@@ -9,11 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { City } from 'src/geo/city.entity';
 import { ImagesService } from 'src/images/images.service';
 import { MailService } from 'src/mail/mail.service';
-import {
-  Notification,
-  NotificationCategory,
-  NotifPriority,
-} from 'src/notifs/entities/notification.entity';
+import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
 import { DeepPartial, ILike, In, IsNull, Not, Repository } from 'typeorm';
 import { Friend, FriendStatus } from './entities/friend.entity';
@@ -69,6 +65,7 @@ import { PushService } from 'src/push/push.service';
 import { Push } from 'src/push/push.entity';
 import { run } from 'src/utils/promise';
 import { SlackService } from 'src/slack/slack.service';
+import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 
 const defaultTimeZone = 'America/Los_Angeles';
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
@@ -91,8 +88,6 @@ export class UserService {
     private prefillUserRepository: Repository<PrefillUser>,
     @InjectRepository(City)
     private cityRepository: Repository<City>,
-    @InjectRepository(Notification)
-    private notifRepository: Repository<Notification>,
     @InjectRepository(Friend)
     private readonly friendRepository: Repository<Friend>,
     @InjectRepository(Tag)
@@ -115,6 +110,7 @@ export class UserService {
     private readonly conversationService: ConversationService,
     private readonly pushService: PushService,
     private readonly slackService: SlackService,
+    private readonly notifsService: NotifsService,
   ) {}
 
   async create(data: DeepPartial<User>): Promise<User> {
@@ -335,14 +331,13 @@ export class UserService {
     if (rel) {
       rel.status = FriendStatus.Pending; // reset to pending / resend
     } else {
-      const notif = this.notifRepository.create({
+      const notif = this.notifsService.createNotif({
         user: addressee,
         category: NotificationCategory.FriendRequest,
-        priority: NotifPriority.High,
         message: `${requester.name} wants to be friends`,
         webAppLocation: profileUrl(requesterId),
         associatedUsers: [requester],
-      });
+      } satisfies CreateNotifParams);
 
       rel = this.friendRepository.create({
         requester,
@@ -376,7 +371,7 @@ export class UserService {
     rel.status = status;
     if (status === FriendStatus.Accepted) {
       rel.acceptedAt = new Date();
-      rel.acceptedNotif = this.notifRepository.create({
+      rel.acceptedNotif = this.notifsService.createNotif({
         user: rel.requester,
         category: NotificationCategory.FriendRequestAccepted,
         message: `${rel.addressee.name} accepted your friend request`,
@@ -480,15 +475,13 @@ export class UserService {
   }
 
   async notifyReferrerOfNewMember(referrer: User, newMember: User) {
-    await this.notifRepository.save(
-      this.notifRepository.create({
-        user: referrer,
-        category: NotificationCategory.NewMemberReferred,
-        message: `${newMember.name} joined the Alliance`,
-        webAppLocation: profileUrl(newMember.id),
-        associatedUsers: [newMember],
-      }),
-    );
+    await this.notifsService.sendNotif({
+      user: referrer,
+      category: NotificationCategory.NewMemberReferred,
+      message: `${newMember.name} joined the Alliance`,
+      webAppLocation: profileUrl(newMember.id),
+      associatedUsers: [newMember],
+    });
   }
 
   /**
@@ -712,7 +705,7 @@ export class UserService {
 
     const promises: Promise<unknown>[] = [];
 
-    const notifs: Notification[] = [];
+    const notifs: CreateNotifParams[] = [];
     const firstSigning = user.contractEvents!.length === 0;
     const userUpdate: DeepPartial<User> = {
       id: user.id,
@@ -740,7 +733,6 @@ export class UserService {
                   communityId: user.pendingCommunity!.id,
                 }),
                 associatedUsers: [user],
-                priority: NotifPriority.High,
               }),
             }),
           );
@@ -765,7 +757,6 @@ export class UserService {
                 communityId: community.id,
               }),
               associatedUsers: [user],
-              priority: NotifPriority.High,
             };
           }
           return {
@@ -777,21 +768,18 @@ export class UserService {
               communityId: community.id,
             }),
             associatedUsers: [user, user.referredBy!],
-            priority: NotifPriority.High,
           };
         },
       });
 
       if (user.referredBy && !referrerNotified) {
-        notifs.push(
-          this.notifRepository.create({
-            user: user.referredBy,
-            category: NotificationCategory.NewMemberReferred,
-            message: `${user.name} joined the Alliance`,
-            webAppLocation: profileUrl(user.id),
-            associatedUsers: [user],
-          }),
-        );
+        notifs.push({
+          user: user.referredBy,
+          category: NotificationCategory.NewMemberReferred,
+          message: `${user.name} joined the Alliance`,
+          webAppLocation: profileUrl(user.id),
+          associatedUsers: [user],
+        });
       }
     } else if (user.referredBy) {
       const referredBy = user.referredBy;
@@ -818,21 +806,18 @@ export class UserService {
                 communityId: community.id,
               }),
               associatedUsers: [user],
-              priority: NotifPriority.High,
             }),
           }),
         );
       } else {
         userUpdate.undergoingGroupAssignment = true;
-        notifs.push(
-          this.notifRepository.create({
-            user: referredBy,
-            category: NotificationCategory.NewMemberReferred,
-            message: `${user.name} joined the Alliance`,
-            webAppLocation: profileUrl(user.id),
-            associatedUsers: [user],
-          }),
-        );
+        notifs.push({
+          user: referredBy,
+          category: NotificationCategory.NewMemberReferred,
+          message: `${user.name} joined the Alliance`,
+          webAppLocation: profileUrl(user.id),
+          associatedUsers: [user],
+        });
       }
     } else {
       // no community and no referrer
@@ -842,7 +827,7 @@ export class UserService {
     await Promise.all([
       this.contractEventRepository.save(contractEvent),
       this.userRepository.save(userUpdate),
-      this.notifRepository.save(notifs),
+      this.notifsService.sendNotifs(notifs),
       this.slackService.sendMessage(
         `${user.name} ${user.referredBy ? `(referred by ${user.referredBy.name}) ` : ''}signed their contract :)`,
       ),
@@ -887,7 +872,6 @@ export class UserService {
               message: `${user.name} suspended their contract and was removed from your group (${community.name})`,
               webAppLocation: profileUrl(user.id),
               associatedUsers: [user],
-              priority: NotifPriority.High,
             };
           },
           saveAsPendingCommunity: true,
@@ -1202,7 +1186,6 @@ export class UserService {
             communityId: community.id,
           }),
           associatedUsers: [user],
-          priority: NotifPriority.High,
         }),
       }),
       ...user.communities.map((community) =>
@@ -1219,7 +1202,6 @@ export class UserService {
               communityId: community.id,
             }),
             associatedUsers: [user],
-            priority: NotifPriority.High,
           }),
           saveAsPendingCommunity: false,
         }),
@@ -1320,7 +1302,6 @@ export class UserService {
           communityId: community.id,
         }),
         associatedUsers: [user],
-        priority: NotifPriority.High,
       }),
     });
   }
@@ -1328,9 +1309,7 @@ export class UserService {
   async addUserToCommunityAndRefreshConversation(params: {
     user: Pick<User, 'id' | 'name'> & DeepPartial<User>;
     community: Community;
-    notifForLeader: (params: {
-      leader: User;
-    }) => DeepPartial<Notification> | null;
+    notifForLeader: (params: { leader: User }) => CreateNotifParams | null;
   }): Promise<Community> {
     const { user, community, notifForLeader } = params;
 
@@ -1338,14 +1317,8 @@ export class UserService {
       return community;
     }
 
-    const notifs: Notification[] = community
-      .leaders!.map((leader) => {
-        const notif = notifForLeader({ leader });
-        if (!notif) {
-          return null;
-        }
-        return this.notifRepository.create(notif);
-      })
+    const notifs: CreateNotifParams[] = community
+      .leaders!.map((leader) => notifForLeader({ leader }))
       .filter((notif) => !!notif);
 
     const updatedP = this.communityRepository.save({
@@ -1353,7 +1326,7 @@ export class UserService {
       users: [...community.users, user],
     });
     await Promise.all([
-      this.notifRepository.save(notifs),
+      this.notifsService.sendNotifs(notifs),
       this.userRepository.save({
         id: user.id,
         undergoingGroupAssignment: false,
@@ -1371,9 +1344,7 @@ export class UserService {
     user: User;
     community: Community;
     removeAsLeader: boolean;
-    notifForLeader: (params: {
-      leader: User;
-    }) => DeepPartial<Notification> | null;
+    notifForLeader: (params: { leader: User }) => CreateNotifParams | null;
     saveAsPendingCommunity: boolean;
   }): Promise<Community> {
     const {
@@ -1395,13 +1366,7 @@ export class UserService {
     const newMembers = community.users.filter((u) => u.id !== user.id);
 
     const notifs = newLeaders!
-      .map((leader) => {
-        const notif = notifForLeader({ leader });
-        if (!notif) {
-          return null;
-        }
-        return this.notifRepository.create(notif);
-      })
+      .map((leader) => notifForLeader({ leader }))
       .filter((notif) => !!notif);
 
     const updatedCommunityP = run(async () => {
@@ -1419,7 +1384,7 @@ export class UserService {
 
     const [updatedCommunity] = await Promise.all([
       updatedCommunityP,
-      this.notifRepository.save(notifs),
+      this.notifsService.sendNotifs(notifs),
       saveAsPendingCommunity
         ? this.userRepository.save({
             id: user.id,
@@ -1479,7 +1444,7 @@ export class UserService {
         saveAsPendingCommunity: false,
       });
 
-    const notif = this.notifRepository.create({
+    const notif: CreateNotifParams = {
       user: removee,
       category: NotificationCategory.RemovedFromCommunity,
       message: `${user.name} removed you from their group (${community.name})`,
@@ -1487,11 +1452,10 @@ export class UserService {
         tab: 'groups',
       }),
       associatedUsers: [user],
-      priority: NotifPriority.High,
-    });
+    };
     const [updatedCommunity] = await Promise.all([
       updatedCommunityP,
-      this.notifRepository.save(notif),
+      this.notifsService.sendNotif(notif),
     ]);
 
     return updatedCommunity;
@@ -1841,8 +1805,8 @@ export class UserService {
         console.log('Community leaders not found for community', communityId);
         break sendNotificationToLeaders;
       }
-      for (const leader of communityWithLeaders.leaders) {
-        const notif = this.notifRepository.create({
+      await this.notifsService.sendNotifs(
+        communityWithLeaders.leaders.map((leader) => ({
           user: leader,
           category: NotificationCategory.OnetimeInviteRequestCreated,
           message: `${user.name} requested an invite for ${rest.invitee} (${community.name})`,
@@ -1852,10 +1816,8 @@ export class UserService {
           }),
           associatedUsers: [user],
           onetimeInvite: savedInvite,
-          priority: NotifPriority.High,
-        });
-        this.notifRepository.save(notif);
-      }
+        })),
+      );
     }
 
     return savedInvite;
@@ -1929,18 +1891,16 @@ export class UserService {
     }
     const savedInvite = await this.onetimeInviteRepository.save(request);
 
-    await this.notifRepository.save(
-      this.notifRepository.create({
-        user: savedInvite.invitingUser,
-        category,
-        message: message.replace('[USER]', savedInvite.invitee),
-        webAppLocation: groupUrl({
-          tab: 'invites',
-          communityId: savedInvite.communityId,
-        }),
-        associatedUsers: [savedInvite.invitingUser],
+    await this.notifsService.sendNotif({
+      user: savedInvite.invitingUser,
+      category,
+      message: message.replace('[USER]', savedInvite.invitee),
+      webAppLocation: groupUrl({
+        tab: 'invites',
+        communityId: savedInvite.communityId,
       }),
-    );
+      associatedUsers: [savedInvite.invitingUser],
+    });
 
     return savedInvite;
   }
@@ -2066,7 +2026,7 @@ export class UserService {
       invitingUser,
       status: CommunityInviteStatus.InviteePending,
     });
-    const notif = this.notifRepository.create({
+    const notif: CreateNotifParams = {
       user: invitedUser,
       category: NotificationCategory.CommunityInviteCreated,
       message: `${invitingUser.name} invited you to join their group (${community.name})`,
@@ -2074,11 +2034,11 @@ export class UserService {
         tab: 'groups',
       }),
       associatedUsers: [invitingUser],
-    });
+    };
 
     const [savedInvite] = await Promise.all([
       this.communityInviteRepository.save(invite),
-      this.notifRepository.save(notif),
+      this.notifsService.sendNotif(notif),
     ]);
     return savedInvite;
   }
@@ -2147,19 +2107,21 @@ export class UserService {
       if (!communityWithLeaders?.leaders?.length) {
         break sendNotificationToLeaders;
       }
-      const notifs = communityWithLeaders.leaders.map((leader) =>
-        this.notifRepository.create({
-          user: leader,
-          category: NotificationCategory.CommunityInviteRequestCreated,
-          message: `${invitingUser.name} requested an invite for ${invitedUser.name} (${community.name})`,
-          webAppLocation: groupUrl({
-            tab: 'invites',
-            communityId: community.id,
-          }),
-          associatedUsers: [invitingUser, invitedUser],
-        }),
+      await this.notifsService.sendNotifs(
+        communityWithLeaders.leaders.map(
+          (leader) =>
+            ({
+              user: leader,
+              category: NotificationCategory.CommunityInviteRequestCreated,
+              message: `${invitingUser.name} requested an invite for ${invitedUser.name} (${community.name})`,
+              webAppLocation: groupUrl({
+                tab: 'invites',
+                communityId: community.id,
+              }),
+              associatedUsers: [invitingUser, invitedUser],
+            }) satisfies CreateNotifParams,
+        ),
       );
-      await this.notifRepository.save(notifs);
     }
 
     return savedInvite;
@@ -2193,8 +2155,8 @@ export class UserService {
     invite.status = CommunityInviteStatus.InviteePending;
     const savedInvite = await this.communityInviteRepository.save(invite);
 
-    const notifs = [
-      this.notifRepository.create({
+    await this.notifsService.sendNotifs([
+      {
         user: invite.invitedUser,
         category: NotificationCategory.CommunityInviteCreated,
         message: `${invite.invitingUser?.name ?? user.name} invited you to join their group (${invite.community.name})`,
@@ -2202,10 +2164,10 @@ export class UserService {
           tab: 'groups',
         }),
         associatedUsers: [invite.invitingUser ?? user],
-      }),
+      } satisfies CreateNotifParams,
       ...(invite.invitingUser
         ? [
-            this.notifRepository.create({
+            {
               user: invite.invitingUser,
               category: NotificationCategory.CommunityInviteCreated,
               message: `Your request to invite ${invite.invitedUser.name} was approved`,
@@ -2214,11 +2176,10 @@ export class UserService {
                 communityId: invite.community.id,
               }),
               associatedUsers: [],
-            }),
+            } satisfies CreateNotifParams,
           ]
         : []),
-    ];
-    await this.notifRepository.save(notifs);
+    ]);
 
     return savedInvite;
   }
@@ -2252,7 +2213,7 @@ export class UserService {
     await this.communityInviteRepository.save(invite);
 
     if (invite.invitingUser) {
-      const notif = this.notifRepository.create({
+      await this.notifsService.sendNotif({
         user: invite.invitingUser,
         category: NotificationCategory.CommunityInviteRequestRejected,
         message: `Your request to invite ${invite.invitedUser.name} was rejected`,
@@ -2261,7 +2222,6 @@ export class UserService {
         }),
         associatedUsers: [user],
       });
-      await this.notifRepository.save(notif);
     }
   }
 
@@ -2340,9 +2300,9 @@ export class UserService {
       },
     );
 
-    const notifs = updatedCommunities.flatMap((community) =>
-      community.leaders!.map((leader) =>
-        this.notifRepository.create({
+    const notifs: CreateNotifParams[] = updatedCommunities.flatMap(
+      (community) =>
+        community.leaders!.map((leader) => ({
           user: leader,
           category: NotificationCategory.MemberLeftCommunity,
           message: `${invite.invitedUser.name} left your group (${community.name})`,
@@ -2351,8 +2311,7 @@ export class UserService {
             communityId: community.id,
           }),
           associatedUsers: [invite.invitedUser],
-        }),
-      ),
+        })),
     );
 
     const saveUser = this.userRepository.save(invite.invitedUser);
@@ -2363,12 +2322,12 @@ export class UserService {
         ...updatedCommunities.map((c) =>
           this.conversationService.syncCommunityConversationMembers(c.id),
         ),
-        this.notifRepository.save(notifs),
+        this.notifsService.sendNotifs(notifs),
       ]);
     });
 
-    const notif = this.notifRepository.create({
-      user: invite.invitingUser,
+    const saveNotif = this.notifsService.sendNotif({
+      user: invite.invitingUser!,
       category: NotificationCategory.CommunityInviteAccepted,
       message: `${invite.invitedUser.name} accepted your invitation to join your group (${community.name})`,
       webAppLocation: groupUrl({
@@ -2377,7 +2336,6 @@ export class UserService {
       }),
       associatedUsers: [invite.invitedUser],
     });
-    const saveNotif = this.notifRepository.save(notif);
     await Promise.all([saveInvite, syncConversationMembers, saveNotif]);
   }
 
@@ -2395,8 +2353,8 @@ export class UserService {
     invite.status = CommunityInviteStatus.InviteeRejected;
     await this.communityInviteRepository.save(invite);
 
-    const notif = this.notifRepository.create({
-      user: invite.invitingUser,
+    await this.notifsService.sendNotif({
+      user: invite.invitingUser!,
       category: NotificationCategory.CommunityInviteRejected,
       message: `${invite.invitedUser?.name} declined your invitation to join your group (${invite.community.name})`,
       webAppLocation: groupUrl({
@@ -2405,7 +2363,6 @@ export class UserService {
       }),
       associatedUsers: [invite.invitedUser],
     });
-    await this.notifRepository.save(notif);
   }
 
   async leaveCommunity(communityId: number, userId: number): Promise<void> {
@@ -2434,23 +2391,21 @@ export class UserService {
     community.users = community.users.filter((u) => u.id !== user.id);
 
     await this.communityRepository.save(community);
-    const notifs = [
-      ...community.leaders!.map((leader) =>
-        this.notifRepository.create({
-          user: leader,
-          category: NotificationCategory.MemberLeftCommunity,
-          message: `${user.name} left your group (${community.name})`,
-          webAppLocation: groupUrl({
-            tab: 'members',
-            communityId: community.id,
-          }),
-          associatedUsers: [user],
+    const notifsP = this.notifsService.sendNotifs(
+      community.leaders!.map((leader) => ({
+        user: leader,
+        category: NotificationCategory.MemberLeftCommunity,
+        message: `${user.name} left your group (${community.name})`,
+        webAppLocation: groupUrl({
+          tab: 'members',
+          communityId: community.id,
         }),
-      ),
-    ];
+        associatedUsers: [user],
+      })),
+    );
     await Promise.all([
       this.conversationService.syncCommunityConversationMembers(communityId),
-      this.notifRepository.save(notifs),
+      notifsP,
     ]);
   }
 
@@ -2534,7 +2489,7 @@ export class UserService {
       allowedMemberCounts.set(communityId, allowed! - 1);
     }
 
-    const notifs: Notification[] = [];
+    const notifs: CreateNotifParams[] = [];
     const updatedCommunities = new Set<number>();
     for (const { userId, communityId } of body.assignments) {
       const user = userById.get(userId);
@@ -2551,18 +2506,16 @@ export class UserService {
         if (!keep) {
           updatedCommunities.add(community.id);
           notifs.push(
-            ...community.leaders!.map((leader) =>
-              this.notifRepository.create({
-                user: leader,
-                category: NotificationCategory.MemberLeftCommunity,
-                message: `${user.name} left your group (${community.name})`,
-                webAppLocation: groupUrl({
-                  tab: 'members',
-                  communityId: community.id,
-                }),
-                associatedUsers: [user],
+            ...community.leaders!.map((leader) => ({
+              user: leader,
+              category: NotificationCategory.MemberLeftCommunity,
+              message: `${user.name} left your group (${community.name})`,
+              webAppLocation: groupUrl({
+                tab: 'members',
+                communityId: community.id,
               }),
-            ),
+              associatedUsers: [user],
+            })),
           );
         }
         return keep;
@@ -2570,16 +2523,15 @@ export class UserService {
       user.communities.push(community);
       updatedCommunities.add(community.id);
       user.undergoingGroupAssignment = false;
-      notifs.push(
-        this.notifRepository.create({
-          user,
-          category: NotificationCategory.CommunityAssigned,
-          message: `You were assigned to a new group (${community.name})`,
-          webAppLocation: groupUrl({
-            communityId: community.id,
-          }),
+      notifs.push({
+        user,
+        category: NotificationCategory.CommunityAssigned,
+        message: `You were assigned to a new group (${community.name})`,
+        webAppLocation: groupUrl({
+          communityId: community.id,
         }),
-      );
+        associatedUsers: [],
+      });
     }
 
     await Promise.all(
@@ -2591,7 +2543,7 @@ export class UserService {
       ...Array.from(updatedCommunities.values()).map((communityId) =>
         this.conversationService.syncCommunityConversationMembers(communityId),
       ),
-      this.notifRepository.save(notifs),
+      this.notifsService.sendNotifs(notifs),
     ]);
   }
 

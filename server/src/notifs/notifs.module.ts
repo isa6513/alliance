@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailModule } from 'src/mail/mail.module';
 import { MmsModule } from 'src/mms/mms.module';
@@ -14,7 +14,7 @@ import { LikeNotificationService } from './like-notification.service';
     TypeOrmModule.forFeature([Notification, ActionEventNotif]),
     MailModule,
     MmsModule,
-    UserModule,
+    forwardRef(() => UserModule),
   ],
   controllers: [NotifsController],
   providers: [NotifsService, LikeNotificationService],

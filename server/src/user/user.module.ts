@@ -23,6 +23,7 @@ import { ContractEvent } from './entities/contract-event.entity';
 import { PushModule } from 'src/push/push.module';
 import { UserDevice } from './entities/user-device.entity';
 import { SlackModule } from 'src/slack/slack.module';
+import { NotifsModule } from 'src/notifs/notifs.module';
 
 @Module({
   imports: [
@@ -48,11 +49,12 @@ import { SlackModule } from 'src/slack/slack.module';
     forwardRef(() => MessagingModule),
     PushModule,
     SlackModule,
+    forwardRef(() => NotifsModule),
   ],
   controllers: [UserController],
   providers: [UserService, IsUserAlreadyExist],
   exports: [UserService],
 })
 export class UserModule {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 }

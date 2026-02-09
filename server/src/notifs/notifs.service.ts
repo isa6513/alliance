@@ -7,10 +7,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
 import { User } from 'src/user/entities/user.entity';
-import { IsNull, LessThan, Repository } from 'typeorm';
+import { DeepPartial, IsNull, LessThan, Repository } from 'typeorm';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
 import {
-  NotifPriority,
+  NOTIFICATION_CATEGORY_PRIORITIES,
   Notification,
   NotificationCategory,
 } from './entities/notification.entity';
@@ -18,6 +18,14 @@ import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
 import { ActionUpdate } from 'src/actions/entities/action-update.entity';
 import { actionUrl } from 'src/search/approutes';
 import { NotificationChannel } from './notif-utils';
+
+export type CreateNotifParams = Required<
+  Pick<
+    DeepPartial<Notification>,
+    'user' | 'category' | 'message' | 'webAppLocation' | 'associatedUsers'
+  >
+> &
+  DeepPartial<Notification>;
 
 export function shouldEmailUser(user: User) {
   return (
@@ -117,7 +125,7 @@ export class NotifsService {
   }
 
   async createActionUpdateNotif(actionUpdate: ActionUpdate, user: User) {
-    const notif = this.notifsRepository.create({
+    return this.sendNotif({
       user,
       actionUpdate,
       category: NotificationCategory.ActionUpdate,
@@ -125,8 +133,22 @@ export class NotifsService {
       webAppLocation: actionUrl(actionUpdate.action.id),
       mobileAppLocation: actionUrl(actionUpdate.action.id),
       sendTime: actionUpdate.date,
-      priority: NotifPriority.High,
+      associatedUsers: [],
     });
-    return this.notifsRepository.save(notif);
+  }
+
+  createNotif(notif: CreateNotifParams) {
+    if (!notif.priority) {
+      notif.priority = NOTIFICATION_CATEGORY_PRIORITIES[notif.category];
+    }
+    return this.notifsRepository.create(notif);
+  }
+
+  async sendNotif(notif: CreateNotifParams) {
+    return this.notifsRepository.save(this.createNotif(notif));
+  }
+
+  async sendNotifs(notifs: CreateNotifParams[]) {
+    return this.notifsRepository.save(notifs.map((n) => this.createNotif(n)));
   }
 }

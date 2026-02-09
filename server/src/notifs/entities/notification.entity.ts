@@ -22,18 +22,18 @@ import type { Push } from 'src/push/push.entity';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',
-  ForumReply = 'forum_reply', // yes
-  FriendRequest = 'friend_request', // yes (marked as read if accepted)
-  FriendRequestAccepted = 'friend_request_accepted', // no
-  ActionUpdate = 'action_update', // yes
-  Likes = 'likes', // no
-  RemovedFromCommunity = 'removed_from_community', // yes
-  RemovedFromCommunityForLeader = 'removed_from_community_for_leader', // yes
-  MemberLeftCommunity = 'member_left_community', // yes (for the leads)
-  MemberSuspendedRemovedFromCommunity = 'member_suspended_removed_from_community', // yes (for the leads)
-  MemberJoinedCommunity = 'member_joined_community', // yes
-  CommunityAssigned = 'community_assigned', // yes
-  NewMemberReferred = 'new_member_referred', // yes
+  ForumReply = 'forum_reply',
+  FriendRequest = 'friend_request',
+  FriendRequestAccepted = 'friend_request_accepted',
+  ActionUpdate = 'action_update',
+  Likes = 'likes',
+  RemovedFromCommunity = 'removed_from_community',
+  RemovedFromCommunityForLeader = 'removed_from_community_for_leader',
+  MemberLeftCommunity = 'member_left_community',
+  MemberSuspendedRemovedFromCommunity = 'member_suspended_removed_from_community',
+  MemberJoinedCommunity = 'member_joined_community',
+  CommunityAssigned = 'community_assigned',
+  NewMemberReferred = 'new_member_referred',
 
   // Legacy
   CommunityInviteCreated = 'community_invite_created',
@@ -50,6 +50,33 @@ export enum NotifPriority {
   Low = 'low',
   High = 'high',
 }
+
+export const NOTIFICATION_CATEGORY_PRIORITIES = {
+  [NotificationCategory.ActionEvent]: NotifPriority.Low,
+  [NotificationCategory.ForumReply]: NotifPriority.High,
+  [NotificationCategory.FriendRequest]: NotifPriority.High,
+  [NotificationCategory.FriendRequestAccepted]: NotifPriority.Low,
+  [NotificationCategory.ActionUpdate]: NotifPriority.High,
+  [NotificationCategory.Likes]: NotifPriority.Low,
+  [NotificationCategory.RemovedFromCommunity]: NotifPriority.High,
+  [NotificationCategory.RemovedFromCommunityForLeader]: NotifPriority.High,
+  [NotificationCategory.MemberLeftCommunity]: NotifPriority.High,
+  [NotificationCategory.MemberSuspendedRemovedFromCommunity]:
+    NotifPriority.High,
+  [NotificationCategory.MemberJoinedCommunity]: NotifPriority.High,
+  [NotificationCategory.CommunityAssigned]: NotifPriority.High,
+  [NotificationCategory.NewMemberReferred]: NotifPriority.High,
+
+  // Legacy
+  [NotificationCategory.CommunityInviteCreated]: NotifPriority.Low,
+  [NotificationCategory.CommunityInviteRejected]: NotifPriority.High,
+  [NotificationCategory.CommunityInviteAccepted]: NotifPriority.High,
+  [NotificationCategory.OnetimeInviteRequestCreated]: NotifPriority.Low,
+  [NotificationCategory.OnetimeInviteRequestApproved]: NotifPriority.High,
+  [NotificationCategory.OnetimeInviteRequestRejected]: NotifPriority.High,
+  [NotificationCategory.CommunityInviteRequestCreated]: NotifPriority.Low,
+  [NotificationCategory.CommunityInviteRequestRejected]: NotifPriority.High,
+} satisfies Record<NotificationCategory, NotifPriority>;
 
 @Entity()
 export class Notification {

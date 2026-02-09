@@ -7,6 +7,7 @@ import {
 } from './entities/notification.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ProfileDto } from 'src/user/dto/user.dto';
+import { NotifsService } from './notifs.service';
 
 export type LikeNotificationTarget = 'post' | 'comment' | 'activity';
 
@@ -15,6 +16,7 @@ export class LikeNotificationService {
   constructor(
     @InjectRepository(Notification)
     private readonly notifRepository: Repository<Notification>,
+    private readonly notifsService: NotifsService,
   ) {}
 
   async createOrUpdate(params: {
@@ -78,7 +80,7 @@ export class LikeNotificationService {
     }
 
     const likerProfile = new ProfileDto(liker);
-    const notification = this.notifRepository.create({
+    await this.notifsService.sendNotif({
       user: owner,
       associatedUsers: [liker],
       category: NotificationCategory.Likes,
@@ -93,7 +95,6 @@ export class LikeNotificationService {
       groupingKey,
       groupingCount: 1,
     });
-    await this.notifRepository.save(notification);
   }
 
   async getActiveLikeNotification(params: {
