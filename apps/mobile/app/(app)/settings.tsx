@@ -31,6 +31,7 @@ import Button, { ButtonColor } from "../../components/system/Button";
 import TimeZoneSelect from "../../components/forms/TimeZoneSelect";
 import AwayRangesSection from "../../components/AwayRangesSection";
 import { useMutation } from "@tanstack/react-query";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -170,29 +171,17 @@ export default function SettingsPage() {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="p-4 py-12">
-        {/* Header */}
-        <View className="flex-row items-center justify-between mb-6">
-          <View className="flex-row items-center">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="mr-3 p-1"
-            >
-              <ChevronLeft size={24} color="#18181b" />
-            </TouchableOpacity>
-            <Text className="text-2xl font-semibold">Settings</Text>
-          </View>
-          <View className="flex-row items-center gap-3">
-            <Text className="text-sm text-zinc-500">
-              {saving
-                ? "Saving..."
-                : hasChanges
+      <View className="px-4 pb-12">
+        <View>
+          <SimplePageTitle title="Settings" />
+          <Text className="text-sm text-zinc-500 absolute right-4 top-14">
+            {saving
+              ? "Saving..."
+              : hasChanges
                 ? "Unsaved changes"
                 : "All saved"}
-            </Text>
-          </View>
+          </Text>
         </View>
-
         {/* Profile Section */}
         <View className="mb-6">
           <View className="gap-4">
@@ -304,11 +293,11 @@ export default function SettingsPage() {
           {!(
             editableUser.emailNotifsEnabled || editableUser.textNotifsEnabled
           ) && (
-            <Text className="text-sm text-zinc-500 mb-2">
-              You will not receive any notifications. Please keep a notification
-              channel enabled if you need reminders.
-            </Text>
-          )}
+              <Text className="text-sm text-zinc-500 mb-2">
+                You will not receive any notifications. Please keep a notification
+                channel enabled if you need reminders.
+              </Text>
+            )}
 
           <View className="gap-3 mb-4">
             <TouchableOpacity
@@ -559,17 +548,16 @@ export default function SettingsPage() {
                     }}
                   >
                     <View
-                      className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${
-                        editableUser.preferredActionReminderChannel ===
+                      className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${editableUser.preferredActionReminderChannel ===
                         option.value
-                          ? "border-green-600"
-                          : "border-zinc-300"
-                      }`}
+                        ? "border-green-600"
+                        : "border-zinc-300"
+                        }`}
                     >
                       {editableUser.preferredActionReminderChannel ===
                         option.value && (
-                        <View className="w-2.5 h-2.5 rounded-full bg-green-600" />
-                      )}
+                          <View className="w-2.5 h-2.5 rounded-full bg-green-600" />
+                        )}
                     </View>
                     <Text className="text-base text-zinc-800">
                       {option.label}
@@ -612,11 +600,10 @@ export default function SettingsPage() {
                     }}
                   >
                     <View
-                      className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${
-                        editableUser.formDataPreference === option.value
-                          ? "border-green-600"
-                          : "border-zinc-300"
-                      }`}
+                      className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${editableUser.formDataPreference === option.value
+                        ? "border-green-600"
+                        : "border-zinc-300"
+                        }`}
                     >
                       {editableUser.formDataPreference === option.value && (
                         <View className="w-2.5 h-2.5 rounded-full bg-green-600" />

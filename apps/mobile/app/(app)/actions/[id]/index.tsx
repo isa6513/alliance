@@ -53,11 +53,12 @@ function ActivityItem({ activity, onLike }: ActivityItemProps) {
   }
 
   return (
-    <View className="flex-row gap-x-3 items-start py-3 border-b border-zinc-100">
+    <View className="flex-row gap-x-3 py-3 border-b border-zinc-100 items-center">
       <ProfileImage pfp={activity.user.profilePicture} size="medium" />
       <View className="flex-1">
         <Text className="font-medium text-zinc-900">
           {activity.user.displayName}
+          {activity.type === "user_completed" && <Text className="text-zinc-500"> completed.</Text>}
         </Text>
         <Text className="text-zinc-400 text-xs mt-1">
           {formatTime(new Date(activity.createdAt), { addSuffix: true })}
@@ -323,12 +324,12 @@ export default function ActionDetailScreen() {
           )}
 
           {/* Tab Bar */}
-          <View className="flex-row border-b border-zinc-200 mb-4">
+          <View className="flex-row border-b border-zinc-200 mb-4 w-full">
             {tabs.map((tab) => (
               <TouchableOpacity
                 key={tab.id}
                 onPress={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 items-center ${activeTab === tab.id ? "border-b-2 border-green" : ""
+                className={`px-4 py-3 items-center grow ${activeTab === tab.id ? "border-b-2 border-green" : ""
                   }`}
                 activeOpacity={0.7}
               >

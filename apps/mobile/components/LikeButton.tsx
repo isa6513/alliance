@@ -28,7 +28,7 @@ export default function LikeButton({
       className={`${baseClasses} ${borderClasses}`}
       disabled={!onPress}
     >
-      <Heart size={16} color={iconColor} fill={liked ? iconColor : "none"} />
+      <Heart size={19} color={iconColor} fill={liked ? iconColor : "none"} />
       {likes > 0 && <Text className="text-sm text-zinc-800">{likes}</Text>}
     </TouchableOpacity>
   );

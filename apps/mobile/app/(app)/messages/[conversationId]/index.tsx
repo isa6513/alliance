@@ -291,8 +291,9 @@ export default function ConversationScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => router.push(`/messages/${selectedConvo.id}/info`)}
+          className="-mb-2"
         >
-          <Info size={20} color="#111827" />
+          <Info size={20} color="#71717a" />
         </TouchableOpacity>
       </View>
 
@@ -343,9 +344,9 @@ export default function ConversationScreen() {
                   prev.author.id !== item.author.id ||
                   Math.abs(
                     new Date(item.createdAt).getTime() -
-                      new Date(prev.createdAt).getTime()
+                    new Date(prev.createdAt).getTime()
                   ) >
-                    1000 * 60 * 60 * 3;
+                  1000 * 60 * 60 * 3;
                 const isFirstInReplyGroup =
                   index === 0 || prev.replyTo?.id !== item.replyTo?.id;
 

@@ -7,9 +7,9 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { RelativePathString, router, useNavigation } from "expo-router";
+import { RelativePathString, router } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Menu, Search } from "lucide-react-native";
+import { Search } from "lucide-react-native";
 import {
     searchSaveSelected,
     SearchItemDto,
@@ -23,7 +23,7 @@ import {
 import Text from "../../components/system/Text";
 import ProfileImage from "../../components/ProfileImage";
 import { getImageSource } from "../../lib/config";
-import { DrawerActions } from "@react-navigation/native";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 
 const resolveItemImage = (image?: string) => {
     if (!image) return null;
@@ -98,8 +98,6 @@ export default function SearchScreen() {
         }
     }, [handleChooseItem, selectedItem]);
 
-    const navigation = useNavigation();
-
     return (
         <KeyboardAwareScrollView
             className="flex-1 bg-white"
@@ -107,15 +105,9 @@ export default function SearchScreen() {
             bottomOffset={72}
             keyboardShouldPersistTaps="handled"
         >
-            <View className="px-4 pt-14 pb-8">
-                <View className="flex-row items-center gap-2">
-                    <Menu size={24} color="#71717a" strokeWidth={2.5} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} />
-                    <Text className="text-xl font-semibold text-zinc-900 font-serif">
-                        Search
-                    </Text>
-                </View>
-
-                <View className="mt-4">
+            <View className="px-4 pb-8">
+                <SimplePageTitle title="Search" />
+                <View>
                     <View className="flex-row items-center gap-2 border border-zinc-200 rounded bg-zinc-50 px-3 py-3">
                         <Search size={16} color="#71717a" />
                         <TextInput
