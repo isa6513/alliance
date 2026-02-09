@@ -3031,7 +3031,7 @@ export class ActionsService {
   async getGlobalFeed(limit: number = 15): Promise<GlobalFeedItemDto[]> {
     const feedItems: GlobalFeedItemDto[] = [];
     const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const oneWeekAgo = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
 
     // 1. Fetch recent activities (last week) and group by action + type (no day bucketing)
     const recentActivities = await this.actionActivityRepository
