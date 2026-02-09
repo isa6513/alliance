@@ -6,6 +6,7 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityFeedItem from "./ActivityFeedItem";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
+import { MessageCircle } from "lucide-react";
 
 export interface ForumListPostProps {
   post: PostDto;
@@ -63,6 +64,14 @@ const ForumListPost = ({
               <div className="flex flex-row gap-x-1 items-center">
                 {post.pinned && <PinnedIcon size="small" />}
                 <p className={`text-base`}>{post.title}</p>
+                {post.commentCount != null && post.commentCount > 0 && (
+                  <>
+                    <MessageCircle size={14} className="text-zinc-500 ml-1" strokeWidth={2.5} />
+                    <span className="text-zinc-500">
+                      {post.commentCount}
+                    </span>
+                  </>
+                )}
               </div>
               {isPrivateFuturePost && (
                 <span className="text-sm text-blue">
