@@ -1410,14 +1410,22 @@ export class UserService {
       })
       .filter((notif) => !!notif);
 
-    const [updatedCommunity] = await Promise.all([
-      this.communityRepository.save({
+    const updatedCommunityP = run(async () => {
+      const updatedCommunity = await this.communityRepository.save({
         id: community.id,
         users: newMembers,
         leaders: newLeaders,
-      }),
+      });
+      await this.conversationService.syncCommunityConversationMembers(
+        community.id,
+      );
+
+      return updatedCommunity;
+    });
+
+    const [updatedCommunity] = await Promise.all([
+      updatedCommunityP,
       this.notifRepository.save(notifs),
-      this.conversationService.syncCommunityConversationMembers(community.id),
     ]);
 
     return updatedCommunity;
