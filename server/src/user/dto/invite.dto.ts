@@ -73,6 +73,7 @@ export class OnetimeInviteDto extends PickType(OnetimeInvite, [
   'status',
   'createdAt',
   'community',
+  'invitedUserId',
 ]) {
   @ApiProperty({ type: ProfileDto })
   @Type(() => ProfileDto)

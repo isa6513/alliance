@@ -99,6 +99,12 @@ export class OnetimeInvite {
   @IsOptional()
   invitedUser: Ty<User> | null;
 
+  @RelationId((invite: OnetimeInvite) => invite.invitedUser)
+  @Type(() => Number)
+  @ApiPropertyOptional()
+  @IsOptional()
+  invitedUserId?: number;
+
   @ManyToOne(() => Community, (community) => community.invites, {
     nullable: true,
     onDelete: 'SET NULL',

@@ -45,7 +45,7 @@ export type ContractEvent = {
 
 export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
 
-export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'community_invite_created' | 'community_invite_rejected' | 'community_invite_accepted' | 'removed_from_community' | 'left_community_reminder' | 'member_left_community' | 'member_suspended_removed_from_community' | 'member_joined_community' | 'community_assigned' | 'new_member_referred' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected' | 'community_invite_request_created' | 'community_invite_request_rejected';
+export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'removed_from_community' | 'removed_from_community_for_leader' | 'member_left_community' | 'member_suspended_removed_from_community' | 'member_joined_community' | 'community_assigned' | 'new_member_referred' | 'community_invite_created' | 'community_invite_rejected' | 'community_invite_accepted' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected' | 'community_invite_request_created' | 'community_invite_request_rejected';
 
 export type NotifPriority = 'low' | 'high';
 
@@ -488,6 +488,7 @@ export type OnetimeInvite = {
     usedAt: string | null;
     invitingUser: User;
     invitedUser: User | null;
+    invitedUserId?: number;
     community?: Community | null;
     communityId?: number;
     notifs: Array<Notification>;
@@ -823,6 +824,7 @@ export type OnetimeInviteDto = {
     code: string;
     createdAt: string;
     status: OnetimeInviteStatus;
+    invitedUserId?: number;
     community?: Community | null;
     invitingUser: ProfileDto;
 };

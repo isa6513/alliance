@@ -13,6 +13,7 @@ import List from "@alliance/sharedweb/ui/List";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import { Link, href } from "react-router";
 
 const InvitesPage = () => {
   const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
@@ -63,6 +64,8 @@ const InvitesPage = () => {
     const url = `${baseUrl}/signup?ref=${text}`;
     navigator.clipboard.writeText(url);
   };
+
+  console.log(invites);
 
   return (
     <div className="flex flex-row w-full items-center justify-center pt-36">
@@ -116,7 +119,9 @@ const InvitesPage = () => {
                   <p>
                     {invite.invitingUser?.displayName}{" "}
                     <span className="text-gray-500"> inviting </span>{" "}
-                    {invite.invitee}
+                    {invite.invitedUserId ?
+                      <a href={getBaseUrl() + `/member/${invite.invitedUserId}`} className="underline"> {invite.invitee} </a>
+                      : invite.invitee}
                   </p>
                 </div>
                 <div className="flex flex-row gap-3 items-center">
