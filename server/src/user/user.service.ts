@@ -1172,7 +1172,7 @@ export class UserService {
     const user = await this.userRepository.findOneOrFail({
       where: { id: userId },
       relations: {
-        communities: { leaders: true },
+        communities: { leaders: true, users: true },
       },
     });
 
