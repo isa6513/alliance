@@ -27,21 +27,24 @@ export enum NotificationCategory {
   FriendRequestAccepted = 'friend_request_accepted', // no
   ActionUpdate = 'action_update', // yes
   Likes = 'likes', // no
-  CommunityInviteCreated = 'community_invite_created', // dead
-  CommunityInviteRejected = 'community_invite_rejected', // dead
-  CommunityInviteAccepted = 'community_invite_accepted', // dead
   RemovedFromCommunity = 'removed_from_community', // yes
+  RemovedFromCommunityForLeader = 'removed_from_community_for_leader', // yes
   LeftCommunityReminder = 'left_community_reminder', // yes (tells member to use group assignment if they leave a group; maybe deprecate)
   MemberLeftCommunity = 'member_left_community', // yes (for the leads)
   MemberSuspendedRemovedFromCommunity = 'member_suspended_removed_from_community', // yes (for the leads)
   MemberJoinedCommunity = 'member_joined_community', // yes
   CommunityAssigned = 'community_assigned', // yes
   NewMemberReferred = 'new_member_referred', // yes
-  OnetimeInviteRequestCreated = 'onetime_invite_request_created', // dead
-  OnetimeInviteRequestApproved = 'onetime_invite_request_approved', // dead
-  OnetimeInviteRequestRejected = 'onetime_invite_request_rejected', // dead
-  CommunityInviteRequestCreated = 'community_invite_request_created', // dead
-  CommunityInviteRequestRejected = 'community_invite_request_rejected', // dead
+
+  // Legacy
+  CommunityInviteCreated = 'community_invite_created',
+  CommunityInviteRejected = 'community_invite_rejected',
+  CommunityInviteAccepted = 'community_invite_accepted',
+  OnetimeInviteRequestCreated = 'onetime_invite_request_created',
+  OnetimeInviteRequestApproved = 'onetime_invite_request_approved',
+  OnetimeInviteRequestRejected = 'onetime_invite_request_rejected',
+  CommunityInviteRequestCreated = 'community_invite_request_created',
+  CommunityInviteRequestRejected = 'community_invite_request_rejected',
 }
 
 export enum NotifPriority {

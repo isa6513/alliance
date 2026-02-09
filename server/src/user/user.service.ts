@@ -1390,22 +1390,36 @@ export class UserService {
     user: User;
     community: Community;
     removeAsLeader: boolean;
-    notifFor: (params: { leader: User }) => DeepPartial<Notification> | boolean;
+    notifForLeader: (params: {
+      leader: User;
+    }) => DeepPartial<Notification> | null;
   }): Promise<Community> {
-    const { user, community, removeAsLeader } = params;
+    const { user, community, removeAsLeader, notifForLeader } = params;
     const newMembers = community.users.filter((u) => u.id !== user.id);
     const newLeaders = removeAsLeader
       ? community.leaders!.filter((l) => l.id !== user.id)
       : community.leaders;
 
-    const updatedCommunity = await this.communityRepository.save({
-      id: community.id,
-      users: newMembers,
-      leaders: newLeaders,
-    });
-    await this.conversationService.syncCommunityConversationMembers(
-      updatedCommunity.id,
-    );
+    const notifs = newLeaders!
+      .map((leader) => {
+        const notif = notifForLeader({ leader });
+        if (!notif) {
+          return null;
+        }
+        return this.notifRepository.create(notif);
+      })
+      .filter((notif) => !!notif);
+
+    const [updatedCommunity] = await Promise.all([
+      this.communityRepository.save({
+        id: community.id,
+        users: newMembers,
+        leaders: newLeaders,
+      }),
+      this.notifRepository.save(notifs),
+      this.conversationService.syncCommunityConversationMembers(community.id),
+    ]);
+
     return updatedCommunity;
   }
 
@@ -1422,14 +1436,38 @@ export class UserService {
     if (!user.leaderOfIdSet.has(communityId)) {
       throw new BadRequestException();
     }
-    const community = await this.removeUserFromCommunityAdmin(
-      communityId,
-      removeeId,
-    );
 
-    const removee = await this.userRepository.findOneOrFail({
-      where: { id: removeeId },
-    });
+    const [community, removee] = await Promise.all([
+      this.findCommunityOrFail(communityId),
+      this.userRepository.findOneOrFail({
+        where: { id: removeeId },
+      }),
+    ]);
+
+    const updatedCommunityP =
+      this.removeUserFromCommunityAndRefreshConversation({
+        user: removee,
+        community,
+        removeAsLeader: true,
+        notifForLeader: ({ leader }) => {
+          if (leader.id === user.id) {
+            // do not notify self
+            return null;
+          }
+
+          return {
+            user: leader,
+            category: NotificationCategory.RemovedFromCommunityForLeader,
+            message: `${user.name} removed ${removee.name} from your group (${community.name})`,
+            webAppLocation: groupUrl({
+              tab: 'members',
+              communityId: community.id,
+            }),
+            associatedUsers: [removee, user],
+          };
+        },
+      });
+
     const notif = this.notifRepository.create({
       user: removee,
       category: NotificationCategory.RemovedFromCommunity,
@@ -1438,10 +1476,14 @@ export class UserService {
         tab: 'groups',
       }),
       associatedUsers: [user],
+      priority: NotifPriority.High,
     });
-    await this.notifRepository.save(notif);
+    const [updatedCommunity] = await Promise.all([
+      updatedCommunityP,
+      this.notifRepository.save(notif),
+    ]);
 
-    return community;
+    return updatedCommunity;
   }
 
   async removeUserFromCommunityAdmin(
