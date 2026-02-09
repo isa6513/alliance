@@ -131,7 +131,6 @@ __metadata:
     "@stripe/react-stripe-js": "npm:^3.7.0"
     "@stripe/stripe-js": "npm:^8.6.0"
     "@tailwindcss/vite": "npm:^4.1.4"
-    "@tanstack/query-async-storage-persister": "npm:^5.90.22"
     "@tanstack/react-query": "npm:^5.90.20"
     "@tanstack/react-query-persist-client": "npm:^5.90.22"
     "@types/compression": "npm:^1"
@@ -4490,16 +4489,6 @@ __metadata:
   peerDependencies:
     vite: ^5.2.0 || ^6
   checksum: 10c0/334384b196aebb91d9e2dae0a3959f404fdb570bb590c69786b0bdd27d7bfded37c0ad439fccb8c16f3180232820eeeb1dd05d97006e22dabdc2f9a35111e84b
-  languageName: node
-  linkType: hard
-
-"@tanstack/query-async-storage-persister@npm:^5.90.22":
-  version: 5.90.22
-  resolution: "@tanstack/query-async-storage-persister@npm:5.90.22"
-  dependencies:
-    "@tanstack/query-core": "npm:5.90.20"
-    "@tanstack/query-persist-client-core": "npm:5.91.19"
-  checksum: 10c0/6502db4d5fd2e0b9a2b4324804e4d98b258c30c02607e8ebc64bae4fcf268f10fb8043ff1a1eef2b1b311ea9ff6d5b0a4db807c6cdf7c9d60bbb02af011e59e4
   languageName: node
   linkType: hard
 
