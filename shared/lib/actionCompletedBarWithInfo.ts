@@ -9,6 +9,10 @@ export interface ActionCompletedBarWithInfoPropsShared {
     | "usersCompleted"
     | "usersJoined"
     | "optional"
+    | "customStatType"
+    | "customStatValue"
+    | "customStatGoal"
+    | "customStatLabel"
   >;
   friendActivities: ActionActivityDto[] | null;
 }

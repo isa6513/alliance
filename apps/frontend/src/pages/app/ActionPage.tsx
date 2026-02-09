@@ -111,13 +111,25 @@ export default function ActionPage() {
         </div>
         {!publicMode && !action.publicOnly && (
           <div className="hidden lg:flex flex-col w-[320px] xl:w-[340px] rounded gap-y-12 border-l border-zinc-200 pl-4 xl:pl-10">
-            <ActionCompletedBarWithInfo
-              friendActivities={[]}
-              action={action}
-              textSize="base"
-              textColor="zinc-800"
-              showInfoTooltip
-            />
+            <div>
+              <ActionCompletedBarWithInfo
+                friendActivities={[]}
+                action={action}
+                textSize="base"
+                textColor="zinc-800"
+                showInfoTooltip
+              />
+              {!!action.customStatType && action.customStatValue !== null && !!action.customStatGoal && (
+                <div className="mt-3">
+                  <p className="text-zinc-800">
+                    {action.customStatLabel}:
+                  </p>
+                  <p className="text-xl font-bold">
+                    {action.customStatValue ?? 0}
+                  </p>
+                </div>
+              )}
+            </div>
             <ActionActivityList
               actionId={action.id}
               activities={activities}
@@ -128,7 +140,7 @@ export default function ActionPage() {
             />
           </div>
         )}
-      </div>
+      </div >
     </>
   );
 }

@@ -56,6 +56,8 @@ export type ActionTaskType = 'Funding' | 'Activity' | 'Ongoing';
 
 export type VisibilityMode = 'public' | 'all_members' | 'participating_groups';
 
+export type CustomActionStat = 'none' | 'users_invited';
+
 /**
  * New status of the action after the event
  */
@@ -395,6 +397,10 @@ export type Action = {
      * Date and time when the action was computed for autocomplete
      */
     computedAutocompleteAt?: string;
+    customStatType?: CustomActionStat;
+    customStatLabel?: string;
+    customStatValue?: number;
+    customStatGoal?: number;
     /**
      * Events associated with the action
      */
@@ -1237,6 +1243,10 @@ export type ActionDto = {
      * Date and time when the action was computed for autocomplete
      */
     computedAutocompleteAt?: string;
+    customStatType?: CustomActionStat;
+    customStatLabel?: string;
+    customStatValue?: number;
+    customStatGoal?: number;
     participatingTags: Array<Tag>;
     activities: Array<Array<ActionActivity>>;
     suite?: ActionSuite;
@@ -1414,6 +1424,10 @@ export type CreateActionDto = {
      * Date and time when the action was computed for autocomplete
      */
     computedAutocompleteAt?: string;
+    customStatType?: CustomActionStat;
+    customStatLabel?: string;
+    customStatValue?: number;
+    customStatGoal?: number;
     participatingTags: Array<Tag>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
@@ -1522,6 +1536,10 @@ export type UpdateActionDto = {
      * Date and time when the action was computed for autocomplete
      */
     computedAutocompleteAt?: string;
+    customStatType?: CustomActionStat;
+    customStatLabel?: string;
+    customStatValue?: number;
+    customStatGoal?: number;
     participatingTags?: Array<Tag>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
@@ -1814,6 +1832,10 @@ export type ExportActionDto = {
      * Date and time when the action was computed for autocomplete
      */
     computedAutocompleteAt?: string;
+    customStatType?: CustomActionStat;
+    customStatLabel?: string;
+    customStatValue?: number;
+    customStatGoal?: number;
     /**
      * Events associated with the action
      */

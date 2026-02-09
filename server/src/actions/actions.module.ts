@@ -33,6 +33,8 @@ import { ForumModule } from 'src/forum/forum.module';
 import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
 import { PushModule } from 'src/push/push.module';
 import { SlackModule } from 'src/slack/slack.module';
+import { ActionStatsService } from './action-stats.service';
+import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 
 @Module({
   imports: [
@@ -44,6 +46,7 @@ import { SlackModule } from 'src/slack/slack.module';
       Comment,
       EditableContent,
       Post,
+      OnetimeInvite,
       Tag,
       ActionUpdate,
       ReminderGroup,
@@ -73,6 +76,7 @@ import { SlackModule } from 'src/slack/slack.module';
     ReloadUsersJoinedWorker,
     ContractSuspenderWorker,
     ForumActionCompleterWorker,
+    ActionStatsService,
   ],
   exports: [ActionsService, ActionEventRecipientService],
 })

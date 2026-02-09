@@ -117,7 +117,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
     required?: boolean;
     show?: (f: ActionFormProps["form"]) => boolean;
     helpText?: string;
-    options?: { value: string | number; label: string }[];
+    options?: { value: string | number | undefined; label: string }[];
     rows?: number;
     gridCol?: boolean; // render in 2-col grid within section
     inverted?: boolean; // for checkboxes: invert the displayed/stored value
@@ -128,6 +128,14 @@ const ActionForm: React.FC<ActionFormProps> = ({
       { value: "Activity", label: "Activity" },
       { value: "Funding", label: "Funding" },
       { value: "Ongoing", label: "Ongoing" },
+    ],
+    []
+  );
+
+  const customStatTypeOptions = useMemo(
+    () => [
+      { value: "none", label: "None" },
+      { value: "users_invited", label: "Users Invited" },
     ],
     []
   );
@@ -154,6 +162,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
     ],
     [availableSuites, suitesLoading]
   );
+
+  console.log(form.customStatType);
 
   const fieldDefs = useMemo(
     (): FieldDef[] => [
@@ -310,6 +320,30 @@ const ActionForm: React.FC<ActionFormProps> = ({
           "Prevents members from completing the action even on the detail page",
       },
       {
+        name: "customStatType",
+        label: "Custom Stat Type",
+        type: "select",
+        section: "settings",
+        options: customStatTypeOptions,
+        gridCol: true,
+      },
+      {
+        name: "customStatGoal",
+        label: "Custom Stat Goal",
+        type: "number",
+        section: "settings",
+        gridCol: true,
+        show: (f) => !!f.customStatType && f.customStatType !== "none",
+      },
+      {
+        name: "customStatLabel",
+        label: "Custom Stat Label",
+        type: "text",
+        section: "settings",
+        gridCol: true,
+        show: (f) => !!f.customStatType && f.customStatType !== "none",
+      },
+      {
         name: "publicOnly",
         label: "Public Only",
         type: "checkbox",
@@ -336,6 +370,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       suiteSelectOptions,
       suitesLoading,
       visibilityModeOptions,
+      customStatTypeOptions,
     ]
   );
 

@@ -27,6 +27,11 @@ import { ActionSuite } from './action-suite.entity';
 import { ActionUpdate } from './action-update.entity';
 import { findLeast } from 'src/utils/filter';
 
+export enum CustomActionStat {
+  NONE = 'none',
+  USERS_INVITED = 'users_invited',
+}
+
 export enum ActionTaskType {
   Funding = 'Funding', //giving money to a particular cause
   Activity = 'Activity', // one-time action taking a limited amount of time
@@ -270,6 +275,27 @@ export class Action {
   @IsOptional()
   @Type(() => Date)
   computedAutocompleteAt?: Date;
+
+  @Column({ type: 'enum', enum: CustomActionStat, nullable: true })
+  @Type(() => String)
+  @ApiPropertyOptional({ enum: CustomActionStat, enumName: 'CustomActionStat' })
+  @IsOptional()
+  customStatType?: CustomActionStat;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  customStatLabel?: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  customStatValue?: number;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  customStatGoal?: number;
 
   // Relations
 

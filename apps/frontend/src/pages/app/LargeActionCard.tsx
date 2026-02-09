@@ -93,17 +93,14 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         </Card>
       )}
       <Card
-        className={`p-4 sm:p-6 transition-all duration-300 ${
-          state === LargeActionCardState.Closed
+        className={`p-4 sm:p-6 transition-all duration-300 ${state === LargeActionCardState.Closed
             ? "opacity-0 overflow-hidden"
             : "opacity-100"
-        } ${className} w-full relative 
-         ${state === LargeActionCardState.Minified ? "pb-4" : ""} ${
-          dismissProps ? "rounded-t-none" : "rounded"
-        }
-        ${
-          action.optional ? "border-dashed border-[1.5px] !border-blue-300" : ""
-        }`}
+          } ${className} w-full relative 
+         ${state === LargeActionCardState.Minified ? "pb-4" : ""} ${dismissProps ? "rounded-t-none" : "rounded"
+          }
+        ${action.optional ? "border-dashed border-[1.5px] !border-blue-300" : ""
+          }`}
       >
         {action.optional && (
           <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
