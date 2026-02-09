@@ -1218,6 +1218,8 @@ export class UserService {
               tab: 'members',
               communityId: community.id,
             }),
+            associatedUsers: [user],
+            priority: NotifPriority.High,
           }),
           saveAsPendingCommunity: false,
         }),
