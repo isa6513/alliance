@@ -206,7 +206,6 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       if (html) {
         e.preventDefault();
         const md = htmlToMarkdownFromDocs(html);
-        console.log("md", html);
         const ta = textareaRef.current;
         if (ta) {
           const before = value.body.slice(0, ta.selectionStart);
@@ -223,7 +222,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         }
       }
     } catch (err) {
-      console.error("Failed to paste image(s)", err);
+      console.error("Failed to process pasted content", err);
     }
   };
 
