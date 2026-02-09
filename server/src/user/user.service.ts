@@ -731,7 +731,17 @@ export class UserService {
             this.addUserToCommunityAndRefreshConversation({
               user,
               community: user.pendingCommunity,
-              notifForLeader: true,
+              notifForLeader: ({ leader }) => ({
+                user: leader,
+                category: NotificationCategory.MemberJoinedCommunity,
+                message: `${user.name} signed their contract and was re-added to your group (${user.pendingCommunity!.name})`,
+                webAppLocation: groupUrl({
+                  tab: 'members',
+                  communityId: user.pendingCommunity!.id,
+                }),
+                associatedUsers: [user],
+                priority: NotifPriority.High,
+              }),
             }),
           );
         }
@@ -799,7 +809,17 @@ export class UserService {
           this.addUserToCommunityAndRefreshConversation({
             user,
             community,
-            notifForLeader: true,
+            notifForLeader: ({ leader }) => ({
+              user: leader,
+              category: NotificationCategory.MemberJoinedCommunity,
+              message: `${user.name} (referred by ${referredBy.name}) joined the Alliance and your group (${community.name})`,
+              webAppLocation: groupUrl({
+                tab: 'members',
+                communityId: community.id,
+              }),
+              associatedUsers: [user],
+              priority: NotifPriority.High,
+            }),
           }),
         );
       } else {
@@ -1173,15 +1193,25 @@ export class UserService {
       this.addUserToCommunityAndRefreshConversation({
         user,
         community,
-        notifForLeader: true,
+        notifForLeader: ({ leader }) => ({
+          user: leader,
+          category: NotificationCategory.MemberJoinedCommunity,
+          message: `${user.name} joined your public group (${community.name})`,
+          webAppLocation: groupUrl({
+            tab: 'members',
+            communityId: community.id,
+          }),
+          associatedUsers: [user],
+          priority: NotifPriority.High,
+        }),
       }),
       ...user.communities.map((community) =>
         this.removeUserFromCommunityAndRefreshConversation({
           user,
           community,
           removeAsLeader: false,
-          notifForLeader: (params) => ({
-            user: params.leader,
+          notifForLeader: ({ leader }) => ({
+            user: leader,
             category: NotificationCategory.MemberLeftCommunity,
             message: `${user.name} left your group (${community.name})`,
             webAppLocation: groupUrl({
@@ -1279,16 +1309,26 @@ export class UserService {
     return this.addUserToCommunityAndRefreshConversation({
       user,
       community,
-      notifForLeader: () => true,
+      notifForLeader: ({ leader }) => ({
+        user: leader,
+        category: NotificationCategory.MemberJoinedCommunity,
+        message: `Staff added ${user.name} to your group (${community.name})`,
+        webAppLocation: groupUrl({
+          tab: 'members',
+          communityId: community.id,
+        }),
+        associatedUsers: [user],
+        priority: NotifPriority.High,
+      }),
     });
   }
 
   async addUserToCommunityAndRefreshConversation(params: {
     user: Pick<User, 'id' | 'name'> & DeepPartial<User>;
     community: Community;
-    notifForLeader:
-      | boolean
-      | ((params: { leader: User }) => DeepPartial<Notification> | boolean);
+    notifForLeader: (params: {
+      leader: User;
+    }) => DeepPartial<Notification> | null;
   }): Promise<Community> {
     const { user, community, notifForLeader } = params;
 
@@ -1298,28 +1338,11 @@ export class UserService {
 
     const notifs: Notification[] = community
       .leaders!.map((leader) => {
-        const notif =
-          typeof notifForLeader === 'function'
-            ? notifForLeader({ leader })
-            : notifForLeader;
+        const notif = notifForLeader({ leader });
         if (!notif) {
           return null;
         }
-        return this.notifRepository.create(
-          notif === true
-            ? {
-                user: leader,
-                category: NotificationCategory.MemberJoinedCommunity,
-                message: `${user.name} joined your group (${community.name})`,
-                webAppLocation: groupUrl({
-                  tab: 'members',
-                  communityId: community.id,
-                }),
-                associatedUsers: [user],
-                priority: NotifPriority.High,
-              }
-            : notif,
-        );
+        return this.notifRepository.create(notif);
       })
       .filter((notif) => !!notif);
 
