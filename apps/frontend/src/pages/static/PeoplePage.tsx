@@ -32,7 +32,7 @@ const PeoplePage: React.FC = () => {
     },
     {
       name: "Tara Chklovski",
-      description: "Founder, CEO, Technovation  ",
+      description: "Founder, CEO, Technovation",
     },
     {
       name: "Brice Lalonde",
