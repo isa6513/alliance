@@ -839,7 +839,7 @@ export class UserService {
   ): Promise<Date> {
     const user = await this.findOneOrFail(userId, {
       contractEvents: true,
-      communities: { leaders: true },
+      communities: { leaders: true, users: true },
       leaderOf: true,
     });
     if (!user.hasActiveContract) {
@@ -853,15 +853,14 @@ export class UserService {
       autoSuspendKey,
     });
 
-    const notifs: Notification[] = [];
-
-    let pendingCommunity: Community | null = null;
-    for (const community of user.communities) {
-      if (!user.leaderOfIdSet.has(community.id)) {
-        pendingCommunity = community;
-        notifs.push(
-          ...community.leaders!.map((leader) =>
-            this.notifRepository.create({
+    const communitiesP = Promise.all(
+      user.communities.map((community) =>
+        this.removeUserFromCommunityAndRefreshConversation({
+          user,
+          community,
+          removeAsLeader: false,
+          notifForLeader: ({ leader }) => {
+            return {
               user: leader,
               category:
                 NotificationCategory.MemberSuspendedRemovedFromCommunity,
@@ -869,32 +868,16 @@ export class UserService {
               webAppLocation: profileUrl(user.id),
               associatedUsers: [user],
               priority: NotifPriority.High,
-            }),
-          ),
-        );
-      }
-    }
-    const updatedCommunities: Community[] = user.communities.filter(
-      (community) => !user.leaderOfIdSet.has(community.id),
+            };
+          },
+          saveAsPendingCommunity: true,
+        }),
+      ),
     );
 
     await Promise.all([
       this.contractEventRepository.save(contractEvent),
-      run(async () => {
-        await this.notifRepository.save(notifs);
-        await this.userRepository.save({
-          id: user.id,
-          communities: user.leaderOf,
-          pendingCommunity,
-        });
-        await Promise.all(
-          updatedCommunities.map((community) =>
-            this.conversationService.syncCommunityConversationMembers(
-              community.id,
-            ),
-          ),
-        );
-      }),
+      communitiesP,
     ]);
 
     if (!automatic) {
@@ -1394,12 +1377,25 @@ export class UserService {
     notifForLeader: (params: {
       leader: User;
     }) => DeepPartial<Notification> | null;
+    saveAsPendingCommunity: boolean;
   }): Promise<Community> {
-    const { user, community, removeAsLeader, notifForLeader } = params;
-    const newMembers = community.users.filter((u) => u.id !== user.id);
+    const {
+      user,
+      community,
+      removeAsLeader,
+      notifForLeader,
+      saveAsPendingCommunity,
+    } = params;
     const newLeaders = removeAsLeader
       ? community.leaders!.filter((l) => l.id !== user.id)
-      : community.leaders;
+      : community.leaders!;
+    const newLeaderIds = new Set(newLeaders.map((l) => l.id));
+
+    if (newLeaderIds.has(user.id)) {
+      // user is not removed, no further action needed
+      return community;
+    }
+    const newMembers = community.users.filter((u) => u.id !== user.id);
 
     const notifs = newLeaders!
       .map((leader) => {
@@ -1427,6 +1423,14 @@ export class UserService {
     const [updatedCommunity] = await Promise.all([
       updatedCommunityP,
       this.notifRepository.save(notifs),
+      saveAsPendingCommunity
+        ? this.userRepository.save({
+            id: user.id,
+            pendingCommunity: {
+              id: community.id,
+            },
+          })
+        : null,
     ]);
 
     return updatedCommunity;
@@ -1475,6 +1479,7 @@ export class UserService {
             associatedUsers: [removee, user],
           };
         },
+        saveAsPendingCommunity: false,
       });
 
     const notif = this.notifRepository.create({
