@@ -21,13 +21,16 @@ export const connectionOptions = (): PostgresConnectionOptions => {
   return process.env.NODE_ENV === 'production' ||
     process.env.NODE_ENV === 'staging'
     ? {
-        ...shared,
-        ssl: { rejectUnauthorized: false },
-        extra: { ssl: { rejectUnauthorized: false } }, //TODO
-      }
+      ...shared,
+      ssl: {
+        rejectUnauthorized: true,
+        ca: process.env.DB_CA_CERT,
+      },
+      extra: { ssl: { rejectUnauthorized: true, ca: process.env.DB_CA_CERT } },
+    }
     : {
-        ...shared,
-      };
+      ...shared,
+    };
 };
 
 // verison used for migrations only

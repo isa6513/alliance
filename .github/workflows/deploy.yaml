@@ -514,7 +514,8 @@ jobs:
             export USE_CLOUDFRONT=${{ vars.USE_CLOUDFRONT }}
             export CLOUDFRONT_DOMAIN=${{ secrets.CLOUDFRONT_DOMAIN }}
             export SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}
-
+            export DB_CA_CERT=${{ secrets.DB_CA_CERT }}
+            
             rollback () {
               echo "Deployment failed - rolling back"
               cd ~/
