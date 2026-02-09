@@ -1169,60 +1169,32 @@ export class UserService {
       throw new BadRequestException('Community is full');
     }
 
-    const updatedCommunities: Community[] = [];
-    user.communities = user.communities.filter((existing) => {
-      const keep =
-        existing.id === community.id || user.leaderOfIdSet.has(existing.id);
-      if (!keep) {
-        updatedCommunities.push(existing);
-      }
-      return keep;
-    });
-    user.communities.push(community);
-    user.undergoingGroupAssignment = false;
-
-    const notifs = community.leaders!.map((leader) =>
-      this.notifRepository.create({
-        user: leader,
-        category: NotificationCategory.MemberJoinedCommunity,
-        message: `${user.name} joined your public group (${community.name})`,
-        priority: NotifPriority.High,
-        webAppLocation: groupUrl({
-          tab: 'members',
-          communityId: community.id,
-        }),
-        associatedUsers: [user],
+    const [addedCommunity] = await Promise.all([
+      this.addUserToCommunityAndRefreshConversation({
+        user,
+        community,
+        notifForLeader: true,
       }),
-    );
-
-    notifs.push(
-      ...updatedCommunities.flatMap((c) =>
-        (c.leaders ?? []).map((leader) =>
-          this.notifRepository.create({
-            user: leader,
+      ...user.communities.map((community) =>
+        this.removeUserFromCommunityAndRefreshConversation({
+          user,
+          community,
+          removeAsLeader: false,
+          notifForLeader: (params) => ({
+            user: params.leader,
             category: NotificationCategory.MemberLeftCommunity,
-            message: `${user.name} left your group (${c.name})`,
+            message: `${user.name} left your group (${community.name})`,
             webAppLocation: groupUrl({
               tab: 'members',
-              communityId: c.id,
+              communityId: community.id,
             }),
-            associatedUsers: [user],
           }),
-        ),
+          saveAsPendingCommunity: false,
+        }),
       ),
-    );
-
-    await this.userRepository.save(user);
-
-    await Promise.all([
-      this.conversationService.syncCommunityConversationMembers(community.id),
-      ...updatedCommunities.map((c) =>
-        this.conversationService.syncCommunityConversationMembers(c.id),
-      ),
-      this.notifRepository.save(notifs),
     ]);
 
-    return community;
+    return addedCommunity;
   }
 
   async updateCommunity(
