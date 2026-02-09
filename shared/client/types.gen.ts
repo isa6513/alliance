@@ -558,7 +558,6 @@ export type User = {
     isNotSignedUpPartialProfile: boolean;
     customCityString?: string | null;
     over18: boolean | null;
-    onboardingComplete: boolean;
     anonymous: boolean;
     shareInfoPublicly: boolean;
     formDataPreference: PublicFormResponseDefault;
@@ -618,7 +617,6 @@ export type UserDto = {
     profileDescription: string | null;
     referralCode: string | null;
     customCityString?: string | null;
-    onboardingComplete: boolean;
     anonymous: boolean;
     shareInfoPublicly: boolean;
     formDataPreference: PublicFormResponseDefault;
@@ -660,12 +658,6 @@ export type ProfileDto = {
     hasActiveContract: boolean;
     isCommunityLeader: boolean;
     lastContractEvent?: ContractEvent;
-};
-
-export type OnboardingDto = {
-    over18: boolean | null;
-    anonymous: boolean;
-    cityId?: number;
 };
 
 export type UserAwayRangeReason = 'vacation' | 'emergency' | 'other';
@@ -2697,21 +2689,6 @@ export type UserFindMeResponses = {
 };
 
 export type UserFindMeResponse = UserFindMeResponses[keyof UserFindMeResponses];
-
-export type UserOnboardingData = {
-    body: OnboardingDto;
-    path?: never;
-    query?: never;
-    url: '/user/onboarding';
-};
-
-export type UserOnboardingErrors = {
-    401: unknown;
-};
-
-export type UserOnboardingResponses = {
-    200: unknown;
-};
 
 export type UserSignContractData = {
     body?: never;

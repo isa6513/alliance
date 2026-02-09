@@ -100,7 +100,6 @@ export class UserDto extends PickType(User, [
   'admin',
   'staff',
   'id',
-  'onboardingComplete',
   'emailNotifsEnabled',
   'pushNotifsEnabled',
   'textNotifsEnabled',
@@ -184,12 +183,6 @@ export class UpdateProfileDto extends PartialType(
   @ApiPropertyOptional({ type: Number, nullable: true })
   @IsOptional()
   cityId?: number | null;
-}
-
-export class OnboardingDto extends PickType(User, ['over18', 'anonymous']) {
-  @ApiPropertyOptional()
-  @IsOptional()
-  cityId?: number;
 }
 
 export class ReferralDto {

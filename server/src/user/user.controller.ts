@@ -89,14 +89,6 @@ export class UserController {
     return new ProfileDto(profile);
   }
 
-  @Post('onboarding')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse()
-  @ApiUnauthorizedResponse()
-  async onboarding(@Request() req: JwtRequest, @Body() body: OnboardingDto) {
-    await this.userService.onboarding(req.user.sub, body);
-  }
-
   @Post('signcontract')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: String })

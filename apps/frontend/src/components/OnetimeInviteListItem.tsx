@@ -51,7 +51,7 @@ const OnetimeInviteListItem = ({
   const handleCopy = () => {
     onCopy?.(invite.code);
     setCopied(true);
-    setTimeout(() => setCopied(false), 4000);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (

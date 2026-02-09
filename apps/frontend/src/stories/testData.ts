@@ -101,7 +101,6 @@ export const testAuthUser: UserDto = {
   name: "First Lastname",
   email: "first.lastname@example.com",
   admin: false,
-  onboardingComplete: false,
   referralCode: "1234567890",
   anonymous: false,
   forumDigestPreference: "off",

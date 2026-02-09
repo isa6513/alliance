@@ -134,44 +134,6 @@ describe('Users (e2e)', () => {
     expect(res.status).toBe(201);
   });
 
-  it('can complete onboarding with city and anonymous settings', async () => {
-    // First create a test city
-    const testCity = cityRepo.create({
-      id: 1,
-      name: 'Test City',
-      admin1: 'Test State',
-      admin2: 'Test County',
-      countryCode: 'TC',
-      latitude: 37.7749,
-      longitude: -122.4194,
-      countryName: 'Test Country',
-    });
-    await cityRepo.save(testCity);
-
-    const res = await request(ctx.app.getHttpServer())
-      .post('/user/onboarding')
-      .send({
-        cityId: testCity.id,
-        over18: true,
-        anonymous: true,
-      })
-      .set('Authorization', `Bearer ${userAToken}`);
-
-    expect(res.status).toBe(201);
-
-    // Verify the user was updated in the database
-    const updatedUser = await userRepo.findOne({
-      where: { id: userAId },
-      relations: { city: true },
-    });
-    expect(updatedUser).not.toBeNull();
-
-    expect(updatedUser?.anonymous).toBe(true);
-    expect(updatedUser?.over18).toBe(true);
-    expect(updatedUser?.city?.id).toBe(testCity.id);
-    expect(updatedUser?.onboardingComplete).toBe(true);
-  });
-
   it('can update user anonymous setting and city via update endpoint', async () => {
     // Create another test city
     const newCity = cityRepo.create({
@@ -758,7 +720,7 @@ describe('Users (e2e)', () => {
         leader1Notifs.some(
           (n) =>
             n.category ===
-              NotificationCategory.MemberSuspendedRemovedFromCommunity &&
+            NotificationCategory.MemberSuspendedRemovedFromCommunity &&
             n.message.includes('suspended their contract'),
         ),
       ).toBe(true);
@@ -767,7 +729,7 @@ describe('Users (e2e)', () => {
         leader2Notifs.some(
           (n) =>
             n.category ===
-              NotificationCategory.MemberSuspendedRemovedFromCommunity &&
+            NotificationCategory.MemberSuspendedRemovedFromCommunity &&
             n.message.includes('suspended their contract'),
         ),
       ).toBe(true);

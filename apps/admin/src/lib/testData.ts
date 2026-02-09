@@ -24,7 +24,6 @@ export const FORM_BUILDER_PREVIEW_USER: UserDto = {
   invitedCommunities: [],
   hasActiveContract: true,
   referralCode: null,
-  onboardingComplete: true,
   anonymous: false,
   email: "preview@example.com",
   contractEvents: [

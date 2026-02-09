@@ -245,11 +245,6 @@ export class User {
   @Column({ default: false })
   @ApiProperty()
   @Allow()
-  onboardingComplete: boolean;
-
-  @Column({ default: false })
-  @ApiProperty()
-  @Allow()
   anonymous: boolean;
 
   @Column({ default: false })
@@ -470,10 +465,10 @@ export class User {
     if (hasActiveContract === undefined) {
       const latestContractEvent = this.contractEvents
         ? findLeast(
-            this.contractEvents,
-            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-            (event) => event.date <= date,
-          )
+          this.contractEvents,
+          (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+          (event) => event.date <= date,
+        )
         : null;
       hasActiveContract =
         latestContractEvent?.type === ContractEventType.SIGNED;
@@ -498,10 +493,10 @@ export class User {
     populateCache: if (hasActiveContract === undefined) {
       const latestContractEventBeforeStart = this.contractEvents
         ? findLeast(
-            this.contractEvents,
-            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-            (event) => event.date.getTime() <= startTime,
-          )
+          this.contractEvents,
+          (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+          (event) => event.date.getTime() <= startTime,
+        )
         : null;
       if (latestContractEventBeforeStart?.type !== ContractEventType.SIGNED) {
         hasActiveContract = false;

@@ -67,7 +67,6 @@ export const testUser = new User({
   stripeCustomerId: '',
   isNotSignedUpPartialProfile: false,
   over18: false,
-  onboardingComplete: false,
   preferredActionReminderChannel: NotificationChannel.Text,
   awayRanges: [],
   anonymous: false,
