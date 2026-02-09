@@ -3,7 +3,6 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -158,7 +157,7 @@ export class ConversationService {
         (participant) => participant.user.id === userId,
       )
     ) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
     return this.buildConversationDto(conversation.id, userId);
   }

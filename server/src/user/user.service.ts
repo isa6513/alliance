@@ -3,7 +3,6 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -116,7 +115,7 @@ export class UserService {
     private readonly conversationService: ConversationService,
     private readonly pushService: PushService,
     private readonly slackService: SlackService,
-  ) { }
+  ) {}
 
   async create(data: DeepPartial<User>): Promise<User> {
     const user = this.userRepository.create(data);
@@ -133,8 +132,8 @@ export class UserService {
         const city =
           (data.cityId
             ? await this.cityRepository.findOne({
-              where: { id: data.cityId },
-            })
+                where: { id: data.cityId },
+              })
             : undefined) ?? undefined;
 
         if (data.cityId && !city) {
@@ -296,8 +295,8 @@ export class UserService {
 
     const city = body.cityId
       ? await this.cityRepository.findOne({
-        where: { id: body.cityId },
-      })
+          where: { id: body.cityId },
+        })
       : null;
 
     if (city) {
@@ -518,23 +517,23 @@ export class UserService {
     const users =
       direction === 'sent'
         ? (
-          await this.friendRepository.find({
-            where: {
-              requester: { id: userId },
-              status: FriendStatus.Pending,
-            },
-            relations: { addressee: true },
-          })
-        ).map((r) => r.addressee!)
+            await this.friendRepository.find({
+              where: {
+                requester: { id: userId },
+                status: FriendStatus.Pending,
+              },
+              relations: { addressee: true },
+            })
+          ).map((r) => r.addressee!)
         : (
-          await this.friendRepository.find({
-            where: {
-              addressee: { id: userId },
-              status: FriendStatus.Pending,
-            },
-            relations: { requester: true },
-          })
-        ).map((r) => r.requester!);
+            await this.friendRepository.find({
+              where: {
+                addressee: { id: userId },
+                status: FriendStatus.Pending,
+              },
+              relations: { requester: true },
+            })
+          ).map((r) => r.requester!);
 
     return users.map((u) => new ProfileDto(u));
   }
@@ -587,7 +586,7 @@ export class UserService {
       .getExists();
 
     if (!isLeader) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         `User ${userId} is not a leader of community ${communityId}`,
       );
     }
@@ -724,9 +723,9 @@ export class UserService {
         if (
           user.pendingCommunity.maxCapacity !== null &&
           user.pendingCommunity.maxCapacity -
-          (user.pendingCommunity.users.length -
-            user.pendingCommunity.leaders!.length) >
-          0
+            (user.pendingCommunity.users.length -
+              user.pendingCommunity.leaders!.length) >
+            0
         ) {
           promises.push(
             this.addUserToCommunityAndRefreshConversation({
@@ -1235,7 +1234,7 @@ export class UserService {
   ): Promise<Community> {
     const user = await this.findOneOrFail(userId);
     if (!user.leaderOfIds.some((cid) => cid === communityId) && !user.admin) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
 
     const community = await this.findCommunityOrFail(communityId);
@@ -1279,7 +1278,7 @@ export class UserService {
       relations: { communities: { users: true } },
     });
     if (!user.leaderOfIds.some((cid) => cid === communityId)) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
     if (!user.communities.length) {
       throw new NotFoundException();
@@ -1289,7 +1288,7 @@ export class UserService {
     }
     const community = user.communities[0];
     if (community.users.some((user) => user.id !== userId)) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         'User cannot delete community with other members',
       );
     }
@@ -1319,9 +1318,9 @@ export class UserService {
     community: Community;
     notifFor: (params: { leader: User }) =>
       | {
-        message: string;
-        associatedUsers: User[];
-      }
+          message: string;
+          associatedUsers: User[];
+        }
       | boolean;
   }): Promise<Community> {
     const { user, community, notifFor } = params;
@@ -1405,7 +1404,7 @@ export class UserService {
       where: { id: userId },
     });
     if (!user.leaderOfIdSet.has(communityId)) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
     const community = await this.removeUserFromCommunityAdmin(
       communityId,
@@ -1678,8 +1677,8 @@ export class UserService {
     const communityP =
       communityId !== undefined
         ? this.communityRepository.findOne({
-          where: { id: communityId },
-        })
+            where: { id: communityId },
+          })
         : undefined;
 
     const user = await userP;
@@ -1728,7 +1727,7 @@ export class UserService {
         user.admin
       )
     ) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
 
     await this.onetimeInviteRepository.update(inviteId, {
@@ -1747,7 +1746,7 @@ export class UserService {
       (community) => community.id === communityId,
     );
     if (!community) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         `User is not a member of community ${communityId} or community does not exist`,
       );
     }
@@ -1839,7 +1838,7 @@ export class UserService {
     }
 
     if (!user.leaderOfIds.some((cid) => cid === request.communityId)) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         `User is not a leader of community ${request.communityId}`,
       );
     }
@@ -1890,7 +1889,7 @@ export class UserService {
         user.admin
       )
     ) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
     await this.communityInviteRepository.update(inviteId, {
       deletedAt: new Date(),
@@ -2117,7 +2116,7 @@ export class UserService {
 
     const user = await userP;
     if (!user.leaderOfIds.some((cid) => cid === invite.community.id)) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         `User is not a leader of community ${invite.community.id}`,
       );
     }
@@ -2137,17 +2136,17 @@ export class UserService {
       }),
       ...(invite.invitingUser
         ? [
-          this.notifRepository.create({
-            user: invite.invitingUser,
-            category: NotificationCategory.CommunityInviteCreated,
-            message: `Your request to invite ${invite.invitedUser.name} was approved`,
-            webAppLocation: groupUrl({
-              tab: 'groups',
-              communityId: invite.community.id,
+            this.notifRepository.create({
+              user: invite.invitingUser,
+              category: NotificationCategory.CommunityInviteCreated,
+              message: `Your request to invite ${invite.invitedUser.name} was approved`,
+              webAppLocation: groupUrl({
+                tab: 'groups',
+                communityId: invite.community.id,
+              }),
+              associatedUsers: [],
             }),
-            associatedUsers: [],
-          }),
-        ]
+          ]
         : []),
     ];
     await this.notifRepository.save(notifs);
@@ -2175,7 +2174,7 @@ export class UserService {
 
     const user = await userP;
     if (!user.leaderOfIds.some((cid) => cid === invite.community.id)) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         `User is not a leader of community ${invite.community.id}`,
       );
     }

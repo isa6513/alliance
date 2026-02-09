@@ -1,7 +1,7 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
@@ -56,7 +56,7 @@ export class NotifsService {
     private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
     private readonly mailService: MailService,
     private readonly mmsService: MmsService,
-  ) { }
+  ) {}
 
   async findAll(userId: number) {
     const notifs = await this.notifsRepository.find({
@@ -81,7 +81,7 @@ export class NotifsService {
       throw new NotFoundException('Notif not found');
     }
     if (notif.user.id !== userId) {
-      throw new UnauthorizedException();
+      throw new BadRequestException();
     }
     return this.notifsRepository.update(
       { id: id, readAt: IsNull() },
@@ -125,7 +125,7 @@ export class NotifsService {
       webAppLocation: actionUrl(actionUpdate.action.id),
       mobileAppLocation: actionUrl(actionUpdate.action.id),
       sendTime: actionUpdate.date,
-      priority: NotifPriority.High
+      priority: NotifPriority.High,
     });
     return this.notifsRepository.save(notif);
   }

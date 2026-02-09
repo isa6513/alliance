@@ -68,7 +68,7 @@ export class AuthService {
       }
       if (!invite) {
         if (process.env.NODE_ENV !== 'test') {
-          throw new UnauthorizedException('invalid referral code'); //TODO: feature flag
+          throw new BadRequestException('invalid referral code'); //TODO: feature flag
         }
       } else {
         await this.usersService.invalidateInvite(invite.id);
