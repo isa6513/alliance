@@ -163,8 +163,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
     [availableSuites, suitesLoading]
   );
 
-  console.log(form.customStatType);
-
   const fieldDefs = useMemo(
     (): FieldDef[] => [
       // === CONTENT SECTION ===

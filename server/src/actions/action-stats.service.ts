@@ -1,7 +1,7 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { Action, CustomActionStat } from "./entities/action.entity";
 import { Injectable } from "@nestjs/common";
-import { Between, IsNull, Not, Repository } from "typeorm";
+import { And, Between, IsNull, Not, Repository } from "typeorm";
 import { OnetimeInvite, OnetimeInviteStatus } from "src/user/entities/onetime-invite.entity";
 import { ActionStatus } from "./entities/action-event.entity";
 import { Cron, CronExpression } from "@nestjs/schedule";
@@ -18,7 +18,7 @@ export class ActionStatsService {
   @Cron(CronExpression.EVERY_5_MINUTES)
   async computeAllActionStats() {
     const actions = await this.actionRepository.find({
-      where: { customStatType: Not(IsNull()) },
+      where: { customStatType: And(Not(IsNull()), Not(CustomActionStat.NONE)) },
       relations: { events: true },
     }).then(actions => actions.filter(action => action.status === ActionStatus.MemberAction));
 
@@ -42,7 +42,7 @@ export class ActionStatsService {
       default:
         throw new Error(`Unknown custom stat type: ${action.customStatType satisfies never}`);
     }
-    this.actionRepository.update(action.id, { customStatValue: statValue });
+    await this.actionRepository.update(action.id, { customStatValue: statValue });
   }
 
   private async computeUsersInvited(action: Action) {

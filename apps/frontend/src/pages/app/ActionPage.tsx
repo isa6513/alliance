@@ -119,7 +119,7 @@ export default function ActionPage() {
                 textColor="zinc-800"
                 showInfoTooltip
               />
-              {!!action.customStatType && action.customStatValue !== null && !!action.customStatGoal && (
+              {!!action.customStatType && action.customStatValue !== null && (
                 <div className="mt-3">
                   <p className="text-zinc-800">
                     {action.customStatLabel}:
@@ -140,7 +140,7 @@ export default function ActionPage() {
             />
           </div>
         )}
-      </div >
+      </div>
     </>
   );
 }
