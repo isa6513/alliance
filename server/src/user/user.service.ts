@@ -731,7 +731,7 @@ export class UserService {
             this.addUserToCommunityAndRefreshConversation({
               user,
               community: user.pendingCommunity,
-              notifFor: () => true,
+              notifForLeader: true,
             }),
           );
         }
@@ -743,17 +743,31 @@ export class UserService {
       await this.addUserToCommunityAndRefreshConversation({
         user,
         community,
-        notifFor: ({ leader }) => {
+        notifForLeader: ({ leader }) => {
           if (leader.id === user.referredBy?.id) {
             referrerNotified = true;
             return {
+              user: leader,
+              category: NotificationCategory.MemberJoinedCommunity,
               message: `${user.name} joined the Alliance and your group (${community.name})`,
+              webAppLocation: groupUrl({
+                tab: 'members',
+                communityId: community.id,
+              }),
               associatedUsers: [user],
+              priority: NotifPriority.High,
             };
           }
           return {
+            user: leader,
+            category: NotificationCategory.MemberJoinedCommunity,
             message: `${user.name} (referred by ${user.referredBy!.name}) joined the Alliance and your group (${community.name})`,
+            webAppLocation: groupUrl({
+              tab: 'members',
+              communityId: community.id,
+            }),
             associatedUsers: [user, user.referredBy!],
+            priority: NotifPriority.High,
           };
         },
       });
@@ -785,7 +799,7 @@ export class UserService {
           this.addUserToCommunityAndRefreshConversation({
             user,
             community,
-            notifFor: () => true,
+            notifForLeader: true,
           }),
         );
       } else {
@@ -1309,21 +1323,18 @@ export class UserService {
     return this.addUserToCommunityAndRefreshConversation({
       user,
       community,
-      notifFor: () => true,
+      notifForLeader: () => true,
     });
   }
 
   async addUserToCommunityAndRefreshConversation(params: {
     user: Pick<User, 'id' | 'name'> & DeepPartial<User>;
     community: Community;
-    notifFor: (params: { leader: User }) =>
-      | {
-          message: string;
-          associatedUsers: User[];
-        }
-      | boolean;
+    notifForLeader:
+      | boolean
+      | ((params: { leader: User }) => DeepPartial<Notification> | boolean);
   }): Promise<Community> {
-    const { user, community, notifFor } = params;
+    const { user, community, notifForLeader } = params;
 
     if (community.users.some((existing) => existing.id === user.id)) {
       return community;
@@ -1331,24 +1342,28 @@ export class UserService {
 
     const notifs: Notification[] = community
       .leaders!.map((leader) => {
-        const notif = notifFor({ leader });
+        const notif =
+          typeof notifForLeader === 'function'
+            ? notifForLeader({ leader })
+            : notifForLeader;
         if (!notif) {
           return null;
         }
-        return this.notifRepository.create({
-          user: leader,
-          category: NotificationCategory.MemberJoinedCommunity,
-          message:
-            notif === true
-              ? `${user.name} joined your group (${community.name})`
-              : notif.message,
-          webAppLocation: groupUrl({
-            tab: 'members',
-            communityId: community.id,
-          }),
-          associatedUsers: notif === true ? [user] : notif.associatedUsers,
-          priority: NotifPriority.High,
-        });
+        return this.notifRepository.create(
+          notif === true
+            ? {
+                user: leader,
+                category: NotificationCategory.MemberJoinedCommunity,
+                message: `${user.name} joined your group (${community.name})`,
+                webAppLocation: groupUrl({
+                  tab: 'members',
+                  communityId: community.id,
+                }),
+                associatedUsers: [user],
+                priority: NotifPriority.High,
+              }
+            : notif,
+        );
       })
       .filter((notif) => !!notif);
 
@@ -1375,6 +1390,7 @@ export class UserService {
     user: User;
     community: Community;
     removeAsLeader: boolean;
+    notifFor: (params: { leader: User }) => DeepPartial<Notification> | boolean;
   }): Promise<Community> {
     const { user, community, removeAsLeader } = params;
     const newMembers = community.users.filter((u) => u.id !== user.id);
