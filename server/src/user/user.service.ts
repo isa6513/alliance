@@ -868,6 +868,7 @@ export class UserService {
               message: `${user.name} suspended their contract and was removed from your group (${community.name})`,
               webAppLocation: profileUrl(user.id),
               associatedUsers: [user],
+              priority: NotifPriority.High,
             }),
           ),
         );
