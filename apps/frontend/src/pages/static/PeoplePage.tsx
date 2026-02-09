@@ -1,7 +1,4 @@
-import {
-  ProfileDto,
-  userMembersPublic,
-} from "@alliance/shared/client";
+import { ProfileDto, userMembersPublic } from "@alliance/shared/client";
 import React, { useEffect, useMemo, useState } from "react";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
@@ -28,6 +25,34 @@ const PeoplePage: React.FC = () => {
   const defaultDisplayCount = 100;
   const [displayCount, setDisplayCount] = useState(defaultDisplayCount);
 
+  const experts = [
+    {
+      name: "Janos Pasztor",
+      description: "Former UN Assistant Secretary-General for Climate Change",
+    },
+    {
+      name: "Tara Chklovski",
+      description: "Founder, CEO, Technovation  ",
+    },
+    {
+      name: "Brice Lalonde",
+      description: "Former French Minister of the Environment",
+    },
+    {
+      name: "Connie Guglielmo",
+      description: "Former Editor-in-Chief, CNET",
+    },
+    {
+      name: "Durwood Zaelke",
+      description:
+        "President, Institute for Governance & Sustainable Development",
+    },
+    {
+      name: "Beth Barnes",
+      description: "Founder and CEO of METR",
+    },
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
       const membersRes = await userMembersPublic();
@@ -35,7 +60,20 @@ const PeoplePage: React.FC = () => {
       setMembers(membersRes.data ?? []);
 
       // sort staff by names alphabetically
-      setStaffProfiles(membersRes.data?.filter((member) => Object.keys(staffIds).includes(member.id.toString())).sort((a, b) => (a.displayName ?? "").localeCompare(b.displayName ?? "", undefined, { sensitivity: "base" })).reverse() ?? []);
+      setStaffProfiles(
+        membersRes.data
+          ?.filter((member) =>
+            Object.keys(staffIds).includes(member.id.toString())
+          )
+          .sort((a, b) =>
+            (a.displayName ?? "").localeCompare(
+              b.displayName ?? "",
+              undefined,
+              { sensitivity: "base" }
+            )
+          )
+          .reverse() ?? []
+      );
     };
 
     fetchData();
@@ -85,17 +123,21 @@ const PeoplePage: React.FC = () => {
             Strategic office
           </h2>
           <p className="mb-6 text-zinc-900">
-            Members of the office plan actions and develop our online
-            platform.
+            Members of the office plan actions and develop our online platform.
           </p>
           <div className="space-y-8">
             {staffProfiles
               .filter((member) => member.id !== undefined)
               .map((member) => (
                 <div key={member.id} className="flex gap-5">
-                  <ProfileImage pfp={member.profilePicture ?? null} size="huge" />
+                  <ProfileImage
+                    pfp={member.profilePicture ?? null}
+                    size="huge"
+                  />
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-zinc-900">{member.displayName}</h3>
+                    <h3 className="text-xl font-semibold text-zinc-900">
+                      {member.displayName}
+                    </h3>
                     <div className="text-zinc-600 text-base mt-1">
                       <AppMarkdownWrapper
                         markdownContent={member.profileDescription ?? ""}
@@ -108,10 +150,31 @@ const PeoplePage: React.FC = () => {
         </div>
         <div className="mt-12 md:mt-16">
           <h2 className="!font-semibold !text-xl md:!text-3xl my-4 font-serif">
+            Experts
+          </h2>
+          <p className="text-zinc-900">
+            We are gradually building a group of experts who occasionally lend
+            time, knowledge, or resources to the Alliance.
+          </p>
+          <p className="text-zinc-500 text-base mb-4">
+            This list only includes experts who have chosen to make their
+            information public.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-8 mt-8">
+            {experts.map((expert) => (
+              <div key={expert.name} className="">
+                <p className="text-zinc-900 text-base">{expert.name}</p>
+                <p className="text-zinc-500 text-base">{expert.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-12 md:mt-16">
+          <h2 className="!font-semibold !text-xl md:!text-3xl my-4 font-serif">
             Members
           </h2>
           <p className="text-zinc-900">
-            The Alliance has 74 members. Membership is currently by invitation
+            The Alliance has 86 members. Membership is currently by invitation
             only.
           </p>
           <p className="text-zinc-500 text-base mb-4">
@@ -132,10 +195,7 @@ const PeoplePage: React.FC = () => {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {displayedMembers.map((member) => (
-                <PublicMemberDirectoryCard
-                  key={member.id}
-                  member={member}
-                />
+                <PublicMemberDirectoryCard key={member.id} member={member} />
               ))}
             </div>
             {hasMoreMembers && (
@@ -146,8 +206,7 @@ const PeoplePage: React.FC = () => {
                   }
                   className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50"
                 >
-                  Show more ({filteredMembers.length - displayCount}{" "}
-                  remaining)
+                  Show more ({filteredMembers.length - displayCount} remaining)
                 </button>
               </div>
             )}
