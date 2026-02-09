@@ -68,8 +68,8 @@ export class ProfileDto extends PickType(User, [
     this.isCommunityLeader = user.isCommunityLeader;
     this.lastContractEvent = user.contractEvents?.length
       ? user.contractEvents?.sort(
-          (a, b) => b.date.getTime() - a.date.getTime(),
-        )[0]
+        (a, b) => b.date.getTime() - a.date.getTime(),
+      )[0]
       : undefined;
     if (user.anonymous) {
       this.displayName = 'Someone';
@@ -152,14 +152,6 @@ export class UserDto extends PickType(User, [
     Object.assign(this, instanceToPlain(user));
     this.profilePicture = getImageSource(user.profilePicture);
   }
-}
-
-// used instead of constructor to propagate nulls (TODO? ugly but maybe fine)
-export function userToDto(user: User | null): ProfileDto | null {
-  if (!user) {
-    return null;
-  }
-  return new ProfileDto(user);
 }
 
 export class UpdateProfileDto extends PartialType(

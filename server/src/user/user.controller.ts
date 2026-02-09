@@ -35,7 +35,6 @@ import {
   ProfileDtoWithFriends,
   UpdateProfileDto,
   UserDto,
-  userToDto,
 } from './dto/user.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
@@ -76,7 +75,7 @@ class VerifyEmailBody {
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Get('me')
   @UseGuards(AuthGuard)
@@ -402,9 +401,8 @@ export class UserController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ProfileDto | null> {
-    return userToDto(
-      await this.userService.findOne(id, { contractEvents: true }),
-    );
+    const user = await this.userService.findOne(id, { contractEvents: true });
+    return user ? new ProfileDto(user) : null;
   }
 
   @Post('verifyEmail')

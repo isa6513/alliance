@@ -34,6 +34,7 @@ const NewActionSuitePage = () => {
             type="text"
             name="suiteName"
             placeholder="Suite Name"
+            autoFocus
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
           />
           <div className="flex flex-row justify-end min-w-96 gap-x-3 mt-5">

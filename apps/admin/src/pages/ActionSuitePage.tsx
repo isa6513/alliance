@@ -73,7 +73,7 @@ const ActionSuitePage = () => {
       } else {
         setError(
           ((resp.error as Error).message as string) +
-            " (events will fail to delete if reminders depend on their existence)"
+          " (events will fail to delete if reminders depend on their existence)"
         );
       }
     });

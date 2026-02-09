@@ -1830,7 +1830,7 @@ export class ActionsService {
       where: { id: suiteId },
       relations: { actions: { events: true } },
     });
-    const eventIdx = event.action.events.findIndex(
+    const eventIdx = event.action.events.sort((a, b) => a.date.getTime() - b.date.getTime()).findIndex(
       (event) => event.id === eventId,
     );
     const eventsToUpdate = new Set<number>([eventId]);
@@ -1841,7 +1841,7 @@ export class ActionsService {
           'Events do not have equivalent events to edit',
         );
       }
-      const possibleEvent = action.events[eventIdx];
+      const possibleEvent = action.events.sort((a, b) => a.date.getTime() - b.date.getTime())[eventIdx];
       if (
         possibleEvent.newStatus === event.newStatus &&
         possibleEvent.suiteManaged
@@ -1895,7 +1895,7 @@ export class ActionsService {
           'Events do not have equivalent events to delete',
         );
       }
-      const possibleEvent = action.events[eventIdx];
+      const possibleEvent = action.events.sort((a, b) => a.date.getTime() - b.date.getTime())[eventIdx];
       if (
         possibleEvent.newStatus === event.newStatus &&
         possibleEvent.suiteManaged
