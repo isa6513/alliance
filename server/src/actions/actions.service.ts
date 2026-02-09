@@ -1885,7 +1885,7 @@ export class ActionsService {
       where: { id: suiteId },
       relations: { actions: { events: true } },
     });
-    const eventIdx = event.action.events.findIndex(
+    const eventIdx = event.action.events.sort((a, b) => a.date.getTime() - b.date.getTime()).findIndex(
       (event) => event.id === eventId,
     );
 
