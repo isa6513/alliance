@@ -882,7 +882,7 @@ describe('Users (e2e)', () => {
           communityId: communityLedByUserB.id,
         });
 
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(400);
     });
 
     it('allows leaders to create community invites for their own communities', async () => {
@@ -1026,7 +1026,7 @@ describe('Users (e2e)', () => {
               communityId: communityLedByUserA.id,
             });
 
-          expect(res.status).toBe(401);
+          expect(res.status).toBe(400);
           expect(res.body.message).toContain('not a member');
         });
 
@@ -1084,7 +1084,7 @@ describe('Users (e2e)', () => {
             .set('Authorization', `Bearer ${userBToken}`)
             .send();
 
-          expect(res.status).toBe(401);
+          expect(res.status).toBe(400);
           expect(res.body.message).toContain('not a leader');
         });
       });
@@ -1113,7 +1113,7 @@ describe('Users (e2e)', () => {
             .set('Authorization', `Bearer ${userBToken}`)
             .send();
 
-          expect(res.status).toBe(401);
+          expect(res.status).toBe(400);
           expect(res.body.message).toContain('not a leader');
         });
 
