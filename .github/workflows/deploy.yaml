@@ -494,7 +494,12 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install Playwright
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright System Dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Take Screenshots
         run: corepack yarn workspace @alliance/citesting take
@@ -613,10 +618,11 @@ jobs:
           APPROVE_URL="${{ github.server_url }}/${{ github.repository }}/actions/workflows/approve-visual-baseline.yaml?environment=${ENV_NAME}&sha=${SHA}"
 
           # Header text
-          TEXT="*Visual Regression Detected (${ENV_NAME})*\n"
-          TEXT+="${ENV_NAME^} deploy blocked by visual regression check.\n"
-          TEXT+="*Commit:* \`${SHA}\`\n"
-          TEXT+="<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>  |  <${APPROVE_URL}|Approve baseline>\n"
+          NL=$'\n'
+          TEXT="*Visual Regression Detected (${ENV_NAME})*${NL}"
+          TEXT+="${ENV_NAME^} deploy blocked by visual regression check.${NL}"
+          TEXT+="*Commit:* \`${SHA}\`${NL}"
+          TEXT+="<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>  |  <${APPROVE_URL}|Approve baseline>${NL}"
 
           # Process each failure
           FAILURES=$(cat "$RESULTS" | jq -c '.[] | select(.status == "fail")')
@@ -625,7 +631,7 @@ jobs:
             REASON=$(echo "$fail" | jq -r '.reason')
             FILE="${PAGE}.png"
 
-            TEXT+="\n---\n*${PAGE}*\n${REASON}\n"
+            TEXT+="${NL}---${NL}*${PAGE}*${NL}${REASON}${NL}"
 
             # Upload baseline, current, and diff images → collect permalinks
             GALLERY=""
@@ -642,7 +648,7 @@ jobs:
               [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
             fi
 
-            [ -n "$GALLERY" ] && TEXT+="\n${GALLERY}\n"
+            [ -n "$GALLERY" ] && TEXT+="${NL}${GALLERY}${NL}"
           done <<< "$FAILURES"
 
           # Post the message with gallery permalinks via chat.postMessage
