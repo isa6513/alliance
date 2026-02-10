@@ -25,10 +25,7 @@ import { groupUrl, profileUrl } from 'src/search/approutes';
 import { Tag } from './entities/tag.entity';
 import { CreateTagDto } from './dto/tag.dto';
 import { Community } from 'src/community/entities/community.entity';
-import {
-  CreateCommunityDto,
-  UpdateCommunityDto,
-} from 'src/community/dto/community.dto';
+import { UpdateCommunityDto } from 'src/community/dto/community.dto';
 import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import {
   OnetimeInvite,
@@ -1049,30 +1046,6 @@ export class UserService {
     return awayRanges.some(
       (range) => checkDate >= range.startDate && checkDate <= range.endDate,
     );
-  }
-
-  async createCommunity(
-    userId: number,
-    body: CreateCommunityDto,
-  ): Promise<Community> {
-    const user = await this.userRepository.findOneOrFail({
-      where: { id: userId },
-    });
-    if (body.name.trim().length === 0) {
-      throw new BadRequestException('Name cannot be empty');
-    }
-
-    const community = this.communityRepository.create({
-      ...body,
-      name: body.name.trim(),
-      leaders: [user],
-      users: [user],
-    });
-    const savedCommunity = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(
-      savedCommunity.id,
-    );
-    return savedCommunity;
   }
 
   async findAllCommunities(): Promise<Community[]> {

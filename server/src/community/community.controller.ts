@@ -1,8 +1,9 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { CommunityService } from './community.service';
 import { CommunityDto, CreateCommunityDto } from './dto/community.dto';
+import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
 
 @ApiTags('community')
 @Controller('community')
@@ -17,6 +18,18 @@ export class CommunityController {
   ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.createCommunityAdmin(body),
+    );
+  }
+
+  @Post('create')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async createCommunity(
+    @Request() req: JwtRequest,
+    @Body() body: CreateCommunityDto,
+  ) {
+    return new CommunityDto(
+      await this.communityService.createCommunity(req.user.sub, body),
     );
   }
 }

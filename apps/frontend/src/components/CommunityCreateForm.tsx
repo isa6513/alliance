@@ -1,7 +1,7 @@
 import {
   CommunityDto,
   CreateCommunityDto,
-  userCreateCommunity,
+  communityCreateCommunity,
 } from "@alliance/shared/client";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 import { groupSettings } from "@alliance/shared/lib/copy";
@@ -71,7 +71,7 @@ const CommunityCreateForm = ({
     setIsSubmitting(true);
     setError(null);
     try {
-      const response = await userCreateCommunity({
+      const response = await communityCreateCommunity({
         body: {
           ...formValues,
           photo: photoUrl ?? undefined,

@@ -55,7 +55,6 @@ import {
 import {
   CommunityDto,
   CommunityMemberDto,
-  CreateCommunityDto,
   UpdateCommunityDto,
 } from 'src/community/dto/community.dto';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
@@ -403,17 +402,6 @@ export class UserController {
     return this.userService.verifyEmail(body.token);
   }
 
-  @Post('communities')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: CommunityDto })
-  async createCommunity(
-    @Request() req: JwtRequest,
-    @Body() body: CreateCommunityDto,
-  ) {
-    return new CommunityDto(
-      await this.userService.createCommunity(req.user.sub, body),
-    );
-  }
 
   @Get('communities')
   @UseGuards(AdminGuard)

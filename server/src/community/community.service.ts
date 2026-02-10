@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Community } from './entities/community.entity';
@@ -6,6 +6,7 @@ import { Relations } from 'src/utils/Repository';
 import { ImagesService } from 'src/images/images.service';
 import { ConversationService } from 'src/messaging/conversation.service';
 import { CreateCommunityDto } from './dto/community.dto';
+import { User } from 'src/user/entities/user.entity';
 
 export const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
   Object.freeze({
@@ -18,8 +19,10 @@ export class CommunityService {
   constructor(
     @InjectRepository(Community)
     private readonly communityRepository: Repository<Community>,
-    private readonly imagesService: ImagesService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly conversationService: ConversationService,
+    private readonly imagesService: ImagesService,
   ) {}
 
   async findOneOrFail(
@@ -40,6 +43,30 @@ export class CommunityService {
       body.photo = key;
     }
     const community = this.communityRepository.create(body);
+    const savedCommunity = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(
+      savedCommunity.id,
+    );
+    return savedCommunity;
+  }
+
+  async createCommunity(
+    userId: number,
+    body: CreateCommunityDto,
+  ): Promise<Community> {
+    const user = await this.userRepository.findOneOrFail({
+      where: { id: userId },
+    });
+    if (body.name.trim().length === 0) {
+      throw new BadRequestException('Name cannot be empty');
+    }
+
+    const community = this.communityRepository.create({
+      ...body,
+      name: body.name.trim(),
+      leaders: [user],
+      users: [user],
+    });
     const savedCommunity = await this.communityRepository.save(community);
     await this.conversationService.syncCommunityConversationMembers(
       savedCommunity.id,

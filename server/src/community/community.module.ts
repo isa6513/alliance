@@ -7,10 +7,11 @@ import { CommunityService } from './community.service';
 import { ImagesModule } from 'src/images/images.module';
 import { MessagingModule } from 'src/messaging/messaging.module';
 import { UserModule } from 'src/user/user.module';
+import { User } from 'src/user/entities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Community, CommunityInvite]),
+    TypeOrmModule.forFeature([Community, CommunityInvite, User]),
     forwardRef(() => UserModule),
     ImagesModule,
     forwardRef(() => MessagingModule),

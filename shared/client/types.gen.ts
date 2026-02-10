@@ -752,16 +752,6 @@ export type VerifyEmailBody = {
     [key: string]: unknown;
 };
 
-export type CreateCommunityDto = {
-    name: string;
-    description: string;
-    photo?: string;
-    public: boolean;
-    allowMemberInvites: boolean;
-    allowStaffAssignments: boolean;
-    maxCapacity: number | null;
-};
-
 export type CommunityDto = {
     id: number;
     name: string;
@@ -1035,6 +1025,16 @@ export type NotifClickDto = {
 
 export type NotifClickResponseDto = {
     mms: boolean;
+};
+
+export type CreateCommunityDto = {
+    name: string;
+    description: string;
+    photo?: string;
+    public: boolean;
+    allowMemberInvites: boolean;
+    allowStaffAssignments: boolean;
+    maxCapacity: number | null;
 };
 
 export type EditableContentDto = {
@@ -3149,19 +3149,6 @@ export type UserGetCommunitiesResponses = {
 
 export type UserGetCommunitiesResponse = UserGetCommunitiesResponses[keyof UserGetCommunitiesResponses];
 
-export type UserCreateCommunityData = {
-    body: CreateCommunityDto;
-    path?: never;
-    query?: never;
-    url: '/user/communities';
-};
-
-export type UserCreateCommunityResponses = {
-    200: CommunityDto;
-};
-
-export type UserCreateCommunityResponse = UserCreateCommunityResponses[keyof UserCreateCommunityResponses];
-
 export type UserGetPublicCommunitiesData = {
     body?: never;
     path?: never;
@@ -4169,6 +4156,19 @@ export type CommunityCreateCommunityAdminResponses = {
 };
 
 export type CommunityCreateCommunityAdminResponse = CommunityCreateCommunityAdminResponses[keyof CommunityCreateCommunityAdminResponses];
+
+export type CommunityCreateCommunityData = {
+    body: CreateCommunityDto;
+    path?: never;
+    query?: never;
+    url: '/community/create';
+};
+
+export type CommunityCreateCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type CommunityCreateCommunityResponse = CommunityCreateCommunityResponses[keyof CommunityCreateCommunityResponses];
 
 export type ActionsJoinData = {
     body?: never;
