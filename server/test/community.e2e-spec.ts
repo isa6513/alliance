@@ -752,7 +752,7 @@ describe('Community (e2e)', () => {
           }),
         );
 
-        const result = await communityService.removeLeaderFromCommunity(
+        const result = await communityService.removeLeaderAdmin(
           community.id,
           secondUser.id,
         );
@@ -776,10 +776,7 @@ describe('Community (e2e)', () => {
           }),
         );
 
-        await communityService.removeLeaderFromCommunity(
-          community.id,
-          secondUser.id,
-        );
+        await communityService.removeLeaderAdmin(community.id, secondUser.id);
 
         const refreshed = await communityRepo.findOneOrFail({
           where: { id: community.id },
@@ -798,7 +795,7 @@ describe('Community (e2e)', () => {
           }),
         );
 
-        const result = await communityService.removeLeaderFromCommunity(
+        const result = await communityService.removeLeaderAdmin(
           community.id,
           secondUser.id,
         );
@@ -814,7 +811,7 @@ describe('Community (e2e)', () => {
 
       it('throws when community does not exist', async () => {
         await expect(
-          communityService.removeLeaderFromCommunity(999999, secondUser.id),
+          communityService.removeLeaderAdmin(999999, secondUser.id),
         ).rejects.toThrow(EntityNotFoundError);
       });
     });

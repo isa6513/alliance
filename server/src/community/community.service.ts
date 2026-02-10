@@ -506,7 +506,7 @@ export class CommunityService {
     return updated;
   }
 
-  async removeLeaderFromCommunity(
+  async removeLeaderAdmin(
     communityId: number,
     userId: number,
   ): Promise<Community> {

@@ -184,10 +184,7 @@ export class CommunityController {
     @Body() body: CommunityMemberDto,
   ): Promise<CommunityDto> {
     return new CommunityDto(
-      await this.communityService.removeLeaderFromCommunity(
-        communityId,
-        body.userId,
-      ),
+      await this.communityService.removeLeaderAdmin(communityId, body.userId),
     );
   }
 }
