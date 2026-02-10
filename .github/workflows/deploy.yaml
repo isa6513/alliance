@@ -568,7 +568,6 @@ jobs:
           ENV_NAME="${{ env.env_name }}"
           BASELINE_DIR="${{ github.workspace }}/screenshots/baseline"
           CURRENT_DIR="${{ github.workspace }}/screenshots/current"
-          DIFF_DIR="${{ github.workspace }}/screenshots/diffs"
           TOKEN="${{ secrets.SLACK_BOT_TOKEN }}"
           CHANNEL="${{ secrets.SLACK_DEPLOY_CHANNEL_ID }}"
 
@@ -636,7 +635,7 @@ jobs:
 
             TEXT+="${NL}*${PAGE}*${NL}"
 
-            # Upload baseline, current, and diff images → collect permalinks
+            # Upload baseline and current images → collect permalinks
             GALLERY=""
             if [ -f "$BASELINE_DIR/$FILE" ]; then
               PLINK=$(upload_to_slack "$BASELINE_DIR/$FILE" "${PAGE} — Baseline")
@@ -644,10 +643,6 @@ jobs:
             fi
             if [ -f "$CURRENT_DIR/$FILE" ]; then
               PLINK=$(upload_to_slack "$CURRENT_DIR/$FILE" "${PAGE} — Current")
-              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
-            fi
-            if [ -f "$DIFF_DIR/$FILE" ]; then
-              PLINK=$(upload_to_slack "$DIFF_DIR/$FILE" "${PAGE} — Diff")
               [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
             fi
 
