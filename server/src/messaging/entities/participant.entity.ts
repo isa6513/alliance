@@ -46,7 +46,7 @@ export class Participant {
   @ApiProperty({ enum: ParticipantRole, enumName: 'ParticipantRole' })
   role: ParticipantRole;
 
-  @ManyToOne(() => Message, { nullable: true })
+  @ManyToOne(() => Message, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'lastReadMessageId' })
   @ApiPropertyOptional({ type: () => Message })
   lastReadMessage?: Ty<Message>;

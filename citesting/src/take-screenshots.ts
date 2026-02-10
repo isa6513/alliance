@@ -2,7 +2,7 @@ import { spawn } from "child_process";
 import { promises as fs } from "fs";
 import path from "path";
 import process from "process";
-import { chromium } from "@playwright/test";
+import { chromium, type Page } from "@playwright/test";
 import { screenshotTargets } from "./screenshot-targets";
 
 type ChildProcessHandle = ReturnType<typeof spawn>;
@@ -224,40 +224,32 @@ const loadSeedData = async (psqlBase: string[], pgEnv: NodeJS.ProcessEnv) => {
 /*  Auth                                                               */
 /* ------------------------------------------------------------------ */
 
-type PlaywrightCookie = {
-  name: string;
-  value: string;
-  domain: string;
-  path: string;
-};
-
-const loginTestUser = async (): Promise<PlaywrightCookie[]> => {
+const loginTestUser = async (page: Page): Promise<void> => {
   console.log(`${logPrefix} Logging in test user (${testUserEmail})...`);
 
-  const res = await fetch(`http://localhost:${backendPort}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: testUserEmail,
-      password: testUserPassword,
-      mode: "header",
-    }),
-  });
+  // Navigate to the frontend so we have a page origin, then perform the
+  // login fetch from inside the browser.  This lets the backend's Set-Cookie
+  // headers be stored naturally by the browser with the correct domain,
+  // path, httpOnly, and sameSite attributes.
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Login failed (${res.status}): ${body}`);
+  const apiUrl = `http://localhost:${backendPort}`;
+  const ok = await page.evaluate(
+    async ({ apiUrl, email, password }) => {
+      const res = await fetch(`${apiUrl}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, mode: "cookie" }),
+        credentials: "include",
+      });
+      return res.ok;
+    },
+    { apiUrl, email: testUserEmail, password: testUserPassword }
+  );
+
+  if (!ok) {
+    throw new Error("Login failed — check test user credentials and seed data");
   }
-
-  const { access_token, refresh_token } = (await res.json()) as {
-    access_token: string;
-    refresh_token: string;
-  };
-
-  return [
-    { name: "access_token", value: access_token, domain: "localhost", path: "/" },
-    { name: "refresh_token", value: refresh_token, domain: "localhost", path: "/" },
-  ];
 };
 
 /* ------------------------------------------------------------------ */
@@ -378,7 +370,6 @@ const takeScreenshots = async () => {
   await waitForHttp(baseUrl, 90000);
 
   const hasAuthTargets = screenshotTargets.some((t) => t.requiresAuth);
-  const authCookies = hasAuthTargets ? await loginTestUser() : [];
 
   const browser = await chromium.launch({ headless: true });
 
@@ -395,8 +386,8 @@ const takeScreenshots = async () => {
   let authPage = publicPage;
   if (hasAuthTargets) {
     authContext = await browser.newContext(contextOptions);
-    await authContext.addCookies(authCookies);
     authPage = await authContext.newPage();
+    await loginTestUser(authPage);
   }
 
   for (const [index, target] of screenshotTargets.entries()) {

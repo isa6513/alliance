@@ -1,15 +1,37 @@
+import { forumFindAllPosts, PostDto } from "@alliance/shared/client";
 import React, { useCallback } from "react";
-import { href, useNavigate, useOutletContext } from "react-router";
+import { href, useLoaderData, useNavigate } from "react-router";
 import ForumListPost from "../../components/ForumListPost";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
 import List from "@alliance/sharedweb/ui/List";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
-import { AppLayoutOutletContext } from "../../applayout";
+
+export async function clientLoader() {
+  const response = await forumFindAllPosts();
+  const posts = response.data ?? null;
+  if (!posts) {
+    return null;
+  }
+
+  return [...posts].sort(
+    (a, b) =>
+      new Date(b.lastComment?.createdAt ?? b.updatedAt).getTime() -
+      new Date(a.lastComment?.createdAt ?? a.updatedAt).getTime()
+  );
+}
+
+const pinFirst = (posts: PostDto[]) => {
+  return [...posts].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return 0;
+  });
+};
 
 const ForumPage: React.FC = () => {
-  const { posts } = useOutletContext<AppLayoutOutletContext>();
+  const posts = useLoaderData<typeof clientLoader>();
 
   const navigate = useNavigate();
 
@@ -22,12 +44,7 @@ const ForumPage: React.FC = () => {
   if (posts === null) {
     return null;
   }
-
-  const sorted = posts.sort((a, b) => {
-    if (a.pinned && !b.pinned) return -1;
-    if (!a.pinned && b.pinned) return 1;
-    return 0;
-  });
+  const sorted = pinFirst(posts);
 
   return (
     <CenterLayout className="space-y-3">

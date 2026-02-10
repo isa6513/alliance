@@ -4,8 +4,6 @@ import {
   actionsDismissAction,
   actionsFindAllLoggedIn,
   actionsMyActivity,
-  forumFindAllPosts,
-  PostDto,
   ProfileDto,
   userGetAwayRanges,
   userMyProfile,
@@ -41,7 +39,6 @@ export interface RouteMatches {
 
 export interface LoaderData {
   actionData: Promise<ActionLoaderData | null>;
-  posts: Promise<PostDto[] | null>;
   profile: Promise<ProfileDto | null>;
 }
 
@@ -57,7 +54,6 @@ export interface ActivitiesForAction {
 
 export interface AppLayoutOutletContext {
   actions: ActionWithAwayStatus[] | null;
-  posts: PostDto[] | null;
   profile: ProfileDto | null;
   loading: boolean;
   handleDismissAction: (actionId: number) => void;
@@ -90,13 +86,10 @@ export function clientLoader() {
     };
   });
 
-  const posts = forumFindAllPosts().then((response) => response.data ?? null);
-
   const profile = userMyProfile().then((response) => response.data ?? null);
 
   return {
     actionData: result,
-    posts,
     profile,
   } satisfies LoaderData;
 }
@@ -141,12 +134,10 @@ export default function AppLayout() {
 
   const {
     actionData: actionDataLoader,
-    posts: postsLoader,
     profile: profileLoader,
   } = useLoaderData<typeof clientLoader>();
 
   const [actions, setActions] = useState<ActionWithAwayStatus[] | null>(null);
-  const [posts, setPosts] = useState<PostDto[] | null>(null);
   const [profile, setProfile] = useState<ProfileDto | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -189,24 +180,12 @@ export default function AppLayout() {
       }
     })().finally(() => setLoading(false));
 
-    postsLoader.then((data) => {
-      if (data) {
-        setPosts(
-          data.sort(
-            (a, b) =>
-              new Date(b.lastComment?.createdAt ?? b.updatedAt).getTime() -
-              new Date(a.lastComment?.createdAt ?? a.updatedAt).getTime()
-          )
-        );
-      }
-    });
-
     profileLoader.then((data) => {
       if (data) {
         setProfile(data);
       }
     });
-  }, [actionDataLoader, postsLoader, profileLoader]);
+  }, [actionDataLoader, profileLoader]);
 
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -245,7 +224,6 @@ export default function AppLayout() {
         context={
           {
             actions,
-            posts,
             profile,
             loading,
             handleDismissAction,

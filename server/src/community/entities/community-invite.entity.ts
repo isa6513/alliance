@@ -65,14 +65,14 @@ export class CommunityInvite {
 
   // Relations
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @ApiPropertyOptional({ type: () => User })
   @Type(() => User)
   @JoinColumn({ name: 'invitingUserId' })
   @IsOptional()
   invitingUser?: Ty<User>;
 
-  @ManyToOne(() => User, (user) => user.invitedCommunities)
+  @ManyToOne(() => User, (user) => user.invitedCommunities, { onDelete: 'CASCADE' })
   @ApiProperty({ type: () => User })
   @Type(() => User)
   @JoinColumn({ name: 'invitedUserId' })
