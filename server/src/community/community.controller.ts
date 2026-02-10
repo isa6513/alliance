@@ -68,6 +68,16 @@ export class CommunityController {
     );
   }
 
+  @Get('list/my')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityDto, isArray: true })
+  async getMyCommunities(@Request() req: JwtRequest): Promise<CommunityDto[]> {
+    const communities = await this.communityService.findUserCommunities(
+      req.user.sub,
+    );
+    return communities.map((community) => new CommunityDto(community));
+  }
+
   @Post(':communityId/join')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: CommunityDto })

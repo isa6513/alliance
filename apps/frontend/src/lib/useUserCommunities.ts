@@ -1,5 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
-import { CommunityDto, userGetMyCommunities } from "@alliance/shared/client";
+import {
+  CommunityDto,
+  communityGetMyCommunities,
+} from "@alliance/shared/client";
 
 export function useUserCommunities() {
   const [communities, setCommunities] = useState<CommunityDto[] | null>(null);
@@ -8,7 +11,7 @@ export function useUserCommunities() {
     async (
       selectedCommunityId?: number | null
     ): Promise<CommunityDto | null> => {
-      const resp = await userGetMyCommunities();
+      const resp = await communityGetMyCommunities();
       if (resp.data) {
         setCommunities(resp.data);
         // Atomically return the selected community if requested

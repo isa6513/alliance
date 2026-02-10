@@ -1,4 +1,7 @@
-import { CommunityDto, userGetMyCommunities } from "@alliance/shared/client";
+import {
+  CommunityDto,
+  communityGetMyCommunities,
+} from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./AuthContext";
@@ -18,10 +21,6 @@ type UseMyCommunitiesReturn = {
   updateSelectedCommunity: (community: CommunityDto) => void;
 };
 
-function getQueryKey(userId: number | null) {
-  return ["userGetMyCommunities", userId];
-}
-
 function findCommunityById(
   communities: CommunityDto[],
   communityId: number | null
@@ -40,12 +39,15 @@ export function useMyCommunities(
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const queryKey = useMemo(() => getQueryKey(user?.id ?? null), [user?.id]);
+  const queryKey = useMemo(
+    () => ["communityGetMyCommunities", user?.id ?? null],
+    [user?.id]
+  );
 
   const { data: communities = [] } = useQuery({
     queryKey,
     queryFn: () =>
-      userGetMyCommunities().then((response) => {
+      communityGetMyCommunities().then((response) => {
         return response.data ?? [];
       }),
   });

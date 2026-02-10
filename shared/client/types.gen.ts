@@ -819,21 +819,6 @@ export type RequestCommunityInviteDto = {
     invitedUserId: number;
 };
 
-export type CommunityDto = {
-    id: number;
-    name: string;
-    description: string;
-    photo?: string;
-    public: boolean;
-    allowMemberInvites: boolean;
-    allowStaffAssignments: boolean;
-    maxCapacity: number | null;
-    pendingUsers?: Array<User>;
-    internalInvites: Array<CommunityInvite>;
-    users: Array<ProfileDto>;
-    leaders: Array<ProfileDto>;
-};
-
 export type CommunityMemberContactInfoDto = {
     id: number;
     timeZone?: string;
@@ -907,6 +892,21 @@ export type MessageDto = {
     author: ProfileDto;
     conversationId: number;
     replyTo?: MessageReferenceDto;
+};
+
+export type CommunityDto = {
+    id: number;
+    name: string;
+    description: string;
+    photo?: string;
+    public: boolean;
+    allowMemberInvites: boolean;
+    allowStaffAssignments: boolean;
+    maxCapacity: number | null;
+    pendingUsers?: Array<User>;
+    internalInvites: Array<CommunityInvite>;
+    users: Array<ProfileDto>;
+    leaders: Array<ProfileDto>;
 };
 
 export type ConversationAdminSummaryDto = {
@@ -3440,19 +3440,6 @@ export type UserGetOnetimeInvitesByRequesterResponses = {
 
 export type UserGetOnetimeInvitesByRequesterResponse = UserGetOnetimeInvitesByRequesterResponses[keyof UserGetOnetimeInvitesByRequesterResponses];
 
-export type UserGetMyCommunitiesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/user/myCommunities';
-};
-
-export type UserGetMyCommunitiesResponses = {
-    200: Array<CommunityDto>;
-};
-
-export type UserGetMyCommunitiesResponse = UserGetMyCommunitiesResponses[keyof UserGetMyCommunitiesResponses];
-
 export type UserGetCommunityMemberContactInfoData = {
     body?: never;
     path?: never;
@@ -3985,18 +3972,18 @@ export type CommunityCreateCommunityResponses = {
 
 export type CommunityCreateCommunityResponse = CommunityCreateCommunityResponses[keyof CommunityCreateCommunityResponses];
 
-export type CommunityGetCommunitiesData = {
+export type CommunityGetCommunitiesAdminData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/community/list';
 };
 
-export type CommunityGetCommunitiesResponses = {
+export type CommunityGetCommunitiesAdminResponses = {
     200: Array<CommunityDto>;
 };
 
-export type CommunityGetCommunitiesResponse = CommunityGetCommunitiesResponses[keyof CommunityGetCommunitiesResponses];
+export type CommunityGetCommunitiesAdminResponse = CommunityGetCommunitiesAdminResponses[keyof CommunityGetCommunitiesAdminResponses];
 
 export type CommunityGetPublicCommunitiesData = {
     body?: never;
@@ -4010,6 +3997,19 @@ export type CommunityGetPublicCommunitiesResponses = {
 };
 
 export type CommunityGetPublicCommunitiesResponse = CommunityGetPublicCommunitiesResponses[keyof CommunityGetPublicCommunitiesResponses];
+
+export type CommunityGetMyCommunitiesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/community/list/my';
+};
+
+export type CommunityGetMyCommunitiesResponses = {
+    200: Array<CommunityDto>;
+};
+
+export type CommunityGetMyCommunitiesResponse = CommunityGetMyCommunitiesResponses[keyof CommunityGetMyCommunitiesResponses];
 
 export type CommunityJoinPublicCommunityData = {
     body?: never;

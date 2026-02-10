@@ -520,4 +520,27 @@ export class CommunityService {
     await this.conversationService.syncCommunityConversationMembers(updated.id);
     return updated;
   }
+
+  async findUserCommunities(userId: number): Promise<Community[]> {
+    const user = await this.userRepository.findOneOrFail({
+      where: {
+        id: userId,
+      },
+      relations: {
+        communities: {
+          users: {
+            contractEvents: true,
+          },
+          leaders: true,
+        },
+      },
+    });
+    function leaderKey(community: Community) {
+      return (community.leaders?.some((leader) => leader.id === userId) ??
+        false)
+        ? 0
+        : 1;
+    }
+    return user.communities.sort((a, b) => leaderKey(a) - leaderKey(b));
+  }
 }

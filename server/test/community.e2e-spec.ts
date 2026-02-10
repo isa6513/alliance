@@ -816,6 +816,76 @@ describe('Community (e2e)', () => {
       });
     });
 
+    describe('findUserCommunities', () => {
+      it('returns communities for a user', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E FindUserCommunities',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        const result = await communityService.findUserCommunities(testUser.id);
+
+        const ids = result.map((c) => c.id);
+        expect(ids).toContain(community.id);
+        result.forEach((c) => {
+          expect(c.users).toBeDefined();
+          expect(c.leaders).toBeDefined();
+        });
+      });
+
+      it('sorts leader communities before non-leader communities', async () => {
+        const leaderCommunity = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E FindUser Leader Community',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+        const memberCommunity = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E FindUser Member Only Community',
+            leaders: [secondUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        const result = await communityService.findUserCommunities(testUser.id);
+
+        const leaderIdx = result.findIndex((c) => c.id === leaderCommunity.id);
+        const memberIdx = result.findIndex(
+          (c) => c.id === memberCommunity.id,
+        );
+        expect(leaderIdx).toBeGreaterThanOrEqual(0);
+        expect(memberIdx).toBeGreaterThanOrEqual(0);
+        expect(leaderIdx).toBeLessThan(memberIdx);
+      });
+
+      it('returns empty array when user has no communities', async () => {
+        const lonelyUser = await userRepo.save(
+          userRepo.create({
+            name: 'Lonely User',
+            email: 'lonely.community@example.com',
+            password: 'Password123!',
+          }),
+        );
+
+        const result = await communityService.findUserCommunities(
+          lonelyUser.id,
+        );
+
+        expect(result).toEqual([]);
+      });
+
+      it('throws when user does not exist', async () => {
+        await expect(
+          communityService.findUserCommunities(999999),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+    });
+
     describe('addUserToCommunityAdmin', () => {
       it('adds a user to community as admin', async () => {
         const community = await communityRepo.save(
@@ -984,6 +1054,62 @@ describe('Community (e2e)', () => {
 
     it('GET /community/list returns 401 when unauthenticated', async () => {
       const res = await request(ctx.app.getHttpServer()).get('/community/list');
+
+      expect(res.status).toBe(401);
+    });
+
+    it('GET /community/list/my returns communities for authenticated user', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP My Community',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/community/list/my')
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      const ids = res.body.map((c: CommunityDto) => c.id);
+      expect(ids).toContain(community.id);
+    });
+
+    it('GET /community/list/my returns leader communities before non-leader communities', async () => {
+      const leaderCommunity = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP My Leader Community',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+      const memberCommunity = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP My Member Only Community',
+          leaders: [secondUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/community/list/my')
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(200);
+      const ids = res.body.map((c: CommunityDto) => c.id);
+      const leaderIdx = ids.indexOf(leaderCommunity.id);
+      const memberIdx = ids.indexOf(memberCommunity.id);
+      expect(leaderIdx).toBeGreaterThanOrEqual(0);
+      expect(memberIdx).toBeGreaterThanOrEqual(0);
+      expect(leaderIdx).toBeLessThan(memberIdx);
+    });
+
+    it('GET /community/list/my returns 401 when unauthenticated', async () => {
+      const res = await request(ctx.app.getHttpServer()).get(
+        '/community/list/my',
+      );
 
       expect(res.status).toBe(401);
     });

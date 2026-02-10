@@ -52,7 +52,6 @@ import {
   UpdateAwayRangeDto,
   UserAwayRangeDto,
 } from './dto/away-range.dto';
-import { CommunityDto } from 'src/community/dto/community.dto';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import {
   RegisterDeviceDto,
@@ -648,16 +647,6 @@ export class UserController {
       req.user.sub,
       communityId,
     );
-  }
-
-  @Get('myCommunities')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: CommunityDto, isArray: true })
-  async getMyCommunities(@Request() req: JwtRequest) {
-    const communities = await this.userService.findUserCommunities(
-      req.user.sub,
-    );
-    return communities.map((community) => new CommunityDto(community));
   }
 
   // @Get('communityMemberInfo')
