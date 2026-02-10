@@ -649,27 +649,26 @@ export class UserController {
     );
   }
 
-  // @Get('communityMemberInfo')
-  // @UseGuards(AuthGuard)
-  // @ApiOkResponse({ type: CommunityUserInfoDto })
-  // async getCommunityMemberInfo(@Request() req: JwtRequest) {
-  //   return this.actionsService.getMemberInfo(req.user.sub);
-  // }
-
-  @Get('communityMemberContactInfo')
+  @Get('community/memberContactInfo/:communityId')
   @UseGuards(CommunityLeaderGuard)
   @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
-  async getCommunityMemberContactInfo(@Request() req: JwtRequest) {
-    return this.userService.getMemberContactInfo(req.user.sub);
+  async getCommunityMemberContactInfo(
+    @Request() req: JwtRequest,
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    return this.userService.getMemberContactInfo({
+      leaderId: req.user.sub,
+      communityId,
+    });
   }
 
-  @Get('communityMemberContactInfo/:communityId')
+  @Get('community/memberContactInfo/:communityId/admin')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
   async getCommunityMemberContactInfoAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
   ) {
-    return this.userService.getMemberContactInfoByCommunityId(communityId);
+    return this.userService.getMemberContactInfo({ communityId });
   }
 
   @Get('memberContactInfo')

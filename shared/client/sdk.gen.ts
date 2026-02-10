@@ -616,16 +616,16 @@ export const userGetOnetimeInvitesByRequester = <ThrowOnError extends boolean = 
     });
 };
 
-export const userGetCommunityMemberContactInfo = <ThrowOnError extends boolean = false>(options?: Options<UserGetCommunityMemberContactInfoData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).get<UserGetCommunityMemberContactInfoResponse, unknown, ThrowOnError>({
-        url: '/user/communityMemberContactInfo',
+export const userGetCommunityMemberContactInfo = <ThrowOnError extends boolean = false>(options: Options<UserGetCommunityMemberContactInfoData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).get<UserGetCommunityMemberContactInfoResponse, unknown, ThrowOnError>({
+        url: '/user/community/memberContactInfo/{communityId}',
         ...options
     });
 };
 
 export const userGetCommunityMemberContactInfoAdmin = <ThrowOnError extends boolean = false>(options: Options<UserGetCommunityMemberContactInfoAdminData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<UserGetCommunityMemberContactInfoAdminResponse, unknown, ThrowOnError>({
-        url: '/user/communityMemberContactInfo/{communityId}',
+        url: '/user/community/memberContactInfo/{communityId}/admin',
         ...options
     });
 };

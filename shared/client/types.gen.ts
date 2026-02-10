@@ -3442,9 +3442,11 @@ export type UserGetOnetimeInvitesByRequesterResponse = UserGetOnetimeInvitesByRe
 
 export type UserGetCommunityMemberContactInfoData = {
     body?: never;
-    path?: never;
+    path: {
+        communityId: number;
+    };
     query?: never;
-    url: '/user/communityMemberContactInfo';
+    url: '/user/community/memberContactInfo/{communityId}';
 };
 
 export type UserGetCommunityMemberContactInfoResponses = {
@@ -3459,7 +3461,7 @@ export type UserGetCommunityMemberContactInfoAdminData = {
         communityId: number;
     };
     query?: never;
-    url: '/user/communityMemberContactInfo/{communityId}';
+    url: '/user/community/memberContactInfo/{communityId}/admin';
 };
 
 export type UserGetCommunityMemberContactInfoAdminResponses = {

@@ -41,11 +41,7 @@ import {
   UserAwayRange,
   UserAwayRangeReason,
 } from './entities/user-away-range.entity';
-import {
-  CreateAwayRangeDto,
-  UpdateAwayRangeDto,
-  UserAwayRangeDto,
-} from './dto/away-range.dto';
+import { CreateAwayRangeDto, UpdateAwayRangeDto } from './dto/away-range.dto';
 import { Temporal } from '@js-temporal/polyfill';
 import {
   CommunityInvite,
@@ -65,6 +61,7 @@ import { run } from 'src/utils/promise';
 import { SlackService } from 'src/slack/slack.service';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { CommunityService } from 'src/community/community.service';
+import { getContactInfo } from 'src/utils/user';
 
 const defaultTimeZone = 'America/Los_Angeles';
 
@@ -1047,74 +1044,41 @@ export class UserService {
     return userIds;
   }
 
-  async getMemberContactInfoByCommunityId(
-    communityId: number,
-  ): Promise<CommunityMemberContactInfoDto[]> {
-    const userIds = await this.findUserIdsForCommunity(communityId);
-    if (userIds.length === 0) {
-      return [];
-    }
-    return this.getMemberContactInfo(userIds[0]);
-  }
-
   async getAllMemberContactInfo(): Promise<CommunityMemberContactInfoDto[]> {
     const users = await this.userRepository.find({
-      relations: ['awayRanges'],
+      relations: { awayRanges: true },
     });
 
-    return users.map((user) => {
-      const awayRanges: UserAwayRangeDto[] = (user.awayRanges ?? [])
-        .slice()
-        .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
-        .map((awayRange) =>
-          Object.assign(new UserAwayRangeDto(), {
-            id: awayRange.id,
-            startDate: awayRange.startDate,
-            endDate: awayRange.endDate,
-            createdAt: awayRange.createdAt,
-            reason: awayRange.reason,
-            note: awayRange.note,
-          }),
-        );
-
-      return new CommunityMemberContactInfoDto(
-        user,
-        'America/Los_Angeles',
-        awayRanges,
-      );
+    return getContactInfo({
+      users,
+      timeZone: 'America/Los_Angeles',
     });
   }
 
-  async getMemberContactInfo(
-    userId: number,
-  ): Promise<CommunityMemberContactInfoDto[]> {
-    const leader = await this.findOneOrFail(userId);
-    const community = await this.findCommunityForUserOrFail(userId);
-    const userIds = await this.findUserIdsForCommunity(community.id);
-    const users = await this.userRepository.find({
-      where: { id: In(userIds) },
-      relations: { awayRanges: true },
-    });
-    return users.map((user) => {
-      const awayRanges: UserAwayRangeDto[] = (user.awayRanges ?? [])
-        .slice()
-        .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
-        .map((awayRange) =>
-          Object.assign(new UserAwayRangeDto(), {
-            id: awayRange.id,
-            startDate: awayRange.startDate,
-            endDate: awayRange.endDate,
-            createdAt: awayRange.createdAt,
-            reason: awayRange.reason,
-            note: awayRange.note,
-          }),
-        );
+  async getMemberContactInfo(params: {
+    leaderId?: number;
+    communityId: number;
+  }): Promise<CommunityMemberContactInfoDto[]> {
+    const { leaderId, communityId } = params;
 
-      return new CommunityMemberContactInfoDto(
-        user,
-        leader.timeZone,
-        awayRanges,
-      );
+    const [leader, community] = await Promise.all([
+      leaderId !== undefined ? this.findOneOrFail(leaderId) : undefined,
+      this.communityService.findOneOrFail(communityId, {
+        users: {
+          awayRanges: true,
+        },
+        leaders: true,
+      }),
+    ]);
+    if (
+      leaderId !== undefined &&
+      !community.leaders!.some((leader) => leader.id === leaderId)
+    ) {
+      throw new BadRequestException('User is not a leader of this community');
+    }
+    return getContactInfo({
+      users: community.users,
+      timeZone: leader?.timeZone ?? 'America/Los_Angeles',
     });
   }
 
