@@ -403,14 +403,6 @@ export class UserController {
   }
 
 
-  @Get('communities')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: [CommunityDto] })
-  async getCommunities() {
-    return (await this.userService.findAllCommunities()).map(
-      (community) => new CommunityDto(community),
-    );
-  }
 
   @Get('communities/public')
   @UseGuards(AuthGuard)

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import {
   userAssignGroupsAdmin,
-  userGetCommunities,
+  communityGetCommunities,
 } from "@alliance/shared/client";
 import type {
   AssignGroupsDto,
@@ -105,7 +105,7 @@ const GroupAssignmentPanel: React.FC<GroupAssignmentPanelProps> = ({
       setLoadingCommunities(true);
       setCommunitiesError(null);
       try {
-        const response = await userGetCommunities();
+        const response = await communityGetCommunities();
         setCommunities(response.data ?? []);
       } catch (error) {
         console.error("Failed to load communities", error);

@@ -78,4 +78,11 @@ export class CommunityService {
     );
     return savedCommunity;
   }
+
+  async findAllCommunities(): Promise<Community[]> {
+    const communities = await this.communityRepository.find({
+      relations: COMMUNITY_DEFAULT_RELATIONS,
+    });
+    return communities.sort((a, b) => a.name.localeCompare(b.name));
+  }
 }

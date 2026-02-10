@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, Link } from "react-router";
 import {
   communityCreateCommunityAdmin,
-  userGetCommunities,
+  communityGetCommunities,
 } from "@alliance/shared/client";
 import type {
   CommunityDto,
@@ -49,7 +49,7 @@ const GroupsPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await userGetCommunities();
+      const response = await communityGetCommunities();
       setCommunities(response.data ?? []);
     } catch (err) {
       console.error("Failed to load communities", err);

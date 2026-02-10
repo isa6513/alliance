@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, Link, useNavigate, useParams } from "react-router";
 import {
   actionsGetCommunityMemberInfoAdmin,
+  communityGetCommunities,
   userAddLeaderToCommunity,
   userAddMemberToCommunity,
   userDeleteCommunityAdmin,
-  userGetCommunities,
   userGetCommunityMemberContactInfoAdmin,
   userList,
   userRemoveLeaderFromCommunity,
@@ -80,7 +80,7 @@ const CommunityDetailPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await userGetCommunities();
+      const response = await communityGetCommunities();
       const match =
         response.data?.find((candidate) => candidate.id === communityId) ??
         null;

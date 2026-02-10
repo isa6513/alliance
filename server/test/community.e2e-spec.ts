@@ -4,7 +4,10 @@ import { Repository } from 'typeorm';
 import { EntityNotFoundError } from 'typeorm';
 import { User } from '../src/user/entities/user.entity';
 import { Community } from '../src/community/entities/community.entity';
-import { CreateCommunityDto } from '../src/community/dto/community.dto';
+import {
+  CommunityDto,
+  CreateCommunityDto,
+} from '../src/community/dto/community.dto';
 import { CommunityService } from '../src/community/community.service';
 import { createTestApp, TestContext } from './e2e-test-utils';
 
@@ -143,6 +146,38 @@ describe('Community (e2e)', () => {
       });
     });
 
+    describe('findAllCommunities', () => {
+      const SORTED_PREFIX = 'E2E Sorted ';
+      it('returns all communities sorted by name', async () => {
+        const names = [
+          `${SORTED_PREFIX}Zulu`,
+          `${SORTED_PREFIX}Alpha`,
+          `${SORTED_PREFIX}Mike`,
+        ];
+        await communityRepo.save(
+          names.map((name) =>
+            communityRepo.create({
+              name,
+              leaders: [testUser],
+              users: [testUser],
+            }),
+          ),
+        );
+
+        const result = await communityService.findAllCommunities();
+        const ours = result.filter((c) => c.name.startsWith(SORTED_PREFIX));
+
+        expect(ours.length).toBe(3);
+        expect(ours.map((c) => c.name)).toEqual([
+          `${SORTED_PREFIX}Alpha`,
+          `${SORTED_PREFIX}Mike`,
+          `${SORTED_PREFIX}Zulu`,
+        ]);
+        expect(ours[0].users).toBeDefined();
+        expect(ours[0].leaders).toBeDefined();
+      });
+    });
+
     describe('createCommunityAdmin', () => {
       it('creates community without requiring a user', async () => {
         const body = createDto({
@@ -234,6 +269,60 @@ describe('Community (e2e)', () => {
           name: 'Non-Admin Tries Admin',
           description: 'Should fail',
         });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('GET /community/list returns communities when admin', async () => {
+      // Ensure at least one community exists
+      await communityService.createCommunityAdmin(
+        createDto({ name: 'Listed Community', description: 'For list test' }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/community/list')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThanOrEqual(1);
+      const names = res.body.map((c: CommunityDto) => c.name);
+      expect(names).toContain('Listed Community');
+    });
+
+    it('GET /community/list returns communities sorted by name', async () => {
+      const alphaName = 'E2E List Alpha Group';
+      const zuluName = 'E2E List Zulu Group';
+      await communityService.createCommunityAdmin(
+        createDto({ name: zuluName, description: 'z' }),
+      );
+      await communityService.createCommunityAdmin(
+        createDto({ name: alphaName, description: 'a' }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/community/list')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
+
+      expect(res.status).toBe(200);
+      const names = res.body.map((c: { name: string }) => c.name);
+      const alphaIdx = names.indexOf(alphaName);
+      const zuluIdx = names.indexOf(zuluName);
+      expect(alphaIdx).toBeGreaterThanOrEqual(0);
+      expect(zuluIdx).toBeGreaterThanOrEqual(0);
+      expect(alphaIdx).toBeLessThan(zuluIdx);
+    });
+
+    it('GET /community/list returns 401 when not admin', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get('/community/list')
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(401);
+    });
+
+    it('GET /community/list returns 401 when unauthenticated', async () => {
+      const res = await request(ctx.app.getHttpServer()).get('/community/list');
 
       expect(res.status).toBe(401);
     });

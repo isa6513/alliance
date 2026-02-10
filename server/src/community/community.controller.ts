@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { CommunityService } from './community.service';
@@ -30,6 +37,15 @@ export class CommunityController {
   ) {
     return new CommunityDto(
       await this.communityService.createCommunity(req.user.sub, body),
+    );
+  }
+
+  @Get('list')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [CommunityDto] })
+  async getCommunities() {
+    return (await this.communityService.findAllCommunities()).map(
+      (community) => new CommunityDto(community),
     );
   }
 }
