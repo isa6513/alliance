@@ -290,7 +290,13 @@ const InviteGraphPage = () => {
       )
       .force("charge", d3.forceManyBody().strength(-120))
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(NODE_RADIUS + 5));
+      .force("collision", d3.forceCollide().radius(NODE_RADIUS + 5))
+      .stop();
+
+    // Pre-warm simulation so layout is stable before rendering
+    const tickCount = 500
+    console.log("tickCount", tickCount);
+    for (let i = 0; i < tickCount; i++) simulation.tick();
 
     // Draw links
     const link = g
@@ -434,8 +440,8 @@ const InviteGraphPage = () => {
     // Tooltip on hover
     node.append("title").text((d) => d.displayName);
 
-    // Tick updates
-    simulation.on("tick", () => {
+    // Position update helper
+    function updatePositions() {
       link
         .attr("x1", (d) => (d.source as GraphNode).x!)
         .attr("y1", (d) => (d.source as GraphNode).y!)
@@ -443,7 +449,13 @@ const InviteGraphPage = () => {
         .attr("y2", (d) => (d.target as GraphNode).y!);
 
       node.attr("transform", (d) => `translate(${d.x},${d.y})`);
-    });
+    }
+
+    // Apply pre-warmed positions
+    updatePositions();
+
+    // Re-enable simulation for interactive dragging
+    simulation.on("tick", updatePositions).restart();
 
     // Initial zoom to fit
     svg.call(
