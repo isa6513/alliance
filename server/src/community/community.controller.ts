@@ -44,7 +44,7 @@ export class CommunityController {
   async createCommunity(
     @Request() req: JwtRequest,
     @Body() body: CreateCommunityDto,
-  ) {
+  ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.createCommunity(req.user.sub, body),
     );
@@ -53,7 +53,7 @@ export class CommunityController {
   @Get('list')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [CommunityDto] })
-  async getCommunities() {
+  async getCommunitiesAdmin(): Promise<CommunityDto[]> {
     return (await this.communityService.findAllCommunities()).map(
       (community) => new CommunityDto(community),
     );
@@ -62,7 +62,7 @@ export class CommunityController {
   @Get('list/public')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [CommunityDto] })
-  async getPublicCommunities() {
+  async getPublicCommunities(): Promise<CommunityDto[]> {
     return (await this.communityService.findPublicCommunities()).map(
       (community) => new CommunityDto(community),
     );
@@ -74,7 +74,7 @@ export class CommunityController {
   async joinPublicCommunity(
     @Request() req: JwtRequest,
     @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
+  ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.joinPublicCommunity(
         req.user.sub,
@@ -90,7 +90,7 @@ export class CommunityController {
     @Param('communityId', ParseIntPipe) communityId: number,
     @Body() body: UpdateCommunityDto,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.updateCommunity(
         communityId,
@@ -107,7 +107,7 @@ export class CommunityController {
     @Request() req: JwtRequest,
     @Param('communityId', ParseIntPipe) communityId: number,
     @Body() body: CommunityMemberDto,
-  ) {
+  ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.removeUserFromCommunity({
         userId: req.user.sub,
@@ -123,7 +123,7 @@ export class CommunityController {
   async removeMemberAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
     @Body() body: CommunityMemberDto,
-  ) {
+  ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.removeUserFromCommunityAdmin(
         communityId,
@@ -138,14 +138,16 @@ export class CommunityController {
   async delete(
     @Param('communityId', ParseIntPipe) communityId: number,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<void> {
     await this.communityService.deleteCommunity(req.user.sub, communityId);
   }
 
   @Delete(':communityId/admin')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteAdmin(@Param('communityId', ParseIntPipe) communityId: number) {
+  async deleteAdmin(
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ): Promise<void> {
     await this.communityService.deleteCommunityAdmin(communityId);
   }
 
