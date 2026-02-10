@@ -1,0 +1,258 @@
+import { Repository } from 'typeorm';
+import { CommunityService } from './community.service';
+import { Community } from './entities/community.entity';
+import { User } from 'src/user/entities/user.entity';
+import { ConversationService } from 'src/messaging/conversation.service';
+import { ImagesService } from 'src/images/images.service';
+import { NotifsService, CreateNotifParams } from 'src/notifs/notifs.service';
+import { NotificationCategory } from 'src/notifs/entities/notification.entity';
+
+describe('CommunityService', () => {
+  let service: CommunityService;
+  let communityRepository: jest.Mocked<Repository<Community>>;
+  let userRepository: jest.Mocked<Repository<User>>;
+  let conversationService: jest.Mocked<ConversationService>;
+  let notifsService: jest.Mocked<NotifsService>;
+
+  const leader1 = { id: 10, name: 'Leader One' } as User;
+  const leader2 = { id: 11, name: 'Leader Two' } as User;
+
+  const buildCommunity = (overrides?: Partial<Community>): Community =>
+    ({
+      id: 1,
+      name: 'Test Community',
+      users: [],
+      leaders: [leader1, leader2],
+      ...overrides,
+    }) as Community;
+
+  beforeEach(() => {
+    communityRepository = {
+      save: jest
+        .fn()
+        .mockImplementation((entity) => Promise.resolve({ ...entity })),
+    } as unknown as jest.Mocked<Repository<Community>>;
+
+    userRepository = {
+      save: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<Repository<User>>;
+
+    conversationService = {
+      syncCommunityConversationMembers: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<ConversationService>;
+
+    notifsService = {
+      sendNotifs: jest.fn().mockResolvedValue([]),
+    } as unknown as jest.Mocked<NotifsService>;
+
+    service = new CommunityService(
+      communityRepository,
+      userRepository,
+      conversationService,
+      {} as ImagesService,
+      notifsService,
+    );
+  });
+
+  describe('addUserToCommunityAndRefreshConversation', () => {
+    it('returns the community unchanged when user is already a member', async () => {
+      const user = { id: 5, name: 'Existing User' } as User;
+      const community = buildCommunity({ users: [user] });
+
+      const result = await service.addUserToCommunityAndRefreshConversation({
+        user,
+        community,
+        notifForLeader: () => null,
+      });
+
+      expect(result).toBe(community);
+      expect(communityRepository.save).not.toHaveBeenCalled();
+      expect(notifsService.sendNotifs).not.toHaveBeenCalled();
+    });
+
+    it('adds user to community, sends notifs, and syncs conversation', async () => {
+      const user = { id: 5, name: 'New User' } as User;
+      const community = buildCommunity();
+
+      const notifFactory = jest.fn(({ leader }: { leader: User }) => ({
+        user: { id: leader.id },
+        category: 'test' as NotificationCategory,
+        message: `${user.name} joined`,
+        webAppLocation: '/community/1',
+        associatedUsers: [],
+      })) as (params: { leader: User }) => CreateNotifParams;
+
+      await service.addUserToCommunityAndRefreshConversation({
+        user,
+        community,
+        notifForLeader: notifFactory,
+      });
+
+      // saves the community with the new user appended
+      expect(communityRepository.save).toHaveBeenCalledWith({
+        id: community.id,
+        users: [user],
+      });
+
+      // clears user's pending state
+      expect(userRepository.save).toHaveBeenCalledWith({
+        id: user.id,
+        undergoingGroupAssignment: false,
+        pendingCommunity: null,
+      });
+
+      // sends one notif per leader
+      expect(notifsService.sendNotifs).toHaveBeenCalledTimes(1);
+      const sentNotifs = notifsService.sendNotifs.mock.calls[0][0];
+      expect(sentNotifs).toHaveLength(2);
+
+      // syncs conversation members
+      expect(
+        conversationService.syncCommunityConversationMembers,
+      ).toHaveBeenCalledWith(community.id);
+    });
+
+    it('filters out null notifs from the leader notif factory', async () => {
+      const user = { id: 6, name: 'Another User' } as User;
+      const community = buildCommunity();
+
+      // only produce a notif for leader1, return null for leader2
+      const notifFactory = ({ leader }: { leader: User }) =>
+        leader.id === leader1.id
+          ? ({
+              user: { id: leader.id },
+              category: 'test' as NotificationCategory,
+              message: 'joined',
+              webAppLocation: '/',
+              associatedUsers: [],
+            } as CreateNotifParams)
+          : null;
+
+      await service.addUserToCommunityAndRefreshConversation({
+        user,
+        community,
+        notifForLeader: notifFactory,
+      });
+
+      const sentNotifs = notifsService.sendNotifs.mock.calls[0][0];
+      expect(sentNotifs).toHaveLength(1);
+    });
+  });
+
+  describe('removeUserFromCommunityAndRefreshConversation', () => {
+    it('returns the community unchanged when user is still a leader and not removed as leader', async () => {
+      const user = leader1;
+      const community = buildCommunity({ users: [leader1, leader2] });
+
+      const result =
+        await service.removeUserFromCommunityAndRefreshConversation({
+          user,
+          community,
+          removeAsLeader: false,
+          notifForLeader: () => null,
+          saveAsPendingCommunity: false,
+        });
+
+      expect(result).toBe(community);
+      expect(communityRepository.save).not.toHaveBeenCalled();
+      expect(notifsService.sendNotifs).not.toHaveBeenCalled();
+    });
+
+    it('removes user from members and leaders, sends notifs, and syncs conversation', async () => {
+      const user = leader1;
+      const community = buildCommunity({
+        users: [leader1, leader2],
+      });
+
+      const notifFactory = jest.fn(({ leader }: { leader: User }) => ({
+        user: { id: leader.id },
+        category: 'test' as NotificationCategory,
+        message: `${user.name} left`,
+        webAppLocation: '/community/1',
+        associatedUsers: [],
+      })) as (params: { leader: User }) => CreateNotifParams;
+
+      await service.removeUserFromCommunityAndRefreshConversation({
+        user,
+        community,
+        removeAsLeader: true,
+        notifForLeader: notifFactory,
+        saveAsPendingCommunity: false,
+      });
+
+      // saves community with user removed from both members and leaders
+      expect(communityRepository.save).toHaveBeenCalledWith({
+        id: community.id,
+        users: [leader2],
+        leaders: [leader2],
+      });
+
+      // notifs sent only to remaining leaders (leader2)
+      const sentNotifs = notifsService.sendNotifs.mock.calls[0][0];
+      expect(sentNotifs).toHaveLength(1);
+
+      // syncs conversation
+      expect(
+        conversationService.syncCommunityConversationMembers,
+      ).toHaveBeenCalledWith(community.id);
+    });
+
+    it('removes a non-leader user from members while keeping leaders intact', async () => {
+      const user = { id: 99, name: 'Regular Member' } as User;
+      const community = buildCommunity({
+        users: [leader1, leader2, user],
+      });
+
+      await service.removeUserFromCommunityAndRefreshConversation({
+        user,
+        community,
+        removeAsLeader: false,
+        notifForLeader: () => null,
+        saveAsPendingCommunity: false,
+      });
+
+      expect(communityRepository.save).toHaveBeenCalledWith({
+        id: community.id,
+        users: [leader1, leader2],
+        leaders: [leader1, leader2],
+      });
+    });
+
+    it('saves user pendingCommunity when saveAsPendingCommunity is true', async () => {
+      const user = { id: 99, name: 'Departing Member' } as User;
+      const community = buildCommunity({
+        users: [leader1, user],
+      });
+
+      await service.removeUserFromCommunityAndRefreshConversation({
+        user,
+        community,
+        removeAsLeader: false,
+        notifForLeader: () => null,
+        saveAsPendingCommunity: true,
+      });
+
+      expect(userRepository.save).toHaveBeenCalledWith({
+        id: user.id,
+        pendingCommunity: { id: community.id },
+      });
+    });
+
+    it('does not save pendingCommunity when saveAsPendingCommunity is false', async () => {
+      const user = { id: 99, name: 'Departing Member' } as User;
+      const community = buildCommunity({
+        users: [leader1, user],
+      });
+
+      await service.removeUserFromCommunityAndRefreshConversation({
+        user,
+        community,
+        removeAsLeader: false,
+        notifForLeader: () => null,
+        saveAsPendingCommunity: false,
+      });
+
+      expect(userRepository.save).not.toHaveBeenCalled();
+    });
+  });
+});

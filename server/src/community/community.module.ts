@@ -8,13 +8,15 @@ import { ImagesModule } from 'src/images/images.module';
 import { MessagingModule } from 'src/messaging/messaging.module';
 import { UserModule } from 'src/user/user.module';
 import { User } from 'src/user/entities/user.entity';
+import { NotifsModule } from 'src/notifs/notifs.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Community, CommunityInvite, User]),
-    forwardRef(() => UserModule),
     ImagesModule,
     forwardRef(() => MessagingModule),
+    forwardRef(() => NotifsModule),
+    forwardRef(() => UserModule),
   ],
   controllers: [CommunityController],
   providers: [CommunityService],

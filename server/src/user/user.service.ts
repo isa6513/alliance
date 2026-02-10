@@ -65,9 +65,7 @@ import { Push } from 'src/push/push.entity';
 import { run } from 'src/utils/promise';
 import { SlackService } from 'src/slack/slack.service';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
-import {
-  CommunityService,
-} from 'src/community/community.service';
+import { CommunityService } from 'src/community/community.service';
 
 const defaultTimeZone = 'America/Los_Angeles';
 
@@ -696,7 +694,7 @@ export class UserService {
             0
         ) {
           promises.push(
-            this.addUserToCommunityAndRefreshConversation({
+            this.communityService.addUserToCommunityAndRefreshConversation({
               user,
               community: user.pendingCommunity,
               notifForLeader: ({ leader }) => ({
@@ -717,7 +715,7 @@ export class UserService {
       // Join community from invite
       const community = user.referredByInvite.community;
       let referrerNotified = false;
-      await this.addUserToCommunityAndRefreshConversation({
+      await this.communityService.addUserToCommunityAndRefreshConversation({
         user,
         community,
         notifForLeader: ({ leader }) => {
@@ -769,7 +767,7 @@ export class UserService {
 
       if (community) {
         promises.push(
-          this.addUserToCommunityAndRefreshConversation({
+          this.communityService.addUserToCommunityAndRefreshConversation({
             user,
             community,
             notifForLeader: ({ leader }) => ({
@@ -835,7 +833,7 @@ export class UserService {
 
     const communitiesP = Promise.all(
       user.communities.map((community) =>
-        this.removeUserFromCommunityAndRefreshConversation({
+        this.communityService.removeUserFromCommunityAndRefreshConversation({
           user,
           community,
           removeAsLeader: false,
@@ -1064,7 +1062,7 @@ export class UserService {
     }
 
     const [addedCommunity] = await Promise.all([
-      this.addUserToCommunityAndRefreshConversation({
+      this.communityService.addUserToCommunityAndRefreshConversation({
         user,
         community,
         notifForLeader: ({ leader }) => ({
@@ -1079,7 +1077,7 @@ export class UserService {
         }),
       }),
       ...user.communities.map((community) =>
-        this.removeUserFromCommunityAndRefreshConversation({
+        this.communityService.removeUserFromCommunityAndRefreshConversation({
           user,
           community,
           removeAsLeader: false,
@@ -1180,7 +1178,7 @@ export class UserService {
       this.findOneOrFail(userId),
     ]);
 
-    return this.addUserToCommunityAndRefreshConversation({
+    return this.communityService.addUserToCommunityAndRefreshConversation({
       user,
       community,
       notifForLeader: ({ leader }) => ({
@@ -1194,98 +1192,6 @@ export class UserService {
         associatedUsers: [user],
       }),
     });
-  }
-
-  async addUserToCommunityAndRefreshConversation(params: {
-    user: Pick<User, 'id' | 'name'> & DeepPartial<User>;
-    community: Community;
-    notifForLeader: (params: { leader: User }) => CreateNotifParams | null;
-  }): Promise<Community> {
-    const { user, community, notifForLeader } = params;
-
-    if (community.users.some((existing) => existing.id === user.id)) {
-      return community;
-    }
-
-    const notifs: CreateNotifParams[] = community
-      .leaders!.map((leader) => notifForLeader({ leader }))
-      .filter((notif) => !!notif);
-
-    const updatedP = this.communityRepository.save({
-      id: community.id,
-      users: [...community.users, user],
-    });
-    await Promise.all([
-      this.notifsService.sendNotifs(notifs),
-      this.userRepository.save({
-        id: user.id,
-        undergoingGroupAssignment: false,
-        pendingCommunity: null,
-      }),
-      updatedP.then((updated) =>
-        this.conversationService.syncCommunityConversationMembers(updated.id),
-      ),
-    ]);
-
-    return updatedP;
-  }
-
-  async removeUserFromCommunityAndRefreshConversation(params: {
-    user: User;
-    community: Community;
-    removeAsLeader: boolean;
-    notifForLeader: (params: { leader: User }) => CreateNotifParams | null;
-    saveAsPendingCommunity: boolean;
-  }): Promise<Community> {
-    const {
-      user,
-      community,
-      removeAsLeader,
-      notifForLeader,
-      saveAsPendingCommunity,
-    } = params;
-    const newLeaders = removeAsLeader
-      ? community.leaders!.filter((l) => l.id !== user.id)
-      : community.leaders!;
-    const newLeaderIds = new Set(newLeaders.map((l) => l.id));
-
-    if (newLeaderIds.has(user.id)) {
-      // user is not removed, no further action needed
-      return community;
-    }
-    const newMembers = community.users.filter((u) => u.id !== user.id);
-
-    const notifs = newLeaders!
-      .map((leader) => notifForLeader({ leader }))
-      .filter((notif) => !!notif);
-
-    const updatedCommunityP = run(async () => {
-      const updatedCommunity = await this.communityRepository.save({
-        id: community.id,
-        users: newMembers,
-        leaders: newLeaders,
-      });
-      await this.conversationService.syncCommunityConversationMembers(
-        community.id,
-      );
-
-      return updatedCommunity;
-    });
-
-    const [updatedCommunity] = await Promise.all([
-      updatedCommunityP,
-      this.notifsService.sendNotifs(notifs),
-      saveAsPendingCommunity
-        ? this.userRepository.save({
-            id: user.id,
-            pendingCommunity: {
-              id: community.id,
-            },
-          })
-        : null,
-    ]);
-
-    return updatedCommunity;
   }
 
   async removeUserFromCommunity(params: {
@@ -1310,7 +1216,7 @@ export class UserService {
     ]);
 
     const updatedCommunityP =
-      this.removeUserFromCommunityAndRefreshConversation({
+      this.communityService.removeUserFromCommunityAndRefreshConversation({
         user: removee,
         community,
         removeAsLeader: true,
@@ -1359,7 +1265,7 @@ export class UserService {
     const user = await this.findOneOrFail(userId);
 
     const updatedCommunityP =
-      this.removeUserFromCommunityAndRefreshConversation({
+      this.communityService.removeUserFromCommunityAndRefreshConversation({
         user,
         community,
         removeAsLeader: true,
