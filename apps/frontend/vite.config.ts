@@ -20,7 +20,7 @@ export default defineConfig({
     exclude: ["@alliance/shared", "@alliance/sharedweb"],
   },
   build: {
-    sourcemap: true,
+    sourcemap: "hidden",
   },
   server: {
     watch: {

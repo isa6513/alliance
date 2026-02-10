@@ -295,7 +295,6 @@ const InviteGraphPage = () => {
 
     // Pre-warm simulation so layout is stable before rendering
     const tickCount = 500
-    console.log("tickCount", tickCount);
     for (let i = 0; i < tickCount; i++) simulation.tick();
 
     // Draw links
