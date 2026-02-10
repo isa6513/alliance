@@ -1,3 +1,4 @@
+import { formatShortDate } from "@alliance/shared/lib/dateFormatters";
 import { useCallback, useMemo, useState } from "react";
 import { Link, href } from "react-router";
 import {
@@ -78,14 +79,7 @@ const CommunityMemberTableRow = ({
   const formatAwayRange = (range: UserAwayRangeDto) => {
     const start = new Date(range.startDate);
     const end = new Date(range.endDate);
-
-    const formatDate = (date: Date) =>
-      date.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-      });
-
-    return `${formatDate(start)} - ${formatDate(end)}`;
+    return `${formatShortDate(start)} - ${formatShortDate(end)}`;
   };
 
   const formatAwayReason = (reason?: string) =>

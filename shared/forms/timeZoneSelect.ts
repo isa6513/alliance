@@ -98,8 +98,22 @@ export const TZ_OPTIONS: TzOption[] = [
   { group: "Pacific", label: "Pacific/Kiritimati", tz: "Pacific/Kiritimati" },
 ];
 
+const formatterCache = new Map<string, Intl.DateTimeFormat>();
+function getCachedFormatter(
+  key: string,
+  opts: Intl.DateTimeFormatOptions,
+  locale?: string,
+): Intl.DateTimeFormat {
+  let fmt = formatterCache.get(key);
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat(locale, opts);
+    formatterCache.set(key, fmt);
+  }
+  return fmt;
+}
+
 export function formatNowTimeInTz(tz: string, hour12: boolean = true): string {
-  return new Intl.DateTimeFormat(undefined, {
+  return getCachedFormatter(`time:${tz}:${hour12}`, {
     timeZone: tz,
     hour: "numeric",
     minute: "2-digit",
@@ -109,11 +123,11 @@ export function formatNowTimeInTz(tz: string, hour12: boolean = true): string {
 
 export function getOffsetMinutes(tz: string): number | null {
   try {
-    const parts = new Intl.DateTimeFormat("en", {
+    const parts = getCachedFormatter(`offset:${tz}`, {
       timeZone: tz,
       timeZoneName: "shortOffset",
       hour: "2-digit",
-    }).formatToParts(new Date());
+    }, "en").formatToParts(new Date());
 
     const off = parts.find((p) => p.type === "timeZoneName")?.value ?? "";
     const m = off.match(/([+-])(\d{1,2})(?::?(\d{2}))?/i);
@@ -128,11 +142,10 @@ export function getOffsetMinutes(tz: string): number | null {
 }
 
 export function getGenericLabelFromIntl(tz: string): string | null {
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat("en-US", {
+  const parts = getCachedFormatter(`generic:${tz}`, {
     timeZone: tz,
     timeZoneName: "longGeneric",
-  }).formatToParts(now);
+  }, "en-US").formatToParts(new Date());
   return parts.find((p) => p.type === "timeZoneName")?.value ?? null;
 }
 
@@ -153,7 +166,11 @@ export const DEFAULT_TIMEZONE = "America/Los_Angeles";
 
 const OBSERVER_REFRESH_MS = 30_000;
 
+let cachedBaseItems: Omit<TimeZoneSelectItem, "timeLabel">[] | null = null;
+
 function baseItems(): Omit<TimeZoneSelectItem, "timeLabel">[] {
+  if (cachedBaseItems) return cachedBaseItems;
+
   const tzs = TZ_OPTIONS.map((tz) => tz.tz);
 
   const items = tzs.map((tz) => {
@@ -177,6 +194,7 @@ function baseItems(): Omit<TimeZoneSelectItem, "timeLabel">[] {
       a.labelLeft.localeCompare(b.labelLeft)
   );
 
+  cachedBaseItems = items;
   return items;
 }
 
@@ -205,9 +223,11 @@ export function useTimeZoneSelect({
   const [tick, forceTick] = useState(0);
 
   useEffect(() => {
+    if (!open) return;
+    forceTick((x) => x + 1);
     const id = setInterval(() => forceTick((x) => x + 1), OBSERVER_REFRESH_MS);
     return () => clearInterval(id);
-  }, []);
+  }, [open]);
 
   useEffect(() => {
     if (value != null) setInternalValue(value);

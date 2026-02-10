@@ -7,6 +7,7 @@ import {
   userUpdateAwayRange,
 } from "@alliance/shared/client";
 import { awayRangesDescription } from "@alliance/shared/lib/copy";
+import { formatLongDate } from "@alliance/shared/lib/dateFormatters";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
@@ -336,17 +337,9 @@ const AwayRangesSection: React.FC = () => {
                       </p>
                     )}
                     <p className="font-medium">
-                      {new Date(range.startDate).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                      {formatLongDate(new Date(range.startDate))}
                       {" → "}
-                      {new Date(range.endDate).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                      {formatLongDate(new Date(range.endDate))}
                     </p>
                     <p className="text-sm mt-1">
                       {reasonDisplayName(range.reason)}

@@ -1,3 +1,4 @@
+import { formatShortDate } from "@alliance/shared/lib/dateFormatters";
 import type { CustomComponentProps } from "./types";
 import Card from "../../ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -13,9 +14,9 @@ const ExampleContractComponent = ({
         <p>
           Your contract was signed on:{" "}
           <b>
-            {new Date(
+            {formatShortDate(new Date(
               user?.contractEvents?.[0]?.date ?? new Date()
-            ).toLocaleDateString()}
+            ))}
           </b>
         </p>
         <input

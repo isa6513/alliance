@@ -1,3 +1,4 @@
+import { formatLongDateEnUS } from "@alliance/shared/lib/dateFormatters";
 import matter from "gray-matter";
 import React from "react";
 import { useLoaderData } from "react-router";
@@ -54,11 +55,7 @@ const ProgressPostPage: React.FC = () => {
             </p>
 
             <p className="text-zinc-500">
-              {new Date(frontmatter?.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {formatLongDateEnUS(new Date(frontmatter?.date))}
             </p>
           </div>
 

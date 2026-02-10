@@ -3,6 +3,7 @@ import {
   UserActionRelationPillStatus,
   UserActionSummaryDto,
 } from "@alliance/shared/client";
+import { formatDateTime } from "@alliance/shared/lib/dateFormatters";
 import React, { Fragment } from "react";
 import { JSX, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
@@ -139,15 +140,7 @@ function Pill({
             <p className="text-zinc-500">
               {action.latestMemberActionDeadline === null
                 ? "No deadline"
-                : `Due ${new Date(
-                    action.latestMemberActionDeadline
-                  ).toLocaleString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}`}
+                : `Due ${formatDateTime(new Date(action.latestMemberActionDeadline))}`}
             </p>
             <p className={pillTextStyle}>
               {pillSubtitleText}

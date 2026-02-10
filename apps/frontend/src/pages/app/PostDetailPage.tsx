@@ -4,6 +4,7 @@ import {
   forumRemovePost,
   forumUnlikePost,
 } from "@alliance/shared/client";
+import { formatFullDateTime } from "@alliance/shared/lib/dateFormatters";
 import Card from "@alliance/sharedweb/ui/Card";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
@@ -114,7 +115,7 @@ const PostDetailPage: React.FC = () => {
             <Card style={CardStyle.Alert} className="mb-2 border-none">
               <span className="text-zinc-800">
                 Only you can see this post. it is scheduled for{" "}
-                {new Date(post.visibleAt).toLocaleString()}
+                {formatFullDateTime(new Date(post.visibleAt))}
               </span>
             </Card>
           )}
