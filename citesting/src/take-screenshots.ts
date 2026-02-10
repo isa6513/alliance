@@ -176,6 +176,12 @@ const setupDatabase = async () => {
   // doesn't matter (handles circular FKs such as comment → comment).
   console.log(`${logPrefix} Loading seed dump...`);
   await loadSeedData(psqlBase, pgEnv);
+
+  // Shift all timestamps forward so relative times ("2 days ago") are
+  // stable regardless of when the test runs.  The seed was dumped on
+  // SEED_REFERENCE_DATE; we add (NOW() - reference) to every timestamp column.
+  console.log(`${logPrefix} Shifting timestamps to current date...`);
+  await shiftTimestamps(psqlBase, pgEnv);
 };
 
 const loadSeedData = async (psqlBase: string[], pgEnv: NodeJS.ProcessEnv) => {
@@ -218,6 +224,45 @@ const loadSeedData = async (psqlBase: string[], pgEnv: NodeJS.ProcessEnv) => {
       }
     });
   });
+};
+
+// Date the seed dump was created — used to compute the time shift.
+const SEED_REFERENCE_DATE = "2026-02-10T18:00:00Z";
+
+const shiftTimestamps = async (
+  psqlBase: string[],
+  pgEnv: NodeJS.ProcessEnv
+) => {
+  // Dynamically discover every timestamp/timestamptz column in the public
+  // schema and shift it forward by (NOW() - SEED_REFERENCE_DATE).  This keeps
+  // relative time strings ("2 days ago") stable across runs.
+  const sql = `
+    DO $$
+    DECLARE
+      r RECORD;
+      delta INTERVAL := NOW() - '${SEED_REFERENCE_DATE}'::timestamptz;
+    BEGIN
+      FOR r IN
+        SELECT table_name, column_name
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND data_type IN ('timestamp with time zone',
+                            'timestamp without time zone')
+      LOOP
+        EXECUTE format(
+          'UPDATE %I SET %I = %I + $1 WHERE %I IS NOT NULL',
+          r.table_name, r.column_name, r.column_name, r.column_name
+        ) USING delta;
+      END LOOP;
+    END
+    $$;
+  `;
+
+  await runCommand(
+    "psql",
+    [...psqlBase, "-d", dbName, "-c", sql],
+    { cwd: repoRoot, env: pgEnv }
+  );
 };
 
 /* ------------------------------------------------------------------ */

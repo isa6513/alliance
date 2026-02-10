@@ -69,7 +69,6 @@ import { CommunityModule } from './community/community.module';
     NotifsModule,
     GeoModule,
     MailModule,
-    PaymentsModule,
     AdminViewerModule,
     SearchModule,
     TasksModule,
