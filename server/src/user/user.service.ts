@@ -1025,20 +1025,6 @@ export class UserService {
     );
   }
 
-  async removeLeaderFromCommunity(
-    communityId: number,
-    userId: number,
-  ): Promise<Community> {
-    const community = await this.communityService.findOneOrFail(communityId);
-
-    community.leaders = (community.leaders ?? []).filter(
-      (leader) => leader.id !== userId,
-    );
-
-    const updated = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(updated.id);
-    return updated;
-  }
 
   async findUserCommunities(userId: number): Promise<Community[]> {
     const user = await this.findOneOrFail(userId, {

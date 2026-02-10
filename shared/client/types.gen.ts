@@ -752,25 +752,6 @@ export type VerifyEmailBody = {
     [key: string]: unknown;
 };
 
-export type CommunityMemberDto = {
-    userId: number;
-};
-
-export type CommunityDto = {
-    id: number;
-    name: string;
-    description: string;
-    photo?: string;
-    public: boolean;
-    allowMemberInvites: boolean;
-    allowStaffAssignments: boolean;
-    maxCapacity: number | null;
-    pendingUsers?: Array<User>;
-    internalInvites: Array<CommunityInvite>;
-    users: Array<ProfileDto>;
-    leaders: Array<ProfileDto>;
-};
-
 export type CreateTagDto = {
     name: string;
     description: string;
@@ -836,6 +817,21 @@ export type CommunityInviteDto = {
 export type RequestCommunityInviteDto = {
     communityId: number;
     invitedUserId: number;
+};
+
+export type CommunityDto = {
+    id: number;
+    name: string;
+    description: string;
+    photo?: string;
+    public: boolean;
+    allowMemberInvites: boolean;
+    allowStaffAssignments: boolean;
+    maxCapacity: number | null;
+    pendingUsers?: Array<User>;
+    internalInvites: Array<CommunityInvite>;
+    users: Array<ProfileDto>;
+    leaders: Array<ProfileDto>;
 };
 
 export type CommunityMemberContactInfoDto = {
@@ -1035,6 +1031,10 @@ export type UpdateCommunityDto = {
     allowMemberInvites?: boolean;
     allowStaffAssignments?: boolean;
     maxCapacity?: number | null;
+};
+
+export type CommunityMemberDto = {
+    userId: number;
 };
 
 export type EditableContentDto = {
@@ -3108,21 +3108,6 @@ export type UserVerifyEmailResponses = {
 
 export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
 
-export type UserRemoveLeaderFromCommunityData = {
-    body: CommunityMemberDto;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/communities/{communityId}/removeLeader';
-};
-
-export type UserRemoveLeaderFromCommunityResponses = {
-    200: CommunityDto;
-};
-
-export type UserRemoveLeaderFromCommunityResponse = UserRemoveLeaderFromCommunityResponses[keyof UserRemoveLeaderFromCommunityResponses];
-
 export type UserCreateTagData = {
     body: CreateTagDto;
     path?: never;
@@ -4141,6 +4126,21 @@ export type CommunityAddLeaderAdminResponses = {
 };
 
 export type CommunityAddLeaderAdminResponse = CommunityAddLeaderAdminResponses[keyof CommunityAddLeaderAdminResponses];
+
+export type CommunityRemoveLeaderAdminData = {
+    body: CommunityMemberDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/community/{communityId}/removeLeader/admin';
+};
+
+export type CommunityRemoveLeaderAdminResponses = {
+    200: CommunityDto;
+};
+
+export type CommunityRemoveLeaderAdminResponse = CommunityRemoveLeaderAdminResponses[keyof CommunityRemoveLeaderAdminResponses];
 
 export type ActionsJoinData = {
     body?: never;

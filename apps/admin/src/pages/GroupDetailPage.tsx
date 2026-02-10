@@ -6,11 +6,11 @@ import {
   communityAddMemberAdmin,
   communityDeleteAdmin,
   communityGetCommunities,
+  communityRemoveLeaderAdmin,
   communityRemoveMemberAdmin,
   communityUpdate,
   userGetCommunityMemberContactInfoAdmin,
   userList,
-  userRemoveLeaderFromCommunity,
 } from "@alliance/shared/client";
 import type {
   CommunityDto,
@@ -361,7 +361,7 @@ const CommunityDetailPage: React.FC = () => {
               next.add(userId);
               return next;
             });
-            const response = await userRemoveLeaderFromCommunity({
+            const response = await communityRemoveLeaderAdmin({
               path: { communityId },
               body: { userId },
             });

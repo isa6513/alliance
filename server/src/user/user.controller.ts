@@ -52,10 +52,7 @@ import {
   UpdateAwayRangeDto,
   UserAwayRangeDto,
 } from './dto/away-range.dto';
-import {
-  CommunityDto,
-  CommunityMemberDto,
-} from 'src/community/dto/community.dto';
+import { CommunityDto } from 'src/community/dto/community.dto';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import {
   RegisterDeviceDto,
@@ -399,22 +396,6 @@ export class UserController {
   @ApiOkResponse({ type: User })
   async verifyEmail(@Body() body: VerifyEmailBody) {
     return this.userService.verifyEmail(body.token);
-  }
-
-
-  @Post('communities/:communityId/removeLeader')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: CommunityDto })
-  async removeLeaderFromCommunity(
-    @Param('communityId', ParseIntPipe) communityId: number,
-    @Body() body: CommunityMemberDto,
-  ) {
-    return new CommunityDto(
-      await this.userService.removeLeaderFromCommunity(
-        communityId,
-        body.userId,
-      ),
-    );
   }
 
   @Post('createTag')
