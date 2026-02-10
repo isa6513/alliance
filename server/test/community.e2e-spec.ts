@@ -178,6 +178,47 @@ describe('Community (e2e)', () => {
       });
     });
 
+    describe('findPublicCommunities', () => {
+      const PUBLIC_PREFIX = 'E2E Public ';
+      it('returns only public communities sorted by name', async () => {
+        await communityRepo.save(
+          communityRepo.create({
+            name: `${PUBLIC_PREFIX}Zulu`,
+            public: true,
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+        await communityRepo.save(
+          communityRepo.create({
+            name: `${PUBLIC_PREFIX}Alpha`,
+            public: true,
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+        await communityRepo.save(
+          communityRepo.create({
+            name: `${PUBLIC_PREFIX}Private`,
+            public: false,
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        const result = await communityService.findPublicCommunities();
+        const ours = result.filter((c) => c.name.startsWith(PUBLIC_PREFIX));
+
+        expect(ours.length).toBe(2);
+        expect(ours.map((c) => c.name)).toEqual([
+          `${PUBLIC_PREFIX}Alpha`,
+          `${PUBLIC_PREFIX}Zulu`,
+        ]);
+        expect(ours[0].users).toBeDefined();
+        expect(ours[0].leaders).toBeDefined();
+      });
+    });
+
     describe('createCommunityAdmin', () => {
       it('creates community without requiring a user', async () => {
         const body = createDto({
@@ -323,6 +364,58 @@ describe('Community (e2e)', () => {
 
     it('GET /community/list returns 401 when unauthenticated', async () => {
       const res = await request(ctx.app.getHttpServer()).get('/community/list');
+
+      expect(res.status).toBe(401);
+    });
+
+    it('GET /community/list/public returns only public communities when authenticated', async () => {
+      const publicName = 'E2E HTTP Public Group';
+      const privateName = 'E2E HTTP Private Group';
+      await communityService.createCommunityAdmin(
+        createDto({ name: publicName, description: 'public', public: true }),
+      );
+      await communityService.createCommunityAdmin(
+        createDto({ name: privateName, description: 'private', public: false }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/community/list/public')
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      const names = res.body.map((c: CommunityDto) => c.name);
+      expect(names).toContain(publicName);
+      expect(names).not.toContain(privateName);
+    });
+
+    it('GET /community/list/public returns communities sorted by name', async () => {
+      const alphaName = 'E2E ListPub Alpha';
+      const zuluName = 'E2E ListPub Zulu';
+      await communityService.createCommunityAdmin(
+        createDto({ name: zuluName, description: 'z', public: true }),
+      );
+      await communityService.createCommunityAdmin(
+        createDto({ name: alphaName, description: 'a', public: true }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get('/community/list/public')
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(200);
+      const names = res.body.map((c: { name: string }) => c.name);
+      const alphaIdx = names.indexOf(alphaName);
+      const zuluIdx = names.indexOf(zuluName);
+      expect(alphaIdx).toBeGreaterThanOrEqual(0);
+      expect(zuluIdx).toBeGreaterThanOrEqual(0);
+      expect(alphaIdx).toBeLessThan(zuluIdx);
+    });
+
+    it('GET /community/list/public returns 401 when unauthenticated', async () => {
+      const res = await request(ctx.app.getHttpServer()).get(
+        '/community/list/public',
+      );
 
       expect(res.status).toBe(401);
     });

@@ -3136,19 +3136,6 @@ export type UserVerifyEmailResponses = {
 
 export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
 
-export type UserGetPublicCommunitiesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/user/communities/public';
-};
-
-export type UserGetPublicCommunitiesResponses = {
-    200: Array<CommunityDto>;
-};
-
-export type UserGetPublicCommunitiesResponse = UserGetPublicCommunitiesResponses[keyof UserGetPublicCommunitiesResponses];
-
 export type UserJoinPublicCommunityData = {
     body?: never;
     path: {
@@ -4169,6 +4156,19 @@ export type CommunityGetCommunitiesResponses = {
 };
 
 export type CommunityGetCommunitiesResponse = CommunityGetCommunitiesResponses[keyof CommunityGetCommunitiesResponses];
+
+export type CommunityGetPublicCommunitiesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/community/list/public';
+};
+
+export type CommunityGetPublicCommunitiesResponses = {
+    200: Array<CommunityDto>;
+};
+
+export type CommunityGetPublicCommunitiesResponse = CommunityGetPublicCommunitiesResponses[keyof CommunityGetPublicCommunitiesResponses];
 
 export type ActionsJoinData = {
     body?: never;

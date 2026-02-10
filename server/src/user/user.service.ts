@@ -66,7 +66,6 @@ import { run } from 'src/utils/promise';
 import { SlackService } from 'src/slack/slack.service';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import {
-  COMMUNITY_DEFAULT_RELATIONS,
   CommunityService,
 } from 'src/community/community.service';
 
@@ -1027,16 +1026,6 @@ export class UserService {
     return awayRanges.some(
       (range) => checkDate >= range.startDate && checkDate <= range.endDate,
     );
-  }
-
-  async findPublicCommunities(): Promise<Community[]> {
-    const communities = await this.communityRepository.find({
-      where: {
-        public: true,
-      },
-      relations: COMMUNITY_DEFAULT_RELATIONS,
-    });
-    return communities.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   async joinPublicCommunity(

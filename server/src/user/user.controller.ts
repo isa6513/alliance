@@ -404,14 +404,6 @@ export class UserController {
 
 
 
-  @Get('communities/public')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: [CommunityDto] })
-  async getPublicCommunities() {
-    return (await this.userService.findPublicCommunities()).map(
-      (community) => new CommunityDto(community),
-    );
-  }
 
   @Post('communities/:communityId/join')
   @UseGuards(AuthGuard)

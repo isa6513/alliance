@@ -1,6 +1,6 @@
 import {
   CommunityDto,
-  userGetPublicCommunities,
+  communityGetPublicCommunities,
   userJoinGroupAssignment,
   userJoinPublicCommunity,
   userLeaveCommunity,
@@ -113,7 +113,7 @@ const MyGroupsPage = ({
     setPublicCommunitiesLoading(true);
     setPublicCommunitiesError(null);
     void (async () => {
-      const response = await userGetPublicCommunities();
+      const response = await communityGetPublicCommunities();
       if (response.data) {
         setPublicCommunities(response.data);
       } else {

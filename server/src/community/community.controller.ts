@@ -48,4 +48,13 @@ export class CommunityController {
       (community) => new CommunityDto(community),
     );
   }
+
+  @Get('list/public')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [CommunityDto] })
+  async getPublicCommunities() {
+    return (await this.communityService.findPublicCommunities()).map(
+      (community) => new CommunityDto(community),
+    );
+  }
 }

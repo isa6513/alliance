@@ -8,7 +8,7 @@ import { ConversationService } from 'src/messaging/conversation.service';
 import { CreateCommunityDto } from './dto/community.dto';
 import { User } from 'src/user/entities/user.entity';
 
-export const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
+const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
   Object.freeze({
     users: true,
     leaders: true,
@@ -81,6 +81,16 @@ export class CommunityService {
 
   async findAllCommunities(): Promise<Community[]> {
     const communities = await this.communityRepository.find({
+      relations: COMMUNITY_DEFAULT_RELATIONS,
+    });
+    return communities.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async findPublicCommunities(): Promise<Community[]> {
+    const communities = await this.communityRepository.find({
+      where: {
+        public: true,
+      },
       relations: COMMUNITY_DEFAULT_RELATIONS,
     });
     return communities.sort((a, b) => a.name.localeCompare(b.name));
