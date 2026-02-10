@@ -155,7 +155,7 @@ export class CommunityController {
   async addMemberAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
     @Body() body: CommunityMemberDto,
-  ) {
+  ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.addUserToCommunityAdmin({
         communityId,
@@ -170,7 +170,7 @@ export class CommunityController {
   async addLeaderAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
     @Body() body: CommunityMemberDto,
-  ) {
+  ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.addLeaderAdmin(communityId, body.userId),
     );
@@ -182,7 +182,7 @@ export class CommunityController {
   async removeLeaderAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
     @Body() body: CommunityMemberDto,
-  ) {
+  ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.removeLeaderFromCommunity(
         communityId,
