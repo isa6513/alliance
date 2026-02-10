@@ -1442,17 +1442,40 @@ export class UserService {
     userId: number,
   ): Promise<Community> {
     const community = await this.findCommunityOrFail(communityId);
+    const user = await this.findOneOrFail(userId);
 
-    community.users = (community.users ?? []).filter(
-      (user) => user.id !== userId,
-    );
-    community.leaders = (community.leaders ?? []).filter(
-      (leader) => leader.id !== userId,
-    );
+    const updatedCommunityP =
+      this.removeUserFromCommunityAndRefreshConversation({
+        user,
+        community,
+        removeAsLeader: true,
+        notifForLeader: ({ leader }) => {
+          return {
+            user: leader,
+            category: NotificationCategory.RemovedFromCommunityForLeader,
+            message: `Alliance staff removed ${user.name} from your group (${community.name})`,
+            webAppLocation: groupUrl({
+              tab: 'members',
+              communityId: community.id,
+            }),
+            associatedUsers: [user],
+          };
+        },
+        saveAsPendingCommunity: false,
+      });
 
-    const updated = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(updated.id);
-    return updated;
+    const notifP = this.notifsService.sendNotif({
+      user,
+      category: NotificationCategory.RemovedFromCommunity,
+      message: `Alliance staff removed you from your group (${community.name})`,
+      webAppLocation: groupUrl({
+        tab: 'groups',
+      }),
+      associatedUsers: [],
+    });
+
+    const [updatedCommunity] = await Promise.all([updatedCommunityP, notifP]);
+    return updatedCommunity;
   }
 
   async addLeaderToCommunity(
