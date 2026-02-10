@@ -5,7 +5,7 @@ import {
   communityAddLeaderAdmin,
   communityAddMemberAdmin,
   communityDeleteAdmin,
-  communityGetCommunities,
+  communityGetMyCommunities,
   communityRemoveLeaderAdmin,
   communityRemoveMemberAdmin,
   communityUpdate,
@@ -80,7 +80,7 @@ const CommunityDetailPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await communityGetCommunities();
+      const response = await communityGetMyCommunities();
       const match =
         response.data?.find((candidate) => candidate.id === communityId) ??
         null;
