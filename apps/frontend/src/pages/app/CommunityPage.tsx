@@ -604,7 +604,7 @@ const CommunityPage = () => {
                             <input
                               id="maxCapacity"
                               type="number"
-                              min={1}
+                              min={Math.max(memberCount, 1)}
                               value={editMaxCapacity ?? ""}
                               onChange={(e) => {
                                 const value = e.target.value;
