@@ -18,6 +18,7 @@ const ProfileImage = ({
   return (
     <img
       src={!!pfp ? pfp : "/noun-user-icon.svg"}
+      loading="lazy"
       className={`object-cover bg-white shrink-0 inline ${sizeClass[size]} ${!pfp ? "border border-zinc-300" : ""
         } ${className ?? ""}`}
     />
