@@ -9,7 +9,6 @@ import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
 import React, { useCallback, useState } from "react";
 import { Link, href, useNavigate, useParams } from "react-router";
-import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
 import PostLikeButton from "../../components/PostLikeButton";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
@@ -50,7 +49,6 @@ const PostDetailPage: React.FC = () => {
         await forumRemovePost({
           path: { id: post.id },
         });
-        setRevalidate();
         navigate(href("/forum"));
       } catch (err) {
         console.error("Error deleting post:", err);

@@ -7,13 +7,15 @@ import { isFeatureEnabled } from "../lib/config";
 
 const InviteMemberCard = () => {
   const { user } = useAuth();
+  const referralPath = user?.referralCode ? `/signup?ref=${user.referralCode}` : "";
+  const referralLink =
+    typeof window !== "undefined" ? `${window.location.origin}${referralPath}` : referralPath;
 
   const copyReferralLink = useCallback(() => {
-    if (user?.referralCode) {
-      const referralLink = `${window.location.origin}/signup?ref=${user.referralCode}`;
+    if (user?.referralCode && referralLink) {
       navigator.clipboard.writeText(referralLink);
     }
-  }, [user]);
+  }, [user, referralLink]);
 
   if (!isFeatureEnabled(Features.PublicSignup)) {
     if (!user?.admin) {
@@ -33,7 +35,7 @@ const InviteMemberCard = () => {
           <p className=" text-gray-800 pt-3">Your referral link:</p>
           <div className="flex items-center space-x-2 flex-1">
             <code className="flex-1 px-3 py-3 bg-gray-100 rounded text-sm">
-              {`${window.location.origin}/signup?ref=${user.referralCode}`}
+              {referralLink}
             </code>
             <Button onClick={copyReferralLink} className="active:bg-zinc-500">
               Copy

@@ -1,106 +1,11 @@
-import {
-  ActionActivityDto,
-  ActionDto,
-  actionsDismissAction,
-  actionsFindAllLoggedIn,
-  actionsMyActivity,
-  ProfileDto,
-  userGetAwayRanges,
-  userMyProfile,
-} from "@alliance/shared/client";
 import { isStaging } from "@alliance/sharedweb/lib/config";
 import { Features } from "@alliance/shared/lib/features";
-import { useCallback, useEffect, useState } from "react";
-import {
-  href,
-  Outlet,
-  useLoaderData,
-  useNavigate,
-  useNavigation,
-  useRouteLoaderData,
-} from "react-router";
+import { useEffect } from "react";
+import { href, Outlet, useNavigate, useNavigation } from "react-router";
 import BugReportButton from "./components/BugReportButton";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useAuth } from "./lib/AuthContext";
 import { isFeatureEnabled } from "./lib/config";
-import {
-  ActionWithAwayStatus,
-  getAwayStatus,
-} from "@alliance/shared/lib/actionUtils";
-
-export interface RouteMatch {
-  data: unknown;
-  id: string;
-}
-
-export interface RouteMatches {
-  matches: RouteMatch[];
-}
-
-export interface LoaderData {
-  actionData: Promise<ActionLoaderData | null>;
-  profile: Promise<ProfileDto | null>;
-}
-
-export interface ActionLoaderData {
-  actions: ActionDto[] | null;
-  loading?: boolean;
-}
-
-export interface ActivitiesForAction {
-  join: ActionActivityDto | null;
-  completion: ActionActivityDto | null;
-}
-
-export interface AppLayoutOutletContext {
-  actions: ActionWithAwayStatus[] | null;
-  profile: ProfileDto | null;
-  loading: boolean;
-  handleDismissAction: (actionId: number) => void;
-}
-
-const revalidateKey = "revalidate";
-
-export function clientLoader() {
-  localStorage.setItem(revalidateKey, "false");
-
-  const result: Promise<ActionLoaderData | null> = Promise.all([
-    actionsFindAllLoggedIn({ query: { sorted: true } }),
-    actionsMyActivity(),
-  ]).then(([actions, activities]) => {
-    if (!activities.data || !actions.data) {
-      return {
-        actions: actions.data ?? null,
-        loading: false,
-      } satisfies ActionLoaderData;
-    }
-
-    // for most users draft actions will be filtered out on server. extra filter just makes admin users not see extra actions
-    const filteredActions = actions.data?.filter(
-      (action) => action.status !== "draft"
-    );
-
-    return {
-      actions: filteredActions,
-      loading: false,
-    };
-  });
-
-  const profile = userMyProfile().then((response) => response.data ?? null);
-
-  return {
-    actionData: result,
-    profile,
-  } satisfies LoaderData;
-}
-
-export function useAppLoaderData(): LoaderData {
-  const data = useRouteLoaderData<typeof clientLoader>("applayout");
-  if (!data) {
-    throw new Error("No data - applayout loader not found");
-  }
-  return data;
-}
 
 export function HydrateFallback() {
   return (
@@ -131,61 +36,6 @@ export default function AppLayout() {
     logout,
     isImpersonation,
   } = useAuth();
-
-  const {
-    actionData: actionDataLoader,
-    profile: profileLoader,
-  } = useLoaderData<typeof clientLoader>();
-
-  const [actions, setActions] = useState<ActionWithAwayStatus[] | null>(null);
-  const [profile, setProfile] = useState<ProfileDto | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const handleDismissAction = useCallback(
-    async (actionId: number) => {
-      const action = actions?.find((a) => a.id === actionId);
-      if (!action) {
-        return;
-      }
-
-      await actionsDismissAction({
-        path: { id: action.id },
-      });
-
-      setActions(
-        (prev) =>
-          prev?.map((action) =>
-            action.id === actionId
-              ? { ...action, shouldParticipate: false }
-              : action
-          ) ?? null
-      );
-    },
-    [actions, setActions]
-  );
-
-  useEffect(() => {
-    void (async () => {
-      const response = await userGetAwayRanges();
-      const awayRanges = response.data ?? [];
-      const data = await actionDataLoader;
-      if (data?.actions) {
-        const now = new Date();
-        setActions(
-          data.actions.map((action) => ({
-            ...action,
-            awayStatus: getAwayStatus(action, awayRanges, now),
-          }))
-        );
-      }
-    })().finally(() => setLoading(false));
-
-    profileLoader.then((data) => {
-      if (data) {
-        setProfile(data);
-      }
-    });
-  }, [actionDataLoader, profileLoader]);
 
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -220,16 +70,7 @@ export default function AppLayout() {
 
   return (
     <>
-      <Outlet
-        context={
-          {
-            actions,
-            profile,
-            loading,
-            handleDismissAction,
-          } satisfies AppLayoutOutletContext
-        }
-      />
+      <Outlet />
       {isFeatureEnabled(Features.BugReporting) && <BugReportButton />}
       {isStaging() && (
         <div className="fixed top-0 left-0 right-0 h-6 bg-green z-50 flex flex-row gap-1">
@@ -251,8 +92,4 @@ export default function AppLayout() {
       )}
     </>
   );
-}
-
-export function setRevalidate() {
-  localStorage.setItem(revalidateKey, "true");
 }

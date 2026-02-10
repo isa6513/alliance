@@ -18,7 +18,6 @@ import {
 import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
 import { isFeatureEnabled } from "../../lib/config";
-import { setRevalidate } from "../../applayout";
 import { EyeOff, Eye } from "lucide-react";
 import { CardStyle } from "@alliance/shared/styles/card";
 
@@ -75,7 +74,6 @@ const LoginPage: React.FC = () => {
       },
     });
     if (loginResponse.response.ok) {
-      setRevalidate();
       onLogin();
       navigate(returnUrl || href("/tasks"));
     } else {

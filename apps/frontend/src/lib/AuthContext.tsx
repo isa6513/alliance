@@ -17,7 +17,6 @@ import React, {
 } from "react";
 
 import posthog from "posthog-js";
-import { setRevalidate } from "../applayout";
 import { testAuthUser } from "../stories/testData";
 
 interface AuthContextType {
@@ -71,8 +70,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
           try {
             await authRefreshTokens();
 
-            setRevalidate();
-
             const { data } = await authMe();
             if (!cancelled && data) {
               setUser(data.user);
@@ -102,7 +99,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
         console.error("login error", error);
         throw new Error("Login failed");
       }
-      setRevalidate();
 
       const { data } = await authMe();
       if (data) {
@@ -117,7 +113,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
       window.location.href = "/login";
       posthog.reset();
       setUser(undefined);
-      setRevalidate();
     }, []);
 
     const onLogin = useCallback(() => {
@@ -127,7 +122,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
           setIsImpersonation(res.data.isImpersonation ?? false);
         }
       });
-      setRevalidate();
     }, []);
 
     const refreshUser = useCallback(async () => {

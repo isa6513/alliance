@@ -18,7 +18,6 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
-import { setRevalidate } from "../../applayout";
 import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
 import { useAuth } from "../../lib/AuthContext";
 import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
@@ -159,7 +158,6 @@ const PostFormPage: React.FC = () => {
           body: postData,
         });
       }
-      setRevalidate();
 
       if (response.data) {
         setClearDraftSignal((x) => x + 1);

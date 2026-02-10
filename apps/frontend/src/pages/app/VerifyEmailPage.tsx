@@ -1,10 +1,10 @@
 import { userVerifyEmail } from "@alliance/shared/client";
 import { useEffect, useState } from "react";
-import { Link, href } from "react-router";
+import { Link, href, useSearchParams } from "react-router";
 
 const VerifyEmailPage = () => {
-  const token = new URLSearchParams(window.location.search).get("token");
-  console.log(token);
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
   const [verified, setVerified] = useState(false);
 

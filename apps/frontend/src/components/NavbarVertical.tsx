@@ -24,8 +24,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Link, href, useOutletContext } from "react-router";
-import { AppLayoutOutletContext } from "../applayout";
+import { Link, href, useLocation } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import { isFeatureEnabled } from "../lib/config";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
@@ -103,7 +102,8 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 }: {
   todoActions: number;
 }) => {
-  const { profile } = useOutletContext<AppLayoutOutletContext>();
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
 
   const { unreadCount } = useNotifications();
 
@@ -259,12 +259,10 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     };
   });
 
-  const profilePicture = profile?.profilePicture || null;
-
   const currentLocation: NavbarPage | null =
     navSections
       .flatMap((section) => section.items)
-      .find((item) => item.destination === window.location.pathname)?.page ||
+      .find((item) => item.destination === location.pathname)?.page ||
     null;
 
   useEffect(() => {
@@ -298,19 +296,27 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     currentLocation,
   ]);
 
-  const { isAuthenticated } = useAuth();
+  const profilePicture = user?.profilePicture || null;
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    if (!isAuthenticated) {
+      document.documentElement.style.setProperty("--nav-width", "0px");
+      document.documentElement.style.setProperty("--mobile-nav-height", "0px");
+      return;
+    }
+
+    if (document.documentElement.style.getPropertyValue("--nav-width") === "0px") {
+      requestAnimationFrame(() => {
+        updateNavWidth();
+        updateMobileNavHeight();
+      });
+    }
+  }, [isAuthenticated, updateNavWidth, updateMobileNavHeight]);
 
   if (!isAuthenticated) {
-    document.documentElement.style.setProperty("--nav-width", `0px`);
-    document.documentElement.style.setProperty("--mobile-nav-height", `0px`);
     return null;
-  } else if (
-    document.documentElement.style.getPropertyValue("--nav-width") === "0px"
-  ) {
-    requestAnimationFrame(() => {
-      updateNavWidth();
-      updateMobileNavHeight();
-    });
   }
 
   return (
@@ -380,7 +386,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                     >
                       <div className="text-zinc-700 flex items-center gap-x-2.5">
                         <ProfileImage pfp={profilePicture} size="small" />
-                        <span>{profile?.displayName}</span>
+                        <span>{user?.displayName ?? user?.name ?? "Profile"}</span>
                       </div>
                     </Link>
                   ) : (

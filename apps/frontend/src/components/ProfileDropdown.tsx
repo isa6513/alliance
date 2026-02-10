@@ -1,20 +1,17 @@
 import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { useCallback, useState } from "react";
-import { Link, href, useNavigate, useOutletContext } from "react-router";
+import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import { AppLayoutOutletContext } from "../applayout";
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
 
-  const { profile } = useOutletContext<AppLayoutOutletContext>();
-
-  const profilePicture = profile?.profilePicture || null;
-  const userId = profile?.id || null;
+  const profilePicture = user?.profilePicture || null;
+  const userId = user?.id || null;
   const profileUrl = userId
     ? href("/member/:id", { id: userId.toString() })
     : href("/profile");

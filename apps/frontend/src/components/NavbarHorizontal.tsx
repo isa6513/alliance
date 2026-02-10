@@ -1,5 +1,6 @@
 import { Features } from "@alliance/shared/lib/features";
-import { Link, href } from "react-router";
+import { useEffect, useRef } from "react";
+import { Link, href, useLocation } from "react-router";
 import logo from "../assets/planet-earth.png";
 import { useAuth } from "../lib/AuthContext";
 import { isFeatureEnabled } from "../lib/config";
@@ -47,6 +48,8 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
 }: {
   todoActions: number;
 }) => {
+  const location = useLocation();
+  const navRef = useRef<HTMLDivElement | null>(null);
   const activeLinks = isFeatureEnabled(Features.Forum)
     ? links
     : links.filter((link) => link !== NavbarPage.Forum);
@@ -58,9 +61,16 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
   }
 
   const currentLocation: NavbarPage | null =
-    activeLinks.find(
-      (link) => destinations[link] === window.location.pathname
-    ) || null;
+    activeLinks.find((link) => destinations[link] === location.pathname) ||
+    null;
+
+  useEffect(() => {
+    if (typeof document === "undefined" || !navRef.current) return;
+    document.documentElement.style.setProperty(
+      "--nav-height",
+      `${navRef.current.offsetHeight}px`
+    );
+  }, [currentLocation]);
 
   return (
     <>
@@ -69,14 +79,7 @@ const NavbarHorizontal: React.FC<{ todoActions: number }> = ({
       flex flex-col md:flex-row border-zinc-300 border-b bg-white
     w-screen text-left items-center fixed px-3 sm:px-7 z-20 justify-between gap-x-5 md:pt-0"
         id="main-nav"
-        ref={(el) => {
-          if (el) {
-            document.documentElement.style.setProperty(
-              "--nav-height",
-              `${el.offsetHeight}px`
-            );
-          }
-        }}
+        ref={navRef}
       >
         <div className="flex flex-row lg:gap-x-0 items-center w-full md:w-auto justify-around">
           <Link

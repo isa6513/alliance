@@ -1,5 +1,12 @@
 import { actionsFindOne } from "@alliance/shared/client";
-import { href, Navigate, Outlet, useNavigate, useParams } from "react-router";
+import {
+  href,
+  Navigate,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router";
 import ActionActivityList from "../../components/ActionActivityList";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -32,6 +39,7 @@ export function meta({ data }: { data: Awaited<ReturnType<typeof loader>> }) {
 
 export default function ActionPage() {
   const { id: idParam } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const actionId = parseInt(idParam!);
@@ -66,10 +74,7 @@ export default function ActionPage() {
   // TODO: hack because some action pages are public and some are private. we should handle this in a more general way elsehwere (ie applayout.tsx logic)
   if (!action && !loading && !user && !userLoading) {
     return (
-      <Navigate
-        to={href("/login") + `?redirect=${window.location.pathname}`}
-        replace
-      />
+      <Navigate to={href("/login") + `?redirect=${location.pathname}`} replace />
     );
   }
 

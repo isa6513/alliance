@@ -14,7 +14,6 @@ import List from "@alliance/sharedweb/ui/List";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import React, { useState } from "react";
 import { Link, href } from "react-router";
-import { setRevalidate } from "../applayout";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -85,7 +84,6 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
       queryClient.invalidateQueries({
         queryKey: ["userListReceivedRequests"],
       });
-      setRevalidate();
     } catch (error) {
       console.error("Error accepting friend request:", error);
     } finally {

@@ -1,17 +1,23 @@
+import { type ReactNode, useEffect } from "react";
+
 export function HtmlBackgroundManager({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return children;
 }
 
 export const useWhiteBackground = () => {
-  const html = document.documentElement;
-  html.classList.add("white");
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.classList.add("white");
+  }, []);
 };
 
 export const useGrayBackground = () => {
-  const html = document.documentElement;
-  html.classList.remove("white");
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.classList.remove("white");
+  }, []);
 };

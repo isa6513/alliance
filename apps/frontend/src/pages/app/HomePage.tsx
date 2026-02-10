@@ -1,7 +1,6 @@
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import { useMemo, useRef, useState } from "react";
-import { Link, href, useNavigate, useOutletContext } from "react-router";
-import { AppLayoutOutletContext } from "../../applayout";
+import { Link, href, useNavigate } from "react-router";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
 import GlobalFeed from "../../components/GlobalFeed";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -29,11 +28,11 @@ import {
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import HomeNotifsCard from "../../components/HomeNotifsCard";
+import { useTaskActionsData } from "../../lib/useTaskActionsData";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { actions, loading, handleDismissAction } =
-    useOutletContext<AppLayoutOutletContext>();
+  const { actions, loading, handleDismissAction } = useTaskActionsData();
 
   const { user } = useAuth();
 

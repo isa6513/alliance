@@ -63,25 +63,23 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
       )}
       <div className="flex flex-row items-center gap-x-5 sm:gap-x-10 text-base sm:text-lg">
         {links.map((link) => (
-          <>
-            {link == NavbarPage.LogIn ? (
-              <Link
-                to={destinations[link]}
-                key={link}
-                className="border border-zinc-200 bg-white hover:bg-zinc-50 py-1 md:py-1.5 px-3 md:px-5 rounded-full whitespace-nowrap"
-              >
-                {link}
-              </Link>
-            ) : (
-              <Link
-                to={destinations[link]}
-                key={link}
-                className="hover:underline whitespace-nowrap"
-              >
-                {link}
-              </Link>
-            )}
-          </>
+          link === NavbarPage.LogIn ? (
+            <Link
+              to={destinations[link]}
+              key={link}
+              className="border border-zinc-200 bg-white hover:bg-zinc-50 py-1 md:py-1.5 px-3 md:px-5 rounded-full whitespace-nowrap"
+            >
+              {link}
+            </Link>
+          ) : (
+            <Link
+              to={destinations[link]}
+              key={link}
+              className="hover:underline whitespace-nowrap"
+            >
+              {link}
+            </Link>
+          )
         ))}
       </div>
     </div>

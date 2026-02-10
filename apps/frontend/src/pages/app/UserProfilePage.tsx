@@ -6,7 +6,6 @@ import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, useLocation, useNavigate, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
-import { setRevalidate } from "../../applayout";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
 import FriendsTab from "../../components/FriendsTab";
@@ -150,7 +149,6 @@ const UserProfilePage: React.FC = () => {
     if (!userId || !user) return;
     try {
       await acceptFriendRequest.mutateAsync(userId);
-      setRevalidate();
     } catch (error) {
       console.error("Error accepting friend request:", error);
     }
@@ -191,7 +189,6 @@ const UserProfilePage: React.FC = () => {
 
       if (response && id) {
         setIsEditing(false);
-        setRevalidate();
         navigate(href("/member/:id", { id })); // to make navbar pfp reload
       }
     } catch (err: unknown) {
