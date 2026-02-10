@@ -13,7 +13,7 @@ import { UserModule } from 'src/user/user.module';
     TypeOrmModule.forFeature([Community, CommunityInvite]),
     forwardRef(() => UserModule),
     ImagesModule,
-    MessagingModule,
+    forwardRef(() => MessagingModule),
   ],
   controllers: [CommunityController],
   providers: [CommunityService],
