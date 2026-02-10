@@ -146,7 +146,7 @@ export class UserService {
       updateData.preferredReminderTime = undefined;
     }
 
-    if (profilePicture && profilePicture.length > 100) {
+    if (profilePicture?.startsWith('data:')) {
       //TODO: differentiate between file and url
       const key =
         await this.imagesService.processAndUploadProfileImage(profilePicture);
@@ -1157,7 +1157,7 @@ export class UserService {
       throw new BadRequestException('Name cannot be empty');
     }
 
-    if (photo && photo.length > 100) {
+    if (photo?.startsWith('data:')) {
       //TODO: differentiate between file and url
       const key = await this.imagesService.processAndUploadProfileImage(photo);
 

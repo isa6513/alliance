@@ -393,12 +393,9 @@ export class ConversationService {
     if (conversation.type !== ConversationType.Direct) {
       conversation.title = dto.title ?? conversation.title;
 
-      if (dto.photo && dto.photo.length > 200) {
-        const key = dto.photo
-          ? await this.imagesService.processAndUploadProfileImage(dto.photo)
-          : conversation.photo;
-
-        conversation.photo = key;
+      if (dto.photo?.startsWith('data:')) {
+        conversation.photo =
+          await this.imagesService.processAndUploadProfileImage(dto.photo);
       }
     }
 

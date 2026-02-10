@@ -36,11 +36,10 @@ export class CommunityService {
   }
 
   async createCommunityAdmin(body: CreateCommunityDto): Promise<Community> {
-    if (body.photo && body.photo.length > 100) {
-      const key = await this.imagesService.processAndUploadProfileImage(
+    if (body.photo?.startsWith('data:')) {
+      body.photo = await this.imagesService.processAndUploadProfileImage(
         body.photo,
       );
-      body.photo = key;
     }
     const community = this.communityRepository.create(body);
     const savedCommunity = await this.communityRepository.save(community);
@@ -59,6 +58,12 @@ export class CommunityService {
     });
     if (body.name.trim().length === 0) {
       throw new BadRequestException('Name cannot be empty');
+    }
+
+    if (body.photo?.startsWith('data:')) {
+      body.photo = await this.imagesService.processAndUploadProfileImage(
+        body.photo,
+      );
     }
 
     const community = this.communityRepository.create({
