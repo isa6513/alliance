@@ -92,3 +92,8 @@ output "cloudfront_domain_staging" {
 output "metrics_server_ip" {
     value = aws_eip.monitoring_eip.public_ip
 }
+
+output "ci_storage_bucket_name" {
+  description = "S3 bucket used for CI storage (visual regression baselines, etc.)"
+  value       = aws_s3_bucket.ci_storage.bucket
+}

@@ -11,6 +11,7 @@
     "react-markdown": "*"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
     "@playwright/test": "^1.50.0",
     "glob": "^11.0.0",
     "pixelmatch": "^5.3.0",
@@ -20,6 +21,7 @@
   },
   "scripts": {
     "take": "ts-node src/take-screenshots.ts",
-    "compare": "ts-node src/compare-screenshots.ts"
+    "compare": "ts-node src/compare-screenshots.ts",
+    "ai-review": "ts-node src/ai-review.ts"
   }
 }
