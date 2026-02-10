@@ -1,0 +1,42 @@
+name: Approve Visual Baseline
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Commit SHA whose screenshots should become the new baseline"
+        required: true
+        type: string
+
+env:
+  AWS_REGION: us-west-2
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  approve-baseline:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate SHA screenshots exist
+        run: |
+          COUNT=$(aws s3 ls "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/${{ inputs.sha }}/" | wc -l)
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No screenshots found for SHA ${{ inputs.sha }}"
+            exit 1
+          fi
+          echo "Found $COUNT screenshots for SHA ${{ inputs.sha }}"
+
+      - name: Promote to baseline
+        run: |
+          aws s3 sync \
+            "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/${{ inputs.sha }}/" \
+            "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/latest/" \
+            --delete
+          echo "Baseline updated to SHA ${{ inputs.sha }}"
+
+      - name: Notify Slack
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"Visual baseline approved and updated to \`${{ inputs.sha }}\`. Re-run the failed deploy to continue.\"}" \
+            ${{ secrets.SLACK_WEBHOOK_URL_DEPLOYMENT }}
