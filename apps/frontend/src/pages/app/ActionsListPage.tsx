@@ -24,9 +24,6 @@ const ActionsListPage = () => {
     }, {} as Record<FilterMode, ActionDto[]>);
   }, [actions]);
 
-  if (true === true) {
-    throw new Error("error");
-  }
   useGrayBackground();
 
   const filteredActions = useMemo(
