@@ -3,6 +3,7 @@ import { href, Link, useNavigate, useParams } from "react-router";
 import {
   actionsGetCommunityMemberInfoAdmin,
   communityGetCommunities,
+  communityRemoveMemberAdmin,
   communityUpdate,
   userAddLeaderToCommunity,
   userAddMemberToCommunity,
@@ -10,7 +11,6 @@ import {
   userGetCommunityMemberContactInfoAdmin,
   userList,
   userRemoveLeaderFromCommunity,
-  userRemoveMemberFromCommunityAdmin,
 } from "@alliance/shared/client";
 import type {
   CommunityDto,
@@ -305,7 +305,7 @@ const CommunityDetailPage: React.FC = () => {
               next.add(userId);
               return next;
             });
-            const response = await userRemoveMemberFromCommunityAdmin({
+            const response = await communityRemoveMemberAdmin({
               path: { communityId },
               body: { userId },
             });

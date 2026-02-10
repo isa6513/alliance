@@ -417,6 +417,52 @@ describe('Community (e2e)', () => {
       });
     });
 
+    describe('removeUserFromCommunityAdmin', () => {
+      it('removes a user from community as admin', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Admin Remove Member',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        const result = await communityService.removeUserFromCommunityAdmin(
+          community.id,
+          secondUser.id,
+        );
+
+        expect(result.id).toBe(community.id);
+        const refreshed = await communityRepo.findOneOrFail({
+          where: { id: community.id },
+          relations: { users: true },
+        });
+        const memberIds = refreshed.users.map((u) => u.id);
+        expect(memberIds).not.toContain(secondUser.id);
+        expect(memberIds).toContain(testUser.id);
+      });
+
+      it('throws when community does not exist', async () => {
+        await expect(
+          communityService.removeUserFromCommunityAdmin(999999, secondUser.id),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+
+      it('throws when user does not exist', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Admin Remove NonexistentUser',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await expect(
+          communityService.removeUserFromCommunityAdmin(community.id, 999999),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+    });
+
     describe('updateCommunity', () => {
       it('updates community name and description', async () => {
         const community = await communityRepo.save(
@@ -901,6 +947,63 @@ describe('Community (e2e)', () => {
 
       const res = await request(ctx.app.getHttpServer())
         .post(`/community/${community.id}/removeMember`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('POST /community/:communityId/removeMember/admin removes member when admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Remove Member',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/removeMember/admin`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(201);
+      expect(res.body.id).toBe(community.id);
+      const refreshed = await communityRepo.findOneOrFail({
+        where: { id: community.id },
+        relations: { users: true },
+      });
+      const memberIds = refreshed.users.map((u: User) => u.id);
+      expect(memberIds).not.toContain(secondUser.id);
+    });
+
+    it('POST /community/:communityId/removeMember/admin returns 401 when not admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Remove NotAdmin',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/removeMember/admin`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('POST /community/:communityId/removeMember/admin returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Remove NoAuth',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/removeMember/admin`)
         .send({ userId: secondUser.id });
 
       expect(res.status).toBe(401);

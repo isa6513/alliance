@@ -3149,21 +3149,6 @@ export type UserAddMemberToCommunityResponses = {
 
 export type UserAddMemberToCommunityResponse = UserAddMemberToCommunityResponses[keyof UserAddMemberToCommunityResponses];
 
-export type UserRemoveMemberFromCommunityAdminData = {
-    body: CommunityMemberDto;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/communities/{communityId}/removeMember/admin';
-};
-
-export type UserRemoveMemberFromCommunityAdminResponses = {
-    200: CommunityDto;
-};
-
-export type UserRemoveMemberFromCommunityAdminResponse = UserRemoveMemberFromCommunityAdminResponses[keyof UserRemoveMemberFromCommunityAdminResponses];
-
 export type UserAddLeaderToCommunityData = {
     body: CommunityMemberDto;
     path: {
@@ -4141,6 +4126,21 @@ export type CommunityRemoveMemberResponses = {
 };
 
 export type CommunityRemoveMemberResponse = CommunityRemoveMemberResponses[keyof CommunityRemoveMemberResponses];
+
+export type CommunityRemoveMemberAdminData = {
+    body: CommunityMemberDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/community/{communityId}/removeMember/admin';
+};
+
+export type CommunityRemoveMemberAdminResponses = {
+    200: CommunityDto;
+};
+
+export type CommunityRemoveMemberAdminResponse = CommunityRemoveMemberAdminResponses[keyof CommunityRemoveMemberAdminResponses];
 
 export type ActionsJoinData = {
     body?: never;

@@ -115,4 +115,19 @@ export class CommunityController {
       }),
     );
   }
+
+  @Post(':communityId/removeMember/admin')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async removeMemberAdmin(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: CommunityMemberDto,
+  ) {
+    return new CommunityDto(
+      await this.communityService.removeUserFromCommunityAdmin(
+        communityId,
+        body.userId,
+      ),
+    );
+  }
 }

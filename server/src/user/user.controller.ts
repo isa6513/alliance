@@ -435,20 +435,6 @@ export class UserController {
     );
   }
 
-  @Post('communities/:communityId/removeMember/admin')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: CommunityDto })
-  async removeMemberFromCommunityAdmin(
-    @Param('communityId', ParseIntPipe) communityId: number,
-    @Body() body: CommunityMemberDto,
-  ) {
-    return new CommunityDto(
-      await this.userService.removeUserFromCommunityAdmin(
-        communityId,
-        body.userId,
-      ),
-    );
-  }
 
   @Post('communities/:communityId/addLeader')
   @UseGuards(AdminGuard)
