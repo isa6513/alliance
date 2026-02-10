@@ -568,19 +568,32 @@ jobs:
         if: github.ref_name == 'production' && steps.ai-review.outcome == 'failure'
         run: |
           RESULTS="${{ github.workspace }}/screenshots/ai-review-results.json"
-          BUCKET="${{ secrets.VISUAL_REGRESSION_BUCKET }}"
           SHA="${{ github.sha }}"
-          S3_PREFIX="visual-regression/production"
           BASELINE_DIR="${{ github.workspace }}/screenshots/baseline"
           CURRENT_DIR="${{ github.workspace }}/screenshots/current"
-          COMPOSITES_DIR="${{ github.workspace }}/screenshots/composites"
-          mkdir -p "$COMPOSITES_DIR"
+          DIFF_DIR="${{ github.workspace }}/screenshots/diffs"
+          TOKEN="${{ secrets.SLACK_BOT_TOKEN }}"
+          CHANNEL="${{ secrets.SLACK_DEPLOY_CHANNEL_ID }}"
 
-          # Build Slack blocks from failed results
-          BLOCKS="["
-          BLOCKS+='{"type":"header","text":{"type":"plain_text","text":"Visual Regression Detected"}},'
+          # Upload a file to Slack (without channel) and return its permalink
+          upload_to_slack() {
+            local filepath="$1"
+            local title="$2"
+            local resp
+            resp=$(curl -s -F "file=@${filepath}" \
+              -F "title=${title}" \
+              -F "token=${TOKEN}" \
+              https://slack.com/api/files.upload)
+            echo "$resp" | jq -r '.file.permalink // empty'
+          }
+
           APPROVE_URL="${{ github.server_url }}/${{ github.repository }}/actions/workflows/approve-visual-baseline.yaml"
-          BLOCKS+='{"type":"section","text":{"type":"mrkdwn","text":"Production deploy blocked by visual regression check.\n*Commit:* `'"$SHA"'`\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>  |  <'"$APPROVE_URL"'|Approve baseline>"}},'
+
+          # Header text
+          TEXT="*Visual Regression Detected*\n"
+          TEXT+="Production deploy blocked by visual regression check.\n"
+          TEXT+="*Commit:* \`${SHA}\`\n"
+          TEXT+="<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>  |  <${APPROVE_URL}|Approve baseline>\n"
 
           # Process each failure
           FAILURES=$(cat "$RESULTS" | jq -c '.[] | select(.status == "fail")')
@@ -589,40 +602,33 @@ jobs:
             REASON=$(echo "$fail" | jq -r '.reason')
             FILE="${PAGE}.png"
 
-            BLOCKS+='{"type":"divider"},'
-            BLOCKS+='{"type":"section","text":{"type":"mrkdwn","text":"*'"$PAGE"'*\n'"$(echo "$REASON" | sed 's/"/\\"/g')"'"}},'
+            TEXT+="\n---\n*${PAGE}*\n${REASON}\n"
 
-            # Create side-by-side composite: Baseline | Current
-            COMPOSITE=""
-            if [ -f "$BASELINE_DIR/$FILE" ] && [ -f "$CURRENT_DIR/$FILE" ]; then
-              convert \
-                \( "$BASELINE_DIR/$FILE" -resize 700x -gravity North -background white -extent 700x \
-                   -font Helvetica -pointsize 24 -gravity North \
-                   label:"Baseline" +swap -append \) \
-                \( "$CURRENT_DIR/$FILE" -resize 700x -gravity North -background white -extent 700x \
-                   -font Helvetica -pointsize 24 -gravity North \
-                   label:"Current" +swap -append \) \
-                +append "$COMPOSITES_DIR/$FILE"
-
-              aws s3 cp "$COMPOSITES_DIR/$FILE" \
-                "s3://${BUCKET}/${S3_PREFIX}/${SHA}/composites/$FILE"
-
-              COMPOSITE=$(aws s3 presign \
-                "s3://${BUCKET}/${S3_PREFIX}/${SHA}/composites/$FILE" \
-                --expires-in 604800 2>/dev/null || echo "")
+            # Upload baseline, current, and diff images → collect permalinks
+            GALLERY=""
+            if [ -f "$BASELINE_DIR/$FILE" ]; then
+              PLINK=$(upload_to_slack "$BASELINE_DIR/$FILE" "${PAGE} — Baseline")
+              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
+            fi
+            if [ -f "$CURRENT_DIR/$FILE" ]; then
+              PLINK=$(upload_to_slack "$CURRENT_DIR/$FILE" "${PAGE} — Current")
+              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
+            fi
+            if [ -f "$DIFF_DIR/$FILE" ]; then
+              PLINK=$(upload_to_slack "$DIFF_DIR/$FILE" "${PAGE} — Diff")
+              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
             fi
 
-            if [ -n "$COMPOSITE" ]; then
-              BLOCKS+='{"type":"image","image_url":"'"$COMPOSITE"'","alt_text":"'"$PAGE"' baseline vs current"},'
-            fi
+            [ -n "$GALLERY" ] && TEXT+="\n${GALLERY}\n"
           done <<< "$FAILURES"
 
-          # Remove trailing comma, close array
-          BLOCKS="${BLOCKS%,}]"
-
-          curl -X POST -H 'Content-type: application/json' \
-            --data "{\"blocks\":${BLOCKS}}" \
-            ${{ secrets.SLACK_WEBHOOK_URL_DEPLOYMENT }}
+          # Post the message with gallery permalinks via chat.postMessage
+          curl -s -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-type: application/json" \
+            --data "$(jq -n --arg channel "$CHANNEL" --arg text "$TEXT" \
+              '{channel: $channel, text: $text, mrkdwn: true, unfurl_links: true, unfurl_media: true}')" \
+            https://slack.com/api/chat.postMessage
 
       - name: Promote to Latest Baseline
         if: github.ref_name == 'production' && steps.ai-review.outcome != 'failure'
