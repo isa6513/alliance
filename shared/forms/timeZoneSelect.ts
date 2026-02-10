@@ -166,27 +166,29 @@ export const DEFAULT_TIMEZONE = "America/Los_Angeles";
 
 const OBSERVER_REFRESH_MS = 30_000;
 
-let cachedBaseItems: Omit<TimeZoneSelectItem, "timeLabel">[] | null = null;
+type BaseLabel = { tz: string; labelLeft: string; searchText: string };
+let cachedLabels: BaseLabel[] | null = null;
 
-function baseItems(): Omit<TimeZoneSelectItem, "timeLabel">[] {
-  if (cachedBaseItems) return cachedBaseItems;
-
-  const tzs = TZ_OPTIONS.map((tz) => tz.tz);
-
-  const items = tzs.map((tz) => {
+function getBaseLabels(): BaseLabel[] {
+  if (cachedLabels) return cachedLabels;
+  cachedLabels = TZ_OPTIONS.map(({ tz }) => {
     const generic = getGenericLabelFromIntl(tz);
     const city = prettyCityFromIana(tz);
     const left = generic ? `${generic} — ${city}` : city;
-
-    const offsetMins = getOffsetMinutes(tz);
-
     return {
       tz,
       labelLeft: `${left}`.trim(),
       searchText: `${left} ${tz}`.toLowerCase(),
-      offsetMins,
     };
   });
+  return cachedLabels;
+}
+
+function baseItems(): Omit<TimeZoneSelectItem, "timeLabel">[] {
+  const items = getBaseLabels().map((label) => ({
+    ...label,
+    offsetMins: getOffsetMinutes(label.tz),
+  }));
 
   items.sort(
     (a, b) =>
@@ -194,7 +196,6 @@ function baseItems(): Omit<TimeZoneSelectItem, "timeLabel">[] {
       a.labelLeft.localeCompare(b.labelLeft)
   );
 
-  cachedBaseItems = items;
   return items;
 }
 

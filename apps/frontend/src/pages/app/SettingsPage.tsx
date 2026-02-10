@@ -2,9 +2,6 @@ import {
   City,
   CitySearchDto,
   NotificationChannel,
-  PaymentMethodDto,
-  paymentsClearPaymentMethods,
-  paymentsPaymentMethod,
   PublicFormResponseDefault,
   userMyLocation,
   userUpdate,
@@ -38,10 +35,10 @@ const SettingsPage: React.FC = () => {
   );
   const [initialUser, setInitialUser] = useState<UpdateProfileDto | null>(null);
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodDto | null>(
-    null
-  );
-  const [loadingPaymentMethod, setLoadingPaymentMethod] = useState(false);
+  // const [paymentMethod, setPaymentMethod] = useState<PaymentMethodDto | null>(
+  //   null
+  // );
+  // const [loadingPaymentMethod, setLoadingPaymentMethod] = useState(false);
   const [passwordResetMessage, setPasswordResetMessage] = useState<
     string | null
   >(null);
@@ -84,28 +81,28 @@ const SettingsPage: React.FC = () => {
     return keys.some((key) => editableUser[key] !== initialUser[key]);
   }, [editableUser, initialUser]);
 
-  const loadPaymentMethod = useCallback(async () => {
-    try {
-      const response = await paymentsPaymentMethod();
-      if (response.data) {
-        setPaymentMethod(response.data);
-      }
-    } catch { }
-  }, []);
+  // const loadPaymentMethod = useCallback(async () => {
+  //   try {
+  //     const response = await paymentsPaymentMethod();
+  //     if (response.data) {
+  //       setPaymentMethod(response.data);
+  //     }
+  //   } catch { }
+  // }, []);
 
-  const handleClearPaymentMethod = useCallback(async () => {
-    setLoadingPaymentMethod(true);
-    try {
-      const clear = await paymentsClearPaymentMethods();
-      if (clear.response.ok) {
-        setPaymentMethod(null);
-      }
-    } catch (error) {
-      console.error("Failed to clear payment method:", error);
-    } finally {
-      setLoadingPaymentMethod(false);
-    }
-  }, []);
+  // const handleClearPaymentMethod = useCallback(async () => {
+  //   setLoadingPaymentMethod(true);
+  //   try {
+  //     const clear = await paymentsClearPaymentMethods();
+  //     if (clear.response.ok) {
+  //       setPaymentMethod(null);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to clear payment method:", error);
+  //   } finally {
+  //     setLoadingPaymentMethod(false);
+  //   }
+  // }, []);
 
   const handlePasswordReset = useCallback(async () => {
     if (!user?.email) {
@@ -172,7 +169,7 @@ const SettingsPage: React.FC = () => {
         setLoading(false);
       });
 
-    loadPaymentMethod();
+    // loadPaymentMethod();
 
     userMyLocation().then((locationResponse) => {
       if (locationResponse.data) {
@@ -187,7 +184,7 @@ const SettingsPage: React.FC = () => {
         );
       }
     });
-  }, [user, loadPaymentMethod]);
+  }, [user]);
 
   useEffect(() => {
     if (!editableUser || !initialUser || !hasChanges) {
@@ -590,7 +587,7 @@ const SettingsPage: React.FC = () => {
               </div>
             </div>
 
-            {paymentMethod !== null && (
+            {/* {paymentMethod !== null && (
               <div>
                 <hr className="border-zinc-300 mt-4" />
                 <h2 className="!font-semibold text-lg mb-4">Payment methods</h2>
@@ -636,7 +633,7 @@ const SettingsPage: React.FC = () => {
                   </button>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
