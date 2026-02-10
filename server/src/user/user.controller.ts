@@ -57,7 +57,7 @@ import {
   CommunityMemberDto,
   CreateCommunityDto,
   UpdateCommunityDto,
-} from './community.dto';
+} from 'src/community/dto/community.dto';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import {
   RegisterDeviceDto,
@@ -74,7 +74,7 @@ class VerifyEmailBody {
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Get('me')
   @UseGuards(AuthGuard)
@@ -316,9 +316,9 @@ export class UserController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserDto, isArray: true })
   async list(): Promise<UserDto[]> {
-    return (await this.userService.findAll({ contractEvents: true, referredBy: true })).map(
-      (user) => new UserDto(user),
-    );
+    return (
+      await this.userService.findAll({ contractEvents: true, referredBy: true })
+    ).map((user) => new UserDto(user));
   }
 
   @Get('list-public')
@@ -401,13 +401,6 @@ export class UserController {
   @ApiOkResponse({ type: User })
   async verifyEmail(@Body() body: VerifyEmailBody) {
     return this.userService.verifyEmail(body.token);
-  }
-
-  @Post('communities/admin')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: CommunityDto })
-  async createCommunityAdmin(@Body() body: CreateCommunityDto) {
-    return new CommunityDto(await this.userService.createCommunityAdmin(body));
   }
 
   @Post('communities')

@@ -51,7 +51,7 @@ import { CommunityModule } from 'src/community/community.module';
     PushModule,
     SlackModule,
     forwardRef(() => NotifsModule),
-    CommunityModule,
+    forwardRef(() => CommunityModule),
   ],
   controllers: [UserController],
   providers: [UserService, IsUserAlreadyExist],

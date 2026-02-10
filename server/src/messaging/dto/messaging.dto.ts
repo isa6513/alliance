@@ -17,7 +17,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { CommunityDto } from 'src/user/community.dto';
+import { CommunityDto } from 'src/community/dto/community.dto';
 import { ProfileDto } from 'src/user/dto/user.dto';
 import {
   Conversation,

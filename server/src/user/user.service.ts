@@ -25,7 +25,10 @@ import { groupUrl, profileUrl } from 'src/search/approutes';
 import { Tag } from './entities/tag.entity';
 import { CreateTagDto } from './dto/tag.dto';
 import { Community } from 'src/community/entities/community.entity';
-import { CreateCommunityDto, UpdateCommunityDto } from './community.dto';
+import {
+  CreateCommunityDto,
+  UpdateCommunityDto,
+} from 'src/community/dto/community.dto';
 import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import {
   OnetimeInvite,
@@ -1046,21 +1049,6 @@ export class UserService {
     return awayRanges.some(
       (range) => checkDate >= range.startDate && checkDate <= range.endDate,
     );
-  }
-
-  async createCommunityAdmin(body: CreateCommunityDto): Promise<Community> {
-    if (body.photo && body.photo.length > 100) {
-      const key = await this.imagesService.processAndUploadProfileImage(
-        body.photo,
-      );
-      body.photo = key;
-    }
-    const community = this.communityRepository.create(body);
-    const savedCommunity = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(
-      savedCommunity.id,
-    );
-    return savedCommunity;
   }
 
   async createCommunity(

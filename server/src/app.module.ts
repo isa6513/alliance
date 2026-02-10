@@ -28,6 +28,7 @@ import { UserService } from './user/user.service';
 import { MessagingModule } from './messaging/messaging.module';
 import { PushModule } from './push/push.module';
 import { SlackModule } from './slack/slack.module';
+import { CommunityModule } from './community/community.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { SlackModule } from './slack/slack.module';
     EventEmitterModule.forRoot(),
     AuthModule,
     UserModule,
+    CommunityModule,
     TypeOrmModule.forRoot(connectionOptions()),
     ScheduleModule.forRoot(),
     ActionsModule,

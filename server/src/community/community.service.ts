@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Community } from './entities/community.entity';
 import { Relations } from 'src/utils/Repository';
+import { ImagesService } from 'src/images/images.service';
+import { ConversationService } from 'src/messaging/conversation.service';
+import { CreateCommunityDto } from './dto/community.dto';
 
 export const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
   Object.freeze({
@@ -15,6 +18,8 @@ export class CommunityService {
   constructor(
     @InjectRepository(Community)
     private readonly communityRepository: Repository<Community>,
+    private readonly imagesService: ImagesService,
+    private readonly conversationService: ConversationService,
   ) {}
 
   async findOneOrFail(
@@ -25,5 +30,20 @@ export class CommunityService {
       where: { id },
       relations: relations ?? COMMUNITY_DEFAULT_RELATIONS,
     });
+  }
+
+  async createCommunityAdmin(body: CreateCommunityDto): Promise<Community> {
+    if (body.photo && body.photo.length > 100) {
+      const key = await this.imagesService.processAndUploadProfileImage(
+        body.photo,
+      );
+      body.photo = key;
+    }
+    const community = this.communityRepository.create(body);
+    const savedCommunity = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(
+      savedCommunity.id,
+    );
+    return savedCommunity;
   }
 }
