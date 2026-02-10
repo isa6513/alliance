@@ -192,8 +192,12 @@ const CommunityPage = () => {
   }, [communityMemberInfo]);
 
   useEffect(() => {
-    if (amLeader) {
-      userGetCommunityMemberContactInfo().then((resp) => {
+    if (amLeader && community?.id !== undefined) {
+      userGetCommunityMemberContactInfo({
+        path: {
+          communityId: community.id,
+        },
+      }).then((resp) => {
         if (resp.data) {
           setMemberContactInfo(
             resp.data.reduce((acc, contactInfo) => {
@@ -204,7 +208,7 @@ const CommunityPage = () => {
         }
       });
     }
-  }, [amLeader]);
+  }, [amLeader, community?.id]);
 
   const setParams = useCallback(
     (params: { tab?: Tab | null; communityId?: number | null }) => {
