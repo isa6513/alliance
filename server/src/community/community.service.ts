@@ -456,4 +456,31 @@ export class CommunityService {
   async deleteCommunityAdmin(communityId: number): Promise<void> {
     await this.communityRepository.delete(communityId);
   }
+
+  async addUserToCommunityAdmin(params: {
+    communityId: number;
+    userId: number;
+  }): Promise<Community> {
+    const { communityId, userId } = params;
+
+    const [community, user] = await Promise.all([
+      this.findOneOrFail(communityId),
+      this.userRepository.findOneOrFail({ where: { id: userId } }),
+    ]);
+
+    return this.addUserToCommunityAndRefreshConversation({
+      user,
+      community,
+      notifForLeader: ({ leader }) => ({
+        user: leader,
+        category: NotificationCategory.MemberJoinedCommunity,
+        message: `Staff added ${user.name} to your group (${community.name})`,
+        webAppLocation: groupUrl({
+          tab: 'members',
+          communityId: community.id,
+        }),
+        associatedUsers: [user],
+      }),
+    });
+  }
 }

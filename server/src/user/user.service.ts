@@ -1025,35 +1025,6 @@ export class UserService {
     );
   }
 
-
-  async addUserToCommunity(params: {
-    communityId: number;
-    userId: number;
-  }): Promise<Community> {
-    const { communityId, userId } = params;
-
-    const [community, user] = await Promise.all([
-      this.communityService.findOneOrFail(communityId),
-      this.findOneOrFail(userId),
-    ]);
-
-    return this.communityService.addUserToCommunityAndRefreshConversation({
-      user,
-      community,
-      notifForLeader: ({ leader }) => ({
-        user: leader,
-        category: NotificationCategory.MemberJoinedCommunity,
-        message: `Staff added ${user.name} to your group (${community.name})`,
-        webAppLocation: groupUrl({
-          tab: 'members',
-          communityId: community.id,
-        }),
-        associatedUsers: [user],
-      }),
-    });
-  }
-
-
   async addLeaderToCommunity(
     communityId: number,
     userId: number,

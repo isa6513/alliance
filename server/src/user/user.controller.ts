@@ -401,21 +401,6 @@ export class UserController {
     return this.userService.verifyEmail(body.token);
   }
 
-  @Post('communities/:communityId/addMember')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: CommunityDto })
-  async addMemberToCommunity(
-    @Param('communityId', ParseIntPipe) communityId: number,
-    @Body() body: CommunityMemberDto,
-  ) {
-    return new CommunityDto(
-      await this.userService.addUserToCommunity({
-        communityId,
-        userId: body.userId,
-      }),
-    );
-  }
-
   @Post('communities/:communityId/addLeader')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CommunityDto })

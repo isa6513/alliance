@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, Link, useNavigate, useParams } from "react-router";
 import {
   actionsGetCommunityMemberInfoAdmin,
+  communityAddMemberAdmin,
   communityDeleteAdmin,
   communityGetCommunities,
   communityRemoveMemberAdmin,
   communityUpdate,
   userAddLeaderToCommunity,
-  userAddMemberToCommunity,
   userGetCommunityMemberContactInfoAdmin,
   userList,
   userRemoveLeaderFromCommunity,
@@ -287,7 +287,7 @@ const CommunityDetailPage: React.FC = () => {
           case "add": {
             if (!memberSelection.length) return;
             setAddingMember(true);
-            const response = await userAddMemberToCommunity({
+            const response = await communityAddMemberAdmin({
               path: { communityId },
               body: { userId: memberSelection[0] },
             });

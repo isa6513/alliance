@@ -148,4 +148,19 @@ export class CommunityController {
   async deleteAdmin(@Param('communityId', ParseIntPipe) communityId: number) {
     await this.communityService.deleteCommunityAdmin(communityId);
   }
+
+  @Post(':communityId/addMember/admin')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async addMemberAdmin(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: CommunityMemberDto,
+  ) {
+    return new CommunityDto(
+      await this.communityService.addUserToCommunityAdmin({
+        communityId,
+        userId: body.userId,
+      }),
+    );
+  }
 }

@@ -648,6 +648,58 @@ describe('Community (e2e)', () => {
         expect(found).toBeNull();
       });
     });
+
+    describe('addUserToCommunityAdmin', () => {
+      it('adds a user to community as admin', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Admin Add Member',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        const result = await communityService.addUserToCommunityAdmin({
+          communityId: community.id,
+          userId: secondUser.id,
+        });
+
+        expect(result.id).toBe(community.id);
+        const refreshed = await communityRepo.findOneOrFail({
+          where: { id: community.id },
+          relations: { users: true },
+        });
+        const memberIds = refreshed.users.map((u) => u.id);
+        expect(memberIds).toContain(secondUser.id);
+        expect(memberIds).toContain(testUser.id);
+      });
+
+      it('throws when community does not exist', async () => {
+        await expect(
+          communityService.addUserToCommunityAdmin({
+            communityId: 999999,
+            userId: secondUser.id,
+          }),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+
+      it('throws when user does not exist', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Admin Add NonexistentUser',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await expect(
+          communityService.addUserToCommunityAdmin({
+            communityId: community.id,
+            userId: 999999,
+          }),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+    });
   });
 
   describe('CommunityController', () => {
@@ -1229,6 +1281,63 @@ describe('Community (e2e)', () => {
       const res = await request(ctx.app.getHttpServer()).delete(
         `/community/${community.id}/admin`,
       );
+
+      expect(res.status).toBe(401);
+    });
+
+    it('POST /community/:communityId/addMember/admin adds member when admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Add Member',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/addMember/admin`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(201);
+      expect(res.body.id).toBe(community.id);
+      const refreshed = await communityRepo.findOneOrFail({
+        where: { id: community.id },
+        relations: { users: true },
+      });
+      const memberIds = refreshed.users.map((u: User) => u.id);
+      expect(memberIds).toContain(secondUser.id);
+    });
+
+    it('POST /community/:communityId/addMember/admin returns 401 when not admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Add NotAdmin',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/addMember/admin`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('POST /community/:communityId/addMember/admin returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Add NoAuth',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/addMember/admin`)
+        .send({ userId: secondUser.id });
 
       expect(res.status).toBe(401);
     });
