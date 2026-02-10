@@ -492,6 +492,14 @@ jobs:
         run: npm ci
         working-directory: ./server
 
+      - name: Cache Playwright Browsers
+        if: github.ref_name == 'production'
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
       - name: Install Playwright
         if: github.ref_name == 'production'
         run: npx playwright install --with-deps chromium
@@ -531,15 +539,12 @@ jobs:
             echo "No baseline screenshots — skipping comparison"
           fi
 
-      - name: Upload Screenshots to S3
+      - name: Upload Current Screenshots to S3
         if: github.ref_name == 'production'
         run: |
           aws s3 sync \
             ${{ github.workspace }}/screenshots/current/ \
             s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/${{ github.sha }}/
-          aws s3 sync \
-            ${{ github.workspace }}/screenshots/current/ \
-            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/latest/
 
       - name: AI Review
         id: ai-review
@@ -566,6 +571,10 @@ jobs:
           BUCKET="${{ secrets.VISUAL_REGRESSION_BUCKET }}"
           SHA="${{ github.sha }}"
           S3_PREFIX="visual-regression/production"
+          BASELINE_DIR="${{ github.workspace }}/screenshots/baseline"
+          CURRENT_DIR="${{ github.workspace }}/screenshots/current"
+          COMPOSITES_DIR="${{ github.workspace }}/screenshots/composites"
+          mkdir -p "$COMPOSITES_DIR"
 
           # Build Slack blocks from failed results
           BLOCKS="["
@@ -580,21 +589,31 @@ jobs:
             REASON=$(echo "$fail" | jq -r '.reason')
             FILE="${PAGE}.png"
 
-            BASELINE_URL=$(aws s3 presign "s3://${BUCKET}/${S3_PREFIX}/latest/${FILE}" --expires-in 604800 2>/dev/null || echo "")
-            CURRENT_URL=$(aws s3 presign "s3://${BUCKET}/${S3_PREFIX}/${SHA}/${FILE}" --expires-in 604800 2>/dev/null || echo "")
-
             BLOCKS+='{"type":"divider"},'
             BLOCKS+='{"type":"section","text":{"type":"mrkdwn","text":"*'"$PAGE"'*\n'"$(echo "$REASON" | sed 's/"/\\"/g')"'"}},'
 
-            LINKS=""
-            if [ -n "$BASELINE_URL" ]; then
-              LINKS+="<${BASELINE_URL}|Baseline>  "
+            # Create side-by-side composite: Baseline | Current
+            COMPOSITE=""
+            if [ -f "$BASELINE_DIR/$FILE" ] && [ -f "$CURRENT_DIR/$FILE" ]; then
+              convert \
+                \( "$BASELINE_DIR/$FILE" -resize 700x -gravity North -background white -extent 700x \
+                   -font Helvetica -pointsize 24 -gravity North \
+                   label:"Baseline" +swap -append \) \
+                \( "$CURRENT_DIR/$FILE" -resize 700x -gravity North -background white -extent 700x \
+                   -font Helvetica -pointsize 24 -gravity North \
+                   label:"Current" +swap -append \) \
+                +append "$COMPOSITES_DIR/$FILE"
+
+              aws s3 cp "$COMPOSITES_DIR/$FILE" \
+                "s3://${BUCKET}/${S3_PREFIX}/${SHA}/composites/$FILE"
+
+              COMPOSITE=$(aws s3 presign \
+                "s3://${BUCKET}/${S3_PREFIX}/${SHA}/composites/$FILE" \
+                --expires-in 604800 2>/dev/null || echo "")
             fi
-            if [ -n "$CURRENT_URL" ]; then
-              LINKS+="<${CURRENT_URL}|Current>"
-            fi
-            if [ -n "$LINKS" ]; then
-              BLOCKS+='{"type":"context","elements":[{"type":"mrkdwn","text":"'"$LINKS"'"}]},'
+
+            if [ -n "$COMPOSITE" ]; then
+              BLOCKS+='{"type":"image","image_url":"'"$COMPOSITE"'","alt_text":"'"$PAGE"' baseline vs current"},'
             fi
           done <<< "$FAILURES"
 
@@ -604,6 +623,14 @@ jobs:
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"blocks\":${BLOCKS}}" \
             ${{ secrets.SLACK_WEBHOOK_URL_DEPLOYMENT }}
+
+      - name: Promote to Latest Baseline
+        if: github.ref_name == 'production' && steps.ai-review.outcome != 'failure'
+        run: |
+          aws s3 sync \
+            ${{ github.workspace }}/screenshots/current/ \
+            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/latest/ \
+            --delete
 
       - name: Fail if regressions detected
         if: github.ref_name == 'production' && steps.ai-review.outcome == 'failure'

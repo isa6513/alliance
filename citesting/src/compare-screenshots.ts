@@ -29,6 +29,20 @@ const main = async () => {
   }
 
   let totalDiffs = 0;
+  const stats: Record<string, { diffPixels: number; totalPixels: number; pct: number }> = {};
+
+  const padToSize = (img: any, w: number, h: number): any => {
+    if (img.width === w && img.height === h) return img;
+    const padded = new PNG({ width: w, height: h, fill: true });
+    for (let i = 0; i < padded.data.length; i += 4) {
+      padded.data[i] = 255;
+      padded.data[i + 1] = 255;
+      padded.data[i + 2] = 255;
+      padded.data[i + 3] = 255;
+    }
+    PNG.bitblt(img, padded, 0, 0, img.width, img.height, 0, 0);
+    return padded;
+  };
 
   for (const file of currentFiles) {
     const baselinePath = path.join(baselineDir, file);
@@ -47,23 +61,8 @@ const main = async () => {
     const baselineImg = PNG.sync.read(await fs.readFile(baselinePath));
     const currentImg = PNG.sync.read(await fs.readFile(currentPath));
 
-    // Handle dimension mismatches by padding the smaller image
     const width = Math.max(baselineImg.width, currentImg.width);
     const height = Math.max(baselineImg.height, currentImg.height);
-
-    const padToSize = (img: any, w: number, h: number): any => {
-      if (img.width === w && img.height === h) return img;
-      const padded = new PNG({ width: w, height: h, fill: true });
-      // Fill with white
-      for (let i = 0; i < padded.data.length; i += 4) {
-        padded.data[i] = 255;
-        padded.data[i + 1] = 255;
-        padded.data[i + 2] = 255;
-        padded.data[i + 3] = 255;
-      }
-      PNG.bitblt(img, padded, 0, 0, img.width, img.height, 0, 0);
-      return padded;
-    };
 
     const paddedBaseline = padToSize(baselineImg, width, height);
     const paddedCurrent = padToSize(currentImg, width, height);
@@ -79,7 +78,7 @@ const main = async () => {
     );
 
     const totalPixels = width * height;
-    const pct = ((diffPixels / totalPixels) * 100).toFixed(2);
+    const pct = Number(((diffPixels / totalPixels) * 100).toFixed(4));
 
     if (diffPixels > 0) {
       const diffPath = path.join(diffDir, file);
@@ -87,11 +86,16 @@ const main = async () => {
       console.log(
         `${logPrefix} [DIFF] ${file} — ${diffPixels} pixels (${pct}%)`
       );
+      stats[file] = { diffPixels, totalPixels, pct };
       totalDiffs++;
     } else {
       console.log(`${logPrefix} [OK]   ${file} — identical`);
     }
   }
+
+  // Write stats JSON so ai-review can skip trivial diffs
+  const statsPath = path.join(diffDir, "stats.json");
+  await fs.writeFile(statsPath, JSON.stringify(stats, null, 2));
 
   console.log(
     `${logPrefix} Done. ${totalDiffs} of ${currentFiles.length} images have diffs.`

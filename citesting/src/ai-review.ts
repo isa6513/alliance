@@ -4,11 +4,19 @@ import path from "path";
 
 const logPrefix = "[citesting:ai-review]";
 
+// Pages with less than this % of pixels changed are auto-passed
+const TRIVIAL_DIFF_THRESHOLD = 0.05;
+
+// Max concurrent API calls
+const CONCURRENCY = 5;
+
 type ReviewResult = {
   page: string;
   status: "pass" | "fail";
   reason: string;
 };
+
+type DiffStats = Record<string, { diffPixels: number; totalPixels: number; pct: number }>;
 
 const toBase64 = async (filePath: string): Promise<string> => {
   const buf = await fs.readFile(filePath);
@@ -22,6 +30,115 @@ const fileExists = async (p: string): Promise<boolean> => {
   } catch {
     return false;
   }
+};
+
+const reviewPage = async (
+  client: Anthropic,
+  pageName: string,
+  baselinePath: string,
+  currentPath: string,
+  diffPath: string
+): Promise<ReviewResult> => {
+  const [baselineB64, currentB64, diffB64] = await Promise.all([
+    toBase64(baselinePath),
+    toBase64(currentPath),
+    toBase64(diffPath),
+  ]);
+
+  const response = await client.messages.create({
+    model: "claude-sonnet-4-5-20250929",
+    max_tokens: 1024,
+    tools: [
+      {
+        name: "report_review",
+        description:
+          "Report the visual regression review result for a page.",
+        input_schema: {
+          type: "object" as const,
+          properties: {
+            page: {
+              type: "string",
+              description: "The page name being reviewed",
+            },
+            status: {
+              type: "string",
+              enum: ["pass", "fail"],
+              description:
+                "pass if the changes are acceptable (minor/expected), fail if there is a visual regression",
+            },
+            reason: {
+              type: "string",
+              description:
+                "Brief explanation of what changed and why it passes or fails",
+            },
+          },
+          required: ["page", "status", "reason"],
+        },
+      },
+    ],
+    tool_choice: { type: "tool", name: "report_review" },
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: `You are a visual regression tester. Compare these screenshots of the "${pageName}" page.
+
+The first image is the BASELINE (previous known-good version).
+The second image is the CURRENT build.
+The third image is the PIXEL DIFF (red highlights show changed pixels).
+
+Decide whether the visual changes represent a regression (broken layout, missing elements, overlapping text, broken styling) or are acceptable (minor rendering differences, anti-aliasing, expected content changes).
+
+Report "pass" for acceptable changes and "fail" for regressions.`,
+          },
+          {
+            type: "image",
+            source: { type: "base64", media_type: "image/png", data: baselineB64 },
+          },
+          {
+            type: "image",
+            source: { type: "base64", media_type: "image/png", data: currentB64 },
+          },
+          {
+            type: "image",
+            source: { type: "base64", media_type: "image/png", data: diffB64 },
+          },
+        ],
+      },
+    ],
+  });
+
+  const toolUse = response.content.find((block) => block.type === "tool_use");
+  if (toolUse && toolUse.type === "tool_use") {
+    const input = toolUse.input as ReviewResult;
+    return {
+      page: input.page || pageName,
+      status: input.status,
+      reason: input.reason,
+    };
+  }
+
+  return { page: pageName, status: "fail", reason: "Unexpected API response format" };
+};
+
+const runWithConcurrency = async <T>(
+  tasks: (() => Promise<T>)[],
+  limit: number
+): Promise<T[]> => {
+  const results: T[] = [];
+  let i = 0;
+
+  const run = async () => {
+    while (i < tasks.length) {
+      const idx = i++;
+      results[idx] = await tasks[idx]();
+    }
+  };
+
+  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, () => run()));
+  return results;
 };
 
 const main = async () => {
@@ -51,7 +168,15 @@ const main = async () => {
     process.exit(0);
   }
 
+  // Load diff stats if available (written by compare-screenshots)
+  let diffStats: DiffStats = {};
+  const statsPath = path.join(diffDir, "stats.json");
+  if (await fileExists(statsPath)) {
+    diffStats = JSON.parse(await fs.readFile(statsPath, "utf8"));
+  }
+
   const results: ReviewResult[] = [];
+  const apiTasks: { file: string; task: () => Promise<ReviewResult> }[] = [];
 
   for (const file of currentFiles) {
     const pageName = file.replace(/\.png$/, "");
@@ -61,116 +186,46 @@ const main = async () => {
     const hasBaseline = await fileExists(baselinePath);
     const hasDiff = await fileExists(diffPath);
 
-    // No baseline = new page → auto-pass
     if (!hasBaseline) {
       console.log(`${logPrefix} [PASS] ${pageName} — new page, no baseline`);
       results.push({ page: pageName, status: "pass", reason: "New page, no baseline to compare" });
       continue;
     }
 
-    // No diff file = unchanged → auto-pass
     if (!hasDiff) {
       console.log(`${logPrefix} [PASS] ${pageName} — unchanged`);
       results.push({ page: pageName, status: "pass", reason: "No visual changes detected" });
       continue;
     }
 
-    // Has diff → send to Claude for review
-    console.log(`${logPrefix} Reviewing ${pageName} with Claude...`);
+    // Auto-pass trivial diffs (anti-aliasing, sub-pixel rendering)
+    const stat = diffStats[file];
+    if (stat && stat.pct < TRIVIAL_DIFF_THRESHOLD) {
+      console.log(`${logPrefix} [PASS] ${pageName} — trivial diff (${stat.pct}%), skipping AI`);
+      results.push({ page: pageName, status: "pass", reason: `Trivial diff (${stat.pct}% pixels changed)` });
+      continue;
+    }
 
-    const [baselineB64, currentB64, diffB64] = await Promise.all([
-      toBase64(baselinePath),
-      toBase64(path.join(currentDir, file)),
-      toBase64(diffPath),
-    ]);
-
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-5-20250929",
-      max_tokens: 1024,
-      tools: [
-        {
-          name: "report_review",
-          description:
-            "Report the visual regression review result for a page.",
-          input_schema: {
-            type: "object" as const,
-            properties: {
-              page: {
-                type: "string",
-                description: "The page name being reviewed",
-              },
-              status: {
-                type: "string",
-                enum: ["pass", "fail"],
-                description:
-                  "pass if the changes are acceptable (minor/expected), fail if there is a visual regression",
-              },
-              reason: {
-                type: "string",
-                description:
-                  "Brief explanation of what changed and why it passes or fails",
-              },
-            },
-            required: ["page", "status", "reason"],
-          },
-        },
-      ],
-      tool_choice: { type: "tool", name: "report_review" },
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: `You are a visual regression tester. Compare these screenshots of the "${pageName}" page.
-
-The first image is the BASELINE (previous known-good version).
-The second image is the CURRENT build.
-The third image is the PIXEL DIFF (red highlights show changed pixels).
-
-Decide whether the visual changes represent a regression (broken layout, missing elements, overlapping text, broken styling) or are acceptable (minor rendering differences, anti-aliasing, expected content changes).
-
-Report "pass" for acceptable changes and "fail" for regressions.`,
-            },
-            {
-              type: "image",
-              source: { type: "base64", media_type: "image/png", data: baselineB64 },
-            },
-            {
-              type: "image",
-              source: { type: "base64", media_type: "image/png", data: currentB64 },
-            },
-            {
-              type: "image",
-              source: { type: "base64", media_type: "image/png", data: diffB64 },
-            },
-          ],
-        },
-      ],
+    // Queue for parallel AI review
+    console.log(`${logPrefix} Queuing ${pageName} for AI review (${stat ? stat.pct + "%" : "unknown"} diff)...`);
+    apiTasks.push({
+      file,
+      task: () => reviewPage(client, pageName, baselinePath, path.join(currentDir, file), diffPath),
     });
+  }
 
-    const toolUse = response.content.find((block) => block.type === "tool_use");
-    if (toolUse && toolUse.type === "tool_use") {
-      const input = toolUse.input as ReviewResult;
-      const result: ReviewResult = {
-        page: input.page || pageName,
-        status: input.status,
-        reason: input.reason,
-      };
+  // Run AI reviews in parallel
+  if (apiTasks.length > 0) {
+    console.log(`${logPrefix} Sending ${apiTasks.length} pages for AI review (concurrency: ${CONCURRENCY})...`);
+    const apiResults = await runWithConcurrency(
+      apiTasks.map((t) => t.task),
+      CONCURRENCY
+    );
+
+    for (const result of apiResults) {
       results.push(result);
       const icon = result.status === "pass" ? "PASS" : "FAIL";
-      console.log(
-        `${logPrefix} [${icon}] ${result.page} — ${result.reason}`
-      );
-    } else {
-      console.error(
-        `${logPrefix} [ERROR] ${pageName} — unexpected response format`
-      );
-      results.push({
-        page: pageName,
-        status: "fail",
-        reason: "Unexpected API response format",
-      });
+      console.log(`${logPrefix} [${icon}] ${result.page} — ${result.reason}`);
     }
   }
 
