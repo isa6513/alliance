@@ -54,6 +54,8 @@ UPDATE "user" SET "password" = 'pw';
 UPDATE "form_response" SET "answers" = '{}';
 
 UPDATE "mail" SET "to" = 'user'||id||'@example.com';
+UPDATE "mms" SET "to" = 'pruned';
+
 SQL
 
 echo "[$(date)] ==> S3 sync s3://$PROD_ASSETS_BUCKET -> s3://$STAGING_ASSETS_BUCKET"
