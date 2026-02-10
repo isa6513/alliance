@@ -212,7 +212,7 @@ export default function AppLayout() {
     };
 
     window.addEventListener("auth:unauthorized", handleUnauthorized);
-    // authMe();
+
     return () => {
       window.removeEventListener("auth:unauthorized", handleUnauthorized);
     };

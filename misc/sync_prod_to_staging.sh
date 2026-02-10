@@ -54,6 +54,7 @@ UPDATE "user" SET "password" = 'pw';
 UPDATE "form_response" SET "answers" = '{}';
 
 UPDATE "mail" SET "to" = 'user'||id||'@example.com';
+UPDATE "mms" SET "from" = 'pruned';
 UPDATE "mms" SET "to" = 'pruned';
 
 SQL
