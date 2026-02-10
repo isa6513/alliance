@@ -628,10 +628,9 @@ jobs:
           FAILURES=$(cat "$RESULTS" | jq -c '.[] | select(.status == "fail")')
           while IFS= read -r fail; do
             PAGE=$(echo "$fail" | jq -r '.page')
-            REASON=$(echo "$fail" | jq -r '.reason')
             FILE="${PAGE}.png"
 
-            TEXT+="${NL}---${NL}*${PAGE}*${NL}${REASON}${NL}"
+            TEXT+="${NL}*${PAGE}*${NL}"
 
             # Upload baseline, current, and diff images → collect permalinks
             GALLERY=""
