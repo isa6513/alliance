@@ -1016,25 +1016,6 @@ export class UserService {
     return this.userAwayRangeRepository.save(awayRange);
   }
 
-  isUserAwayAt(user: User, checkDate: Date): boolean {
-    return user.awayRanges.some(
-      (range) => checkDate >= range.startDate && checkDate <= range.endDate,
-    );
-  }
-
-  isUserAwayInRange(
-    user: User,
-    range: { startDate: Date; endDate?: Date },
-  ): boolean {
-    return user.awayRanges.some(
-      (awayRange) =>
-        !(
-          (range.endDate && range.endDate <= awayRange.startDate) ||
-          range.startDate >= awayRange.endDate
-        ),
-    );
-  }
-
   async isUserIdAway(
     userId: number,
     checkDate: Date = new Date(),
