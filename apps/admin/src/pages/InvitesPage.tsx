@@ -13,6 +13,7 @@ import List from "@alliance/sharedweb/ui/List";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import { Link } from "react-router";
 
 const InvitesPage = () => {
   const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
@@ -100,7 +101,12 @@ const InvitesPage = () => {
             </div>
           </form>
         </Card>
-        <p className="font-bold my-5">Past Invites</p>
+        <div className="flex flex-row justify-between items-center my-5">
+          <p className="font-bold">Past Invites</p>
+          <Link to="/invites/graph" className="text-sm text-blue-600 hover:underline">
+            View Invite Graph
+          </Link>
+        </div>
         <List>
           {invites.map((invite) => (
             <div

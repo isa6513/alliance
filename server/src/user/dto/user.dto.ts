@@ -146,10 +146,15 @@ export class UserDto extends PickType(User, [
   @Allow()
   hasActiveContract: boolean;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  referredById?: number | null;
+
   constructor(user: User) {
     super();
     Object.assign(this, instanceToPlain(user));
     this.profilePicture = getImageSource(user.profilePicture);
+    this.referredById = user.referredBy?.id ?? null;
   }
 }
 

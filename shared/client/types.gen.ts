@@ -632,6 +632,9 @@ export type UserDto = {
     cityId?: number;
     email: string;
     hasActiveContract: boolean;
+    referredById?: {
+        [key: string]: unknown;
+    };
 };
 
 export type AuthMeResponseDto = {
@@ -993,6 +996,45 @@ export type CreateMessageDto = {
      */
     attachments?: Array<string>;
     replyToId?: string;
+};
+
+export type NotificationDto = {
+    id: number;
+    category: NotificationCategory;
+    message: string;
+    priority: NotifPriority;
+    webAppLocation: string | null;
+    mobileAppLocation: string | null;
+    readAt?: string;
+    createdAt: string;
+    updatedAt: string;
+    sendTime: string;
+    associatedUsers: Array<ProfileDto>;
+};
+
+export type ActionEventNotifDto = {
+    id: number;
+    type: ActionEventNotifType;
+    channel: NotificationChannel;
+    mail: Mail | null;
+    mms: Mms | null;
+    pushes?: Array<Push>;
+    reminderGroup?: ReminderGroup;
+    /**
+     * Indicates whether the notification has been sent
+     */
+    sent: boolean;
+    idempotency_key?: string;
+    createdAt: string;
+    user: ProfileDto;
+};
+
+export type NotifClickDto = {
+    [key: string]: unknown;
+};
+
+export type NotifClickResponseDto = {
+    mms: boolean;
 };
 
 export type EditableContentDto = {
@@ -1588,23 +1630,6 @@ export type PreviewNotificationPlan = {
     channel: string;
 };
 
-export type ActionEventNotifDto = {
-    id: number;
-    type: ActionEventNotifType;
-    channel: NotificationChannel;
-    mail: Mail | null;
-    mms: Mms | null;
-    pushes?: Array<Push>;
-    reminderGroup?: ReminderGroup;
-    /**
-     * Indicates whether the notification has been sent
-     */
-    sent: boolean;
-    idempotency_key?: string;
-    createdAt: string;
-    user: ProfileDto;
-};
-
 export type CreateEditableContentDto = {
     /**
      * Markdown or plain text body
@@ -1936,28 +1961,6 @@ export type CommunityUserInfoDto = {
     actions: Array<UserActionSummaryDto>;
     suites: Array<ActionSuiteSummaryDto>;
     users: Array<UserActionRelationsForUserDto>;
-};
-
-export type NotificationDto = {
-    id: number;
-    category: NotificationCategory;
-    message: string;
-    priority: NotifPriority;
-    webAppLocation: string | null;
-    mobileAppLocation: string | null;
-    readAt?: string;
-    createdAt: string;
-    updatedAt: string;
-    sendTime: string;
-    associatedUsers: Array<ProfileDto>;
-};
-
-export type NotifClickDto = {
-    [key: string]: unknown;
-};
-
-export type NotifClickResponseDto = {
-    mms: boolean;
 };
 
 export type CreatePostDto = {
@@ -4102,6 +4105,71 @@ export type MessageGetMessagesResponses = {
 
 export type MessageGetMessagesResponse = MessageGetMessagesResponses[keyof MessageGetMessagesResponses];
 
+export type NotifsFindAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifs';
+};
+
+export type NotifsFindAllResponses = {
+    200: Array<NotificationDto>;
+};
+
+export type NotifsFindAllResponse = NotifsFindAllResponses[keyof NotifsFindAllResponses];
+
+export type NotifsSetReadData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/notifs/read/{id}';
+};
+
+export type NotifsSetReadResponses = {
+    200: unknown;
+};
+
+export type NotifsSetReadAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifs/read-all';
+};
+
+export type NotifsSetReadAllResponses = {
+    200: unknown;
+};
+
+export type NotifsNotifsForUserData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/notifs/for-user/{id}';
+};
+
+export type NotifsNotifsForUserResponses = {
+    200: Array<ActionEventNotifDto>;
+};
+
+export type NotifsNotifsForUserResponse = NotifsNotifsForUserResponses[keyof NotifsNotifsForUserResponses];
+
+export type NotifsLinkClickData = {
+    body: NotifClickDto;
+    path?: never;
+    query?: never;
+    url: '/notifs/linkClick';
+};
+
+export type NotifsLinkClickResponses = {
+    200: NotifClickResponseDto;
+};
+
+export type NotifsLinkClickResponse = NotifsLinkClickResponses[keyof NotifsLinkClickResponses];
+
 export type ActionsJoinData = {
     body?: never;
     path: {
@@ -5171,71 +5239,6 @@ export type ActionsGetCommunityMemberInfoResponses = {
 };
 
 export type ActionsGetCommunityMemberInfoResponse = ActionsGetCommunityMemberInfoResponses[keyof ActionsGetCommunityMemberInfoResponses];
-
-export type NotifsFindAllData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/notifs';
-};
-
-export type NotifsFindAllResponses = {
-    200: Array<NotificationDto>;
-};
-
-export type NotifsFindAllResponse = NotifsFindAllResponses[keyof NotifsFindAllResponses];
-
-export type NotifsSetReadData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/notifs/read/{id}';
-};
-
-export type NotifsSetReadResponses = {
-    200: unknown;
-};
-
-export type NotifsSetReadAllData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/notifs/read-all';
-};
-
-export type NotifsSetReadAllResponses = {
-    200: unknown;
-};
-
-export type NotifsNotifsForUserData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/notifs/for-user/{id}';
-};
-
-export type NotifsNotifsForUserResponses = {
-    200: Array<ActionEventNotifDto>;
-};
-
-export type NotifsNotifsForUserResponse = NotifsNotifsForUserResponses[keyof NotifsNotifsForUserResponses];
-
-export type NotifsLinkClickData = {
-    body: NotifClickDto;
-    path?: never;
-    query?: never;
-    url: '/notifs/linkClick';
-};
-
-export type NotifsLinkClickResponses = {
-    200: NotifClickResponseDto;
-};
-
-export type NotifsLinkClickResponse = NotifsLinkClickResponses[keyof NotifsLinkClickResponses];
 
 export type ForumFindAllPostsData = {
     body?: never;

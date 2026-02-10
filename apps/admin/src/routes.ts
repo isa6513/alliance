@@ -6,6 +6,7 @@ export default [
       route("/", "pages/Actions.tsx"),
       route("/timeline", "pages/NewTimelinePage.tsx"),
       route("/invites", "pages/InvitesPage.tsx"),
+      route("/invites/graph", "pages/InviteGraphPage.tsx"),
       route("/groups", "pages/GroupsPage.tsx"),
       route("/groups/:id", "pages/GroupDetailPage.tsx"),
       route("/actions/:actionId", "pages/ActionDashboard.tsx"),
