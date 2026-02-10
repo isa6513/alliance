@@ -3,12 +3,11 @@ import {
   forumLikePost,
   forumRemovePost,
   forumUnlikePost,
-  PostDto,
 } from "@alliance/shared/client";
 import Card from "@alliance/sharedweb/ui/Card";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Link, href, useNavigate, useParams } from "react-router";
 import { setRevalidate } from "../../applayout";
 import Comments from "../../components/Comments";
@@ -20,42 +19,26 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 type CommentFilter = "all" | "answered" | "unanswered";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
-  const [post, setPost] = useState<PostDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [commentFilter, setCommentFilter] = useState<CommentFilter>("all");
 
   const { user } = useAuth();
   const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useCIDFromParams();
 
-  const fetchPost = useCallback(async () => {
-    if (!postId) return;
-
-    try {
-      const response = await forumFindOnePost({
-        path: { id: postId },
-      });
-      setPost(response.data ?? null);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching post details:", err);
-      setError("Failed to load post details");
-    } finally {
-      setLoading(false);
-    }
-  }, [postId]);
-
-  useEffect(() => {
-    fetchPost();
-  }, [fetchPost]);
+  const { data: post = null, isLoading: loading, error: queryError } = useQuery({
+    queryKey: ["forumFindOnePost", postId],
+    queryFn: () => forumFindOnePost({ path: { id: postId! } }).then(res => res.data ?? null),
+    enabled: !!postId,
+  });
 
   const handleDeletePost = async () => {
     if (!post || post.author.id !== user?.id) {
@@ -89,14 +72,16 @@ const PostDetailPage: React.FC = () => {
       });
     }
 
-    fetchPost();
-  }, [post, fetchPost, user]);
+    queryClient.invalidateQueries({ queryKey: ["forumFindOnePost", postId] });
+  }, [post, queryClient, postId, user]);
 
-  if (error) {
+  const displayError = error || (queryError ? "Failed to load post details" : null);
+
+  if (displayError) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-          {error}
+          {displayError}
         </div>
       </div>
     );

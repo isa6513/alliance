@@ -24,7 +24,17 @@ import {
   TimeToChurnSampleDto,
 } from "@alliance/shared/client/types.gen";
 import chroma from "chroma-js";
-import * as d3 from "d3";
+import {
+  max,
+  min,
+  scaleLinear,
+  scaleTime,
+  area,
+  curveMonotoneX,
+  range,
+  bin,
+  extent,
+} from "d3";
 import React, {
   useCallback,
   useEffect,
@@ -364,16 +374,15 @@ const StatsPage: React.FC = () => {
     const height =
       margin.top + margin.bottom + chartActionStats.length * (barHeight + gap);
 
-    const maxCompleted = d3.max(chartActionStats, (d) => d.usersCompleted) ?? 0;
+    const maxCompleted = max(chartActionStats, (d) => d.usersCompleted) ?? 0;
     const maxTotalExpected =
-      d3.max(
+      max(
         chartActionStats,
         (d) => d.usersJoined + (d.usersWithdrawn ?? 0)
       ) ?? 0;
     const maxValue = Math.max(maxCompleted, maxTotalExpected, 10);
 
-    const xScale = d3
-      .scaleLinear()
+    const xScale = scaleLinear()
       .domain([0, maxValue * 1.1])
       .nice()
       .range([margin.left, width - margin.right]);
@@ -518,8 +527,8 @@ const StatsPage: React.FC = () => {
     const cohortDates = filteredRetentionCohorts.map((cohort) =>
       new Date(cohort.cohortStart).getTime()
     );
-    const minDate = d3.min(cohortDates) ?? Date.now();
-    const maxDate = d3.max(cohortDates) ?? Date.now();
+    const minDate = min(cohortDates) ?? Date.now();
+    const maxDate = max(cohortDates) ?? Date.now();
     const colorScale = chroma
       .scale(chroma.brewer.Spectral)
       .domain([maxDate, minDate]);
@@ -573,13 +582,13 @@ const StatsPage: React.FC = () => {
     const allWeekIndices = filteredRetentionCohorts.flatMap((cohort) =>
       cohort.points.map((point) => point.weekIndex)
     );
-    const maxWeek = d3.max(allWeekIndices) ?? 0;
+    const maxWeek = max(allWeekIndices) ?? 0;
     const rawMin = Math.max(0, Math.floor(weekRange.min));
     const rawMax = Math.max(rawMin, Math.ceil(weekRange.max));
     const rangeMin = Math.min(rawMin, maxWeek);
     const rangeMax = Math.min(rawMax, maxWeek);
     const weeks =
-      rangeMin <= rangeMax ? d3.range(rangeMin, rangeMax + 1) : [];
+      rangeMin <= rangeMax ? range(rangeMin, rangeMax + 1) : [];
 
     const rows = [...filteredRetentionCohorts]
       .sort(
@@ -609,20 +618,18 @@ const StatsPage: React.FC = () => {
     const width = 1000;
     const height = 320;
     const margin = { top: 28, right: 24, bottom: 56, left: 64 };
-    const maxWeeks = d3.max(churnDurationsWeeks) ?? 0;
+    const maxWeeks = max(churnDurationsWeeks) ?? 0;
     const xMax = Math.max(1, maxWeeks);
 
-    const xScale = d3
-      .scaleLinear()
+    const xScale = scaleLinear()
       .domain([0, xMax])
       .nice()
       .range([margin.left, width - margin.right]);
 
     const maxWeekLabel = Math.max(1, Math.ceil(xMax));
-    const weeklyThresholds = d3.range(0, maxWeekLabel + 1, 1);
+    const weeklyThresholds = range(0, maxWeekLabel + 1, 1);
 
-    const bins = d3
-      .bin<number, number>()
+    const bins = bin<number, number>()
       .domain(xScale.domain() as [number, number])
       .thresholds(weeklyThresholds)(churnDurationsWeeks);
 
@@ -634,9 +641,8 @@ const StatsPage: React.FC = () => {
       trimmedBins.pop();
     }
 
-    const maxCount = d3.max(trimmedBins, (bin) => bin.length) ?? 0;
-    const yScale = d3
-      .scaleLinear()
+    const maxCount = max(trimmedBins, (bin) => bin.length) ?? 0;
+    const yScale = scaleLinear()
       .domain([0, Math.max(1, maxCount)])
       .nice()
       .range([height - margin.bottom, margin.top]);
@@ -677,41 +683,37 @@ const StatsPage: React.FC = () => {
     const height = 350;
     const margin = { top: 28, right: 32, bottom: 64, left: 72 };
 
-    const dateExtent = d3.extent(
+    const dateExtent = extent(
       parsedContractStatusHistory,
       (d) => d.parsedDate
     );
     if (!dateExtent[0] || !dateExtent[1]) return null;
 
-    const xScale = d3
-      .scaleTime()
+    const xScale = scaleTime()
       .domain(dateExtent)
       .range([margin.left, width - margin.right]);
 
     const maxTotal =
-      d3.max(parsedContractStatusHistory, (d) => d.totalEverSigned) ?? 10;
+      max(parsedContractStatusHistory, (d) => d.totalEverSigned) ?? 10;
 
-    const yScale = d3
-      .scaleLinear()
+    const yScale = scaleLinear()
       .domain([0, maxTotal * 1.1])
       .nice()
       .range([height - margin.bottom, margin.top]);
 
     // Area for active users (green, bottom)
-    const activeArea = d3
-      .area<(typeof parsedContractStatusHistory)[0]>()
+    const activeArea = area<(typeof parsedContractStatusHistory)[0]>()
       .x((d) => xScale(d.parsedDate))
       .y0(height - margin.bottom)
       .y1((d) => yScale(d.activeCount))
-      .curve(d3.curveMonotoneX);
+      .curve(curveMonotoneX);
 
     // Area for churned users (red, stacked on top of active)
-    const churnedArea = d3
-      .area<(typeof parsedContractStatusHistory)[0]>()
+    const churnedArea = area<(typeof parsedContractStatusHistory)[0]>()
       .x((d) => xScale(d.parsedDate))
       .y0((d) => yScale(d.activeCount))
       .y1((d) => yScale(d.activeCount + d.churnedCount))
-      .curve(d3.curveMonotoneX);
+      .curve(curveMonotoneX);
 
     const activeAreaPath = activeArea(parsedContractStatusHistory) ?? "";
     const churnedAreaPath = churnedArea(parsedContractStatusHistory) ?? "";

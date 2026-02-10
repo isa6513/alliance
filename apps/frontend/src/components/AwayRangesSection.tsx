@@ -11,8 +11,9 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { Pencil, X } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { href, Link } from "react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 enum ReasonDropdownOption {
   UNSELECTED = "Select a reason",
@@ -67,8 +68,12 @@ function formatDateForInput(date: Date | string): string {
 }
 
 const AwayRangesSection: React.FC = () => {
-  const [awayRanges, setAwayRanges] = useState<UserAwayRangeDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: awayRanges = [], isLoading: loading } = useQuery({
+    queryKey: ["userGetAwayRanges"],
+    queryFn: () => userGetAwayRanges().then(res => res.data ?? []),
+  });
+
   const [creating, setCreating] = useState(false);
   const [startDateInput, setStartDateInput] = useState("");
   const [endDateInput, setEndDateInput] = useState("");
@@ -91,23 +96,6 @@ const AwayRangesSection: React.FC = () => {
   const [updating, setUpdating] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const editReasonIsOther = editReason === "Other";
-
-  const loadAwayRanges = useCallback(async () => {
-    try {
-      const response = await userGetAwayRanges();
-      if (response.data) {
-        setAwayRanges(response.data);
-      }
-    } catch (error) {
-      console.error("Error loading away ranges:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadAwayRanges();
-  }, [loadAwayRanges]);
 
   const handleCreate = async () => {
     setError(null);
@@ -154,13 +142,13 @@ const AwayRangesSection: React.FC = () => {
       );
     }
     setCreating(false);
-    await loadAwayRanges();
+    queryClient.invalidateQueries({ queryKey: ["userGetAwayRanges"] });
   };
 
   const handleDelete = async (id: number) => {
     try {
       await userDeleteAwayRange({ path: { id } });
-      await loadAwayRanges();
+      queryClient.invalidateQueries({ queryKey: ["userGetAwayRanges"] });
     } catch (error) {
       console.error("Error deleting away range:", error);
       alert("There was an error deleting your away period. Please try again.");
@@ -212,7 +200,7 @@ const AwayRangesSection: React.FC = () => {
     });
     if (resp.response.ok) {
       cancelEditing();
-      await loadAwayRanges();
+      queryClient.invalidateQueries({ queryKey: ["userGetAwayRanges"] });
     } else {
       setEditError(
         (resp.error as { message: string }).message ??

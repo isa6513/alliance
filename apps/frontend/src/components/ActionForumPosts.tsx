@@ -1,9 +1,10 @@
-import { forumFindPostsByAction, PostDto } from "@alliance/shared/client";
+import { forumFindPostsByAction } from "@alliance/shared/client";
 import Button from "@alliance/sharedweb/ui/Button";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ForumListPost from "./ForumListPost";
+import { useQuery } from "@tanstack/react-query";
 
 interface ActionForumPostsProps {
   actionId: number;
@@ -12,29 +13,16 @@ interface ActionForumPostsProps {
 const ActionForumPosts: React.FC<ActionForumPostsProps> = ({
   actionId,
 }: ActionForumPostsProps) => {
-  const [posts, setPosts] = useState<PostDto[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchActionPosts = async () => {
-      if (!actionId) return;
+  const { data: posts = [], error: queryError } = useQuery({
+    queryKey: ["forumFindPostsByAction", actionId],
+    queryFn: () => forumFindPostsByAction({ path: { actionId: actionId.toString() } }).then(res => res.data ?? []),
+    enabled: !!actionId,
+  });
 
-      try {
-        const response = await forumFindPostsByAction({
-          path: { actionId: actionId.toString() },
-        });
-        setPosts(response.data ?? []);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching action forum posts:", err);
-        setError("Failed to load discussion posts");
-      }
-    };
-
-    fetchActionPosts();
-  }, [actionId]);
+  const error = queryError ? "Failed to load discussion posts" : null;
 
   const handleCreatePost = () => {
     navigate(

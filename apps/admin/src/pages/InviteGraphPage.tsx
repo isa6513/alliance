@@ -5,9 +5,20 @@ import {
   UserDto,
 } from "@alliance/shared/client";
 import { useEffect, useRef, useState } from "react";
-import * as d3 from "d3";
+import {
+  select,
+  zoom,
+  zoomIdentity,
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+  drag,
+} from "d3";
+import type { SimulationNodeDatum, SimulationLinkDatum } from "d3";
 
-interface GraphNode extends d3.SimulationNodeDatum {
+interface GraphNode extends SimulationNodeDatum {
   id: string;
   userId?: number;
   displayName: string;
@@ -15,7 +26,7 @@ interface GraphNode extends d3.SimulationNodeDatum {
   isCenter?: boolean;
 }
 
-interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
+interface GraphLink extends SimulationLinkDatum<GraphNode> {
   source: string | GraphNode;
   target: string | GraphNode;
 }
@@ -42,7 +53,7 @@ const InviteGraphPage = () => {
   useEffect(() => {
     if (loading || !svgRef.current) return;
 
-    const svg = d3.select(svgRef.current);
+    const svg = select(svgRef.current);
     svg.selectAll("*").remove();
 
     const width = svgRef.current.clientWidth;
@@ -269,28 +280,25 @@ const InviteGraphPage = () => {
     const g = svg.append("g");
 
     // Zoom behavior
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.2, 4])
       .on("zoom", (event) => {
         g.attr("transform", event.transform);
       });
 
-    svg.call(zoom);
+    svg.call(zoomBehavior);
 
     // Create simulation
-    const simulation = d3
-      .forceSimulation<GraphNode>(nodes)
+    const simulation = forceSimulation<GraphNode>(nodes)
       .force(
         "link",
-        d3
-          .forceLink<GraphNode, GraphLink>(links)
+        forceLink<GraphNode, GraphLink>(links)
           .id((d) => d.id)
           .distance(60)
       )
-      .force("charge", d3.forceManyBody().strength(-120))
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(NODE_RADIUS + 5))
+      .force("charge", forceManyBody().strength(-120))
+      .force("center", forceCenter(width / 2, height / 2))
+      .force("collision", forceCollide().radius(NODE_RADIUS + 5))
       .stop();
 
     // Pre-warm simulation so layout is stable before rendering
@@ -400,8 +408,7 @@ const InviteGraphPage = () => {
       .text((d) => (d.isCenter ? "" : d.displayName));
 
     // Drag behavior
-    const drag = d3
-      .drag<SVGGElement, GraphNode>()
+    const dragBehavior = drag<SVGGElement, GraphNode>()
       .on("start", (event, d) => {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
@@ -417,7 +424,7 @@ const InviteGraphPage = () => {
         d.fy = null;
       });
 
-    node.call(drag);
+    node.call(dragBehavior);
 
     // Click to highlight subgraph
     node.on("click", (event, d) => {
@@ -458,8 +465,8 @@ const InviteGraphPage = () => {
 
     // Initial zoom to fit
     svg.call(
-      zoom.transform,
-      d3.zoomIdentity
+      zoomBehavior.transform,
+      zoomIdentity
         .translate(width / 2, height / 2)
         .scale(0.8)
         .translate(-width / 2, -height / 2)

@@ -7,8 +7,9 @@ import {
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, href, useOutletContext, useParams } from "react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "@alliance/shared/lib/utils";
@@ -43,38 +44,30 @@ const ActionActivityDetail = () => {
   const params = useParams();
   const activityId = parseInt(params.activityId!);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { action, activities, handleLikeActivity, setActivities } =
     useOutletContext<ActionActivityDetailContext>();
 
-  // Find the activity from the shared state
+  // Find the activity from the shared state (used for like sync)
   const origactivity = activities.find((a) => a.id === activityId) || null;
 
-  const [activity, setActivity] = useState<ActionActivityDto | null>(
-    origactivity
-  );
-  useEffect(() => {
-    if (!origactivity) {
-      return;
-    }
-    setActivity((prev) =>
-      !!prev
-        ? {
-            ...prev,
-            likes: origactivity.likes,
-            likesCount: origactivity.likesCount,
-            likedByMe: origactivity.likedByMe,
-          }
-        : prev
-    );
-  }, [origactivity]);
+  const { data: fetchedActivity } = useQuery({
+    queryKey: ["actionsGetActivity", activityId],
+    queryFn: () => actionsGetActivity({ path: { id: activityId } }).then(res => res.data ?? null),
+    enabled: !!activityId,
+  });
 
-  useEffect(() => {
-    actionsGetActivity({ path: { id: activityId } }).then((resp) => {
-      if (resp.data) {
-        setActivity(resp.data);
-      }
-    });
-  }, [activityId]);
+  // Merge fetched activity with live like data from outlet context
+  const activity = useMemo(() => {
+    const base = fetchedActivity ?? origactivity;
+    if (!base || !origactivity) return base;
+    return {
+      ...base,
+      likes: origactivity.likes,
+      likesCount: origactivity.likesCount,
+      likedByMe: origactivity.likedByMe,
+    };
+  }, [fetchedActivity, origactivity]);
 
   const verb = activity?.type === "user_joined" ? "committed to" : "completed";
 
@@ -122,7 +115,7 @@ const ActionActivityDetail = () => {
       setActivities(
         activities.map((a) => (a.id === activity.id ? newActivity : a))
       );
-      setActivity(newActivity);
+      queryClient.invalidateQueries({ queryKey: ["actionsGetActivity", activityId] });
       setEditing(false);
     } catch (error) {
       console.error("Error updating activity:", error);

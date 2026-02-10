@@ -9,10 +9,11 @@ import MembersListItem from "../../components/MembersListItem";
 import List from "@alliance/sharedweb/ui/List";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { useAuth } from "../../lib/AuthContext";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { useQuery } from "@tanstack/react-query";
 
 export enum MemberFilterMode {
   All = "All",
@@ -23,50 +24,50 @@ export enum MemberFilterMode {
 const MembersListPage = () => {
   const { user } = useAuth();
 
-  const [members, setMembers] = useState<ProfileDtoWithFriends[]>([]);
-  const [userSentFriendRequestIds, setUserSentFriendRequestIds] = useState<
-    number[]
-  >([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [myFriends, setMyFriends] = useState<number[]>([]);
+  const {
+    data: members = [],
+    isLoading: isLoadingMembers,
+    error: membersError,
+  } = useQuery({
+    queryKey: ["userMembersWithFriends", { requireSignedContract: true }],
+    queryFn: () =>
+      userMembersWithFriends({ query: { requireSignedContract: true } }).then(
+        (res) => res.data ?? []
+      ),
+  });
+
+  const { data: sentRequests = [], isLoading: isLoadingSentRequests } =
+    useQuery({
+      queryKey: ["userListSentRequests"],
+      queryFn: () => userListSentRequests().then((res) => res.data ?? []),
+    });
+
+  const { data: friendsData = [], isLoading: isLoadingFriends } = useQuery({
+    queryKey: ["userListFriends", user?.id],
+    queryFn: () =>
+      userListFriends({ path: { id: user!.id } }).then(
+        (res) => res.data ?? []
+      ),
+    enabled: !!user,
+  });
+
+  const userSentFriendRequestIds = useMemo(
+    () => sentRequests.map((req) => req.id),
+    [sentRequests]
+  );
+
+  const myFriends = useMemo(
+    () => friendsData.map((friend) => friend.id),
+    [friendsData]
+  );
+
+  const loading = isLoadingMembers || isLoadingSentRequests || isLoadingFriends;
+  const error = membersError ? "Could not load members" : null;
+
   const [filterMode, setFilterMode] = useState<MemberFilterMode>(
     MemberFilterMode.All
   );
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [membersRes, sentRequestsRes] = await Promise.all([
-          userMembersWithFriends({ query: { requireSignedContract: true } }),
-          userListSentRequests(),
-        ]);
-
-        setMembers(membersRes.data ?? []);
-        setUserSentFriendRequestIds(
-          sentRequestsRes.data?.map((req) => req.id) ?? []
-        );
-      } catch {
-        setError("Could not load members");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    const loadMyFriends = async () => {
-      if (!user) return;
-      const friendsRes = await userListFriends({ path: { id: user.id } });
-      if (!friendsRes.data) return;
-      setMyFriends(friendsRes.data.map((friend) => friend.id));
-    };
-
-    loadMyFriends();
-  }, [user]);
 
   const filterBySearch = (member: ProfileDtoWithFriends) => {
     if (!searchQuery.trim()) return true;

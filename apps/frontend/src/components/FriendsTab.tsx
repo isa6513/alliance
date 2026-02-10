@@ -12,10 +12,11 @@ import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import List from "@alliance/sharedweb/ui/List";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, href } from "react-router";
 import { setRevalidate } from "../applayout";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface FriendsTabProps {
   userId: number;
@@ -32,10 +33,31 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
   friends: initialFriends = [],
   className,
 }: FriendsTabProps) => {
-  const [loading, setLoading] = useState(!!initialFriends.length);
-  const [friends, setFriends] = useState<ProfileDto[]>(initialFriends);
-  const [receivedRequests, setReceivedRequests] = useState<ProfileDto[]>([]);
-  const [sentRequests, setSentRequests] = useState<ProfileDto[]>([]);
+  const queryClient = useQueryClient();
+
+  const { data: friends = initialFriends, isLoading: isLoadingFriends } =
+    useQuery({
+      queryKey: ["userListFriends", userId],
+      queryFn: () =>
+        userListFriends({ path: { id: userId } }).then(
+          (res) => res.data ?? []
+        ),
+    });
+
+  const { data: receivedRequests = [], isLoading: isLoadingReceived } =
+    useQuery({
+      queryKey: ["userListReceivedRequests"],
+      queryFn: () =>
+        userListReceivedRequests({}).then((res) => res.data ?? []),
+    });
+
+  const { data: sentRequests = [], isLoading: isLoadingSent } = useQuery({
+    queryKey: ["userListSentRequests"],
+    queryFn: () => userListSentRequests({}).then((res) => res.data ?? []),
+  });
+
+  const loading = isLoadingFriends || isLoadingReceived || isLoadingSent;
+
   const [activeTab, setActiveTab] = useState<"friends" | "received" | "sent">(
     originalTab
   );
@@ -43,30 +65,6 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     {}
   );
   const { confirm } = useToast();
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [friendsResponse, receivedResponse, sentResponse] =
-        await Promise.all([
-          userListFriends({ path: { id: userId } }),
-          userListReceivedRequests({}),
-          userListSentRequests({}),
-        ]);
-
-      setFriends(friendsResponse.data || []);
-      setReceivedRequests(receivedResponse.data || []);
-      setSentRequests(sentResponse.data || []);
-    } catch (error) {
-      console.error("Error fetching friend data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   const startProcessing = (userId: number) => {
     setProcessingIds((prev) => ({ ...prev, [userId]: true }));
@@ -83,7 +81,10 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     try {
       const response = await userAcceptFriendRequest({ path: { requesterId } });
       console.log("response", response);
-      fetchData();
+      queryClient.invalidateQueries({ queryKey: ["userListFriends"] });
+      queryClient.invalidateQueries({
+        queryKey: ["userListReceivedRequests"],
+      });
       setRevalidate();
     } catch (error) {
       console.error("Error accepting friend request:", error);
@@ -97,10 +98,9 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
 
     try {
       await userDeclineFriendRequest({ path: { requesterId } });
-      setReceivedRequests((prev) =>
-        prev.filter((req) => req.id !== requesterId)
-      );
-      fetchData();
+      queryClient.invalidateQueries({
+        queryKey: ["userListReceivedRequests"],
+      });
     } catch (error) {
       console.error("Error declining friend request:", error);
     } finally {
@@ -126,8 +126,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
 
     try {
       await userRemoveFriend({ path: { targetUserId: friendId } });
-      setFriends((prev) => prev.filter((friend) => friend.id !== friendId));
-      fetchData();
+      queryClient.invalidateQueries({ queryKey: ["userListFriends"] });
     } catch (error) {
       console.error("Error removing friend:", error);
     } finally {
@@ -140,8 +139,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
 
     try {
       await userRemoveFriend({ path: { targetUserId: userId } });
-      setSentRequests((prev) => prev.filter((req) => req.id !== userId));
-      fetchData();
+      queryClient.invalidateQueries({ queryKey: ["userListSentRequests"] });
     } catch (error) {
       console.error("Error canceling friend request:", error);
     } finally {

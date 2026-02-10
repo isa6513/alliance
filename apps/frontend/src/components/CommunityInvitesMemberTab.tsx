@@ -9,7 +9,7 @@ import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import OnetimeInviteListItem from "./OnetimeInviteListItem";
 import OnetimeInviteForm from "./OnetimeInviteForm";
@@ -17,6 +17,7 @@ import {
   inviteBuckets,
   deleteInviteConfirmation,
 } from "@alliance/shared/lib/copy";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 function createdAtComparator(
   a: { createdAt: string },
@@ -34,30 +35,18 @@ const CommunityInvitesMemberTab = ({
 }: CommunityInvitesMemberTabProps) => {
   const { user } = useAuth();
   const { error: errorToast, confirm } = useToast();
+  const queryClient = useQueryClient();
 
-  const [loadingInvites, setLoadingInvites] = useState(true);
+  const { data: invites = [], isLoading: loadingInvites } = useQuery({
+    queryKey: ["userGetOnetimeInvitesOverview"],
+    queryFn: () => userGetOnetimeInvitesOverview().then(res => res.data ?? []),
+    enabled: !!user,
+  });
+
   const [creatingInvite, setCreatingInvite] = useState(false);
   const [inviteeName, setInviteeName] = useState("");
   const [inviteeDescription, setInviteeDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
-
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-    void (async () => {
-      setLoadingInvites(true);
-      const response = await userGetOnetimeInvitesOverview();
-      if (response.data) {
-        setInvites(response.data);
-        setError(null);
-      } else {
-        setError("Failed to load invites");
-      }
-      setLoadingInvites(false);
-    })();
-  }, [user]);
 
   const myInvitesForCommunity = useMemo(() => {
     if (!user) {
@@ -120,8 +109,8 @@ const CommunityInvitesMemberTab = ({
       if (response.data) {
         setInviteeName("");
         setInviteeDescription("");
-        setInvites((prev) => [response.data, ...prev]);
         setError(null);
+        queryClient.invalidateQueries({ queryKey: ["userGetOnetimeInvitesOverview"] });
       } else {
         setError("Failed to request invite");
       }
@@ -147,7 +136,7 @@ const CommunityInvitesMemberTab = ({
 
       const response = await userDeleteOnetimeInvite({ path: { inviteId } });
       if (!response.error) {
-        setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
+        queryClient.invalidateQueries({ queryKey: ["userGetOnetimeInvitesOverview"] });
       }
     })();
   };
@@ -156,7 +145,7 @@ const CommunityInvitesMemberTab = ({
     void (async () => {
       const response = await userDeleteOnetimeInvite({ path: { inviteId } });
       if (!response.error) {
-        setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
+        queryClient.invalidateQueries({ queryKey: ["userGetOnetimeInvitesOverview"] });
       } else {
         errorToast("Failed to cancel invite request");
       }
