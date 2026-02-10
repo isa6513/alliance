@@ -21,13 +21,6 @@ export default defineConfig({
   },
   build: {
     sourcemap: "hidden",
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor': ['react', 'react-dom'],
-        }
-      }
-    }
   },
   server: {
     watch: {
