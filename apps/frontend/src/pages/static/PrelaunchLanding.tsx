@@ -2,7 +2,7 @@ import React from "react";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import "./PrelaunchLanding.css";
 import Footer from "../../components/Footer";
-import alliancePeople from "../../assets/alliance_people.jpg";
+import alliancePeople from "../../assets/alliance_people.webp";
 
 const PrelaunchLandingPage: React.FC = () => {
   return (
