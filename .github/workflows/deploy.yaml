@@ -610,7 +610,7 @@ jobs:
             echo "$complete_resp" | jq -r '.files[0].permalink // empty'
           }
 
-          APPROVE_URL="${{ github.server_url }}/${{ github.repository }}/actions/workflows/approve-visual-baseline.yaml"
+          APPROVE_URL="${{ github.server_url }}/${{ github.repository }}/actions/workflows/approve-visual-baseline.yaml?environment=${ENV_NAME}&sha=${SHA}"
 
           # Header text
           TEXT="*Visual Regression Detected (${ENV_NAME})*\n"
