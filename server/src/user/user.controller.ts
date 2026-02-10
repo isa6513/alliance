@@ -401,25 +401,6 @@ export class UserController {
     return this.userService.verifyEmail(body.token);
   }
 
-  @Delete('communities/:communityId/admin')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse()
-  async deleteCommunityAdmin(
-    @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
-    await this.userService.deleteCommunityAdmin(communityId);
-  }
-
-  @Delete('communities/:communityId')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse()
-  async deleteCommunity(
-    @Param('communityId', ParseIntPipe) communityId: number,
-    @Request() req: JwtRequest,
-  ) {
-    await this.userService.deleteCommunity(req.user.sub, communityId);
-  }
-
   @Post('communities/:communityId/addMember')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CommunityDto })
@@ -434,7 +415,6 @@ export class UserController {
       }),
     );
   }
-
 
   @Post('communities/:communityId/addLeader')
   @UseGuards(AdminGuard)

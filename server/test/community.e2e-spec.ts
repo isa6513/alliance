@@ -1,4 +1,8 @@
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import request from 'supertest';
 import { Repository } from 'typeorm';
 import { EntityNotFoundError } from 'typeorm';
@@ -564,6 +568,86 @@ describe('Community (e2e)', () => {
         expect(updated.photo).toBe('short-photo-key');
       });
     });
+
+    describe('deleteCommunity', () => {
+      it('deletes community when user is leader and sole member', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Delete Solo Leader',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await communityService.deleteCommunity(testUser.id, community.id);
+
+        const found = await communityRepo.findOne({
+          where: { id: community.id },
+        });
+        expect(found).toBeNull();
+      });
+
+      it('throws BadRequestException when user is not a leader', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Delete NotLeader',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        await expect(
+          communityService.deleteCommunity(secondUser.id, community.id),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('throws when user is not a member of the community', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Delete NotMember',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await expect(
+          communityService.deleteCommunity(secondUser.id, community.id),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+
+      it('throws BadRequestException when community has other members', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Delete HasMembers',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        await expect(
+          communityService.deleteCommunity(testUser.id, community.id),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('deleteCommunityAdmin', () => {
+      it('deletes community as admin', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Admin Delete',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await communityService.deleteCommunityAdmin(community.id);
+
+        const found = await communityRepo.findOne({
+          where: { id: community.id },
+        });
+        expect(found).toBeNull();
+      });
+    });
   });
 
   describe('CommunityController', () => {
@@ -1027,6 +1111,126 @@ describe('Community (e2e)', () => {
         .set('Authorization', `Bearer ${secondUserToken}`);
 
       expect(res.status).toBeGreaterThanOrEqual(400);
+    });
+
+    it('DELETE /community/:communityId deletes community when authenticated as leader and sole member', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Delete Solo',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .delete(`/community/${community.id}`)
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(200);
+      const found = await communityRepo.findOne({
+        where: { id: community.id },
+      });
+      expect(found).toBeNull();
+    });
+
+    it('DELETE /community/:communityId returns 400 when community has other members', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Delete HasMembers',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .delete(`/community/${community.id}`)
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(400);
+    });
+
+    it('DELETE /community/:communityId returns 400 when user is not a leader', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Delete NotLeader',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .delete(`/community/${community.id}`)
+        .set('Authorization', `Bearer ${secondUserToken}`);
+
+      expect(res.status).toBe(400);
+    });
+
+    it('DELETE /community/:communityId returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Delete NoAuth',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer()).delete(
+        `/community/${community.id}`,
+      );
+
+      expect(res.status).toBe(401);
+    });
+
+    it('DELETE /community/:communityId/admin deletes community when admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Delete',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .delete(`/community/${community.id}/admin`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
+
+      expect(res.status).toBe(200);
+      const found = await communityRepo.findOne({
+        where: { id: community.id },
+      });
+      expect(found).toBeNull();
+    });
+
+    it('DELETE /community/:communityId/admin returns 401 when not admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Delete NotAdmin',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .delete(`/community/${community.id}/admin`)
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(401);
+    });
+
+    it('DELETE /community/:communityId/admin returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Delete NoAuth',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer()).delete(
+        `/community/${community.id}/admin`,
+      );
+
+      expect(res.status).toBe(401);
     });
   });
 

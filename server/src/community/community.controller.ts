@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -129,5 +130,22 @@ export class CommunityController {
         body.userId,
       ),
     );
+  }
+
+  @Delete(':communityId')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async delete(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Request() req: JwtRequest,
+  ) {
+    await this.communityService.deleteCommunity(req.user.sub, communityId);
+  }
+
+  @Delete(':communityId/admin')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async deleteAdmin(@Param('communityId', ParseIntPipe) communityId: number) {
+    await this.communityService.deleteCommunityAdmin(communityId);
   }
 }

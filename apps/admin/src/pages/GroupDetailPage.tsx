@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, Link, useNavigate, useParams } from "react-router";
 import {
   actionsGetCommunityMemberInfoAdmin,
+  communityDeleteAdmin,
   communityGetCommunities,
   communityRemoveMemberAdmin,
   communityUpdate,
   userAddLeaderToCommunity,
   userAddMemberToCommunity,
-  userDeleteCommunityAdmin,
   userGetCommunityMemberContactInfoAdmin,
   userList,
   userRemoveLeaderFromCommunity,
@@ -424,7 +424,7 @@ const CommunityDetailPage: React.FC = () => {
     setDeleting(true);
     setError(null);
     try {
-      await userDeleteCommunityAdmin({ path: { communityId } });
+      await communityDeleteAdmin({ path: { communityId } });
       success("Community deleted", community.name);
       navigate(href("/groups"));
     } catch (err) {

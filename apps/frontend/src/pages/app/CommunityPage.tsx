@@ -1,12 +1,12 @@
 import {
+  actionsGetCommunityMemberInfo,
+  communityDelete,
+  CommunityMemberContactInfoDto,
+  communityUpdate,
+  conversationGetCommunityConversations,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   userGetCommunityMemberContactInfo,
-  actionsGetCommunityMemberInfo,
-  CommunityMemberContactInfoDto,
-  conversationGetCommunityConversations,
-  communityUpdate,
-  userDeleteCommunity,
 } from "@alliance/shared/client";
 import { groupSettings } from "@alliance/shared/lib/copy";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -327,7 +327,7 @@ const CommunityPage = () => {
     setIsSaving(true);
     setError(null);
     try {
-      const response = await userDeleteCommunity({
+      const response = await communityDelete({
         path: { communityId: community.id },
       });
       if (response.data) {

@@ -1025,32 +1025,6 @@ export class UserService {
     );
   }
 
-  async deleteCommunityAdmin(communityId: number): Promise<void> {
-    await this.communityRepository.delete(communityId);
-  }
-
-  async deleteCommunity(userId: number, communityId: number): Promise<void> {
-    const user = await this.userRepository.findOneOrFail({
-      where: { id: userId, communities: { id: communityId } },
-      relations: { communities: { users: true } },
-    });
-    if (!user.leaderOfIds.some((cid) => cid === communityId)) {
-      throw new BadRequestException();
-    }
-    if (!user.communities.length) {
-      throw new NotFoundException();
-    }
-    if (user.communities.length !== 1) {
-      throw new InternalServerErrorException('Multiple communities found');
-    }
-    const community = user.communities[0];
-    if (community.users.some((user) => user.id !== userId)) {
-      throw new BadRequestException(
-        'User cannot delete community with other members',
-      );
-    }
-    await this.communityRepository.delete(communityId);
-  }
 
   async addUserToCommunity(params: {
     communityId: number;
