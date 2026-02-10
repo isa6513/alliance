@@ -2453,13 +2453,12 @@ export class ActionsService {
     communityId: number,
   ): Promise<CommunityUserInfoDto> {
     const usersPromise = run(async () => {
-      const community = await this.userService.findOneCommunityWithUserOrFail(
-        communityId,
-        userId,
-        {
-          users: { awayRanges: true, contractEvents: true, tags: true },
-        },
-      );
+      const community = await this.communityService.findOneOrFail(communityId, {
+        users: { awayRanges: true, contractEvents: true, tags: true },
+      });
+      if (!community.users.some((user) => user.id === userId)) {
+        throw new NotFoundException('User is not a member of this community');
+      }
 
       return community.users;
     });

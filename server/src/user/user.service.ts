@@ -1025,23 +1025,6 @@ export class UserService {
     );
   }
 
-  async findOneCommunityWithUserOrFail(
-    communityId: number,
-    userId: number,
-    relations?: Relations<Community>,
-  ): Promise<Community> {
-    const community = await this.communityRepository.findOneOrFail({
-      where: { id: communityId },
-      relations: relations ?? {
-        users: true,
-      },
-    });
-    if (!community.users.some((user) => user.id === userId)) {
-      throw new NotFoundException('User is not a member of this community');
-    }
-    return community;
-  }
-
   async findCommunityForUserOrFail(
     userId: number,
     relations?: Relations<Community>,
