@@ -1025,28 +1025,6 @@ export class UserService {
     );
   }
 
-  async addLeaderToCommunity(
-    communityId: number,
-    userId: number,
-  ): Promise<Community> {
-    const community = await this.communityService.findOneOrFail(communityId);
-    const user = await this.findOneOrFail(userId);
-
-    community.users = community.users ?? [];
-    if (!community.users.some((existing) => existing.id === userId)) {
-      community.users.push(user);
-    }
-
-    community.leaders = community.leaders ?? [];
-    if (!community.leaders.some((existing) => existing.id === userId)) {
-      community.leaders.push(user);
-    }
-
-    const updated = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(updated.id);
-    return updated;
-  }
-
   async removeLeaderFromCommunity(
     communityId: number,
     userId: number,

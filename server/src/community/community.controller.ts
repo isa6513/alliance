@@ -163,4 +163,16 @@ export class CommunityController {
       }),
     );
   }
+
+  @Post(':communityId/addLeader/admin')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async addLeaderAdmin(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: CommunityMemberDto,
+  ) {
+    return new CommunityDto(
+      await this.communityService.addLeaderAdmin(communityId, body.userId),
+    );
+  }
 }

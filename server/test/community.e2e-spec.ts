@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import request from 'supertest';
 import { Repository } from 'typeorm';
 import { EntityNotFoundError } from 'typeorm';
@@ -646,6 +642,103 @@ describe('Community (e2e)', () => {
           where: { id: community.id },
         });
         expect(found).toBeNull();
+      });
+    });
+
+    describe('addLeaderAdmin', () => {
+      it('adds user as leader and member to community', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Add Leader Fresh',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        const result = await communityService.addLeaderAdmin(
+          community.id,
+          secondUser.id,
+        );
+
+        expect(result.id).toBe(community.id);
+        const refreshed = await communityRepo.findOneOrFail({
+          where: { id: community.id },
+          relations: { users: true, leaders: true },
+        });
+        const memberIds = refreshed.users.map((u) => u.id);
+        const leaderIds = refreshed.leaders!.map((u) => u.id);
+        expect(memberIds).toContain(secondUser.id);
+        expect(leaderIds).toContain(secondUser.id);
+      });
+
+      it('adds existing member as leader without duplicating membership', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Add Leader Existing Member',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        const result = await communityService.addLeaderAdmin(
+          community.id,
+          secondUser.id,
+        );
+
+        expect(result.id).toBe(community.id);
+        const refreshed = await communityRepo.findOneOrFail({
+          where: { id: community.id },
+          relations: { users: true, leaders: true },
+        });
+        const memberIds = refreshed.users.map((u) => u.id);
+        const leaderIds = refreshed.leaders!.map((u) => u.id);
+        expect(memberIds).toContain(secondUser.id);
+        expect(leaderIds).toContain(secondUser.id);
+        // Should not have duplicates
+        expect(memberIds.filter((id) => id === secondUser.id).length).toBe(1);
+      });
+
+      it('is idempotent when user is already a leader', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Add Leader Already Leader',
+            leaders: [testUser, secondUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        const result = await communityService.addLeaderAdmin(
+          community.id,
+          secondUser.id,
+        );
+
+        expect(result.id).toBe(community.id);
+        const refreshed = await communityRepo.findOneOrFail({
+          where: { id: community.id },
+          relations: { users: true, leaders: true },
+        });
+        const leaderIds = refreshed.leaders!.map((u) => u.id);
+        expect(leaderIds.filter((id) => id === secondUser.id).length).toBe(1);
+      });
+
+      it('throws when community does not exist', async () => {
+        await expect(
+          communityService.addLeaderAdmin(999999, secondUser.id),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+
+      it('throws when user does not exist', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Add Leader NonexistentUser',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await expect(
+          communityService.addLeaderAdmin(community.id, 999999),
+        ).rejects.toThrow(EntityNotFoundError);
       });
     });
 
@@ -1337,6 +1430,65 @@ describe('Community (e2e)', () => {
 
       const res = await request(ctx.app.getHttpServer())
         .post(`/community/${community.id}/addMember/admin`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('POST /community/:communityId/addLeader/admin adds leader when admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Add Leader',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/addLeader/admin`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(201);
+      expect(res.body.id).toBe(community.id);
+      const refreshed = await communityRepo.findOneOrFail({
+        where: { id: community.id },
+        relations: { users: true, leaders: true },
+      });
+      const memberIds = refreshed.users.map((u: User) => u.id);
+      const leaderIds = refreshed.leaders!.map((u: User) => u.id);
+      expect(memberIds).toContain(secondUser.id);
+      expect(leaderIds).toContain(secondUser.id);
+    });
+
+    it('POST /community/:communityId/addLeader/admin returns 401 when not admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Add Leader NotAdmin',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/addLeader/admin`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('POST /community/:communityId/addLeader/admin returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Admin Add Leader NoAuth',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/addLeader/admin`)
         .send({ userId: secondUser.id });
 
       expect(res.status).toBe(401);

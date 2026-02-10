@@ -483,4 +483,26 @@ export class CommunityService {
       }),
     });
   }
+
+  async addLeaderAdmin(
+    communityId: number,
+    userId: number,
+  ): Promise<Community> {
+    const [community, user] = await Promise.all([
+      this.findOneOrFail(communityId),
+      this.userRepository.findOneOrFail({ where: { id: userId } }),
+    ]);
+
+    if (!community.users.some((existing) => existing.id === userId)) {
+      community.users.push(user);
+    }
+
+    if (!community.leaders!.some((existing) => existing.id === userId)) {
+      community.leaders!.push(user);
+    }
+
+    const updated = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(updated.id);
+    return updated;
+  }
 }

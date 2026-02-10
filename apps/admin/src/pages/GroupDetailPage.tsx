@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, Link, useNavigate, useParams } from "react-router";
 import {
   actionsGetCommunityMemberInfoAdmin,
+  communityAddLeaderAdmin,
   communityAddMemberAdmin,
   communityDeleteAdmin,
   communityGetCommunities,
   communityRemoveMemberAdmin,
   communityUpdate,
-  userAddLeaderToCommunity,
   userGetCommunityMemberContactInfoAdmin,
   userList,
   userRemoveLeaderFromCommunity,
@@ -322,7 +322,7 @@ const CommunityDetailPage: React.FC = () => {
           case "add-leader": {
             if (!leaderSelection.length) return;
             setAddingLeader(true);
-            const response = await userAddLeaderToCommunity({
+            const response = await communityAddLeaderAdmin({
               path: { communityId },
               body: { userId: leaderSelection[0] },
             });
@@ -340,7 +340,7 @@ const CommunityDetailPage: React.FC = () => {
               next.add(userId);
               return next;
             });
-            const response = await userAddLeaderToCommunity({
+            const response = await communityAddLeaderAdmin({
               path: { communityId },
               body: { userId },
             });

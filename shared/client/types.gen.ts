@@ -3108,21 +3108,6 @@ export type UserVerifyEmailResponses = {
 
 export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
 
-export type UserAddLeaderToCommunityData = {
-    body: CommunityMemberDto;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/communities/{communityId}/addLeader';
-};
-
-export type UserAddLeaderToCommunityResponses = {
-    200: CommunityDto;
-};
-
-export type UserAddLeaderToCommunityResponse = UserAddLeaderToCommunityResponses[keyof UserAddLeaderToCommunityResponses];
-
 export type UserRemoveLeaderFromCommunityData = {
     body: CommunityMemberDto;
     path: {
@@ -4141,6 +4126,21 @@ export type CommunityAddMemberAdminResponses = {
 };
 
 export type CommunityAddMemberAdminResponse = CommunityAddMemberAdminResponses[keyof CommunityAddMemberAdminResponses];
+
+export type CommunityAddLeaderAdminData = {
+    body: CommunityMemberDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/community/{communityId}/addLeader/admin';
+};
+
+export type CommunityAddLeaderAdminResponses = {
+    200: CommunityDto;
+};
+
+export type CommunityAddLeaderAdminResponse = CommunityAddLeaderAdminResponses[keyof CommunityAddLeaderAdminResponses];
 
 export type ActionsJoinData = {
     body?: never;
