@@ -31,6 +31,16 @@ const outputDir = path.isAbsolute(rawOutputDir)
   ? rawOutputDir
   : path.join(repoRoot, rawOutputDir);
 
+const dbHost = process.env.DB_HOST ?? "localhost";
+const dbPort = process.env.DB_PORT ?? "5432";
+const dbUser = process.env.DB_USERNAME ?? "postgres";
+const dbPass = process.env.DB_PASSWORD ?? "postgres";
+const dbName = process.env.DB_NAME ?? "citesting";
+
+const testUserEmail = process.env.TEST_USER_EMAIL ?? "user15@example.com";
+const testUserPassword =
+  process.env.TEST_USER_PASSWORD ?? "Steadying3-Sacrament-Crave";
+
 const childProcesses: ChildProcessHandle[] = [];
 
 const delay = (ms: number) =>
@@ -139,15 +149,130 @@ const fileExists = async (filePath: string) => {
   }
 };
 
+/* ------------------------------------------------------------------ */
+/*  Database setup                                                     */
+/* ------------------------------------------------------------------ */
+
+const setupDatabase = async () => {
+  console.log(`${logPrefix} Setting up database "${dbName}"...`);
+
+  const pgEnv: NodeJS.ProcessEnv = { ...process.env, PGPASSWORD: dbPass };
+  const psqlBase = ["-h", dbHost, "-p", dbPort, "-U", dbUser];
+
+  // Drop and recreate the database so every run starts clean.
+  await runCommand(
+    "psql",
+    [...psqlBase, "-d", "postgres", "-c", `DROP DATABASE IF EXISTS "${dbName}"`],
+    { cwd: repoRoot, env: pgEnv }
+  );
+  await runCommand(
+    "psql",
+    [...psqlBase, "-d", "postgres", "-c", `CREATE DATABASE "${dbName}"`],
+    { cwd: repoRoot, env: pgEnv }
+  );
+
+  // Load the full dump (schema + data). Using session_replication_role =
+  // replica disables FK triggers during the bulk insert so row ordering
+  // doesn't matter (handles circular FKs such as comment → comment).
+  console.log(`${logPrefix} Loading seed dump...`);
+  await loadSeedData(psqlBase, pgEnv);
+};
+
+const loadSeedData = async (psqlBase: string[], pgEnv: NodeJS.ProcessEnv) => {
+  const seedFile = path.join(repoRoot, "citesting", "fixtures", "seed.sql");
+  let seedContent = await fs.readFile(seedFile, "utf8");
+
+  // Strip pg17-only constructs so the dump loads on older Postgres versions.
+  seedContent = seedContent
+    .split("\n")
+    .filter((line) => {
+      if (/^SET\s+transaction_timeout\s*=/i.test(line)) return false;
+      if (/^\\restrict\b/.test(line)) return false;
+      if (/^\\unrestrict\b/.test(line)) return false;
+      return true;
+    })
+    .join("\n");
+
+  return new Promise<void>((resolve, reject) => {
+    const child = spawn(
+      "psql",
+      [...psqlBase, "-d", dbName, "-v", "ON_ERROR_STOP=1"],
+      {
+        cwd: repoRoot,
+        env: pgEnv,
+        stdio: ["pipe", "inherit", "inherit"],
+      }
+    );
+
+    child.stdin.write("SET session_replication_role = 'replica';\n");
+    child.stdin.write(seedContent);
+    child.stdin.write("\nSET session_replication_role = 'origin';\n");
+    child.stdin.end();
+
+    child.on("error", (error) => reject(error));
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`psql seed loading failed with exit code ${code}`));
+      }
+    });
+  });
+};
+
+/* ------------------------------------------------------------------ */
+/*  Auth                                                               */
+/* ------------------------------------------------------------------ */
+
+type PlaywrightCookie = {
+  name: string;
+  value: string;
+  domain: string;
+  path: string;
+};
+
+const loginTestUser = async (): Promise<PlaywrightCookie[]> => {
+  console.log(`${logPrefix} Logging in test user (${testUserEmail})...`);
+
+  const res = await fetch(`http://localhost:${backendPort}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: testUserEmail,
+      password: testUserPassword,
+      mode: "header",
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Login failed (${res.status}): ${body}`);
+  }
+
+  const { access_token, refresh_token } = (await res.json()) as {
+    access_token: string;
+    refresh_token: string;
+  };
+
+  return [
+    { name: "access_token", value: access_token, domain: "localhost", path: "/" },
+    { name: "refresh_token", value: refresh_token, domain: "localhost", path: "/" },
+  ];
+};
+
+/* ------------------------------------------------------------------ */
+/*  Server lifecycle                                                   */
+/* ------------------------------------------------------------------ */
+
 const startBackend = () => {
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     NODE_ENV: process.env.NODE_ENV ?? "test",
-    DB_HOST: process.env.DB_HOST ?? "localhost",
-    DB_PORT: process.env.DB_PORT ?? "5432",
-    DB_USERNAME: process.env.DB_USERNAME ?? "postgres",
-    DB_PASSWORD: process.env.DB_PASSWORD ?? "postgres",
-    DB_NAME: process.env.DB_NAME ?? "postgres",
+    DB_HOST: dbHost,
+    DB_PORT: dbPort,
+    DB_USERNAME: dbUser,
+    DB_PASSWORD: dbPass,
+    DB_NAME: dbName,
     JWT_SECRET: process.env.JWT_SECRET ?? "dev-jwt-secret",
     JWT_REFRESH_SECRET:
       process.env.JWT_REFRESH_SECRET ?? "dev-jwt-refresh-secret",
@@ -236,9 +361,15 @@ const startFrontend = async () => {
   );
 };
 
+/* ------------------------------------------------------------------ */
+/*  Screenshot capture                                                 */
+/* ------------------------------------------------------------------ */
+
 const takeScreenshots = async () => {
   await fs.mkdir(outputDir, { recursive: true });
   console.log(`${logPrefix} Output directory: ${outputDir}`);
+
+  await setupDatabase();
 
   startBackend();
   await startFrontend();
@@ -246,15 +377,30 @@ const takeScreenshots = async () => {
   await waitForHttp(`http://localhost:${backendPort}/`, 60000);
   await waitForHttp(baseUrl, 90000);
 
+  const hasAuthTargets = screenshotTargets.some((t) => t.requiresAuth);
+  const authCookies = hasAuthTargets ? await loginTestUser() : [];
+
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
+
+  const contextOptions = {
     viewport: { width: 1440, height: 900 },
-    colorScheme: "light",
-    reducedMotion: "reduce",
-  });
-  const page = await context.newPage();
+    colorScheme: "light" as const,
+    reducedMotion: "reduce" as const,
+  };
+
+  const publicContext = await browser.newContext(contextOptions);
+  const publicPage = await publicContext.newPage();
+
+  let authContext = publicContext;
+  let authPage = publicPage;
+  if (hasAuthTargets) {
+    authContext = await browser.newContext(contextOptions);
+    await authContext.addCookies(authCookies);
+    authPage = await authContext.newPage();
+  }
 
   for (const [index, target] of screenshotTargets.entries()) {
+    const page = target.requiresAuth ? authPage : publicPage;
     const url = new URL(target.path, baseUrl).toString();
     const label = target.name || target.path;
     const fileName = `${String(index + 1).padStart(2, "0")}-${sanitizeFileName(
@@ -277,10 +423,18 @@ const takeScreenshots = async () => {
     await page.screenshot({ path: filePath, fullPage: true });
   }
 
-  await page.close();
-  await context.close();
+  await publicPage.close();
+  await publicContext.close();
+  if (hasAuthTargets) {
+    await authPage.close();
+    await authContext.close();
+  }
   await browser.close();
 };
+
+/* ------------------------------------------------------------------ */
+/*  Entrypoint                                                         */
+/* ------------------------------------------------------------------ */
 
 const main = async () => {
   const handleTermination = (signal: NodeJS.Signals) => {
