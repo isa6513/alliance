@@ -7,6 +7,14 @@ on:
         description: "Commit SHA whose screenshots should become the new baseline"
         required: true
         type: string
+      environment:
+        description: "Environment to approve baseline for"
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+        default: staging
 
 env:
   AWS_REGION: us-west-2
@@ -16,13 +24,13 @@ env:
 jobs:
   approve-baseline:
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ inputs.environment }}
     steps:
       - name: Validate SHA screenshots exist
         run: |
-          COUNT=$(aws s3 ls "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/${{ inputs.sha }}/" | wc -l)
+          COUNT=$(aws s3 ls "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ inputs.environment }}/${{ inputs.sha }}/" | wc -l)
           if [ "$COUNT" -eq 0 ]; then
-            echo "No screenshots found for SHA ${{ inputs.sha }}"
+            echo "No screenshots found for SHA ${{ inputs.sha }} in ${{ inputs.environment }}"
             exit 1
           fi
           echo "Found $COUNT screenshots for SHA ${{ inputs.sha }}"
@@ -30,13 +38,13 @@ jobs:
       - name: Promote to baseline
         run: |
           aws s3 sync \
-            "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/${{ inputs.sha }}/" \
-            "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/latest/" \
+            "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ inputs.environment }}/${{ inputs.sha }}/" \
+            "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ inputs.environment }}/latest/" \
             --delete
-          echo "Baseline updated to SHA ${{ inputs.sha }}"
+          echo "${{ inputs.environment }} baseline updated to SHA ${{ inputs.sha }}"
 
       - name: Notify Slack
         run: |
           curl -X POST -H 'Content-type: application/json' \
-            --data "{\"text\":\"Visual baseline approved and updated to \`${{ inputs.sha }}\`. Re-run the failed deploy to continue.\"}" \
+            --data "{\"text\":\"Visual baseline (${{ inputs.environment }}) approved and updated to \`${{ inputs.sha }}\`. Re-run the failed deploy to continue.\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL_DEPLOYMENT }}
