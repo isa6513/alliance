@@ -1022,28 +1022,6 @@ export class UserService {
     );
   }
 
-  async findCommunityForUserOrFail(
-    userId: number,
-    relations?: Relations<Community>,
-  ): Promise<Community> {
-    const user = await this.findOneOrFail(userId, {
-      communities: relations ?? true,
-    });
-    const community = user.communities.length > 0 ? user.communities[0] : null;
-    if (!community) {
-      throw new NotFoundException('User is not a member of any community.');
-    }
-    return community;
-  }
-
-  async findUserIdsForCommunity(communityId: number): Promise<number[]> {
-    const community = await this.communityService.findOneOrFail(communityId, {
-      users: true,
-    });
-    const userIds = community.users!.map((user) => user.id);
-    return userIds;
-  }
-
   async getAllMemberContactInfo(): Promise<CommunityMemberContactInfoDto[]> {
     const users = await this.userRepository.find({
       relations: { awayRanges: true },
