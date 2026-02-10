@@ -354,6 +354,51 @@ describe('Community (e2e)', () => {
       });
     });
 
+    describe('removeUserFromCommunity', () => {
+      it('removes a member when called by a leader', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Remove Member',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        const result = await communityService.removeUserFromCommunity({
+          userId: testUser.id,
+          removeeId: secondUser.id,
+          communityId: community.id,
+        });
+
+        expect(result.id).toBe(community.id);
+        const refreshed = await communityRepo.findOneOrFail({
+          where: { id: community.id },
+          relations: { users: true },
+        });
+        const memberIds = refreshed.users.map((u) => u.id);
+        expect(memberIds).not.toContain(secondUser.id);
+        expect(memberIds).toContain(testUser.id);
+      });
+
+      it('throws BadRequestException when caller is not a leader', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Remove Member NotLeader',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        await expect(
+          communityService.removeUserFromCommunity({
+            userId: secondUser.id,
+            removeeId: testUser.id,
+            communityId: community.id,
+          }),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
     describe('updateCommunity', () => {
       it('updates community name and description', async () => {
         const community = await communityRepo.save(
@@ -767,6 +812,63 @@ describe('Community (e2e)', () => {
         .send({ name: '' });
 
       expect(res.status).toBe(400);
+    });
+
+    it('POST /community/:communityId/removeMember removes member when authenticated as leader', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Remove Member',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/removeMember`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(201);
+      expect(res.body.id).toBe(community.id);
+      const refreshed = await communityRepo.findOneOrFail({
+        where: { id: community.id },
+        relations: { users: true },
+      });
+      const memberIds = refreshed.users.map((u: User) => u.id);
+      expect(memberIds).not.toContain(secondUser.id);
+    });
+
+    it('POST /community/:communityId/removeMember returns 400 when not a leader', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Remove Member NotLeader',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/removeMember`)
+        .set('Authorization', `Bearer ${secondUserToken}`)
+        .send({ userId: testUser.id });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('POST /community/:communityId/removeMember returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Remove Member NoAuth',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/removeMember`)
+        .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(401);
     });
 
     it('POST /community/:communityId/join returns error for non-public community', async () => {

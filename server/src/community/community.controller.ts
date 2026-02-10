@@ -14,6 +14,7 @@ import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { CommunityService } from './community.service';
 import {
   CommunityDto,
+  CommunityMemberDto,
   CreateCommunityDto,
   UpdateCommunityDto,
 } from './dto/community.dto';
@@ -95,6 +96,23 @@ export class CommunityController {
         body,
         req.user.sub,
       ),
+    );
+  }
+
+  @Post(':communityId/removeMember')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async removeMember(
+    @Request() req: JwtRequest,
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: CommunityMemberDto,
+  ) {
+    return new CommunityDto(
+      await this.communityService.removeUserFromCommunity({
+        userId: req.user.sub,
+        removeeId: body.userId,
+        communityId,
+      }),
     );
   }
 }

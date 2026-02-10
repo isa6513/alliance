@@ -3,11 +3,11 @@ import { useCallback, useMemo, useState } from "react";
 import { Link, href } from "react-router";
 import {
   CommunityMemberContactInfoDto,
+  communityRemoveMember,
   ProfileDto,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   UserAwayRangeDto,
-  userRemoveMemberFromCommunity,
 } from "@alliance/shared/client";
 import ProfileImage from "./ProfileImage";
 import UserProgressPills from "./UserProgressPills";
@@ -100,7 +100,7 @@ const CommunityMemberTableRow = ({
       placement: "topleft",
     });
     if (ok) {
-      await userRemoveMemberFromCommunity({
+      await communityRemoveMember({
         path: { communityId },
         body: {
           userId: profile.id,

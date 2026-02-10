@@ -450,23 +450,6 @@ export class UserController {
     );
   }
 
-  @Post('communities/:communityId/removeMember')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: CommunityDto })
-  async removeMemberFromCommunity(
-    @Request() req: JwtRequest,
-    @Param('communityId', ParseIntPipe) communityId: number,
-    @Body() body: CommunityMemberDto,
-  ) {
-    return new CommunityDto(
-      await this.userService.removeUserFromCommunity({
-        userId: req.user.sub,
-        removeeId: body.userId,
-        communityId,
-      }),
-    );
-  }
-
   @Post('communities/:communityId/addLeader')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CommunityDto })
