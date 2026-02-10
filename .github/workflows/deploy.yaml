@@ -480,13 +480,16 @@ jobs:
           cache: "yarn"
 
       - name: Install Yarn Dependencies
+        if: github.ref_name == 'production'
         run: corepack yarn install --immutable
 
       - name: Install Backend Dependencies
+        if: github.ref_name == 'production'
         run: npm ci
         working-directory: ./server
 
       - name: Cache Playwright Browsers
+        if: github.ref_name == 'production'
         uses: actions/cache@v4
         id: playwright-cache
         with:
@@ -494,10 +497,11 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install Playwright
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        if: github.ref_name == 'production' && steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Take Screenshots
+        if: github.ref_name == 'production'
         run: corepack yarn workspace @alliance/citesting take
         env:
           DB_HOST: localhost
@@ -510,6 +514,7 @@ jobs:
           SCREENSHOT_OUTPUT_DIR: ${{ github.workspace }}/screenshots/current
 
       - name: Download Baseline from S3
+        if: github.ref_name == 'production'
         run: |
           mkdir -p ${{ github.workspace }}/screenshots/baseline
           aws s3 sync \
@@ -518,6 +523,7 @@ jobs:
             || echo "No baseline found — first run"
 
       - name: Compare Screenshots
+        if: github.ref_name == 'production'
         run: |
           BASELINE=${{ github.workspace }}/screenshots/baseline
           if [ "$(ls -A "$BASELINE" 2>/dev/null)" ]; then
@@ -530,12 +536,14 @@ jobs:
           fi
 
       - name: Upload Current Screenshots to S3
+        if: github.ref_name == 'production'
         run: |
           aws s3 sync \
             ${{ github.workspace }}/screenshots/current/ \
             s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ env.env_name }}/${{ github.sha }}/
 
       - name: AI Review
+        if: github.ref_name == 'production'
         id: ai-review
         continue-on-error: true
         run: |
@@ -553,7 +561,7 @@ jobs:
           AI_REVIEW_OUTPUT: ${{ github.workspace }}/screenshots/ai-review-results.json
 
       - name: Notify Slack on Visual Regression
-        if: steps.ai-review.outcome == 'failure'
+        if: github.ref_name == 'production' && steps.ai-review.outcome == 'failure'
         run: |
           RESULTS="${{ github.workspace }}/screenshots/ai-review-results.json"
           SHA="${{ github.sha }}"
@@ -655,7 +663,7 @@ jobs:
             https://slack.com/api/chat.postMessage
 
       - name: Promote to Latest Baseline
-        if: steps.ai-review.outcome != 'failure'
+        if: github.ref_name == 'production' && steps.ai-review.outcome != 'failure'
         run: |
           aws s3 sync \
             ${{ github.workspace }}/screenshots/current/ \
@@ -663,7 +671,7 @@ jobs:
             --delete
 
       - name: Fail if regressions detected
-        if: steps.ai-review.outcome == 'failure'
+        if: github.ref_name == 'production' && steps.ai-review.outcome == 'failure'
         run: |
           echo "AI review detected visual regressions — blocking deploy"
           exit 1
