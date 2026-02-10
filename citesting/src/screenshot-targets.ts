@@ -18,6 +18,8 @@ export const screenshotTargets: ScreenshotTarget[] = [
   // Authenticated routes
   { name: "tasks", path: "/tasks", requiresAuth: true },
   { name: "actions", path: "/actions", requiresAuth: true },
+  { name: "action", path: "/actions/74", requiresAuth: true },
+  { name: "post", path: "/forum/post/5", requiresAuth: true },
   { name: "feed", path: "/feed", requiresAuth: true },
   { name: "forum", path: "/forum", requiresAuth: true },
   { name: "messages", path: "/messages", requiresAuth: true },

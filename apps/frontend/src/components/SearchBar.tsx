@@ -17,7 +17,7 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { items, itemsByCategory, selectedItem, setSelectedItem } =
+  const { items, itemsByCategory, selectedItem, setSelectedItem, loading } =
     useSearchResults(search, { debounceMs: 50, autoselectFirst: true });
 
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -143,7 +143,7 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
         onKeyDown={handleKeyDown}
         ref={inputRef}
       />
-      {open && items.length === 0 && search.length > 0 && (
+      {open && items.length === 0 && search.length > 0 && !loading && (
         <div className="w-full bg-white border border-zinc-200 -mt-[3px] shrink-0 rounded-b-md py-2 px-2 flex flex-col max-h-[min(calc(100vh-50px),400px)] overflow-y-auto">
           <p className="text-black text-sm font-medium pl-3 pb-1 w-full">
             No results found

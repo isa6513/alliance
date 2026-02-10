@@ -88,22 +88,22 @@ export const useSearchResults = (
     createEmptySearchCategories
   );
   const [selectedItem, setSelectedItem] = useState<SearchItemDto | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
     let cancelled = false;
-    const timeout = setTimeout(() => {
-      if (!query.length) {
-        setItems([]);
-        setItemsByCategory(createEmptySearchCategories());
-        setSelectedItem(null);
-        setLoading(false);
-        setError(null);
-        return;
-      }
+    if (!query.length) {
+      setItems([]);
+      setItemsByCategory(createEmptySearchCategories());
+      setSelectedItem(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
-      setLoading(true);
+    setLoading(true);
+    const timeout = setTimeout(() => {
       setError(null);
       searchAll({ query: { query } })
         .then((response) => {

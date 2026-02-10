@@ -51,13 +51,13 @@ const MembersListPage = () => {
     enabled: !!user,
   });
 
-  const userSentFriendRequestIds = useMemo(
-    () => sentRequests.map((req) => req.id),
+  const sentRequestIds = useMemo(
+    () => new Set(sentRequests.map((req) => req.id)),
     [sentRequests]
   );
 
-  const myFriends = useMemo(
-    () => friendsData.map((friend) => friend.id),
+  const friendIds = useMemo(
+    () => new Set(friendsData.map((friend) => friend.id)),
     [friendsData]
   );
 
@@ -69,26 +69,34 @@ const MembersListPage = () => {
   );
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filterBySearch = (member: ProfileDtoWithFriends) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    return member.displayName.toLowerCase().includes(query);
-  };
+  const { allFriendsOfFriends, allOtherMembers, staffMembers } = useMemo(() => {
+    const fofs: ProfileDtoWithFriends[] = [];
+    const fofIds = new Set<string>();
+    for (const member of members) {
+      if (
+        member.id !== user?.id &&
+        !friendIds.has(member.id) &&
+        member.friends.some((f) => friendIds.has(f.id))
+      ) {
+        fofs.push(member);
+        fofIds.add(member.id);
+      }
+    }
+    const others = members.filter((m) => !fofIds.has(m.id));
+    const staff = members.filter((m) => m.staff);
+    return { allFriendsOfFriends: fofs, allOtherMembers: others, staffMembers: staff };
+  }, [members, user?.id, friendIds]);
 
-  const allFriendsOfFriends = members.filter(
-    (member) =>
-      member.id !== user?.id &&
-      !myFriends.includes(member.id) &&
-      member.friends.some((friend) => myFriends.includes(friend.id))
-  );
-
-  const allOtherMembers = members.filter(
-    (member) => !allFriendsOfFriends.some((fof) => fof.id === member.id)
-  );
-
-  const friendsOfFriends = allFriendsOfFriends.filter(filterBySearch);
-  const otherMembers = allOtherMembers.filter(filterBySearch);
-  const staffMembers = members.filter((member) => member.staff);
+  const { friendsOfFriends, otherMembers } = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return { friendsOfFriends: allFriendsOfFriends, otherMembers: allOtherMembers };
+    const filterBySearch = (m: ProfileDtoWithFriends) =>
+      m.displayName.toLowerCase().includes(query);
+    return {
+      friendsOfFriends: allFriendsOfFriends.filter(filterBySearch),
+      otherMembers: allOtherMembers.filter(filterBySearch),
+    };
+  }, [searchQuery, allFriendsOfFriends, allOtherMembers]);
 
   const secondaryLabels = {
     [MemberFilterMode.All]: members.length.toString(),
@@ -102,8 +110,8 @@ const MembersListPage = () => {
         <MembersListItem
           key={member.id}
           profile={member}
-          sentFriendRequest={userSentFriendRequestIds.includes(member.id)}
-          isFriend={myFriends.includes(member.id)}
+          sentFriendRequest={sentRequestIds.has(member.id)}
+          isFriend={friendIds.has(member.id)}
         />
       ))}
     </List>
