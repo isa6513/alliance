@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -11,8 +12,13 @@ import {
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { CommunityService } from './community.service';
-import { CommunityDto, CreateCommunityDto } from './dto/community.dto';
+import {
+  CommunityDto,
+  CreateCommunityDto,
+  UpdateCommunityDto,
+} from './dto/community.dto';
 import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
+import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 
 @ApiTags('community')
 @Controller('community')
@@ -71,6 +77,23 @@ export class CommunityController {
       await this.communityService.joinPublicCommunity(
         req.user.sub,
         communityId,
+      ),
+    );
+  }
+
+  @Patch(':communityId')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async update(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Body() body: UpdateCommunityDto,
+    @Request() req: JwtRequest,
+  ) {
+    return new CommunityDto(
+      await this.communityService.updateCommunity(
+        communityId,
+        body,
+        req.user.sub,
       ),
     );
   }

@@ -3,6 +3,7 @@ import { href, Link, useNavigate, useParams } from "react-router";
 import {
   actionsGetCommunityMemberInfoAdmin,
   communityGetCommunities,
+  communityUpdate,
   userAddLeaderToCommunity,
   userAddMemberToCommunity,
   userDeleteCommunityAdmin,
@@ -10,7 +11,6 @@ import {
   userList,
   userRemoveLeaderFromCommunity,
   userRemoveMemberFromCommunityAdmin,
-  userUpdateCommunity,
 } from "@alliance/shared/client";
 import type {
   CommunityDto,
@@ -241,7 +241,7 @@ const CommunityDetailPage: React.FC = () => {
       setSavingDetails(true);
       setError(null);
       try {
-        const response = await userUpdateCommunity({
+        const response = await communityUpdate({
           path: { communityId },
           body: payload,
         });

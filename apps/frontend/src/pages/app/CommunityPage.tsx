@@ -5,7 +5,7 @@ import {
   actionsGetCommunityMemberInfo,
   CommunityMemberContactInfoDto,
   conversationGetCommunityConversations,
-  userUpdateCommunity,
+  communityUpdate,
   userDeleteCommunity,
 } from "@alliance/shared/client";
 import { groupSettings } from "@alliance/shared/lib/copy";
@@ -259,7 +259,7 @@ const CommunityPage = () => {
     setIsSaving(true);
     setError(null);
     try {
-      const response = await userUpdateCommunity({
+      const response = await communityUpdate({
         path: { communityId: community.id },
         body: {
           name: editName,

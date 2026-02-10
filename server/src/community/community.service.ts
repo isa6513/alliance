@@ -5,7 +5,7 @@ import { Community } from './entities/community.entity';
 import { Relations } from 'src/utils/Repository';
 import { ImagesService } from 'src/images/images.service';
 import { ConversationService } from 'src/messaging/conversation.service';
-import { CreateCommunityDto } from './dto/community.dto';
+import { CreateCommunityDto, UpdateCommunityDto } from './dto/community.dto';
 import { User } from 'src/user/entities/user.entity';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { run } from 'src/utils/promise';
@@ -270,5 +270,47 @@ export class CommunityService {
     ]);
 
     return addedCommunity;
+  }
+
+  async updateCommunity(
+    communityId: number,
+    body: UpdateCommunityDto,
+    userId: number,
+  ): Promise<Community> {
+    const user = await this.userRepository.findOneOrFail({
+      where: { id: userId },
+    });
+    if (!user.leaderOfIds.some((cid) => cid === communityId) && !user.admin) {
+      throw new BadRequestException();
+    }
+
+    const community = await this.findOneOrFail(communityId);
+
+    const { name, photo, ...updateData } = body;
+
+    community.name = name?.trim() ?? community.name;
+    if (community.name.length === 0) {
+      throw new BadRequestException('Name cannot be empty');
+    }
+
+    if (photo?.startsWith('data:')) {
+      const key = await this.imagesService.processAndUploadProfileImage(photo);
+
+      const updateDataWithPhoto = {
+        ...updateData,
+        photo: key,
+      };
+
+      Object.assign(community, updateDataWithPhoto);
+    } else {
+      Object.assign(community, updateData);
+      if (photo !== undefined) {
+        community.photo = photo;
+      }
+    }
+
+    const updated = await this.communityRepository.save(community);
+    await this.conversationService.syncCommunityConversationMembers(updated.id);
+    return updated;
   }
 }

@@ -752,14 +752,8 @@ export type VerifyEmailBody = {
     [key: string]: unknown;
 };
 
-export type UpdateCommunityDto = {
-    name?: string;
-    description?: string;
-    photo?: string;
-    public?: boolean;
-    allowMemberInvites?: boolean;
-    allowStaffAssignments?: boolean;
-    maxCapacity?: number | null;
+export type CommunityMemberDto = {
+    userId: number;
 };
 
 export type CommunityDto = {
@@ -775,10 +769,6 @@ export type CommunityDto = {
     internalInvites: Array<CommunityInvite>;
     users: Array<ProfileDto>;
     leaders: Array<ProfileDto>;
-};
-
-export type CommunityMemberDto = {
-    userId: number;
 };
 
 export type CreateTagDto = {
@@ -1035,6 +1025,16 @@ export type CreateCommunityDto = {
     allowMemberInvites: boolean;
     allowStaffAssignments: boolean;
     maxCapacity: number | null;
+};
+
+export type UpdateCommunityDto = {
+    name?: string;
+    description?: string;
+    photo?: string;
+    public?: boolean;
+    allowMemberInvites?: boolean;
+    allowStaffAssignments?: boolean;
+    maxCapacity?: number | null;
 };
 
 export type EditableContentDto = {
@@ -3108,34 +3108,6 @@ export type UserVerifyEmailResponses = {
 
 export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
 
-export type UserDeleteCommunityData = {
-    body?: never;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/communities/{communityId}';
-};
-
-export type UserDeleteCommunityResponses = {
-    200: unknown;
-};
-
-export type UserUpdateCommunityData = {
-    body: UpdateCommunityDto;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/communities/{communityId}';
-};
-
-export type UserUpdateCommunityResponses = {
-    200: CommunityDto;
-};
-
-export type UserUpdateCommunityResponse = UserUpdateCommunityResponses[keyof UserUpdateCommunityResponses];
-
 export type UserDeleteCommunityAdminData = {
     body?: never;
     path: {
@@ -3146,6 +3118,19 @@ export type UserDeleteCommunityAdminData = {
 };
 
 export type UserDeleteCommunityAdminResponses = {
+    200: unknown;
+};
+
+export type UserDeleteCommunityData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/user/communities/{communityId}';
+};
+
+export type UserDeleteCommunityResponses = {
     200: unknown;
 };
 
@@ -4141,6 +4126,21 @@ export type CommunityJoinPublicCommunityResponses = {
 };
 
 export type CommunityJoinPublicCommunityResponse = CommunityJoinPublicCommunityResponses[keyof CommunityJoinPublicCommunityResponses];
+
+export type CommunityUpdateData = {
+    body: UpdateCommunityDto;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/community/{communityId}';
+};
+
+export type CommunityUpdateResponses = {
+    200: CommunityDto;
+};
+
+export type CommunityUpdateResponse = CommunityUpdateResponses[keyof CommunityUpdateResponses];
 
 export type ActionsJoinData = {
     body?: never;

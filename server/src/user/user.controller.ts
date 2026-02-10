@@ -55,7 +55,6 @@ import {
 import {
   CommunityDto,
   CommunityMemberDto,
-  UpdateCommunityDto,
 } from 'src/community/dto/community.dto';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import {
@@ -400,19 +399,6 @@ export class UserController {
   @ApiOkResponse({ type: User })
   async verifyEmail(@Body() body: VerifyEmailBody) {
     return this.userService.verifyEmail(body.token);
-  }
-
-  @Patch('communities/:communityId')
-  @UseGuards(CommunityLeaderGuard)
-  @ApiOkResponse({ type: CommunityDto })
-  async updateCommunity(
-    @Param('communityId', ParseIntPipe) communityId: number,
-    @Body() body: UpdateCommunityDto,
-    @Request() req: JwtRequest,
-  ) {
-    return new CommunityDto(
-      await this.userService.updateCommunity(communityId, body, req.user.sub),
-    );
   }
 
   @Delete('communities/:communityId/admin')

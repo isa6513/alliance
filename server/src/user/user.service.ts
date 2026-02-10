@@ -25,7 +25,6 @@ import { groupUrl, profileUrl } from 'src/search/approutes';
 import { Tag } from './entities/tag.entity';
 import { CreateTagDto } from './dto/tag.dto';
 import { Community } from 'src/community/entities/community.entity';
-import { UpdateCommunityDto } from 'src/community/dto/community.dto';
 import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import {
   OnetimeInvite,
@@ -1024,48 +1023,6 @@ export class UserService {
     return awayRanges.some(
       (range) => checkDate >= range.startDate && checkDate <= range.endDate,
     );
-  }
-
-
-  async updateCommunity(
-    communityId: number,
-    body: UpdateCommunityDto,
-    userId: number,
-  ): Promise<Community> {
-    const user = await this.findOneOrFail(userId);
-    if (!user.leaderOfIds.some((cid) => cid === communityId) && !user.admin) {
-      throw new BadRequestException();
-    }
-
-    const community = await this.communityService.findOneOrFail(communityId);
-
-    const { name, photo, ...updateData } = body;
-
-    community.name = name?.trim() ?? community.name;
-    if (community.name.length === 0) {
-      throw new BadRequestException('Name cannot be empty');
-    }
-
-    if (photo?.startsWith('data:')) {
-      //TODO: differentiate between file and url
-      const key = await this.imagesService.processAndUploadProfileImage(photo);
-
-      const updateDataWithPhoto = {
-        ...updateData,
-        photo: key,
-      };
-
-      Object.assign(community, updateDataWithPhoto);
-    } else {
-      Object.assign(community, updateData);
-      if (photo !== undefined) {
-        community.photo = photo;
-      }
-    }
-
-    const updated = await this.communityRepository.save(community);
-    await this.conversationService.syncCommunityConversationMembers(updated.id);
-    return updated;
   }
 
   async deleteCommunityAdmin(communityId: number): Promise<void> {

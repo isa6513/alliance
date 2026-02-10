@@ -353,6 +353,108 @@ describe('Community (e2e)', () => {
         ).rejects.toThrow(BadRequestException);
       });
     });
+
+    describe('updateCommunity', () => {
+      it('updates community name and description', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Update Original',
+            description: 'Original description',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        const updated = await communityService.updateCommunity(
+          community.id,
+          { name: 'E2E Update Changed', description: 'New description' },
+          testUser.id,
+        );
+
+        expect(updated.name).toBe('E2E Update Changed');
+        expect(updated.description).toBe('New description');
+      });
+
+      it('trims community name', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Update Trim',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        const updated = await communityService.updateCommunity(
+          community.id,
+          { name: '  Trimmed Update Name  ' },
+          testUser.id,
+        );
+
+        expect(updated.name).toBe('Trimmed Update Name');
+      });
+
+      it('throws BadRequestException when name is empty', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Update EmptyName',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await expect(
+          communityService.updateCommunity(
+            community.id,
+            { name: '' },
+            testUser.id,
+          ),
+        ).rejects.toThrow(BadRequestException);
+
+        await expect(
+          communityService.updateCommunity(
+            community.id,
+            { name: '   ' },
+            testUser.id,
+          ),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('throws BadRequestException when user is not a leader of the community', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Update NotLeader',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        await expect(
+          communityService.updateCommunity(
+            community.id,
+            { name: 'Should Fail' },
+            secondUser.id,
+          ),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('updates photo when provided as short string', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Update Photo',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        const updated = await communityService.updateCommunity(
+          community.id,
+          { photo: 'short-photo-key' },
+          testUser.id,
+        );
+
+        expect(updated.photo).toBe('short-photo-key');
+      });
+    });
   });
 
   describe('CommunityController', () => {
@@ -590,6 +692,79 @@ describe('Community (e2e)', () => {
       const res = await request(ctx.app.getHttpServer())
         .post(`/community/${community.id}/join`)
         .set('Authorization', `Bearer ${secondUserToken}`);
+
+      expect(res.status).toBe(400);
+    });
+
+    it('PATCH /community/:communityId updates community when authenticated as leader', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Update',
+          description: 'Before update',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .patch(`/community/${community.id}`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({
+          name: 'E2E HTTP Updated',
+          description: 'After update',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.name).toBe('E2E HTTP Updated');
+      expect(res.body.description).toBe('After update');
+    });
+
+    it('PATCH /community/:communityId returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Update NoAuth',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .patch(`/community/${community.id}`)
+        .send({ name: 'Should Fail' });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('PATCH /community/:communityId returns 401 when user is not a leader', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Update NonLeader',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .patch(`/community/${community.id}`)
+        .set('Authorization', `Bearer ${secondUserToken}`)
+        .send({ name: 'Should Fail' });
+
+      expect(res.status).toBeGreaterThanOrEqual(400);
+    });
+
+    it('PATCH /community/:communityId returns 400 when name is empty', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Update EmptyName',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .patch(`/community/${community.id}`)
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ name: '' });
 
       expect(res.status).toBe(400);
     });
