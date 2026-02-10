@@ -12,7 +12,9 @@ export class CommunityController {
   @Post('create/admin')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CommunityDto })
-  async createCommunityAdmin(@Body() body: CreateCommunityDto) {
+  async createCommunityAdmin(
+    @Body() body: CreateCommunityDto,
+  ): Promise<CommunityDto> {
     return new CommunityDto(
       await this.communityService.createCommunityAdmin(body),
     );
