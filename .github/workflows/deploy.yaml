@@ -505,6 +505,7 @@ jobs:
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
           DB_NAME: citesting
+          ASSETS_BUCKET: ${{ secrets.CI_ASSETS_BUCKET }}
           NODE_ENV: test
           SCREENSHOT_OUTPUT_DIR: ${{ github.workspace }}/screenshots/current
 
@@ -530,8 +531,20 @@ jobs:
             echo "No baseline screenshots — skipping comparison"
           fi
 
-      - name: AI Review
+      - name: Upload Screenshots to S3
         if: github.ref_name == 'production'
+        run: |
+          aws s3 sync \
+            ${{ github.workspace }}/screenshots/current/ \
+            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/${{ github.sha }}/
+          aws s3 sync \
+            ${{ github.workspace }}/screenshots/current/ \
+            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/latest/
+
+      - name: AI Review
+        id: ai-review
+        if: github.ref_name == 'production'
+        continue-on-error: true
         run: |
           BASELINE=${{ github.workspace }}/screenshots/baseline
           if [ "$(ls -A "$BASELINE" 2>/dev/null)" ]; then
@@ -544,16 +557,58 @@ jobs:
           fi
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AI_REVIEW_OUTPUT: ${{ github.workspace }}/screenshots/ai-review-results.json
 
-      - name: Upload Screenshots to S3
-        if: github.ref_name == 'production'
+      - name: Notify Slack on Visual Regression
+        if: github.ref_name == 'production' && steps.ai-review.outcome == 'failure'
         run: |
-          aws s3 sync \
-            ${{ github.workspace }}/screenshots/current/ \
-            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/${{ github.sha }}/
-          aws s3 sync \
-            ${{ github.workspace }}/screenshots/current/ \
-            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/production/latest/
+          RESULTS="${{ github.workspace }}/screenshots/ai-review-results.json"
+          BUCKET="${{ secrets.VISUAL_REGRESSION_BUCKET }}"
+          SHA="${{ github.sha }}"
+          S3_PREFIX="visual-regression/production"
+
+          # Build Slack blocks from failed results
+          BLOCKS="["
+          BLOCKS+='{"type":"header","text":{"type":"plain_text","text":"Visual Regression Detected"}},'
+          BLOCKS+='{"type":"section","text":{"type":"mrkdwn","text":"Production deploy blocked by visual regression check.\n*Commit:* `'"$SHA"'`\n*Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>"}},'
+
+          # Process each failure
+          FAILURES=$(cat "$RESULTS" | jq -c '.[] | select(.status == "fail")')
+          while IFS= read -r fail; do
+            PAGE=$(echo "$fail" | jq -r '.page')
+            REASON=$(echo "$fail" | jq -r '.reason')
+            FILE="${PAGE}.png"
+
+            BASELINE_URL=$(aws s3 presign "s3://${BUCKET}/${S3_PREFIX}/latest/${FILE}" --expires-in 604800 2>/dev/null || echo "")
+            CURRENT_URL=$(aws s3 presign "s3://${BUCKET}/${S3_PREFIX}/${SHA}/${FILE}" --expires-in 604800 2>/dev/null || echo "")
+
+            BLOCKS+='{"type":"divider"},'
+            BLOCKS+='{"type":"section","text":{"type":"mrkdwn","text":"*'"$PAGE"'*\n'"$(echo "$REASON" | sed 's/"/\\"/g')"'"}},'
+
+            LINKS=""
+            if [ -n "$BASELINE_URL" ]; then
+              LINKS+="<${BASELINE_URL}|Baseline>  "
+            fi
+            if [ -n "$CURRENT_URL" ]; then
+              LINKS+="<${CURRENT_URL}|Current>"
+            fi
+            if [ -n "$LINKS" ]; then
+              BLOCKS+='{"type":"context","elements":[{"type":"mrkdwn","text":"'"$LINKS"'"}]},'
+            fi
+          done <<< "$FAILURES"
+
+          # Remove trailing comma, close array
+          BLOCKS="${BLOCKS%,}]"
+
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"blocks\":${BLOCKS}}" \
+            ${{ secrets.SLACK_WEBHOOK_URL_DEPLOYMENT }}
+
+      - name: Fail if regressions detected
+        if: github.ref_name == 'production' && steps.ai-review.outcome == 'failure'
+        run: |
+          echo "AI review detected visual regressions — blocking deploy"
+          exit 1
 
   deploy-nest-backend:
     runs-on: ubuntu-latest

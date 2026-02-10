@@ -174,6 +174,13 @@ Report "pass" for acceptable changes and "fail" for regressions.`,
     }
   }
 
+  // Write structured results to JSON file if AI_REVIEW_OUTPUT is set
+  const outputPath = process.env.AI_REVIEW_OUTPUT;
+  if (outputPath) {
+    await fs.writeFile(outputPath, JSON.stringify(results, null, 2));
+    console.log(`${logPrefix} Results written to ${outputPath}`);
+  }
+
   // Summary
   const failures = results.filter((r) => r.status === "fail");
   console.log(

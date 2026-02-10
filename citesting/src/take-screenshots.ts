@@ -309,6 +309,7 @@ const startBackend = () => {
     DB_PORT: dbPort,
     DB_USERNAME: dbUser,
     DB_PASSWORD: dbPass,
+    ASSETS_BUCKET: process.env.ASSETS_BUCKET,
     DB_NAME: dbName,
     JWT_SECRET: process.env.JWT_SECRET ?? "dev-jwt-secret",
     JWT_REFRESH_SECRET:
