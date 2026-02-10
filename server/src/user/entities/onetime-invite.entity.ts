@@ -13,7 +13,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsOptional } from 'class-validator';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
-import { Community } from './community.entity';
+import { Community } from 'src/community/entities/community.entity';
 import { Ty } from 'src/tasks/entities/type';
 import { Notification } from 'src/notifs/entities/notification.entity';
 

@@ -24,7 +24,7 @@ import { User } from './entities/user.entity';
 import { groupUrl, profileUrl } from 'src/search/approutes';
 import { Tag } from './entities/tag.entity';
 import { CreateTagDto } from './dto/tag.dto';
-import { Community } from './entities/community.entity';
+import { Community } from 'src/community/entities/community.entity';
 import { CreateCommunityDto, UpdateCommunityDto } from './community.dto';
 import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import {
@@ -51,7 +51,7 @@ import { Temporal } from '@js-temporal/polyfill';
 import {
   CommunityInvite,
   CommunityInviteStatus,
-} from './entities/community-invite.entity';
+} from 'src/community/entities/community-invite.entity';
 import { ConversationService } from 'src/messaging/conversation.service';
 import {
   ContractEvent,
@@ -110,7 +110,7 @@ export class UserService {
     private readonly pushService: PushService,
     private readonly slackService: SlackService,
     private readonly notifsService: NotifsService,
-  ) { }
+  ) {}
 
   async create(data: DeepPartial<User>): Promise<User> {
     const user = this.userRepository.create(data);
@@ -127,8 +127,8 @@ export class UserService {
         const city =
           (data.cityId
             ? await this.cityRepository.findOne({
-              where: { id: data.cityId },
-            })
+                where: { id: data.cityId },
+              })
             : undefined) ?? undefined;
 
         if (data.cityId && !city) {
@@ -486,23 +486,23 @@ export class UserService {
     const users =
       direction === 'sent'
         ? (
-          await this.friendRepository.find({
-            where: {
-              requester: { id: userId },
-              status: FriendStatus.Pending,
-            },
-            relations: { addressee: true },
-          })
-        ).map((r) => r.addressee!)
+            await this.friendRepository.find({
+              where: {
+                requester: { id: userId },
+                status: FriendStatus.Pending,
+              },
+              relations: { addressee: true },
+            })
+          ).map((r) => r.addressee!)
         : (
-          await this.friendRepository.find({
-            where: {
-              addressee: { id: userId },
-              status: FriendStatus.Pending,
-            },
-            relations: { requester: true },
-          })
-        ).map((r) => r.requester!);
+            await this.friendRepository.find({
+              where: {
+                addressee: { id: userId },
+                status: FriendStatus.Pending,
+              },
+              relations: { requester: true },
+            })
+          ).map((r) => r.requester!);
 
     return users.map((u) => new ProfileDto(u));
   }
@@ -692,9 +692,9 @@ export class UserService {
         if (
           user.pendingCommunity.maxCapacity !== null &&
           user.pendingCommunity.maxCapacity -
-          (user.pendingCommunity.users.length -
-            user.pendingCommunity.leaders!.length) >
-          0
+            (user.pendingCommunity.users.length -
+              user.pendingCommunity.leaders!.length) >
+            0
         ) {
           promises.push(
             this.addUserToCommunityAndRefreshConversation({
@@ -1363,11 +1363,11 @@ export class UserService {
       this.notifsService.sendNotifs(notifs),
       saveAsPendingCommunity
         ? this.userRepository.save({
-          id: user.id,
-          pendingCommunity: {
-            id: community.id,
-          },
-        })
+            id: user.id,
+            pendingCommunity: {
+              id: community.id,
+            },
+          })
         : null,
     ]);
 
@@ -1709,8 +1709,8 @@ export class UserService {
     const communityP =
       communityId !== undefined
         ? this.communityRepository.findOne({
-          where: { id: communityId },
-        })
+            where: { id: communityId },
+          })
         : undefined;
 
     const user = await userP;
@@ -2166,17 +2166,17 @@ export class UserService {
       } satisfies CreateNotifParams,
       ...(invite.invitingUser
         ? [
-          {
-            user: invite.invitingUser,
-            category: NotificationCategory.CommunityInviteCreated,
-            message: `Your request to invite ${invite.invitedUser.name} was approved`,
-            webAppLocation: groupUrl({
-              tab: 'groups',
-              communityId: invite.community.id,
-            }),
-            associatedUsers: [],
-          } satisfies CreateNotifParams,
-        ]
+            {
+              user: invite.invitingUser,
+              category: NotificationCategory.CommunityInviteCreated,
+              message: `Your request to invite ${invite.invitedUser.name} was approved`,
+              webAppLocation: groupUrl({
+                tab: 'groups',
+                communityId: invite.community.id,
+              }),
+              associatedUsers: [],
+            } satisfies CreateNotifParams,
+          ]
         : []),
     ]);
 

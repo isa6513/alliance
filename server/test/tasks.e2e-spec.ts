@@ -27,7 +27,7 @@ import {
   ContractEvent,
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
-import { Community } from 'src/user/entities/community.entity';
+import { Community } from 'src/community/entities/community.entity';
 import {
   Comment,
   CommentParentObject,
@@ -789,7 +789,8 @@ describe('Tasks (e2e)', () => {
 
     it('extracts and saves user fields', async () => {
       // Set up initial user state with a profileDescription
-      const initialDescription = 'This is my profile description that should not be deleted';
+      const initialDescription =
+        'This is my profile description that should not be deleted';
       await userRepo.update(ctx.testUserId, {
         profileDescription: initialDescription,
         phoneNumber: null as unknown as string,

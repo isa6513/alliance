@@ -1,7 +1,7 @@
 import { ApiProperty, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsNumber } from 'class-validator';
-import { Community } from './entities/community.entity';
+import { Community } from 'src/community/entities/community.entity';
 import { ProfileDto } from './dto/user.dto';
 import { getImageSource } from 'src/images/images.service';
 

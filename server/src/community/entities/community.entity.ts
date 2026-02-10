@@ -9,13 +9,13 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { User } from './user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { Type } from 'class-transformer';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import { OnetimeInvite } from './onetime-invite.entity';
+import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import { CommunityInvite } from './community-invite.entity';
 
 @Entity()

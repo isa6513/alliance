@@ -10,7 +10,7 @@ import { FriendStatus } from '../src/user/entities/friend.entity';
 import { User } from '../src/user/entities/user.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { UserService } from 'src/user/user.service';
-import { Community } from '../src/user/entities/community.entity';
+import { Community } from '../src/community/entities/community.entity';
 import {
   OnetimeInvite,
   OnetimeInviteStatus,
@@ -720,7 +720,7 @@ describe('Users (e2e)', () => {
         leader1Notifs.some(
           (n) =>
             n.category ===
-            NotificationCategory.MemberSuspendedRemovedFromCommunity &&
+              NotificationCategory.MemberSuspendedRemovedFromCommunity &&
             n.message.includes('suspended their contract'),
         ),
       ).toBe(true);
@@ -729,7 +729,7 @@ describe('Users (e2e)', () => {
         leader2Notifs.some(
           (n) =>
             n.category ===
-            NotificationCategory.MemberSuspendedRemovedFromCommunity &&
+              NotificationCategory.MemberSuspendedRemovedFromCommunity &&
             n.message.includes('suspended their contract'),
         ),
       ).toBe(true);

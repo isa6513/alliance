@@ -38,8 +38,8 @@ import {
 } from 'src/datasources/basecolumns';
 import { Temporal } from '@js-temporal/polyfill';
 import { NotificationChannel } from 'src/notifs/notif-utils';
-import { Community } from './community.entity';
-import { CommunityInvite } from './community-invite.entity';
+import { Community } from 'src/community/entities/community.entity';
+import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 import { Participant } from 'src/messaging/entities/participant.entity';
 import { Ty } from 'src/tasks/entities/type';
 import { ContractEvent, ContractEventType } from './contract-event.entity';
@@ -465,10 +465,10 @@ export class User {
     if (hasActiveContract === undefined) {
       const latestContractEvent = this.contractEvents
         ? findLeast(
-          this.contractEvents,
-          (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-          (event) => event.date <= date,
-        )
+            this.contractEvents,
+            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+            (event) => event.date <= date,
+          )
         : null;
       hasActiveContract =
         latestContractEvent?.type === ContractEventType.SIGNED;
@@ -493,10 +493,10 @@ export class User {
     populateCache: if (hasActiveContract === undefined) {
       const latestContractEventBeforeStart = this.contractEvents
         ? findLeast(
-          this.contractEvents,
-          (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-          (event) => event.date.getTime() <= startTime,
-        )
+            this.contractEvents,
+            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+            (event) => event.date.getTime() <= startTime,
+          )
         : null;
       if (latestContractEventBeforeStart?.type !== ContractEventType.SIGNED) {
         hasActiveContract = false;

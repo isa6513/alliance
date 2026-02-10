@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Allow, IsNumber, IsOptional } from 'class-validator';
 import { OnetimeInvite } from '../entities/onetime-invite.entity';
-import { CommunityInvite } from '../entities/community-invite.entity';
+import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 import { ProfileDto } from './user.dto';
 import { Type } from 'class-transformer';
 

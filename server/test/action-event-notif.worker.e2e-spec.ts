@@ -14,7 +14,7 @@ import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity'
 import { NotificationChannel } from 'src/notifs/notif-utils';
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Community } from 'src/user/entities/community.entity';
+import { Community } from 'src/community/entities/community.entity';
 import { Repository } from 'typeorm';
 import {
   ActionActivity,

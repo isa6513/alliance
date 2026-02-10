@@ -8,7 +8,7 @@ import {
   OnetimeInvite,
   OnetimeInviteStatus,
 } from '../src/user/entities/onetime-invite.entity';
-import { Community } from '../src/user/entities/community.entity';
+import { Community } from '../src/community/entities/community.entity';
 import { Friend } from '../src/user/entities/friend.entity';
 
 describe('Auth (e2e)', () => {

@@ -16,7 +16,7 @@ import {
 } from 'src/datasources/basecolumns';
 import { Ty } from 'src/tasks/entities/type';
 import { Participant } from './participant.entity';
-import { Community } from 'src/user/entities/community.entity';
+import { Community } from 'src/community/entities/community.entity';
 
 export enum ConversationType {
   Direct = 'direct',
