@@ -30,7 +30,6 @@ import { PrefillUserDto } from './prefill-user.dto';
 import {
   AssignGroupsDto,
   FriendStatusDto,
-  OnboardingDto,
   ProfileDto,
   ProfileDtoWithFriends,
   UpdateProfileDto,
