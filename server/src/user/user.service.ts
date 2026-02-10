@@ -65,13 +65,12 @@ import { Push } from 'src/push/push.entity';
 import { run } from 'src/utils/promise';
 import { SlackService } from 'src/slack/slack.service';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
+import {
+  COMMUNITY_DEFAULT_RELATIONS,
+  CommunityService,
+} from 'src/community/community.service';
 
 const defaultTimeZone = 'America/Los_Angeles';
-const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
-  Object.freeze({
-    users: true,
-    leaders: true,
-  });
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -110,6 +109,7 @@ export class UserService {
     private readonly pushService: PushService,
     private readonly slackService: SlackService,
     private readonly notifsService: NotifsService,
+    private readonly communityService: CommunityService,
   ) {}
 
   async create(data: DeepPartial<User>): Promise<User> {
@@ -1048,16 +1048,6 @@ export class UserService {
     );
   }
 
-  async findCommunityOrFail(
-    id: number,
-    relations?: Relations<Community>,
-  ): Promise<Community> {
-    return this.communityRepository.findOneOrFail({
-      where: { id },
-      relations: relations ?? COMMUNITY_DEFAULT_RELATIONS,
-    });
-  }
-
   async createCommunityAdmin(body: CreateCommunityDto): Promise<Community> {
     if (body.photo && body.photo.length > 100) {
       const key = await this.imagesService.processAndUploadProfileImage(
@@ -1197,7 +1187,7 @@ export class UserService {
       throw new BadRequestException();
     }
 
-    const community = await this.findCommunityOrFail(communityId);
+    const community = await this.communityService.findOneOrFail(communityId);
 
     const { name, photo, ...updateData } = body;
 
@@ -1262,7 +1252,7 @@ export class UserService {
     const { communityId, userId } = params;
 
     const [community, user] = await Promise.all([
-      this.findCommunityOrFail(communityId),
+      this.communityService.findOneOrFail(communityId),
       this.findOneOrFail(userId),
     ]);
 
@@ -1389,7 +1379,7 @@ export class UserService {
     }
 
     const [community, removee] = await Promise.all([
-      this.findCommunityOrFail(communityId),
+      this.communityService.findOneOrFail(communityId),
       this.userRepository.findOneOrFail({
         where: { id: removeeId },
       }),
@@ -1441,7 +1431,7 @@ export class UserService {
     communityId: number,
     userId: number,
   ): Promise<Community> {
-    const community = await this.findCommunityOrFail(communityId);
+    const community = await this.communityService.findOneOrFail(communityId);
     const user = await this.findOneOrFail(userId);
 
     const updatedCommunityP =
@@ -1482,7 +1472,7 @@ export class UserService {
     communityId: number,
     userId: number,
   ): Promise<Community> {
-    const community = await this.findCommunityOrFail(communityId);
+    const community = await this.communityService.findOneOrFail(communityId);
     const user = await this.findOneOrFail(userId);
 
     community.users = community.users ?? [];
@@ -1504,7 +1494,7 @@ export class UserService {
     communityId: number,
     userId: number,
   ): Promise<Community> {
-    const community = await this.findCommunityOrFail(communityId);
+    const community = await this.communityService.findOneOrFail(communityId);
 
     community.leaders = (community.leaders ?? []).filter(
       (leader) => leader.id !== userId,
@@ -1565,7 +1555,7 @@ export class UserService {
   }
 
   async findUserIdsForCommunity(communityId: number): Promise<number[]> {
-    const community = await this.findCommunityOrFail(communityId, {
+    const community = await this.communityService.findOneOrFail(communityId, {
       users: true,
     });
     const userIds = community.users!.map((user) => user.id);
@@ -1999,7 +1989,7 @@ export class UserService {
     const { invitedUserId, communityId } = body;
 
     const invitedUser = await this.findOneOrFail(invitedUserId);
-    const community = await this.findCommunityOrFail(communityId);
+    const community = await this.communityService.findOneOrFail(communityId);
     const invitingUser = await this.findOneLeaderOrFail(userId, communityId);
 
     const existingInvites = await this.communityInviteRepository.find({
@@ -2066,7 +2056,7 @@ export class UserService {
         }
         return user;
       });
-    const communityP = this.findCommunityOrFail(communityId);
+    const communityP = this.communityService.findOneOrFail(communityId);
 
     const existingInvites = await this.communityInviteRepository.find({
       where: {
@@ -2267,9 +2257,12 @@ export class UserService {
 
     invite.status = CommunityInviteStatus.InviteeAccepted;
 
-    const community = await this.findCommunityOrFail(invite.community.id, {
-      users: true,
-    });
+    const community = await this.communityService.findOneOrFail(
+      invite.community.id,
+      {
+        users: true,
+      },
+    );
 
     if (community.users!.some((user) => user.id === invite.invitedUser.id)) {
       throw new BadRequestException();

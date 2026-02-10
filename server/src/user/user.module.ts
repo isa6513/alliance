@@ -24,6 +24,7 @@ import { PushModule } from 'src/push/push.module';
 import { UserDevice } from './entities/user-device.entity';
 import { SlackModule } from 'src/slack/slack.module';
 import { NotifsModule } from 'src/notifs/notifs.module';
+import { CommunityModule } from 'src/community/community.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { NotifsModule } from 'src/notifs/notifs.module';
     PushModule,
     SlackModule,
     forwardRef(() => NotifsModule),
+    CommunityModule,
   ],
   controllers: [UserController],
   providers: [UserService, IsUserAlreadyExist],

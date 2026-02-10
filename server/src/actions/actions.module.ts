@@ -35,6 +35,7 @@ import { PushModule } from 'src/push/push.module';
 import { SlackModule } from 'src/slack/slack.module';
 import { ActionStatsService } from './action-stats.service';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
+import { CommunityModule } from 'src/community/community.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
       ContractEvent,
     ]),
     UserModule,
+    CommunityModule,
     NotifsModule,
     MailModule,
     MmsModule,
@@ -80,4 +82,4 @@ import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
   ],
   exports: [ActionsService, ActionEventRecipientService],
 })
-export class ActionsModule { }
+export class ActionsModule {}

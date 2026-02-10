@@ -109,6 +109,7 @@ import {
   computeIsTaggedOrInManualCohort,
 } from 'src/utils/action-user';
 import { computeIsAwayInRange } from 'src/utils/user';
+import { CommunityService } from 'src/community/community.service';
 
 const MS_IN_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -156,12 +157,13 @@ export class ActionsService {
     private readonly postRepository: Repository<Post>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
+    private readonly communityService: CommunityService,
     private readonly notifsService: NotifsService,
     private readonly actionEventRecipientService: ActionEventRecipientService,
     private readonly actionEventReminderService: ActionEventReminderService,
     private readonly likeNotificationService: LikeNotificationService,
     private readonly forumService: ForumService,
-  ) { }
+  ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
     const { participatingTags, suiteId, authorIds, ...rest } = createActionDto;
@@ -414,9 +416,7 @@ export class ActionsService {
       },
       select: { userId: true },
     });
-    const completedUserIds = new Set(
-      completedActivities.map((a) => a.userId),
-    );
+    const completedUserIds = new Set(completedActivities.map((a) => a.userId));
 
     const incompleteUserIds = joinedUserIds.filter(
       (id) => !completedUserIds.has(id),
@@ -437,16 +437,16 @@ export class ActionsService {
     const actions = sorted
       ? await this.findAllSorted(relations)
       : await this.actionRepository.find({
-        relations,
-      });
+          relations,
+        });
 
     const user = userId
       ? await this.userService.findOne(userId, {
-        tags: true,
-        awayRanges: true,
-        contractEvents: true,
-        activities: true,
-      })
+          tags: true,
+          awayRanges: true,
+          contractEvents: true,
+          activities: true,
+        })
       : null;
 
     const filtered: Action[] = [];
@@ -489,10 +489,10 @@ export class ActionsService {
           shouldParticipate: shouldParticipate,
           userRelation: user
             ? await this.getActionRelationFromActivities(
-              user.activities!.filter(
-                (activity) => activity.actionId === action.id,
-              ),
-            )
+                user.activities!.filter(
+                  (activity) => activity.actionId === action.id,
+                ),
+              )
             : undefined,
           reqAuthenticated: !!user,
         });
@@ -539,9 +539,9 @@ export class ActionsService {
   ): Promise<Action> {
     const user = userId
       ? await this.userService.findOne(userId, {
-        tags: true,
-        contractEvents: true,
-      })
+          tags: true,
+          contractEvents: true,
+        })
       : null;
     const action = await this.actionRepository.findOne({
       where: { id },
@@ -576,9 +576,9 @@ export class ActionsService {
     const action = await this.findOne(id, userId, serverSide);
     const user = userId
       ? await this.userService.findOne(userId, {
-        tags: true,
-        contractEvents: true,
-      })
+          tags: true,
+          contractEvents: true,
+        })
       : null;
     return new ActionDto(action, {
       canParticipate: user
@@ -928,9 +928,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-        activities.map((a) => a.id),
-        requestingUserId,
-      )
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
       : new Set<number>();
 
     if (comments) {
@@ -1033,9 +1033,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-        activities.map((a) => a.id),
-        requestingUserId,
-      )
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
       : new Set<number>();
 
     if (comments) {
@@ -1174,9 +1174,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-        activities.map((a) => a.id),
-        requestingUserId,
-      )
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
       : new Set<number>();
 
     if (comments) {
@@ -1458,7 +1458,7 @@ export class ActionsService {
     comments?: boolean,
     requestingUserId?: number,
   ) {
-    const community = await this.userService.findCommunityOrFail(communityId);
+    const community = await this.communityService.findOneOrFail(communityId);
 
     const members = community.users ?? [];
 
@@ -1478,9 +1478,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-        memberActivities.map((a) => a.id),
-        requestingUserId,
-      )
+          memberActivities.map((a) => a.id),
+          requestingUserId,
+        )
       : new Set<number>();
 
     if (comments) {
@@ -1830,9 +1830,9 @@ export class ActionsService {
       where: { id: suiteId },
       relations: { actions: { events: true } },
     });
-    const eventIdx = event.action.events.sort((a, b) => a.date.getTime() - b.date.getTime()).findIndex(
-      (event) => event.id === eventId,
-    );
+    const eventIdx = event.action.events
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .findIndex((event) => event.id === eventId);
     const eventsToUpdate = new Set<number>([eventId]);
 
     for (const action of suite.actions) {
@@ -1841,7 +1841,9 @@ export class ActionsService {
           'Events do not have equivalent events to edit',
         );
       }
-      const possibleEvent = action.events.sort((a, b) => a.date.getTime() - b.date.getTime())[eventIdx];
+      const possibleEvent = action.events.sort(
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      )[eventIdx];
       if (
         possibleEvent.newStatus === event.newStatus &&
         possibleEvent.suiteManaged
@@ -1885,9 +1887,9 @@ export class ActionsService {
       where: { id: suiteId },
       relations: { actions: { events: true } },
     });
-    const eventIdx = event.action.events.sort((a, b) => a.date.getTime() - b.date.getTime()).findIndex(
-      (event) => event.id === eventId,
-    );
+    const eventIdx = event.action.events
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .findIndex((event) => event.id === eventId);
 
     for (const action of suite.actions) {
       if (action.events.length <= eventIdx) {
@@ -1895,7 +1897,9 @@ export class ActionsService {
           'Events do not have equivalent events to delete',
         );
       }
-      const possibleEvent = action.events.sort((a, b) => a.date.getTime() - b.date.getTime())[eventIdx];
+      const possibleEvent = action.events.sort(
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      )[eventIdx];
       if (
         possibleEvent.newStatus === event.newStatus &&
         possibleEvent.suiteManaged
@@ -1962,7 +1966,7 @@ export class ActionsService {
         fakeGroup.send_range_start &&
         fakeGroup.send_range_end &&
         new Date(fakeGroup.send_range_start).getTime() >
-        new Date(fakeGroup.send_range_end).getTime()
+          new Date(fakeGroup.send_range_end).getTime()
       ) {
         throw new BadRequestException(
           'Send range start must be before the end',
@@ -2028,13 +2032,13 @@ export class ActionsService {
       ...action,
       taskForm: taskForm
         ? await this.formRepository.findOneOrFail({
-          where: { id: action.taskFormId },
-        })
+            where: { id: action.taskFormId },
+          })
         : undefined,
       reminderGroups: reminders
         ? await this.actionEventReminderService.getReminderGroupsForEvent(
-          action.id,
-        )
+            action.id,
+          )
         : undefined,
     };
 
@@ -2304,7 +2308,7 @@ export class ActionsService {
         detail.status = action.optional
           ? UserActionRelationPillStatus.OptionalTask
           : action.latestMemberActionEvent?.deadline &&
-            action.latestMemberActionEvent.deadline < now
+              action.latestMemberActionEvent.deadline < now
             ? UserActionRelationPillStatus.MissedDeadline
             : UserActionRelationPillStatus.Todo;
       }
@@ -2436,8 +2440,8 @@ export class ActionsService {
   async findMemberInfoByCommunityId(
     communityId: number,
   ): Promise<CommunityUserInfoDto> {
-    const usersPromise = this.userService
-      .findCommunityOrFail(communityId, {
+    const usersPromise = this.communityService
+      .findOneOrFail(communityId, {
         users: { awayRanges: true, contractEvents: true, tags: true },
       })
       .then((community) => community.users);
@@ -2694,7 +2698,7 @@ export class ActionsService {
 
         const baseCandidates = action.commitmentless
           ? activeUsers
-          : joinedUsersByAction.get(action.id) ?? [];
+          : (joinedUsersByAction.get(action.id) ?? []);
 
         const baseUsers = baseCandidates.filter(
           (user) =>
@@ -3278,7 +3282,8 @@ export class ActionsService {
           postId: group.postId,
           postTitle,
           count: group.users.size,
-          commentId: usersArray.length === 1 ? usersArray[0].commentId : undefined,
+          commentId:
+            usersArray.length === 1 ? usersArray[0].commentId : undefined,
         };
 
         feedItems.push({
