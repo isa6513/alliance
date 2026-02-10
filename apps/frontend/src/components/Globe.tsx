@@ -1,5 +1,20 @@
 import React, { useEffect, useRef } from "react";
-import * as d3 from "d3";
+import {
+  geoOrthographic,
+  geoPath,
+  select,
+  drag,
+  zoom,
+  timer,
+} from "d3";
+import type {
+  Selection,
+  GeoProjection,
+  GeoPath,
+  GeoPermissibleObjects,
+  Timer,
+  D3DragEvent,
+} from "d3";
 import world from "./world";
 
 interface Coordinate {
@@ -26,12 +41,12 @@ const Globe: React.FC<GlobeProps> = ({
 
   /* --- persistent d3 handles ------------------------------------------- */
   const svgRef =
-    useRef<d3.Selection<SVGSVGElement, unknown, null, undefined>>(null);
-  const projectionRef = useRef<d3.GeoProjection>(null);
-  const pathRef = useRef<d3.GeoPath<any, d3.GeoPermissibleObjects>>(null);
+    useRef<Selection<SVGSVGElement, unknown, null, undefined>>(null);
+  const projectionRef = useRef<GeoProjection>(null);
+  const pathRef = useRef<GeoPath<any, GeoPermissibleObjects>>(null);
   const peopleGroupRef =
-    useRef<d3.Selection<SVGGElement, unknown, null, undefined>>(null);
-  const rotateTimerRef = useRef<d3.Timer>(null);
+    useRef<Selection<SVGGElement, unknown, null, undefined>>(null);
+  const rotateTimerRef = useRef<Timer>(null);
 
   /* helper reused in several places */
   function isVisible(d: Coordinate): boolean {
@@ -69,19 +84,17 @@ const Globe: React.FC<GlobeProps> = ({
     const sensitivity = 75;
 
     // GEO STUFF
-    const projection = d3
-      .geoOrthographic()
+    const projection = geoOrthographic()
       .scale(scale)
       .center([0, 0])
       .rotate([270, 0]) // keep your preferred initial orientation
       .translate([width / 2, height / 2]);
 
     projectionRef.current = projection;
-    pathRef.current = d3.geoPath().projection(projection);
+    pathRef.current = geoPath().projection(projection);
 
     // ROOT SVG
-    const svg = d3
-      .select(mapRef.current)
+    const svg = select(mapRef.current)
       .append("svg")
       .attr("width", width)
       .attr("height", height);
@@ -124,7 +137,7 @@ const Globe: React.FC<GlobeProps> = ({
     svg.call(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore typing mismatch
-      d3.drag().on("drag", (event: d3.D3DragEvent) => {
+      drag().on("drag", (event: D3DragEvent) => {
         const r = projection.rotate();
         projection.rotate([r[0] + event.dx * k, 0]);
         mapG.selectAll("path").attr("d", pathRef.current as any);
@@ -135,8 +148,7 @@ const Globe: React.FC<GlobeProps> = ({
     /* --- zoom filter (optional – disabled wheel) ---------------------- */
     svg.call(
       // @ts-ignore
-      d3
-        .zoom()
+      zoom()
         .filter((e) => !e.ctrlKey && !e.button && !e.type.includes("wheel"))
         .on("zoom", null)
     );
@@ -149,7 +161,7 @@ const Globe: React.FC<GlobeProps> = ({
 
     /* --- spin --------------------------------------------------------- */
     if (spin) {
-      rotateTimerRef.current = d3.timer(() => {
+      rotateTimerRef.current = timer(() => {
         const r = projection.rotate();
         projection.rotate([r[0] - sensitivity / projection.scale() / 6, r[1]]);
         mapG.selectAll("path").attr("d", pathRef.current as any);
@@ -189,7 +201,7 @@ const Globe: React.FC<GlobeProps> = ({
       .each(function (d) {
         // position immediately
         const [cx, cy] = projectionRef.current!([d.longitude, d.latitude])!;
-        d3.select(this).attr("cx", cx).attr("cy", cy);
+        select(this).attr("cx", cx).attr("cy", cy);
       });
 
     // EXIT

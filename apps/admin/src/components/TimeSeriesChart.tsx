@@ -1,4 +1,13 @@
-import * as d3 from "d3";
+import {
+  extent,
+  max,
+  bisector,
+  scaleTime,
+  scaleLinear,
+  line,
+  area,
+  curveMonotoneX,
+} from "d3";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -127,33 +136,30 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
     const width = 1000;
     const margin = { top: 28, right: 32, bottom: 64, left: 72 };
 
-    const dateExtent = d3.extent(data, (d) => d.date);
+    const dateExtent = extent(data, (d) => d.date);
     if (!dateExtent[0] || !dateExtent[1]) return null;
 
-    const xScale = d3
-      .scaleTime()
+    const xScale = scaleTime()
       .domain(dateExtent)
       .range([margin.left, width - margin.right]);
 
     const maxValue = yDomain
       ? yDomain[1]
-      : d3.max(series, (s) => d3.max(data, (d) => s.getValue(d))) ?? 0;
+      : max(series, (s) => max(data, (d) => s.getValue(d))) ?? 0;
     const minValue = yDomain ? yDomain[0] : 0;
 
-    const yScale = d3
-      .scaleLinear()
+    const yScale = scaleLinear()
       .domain([minValue, yDomain ? maxValue : Math.max(maxValue * 1.1, 10)])
       .nice()
       .range([height - margin.bottom, margin.top]);
 
-    const line = d3
-      .line<DataPoint>()
+    const lineFn = line<DataPoint>()
       .x((d) => xScale(d.date!))
-      .curve(d3.curveMonotoneX);
+      .curve(curveMonotoneX);
 
     const lines = series.map((s) => ({
       series: s,
-      path: line.y((d) => yScale(s.getValue(d)))(data) ?? "",
+      path: lineFn.y((d) => yScale(s.getValue(d)))(data) ?? "",
     }));
 
     let areaPath = "";
@@ -162,13 +168,12 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
         ? series.find((s) => s.key === areaSeriesKey)
         : series[0];
       if (areaSeries) {
-        const area = d3
-          .area<DataPoint>()
+        const areaFn = area<DataPoint>()
           .x((d) => xScale(d.date!))
           .y0(height - margin.bottom)
           .y1((d) => yScale(areaSeries.getValue(d)))
-          .curve(d3.curveMonotoneX);
-        areaPath = area(data) ?? "";
+          .curve(curveMonotoneX);
+        areaPath = areaFn(data) ?? "";
       }
     }
 
@@ -188,7 +193,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
       })
       : rawYTicks;
 
-    const bisectDate = d3.bisector<DataPoint, Date>((d) => d.date!).center;
+    const bisectDate = bisector<DataPoint, Date>((d) => d.date!).center;
 
     return {
       width,
@@ -218,32 +223,29 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
 
     const xExtent = xRange
       ? [xRange.min, xRange.max]
-      : d3.extent(allData, getXValue);
+      : extent(allData, getXValue);
     if (xExtent[0] === undefined || xExtent[1] === undefined) return null;
 
-    const xScale = d3
-      .scaleLinear()
+    const xScale = scaleLinear()
       .domain([xExtent[0], xExtent[1]])
       .range([margin.left, width - margin.right]);
 
-    const maxValue = yDomain ? yDomain[1] : d3.max(allData, getYValue) ?? 0;
+    const maxValue = yDomain ? yDomain[1] : max(allData, getYValue) ?? 0;
     const minValue = yDomain ? yDomain[0] : 0;
 
-    const yScale = d3
-      .scaleLinear()
+    const yScale = scaleLinear()
       .domain([minValue, yDomain ? maxValue : Math.max(maxValue * 1.1, 1)])
       .nice()
       .range([height - margin.bottom, margin.top]);
 
-    const line = d3
-      .line<DataPoint>()
+    const lineFn = line<DataPoint>()
       .x((d) => xScale(getXValue(d)))
       .y((d) => yScale(getYValue(d)))
-      .curve(d3.curveMonotoneX);
+      .curve(curveMonotoneX);
 
     const lines = multiLineData.map((s) => ({
       series: s,
-      path: line(s.data) ?? "",
+      path: lineFn(s.data) ?? "",
     }));
 
     const xTicks = xScale.ticks(Math.min(8, xExtent[1] - xExtent[0] + 1));
