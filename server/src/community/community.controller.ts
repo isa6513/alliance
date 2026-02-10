@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   Request,
   UseGuards,
@@ -55,6 +57,21 @@ export class CommunityController {
   async getPublicCommunities() {
     return (await this.communityService.findPublicCommunities()).map(
       (community) => new CommunityDto(community),
+    );
+  }
+
+  @Post(':communityId/join')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityDto })
+  async joinPublicCommunity(
+    @Request() req: JwtRequest,
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    return new CommunityDto(
+      await this.communityService.joinPublicCommunity(
+        req.user.sub,
+        communityId,
+      ),
     );
   }
 }

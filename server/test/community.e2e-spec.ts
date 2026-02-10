@@ -34,6 +34,8 @@ describe('Community (e2e)', () => {
   let communityService: CommunityService;
   let testUser: User;
   let testUserToken: string;
+  let secondUser: User;
+  let secondUserToken: string;
 
   beforeAll(async () => {
     ctx = await createTestApp([]);
@@ -50,6 +52,18 @@ describe('Community (e2e)', () => {
     );
     testUserToken = ctx.jwtService.sign(
       { sub: testUser.id, email: testUser.email, name: testUser.name },
+      { secret: process.env.JWT_SECRET },
+    );
+
+    secondUser = await userRepo.save(
+      userRepo.create({
+        name: 'Community Second User',
+        email: 'community.second@example.com',
+        password: 'Password123!',
+      }),
+    );
+    secondUserToken = ctx.jwtService.sign(
+      { sub: secondUser.id, email: secondUser.email, name: secondUser.name },
       { secret: process.env.JWT_SECRET },
     );
   }, 50000);
@@ -247,6 +261,98 @@ describe('Community (e2e)', () => {
         expect(community.photo).toBe('short');
       });
     });
+
+    describe('joinPublicCommunity', () => {
+      it('joins a public community successfully', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Join Public',
+            public: true,
+            allowMemberInvites: true,
+            allowStaffAssignments: true,
+            maxCapacity: 10,
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        const result = await communityService.joinPublicCommunity(
+          secondUser.id,
+          community.id,
+        );
+
+        expect(result.id).toBe(community.id);
+        const refreshed = await communityRepo.findOneOrFail({
+          where: { id: community.id },
+          relations: { users: true },
+        });
+        const memberIds = refreshed.users.map((u) => u.id);
+        expect(memberIds).toContain(secondUser.id);
+      });
+
+      it('throws EntityNotFoundError when community is not public', async () => {
+        const privateCommunity = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Join Private',
+            public: false,
+            allowMemberInvites: true,
+            allowStaffAssignments: true,
+            maxCapacity: 10,
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await expect(
+          communityService.joinPublicCommunity(
+            secondUser.id,
+            privateCommunity.id,
+          ),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+
+      it('throws EntityNotFoundError when community does not exist', async () => {
+        await expect(
+          communityService.joinPublicCommunity(secondUser.id, 999999),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+
+      it('throws BadRequestException when user is already a member', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Join Already Member',
+            public: true,
+            allowMemberInvites: true,
+            allowStaffAssignments: true,
+            maxCapacity: 10,
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        await expect(
+          communityService.joinPublicCommunity(secondUser.id, community.id),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('throws BadRequestException when community is at capacity', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Join Full',
+            public: true,
+            allowMemberInvites: true,
+            allowStaffAssignments: true,
+            maxCapacity: 0,
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await expect(
+          communityService.joinPublicCommunity(secondUser.id, community.id),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
   });
 
   describe('CommunityController', () => {
@@ -418,6 +524,94 @@ describe('Community (e2e)', () => {
       );
 
       expect(res.status).toBe(401);
+    });
+
+    it('POST /community/:communityId/join joins public community when authenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Join Public',
+          public: true,
+          allowMemberInvites: true,
+          allowStaffAssignments: true,
+          maxCapacity: 10,
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/join`)
+        .set('Authorization', `Bearer ${secondUserToken}`);
+
+      expect(res.status).toBe(201);
+      expect(res.body.id).toBe(community.id);
+      expect(res.body.name).toBe('E2E HTTP Join Public');
+    });
+
+    it('POST /community/:communityId/join returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Join NoAuth',
+          public: true,
+          allowMemberInvites: true,
+          allowStaffAssignments: true,
+          maxCapacity: 10,
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer()).post(
+        `/community/${community.id}/join`,
+      );
+
+      expect(res.status).toBe(401);
+    });
+
+    it('POST /community/:communityId/join returns 400 when already a member', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Join AlreadyMember',
+          public: true,
+          allowMemberInvites: true,
+          allowStaffAssignments: true,
+          maxCapacity: 10,
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      // Join first time
+      await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/join`)
+        .set('Authorization', `Bearer ${secondUserToken}`);
+
+      // Try joining again
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/join`)
+        .set('Authorization', `Bearer ${secondUserToken}`);
+
+      expect(res.status).toBe(400);
+    });
+
+    it('POST /community/:communityId/join returns error for non-public community', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Join Private',
+          public: false,
+          allowMemberInvites: true,
+          allowStaffAssignments: true,
+          maxCapacity: 10,
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/join`)
+        .set('Authorization', `Bearer ${secondUserToken}`);
+
+      expect(res.status).toBeGreaterThanOrEqual(400);
     });
   });
 

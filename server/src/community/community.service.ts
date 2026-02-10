@@ -9,6 +9,8 @@ import { CreateCommunityDto } from './dto/community.dto';
 import { User } from 'src/user/entities/user.entity';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { run } from 'src/utils/promise';
+import { NotificationCategory } from 'src/notifs/entities/notification.entity';
+import { groupUrl } from 'src/search/approutes';
 
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
   Object.freeze({
@@ -114,23 +116,29 @@ export class CommunityService {
       .leaders!.map((leader) => notifForLeader({ leader }))
       .filter((notif) => !!notif);
 
-    const updatedP = this.communityRepository.save({
-      id: community.id,
-      users: [...community.users, user],
+    const updatedCommunityP = run(async () => {
+      const updates = await this.communityRepository.save({
+        id: community.id,
+        users: [...community.users, user],
+      });
+
+      await this.conversationService.syncCommunityConversationMembers(
+        community.id,
+      );
+
+      return { ...community, ...updates };
     });
-    await Promise.all([
+    const [updated] = await Promise.all([
+      updatedCommunityP,
       this.notifsService.sendNotifs(notifs),
       this.userRepository.save({
         id: user.id,
         undergoingGroupAssignment: false,
         pendingCommunity: null,
       }),
-      updatedP.then((updated) =>
-        this.conversationService.syncCommunityConversationMembers(updated.id),
-      ),
     ]);
 
-    return updatedP;
+    return updated;
   }
 
   async removeUserFromCommunityAndRefreshConversation(params: {
@@ -163,7 +171,7 @@ export class CommunityService {
       .filter((notif) => !!notif);
 
     const updatedCommunityP = run(async () => {
-      const updatedCommunity = await this.communityRepository.save({
+      const updates = await this.communityRepository.save({
         id: community.id,
         users: newMembers,
         leaders: newLeaders,
@@ -172,7 +180,7 @@ export class CommunityService {
         community.id,
       );
 
-      return updatedCommunity;
+      return { ...community, ...updates };
     });
 
     const [updatedCommunity] = await Promise.all([
@@ -189,5 +197,78 @@ export class CommunityService {
     ]);
 
     return updatedCommunity;
+  }
+
+  async joinPublicCommunity(
+    userId: number,
+    communityId: number,
+  ): Promise<Community> {
+    const community = await this.communityRepository.findOneOrFail({
+      where: {
+        id: communityId,
+        public: true,
+      },
+      relations: {
+        users: true,
+        leaders: true,
+      },
+    });
+
+    const user = await this.userRepository.findOneOrFail({
+      where: { id: userId },
+      relations: {
+        communities: { leaders: true, users: true },
+      },
+    });
+
+    if (community.users.some((existing) => existing.id === userId)) {
+      throw new BadRequestException(
+        'User is already a member of this community',
+      );
+    }
+
+    if (
+      community.users.length - community.leaders!.length >=
+      community.maxCapacity!
+    ) {
+      throw new BadRequestException('Community is full');
+    }
+
+    const [addedCommunity] = await Promise.all([
+      this.addUserToCommunityAndRefreshConversation({
+        user,
+        community,
+        notifForLeader: ({ leader }) => ({
+          user: leader,
+          category: NotificationCategory.MemberJoinedCommunity,
+          message: `${user.name} joined your public group (${community.name})`,
+          webAppLocation: groupUrl({
+            tab: 'members',
+            communityId: community.id,
+          }),
+          associatedUsers: [user],
+        }),
+      }),
+      ...user.communities.map((community) =>
+        this.removeUserFromCommunityAndRefreshConversation({
+          user,
+          community,
+          removeAsLeader: false,
+          notifForLeader: ({ leader }) => ({
+            user: leader,
+            category: NotificationCategory.MemberLeftCommunity,
+            message: `${user.name} left your group (${community.name})`,
+            webAppLocation: groupUrl({
+              tab: 'members',
+              communityId: community.id,
+            }),
+            associatedUsers: [user],
+          }),
+          saveAsPendingCommunity: false,
+        }),
+      ),
+    ]);
+
+    return addedCommunity;
   }
 }

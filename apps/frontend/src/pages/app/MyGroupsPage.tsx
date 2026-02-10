@@ -1,8 +1,8 @@
 import {
   CommunityDto,
   communityGetPublicCommunities,
+  communityJoinPublicCommunity,
   userJoinGroupAssignment,
-  userJoinPublicCommunity,
   userLeaveCommunity,
   userLeaveGroupAssignment,
 } from "@alliance/shared/client";
@@ -235,7 +235,7 @@ const MyGroupsPage = ({
       }
       setJoiningCommunityId(community.id);
       try {
-        const response = await userJoinPublicCommunity({
+        const response = await communityJoinPublicCommunity({
           path: { communityId: community.id },
         });
         if (!response.data) {

@@ -752,6 +752,16 @@ export type VerifyEmailBody = {
     [key: string]: unknown;
 };
 
+export type UpdateCommunityDto = {
+    name?: string;
+    description?: string;
+    photo?: string;
+    public?: boolean;
+    allowMemberInvites?: boolean;
+    allowStaffAssignments?: boolean;
+    maxCapacity?: number | null;
+};
+
 export type CommunityDto = {
     id: number;
     name: string;
@@ -765,16 +775,6 @@ export type CommunityDto = {
     internalInvites: Array<CommunityInvite>;
     users: Array<ProfileDto>;
     leaders: Array<ProfileDto>;
-};
-
-export type UpdateCommunityDto = {
-    name?: string;
-    description?: string;
-    photo?: string;
-    public?: boolean;
-    allowMemberInvites?: boolean;
-    allowStaffAssignments?: boolean;
-    maxCapacity?: number | null;
 };
 
 export type CommunityMemberDto = {
@@ -2042,34 +2042,6 @@ export type CitySearchDto = {
     countryName: string;
 };
 
-export type CreatePaymentIntentDto = {
-    actionId: number;
-};
-
-export type ClientSecretDto = {
-    clientSecret: string;
-    userToken?: string;
-    savedPaymentMethodId?: string;
-    savedPaymentMethodLast4?: string;
-    amount?: number;
-};
-
-export type CreatePartialProfileDto = {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-};
-
-export type PaymentMethodDto = {
-    id: string;
-    type: string;
-    brand: string;
-    last4: string;
-    exp_month: number;
-    exp_year: number;
-};
-
 export type TableMetadataDto = {
     name: string;
     entityName: string;
@@ -3136,21 +3108,6 @@ export type UserVerifyEmailResponses = {
 
 export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
 
-export type UserJoinPublicCommunityData = {
-    body?: never;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/communities/{communityId}/join';
-};
-
-export type UserJoinPublicCommunityResponses = {
-    200: CommunityDto;
-};
-
-export type UserJoinPublicCommunityResponse = UserJoinPublicCommunityResponses[keyof UserJoinPublicCommunityResponses];
-
 export type UserDeleteCommunityData = {
     body?: never;
     path: {
@@ -4169,6 +4126,21 @@ export type CommunityGetPublicCommunitiesResponses = {
 };
 
 export type CommunityGetPublicCommunitiesResponse = CommunityGetPublicCommunitiesResponses[keyof CommunityGetPublicCommunitiesResponses];
+
+export type CommunityJoinPublicCommunityData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/community/{communityId}/join';
+};
+
+export type CommunityJoinPublicCommunityResponses = {
+    200: CommunityDto;
+};
+
+export type CommunityJoinPublicCommunityResponse = CommunityJoinPublicCommunityResponses[keyof CommunityJoinPublicCommunityResponses];
 
 export type ActionsJoinData = {
     body?: never;
@@ -5594,65 +5566,6 @@ export type GeoLoadCityDataData = {
 };
 
 export type GeoLoadCityDataResponses = {
-    200: unknown;
-};
-
-export type PaymentsCreatePaymentIntentData = {
-    body: CreatePaymentIntentDto;
-    path?: never;
-    query?: never;
-    url: '/payments/create-payment-intent';
-};
-
-export type PaymentsCreatePaymentIntentResponses = {
-    200: ClientSecretDto;
-};
-
-export type PaymentsCreatePaymentIntentResponse = PaymentsCreatePaymentIntentResponses[keyof PaymentsCreatePaymentIntentResponses];
-
-export type PaymentsSetPartialProfileData = {
-    body: CreatePartialProfileDto;
-    path?: never;
-    query?: never;
-    url: '/payments/set-partial-profile';
-};
-
-export type PaymentsSetPartialProfileResponses = {
-    200: unknown;
-};
-
-export type PaymentsWebhookData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/payments/webhook';
-};
-
-export type PaymentsWebhookResponses = {
-    200: unknown;
-};
-
-export type PaymentsPaymentMethodData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/payments/payment-method';
-};
-
-export type PaymentsPaymentMethodResponses = {
-    200: PaymentMethodDto;
-};
-
-export type PaymentsPaymentMethodResponse = PaymentsPaymentMethodResponses[keyof PaymentsPaymentMethodResponses];
-
-export type PaymentsClearPaymentMethodsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/payments/clear-payment-method';
-};
-
-export type PaymentsClearPaymentMethodsResponses = {
     200: unknown;
 };
 
