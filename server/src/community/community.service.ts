@@ -327,6 +327,11 @@ export class CommunityService {
     if (!user.leaderOfIdSet.has(communityId)) {
       throw new BadRequestException();
     }
+    if (userId === removeeId) {
+      throw new BadRequestException(
+        'You cannot remove yourself from your own community',
+      );
+    }
 
     const [community, removee] = await Promise.all([
       this.findOneOrFail(communityId),

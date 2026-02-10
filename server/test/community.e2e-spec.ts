@@ -397,6 +397,24 @@ describe('Community (e2e)', () => {
           }),
         ).rejects.toThrow(BadRequestException);
       });
+
+      it('throws BadRequestException when leader tries to remove themselves', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E Remove Self',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        await expect(
+          communityService.removeUserFromCommunity({
+            userId: testUser.id,
+            removeeId: testUser.id,
+            communityId: community.id,
+          }),
+        ).rejects.toThrow(BadRequestException);
+      });
     });
 
     describe('updateCommunity', () => {
@@ -850,6 +868,23 @@ describe('Community (e2e)', () => {
       const res = await request(ctx.app.getHttpServer())
         .post(`/community/${community.id}/removeMember`)
         .set('Authorization', `Bearer ${secondUserToken}`)
+        .send({ userId: testUser.id });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('POST /community/:communityId/removeMember returns 400 when leader tries to remove themselves', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP Remove Self',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post(`/community/${community.id}/removeMember`)
+        .set('Authorization', `Bearer ${testUserToken}`)
         .send({ userId: testUser.id });
 
       expect(res.status).toBe(400);
