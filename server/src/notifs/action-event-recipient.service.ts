@@ -20,6 +20,7 @@ import {
 import { ActionSuite } from 'src/actions/entities/action-suite.entity';
 import { computeIsAwayInRange } from 'src/utils/user';
 import { findLeast } from 'src/utils/filter';
+import { CommunityService } from 'src/community/community.service';
 
 @Injectable()
 export class ActionEventRecipientService {
@@ -28,6 +29,7 @@ export class ActionEventRecipientService {
     private readonly actionActivityRepository: Repository<ActionActivity>,
     @InjectRepository(Action)
     private readonly actionRepository: Repository<Action>,
+    private readonly communityService: CommunityService,
     private readonly userService: UserService,
   ) {}
 
@@ -298,7 +300,9 @@ export class ActionEventRecipientService {
     ).map((user) => user.id);
 
     const leaders =
-      await this.userService.findLeadersOfCommunitiesWithUsers(uncompleted);
+      await this.communityService.findLeadersOfCommunitiesWithUsers(
+        uncompleted,
+      );
 
     return leaders.filter(
       (leader) => leader.remindAboutUncompletedGroupMembers,

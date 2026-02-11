@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, IsNull, Repository } from 'typeorm';
+import { DeepPartial, In, IsNull, Repository } from 'typeorm';
 import { Community } from './entities/community.entity';
 import { Relations } from 'src/utils/Repository';
 import { ImagesService } from 'src/images/images.service';
@@ -1091,5 +1091,41 @@ export class CommunityService {
       }),
       associatedUsers: [invite.invitedUser],
     });
+  }
+
+  /**
+   * Finds all community leaders whose communities contain any of the given users.
+   *
+   * This does not include themselves, unless there is another user in the same community.
+   */
+  async findLeadersOfCommunitiesWithUsers(userIds: number[]): Promise<User[]> {
+    const communities = await this.communityRepository.find({
+      where: {
+        users: {
+          id: In(userIds),
+        },
+      },
+      relations: { leaders: { contractEvents: true }, users: true },
+    });
+
+    const leadersById = new Map<number, User>(
+      communities.flatMap((community) =>
+        community.leaders!.map((leader) => [leader.id, leader]),
+      ),
+    );
+
+    const leadersWithUsers = new Set<number>(
+      communities.flatMap((community) =>
+        community
+          .leaders!.filter((leader) =>
+            community.users.some((user) => user.id !== leader.id),
+          )
+          .map((leader) => leader.id),
+      ),
+    );
+
+    return Array.from(leadersWithUsers.values()).map(
+      (leaderId) => leadersById.get(leaderId)!,
+    );
   }
 }

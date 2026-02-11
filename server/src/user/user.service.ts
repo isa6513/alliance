@@ -1506,40 +1506,4 @@ export class UserService {
     }
     return this.pushService.sendPushNotification(device.expoPushToken, message);
   }
-
-  /**
-   * Finds all community leaders whose communities contain any of the given users.
-   *
-   * This does not include themselves, unless there is another user in the same community.
-   */
-  async findLeadersOfCommunitiesWithUsers(userIds: number[]): Promise<User[]> {
-    const communities = await this.communityRepository.find({
-      where: {
-        users: {
-          id: In(userIds),
-        },
-      },
-      relations: { leaders: { contractEvents: true }, users: true },
-    });
-
-    const leadersById = new Map<number, User>(
-      communities.flatMap((community) =>
-        community.leaders!.map((leader) => [leader.id, leader]),
-      ),
-    );
-
-    const leadersWithUsers = new Set<number>(
-      communities.flatMap((community) =>
-        community
-          .leaders!.filter((leader) =>
-            community.users.some((user) => user.id !== leader.id),
-          )
-          .map((leader) => leader.id),
-      ),
-    );
-
-    return Array.from(leadersWithUsers.values()).map(
-      (leaderId) => leadersById.get(leaderId)!,
-    );
-  }
 }
