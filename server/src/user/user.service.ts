@@ -39,10 +39,7 @@ import {
 } from './entities/user-away-range.entity';
 import { CreateAwayRangeDto, UpdateAwayRangeDto } from './dto/away-range.dto';
 import { Temporal } from '@js-temporal/polyfill';
-import {
-  CommunityInvite,
-} from 'src/community/entities/community-invite.entity';
-import { ConversationService } from 'src/messaging/conversation.service';
+import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 import {
   ContractEvent,
   ContractEventType,
@@ -89,7 +86,6 @@ export class UserService {
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
-    private readonly conversationService: ConversationService,
     private readonly pushService: PushService,
     private readonly slackService: SlackService,
     private readonly notifsService: NotifsService,
@@ -1353,7 +1349,7 @@ export class UserService {
           undergoingGroupAssignment: true,
         },
         relations: {
-          communities: { leaders: true },
+          communities: { leaders: true, users: true },
         },
       })
       .then((users) => new Map(users.map((user) => [user.id, user])));
@@ -1397,8 +1393,7 @@ export class UserService {
       allowedMemberCounts.set(communityId, allowed! - 1);
     }
 
-    const notifs: CreateNotifParams[] = [];
-    const updatedCommunities = new Set<number>();
+    const userNotifs: CreateNotifParams[] = [];
     for (const { userId, communityId } of body.assignments) {
       const user = userById.get(userId);
       if (!user) {
@@ -1409,29 +1404,49 @@ export class UserService {
         throw new NotFoundException(`Community ${communityId} not found`);
       }
 
-      user.communities = user.communities.filter((community) => {
-        const keep = user.leaderOfIdSet.has(community.id);
-        if (!keep) {
-          updatedCommunities.add(community.id);
-          notifs.push(
-            ...community.leaders!.map((leader) => ({
-              user: leader,
-              category: NotificationCategory.MemberLeftCommunity,
-              message: `${user.name} left your group (${community.name})`,
-              webAppLocation: groupUrl({
-                tab: 'members',
-                communityId: community.id,
-              }),
-              associatedUsers: [user],
-            })),
-          );
-        }
-        return keep;
+      // Remove user from old communities (except ones they lead)
+      await Promise.all(
+        user.communities
+          .filter((oldCommunity) => !user.leaderOfIdSet.has(oldCommunity.id))
+          .map((oldCommunity) =>
+            this.communityService.removeUserFromCommunityAndRefreshConversation(
+              {
+                user,
+                community: oldCommunity,
+                removeAsLeader: false,
+                notifForLeader: ({ leader }) => ({
+                  user: leader,
+                  category: NotificationCategory.MemberLeftCommunity,
+                  message: `${user.name} left your group (${oldCommunity.name})`,
+                  webAppLocation: groupUrl({
+                    tab: 'members',
+                    communityId: oldCommunity.id,
+                  }),
+                  associatedUsers: [user],
+                }),
+                saveAsPendingCommunity: false,
+              },
+            ),
+          ),
+      );
+
+      // Add user to new community
+      await this.communityService.addUserToCommunityAndRefreshConversation({
+        user,
+        community,
+        notifForLeader: ({ leader }) => ({
+          user: leader,
+          category: NotificationCategory.CommunityAssigned,
+          message: `Alliance staff assigned ${user.name} to your group (${community.name})`,
+          webAppLocation: groupUrl({
+            tab: 'members',
+            communityId: community.id,
+          }),
+          associatedUsers: [user],
+        }),
       });
-      user.communities.push(community);
-      updatedCommunities.add(community.id);
-      user.undergoingGroupAssignment = false;
-      notifs.push({
+
+      userNotifs.push({
         user,
         category: NotificationCategory.CommunityAssigned,
         message: `You were assigned to a new group (${community.name})`,
@@ -1442,17 +1457,7 @@ export class UserService {
       });
     }
 
-    await Promise.all(
-      Array.from(userById.values()).map((user) =>
-        this.userRepository.save(user),
-      ),
-    );
-    await Promise.all([
-      ...Array.from(updatedCommunities.values()).map((communityId) =>
-        this.conversationService.syncCommunityConversationMembers(communityId),
-      ),
-      this.notifsService.sendNotifs(notifs),
-    ]);
+    await this.notifsService.sendNotifs(userNotifs);
   }
 
   async getAllUserIds(): Promise<number[]> {
