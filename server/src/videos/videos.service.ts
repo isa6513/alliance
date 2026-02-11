@@ -283,7 +283,7 @@ export class VideosService {
       }),
     );
 
-    await this.videoRepository.update(video.id, { status: 'ready' });
+    await this.videoRepository.update(video.id, { status: 'ready', processingInfo: null });
     return this.videoRepository.findOneBy({ id });
   }
 

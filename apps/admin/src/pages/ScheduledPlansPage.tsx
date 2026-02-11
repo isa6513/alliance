@@ -102,11 +102,13 @@ const ScheduledPlansPage = () => {
       weekday: "long",
       month: "long",
       day: "numeric",
+      timeZone: "America/Los_Angeles",
     }).format(parsed);
 
     const timeLabel = new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "2-digit",
+      timeZone: "America/Los_Angeles",
     }).format(parsed);
 
     return { dayLabel, timeLabel };
@@ -140,6 +142,7 @@ const ScheduledPlansPage = () => {
             <ul className="space-y-6">
               {timelineItems.map((item) => {
                 const { dayLabel } = formatPlanDate(item.date);
+                const utcLabel = new Date(item.date).toISOString();
                 const isExpanded = expandedPlans.has(item.key);
                 const userCount = item.users?.length ?? 0;
 
@@ -172,6 +175,9 @@ const ScheduledPlansPage = () => {
                               </Link>
                             </div>
                           )}
+                          <div className="text-xs text-gray-400 font-mono">
+                            {utcLabel}
+                          </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Users size={16} className="text-gray-500" />
                             <span>

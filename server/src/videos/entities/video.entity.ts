@@ -37,7 +37,7 @@ export class Video {
 
   @Column({ type: 'jsonb', nullable: true })
   @ApiPropertyOptional()
-  processingInfo?: Record<string, unknown>;
+  processingInfo?: Record<string, unknown> | null;
 
   @CreateDateColumnTz()
   dateCreated: Date;
