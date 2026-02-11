@@ -462,11 +462,11 @@ export class CommunityService {
       );
     }
 
-    community.users = community.users.filter((u) => u.id !== user.id);
-
-    await this.communityRepository.save(community);
-    const notifsP = this.notifsService.sendNotifs(
-      community.leaders!.map((leader) => ({
+    await this.removeUserFromCommunityAndRefreshConversation({
+      user,
+      community,
+      removeAsLeader: true,
+      notifForLeader: ({ leader }) => ({
         user: leader,
         category: NotificationCategory.MemberLeftCommunity,
         message: `${user.name} left your group (${community.name})`,
@@ -475,12 +475,9 @@ export class CommunityService {
           communityId: community.id,
         }),
         associatedUsers: [user],
-      })),
-    );
-    await Promise.all([
-      this.conversationService.syncCommunityConversationMembers(communityId),
-      notifsP,
-    ]);
+      }),
+      saveAsPendingCommunity: false,
+    });
   }
 
   async deleteCommunity(userId: number, communityId: number): Promise<void> {
