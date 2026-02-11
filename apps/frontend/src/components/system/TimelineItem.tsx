@@ -49,7 +49,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         <p className="mt-1 text-zinc-500 text-sm">{description}</p>
       )}
       {showCompletedBar && (
-        <Card>
+        <Card className="p-5">
           <ActionCompletedBarWithInfo
             friendActivities={friendActivities}
             action={action}
