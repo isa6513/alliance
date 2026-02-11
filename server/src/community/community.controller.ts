@@ -282,4 +282,19 @@ export class CommunityController {
       await this.communityService.requestCommunityInvite(body, req.user.sub),
     );
   }
+
+  @Post('communityInvites/:inviteId/approveRequest')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: CommunityInviteDto })
+  async approveCommunityInviteRequest(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ): Promise<CommunityInviteDto> {
+    return new CommunityInviteDto(
+      await this.communityService.approveCommunityInviteRequest(
+        inviteId,
+        req.user.sub,
+      ),
+    );
+  }
 }

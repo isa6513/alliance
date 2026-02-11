@@ -518,20 +518,6 @@ export class UserController {
   }
 
 
-  @Post('communityInvites/:inviteId/approveRequest')
-  @UseGuards(CommunityLeaderGuard)
-  @ApiOkResponse({ type: CommunityInviteDto })
-  async approveCommunityInviteRequest(
-    @Param('inviteId', ParseIntPipe) inviteId: number,
-    @Request() req: JwtRequest,
-  ): Promise<CommunityInviteDto> {
-    return new CommunityInviteDto(
-      await this.userService.approveCommunityInviteRequest(
-        inviteId,
-        req.user.sub,
-      ),
-    );
-  }
 
   @Post('communityInvites/:inviteId/rejectRequest')
   @UseGuards(CommunityLeaderGuard)

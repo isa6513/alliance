@@ -1362,6 +1362,105 @@ describe('Community (e2e)', () => {
     expect(res.status).toBeGreaterThanOrEqual(400);
   });
 
+  it('POST /community/communityInvites/:inviteId/approveRequest approves request when authenticated as leader', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP ApproveRequest Leader',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.RequestPending,
+        invitingUser: secondUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/approveRequest`)
+      .set('Authorization', `Bearer ${testUserToken}`);
+
+    expect(res.status).toBe(201);
+    expect(res.body.status).toBe(CommunityInviteStatus.InviteePending);
+    expect(res.body.id).toBe(invite.id);
+  });
+
+  it('POST /community/communityInvites/:inviteId/approveRequest returns 401 when unauthenticated', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP ApproveRequest NoAuth',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.RequestPending,
+        invitingUser: secondUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer()).post(
+      `/community/communityInvites/${invite.id}/approveRequest`,
+    );
+
+    expect(res.status).toBe(401);
+  });
+
+  it('POST /community/communityInvites/:inviteId/approveRequest returns 401 when user is not a leader', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP ApproveRequest NotLeader',
+        leaders: [testUser],
+        users: [testUser, secondUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.RequestPending,
+        invitingUser: secondUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/approveRequest`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    // CommunityLeaderGuard rejects non-leaders with 401
+    expect(res.status).toBe(401);
+  });
+
+  it('POST /community/communityInvites/:inviteId/approveRequest returns 400 when invite is not RequestPending', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP ApproveRequest WrongStatus',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/approveRequest`)
+      .set('Authorization', `Bearer ${testUserToken}`);
+
+    expect(res.status).toBe(400);
+  });
+
   it('DELETE /community/communityInvites/:inviteId returns 401 when user is not a leader or admin', async () => {
     const community = await communityRepo.save(
       communityRepo.create({

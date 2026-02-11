@@ -1320,63 +1320,6 @@ export class UserService {
     });
   }
 
-  async approveCommunityInviteRequest(
-    inviteId: number,
-    userId: number,
-  ): Promise<CommunityInvite> {
-    const userP = this.findOneOrFail(userId);
-    const invite = await this.communityInviteRepository.findOneOrFail({
-      where: { id: inviteId, deletedAt: IsNull() },
-      relations: { invitingUser: true, invitedUser: true, community: true },
-    });
-
-    if (invite.status !== CommunityInviteStatus.RequestPending) {
-      throw new BadRequestException(
-        `Invite is not a pending request. Status: ${JSON.stringify(
-          invite.status,
-        )}`,
-      );
-    }
-
-    const user = await userP;
-    if (!user.leaderOfIds.some((cid) => cid === invite.community.id)) {
-      throw new BadRequestException(
-        `User is not a leader of community ${invite.community.id}`,
-      );
-    }
-
-    invite.status = CommunityInviteStatus.InviteePending;
-    const savedInvite = await this.communityInviteRepository.save(invite);
-
-    await this.notifsService.sendNotifs([
-      {
-        user: invite.invitedUser,
-        category: NotificationCategory.CommunityInviteCreated,
-        message: `${invite.invitingUser?.name ?? user.name} invited you to join their group (${invite.community.name})`,
-        webAppLocation: groupUrl({
-          tab: 'groups',
-        }),
-        associatedUsers: [invite.invitingUser ?? user],
-      } satisfies CreateNotifParams,
-      ...(invite.invitingUser
-        ? [
-            {
-              user: invite.invitingUser,
-              category: NotificationCategory.CommunityInviteCreated,
-              message: `Your request to invite ${invite.invitedUser.name} was approved`,
-              webAppLocation: groupUrl({
-                tab: 'groups',
-                communityId: invite.community.id,
-              }),
-              associatedUsers: [],
-            } satisfies CreateNotifParams,
-          ]
-        : []),
-    ]);
-
-    return savedInvite;
-  }
-
   async rejectCommunityInviteRequest(
     inviteId: number,
     userId: number,
