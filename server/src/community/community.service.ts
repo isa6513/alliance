@@ -565,6 +565,12 @@ export class CommunityService {
   }): Promise<CommunityMemberContactInfoDto[]> {
     const { leaderId, communityId } = params;
 
+    const leaderP =
+      leaderId !== undefined
+        ? this.userRepository.findOneOrFail({
+            where: { id: leaderId },
+          })
+        : null;
     const community = await this.findOneOrFail(communityId, {
       users: {
         awayRanges: true,
@@ -579,12 +585,7 @@ export class CommunityService {
       throw new BadRequestException('User is not a leader of this community');
     }
 
-    const leader =
-      leaderId !== undefined
-        ? await this.userRepository.findOneOrFail({
-            where: { id: leaderId },
-          })
-        : null;
+    const leader = await leaderP;
     return getContactInfo({
       users: community.users,
       timeZone: leader?.timeZone ?? DEFAULT_TIME_ZONE,
