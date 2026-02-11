@@ -211,7 +211,7 @@ export class CommunityController {
   async getMemberContactInfo(
     @Request() req: JwtRequest,
     @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
+  ): Promise<CommunityMemberContactInfoDto[]> {
     return this.communityService.getMemberContactInfo({
       leaderId: req.user.sub,
       communityId,
@@ -223,14 +223,16 @@ export class CommunityController {
   @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
   async getMemberContactInfoAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
+  ): Promise<CommunityMemberContactInfoDto[]> {
     return this.communityService.getMemberContactInfo({ communityId });
   }
 
   @Get('memberContactInfo')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
-  async getAllMemberContactInfoAdmin() {
+  async getAllMemberContactInfoAdmin(): Promise<
+    CommunityMemberContactInfoDto[]
+  > {
     return this.communityService.getAllMemberContactInfoAdmin();
   }
 
@@ -252,7 +254,7 @@ export class CommunityController {
   async deleteCommunityInvite(
     @Param('inviteId', ParseIntPipe) inviteId: number,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<void> {
     await this.communityService.deleteCommunityInvite(inviteId, req.user.sub);
   }
 }
