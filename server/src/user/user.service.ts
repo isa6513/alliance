@@ -1430,17 +1430,23 @@ export class UserService {
           ),
       );
 
+      // Refetch community to get up-to-date users list
+      const freshCommunity = await this.communityRepository.findOneOrFail({
+        where: { id: communityId },
+        relations: { users: true, leaders: true },
+      });
+
       // Add user to new community
       await this.communityService.addUsersToCommunityAndRefreshConversation({
         user,
-        community,
+        community: freshCommunity,
         notifForLeader: ({ leader }) => ({
           user: leader,
           category: NotificationCategory.CommunityAssigned,
-          message: `Alliance staff assigned ${user.name} to your group (${community.name})`,
+          message: `Alliance staff assigned ${user.name} to your group (${freshCommunity.name})`,
           webAppLocation: groupUrl({
             tab: 'members',
-            communityId: community.id,
+            communityId: freshCommunity.id,
           }),
           associatedUsers: [user],
         }),
@@ -1449,9 +1455,9 @@ export class UserService {
       userNotifs.push({
         user,
         category: NotificationCategory.CommunityAssigned,
-        message: `You were assigned to a new group (${community.name})`,
+        message: `You were assigned to a new group (${freshCommunity.name})`,
         webAppLocation: groupUrl({
-          communityId: community.id,
+          communityId: freshCommunity.id,
         }),
         associatedUsers: [],
       });

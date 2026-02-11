@@ -1056,6 +1056,126 @@ describe('Users (e2e)', () => {
     });
   });
 
+  describe('assignGroupsAdmin', () => {
+    it('persists all users when multiple are assigned to the same community', async () => {
+      const leader = await userRepo.save(
+        userRepo.create({
+          name: 'Batch Leader',
+          email: 'batch.leader@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'Batch Community',
+          description: 'For batch assignment test',
+          leaders: [leader],
+          users: [leader],
+          maxCapacity: 10,
+        }),
+      );
+
+      // Create two users undergoing group assignment
+      const batchUser1 = await userRepo.save(
+        userRepo.create({
+          name: 'Batch User 1',
+          email: 'batch.user1@example.com',
+          password: 'Password123!',
+          undergoingGroupAssignment: true,
+        }),
+      );
+
+      const batchUser2 = await userRepo.save(
+        userRepo.create({
+          name: 'Batch User 2',
+          email: 'batch.user2@example.com',
+          password: 'Password123!',
+          undergoingGroupAssignment: true,
+        }),
+      );
+
+      // Assign both users to the same community in a single call
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/groupAssignment/assign')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          assignments: [
+            { userId: batchUser1.id, communityId: community.id },
+            { userId: batchUser2.id, communityId: community.id },
+          ],
+        });
+
+      expect(res.status).toBe(201);
+
+      // Verify both users are in the community
+      const updatedCommunity = await communityRepo.findOneOrFail({
+        where: { id: community.id },
+        relations: { users: true },
+      });
+
+      const memberIds = updatedCommunity.users.map((u) => u.id);
+      expect(memberIds).toContain(batchUser1.id);
+      expect(memberIds).toContain(batchUser2.id);
+      expect(memberIds).toContain(leader.id);
+    });
+
+    it('correctly reassigns a user to a community they were previously removed from', async () => {
+      const leader = await userRepo.save(
+        userRepo.create({
+          name: 'Reassign Leader',
+          email: 'reassign.leader@example.com',
+          password: 'Password123!',
+        }),
+      );
+
+      const oldCommunity = await communityRepo.save(
+        communityRepo.create({
+          name: 'Old Community',
+          description: 'Community user starts in',
+          leaders: [leader],
+          users: [leader],
+          maxCapacity: 10,
+        }),
+      );
+
+      // User starts as a member of oldCommunity
+      const reassignUser = await userRepo.save(
+        userRepo.create({
+          name: 'Reassign User',
+          email: 'reassign.user@example.com',
+          password: 'Password123!',
+          communities: [oldCommunity],
+          undergoingGroupAssignment: true,
+        }),
+      );
+
+      // Assign the user back to the same community they're already in
+      // (this simulates the flow where the user is removed from old communities
+      // then added to the target, which happens to be the same community)
+      const res = await request(ctx.app.getHttpServer())
+        .post('/user/groupAssignment/assign')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          assignments: [
+            { userId: reassignUser.id, communityId: oldCommunity.id },
+          ],
+        });
+
+      expect(res.status).toBe(201);
+
+      // Verify the user is a member of the community
+      const updatedCommunity = await communityRepo.findOneOrFail({
+        where: { id: oldCommunity.id },
+        relations: { users: true },
+      });
+
+      const memberIds = updatedCommunity.users.map((u) => u.id);
+      expect(memberIds).toContain(reassignUser.id);
+      expect(memberIds).toContain(leader.id);
+    });
+  });
+
   afterAll(async () => {
     await ctx.app.close();
   });
