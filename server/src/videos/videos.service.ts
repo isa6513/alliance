@@ -21,7 +21,7 @@ export class VideosService {
     @InjectRepository(Video)
     private videoRepository: Repository<Video>,
     @Inject('S3_CLIENT') private readonly s3: S3Client,
-  ) {}
+  ) { }
 
   private readonly bucket = process.env.ASSETS_BUCKET!;
 
@@ -54,8 +54,20 @@ export class VideosService {
       await fs.promises.mkdir(outputDir, { recursive: true });
       await fs.promises.writeFile(inputPath, buffer);
 
+      const processingInfo = {
+        codec: 'libx264',
+        preset: 'fast',
+        crf: 28,
+        maxrate: '2M',
+        bufsize: '4M',
+        scale: '-2:720',
+        audioCodec: 'aac',
+        audioBitrate: '128k',
+        hlsTime: 6,
+      };
+
       // Run ffmpeg to produce HLS segments
-      await this.runFfmpeg(inputPath, outputDir);
+      await this.runFfmpeg(inputPath, outputDir, processingInfo);
 
       // Extract duration (best-effort)
       const duration = await this.getDuration(inputPath).catch(() => undefined);
@@ -84,40 +96,55 @@ export class VideosService {
       await this.videoRepository.update(video.id, {
         status: 'ready',
         duration,
+        processingInfo,
       });
     } catch (err) {
       this.logger.error(`Failed to process video ${video.id}`, err);
       await this.videoRepository.update(video.id, { status: 'failed' });
     } finally {
       // Clean up temp dir
-      await fs.promises.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+      await fs.promises.rm(tmpDir, { recursive: true, force: true }).catch(() => { });
     }
   }
 
-  private runFfmpeg(inputPath: string, outputDir: string): Promise<void> {
+  private runFfmpeg(
+    inputPath: string,
+    outputDir: string,
+    settings: {
+      codec: string;
+      preset: string;
+      crf: number;
+      maxrate: string;
+      bufsize: string;
+      scale: string;
+      audioCodec: string;
+      audioBitrate: string;
+      hlsTime: number;
+    },
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       const outputPath = path.join(outputDir, 'playlist.m3u8');
       const proc = spawn('ffmpeg', [
         '-i',
         inputPath,
         '-c:v',
-        'libx264',
+        settings.codec,
         '-preset',
-        'fast',
+        settings.preset,
         '-crf',
-        '28',
+        String(settings.crf),
         '-maxrate',
-        '2M',
+        settings.maxrate,
         '-bufsize',
-        '4M',
+        settings.bufsize,
         '-vf',
-        'scale=-2:720',
+        `scale=${settings.scale}`,
         '-c:a',
-        'aac',
+        settings.audioCodec,
         '-b:a',
-        '128k',
+        settings.audioBitrate,
         '-hls_time',
-        '6',
+        String(settings.hlsTime),
         '-hls_list_size',
         '0',
         '-hls_segment_filename',
@@ -177,6 +204,86 @@ export class VideosService {
   }
 
   async getVideo(id: number): Promise<Video | null> {
+    return this.videoRepository.findOneBy({ id });
+  }
+
+  async listVideos(): Promise<Video[]> {
+    return this.videoRepository.find({ order: { dateCreated: 'DESC' } });
+  }
+
+  async getVideoDetails(id: number): Promise<{
+    video: Video;
+    segments: { filename: string; size: number; key: string }[];
+    totalOutputSize: number;
+  } | null> {
+    const video = await this.videoRepository.findOneBy({ id });
+    if (!video) return null;
+
+    const listResult = await this.s3.send(
+      new ListObjectsV2Command({
+        Bucket: this.bucket,
+        Prefix: `${video.key}/`,
+      }),
+    );
+
+    const segments = (listResult.Contents ?? []).map((obj) => ({
+      filename: obj.Key!.split('/').pop()!,
+      size: obj.Size ?? 0,
+      key: obj.Key!,
+    }));
+
+    const totalOutputSize = segments.reduce((sum, seg) => sum + seg.size, 0);
+
+    return { video, segments, totalOutputSize };
+  }
+
+  async replaceVideoContent(
+    id: number,
+    files: Express.Multer.File[],
+  ): Promise<Video | null> {
+    const video = await this.videoRepository.findOneBy({ id });
+    if (!video) return null;
+
+    // Delete existing S3 objects under this video's key prefix
+    const listResult = await this.s3.send(
+      new ListObjectsV2Command({
+        Bucket: this.bucket,
+        Prefix: `${video.key}/`,
+      }),
+    );
+
+    if (listResult.Contents && listResult.Contents.length > 0) {
+      await Promise.all(
+        listResult.Contents.map((obj) =>
+          this.s3.send(
+            new DeleteObjectCommand({
+              Bucket: this.bucket,
+              Key: obj.Key!,
+            }),
+          ),
+        ),
+      );
+    }
+
+    // Upload new files preserving their original filenames
+    await Promise.all(
+      files.map(async (file) => {
+        const contentType = file.originalname.endsWith('.m3u8')
+          ? 'application/vnd.apple.mpegurl'
+          : 'video/MP2T';
+
+        await this.s3.send(
+          new PutObjectCommand({
+            Bucket: this.bucket,
+            Key: `${video.key}/${file.originalname}`,
+            Body: file.buffer,
+            ContentType: contentType,
+          }),
+        );
+      }),
+    );
+
+    await this.videoRepository.update(video.id, { status: 'ready' });
     return this.videoRepository.findOneBy({ id });
   }
 

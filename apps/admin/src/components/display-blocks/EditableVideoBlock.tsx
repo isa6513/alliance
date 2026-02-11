@@ -4,6 +4,7 @@ import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import { videosGetVideoStatus, videosUploadVideo } from "@alliance/shared/client";
+import { Link, href } from "react-router";
 
 export function EditableVideoBlock({
   block,
@@ -98,10 +99,19 @@ export function EditableVideoBlock({
     >
       {({ block: activeBlock, onUpdate: handleUpdate }) => (
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-black">
-            Video
-          </label>
-          {/* File upload */}
+          <div className="flex items-center space-x-2">
+            <label className="block text-sm font-medium text-black">
+              Video
+            </label>
+            {activeBlock.videoId && (
+              <Link
+                to={href(`/videos/:videoId`, { videoId: activeBlock.videoId.toString() })}
+                className="text-xs text-blue-600"
+              >
+                Manage video file
+              </Link>
+            )}
+          </div>
           <div className="flex items-center space-x-2">
             <input
               type="file"
@@ -137,7 +147,6 @@ export function EditableVideoBlock({
             />
           </div>
 
-          {/* Preview */}
           {activeBlock.src && (
             <div className="pt-2 border-t border-gray-200">
               <RenderDisplayBlock block={activeBlock} />

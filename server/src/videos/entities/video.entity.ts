@@ -35,6 +35,10 @@ export class Video {
   @ApiPropertyOptional()
   duration?: number;
 
+  @Column({ type: 'jsonb', nullable: true })
+  @ApiPropertyOptional()
+  processingInfo?: Record<string, unknown>;
+
   @CreateDateColumnTz()
   dateCreated: Date;
 

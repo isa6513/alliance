@@ -12,10 +12,11 @@ import {
   Post,
   Res,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { basename } from 'path';
@@ -24,7 +25,11 @@ import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { VideosService } from './videos.service';
 import {
   DeleteVideoResponseDto,
+  ReplaceVideoResponseDto,
   UploadVideoResponseDto,
+  VideoDetailResponseDto,
+  VideoListResponseDto,
+  VideoProcessingInfoDto,
   VideoStatusResponseDto,
 } from './dto/video-response.dto';
 
@@ -57,6 +62,26 @@ export class VideosController {
     return { id: video.id, key: video.key, status: video.status };
   }
 
+  @Get()
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: VideoListResponseDto })
+  async listVideos(): Promise<VideoListResponseDto> {
+    const videos = await this.videosService.listVideos();
+    return {
+      videos: videos.map((v) => ({
+        id: v.id,
+        key: v.key,
+        originalFilename: v.originalFilename,
+        mime: v.mime,
+        size: v.size,
+        status: v.status,
+        duration: v.duration,
+        dateCreated: v.dateCreated,
+        dateUpdated: v.dateUpdated,
+      })),
+    };
+  }
+
   @Get(':id/status')
   @ApiOkResponse({ type: VideoStatusResponseDto })
   async getVideoStatus(
@@ -72,6 +97,58 @@ export class VideosController {
       status: video.status,
       duration: video.duration,
     };
+  }
+
+  @Get(':id/details')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: VideoDetailResponseDto })
+  async getVideoDetails(
+    @Param('id') id: number,
+  ): Promise<VideoDetailResponseDto> {
+    const result = await this.videosService.getVideoDetails(id);
+    if (!result) throw new NotFoundException();
+
+    const { video, segments, totalOutputSize } = result;
+
+    return {
+      id: video.id,
+      key: video.key,
+      originalFilename: video.originalFilename,
+      mime: video.mime,
+      size: video.size,
+      status: video.status,
+      duration: video.duration,
+      segments,
+      totalOutputSize,
+      processingInfo: (video.processingInfo as unknown as VideoProcessingInfoDto) ?? undefined,
+      dateCreated: video.dateCreated,
+      dateUpdated: video.dateUpdated,
+    };
+  }
+
+  @Post(':id/replace')
+  @UseGuards(AdminGuard)
+  @UseInterceptors(FilesInterceptor('files', 200, { limits: { fileSize: 500 * 1024 * 1024 } }))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+        },
+      },
+    },
+  })
+  @ApiOkResponse({ type: ReplaceVideoResponseDto })
+  async replaceVideo(
+    @Param('id') id: number,
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<ReplaceVideoResponseDto> {
+    const video = await this.videosService.replaceVideoContent(id, files);
+    if (!video) throw new NotFoundException();
+    return { id: video.id, key: video.key, status: video.status };
   }
 
   @Get(':id/:filename')

@@ -2040,11 +2040,66 @@ export type UploadVideoResponseDto = {
     status: string;
 };
 
+export type VideoListItemDto = {
+    id: number;
+    key: string;
+    originalFilename: string;
+    mime: string;
+    size: number;
+    status: string;
+    duration?: number;
+    dateCreated: string;
+    dateUpdated: string;
+};
+
+export type VideoListResponseDto = {
+    videos: Array<VideoListItemDto>;
+};
+
 export type VideoStatusResponseDto = {
     id: number;
     key: string;
     status: string;
     duration?: number;
+};
+
+export type VideoSegmentDto = {
+    filename: string;
+    size: number;
+    key: string;
+};
+
+export type VideoProcessingInfoDto = {
+    codec: string;
+    preset: string;
+    crf: number;
+    maxrate: string;
+    bufsize: string;
+    scale: string;
+    audioCodec: string;
+    audioBitrate: string;
+    hlsTime: number;
+};
+
+export type VideoDetailResponseDto = {
+    id: number;
+    key: string;
+    originalFilename: string;
+    mime: string;
+    size: number;
+    status: string;
+    duration?: number;
+    segments: Array<VideoSegmentDto>;
+    totalOutputSize: number;
+    processingInfo?: VideoProcessingInfoDto;
+    dateCreated: string;
+    dateUpdated: string;
+};
+
+export type ReplaceVideoResponseDto = {
+    id: number;
+    key: string;
+    status: string;
 };
 
 export type DeleteVideoResponseDto = {
@@ -5583,6 +5638,19 @@ export type VideosUploadVideoResponses = {
 
 export type VideosUploadVideoResponse = VideosUploadVideoResponses[keyof VideosUploadVideoResponses];
 
+export type VideosListVideosData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/videos';
+};
+
+export type VideosListVideosResponses = {
+    200: VideoListResponseDto;
+};
+
+export type VideosListVideosResponse = VideosListVideosResponses[keyof VideosListVideosResponses];
+
 export type VideosGetVideoStatusData = {
     body?: never;
     path: {
@@ -5597,6 +5665,38 @@ export type VideosGetVideoStatusResponses = {
 };
 
 export type VideosGetVideoStatusResponse = VideosGetVideoStatusResponses[keyof VideosGetVideoStatusResponses];
+
+export type VideosGetVideoDetailsData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/videos/{id}/details';
+};
+
+export type VideosGetVideoDetailsResponses = {
+    200: VideoDetailResponseDto;
+};
+
+export type VideosGetVideoDetailsResponse = VideosGetVideoDetailsResponses[keyof VideosGetVideoDetailsResponses];
+
+export type VideosReplaceVideoData = {
+    body: {
+        files?: Array<Blob | File>;
+    };
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/videos/{id}/replace';
+};
+
+export type VideosReplaceVideoResponses = {
+    200: ReplaceVideoResponseDto;
+};
+
+export type VideosReplaceVideoResponse = VideosReplaceVideoResponses[keyof VideosReplaceVideoResponses];
 
 export type VideosStreamVideoFileData = {
     body?: never;

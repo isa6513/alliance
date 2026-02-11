@@ -23,6 +23,8 @@ export default [
       route("/test-push", "pages/TestPushNotification.tsx"),
       route("/members", "pages/UsersList.tsx"),
       route("/image", "pages/ImageUpload.tsx"),
+      route("/videos", "pages/VideoManagement.tsx"),
+      route("/videos/:videoId", "pages/VideoDetail.tsx"),
       route("/messaging", "pages/MessagingOverview.tsx"),
       route(
         "/messaging/:conversationId",

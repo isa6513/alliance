@@ -18,6 +18,7 @@ import Dropdown from "@alliance/sharedweb/ui/Dropdown";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {
   Database,
+  Film,
   SquareActivity,
   Users,
   UserPlus,
@@ -259,6 +260,11 @@ const Sidebar: React.FC = () => {
                     to: "/image",
                     label: "Image Upload",
                     icon: <ImageUp size={16} />,
+                  },
+                  {
+                    to: "/videos",
+                    label: "Videos",
+                    icon: <Film size={16} />,
                   },
                   {
                     to: "/messaging",
