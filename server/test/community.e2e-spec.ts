@@ -584,6 +584,100 @@ describe('Community (e2e)', () => {
     expect(res.status).toBe(401);
   });
 
+  it('POST /community/:communityId/leave removes member from community when authenticated', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP Leave Community',
+        leaders: [testUser],
+        users: [testUser, secondUser],
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/${community.id}/leave`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(201);
+    const refreshed = await communityRepo.findOneOrFail({
+      where: { id: community.id },
+      relations: { users: true },
+    });
+    const memberIds = refreshed.users.map((u: User) => u.id);
+    expect(memberIds).not.toContain(secondUser.id);
+    expect(memberIds).toContain(testUser.id);
+  });
+
+  it('POST /community/:communityId/leave returns 401 when unauthenticated', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP Leave NoAuth',
+        leaders: [testUser],
+        users: [testUser, secondUser],
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer()).post(
+      `/community/${community.id}/leave`,
+    );
+
+    expect(res.status).toBe(401);
+  });
+
+  it('POST /community/:communityId/leave returns 400 when user is not a member', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP Leave NotMember',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/${community.id}/leave`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(400);
+  });
+
+  it('POST /community/:communityId/leave returns 400 when user is the last leader', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP Leave LastLeader',
+        leaders: [testUser],
+        users: [testUser, secondUser],
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/${community.id}/leave`)
+      .set('Authorization', `Bearer ${testUserToken}`);
+
+    expect(res.status).toBe(400);
+  });
+
+  it('POST /community/:communityId/leave allows leader to leave when another leader exists', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP Leave CoLeader',
+        leaders: [testUser, secondUser],
+        users: [testUser, secondUser],
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/${community.id}/leave`)
+      .set('Authorization', `Bearer ${testUserToken}`);
+
+    expect(res.status).toBe(201);
+    const refreshed = await communityRepo.findOneOrFail({
+      where: { id: community.id },
+      relations: { users: true, leaders: true },
+    });
+    const memberIds = refreshed.users.map((u: User) => u.id);
+    expect(memberIds).not.toContain(testUser.id);
+    expect(memberIds).toContain(secondUser.id);
+  });
+
   it('POST /community/:communityId/join returns error for non-public community', async () => {
     const community = await communityRepo.save(
       communityRepo.create({

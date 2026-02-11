@@ -147,6 +147,16 @@ export class CommunityController {
     );
   }
 
+  @Post(':communityId/leave')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async leave(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Request() req: JwtRequest,
+  ): Promise<void> {
+    await this.communityService.leaveCommunity(communityId, req.user.sub);
+  }
+
   @Delete(':communityId')
   @UseGuards(AuthGuard)
   @ApiOkResponse()

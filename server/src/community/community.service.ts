@@ -439,6 +439,50 @@ export class CommunityService {
     return updatedCommunity;
   }
 
+  async leaveCommunity(communityId: number, userId: number): Promise<void> {
+    const community = await this.communityRepository.findOneOrFail({
+      where: {
+        id: communityId,
+      },
+      relations: {
+        users: true,
+        leaders: true,
+      },
+    });
+    const user = community.users.find((user) => user.id === userId);
+    if (!user) {
+      throw new BadRequestException('User not found in community');
+    }
+    if (
+      community.leaders!.length === 1 &&
+      community.leaders![0].id === userId
+    ) {
+      throw new BadRequestException(
+        'You cannot leave as the last leader of the community',
+      );
+    }
+
+    community.users = community.users.filter((u) => u.id !== user.id);
+
+    await this.communityRepository.save(community);
+    const notifsP = this.notifsService.sendNotifs(
+      community.leaders!.map((leader) => ({
+        user: leader,
+        category: NotificationCategory.MemberLeftCommunity,
+        message: `${user.name} left your group (${community.name})`,
+        webAppLocation: groupUrl({
+          tab: 'members',
+          communityId: community.id,
+        }),
+        associatedUsers: [user],
+      })),
+    );
+    await Promise.all([
+      this.conversationService.syncCommunityConversationMembers(communityId),
+      notifsP,
+    ]);
+  }
+
   async deleteCommunity(userId: number, communityId: number): Promise<void> {
     const user = await this.userRepository.findOneOrFail({
       where: { id: userId, communities: { id: communityId } },

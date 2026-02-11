@@ -2,8 +2,8 @@ import {
   CommunityDto,
   communityGetPublicCommunities,
   communityJoinPublicCommunity,
+  communityLeave,
   userJoinGroupAssignment,
-  userLeaveCommunity,
   userLeaveGroupAssignment,
 } from "@alliance/shared/client";
 import List from "@alliance/sharedweb/ui/List";
@@ -181,7 +181,7 @@ const MyGroupsPage = ({
 
   const onConfirmLeaveGroup = useCallback(
     async (community: CommunityDto) => {
-      const response = await userLeaveCommunity({
+      const response = await communityLeave({
         path: { communityId: community.id },
       });
       if (response.data) {

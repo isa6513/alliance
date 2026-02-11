@@ -3476,19 +3476,6 @@ export type UserRejectCommunityInviteResponses = {
     200: unknown;
 };
 
-export type UserLeaveCommunityData = {
-    body?: never;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/communities/{communityId}/leave';
-};
-
-export type UserLeaveCommunityResponses = {
-    200: unknown;
-};
-
 export type UserJoinGroupAssignmentData = {
     body?: never;
     path?: never;
@@ -4052,6 +4039,19 @@ export type CommunityRemoveMemberAdminResponses = {
 };
 
 export type CommunityRemoveMemberAdminResponse = CommunityRemoveMemberAdminResponses[keyof CommunityRemoveMemberAdminResponses];
+
+export type CommunityLeaveData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/community/{communityId}/leave';
+};
+
+export type CommunityLeaveResponses = {
+    200: unknown;
+};
 
 export type CommunityDeleteAdminData = {
     body?: never;
