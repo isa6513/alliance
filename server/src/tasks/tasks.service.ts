@@ -53,6 +53,7 @@ import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 import { SlackService } from 'src/slack/slack.service';
 import { UpdateProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
+import { VideosService } from 'src/videos/videos.service';
 
 @Injectable()
 export class TasksService {
@@ -73,6 +74,7 @@ export class TasksService {
     @InjectRepository(ActionShareUrl)
     private actionShareUrlRepository: Repository<ActionShareUrl>,
     private slackService: SlackService,
+    private videosService: VideosService,
   ) {}
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
@@ -195,8 +197,19 @@ export class TasksService {
     updateFormDto: CreateFormDto,
   ): Promise<Form> {
     const form = await this.getForm(formId);
+    const oldVideoIds = new Set(this.extractVideoIds(form.schema));
     Object.assign(form, updateFormDto);
-    return this.transformImageUrls(await this.formRepository.save(form));
+    const saved = await this.formRepository.save(form);
+    const newVideoIds = new Set(
+      this.extractVideoIds(saved.schema),
+    );
+    const removedVideoIds = [...oldVideoIds].filter(
+      (id) => !newVideoIds.has(id),
+    );
+    if (removedVideoIds.length > 0) {
+      void this.cleanupVideos(removedVideoIds);
+    }
+    return this.transformImageUrls(saved);
   }
 
   async submitForm(
@@ -511,9 +524,39 @@ export class TasksService {
     );
   }
 
+  private extractVideoIds(schema: Record<string, unknown>): number[] {
+    const ids: number[] = [];
+    const pages = schema?.pages as Array<{ fields?: Array<unknown> }>;
+    if (!Array.isArray(pages)) return ids;
+    for (const page of pages) {
+      if (!Array.isArray(page?.fields)) continue;
+      for (const field of page.fields) {
+        const f = field as Record<string, unknown>;
+        if (f?.kind === 'video' && typeof f.videoId === 'number') {
+          ids.push(f.videoId);
+        }
+      }
+    }
+    return ids;
+  }
+
+  private async cleanupVideos(videoIds: number[]): Promise<void> {
+    await Promise.all(
+      videoIds.map((id) =>
+        this.videosService.deleteVideo(id).catch((err) => {
+          this.logger.warn(`Failed to clean up video ${id}`, err);
+        }),
+      ),
+    );
+  }
+
   async deleteForm(formId: number): Promise<void> {
     const form = await this.getForm(formId);
+    const videoIds = this.extractVideoIds(form.schema);
     await this.formRepository.remove(form);
+    if (videoIds.length > 0) {
+      void this.cleanupVideos(videoIds);
+    }
   }
 
   async getFormResponses(formId: number): Promise<FormResponseDto[]> {
