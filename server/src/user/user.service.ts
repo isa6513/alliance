@@ -1279,26 +1279,6 @@ export class UserService {
     return savedInvite;
   }
 
-  async deleteCommunityInvite(inviteId: number, userId: number): Promise<void> {
-    const invite = await this.communityInviteRepository.findOneOrFail({
-      where: { id: inviteId, deletedAt: IsNull() },
-      relations: { invitingUser: true, community: true },
-    });
-    const user = await this.findOneOrFail(userId, { leaderOf: true });
-    if (
-      !(
-        invite.invitingUser?.id === userId ||
-        user.leaderOf.some((leader) => leader.id === invite.community?.id) ||
-        user.admin
-      )
-    ) {
-      throw new BadRequestException();
-    }
-    await this.communityInviteRepository.update(inviteId, {
-      deletedAt: new Date(),
-    });
-  }
-
   async findInviteByCode(
     code: string,
     relations?: Relations<OnetimeInvite>,

@@ -5,12 +5,12 @@ import {
   ProfileDto,
   userCreateCommunityInvite,
   userCreateOnetimeInvite,
-  userDeleteCommunityInvite,
   userDeleteOnetimeInvite,
   userGetCommunityInvites,
   userGetOnetimeInvitesByCommunity,
   userApproveOnetimeInvite,
   userRejectOnetimeInvite,
+  communityDeleteCommunityInvite,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useEffect, useMemo, useState } from "react";
@@ -266,7 +266,7 @@ const CommunityInvitesLeaderTab = ({
   };
 
   const handleDeleteCommunityInvite = (inviteId: number) => {
-    userDeleteCommunityInvite({ path: { inviteId } }).then((response) => {
+    communityDeleteCommunityInvite({ path: { inviteId } }).then((response) => {
       if (response.data) {
         setCommunityInvites((prev) =>
           prev.filter((invite) => invite.id !== inviteId)

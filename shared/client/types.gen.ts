@@ -3377,19 +3377,6 @@ export type UserDeleteOnetimeInviteResponses = {
     200: unknown;
 };
 
-export type UserDeleteCommunityInviteData = {
-    body?: never;
-    path: {
-        inviteId: number;
-    };
-    query?: never;
-    url: '/user/communityInvites/{inviteId}';
-};
-
-export type UserDeleteCommunityInviteResponses = {
-    200: unknown;
-};
-
 export type UserGetIncomingCommunityInvitesForUserData = {
     body?: never;
     path?: never;
@@ -4162,6 +4149,19 @@ export type CommunityGetAllMemberContactInfoAdminResponses = {
 };
 
 export type CommunityGetAllMemberContactInfoAdminResponse = CommunityGetAllMemberContactInfoAdminResponses[keyof CommunityGetAllMemberContactInfoAdminResponses];
+
+export type CommunityDeleteCommunityInviteData = {
+    body?: never;
+    path: {
+        inviteId: number;
+    };
+    query?: never;
+    url: '/community/communityInvites/{inviteId}';
+};
+
+export type CommunityDeleteCommunityInviteResponses = {
+    200: unknown;
+};
 
 export type ActionsJoinData = {
     body?: never;

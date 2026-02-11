@@ -229,4 +229,14 @@ export class CommunityController {
   async getAllMemberContactInfoAdmin() {
     return this.communityService.getAllMemberContactInfoAdmin();
   }
+
+  @Delete('communityInvites/:inviteId')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse()
+  async deleteCommunityInvite(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ) {
+    await this.communityService.deleteCommunityInvite(inviteId, req.user.sub);
+  }
 }

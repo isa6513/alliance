@@ -587,15 +587,6 @@ export class UserController {
     await this.userService.deleteOnetimeInvite(inviteId, req.user.sub);
   }
 
-  @Delete('communityInvites/:inviteId')
-  @UseGuards(CommunityLeaderGuard)
-  @ApiOkResponse()
-  async deleteCommunityInvite(
-    @Param('inviteId', ParseIntPipe) inviteId: number,
-    @Request() req: JwtRequest,
-  ) {
-    await this.userService.deleteCommunityInvite(inviteId, req.user.sub);
-  }
 
   @Get('communityInvites')
   @UseGuards(AuthGuard)

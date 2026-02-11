@@ -1,9 +1,13 @@
 import { BadRequestException } from '@nestjs/common';
 import request from 'supertest';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { EntityNotFoundError } from 'typeorm';
 import { User } from '../src/user/entities/user.entity';
 import { Community } from '../src/community/entities/community.entity';
+import {
+  CommunityInvite,
+  CommunityInviteStatus,
+} from '../src/community/entities/community-invite.entity';
 import {
   CommunityDto,
   CreateCommunityDto,
@@ -31,6 +35,7 @@ describe('Community (e2e)', () => {
   let ctx: TestContext;
   let userRepo: Repository<User>;
   let communityRepo: Repository<Community>;
+  let communityInviteRepo: Repository<CommunityInvite>;
   let communityService: CommunityService;
   let testUser: User;
   let testUserToken: string;
@@ -41,6 +46,7 @@ describe('Community (e2e)', () => {
     ctx = await createTestApp([]);
     userRepo = ctx.dataSource.getRepository(User);
     communityRepo = ctx.dataSource.getRepository(Community);
+    communityInviteRepo = ctx.dataSource.getRepository(CommunityInvite);
     communityService = ctx.app.get(CommunityService);
   }, 50000);
 
@@ -71,9 +77,10 @@ describe('Community (e2e)', () => {
   });
 
   afterEach(async () => {
+    await communityInviteRepo.createQueryBuilder('ci').delete().execute();
     await communityRepo.createQueryBuilder('community').delete().execute();
     await userRepo.delete({
-      id: In([testUser.id, secondUser.id]),
+      id: Not(In([ctx.testUserId, ctx.adminUserId])),
     });
   });
 
@@ -976,6 +983,111 @@ describe('Community (e2e)', () => {
         const ids = result.map((r) => r.id);
         expect(ids).toContain(testUser.id);
         expect(ids).toContain(secondUser.id);
+      });
+    });
+
+    describe('deleteCommunityInvite', () => {
+      it('soft-deletes invite when called by the inviting user', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E DeleteInvite ByInviter',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+        const invite = await communityInviteRepo.save(
+          communityInviteRepo.create({
+            status: CommunityInviteStatus.InviteePending,
+            invitingUser: testUser,
+            invitedUser: secondUser,
+            community,
+          }),
+        );
+
+        await communityService.deleteCommunityInvite(invite.id, testUser.id);
+
+        const found = await communityInviteRepo.findOneOrFail({
+          where: { id: invite.id },
+        });
+        expect(found.deletedAt).not.toBeNull();
+      });
+
+      it('soft-deletes invite when called by a community leader', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E DeleteInvite ByLeader',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+        const invite = await communityInviteRepo.save(
+          communityInviteRepo.create({
+            status: CommunityInviteStatus.InviteePending,
+            invitingUser: secondUser,
+            invitedUser: testUser,
+            community,
+          }),
+        );
+
+        // testUser is leader of the community, not the inviter
+        await communityService.deleteCommunityInvite(invite.id, testUser.id);
+
+        const found = await communityInviteRepo.findOneOrFail({
+          where: { id: invite.id },
+        });
+        expect(found.deletedAt).not.toBeNull();
+      });
+
+      it('throws BadRequestException when user is neither inviter nor leader nor admin', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E DeleteInvite Unauthorized',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+        const invite = await communityInviteRepo.save(
+          communityInviteRepo.create({
+            status: CommunityInviteStatus.InviteePending,
+            invitingUser: testUser,
+            invitedUser: secondUser,
+            community,
+          }),
+        );
+
+        // secondUser is neither the inviter, nor a leader, nor admin
+        await expect(
+          communityService.deleteCommunityInvite(invite.id, secondUser.id),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('throws when invite does not exist', async () => {
+        await expect(
+          communityService.deleteCommunityInvite(999999, testUser.id),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+
+      it('throws when invite is already soft-deleted', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E DeleteInvite AlreadyDeleted',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+        const invite = await communityInviteRepo.save(
+          communityInviteRepo.create({
+            status: CommunityInviteStatus.InviteePending,
+            invitingUser: testUser,
+            invitedUser: secondUser,
+            community,
+            deletedAt: new Date(),
+          }),
+        );
+
+        await expect(
+          communityService.deleteCommunityInvite(invite.id, testUser.id),
+        ).rejects.toThrow(EntityNotFoundError);
       });
     });
 
@@ -1957,6 +2069,111 @@ describe('Community (e2e)', () => {
         '/community/memberContactInfo',
       );
 
+      expect(res.status).toBe(401);
+    });
+
+    it('DELETE /community/communityInvites/:inviteId deletes invite when authenticated as leader and inviter', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP DeleteInvite Leader',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+      const invite = await communityInviteRepo.save(
+        communityInviteRepo.create({
+          status: CommunityInviteStatus.InviteePending,
+          invitingUser: testUser,
+          invitedUser: secondUser,
+          community,
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .delete(`/community/communityInvites/${invite.id}`)
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(200);
+      const found = await communityInviteRepo.findOneOrFail({
+        where: { id: invite.id },
+      });
+      expect(found.deletedAt).not.toBeNull();
+    });
+
+    it('DELETE /community/communityInvites/:inviteId deletes invite when authenticated as admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP DeleteInvite Admin',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+      const invite = await communityInviteRepo.save(
+        communityInviteRepo.create({
+          status: CommunityInviteStatus.InviteePending,
+          invitingUser: testUser,
+          invitedUser: secondUser,
+          community,
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .delete(`/community/communityInvites/${invite.id}`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
+
+      expect(res.status).toBe(200);
+      const found = await communityInviteRepo.findOneOrFail({
+        where: { id: invite.id },
+      });
+      expect(found.deletedAt).not.toBeNull();
+    });
+
+    it('DELETE /community/communityInvites/:inviteId returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP DeleteInvite NoAuth',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+      const invite = await communityInviteRepo.save(
+        communityInviteRepo.create({
+          status: CommunityInviteStatus.InviteePending,
+          invitingUser: testUser,
+          invitedUser: secondUser,
+          community,
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer()).delete(
+        `/community/communityInvites/${invite.id}`,
+      );
+
+      expect(res.status).toBe(401);
+    });
+
+    it('DELETE /community/communityInvites/:inviteId returns 401 when user is not a leader or admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP DeleteInvite NotLeader',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+      const invite = await communityInviteRepo.save(
+        communityInviteRepo.create({
+          status: CommunityInviteStatus.InviteePending,
+          invitingUser: testUser,
+          invitedUser: secondUser,
+          community,
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .delete(`/community/communityInvites/${invite.id}`)
+        .set('Authorization', `Bearer ${secondUserToken}`);
+
+      // CommunityLeaderGuard rejects non-leaders with 401
       expect(res.status).toBe(401);
     });
   });

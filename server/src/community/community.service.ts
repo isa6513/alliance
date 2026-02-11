@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, IsNull, Repository } from 'typeorm';
 import { Community } from './entities/community.entity';
 import { Relations } from 'src/utils/Repository';
 import { ImagesService } from 'src/images/images.service';
@@ -18,6 +18,7 @@ import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { groupUrl } from 'src/search/approutes';
 import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
 import { getContactInfo } from 'src/utils/user';
+import { CommunityInvite } from './entities/community-invite.entity';
 
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
   Object.freeze({
@@ -28,6 +29,8 @@ const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
 @Injectable()
 export class CommunityService {
   constructor(
+    @InjectRepository(CommunityInvite)
+    private readonly communityInviteRepository: Repository<CommunityInvite>,
     @InjectRepository(Community)
     private readonly communityRepository: Repository<Community>,
     @InjectRepository(User)
@@ -589,6 +592,30 @@ export class CommunityService {
     return getContactInfo({
       users: community.users,
       timeZone: leader?.timeZone ?? DEFAULT_TIME_ZONE,
+    });
+  }
+
+  async deleteCommunityInvite(inviteId: number, userId: number): Promise<void> {
+    const invite = await this.communityInviteRepository.findOneOrFail({
+      where: { id: inviteId, deletedAt: IsNull() },
+      relations: { invitingUser: true, community: true },
+    });
+    const user = await this.userRepository.findOneOrFail({
+      where: { id: userId },
+      relations: { leaderOf: true },
+    });
+
+    if (
+      !(
+        invite.invitingUser?.id === userId ||
+        user.leaderOf.some((leader) => leader.id === invite.community?.id) ||
+        user.admin
+      )
+    ) {
+      throw new BadRequestException();
+    }
+    await this.communityInviteRepository.update(inviteId, {
+      deletedAt: new Date(),
     });
   }
 }
