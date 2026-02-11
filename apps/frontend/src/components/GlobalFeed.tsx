@@ -14,9 +14,10 @@ import {
 interface ProfilePicRowProps {
   users: ProfileDto[];
   maxDisplay?: number;
+  showExtraCount?: boolean;
 }
 
-const ProfilePicRow = ({ users, maxDisplay = 20 }: ProfilePicRowProps) => {
+const ProfilePicRow = ({ users, maxDisplay = 20, showExtraCount = false }: ProfilePicRowProps) => {
   const displayUsers = users.slice(0, maxDisplay);
   const extraCount = users.length > maxDisplay ? users.length - maxDisplay : 0;
 
@@ -36,7 +37,7 @@ const ProfilePicRow = ({ users, maxDisplay = 20 }: ProfilePicRowProps) => {
           />
         </Link>
       ))}
-      {extraCount > 0 && (
+      {showExtraCount && extraCount > 0 && (
         <span className="text-zinc-400 ml-1.5">+{extraCount}</span>
       )}
     </div>
@@ -119,7 +120,7 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
   return (
     <div className="py-3">
       <div className="text-zinc-700 mt-1.5">
-        <ProfilePicRow users={item.users.slice(0, 8)} />
+        <ProfilePicRow users={item.users} maxDisplay={8} />
         {isSingle ? (
           <>
             <Link
