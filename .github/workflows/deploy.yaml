@@ -198,6 +198,7 @@ jobs:
       - test-backend-e2e
       - test-backend-unit
       - migrations-drift-check
+      - visual-regression
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: SSH and Deploy frontend SSR on EC2
@@ -305,6 +306,7 @@ jobs:
     needs:
       - dirty-check
       - build-admin-frontend
+      - visual-regression
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Download Admin Build Artifact
@@ -454,6 +456,235 @@ jobs:
           fi
         working-directory: ./server
 
+  visual-regression:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate Yarn 4.x
+        run: corepack prepare yarn@4.9.1 --activate
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Setup npm cache for server
+        if: github.ref_name == 'production'
+        uses: actions/setup-node@v4
+        with: { node-version: 22 }
+
+      - name: Install Yarn Dependencies
+        if: github.ref_name == 'production'
+        run: corepack yarn install --immutable
+
+      - name: Install Backend Dependencies
+        if: github.ref_name == 'production'
+        run: npm ci
+        working-directory: ./server
+
+      - name: Cache Playwright Browsers
+        if: github.ref_name == 'production'
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install Playwright
+        if: github.ref_name == 'production' && steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Take Screenshots
+        if: github.ref_name == 'production'
+        run: corepack yarn workspace @alliance/citesting take
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: citesting
+          ASSETS_BUCKET: ${{ secrets.CI_ASSETS_BUCKET }}
+          NODE_ENV: test
+          SCREENSHOT_OUTPUT_DIR: ${{ github.workspace }}/screenshots/current
+
+      - name: Download Baseline from S3
+        if: github.ref_name == 'production'
+        run: |
+          mkdir -p ${{ github.workspace }}/screenshots/baseline
+          aws s3 sync \
+            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ env.env_name }}/latest/ \
+            ${{ github.workspace }}/screenshots/baseline/ \
+            || echo "No baseline found — first run"
+
+      - name: Compare Screenshots
+        if: github.ref_name == 'production'
+        run: |
+          BASELINE=${{ github.workspace }}/screenshots/baseline
+          if [ "$(ls -A "$BASELINE" 2>/dev/null)" ]; then
+            corepack yarn workspace @alliance/citesting compare \
+              "$BASELINE" \
+              ${{ github.workspace }}/screenshots/current \
+              ${{ github.workspace }}/screenshots/diffs
+          else
+            echo "No baseline screenshots — skipping comparison"
+          fi
+
+      - name: Upload Current Screenshots to S3
+        if: github.ref_name == 'production'
+        run: |
+          aws s3 sync \
+            ${{ github.workspace }}/screenshots/current/ \
+            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ env.env_name }}/${{ github.sha }}/
+
+      - name: AI Review
+        if: github.ref_name == 'production'
+        id: ai-review
+        continue-on-error: true
+        run: |
+          BASELINE=${{ github.workspace }}/screenshots/baseline
+          if [ "$(ls -A "$BASELINE" 2>/dev/null)" ]; then
+            corepack yarn workspace @alliance/citesting ai-review \
+              "$BASELINE" \
+              ${{ github.workspace }}/screenshots/current \
+              ${{ github.workspace }}/screenshots/diffs
+          else
+            echo "No baseline — skipping AI review"
+          fi
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY_CI }}
+          AI_REVIEW_OUTPUT: ${{ github.workspace }}/screenshots/ai-review-results.json
+
+      - name: Notify Slack on Visual Regression
+        if: github.ref_name == 'production' && steps.ai-review.outcome == 'failure'
+        run: |
+          RESULTS="${{ github.workspace }}/screenshots/ai-review-results.json"
+          SHA="${{ github.sha }}"
+          ENV_NAME="${{ env.env_name }}"
+          BASELINE_DIR="${{ github.workspace }}/screenshots/baseline"
+          CURRENT_DIR="${{ github.workspace }}/screenshots/current"
+          TOKEN="${{ secrets.SLACK_BOT_TOKEN }}"
+          CHANNEL="${{ secrets.SLACK_DEPLOY_CHANNEL_ID }}"
+
+          # Upload a file to Slack via v2 API (without channel) and return its permalink
+          # 1. getUploadURLExternal → upload_url + file_id
+          # 2. POST file content to upload_url
+          # 3. completeUploadExternal → permalink
+          upload_to_slack() {
+            local filepath="$1"
+            local title="$2"
+            local filesize
+            filesize=$(stat --printf="%s" "$filepath" 2>/dev/null || stat -f%z "$filepath")
+            local filename
+            filename=$(basename "$filepath")
+
+            # Step 1: Get upload URL
+            local url_resp
+            url_resp=$(curl -s -X POST \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-type: application/x-www-form-urlencoded" \
+              --data-urlencode "filename=${filename}" \
+              --data-urlencode "length=${filesize}" \
+              https://slack.com/api/files.getUploadURLExternal)
+
+            local upload_url file_id
+            upload_url=$(echo "$url_resp" | jq -r '.upload_url // empty')
+            file_id=$(echo "$url_resp" | jq -r '.file_id // empty')
+
+            if [ -z "$upload_url" ] || [ -z "$file_id" ]; then
+              echo ""
+              return
+            fi
+
+            # Step 2: Upload file content
+            curl -s -X POST \
+              -F "file=@${filepath}" \
+              "$upload_url" > /dev/null
+
+            # Step 3: Complete upload (no channel → unpublished)
+            local complete_resp
+            complete_resp=$(curl -s -X POST \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-type: application/json" \
+              --data "$(jq -n --arg id "$file_id" --arg title "$title" \
+                '{files: [{id: $id, title: $title}]}')" \
+              https://slack.com/api/files.completeUploadExternal)
+
+            echo "$complete_resp" | jq -r '.files[0].permalink // empty'
+          }
+
+          APPROVE_URL="${{ github.server_url }}/${{ github.repository }}/actions/workflows/approve-visual-baseline.yaml?environment=${ENV_NAME}&sha=${SHA}"
+
+          # Header text
+          NL=$'\n'
+          TEXT="*Visual Regression Detected (${ENV_NAME})*${NL}"
+          TEXT+="${ENV_NAME^} deploy blocked by visual regression check.${NL}"
+          TEXT+="*Commit:* \`${SHA}\`${NL}"
+          TEXT+="<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>  |  <${APPROVE_URL}|Approve baseline>${NL}"
+
+          # Process each failure
+          FAILURES=$(cat "$RESULTS" | jq -c '.[] | select(.status == "fail")')
+          while IFS= read -r fail; do
+            PAGE=$(echo "$fail" | jq -r '.page')
+            FILE="${PAGE}.png"
+
+            TEXT+="${NL}*${PAGE}*${NL}"
+
+            # Upload baseline and current images → collect permalinks
+            GALLERY=""
+            if [ -f "$BASELINE_DIR/$FILE" ]; then
+              PLINK=$(upload_to_slack "$BASELINE_DIR/$FILE" "${PAGE} — Baseline")
+              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
+            fi
+            if [ -f "$CURRENT_DIR/$FILE" ]; then
+              PLINK=$(upload_to_slack "$CURRENT_DIR/$FILE" "${PAGE} — Current")
+              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
+            fi
+
+            [ -n "$GALLERY" ] && TEXT+="${NL}${GALLERY}${NL}"
+          done <<< "$FAILURES"
+
+          # Post the message with gallery permalinks via chat.postMessage
+          curl -s -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-type: application/json" \
+            --data "$(jq -n --arg channel "$CHANNEL" --arg text "$TEXT" \
+              '{channel: $channel, text: $text, mrkdwn: true, unfurl_links: true, unfurl_media: true}')" \
+            https://slack.com/api/chat.postMessage
+
+      - name: Promote to Latest Baseline
+        if: github.ref_name == 'production' && steps.ai-review.outcome != 'failure'
+        run: |
+          aws s3 sync \
+            ${{ github.workspace }}/screenshots/current/ \
+            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ env.env_name }}/latest/ \
+            --delete
+
+      - name: Fail if regressions detected
+        if: github.ref_name == 'production' && steps.ai-review.outcome == 'failure'
+        run: |
+          echo "AI review detected visual regressions — blocking deploy"
+          exit 1
+
   deploy-nest-backend:
     runs-on: ubuntu-latest
     needs:
@@ -463,6 +694,7 @@ jobs:
       - test-backend-unit
       - build-react-app
       - migrations-drift-check
+      - visual-regression
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Download NestJS Build Artifact

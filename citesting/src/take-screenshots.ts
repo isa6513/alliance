@@ -15,7 +15,7 @@ type SpawnOptions = {
 const repoRoot = path.resolve(__dirname, "..", "..");
 const backendPort = Number(process.env.BACKEND_PORT ?? "3005");
 const frontendPort = Number(process.env.FRONTEND_PORT ?? "5173");
-const frontendMode = (process.env.FRONTEND_MODE ?? "dev").toLowerCase();
+const frontendMode = (process.env.FRONTEND_MODE ?? "prod").toLowerCase();
 const frontendBuildMode = process.env.FRONTEND_BUILD_MODE ?? "development";
 const baseUrl =
   process.env.FRONTEND_URL ?? `http://localhost:${frontendPort}`;
