@@ -1,10 +1,14 @@
-import { ActionUpdateDto } from "@alliance/shared/client";
+import { ActionDto, ActionUpdateDto } from "@alliance/shared/client";
 import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
+import ActionCompletedBarWithInfo from "../../pages/app/ActionCompletedBarWithInfo";
+import Card from "@alliance/sharedweb/ui/Card";
 
 interface TimelineItemProps {
   highlighted?: boolean;
   title?: string;
   description: string;
+  action: ActionDto;
+  showCompletedBar?: boolean;
   updates?: ActionUpdateDto[];
   time?: string;
 }
@@ -13,6 +17,8 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   highlighted = false,
   title,
   description,
+  action,
+  showCompletedBar = false,
   updates,
   time,
 }: TimelineItemProps) => {
@@ -21,9 +27,9 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   );
   return (
     <div className="flex flex-col gap-y-2">
-      <div className="flex flex-col md:flex-row md:items-center md:gap-x-2 mt-px">
+      <div className="flex flex-row items-center gap-x-2 mt-px">
         <p
-          className={`${highlighted ? "font-medium text-green" : "text-black"}`}
+          className={`font-medium ${highlighted ? "text-green" : "text-black"}`}
         >
           {title}
         </p>
@@ -31,6 +37,17 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       </div>
       {description && (
         <p className="mt-1 text-zinc-500 text-sm">{description}</p>
+      )}
+      {showCompletedBar && (
+        <Card>
+          <ActionCompletedBarWithInfo
+            friendActivities={[]}
+            action={action}
+            textSize="base"
+            textColor="zinc-800"
+            showInfoTooltip
+          />
+        </Card>
       )}
       {updates && updates.length > 0 && (
         <div className="flex flex-col gap-y-1.5 mt-2">

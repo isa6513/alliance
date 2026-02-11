@@ -91,7 +91,7 @@ const ActionContents = () => {
       </div>
       <div className="flex flex-col gap-y-8 sm:gap-y-12">
         {loggedInMode && <ActionEventsPanel action={action} />}
-        {loggedInMode && action.status !== "planned" && (
+        {loggedInMode && action.status === "member_action" && (
           <div className="flex flex-col gap-y-4 md:hidden">
             <ActionCompletedBarWithInfo
               friendActivities={[]}

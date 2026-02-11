@@ -92,6 +92,8 @@ export default function ActionPage() {
     );
   }
 
+  const showSidebar = !publicMode && !action.publicOnly && action.status === "member_action";
+
   return (
     <>
       {publicMode && <PrelaunchNavbar transparent={false} absolute={false} />}
@@ -114,7 +116,7 @@ export default function ActionPage() {
             }
           />
         </div>
-        {!publicMode && !action.publicOnly && (
+        {showSidebar && (
           <div className="hidden lg:flex flex-col w-[320px] xl:w-[340px] rounded gap-y-12 border-l border-zinc-200 pl-4 xl:pl-10">
             <div>
               <ActionCompletedBarWithInfo
