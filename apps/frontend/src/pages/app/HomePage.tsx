@@ -57,8 +57,6 @@ const HomePage = () => {
     completedActions,
   } = useHomePageActions(actions);
 
-  console.log('currentTask', currentTask);
-
   const numTodo = todoActions.filter(showActionInSidebarList).length;
 
   const isLargeScreen = useMediaQuery("(min-width: 1150px)");
