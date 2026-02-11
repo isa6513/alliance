@@ -1,7 +1,8 @@
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import { useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, href, useNavigate } from "react-router";
+import { ActionDto } from "@alliance/shared/client";
+import { Link, href } from "react-router";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
 import GlobalFeed from "../../components/GlobalFeed";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -32,7 +33,6 @@ import HomeNotifsCard from "../../components/HomeNotifsCard";
 import { useTaskActionsData } from "../../lib/useTaskActionsData";
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { actions, loading, handleDismissAction } = useTaskActionsData();
 
@@ -201,12 +201,20 @@ const HomePage = () => {
             dismissProps={dismissProps}
             handleDismiss={() => handleDismissAction(currentTask.id)}
             userRelation={currentTask.userRelation}
+            onCompleteAction={() => {
+              queryClient.setQueryData<ActionDto[] | undefined>(["actions"], (prev) =>
+                prev?.map((action) =>
+                  action.id === currentTask.id
+                    ? { ...action, userRelation: "completed" as const }
+                    : action
+                )
+              );
+            }}
             onUpdateActionState={() => {
               queryClient.invalidateQueries({ queryKey: ["actions"] });
               mainScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
               document.scrollingElement?.scrollTo({ top: 0, behavior: "auto" });
               window.scrollTo({ top: 0, behavior: "auto" });
-              navigate(href("/tasks"));
             }}
           />
         ) : (
@@ -238,7 +246,6 @@ const HomePage = () => {
     loading,
     currentTask,
     user,
-    navigate,
     handleDismissAction,
     showingTasksList,
     tasksListContent,

@@ -19,6 +19,7 @@ import useActivities, {
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   showDetails?: boolean;
   className?: string;
+  onCompleteAction: () => void;
 }
 
 enum LargeActionCardState {
@@ -36,6 +37,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   dismissProps,
   userRelation,
   onUpdateActionState,
+  onCompleteAction,
   handleDismiss,
   showDetails = true,
   className = "",
@@ -63,6 +65,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       onUpdateActionState();
     }, 200);
   }, [onUpdateActionState]);
+
+  const handleCompleteAction = useCallback(() => {
+    onCompleteAction();
+    handleUpdateActionState();
+  }, [onCompleteAction, handleUpdateActionState]);
 
   const goToActionPage = useCallback(
     (e: React.MouseEvent) => {
@@ -94,8 +101,8 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       )}
       <Card
         className={`p-4 sm:p-6 transition-all duration-300 ${state === LargeActionCardState.Closed
-            ? "opacity-0 overflow-hidden"
-            : "opacity-100"
+          ? "opacity-0 overflow-hidden"
+          : "opacity-100"
           } ${className} w-full relative 
          ${state === LargeActionCardState.Minified ? "pb-4" : ""} ${dismissProps ? "rounded-t-none" : "rounded"
           }
@@ -146,7 +153,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             <ActionTaskPanel
               action={action}
               userRelation={userRelation}
-              onCompleteAction={handleUpdateActionState}
+              onCompleteAction={handleCompleteAction}
               onJoinAction={handleUpdateActionState}
               onDeclineAction={handleUpdateActionState}
               onOptOutAction={handleUpdateActionState}
