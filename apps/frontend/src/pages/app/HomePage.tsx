@@ -1,5 +1,6 @@
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import { useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, href, useNavigate } from "react-router";
 import BasicErrorMessage from "../../components/BasicErrorMessage";
 import GlobalFeed from "../../components/GlobalFeed";
@@ -32,6 +33,7 @@ import { useTaskActionsData } from "../../lib/useTaskActionsData";
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { actions, loading, handleDismissAction } = useTaskActionsData();
 
   const { user } = useAuth();
@@ -54,6 +56,8 @@ const HomePage = () => {
     remainingTasksEstimatedTimeCurrentWeek,
     completedActions,
   } = useHomePageActions(actions);
+
+  console.log('currentTask', currentTask);
 
   const numTodo = todoActions.filter(showActionInSidebarList).length;
 
@@ -200,6 +204,7 @@ const HomePage = () => {
             handleDismiss={() => handleDismissAction(currentTask.id)}
             userRelation={currentTask.userRelation}
             onUpdateActionState={() => {
+              queryClient.invalidateQueries({ queryKey: ["actions"] });
               mainScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
               document.scrollingElement?.scrollTo({ top: 0, behavior: "auto" });
               window.scrollTo({ top: 0, behavior: "auto" });
@@ -240,6 +245,7 @@ const HomePage = () => {
     showingTasksList,
     tasksListContent,
     isLargeScreen,
+    queryClient,
   ]);
 
   const sidebarContent = useMemo(() => {

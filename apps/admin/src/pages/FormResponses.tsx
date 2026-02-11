@@ -16,7 +16,7 @@ import type {
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import { CirclePlay } from "lucide-react";
 import { CardStyle } from "@alliance/shared/styles/card";
 import FormResponseStatistics from "../components/FormResponseStatistics";
@@ -158,7 +158,6 @@ const matchesResponseFilter = (
 };
 const FormResponses: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
-  const navigate = useNavigate();
 
   const [form, setForm] = useState<FormWithSchema | null>(null);
   const [responses, setResponses] = useState<FormResponseDto[]>([]);
