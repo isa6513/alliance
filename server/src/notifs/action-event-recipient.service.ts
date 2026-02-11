@@ -18,10 +18,6 @@ import {
   ReminderGroup,
 } from 'src/actions/entities/reminder-group.entity';
 import { ActionSuite } from 'src/actions/entities/action-suite.entity';
-import {
-  ContractEvent,
-  ContractEventType,
-} from 'src/user/entities/contract-event.entity';
 import { computeIsAwayInRange } from 'src/utils/user';
 import { findLeast } from 'src/utils/filter';
 
@@ -34,25 +30,6 @@ export class ActionEventRecipientService {
     private readonly actionRepository: Repository<Action>,
     private readonly userService: UserService,
   ) {}
-
-  private isContractActiveAtDate(
-    contractEvents: ContractEvent[] | null,
-    date: Date,
-  ): boolean {
-    if (contractEvents === null || contractEvents === undefined) {
-      throw new Error('user contract events not loaded');
-    }
-
-    const lastEventBefore = contractEvents
-      .filter((event) => event.date <= date)
-      .reduce(
-        (a: ContractEvent | null, b) =>
-          a === null || a.date.getTime() < b.date.getTime() ? b : a,
-        null,
-      );
-
-    return lastEventBefore?.type === ContractEventType.SIGNED;
-  }
 
   computeShouldParticipate(params: {
     eventDate: Date;
@@ -311,16 +288,17 @@ export class ActionEventRecipientService {
     type: ActionEventNotifType,
     suite?: ActionSuite,
   ): Promise<User[]> {
-    const uncompleted = (await this.findFilteredUsersForEvent(
-      event,
-      deadlineEvent,
-      ActionEventNotifType.PersonalReminder,
-      suite,
-    )).map((user) => user.id);
-    
-    const leaders = await this.userService.findLeadersOfCommunitiesWithUsers(
-      uncompleted,
-    );
+    const uncompleted = (
+      await this.findFilteredUsersForEvent(
+        event,
+        deadlineEvent,
+        ActionEventNotifType.PersonalReminder,
+        suite,
+      )
+    ).map((user) => user.id);
+
+    const leaders =
+      await this.userService.findLeadersOfCommunitiesWithUsers(uncompleted);
 
     return leaders.filter(
       (leader) => leader.remindAboutUncompletedGroupMembers,
