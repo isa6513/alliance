@@ -1,6 +1,23 @@
+import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 import request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
+
+jest.mock('child_process', () => ({
+  spawn: jest.fn(() => {
+    const proc = new EventEmitter() as EventEmitter & {
+      stdout: EventEmitter;
+      stderr: EventEmitter;
+    };
+    proc.stdout = new EventEmitter();
+    proc.stderr = new EventEmitter();
+    process.nextTick(() => {
+      proc.stdout.emit('data', '1.5'); // ffprobe duration
+      proc.emit('close', 0);
+    });
+    return proc;
+  }),
+}));
 import { VideosModule } from '../src/videos/videos.module';
 import { Repository } from 'typeorm';
 import { Video } from '../src/videos/entities/video.entity';
