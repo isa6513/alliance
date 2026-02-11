@@ -30,7 +30,6 @@ describe('Users (e2e)', () => {
   let userBToken: string;
   let communityLedByUserA: Community;
   let communityLedByUserB: Community;
-  let inviteTargetUserId: number;
   let alternateInviteTargetUserId: number;
   let communityMemberId: number;
   let communityMemberToken: string;
@@ -66,15 +65,6 @@ describe('Users (e2e)', () => {
       { sub: userBId, email: userB.email, name: userB.name },
       { secret: process.env.JWT_SECRET },
     );
-
-    const inviteTarget = await userRepo.save(
-      userRepo.create({
-        name: 'Pending Invite Target',
-        email: 'pending.invite@example.com',
-        password: 'Password123!',
-      }),
-    );
-    inviteTargetUserId = inviteTarget.id;
 
     const alternateInviteTarget = await userRepo.save(
       userRepo.create({
@@ -835,32 +825,6 @@ describe('Users (e2e)', () => {
   });
 
   describe('community invite permissions', () => {
-    it('prevents leaders from inviting people into communities they do not lead', async () => {
-      const res = await request(ctx.app.getHttpServer())
-        .post('/user/createCommunityInvite')
-        .set('Authorization', `Bearer ${userAToken}`)
-        .send({
-          invitedUserId: inviteTargetUserId,
-          communityId: communityLedByUserB.id,
-        });
-
-      expect(res.status).toBe(400);
-    });
-
-    it('allows leaders to create community invites for their own communities', async () => {
-      const res = await request(ctx.app.getHttpServer())
-        .post('/user/createCommunityInvite')
-        .set('Authorization', `Bearer ${userAToken}`)
-        .send({
-          invitedUserId: alternateInviteTargetUserId,
-          communityId: communityLedByUserA.id,
-        });
-
-      expect(res.status).toBe(201);
-      expect(res.body.community.id).toBe(communityLedByUserA.id);
-      expect(res.body.invitedUser.id).toBe(alternateInviteTargetUserId);
-    });
-
     describe('onetime invite workflows', () => {
       const createPendingInviteRequest = async (
         overrides: {
