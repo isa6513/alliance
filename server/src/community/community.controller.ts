@@ -348,4 +348,14 @@ export class CommunityController {
   ): Promise<void> {
     await this.communityService.acceptCommunityInvite(inviteId, req.user.sub);
   }
+
+  @Post('communityInvites/:inviteId/reject')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async rejectCommunityInvite(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ) {
+    await this.communityService.rejectCommunityInvite(inviteId, req.user.sub);
+  }
 }

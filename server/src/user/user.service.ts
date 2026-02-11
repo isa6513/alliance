@@ -41,7 +41,6 @@ import { CreateAwayRangeDto, UpdateAwayRangeDto } from './dto/away-range.dto';
 import { Temporal } from '@js-temporal/polyfill';
 import {
   CommunityInvite,
-  CommunityInviteStatus,
 } from 'src/community/entities/community-invite.entity';
 import { ConversationService } from 'src/messaging/conversation.service';
 import {
@@ -1315,32 +1314,6 @@ export class UserService {
     await this.onetimeInviteRepository.update(inviteId, {
       status: OnetimeInviteStatus.LINK_USED,
       usedAt: new Date(),
-    });
-  }
-
-  async rejectCommunityInvite(inviteId: number, userId: number): Promise<void> {
-    const invite = await this.communityInviteRepository.findOneOrFail({
-      where: { id: inviteId, deletedAt: IsNull() },
-      relations: { invitedUser: true, invitingUser: true, community: true },
-    });
-    if (invite.invitedUser.id !== userId) {
-      throw new BadRequestException();
-    }
-    if (invite.status !== CommunityInviteStatus.InviteePending) {
-      throw new BadRequestException();
-    }
-    invite.status = CommunityInviteStatus.InviteeRejected;
-    await this.communityInviteRepository.save(invite);
-
-    await this.notifsService.sendNotif({
-      user: invite.invitingUser!,
-      category: NotificationCategory.CommunityInviteRejected,
-      message: `${invite.invitedUser?.name} declined your invitation to join your group (${invite.community.name})`,
-      webAppLocation: groupUrl({
-        tab: 'invites',
-        communityId: invite.community.id,
-      }),
-      associatedUsers: [invite.invitedUser],
     });
   }
 

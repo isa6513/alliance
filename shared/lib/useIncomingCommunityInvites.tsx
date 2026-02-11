@@ -11,7 +11,7 @@ import {
   communityAcceptCommunityInvite,
   communityGetIncomingCommunityInvitesForUser,
   CommunityInviteDto,
-  userRejectCommunityInvite,
+  communityRejectCommunityInvite,
 } from "@alliance/shared/client";
 
 type IncomingCommunityInvitesContext = {
@@ -68,7 +68,9 @@ export const IncomingCommunityInvitesProvider = ({
 
   const declineCommunityInvite = useCallback(
     async (inviteId: number) => {
-      const response = await userRejectCommunityInvite({ path: { inviteId } });
+      const response = await communityRejectCommunityInvite({
+        path: { inviteId },
+      });
       if (response.data) {
         setInvites((prev) =>
           prev.map((invite) => ({

@@ -1940,4 +1940,104 @@ describe('Community (e2e)', () => {
       secondUser.id,
     );
   });
+
+  it('POST /community/communityInvites/:inviteId/reject rejects invite when authenticated as invited user', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP RejectInvite',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/reject`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(201);
+    const updatedInvite = await communityInviteRepo.findOneOrFail({
+      where: { id: invite.id },
+    });
+    expect(updatedInvite.status).toBe(CommunityInviteStatus.InviteeRejected);
+  });
+
+  it('POST /community/communityInvites/:inviteId/reject returns 401 when unauthenticated', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP RejectInvite NoAuth',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer()).post(
+      `/community/communityInvites/${invite.id}/reject`,
+    );
+
+    expect(res.status).toBe(401);
+  });
+
+  it('POST /community/communityInvites/:inviteId/reject returns 400 when user is not the invited user', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP RejectInvite WrongUser',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/reject`)
+      .set('Authorization', `Bearer ${testUserToken}`);
+
+    expect(res.status).toBe(400);
+  });
+
+  it('POST /community/communityInvites/:inviteId/reject returns 400 when invite is not InviteePending', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP RejectInvite WrongStatus',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.RequestPending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/reject`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(400);
+  });
 });
