@@ -68,38 +68,23 @@ export function EditableVideoBlock({
     setUploadError(null);
     setProcessingStatus(null);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+    const res = await videosUploadVideo({ body: { file } });
 
-      const res = await videosUploadVideo({ body: { file } });
-
-      if (!res.response.ok) {
-        setUploadError(`Upload failed with status ${res.response.status}`);
-      }
-
-      const data = res.data;
-      if (data) {
-        update({ src: data.key, videoId: data.id });
-        setProcessingStatus("processing");
-      } else {
-        setUploadError("Upload failed");
-      }
-    } catch (error) {
-      console.error("Failed to upload video:", error);
-      const isNetworkError =
-        error instanceof TypeError && /network|fetch/i.test(error.message);
-      setUploadError(
-        isNetworkError
-          ? "Upload failed — file may be too large."
-          : error instanceof Error
-            ? error.message
-            : "Failed to upload video"
-      );
-    } finally {
+    if (!res.response.ok) {
+      setUploadError(`Upload failed with status ${res.response.status}`);
       setIsUploading(false);
+      return;
     }
-  };
+
+    const data = res.data;
+    if (data) {
+      update({ src: data.key, videoId: data.id });
+      setProcessingStatus("processing");
+    } else {
+      setUploadError("Upload failed");
+    }
+    setIsUploading(false);
+  }
 
   return (
     <DisplayBlockWrapper
