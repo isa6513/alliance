@@ -10,7 +10,7 @@ const HomeNotifsCard = () => {
 
   const priority = notifications
     .filter((notification) => notification.priority === "high")
-    .filter((notification) => !notification.readAt);
+    .filter((notification) => !notification.readAt || notification.category === 'action_update');
 
   if (priority.length === 0) {
     return null;
@@ -22,7 +22,7 @@ const HomeNotifsCard = () => {
       className="gap-2 max-w-[500px] lg:max-w-[550px] mt-5 p-2!"
     >
       <div className="flex flex-row justify-between items-center p-3 pb-0">
-        <p className="text-zinc-500 text-base">Recent notifications</p>
+        <p className="text-zinc-500 text-base">Recent happenings</p>
         <Link
           to={href("/notifications")}
           className="text-sm text-green hover:underline"
@@ -45,7 +45,7 @@ const HomeNotifsCard = () => {
             >
               <NotificationText
                 notification={notification}
-                handleNotifClick={() => () => {}}
+                handleNotifClick={() => () => { }}
                 className="py-2"
               />
               <ArrowRight size="16" className="shrink-0 text-green mx-2" />
