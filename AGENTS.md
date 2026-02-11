@@ -2,11 +2,11 @@
 
 ### Server
 
-For all controller endpoints, ensure the function has an `@ApiOkResponse({ type:  })` decorator to properly specify the openapi output, and ensure that the function returns that same DTO type.
+For all controller endpoints, ensure the function has an `@ApiOkResponse({ type:  })` decorator to properly specify the openapi output (omit type if returning void), and ensure that the function returns that same DTO type.
 
 For DTOs, use mapped types based on database entities rather than redefining values, e.g. `SampleDto extends OmitType(SampleEntity, ['sample']) {}`. Use @ApiPropertyOptional for all optional (? marked) properties rather than setting nullable
 
-For new endpoints, use either @AuthGuard or @AdminGuard depending on the appropriate level of security.
+For new endpoints, use either @AuthGuard, @AdminGuard, or @CommunityLeaderGuard depending on the appropriate level of security.
 
 Test server code with `npm run test:agents` which runs the end to end tests with a custom postgres instance.
 
