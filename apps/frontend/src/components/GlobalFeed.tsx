@@ -119,7 +119,7 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
   return (
     <div className="py-3">
       <div className="text-zinc-700 mt-1.5">
-        <ProfilePicRow users={item.users} />
+        <ProfilePicRow users={item.users.slice(0, 8)} />
         {isSingle ? (
           <>
             <Link
@@ -148,7 +148,7 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
             opacity: expanded ? 1 : 0,
           }}
         >
-          <div ref={contentRef} className="pt-3 pl-2 space-y-1">
+          <div ref={contentRef} className="pt-3 pl-2 space-y-1 max-h-80 overflow-y-auto">
             {item.users.map((user) => (
               <Link
                 key={user.id}

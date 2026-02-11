@@ -3199,7 +3199,7 @@ export class ActionsService {
 
       if (uniqueNewMembers.size > 0 && latestMemberDate) {
         const newMembers: GlobalFeedNewMembersDto = {
-          users: Array.from(uniqueNewMembers.values()).slice(0, 8),
+          users: Array.from(uniqueNewMembers.values()).slice(0, 20),
           count: uniqueNewMembers.size,
         };
 
