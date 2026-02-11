@@ -1320,46 +1320,6 @@ export class UserService {
     });
   }
 
-  async rejectCommunityInviteRequest(
-    inviteId: number,
-    userId: number,
-  ): Promise<void> {
-    const userP = this.findOneOrFail(userId);
-    const invite = await this.communityInviteRepository.findOneOrFail({
-      where: { id: inviteId, deletedAt: IsNull() },
-      relations: { invitedUser: true, invitingUser: true, community: true },
-    });
-
-    if (invite.status !== CommunityInviteStatus.RequestPending) {
-      throw new BadRequestException(
-        `Invite is not a pending request. Status: ${JSON.stringify(
-          invite.status,
-        )}`,
-      );
-    }
-
-    const user = await userP;
-    if (!user.leaderOfIds.some((cid) => cid === invite.community.id)) {
-      throw new BadRequestException(
-        `User is not a leader of community ${invite.community.id}`,
-      );
-    }
-
-    invite.status = CommunityInviteStatus.RequestRejected;
-    await this.communityInviteRepository.save(invite);
-
-    if (invite.invitingUser) {
-      await this.notifsService.sendNotif({
-        user: invite.invitingUser,
-        category: NotificationCategory.CommunityInviteRequestRejected,
-        message: `Your request to invite ${invite.invitedUser.name} was rejected`,
-        webAppLocation: groupUrl({
-          tab: 'groups',
-        }),
-        associatedUsers: [user],
-      });
-    }
-  }
 
   async findCommunityInvites(
     communityId: number,

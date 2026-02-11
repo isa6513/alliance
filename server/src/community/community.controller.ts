@@ -297,4 +297,17 @@ export class CommunityController {
       ),
     );
   }
+
+  @Post('communityInvites/:inviteId/rejectRequest')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse()
+  async rejectCommunityInviteRequest(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ): Promise<void> {
+    await this.communityService.rejectCommunityInviteRequest(
+      inviteId,
+      req.user.sub,
+    );
+  }
 }
