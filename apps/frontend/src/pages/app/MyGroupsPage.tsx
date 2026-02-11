@@ -27,19 +27,18 @@ import { useAuth } from "../../lib/AuthContext";
 import CommunityInviteList from "../../components/CommunityInviteList";
 import CommunityCreateForm from "../../components/CommunityCreateForm";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
+import { useMyCommunities } from "../../lib/useMyCommunities";
 
 export type MyGroupsPageProps = {
-  communities: CommunityDto[] | null;
   onSelectCommunity: (communityId: number | null | undefined) => void;
   onBack?: () => void;
 };
 
-const MyGroupsPage = ({
-  communities,
-  onSelectCommunity,
-  onBack,
-}: MyGroupsPageProps) => {
+const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
   const { user, refreshUser } = useAuth();
+  const { communities, removeCommunity } = useMyCommunities({
+    selectedCommunityId: null,
+  });
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [leavingCommunityId, setLeavingCommunityId] = useState<number | null>(
     null
@@ -187,9 +186,11 @@ const MyGroupsPage = ({
       if (response.data) {
         onSelectCommunity(null);
         setLeavingCommunityId(null);
+        removeCommunity(community.id);
+
       }
     },
-    [onSelectCommunity]
+    [onSelectCommunity, removeCommunity]
   );
 
   const handleRequestAssignment = useCallback(

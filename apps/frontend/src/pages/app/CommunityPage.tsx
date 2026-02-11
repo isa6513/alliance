@@ -399,7 +399,6 @@ const CommunityPage = () => {
         }
       }}
       onBack={() => setParams({ tab: null })}
-      communities={communities}
     />
   );
 
