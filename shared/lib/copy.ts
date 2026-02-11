@@ -1,8 +1,8 @@
 export const noTasksToDoRightNow = "No tasks to do right now";
 export const noTasksContractSuspended =
-  "You will not be given new tasks while your contract is suspended.";
+  "You will not be assigned tasks while your contract is suspended.";
 export const taskNotAssigned =
-  "You have not been assigned to complete this task - no action is needed.";
+  "You have not been assigned this task - no action is needed.";
 export const taskWithdrew = "You withdrew from this action.";
 export const taskCompleted = "You've completed this task.";
 export const taskDeadlinePassed = "The deadline for member action has passed.";
