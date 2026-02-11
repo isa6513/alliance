@@ -29,6 +29,7 @@ import { MessagingModule } from './messaging/messaging.module';
 import { PushModule } from './push/push.module';
 import { SlackModule } from './slack/slack.module';
 import { CommunityModule } from './community/community.module';
+import { VideosModule } from './videos/videos.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { CommunityModule } from './community/community.module';
     ScheduleModule.forRoot(),
     ActionsModule,
     ImagesModule,
+    VideosModule,
     ForumModule,
     NotifsModule,
     GeoModule,

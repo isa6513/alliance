@@ -2034,6 +2034,23 @@ export type UpdatePostAuthorsDto = {
     authorIds: Array<number>;
 };
 
+export type UploadVideoResponseDto = {
+    id: number;
+    key: string;
+    status: string;
+};
+
+export type VideoStatusResponseDto = {
+    id: number;
+    key: string;
+    status: string;
+    duration?: number;
+};
+
+export type DeleteVideoResponseDto = {
+    deleted: boolean;
+};
+
 export type CitySearchDto = {
     id: number;
     name: string;
@@ -5550,6 +5567,65 @@ export type ForumUpdatePostAuthorsResponses = {
 };
 
 export type ForumUpdatePostAuthorsResponse = ForumUpdatePostAuthorsResponses[keyof ForumUpdatePostAuthorsResponses];
+
+export type VideosUploadVideoData = {
+    body: {
+        file?: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/videos/upload';
+};
+
+export type VideosUploadVideoResponses = {
+    200: UploadVideoResponseDto;
+};
+
+export type VideosUploadVideoResponse = VideosUploadVideoResponses[keyof VideosUploadVideoResponses];
+
+export type VideosGetVideoStatusData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/videos/{id}/status';
+};
+
+export type VideosGetVideoStatusResponses = {
+    200: VideoStatusResponseDto;
+};
+
+export type VideosGetVideoStatusResponse = VideosGetVideoStatusResponses[keyof VideosGetVideoStatusResponses];
+
+export type VideosStreamVideoFileData = {
+    body?: never;
+    path: {
+        id: number;
+        filename: string;
+    };
+    query?: never;
+    url: '/videos/{id}/{filename}';
+};
+
+export type VideosStreamVideoFileResponses = {
+    200: unknown;
+};
+
+export type VideosDeleteVideoData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/videos/{id}';
+};
+
+export type VideosDeleteVideoResponses = {
+    200: DeleteVideoResponseDto;
+};
+
+export type VideosDeleteVideoResponse = VideosDeleteVideoResponses[keyof VideosDeleteVideoResponses];
 
 export type GeoSearchCityData = {
     body?: never;

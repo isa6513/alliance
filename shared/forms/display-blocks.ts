@@ -9,6 +9,7 @@ export type DisplayKind =
   | "spacer" // vertical space
   | "html" // controlled/allowlisted HTML snippet
   | "image" // decorative image
+  | "video" // video player (HLS)
   | "quote" // quote block
   | "biglink"; // prominent link card
 
@@ -68,6 +69,13 @@ export type ImageBlock = BaseBlock & {
   caption?: string;
 };
 
+export type VideoBlock = BaseBlock & {
+  kind: "video";
+  src: string; // S3 key prefix, e.g. "videos/1707564123456"
+  videoId?: number; // DB id for status polling during processing
+  caption?: string;
+};
+
 export type BigLinkBlock = BaseBlock & {
   kind: "biglink";
   text: string;
@@ -83,6 +91,7 @@ export type DisplayBlock =
   | SpacerBlock
   | HtmlBlock
   | ImageBlock
+  | VideoBlock
   | BigLinkBlock;
 
 export type ManualDisplayBlockContent = Omit<

@@ -36,6 +36,7 @@ export function ElementSelect({
     "spacer",
     "html",
     "image",
+    "video",
     "quote",
     "biglink",
   ];
@@ -62,8 +63,8 @@ export function ElementSelect({
                   {type === "custom"
                     ? "Custom Component Field"
                     : type === "textarea"
-                    ? "Text Field"
-                    : `${type.charAt(0).toUpperCase() + type.slice(1)} Field`}
+                      ? "Text Field"
+                      : `${type.charAt(0).toUpperCase() + type.slice(1)} Field`}
                 </button>
               ))}
             </div>

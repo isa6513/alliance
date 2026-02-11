@@ -5,6 +5,7 @@ export { EditableDividerBlock } from './EditableDividerBlock';
 export { EditableSpacerBlock } from './EditableSpacerBlock';
 export { EditableHtmlBlock } from './EditableHtmlBlock';
 export { EditableImageBlock } from './EditableImageBlock';
+export { EditableVideoBlock } from './EditableVideoBlock';
 export { EditableBigLinkBlock } from './EditableBigLinkBlock';
 export type { BaseDisplayBlockProps } from './types';
 export { DisplayBlockWrapper } from './DisplayBlockWrapper';

@@ -6,6 +6,7 @@ import { Link } from "react-router";
 import Card from "../ui/Card";
 import { MessagesSquare } from "lucide-react";
 import { CardStyle } from "@alliance/shared/styles/card";
+import VideoPlayer from "./VideoPlayer";
 
 type Props = {
   block: DisplayBlock;
@@ -107,6 +108,15 @@ export default function RenderDisplayBlock({ block }: Props) {
         </figure>
       );
     }
+
+    case "video":
+      return (
+        <VideoPlayer
+          src={block.src}
+          videoId={block.videoId}
+          caption={block.caption}
+        />
+      );
 
     case "quote":
       return (

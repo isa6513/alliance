@@ -27,6 +27,7 @@ import {
   EditableHeaderBlock,
   EditableHtmlBlock,
   EditableImageBlock,
+  EditableVideoBlock,
   EditableLabelBlock,
   EditableSpacerBlock,
   EditableTextBlock,
@@ -423,6 +424,7 @@ export function FormBuilder({
       { id: "spacer", name: "Spacer Block", type: "block" as const },
       { id: "html", name: "HTML Block", type: "block" as const },
       { id: "image", name: "Image Block", type: "block" as const },
+      { id: "video", name: "Video Block", type: "block" as const },
       { id: "quote", name: "Quote Block", type: "block" as const },
       { id: "biglink", name: "Big Link Block", type: "block" as const },
     ],
@@ -720,6 +722,13 @@ export function FormBuilder({
           src: "https://via.placeholder.com/300x200",
         };
         break;
+      case "video":
+        newBlock = {
+          kind: "video",
+          id: blockId,
+          src: "",
+        };
+        break;
       case "quote":
         newBlock = { kind: "quote", id: blockId, text: "body text" };
         break;
@@ -845,7 +854,7 @@ export function FormBuilder({
                 field.customValidatorId
               )
                 ? resolvedIds.get(field.customValidatorId) ??
-                  field.customValidatorId
+                field.customValidatorId
                 : field.customValidatorId;
               return {
                 ...field,
@@ -1253,8 +1262,8 @@ export function FormBuilder({
                       </span>
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${element.type === "field"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-green-100 text-green-800"
                           }`}
                       >
                         {element.type === "field" ? "Field" : "Block"}
@@ -1570,6 +1579,13 @@ export function FormBuilder({
                       {...commonProps}
                     />
                   );
+                case "video":
+                  return (
+                    <EditableVideoBlock
+                      block={block as any}
+                      {...commonProps}
+                    />
+                  );
                 case "quote":
                   return (
                     <EditableQuoteBlock
@@ -1606,440 +1622,440 @@ export function FormBuilder({
   return (
     <CustomValidatorDraftsContext.Provider value={customValidatorDraftContext}>
       <div className="flex h-[calc(100vh-40px)] bg-gray-50">
-      {!isPreviewMode && activeEditor === "form" && (
-        <ElementSelect
-          onAddField={addField}
-          onAddDisplayBlock={addDisplayBlock}
-        />
-      )}
+        {!isPreviewMode && activeEditor === "form" && (
+          <ElementSelect
+            onAddField={addField}
+            onAddDisplayBlock={addDisplayBlock}
+          />
+        )}
 
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 p-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap xl:flex-nowrap">
-            <div className="flex items-center space-x-4 flex-1 min-w-[200px]">
-              <input
-                type="text"
-                value={schema.title}
-                onChange={(e) =>
-                  updateSchema({ ...schema, title: e.target.value })
-                }
-                className="font-bold px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                placeholder="Form title"
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              {activeEditor === "form" && (
-                <Button
-                  onClick={() => setIsPreviewMode(!isPreviewMode)}
-                  color={ButtonColor.Stone}
-                  size="small"
-                >
-                  {isPreviewMode ? "Edit" : "Preview"}
-                </Button>
-              )}
-              <Button
-                onClick={handleSaveForm}
-                disabled={isSaving || isLoading || !hasUnsavedChanges}
-                color={ButtonColor.Blue}
-                size="small"
-              >
-                {isSaving
-                  ? "Saving..."
-                  : hasUnsavedChanges
-                    ? "Save Form"
-                    : "No changes"}
-              </Button>
-            </div>
-            <div className="inline-flex rounded-md bg-gray-200 p-0.5 text-sm font-medium text-gray-600">
-              <button
-                type="button"
-                className={`px-3 py-2 rounded-md text-nowrap ${activeEditor === "form"
-                    ? "bg-white shadow text-gray-900"
-                    : "text-gray-600"
-                  }`}
-                onClick={() => setActiveEditor("form")}
-              >
-                Form builder
-              </button>
-              <button
-                type="button"
-                className={`px-3 py-1 rounded-md text-nowrap ${activeEditor === "outputs"
-                    ? "bg-white shadow text-gray-900"
-                    : "text-gray-600"
-                  }`}
-                onClick={() => setActiveEditor("outputs")}
-              >
-                Output views
-              </button>
-            </div>
-          </div>
-
-          {/* Page tabs - only show in edit mode */}
-          {!isPreviewMode && activeEditor === "form" && (
-            <div
-              className="flex space-x-1 mt-4 items-center"
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-
-                if (
-                  draggedPageIndex === null ||
-                  pageDropPosition === null ||
-                  dragOverPageIndex === null
-                ) {
-                  handlePageDragEnd();
-                  return;
-                }
-
-                // Use the last known drop position and target
-                const dropIndex = dragOverPageIndex;
-                let insertionIndex = dropIndex;
-                if (pageDropPosition === "after") {
-                  insertionIndex = dropIndex + 1;
-                }
-
-                if (draggedPageIndex < insertionIndex) {
-                  insertionIndex -= 1;
-                }
-
-                if (draggedPageIndex === insertionIndex) {
-                  handlePageDragEnd();
-                  return;
-                }
-
-                const newPages = [...schema.pages];
-                const [draggedPage] = newPages.splice(draggedPageIndex, 1);
-                newPages.splice(insertionIndex, 0, draggedPage);
-
-                let newSelectedPageIndex = selectedPageIndex;
-                if (selectedPageIndex === draggedPageIndex) {
-                  newSelectedPageIndex = insertionIndex;
-                } else if (
-                  selectedPageIndex > draggedPageIndex &&
-                  selectedPageIndex <= insertionIndex
-                ) {
-                  newSelectedPageIndex = selectedPageIndex - 1;
-                } else if (
-                  selectedPageIndex < draggedPageIndex &&
-                  selectedPageIndex >= insertionIndex
-                ) {
-                  newSelectedPageIndex = selectedPageIndex + 1;
-                }
-
-                updateSchema({
-                  ...schema,
-                  pages: newPages,
-                });
-
-                setSelectedPageIndex(newSelectedPageIndex);
-                handlePageDragEnd();
-              }}
-            >
-              {schema.pages.map((page, index) => {
-                const isDragging = draggedPageIndex === index;
-                const showInsertionBar =
-                  dragOverPageIndex === index &&
-                  pageDropPosition &&
-                  !isDragging;
-
-                return (
-                  <div key={page.id} className="relative">
-                    {/* Insertion bar before */}
-                    {showInsertionBar && pageDropPosition === "before" && (
-                      <div className="absolute -left-0.5 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full z-10">
-                        <div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-500 rounded-full"></div>
-                      </div>
-                    )}
-
-                    <div
-                      draggable
-                      onDragStart={handlePageDragStart(index)}
-                      onDragEnd={handlePageDragEnd}
-                      onDragOver={handlePageDragOver(index)}
-                      onDrop={handlePageDrop(index)}
-                      className={`flex items-center rounded-md text-sm font-medium cursor-move pr-2 transition-all border ${selectedPageIndex === index
-                          ? "bg-blue-100 text-blue-700 border-blue-200"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent"
-                        } ${isDragging ? "opacity-50 scale-95" : ""}`}
-                    >
-                      {/* Drag handle */}
-                      <div
-                        className="px-2 py-2 text-gray-400 hover:text-gray-600 cursor-move"
-                        title="Drag to reorder"
-                      >
-                        <svg
-                          className="w-3 h-3"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M10 6L6 10l4 4 4-4-4-4zM8 12l2-2 2 2H8z" />
-                          <path d="M7 2a1 1 0 000 2h6a1 1 0 100-2H7zM7 16a1 1 0 100 2h6a1 1 0 100-2H7z" />
-                        </svg>
-                      </div>
-
-                      <button
-                        onClick={() => setSelectedPageIndex(index)}
-                        className="py-2 flex-1 text-left pr-2"
-                      >
-                        {page.title}
-                      </button>
-
-                      {schema.pages.length > 1 && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removePage(index);
-                          }}
-                          className="py-2 text-gray-400 hover:text-red-500"
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Insertion bar after */}
-                    {showInsertionBar && pageDropPosition === "after" && (
-                      <div className="absolute -right-0.5 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full z-10">
-                        <div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-500 rounded-full"></div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              <div
-                onClick={addPage}
-                color={ButtonColor.White}
-                className="p-1 !h-6 !w-6 rounded-full hover:bg-gray-200 flex items-center justify-center cursor-pointer"
-              >
-                <p className="-mt-px text-zinc-700">+</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Loading/Success/Error Messages */}
-        <div className="flex-shrink-0 mx-4 min-h-0 relative">
-          {isLoading && (
-            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 mb-2">
-              <span className="block sm:inline">Loading form...</span>
-            </div>
-          )}
-          {loadError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-2">
-              <span className="block sm:inline">
-                Error loading form: {loadError}
-              </span>
-            </div>
-          )}
-          {saveError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-2">
-              <span className="block sm:inline">
-                Error saving form: {saveError}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div
-          ref={contentScrollRef}
-          className="flex-1 p-6 overflow-y-auto min-h-0"
-        >
-          {activeEditor === "outputs" ? (
-            <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
-          ) : isPreviewMode ? (
-            <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
-              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Preview as</span>
-                  <select
-                    value={previewUserId}
-                    onChange={(event) => setPreviewUserId(event.target.value)}
-                    className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  >
-                    <option value="preview">Preview user</option>
-                    {previewUsers.map((user) => (
-                      <option key={user.id} value={String(user.id)}>
-                        {user.name ?? `User #${user.id}`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
-                  {isLoadingPreviewUsers && <span>Loading users…</span>}
-                  {previewUserError && (
-                    <span className="text-red-600">{previewUserError}</span>
-                  )}
-                  <button
-                    type="button"
-                    className="text-blue-600 hover:text-blue-700"
-                    onClick={() => void fetchPreviewUsers()}
-                  >
-                    Refresh users
-                  </button>
-                </div>
-              </div>
-              <FormRenderer
-                id={0}
-                actionId={0}
-                form={schema}
-                onSubmit={null}
-                renderFormAsCompleted={false}
-                userId={resolvedPreviewUserId}
-                user={resolvedPreviewUser}
-                initialPageIndex={selectedPageIndex}
-              />
-            </div>
-          ) : (
-            <div
-              className="max-w-2xl mx-auto bg-white rounded-lg border border-gray-200 p-6 mb-8"
-              onClick={handleClickOutside}
-            >
-              <div className="mb-6">
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="bg-white border-b border-gray-200 p-4">
+            <div className="flex items-center justify-between gap-4 flex-wrap xl:flex-nowrap">
+              <div className="flex items-center space-x-4 flex-1 min-w-[200px]">
                 <input
                   type="text"
-                  value={currentPage.title || ""}
+                  value={schema.title}
                   onChange={(e) =>
-                    updateSchema({
-                      ...schema,
-                      pages: schema.pages.map((page, idx) =>
-                        idx === selectedPageIndex
-                          ? { ...page, title: e.target.value }
-                          : page
-                      ),
-                    })
+                    updateSchema({ ...schema, title: e.target.value })
                   }
-                  className="text-lg font-medium w-full border-none outline-none"
-                  placeholder="Page title"
+                  className="font-bold px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                  placeholder="Form title"
                 />
-                {currentPage.description && (
-                  <p className="text-gray-600 mt-1">
-                    {currentPage.description}
-                  </p>
-                )}
               </div>
-
-              <div className="space-y-4">
-                {/* Search bar at the beginning if no fields */}
-                {currentPage.fields.length === 0 && (
-                  <InlineSearch insertIndex={0} />
+              <div className="flex items-center space-x-2">
+                {activeEditor === "form" && (
+                  <Button
+                    onClick={() => setIsPreviewMode(!isPreviewMode)}
+                    color={ButtonColor.Stone}
+                    size="small"
+                  >
+                    {isPreviewMode ? "Edit" : "Preview"}
+                  </Button>
                 )}
+                <Button
+                  onClick={handleSaveForm}
+                  disabled={isSaving || isLoading || !hasUnsavedChanges}
+                  color={ButtonColor.Blue}
+                  size="small"
+                >
+                  {isSaving
+                    ? "Saving..."
+                    : hasUnsavedChanges
+                      ? "Save Form"
+                      : "No changes"}
+                </Button>
+              </div>
+              <div className="inline-flex rounded-md bg-gray-200 p-0.5 text-sm font-medium text-gray-600">
+                <button
+                  type="button"
+                  className={`px-3 py-2 rounded-md text-nowrap ${activeEditor === "form"
+                    ? "bg-white shadow text-gray-900"
+                    : "text-gray-600"
+                    }`}
+                  onClick={() => setActiveEditor("form")}
+                >
+                  Form builder
+                </button>
+                <button
+                  type="button"
+                  className={`px-3 py-1 rounded-md text-nowrap ${activeEditor === "outputs"
+                    ? "bg-white shadow text-gray-900"
+                    : "text-gray-600"
+                    }`}
+                  onClick={() => setActiveEditor("outputs")}
+                >
+                  Output views
+                </button>
+              </div>
+            </div>
 
-                {currentPage.fields.map((field, index) => (
-                  <div key={field.id || index}>
-                    {/* Search bar before each element (except first) */}
-                    {index > 0 && <InlineSearch insertIndex={index} />}
-                    {/* First element gets search at beginning */}
-                    {index === 0 && <InlineSearch insertIndex={0} />}
+            {/* Page tabs - only show in edit mode */}
+            {!isPreviewMode && activeEditor === "form" && (
+              <div
+                className="flex space-x-1 mt-4 items-center"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
 
-                    {renderField(field, index)}
+                  if (
+                    draggedPageIndex === null ||
+                    pageDropPosition === null ||
+                    dragOverPageIndex === null
+                  ) {
+                    handlePageDragEnd();
+                    return;
+                  }
 
-                    {/* Search bar after last element */}
-                    {index === currentPage.fields.length - 1 && (
-                      <InlineSearch insertIndex={index + 1} />
-                    )}
+                  // Use the last known drop position and target
+                  const dropIndex = dragOverPageIndex;
+                  let insertionIndex = dropIndex;
+                  if (pageDropPosition === "after") {
+                    insertionIndex = dropIndex + 1;
+                  }
+
+                  if (draggedPageIndex < insertionIndex) {
+                    insertionIndex -= 1;
+                  }
+
+                  if (draggedPageIndex === insertionIndex) {
+                    handlePageDragEnd();
+                    return;
+                  }
+
+                  const newPages = [...schema.pages];
+                  const [draggedPage] = newPages.splice(draggedPageIndex, 1);
+                  newPages.splice(insertionIndex, 0, draggedPage);
+
+                  let newSelectedPageIndex = selectedPageIndex;
+                  if (selectedPageIndex === draggedPageIndex) {
+                    newSelectedPageIndex = insertionIndex;
+                  } else if (
+                    selectedPageIndex > draggedPageIndex &&
+                    selectedPageIndex <= insertionIndex
+                  ) {
+                    newSelectedPageIndex = selectedPageIndex - 1;
+                  } else if (
+                    selectedPageIndex < draggedPageIndex &&
+                    selectedPageIndex >= insertionIndex
+                  ) {
+                    newSelectedPageIndex = selectedPageIndex + 1;
+                  }
+
+                  updateSchema({
+                    ...schema,
+                    pages: newPages,
+                  });
+
+                  setSelectedPageIndex(newSelectedPageIndex);
+                  handlePageDragEnd();
+                }}
+              >
+                {schema.pages.map((page, index) => {
+                  const isDragging = draggedPageIndex === index;
+                  const showInsertionBar =
+                    dragOverPageIndex === index &&
+                    pageDropPosition &&
+                    !isDragging;
+
+                  return (
+                    <div key={page.id} className="relative">
+                      {/* Insertion bar before */}
+                      {showInsertionBar && pageDropPosition === "before" && (
+                        <div className="absolute -left-0.5 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full z-10">
+                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                      )}
+
+                      <div
+                        draggable
+                        onDragStart={handlePageDragStart(index)}
+                        onDragEnd={handlePageDragEnd}
+                        onDragOver={handlePageDragOver(index)}
+                        onDrop={handlePageDrop(index)}
+                        className={`flex items-center rounded-md text-sm font-medium cursor-move pr-2 transition-all border ${selectedPageIndex === index
+                          ? "bg-blue-100 text-blue-700 border-blue-200"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent"
+                          } ${isDragging ? "opacity-50 scale-95" : ""}`}
+                      >
+                        {/* Drag handle */}
+                        <div
+                          className="px-2 py-2 text-gray-400 hover:text-gray-600 cursor-move"
+                          title="Drag to reorder"
+                        >
+                          <svg
+                            className="w-3 h-3"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M10 6L6 10l4 4 4-4-4-4zM8 12l2-2 2 2H8z" />
+                            <path d="M7 2a1 1 0 000 2h6a1 1 0 100-2H7zM7 16a1 1 0 100 2h6a1 1 0 100-2H7z" />
+                          </svg>
+                        </div>
+
+                        <button
+                          onClick={() => setSelectedPageIndex(index)}
+                          className="py-2 flex-1 text-left pr-2"
+                        >
+                          {page.title}
+                        </button>
+
+                        {schema.pages.length > 1 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removePage(index);
+                            }}
+                            className="py-2 text-gray-400 hover:text-red-500"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Insertion bar after */}
+                      {showInsertionBar && pageDropPosition === "after" && (
+                        <div className="absolute -right-0.5 top-0 bottom-0 w-0.5 bg-blue-500 rounded-full z-10">
+                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                <div
+                  onClick={addPage}
+                  color={ButtonColor.White}
+                  className="p-1 !h-6 !w-6 rounded-full hover:bg-gray-200 flex items-center justify-center cursor-pointer"
+                >
+                  <p className="-mt-px text-zinc-700">+</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Loading/Success/Error Messages */}
+          <div className="flex-shrink-0 mx-4 min-h-0 relative">
+            {isLoading && (
+              <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 mb-2">
+                <span className="block sm:inline">Loading form...</span>
+              </div>
+            )}
+            {loadError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-2">
+                <span className="block sm:inline">
+                  Error loading form: {loadError}
+                </span>
+              </div>
+            )}
+            {saveError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-2">
+                <span className="block sm:inline">
+                  Error saving form: {saveError}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div
+            ref={contentScrollRef}
+            className="flex-1 p-6 overflow-y-auto min-h-0"
+          >
+            {activeEditor === "outputs" ? (
+              <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
+            ) : isPreviewMode ? (
+              <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
+                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Preview as</span>
+                    <select
+                      value={previewUserId}
+                      onChange={(event) => setPreviewUserId(event.target.value)}
+                      className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="preview">Preview user</option>
+                      {previewUsers.map((user) => (
+                        <option key={user.id} value={String(user.id)}>
+                          {user.name ?? `User #${user.id}`}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                ))}
-
-                {/* Drop zone at the end of the list */}
-                {draggedItem && currentPage.fields.length > 0 && (
-                  <div
-                    className="relative h-4 -mt-2"
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      e.dataTransfer.dropEffect = "move";
-                      setDragOverIndex(currentPage.fields.length);
-                      setDropPosition("before");
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      if (
-                        !draggedItem ||
-                        draggedItem.pageIndex !== selectedPageIndex
-                      )
-                        return;
-
-                      const { index: dragIndex } = draggedItem;
-                      const insertionIndex =
-                        currentPage.fields.length -
-                        (dragIndex < currentPage.fields.length ? 1 : 0);
-
-                      if (dragIndex === insertionIndex) {
-                        setDraggedItem(null);
-                        setDragOverIndex(null);
-                        setDropPosition(null);
-                        return;
-                      }
-
-                      const currentFields = [...currentPage.fields];
-                      const [draggedField] = currentFields.splice(dragIndex, 1);
-                      currentFields.push(draggedField);
-
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    {isLoadingPreviewUsers && <span>Loading users…</span>}
+                    {previewUserError && (
+                      <span className="text-red-600">{previewUserError}</span>
+                    )}
+                    <button
+                      type="button"
+                      className="text-blue-600 hover:text-blue-700"
+                      onClick={() => void fetchPreviewUsers()}
+                    >
+                      Refresh users
+                    </button>
+                  </div>
+                </div>
+                <FormRenderer
+                  id={0}
+                  actionId={0}
+                  form={schema}
+                  onSubmit={null}
+                  renderFormAsCompleted={false}
+                  userId={resolvedPreviewUserId}
+                  user={resolvedPreviewUser}
+                  initialPageIndex={selectedPageIndex}
+                />
+              </div>
+            ) : (
+              <div
+                className="max-w-2xl mx-auto bg-white rounded-lg border border-gray-200 p-6 mb-8"
+                onClick={handleClickOutside}
+              >
+                <div className="mb-6">
+                  <input
+                    type="text"
+                    value={currentPage.title || ""}
+                    onChange={(e) =>
                       updateSchema({
                         ...schema,
                         pages: schema.pages.map((page, idx) =>
                           idx === selectedPageIndex
-                            ? { ...page, fields: currentFields }
+                            ? { ...page, title: e.target.value }
                             : page
                         ),
-                      });
-
-                      setDraggedItem(null);
-                      setDragOverIndex(null);
-                      setDropPosition(null);
-                    }}
-                  >
-                    {dragOverIndex === currentPage.fields.length && (
-                      <div className="absolute -top-1 left-0 right-0 h-0.5 bg-blue-500 rounded-full z-10">
-                        <div className="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 rounded-full"></div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {currentPage.fields.length === 0 && (
-                  <div
-                    className="text-center py-12 text-gray-500 relative"
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      e.dataTransfer.dropEffect = "move";
-                      setDragOverIndex(0);
-                      setDropPosition("before");
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      if (
-                        !draggedItem ||
-                        draggedItem.pageIndex !== selectedPageIndex
-                      )
-                        return;
-
-                      // This shouldn't happen since we're on an empty page, but handle it gracefully
-                      setDraggedItem(null);
-                      setDragOverIndex(null);
-                      setDropPosition(null);
-                    }}
-                  >
-                    {draggedItem && dragOverIndex === 0 && (
-                      <div className="absolute -top-1 left-0 right-0 h-0.5 bg-blue-500 rounded-full z-10">
-                        <div className="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 rounded-full"></div>
-                      </div>
-                    )}
-                    <p>
-                      No fields added yet. Use the sidebar to add fields and
-                      display blocks.
+                      })
+                    }
+                    className="text-lg font-medium w-full border-none outline-none"
+                    placeholder="Page title"
+                  />
+                  {currentPage.description && (
+                    <p className="text-gray-600 mt-1">
+                      {currentPage.description}
                     </p>
-                  </div>
-                )}
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  {/* Search bar at the beginning if no fields */}
+                  {currentPage.fields.length === 0 && (
+                    <InlineSearch insertIndex={0} />
+                  )}
+
+                  {currentPage.fields.map((field, index) => (
+                    <div key={field.id || index}>
+                      {/* Search bar before each element (except first) */}
+                      {index > 0 && <InlineSearch insertIndex={index} />}
+                      {/* First element gets search at beginning */}
+                      {index === 0 && <InlineSearch insertIndex={0} />}
+
+                      {renderField(field, index)}
+
+                      {/* Search bar after last element */}
+                      {index === currentPage.fields.length - 1 && (
+                        <InlineSearch insertIndex={index + 1} />
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Drop zone at the end of the list */}
+                  {draggedItem && currentPage.fields.length > 0 && (
+                    <div
+                      className="relative h-4 -mt-2"
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        setDragOverIndex(currentPage.fields.length);
+                        setDropPosition("before");
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (
+                          !draggedItem ||
+                          draggedItem.pageIndex !== selectedPageIndex
+                        )
+                          return;
+
+                        const { index: dragIndex } = draggedItem;
+                        const insertionIndex =
+                          currentPage.fields.length -
+                          (dragIndex < currentPage.fields.length ? 1 : 0);
+
+                        if (dragIndex === insertionIndex) {
+                          setDraggedItem(null);
+                          setDragOverIndex(null);
+                          setDropPosition(null);
+                          return;
+                        }
+
+                        const currentFields = [...currentPage.fields];
+                        const [draggedField] = currentFields.splice(dragIndex, 1);
+                        currentFields.push(draggedField);
+
+                        updateSchema({
+                          ...schema,
+                          pages: schema.pages.map((page, idx) =>
+                            idx === selectedPageIndex
+                              ? { ...page, fields: currentFields }
+                              : page
+                          ),
+                        });
+
+                        setDraggedItem(null);
+                        setDragOverIndex(null);
+                        setDropPosition(null);
+                      }}
+                    >
+                      {dragOverIndex === currentPage.fields.length && (
+                        <div className="absolute -top-1 left-0 right-0 h-0.5 bg-blue-500 rounded-full z-10">
+                          <div className="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {currentPage.fields.length === 0 && (
+                    <div
+                      className="text-center py-12 text-gray-500 relative"
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        setDragOverIndex(0);
+                        setDropPosition("before");
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (
+                          !draggedItem ||
+                          draggedItem.pageIndex !== selectedPageIndex
+                        )
+                          return;
+
+                        // This shouldn't happen since we're on an empty page, but handle it gracefully
+                        setDraggedItem(null);
+                        setDragOverIndex(null);
+                        setDropPosition(null);
+                      }}
+                    >
+                      {draggedItem && dragOverIndex === 0 && (
+                        <div className="absolute -top-1 left-0 right-0 h-0.5 bg-blue-500 rounded-full z-10">
+                          <div className="absolute -left-1 -top-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                        </div>
+                      )}
+                      <p>
+                        No fields added yet. Use the sidebar to add fields and
+                        display blocks.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
       </div>
     </CustomValidatorDraftsContext.Provider>
   );
