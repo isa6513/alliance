@@ -733,16 +733,12 @@ export class CommunityService {
     const invitingUserP = this.userRepository.findOne({
       where: { id: userId, communities: { id: communityId } },
     });
-    const invitedUserP = this.userRepository
-      .findOne({
-        where: { id: invitedUserId },
-        relations: {
-          communities: true,
-        },
-      })
-      .then((user) => {
-        return user;
-      });
+    const invitedUserP = this.userRepository.findOne({
+      where: { id: invitedUserId },
+      relations: {
+        communities: true,
+      },
+    });
     const communityP = this.communityRepository.findOne({
       where: { id: communityId },
     });
@@ -767,10 +763,10 @@ export class CommunityService {
     }
 
     const invitedUser = await invitedUserP;
-    if (
-      !invitedUser ||
-      invitedUser.communities.some((c) => c.id === communityId)
-    ) {
+    if (!invitedUser) {
+      throw new BadRequestException('Invited user not found');
+    }
+    if (invitedUser.communities.some((c) => c.id === communityId)) {
       throw new BadRequestException(
         'Invited user is already a member of the community',
       );
