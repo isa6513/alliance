@@ -491,10 +491,7 @@ jobs:
       - name: Setup npm cache for server
         if: github.ref_name == 'production'
         uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "npm"
-          cache-dependency-path: server/package-lock.json
+        with: { node-version: 22 }
 
       - name: Install Yarn Dependencies
         if: github.ref_name == 'production'
