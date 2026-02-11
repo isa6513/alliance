@@ -2,6 +2,7 @@ import { ActionDto, ActionUpdateDto } from "@alliance/shared/client";
 import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 import ActionCompletedBarWithInfo from "../../pages/app/ActionCompletedBarWithInfo";
 import Card from "@alliance/sharedweb/ui/Card";
+import useActivities, { ActivityList } from "@alliance/shared/lib/useActivities";
 
 interface TimelineItemProps {
   highlighted?: boolean;
@@ -25,6 +26,15 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const sortedUpdates = [...(updates ?? [])].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+
+
+  const { activities: friendActivities } = useActivities({
+    list: ActivityList.FriendsForAction,
+    objectId: action.id,
+    comments: false,
+    limit: 8,
+  });
+
   return (
     <div className="flex flex-col gap-y-2">
       <div className="flex flex-row items-center gap-x-2 mt-px">
@@ -41,7 +51,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       {showCompletedBar && (
         <Card>
           <ActionCompletedBarWithInfo
-            friendActivities={[]}
+            friendActivities={friendActivities}
             action={action}
             textSize="base"
             textColor="zinc-800"
