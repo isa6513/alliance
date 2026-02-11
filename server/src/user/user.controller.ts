@@ -42,7 +42,6 @@ import {
   CommunityInviteDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
-  RequestCommunityInviteDto,
   RequestOnetimeInviteDto,
 } from './dto/invite.dto';
 import {
@@ -518,17 +517,6 @@ export class UserController {
     );
   }
 
-  @Post('communityInvites/request')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: CommunityInviteDto })
-  async requestCommunityInvite(
-    @Body() body: RequestCommunityInviteDto,
-    @Request() req: JwtRequest,
-  ): Promise<CommunityInviteDto> {
-    return new CommunityInviteDto(
-      await this.userService.requestCommunityInvite(body, req.user.sub),
-    );
-  }
 
   @Post('communityInvites/:inviteId/approveRequest')
   @UseGuards(CommunityLeaderGuard)

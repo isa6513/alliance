@@ -26,6 +26,7 @@ import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relation
 import {
   CommunityInviteDto,
   CreateCommunityInviteDto,
+  RequestCommunityInviteDto,
 } from 'src/user/dto/invite.dto';
 
 @ApiTags('community')
@@ -268,5 +269,17 @@ export class CommunityController {
     @Request() req: JwtRequest,
   ): Promise<void> {
     await this.communityService.deleteCommunityInvite(inviteId, req.user.sub);
+  }
+
+  @Post('communityInvites/request')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: CommunityInviteDto })
+  async requestCommunityInvite(
+    @Body() body: RequestCommunityInviteDto,
+    @Request() req: JwtRequest,
+  ): Promise<CommunityInviteDto> {
+    return new CommunityInviteDto(
+      await this.communityService.requestCommunityInvite(body, req.user.sub),
+    );
   }
 }

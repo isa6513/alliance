@@ -799,11 +799,6 @@ export type CreateOnetimeInviteDto = {
     communityId?: number;
 };
 
-export type RequestCommunityInviteDto = {
-    communityId: number;
-    invitedUserId: number;
-};
-
 export type CommunityInviteDto = {
     id: number;
     status: CommunityInviteStatus;
@@ -1035,6 +1030,11 @@ export type CommunityMemberContactInfoDto = {
 export type CreateCommunityInviteDto = {
     invitedUserId: number;
     communityId: number;
+};
+
+export type RequestCommunityInviteDto = {
+    communityId: number;
+    invitedUserId: number;
 };
 
 export type EditableContentDto = {
@@ -3312,19 +3312,6 @@ export type UserCreateOnetimeInviteResponses = {
 
 export type UserCreateOnetimeInviteResponse = UserCreateOnetimeInviteResponses[keyof UserCreateOnetimeInviteResponses];
 
-export type UserRequestCommunityInviteData = {
-    body: RequestCommunityInviteDto;
-    path?: never;
-    query?: never;
-    url: '/user/communityInvites/request';
-};
-
-export type UserRequestCommunityInviteResponses = {
-    200: CommunityInviteDto;
-};
-
-export type UserRequestCommunityInviteResponse = UserRequestCommunityInviteResponses[keyof UserRequestCommunityInviteResponses];
-
 export type UserApproveCommunityInviteRequestData = {
     body?: never;
     path: {
@@ -4179,6 +4166,19 @@ export type CommunityDeleteCommunityInviteData = {
 export type CommunityDeleteCommunityInviteResponses = {
     200: unknown;
 };
+
+export type CommunityRequestCommunityInviteData = {
+    body: RequestCommunityInviteDto;
+    path?: never;
+    query?: never;
+    url: '/community/communityInvites/request';
+};
+
+export type CommunityRequestCommunityInviteResponses = {
+    200: CommunityInviteDto;
+};
+
+export type CommunityRequestCommunityInviteResponse = CommunityRequestCommunityInviteResponses[keyof CommunityRequestCommunityInviteResponses];
 
 export type ActionsJoinData = {
     body?: never;
