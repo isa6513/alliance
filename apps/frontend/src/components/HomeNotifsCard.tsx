@@ -10,7 +10,8 @@ const HomeNotifsCard = () => {
 
   const priority = notifications
     .filter((notification) => notification.priority === "high")
-    .filter((notification) => !notification.readAt || notification.category === 'action_update');
+    .filter((notification) => !notification.readAt ||
+      (notification.category === 'action_update' && new Date(notification.sendTime).getTime() > new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).getTime()));
 
   if (priority.length === 0) {
     return null;
