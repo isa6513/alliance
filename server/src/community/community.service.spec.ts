@@ -6,9 +6,11 @@ import { ConversationService } from 'src/messaging/conversation.service';
 import { ImagesService } from 'src/images/images.service';
 import { NotifsService, CreateNotifParams } from 'src/notifs/notifs.service';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
+import { CommunityInvite } from './entities/community-invite.entity';
 
 describe('CommunityService', () => {
   let service: CommunityService;
+  let communityInviteRepository: jest.Mocked<Repository<CommunityInvite>>;
   let communityRepository: jest.Mocked<Repository<Community>>;
   let userRepository: jest.Mocked<Repository<User>>;
   let conversationService: jest.Mocked<ConversationService>;
@@ -27,6 +29,10 @@ describe('CommunityService', () => {
     }) as Community;
 
   beforeEach(() => {
+    communityInviteRepository = {
+      save: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<Repository<CommunityInvite>>;
+
     communityRepository = {
       save: jest
         .fn()
@@ -46,6 +52,7 @@ describe('CommunityService', () => {
     } as unknown as jest.Mocked<NotifsService>;
 
     service = new CommunityService(
+      communityInviteRepository,
       communityRepository,
       userRepository,
       conversationService,
