@@ -11,7 +11,7 @@ import { Relations } from 'src/utils/Repository';
 import { ImagesService } from 'src/images/images.service';
 import { ConversationService } from 'src/messaging/conversation.service';
 import { CreateCommunityDto, UpdateCommunityDto } from './dto/community.dto';
-import { User } from 'src/user/entities/user.entity';
+import { DEFAULT_TIME_ZONE, User } from 'src/user/entities/user.entity';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { run } from 'src/utils/promise';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
@@ -555,7 +555,7 @@ export class CommunityService {
 
     return getContactInfo({
       users,
-      timeZone: 'America/Los_Angeles',
+      timeZone: DEFAULT_TIME_ZONE,
     });
   }
 
@@ -587,7 +587,7 @@ export class CommunityService {
         : null;
     return getContactInfo({
       users: community.users,
-      timeZone: leader?.timeZone ?? 'America/Los_Angeles',
+      timeZone: leader?.timeZone ?? DEFAULT_TIME_ZONE,
     });
   }
 }

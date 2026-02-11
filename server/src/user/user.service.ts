@@ -20,7 +20,7 @@ import {
   ProfileDto,
   UpdateProfileDto,
 } from './dto/user.dto';
-import { User } from './entities/user.entity';
+import { DEFAULT_TIME_ZONE, User } from './entities/user.entity';
 import { groupUrl, profileUrl } from 'src/search/approutes';
 import { Tag } from './entities/tag.entity';
 import { CreateTagDto } from './dto/tag.dto';
@@ -60,8 +60,6 @@ import { run } from 'src/utils/promise';
 import { SlackService } from 'src/slack/slack.service';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { CommunityService } from 'src/community/community.service';
-
-const defaultTimeZone = 'America/Los_Angeles';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -897,7 +895,7 @@ export class UserService {
     const startDay = Temporal.PlainDate.from(data.startDay);
     const endDay = Temporal.PlainDate.from(data.endDay);
     const user = await this.findOneOrFail(userId);
-    const tz = user.timeZone ?? defaultTimeZone;
+    const tz = user.timeZone ?? DEFAULT_TIME_ZONE;
 
     const startDate = new Date(
       startDay
@@ -962,7 +960,7 @@ export class UserService {
     }
 
     const user = await this.findOneOrFail(userId);
-    const tz = user.timeZone ?? defaultTimeZone;
+    const tz = user.timeZone ?? DEFAULT_TIME_ZONE;
 
     if (data.startDay) {
       const startDay = Temporal.PlainDate.from(data.startDay);

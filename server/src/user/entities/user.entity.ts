@@ -49,6 +49,8 @@ import { Mms } from 'src/mms/mms.entity';
 import { findLeast } from 'src/utils/filter';
 import { OnetimeInvite } from './onetime-invite.entity';
 
+export const DEFAULT_TIME_ZONE = 'America/Los_Angeles';
+
 export enum NotificationPreference {
   All = 'all',
   Digest = 'digest',
