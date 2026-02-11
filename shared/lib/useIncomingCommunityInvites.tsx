@@ -8,9 +8,9 @@ import {
   useMemo,
 } from "react";
 import {
+  communityAcceptCommunityInvite,
   communityGetIncomingCommunityInvitesForUser,
   CommunityInviteDto,
-  userAcceptCommunityInvite,
   userRejectCommunityInvite,
 } from "@alliance/shared/client";
 
@@ -51,7 +51,9 @@ export const IncomingCommunityInvitesProvider = ({
 
   const acceptCommunityInvite = useCallback(
     async (inviteId: number) => {
-      const response = await userAcceptCommunityInvite({ path: { inviteId } });
+      const response = await communityAcceptCommunityInvite({
+        path: { inviteId },
+      });
       if (response.data) {
         setInvites((prev) =>
           prev.map((invite) => ({

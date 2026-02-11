@@ -338,4 +338,14 @@ export class CommunityController {
       )
     ).map((invite) => new CommunityInviteDto(invite));
   }
+
+  @Post('communityInvites/:inviteId/accept')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async acceptCommunityInvite(
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @Request() req: JwtRequest,
+  ): Promise<void> {
+    await this.communityService.acceptCommunityInvite(inviteId, req.user.sub);
+  }
 }

@@ -1765,4 +1765,179 @@ describe('Community (e2e)', () => {
 
     expect(res.status).toBe(401);
   });
+
+  it('POST /community/communityInvites/:inviteId/accept accepts invite when authenticated as invited user', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP AcceptInvite',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/accept`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(201);
+    const updatedInvite = await communityInviteRepo.findOneOrFail({
+      where: { id: invite.id },
+    });
+    expect(updatedInvite.status).toBe(CommunityInviteStatus.InviteeAccepted);
+    const refreshed = await communityRepo.findOneOrFail({
+      where: { id: community.id },
+      relations: { users: true },
+    });
+    const memberIds = refreshed.users.map((u: User) => u.id);
+    expect(memberIds).toContain(secondUser.id);
+  });
+
+  it('POST /community/communityInvites/:inviteId/accept returns 401 when unauthenticated', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP AcceptInvite NoAuth',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer()).post(
+      `/community/communityInvites/${invite.id}/accept`,
+    );
+
+    expect(res.status).toBe(401);
+  });
+
+  it('POST /community/communityInvites/:inviteId/accept returns 400 when user is not the invited user', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP AcceptInvite WrongUser',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/accept`)
+      .set('Authorization', `Bearer ${testUserToken}`);
+
+    expect(res.status).toBe(400);
+  });
+
+  it('POST /community/communityInvites/:inviteId/accept returns 400 when invite is not InviteePending', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP AcceptInvite WrongStatus',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.RequestPending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/accept`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(400);
+  });
+
+  it('POST /community/communityInvites/:inviteId/accept returns 400 when user is already a member', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP AcceptInvite AlreadyMember',
+        leaders: [testUser],
+        users: [testUser, secondUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/accept`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(400);
+  });
+
+  it('POST /community/communityInvites/:inviteId/accept removes user from non-leader communities', async () => {
+    const oldCommunity = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP AcceptInvite OldGroup',
+        leaders: [testUser],
+        users: [testUser, secondUser],
+      }),
+    );
+    const newCommunity = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP AcceptInvite NewGroup',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    const invite = await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community: newCommunity,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .post(`/community/communityInvites/${invite.id}/accept`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(201);
+    // User should be added to new community
+    const refreshedNew = await communityRepo.findOneOrFail({
+      where: { id: newCommunity.id },
+      relations: { users: true },
+    });
+    expect(refreshedNew.users.map((u: User) => u.id)).toContain(secondUser.id);
+    // User should be removed from old community (not a leader there)
+    const refreshedOld = await communityRepo.findOneOrFail({
+      where: { id: oldCommunity.id },
+      relations: { users: true },
+    });
+    expect(refreshedOld.users.map((u: User) => u.id)).not.toContain(
+      secondUser.id,
+    );
+  });
 });

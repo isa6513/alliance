@@ -570,16 +570,6 @@ export class UserController {
     );
   }
 
-  @Post('communityInvites/:inviteId/accept')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse()
-  async acceptCommunityInvite(
-    @Param('inviteId', ParseIntPipe) inviteId: number,
-    @Request() req: JwtRequest,
-  ) {
-    await this.userService.acceptCommunityInvite(inviteId, req.user.sub);
-  }
-
   @Post('communityInvites/:inviteId/reject')
   @UseGuards(AuthGuard)
   @ApiOkResponse()

@@ -53,7 +53,6 @@ import { RegisterDeviceDto, UserDeviceDto } from './dto/device.dto';
 import { UserDevice } from './entities/user-device.entity';
 import { PushService } from 'src/push/push.service';
 import { Push } from 'src/push/push.entity';
-import { run } from 'src/utils/promise';
 import { SlackService } from 'src/slack/slack.service';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { CommunityService } from 'src/community/community.service';
@@ -1317,100 +1316,6 @@ export class UserService {
       status: OnetimeInviteStatus.LINK_USED,
       usedAt: new Date(),
     });
-  }
-
-  async acceptCommunityInvite(inviteId: number, userId: number): Promise<void> {
-    const invite = await this.communityInviteRepository.findOneOrFail({
-      where: { id: inviteId, deletedAt: IsNull() },
-      relations: {
-        invitedUser: {
-          communities: { leaders: true },
-        },
-        invitingUser: true,
-        community: true,
-      },
-    });
-    if (invite.invitedUser.id !== userId) {
-      throw new BadRequestException();
-    }
-    if (invite.status !== CommunityInviteStatus.InviteePending) {
-      throw new BadRequestException();
-    }
-
-    invite.status = CommunityInviteStatus.InviteeAccepted;
-
-    const community = await this.communityService.findOneOrFail(
-      invite.community.id,
-      {
-        users: true,
-      },
-    );
-
-    if (community.users!.some((user) => user.id === invite.invitedUser.id)) {
-      throw new BadRequestException();
-    }
-
-    const saveInvite = this.communityInviteRepository.save(invite);
-
-    community.users!.push(invite.invitedUser);
-    const saveCommunity = this.communityRepository
-      .save(community)
-      .then((savedCommunity) =>
-        this.conversationService.syncCommunityConversationMembers(
-          savedCommunity.id,
-        ),
-      );
-
-    // Remove user from all other communities that they are not a leader of
-    const updatedCommunities: Community[] = [];
-    invite.invitedUser.communities = invite.invitedUser.communities.filter(
-      (c) => {
-        const keep =
-          c.id === community.id || invite.invitedUser.leaderOfIdSet.has(c.id);
-        if (!keep) {
-          updatedCommunities.push(c);
-        }
-        return keep;
-      },
-    );
-
-    const notifs: CreateNotifParams[] = updatedCommunities.flatMap(
-      (community) =>
-        community.leaders!.map((leader) => ({
-          user: leader,
-          category: NotificationCategory.MemberLeftCommunity,
-          message: `${invite.invitedUser.name} left your group (${community.name})`,
-          webAppLocation: groupUrl({
-            tab: 'members',
-            communityId: community.id,
-          }),
-          associatedUsers: [invite.invitedUser],
-        })),
-    );
-
-    const saveUser = this.userRepository.save(invite.invitedUser);
-    const syncConversationMembers = run(async () => {
-      await saveCommunity;
-      await saveUser;
-      await Promise.all([
-        ...updatedCommunities.map((c) =>
-          this.conversationService.syncCommunityConversationMembers(c.id),
-        ),
-        this.notifsService.sendNotifs(notifs),
-      ]);
-    });
-
-    const saveNotif = this.notifsService.sendNotif({
-      user: invite.invitingUser!,
-      category: NotificationCategory.CommunityInviteAccepted,
-      message: `${invite.invitedUser.name} accepted your invitation to join your group (${community.name})`,
-      webAppLocation: groupUrl({
-        tab: 'invites',
-        communityId: community.id,
-      }),
-      associatedUsers: [invite.invitedUser],
-    });
-    await Promise.all([saveInvite, syncConversationMembers, saveNotif]);
   }
 
   async rejectCommunityInvite(inviteId: number, userId: number): Promise<void> {

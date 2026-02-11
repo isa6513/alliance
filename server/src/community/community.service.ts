@@ -952,4 +952,84 @@ export class CommunityService {
     });
     return invites;
   }
+
+  async acceptCommunityInvite(inviteId: number, userId: number): Promise<void> {
+    const invite = await this.communityInviteRepository.findOneOrFail({
+      where: { id: inviteId, deletedAt: IsNull() },
+      relations: {
+        invitedUser: {
+          communities: { leaders: true, users: true },
+        },
+        invitingUser: true,
+        community: true,
+      },
+    });
+    if (invite.invitedUser.id !== userId) {
+      throw new BadRequestException();
+    }
+    if (invite.status !== CommunityInviteStatus.InviteePending) {
+      throw new BadRequestException();
+    }
+
+    invite.status = CommunityInviteStatus.InviteeAccepted;
+
+    const community = await this.findOneOrFail(invite.community.id);
+
+    if (community.users.some((user) => user.id === invite.invitedUser.id)) {
+      throw new BadRequestException();
+    }
+
+    await Promise.all([
+      this.communityInviteRepository.save(invite),
+      this.addUserToCommunityAndRefreshConversation({
+        user: invite.invitedUser,
+        community,
+        notifForLeader: ({ leader }) => {
+          if (leader.id === invite.invitingUser?.id) {
+            return null;
+          }
+          return {
+            user: leader,
+            category: NotificationCategory.MemberJoinedCommunity,
+            message: `${invite.invitedUser.name} joined your group (${community.name})`,
+            webAppLocation: groupUrl({
+              tab: 'members',
+              communityId: community.id,
+            }),
+            associatedUsers: [invite.invitedUser],
+          };
+        },
+      }),
+      ...invite.invitedUser.communities
+        .filter((c) => !c.leaders!.some((l) => l.id === invite.invitedUser.id))
+        .map((c) =>
+          this.removeUserFromCommunityAndRefreshConversation({
+            user: invite.invitedUser,
+            community: c,
+            removeAsLeader: false,
+            notifForLeader: ({ leader }) => ({
+              user: leader,
+              category: NotificationCategory.MemberLeftCommunity,
+              message: `${invite.invitedUser.name} left your group (${c.name})`,
+              webAppLocation: groupUrl({
+                tab: 'members',
+                communityId: c.id,
+              }),
+              associatedUsers: [invite.invitedUser],
+            }),
+            saveAsPendingCommunity: false,
+          }),
+        ),
+      this.notifsService.sendNotif({
+        user: invite.invitingUser!,
+        category: NotificationCategory.CommunityInviteAccepted,
+        message: `${invite.invitedUser.name} accepted your invitation to join your group (${community.name})`,
+        webAppLocation: groupUrl({
+          tab: 'members',
+          communityId: community.id,
+        }),
+        associatedUsers: [invite.invitedUser],
+      }),
+    ]);
+  }
 }
