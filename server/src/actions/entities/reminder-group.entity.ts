@@ -5,7 +5,7 @@ import { Allow, IsDefined, IsOptional } from 'class-validator';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { Ty } from 'src/tasks/entities/type';
 import { Tag } from 'src/user/entities/tag.entity';
-import { User } from 'src/user/entities/user.entity';
+import { DEFAULT_TIME_ZONE, User } from 'src/user/entities/user.entity';
 import {
   Check,
   Column,
@@ -244,7 +244,7 @@ export function getGroupSendTimeForUser(
       );
     case ReminderGroupTimingMode.WithinRange:
       return firstOccurrenceInRange(
-        user.timeZone ?? 'America/Los_Angeles',
+        user.timeZone ?? DEFAULT_TIME_ZONE,
         user.preferredReminderTime ?? Temporal.PlainTime.from('19:00:00'),
         Temporal.Instant.fromEpochMilliseconds(
           group.send_range_start!.getTime(),
@@ -266,7 +266,7 @@ export function getGroupSendTimeForUser(
         group.relative_range_end_seconds_from_deadline!,
       );
       return firstOccurrenceInRange(
-        user.timeZone ?? 'America/Los_Angeles',
+        user.timeZone ?? DEFAULT_TIME_ZONE,
         user.preferredReminderTime ?? Temporal.PlainTime.from('19:00:00'),
         Temporal.Instant.fromEpochMilliseconds(start.getTime()),
         Temporal.Instant.fromEpochMilliseconds(end.getTime()),

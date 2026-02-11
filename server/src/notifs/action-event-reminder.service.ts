@@ -25,7 +25,7 @@ import {
   ActionEvent,
   ActionStatus,
 } from '../actions/entities/action-event.entity';
-import { User } from '../user/entities/user.entity';
+import { DEFAULT_TIME_ZONE, User } from '../user/entities/user.entity';
 import { ActionEventRecipientService } from './action-event-recipient.service';
 import { ActionEventNotifDto } from './entities/action-event-notif.dto';
 import {
@@ -82,7 +82,7 @@ export class ActionEventReminderService {
     private readonly recipientService: ActionEventRecipientService,
     private readonly userService: UserService,
     private readonly mailService: MailService,
-  ) { }
+  ) {}
 
   async findPlansForGroup(
     group: ReminderGroup,
@@ -285,11 +285,10 @@ export class ActionEventReminderService {
   ): Promise<Temporal.ZonedDateTime> {
     const defaultSendTime: Temporal.PlainTime =
       Temporal.PlainTime.from('19:00:00');
-    const defaultTimeZone: Temporal.TimeZoneLike = 'America/Los_Angeles'; //pacific
 
     const timeOfDay: Temporal.PlainTime =
       user.preferredReminderTime ?? defaultSendTime;
-    const timezone: Temporal.TimeZoneLike = user.timeZone ?? defaultTimeZone;
+    const timezone: Temporal.TimeZoneLike = user.timeZone ?? DEFAULT_TIME_ZONE;
 
     const zoned = day.toZonedDateTime({
       plainTime: timeOfDay,
@@ -423,8 +422,10 @@ export class ActionEventReminderService {
     });
   }
 
-
-  async findUncompletedMembersInCommunities(group: ReminderGroup, leader: User): Promise<User[]> {
+  async findUncompletedMembersInCommunities(
+    group: ReminderGroup,
+    leader: User,
+  ): Promise<User[]> {
     const baseUsers = await this.recipientService.findFilteredUsersForEvent(
       group.memberActionEvent,
       group.deadlineEvent ?? null,
@@ -442,11 +443,12 @@ export class ActionEventReminderService {
     );
 
     const inCommunities = usersWithCommunities.filter((user) =>
-      user.communities.some((community) => leaderCommunityIds.has(community.id)),
+      user.communities.some((community) =>
+        leaderCommunityIds.has(community.id),
+      ),
     );
     return inCommunities.filter((user) => user.id !== leader.id);
   }
-
 
   async loadEventsForPreview(
     eventId: number,
@@ -499,14 +501,27 @@ export class ActionEventReminderService {
     dto: PreviewEmailHtmlDto,
     sendTime?: Date,
   ): Promise<PreviewEmailHtmlResponse> {
-    const context = await this.getKeywordContextForPreview(eventId, dto, sendTime);
+    const context = await this.getKeywordContextForPreview(
+      eventId,
+      dto,
+      sendTime,
+    );
 
-    const replacedMessage = processKeywordReplacements(dto.emailMessage, context);
-    const replacedSubject = processKeywordReplacements(dto.emailSubject, context);
+    const replacedMessage = processKeywordReplacements(
+      dto.emailMessage,
+      context,
+    );
+    const replacedSubject = processKeywordReplacements(
+      dto.emailSubject,
+      context,
+    );
 
-    const html = await this.mailService.renderHtml(EmailType.CustomActionReminder, {
-      customMessage: replacedMessage.replace(/\n/g, '<br>'),
-    });
+    const html = await this.mailService.renderHtml(
+      EmailType.CustomActionReminder,
+      {
+        customMessage: replacedMessage.replace(/\n/g, '<br>'),
+      },
+    );
 
     return {
       subject: replacedSubject,
