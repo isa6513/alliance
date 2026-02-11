@@ -549,13 +549,6 @@ jobs:
             echo "No baseline screenshots — skipping comparison"
           fi
 
-      - name: Upload Current Screenshots to S3
-        if: github.ref_name == 'production'
-        run: |
-          aws s3 sync \
-            ${{ github.workspace }}/screenshots/current/ \
-            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ env.env_name }}/${{ github.sha }}/
-
       - name: AI Review
         if: github.ref_name == 'production'
         id: ai-review
@@ -670,6 +663,15 @@ jobs:
             --data "$(jq -n --arg channel "$CHANNEL" --arg text "$TEXT" \
               '{channel: $channel, text: $text, mrkdwn: true, unfurl_links: true, unfurl_media: true}')" \
             https://slack.com/api/chat.postMessage
+
+
+      - name: Upload Current Screenshots to S3
+        if: github.ref_name == 'production' && steps.ai-review.outcome != 'failure'
+        run: |
+          aws s3 sync \
+            ${{ github.workspace }}/screenshots/current/ \
+            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ env.env_name }}/${{ github.sha }}/
+
 
       - name: Promote to Latest Baseline
         if: github.ref_name == 'production' && steps.ai-review.outcome != 'failure'
