@@ -939,33 +939,35 @@ const StatsPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col">
-              <div className="text-sm text-gray-600">
-                Total expected weekly member time
+            <div className="flex flex-row gap-6 items-end">
+              <div className="flex flex-col gap-y-1">
+                <div className="text-sm text-gray-600">
+                  Total expected weekly member time
+                </div>
+                <div className="text-base font-semibold text-gray-900">
+                  {((aggregateStats.signedUsers * 15) / 60).toFixed(2)} hours /
+                  week
+                </div>
               </div>
-              <div className="text-base font-semibold text-gray-900">
-                {((aggregateStats.signedUsers * 15) / 60).toFixed(2)} hours /
-                week
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <div className="text-sm text-gray-600">
-                Annual expected value of member time (assuming{" "}
-                <input
-                  type="number"
-                  value={assumedHourlyRate}
-                  onChange={(e) => setAssumedHourlyRate(Number(e.target.value))}
-                  className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white w-16"
-                />{" "}
-                / hour)
-              </div>
-              <div className="text-base font-semibold text-gray-900">
-                $
-                {(
-                  ((aggregateStats.signedUsers * 15) / 60) *
-                  assumedHourlyRate *
-                  52
-                ).toFixed(2)}
+              <div className="flex flex-col">
+                <div className="text-sm text-gray-600">
+                  Annual expected value of member time (assuming{" "}
+                  <input
+                    type="number"
+                    value={assumedHourlyRate}
+                    onChange={(e) => setAssumedHourlyRate(Number(e.target.value))}
+                    className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white w-16"
+                  />{" "}
+                  / hour)
+                </div>
+                <div className="text-base font-semibold text-gray-900">
+                  $
+                  {(
+                    ((aggregateStats.signedUsers * 15) / 60) *
+                    assumedHourlyRate *
+                    52
+                  ).toFixed(2)}
+                </div>
               </div>
             </div>
           </div>
@@ -1097,7 +1099,7 @@ const StatsPage: React.FC = () => {
                       >
                         {Math.round(
                           (bar.value / inviteFunnelGeometry.bars[idx - 1].value) *
-                            100
+                          100
                         )}
                         %
                       </text>
@@ -1547,7 +1549,7 @@ const StatsPage: React.FC = () => {
                       rx={4}
                       fill={
                         action.memberActionEndDate &&
-                        new Date(action.memberActionEndDate) > new Date()
+                          new Date(action.memberActionEndDate) > new Date()
                           ? isHovered
                             ? "url(#in-progress-stripes-hover)"
                             : "url(#in-progress-stripes)"
