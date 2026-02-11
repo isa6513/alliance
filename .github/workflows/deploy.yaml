@@ -488,6 +488,14 @@ jobs:
           node-version: 22
           cache: "yarn"
 
+      - name: Setup npm cache for server
+        if: github.ref_name == 'production'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
       - name: Install Yarn Dependencies
         if: github.ref_name == 'production'
         run: corepack yarn install --immutable

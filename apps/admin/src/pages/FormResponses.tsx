@@ -488,14 +488,6 @@ const FormResponses: React.FC = () => {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button
-                onClick={() => navigate("/forms")}
-                color={ButtonColor.Transparent}
-                size="small"
-              >
-                &larr; Forms
-              </Button>
-              <div className="h-6 w-px bg-gray-200" />
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">
                   {form?.title ?? "Form Responses"}
