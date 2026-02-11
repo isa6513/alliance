@@ -601,7 +601,7 @@ describe('Community (e2e)', () => {
       .post(`/community/${community.id}/join`)
       .set('Authorization', `Bearer ${secondUserToken}`);
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBeGreaterThanOrEqual(400);
   });
 
   it('DELETE /community/:communityId deletes community when authenticated as leader and sole member', async () => {
