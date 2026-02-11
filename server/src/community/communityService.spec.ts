@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { CommunityService } from './community.service';
 import { Community } from './entities/community.entity';
@@ -61,18 +62,19 @@ describe('CommunityService', () => {
     );
   });
 
-  describe('addUserToCommunityAndRefreshConversation', () => {
-    it('returns the community unchanged when user is already a member', async () => {
+  describe('addUsersToCommunityAndRefreshConversation', () => {
+    it('throws when user is already a member', async () => {
       const user = { id: 5, name: 'Existing User' } as User;
       const community = buildCommunity({ users: [user] });
 
-      const result = await service.addUserToCommunityAndRefreshConversation({
-        user,
-        community,
-        notifForLeader: () => null,
-      });
+      await expect(
+        service.addUsersToCommunityAndRefreshConversation({
+          user,
+          community,
+          notifForLeader: () => null,
+        }),
+      ).rejects.toThrow(BadRequestException);
 
-      expect(result).toBe(community);
       expect(communityRepository.save).not.toHaveBeenCalled();
       expect(notifsService.sendNotifs).not.toHaveBeenCalled();
     });
@@ -89,7 +91,7 @@ describe('CommunityService', () => {
         associatedUsers: [],
       })) as (params: { leader: User }) => CreateNotifParams;
 
-      await service.addUserToCommunityAndRefreshConversation({
+      await service.addUsersToCommunityAndRefreshConversation({
         user,
         community,
         notifForLeader: notifFactory,
@@ -102,11 +104,13 @@ describe('CommunityService', () => {
       });
 
       // clears user's pending state
-      expect(userRepository.save).toHaveBeenCalledWith({
-        id: user.id,
-        undergoingGroupAssignment: false,
-        pendingCommunity: null,
-      });
+      expect(userRepository.save).toHaveBeenCalledWith([
+        {
+          id: user.id,
+          undergoingGroupAssignment: false,
+          pendingCommunity: null,
+        },
+      ]);
 
       // sends one notif per leader
       expect(notifsService.sendNotifs).toHaveBeenCalledTimes(1);
@@ -135,7 +139,7 @@ describe('CommunityService', () => {
             } as CreateNotifParams)
           : null;
 
-      await service.addUserToCommunityAndRefreshConversation({
+      await service.addUsersToCommunityAndRefreshConversation({
         user,
         community,
         notifForLeader: notifFactory,
@@ -147,8 +151,8 @@ describe('CommunityService', () => {
   });
 
   describe('removeUserFromCommunityAndRefreshConversation', () => {
-    it('returns the community unchanged when user is still a leader and not removed as leader', async () => {
-      const user = leader1;
+    it('returns the community unchanged when user is not a member', async () => {
+      const user = { id: 99, name: 'Non-member' } as User;
       const community = buildCommunity({ users: [leader1, leader2] });
 
       const result =
@@ -239,10 +243,12 @@ describe('CommunityService', () => {
         saveAsPendingCommunity: true,
       });
 
-      expect(userRepository.save).toHaveBeenCalledWith({
-        id: user.id,
-        pendingCommunity: { id: community.id },
-      });
+      expect(userRepository.save).toHaveBeenCalledWith([
+        {
+          id: user.id,
+          pendingCommunity: { id: community.id },
+        },
+      ]);
     });
 
     it('does not save pendingCommunity when saveAsPendingCommunity is false', async () => {

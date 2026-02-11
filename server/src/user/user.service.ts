@@ -652,7 +652,7 @@ export class UserService {
             0
         ) {
           promises.push(
-            this.communityService.addUserToCommunityAndRefreshConversation({
+            this.communityService.addUsersToCommunityAndRefreshConversation({
               user,
               community: user.pendingCommunity,
               notifForLeader: ({ leader }) => ({
@@ -673,7 +673,7 @@ export class UserService {
       // Join community from invite
       const community = user.referredByInvite.community;
       let referrerNotified = false;
-      await this.communityService.addUserToCommunityAndRefreshConversation({
+      await this.communityService.addUsersToCommunityAndRefreshConversation({
         user,
         community,
         notifForLeader: ({ leader }) => {
@@ -725,7 +725,7 @@ export class UserService {
 
       if (community) {
         promises.push(
-          this.communityService.addUserToCommunityAndRefreshConversation({
+          this.communityService.addUsersToCommunityAndRefreshConversation({
             user,
             community,
             notifForLeader: ({ leader }) => ({
@@ -1431,7 +1431,7 @@ export class UserService {
       );
 
       // Add user to new community
-      await this.communityService.addUserToCommunityAndRefreshConversation({
+      await this.communityService.addUsersToCommunityAndRefreshConversation({
         user,
         community,
         notifForLeader: ({ leader }) => ({

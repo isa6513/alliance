@@ -118,15 +118,29 @@ export class CommunityService {
     return communities.sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async addUserToCommunityAndRefreshConversation(params: {
-    user: Pick<User, 'id' | 'name'> & DeepPartial<User>;
-    community: Community;
-    notifForLeader: (params: { leader: User }) => CreateNotifParams | null;
-  }): Promise<Community> {
-    const { user, community, notifForLeader } = params;
+  async addUsersToCommunityAndRefreshConversation(
+    params: {
+      community: Community;
+      notifForLeader: (params: { leader: User }) => CreateNotifParams | null;
+    } & (
+      | {
+          user: Pick<User, 'id' | 'name'> & DeepPartial<User>;
+          users?: undefined;
+        }
+      | {
+          user?: undefined;
+          users: (Pick<User, 'id' | 'name'> & DeepPartial<User>)[];
+        }
+    ),
+  ): Promise<Community> {
+    const { user, users: usersParam, community, notifForLeader } = params;
+    const users = usersParam ?? [user];
 
-    if (community.users.some((existing) => existing.id === user.id)) {
-      return community;
+    const userIdSet = new Set(users.map((user) => user.id));
+    if (community.users.some((existing) => userIdSet.has(existing.id))) {
+      throw new BadRequestException(
+        `One or more users are already a member of community ${community.id}`,
+      );
     }
 
     const notifs: CreateNotifParams[] = community
@@ -136,7 +150,7 @@ export class CommunityService {
     const updatedCommunityP = run(async () => {
       const updates = await this.communityRepository.save({
         id: community.id,
-        users: [...community.users, user],
+        users: [...community.users, ...users],
       });
 
       await this.conversationService.syncCommunityConversationMembers(
@@ -148,42 +162,57 @@ export class CommunityService {
     const [updated] = await Promise.all([
       updatedCommunityP,
       this.notifsService.sendNotifs(notifs),
-      this.userRepository.save({
-        id: user.id,
-        undergoingGroupAssignment: false,
-        pendingCommunity: null,
-      }),
+      this.userRepository.save(
+        users.map((user) => ({
+          id: user.id,
+          undergoingGroupAssignment: false,
+          pendingCommunity: null,
+        })),
+      ),
     ]);
 
     return updated;
   }
 
-  async removeUserFromCommunityAndRefreshConversation(params: {
-    user: User;
-    community: Community;
-    removeAsLeader: boolean;
-    notifForLeader: (params: { leader: User }) => CreateNotifParams | null;
-    saveAsPendingCommunity: boolean;
-  }): Promise<Community> {
+  async removeUserFromCommunityAndRefreshConversation(
+    params: {
+      community: Community;
+      removeAsLeader: boolean;
+      notifForLeader: (params: { leader: User }) => CreateNotifParams | null;
+      saveAsPendingCommunity: boolean;
+    } & (
+      | {
+          user: User;
+          users?: undefined;
+        }
+      | {
+          user?: undefined;
+          users: User[];
+        }
+    ),
+  ): Promise<Community> {
     const {
       user,
+      users: usersParam,
       community,
       removeAsLeader,
       notifForLeader,
       saveAsPendingCommunity,
     } = params;
-    const newLeaders = removeAsLeader
-      ? community.leaders!.filter((l) => l.id !== user.id)
-      : community.leaders!;
-    const newLeaderIds = new Set(newLeaders.map((l) => l.id));
+    const users = usersParam ?? [user];
+    const userIdSet = new Set(users.map((user) => user.id));
 
-    if (newLeaderIds.has(user.id)) {
-      // user is not removed, no further action needed
+    const newMembers = community.users.filter((u) => !userIdSet.has(u.id));
+    if (newMembers.length === community.users.length) {
+      // users are not removed, no further action needed
       return community;
     }
-    const newMembers = community.users.filter((u) => u.id !== user.id);
 
-    const notifs = newLeaders!
+    const newLeaders = removeAsLeader
+      ? community.leaders!.filter((l) => !userIdSet.has(l.id))
+      : community.leaders!;
+
+    const notifs = newLeaders
       .map((leader) => notifForLeader({ leader }))
       .filter((notif) => !!notif);
 
@@ -204,12 +233,12 @@ export class CommunityService {
       updatedCommunityP,
       this.notifsService.sendNotifs(notifs),
       saveAsPendingCommunity
-        ? this.userRepository.save({
-            id: user.id,
-            pendingCommunity: {
-              id: community.id,
-            },
-          })
+        ? this.userRepository.save([
+            ...users.map((user) => ({
+              id: user.id,
+              pendingCommunity: { id: community.id },
+            })),
+          ])
         : null,
     ]);
 
@@ -252,7 +281,7 @@ export class CommunityService {
     }
 
     const [addedCommunity] = await Promise.all([
-      this.addUserToCommunityAndRefreshConversation({
+      this.addUsersToCommunityAndRefreshConversation({
         user,
         community,
         notifForLeader: ({ leader }) => ({
@@ -521,7 +550,7 @@ export class CommunityService {
       this.userRepository.findOneOrFail({ where: { id: userId } }),
     ]);
 
-    return this.addUserToCommunityAndRefreshConversation({
+    return this.addUsersToCommunityAndRefreshConversation({
       user,
       community,
       notifForLeader: ({ leader }) => ({
@@ -981,7 +1010,7 @@ export class CommunityService {
 
     await Promise.all([
       this.communityInviteRepository.save(invite),
-      this.addUserToCommunityAndRefreshConversation({
+      this.addUsersToCommunityAndRefreshConversation({
         user: invite.invitedUser,
         community,
         notifForLeader: ({ leader }) => {
