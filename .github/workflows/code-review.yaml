@@ -330,8 +330,10 @@ jobs:
 
       - name: Post to Slack (NEEDS_REVIEW)
         if: ${{ steps.combine_reviews.outputs.needs_review == 'true' && (success() || failure()) }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_CLA }}
         run: |
           curl -s -X POST -H 'Content-type: application/json' \
-            --data '${{ steps.slack_body_review.outputs.payload }}' \
-            "${{ secrets.SLACK_WEBHOOK_URL_CLA }}"
+            --data @slack.json \
+            "$SLACK_WEBHOOK_URL"
 
