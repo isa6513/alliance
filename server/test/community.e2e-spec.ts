@@ -676,6 +676,8 @@ describe('Community (e2e)', () => {
     const memberIds = refreshed.users.map((u: User) => u.id);
     expect(memberIds).not.toContain(testUser.id);
     expect(memberIds).toContain(secondUser.id);
+    const leaderIds = refreshed.leaders!.map((u: User) => u.id);
+    expect(leaderIds).not.toContain(testUser.id);
   });
 
   it('POST /community/:communityId/join returns error for non-public community', async () => {
