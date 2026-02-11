@@ -597,7 +597,7 @@ describe('Community (e2e)', () => {
       .post(`/community/${community.id}/leave`)
       .set('Authorization', `Bearer ${secondUserToken}`);
 
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(200);
     const refreshed = await communityRepo.findOneOrFail({
       where: { id: community.id },
       relations: { users: true },
@@ -668,7 +668,7 @@ describe('Community (e2e)', () => {
       .post(`/community/${community.id}/leave`)
       .set('Authorization', `Bearer ${testUserToken}`);
 
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(200);
     const refreshed = await communityRepo.findOneOrFail({
       where: { id: community.id },
       relations: { users: true, leaders: true },

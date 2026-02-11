@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  HttpCode,
   Post,
   Request,
   UseGuards,
@@ -148,6 +149,7 @@ export class CommunityController {
   }
 
   @Post(':communityId/leave')
+  @HttpCode(200)
   @UseGuards(AuthGuard)
   @ApiOkResponse()
   async leave(
