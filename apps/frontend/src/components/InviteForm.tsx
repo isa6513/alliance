@@ -8,7 +8,7 @@ import {
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import CommunityCreateForm from "./CommunityCreateForm";
@@ -18,6 +18,7 @@ import { Link } from "react-router";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
+import OnetimeInviteForm from "./OnetimeInviteForm";
 
 type ResponsibilityChoice = "responsible" | "not_responsible" | null;
 
@@ -37,7 +38,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   );
   const [creatingInvite, setCreatingInvite] = useState(false);
   const [communities, setCommunities] = useState<CommunityDto[]>([]);
-  const infoInputRef = useRef<HTMLTextAreaElement | null>(null);
 
   const refreshCommunities = useCallback(
     async (resetSelectedCommunityId: boolean) => {
@@ -58,15 +58,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   useEffect(() => {
     void refreshCommunities(true);
   }, [refreshCommunities]);
-
-  useEffect(() => {
-    const infoInput = infoInputRef.current;
-    if (!infoInput) {
-      return;
-    }
-    infoInput.style.height = "auto";
-    infoInput.style.height = infoInput.scrollHeight + "px";
-  }, [info]);
 
   const { leaderCommunities, memberCommunities } = useMemo(() => {
     const leaderCommunities: CommunityDto[] = [];
@@ -199,20 +190,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
             getMemberCount(memberCommunities[0]),
         };
 
-  const infoForm = (
-    <textarea
-      ref={infoInputRef}
-      className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-      placeholder="Context about the invitation"
-      value={info}
-      onChange={(e) => {
-        setInfo(e.target.value);
-      }}
-      rows={2}
-      style={{ resize: "none" }}
-    />
-  );
-
   return (
     <Card style={CardStyle.Grey}>
       <div className="flex flex-col gap-y-6">
@@ -304,61 +281,32 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 </div>
               )}
             </div>
-            <div className="flex flex-col gap-y-2">
-              <input
-                type="text"
-                className="border border-zinc-300 rounded px-3 py-2 flex-1"
-                placeholder="Enter the invitee's first name"
-                value={inviteeName}
-                onChange={(e) => setInviteeName(e.target.value)}
-              />
-              <p className="my-2 text-zinc-500">
-                {onetimeInviteCreation.inviteeContextExplanation}
-              </p>
-              {infoForm}
-              <Button
-                color={ButtonColor.Black}
-                onClick={() => handleCreateInvite(null)}
-                disabled={creatingInvite || !inviteeName.trim()}
-                className="w-full"
-              >
-                {creatingInvite ? "Creating..." : "Create invite"}
-              </Button>
-            </div>
+            <OnetimeInviteForm
+              inviteeName={inviteeName}
+              setInviteeName={setInviteeName}
+              info={info}
+              setInfo={setInfo}
+              onSubmit={() => handleCreateInvite(null)}
+              creatingInvite={creatingInvite}
+              submittingText="Creating..."
+            />
           </div>
         )}
 
         {responsibilityChoice === "responsible" && (
           <>
             {/* Invitee name input */}
-            <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
-              <div className="flex flex-col gap-y-2">
-                <p className="text-xl font-semibold">
-                  {onetimeInviteCreation.responsible.leader.invite.title}
-                </p>
-                <div className="text-zinc-500">
-                  <AppMarkdownWrapper
-                    markdownContent={onetimeInviteCreation.responsible.leader.invite.explanation.join(
-                      "\n\n"
-                    )}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-y-2">
-                <div className="flex flex-row gap-x-2">
-                  <input
-                    type="text"
-                    className="border border-zinc-300 rounded px-3 py-2 flex-1"
-                    placeholder="Enter the invitee's first name"
-                    value={inviteeName}
-                    onChange={(e) => setInviteeName(e.target.value)}
-                  />
-                </div>
-                <p className="my-2 text-zinc-500">
-                  {onetimeInviteCreation.inviteeContextExplanation}
-                </p>
-                {infoForm}
-              </div>
+            <div className="border-t border-zinc-200 pt-4">
+              <OnetimeInviteForm
+                title={onetimeInviteCreation.responsible.leader.invite.title}
+                explanation={
+                  onetimeInviteCreation.responsible.leader.invite.explanation
+                }
+                inviteeName={inviteeName}
+                setInviteeName={setInviteeName}
+                info={info}
+                setInfo={setInfo}
+              />
             </div>
 
             {isLeader && (

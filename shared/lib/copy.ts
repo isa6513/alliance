@@ -127,7 +127,7 @@ export const inviteBuckets = {
   },
   waitingForResponse: {
     title: "No action needed",
-    description: "Other members need to approve or send these invites.",
+    description: "Other members need to respond to these invites.",
   },
   settled: {
     title: "Past invites",

@@ -1,133 +1,86 @@
-import { onetimeInviteCreationGroup } from "@alliance/shared/lib/copy";
-import { CardStyle } from "@alliance/shared/styles/card";
+import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card from "@alliance/sharedweb/ui/Card";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { useEffect, useRef } from "react";
-import { Link } from "react-router";
 
-type SharedProps = {
+type OnetimeInviteFormProps = {
+  title?: string;
+  explanation?: readonly string[];
   inviteeName: string;
   setInviteeName: (value: string) => void;
-  creatingInvite: boolean;
+  info: string;
+  setInfo: (value: string) => void;
+  onSubmit?: () => void;
+  submitText?: string;
+  submittingText?: string;
+  creatingInvite?: boolean;
 };
-
-type LeaderInviteFormProps = SharedProps & {
-  isLeader: true;
-  onCreateInvite: () => void;
-  inviteeDescription?: undefined;
-  setInviteeDescription?: undefined;
-  onRequestInvite?: undefined;
-};
-
-type MemberInviteFormProps = SharedProps & {
-  isLeader: false;
-  onCreateInvite?: undefined;
-  inviteeDescription: string;
-  setInviteeDescription: (value: string) => void;
-  onRequestInvite: () => void;
-};
-
-type OnetimeInviteFormProps = LeaderInviteFormProps | MemberInviteFormProps;
 
 const OnetimeInviteForm = ({
+  title,
+  explanation,
   inviteeName,
   setInviteeName,
-  creatingInvite,
-  onCreateInvite,
-  isLeader,
-  inviteeDescription,
-  setInviteeDescription,
-  onRequestInvite,
+  info,
+  setInfo,
+  onSubmit,
+  submitText = "Create invite",
+  submittingText = "Creating invite...",
+  creatingInvite = false,
 }: OnetimeInviteFormProps) => {
-  const descriptionInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const infoInputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
-    const descriptionInput = descriptionInputRef.current;
-    if (!descriptionInput) {
+    const infoInput = infoInputRef.current;
+    if (!infoInput) {
       return;
     }
-    descriptionInput.style.height = "auto";
-    descriptionInput.style.height = descriptionInput.scrollHeight + "px";
-  }, [inviteeDescription, descriptionInputRef]);
+    infoInput.style.height = "auto";
+    infoInput.style.height = infoInput.scrollHeight + "px";
+  }, [info]);
 
   return (
-    <Card style={CardStyle.Grey}>
-      {isLeader ? (
+    <div className="flex flex-col gap-y-4">
+      {title && explanation && (
         <div className="flex flex-col gap-y-2">
-          <p className="font-semibold">
-            {onetimeInviteCreationGroup.leader.title}
-          </p>
-          {onetimeInviteCreationGroup.leader.explanation.map((block, index) => (
-            <p className="text-zinc-500" key={index}>
-              {block}
-            </p>
-          ))}
-          <Link
-            to="/groups?tab=resources"
-            className="text-green hover:underline"
-          >
-            Invite guide
-          </Link>
-          <div className="flex flex-row gap-x-2 mt-2">
-            <input
-              type="text"
-              className="border border-zinc-300 rounded px-3 h-10 flex-1"
-              placeholder="Enter the invitee's first name"
-              value={inviteeName}
-              onChange={(e) => setInviteeName(e.target.value)}
-            />
-            <Button
-              color={ButtonColor.Black}
-              onClick={onCreateInvite}
-              className="!h-10"
-              disabled={creatingInvite || !inviteeName}
-            >
-              {creatingInvite ? "Creating invite..." : "Create invite"}
-            </Button>
+          <p className="text-xl font-semibold">{title}</p>
+          <div className="text-zinc-500">
+            <AppMarkdownWrapper markdownContent={explanation.join("\n\n")} />
           </div>
         </div>
-      ) : (
-        <div className="flex flex-col gap-y-3">
-          <p className="font-semibold">
-            {onetimeInviteCreationGroup.member.title}
-          </p>
-          <p className="text-zinc-500">
-            {onetimeInviteCreationGroup.member.explanation}
-          </p>
-          <ol className="text-zinc-500 list-decimal list-inside mb-2">
-            {onetimeInviteCreationGroup.member.bullets.map((block, index) => (
-              <li key={index}>{block}</li>
-            ))}
-          </ol>
-
-          <input
-            type="text"
-            className="border border-zinc-300 rounded px-3 py-2 bg-white"
-            placeholder="Enter the invitee's first name"
-            value={inviteeName}
-            onChange={(e) => setInviteeName(e.target.value)}
-          />
-          <textarea
-            ref={descriptionInputRef}
-            className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-            placeholder="Context about invitee"
-            value={inviteeDescription}
-            onChange={(e) => {
-              setInviteeDescription(e.target.value);
-            }}
-            rows={2}
-            style={{ resize: "none" }}
-          />
+      )}
+      <div className="flex flex-col gap-y-2">
+        <input
+          type="text"
+          className="border border-zinc-300 rounded px-3 py-2 flex-1"
+          placeholder="Enter the invitee's first name"
+          value={inviteeName}
+          onChange={(e) => setInviteeName(e.target.value)}
+        />
+        <p className="my-2 text-zinc-500">
+          {onetimeInviteCreation.inviteeContextExplanation}
+        </p>
+        <textarea
+          ref={infoInputRef}
+          className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
+          placeholder="Context about the invitation"
+          value={info}
+          onChange={(e) => setInfo(e.target.value)}
+          rows={2}
+          style={{ resize: "none" }}
+        />
+        {onSubmit && (
           <Button
             color={ButtonColor.Black}
-            onClick={onRequestInvite}
-            disabled={creatingInvite || !inviteeName}
+            onClick={onSubmit}
+            disabled={creatingInvite || !inviteeName.trim()}
+            className="w-full"
           >
-            {creatingInvite ? "Requesting..." : "Request invite"}
+            {creatingInvite ? submittingText : submitText}
           </Button>
-        </div>
-      )}
-    </Card>
+        )}
+      </div>
+    </div>
   );
 };
 

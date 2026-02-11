@@ -40,13 +40,23 @@ import MyGroupsPage from "./MyGroupsPage";
 import { Link } from "react-router";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { useMyCommunities } from "../../lib/useMyCommunities";
+import CommunityInvitesLeaderTab from "../../components/CommunityInvitesLeaderTab";
 
-export type Tab = "activity" | "members" | "groups";
+export type Tab = "activity" | "members" | "groups" | "invites";
 
 const TAB_DISPLAY_NAMES = {
   activity: "Activity",
   members: "Members",
+  invites: "Invites",
 } satisfies Partial<Record<Tab, string>>;
+
+const SHOWN_TABS = {
+  leader: ["activity", "members", "invites"],
+  member: ["activity", "members"],
+} as const satisfies Record<
+  "leader" | "member",
+  (keyof typeof TAB_DISPLAY_NAMES)[]
+>;
 
 const CURRENT_ACTION_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 
@@ -348,9 +358,7 @@ const CommunityPage = () => {
     }
   }, [community, isSaving, removeCommunity, setParams]);
 
-  const tabs: (keyof typeof TAB_DISPLAY_NAMES)[] = amLeader
-    ? ["activity", "members"]
-    : ["activity", "members"];
+  const tabs = SHOWN_TABS[amLeader ? "leader" : "member"];
 
   const isLargeScreen = useMediaQuery("(min-width: 1250px)");
   const isChatOpen = messagingEnabled && chatOpen;
@@ -714,6 +722,13 @@ const CommunityPage = () => {
             />
           )}
           {tab === "groups" && groupManagementPage}
+          {tab === "invites" && (
+            <CommunityInvitesLeaderTab
+              communityId={community.id}
+              existingMembers={community.users}
+              setInviteNotifCount={() => {}}
+            />
+          )}
           <BottomSpacer />
           {!chatOpen && messagingEnabled && isLargeScreen && (
             <div className="absolute bottom-5 right-7 bg-white hover:bg-zinc-100">

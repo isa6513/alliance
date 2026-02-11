@@ -27,7 +27,6 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { CardStyle } from "@alliance/shared/styles/card";
 import CommunityInviteListItem from "./CommunityInviteListItem";
 import OnetimeInviteListItem from "./OnetimeInviteListItem";
-import OnetimeInviteForm from "./OnetimeInviteForm";
 import {
   bucketOnetimeInvitesByActionability,
   bucketCommunityInvitesByActionability,
@@ -35,7 +34,9 @@ import {
 import {
   inviteBuckets,
   deleteInviteConfirmation,
+  onetimeInviteCreation,
 } from "@alliance/shared/lib/copy";
+import OnetimeInviteForm from "./OnetimeInviteForm";
 
 export interface CommunityInvitesLeaderTabProps {
   communityId: number;
@@ -54,6 +55,7 @@ const CommunityInvitesLeaderTab = ({
   setInviteNotifCount,
 }: CommunityInvitesLeaderTabProps) => {
   const [name, setName] = useState("");
+  const [info, setInfo] = useState("");
   const { user } = useAuth();
 
   const [creatingInvite, setCreatingInvite] = useState(false);
@@ -167,12 +169,14 @@ const CommunityInvitesLeaderTab = ({
       invitee: name,
       communityId,
       invitingUserId: user.id,
+      ...(info.trim() && { info: info.trim() }),
     } satisfies CreateOnetimeInviteDto;
 
     userCreateOnetimeInvite({ body })
       .then((response) => {
         if (response.data) {
           setName("");
+          setInfo("");
           setOnetimeInvites((prev) => [response.data, ...prev]);
           setError(null);
         }
@@ -288,13 +292,20 @@ const CommunityInvitesLeaderTab = ({
         />
 
         {inviteMode === InviteMode.NewMember ? (
-          <OnetimeInviteForm
-            inviteeName={name}
-            setInviteeName={setName}
-            creatingInvite={creatingInvite}
-            onCreateInvite={handleInvite}
-            isLeader={true}
-          />
+          <Card style={CardStyle.Grey}>
+            <OnetimeInviteForm
+              title={onetimeInviteCreation.responsible.leader.invite.title}
+              explanation={
+                onetimeInviteCreation.responsible.leader.invite.explanation
+              }
+              inviteeName={name}
+              setInviteeName={setName}
+              info={info}
+              setInfo={setInfo}
+              onSubmit={handleInvite}
+              creatingInvite={creatingInvite}
+            />
+          </Card>
         ) : (
           <Card style={CardStyle.Grey}>
             <div className="flex flex-col gap-y-2">
