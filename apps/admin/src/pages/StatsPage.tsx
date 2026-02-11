@@ -6,6 +6,7 @@ import {
   analyticsGetAggregateStats,
   analyticsGetContractStatusHistory,
   analyticsGetTimeToChurnSamples,
+  analyticsGetInviteFunnel,
 } from "@alliance/shared/client";
 import {
   TimeSeriesChart,
@@ -22,6 +23,7 @@ import {
   AggregateStatsDto,
   ContractStatusPointDto,
   TimeToChurnSampleDto,
+  InviteFunnelDto,
 } from "@alliance/shared/client/types.gen";
 import chroma from "chroma-js";
 import {
@@ -182,6 +184,12 @@ const StatsPage: React.FC = () => {
       end: formatDateAsLocal(end),
     };
   });
+  const [inviteFunnel, setInviteFunnel] = useState<InviteFunnelDto | null>(null);
+  const [inviteFunnelLoading, setInviteFunnelLoading] = useState<boolean>(false);
+  const [inviteFunnelRange, setInviteFunnelRange] = useState<{
+    start: string;
+    end: string;
+  } | null>(null);
   const [assumedHourlyRate, setAssumedHourlyRate] = useState<number>(15);
   const [contractStatusHistory, setContractStatusHistory] = useState<
     ContractStatusPointDto[]
@@ -326,6 +334,26 @@ const StatsPage: React.FC = () => {
   useEffect(() => {
     void loadTimeToChurnSamples();
   }, [loadTimeToChurnSamples]);
+
+  const loadInviteFunnel = useCallback(async () => {
+    setInviteFunnelLoading(true);
+    try {
+      const response = await analyticsGetInviteFunnel({
+        query: inviteFunnelRange
+          ? { startDate: inviteFunnelRange.start, endDate: inviteFunnelRange.end }
+          : {},
+      });
+      setInviteFunnel(response.data ?? null);
+    } catch (err) {
+      console.error("Failed to load invite funnel", err);
+    } finally {
+      setInviteFunnelLoading(false);
+    }
+  }, [inviteFunnelRange]);
+
+  useEffect(() => {
+    void loadInviteFunnel();
+  }, [loadInviteFunnel]);
 
   const loadContractStatusHistory = useCallback(async () => {
     setContractStatusLoading(true);
@@ -735,6 +763,36 @@ const StatsPage: React.FC = () => {
     };
   }, [parsedContractStatusHistory]);
 
+  const inviteFunnelGeometry = useMemo(() => {
+    if (!inviteFunnel) return null;
+
+    const bars = [
+      { label: "Invites Created", value: inviteFunnel.invitesCreated, color: "#6366f1" },
+      { label: "Invites Used", value: inviteFunnel.invitesUsed, color: "#8b5cf6" },
+      { label: "Signed Contract", value: inviteFunnel.contractSigned, color: "#a855f7" },
+      { label: "Finished Onboarding", value: inviteFunnel.onboardingCompleted, color: "#c084fc" },
+    ];
+
+    const width = 600;
+    const height = 300;
+    const margin = { top: 28, right: 32, bottom: 48, left: 56 };
+    const maxValue = Math.max(1, ...bars.map((b) => b.value));
+
+    const barAreaWidth = width - margin.left - margin.right;
+    const barWidth = Math.min(80, barAreaWidth / bars.length - 16);
+    const totalBarsWidth = bars.length * barWidth + (bars.length - 1) * 16;
+    const offsetX = margin.left + (barAreaWidth - totalBarsWidth) / 2;
+
+    const yScale = scaleLinear()
+      .domain([0, maxValue * 1.15])
+      .nice()
+      .range([height - margin.bottom, margin.top]);
+
+    const yTicks = yScale.ticks(5);
+
+    return { bars, width, height, margin, barWidth, offsetX, yScale, yTicks, maxValue };
+  }, [inviteFunnel]);
+
   const handleApplyRange = useCallback(() => {
     setQueryRange({ start: startInput, end: endInput });
   }, [endInput, startInput]);
@@ -910,6 +968,151 @@ const StatsPage: React.FC = () => {
           </div>
         </div>
       ) : null}
+
+      {/* Invite Conversion Funnel */}
+      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-4 py-3 border-b border-gray-200">
+          <h3 className="font-semibold text-gray-900">
+            Invite Conversion Funnel
+          </h3>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-gray-600">From</label>
+              <input
+                type="date"
+                value={inviteFunnelRange?.start ?? ""}
+                onChange={(e) =>
+                  setInviteFunnelRange((prev) => ({
+                    start: e.target.value,
+                    end: prev?.end ?? formatDateAsLocal(new Date()),
+                  }))
+                }
+                className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-gray-600">To</label>
+              <input
+                type="date"
+                value={inviteFunnelRange?.end ?? ""}
+                onChange={(e) =>
+                  setInviteFunnelRange((prev) => ({
+                    start: prev?.start ?? "2020-01-01",
+                    end: e.target.value,
+                  }))
+                }
+                className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+              />
+            </div>
+            {inviteFunnelRange && (
+              <button
+                onClick={() => setInviteFunnelRange(null)}
+                className="px-3 py-1 rounded-md text-xs border border-gray-300 bg-white hover:border-gray-400"
+              >
+                All time
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="relative p-4">
+          {inviteFunnelLoading && !inviteFunnel && (
+            <p className="text-sm text-gray-600">Loading invite funnel...</p>
+          )}
+          {!inviteFunnelLoading && !inviteFunnel && (
+            <p className="text-sm text-gray-600">No invite funnel data.</p>
+          )}
+          {inviteFunnelGeometry && inviteFunnel && (
+            <svg
+              viewBox={`0 0 ${inviteFunnelGeometry.width} ${inviteFunnelGeometry.height}`}
+              className="w-full max-w-[600px] mx-auto"
+            >
+              {/* Y-axis grid lines */}
+              {inviteFunnelGeometry.yTicks.map((tick) => (
+                <g key={`funnel-y-${tick}`}>
+                  <line
+                    x1={inviteFunnelGeometry.margin.left}
+                    x2={inviteFunnelGeometry.width - inviteFunnelGeometry.margin.right}
+                    y1={inviteFunnelGeometry.yScale(tick)}
+                    y2={inviteFunnelGeometry.yScale(tick)}
+                    stroke="#e5e7eb"
+                    strokeDasharray="4 6"
+                  />
+                  <text
+                    x={inviteFunnelGeometry.margin.left - 10}
+                    y={inviteFunnelGeometry.yScale(tick)}
+                    textAnchor="end"
+                    dominantBaseline="middle"
+                    className="fill-gray-500 text-xs"
+                  >
+                    {tick}
+                  </text>
+                </g>
+              ))}
+
+              {/* Bars */}
+              {inviteFunnelGeometry.bars.map((bar, idx) => {
+                const x =
+                  inviteFunnelGeometry.offsetX +
+                  idx * (inviteFunnelGeometry.barWidth + 16);
+                const barHeight =
+                  inviteFunnelGeometry.yScale(0) -
+                  inviteFunnelGeometry.yScale(bar.value);
+                const y = inviteFunnelGeometry.yScale(bar.value);
+
+                return (
+                  <g key={bar.label}>
+                    <rect
+                      x={x}
+                      y={y}
+                      width={inviteFunnelGeometry.barWidth}
+                      height={Math.max(0, barHeight)}
+                      rx={4}
+                      fill={bar.color}
+                    />
+                    {/* Value label above bar */}
+                    <text
+                      x={x + inviteFunnelGeometry.barWidth / 2}
+                      y={y - 6}
+                      textAnchor="middle"
+                      className="fill-gray-700 text-xs font-semibold"
+                    >
+                      {bar.value}
+                    </text>
+                    {/* Conversion rate label */}
+                    {idx > 0 && inviteFunnelGeometry.bars[idx - 1].value > 0 && (
+                      <text
+                        x={x + inviteFunnelGeometry.barWidth / 2}
+                        y={y - 18}
+                        textAnchor="middle"
+                        className="fill-gray-400 text-[10px]"
+                      >
+                        {Math.round(
+                          (bar.value / inviteFunnelGeometry.bars[idx - 1].value) *
+                            100
+                        )}
+                        %
+                      </text>
+                    )}
+                    {/* X-axis label */}
+                    <text
+                      x={x + inviteFunnelGeometry.barWidth / 2}
+                      y={
+                        inviteFunnelGeometry.height -
+                        inviteFunnelGeometry.margin.bottom +
+                        16
+                      }
+                      textAnchor="middle"
+                      className="fill-gray-600 text-[11px]"
+                    >
+                      {bar.label}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          )}
+        </div>
+      </div>
 
       {/* Members Over Time Chart */}
       <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">

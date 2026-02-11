@@ -10,6 +10,7 @@ import { ContractStatusPointDto } from './contract-status-history.dto';
 import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionCompletionCurveDto } from './action-completion-curve.dto';
 import { ActionStatsWithOnboardingDto } from './actionstats-with-onboarding.dto';
+import { InviteFunnelDto } from './invite-funnel.dto';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -95,6 +96,18 @@ export class AnalyticsController {
   @ApiOkResponse({ type: AggregateStatsDto })
   async getAggregateStats(): Promise<AggregateStatsDto> {
     return await this.analyticsService.getAggregateStats();
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('invite-funnel')
+  @ApiOkResponse({ type: InviteFunnelDto })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  async getInviteFunnel(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ): Promise<InviteFunnelDto> {
+    return await this.analyticsService.getInviteFunnel(startDate, endDate);
   }
 
   @UseGuards(AdminGuard)

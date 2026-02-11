@@ -2481,6 +2481,25 @@ export type AggregateStatsDto = {
     signedUsers: number;
 };
 
+export type InviteFunnelDto = {
+    /**
+     * Total one-time invites created
+     */
+    invitesCreated: number;
+    /**
+     * Invites that were used (user signed up)
+     */
+    invitesUsed: number;
+    /**
+     * Invited users who signed the contract
+     */
+    contractSigned: number;
+    /**
+     * Invited users who finished onboarding (completed 4+ actions)
+     */
+    onboardingCompleted: number;
+};
+
 export type ContractStatusPointDto = {
     /**
      * The date for this data point
@@ -6111,6 +6130,22 @@ export type AnalyticsGetAggregateStatsResponses = {
 };
 
 export type AnalyticsGetAggregateStatsResponse = AnalyticsGetAggregateStatsResponses[keyof AnalyticsGetAggregateStatsResponses];
+
+export type AnalyticsGetInviteFunnelData = {
+    body?: never;
+    path?: never;
+    query?: {
+        startDate?: string;
+        endDate?: string;
+    };
+    url: '/analytics/invite-funnel';
+};
+
+export type AnalyticsGetInviteFunnelResponses = {
+    200: InviteFunnelDto;
+};
+
+export type AnalyticsGetInviteFunnelResponse = AnalyticsGetInviteFunnelResponses[keyof AnalyticsGetInviteFunnelResponses];
 
 export type AnalyticsGetContractStatusHistoryData = {
     body?: never;

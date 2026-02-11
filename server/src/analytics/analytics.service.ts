@@ -28,6 +28,7 @@ import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import { ActionCompletionCurveDto } from './action-completion-curve.dto';
 import { ActionStatsWithOnboardingDto } from './actionstats-with-onboarding.dto';
+import { InviteFunnelDto } from './invite-funnel.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -1009,5 +1010,79 @@ ORDER BY pp.total_session_duration_seconds DESC
     }
 
     return results;
+  }
+
+  async getInviteFunnel(
+    startDate?: string,
+    endDate?: string,
+  ): Promise<InviteFunnelDto> {
+    const dateFilter =
+      startDate && endDate
+        ? { createdAt: Between(new Date(startDate), new Date(endDate)) }
+        : {};
+
+    // 1. Total invites created (excluding rejected requests)
+    const invitesCreated = await this.onetimeInviteRepository.count({
+      where: [
+        { status: OnetimeInviteStatus.LINK_UNUSED, ...dateFilter },
+        { status: OnetimeInviteStatus.LINK_USED, ...dateFilter },
+      ],
+    });
+
+    // 2. Invites used (signup)
+    const usedInvites = await this.onetimeInviteRepository.find({
+      where: { status: OnetimeInviteStatus.LINK_USED, ...dateFilter },
+      relations: { invitedUser: true },
+    });
+    const invitesUsed = usedInvites.length;
+
+    // Collect invited user IDs
+    const invitedUserIds = usedInvites
+      .map((invite) => invite.invitedUser?.id)
+      .filter((id): id is number => id !== undefined && id !== null);
+
+    if (invitedUserIds.length === 0) {
+      return {
+        invitesCreated,
+        invitesUsed,
+        contractSigned: 0,
+        onboardingCompleted: 0,
+      };
+    }
+
+    // 3. Invited users who signed the contract
+    const contractSignedCount = await this.contractEventRepository
+      .createQueryBuilder('event')
+      .select('COUNT(DISTINCT event.user)', 'count')
+      .innerJoin('event.user', 'user')
+      .where('event.type = :type', { type: ContractEventType.SIGNED })
+      .andWhere('user.id IN (:...userIds)', { userIds: invitedUserIds })
+      .getRawOne<{ count: string }>();
+
+    const contractSigned = Number(contractSignedCount?.count ?? 0);
+
+    // 4. Invited users who finished onboarding (>= 4 completed actions)
+    const onboardingRows = await this.actionActivityRepository
+      .createQueryBuilder('activity')
+      .select('activity.userId', 'userId')
+      .addSelect('COUNT(DISTINCT activity.actionId)', 'completedActions')
+      .where('activity.type = :type', {
+        type: ActionActivityType.USER_COMPLETED,
+      })
+      .andWhere('activity.userId IN (:...userIds)', {
+        userIds: invitedUserIds,
+      })
+      .groupBy('activity.userId')
+      .having('COUNT(DISTINCT activity.actionId) >= 4')
+      .getRawMany<{ userId: string; completedActions: string }>();
+
+    const onboardingCompleted = onboardingRows.length;
+
+    return {
+      invitesCreated,
+      invitesUsed,
+      contractSigned,
+      onboardingCompleted,
+    };
   }
 }
