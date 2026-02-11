@@ -30,7 +30,6 @@ describe('Users (e2e)', () => {
   let userBToken: string;
   let communityLedByUserA: Community;
   let communityLedByUserB: Community;
-  let alternateInviteTargetUserId: number;
   let communityMemberId: number;
   let communityMemberToken: string;
 
@@ -65,15 +64,6 @@ describe('Users (e2e)', () => {
       { sub: userBId, email: userB.email, name: userB.name },
       { secret: process.env.JWT_SECRET },
     );
-
-    const alternateInviteTarget = await userRepo.save(
-      userRepo.create({
-        name: 'Second Invite Target',
-        email: 'second.invite@example.com',
-        password: 'Password123!',
-      }),
-    );
-    alternateInviteTargetUserId = alternateInviteTarget.id;
 
     communityLedByUserA = await communityRepo.save(
       communityRepo.create({
