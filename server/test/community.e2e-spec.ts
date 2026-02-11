@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import request from 'supertest';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { EntityNotFoundError } from 'typeorm';
 import { User } from '../src/user/entities/user.entity';
 import { Community } from '../src/community/entities/community.entity';
@@ -42,7 +42,9 @@ describe('Community (e2e)', () => {
     userRepo = ctx.dataSource.getRepository(User);
     communityRepo = ctx.dataSource.getRepository(Community);
     communityService = ctx.app.get(CommunityService);
+  }, 50000);
 
+  beforeEach(async () => {
     testUser = await userRepo.save(
       userRepo.create({
         name: 'Community Test User',
@@ -66,7 +68,18 @@ describe('Community (e2e)', () => {
       { sub: secondUser.id, email: secondUser.email, name: secondUser.name },
       { secret: process.env.JWT_SECRET },
     );
-  }, 50000);
+  });
+
+  afterEach(async () => {
+    await communityRepo.createQueryBuilder('community').delete().execute();
+    await userRepo.delete({
+      id: In([testUser.id, secondUser.id]),
+    });
+  });
+
+  afterAll(async () => {
+    await ctx.app.close();
+  });
 
   describe('CommunityService', () => {
     describe('findOneOrFail', () => {
@@ -870,11 +883,15 @@ describe('Community (e2e)', () => {
           }),
         );
 
-        const result = await communityService.findUserCommunities(
-          lonelyUser.id,
-        );
+        try {
+          const result = await communityService.findUserCommunities(
+            lonelyUser.id,
+          );
 
-        expect(result).toEqual([]);
+          expect(result).toEqual([]);
+        } finally {
+          await userRepo.delete({ id: lonelyUser.id });
+        }
       });
 
       it('throws when user does not exist', async () => {
@@ -1942,9 +1959,5 @@ describe('Community (e2e)', () => {
 
       expect(res.status).toBe(401);
     });
-  });
-
-  afterAll(async () => {
-    await ctx.app.close();
   });
 });
