@@ -30,7 +30,6 @@ import {
   OnetimeInviteStatus,
 } from './entities/onetime-invite.entity';
 import {
-  CommunityInviteDto,
   CreateOnetimeInviteDto,
   RequestOnetimeInviteDto,
 } from './dto/invite.dto';
@@ -1318,19 +1317,6 @@ export class UserService {
       status: OnetimeInviteStatus.LINK_USED,
       usedAt: new Date(),
     });
-  }
-
-  async findIncomingCommunityInvitesForUser(
-    userId: number,
-  ): Promise<CommunityInviteDto[]> {
-    const invites = await this.communityInviteRepository.find({
-      where: {
-        invitedUser: { id: userId },
-        deletedAt: IsNull(),
-      },
-      relations: { invitingUser: true, community: true },
-    });
-    return invites.map((invite) => new CommunityInviteDto(invite));
   }
 
   async acceptCommunityInvite(inviteId: number, userId: number): Promise<void> {

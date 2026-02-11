@@ -1587,7 +1587,7 @@ describe('Community (e2e)', () => {
     expect(res.status).toBe(401);
   });
 
-  it('GET /community/communityInvites/:communityId returns invites when authenticated as leader', async () => {
+  it('GET /community/communityInvites/community/:communityId returns invites when authenticated as leader', async () => {
     const community = await communityRepo.save(
       communityRepo.create({
         name: 'E2E HTTP GetCommunityInvites Leader',
@@ -1605,7 +1605,7 @@ describe('Community (e2e)', () => {
     );
 
     const res = await request(ctx.app.getHttpServer())
-      .get(`/community/communityInvites/${community.id}`)
+      .get(`/community/communityInvites/community/${community.id}`)
       .set('Authorization', `Bearer ${testUserToken}`);
 
     expect(res.status).toBe(200);
@@ -1615,7 +1615,7 @@ describe('Community (e2e)', () => {
     expect(res.body[0].community.id).toBe(community.id);
   });
 
-  it('GET /community/communityInvites/:communityId excludes deleted invites', async () => {
+  it('GET /community/communityInvites/community/:communityId excludes deleted invites', async () => {
     const community = await communityRepo.save(
       communityRepo.create({
         name: 'E2E HTTP GetCommunityInvites ExcludeDeleted',
@@ -1634,7 +1634,7 @@ describe('Community (e2e)', () => {
     );
 
     const res = await request(ctx.app.getHttpServer())
-      .get(`/community/communityInvites/${community.id}`)
+      .get(`/community/communityInvites/community/${community.id}`)
       .set('Authorization', `Bearer ${testUserToken}`);
 
     expect(res.status).toBe(200);
@@ -1642,7 +1642,7 @@ describe('Community (e2e)', () => {
     expect(res.body.length).toBe(0);
   });
 
-  it('GET /community/communityInvites/:communityId returns empty array when no invites exist', async () => {
+  it('GET /community/communityInvites/community/:communityId returns empty array when no invites exist', async () => {
     const community = await communityRepo.save(
       communityRepo.create({
         name: 'E2E HTTP GetCommunityInvites Empty',
@@ -1652,7 +1652,7 @@ describe('Community (e2e)', () => {
     );
 
     const res = await request(ctx.app.getHttpServer())
-      .get(`/community/communityInvites/${community.id}`)
+      .get(`/community/communityInvites/community/${community.id}`)
       .set('Authorization', `Bearer ${testUserToken}`);
 
     expect(res.status).toBe(200);
@@ -1660,7 +1660,7 @@ describe('Community (e2e)', () => {
     expect(res.body.length).toBe(0);
   });
 
-  it('GET /community/communityInvites/:communityId returns 401 when unauthenticated', async () => {
+  it('GET /community/communityInvites/community/:communityId returns 401 when unauthenticated', async () => {
     const community = await communityRepo.save(
       communityRepo.create({
         name: 'E2E HTTP GetCommunityInvites NoAuth',
@@ -1670,13 +1670,13 @@ describe('Community (e2e)', () => {
     );
 
     const res = await request(ctx.app.getHttpServer()).get(
-      `/community/communityInvites/${community.id}`,
+      `/community/communityInvites/community/${community.id}`,
     );
 
     expect(res.status).toBe(401);
   });
 
-  it('GET /community/communityInvites/:communityId returns 401 when user is not a leader', async () => {
+  it('GET /community/communityInvites/community/:communityId returns 401 when user is not a leader', async () => {
     const community = await communityRepo.save(
       communityRepo.create({
         name: 'E2E HTTP GetCommunityInvites NotLeader',
@@ -1686,10 +1686,83 @@ describe('Community (e2e)', () => {
     );
 
     const res = await request(ctx.app.getHttpServer())
-      .get(`/community/communityInvites/${community.id}`)
+      .get(`/community/communityInvites/community/${community.id}`)
       .set('Authorization', `Bearer ${secondUserToken}`);
 
     // CommunityLeaderGuard rejects non-leaders with 401
+    expect(res.status).toBe(401);
+  });
+
+  it('GET /community/communityInvites returns incoming invites for authenticated user', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP GetIncomingInvites',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .get('/community/communityInvites')
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(1);
+    expect(res.body[0].invitedUser.id).toBe(secondUser.id);
+    expect(res.body[0].community.id).toBe(community.id);
+  });
+
+  it('GET /community/communityInvites excludes deleted invites', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP GetIncomingInvites ExcludeDeleted',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+        deletedAt: new Date(),
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .get('/community/communityInvites')
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(0);
+  });
+
+  it('GET /community/communityInvites returns empty array when no invites exist', async () => {
+    const res = await request(ctx.app.getHttpServer())
+      .get('/community/communityInvites')
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(0);
+  });
+
+  it('GET /community/communityInvites returns 401 when unauthenticated', async () => {
+    const res = await request(ctx.app.getHttpServer()).get(
+      '/community/communityInvites',
+    );
+
     expect(res.status).toBe(401);
   });
 });

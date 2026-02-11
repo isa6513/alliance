@@ -39,7 +39,6 @@ import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { AddUserToTagDto, CreateTagDto, TagDto } from './dto/tag.dto';
 import {
-  CommunityInviteDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   RequestOnetimeInviteDto,
@@ -517,10 +516,6 @@ export class UserController {
     );
   }
 
-
-
-
-
   @Delete('onetimeInvites/:inviteId')
   @UseGuards(AuthGuard)
   @ApiOkResponse()
@@ -529,13 +524,6 @@ export class UserController {
     @Request() req: JwtRequest,
   ) {
     await this.userService.deleteOnetimeInvite(inviteId, req.user.sub);
-  }
-
-  @Get('communityInvites')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: [CommunityInviteDto] })
-  async getIncomingCommunityInvitesForUser(@Request() req: JwtRequest) {
-    return this.userService.findIncomingCommunityInvitesForUser(req.user.sub);
   }
 
   @Get('onetimeInvites')

@@ -939,4 +939,17 @@ export class CommunityService {
     });
     return invites;
   }
+
+  async findIncomingCommunityInvitesForUser(
+    userId: number,
+  ): Promise<CommunityInvite[]> {
+    const invites = await this.communityInviteRepository.find({
+      where: {
+        invitedUser: { id: userId },
+        deletedAt: IsNull(),
+      },
+      relations: { invitedUser: true, invitingUser: true, community: true },
+    });
+    return invites;
+  }
 }

@@ -8,9 +8,9 @@ import {
   useMemo,
 } from "react";
 import {
+  communityGetIncomingCommunityInvitesForUser,
   CommunityInviteDto,
   userAcceptCommunityInvite,
-  userGetIncomingCommunityInvitesForUser,
   userRejectCommunityInvite,
 } from "@alliance/shared/client";
 
@@ -32,7 +32,7 @@ export const IncomingCommunityInvitesProvider = ({
   const [invites, setInvites] = useState<CommunityInviteDto[]>([]);
 
   useEffect(() => {
-    userGetIncomingCommunityInvitesForUser().then((response) => {
+    communityGetIncomingCommunityInvitesForUser().then((response) => {
       if (response.data) {
         setInvites(response.data);
       }

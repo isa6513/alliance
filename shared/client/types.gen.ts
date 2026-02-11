@@ -799,16 +799,6 @@ export type CreateOnetimeInviteDto = {
     communityId?: number;
 };
 
-export type CommunityInviteDto = {
-    id: number;
-    status: CommunityInviteStatus;
-    createdAt: string;
-    updatedAt: string;
-    community: Community;
-    invitedUser?: ProfileDto;
-    invitingUser?: ProfileDto;
-};
-
 export type SingleGroupAssignmentDto = {
     userId: number;
     communityId: number;
@@ -1030,6 +1020,16 @@ export type CommunityMemberContactInfoDto = {
 export type CreateCommunityInviteDto = {
     invitedUserId: number;
     communityId: number;
+};
+
+export type CommunityInviteDto = {
+    id: number;
+    status: CommunityInviteStatus;
+    createdAt: string;
+    updatedAt: string;
+    community: Community;
+    invitedUser?: ProfileDto;
+    invitingUser?: ProfileDto;
 };
 
 export type RequestCommunityInviteDto = {
@@ -3380,19 +3380,6 @@ export type UserDeleteOnetimeInviteResponses = {
     200: unknown;
 };
 
-export type UserGetIncomingCommunityInvitesForUserData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/user/communityInvites';
-};
-
-export type UserGetIncomingCommunityInvitesForUserResponses = {
-    200: Array<CommunityInviteDto>;
-};
-
-export type UserGetIncomingCommunityInvitesForUserResponse = UserGetIncomingCommunityInvitesForUserResponses[keyof UserGetIncomingCommunityInvitesForUserResponses];
-
 export type UserGetOnetimeInvitesData = {
     body?: never;
     path?: never;
@@ -4226,7 +4213,7 @@ export type CommunityGetCommunityInvitesData = {
         communityId: number;
     };
     query?: never;
-    url: '/community/communityInvites/{communityId}';
+    url: '/community/communityInvites/community/{communityId}';
 };
 
 export type CommunityGetCommunityInvitesResponses = {
@@ -4234,6 +4221,19 @@ export type CommunityGetCommunityInvitesResponses = {
 };
 
 export type CommunityGetCommunityInvitesResponse = CommunityGetCommunityInvitesResponses[keyof CommunityGetCommunityInvitesResponses];
+
+export type CommunityGetIncomingCommunityInvitesForUserData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/community/communityInvites';
+};
+
+export type CommunityGetIncomingCommunityInvitesForUserResponses = {
+    200: Array<CommunityInviteDto>;
+};
+
+export type CommunityGetIncomingCommunityInvitesForUserResponse = CommunityGetIncomingCommunityInvitesForUserResponses[keyof CommunityGetIncomingCommunityInvitesForUserResponses];
 
 export type ActionsJoinData = {
     body?: never;
