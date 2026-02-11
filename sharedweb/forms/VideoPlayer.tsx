@@ -14,6 +14,7 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
   const [status, setStatus] = useState<"processing" | "ready" | "failed">(
     videoId ? "processing" : "ready"
   );
+  const [mediaReady, setMediaReady] = useState(false);
   const hasVideo = !!(src || videoId);
 
   // Check status immediately, then poll if still processing
@@ -27,7 +28,11 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
         const res = await fetch(`${getApiUrl()}/videos/${videoId}/status`, {
           credentials: "include",
         });
-        if (!res.ok || cancelled) return;
+        if (cancelled) return;
+        if (!res.ok) {
+          setStatus("failed");
+          return true;
+        }
         const data = await res.json();
         if (data.status === "ready" || data.status === "failed") {
           setStatus(data.status);
@@ -39,15 +44,12 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
       return false;
     };
 
-    // Check immediately on mount
     void checkStatus().then((done) => {
       if (done || cancelled) return;
-      // Only start polling if still processing
       const interval = setInterval(async () => {
         const finished = await checkStatus();
         if (finished || cancelled) clearInterval(interval);
       }, 3000);
-      // Store for cleanup
       cleanupInterval = interval;
     });
 
@@ -68,47 +70,44 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
 
     const video = videoRef.current;
 
+    const onLoadedData = () => setMediaReady(true);
+    video.addEventListener("loadeddata", onLoadedData);
+
+    const onError = () => setStatus("failed");
+
     if (Hls.isSupported()) {
       const hls = new Hls();
       hlsRef.current = hls;
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) setStatus("failed");
+      });
       hls.loadSource(manifestUrl);
       hls.attachMedia(video);
       return () => {
+        video.removeEventListener("loadeddata", onLoadedData);
+        video.removeEventListener("error", onError);
         hls.destroy();
         hlsRef.current = null;
       };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      // Safari native HLS
       video.src = manifestUrl;
+      video.addEventListener("error", onError);
     }
+
+    return () => {
+      video.removeEventListener("loadeddata", onLoadedData);
+      video.removeEventListener("error", onError);
+    };
   }, [status, videoId, src]);
 
   if (!hasVideo) return null;
-
-  if (status === "processing") {
-    return (
-      <figure className="mx-auto max-w-full text-center">
-        <div className="flex items-center justify-center h-48 bg-gray-100 rounded">
-          <div className="text-center">
-            <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2" />
-            <p className="text-sm text-gray-600">Processing video...</p>
-          </div>
-        </div>
-        {caption && (
-          <figcaption className="mt-2 text-sm text-gray-600">
-            {caption}
-          </figcaption>
-        )}
-      </figure>
-    );
-  }
 
   if (status === "failed") {
     return (
       <figure className="mx-auto max-w-full text-center">
         <div className="flex items-center justify-center h-48 bg-red-50 rounded">
           <p className="text-sm text-red-600">
-            Video processing failed. Please try uploading again.
+            Could not load video.
           </p>
         </div>
         {caption && (
@@ -120,12 +119,24 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
     );
   }
 
+  const showSpinner = status === "processing" || !mediaReady;
+
   return (
     <figure className="mx-auto max-w-full text-center">
+      {showSpinner && (
+        <div className="flex items-center justify-center h-48 bg-gray-100 rounded">
+          <div className="text-center">
+            <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2" />
+            <p className="text-sm text-gray-600">
+              {"Loading video..."}
+            </p>
+          </div>
+        </div>
+      )}
       <video
         ref={videoRef}
         controls
-        className="mx-auto max-h-120 w-auto rounded"
+        className={showSpinner ? "hidden" : "mx-auto max-h-120 w-auto rounded"}
       />
       {caption && (
         <figcaption className="mt-2 text-sm text-gray-600">

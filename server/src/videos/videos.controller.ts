@@ -61,9 +61,11 @@ export class VideosController {
   @ApiOkResponse({ type: VideoStatusResponseDto })
   async getVideoStatus(
     @Param('id') id: number,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<VideoStatusResponseDto> {
     const video = await this.videosService.getVideo(id);
     if (!video) throw new NotFoundException();
+    res.setHeader('Cache-Control', 'no-store');
     return {
       id: video.id,
       key: video.key,
