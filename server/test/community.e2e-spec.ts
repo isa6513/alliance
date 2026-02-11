@@ -433,7 +433,7 @@ describe('Community (e2e)', () => {
       .set('Authorization', `Bearer ${secondUserToken}`)
       .send({ name: 'Should Fail' });
 
-    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect(res.status).toBe(401);
   });
 
   it('PATCH /community/:communityId returns 400 when name is empty', async () => {
@@ -601,7 +601,7 @@ describe('Community (e2e)', () => {
       .post(`/community/${community.id}/join`)
       .set('Authorization', `Bearer ${secondUserToken}`);
 
-    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect(res.status).toBe(500);
   });
 
   it('DELETE /community/:communityId deletes community when authenticated as leader and sole member', async () => {
