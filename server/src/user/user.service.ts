@@ -1320,17 +1320,6 @@ export class UserService {
     });
   }
 
-
-  async findCommunityInvites(
-    communityId: number,
-  ): Promise<CommunityInviteDto[]> {
-    const invites = await this.communityInviteRepository.find({
-      where: { community: { id: communityId }, deletedAt: IsNull() },
-      relations: { invitedUser: true, invitingUser: true },
-    });
-    return invites.map((invite) => new CommunityInviteDto(invite));
-  }
-
   async findIncomingCommunityInvitesForUser(
     userId: number,
   ): Promise<CommunityInviteDto[]> {

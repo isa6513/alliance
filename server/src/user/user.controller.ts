@@ -520,14 +520,6 @@ export class UserController {
 
 
 
-  @Get('communityInvites/:communityId')
-  @UseGuards(CommunityLeaderGuard)
-  @ApiOkResponse({ type: [CommunityInviteDto] })
-  async getCommunityInvites(
-    @Param('communityId', ParseIntPipe) communityId: number,
-  ): Promise<CommunityInviteDto[]> {
-    return this.userService.findCommunityInvites(communityId);
-  }
 
   @Delete('onetimeInvites/:inviteId')
   @UseGuards(AuthGuard)

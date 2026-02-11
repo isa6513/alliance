@@ -310,4 +310,19 @@ export class CommunityController {
       req.user.sub,
     );
   }
+
+  @Get('communityInvites/:communityId')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: [CommunityInviteDto] })
+  async getCommunityInvites(
+    @Param('communityId', ParseIntPipe) communityId: number,
+    @Request() req: JwtRequest,
+  ): Promise<CommunityInviteDto[]> {
+    return (
+      await this.communityService.findCommunityInvites(
+        req.user.sub,
+        communityId,
+      )
+    ).map((invite) => new CommunityInviteDto(invite));
+  }
 }

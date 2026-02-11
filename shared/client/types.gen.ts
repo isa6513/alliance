@@ -3367,21 +3367,6 @@ export type UserCreateOnetimeInviteResponses = {
 
 export type UserCreateOnetimeInviteResponse = UserCreateOnetimeInviteResponses[keyof UserCreateOnetimeInviteResponses];
 
-export type UserGetCommunityInvitesData = {
-    body?: never;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/communityInvites/{communityId}';
-};
-
-export type UserGetCommunityInvitesResponses = {
-    200: Array<CommunityInviteDto>;
-};
-
-export type UserGetCommunityInvitesResponse = UserGetCommunityInvitesResponses[keyof UserGetCommunityInvitesResponses];
-
 export type UserDeleteOnetimeInviteData = {
     body?: never;
     path: {
@@ -4234,6 +4219,21 @@ export type CommunityRejectCommunityInviteRequestData = {
 export type CommunityRejectCommunityInviteRequestResponses = {
     200: unknown;
 };
+
+export type CommunityGetCommunityInvitesData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/community/communityInvites/{communityId}';
+};
+
+export type CommunityGetCommunityInvitesResponses = {
+    200: Array<CommunityInviteDto>;
+};
+
+export type CommunityGetCommunityInvitesResponse = CommunityGetCommunityInvitesResponses[keyof CommunityGetCommunityInvitesResponses];
 
 export type ActionsJoinData = {
     body?: never;

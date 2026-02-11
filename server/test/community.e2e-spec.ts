@@ -1586,4 +1586,110 @@ describe('Community (e2e)', () => {
     // CommunityLeaderGuard rejects non-leaders with 401
     expect(res.status).toBe(401);
   });
+
+  it('GET /community/communityInvites/:communityId returns invites when authenticated as leader', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP GetCommunityInvites Leader',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .get(`/community/communityInvites/${community.id}`)
+      .set('Authorization', `Bearer ${testUserToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(1);
+    expect(res.body[0].invitedUser.id).toBe(secondUser.id);
+    expect(res.body[0].community.id).toBe(community.id);
+  });
+
+  it('GET /community/communityInvites/:communityId excludes deleted invites', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP GetCommunityInvites ExcludeDeleted',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+    await communityInviteRepo.save(
+      communityInviteRepo.create({
+        status: CommunityInviteStatus.InviteePending,
+        invitingUser: testUser,
+        invitedUser: secondUser,
+        community,
+        deletedAt: new Date(),
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .get(`/community/communityInvites/${community.id}`)
+      .set('Authorization', `Bearer ${testUserToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(0);
+  });
+
+  it('GET /community/communityInvites/:communityId returns empty array when no invites exist', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP GetCommunityInvites Empty',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .get(`/community/communityInvites/${community.id}`)
+      .set('Authorization', `Bearer ${testUserToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(0);
+  });
+
+  it('GET /community/communityInvites/:communityId returns 401 when unauthenticated', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP GetCommunityInvites NoAuth',
+        leaders: [testUser],
+        users: [testUser],
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer()).get(
+      `/community/communityInvites/${community.id}`,
+    );
+
+    expect(res.status).toBe(401);
+  });
+
+  it('GET /community/communityInvites/:communityId returns 401 when user is not a leader', async () => {
+    const community = await communityRepo.save(
+      communityRepo.create({
+        name: 'E2E HTTP GetCommunityInvites NotLeader',
+        leaders: [testUser],
+        users: [testUser, secondUser],
+      }),
+    );
+
+    const res = await request(ctx.app.getHttpServer())
+      .get(`/community/communityInvites/${community.id}`)
+      .set('Authorization', `Bearer ${secondUserToken}`);
+
+    // CommunityLeaderGuard rejects non-leaders with 401
+    expect(res.status).toBe(401);
+  });
 });

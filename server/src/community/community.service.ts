@@ -920,4 +920,23 @@ export class CommunityService {
       });
     }
   }
+
+  async findCommunityInvites(
+    userId: number,
+    communityId: number,
+  ): Promise<CommunityInvite[]> {
+    await this.communityRepository.findOneOrFail({
+      where: {
+        id: communityId,
+        leaders: {
+          id: userId,
+        },
+      },
+    });
+    const invites = await this.communityInviteRepository.find({
+      where: { community: { id: communityId }, deletedAt: IsNull() },
+      relations: { invitedUser: true, invitingUser: true, community: true },
+    });
+    return invites;
+  }
 }
