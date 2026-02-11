@@ -22,6 +22,10 @@ import {
 import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
+import {
+  CommunityInviteDto,
+  CreateCommunityInviteDto,
+} from 'src/user/dto/invite.dto';
 
 @ApiTags('community')
 @Controller('community')
@@ -228,6 +232,18 @@ export class CommunityController {
   @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
   async getAllMemberContactInfoAdmin() {
     return this.communityService.getAllMemberContactInfoAdmin();
+  }
+
+  @Post('communityInvites/create')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: CommunityInviteDto })
+  async createCommunityInvite(
+    @Body() body: CreateCommunityInviteDto,
+    @Request() req: JwtRequest,
+  ): Promise<CommunityInviteDto> {
+    return new CommunityInviteDto(
+      await this.communityService.createCommunityInvite(body, req.user.sub),
+    );
   }
 
   @Delete('communityInvites/:inviteId')

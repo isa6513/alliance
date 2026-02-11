@@ -799,9 +799,9 @@ export type CreateOnetimeInviteDto = {
     communityId?: number;
 };
 
-export type CreateCommunityInviteDto = {
-    invitedUserId: number;
+export type RequestCommunityInviteDto = {
     communityId: number;
+    invitedUserId: number;
 };
 
 export type CommunityInviteDto = {
@@ -812,11 +812,6 @@ export type CommunityInviteDto = {
     community: Community;
     invitedUser?: ProfileDto;
     invitingUser?: ProfileDto;
-};
-
-export type RequestCommunityInviteDto = {
-    communityId: number;
-    invitedUserId: number;
 };
 
 export type SingleGroupAssignmentDto = {
@@ -1035,6 +1030,11 @@ export type CommunityMemberContactInfoDto = {
     preferredReminderTimeUserTz?: string;
     preferredReminderTimeLeaderTz?: string;
     awayRanges: Array<UserAwayRangeDto>;
+};
+
+export type CreateCommunityInviteDto = {
+    invitedUserId: number;
+    communityId: number;
 };
 
 export type EditableContentDto = {
@@ -3295,19 +3295,6 @@ export type UserCreateOnetimeInviteResponses = {
 
 export type UserCreateOnetimeInviteResponse = UserCreateOnetimeInviteResponses[keyof UserCreateOnetimeInviteResponses];
 
-export type UserCreateCommunityInviteData = {
-    body: CreateCommunityInviteDto;
-    path?: never;
-    query?: never;
-    url: '/user/createCommunityInvite';
-};
-
-export type UserCreateCommunityInviteResponses = {
-    200: CommunityInviteDto;
-};
-
-export type UserCreateCommunityInviteResponse = UserCreateCommunityInviteResponses[keyof UserCreateCommunityInviteResponses];
-
 export type UserRequestCommunityInviteData = {
     body: RequestCommunityInviteDto;
     path?: never;
@@ -4149,6 +4136,19 @@ export type CommunityGetAllMemberContactInfoAdminResponses = {
 };
 
 export type CommunityGetAllMemberContactInfoAdminResponse = CommunityGetAllMemberContactInfoAdminResponses[keyof CommunityGetAllMemberContactInfoAdminResponses];
+
+export type CommunityCreateCommunityInviteData = {
+    body: CreateCommunityInviteDto;
+    path?: never;
+    query?: never;
+    url: '/community/communityInvites/create';
+};
+
+export type CommunityCreateCommunityInviteResponses = {
+    200: CommunityInviteDto;
+};
+
+export type CommunityCreateCommunityInviteResponse = CommunityCreateCommunityInviteResponses[keyof CommunityCreateCommunityInviteResponses];
 
 export type CommunityDeleteCommunityInviteData = {
     body?: never;

@@ -1,16 +1,16 @@
 import {
+  communityCreateCommunityInvite,
+  communityDeleteCommunityInvite,
   CommunityInviteDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   ProfileDto,
-  userCreateCommunityInvite,
   userCreateOnetimeInvite,
   userDeleteOnetimeInvite,
   userGetCommunityInvites,
   userGetOnetimeInvitesByCommunity,
   userApproveOnetimeInvite,
   userRejectOnetimeInvite,
-  communityDeleteCommunityInvite,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useEffect, useMemo, useState } from "react";
@@ -187,7 +187,7 @@ const CommunityInvitesLeaderTab = ({
       return;
     }
     setCreatingInvite(true);
-    userCreateCommunityInvite({
+    communityCreateCommunityInvite({
       body: { invitedUserId: selectedUser.id, communityId },
     })
       .then((response) => {

@@ -40,7 +40,6 @@ import { UserService } from './user.service';
 import { AddUserToTagDto, CreateTagDto, TagDto } from './dto/tag.dto';
 import {
   CommunityInviteDto,
-  CreateCommunityInviteDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   RequestCommunityInviteDto,
@@ -519,18 +518,6 @@ export class UserController {
     );
   }
 
-  @Post('createCommunityInvite')
-  @UseGuards(CommunityLeaderGuard)
-  @ApiOkResponse({ type: CommunityInviteDto })
-  async createCommunityInvite(
-    @Body() body: CreateCommunityInviteDto,
-    @Request() req: JwtRequest,
-  ): Promise<CommunityInviteDto> {
-    return new CommunityInviteDto(
-      await this.userService.createCommunityInvite(body, req.user.sub),
-    );
-  }
-
   @Post('communityInvites/request')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: CommunityInviteDto })
@@ -586,7 +573,6 @@ export class UserController {
   ) {
     await this.userService.deleteOnetimeInvite(inviteId, req.user.sub);
   }
-
 
   @Get('communityInvites')
   @UseGuards(AuthGuard)

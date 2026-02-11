@@ -31,7 +31,6 @@ import {
 } from './entities/onetime-invite.entity';
 import {
   CommunityInviteDto,
-  CreateCommunityInviteDto,
   CreateOnetimeInviteDto,
   RequestCommunityInviteDto,
   RequestOnetimeInviteDto,
@@ -524,31 +523,6 @@ export class UserService {
       relations,
     });
     if (!user) throw new NotFoundException(`User ${id} not found`);
-    return user;
-  }
-
-  async findOneLeaderOrFail(
-    userId: number,
-    communityId: number,
-  ): Promise<User> {
-    const user = await this.findOneOrFail(userId);
-    if (user.admin) {
-      return user;
-    }
-
-    const isLeader = await this.communityRepository
-      .createQueryBuilder('community')
-      .innerJoin('community.leaders', 'leader')
-      .where('community.id = :communityId', { communityId })
-      .andWhere('leader.id = :userId', { userId })
-      .getExists();
-
-    if (!isLeader) {
-      throw new BadRequestException(
-        `User ${userId} is not a leader of community ${communityId}`,
-      );
-    }
-
     return user;
   }
 
@@ -1345,56 +1319,6 @@ export class UserService {
       status: OnetimeInviteStatus.LINK_USED,
       usedAt: new Date(),
     });
-  }
-
-  async createCommunityInvite(
-    body: CreateCommunityInviteDto,
-    userId: number,
-  ): Promise<CommunityInvite> {
-    const { invitedUserId, communityId } = body;
-
-    const invitedUser = await this.findOneOrFail(invitedUserId);
-    const community = await this.communityService.findOneOrFail(communityId);
-    const invitingUser = await this.findOneLeaderOrFail(userId, communityId);
-
-    const existingInvites = await this.communityInviteRepository.find({
-      where: {
-        invitedUser: { id: invitedUserId },
-        community: { id: communityId },
-        deletedAt: IsNull(),
-      },
-    });
-    if (
-      existingInvites.some(
-        (invite) => invite.status === CommunityInviteStatus.InviteePending,
-      )
-    ) {
-      throw new BadRequestException(
-        'User has already been invited to this community',
-      );
-    }
-
-    const invite = this.communityInviteRepository.create({
-      invitedUser,
-      community,
-      invitingUser,
-      status: CommunityInviteStatus.InviteePending,
-    });
-    const notif: CreateNotifParams = {
-      user: invitedUser,
-      category: NotificationCategory.CommunityInviteCreated,
-      message: `${invitingUser.name} invited you to join their group (${community.name})`,
-      webAppLocation: groupUrl({
-        tab: 'groups',
-      }),
-      associatedUsers: [invitingUser],
-    };
-
-    const [savedInvite] = await Promise.all([
-      this.communityInviteRepository.save(invite),
-      this.notifsService.sendNotif(notif),
-    ]);
-    return savedInvite;
   }
 
   async requestCommunityInvite(

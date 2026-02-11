@@ -18,7 +18,11 @@ import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { groupUrl } from 'src/search/approutes';
 import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
 import { getContactInfo } from 'src/utils/user';
-import { CommunityInvite } from './entities/community-invite.entity';
+import {
+  CommunityInvite,
+  CommunityInviteStatus,
+} from './entities/community-invite.entity';
+import { CreateCommunityInviteDto } from 'src/user/dto/invite.dto';
 
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
   Object.freeze({
@@ -593,6 +597,63 @@ export class CommunityService {
       users: community.users,
       timeZone: leader?.timeZone ?? DEFAULT_TIME_ZONE,
     });
+  }
+
+  async createCommunityInvite(
+    body: CreateCommunityInviteDto,
+    userId: number,
+  ): Promise<CommunityInvite> {
+    const { invitedUserId, communityId } = body;
+
+    const invitedUser = await this.userRepository.findOneOrFail({
+      where: { id: invitedUserId },
+    });
+    const community = await this.findOneOrFail(communityId);
+    const invitingUser = await this.userRepository.findOneOrFail({
+      where: { id: userId },
+    });
+    if (!invitingUser.admin && !invitingUser.leaderOfIdSet.has(communityId)) {
+      throw new BadRequestException('User is not a leader of this community');
+    }
+
+    const existingInvites = await this.communityInviteRepository.find({
+      where: {
+        invitedUser: { id: invitedUserId },
+        community: { id: communityId },
+        deletedAt: IsNull(),
+      },
+    });
+    if (
+      existingInvites.some(
+        (invite) => invite.status === CommunityInviteStatus.InviteePending,
+      )
+    ) {
+      throw new BadRequestException(
+        'User has already been invited to this community',
+      );
+    }
+
+    const invite = this.communityInviteRepository.create({
+      invitedUser,
+      community,
+      invitingUser,
+      status: CommunityInviteStatus.InviteePending,
+    });
+    const notif: CreateNotifParams = {
+      user: invitedUser,
+      category: NotificationCategory.CommunityInviteCreated,
+      message: `${invitingUser.name} invited you to join their group (${community.name})`,
+      webAppLocation: groupUrl({
+        tab: 'groups',
+      }),
+      associatedUsers: [invitingUser],
+    };
+
+    const [savedInvite] = await Promise.all([
+      this.communityInviteRepository.save(invite),
+      this.notifsService.sendNotif(notif),
+    ]);
+    return savedInvite;
   }
 
   async deleteCommunityInvite(inviteId: number, userId: number): Promise<void> {

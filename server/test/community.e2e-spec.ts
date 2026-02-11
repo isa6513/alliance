@@ -986,6 +986,97 @@ describe('Community (e2e)', () => {
       });
     });
 
+    describe('createCommunityInvite', () => {
+      it('creates invite when user is a leader of the community', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E CreateInvite Leader',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        const result = await communityService.createCommunityInvite(
+          { invitedUserId: secondUser.id, communityId: community.id },
+          testUser.id,
+        );
+
+        expect(result.id).toBeDefined();
+        expect(result.status).toBe(CommunityInviteStatus.InviteePending);
+        expect(result.invitedUser.id).toBe(secondUser.id);
+        expect(result.community.id).toBe(community.id);
+        expect(result.invitingUser?.id).toBe(testUser.id);
+      });
+
+      it('throws BadRequestException when user is not a leader of the community', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E CreateInvite NotLeader',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        await expect(
+          communityService.createCommunityInvite(
+            { invitedUserId: testUser.id, communityId: community.id },
+            secondUser.id,
+          ),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('throws BadRequestException when a pending invite already exists', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E CreateInvite Duplicate',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+        await communityInviteRepo.save(
+          communityInviteRepo.create({
+            status: CommunityInviteStatus.InviteePending,
+            invitingUser: testUser,
+            invitedUser: secondUser,
+            community,
+          }),
+        );
+
+        await expect(
+          communityService.createCommunityInvite(
+            { invitedUserId: secondUser.id, communityId: community.id },
+            testUser.id,
+          ),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('throws when invited user does not exist', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E CreateInvite NoUser',
+            leaders: [testUser],
+            users: [testUser],
+          }),
+        );
+
+        await expect(
+          communityService.createCommunityInvite(
+            { invitedUserId: 999999, communityId: community.id },
+            testUser.id,
+          ),
+        ).rejects.toThrow();
+      });
+
+      it('throws when community does not exist', async () => {
+        await expect(
+          communityService.createCommunityInvite(
+            { invitedUserId: secondUser.id, communityId: 999999 },
+            testUser.id,
+          ),
+        ).rejects.toThrow();
+      });
+    });
+
     describe('deleteCommunityInvite', () => {
       it('soft-deletes invite when called by the inviting user', async () => {
         const community = await communityRepo.save(
@@ -2150,6 +2241,84 @@ describe('Community (e2e)', () => {
       );
 
       expect(res.status).toBe(401);
+    });
+
+    it('POST /community/communityInvites/create creates invite when authenticated as leader', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP CreateInvite Leader',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post('/community/communityInvites/create')
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ invitedUserId: secondUser.id, communityId: community.id });
+
+      expect(res.status).toBe(201);
+      expect(res.body.community.id).toBe(community.id);
+      expect(res.body.invitedUser.id).toBe(secondUser.id);
+    });
+
+    it('POST /community/communityInvites/create returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP CreateInvite NoAuth',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post('/community/communityInvites/create')
+        .send({ invitedUserId: secondUser.id, communityId: community.id });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('POST /community/communityInvites/create returns 401 when user is not a leader', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP CreateInvite NotLeader',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post('/community/communityInvites/create')
+        .set('Authorization', `Bearer ${secondUserToken}`)
+        .send({ invitedUserId: testUser.id, communityId: community.id });
+
+      // CommunityLeaderGuard rejects non-leaders with 401
+      expect(res.status).toBe(401);
+    });
+
+    it('POST /community/communityInvites/create returns 400 when pending invite already exists', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP CreateInvite Duplicate',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+      await communityInviteRepo.save(
+        communityInviteRepo.create({
+          status: CommunityInviteStatus.InviteePending,
+          invitingUser: testUser,
+          invitedUser: secondUser,
+          community,
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .post('/community/communityInvites/create')
+        .set('Authorization', `Bearer ${testUserToken}`)
+        .send({ invitedUserId: secondUser.id, communityId: community.id });
+
+      expect(res.status).toBe(400);
     });
 
     it('DELETE /community/communityInvites/:inviteId returns 401 when user is not a leader or admin', async () => {
