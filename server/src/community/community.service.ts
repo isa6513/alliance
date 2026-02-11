@@ -202,15 +202,20 @@ export class CommunityService {
     const users = usersParam ?? [user];
     const userIdSet = new Set(users.map((user) => user.id));
 
-    const newMembers = community.users.filter((u) => !userIdSet.has(u.id));
+    const newLeaders = removeAsLeader
+      ? community.leaders!.filter((l) => !userIdSet.has(l.id))
+      : community.leaders!;
+
+    const toKeepSet = removeAsLeader
+      ? new Set()
+      : new Set(community.leaders!.map((l) => l.id));
+    const newMembers = community.users.filter(
+      (u) => !userIdSet.has(u.id) || toKeepSet.has(u.id),
+    );
     if (newMembers.length === community.users.length) {
       // users are not removed, no further action needed
       return community;
     }
-
-    const newLeaders = removeAsLeader
-      ? community.leaders!.filter((l) => !userIdSet.has(l.id))
-      : community.leaders!;
 
     const notifs = newLeaders
       .map((leader) => notifForLeader({ leader }))

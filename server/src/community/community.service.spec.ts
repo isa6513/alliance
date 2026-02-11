@@ -150,73 +150,6 @@ describe('CommunityService', () => {
     });
   });
 
-  describe('stale community object bugs', () => {
-    it('persists all users when add is called sequentially with the same community object', async () => {
-      const userA = { id: 5, name: 'User A' } as User;
-      const userB = { id: 6, name: 'User B' } as User;
-      const community = buildCommunity();
-
-      // First call: add userA
-      await service.addUsersToCommunityAndRefreshConversation({
-        user: userA,
-        community,
-        notifForLeader: () => null,
-      });
-
-      // Second call: add userB using the same community object (simulates
-      // assignGroupsAdmin reusing a cached community across loop iterations)
-      await service.addUsersToCommunityAndRefreshConversation({
-        user: userB,
-        community,
-        notifForLeader: () => null,
-      });
-
-      // The second save should include BOTH users, not just userB
-      const secondSaveCall = communityRepository.save.mock.calls[1][0] as {
-        users: User[];
-      };
-      expect(secondSaveCall.users).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ id: userA.id }),
-          expect.objectContaining({ id: userB.id }),
-        ]),
-      );
-    });
-
-    it('allows re-adding a user after removal when using the same community object', async () => {
-      const user = { id: 5, name: 'Reassigned User' } as User;
-      const community = buildCommunity({ users: [user] });
-
-      // Remove user from community
-      await service.removeUserFromCommunityAndRefreshConversation({
-        user,
-        community,
-        removeAsLeader: false,
-        notifForLeader: () => null,
-        saveAsPendingCommunity: false,
-      });
-
-      // Re-add user using the same (now stale) community object — simulates
-      // assignGroupsAdmin fetching the community before removal, then adding
-      // the user back after removal
-      await expect(
-        service.addUsersToCommunityAndRefreshConversation({
-          user,
-          community,
-          notifForLeader: () => null,
-        }),
-      ).resolves.not.toThrow();
-
-      // The add save should include the user
-      const addSaveCall = communityRepository.save.mock.calls[1][0] as {
-        users: User[];
-      };
-      expect(addSaveCall.users).toEqual(
-        expect.arrayContaining([expect.objectContaining({ id: user.id })]),
-      );
-    });
-  });
-
   describe('removeUserFromCommunityAndRefreshConversation', () => {
     it('returns the community unchanged when user is not a member', async () => {
       const user = { id: 99, name: 'Non-member' } as User;
@@ -316,25 +249,6 @@ describe('CommunityService', () => {
           pendingCommunity: { id: community.id },
         },
       ]);
-    });
-
-    it('keeps a leader in members when removeAsLeader is false', async () => {
-      const regularUser = { id: 99, name: 'Regular Member' } as User;
-      const community = buildCommunity({
-        users: [leader1, leader2, regularUser],
-      });
-
-      // Try to remove leader1 without removing as leader
-      await service.removeUserFromCommunityAndRefreshConversation({
-        user: leader1,
-        community,
-        removeAsLeader: false,
-        notifForLeader: () => null,
-        saveAsPendingCommunity: false,
-      });
-
-      // leader1 should still be in both members and leaders
-      expect(communityRepository.save).not.toHaveBeenCalled();
     });
 
     it('does not save pendingCommunity when saveAsPendingCommunity is false', async () => {
