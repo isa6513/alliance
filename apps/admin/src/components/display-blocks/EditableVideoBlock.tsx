@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
-import { getApiUrl } from "@alliance/sharedweb/lib/config";
+import { videosGetVideoStatus, videosUploadVideo } from "@alliance/shared/client";
 
 export function EditableVideoBlock({
   block,
@@ -25,13 +25,12 @@ export function EditableVideoBlock({
     let cancelled = false;
 
     const checkStatus = async () => {
+      if (!block.videoId) return false;
       try {
-        const res = await fetch(`${getApiUrl()}/videos/${block.videoId}/status`, {
-          credentials: "include",
-        });
-        if (!res.ok || cancelled) return false;
-        const data = await res.json();
-        if (data.status === "ready" || data.status === "failed") {
+        const res = await videosGetVideoStatus({ path: { id: block.videoId } });
+        if (!res.response.ok || cancelled) return false;
+        const data = res.data;
+        if (data && (data.status === "ready" || data.status === "failed")) {
           setProcessingStatus(data.status);
           return true;
         }
@@ -73,23 +72,29 @@ export function EditableVideoBlock({
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch(`${getApiUrl()}/videos/upload`, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      const res = await videosUploadVideo({ body: { file } });
 
-      if (!res.ok) {
-        throw new Error(`Upload failed with status ${res.status}`);
+      if (!res.response.ok) {
+        setUploadError(`Upload failed with status ${res.response.status}`);
       }
 
-      const data = await res.json();
-      update({ src: data.key, videoId: data.id });
-      setProcessingStatus("processing");
+      const data = res.data;
+      if (data) {
+        update({ src: data.key, videoId: data.id });
+        setProcessingStatus("processing");
+      } else {
+        setUploadError("Upload failed");
+      }
     } catch (error) {
       console.error("Failed to upload video:", error);
+      const isNetworkError =
+        error instanceof TypeError && /network|fetch/i.test(error.message);
       setUploadError(
-        error instanceof Error ? error.message : "Failed to upload video"
+        isNetworkError
+          ? "Upload failed — file may be too large."
+          : error instanceof Error
+            ? error.message
+            : "Failed to upload video"
       );
     } finally {
       setIsUploading(false);

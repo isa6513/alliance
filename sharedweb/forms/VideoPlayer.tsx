@@ -11,15 +11,21 @@ type VideoPlayerProps = {
 export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
-  const [status, setStatus] = useState<"processing" | "ready" | "failed">(
-    videoId ? "processing" : "ready"
+  const [status, setStatus] = useState<"loading" | "ready" | "failed">(
+    videoId ? "loading" : "ready"
   );
   const [mediaReady, setMediaReady] = useState(false);
   const hasVideo = !!(src || videoId);
 
+  // Reset state when video source changes
+  useEffect(() => {
+    setStatus(videoId ? "loading" : "ready");
+    setMediaReady(false);
+  }, [videoId, src]);
+
   // Check status immediately, then poll if still processing
   useEffect(() => {
-    if (!videoId || status !== "processing") return;
+    if (!videoId || status !== "loading") return;
 
     let cancelled = false;
 
@@ -29,10 +35,11 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
           credentials: "include",
         });
         if (cancelled) return;
-        if (!res.ok) {
+        if (res.status === 404) {
           setStatus("failed");
           return true;
         }
+        if (!res.ok) return false; // transient error, keep polling
         const data = await res.json();
         if (data.status === "ready" || data.status === "failed") {
           setStatus(data.status);
@@ -119,7 +126,7 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
     );
   }
 
-  const showSpinner = status === "processing" || !mediaReady;
+  const showSpinner = status === "loading" || !mediaReady;
 
   return (
     <figure className="mx-auto max-w-full text-center">
