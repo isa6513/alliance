@@ -40,7 +40,7 @@ const HomeNotifsCard = () => {
           };
           return (
             <div
-              className="flex flex-row items-center justify-between gap-x-2 hover:bg-zinc-50 py-2 rounded-md text-base cursor-pointer p-3"
+              className="flex flex-row items-center justify-between gap-x-2 hover:bg-zinc-50 py-2 text-base cursor-pointer p-3"
               key={notification.id}
               onClick={handleClick}
             >
