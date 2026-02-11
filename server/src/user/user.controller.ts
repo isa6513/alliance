@@ -38,7 +38,6 @@ import {
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { AddUserToTagDto, CreateTagDto, TagDto } from './dto/tag.dto';
-import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import {
   CommunityInviteDto,
   CreateCommunityInviteDto,
@@ -647,35 +646,6 @@ export class UserController {
       req.user.sub,
       communityId,
     );
-  }
-
-  @Get('community/memberContactInfo/:communityId')
-  @UseGuards(CommunityLeaderGuard)
-  @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
-  async getCommunityMemberContactInfo(
-    @Request() req: JwtRequest,
-    @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
-    return this.userService.getMemberContactInfo({
-      leaderId: req.user.sub,
-      communityId,
-    });
-  }
-
-  @Get('community/memberContactInfo/:communityId/admin')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
-  async getCommunityMemberContactInfoAdmin(
-    @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
-    return this.userService.getMemberContactInfo({ communityId });
-  }
-
-  @Get('memberContactInfo')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
-  async getAllMemberContactInfo() {
-    return this.userService.getAllMemberContactInfo();
   }
 
   @Post('communityInvites/:inviteId/accept')

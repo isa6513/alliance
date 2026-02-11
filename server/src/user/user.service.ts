@@ -25,7 +25,6 @@ import { groupUrl, profileUrl } from 'src/search/approutes';
 import { Tag } from './entities/tag.entity';
 import { CreateTagDto } from './dto/tag.dto';
 import { Community } from 'src/community/entities/community.entity';
-import { CommunityMemberContactInfoDto } from './dto/user-action-relations.dto';
 import {
   OnetimeInvite,
   OnetimeInviteStatus,
@@ -61,7 +60,6 @@ import { run } from 'src/utils/promise';
 import { SlackService } from 'src/slack/slack.service';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { CommunityService } from 'src/community/community.service';
-import { getContactInfo } from 'src/utils/user';
 
 const defaultTimeZone = 'America/Los_Angeles';
 
@@ -1020,44 +1018,6 @@ export class UserService {
     return awayRanges.some(
       (range) => checkDate >= range.startDate && checkDate <= range.endDate,
     );
-  }
-
-  async getAllMemberContactInfo(): Promise<CommunityMemberContactInfoDto[]> {
-    const users = await this.userRepository.find({
-      relations: { awayRanges: true },
-    });
-
-    return getContactInfo({
-      users,
-      timeZone: 'America/Los_Angeles',
-    });
-  }
-
-  async getMemberContactInfo(params: {
-    leaderId?: number;
-    communityId: number;
-  }): Promise<CommunityMemberContactInfoDto[]> {
-    const { leaderId, communityId } = params;
-
-    const [leader, community] = await Promise.all([
-      leaderId !== undefined ? this.findOneOrFail(leaderId) : undefined,
-      this.communityService.findOneOrFail(communityId, {
-        users: {
-          awayRanges: true,
-        },
-        leaders: true,
-      }),
-    ]);
-    if (
-      leaderId !== undefined &&
-      !community.leaders!.some((leader) => leader.id === leaderId)
-    ) {
-      throw new BadRequestException('User is not a leader of this community');
-    }
-    return getContactInfo({
-      users: community.users,
-      timeZone: leader?.timeZone ?? 'America/Los_Angeles',
-    });
   }
 
   async createTag(body: CreateTagDto): Promise<Tag> {

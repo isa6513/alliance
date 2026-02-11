@@ -819,17 +819,6 @@ export type RequestCommunityInviteDto = {
     invitedUserId: number;
 };
 
-export type CommunityMemberContactInfoDto = {
-    id: number;
-    timeZone?: string;
-    preferredActionReminderChannel: NotificationChannel;
-    email?: string;
-    phoneNumber?: string;
-    preferredReminderTimeUserTz?: string;
-    preferredReminderTimeLeaderTz?: string;
-    awayRanges: Array<UserAwayRangeDto>;
-};
-
 export type SingleGroupAssignmentDto = {
     userId: number;
     communityId: number;
@@ -1035,6 +1024,17 @@ export type UpdateCommunityDto = {
 
 export type CommunityMemberDto = {
     userId: number;
+};
+
+export type CommunityMemberContactInfoDto = {
+    id: number;
+    timeZone?: string;
+    preferredActionReminderChannel: NotificationChannel;
+    email?: string;
+    phoneNumber?: string;
+    preferredReminderTimeUserTz?: string;
+    preferredReminderTimeLeaderTz?: string;
+    awayRanges: Array<UserAwayRangeDto>;
 };
 
 export type EditableContentDto = {
@@ -3459,49 +3459,6 @@ export type UserGetOnetimeInvitesByRequesterResponses = {
 
 export type UserGetOnetimeInvitesByRequesterResponse = UserGetOnetimeInvitesByRequesterResponses[keyof UserGetOnetimeInvitesByRequesterResponses];
 
-export type UserGetCommunityMemberContactInfoData = {
-    body?: never;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/community/memberContactInfo/{communityId}';
-};
-
-export type UserGetCommunityMemberContactInfoResponses = {
-    200: Array<CommunityMemberContactInfoDto>;
-};
-
-export type UserGetCommunityMemberContactInfoResponse = UserGetCommunityMemberContactInfoResponses[keyof UserGetCommunityMemberContactInfoResponses];
-
-export type UserGetCommunityMemberContactInfoAdminData = {
-    body?: never;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/user/community/memberContactInfo/{communityId}/admin';
-};
-
-export type UserGetCommunityMemberContactInfoAdminResponses = {
-    200: Array<CommunityMemberContactInfoDto>;
-};
-
-export type UserGetCommunityMemberContactInfoAdminResponse = UserGetCommunityMemberContactInfoAdminResponses[keyof UserGetCommunityMemberContactInfoAdminResponses];
-
-export type UserGetAllMemberContactInfoData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/user/memberContactInfo';
-};
-
-export type UserGetAllMemberContactInfoResponses = {
-    200: Array<CommunityMemberContactInfoDto>;
-};
-
-export type UserGetAllMemberContactInfoResponse = UserGetAllMemberContactInfoResponses[keyof UserGetAllMemberContactInfoResponses];
-
 export type UserAcceptCommunityInviteData = {
     body?: never;
     path: {
@@ -4162,6 +4119,49 @@ export type CommunityRemoveLeaderAdminResponses = {
 };
 
 export type CommunityRemoveLeaderAdminResponse = CommunityRemoveLeaderAdminResponses[keyof CommunityRemoveLeaderAdminResponses];
+
+export type CommunityGetMemberContactInfoData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/community/memberContactInfo/{communityId}';
+};
+
+export type CommunityGetMemberContactInfoResponses = {
+    200: Array<CommunityMemberContactInfoDto>;
+};
+
+export type CommunityGetMemberContactInfoResponse = CommunityGetMemberContactInfoResponses[keyof CommunityGetMemberContactInfoResponses];
+
+export type CommunityGetMemberContactInfoAdminData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/community/memberContactInfo/{communityId}/admin';
+};
+
+export type CommunityGetMemberContactInfoAdminResponses = {
+    200: Array<CommunityMemberContactInfoDto>;
+};
+
+export type CommunityGetMemberContactInfoAdminResponse = CommunityGetMemberContactInfoAdminResponses[keyof CommunityGetMemberContactInfoAdminResponses];
+
+export type CommunityGetAllMemberContactInfoAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/community/memberContactInfo';
+};
+
+export type CommunityGetAllMemberContactInfoAdminResponses = {
+    200: Array<CommunityMemberContactInfoDto>;
+};
+
+export type CommunityGetAllMemberContactInfoAdminResponse = CommunityGetAllMemberContactInfoAdminResponses[keyof CommunityGetAllMemberContactInfoAdminResponses];
 
 export type ActionsJoinData = {
     body?: never;

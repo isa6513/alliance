@@ -1,12 +1,12 @@
 import {
   actionsGetCommunityMemberInfo,
   communityDelete,
+  communityGetMemberContactInfo,
   CommunityMemberContactInfoDto,
   communityUpdate,
   conversationGetCommunityConversations,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
-  userGetCommunityMemberContactInfo,
 } from "@alliance/shared/client";
 import { groupSettings } from "@alliance/shared/lib/copy";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -193,7 +193,7 @@ const CommunityPage = () => {
 
   useEffect(() => {
     if (amLeader && community?.id !== undefined) {
-      userGetCommunityMemberContactInfo({
+      communityGetMemberContactInfo({
         path: {
           communityId: community.id,
         },

@@ -855,9 +855,7 @@ describe('Community (e2e)', () => {
         const result = await communityService.findUserCommunities(testUser.id);
 
         const leaderIdx = result.findIndex((c) => c.id === leaderCommunity.id);
-        const memberIdx = result.findIndex(
-          (c) => c.id === memberCommunity.id,
-        );
+        const memberIdx = result.findIndex((c) => c.id === memberCommunity.id);
         expect(leaderIdx).toBeGreaterThanOrEqual(0);
         expect(memberIdx).toBeGreaterThanOrEqual(0);
         expect(leaderIdx).toBeLessThan(memberIdx);
@@ -883,6 +881,84 @@ describe('Community (e2e)', () => {
         await expect(
           communityService.findUserCommunities(999999),
         ).rejects.toThrow(EntityNotFoundError);
+      });
+    });
+
+    describe('getMemberContactInfo', () => {
+      it('returns contact info for community members when called by a leader', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E GetMemberContactInfo',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        const result = await communityService.getMemberContactInfo({
+          leaderId: testUser.id,
+          communityId: community.id,
+        });
+
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBe(2);
+        const ids = result.map((r) => r.id);
+        expect(ids).toContain(testUser.id);
+        expect(ids).toContain(secondUser.id);
+      });
+
+      it('returns contact info for community members as admin (no leaderId)', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E GetMemberContactInfo Admin',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        const result = await communityService.getMemberContactInfo({
+          communityId: community.id,
+        });
+
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBe(2);
+      });
+
+      it('throws BadRequestException when user is not a leader', async () => {
+        const community = await communityRepo.save(
+          communityRepo.create({
+            name: 'E2E GetMemberContactInfo NotLeader',
+            leaders: [testUser],
+            users: [testUser, secondUser],
+          }),
+        );
+
+        await expect(
+          communityService.getMemberContactInfo({
+            leaderId: secondUser.id,
+            communityId: community.id,
+          }),
+        ).rejects.toThrow(BadRequestException);
+      });
+
+      it('throws when community does not exist', async () => {
+        await expect(
+          communityService.getMemberContactInfo({
+            leaderId: testUser.id,
+            communityId: 999999,
+          }),
+        ).rejects.toThrow(EntityNotFoundError);
+      });
+    });
+
+    describe('getAllMemberContactInfo', () => {
+      it('returns contact info for all users', async () => {
+        const result = await communityService.getAllMemberContactInfoAdmin();
+
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBeGreaterThanOrEqual(2);
+        const ids = result.map((r) => r.id);
+        expect(ids).toContain(testUser.id);
+        expect(ids).toContain(secondUser.id);
       });
     });
 
@@ -1750,6 +1826,119 @@ describe('Community (e2e)', () => {
       const res = await request(ctx.app.getHttpServer())
         .post(`/community/${community.id}/removeLeader/admin`)
         .send({ userId: secondUser.id });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('GET /community/memberContactInfo/:communityId returns contact info when authenticated as leader', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP GetContactInfo Leader',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get(`/community/memberContactInfo/${community.id}`)
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(2);
+      const ids = res.body.map((r: { id: number }) => r.id);
+      expect(ids).toContain(testUser.id);
+      expect(ids).toContain(secondUser.id);
+    });
+
+    it('GET /community/memberContactInfo/:communityId returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP GetContactInfo NoAuth',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer()).get(
+        `/community/memberContactInfo/${community.id}`,
+      );
+
+      expect(res.status).toBe(401);
+    });
+
+    it('GET /community/memberContactInfo/:communityId/admin returns contact info when admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP GetContactInfo Admin',
+          leaders: [testUser],
+          users: [testUser, secondUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get(`/community/memberContactInfo/${community.id}/admin`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(2);
+    });
+
+    it('GET /community/memberContactInfo/:communityId/admin returns 401 when not admin', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP GetContactInfo Admin NotAdmin',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer())
+        .get(`/community/memberContactInfo/${community.id}/admin`)
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(401);
+    });
+
+    it('GET /community/memberContactInfo/:communityId/admin returns 401 when unauthenticated', async () => {
+      const community = await communityRepo.save(
+        communityRepo.create({
+          name: 'E2E HTTP GetContactInfo Admin NoAuth',
+          leaders: [testUser],
+          users: [testUser],
+        }),
+      );
+
+      const res = await request(ctx.app.getHttpServer()).get(
+        `/community/memberContactInfo/${community.id}/admin`,
+      );
+
+      expect(res.status).toBe(401);
+    });
+
+    it('GET /community/memberContactInfo returns all contact info when admin', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get('/community/memberContactInfo')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('GET /community/memberContactInfo returns 401 when not admin', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get('/community/memberContactInfo')
+        .set('Authorization', `Bearer ${testUserToken}`);
+
+      expect(res.status).toBe(401);
+    });
+
+    it('GET /community/memberContactInfo returns 401 when unauthenticated', async () => {
+      const res = await request(ctx.app.getHttpServer()).get(
+        '/community/memberContactInfo',
+      );
 
       expect(res.status).toBe(401);
     });

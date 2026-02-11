@@ -16,6 +16,8 @@ import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { run } from 'src/utils/promise';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { groupUrl } from 'src/search/approutes';
+import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
+import { getContactInfo } from 'src/utils/user';
 
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
   Object.freeze({
@@ -542,5 +544,50 @@ export class CommunityService {
         : 1;
     }
     return user.communities.sort((a, b) => leaderKey(a) - leaderKey(b));
+  }
+
+  async getAllMemberContactInfoAdmin(): Promise<
+    CommunityMemberContactInfoDto[]
+  > {
+    const users = await this.userRepository.find({
+      relations: { awayRanges: true },
+    });
+
+    return getContactInfo({
+      users,
+      timeZone: 'America/Los_Angeles',
+    });
+  }
+
+  async getMemberContactInfo(params: {
+    leaderId?: number;
+    communityId: number;
+  }): Promise<CommunityMemberContactInfoDto[]> {
+    const { leaderId, communityId } = params;
+
+    const community = await this.findOneOrFail(communityId, {
+      users: {
+        awayRanges: true,
+      },
+      leaders: true,
+    });
+
+    if (
+      leaderId !== undefined &&
+      !community.leaders!.some((leader) => leader.id === leaderId)
+    ) {
+      throw new BadRequestException('User is not a leader of this community');
+    }
+
+    const leader =
+      leaderId !== undefined
+        ? await this.userRepository.findOneOrFail({
+            where: { id: leaderId },
+          })
+        : null;
+    return getContactInfo({
+      users: community.users,
+      timeZone: leader?.timeZone ?? 'America/Los_Angeles',
+    });
   }
 }

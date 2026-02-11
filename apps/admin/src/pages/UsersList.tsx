@@ -1,12 +1,12 @@
 import {
+  actionsActionRelations,
   analyticsGetTimeSpentPerUser,
   analyticsGetTimeSpentPerUserTotal,
+  communityGetAllMemberContactInfoAdmin,
   userAddUserToTag,
-  userList,
-  actionsActionRelations as userGetActionRelations,
-  userRemoveUserFromTag,
   userGetTags,
-  userGetAllMemberContactInfo,
+  userList,
+  userRemoveUserFromTag,
 } from "@alliance/shared/client";
 import {
   CommunityMemberContactInfoDto,
@@ -96,7 +96,7 @@ const UsersList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    userGetActionRelations().then((res) => {
+    actionsActionRelations().then((res) => {
       const data: UserActionRelationsResponseDto | undefined = res.data;
       if (!data) {
         return;
@@ -261,7 +261,7 @@ const UsersList: React.FC = () => {
   >({});
 
   useEffect(() => {
-    userGetAllMemberContactInfo().then((resp) => {
+    communityGetAllMemberContactInfoAdmin().then((resp) => {
       if (resp.data) {
         setMemberContactInfo(
           resp.data.reduce((acc, contactInfo) => {

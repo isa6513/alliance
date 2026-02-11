@@ -6,10 +6,10 @@ import {
   communityAddMemberAdmin,
   communityDeleteAdmin,
   communityGetCommunitiesAdmin,
+  communityGetMemberContactInfoAdmin,
   communityRemoveLeaderAdmin,
   communityRemoveMemberAdmin,
   communityUpdate,
-  userGetCommunityMemberContactInfoAdmin,
   userList,
 } from "@alliance/shared/client";
 import type {
@@ -143,7 +143,7 @@ const CommunityDetailPage: React.FC = () => {
         }
       }
     );
-    userGetCommunityMemberContactInfoAdmin({ path: { communityId } }).then(
+    communityGetMemberContactInfoAdmin({ path: { communityId } }).then(
       (resp) => {
         if (resp.data) {
           setMemberContactInfo(

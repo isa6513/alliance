@@ -21,6 +21,7 @@ import {
 } from './dto/community.dto';
 import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
+import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
 
 @ApiTags('community')
 @Controller('community')
@@ -198,5 +199,34 @@ export class CommunityController {
     return new CommunityDto(
       await this.communityService.removeLeaderAdmin(communityId, body.userId),
     );
+  }
+
+  @Get('memberContactInfo/:communityId')
+  @UseGuards(CommunityLeaderGuard)
+  @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
+  async getMemberContactInfo(
+    @Request() req: JwtRequest,
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    return this.communityService.getMemberContactInfo({
+      leaderId: req.user.sub,
+      communityId,
+    });
+  }
+
+  @Get('memberContactInfo/:communityId/admin')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
+  async getMemberContactInfoAdmin(
+    @Param('communityId', ParseIntPipe) communityId: number,
+  ) {
+    return this.communityService.getMemberContactInfo({ communityId });
+  }
+
+  @Get('memberContactInfo')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: CommunityMemberContactInfoDto, isArray: true })
+  async getAllMemberContactInfoAdmin() {
+    return this.communityService.getAllMemberContactInfoAdmin();
   }
 }
