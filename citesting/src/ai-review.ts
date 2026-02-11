@@ -85,11 +85,12 @@ const reviewPage = async (
             type: "text",
             text: `You are a visual regression tester. Compare these screenshots of the "${pageName}" page.
 
-The first image is the BASELINE (previous known-good version).
+The first image is the BASELINE.
 The second image is the CURRENT build.
 The third image is the PIXEL DIFF (red highlights show changed pixels).
 
 Decide whether the visual changes represent a regression (broken layout, missing elements, overlapping text, broken styling) or are acceptable (minor rendering differences, anti-aliasing, expected content changes).
+If the first image (baseline) is broken and the current build is improved, report "pass". report "fail" if both are broken.
 
 Report "pass" for acceptable changes and "fail" for regressions.`,
           },
