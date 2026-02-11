@@ -186,10 +186,12 @@ const StatsPage: React.FC = () => {
   });
   const [inviteFunnel, setInviteFunnel] = useState<InviteFunnelDto | null>(null);
   const [inviteFunnelLoading, setInviteFunnelLoading] = useState<boolean>(false);
-  const [inviteFunnelRange, setInviteFunnelRange] = useState<{
-    start: string;
-    end: string;
-  } | null>(null);
+  const [inviteFunnelRange, setInviteFunnelRange] = useState(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 7);
+    return { start: formatDateAsLocal(start), end: formatDateAsLocal(end) };
+  });
   const [assumedHourlyRate, setAssumedHourlyRate] = useState<number>(15);
   const [contractStatusHistory, setContractStatusHistory] = useState<
     ContractStatusPointDto[]
@@ -339,9 +341,10 @@ const StatsPage: React.FC = () => {
     setInviteFunnelLoading(true);
     try {
       const response = await analyticsGetInviteFunnel({
-        query: inviteFunnelRange
-          ? { startDate: inviteFunnelRange.start, endDate: inviteFunnelRange.end }
-          : {},
+        query: {
+          startDate: inviteFunnelRange.start,
+          endDate: inviteFunnelRange.end,
+        },
       });
       setInviteFunnel(response.data ?? null);
     } catch (err) {
@@ -980,11 +983,11 @@ const StatsPage: React.FC = () => {
               <label className="text-xs font-semibold text-gray-600">From</label>
               <input
                 type="date"
-                value={inviteFunnelRange?.start ?? ""}
+                value={inviteFunnelRange.start}
                 onChange={(e) =>
                   setInviteFunnelRange((prev) => ({
+                    ...prev,
                     start: e.target.value,
-                    end: prev?.end ?? formatDateAsLocal(new Date()),
                   }))
                 }
                 className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
@@ -994,24 +997,30 @@ const StatsPage: React.FC = () => {
               <label className="text-xs font-semibold text-gray-600">To</label>
               <input
                 type="date"
-                value={inviteFunnelRange?.end ?? ""}
+                value={inviteFunnelRange.end}
                 onChange={(e) =>
                   setInviteFunnelRange((prev) => ({
-                    start: prev?.start ?? "2020-01-01",
+                    ...prev,
                     end: e.target.value,
                   }))
                 }
                 className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
               />
             </div>
-            {inviteFunnelRange && (
-              <button
-                onClick={() => setInviteFunnelRange(null)}
-                className="px-3 py-1 rounded-md text-xs border border-gray-300 bg-white hover:border-gray-400"
-              >
-                All time
-              </button>
-            )}
+            <button
+              onClick={() => {
+                const end = new Date();
+                const start = new Date();
+                start.setDate(end.getDate() - 7);
+                setInviteFunnelRange({
+                  start: formatDateAsLocal(start),
+                  end: formatDateAsLocal(end),
+                });
+              }}
+              className="px-3 py-1 rounded-md text-xs border border-gray-300 bg-white hover:border-gray-400"
+            >
+              Last 7 days
+            </button>
           </div>
         </div>
         <div className="relative p-4">
