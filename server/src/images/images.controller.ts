@@ -17,7 +17,7 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { basename } from 'path';
 import { Readable } from 'stream';
 import { getImageSource, ImagesService } from './images.service';

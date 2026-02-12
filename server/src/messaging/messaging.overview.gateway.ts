@@ -9,13 +9,13 @@ import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Server, Socket } from 'socket.io';
-import { JwtPayload } from 'src/auth/guards/auth.guard';
+import type { JwtPayload } from 'src/auth/guards/jwtreq';
 import { MessagingEvents } from './messaging.events';
 import { MessageDto } from './dto/messaging.dto';
 import { ConversationService } from './conversation.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Participant } from './entities/participant.entity';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { extractTokenFromSocket } from './gateway.utils';
 
 interface MessageCreatedPayload {
@@ -31,8 +31,7 @@ interface MessageCreatedPayload {
   namespace: '/messaging/overview',
 })
 export class MessagingOverviewGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -74,8 +73,7 @@ export class MessagingOverviewGateway
       client.join(this.userRoom(userId));
     } catch (error) {
       this.logger.warn(
-        `Messaging overview gateway auth failed: ${
-          (error as Error).message ?? error
+        `Messaging overview gateway auth failed: ${(error as Error).message ?? error
         }`,
       );
       client.disconnect(true);
@@ -114,8 +112,7 @@ export class MessagingOverviewGateway
           });
         } catch (error) {
           this.logger.warn(
-            `Failed to emit unread update to user ${userId} for conversation ${payload.conversationId}: ${
-              (error as Error).message ?? error
+            `Failed to emit unread update to user ${userId} for conversation ${payload.conversationId}: ${(error as Error).message ?? error
             }`,
           );
         }
@@ -148,8 +145,7 @@ export class MessagingOverviewGateway
           });
         } catch (error) {
           this.logger.warn(
-            `Failed to emit conversation update to user ${userId} for conversation ${payload.conversationId}: ${
-              (error as Error).message ?? error
+            `Failed to emit conversation update to user ${userId} for conversation ${payload.conversationId}: ${(error as Error).message ?? error
             }`,
           );
         }

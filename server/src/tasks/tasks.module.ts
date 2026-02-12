@@ -13,6 +13,7 @@ import { CustomValidator } from './entities/customvalidator.entity';
 import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { VideosModule } from 'src/videos/videos.module';
+import { User } from 'src/user/entities/user.entity';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { VideosModule } from 'src/videos/videos.module';
       Action,
       CustomValidator,
       ActionShareUrl,
+      User,
     ]),
     UserModule,
     ForumModule,

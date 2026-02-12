@@ -11,7 +11,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 import { ActionUpdate } from './action-update.entity';
 import { Action } from './action.entity';
 

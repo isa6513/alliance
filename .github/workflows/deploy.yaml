@@ -51,19 +51,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: "npm"
-          cache-dependency-path: server/package-lock.json
+          bun-version: latest
 
       - name: Install Backend Dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
         working-directory: ./server
 
-      - name: Run Jest Tests
-        run: npm run test:e2e
+      - name: Run E2E Tests
+        run: bun run test:e2e
         working-directory: ./server
 
   test-backend-unit:
@@ -73,19 +71,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: "npm"
-          cache-dependency-path: server/package-lock.json
+          bun-version: latest
 
       - name: Install Backend Dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
         working-directory: ./server
 
-      - name: Run Jest Tests
-        run: npm run test
+      - name: Run Unit Tests
+        run: bun run test
         working-directory: ./server
 
   build-react-app:
@@ -366,27 +362,25 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: "npm"
-          cache-dependency-path: server/package-lock.json
+          bun-version: latest
 
       - name: Install Dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
         working-directory: ./server
 
       - name: Typecheck
-        run: npm run typecheck
+        run: bun run typecheck
         working-directory: ./server
 
       - name: Build NestJS App
-        run: npm run build
+        run: bun run build
         working-directory: ./server
 
       - name: Compile migrations to JS
-        run: npx swc migrations -d migrations --strip-leading-paths -C module.type=commonjs && rm migrations/*.ts
+        run: bunx swc migrations -d migrations --strip-leading-paths -C module.type=commonjs && rm migrations/*.ts
         working-directory: ./server
 
       - name: Zip Build Output
@@ -417,14 +411,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
-          cache: "npm"
-          cache-dependency-path: server/package-lock.json
-      - run: corepack enable
+          bun-version: latest
 
-      - run: cd server && npm ci && npm run build
+      - run: cd server && bun install --frozen-lockfile && bun run build
 
       - run: |
           echo "DB_HOST=localhost" >> $GITHUB_ENV
@@ -435,7 +426,7 @@ jobs:
           echo "NODE_ENV=test" >> $GITHUB_ENV
 
       - name: Run migrations on blank DB
-        run: npx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts migration:run
+        run: bunx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts migration:run
         working-directory: ./server
 
       - name: Schema drift check
@@ -443,7 +434,7 @@ jobs:
         run: |
           set -e
 
-          OUT="$(npx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts schema:log || true)"
+          OUT="$(bunx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts schema:log || true)"
           echo "$OUT"
 
           if echo "$OUT" | grep -Eiq '^\s*(ALTER|CREATE|DROP|COMMENT|RENAME|TRUNCATE|INSERT INTO|UPDATE |DELETE FROM)\b'; then
@@ -488,10 +479,11 @@ jobs:
           node-version: 22
           cache: "yarn"
 
-      - name: Setup npm cache for server
+      - name: Setup Bun
         if: github.ref_name == 'production'
-        uses: actions/setup-node@v4
-        with: { node-version: 22 }
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Install Yarn Dependencies
         if: github.ref_name == 'production'
@@ -499,7 +491,7 @@ jobs:
 
       - name: Install Backend Dependencies
         if: github.ref_name == 'production'
-        run: npm ci
+        run: bun install --frozen-lockfile
         working-directory: ./server
 
       - name: Cache Playwright Browsers

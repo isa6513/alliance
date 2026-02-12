@@ -17,7 +17,7 @@ import { Notification } from '../../notifs/entities/notification.entity';
 import { User } from '../../user/entities/user.entity';
 import { EditableContent } from './editablecontent.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 
 export enum CommentParentObject {
   Post = 'post',

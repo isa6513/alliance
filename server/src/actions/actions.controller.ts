@@ -40,7 +40,8 @@ import {
 } from 'src/user/dto/user-action-relations.dto';
 import { ProfileDto } from 'src/user/dto/user.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
-import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from '../auth/public.decorator';
 import { ActionsService, UserActionRelationDto } from './actions.service';
 import {

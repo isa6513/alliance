@@ -5,14 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, In, IsNull, Repository } from 'typeorm';
+import { DeepPartial, In, IsNull, type Repository } from 'typeorm';
 import { Community } from './entities/community.entity';
-import { Relations } from 'src/utils/Repository';
+import type { Relations } from 'src/utils/Repository';
 import { ImagesService } from 'src/images/images.service';
 import { ConversationService } from 'src/messaging/conversation.service';
 import { CreateCommunityDto, UpdateCommunityDto } from './dto/community.dto';
 import { DEFAULT_TIME_ZONE, User } from 'src/user/entities/user.entity';
-import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
+import { type CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { run } from 'src/utils/promise';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { groupUrl } from 'src/search/approutes';

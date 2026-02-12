@@ -8,7 +8,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import {

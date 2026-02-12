@@ -6,7 +6,7 @@ import {
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import sharp from 'sharp';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
 
 @Injectable()

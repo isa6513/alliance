@@ -6,7 +6,7 @@ import { ActionsService } from 'src/actions/actions.service';
 import { EmailStatus } from 'src/mail/mail.entity';
 import { MailService, processKeywordReplacements } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
-import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, QueryFailedError, type Repository } from 'typeorm';
 import {
   shouldEmailUser,
   shouldPushUser,

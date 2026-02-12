@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import Twilio from 'twilio';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { Mms } from './mms.entity';
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import { EventType } from 'src/eventlog/event-log.entity';

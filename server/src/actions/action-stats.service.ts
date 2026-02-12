@@ -1,7 +1,7 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { Action, CustomActionStat } from "./entities/action.entity";
 import { Injectable } from "@nestjs/common";
-import { And, Between, IsNull, Not, Repository } from "typeorm";
+import { And, Between, IsNull, Not, type Repository } from "typeorm";
 import { OnetimeInvite, OnetimeInviteStatus } from "src/user/entities/onetime-invite.entity";
 import { ActionStatus } from "./entities/action-event.entity";
 import { Cron, CronExpression } from "@nestjs/schedule";

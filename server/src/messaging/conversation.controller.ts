@@ -12,7 +12,8 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { ConversationService } from './conversation.service';
 import {
   ConversationDto,
@@ -27,7 +28,7 @@ import {
 @ApiTags('messaging')
 @Controller('messaging/conversations')
 export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(private readonly conversationService: ConversationService) { }
 
   @Get('admin')
   @ApiOkResponse({ type: ConversationAdminSummaryDto, isArray: true })

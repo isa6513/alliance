@@ -47,7 +47,7 @@ import {
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ProfileDto } from 'src/user/dto/user.dto';
-import { ILike, In, LessThan, MoreThan, Repository } from 'typeorm';
+import { ILike, In, LessThan, MoreThan, type Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
@@ -100,7 +100,7 @@ import {
   ReminderGroupTimingMode,
 } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
-import { Relations } from 'src/utils/Repository';
+import type { Relations } from 'src/utils/Repository';
 import { run } from 'src/utils/promise';
 import { CachedFilter } from 'src/utils/cached-filter';
 import { findLeast } from 'src/utils/filter';

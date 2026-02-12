@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { In, Not, Repository } from 'typeorm';
+import { In, Not, type Repository } from 'typeorm';
 import { User } from '../src/user/entities/user.entity';
 import { Community } from '../src/community/entities/community.entity';
 import {

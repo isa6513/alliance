@@ -13,7 +13,7 @@ import {
 } from 'typeorm';
 import type { DeviceVisibilityTarget } from '../schema';
 import { Form } from './form.entity';
-import { Ty } from './type';
+import type { Ty } from './type';
 
 @Entity()
 @Unique(['user', 'formId'])

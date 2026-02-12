@@ -9,7 +9,7 @@ import {
 import { generateCIDForNotif } from 'src/notifs/notif-utils';
 import { withCid } from 'src/search/approutes';
 import { ForumDigestPreference, User } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { ForumDigestLog } from './entities/forum-digest-log.entity';
 
 @Injectable()

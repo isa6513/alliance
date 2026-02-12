@@ -14,7 +14,8 @@ import {
 import { ApiOkResponse } from '@nestjs/swagger';
 import { ActionActivityDto, OptOutActionDto } from 'src/actions/dto/action.dto';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from 'src/auth/public.decorator';
 import {
   CreateCustomValidatorDto,
@@ -36,7 +37,7 @@ import { TasksService } from './tasks.service';
 
 @Controller('tasks')
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(private readonly tasksService: TasksService) { }
 
   @Post('submitForm/:id')
   @UseGuards(AuthGuard)

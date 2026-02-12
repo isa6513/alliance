@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import request from 'supertest';
 import { User } from '../src/user/entities/user.entity';
 import { Action } from '../src/actions/entities/action.entity';

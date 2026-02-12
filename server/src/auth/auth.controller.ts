@@ -18,19 +18,19 @@ import {
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { UserDto } from '../user/dto/user.dto';
 import { AuthService } from './auth.service';
 import { AccessToken, AuthMeResponseDto } from './dto/authtokens.dto';
 import ForgotPasswordDto, { ResetPasswordDto } from './dto/forgotpassword.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { SignInDto, SignInResponseDto, TokenMode } from './dto/signin.dto';
+import { SignInDto, SignInResponseDto, type TokenMode } from './dto/signin.dto';
 import { AdminGuard } from './guards/admin.guard';
 import {
   AuthGuard,
   extractRefreshTokenFromCookie,
-  JwtRequest,
 } from './guards/auth.guard';
+import type { JwtRequest } from './guards/jwtreq';
 import { RefreshTokenGuard } from './guards/refresh.guard';
 import { Public } from './public.decorator';
 
@@ -38,7 +38,7 @@ import { Public } from './public.decorator';
 @ApiCookieAuth()
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Public()
   @HttpCode(HttpStatus.OK)

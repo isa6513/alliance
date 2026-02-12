@@ -15,7 +15,7 @@ import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Notification } from 'src/notifs/entities/notification.entity';
 import { Tag } from 'src/user/entities/tag.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 
 export enum ActionUpdateNotifyType {
   None = 'none',

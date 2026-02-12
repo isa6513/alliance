@@ -16,7 +16,7 @@ import {
 import { ActionUpdate } from 'src/actions/entities/action-update.entity';
 import { Comment } from 'src/forum/entities/comment.entity';
 import { Type } from 'class-transformer';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import type { Push } from 'src/push/push.entity';
 

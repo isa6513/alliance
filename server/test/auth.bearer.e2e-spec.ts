@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { User } from '../src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { AuthTokens } from '../src/auth/dto/authtokens.dto';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { SignUpDto } from 'src/auth/dto/sign-up.dto';

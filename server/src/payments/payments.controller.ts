@@ -14,7 +14,8 @@ import {
 } from '@nestjs/common';
 import Stripe from 'stripe';
 import { PaymentsService } from './payments.service';
-import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import {
   ApiBody,
   ApiOkResponse,

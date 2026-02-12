@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionEvent } from 'src/actions/entities/action-event.entity';
 import { groupMembersListUrl, tasksUrl, withCid } from 'src/search/approutes';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { EmailStatus, EmailType, Mail } from './mail.entity';
 import { getTimeLeftString } from 'src/notifs/textnotifcontents';
 import { User } from 'src/user/entities/user.entity';

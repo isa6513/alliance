@@ -1,5 +1,5 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, type Repository } from 'typeorm';
 import { ActionEventNotifWorker } from './action-event-notif.worker';
 import { NotificationPlan } from './action-event-reminder.service';
 import { MailService } from 'src/mail/mail.service';

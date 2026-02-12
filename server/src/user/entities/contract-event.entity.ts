@@ -8,7 +8,7 @@ import {
   Unique,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 

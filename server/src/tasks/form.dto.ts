@@ -6,7 +6,7 @@ import { ActionDto } from 'src/actions/dto/action.dto';
 import { UserDto } from 'src/user/dto/user.dto';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
-import { Ty } from './entities/type';
+import type { Ty } from './entities/type';
 import type { DeviceVisibilityTarget } from './schema';
 import { DEVICE_VISIBILITY_TARGETS } from './schema';
 

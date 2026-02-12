@@ -65,7 +65,7 @@ export class CustomValidator {
   @Allow()
   id: number;
 
-  @Column()
+  @Column({ type: 'text' })
   @ApiProperty({
     enum: CustomValidatorType,
     enumName: 'CustomValidatorType',

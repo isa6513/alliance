@@ -16,7 +16,7 @@ import { getImageSource } from 'src/images/images.service';
 import { MmsService } from 'src/mms/mms.service';
 import { welcomeMessage } from 'src/notifs/textnotifcontents';
 import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import {
   CustomValidatorDto,
   CustomValidatorResponseDto,
@@ -39,10 +39,10 @@ import {
   SubmitFormDto,
 } from './form.dto';
 import {
-  CheckboxExtractionTarget,
-  CheckboxField,
-  CityFieldValue,
-  CustomComponentField,
+  type CheckboxExtractionTarget,
+  type CheckboxField,
+  type CityFieldValue,
+  type CustomComponentField,
   FormSchema,
   isQuestionField,
   isQuestionVisible,

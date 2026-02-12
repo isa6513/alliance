@@ -2,9 +2,9 @@ import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import * as crypto from 'crypto';
 import { PostHog } from 'posthog-node';
-import { MailgunWebhookBody } from './mailgun';
+import type { MailgunWebhookBody } from './mailgun';
 import { User } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 function verifyMailgunSignature(sig: {

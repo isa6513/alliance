@@ -943,6 +943,33 @@ export type CreateMessageDto = {
     replyToId?: string;
 };
 
+export type EventType = 'account_created' | 'contract_signed' | 'contract_suspended' | 'sms_unsubscribe' | 'sms_inbound' | 'sms_failure' | 'forum_action_autocomplete' | 'action_comment';
+
+export type EventLogUserDto = {
+    id: number;
+    displayName: string;
+};
+
+export type EventLogDto = {
+    id: string;
+    event: EventType;
+    message: string;
+    blob?: {
+        [key: string]: unknown;
+    };
+    createdAt: string;
+    userId?: number;
+    user?: EventLogUserDto;
+};
+
+export type EventLogListDto = {
+    items: Array<EventLogDto>;
+    totalCount: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+};
+
 export type NotificationDto = {
     id: number;
     category: NotificationCategory;
@@ -3821,6 +3848,38 @@ export type MessageGetMessagesResponses = {
 };
 
 export type MessageGetMessagesResponse = MessageGetMessagesResponses[keyof MessageGetMessagesResponses];
+
+export type EventLogFindAllData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        limit?: number;
+        eventType?: EventType;
+    };
+    url: '/eventlog';
+};
+
+export type EventLogFindAllResponses = {
+    200: EventLogListDto;
+};
+
+export type EventLogFindAllResponse = EventLogFindAllResponses[keyof EventLogFindAllResponses];
+
+export type EventLogFindOneData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/eventlog/{id}';
+};
+
+export type EventLogFindOneResponses = {
+    200: EventLogDto;
+};
+
+export type EventLogFindOneResponse = EventLogFindOneResponses[keyof EventLogFindOneResponses];
 
 export type NotifsFindAllData = {
     body?: never;

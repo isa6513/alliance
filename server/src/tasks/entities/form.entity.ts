@@ -8,7 +8,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import { Ty } from './type';
+import type { Ty } from './type';
 
 @Entity()
 export class Form {

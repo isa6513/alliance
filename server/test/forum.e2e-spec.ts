@@ -6,7 +6,7 @@ import { CreateCommentDto, UpdateCommentDto } from 'src/forum/dto/comment.dto';
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
 import { User } from 'src/user/entities/user.entity';
 import request from 'supertest';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { Action } from '../src/actions/entities/action.entity';
 import { CreatePostDto } from '../src/forum/dto/post.dto';
 import { createTestApp, TestContext } from './e2e-test-utils';

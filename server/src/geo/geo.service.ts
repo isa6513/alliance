@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { CitySearchDto } from './city.dto';
 import { City } from './city.entity';
-import { ILike, In, Repository } from 'typeorm';
+import { ILike, In, type Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as path from 'path';
 import * as fs from 'fs';

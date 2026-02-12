@@ -20,7 +20,8 @@ import {
   CreateCommunityDto,
   UpdateCommunityDto,
 } from './dto/community.dto';
-import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
 import {

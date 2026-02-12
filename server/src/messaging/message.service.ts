@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Conversation } from './entities/conversation.entity';
 import { Message } from './entities/message.entity';

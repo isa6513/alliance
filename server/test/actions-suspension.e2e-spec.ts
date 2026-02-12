@@ -16,7 +16,7 @@ import {
 import { ContractEventType } from '../src/user/entities/contract-event.entity';
 import { User } from '../src/user/entities/user.entity';
 import { UserService } from '../src/user/user.service';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
 

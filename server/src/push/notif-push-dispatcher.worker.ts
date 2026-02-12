@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import {
   Notification,
   NotificationCategory,

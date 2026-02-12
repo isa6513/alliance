@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { CreateDateColumnTz } from "src/datasources/basecolumns";
-import { Ty } from "src/tasks/entities/type";
+import type { Ty } from "src/tasks/entities/type";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId } from "typeorm";
 
@@ -18,6 +18,7 @@ export enum EventType {
 @Entity()
 export class EventLog {
     @PrimaryGeneratedColumn('uuid')
+    @ApiProperty()
     id: string;
 
     @Column({ type: 'enum', enum: EventType })

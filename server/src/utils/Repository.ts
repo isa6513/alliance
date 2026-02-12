@@ -4,7 +4,7 @@
 import { Temporal } from '@js-temporal/polyfill';
 import {
   ObjectLiteral,
-  Repository as TypeOrmRepository,
+  type Repository as TypeOrmRepository,
   FindManyOptions,
   FindOneOptions,
   ObjectId,

@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { TasksModule } from 'src/tasks/tasks.module';
 import { Form } from 'src/tasks/entities/form.entity';

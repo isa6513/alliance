@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { GeneralUpdate } from './general-update.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 
 export enum GeneralUpdateActivityType {
   DISMISSED = 'dismissed',

@@ -14,7 +14,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 export enum FriendStatus {
   Pending = 'pending',
   Accepted = 'accepted',

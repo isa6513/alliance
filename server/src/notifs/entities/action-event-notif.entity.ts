@@ -16,7 +16,7 @@ import { NotificationChannel } from '../notif-utils';
 import { ReminderGroup } from 'src/actions/entities/reminder-group.entity';
 import { Type } from 'class-transformer';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 import { Push } from 'src/push/push.entity';
 
 export enum ActionEventNotifType {

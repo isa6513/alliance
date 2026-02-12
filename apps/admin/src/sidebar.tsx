@@ -30,6 +30,7 @@ import {
   ChevronRight,
   MessageSquare,
   MoreHorizontal,
+  ScrollText,
   TowerControl,
 } from "lucide-react";
 import { useGroupAssignment } from "./lib/GroupAssignmentContext";
@@ -127,41 +128,41 @@ const Sidebar: React.FC = () => {
     name: string;
     actions: Action[];
   }[] = [
-    {
-      name: "Active",
-      actions: filteredActions.filter(
-        (action) =>
-          (action.status === "member_action" ||
-            action.status === "gathering_commitments") &&
-          !action.onboarding
-      ),
-    },
-    {
-      name: "Pending",
-      actions: filteredActions.filter(
-        (action) =>
-          action.status !== "draft" &&
-          action.status !== "member_action" &&
-          action.status !== "gathering_commitments" &&
-          !action.onboarding &&
-          action.status !== "completed"
-      ),
-    },
-    {
-      name: "Draft",
-      actions: filteredActions.filter((action) => action.status === "draft"),
-    },
-    {
-      name: "Onboarding",
-      actions: filteredActions.filter((action) => action.onboarding),
-    },
-    {
-      name: "Completed",
-      actions: filteredActions.filter(
-        (action) => action.status === "completed"
-      ),
-    },
-  ];
+      {
+        name: "Active",
+        actions: filteredActions.filter(
+          (action) =>
+            (action.status === "member_action" ||
+              action.status === "gathering_commitments") &&
+            !action.onboarding
+        ),
+      },
+      {
+        name: "Pending",
+        actions: filteredActions.filter(
+          (action) =>
+            action.status !== "draft" &&
+            action.status !== "member_action" &&
+            action.status !== "gathering_commitments" &&
+            !action.onboarding &&
+            action.status !== "completed"
+        ),
+      },
+      {
+        name: "Draft",
+        actions: filteredActions.filter((action) => action.status === "draft"),
+      },
+      {
+        name: "Onboarding",
+        actions: filteredActions.filter((action) => action.onboarding),
+      },
+      {
+        name: "Completed",
+        actions: filteredActions.filter(
+          (action) => action.status === "completed"
+        ),
+      },
+    ];
 
   const isProd = isProduction();
 
@@ -177,14 +178,12 @@ const Sidebar: React.FC = () => {
         }}
       >
         <div
-          className={`flex flex-col gap-y-3 sticky p-5 py-6 w-[320px] ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`flex flex-col gap-y-3 sticky p-5 py-6 w-[320px] ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <h1
-            className={`text-[14pt] font-bold pb-0 ${
-              isProd ? "text-red-500" : "text-gray-900"
-            }`}
+            className={`text-[14pt] font-bold pb-0 ${isProd ? "text-red-500" : "text-gray-900"
+              }`}
           >
             Alliance Admin
           </h1>
@@ -271,6 +270,11 @@ const Sidebar: React.FC = () => {
                     label: "Messaging",
                     icon: <TowerControl size={16} />,
                   },
+                  {
+                    to: "/event-log",
+                    label: "Event Log",
+                    icon: <ScrollText size={16} />,
+                  },
                 ].map((link) => (
                   <Link
                     key={link.to}
@@ -350,9 +354,8 @@ const Sidebar: React.FC = () => {
                       <div
                         key={action.id}
                         onClick={() => handleEditAction(action.id)}
-                        className={`cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md ${
-                          currentActionId === action.id ? "bg-zinc-200" : ""
-                        }`}
+                        className={`cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md ${currentActionId === action.id ? "bg-zinc-200" : ""
+                          }`}
                       >
                         <p className="text-sm">{action.name}</p>
                       </div>

@@ -1,6 +1,6 @@
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { User } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import {
   Notification,
   NotificationCategory,

@@ -4,14 +4,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { MailService } from '../mail/mail.service';
 import { User } from '../user/entities/user.entity';
-import { PWResetJwtPayload, UserService } from '../user/user.service';
+import { type PWResetJwtPayload, UserService } from '../user/user.service';
 import { AuthTokens } from './dto/authtokens.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInResponseDto } from './dto/signin.dto';
-import { JWTTokenType, JwtPayload } from './guards/auth.guard';
+import { type JwtPayload, JWTTokenType } from './guards/jwtreq';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 
 @Injectable()

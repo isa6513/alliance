@@ -42,7 +42,7 @@ import { NotificationChannel } from 'src/notifs/notif-utils';
 import { Community } from 'src/community/entities/community.entity';
 import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 import { Participant } from 'src/messaging/entities/participant.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 import { ContractEvent, ContractEventType } from './contract-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { UserDevice } from './user-device.entity';

@@ -9,12 +9,13 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { SearchService } from './search.service';
-import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { SearchItemDto } from './searchitem.dto';
 
 @Controller('search')
 export class SearchController {
-  constructor(private readonly searchService: SearchService) {}
+  constructor(private readonly searchService: SearchService) { }
 
   @Get('all')
   @UseGuards(AuthGuard)

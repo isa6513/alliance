@@ -1,13 +1,13 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import bodyParser from 'body-parser';
 import { useContainer } from 'class-validator';
 import cookieParser from 'cookie-parser';
 import { PostHog, setupExpressErrorHandler } from 'posthog-node';
-import { ServerOptions } from 'socket.io';
+import type { ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
 import { PosthogExceptionFilter } from './posthog.filter';
 import { MetricsInterceptor } from './metrics';

@@ -14,7 +14,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { Community } from './community.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 
 export enum CommunityInviteStatus {
   RequestPending = 'request_pending',

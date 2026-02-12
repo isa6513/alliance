@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { ForumActionCompleterWorker } from 'src/actions/forum-action-completer.worker';
 import {

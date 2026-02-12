@@ -12,7 +12,8 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { AuthGuard, JwtRequest } from 'src/auth/guards/auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { MessageService } from './message.service';
 import {
   ConversationMessagesQueryDto,
@@ -27,7 +28,7 @@ export class MessageController {
   constructor(
     private readonly messageService: MessageService,
     private readonly conversationService: ConversationService,
-  ) {}
+  ) { }
 
   @Get('admin/:conversationId')
   @ApiOkResponse({ type: MessageDto, isArray: true })

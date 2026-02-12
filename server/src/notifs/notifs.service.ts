@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
 import { User } from 'src/user/entities/user.entity';
-import { DeepPartial, IsNull, LessThan, Repository } from 'typeorm';
+import { DeepPartial, IsNull, LessThan, type Repository } from 'typeorm';
 import { ActionEventNotif } from './entities/action-event-notif.entity';
 import {
   NOTIFICATION_CATEGORY_PRIORITIES,

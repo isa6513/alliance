@@ -23,7 +23,8 @@ import {
 import { IsNotEmpty, IsString } from 'class-validator';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { City } from 'src/geo/city.entity';
-import { AuthGuard, JwtRequest } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from '../auth/public.decorator';
 import { FriendStatus } from './entities/friend.entity';
 import { PrefillUserDto } from './prefill-user.dto';

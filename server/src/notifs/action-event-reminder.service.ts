@@ -20,7 +20,7 @@ import { EmailType } from 'src/mail/mail.entity';
 import { MailService, processKeywordReplacements } from 'src/mail/mail.service';
 import { Tag } from 'src/user/entities/tag.entity';
 import { UserService } from 'src/user/user.service';
-import { Brackets, In, MoreThan, Repository } from 'typeorm';
+import { Brackets, In, MoreThan, type Repository } from 'typeorm';
 import {
   ActionEvent,
   ActionStatus,

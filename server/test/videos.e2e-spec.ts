@@ -20,7 +20,7 @@ jest.mock('child_process', () => ({
 }));
 
 import { VideosModule } from '../src/videos/videos.module';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { Video } from '../src/videos/entities/video.entity';
 import {
   GetObjectCommand,

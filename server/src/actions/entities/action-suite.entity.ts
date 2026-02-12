@@ -9,7 +9,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { ActionEvent } from './action-event.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 
 @Entity()
 export class ActionSuite {

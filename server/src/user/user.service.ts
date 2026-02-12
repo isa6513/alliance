@@ -11,7 +11,7 @@ import { ImagesService } from 'src/images/images.service';
 import { MailService } from 'src/mail/mail.service';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
-import { DeepPartial, ILike, In, IsNull, Not, Repository } from 'typeorm';
+import { DeepPartial, ILike, In, IsNull, Not, type Repository } from 'typeorm';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
@@ -44,13 +44,13 @@ import {
   ContractEvent,
   ContractEventType,
 } from './entities/contract-event.entity';
-import { Relations } from 'src/utils/Repository';
+import type { Relations } from 'src/utils/Repository';
 import { RegisterDeviceDto, UserDeviceDto } from './dto/device.dto';
 import { UserDevice } from './entities/user-device.entity';
 import { PushService } from 'src/push/push.service';
 import { Push } from 'src/push/push.entity';
 import { EventLogService } from 'src/eventlog/eventlog.service';
-import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
+import { type CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { CommunityService } from 'src/community/community.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 
@@ -95,7 +95,7 @@ export class UserService {
 
   async create(data: DeepPartial<User>): Promise<User> {
     const user = await this.userRepository.save(this.userRepository.create(data));
-    await this.eventLogService.sendMessage({
+    this.eventLogService.sendMessage({
       type: EventType.AccountCreated,
       message: `${user.name} created an account.`,
       userId: user.id,

@@ -1,5 +1,5 @@
 // display-blocks.ts
-import { Condition } from './schema';
+import type { Condition } from './schema';
 
 export type DisplayKind =
   | 'header' // H1–H6

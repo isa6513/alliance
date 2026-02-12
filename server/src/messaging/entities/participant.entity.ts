@@ -7,7 +7,7 @@ import {
   Unique,
 } from 'typeorm';
 import { Conversation } from './conversation.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 import { User } from 'src/user/entities/user.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Message } from './message.entity';

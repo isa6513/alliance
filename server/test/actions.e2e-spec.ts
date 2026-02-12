@@ -3,7 +3,7 @@ import { ActionActivityType } from 'src/actions/entities/action-activity.entity'
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
 import { UserService } from 'src/user/user.service';
 import request from 'supertest';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import {
   ActionDto,
   ActionEventDto,

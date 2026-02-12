@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, type Repository } from 'typeorm';
 import { Community } from 'src/community/entities/community.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Conversation, ConversationType } from './entities/conversation.entity';
@@ -27,7 +27,7 @@ import {
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
 import { ImagesService } from 'src/images/images.service';
-import { Relations } from 'src/utils/Repository';
+import type { Relations } from 'src/utils/Repository';
 
 @Injectable()
 export class ConversationService {

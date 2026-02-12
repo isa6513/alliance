@@ -18,7 +18,7 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { Action } from './action.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 
 export enum ActionActivityType {
   USER_JOINED = 'user_joined',

@@ -5,7 +5,7 @@ import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
 import { ActionStatsRecord } from './actionstats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, IsNull, Repository } from 'typeorm';
+import { Between, In, IsNull, type Repository } from 'typeorm';
 import {
   ActionActivity,
   ActionActivityType,

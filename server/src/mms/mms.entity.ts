@@ -3,7 +3,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from '../datasources/basecolumns';
-import { MessageStatus } from 'twilio/lib/rest/api/v2010/account/message';
+import type { MessageStatus } from 'twilio/lib/rest/api/v2010/account/message';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

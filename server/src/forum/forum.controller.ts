@@ -11,7 +11,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthGuard, JwtPayload, JwtRequest } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import type { JwtPayload } from 'src/auth/guards/jwtreq';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { ReqUser } from '../auth/user.decorator';
 import {
@@ -33,7 +35,7 @@ import { ForumService } from './forum.service';
 @ApiTags('forum')
 @Controller('forum')
 export class ForumController {
-  constructor(private readonly forumService: ForumService) {}
+  constructor(private readonly forumService: ForumService) { }
 
   @Post('posts')
   @UseGuards(AuthGuard)

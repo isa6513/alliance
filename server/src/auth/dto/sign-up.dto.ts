@@ -7,7 +7,7 @@ import {
   Allow,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TokenMode } from './signin.dto';
+import type { TokenMode } from './signin.dto';
 
 export class SignUpDto {
   @IsDefined()

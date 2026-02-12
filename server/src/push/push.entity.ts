@@ -5,7 +5,7 @@ import {
 } from 'src/datasources/basecolumns';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { Notification } from 'src/notifs/entities/notification.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 import {
   Column,
   Entity,

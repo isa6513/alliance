@@ -8,7 +8,7 @@ import {
   Not,
   Or,
   QueryFailedError,
-  Repository,
+  type Repository,
 } from 'typeorm';
 import { PickType } from '@nestjs/swagger';
 import { UserDevice } from 'src/user/entities/user-device.entity';

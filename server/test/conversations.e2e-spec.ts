@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { MessagingModule } from 'src/messaging/messaging.module';
 import {
   Conversation,

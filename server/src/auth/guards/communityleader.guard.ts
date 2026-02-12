@@ -5,16 +5,16 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { UserService } from '../../user/user.service';
-import { JwtPayload } from './auth.guard';
+import type { JwtPayload } from './jwtreq';
 
 @Injectable()
 export class CommunityLeaderGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private userService: UserService,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();

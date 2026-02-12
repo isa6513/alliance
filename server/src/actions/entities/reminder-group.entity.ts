@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsDefined, IsOptional } from 'class-validator';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
-import { Ty } from 'src/tasks/entities/type';
+import type { Ty } from 'src/tasks/entities/type';
 import { Tag } from 'src/user/entities/tag.entity';
 import { DEFAULT_TIME_ZONE, User } from 'src/user/entities/user.entity';
 import {

@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 import request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { ImagesModule } from '../src/images/images.module';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { Image } from '../src/images/entities/image.entity';
 import {
   DeleteObjectCommand,

@@ -31,6 +31,7 @@ export default [
         "pages/MessagingConversationDetail.tsx"
       ),
       route("/posts/:postId?", "pages/PostsManagement.tsx"),
+      route("/event-log", "pages/EventLogPage.tsx"),
     ]),
     route("/database", "pages/DatabaseViewer.tsx"),
   ]),

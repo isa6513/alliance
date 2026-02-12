@@ -14,7 +14,7 @@ import { Server, Socket } from 'socket.io';
 import { ConversationService } from './conversation.service';
 import { MessagingEvents } from './messaging.events';
 import { MessageDto } from './dto/messaging.dto';
-import { JwtPayload } from 'src/auth/guards/auth.guard';
+import type { JwtPayload } from 'src/auth/guards/jwtreq';
 import { extractTokenFromSocket } from './gateway.utils';
 
 @WebSocketGateway({
@@ -25,8 +25,7 @@ import { extractTokenFromSocket } from './gateway.utils';
   namespace: '/messaging',
 })
 export class MessagingGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 

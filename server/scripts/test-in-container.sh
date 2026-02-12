@@ -35,12 +35,17 @@ export PGUSER="app"
 export PGPASSWORD="password"
 export PGDATABASE="app_test"
 
-# 5. Run the e2e tests
+# 5. Run the e2e tests serially (each file gets its own DB schema)
 echo "[test-e2e] Running e2e tests..."
-set +e
-npm run test:e2e
-TEST_EXIT_CODE=$?
-set -e
+TEST_EXIT_CODE=0
+for f in test/*.e2e-spec.ts; do
+  echo "[test-e2e] Running $f..."
+  if ! bun test "./$f" --timeout 50000; then
+    TEST_EXIT_CODE=1
+    echo "[test-e2e] FAILED: $f"
+    break
+  fi
+done
 
 # 6. Tear down Postgres
 echo "[test-e2e] Stopping Postgres and cleaning up..."

@@ -49,7 +49,7 @@ import { CommunityModule } from 'src/community/community.module';
     MailModule,
     forwardRef(() => MessagingModule),
     PushModule,
-    EventLogModule,
+    forwardRef(() => EventLogModule),
     forwardRef(() => NotifsModule),
     forwardRef(() => CommunityModule),
   ],

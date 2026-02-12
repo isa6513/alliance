@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ForumService } from './forum.service';
 import { ForumController } from './forum.controller';
@@ -29,9 +29,9 @@ import { UserModule } from 'src/user/user.module';
       ForumDigestLog,
     ]),
     MailModule,
-    NotifsModule,
-    EventLogModule,
-    UserModule,
+    forwardRef(() => NotifsModule),
+    forwardRef(() => EventLogModule),
+    forwardRef(() => UserModule),
   ],
   controllers: [ForumController],
   providers: [ForumService, ForumDigestService],

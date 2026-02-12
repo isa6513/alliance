@@ -1,11 +1,11 @@
 import { BadRequestException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import { CommunityService } from './community.service';
 import { Community } from './entities/community.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ConversationService } from 'src/messaging/conversation.service';
 import { ImagesService } from 'src/images/images.service';
-import { NotifsService, CreateNotifParams } from 'src/notifs/notifs.service';
+import { NotifsService, type CreateNotifParams } from 'src/notifs/notifs.service';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { CommunityInvite } from './entities/community-invite.entity';
 
