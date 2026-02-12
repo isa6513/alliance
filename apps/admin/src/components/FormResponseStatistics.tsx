@@ -145,14 +145,50 @@ const buildNumberStats = (
   const total = sum;
 
   if (min === max) {
+    const rows: StatRow[] = [
+      {
+        key: "single-value",
+        label: formatNumber(min),
+        count: answeredCount,
+      },
+    ];
+    if (answeredCount < totalResponses) {
+      rows.unshift({
+        key: "no-response",
+        label: "No response",
+        count: totalResponses - answeredCount,
+      });
+    }
+    return { rows, answeredCount, summary: { min, max, avg, median, total } };
+  }
+
+  const shouldUseIntegerBuckets =
+    answeredCount < 20 && sorted.every((value) => Number.isInteger(value));
+
+  if (shouldUseIntegerBuckets) {
+    const counts = new Map<number, number>();
+    sorted.forEach((value) => {
+      counts.set(value, (counts.get(value) ?? 0) + 1);
+    });
+
+    const rows: StatRow[] = Array.from(counts.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([value, count]) => ({
+        key: `int-${value}`,
+        label: String(value),
+        count,
+      }));
+
+    if (answeredCount < totalResponses) {
+      rows.unshift({
+        key: "no-response",
+        label: "No response",
+        count: totalResponses - answeredCount,
+      });
+    }
+
     return {
-      rows: [
-        {
-          key: "single-value",
-          label: formatNumber(min),
-          count: answeredCount,
-        },
-      ],
+      rows,
       answeredCount,
       summary: { min, max, avg, median, total },
     };

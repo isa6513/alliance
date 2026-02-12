@@ -123,6 +123,30 @@ export function OutputFieldToggle({
   );
 }
 
+type OutputPrivateByDefaultToggleProps = {
+  checked?: boolean;
+  onChange: (checked: boolean) => void;
+  className?: string;
+};
+
+export function OutputPrivateByDefaultToggle({
+  checked,
+  onChange,
+  className = "",
+}: OutputPrivateByDefaultToggleProps) {
+  return (
+    <label className={`flex items-center text-xs text-gray-700 ${className}`}>
+      <input
+        type="checkbox"
+        checked={!!checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="mr-2"
+      />
+      Private by default
+    </label>
+  );
+}
+
 // ---------------- Conditional Visibility ----------------
 type ConditionalVisibilityProps = {
   field: (AnyField | DisplayBlock) & { visibleIf?: Condition[] | Condition };

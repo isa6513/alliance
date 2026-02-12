@@ -203,6 +203,24 @@ const FormRenderer = ({
 
   const pageCount = schema.pages?.length ?? 0;
   const maxPageIndex = Math.max(0, (pageCount || 1) - 1);
+  const userDefaultPublic = user?.formDataPreference === "public";
+  const outputFieldDefaultPublic = useMemo(() => {
+    const defaults = new Map<string, boolean>();
+    for (const page of schema.pages ?? []) {
+      for (const element of page.fields ?? []) {
+        if ("label" in element) {
+          const field = element as AnyField;
+          if (field.output?.output) {
+            defaults.set(
+              field.id,
+              field.output.privateByDefault ? false : userDefaultPublic
+            );
+          }
+        }
+      }
+    }
+    return defaults;
+  }, [schema, userDefaultPublic]);
 
   const clampPageIndex = (idx: number): number => {
     if (!Number.isFinite(idx)) return 0;
@@ -224,7 +242,18 @@ const FormRenderer = ({
     return applyDefaultValues({}, defaultValueMap);
   });
   const [publicAnswers, setPublicAnswers] = useState<Record<string, boolean>>(
-    {}
+    () => {
+      const completedPublicAnswers = completedFormResponse?.publicAnswers as
+        | Record<string, unknown>
+        | undefined;
+      const defaults: Record<string, boolean> = {};
+      for (const [fieldId, defaultIsPublic] of outputFieldDefaultPublic) {
+        const completedValue = completedPublicAnswers?.[fieldId];
+        defaults[fieldId] =
+          typeof completedValue === "boolean" ? completedValue : defaultIsPublic;
+      }
+      return defaults;
+    }
   );
   const [visibilityValidatorResults, setVisibilityValidatorResults] = useState<
     Record<number, boolean>
@@ -257,17 +286,34 @@ const FormRenderer = ({
   );
 
   useEffect(() => {
-    if (!user || Object.keys(publicAnswers).length > 0) {
-      return;
-    }
-    if (user.formDataPreference === "public") {
-      const defaults: Record<string, boolean> = {};
-      fieldLookup.forEach((_, fieldId) => {
-        defaults[fieldId] = true;
-      });
-      setPublicAnswers(defaults);
-    }
-  }, [user, publicAnswers, fieldLookup]);
+    const completedPublicAnswers = completedFormResponse?.publicAnswers as
+      | Record<string, unknown>
+      | undefined;
+
+    setPublicAnswers((prev) => {
+      const next: Record<string, boolean> = {};
+      for (const [fieldId, defaultIsPublic] of outputFieldDefaultPublic) {
+        const completedValue = completedPublicAnswers?.[fieldId];
+        const fallbackValue =
+          typeof completedValue === "boolean"
+            ? completedValue
+            : prev[fieldId] ?? defaultIsPublic;
+        next[fieldId] = fallbackValue;
+      }
+
+      const prevKeys = Object.keys(prev);
+      const nextKeys = Object.keys(next);
+      if (prevKeys.length !== nextKeys.length) {
+        return next;
+      }
+      for (const key of nextKeys) {
+        if (prev[key] !== next[key]) {
+          return next;
+        }
+      }
+      return prev;
+    });
+  }, [completedFormResponse?.publicAnswers, outputFieldDefaultPublic]);
 
   const visibilityValidatorIds = useMemo(() => {
     const ids = new Set<number>();

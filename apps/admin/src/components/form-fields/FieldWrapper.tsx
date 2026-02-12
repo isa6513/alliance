@@ -14,6 +14,7 @@ import {
   ConditionalVisibility,
   CustomValidatorSelect,
   OutputFieldToggle,
+  OutputPrivateByDefaultToggle,
 } from "./CommonControls";
 import type { FieldWrapperProps } from "./types";
 import RenderField from "@alliance/sharedweb/forms/RenderField";
@@ -268,16 +269,28 @@ export function FieldWrapper<T extends AnyField>({
       } as Partial<T>);
       return;
     }
+    onUpdate({ output: undefined } as Partial<T>);
+  };
+
+  const handleOutputPrivateByDefaultToggle = (checked: boolean) => {
+    if (!isFormField(field) || !field.output?.output) {
+      return;
+    }
+    if (checked) {
+      onUpdate({
+        output: { ...(field.output ?? {}), privateByDefault: true },
+      } as Partial<T>);
+      return;
+    }
     const currentOutput = field.output;
     if (!currentOutput) {
-      onUpdate({ output: undefined } as Partial<T>);
       return;
     }
     const nextConfig = { ...currentOutput };
-    delete (nextConfig as { output?: boolean }).output;
-    const hasOtherKeys = Object.keys(nextConfig).length > 0;
+    delete (nextConfig as { privateByDefault?: boolean }).privateByDefault;
+    const hasKeys = Object.keys(nextConfig).length > 0;
     onUpdate({
-      output: hasOtherKeys ? nextConfig : undefined,
+      output: hasKeys ? nextConfig : undefined,
     } as Partial<T>);
   };
 
@@ -440,11 +453,18 @@ export function FieldWrapper<T extends AnyField>({
         <div className="bg-gray-100 p-4 rounded-t-lg space-y-2">
           {children}
           {isCurrentFormField && field.kind !== "custom" && (
-            <OutputFieldToggle
-              checked={Boolean(field.output?.output)}
-              onChange={handleOutputFieldToggle}
-              className="mt-2"
-            />
+            <div className="mt-2 flex items-center gap-4">
+              <OutputFieldToggle
+                checked={Boolean(field.output?.output)}
+                onChange={handleOutputFieldToggle}
+              />
+              {field.output?.output && (
+                <OutputPrivateByDefaultToggle
+                  checked={Boolean(field.output?.privateByDefault)}
+                  onChange={handleOutputPrivateByDefaultToggle}
+                />
+              )}
+            </div>
           )}
         </div>
         {isCurrentFormField && (

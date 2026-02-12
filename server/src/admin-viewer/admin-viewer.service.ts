@@ -28,36 +28,59 @@ export class AdminViewerService {
 
   async getTables(): Promise<TableListDto> {
     const entityMetadatas = this.dataSource.entityMetadatas;
+    const dedupedEntityMetadatas = new Map<string, EntityMetadata>();
     const tables: TableMetadataDto[] = [];
 
     for (const metadata of entityMetadatas) {
-      const queryRunner = this.dataSource.createQueryRunner();
-      try {
-        const countResult = await queryRunner.query(
-          `SELECT COUNT(*) as count FROM "${metadata.tableName}"`,
-        );
-        const recordCount = parseInt(countResult[0].count);
-
-        tables.push({
-          name: metadata.tableName,
-          entityName: metadata.name,
-          recordCount,
-          primaryKey: metadata.primaryColumns[0]?.propertyName || 'id',
-        });
-      } catch (error) {
-        console.warn(
-          `Could not get count for table ${metadata.tableName}:`,
-          error,
-        );
-        tables.push({
-          name: metadata.tableName,
-          entityName: metadata.name,
-          recordCount: 0,
-          primaryKey: metadata.primaryColumns[0]?.propertyName || 'id',
-        });
-      } finally {
-        await queryRunner.release();
+      const existing = dedupedEntityMetadatas.get(metadata.tableName);
+      if (!existing) {
+        dedupedEntityMetadatas.set(metadata.tableName, metadata);
+        continue;
       }
+
+      const existingPrimaryCount = existing.primaryColumns?.length ?? 0;
+      const currentPrimaryCount = metadata.primaryColumns?.length ?? 0;
+      if (currentPrimaryCount > existingPrimaryCount) {
+        dedupedEntityMetadatas.set(metadata.tableName, metadata);
+      }
+    }
+
+    if (dedupedEntityMetadatas.size < entityMetadatas.length) {
+      console.warn(
+        `AdminViewerService deduped ${entityMetadatas.length - dedupedEntityMetadatas.size} duplicate table metadata entries`,
+      );
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      for (const metadata of dedupedEntityMetadatas.values()) {
+        try {
+          const countResult = await queryRunner.query(
+            `SELECT COUNT(*) as count FROM "${metadata.tableName}"`,
+          );
+          const recordCount = parseInt(countResult[0].count);
+
+          tables.push({
+            name: metadata.tableName,
+            entityName: metadata.name,
+            recordCount,
+            primaryKey: metadata.primaryColumns[0]?.propertyName || 'id',
+          });
+        } catch (error) {
+          console.warn(
+            `Could not get count for table ${metadata.tableName}:`,
+            error,
+          );
+          tables.push({
+            name: metadata.tableName,
+            entityName: metadata.name,
+            recordCount: 0,
+            primaryKey: metadata.primaryColumns[0]?.propertyName || 'id',
+          });
+        }
+      }
+    } finally {
+      await queryRunner.release();
     }
 
     return { tables: tables.sort((a, b) => a.name.localeCompare(b.name)) };

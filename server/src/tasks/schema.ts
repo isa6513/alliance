@@ -36,6 +36,7 @@ export type DeviceVisibilityTarget = (typeof DEVICE_VISIBILITY_TARGETS)[number];
 
 export interface FieldOutputConfig {
   output?: boolean;
+  privateByDefault?: boolean;
 }
 
 // Base field for dynamic forms (no generics, runtime-first)

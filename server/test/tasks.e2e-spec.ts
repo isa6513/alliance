@@ -15,7 +15,10 @@ import {
 } from 'src/actions/entities/action-event.entity';
 import { User } from 'src/user/entities/user.entity';
 import { FormSchema } from 'src/tasks/schema';
-import { ActionActivity } from 'src/actions/entities/action-activity.entity';
+import {
+  ActionActivity,
+  ActionActivityType,
+} from 'src/actions/entities/action-activity.entity';
 import { CreateActionDto } from 'src/actions/dto/action.dto';
 import {
   CustomValidator,
@@ -271,6 +274,150 @@ describe('Tasks (e2e)', () => {
       .get(`/tasks/slug/${formId}`)
       .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
       .expect(404);
+  });
+
+  it('hides privateByDefault output fields in public output while keeping normal output fields visible', async () => {
+    const outputSchema: FormSchema = {
+      title: 'Output Visibility',
+      pages: [
+        {
+          id: 'page-1',
+          fields: [
+            {
+              id: 'private-output',
+              kind: 'text',
+              label: 'Private output',
+              required: true,
+              output: {
+                output: true,
+                privateByDefault: true,
+              },
+            },
+            {
+              id: 'public-output',
+              kind: 'text',
+              label: 'Public output',
+              required: true,
+              output: {
+                output: true,
+              },
+            },
+            {
+              id: 'non-output',
+              kind: 'text',
+              label: 'Non output',
+            },
+          ],
+        },
+      ],
+      outputViews: [],
+    };
+
+    const action = await actionRepo.save(
+      actionRepo.create({
+        name: 'Output Visibility Action',
+        category: 'Community',
+        body: 'Body copy',
+        shortDescription: 'Short copy',
+        type: ActionTaskType.Activity,
+        commitmentless: true,
+        isForumParticipationAction: false,
+        everyoneShouldComplete: false,
+        shouldCompleteAfterDeadline: false,
+        participatingTags: [ctx.defaultTag],
+        priority: 0,
+        visibilityMode: VisibilityMode.Public,
+        preventCompletion: false,
+        optional: false,
+        useManualCohort: false,
+        publicOnly: false,
+        onboarding: false,
+        isContractSigningAction: false,
+        latestMemberActionEvent: {
+          event: null,
+          deadline: null,
+        },
+      } satisfies CreateActionDto),
+    );
+
+    await eventRepo.save(
+      eventRepo.create({
+        title: 'Output Visibility Event',
+        description: 'Test Action',
+        newStatus: ActionStatus.MemberAction,
+        date: new Date(Date.now() - 1000),
+        action,
+      }),
+    );
+
+    const createFormResponse = await request(ctx.app.getHttpServer())
+      .post('/tasks/createForm')
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .send({
+        title: outputSchema.title,
+        schema: outputSchema,
+      })
+      .expect(201);
+
+    const createdFormId = createFormResponse.body.id as number;
+
+    await request(ctx.app.getHttpServer())
+      .post(`/tasks/submitForm/${createdFormId}`)
+      .set('Authorization', `Bearer ${ctx.accessToken}`)
+      .send({
+        answers: {
+          'private-output': 'should-be-hidden-by-default',
+          'public-output': 'should-be-visible-by-default',
+          'non-output': 'not-an-output-field',
+        },
+        schemaSnapshot: outputSchema,
+        actionId: action.id,
+        publicAnswers: {
+          'private-output': false,
+          'public-output': true,
+        },
+      })
+      .expect(201);
+
+    const activitiesResponse = await request(ctx.app.getHttpServer())
+      .get(`/actions/${action.id}/activities`)
+      .query({ comments: true })
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .expect(200);
+
+    const completionActivity = activitiesResponse.body.find(
+      (activity: { type: ActionActivityType }) =>
+        activity.type === ActionActivityType.USER_COMPLETED,
+    ) as
+      | {
+          formResponseOutput?: {
+            answers?: Record<string, unknown>;
+            publicAnswers?: Record<string, boolean>;
+          };
+        }
+      | undefined;
+
+    expect(completionActivity).toBeDefined();
+    expect(completionActivity?.formResponseOutput).toBeDefined();
+
+    const publicAnswers = completionActivity?.formResponseOutput?.publicAnswers;
+    const answers = completionActivity?.formResponseOutput?.answers ?? {};
+    expect(publicAnswers?.['private-output']).toBe(false);
+    expect(publicAnswers?.['public-output']).toBe(true);
+
+    const outputFieldIds = new Set(['private-output', 'public-output']);
+    const publicOutputAnswers = Object.fromEntries(
+      Object.entries(answers).filter(([fieldId]) => {
+        if (!outputFieldIds.has(fieldId)) {
+          return false;
+        }
+        return publicAnswers?.[fieldId] !== false;
+      }),
+    );
+
+    expect(publicOutputAnswers).toEqual({
+      'public-output': 'should-be-visible-by-default',
+    });
   });
 
   describe('Custom validators', () => {

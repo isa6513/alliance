@@ -147,21 +147,30 @@ const FormRenderer = ({
 
   const pageCount = schema.pages?.length ?? 0;
   const maxPageIndex = Math.max(0, (pageCount || 1) - 1);
+  const userDefaultPublic = user?.formDataPreference === "public";
 
-  const outputFieldIds = useMemo(() => {
-    const ids = new Set<string>();
+  const outputFieldDefaultPublic = useMemo(() => {
+    const defaults = new Map<string, boolean>();
     for (const page of schema.pages ?? []) {
       for (const element of page.fields ?? []) {
         if ("label" in element) {
           const field = element as AnyField;
           if (field.output?.output) {
-            ids.add(field.id);
+            defaults.set(
+              field.id,
+              field.output.privateByDefault ? false : userDefaultPublic
+            );
           }
         }
       }
     }
-    return ids;
-  }, [schema]);
+    return defaults;
+  }, [schema, userDefaultPublic]);
+
+  const outputFieldIds = useMemo(
+    () => new Set<string>(outputFieldDefaultPublic.keys()),
+    [outputFieldDefaultPublic]
+  );
 
   const clampPageIndex = (idx: number): number => {
     if (!Number.isFinite(idx)) return 0;
@@ -227,22 +236,20 @@ const FormRenderer = ({
   const [publicAnswerOverrides, setPublicAnswerOverrides] = useState<
     Partial<Record<string, boolean>>
   >({});
-  const defaultPublic = user?.formDataPreference === "public";
   const resolvedPublicAnswers = useMemo(() => {
     if (readOnly && completedFormResponse?.publicAnswers) {
       return completedFormResponse.publicAnswers as Record<string, boolean>;
     }
     const resolved: Record<string, boolean> = {};
-    for (const fieldId of outputFieldIds) {
+    for (const [fieldId, defaultPublic] of outputFieldDefaultPublic.entries()) {
       resolved[fieldId] = publicAnswerOverrides[fieldId] ?? defaultPublic;
     }
     return resolved;
   }, [
     readOnly,
     completedFormResponse?.publicAnswers,
-    outputFieldIds,
+    outputFieldDefaultPublic,
     publicAnswerOverrides,
-    defaultPublic,
   ]);
 
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
@@ -971,8 +978,8 @@ const FormRenderer = ({
     setFormData((prev) => applyDefaultValues(prev, defaultValueMap));
   }, [defaultValueMap, readOnly]);
 
-  const handlePublicToggleChange = (fieldId: string, checked: boolean) => {
-    const nextPublic = !checked;
+  const handlePublicToggleChange = (fieldId: string, nextPublic: boolean) => {
+    const defaultPublic = outputFieldDefaultPublic.get(fieldId) ?? userDefaultPublic;
     setPublicAnswerOverrides((prev) => {
       if (nextPublic === defaultPublic) {
         if (!(fieldId in prev)) {
@@ -994,7 +1001,14 @@ const FormRenderer = ({
 
   const renderField = (field: AnyField, index: number) => {
     const isOutputField = Boolean(field.output?.output);
-    const sharePublicly = resolvedPublicAnswers[field.id] ?? defaultPublic;
+    const defaultSharePublic =
+      outputFieldDefaultPublic.get(field.id) ?? userDefaultPublic;
+    const sharePublicly = resolvedPublicAnswers[field.id] ?? defaultSharePublic;
+    const useMakePublicToggle = Boolean(field.output?.privateByDefault);
+    const toggleLabel = useMakePublicToggle
+      ? "Make my response public"
+      : "Hide my response from others";
+    const toggleChecked = useMakePublicToggle ? sharePublicly : !sharePublicly;
     return (
       <div key={field.id || index}>
         <RenderField
@@ -1019,16 +1033,20 @@ const FormRenderer = ({
             <input
               type="checkbox"
               className="mr-2 h-4 w-4"
-              checked={!sharePublicly}
+              checked={toggleChecked}
               disabled={readOnly}
               onChange={
                 readOnly
                   ? undefined
-                  : (event) =>
-                      handlePublicToggleChange(field.id, event.target.checked)
+                  : (event) => {
+                      const nextPublic = useMakePublicToggle
+                        ? event.target.checked
+                        : !event.target.checked;
+                      handlePublicToggleChange(field.id, nextPublic);
+                    }
               }
             />
-            Hide my response from others
+            {toggleLabel}
           </label>
         )}
       </div>
