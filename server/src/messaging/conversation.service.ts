@@ -527,9 +527,12 @@ export class ConversationService {
         }),
       );
     } else {
-      const needsUpdate = conversation.title !== community.name;
+      const needsUpdate =
+        conversation.title !== community.name ||
+        conversation.photo !== community.photo;
       if (needsUpdate) {
         conversation.title = community.name;
+        conversation.photo = community.photo;
         await this.conversationRepository.save(conversation);
       }
     }
