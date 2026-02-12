@@ -4,6 +4,7 @@ export class Baseline1750267410680 implements MigrationInterface {
     name = 'Baseline1750267410680'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
         await queryRunner.query(`CREATE TABLE "action_event" ("id" SERIAL NOT NULL, "title" character varying NOT NULL, "description" character varying NOT NULL, "newStatus" character varying NOT NULL, "sendNotifsTo" text NOT NULL, "date" TIMESTAMP NOT NULL, "updateDate" TIMESTAMP NOT NULL DEFAULT now(), "showInTimeline" boolean NOT NULL DEFAULT false, "actionId" integer, CONSTRAINT "PK_f1514b15f14d59f574b8bb43185" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."action_status_enum" AS ENUM('active', 'upcoming', 'past', 'draft')`);
         await queryRunner.query(`CREATE TYPE "public"."action_type_enum" AS ENUM('Funding', 'Activity', 'Ongoing')`);
