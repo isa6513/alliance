@@ -90,10 +90,11 @@ export class UserService {
     private readonly slackService: SlackService,
     private readonly notifsService: NotifsService,
     private readonly communityService: CommunityService,
-  ) {}
+  ) { }
 
   async create(data: DeepPartial<User>): Promise<User> {
     const user = this.userRepository.create(data);
+    this.slackService.sendMessage(`${user.name} created an account.`);
     return this.userRepository.save(user);
   }
 
@@ -107,8 +108,8 @@ export class UserService {
         const city =
           (data.cityId
             ? await this.cityRepository.findOne({
-                where: { id: data.cityId },
-              })
+              where: { id: data.cityId },
+            })
             : undefined) ?? undefined;
 
         if (data.cityId && !city) {
@@ -466,23 +467,23 @@ export class UserService {
     const users =
       direction === 'sent'
         ? (
-            await this.friendRepository.find({
-              where: {
-                requester: { id: userId },
-                status: FriendStatus.Pending,
-              },
-              relations: { addressee: true },
-            })
-          ).map((r) => r.addressee!)
+          await this.friendRepository.find({
+            where: {
+              requester: { id: userId },
+              status: FriendStatus.Pending,
+            },
+            relations: { addressee: true },
+          })
+        ).map((r) => r.addressee!)
         : (
-            await this.friendRepository.find({
-              where: {
-                addressee: { id: userId },
-                status: FriendStatus.Pending,
-              },
-              relations: { requester: true },
-            })
-          ).map((r) => r.requester!);
+          await this.friendRepository.find({
+            where: {
+              addressee: { id: userId },
+              status: FriendStatus.Pending,
+            },
+            relations: { requester: true },
+          })
+        ).map((r) => r.requester!);
 
     return users.map((u) => new ProfileDto(u));
   }
@@ -647,9 +648,9 @@ export class UserService {
         if (
           user.pendingCommunity.maxCapacity !== null &&
           user.pendingCommunity.maxCapacity -
-            (user.pendingCommunity.users.length -
-              user.pendingCommunity.leaders!.length) >
-            0
+          (user.pendingCommunity.users.length -
+            user.pendingCommunity.leaders!.length) >
+          0
         ) {
           promises.push(
             this.communityService.addUsersToCommunityAndRefreshConversation({
@@ -1050,8 +1051,8 @@ export class UserService {
     const communityP =
       communityId !== undefined
         ? this.communityRepository.findOne({
-            where: { id: communityId },
-          })
+          where: { id: communityId },
+        })
         : undefined;
 
     const user = await userP;
