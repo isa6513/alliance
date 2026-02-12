@@ -10,8 +10,13 @@ const HomeNotifsCard = () => {
 
   const priority = notifications
     .filter((notification) => notification.priority === "high")
-    .filter((notification) => !notification.readAt ||
-      (notification.category === 'action_update' && new Date(notification.sendTime).getTime() > new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).getTime()));
+    .filter(
+      (notification) =>
+        !notification.readAt ||
+        (notification.category === "action_update" &&
+          new Date(notification.sendTime).getTime() >
+            new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).getTime())
+    );
 
   if (priority.length === 0) {
     return null;
@@ -23,10 +28,10 @@ const HomeNotifsCard = () => {
       className="gap-2 max-w-[500px] lg:max-w-[550px] mt-5 p-2!"
     >
       <div className="flex flex-row justify-between items-center p-3 pb-0">
-        <p className="text-zinc-500 text-base">Recent happenings</p>
+        <p className="text-zinc-500 text-base">Recent events</p>
         <Link
           to={href("/notifications")}
-          className="text-sm text-green hover:underline"
+          className="text-base text-green hover:underline"
         >
           See all
         </Link>
@@ -46,7 +51,7 @@ const HomeNotifsCard = () => {
             >
               <NotificationText
                 notification={notification}
-                handleNotifClick={() => () => { }}
+                handleNotifClick={() => () => {}}
                 className="py-2"
               />
               <ArrowRight size="16" className="shrink-0 text-green mx-2" />

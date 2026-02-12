@@ -108,9 +108,11 @@ const SignupPage: React.FC = () => {
       <div className="flex flex-col-reverse md:flex-row gap-x-16 lg:gap-x-24 xl:gap-x-32 gap-y-12 py-12 items-center my-auto mx-auto px-4">
         <div className="flex flex-col w-full md:w-lg items-center justify-center">
           <div className="w-full">
-            {isInviteValid && <h2 className="font-serif font-semibold !text-3xl text-center mb-8">
-              Create an account
-            </h2>}
+            {isInviteValid && (
+              <h2 className="font-serif font-semibold !text-3xl text-center mb-8">
+                Create an account
+              </h2>
+            )}
 
             {error && (
               <Card
@@ -129,10 +131,20 @@ const SignupPage: React.FC = () => {
                   referralCode={referralCode}
                 />
               ) : (
-                <div className="p-4 md:p-8 space-y-6 flex flex-col">
-                  <span className="font-semibold">You were sent an invite that has already been used.</span>
+                <div className="p-4 md:p-8 space-y-4 flex flex-col">
+                  <p className="font-semibold">
+                    You were sent an invite that has already been used.
+                  </p>
                   <p>
-                    Sorry about that - please reach out to whoever invited you for a new invite code.
+                    If you haven&apos;t created an account yet, please reach out
+                    to whoever invited you for a new invite code.
+                  </p>
+                  <p>
+                    If you already have an account, please{" "}
+                    <Link to={href("/login")} className="text-link">
+                      log in
+                    </Link>
+                    .
                   </p>
                 </div>
               )}
@@ -193,11 +205,17 @@ const SignupPage: React.FC = () => {
                 </span>{" "}
                 Tasks take 15 minutes per week and have tangible results. For
                 example, our{" "}
-                <Link to={href("/actions/:id", { id: "14" })} className="text-link">
+                <Link
+                  to={href("/actions/:id", { id: "14" })}
+                  className="text-link"
+                >
                   bring your own cup campaign
                 </Link>{" "}
                 and an{" "}
-                <Link to={href("/actions/:id", { id: "56" })} className="text-link">
+                <Link
+                  to={href("/actions/:id", { id: "56" })}
+                  className="text-link"
+                >
                   AI privacy survey
                 </Link>{" "}
                 we ran both made the news.
