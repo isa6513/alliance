@@ -142,9 +142,16 @@ const InvitesPage = () => {
                   </div>
                 </div>
               </div>
-              {invite.info && (
-                <p className="text-zinc-800 pt-4 text-sm">{invite.info}</p>
-              )}
+              <div className="flex flex-row gap-2 items-center justify-between mt-1">
+                <div>
+                  {invite.info && (
+                    <p className="text-zinc-800 pt-4 text-sm">{invite.info}</p>
+                  )}
+                </div>
+                {invite.createdAt && (
+                  <p className="text-zinc-500 text-sm min-w-24">{new Date(invite.createdAt).toLocaleString()}</p>
+                )}
+              </div>
             </div>
           ))}
         </List>
