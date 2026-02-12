@@ -379,6 +379,9 @@ jobs:
 
       - run: cd server && bun install --frozen-lockfile
 
+      - run: PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+        working-directory: ./server
+
       - run: |
           echo "DB_HOST=localhost" >> $GITHUB_ENV
           echo "DB_PORT=5432" >> $GITHUB_ENV
