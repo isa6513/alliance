@@ -134,19 +134,26 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
       .sort((a, b) => a.actionName.localeCompare(b.actionName))
       .map((curve, index) => {
         const data: DataPoint[] = [];
+        let cumulativeFraction = 0;
+        let cumulativeCount = 0;
         curve.dayOffsets.forEach((offset, idx) => {
           if (!Number.isFinite(offset) || offset < 0 || offset > LOCKED_MAX_DAY) {
             return;
           }
           const completionFraction = curve.completionFractions[idx] ?? 0;
+          const completionCount = curve.completedCounts[idx] ?? 0;
           if (Number.isFinite(completionFraction)) {
             sumByDay[offset] += completionFraction;
             countByDay[offset] += 1;
+            cumulativeFraction += completionFraction;
+            cumulativeCount += completionCount;
           }
           data.push({
             x: offset,
             completionFraction,
-            completionCount: curve.completedCounts[idx] ?? 0,
+            completionCount,
+            cumulativeCompletionFraction: cumulativeFraction,
+            cumulativeCompletionCount: cumulativeCount,
             usersJoined: curve.usersJoined,
             actionId: curve.actionId,
             actionName: curve.actionName,
@@ -164,16 +171,21 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
     type AveragePoint = {
       x: number;
       completionFraction: number;
+      cumulativeCompletionFraction: number;
       actionCount: number;
     };
 
+    let avgCumulativeFraction = 0;
     const averageData = sumByDay
       .map((sum, offset) => {
         const count = countByDay[offset];
         if (!count) return null;
+        const fraction = sum / count;
+        avgCumulativeFraction += fraction;
         return {
           x: offset,
-          completionFraction: sum / count,
+          completionFraction: fraction,
+          cumulativeCompletionFraction: avgCumulativeFraction,
           actionCount: count,
         };
       })
@@ -269,12 +281,20 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
           typeof point.completionFraction === "number"
             ? point.completionFraction
             : 0;
+        const cumulativeRate =
+          typeof point.cumulativeCompletionFraction === "number"
+            ? point.cumulativeCompletionFraction
+            : 0;
         const items = [
           { label: "Day", value: point.x as number },
           {
-            label: "Completion rate",
+            label: "Completions today",
             value: `${(completionRate * 100).toFixed(2)}%`,
             color: series.color,
+          },
+          {
+            label: "Total completed",
+            value: `${(cumulativeRate * 100).toFixed(2)}%`,
           },
         ];
 
