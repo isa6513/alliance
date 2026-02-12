@@ -1,10 +1,10 @@
 import CompletedBar from "@alliance/sharedweb/ui/CompletedBar";
 import UserProfilePicRow from "../../components/UserProfilePicRow";
-import InfoTooltip from "../../components/InfoTooltip";
 import {
   ActionCompletedBarWithInfoPropsShared,
   getCompletedPercentage,
 } from "@alliance/shared/lib/actionCompletedBarWithInfo";
+import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 
 interface ActionCompletedBarWithInfoProps
   extends ActionCompletedBarWithInfoPropsShared {
@@ -42,10 +42,10 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
             <InfoTooltip
               content={
                 <p>
-                  The denominator is the number of members expected to
-                  complete this action. Sometimes, different members are
-                  expected to complete different actions, or may have marked
-                  themselves as &quot;Away&quot; in settings.
+                  The denominator is the number of members expected to complete
+                  this action. Sometimes, different members are expected to
+                  complete different actions, or may have marked themselves as
+                  &quot;Away&quot; in settings.
                 </p>
               }
             />

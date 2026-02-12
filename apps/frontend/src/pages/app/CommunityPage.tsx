@@ -718,6 +718,7 @@ const CommunityPage = () => {
               completedAllCurrentActions={
                 completionData.completedAllCurrentActions
               }
+              showInfoTooltip
             />
           )}
           {tab === "groups" && groupManagementPage}

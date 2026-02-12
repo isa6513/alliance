@@ -16,6 +16,7 @@ import UserDisplayName from "./UserDisplayName";
 import { formatDistance } from "date-fns";
 import Button, { ButtonColor } from "./Button";
 import { useToast } from "./ToastProvider";
+import InfoTooltip from "./InfoTooltip";
 
 const CommunityMemberTableRow = ({
   profile,
@@ -29,6 +30,7 @@ const CommunityMemberTableRow = ({
   actions,
   maxActionsPerWeek,
   deadlineTimestamp,
+  showInfoTooltip = false,
 }: {
   profile: ProfileDto;
   canExpand?: boolean;
@@ -41,6 +43,7 @@ const CommunityMemberTableRow = ({
   maxActionsPerWeek: Record<number, number> | null;
   actionRelations: UserActionRelationDetailDto[];
   deadlineTimestamp?: number | null;
+  showInfoTooltip?: boolean;
 }) => {
   const relationByActionId = useMemo(() => {
     return actionRelations.reduce((acc, relation) => {
@@ -188,16 +191,39 @@ const CommunityMemberTableRow = ({
               {!!contactInfo && (
                 <div className="px-4 pt-2 pb-6">
                   <div className="flex flex-col gap-y-3">
-                    <p>
+                    <div className="flex flex-row items-center gap-x-1">
                       <span className="font-semibold">Email:</span>{" "}
-                      {contactInfo.email}
-                    </p>
-                    <p>
+                      {contactInfo.email ?? (
+                        <>
+                          <span className="text-zinc-500">Not provided</span>
+                          {showInfoTooltip && (
+                            <InfoTooltip
+                              content={
+                                <p>Email is not shared with the group leader</p>
+                              }
+                            />
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <div className="flex flex-row items-center gap-x-1">
                       <span className="font-semibold">Phone:</span>{" "}
                       {contactInfo.phoneNumber ?? (
-                        <span className="text-zinc-500">Not provided</span>
+                        <>
+                          <span className="text-zinc-500">Not provided</span>
+                          {showInfoTooltip && (
+                            <InfoTooltip
+                              content={
+                                <p>
+                                  Phone number is not shared with the group
+                                  leader
+                                </p>
+                              }
+                            />
+                          )}
+                        </>
                       )}
-                    </p>
+                    </div>
                     <p>
                       <span className="font-semibold">Time zone:</span>{" "}
                       {contactInfo.timeZone ?? (

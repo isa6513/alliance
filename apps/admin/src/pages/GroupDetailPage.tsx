@@ -865,6 +865,7 @@ const CommunityDetailPage: React.FC = () => {
           maxActionsPerWeek={maxActionsPerWeek}
           memberContactInfo={memberContactInfo ?? undefined}
           completedAllCurrentActions={completedAllCurrentActions}
+          showInfoTooltip
         />
       </div>
     </div>

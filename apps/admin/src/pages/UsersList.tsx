@@ -495,6 +495,7 @@ const UsersList: React.FC = () => {
             actions={actionSummaries}
             maxActionsPerWeek={maxActionsPerWeek}
             completedAllCurrentActions={completedAllCurrentActions}
+            showInfoTooltip
           />
         </div>
       )}

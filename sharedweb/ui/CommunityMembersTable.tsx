@@ -37,6 +37,7 @@ type CommunityMembersTableProps = {
   actions: UserActionSummaryDto[];
   completedAllCurrentActions?: Record<number, boolean>;
   maxActionsPerWeek: Record<number, number> | null;
+  showInfoTooltip?: boolean;
 };
 
 const CommunityMembersTable = ({
@@ -50,6 +51,7 @@ const CommunityMembersTable = ({
   actions,
   completedAllCurrentActions = {},
   maxActionsPerWeek,
+  showInfoTooltip = false,
 }: CommunityMembersTableProps) => {
   const [filterMode, setFilterMode] = useState<CommunityMembersFilterMode>(
     CommunityMembersFilterMode.All
@@ -202,6 +204,7 @@ const CommunityMembersTable = ({
                     actions={visibleActions}
                     maxActionsPerWeek={maxActionsPerWeek}
                     deadlineTimestamp={deadlineTimestampByUserId.get(user.id)}
+                    showInfoTooltip={showInfoTooltip}
                   />
                 ))}
               </tbody>
@@ -262,6 +265,7 @@ const CommunityMembersTable = ({
                 actions={visibleActions}
                 maxActionsPerWeek={maxActionsPerWeek}
                 deadlineTimestamp={deadlineTimestampByUserId.get(user.id)}
+                showInfoTooltip={showInfoTooltip}
               />
             ))}
           </tbody>
