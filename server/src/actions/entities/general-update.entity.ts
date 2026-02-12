@@ -1,13 +1,23 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsDefined, IsOptional } from 'class-validator';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { GeneralUpdateActivity } from './general-update-activity.entity';
 import type { Ty } from 'src/tasks/entities/type';
+import { Tag } from 'src/user/entities/tag.entity';
+import { ActionSuite } from './action-suite.entity';
 
 @Entity()
 export class GeneralUpdate {
@@ -53,10 +63,42 @@ export class GeneralUpdate {
   @Allow()
   endDate: Date;
 
+  @Column({ default: false })
+  @ApiProperty()
+  @IsDefined()
+  useManualCohort: boolean;
+
+  @Column('int', { array: true, nullable: true })
+  @Allow()
+  @ApiPropertyOptional({
+    description: 'User IDs in the manual cohort',
+    type: [Number],
+    nullable: true,
+  })
+  @IsOptional()
+  manualCohortUserIds?: number[] | null;
+
   // Relations
 
   @OneToMany(() => GeneralUpdateActivity, (activity) => activity.generalUpdate)
   @Type(() => GeneralUpdateActivity)
   @IsOptional()
   activities?: Ty<GeneralUpdateActivity>[];
+
+  @ManyToMany(() => Tag, (tag) => tag.generalUpdates, {
+    onDelete: 'CASCADE',
+  })
+  @ApiProperty({ type: () => Tag, isArray: true })
+  @Allow()
+  @JoinTable()
+  @Type(() => Tag)
+  tags: Tag[];
+
+  @ManyToOne(() => ActionSuite, (suite) => suite.generalUpdates, {
+    nullable: true,
+  })
+  @ApiPropertyOptional({ type: () => ActionSuite })
+  @Type(() => ActionSuite)
+  @IsOptional()
+  suite?: ActionSuite | null;
 }

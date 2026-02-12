@@ -15,29 +15,16 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import type { Ty } from 'src/tasks/entities/type';
+import { GeneralUpdate } from 'src/actions/entities/general-update.entity';
 
 @Entity()
 export class Tag {
+  // Fields
+
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty()
   @Allow()
   id: string;
-
-  @ManyToMany(() => User, (user) => user.tags, {
-    onDelete: 'CASCADE',
-  })
-  @ApiProperty({ type: () => User, isArray: true })
-  @Allow()
-  @JoinTable()
-  @Type(() => User)
-  users: Ty<User>[];
-
-  @ManyToMany(() => Action, (action) => action.participatingTags)
-  @ApiProperty({ type: () => Action, isArray: true })
-  @Allow()
-  @JoinTable()
-  @Type(() => Action)
-  participatingIn: Action[];
 
   @Column()
   @ApiProperty()
@@ -65,4 +52,29 @@ export class Tag {
   @Allow()
   @Type(() => Date)
   updatedAt: Date;
+
+  // Relations
+
+  @ManyToMany(() => User, (user) => user.tags, {
+    onDelete: 'CASCADE',
+  })
+  @ApiProperty({ type: () => User, isArray: true })
+  @Allow()
+  @JoinTable()
+  @Type(() => User)
+  users: Ty<User>[];
+
+  @ManyToMany(() => Action, (action) => action.participatingTags)
+  @ApiProperty({ type: () => Action, isArray: true })
+  @Allow()
+  @JoinTable()
+  @Type(() => Action)
+  participatingIn: Action[];
+
+  @ManyToMany(() => GeneralUpdate, (generalUpdate) => generalUpdate.tags)
+  @ApiProperty({ type: () => GeneralUpdate, isArray: true })
+  @Allow()
+  @JoinTable()
+  @Type(() => GeneralUpdate)
+  generalUpdates: GeneralUpdate[];
 }

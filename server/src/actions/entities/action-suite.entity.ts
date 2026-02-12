@@ -10,9 +10,12 @@ import {
 } from 'src/datasources/basecolumns';
 import { ActionEvent } from './action-event.entity';
 import type { Ty } from 'src/tasks/entities/type';
+import { GeneralUpdate } from './general-update.entity';
 
 @Entity()
 export class ActionSuite {
+  // Fields
+
   @PrimaryGeneratedColumn()
   @ApiProperty()
   @Allow()
@@ -22,18 +25,6 @@ export class ActionSuite {
   @ApiProperty()
   @Allow()
   name: string;
-
-  @OneToMany(() => Action, (action) => action.suite)
-  @ApiProperty({ type: () => Action, isArray: true })
-  @Allow()
-  @Type(() => Action)
-  actions: Ty<Action>[];
-
-  @OneToMany(() => ReminderGroup, (reminderGroup) => reminderGroup.actionSuite)
-  @ApiProperty({ type: () => ReminderGroup, isArray: true })
-  @Allow()
-  @Type(() => ReminderGroup)
-  reminderGroups: Ty<ReminderGroup>[];
 
   @CreateDateColumnTz()
   @ApiProperty()
@@ -46,6 +37,28 @@ export class ActionSuite {
   @Type(() => Date)
   @Allow()
   updatedAt: Date;
+
+  // Relations
+
+  @OneToMany(() => Action, (action) => action.suite)
+  @ApiProperty({ type: () => Action, isArray: true })
+  @Allow()
+  @Type(() => Action)
+  actions: Ty<Action>[];
+
+  @OneToMany(() => GeneralUpdate, (generalUpdate) => generalUpdate.suite)
+  @ApiProperty({ type: () => GeneralUpdate, isArray: true })
+  @Allow()
+  @Type(() => GeneralUpdate)
+  generalUpdates: Ty<GeneralUpdate>[];
+
+  @OneToMany(() => ReminderGroup, (reminderGroup) => reminderGroup.actionSuite)
+  @ApiProperty({ type: () => ReminderGroup, isArray: true })
+  @Allow()
+  @Type(() => ReminderGroup)
+  reminderGroups: Ty<ReminderGroup>[];
+
+  // Methods
 
   @Expose()
   @ApiProperty({ type: () => ActionEvent, isArray: true })
