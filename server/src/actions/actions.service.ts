@@ -609,18 +609,17 @@ export class ActionsService {
     const updates = await this.generalUpdateRepository.find({
       where: {
         ...(now && { startDate: LessThan(now), endDate: MoreThan(now) }),
-        activities: {
-          user: { id: userId },
-        },
       },
       relations: {
-        activities: true,
+        activities: { user: true },
       },
     });
     return updates.filter(
       (update) =>
         !update.activities!.some(
-          (activity) => activity.type === GeneralUpdateActivityType.DISMISSED,
+          (activity) =>
+            activity.type === GeneralUpdateActivityType.DISMISSED &&
+            activity.userId === userId,
         ),
     );
   }
