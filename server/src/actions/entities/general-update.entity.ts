@@ -41,13 +41,13 @@ export class GeneralUpdate {
   @Type(() => Date)
   updatedAt: Date;
 
-  @UpdateDateColumnTz()
+  @Column({ type: 'timestamptz' })
   @ApiProperty()
   @Type(() => Date)
   @Allow()
   startDate: Date;
 
-  @UpdateDateColumnTz()
+  @Column({ type: 'timestamptz' })
   @ApiProperty()
   @Type(() => Date)
   @Allow()
