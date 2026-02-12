@@ -100,7 +100,7 @@ export class ActionEvent {
   action: Ty<Action>;
 
   @OneToMany(() => ActionUpdate, (update) => update.associatedEvent)
-  @ApiProperty({ type: ActionUpdate, isArray: true })
+  @ApiProperty({ type: () => ActionUpdate, isArray: true })
   @Type(() => ActionUpdate)
   @Allow()
   updates: Ty<ActionUpdate>[];
