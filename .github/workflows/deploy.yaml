@@ -355,34 +355,6 @@ jobs:
 
             sudo systemctl restart nginx
 
-  build-nest-backend:
-    runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Install Dependencies
-        run: bun install --frozen-lockfile
-        working-directory: ./server
-
-      - name: Typecheck
-        run: bun run typecheck
-        working-directory: ./server
-
-      - name: Zip source for deploy
-        run: zip -r nest-build.zip src package.json bun.lock tsconfig.json migrations
-        working-directory: ./server
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nest-build
-          path: server/nest-build.zip
-
   migrations-drift-check:
     runs-on: ubuntu-latest
     services:
@@ -405,7 +377,7 @@ jobs:
         with:
           bun-version: latest
 
-      - run: cd server && bun install --frozen-lockfile && bun run build
+      - run: cd server && bun install --frozen-lockfile
 
       - run: |
           echo "DB_HOST=localhost" >> $GITHUB_ENV
@@ -673,7 +645,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - dirty-check
-      - build-nest-backend
       - test-backend-e2e
       - test-backend-unit
       - build-react-app
@@ -681,18 +652,20 @@ jobs:
       - visual-regression
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
-      - name: Download NestJS Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: nest-build
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Upload NestJS Build to EC2
+      - name: Zip server source
+        run: zip -r nest-build.zip src package.json bun.lock tsconfig.json migrations
+        working-directory: ./server
+
+      - name: Upload to EC2
         uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.INSTANCE_IP }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "nest-build.zip"
+          source: "server/nest-build.zip"
           target: "~/"
 
       - name: SSH and Deploy Backend on EC2
