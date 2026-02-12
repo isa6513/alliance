@@ -611,7 +611,7 @@ export class ActionsService {
         ...(now && { startDate: LessThan(now), endDate: MoreThan(now) }),
       },
       relations: {
-        activities: { user: true },
+        activities: true,
       },
     });
     return updates.filter(
