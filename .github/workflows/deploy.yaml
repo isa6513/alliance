@@ -669,6 +669,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "nest-build.zip"
+          working-directory: ./server
           target: "~/"
 
       - name: SSH and Deploy Backend on EC2
