@@ -9,7 +9,13 @@ import {
 import { Server, Socket } from 'socket.io';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Logger } from '@nestjs/common';
-import { EventLog } from './event-log.entity';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../user/entities/user.entity';
+import { extractTokenFromSocket } from '../messaging/gateway.utils';
+import type { JwtPayload } from '../auth/guards/jwtreq';
+import type { EventLogDto } from './dto/event-log.dto';
 import { EventLogEvents } from './eventlog.events';
 
 @WebSocketGateway({
@@ -20,27 +26,58 @@ import { EventLogEvents } from './eventlog.events';
   namespace: '/event-log',
 })
 export class EventLogGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
   private logger = new Logger('EventLogGateway');
 
-  constructor(private readonly eventEmitter: EventEmitter2) {
+  constructor(
+    private readonly eventEmitter: EventEmitter2,
+    private readonly jwtService: JwtService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {
     this.eventEmitter.on(
       EventLogEvents.Created,
       this.handleEventLogCreated.bind(this),
     );
   }
 
-  handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
+  async handleConnection(client: Socket) {
+    try {
+      const token = extractTokenFromSocket(client);
+      if (!token) {
+        this.logger.warn('Event log gateway: missing token');
+        client.disconnect(true);
+        return;
+      }
+
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
+        secret: process.env.JWT_SECRET,
+      });
+
+      const user = await this.userRepository.findOne({
+        where: { id: payload.sub },
+        select: ['id', 'admin'],
+      });
+
+      if (!user?.admin) {
+        this.logger.warn(`Event log gateway: non-admin user ${payload.sub}`);
+        client.disconnect(true);
+        return;
+      }
+
+      client.data.userId = payload.sub;
+      this.logger.log(`Admin client connected: ${client.id}`);
+    } catch {
+      this.logger.warn('Event log gateway: auth failed');
+      client.disconnect(true);
+    }
   }
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
-    client.leave('event-log-feed');
   }
 
   @SubscribeMessage('subscribe-event-log')
@@ -55,7 +92,7 @@ export class EventLogGateway
     this.logger.log(`Client ${client.id} unsubscribed from event log feed`);
   }
 
-  private handleEventLogCreated(eventLog: EventLog) {
+  private handleEventLogCreated(eventLog: EventLogDto) {
     this.server.to('event-log-feed').emit('event-log-new', eventLog);
     this.logger.log(`Broadcast new event log: ${eventLog.event}`);
   }
