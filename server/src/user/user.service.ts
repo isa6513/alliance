@@ -95,7 +95,7 @@ export class UserService {
 
   async create(data: DeepPartial<User>): Promise<User> {
     const user = await this.userRepository.save(this.userRepository.create(data));
-    this.eventLogService.sendMessage({
+    await this.eventLogService.sendMessage({
       type: EventType.AccountCreated,
       message: `${user.name} created an account.`,
       userId: user.id,
