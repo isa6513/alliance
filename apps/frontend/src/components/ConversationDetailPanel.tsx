@@ -354,6 +354,16 @@ const ConversationDetailPanel = ({
     );
   }, [mode, selectedConvo, user]);
 
+  const isInvited = useMemo(
+    () =>
+      selectedConvo?.type === "direct" &&
+      selectedConvo.participants.some(
+        (participant) =>
+          participant.user.id !== user?.id && participant.state === "invited"
+      ),
+    [selectedConvo, user]
+  );
+
   return (
     <div
       className="flex flex-col h-full overflow-hidden relative"
@@ -492,43 +502,37 @@ const ConversationDetailPanel = ({
                 <div ref={bottomRef} />
               </div>
             ) : null}
-            {mode === "existing" &&
-              selectedConvo.participants.some(
-                (participant) =>
-                  participant.user.id === user?.id &&
-                  participant.state === "invited"
-              ) && (
-                <div className="flex flex-row items-center gap-x-2 w-full p-5">
-                  <div className="flex flex-col lg:flex-row items-center mx-auto gap-3">
-                    <p className="text-zinc-800">
-                      {selectedConvo.type === "direct"
-                        ? "You have received a message request from "
-                        : "You have been invited to a group message by "}
-                      {
-                        selectedConvo.participants.find(
-                          (participant) =>
-                            participant.user.id !== user?.id &&
-                            participant.state === "joined"
-                        )?.user.displayName
-                      }
-                    </p>
-                    <div className="flex flex-row gap-x-2">
-                      <Button
-                        color={ButtonColor.Black}
-                        onClick={handleAcceptMessageRequest}
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        color={ButtonColor.Light}
-                        onClick={handleDeclineMessageRequest}
-                      >
-                        Decline
-                      </Button>
-                    </div>
+            {mode === "existing" && isInvited && (
+              <div className="flex flex-row items-center gap-x-2 w-full p-5">
+                <div className="flex flex-col lg:flex-row items-center mx-auto gap-3">
+                  <p className="text-zinc-800">
+                    {selectedConvo.type === "direct"
+                      ? `You have received a message request from ${
+                          selectedConvo.participants.find(
+                            (participant) =>
+                              participant.user.id !== user?.id &&
+                              participant.state === "invited"
+                          )?.user.displayName
+                        }`
+                      : "You have been invited to the group chat"}
+                  </p>
+                  <div className="flex flex-row gap-x-2">
+                    <Button
+                      color={ButtonColor.Black}
+                      onClick={handleAcceptMessageRequest}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      color={ButtonColor.Light}
+                      onClick={handleDeclineMessageRequest}
+                    >
+                      Decline
+                    </Button>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
           </div>
           <MessageInput
             message={message}
