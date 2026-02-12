@@ -28,8 +28,9 @@ export class EventLog {
     @ApiProperty()
     message: string;
 
-    @Column({ type: 'jsonb' })
-    blob: Record<string, unknown>;
+    @Column({ type: 'jsonb', nullable: true })
+    @ApiPropertyOptional()
+    blob?: Record<string, unknown>;
 
     @CreateDateColumnTz()
     @ApiProperty({ type: Date })

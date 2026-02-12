@@ -94,13 +94,13 @@ export class UserService {
   ) { }
 
   async create(data: DeepPartial<User>): Promise<User> {
-    const user = this.userRepository.create(data);
-    this.eventLogService.sendMessage({
+    const user = await this.userRepository.save(this.userRepository.create(data));
+    await this.eventLogService.sendMessage({
       type: EventType.AccountCreated,
       message: `${user.name} created an account.`,
       userId: user.id,
     });
-    return this.userRepository.save(user);
+    return user;
   }
 
   async update(id: number, data: UpdateProfileDto): Promise<User> {
