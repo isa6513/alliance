@@ -45,6 +45,7 @@ type FieldStats = {
     max: number;
     avg: number;
     median: number;
+    total: number;
   };
   note?: string;
 };
@@ -141,6 +142,8 @@ const buildNumberStats = (
       ? (sorted[midpoint - 1] + sorted[midpoint]) / 2
       : sorted[midpoint];
 
+  const total = sum;
+
   if (min === max) {
     return {
       rows: [
@@ -151,7 +154,7 @@ const buildNumberStats = (
         },
       ],
       answeredCount,
-      summary: { min, max, avg, median },
+      summary: { min, max, avg, median, total },
     };
   }
 
@@ -187,7 +190,7 @@ const buildNumberStats = (
   return {
     rows,
     answeredCount,
-    summary: { min, max, avg, median },
+    summary: { min, max, avg, median, total },
   };
 };
 
@@ -575,7 +578,7 @@ const FormResponseStatistics: React.FC<FormResponseStatisticsProps> = ({
               )}
             </div>
             {stat.summary && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div>
                   <div className="text-xs text-gray-500">Min</div>
                   <div className="text-sm text-gray-900">
@@ -598,6 +601,12 @@ const FormResponseStatistics: React.FC<FormResponseStatisticsProps> = ({
                   <div className="text-xs text-gray-500">Max</div>
                   <div className="text-sm text-gray-900">
                     {formatNumber(stat.summary.max)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Total</div>
+                  <div className="text-sm text-gray-900">
+                    {formatNumber(stat.summary.total)}
                   </div>
                 </div>
               </div>
