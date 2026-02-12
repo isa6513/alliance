@@ -356,10 +356,9 @@ const ConversationDetailPanel = ({
 
   const isInvited = useMemo(
     () =>
-      selectedConvo?.type === "direct" &&
-      selectedConvo.participants.some(
+      selectedConvo?.participants.some(
         (participant) =>
-          participant.user.id !== user?.id && participant.state === "invited"
+          participant.user.id === user?.id && participant.state === "invited"
       ),
     [selectedConvo, user]
   );
