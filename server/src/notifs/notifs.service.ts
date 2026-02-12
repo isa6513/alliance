@@ -42,6 +42,7 @@ export function shouldTextUser(user: User) {
     user.phoneNumber &&
     user.hasActiveContract &&
     user.phoneNumberValidated &&
+    !user.phoneNumberUnsubscribed &&
     user.preferredActionReminderChannel === NotificationChannel.Text
   );
 }
@@ -64,7 +65,7 @@ export class NotifsService {
     private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
     private readonly mailService: MailService,
     private readonly mmsService: MmsService,
-  ) {}
+  ) { }
 
   async findAll(userId: number) {
     const notifs = await this.notifsRepository.find({
