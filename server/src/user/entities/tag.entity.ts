@@ -67,14 +67,12 @@ export class Tag {
   @ManyToMany(() => Action, (action) => action.participatingTags)
   @ApiProperty({ type: () => Action, isArray: true })
   @Allow()
-  @JoinTable()
   @Type(() => Action)
   participatingIn: Action[];
 
   @ManyToMany(() => GeneralUpdate, (generalUpdate) => generalUpdate.tags)
   @ApiProperty({ type: () => GeneralUpdate, isArray: true })
   @Allow()
-  @JoinTable()
   @Type(() => GeneralUpdate)
   generalUpdates: GeneralUpdate[];
 }
