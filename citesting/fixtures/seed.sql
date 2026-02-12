@@ -2170,6 +2170,7 @@ CREATE TABLE public."user" (
     anonymous boolean DEFAULT false NOT NULL,
     "phoneNumber" character varying,
     "phoneNumberValidated" boolean DEFAULT false NOT NULL,
+    "phoneNumberUnsubscribed" boolean DEFAULT false NOT NULL,
     "emailVerified" boolean DEFAULT false NOT NULL,
     "socialNotifsPreference" public.user_socialnotifspreference_enum DEFAULT 'all'::public.user_socialnotifspreference_enum NOT NULL,
     "turnedOffAllNotifs" boolean DEFAULT false NOT NULL,
