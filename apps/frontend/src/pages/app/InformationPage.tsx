@@ -81,7 +81,7 @@ const InformationPage: React.FC = () => {
 
         <div className="flex flex-col mt-4">
           <h2 className="text-2xl font-semibold">Roadmap</h2>
-          <p className="text-zinc-500">Last updated 1/29/2026</p>
+          <p className="text-zinc-500">Last updated 2/11/2026</p>
         </div>
         <div className="flex flex-col gap-y-2">
           <p>
@@ -120,15 +120,16 @@ const InformationPage: React.FC = () => {
           <p>Right now, the office is:</p>
           <ul className="list-disc list-inside">
             <li>
-              Streamlining the process of leading and joining groups so that we
-              can accommodate more members.
+              Developing processes so that group leads can help and communicate
+              with other group leads.
             </li>
             <li>Developing a mobile app.</li>
+            <li>Reorganizing our information and action pages.</li>
             <li>
-              Moving important notifications to the homepage for greater
-              visibility.
+              Planning videos and textual updates that help members better
+              understand the Alliance.
             </li>
-            <li>Hiring and fundraising.</li>
+            <li>Hiring.</li>
           </ul>
         </div>
 
