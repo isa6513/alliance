@@ -22,7 +22,7 @@ import { CommunityInvite } from 'src/community/entities/community-invite.entity'
 import { ContractEvent } from './entities/contract-event.entity';
 import { PushModule } from 'src/push/push.module';
 import { UserDevice } from './entities/user-device.entity';
-import { SlackModule } from 'src/slack/slack.module';
+import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { CommunityModule } from 'src/community/community.module';
 
@@ -49,7 +49,7 @@ import { CommunityModule } from 'src/community/community.module';
     MailModule,
     forwardRef(() => MessagingModule),
     PushModule,
-    SlackModule,
+    EventLogModule,
     forwardRef(() => NotifsModule),
     forwardRef(() => CommunityModule),
   ],
@@ -58,5 +58,5 @@ import { CommunityModule } from 'src/community/community.module';
   exports: [UserService],
 })
 export class UserModule {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 }

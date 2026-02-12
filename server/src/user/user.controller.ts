@@ -64,7 +64,7 @@ class VerifyEmailBody {
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Get('me')
   @UseGuards(AuthGuard)
@@ -309,6 +309,17 @@ export class UserController {
     return (
       await this.userService.findAll({ contractEvents: true, referredBy: true })
     ).map((user) => new UserDto(user));
+  }
+
+  @Get('userdetail/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: UserDto })
+  async userDetail(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
+    const user = await this.userService.findOne(id, { contractEvents: true, referredBy: true });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return new UserDto(user);
   }
 
   @Get('list-public')

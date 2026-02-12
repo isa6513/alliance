@@ -49,9 +49,10 @@ import { RegisterDeviceDto, UserDeviceDto } from './dto/device.dto';
 import { UserDevice } from './entities/user-device.entity';
 import { PushService } from 'src/push/push.service';
 import { Push } from 'src/push/push.entity';
-import { SlackService } from 'src/slack/slack.service';
+import { EventLogService } from 'src/eventlog/eventlog.service';
 import { CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
 import { CommunityService } from 'src/community/community.service';
+import { EventType } from 'src/eventlog/event-log.entity';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -87,14 +88,18 @@ export class UserService {
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
     private readonly pushService: PushService,
-    private readonly slackService: SlackService,
+    private readonly eventLogService: EventLogService,
     private readonly notifsService: NotifsService,
     private readonly communityService: CommunityService,
   ) { }
 
   async create(data: DeepPartial<User>): Promise<User> {
     const user = this.userRepository.create(data);
-    this.slackService.sendMessage(`${user.name} created an account.`);
+    this.eventLogService.sendMessage({
+      type: EventType.AccountCreated,
+      message: `${user.name} created an account.`,
+      userId: user.id,
+    });
     return this.userRepository.save(user);
   }
 
@@ -760,9 +765,11 @@ export class UserService {
       this.contractEventRepository.save(contractEvent),
       this.userRepository.save(userUpdate),
       this.notifsService.sendNotifs(notifs),
-      this.slackService.sendMessage(
-        `${user.name} ${user.referredBy ? `(referred by ${user.referredBy.name}) ` : ''}signed their contract :)`,
-      ),
+      this.eventLogService.sendMessage({
+        type: EventType.ContractSigned,
+        message: `${user.name} ${user.referredBy ? `(referred by ${user.referredBy.name}) ` : ''}signed their contract :)`,
+        userId: user.id,
+      }),
       ...promises,
     ]);
 
@@ -801,7 +808,7 @@ export class UserService {
               user: leader,
               category:
                 NotificationCategory.MemberSuspendedRemovedFromCommunity,
-              message: `${user.name} suspended their contract and was removed from your group (${community.name})`,
+              message: `${user.name} ${automatic ? 'was automatically suspended' : 'suspended their contract'} and has been removed from your group (${community.name})`,
               webAppLocation: profileUrl(user.id),
               associatedUsers: [user],
             };
@@ -816,11 +823,14 @@ export class UserService {
       communitiesP,
     ]);
 
-    if (!automatic) {
-      await this.slackService.sendMessage(
-        `${user.name} suspended their contract :(`,
-      );
-    }
+    await this.eventLogService.sendMessage({
+      type: EventType.ContractSuspended,
+      message: `${user.name} suspended their contract :(`,
+      userId: user.id,
+      blob: {
+        automatic,
+      },
+    });
 
     return contractEvent.date;
   }

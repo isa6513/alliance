@@ -11,7 +11,7 @@ import { ActionsModule } from 'src/actions/actions.module';
 import { MmsModule } from 'src/mms/mms.module';
 import { CustomValidator } from './entities/customvalidator.entity';
 import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
-import { SlackModule } from 'src/slack/slack.module';
+import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { VideosModule } from 'src/videos/videos.module';
 
 @Module({
@@ -27,10 +27,10 @@ import { VideosModule } from 'src/videos/videos.module';
     ForumModule,
     ActionsModule,
     MmsModule,
-    SlackModule,
+    EventLogModule,
     VideosModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],
 })
-export class TasksModule {}
+export class TasksModule { }

@@ -4,11 +4,11 @@ import {
   notifsNotifsForUser,
   userAddUserToTag,
   userGetTags,
-  userList,
   userRemoveUserFromTag,
   userGetAwayRangeForUser,
   tasksGetFormsForUserSid,
   actionsActionRelationsForUser,
+  userUserDetail,
 } from "@alliance/shared/client";
 import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import {
@@ -41,7 +41,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
   }
 
   const [
-    usersRes,
+    userRes,
     awayRangesRes,
     tagsRes,
     actionRelationsRes,
@@ -50,7 +50,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     notifRes,
     formResponsesRes,
   ] = await Promise.all([
-    userList(),
+    userUserDetail({ path: { id: userId } }),
     userGetAwayRangeForUser({ path: { id: userId } }),
     userGetTags(),
     actionsActionRelationsForUser({ path: { userId } }),
@@ -60,9 +60,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     tasksGetFormsForUserSid({ path: { userId } }).catch(() => ({ data: [] })),
   ]);
 
-  const user = (usersRes.data ?? []).find(
-    (candidate) => candidate.id === userId
-  );
+  const user = userRes.data;
   if (!user) {
     throw new Error("Not found");
   }
@@ -184,8 +182,8 @@ const UserDetailView: React.FC = () => {
 
   const latestEvent = user.contractEvents?.length
     ? user.contractEvents.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      )[0]
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )[0]
     : null;
 
   const sortedFormResponses = useMemo(() => {
@@ -199,15 +197,15 @@ const UserDetailView: React.FC = () => {
     latestEvent === null
       ? "text-zinc-500"
       : latestEvent.type === "signed"
-      ? "text-green"
-      : "text-red-700";
+        ? "text-green"
+        : "text-red-700";
 
   const contractStatus =
     latestEvent === null
       ? "Not signed"
       : latestEvent.type === "signed"
-      ? "Signed"
-      : "Suspended";
+        ? "Signed"
+        : "Suspended";
   const tagKey = useCallback(
     (tagId: string) => `${user.id}-${tagId}`,
     [user.id]
@@ -416,8 +414,8 @@ const UserDetailView: React.FC = () => {
                           <td className="px-3 py-2 text-zinc-500">
                             {relation.latestActivityAt
                               ? new Date(
-                                  relation.latestActivityAt
-                                ).toLocaleDateString()
+                                relation.latestActivityAt
+                              ).toLocaleDateString()
                               : "—"}
                           </td>
                           <td className="px-3 py-2">
@@ -475,17 +473,16 @@ const UserDetailView: React.FC = () => {
                           <div>
                             <div className="flex items-center justify-between gap-2">
                               <span
-                                className={`font-medium ${
-                                  ["sent", "delivered"].includes(
+                                className={`font-medium ${["sent", "delivered"].includes(
+                                  status.toLowerCase()
+                                )
+                                  ? "text-green-600"
+                                  : ["failed", "undelivered"].includes(
                                     status.toLowerCase()
                                   )
-                                    ? "text-green-600"
-                                    : ["failed", "undelivered"].includes(
-                                        status.toLowerCase()
-                                      )
                                     ? "text-red-600"
                                     : "text-amber-600"
-                                }`}
+                                  }`}
                               >
                                 {status}
                               </span>
@@ -546,13 +543,12 @@ const UserDetailView: React.FC = () => {
                                   )}
                                 </span>
                                 <span
-                                  className={`font-medium ${
-                                    mail?.status?.toLowerCase() === "sent"
-                                      ? "text-green-600"
-                                      : mail?.status?.toLowerCase() === "failed"
+                                  className={`font-medium ${mail?.status?.toLowerCase() === "sent"
+                                    ? "text-green-600"
+                                    : mail?.status?.toLowerCase() === "failed"
                                       ? "text-red-600"
                                       : "text-amber-600"
-                                  }`}
+                                    }`}
                                 >
                                   {mail?.status || "unknown"}
                                 </span>
@@ -612,9 +608,8 @@ const UserDetailView: React.FC = () => {
                 return (
                   <label
                     key={tag.id}
-                    className={`flex items-center gap-2 text-sm cursor-pointer hover:bg-zinc-50 px-1 py-0.5 rounded ${
-                      pending ? "opacity-50" : ""
-                    }`}
+                    className={`flex items-center gap-2 text-sm cursor-pointer hover:bg-zinc-50 px-1 py-0.5 rounded ${pending ? "opacity-50" : ""
+                      }`}
                   >
                     <input
                       type="checkbox"
@@ -651,26 +646,24 @@ const UserDetailView: React.FC = () => {
                   return (
                     <div
                       key={range.id}
-                      className={`text-xs p-2 rounded ${
-                        status === "current"
-                          ? "bg-amber-50 border border-amber-200"
-                          : status === "upcoming"
+                      className={`text-xs p-2 rounded ${status === "current"
+                        ? "bg-amber-50 border border-amber-200"
+                        : status === "upcoming"
                           ? "bg-blue-50 border border-blue-200"
                           : "bg-zinc-50"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-medium">
                           {formatAwayRange(range)}
                         </span>
                         <span
-                          className={`text-xs ${
-                            status === "current"
-                              ? "text-amber-700"
-                              : status === "upcoming"
+                          className={`text-xs ${status === "current"
+                            ? "text-amber-700"
+                            : status === "upcoming"
                               ? "text-blue-700"
                               : "text-zinc-400"
-                          }`}
+                            }`}
                         >
                           {status}
                         </span>
@@ -710,11 +703,10 @@ const UserDetailView: React.FC = () => {
                   .map((event, idx) => (
                     <div
                       key={idx}
-                      className={`text-xs flex items-center justify-between px-2 py-1 rounded ${
-                        event.type === "signed"
-                          ? "bg-green-50 text-green-700"
-                          : "bg-red-50 text-red-700"
-                      }`}
+                      className={`text-xs flex items-center justify-between px-2 py-1 rounded ${event.type === "signed"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-red-50 text-red-700"
+                        }`}
                     >
                       <span className="font-medium capitalize">
                         {event.type}
@@ -827,9 +819,8 @@ function notifTimestamp(notif: ActionEventNotifDto) {
 function keyForNotif(notif: ActionEventNotifDto) {
   const mailId = notif.mail?.id;
   const mmsId = notif.mms?.id;
-  return `${notif.user.id}-${notif.channel}-${
-    mailId ?? mmsId ?? Math.random()
-  }`;
+  return `${notif.user.id}-${notif.channel}-${mailId ?? mmsId ?? Math.random()
+    }`;
 }
 
 export default UserDetailView;

@@ -8,7 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import Twilio from 'twilio';
 import { Repository } from 'typeorm';
 import { Mms } from './mms.entity';
-import { SlackService } from 'src/slack/slack.service';
+import { EventLogService } from 'src/eventlog/eventlog.service';
+import { EventType } from 'src/eventlog/event-log.entity';
 
 @Injectable()
 export class MmsService {
@@ -19,7 +20,7 @@ export class MmsService {
   constructor(
     @InjectRepository(Mms)
     private readonly mmsRepository: Repository<Mms>,
-    private readonly slackService: SlackService,
+    private readonly eventLogService: EventLogService,
   ) {
     if (process.env.NODE_ENV === 'test') {
       return;
@@ -115,9 +116,11 @@ export class MmsService {
         error instanceof Error ? error.stack : undefined,
       );
       if (process.env.NODE_ENV === 'production') {
-        this.slackService.sendMessage(
-          `Failed to send MMS to ${to}: ${errorMessage}`,
-        );
+        this.eventLogService.sendMessage({
+          type: EventType.SmsFailure,
+          message: `Failed to send MMS to ${to}: ${errorMessage}`,
+          blob: { errorMessage, to, from: this.twilioPhoneNumber },
+        });
       }
       return null;
     }

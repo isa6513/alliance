@@ -8,7 +8,8 @@ import { suspensionMessage } from 'src/notifs/textnotifcontents';
 import { UserService } from 'src/user/user.service';
 import { DataSource } from 'typeorm';
 import { withPgAdvisoryLock } from '../notifs/lock-utils';
-import { SlackService } from 'src/slack/slack.service';
+import { EventLogService } from 'src/eventlog/eventlog.service';
+import { EventType } from 'src/eventlog/event-log.entity';
 
 const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
 const PROCESS_ONE_LOCK_KEY2 = 0xce01;
@@ -22,8 +23,8 @@ export class ContractSuspenderWorker {
     private readonly mmsService: MmsService,
     private readonly actionsService: ActionsService,
     private readonly userService: UserService,
-    private readonly slackService: SlackService,
-  ) {}
+    private readonly eventLogService: EventLogService,
+  ) { }
 
   async processSuspensions() {
     if (
@@ -60,9 +61,15 @@ export class ContractSuspenderWorker {
             true,
             suspendReasonKeys.get(user.id),
           );
-          await this.slackService.sendMessage(
-            `[${process.env.NODE_ENV}]: Suspending contract for ${user.name} (${user.email}). failure code ${suspendReasonKeys.get(user.id)}`,
-          );
+          await this.eventLogService.sendMessage({
+            type: EventType.ContractSuspended,
+            message: `[${process.env.NODE_ENV}]: Suspending contract for ${user.name}. failure code ${suspendReasonKeys.get(user.id)}`,
+            userId: user.id,
+            blob: {
+              suspendReason: suspendReasonKeys.get(user.id),
+              automatic: true,
+            },
+          });
           if (res) {
             const cid = generateCIDForNotif();
             if (shouldTextUser(user)) {

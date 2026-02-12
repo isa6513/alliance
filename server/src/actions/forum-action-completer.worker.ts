@@ -21,7 +21,8 @@ import {
 import { ActionEvent, ActionStatus } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
 import { ProfileDto } from 'src/user/dto/user.dto';
-import { SlackService } from 'src/slack/slack.service';
+import { EventLogService } from 'src/eventlog/eventlog.service';
+import { EventType } from 'src/eventlog/event-log.entity';
 
 const PROCESS_ONE_LOCK_KEY1 = 0xf0a1;
 const PROCESS_ONE_LOCK_KEY2 = 0xace1;
@@ -47,7 +48,7 @@ export class ForumActionCompleterWorker {
         private readonly forumService: ForumService,
         private readonly actionsService: ActionsService,
         private readonly actionEventRecipientService: ActionEventRecipientService,
-        private readonly slackService: SlackService,
+        private readonly eventLogService: EventLogService,
     ) { }
 
     @Cron('*/5 * * * *')
@@ -242,7 +243,11 @@ export class ForumActionCompleterWorker {
             for (const userId of toComplete) {
                 try {
                     await this.actionsService.completeAction(action.id, userId, { adminCreated: true });
-                    await this.slackService.sendMessage(`Automatically completing action ${action.id} for user ${userId} based on forum participation`);
+                    await this.eventLogService.sendMessage({
+                        type: EventType.ForumActionAutocomplete,
+                        message: `Automatically completing action ${action.id} for user ${userId} based on forum participation`,
+                        userId: userId,
+                    });
                 } catch (error) {
                     if (error instanceof QueryFailedError) {
                         this.logger.warn(

@@ -1302,8 +1302,6 @@ export type GeneralUpdateDto = {
     schema: {
         [key: string]: unknown;
     };
-    createdAt: string;
-    updatedAt: string;
     startDate: string;
     endDate: string;
 };
@@ -3099,6 +3097,21 @@ export type UserListResponses = {
 
 export type UserListResponse = UserListResponses[keyof UserListResponses];
 
+export type UserUserDetailData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/user/userdetail/{id}';
+};
+
+export type UserUserDetailResponses = {
+    200: UserDto;
+};
+
+export type UserUserDetailResponse = UserUserDetailResponses[keyof UserUserDetailResponses];
+
 export type UserListPublicData = {
     body?: never;
     path?: never;
@@ -3874,6 +3887,17 @@ export type NotifsLinkClickResponses = {
 
 export type NotifsLinkClickResponse = NotifsLinkClickResponses[keyof NotifsLinkClickResponses];
 
+export type MmsHandleInboundMmsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/mms/inbound';
+};
+
+export type MmsHandleInboundMmsResponses = {
+    200: unknown;
+};
+
 export type CommunityCreateCommunityAdminData = {
     body: CreateCommunityDto;
     path?: never;
@@ -4362,6 +4386,19 @@ export type ActionsMyActivityResponses = {
 };
 
 export type ActionsMyActivityResponse = ActionsMyActivityResponses[keyof ActionsMyActivityResponses];
+
+export type ActionsAllGeneralUpdatesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/generalUpdates';
+};
+
+export type ActionsAllGeneralUpdatesResponses = {
+    200: Array<GeneralUpdateDto>;
+};
+
+export type ActionsAllGeneralUpdatesResponse = ActionsAllGeneralUpdatesResponses[keyof ActionsAllGeneralUpdatesResponses];
 
 export type ActionsUnreadGeneralUpdatesData = {
     body?: never;

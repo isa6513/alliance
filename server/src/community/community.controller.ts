@@ -32,7 +32,7 @@ import {
 @ApiTags('community')
 @Controller('community')
 export class CommunityController {
-  constructor(private readonly communityService: CommunityService) {}
+  constructor(private readonly communityService: CommunityService) { }
 
   @Post('create/admin')
   @UseGuards(AdminGuard)

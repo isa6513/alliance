@@ -32,7 +32,7 @@ import { ReminderGroup } from './entities/reminder-group.entity';
 import { ForumModule } from 'src/forum/forum.module';
 import { ReloadUsersJoinedWorker } from './reload-users-joined.worker';
 import { PushModule } from 'src/push/push.module';
-import { SlackModule } from 'src/slack/slack.module';
+import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { ActionStatsService } from './action-stats.service';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import { CommunityModule } from 'src/community/community.module';
@@ -70,7 +70,7 @@ import { GeneralUpdateActivity } from './entities/general-update-activity.entity
     MmsModule,
     PushModule,
     ForumModule,
-    SlackModule,
+    EventLogModule,
   ],
   controllers: [ActionsController],
   providers: [
@@ -86,4 +86,4 @@ import { GeneralUpdateActivity } from './entities/general-update-activity.entity
   ],
   exports: [ActionsService, ActionEventRecipientService],
 })
-export class ActionsModule {}
+export class ActionsModule { }

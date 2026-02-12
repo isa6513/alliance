@@ -5,7 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { MmsOptout } from './mms-optout.entity';
-import { SlackService } from 'src/slack/slack.service';
+import { EventLogService } from 'src/eventlog/eventlog.service';
+import { EventType } from 'src/eventlog/event-log.entity';
 
 @Injectable()
 export class MmsUnsubService {
@@ -15,16 +16,23 @@ export class MmsUnsubService {
         private readonly userRepository: Repository<User>,
         @InjectRepository(MmsOptout)
         private readonly mmsOptoutRepository: Repository<MmsOptout>,
-        private readonly slackService: SlackService,
+        private readonly eventLogService: EventLogService,
     ) { }
 
     async unsubFromMms(phoneNumber: string, { reason, rawBody }: { reason: string, rawBody: string }): Promise<void> {
         const user = await this.userRepository.findOneBy({ phoneNumber });
         if (!user) {
-            this.slackService.sendMessage(`Unhandled SMS opt-out from ${phoneNumber}`);
+            this.eventLogService.sendMessage({
+                type: EventType.SmsUnsubscribe,
+                message: `Unhandled SMS opt-out from ${phoneNumber}`,
+            });
             return;
         }
-        this.slackService.sendMessage(`${user.name} keyword unsubscribed from SMS`);
+        this.eventLogService.sendMessage({
+            type: EventType.SmsUnsubscribe,
+            message: `${user.name} keyword unsubscribed from SMS`,
+            userId: user.id,
+        });
         const unsub = this.mmsOptoutRepository.create({ phoneNumber, reason, rawBody, user: { id: user.id } });
         await this.mmsOptoutRepository.save(unsub);
         await this.userRepository.update({ id: user.id }, { phoneNumberUnsubscribed: true });
@@ -35,7 +43,11 @@ export class MmsUnsubService {
     }
 
     async logUnhandledMessage(from: string, to: string, body: string): Promise<void> {
-        this.slackService.sendMessage(`Unhandled inbound SMS from ${from}: ${body}`);
+        this.eventLogService.sendMessage({
+            type: EventType.SmsInbound,
+            message: `Unhandled inbound SMS from ${from}: ${body}`,
+            blob: { from, to, body },
+        });
     }
 
 }

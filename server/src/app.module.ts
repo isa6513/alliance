@@ -19,7 +19,6 @@ import { ImagesModule } from './images/images.module';
 import { MailModule } from './mail/mail.module';
 import { MmsModule } from './mms/mms.module';
 import { NotifsModule } from './notifs/notifs.module';
-import { PaymentsModule } from './payments/payments.module';
 import { S3Module } from './s3/s3.module';
 import { SearchModule } from './search/search.module';
 import { TasksModule } from './tasks/tasks.module';
@@ -27,7 +26,7 @@ import { UserModule } from './user/user.module';
 import { UserService } from './user/user.service';
 import { MessagingModule } from './messaging/messaging.module';
 import { PushModule } from './push/push.module';
-import { SlackModule } from './slack/slack.module';
+import { EventLogModule } from './eventlog/eventlog.module';
 import { CommunityModule } from './community/community.module';
 import { VideosModule } from './videos/videos.module';
 
@@ -78,7 +77,7 @@ import { VideosModule } from './videos/videos.module';
     AnalyticsModule,
     MessagingModule,
     PushModule,
-    SlackModule,
+    EventLogModule,
   ],
   controllers: [AppController],
 })

@@ -1,10 +1,27 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { EventLog, EventType } from './event-log.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class SlackService {
-  private readonly logger = new Logger(SlackService.name);
+export class EventLogService {
+  private readonly logger = new Logger(EventLogService.name);
+  constructor(
+    @InjectRepository(EventLog)
+    private readonly eventLogRepository: Repository<EventLog>,
+  ) { }
 
-  async sendMessage(message: string) {
+  async sendMessage(data: { type: EventType, message: string, blob?: Record<string, unknown>, userId?: number }) {
+    const { type, message, blob, userId } = data;
+
+    const eventLog = this.eventLogRepository.create({
+      event: type,
+      message: message,
+      blob: blob,
+      user: userId ? { id: userId } : undefined,
+    });
+
+    await this.eventLogRepository.save(eventLog);
     const webhookUrl = process.env.SLACK_WEBHOOK_URL;
     if (!webhookUrl) {
       this.logger.warn('SLACK_WEBHOOK_URL is not set; skipping Slack message');

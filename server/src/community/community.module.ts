@@ -22,4 +22,4 @@ import { NotifsModule } from 'src/notifs/notifs.module';
   providers: [CommunityService],
   exports: [CommunityService],
 })
-export class CommunityModule {}
+export class CommunityModule { }

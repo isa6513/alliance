@@ -25,8 +25,9 @@ import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
-import { SlackService } from 'src/slack/slack.service';
+import { EventLogService } from 'src/eventlog/eventlog.service';
 import { NotifsService } from 'src/notifs/notifs.service';
+import { EventType } from 'src/eventlog/event-log.entity';
 
 @Injectable()
 export class ForumService {
@@ -46,9 +47,9 @@ export class ForumService {
     @InjectRepository(EditableContent)
     private editableContentRepository: Repository<EditableContent>,
     private readonly likeNotificationService: LikeNotificationService,
-    private readonly slackService: SlackService,
+    private readonly eventLogService: EventLogService,
     private readonly notifsService: NotifsService,
-  ) {}
+  ) { }
 
   async createPost(
     createPostDto: CreatePostDto,
@@ -101,8 +102,8 @@ export class ForumService {
         Comment,
         'comment',
         'comment.parentObjectId = post.id ' +
-          'AND comment.parentObjectType = :parentType ' +
-          'AND comment.deleted = false',
+        'AND comment.parentObjectType = :parentType ' +
+        'AND comment.deleted = false',
         { parentType: CommentParentObject.Post },
       )
       .where('post.deleted = :deleted', { deleted: false })
@@ -450,14 +451,20 @@ export class ForumService {
 
     await this.commentRepository.save(reply);
 
-    // TODO: real notif system
+    // TODO: notify action authors in app?
     if (
       createCommentDto.parentObjectType === CommentParentObject.Action &&
       process.env.NODE_ENV === 'production'
     ) {
-      this.slackService.sendMessage(
-        `New comment on action ${createCommentDto.parentObjectId} <@U0A89S0NM41> <@U08P0TJ283T> <@U08NU231VGS> - <${process.env.APP_URL}/actions/${createCommentDto.parentObjectId}?replyId=${reply.id}|Open action>`,
-      );
+      this.eventLogService.sendMessage({
+        type: EventType.ActionComment,
+        message: `New comment on action ${createCommentDto.parentObjectId} <@U0A89S0NM41> <@U08P0TJ283T> <@U08NU231VGS> - <${process.env.APP_URL}/actions/${createCommentDto.parentObjectId}?replyId=${reply.id}|Open action>`,
+        userId: userId,
+        blob: {
+          actionId: createCommentDto.parentObjectId,
+          commentId: reply.id,
+        },
+      });
     }
 
     const replyWithAuthor = await this.commentRepository.findOneOrFail({
@@ -590,13 +597,13 @@ export class ForumService {
     const object =
       type === 'comment'
         ? await this.commentRepository.findOne({
-            where: { id },
-            relations: { likes: true, author: true },
-          })
+          where: { id },
+          relations: { likes: true, author: true },
+        })
         : await this.postRepository.findOne({
-            where: { id },
-            relations: { likes: true, author: true, authors: true },
-          });
+          where: { id },
+          relations: { likes: true, author: true, authors: true },
+        });
 
     if (!object) {
       throw new NotFoundException(`${type} with ID "${id}" not found`);
@@ -802,7 +809,7 @@ export class ForumService {
             ? posts.find((post) => post.id === comment.parentObjectId)?.title
             : comment.parentObjectType === CommentParentObject.Action
               ? actions.find((action) => action.id === comment.parentObjectId)
-                  ?.name
+                ?.name
               : undefined,
         ),
     );
@@ -844,8 +851,8 @@ export class ForumService {
     const experts =
       expertIds.length > 0
         ? await this.userRepository.find({
-            where: { id: In(expertIds) },
-          })
+          where: { id: In(expertIds) },
+        })
         : [];
 
     post.experts = experts;
@@ -876,8 +883,8 @@ export class ForumService {
     const authors =
       authorIds.length > 0
         ? await this.userRepository.find({
-            where: { id: In(authorIds) },
-          })
+          where: { id: In(authorIds) },
+        })
         : [];
 
     post.authors = authors;

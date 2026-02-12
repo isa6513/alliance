@@ -50,10 +50,11 @@ import {
 } from './schema';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
-import { SlackService } from 'src/slack/slack.service';
+import { EventLogService } from 'src/eventlog/eventlog.service';
 import { UpdateProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
 import { VideosService } from 'src/videos/videos.service';
+import { EventType } from 'src/eventlog/event-log.entity';
 
 @Injectable()
 export class TasksService {
@@ -73,9 +74,9 @@ export class TasksService {
     private customValidatorRepository: Repository<CustomValidator>,
     @InjectRepository(ActionShareUrl)
     private actionShareUrlRepository: Repository<ActionShareUrl>,
-    private slackService: SlackService,
+    private eventLogService: EventLogService,
     private videosService: VideosService,
-  ) {}
+  ) { }
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
     return this.formRepository.save(createFormDto);
@@ -282,9 +283,12 @@ export class TasksService {
               await this.userService.setOptInMms(user.id, mms.id);
             } else {
               if (process.env.NODE_ENV === 'production') {
-                await this.slackService.sendMessage(
-                  `Failed to send opt-in MMS to ${parsedNumber.number}`,
-                );
+                await this.eventLogService.sendMessage({
+                  type: EventType.SmsFailure,
+                  message: `Failed to send opt-in MMS to ${parsedNumber.number}`,
+                  userId: user.id,
+                  blob: { to: parsedNumber.number },
+                });
               }
             }
           }
