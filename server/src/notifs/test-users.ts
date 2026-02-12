@@ -77,6 +77,7 @@ export const testUser = new User({
   leaderOf: [],
   invitedCommunities: [],
   participants: [],
+  phoneNumberUnsubscribed: false,
   remindAboutUncompletedGroupMembers: true,
 } satisfies Omit<
   User,
