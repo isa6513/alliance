@@ -82,6 +82,7 @@ import { Action } from './entities/action.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { ForumActionCompleterWorker } from './forum-action-completer.worker';
+import { GeneralUpdateDto } from './dto/general-update.dto';
 
 @Controller('actions')
 export class ActionsController {
@@ -194,6 +195,42 @@ export class ActionsController {
     return this.actionsService.getActivityForUser(req.user?.sub);
   }
 
+  @Get('generalUpdates')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [GeneralUpdateDto] })
+  async allGeneralUpdates(): Promise<GeneralUpdateDto[]> {
+    return (await this.actionsService.findAllGeneralUpdates()).map(
+      (generalUpdate) => new GeneralUpdateDto(generalUpdate),
+    );
+  }
+
+  @Get('generalUpdates/unread')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [GeneralUpdateDto] })
+  async unreadGeneralUpdates(
+    @Request() req: JwtRequest,
+  ): Promise<GeneralUpdateDto[]> {
+    return (
+      await this.actionsService.findUnreadGeneralUpdates(
+        req.user.sub,
+        new Date(),
+      )
+    ).map((generalUpdate) => new GeneralUpdateDto(generalUpdate));
+  }
+
+  @Post('generalUpdates/:generalUpdateId/dismiss')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async dismissGeneralUpdate(
+    @Request() req: JwtRequest,
+    @Param('generalUpdateId', ParseIntPipe) generalUpdateId: number,
+  ): Promise<void> {
+    return this.actionsService.dismissGeneralUpdate(
+      req.user.sub,
+      generalUpdateId,
+    );
+  }
+
   @Get('userlocations/:id')
   @ApiOkResponse({ type: [LatLonDto] })
   async userLocations(
@@ -233,7 +270,8 @@ export class ActionsController {
   @UseGuards(AuthOptionalGuard)
   @ApiOkResponse({ type: [GlobalFeedItemDto] })
   @ApiOperation({
-    summary: 'Get unified global feed with activities, updates, and new members',
+    summary:
+      'Get unified global feed with activities, updates, and new members',
   })
   async getGlobalFeed(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,

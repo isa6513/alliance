@@ -47,7 +47,7 @@ import {
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ProfileDto } from 'src/user/dto/user.dto';
-import { ILike, In, MoreThan, Repository } from 'typeorm';
+import { ILike, In, LessThan, MoreThan, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
@@ -110,6 +110,9 @@ import {
 } from 'src/utils/action-user';
 import { computeIsAwayInRange } from 'src/utils/user';
 import { CommunityService } from 'src/community/community.service';
+import { GeneralUpdate } from './entities/general-update.entity';
+import { GeneralUpdateActivity } from './entities/general-update-activity.entity';
+import { GeneralUpdateActivityType } from './entities/general-update-activity.entity';
 
 const MS_IN_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -139,6 +142,10 @@ export class ActionsService {
     private readonly commentRepository: Repository<Comment>,
     @InjectRepository(EditableContent)
     private readonly editableContentRepository: Repository<EditableContent>,
+    @InjectRepository(GeneralUpdate)
+    private readonly generalUpdateRepository: Repository<GeneralUpdate>,
+    @InjectRepository(GeneralUpdateActivity)
+    private readonly generalUpdateActivityRepository: Repository<GeneralUpdateActivity>,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     @InjectRepository(ActionUpdate)
@@ -163,7 +170,7 @@ export class ActionsService {
     private readonly actionEventReminderService: ActionEventReminderService,
     private readonly likeNotificationService: LikeNotificationService,
     private readonly forumService: ForumService,
-  ) { }
+  ) {}
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
     const { participatingTags, suiteId, authorIds, ...rest } = createActionDto;
@@ -437,16 +444,16 @@ export class ActionsService {
     const actions = sorted
       ? await this.findAllSorted(relations)
       : await this.actionRepository.find({
-        relations,
-      });
+          relations,
+        });
 
     const user = userId
       ? await this.userService.findOne(userId, {
-        tags: true,
-        awayRanges: true,
-        contractEvents: true,
-        activities: true,
-      })
+          tags: true,
+          awayRanges: true,
+          contractEvents: true,
+          activities: true,
+        })
       : null;
 
     const filtered: Action[] = [];
@@ -489,10 +496,10 @@ export class ActionsService {
           shouldParticipate: shouldParticipate,
           userRelation: user
             ? await this.getActionRelationFromActivities(
-              user.activities!.filter(
-                (activity) => activity.actionId === action.id,
-              ),
-            )
+                user.activities!.filter(
+                  (activity) => activity.actionId === action.id,
+                ),
+              )
             : undefined,
           reqAuthenticated: !!user,
         });
@@ -539,9 +546,9 @@ export class ActionsService {
   ): Promise<Action> {
     const user = userId
       ? await this.userService.findOne(userId, {
-        tags: true,
-        contractEvents: true,
-      })
+          tags: true,
+          contractEvents: true,
+        })
       : null;
     const action = await this.actionRepository.findOne({
       where: { id },
@@ -576,9 +583,9 @@ export class ActionsService {
     const action = await this.findOne(id, userId, serverSide);
     const user = userId
       ? await this.userService.findOne(userId, {
-        tags: true,
-        contractEvents: true,
-      })
+          tags: true,
+          contractEvents: true,
+        })
       : null;
     return new ActionDto(action, {
       canParticipate: user
@@ -589,6 +596,57 @@ export class ActionsService {
         : undefined,
       reqAuthenticated: !!user,
     });
+  }
+
+  async findAllGeneralUpdates(): Promise<GeneralUpdate[]> {
+    return await this.generalUpdateRepository.find();
+  }
+
+  async findUnreadGeneralUpdates(
+    userId: number,
+    now?: Date,
+  ): Promise<GeneralUpdate[]> {
+    const updates = await this.generalUpdateRepository.find({
+      where: {
+        ...(now && { startDate: LessThan(now), endDate: MoreThan(now) }),
+        activities: {
+          user: { id: userId },
+        },
+      },
+      relations: {
+        activities: true,
+      },
+    });
+    return updates.filter(
+      (update) =>
+        !update.activities!.some(
+          (activity) => activity.type === GeneralUpdateActivityType.DISMISSED,
+        ),
+    );
+  }
+
+  async dismissGeneralUpdate(
+    userId: number,
+    generalUpdateId: number,
+  ): Promise<void> {
+    const generalUpdates = await this.findUnreadGeneralUpdates(userId);
+    const generalUpdate = generalUpdates.find(
+      (update) => update.id === generalUpdateId,
+    );
+    if (!generalUpdate) {
+      throw new NotFoundException(
+        'General update not found or already dismissed',
+      );
+    }
+
+    await this.generalUpdateActivityRepository.save(
+      this.generalUpdateActivityRepository.create({
+        generalUpdate: { id: generalUpdateId },
+        user: { id: userId },
+        type: GeneralUpdateActivityType.DISMISSED,
+        createdAt: new Date(),
+      }),
+    );
   }
 
   // assumes pre-filtered for one users activities!
@@ -928,9 +986,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-        activities.map((a) => a.id),
-        requestingUserId,
-      )
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
       : new Set<number>();
 
     if (comments) {
@@ -1033,9 +1091,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-        activities.map((a) => a.id),
-        requestingUserId,
-      )
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
       : new Set<number>();
 
     if (comments) {
@@ -1174,9 +1232,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-        activities.map((a) => a.id),
-        requestingUserId,
-      )
+          activities.map((a) => a.id),
+          requestingUserId,
+        )
       : new Set<number>();
 
     if (comments) {
@@ -1478,9 +1536,9 @@ export class ActionsService {
 
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(
-        memberActivities.map((a) => a.id),
-        requestingUserId,
-      )
+          memberActivities.map((a) => a.id),
+          requestingUserId,
+        )
       : new Set<number>();
 
     if (comments) {
@@ -1966,7 +2024,7 @@ export class ActionsService {
         fakeGroup.send_range_start &&
         fakeGroup.send_range_end &&
         new Date(fakeGroup.send_range_start).getTime() >
-        new Date(fakeGroup.send_range_end).getTime()
+          new Date(fakeGroup.send_range_end).getTime()
       ) {
         throw new BadRequestException(
           'Send range start must be before the end',
@@ -2032,13 +2090,13 @@ export class ActionsService {
       ...action,
       taskForm: taskForm
         ? await this.formRepository.findOneOrFail({
-          where: { id: action.taskFormId },
-        })
+            where: { id: action.taskFormId },
+          })
         : undefined,
       reminderGroups: reminders
         ? await this.actionEventReminderService.getReminderGroupsForEvent(
-          action.id,
-        )
+            action.id,
+          )
         : undefined,
     };
 
@@ -2308,7 +2366,7 @@ export class ActionsService {
         detail.status = action.optional
           ? UserActionRelationPillStatus.OptionalTask
           : action.latestMemberActionEvent?.deadline &&
-            action.latestMemberActionEvent.deadline < now
+              action.latestMemberActionEvent.deadline < now
             ? UserActionRelationPillStatus.MissedDeadline
             : UserActionRelationPillStatus.Todo;
       }
@@ -2565,11 +2623,10 @@ export class ActionsService {
         }
         const memberEvent = memberActionEventByActionId.get(action.id);
         if (memberEvent) {
-          const deadlineEvent =
-            this.actionEventRecipientService.getNextEvent({
-              events: action.events,
-              currentEventId: memberEvent.id,
-            });
+          const deadlineEvent = this.actionEventRecipientService.getNextEvent({
+            events: action.events,
+            currentEventId: memberEvent.id,
+          });
           if (deadlineEvent) {
             deadlineDateByActionId.set(action.id, deadlineEvent.date);
           }

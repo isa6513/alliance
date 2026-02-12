@@ -12,6 +12,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
+import { GeneralUpdateActivity } from 'src/actions/entities/general-update-activity.entity';
 import { City } from 'src/geo/city.entity';
 import { Mail } from 'src/mail/mail.entity';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
@@ -303,6 +304,9 @@ export class User {
   @OneToMany(() => ActionActivity, (activity) => activity.user)
   activities?: ActionActivity[];
 
+  @OneToMany(() => GeneralUpdateActivity, (activity) => activity.user)
+  generalUpdateActivities?: GeneralUpdateActivity[];
+
   @OneToMany(() => Friend, (friend) => friend.requester)
   sentFriendRequests?: Friend[];
 
@@ -470,10 +474,10 @@ export class User {
     if (hasActiveContract === undefined) {
       const latestContractEvent = this.contractEvents
         ? findLeast(
-          this.contractEvents,
-          (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-          (event) => event.date <= date,
-        )
+            this.contractEvents,
+            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+            (event) => event.date <= date,
+          )
         : null;
       hasActiveContract =
         latestContractEvent?.type === ContractEventType.SIGNED;
@@ -498,10 +502,10 @@ export class User {
     populateCache: if (hasActiveContract === undefined) {
       const latestContractEventBeforeStart = this.contractEvents
         ? findLeast(
-          this.contractEvents,
-          (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-          (event) => event.date.getTime() <= startTime,
-        )
+            this.contractEvents,
+            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+            (event) => event.date.getTime() <= startTime,
+          )
         : null;
       if (latestContractEventBeforeStart?.type !== ContractEventType.SIGNED) {
         hasActiveContract = false;

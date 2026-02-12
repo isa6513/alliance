@@ -36,28 +36,32 @@ import { SlackModule } from 'src/slack/slack.module';
 import { ActionStatsService } from './action-stats.service';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import { CommunityModule } from 'src/community/community.module';
+import { GeneralUpdate } from './entities/general-update.entity';
+import { GeneralUpdateActivity } from './entities/general-update-activity.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       User,
       Action,
-      ActionEvent,
       ActionActivity,
-      Comment,
-      EditableContent,
-      Post,
-      OnetimeInvite,
-      Tag,
-      ActionUpdate,
-      ReminderGroup,
+      ActionEvent,
       ActionEventNotif,
+      ActionShareUrl,
       ActionSuite,
+      ActionUpdate,
+      Comment,
+      ContractEvent,
       CustomValidator,
+      EditableContent,
       Form,
       FormResponse,
-      ActionShareUrl,
-      ContractEvent,
+      GeneralUpdate,
+      GeneralUpdateActivity,
+      OnetimeInvite,
+      Post,
+      ReminderGroup,
+      Tag,
     ]),
     UserModule,
     CommunityModule,

@@ -1296,6 +1296,18 @@ export type ActionDto = {
     authors?: Array<ProfileDto>;
 };
 
+export type GeneralUpdateDto = {
+    id: number;
+    name: string;
+    schema: {
+        [key: string]: unknown;
+    };
+    createdAt: string;
+    updatedAt: string;
+    startDate: string;
+    endDate: string;
+};
+
 export type LatLonDto = {
     latitude: number;
     longitude: number;
@@ -4350,6 +4362,32 @@ export type ActionsMyActivityResponses = {
 };
 
 export type ActionsMyActivityResponse = ActionsMyActivityResponses[keyof ActionsMyActivityResponses];
+
+export type ActionsUnreadGeneralUpdatesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/generalUpdates/unread';
+};
+
+export type ActionsUnreadGeneralUpdatesResponses = {
+    200: Array<GeneralUpdateDto>;
+};
+
+export type ActionsUnreadGeneralUpdatesResponse = ActionsUnreadGeneralUpdatesResponses[keyof ActionsUnreadGeneralUpdatesResponses];
+
+export type ActionsDismissGeneralUpdateData = {
+    body?: never;
+    path: {
+        generalUpdateId: number;
+    };
+    query?: never;
+    url: '/actions/generalUpdates/{generalUpdateId}/dismiss';
+};
+
+export type ActionsDismissGeneralUpdateResponses = {
+    200: unknown;
+};
 
 export type ActionsUserLocationsData = {
     body?: never;
