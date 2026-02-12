@@ -18,6 +18,7 @@ jest.mock('child_process', () => ({
     return proc;
   }),
 }));
+
 import { VideosModule } from '../src/videos/videos.module';
 import { Repository } from 'typeorm';
 import { Video } from '../src/videos/entities/video.entity';

@@ -95,6 +95,9 @@ export class User {
   @ApiProperty()
   phoneNumberValidated: boolean;
 
+  @Column({ default: false })
+  phoneNumberUnsubscribed: boolean;
+
   @OneToOne(() => Mms, { nullable: true })
   @JoinColumn({ name: 'optInMmsId' })
   optInMms?: Mms;
