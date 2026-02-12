@@ -194,7 +194,7 @@ jobs:
       - test-backend-e2e
       - test-backend-unit
       - migrations-drift-check
-      - visual-regression
+      - visual-regression-gate
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: SSH and Deploy frontend SSR on EC2
@@ -302,7 +302,7 @@ jobs:
     needs:
       - dirty-check
       - build-admin-frontend
-      - visual-regression
+      - visual-regression-gate
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Download Admin Build Artifact
@@ -328,7 +328,6 @@ jobs:
           script: |
             sudo yum install -y unzip nginx
 
-            mkdir -p ~/alliance-app
             unzip -o ~/admin-build.zip -d ~/admin-app
 
             sudo rm -f /etc/nginx/conf.d/default.conf
@@ -351,7 +350,6 @@ jobs:
             fi
 
             chmod o+x /home/ec2-user
-            chmod -R o+rx /home/ec2-user/alliance-app
 
             sudo systemctl restart nginx
 
@@ -412,7 +410,23 @@ jobs:
           fi
         working-directory: ./server
 
+  visual-regression-gate:
+    runs-on: ubuntu-latest
+    needs: [visual-regression]
+    if: always()
+    steps:
+      - name: Check result
+        run: |
+          result="${{ needs.visual-regression.result }}"
+          if [[ "$result" == "success" || "$result" == "skipped" ]]; then
+            echo "Gate passed (result: $result)"
+          else
+            echo "Visual regression failed"
+            exit 1
+          fi
+
   visual-regression:
+    if: github.ref_name == 'production'
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     services:
@@ -652,7 +666,7 @@ jobs:
       - test-backend-unit
       - build-react-app
       - migrations-drift-check
-      - visual-regression
+      - visual-regression-gate
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
       - name: Checkout Code
