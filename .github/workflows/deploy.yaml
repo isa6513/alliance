@@ -662,6 +662,9 @@ jobs:
         run: zip -r nest-build.zip src package.json bun.lock tsconfig.json migrations
         working-directory: ./server
 
+      - name: move server to root
+        run: mv ./server/nest-build.zip ./nest-build.zip
+
       - name: Upload to EC2
         uses: appleboy/scp-action@v0.1.3
         with:
@@ -669,7 +672,6 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "nest-build.zip"
-          working-directory: ./server
           target: "~/"
 
       - name: SSH and Deploy Backend on EC2
