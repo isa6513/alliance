@@ -751,7 +751,7 @@ jobs:
             fi
 
             cd ~/nest-backend
-            bun install --production
+            bun install
 
             # Run migrations
             bunx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts migration:run
