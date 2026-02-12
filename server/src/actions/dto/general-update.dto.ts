@@ -5,13 +5,17 @@ export class GeneralUpdateDto extends PickType(GeneralUpdate, [
   'id',
   'name',
   'schema',
-  'createdAt',
-  'updatedAt',
   'startDate',
   'endDate',
 ]) {
   constructor(generalUpdate: GeneralUpdate) {
     super();
-    Object.assign(this, generalUpdate);
+    Object.assign(this, {
+      id: generalUpdate.id,
+      name: generalUpdate.name,
+      schema: generalUpdate.schema,
+      startDate: generalUpdate.startDate,
+      endDate: generalUpdate.endDate,
+    });
   }
 }
