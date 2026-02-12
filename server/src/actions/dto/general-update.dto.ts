@@ -9,4 +9,9 @@ export class GeneralUpdateDto extends PickType(GeneralUpdate, [
   'updatedAt',
   'startDate',
   'endDate',
-]) {}
+]) {
+  constructor(generalUpdate: GeneralUpdate) {
+    super();
+    Object.assign(this, generalUpdate);
+  }
+}
