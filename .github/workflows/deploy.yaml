@@ -364,8 +364,6 @@ jobs:
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
@@ -375,16 +373,8 @@ jobs:
         run: bun run typecheck
         working-directory: ./server
 
-      - name: Build NestJS App
-        run: bun run build
-        working-directory: ./server
-
-      - name: Compile migrations to JS
-        run: bunx swc migrations -d migrations --strip-leading-paths -C module.type=commonjs && rm migrations/*.ts
-        working-directory: ./server
-
-      - name: Zip Build Output
-        run: zip -r nest-build.zip dist package.json package-lock.json migrations
+      - name: Zip source for deploy
+        run: zip -r nest-build.zip src package.json bun.lock tsconfig.json migrations
         working-directory: ./server
 
       - name: Upload Artifact
@@ -713,18 +703,20 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -Euo pipefail
-            # Install nvm and Node.js 22
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+            # Install/update Bun
+            if ! command -v bun &> /dev/null; then
+              curl -fsSL https://bun.sh/install | bash
+            fi
+            export BUN_INSTALL="$HOME/.bun"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+
+            # Ensure pm2 is available (still needs Node for pm2)
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-            nvm install 22
-            nvm use 22
-            nvm alias default 22
+            command -v pm2 &> /dev/null || npm install -g pm2
 
             cd ~/
-            rm -rf nest-backend-deploy-backup || true
-            mv nest-backend nest-backend-deploy-backup
 
             export DB_HOST=${{ secrets.RDS_HOSTNAME }}
             export DB_PORT=${{ secrets.RDS_PORT }}
@@ -755,6 +747,9 @@ jobs:
             export SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}
             export DB_CA_CERT="${{ secrets.DB_CA_CERT }}"
             
+            rm -rf nest-backend-deploy-backup || true
+            mv nest-backend nest-backend-deploy-backup || true
+
             rollback () {
               echo "Deployment failed - rolling back"
               cd ~/
@@ -763,7 +758,7 @@ jobs:
                 rm -rf nest-backend
                 mv nest-backend-deploy-backup nest-backend
                 cd nest-backend
-                pm2 start dist/main.js --name nest-app || pm2 start dist/src/main.js --name nest-app
+                pm2 start "bun src/main.ts" --name nest-app --interpreter none
               fi
               exit 1
             }
@@ -777,19 +772,18 @@ jobs:
             fi
 
             cd ~/nest-backend
-            npm install --omit=dev
+            bun install --production
 
-            npm run migration:runprod
+            # Run migrations
+            bunx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts migration:run
 
-            npm install -g pm2
             pm2 delete nest-app || true
-            pm2 start dist/main.js --name nest-app
+            pm2 start "bun src/main.ts" --name nest-app --interpreter none
             pm2 save
 
             sleep 10
-
             curl --silent --fail --show-error "https://${{vars.DOMAIN_NAME}}/api/" > /dev/null
-
+ 
   verify-deployment:
     needs:
       - deploy-nest-backend

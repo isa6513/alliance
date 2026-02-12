@@ -61,7 +61,7 @@ export class Friend {
     onDelete: 'SET NULL',
   })
   @JoinColumn()
-  sentNotif: Notification | null;
+  sentNotif: Ty<Notification> | null;
 
   @OneToOne(() => Notification, {
     cascade: true,
@@ -69,5 +69,5 @@ export class Friend {
     onDelete: 'SET NULL',
   })
   @JoinColumn()
-  acceptedNotif: Notification | null;
+  acceptedNotif: Ty<Notification> | null;
 }

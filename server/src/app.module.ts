@@ -61,7 +61,7 @@ import { VideosModule } from './videos/videos.module';
     AuthModule,
     UserModule,
     CommunityModule,
-    TypeOrmModule.forRoot(connectionOptions()),
+    TypeOrmModule.forRoot({ ...connectionOptions(), autoLoadEntities: true }),
     ScheduleModule.forRoot(),
     ActionsModule,
     ImagesModule,
