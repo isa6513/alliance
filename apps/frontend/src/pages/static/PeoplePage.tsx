@@ -181,10 +181,10 @@ const PeoplePage: React.FC = () => {
           <h2 className="!font-semibold !text-xl md:!text-3xl my-4 font-serif">
             Members
           </h2>
-          <p className="text-zinc-900">
+          {nmembers !== undefined ? <p className="text-zinc-900">
             The Alliance has {nmembers} members. Membership is currently by invitation
             only.
-          </p>
+          </p> : null}
           <p className="text-zinc-500 text-base mb-4">
             This directory only includes members who have chosen to make their
             information public.
