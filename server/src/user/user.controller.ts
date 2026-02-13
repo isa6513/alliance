@@ -405,6 +405,13 @@ export class UserController {
     return this.userService.verifyEmail(body.token);
   }
 
+  @Post('nmembers')
+  @Public()
+  @ApiOkResponse({ type: Number })
+  async nmembers() {
+    return this.userService.signedMembersCount();
+  }
+
   @Post('createTag')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: TagDto })

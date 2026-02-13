@@ -1517,4 +1517,10 @@ export class UserService {
     }
     return this.pushService.sendPushNotification(device.expoPushToken, message);
   }
+
+  async signedMembersCount(): Promise<number> {
+    return (await this.userRepository.find({
+      relations: { contractEvents: true },
+    })).filter((user) => user.hasActiveContract).length;
+  }
 }

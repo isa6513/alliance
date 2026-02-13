@@ -3272,6 +3272,19 @@ export type UserVerifyEmailResponses = {
 
 export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
 
+export type UserNmembersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/nmembers';
+};
+
+export type UserNmembersResponses = {
+    200: number;
+};
+
+export type UserNmembersResponse = UserNmembersResponses[keyof UserNmembersResponses];
+
 export type UserCreateTagData = {
     body: CreateTagDto;
     path?: never;

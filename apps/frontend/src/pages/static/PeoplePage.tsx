@@ -1,4 +1,4 @@
-import { ProfileDto, userMembersPublic } from "@alliance/shared/client";
+import { ProfileDto, userMembersPublic, userNmembers } from "@alliance/shared/client";
 import React, { useEffect, useMemo, useState } from "react";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
@@ -6,8 +6,14 @@ import sidneyandmark from "../../assets/sidneyandmark.jpg";
 import PublicMemberDirectoryCard from "../../components/PublicMemberDirectoryCard";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { useLoaderData } from "react-router";
+
+export function loader() {
+  return userNmembers().then((res) => res.data);
+}
 
 const PeoplePage: React.FC = () => {
+  const nmembers = useLoaderData<typeof loader>();
   const staffIds: Record<number, string> = useMemo(() => {
     return {
       10: "Mark Xu",
@@ -176,7 +182,7 @@ const PeoplePage: React.FC = () => {
             Members
           </h2>
           <p className="text-zinc-900">
-            The Alliance has 90 members. Membership is currently by invitation
+            The Alliance has {nmembers} members. Membership is currently by invitation
             only.
           </p>
           <p className="text-zinc-500 text-base mb-4">
