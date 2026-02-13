@@ -14,6 +14,8 @@ const PeoplePage: React.FC = () => {
       7: "Sidney Hough",
       15: "Casey Manning",
       64: "Charles Lien",
+      11: "Grant Hough",
+      127: "Alex Hockett",
     };
   }, []);
 
@@ -174,7 +176,7 @@ const PeoplePage: React.FC = () => {
             Members
           </h2>
           <p className="text-zinc-900">
-            The Alliance has 86 members. Membership is currently by invitation
+            The Alliance has 90 members. Membership is currently by invitation
             only.
           </p>
           <p className="text-zinc-500 text-base mb-4">
