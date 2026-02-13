@@ -299,8 +299,8 @@ const FormRenderer = ({
         const conditions = Array.isArray(element.visibleIf)
           ? element.visibleIf
           : element.visibleIf
-          ? [element.visibleIf]
-          : [];
+            ? [element.visibleIf]
+            : [];
         for (const condition of conditions) {
           if ("validatorId" in condition) {
             ids.add(condition.validatorId);
@@ -1006,7 +1006,7 @@ const FormRenderer = ({
     const sharePublicly = resolvedPublicAnswers[field.id] ?? defaultSharePublic;
     const useMakePublicToggle = Boolean(field.output?.privateByDefault);
     const toggleLabel = useMakePublicToggle
-      ? "Make my response public"
+      ? "Show my response to other members"
       : "Hide my response from others";
     const toggleChecked = useMakePublicToggle ? sharePublicly : !sharePublicly;
     return (
@@ -1039,11 +1039,11 @@ const FormRenderer = ({
                 readOnly
                   ? undefined
                   : (event) => {
-                      const nextPublic = useMakePublicToggle
-                        ? event.target.checked
-                        : !event.target.checked;
-                      handlePublicToggleChange(field.id, nextPublic);
-                    }
+                    const nextPublic = useMakePublicToggle
+                      ? event.target.checked
+                      : !event.target.checked;
+                    handlePublicToggleChange(field.id, nextPublic);
+                  }
               }
             />
             {toggleLabel}
@@ -1072,9 +1072,8 @@ const FormRenderer = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Page Content */}
         <div
-          className={`space-y-6 ${
-            readOnly && schema.pages.length === 1 ? "mb-0" : ""
-          }`}
+          className={`space-y-6 ${readOnly && schema.pages.length === 1 ? "mb-0" : ""
+            }`}
         >
           {currentPage !== null &&
             currentPage.fields.map((element, index) =>
@@ -1161,18 +1160,16 @@ const FormRenderer = ({
                 <p className="mb-1 text-center">Withdrawal options</p>
                 <Button
                   color={ButtonColor.White}
-                  className={`!items-start !justify-start text-left !font-normal ${
-                    outOfTimeSelected ? "!bg-zinc-200" : ""
-                  }`}
+                  className={`!items-start !justify-start text-left !font-normal ${outOfTimeSelected ? "!bg-zinc-200" : ""
+                    }`}
                   onClick={handleOutOfTime}
                 >
                   Took more than 15 minutes
                 </Button>
                 <Button
                   color={ButtonColor.White}
-                  className={`!items-start !justify-start text-left !font-normal ${
-                    otherReasonSelected ? "!bg-zinc-100" : ""
-                  }`}
+                  className={`!items-start !justify-start text-left !font-normal ${otherReasonSelected ? "!bg-zinc-100" : ""
+                    }`}
                   onClick={handleOtherReason}
                 >
                   Other reason
