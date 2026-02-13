@@ -22,7 +22,7 @@ import {
   SquareActivity,
   Users,
   UserPlus,
-  UsersRound,
+  CirclePile,
   Calendar,
   ImageUp,
   BarChart2,
@@ -204,7 +204,7 @@ const Sidebar: React.FC = () => {
               {
                 to: "/groups",
                 label: "Groups",
-                icon: <UsersRound size={16} />,
+                icon: <CirclePile size={16} />,
                 notifCount: membersUndergoingGroupAssignment.length,
               },
               {
