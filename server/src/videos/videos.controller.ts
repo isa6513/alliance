@@ -11,12 +11,11 @@ import {
   Param,
   Post,
   Res,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { basename } from 'path';
@@ -44,21 +43,24 @@ export class VideosController {
 
   @Post('upload')
   @UseGuards(AdminGuard)
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5000 * 1024 * 1024 } }))
+  @UseInterceptors(FilesInterceptor('files', 200, { limits: { fileSize: 5000 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        file: { type: 'string', format: 'binary' },
+        files: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+        },
       },
     },
   })
   @ApiOkResponse({ type: UploadVideoResponseDto })
   async uploadVideo(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[],
   ): Promise<UploadVideoResponseDto> {
-    const video = await this.videosService.uploadVideo(file);
+    const video = await this.videosService.uploadVideo(files);
     return { id: video.id, key: video.key, status: video.status };
   }
 

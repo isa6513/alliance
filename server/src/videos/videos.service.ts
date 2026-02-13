@@ -8,10 +8,6 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import { Video } from './entities/video.entity';
-import { spawn } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
 
 @Injectable()
 export class VideosService {
@@ -25,182 +21,42 @@ export class VideosService {
 
   private readonly bucket = process.env.ASSETS_BUCKET!;
 
-  async uploadVideo(file: Express.Multer.File): Promise<Video> {
+  async uploadVideo(files: Express.Multer.File[]): Promise<Video> {
     const key = `videos/${Date.now()}`;
+    const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+    const playlist = files.find((f) => f.originalname.endsWith('.m3u8'));
+
     const video = await this.videoRepository.save(
       this.videoRepository.create({
         key,
-        originalFilename: file.originalname,
-        mime: file.mimetype,
-        size: file.size,
-        status: 'processing',
+        originalFilename: playlist?.originalname ?? files[0].originalname,
+        mime: 'application/vnd.apple.mpegurl',
+        size: totalSize,
+        status: 'ready',
       }),
     );
 
-    // Fire-and-forget processing
-    void this.processVideo(video, file.buffer);
+    // Upload all HLS files directly to S3, renaming the .m3u8 to playlist.m3u8
+    await Promise.all(
+      files.map(async (file) => {
+        const isPlaylist = file.originalname.endsWith('.m3u8');
+        const filename = isPlaylist ? 'playlist.m3u8' : file.originalname;
+        const contentType = isPlaylist
+          ? 'application/vnd.apple.mpegurl'
+          : 'video/MP2T';
+
+        await this.s3.send(
+          new PutObjectCommand({
+            Bucket: this.bucket,
+            Key: `${video.key}/${filename}`,
+            Body: file.buffer,
+            ContentType: contentType,
+          }),
+        );
+      }),
+    );
 
     return video;
-  }
-
-  private async processVideo(video: Video, buffer: Buffer): Promise<void> {
-    const tmpDir = await fs.promises.mkdtemp(
-      path.join(os.tmpdir(), 'video-'),
-    );
-    const inputPath = path.join(tmpDir, 'input');
-    const outputDir = path.join(tmpDir, 'output');
-
-    try {
-      await fs.promises.mkdir(outputDir, { recursive: true });
-      await fs.promises.writeFile(inputPath, buffer);
-
-      const processingInfo = {
-        codec: 'libx264',
-        preset: 'fast',
-        crf: 28,
-        maxrate: '2M',
-        bufsize: '4M',
-        scale: '-2:720',
-        audioCodec: 'aac',
-        audioBitrate: '128k',
-        hlsTime: 6,
-      };
-
-      // Run ffmpeg to produce HLS segments
-      await this.runFfmpeg(inputPath, outputDir, processingInfo);
-
-      // Extract duration (best-effort)
-      const duration = await this.getDuration(inputPath).catch(() => undefined);
-
-      // Upload all output files to S3
-      const files = await fs.promises.readdir(outputDir);
-      await Promise.all(
-        files.map(async (filename) => {
-          const filePath = path.join(outputDir, filename);
-          const fileBuffer = await fs.promises.readFile(filePath);
-          const contentType = filename.endsWith('.m3u8')
-            ? 'application/vnd.apple.mpegurl'
-            : 'video/MP2T';
-
-          await this.s3.send(
-            new PutObjectCommand({
-              Bucket: this.bucket,
-              Key: `${video.key}/${filename}`,
-              Body: fileBuffer,
-              ContentType: contentType,
-            }),
-          );
-        }),
-      );
-
-      await this.videoRepository.update(video.id, {
-        status: 'ready',
-        duration,
-        processingInfo,
-      });
-    } catch (err) {
-      this.logger.error(`Failed to process video ${video.id}`, err);
-      await this.videoRepository.update(video.id, { status: 'failed' });
-    } finally {
-      // Clean up temp dir
-      await fs.promises.rm(tmpDir, { recursive: true, force: true }).catch(() => { });
-    }
-  }
-
-  private runFfmpeg(
-    inputPath: string,
-    outputDir: string,
-    settings: {
-      codec: string;
-      preset: string;
-      crf: number;
-      maxrate: string;
-      bufsize: string;
-      scale: string;
-      audioCodec: string;
-      audioBitrate: string;
-      hlsTime: number;
-    },
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const outputPath = path.join(outputDir, 'playlist.m3u8');
-      const proc = spawn('ffmpeg', [
-        '-i',
-        inputPath,
-        '-c:v',
-        settings.codec,
-        '-preset',
-        settings.preset,
-        '-crf',
-        String(settings.crf),
-        '-maxrate',
-        settings.maxrate,
-        '-bufsize',
-        settings.bufsize,
-        '-vf',
-        `scale=${settings.scale}`,
-        '-c:a',
-        settings.audioCodec,
-        '-b:a',
-        settings.audioBitrate,
-        '-hls_time',
-        String(settings.hlsTime),
-        '-hls_list_size',
-        '0',
-        '-hls_segment_filename',
-        path.join(outputDir, 'segment_%03d.ts'),
-        outputPath,
-      ]);
-
-      let stderr = '';
-      proc.stderr.on('data', (data) => {
-        stderr += data.toString();
-      });
-
-      proc.on('close', (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`ffmpeg exited with code ${code}: ${stderr}`));
-        }
-      });
-
-      proc.on('error', reject);
-    });
-  }
-
-  private getDuration(inputPath: string): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const proc = spawn('ffprobe', [
-        '-v',
-        'error',
-        '-show_entries',
-        'format=duration',
-        '-of',
-        'default=noprint_wrappers=1:nokey=1',
-        inputPath,
-      ]);
-
-      let stdout = '';
-      proc.stdout.on('data', (data) => {
-        stdout += data.toString();
-      });
-
-      proc.on('close', (code) => {
-        if (code === 0) {
-          const duration = parseFloat(stdout.trim());
-          if (!isNaN(duration)) {
-            resolve(duration);
-          } else {
-            reject(new Error('Could not parse duration'));
-          }
-        } else {
-          reject(new Error(`ffprobe exited with code ${code}`));
-        }
-      });
-
-      proc.on('error', reject);
-    });
   }
 
   async getVideo(id: number): Promise<Video | null> {

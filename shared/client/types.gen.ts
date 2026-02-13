@@ -96,84 +96,6 @@ export type ActionEvent = {
     suiteManaged: boolean;
 };
 
-export type Tag = {
-    id: string;
-    users: Array<User>;
-    participatingIn: Array<Action>;
-    name: string;
-    description: string;
-    publicDisplayName?: string;
-    createdAt: string;
-    updatedAt: string;
-};
-
-/**
- * Type of action activity
- */
-export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete' | 'user_dismissed';
-
-export type EditableContent = {
-    /**
-     * Markdown or plain text body
-     */
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
-};
-
-export type FormResponse = {
-    id: number;
-    formId: number;
-    answers: {
-        [key: string]: unknown;
-    };
-    visibilityValidatorResults: {
-        [key: string]: unknown;
-    };
-    publicAnswers: {
-        [key: string]: unknown;
-    };
-    deviceType?: string;
-    user?: User;
-    sessionReplayUrl?: string;
-    createdAt: string;
-    phDistinctId?: string;
-    schemaSnapshot: {
-        [key: string]: unknown;
-    };
-    sid?: string;
-};
-
-/**
- * Source of the activity
- */
-export type ActivitySource = 'user' | 'admin_override';
-
-export type ActionActivity = {
-    id: number;
-    /**
-     * Type of action activity
-     */
-    type: ActionActivityType;
-    actionId: number;
-    userId: number;
-    createdAt: string;
-    dollar_amount?: number;
-    editableContent?: EditableContent;
-    likes: Array<User>;
-    likesCount: number;
-    taskFormResponse?: FormResponse;
-    declineReason?: string;
-    isMoral?: boolean;
-    outOfTime?: boolean;
-    /**
-     * Source of the activity
-     */
-    source: ActivitySource;
-};
-
 export type ReminderGroupTimingMode = 'absolute' | 'from_deadline' | 'within_range' | 'within_relative_range' | 'event_launch';
 
 export type ReminderCohortType = 'all_uncompleted' | 'group_leads_with_uncompleted' | 'tag' | 'custom';
@@ -269,11 +191,110 @@ export type ReminderGroup = {
 export type ActionSuite = {
     id: number;
     name: string;
-    actions: Array<Action>;
-    reminderGroups: Array<ReminderGroup>;
     createdAt: string;
     updatedAt: string;
+    actions: Array<Action>;
+    generalUpdates: Array<GeneralUpdate>;
+    reminderGroups: Array<ReminderGroup>;
     events: Array<ActionEvent>;
+};
+
+export type GeneralUpdate = {
+    id: number;
+    name: string;
+    schema: {
+        [key: string]: unknown;
+    };
+    createdAt: string;
+    updatedAt: string;
+    startDate: string;
+    endDate: string;
+    useManualCohort: boolean;
+    /**
+     * User IDs in the manual cohort
+     */
+    manualCohortUserIds?: Array<number> | null;
+    tags: Array<Tag>;
+    suite?: ActionSuite;
+};
+
+export type Tag = {
+    id: string;
+    name: string;
+    description: string;
+    publicDisplayName?: string;
+    createdAt: string;
+    updatedAt: string;
+    users: Array<User>;
+    participatingIn: Array<Action>;
+    generalUpdates: Array<GeneralUpdate>;
+};
+
+/**
+ * Type of action activity
+ */
+export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete' | 'user_dismissed';
+
+export type EditableContent = {
+    /**
+     * Markdown or plain text body
+     */
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+};
+
+export type FormResponse = {
+    id: number;
+    formId: number;
+    answers: {
+        [key: string]: unknown;
+    };
+    visibilityValidatorResults: {
+        [key: string]: unknown;
+    };
+    publicAnswers: {
+        [key: string]: unknown;
+    };
+    deviceType?: string;
+    user?: User;
+    sessionReplayUrl?: string;
+    createdAt: string;
+    phDistinctId?: string;
+    schemaSnapshot: {
+        [key: string]: unknown;
+    };
+    sid?: string;
+};
+
+/**
+ * Source of the activity
+ */
+export type ActivitySource = 'user' | 'admin_override';
+
+export type ActionActivity = {
+    id: number;
+    /**
+     * Type of action activity
+     */
+    type: ActionActivityType;
+    actionId: number;
+    userId: number;
+    createdAt: string;
+    dollar_amount?: number;
+    editableContent?: EditableContent;
+    likes: Array<User>;
+    likesCount: number;
+    taskFormResponse?: FormResponse;
+    declineReason?: string;
+    isMoral?: boolean;
+    outOfTime?: boolean;
+    /**
+     * Source of the activity
+     */
+    source: ActivitySource;
 };
 
 export type Action = {
@@ -632,9 +653,7 @@ export type UserDto = {
     cityId?: number;
     email: string;
     hasActiveContract: boolean;
-    referredById?: {
-        [key: string]: unknown;
-    };
+    referredById?: number;
 };
 
 export type AuthMeResponseDto = {
@@ -765,6 +784,7 @@ export type TagDto = {
     publicDisplayName?: string;
     createdAt: string;
     updatedAt: string;
+    generalUpdates: Array<GeneralUpdate>;
     users: Array<ProfileDto>;
 };
 
@@ -1712,9 +1732,10 @@ export type CreateActionUpdateDto = {
 export type ActionSuiteDto = {
     id: number;
     name: string;
-    reminderGroups: Array<ReminderGroup>;
     createdAt: string;
     updatedAt: string;
+    generalUpdates: Array<GeneralUpdate>;
+    reminderGroups: Array<ReminderGroup>;
     events: Array<ActionEvent>;
     actions: Array<ActionDto>;
 };
@@ -5759,7 +5780,7 @@ export type ForumUpdatePostAuthorsResponse = ForumUpdatePostAuthorsResponses[key
 
 export type VideosUploadVideoData = {
     body: {
-        file?: Blob | File;
+        files?: Array<Blob | File>;
     };
     path?: never;
     query?: never;

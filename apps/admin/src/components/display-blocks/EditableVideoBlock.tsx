@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
-import { videosGetVideoStatus, videosUploadVideo } from "@alliance/shared/client";
+import { videosGetVideoStatus } from "@alliance/shared/client";
+import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import { Link, href } from "react-router";
 
 export function EditableVideoBlock({
@@ -63,26 +64,41 @@ export function EditableVideoBlock({
     e: React.ChangeEvent<HTMLInputElement>,
     update: (updates: Partial<VideoBlock>) => void
   ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+
+    const hasPlaylist = files.some((f) => f.name.endsWith(".m3u8"));
+    if (!hasPlaylist) {
+      setUploadError("At least one .m3u8 playlist file is required");
+      return;
+    }
 
     setIsUploading(true);
     setUploadError(null);
     setProcessingStatus(null);
 
-    const res = await videosUploadVideo({ body: { file } });
+    try {
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("files", file);
+      }
 
-    if (res.error || !res.response.ok) {
-      setUploadError(`Upload failed with status ${res.response.status}`);
-      setIsUploading(false);
-      return;
-    }
+      const res = await fetch(`${getApiUrl()}/videos/upload`, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
 
-    const data = res.data;
-    if (data) {
+      if (!res.ok) {
+        setUploadError(`Upload failed with status ${res.status}`);
+        setIsUploading(false);
+        return;
+      }
+
+      const data = await res.json();
       update({ src: data.key, videoId: data.id });
-      setProcessingStatus("processing");
-    } else {
+      setProcessingStatus("ready");
+    } catch {
       setUploadError("Upload failed");
     }
     setIsUploading(false);
@@ -116,7 +132,8 @@ export function EditableVideoBlock({
           <div className="flex items-center space-x-2">
             <input
               type="file"
-              accept="video/*"
+              multiple
+              accept=".m3u8,.ts"
               onChange={(event) => handleFileChange(event, handleUpdate)}
               disabled={isUploading}
               className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
