@@ -1,3 +1,4 @@
+import React from "react";
 import type { VideoBlock } from "@alliance/shared/forms/display-blocks";
 import { useState, useEffect } from "react";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
@@ -71,7 +72,7 @@ export function EditableVideoBlock({
 
     const res = await videosUploadVideo({ body: { file } });
 
-    if (!res.response.ok || res.error) {
+    if (res.error || !res.response.ok) {
       setUploadError(`Upload failed with status ${res.response.status}`);
       setIsUploading(false);
       return;
