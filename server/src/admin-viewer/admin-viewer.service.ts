@@ -24,36 +24,15 @@ export class AdminViewerService {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async getTables(): Promise<TableListDto> {
     const entityMetadatas = this.dataSource.entityMetadatas;
-    const dedupedEntityMetadatas = new Map<string, EntityMetadata>();
     const tables: TableMetadataDto[] = [];
-
-    for (const metadata of entityMetadatas) {
-      const existing = dedupedEntityMetadatas.get(metadata.tableName);
-      if (!existing) {
-        dedupedEntityMetadatas.set(metadata.tableName, metadata);
-        continue;
-      }
-
-      const existingPrimaryCount = existing.primaryColumns?.length ?? 0;
-      const currentPrimaryCount = metadata.primaryColumns?.length ?? 0;
-      if (currentPrimaryCount > existingPrimaryCount) {
-        dedupedEntityMetadatas.set(metadata.tableName, metadata);
-      }
-    }
-
-    if (dedupedEntityMetadatas.size < entityMetadatas.length) {
-      console.warn(
-        `AdminViewerService deduped ${entityMetadatas.length - dedupedEntityMetadatas.size} duplicate table metadata entries`,
-      );
-    }
 
     const queryRunner = this.dataSource.createQueryRunner();
     try {
-      for (const metadata of dedupedEntityMetadatas.values()) {
+      for (const metadata of entityMetadatas.values()) {
         try {
           const countResult = await queryRunner.query(
             `SELECT COUNT(*) as count FROM "${metadata.tableName}"`,

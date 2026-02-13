@@ -11,7 +11,7 @@ export const connectionOptions = (): PostgresConnectionOptions => {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: ['dist/**/*.entity{.ts,.js}'],
+    entities: ['dist/**/*.entity{.ts}'],
     useUTC: true,
     maxQueryExecutionTime: 100,
     logging: ['error', 'warn'],
