@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { UserDto } from "@alliance/shared/client";
 import {
   FormResponseDto,
@@ -199,6 +199,7 @@ const FormRenderer = ({
       return 0;
     }
   });
+  const formTopRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<Record<string, FormValue>>(() => {
     if (readOnly) {
       const answers =
@@ -967,6 +968,14 @@ const FormRenderer = ({
     setCurrentPageIndex(clamped);
   }, [initialPageIndex, persistKey, readOnly, pageCount]);
 
+  const prevPageIndexRef = useRef(currentPageIndex);
+  useEffect(() => {
+    if (prevPageIndexRef.current !== currentPageIndex) {
+      prevPageIndexRef.current = currentPageIndex;
+      formTopRef.current?.scrollIntoView({ behavior: "instant", block: 'start' });
+    }
+  }, [currentPageIndex]);
+
   useEffect(() => {
     setFieldErrors({});
   }, [schema]);
@@ -1068,7 +1077,7 @@ const FormRenderer = ({
   };
 
   return (
-    <div className="mx-auto">
+    <div ref={formTopRef} className="mx-auto scroll-mt-24">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Page Content */}
         <div
