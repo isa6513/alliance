@@ -162,8 +162,7 @@ const buildNumberStats = (
     return { rows, answeredCount, summary: { min, max, avg, median, total } };
   }
 
-  const shouldUseIntegerBuckets =
-    answeredCount < 20 && sorted.every((value) => Number.isInteger(value));
+  const shouldUseIntegerBuckets = sorted.every((value) => Number.isInteger(value));
 
   if (shouldUseIntegerBuckets) {
     const counts = new Map<number, number>();
