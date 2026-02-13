@@ -147,7 +147,7 @@ describe('Videos (e2e)', () => {
   it('rejects upload without admin token', async () => {
     await request(ctx.app.getHttpServer())
       .post('/videos/upload')
-      .attach('file', Buffer.from('fake-video-data'), {
+      .attach('files', Buffer.from('fake-video-data'), {
         filename: 'test.mp4',
         contentType: 'video/mp4',
       })
