@@ -81,7 +81,7 @@ jobs:
         working-directory: ./server
 
       - name: Run Unit Tests
-        run: bun run test
+        run: bun test
         working-directory: ./server
 
   build-react-app:
