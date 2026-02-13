@@ -90,6 +90,12 @@ const OnetimeInviteListItem = ({
             className="break-words text-sm text-zinc-400"
           />
         )}
+        {invite.info && (
+          <AppMarkdownWrapper
+            markdownContent={invite.info}
+            className="break-words text-sm text-zinc-400"
+          />
+        )}
       </div>
 
       <div className="mt-4 sm:mt-0 flex flex-col sm:items-end justify-between sm:gap-2">
