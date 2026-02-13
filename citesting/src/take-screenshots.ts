@@ -457,7 +457,7 @@ const takeScreenshots = async () => {
         // Some pages keep background requests open; ignore.
       });
     }
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
     await page.screenshot({ path: filePath, fullPage: true });
   }
 
