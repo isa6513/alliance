@@ -481,6 +481,13 @@ jobs:
           NODE_ENV: test
           SCREENSHOT_OUTPUT_DIR: ${{ github.workspace }}/screenshots/current
 
+      - name: Upload Current Screenshots to S3
+        if: github.ref_name == 'production'
+        run: |
+          aws s3 sync \
+            ${{ github.workspace }}/screenshots/current/ \
+            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ env.env_name }}/${{ github.sha }}/
+
       - name: Download Baseline from S3
         if: github.ref_name == 'production'
         run: |
@@ -617,15 +624,6 @@ jobs:
             --data "$(jq -n --arg channel "$CHANNEL" --arg text "$TEXT" \
               '{channel: $channel, text: $text, mrkdwn: true, unfurl_links: true, unfurl_media: true}')" \
             https://slack.com/api/chat.postMessage
-
-
-      - name: Upload Current Screenshots to S3
-        if: github.ref_name == 'production' && steps.ai-review.outcome != 'failure'
-        run: |
-          aws s3 sync \
-            ${{ github.workspace }}/screenshots/current/ \
-            s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ env.env_name }}/${{ github.sha }}/
-
 
       - name: Promote to Latest Baseline
         if: github.ref_name == 'production' && steps.ai-review.outcome != 'failure'
