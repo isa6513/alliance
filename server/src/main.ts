@@ -65,8 +65,8 @@ async function bootstrap() {
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   validateEnv();
-  app.use(bodyParser.json({ limit: '5gb' }));
-  app.use(bodyParser.urlencoded({ limit: '5gb', extended: true }));
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

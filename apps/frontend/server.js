@@ -7,10 +7,10 @@ import client from "prom-client";
 const viteDevServer = ["production", "staging"].includes(process.env.NODE_ENV)
   ? undefined
   : await import("vite").then((vite) =>
-      vite.createServer({
-        server: { middlewareMode: true },
-      })
-    );
+    vite.createServer({
+      server: { middlewareMode: true },
+    })
+  );
 
 const reactRouterHandler = createRequestHandler({
   build: await import("./build/server/index.js"),
@@ -73,7 +73,7 @@ app.use((req, res, next) => {
 
 // Everything else (like favicon.ico) is cached for an hour. You may want to be
 // more aggressive with this caching.
-app.use(express.static("build/client", { maxAge: "1h" }));
+app.use(express.static("build/client", { maxAge: "1h", }));
 
 app.use(morgan("tiny"));
 

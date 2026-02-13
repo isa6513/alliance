@@ -44,7 +44,7 @@ export class VideosController {
 
   @Post('upload')
   @UseGuards(AdminGuard)
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 500 * 1024 * 1024 } }))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5000 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -128,7 +128,7 @@ export class VideosController {
 
   @Post(':id/replace')
   @UseGuards(AdminGuard)
-  @UseInterceptors(FilesInterceptor('files', 200, { limits: { fileSize: 500 * 1024 * 1024 } }))
+  @UseInterceptors(FilesInterceptor('files', 200, { limits: { fileSize: 5000 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {

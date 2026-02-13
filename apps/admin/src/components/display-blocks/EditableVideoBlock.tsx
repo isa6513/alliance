@@ -71,7 +71,7 @@ export function EditableVideoBlock({
 
     const res = await videosUploadVideo({ body: { file } });
 
-    if (!res.response.ok) {
+    if (!res.response.ok || res.error) {
       setUploadError(`Upload failed with status ${res.response.status}`);
       setIsUploading(false);
       return;
