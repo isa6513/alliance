@@ -1131,7 +1131,7 @@ const FormRenderer = ({
                     <Button
                       color={ButtonColor.Black}
                       type="submit"
-                      className="w-full !py-3 !text-base"
+                      className="w-full !py-3 !text-base !h-[45px]"
                       disabled={submitting}
                     >
                       {schema.submit?.label || "Complete"}
@@ -1141,7 +1141,7 @@ const FormRenderer = ({
                   <div className="flex flex-1 space-x-2 items-center">
                     <Button
                       color={ButtonColor.Black}
-                      className="!cursor-not-allowed w-full !py-3 !text-base"
+                      className="!cursor-not-allowed w-full !py-3 !text-base !h-[45px]"
                       onClick={validateForPreview}
                     >
                       {schema.submit?.label || "Complete"} (Preview Mode)
