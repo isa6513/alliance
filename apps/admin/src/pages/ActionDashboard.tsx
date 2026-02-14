@@ -23,7 +23,12 @@ import {
   userGetTags,
   userMembers,
 } from "@alliance/shared/client";
-import type { ActionStatsWithOnboardingDto, ActionStatus, ProfileDto, ShareUrlStatsDto } from "@alliance/shared/client/types.gen";
+import type {
+  ActionStatsWithOnboardingDto,
+  ActionStatus,
+  ProfileDto,
+  ShareUrlStatsDto,
+} from "@alliance/shared/client/types.gen";
 import FormResponseStatistics from "../components/FormResponseStatistics";
 import type { FormWithSchema } from "./FormResponses";
 import { getApiUrl, getBaseUrl } from "@alliance/sharedweb/lib/config";
@@ -123,7 +128,8 @@ const ActionDashboard: React.FC = () => {
 
   const [shareUrlStats, setShareUrlStats] = useState<ShareUrlStatsDto[]>([]);
   const [shareUrlStatsLoading, setShareUrlStatsLoading] = useState(false);
-  const [actionStats, setActionStats] = useState<ActionStatsWithOnboardingDto | null>(null);
+  const [actionStats, setActionStats] =
+    useState<ActionStatsWithOnboardingDto | null>(null);
   const [taskForm, setTaskForm] = useState<FormWithSchema | null>(null);
   const [formResponses, setFormResponses] = useState<FormResponseDto[]>([]);
   const [incompleteUsers, setIncompleteUsers] = useState<ProfileDto[]>([]);
@@ -462,7 +468,13 @@ const ActionDashboard: React.FC = () => {
 
   // Load incomplete users when action is done
   useEffect(() => {
-    const doneStatuses: ActionStatus[] = ["completed", "failed", "abandoned", "resolution", "office_action"];
+    const doneStatuses: ActionStatus[] = [
+      "completed",
+      "failed",
+      "abandoned",
+      "resolution",
+      "office_action",
+    ];
     if (!actionId || !action?.status || !doneStatuses.includes(action.status)) {
       setIncompleteUsers([]);
       return;
@@ -854,7 +866,6 @@ const ActionDashboard: React.FC = () => {
   const readinessComplete =
     readinessTotalCount > 0 && readinessReadyCount === readinessTotalCount;
 
-
   if (loading) {
     return <div className="p-8">Loading action...</div>;
   }
@@ -939,10 +950,11 @@ const ActionDashboard: React.FC = () => {
                 <button
                   key={tab.key}
                   onClick={() => onTabChange(tab.key)}
-                  className={`py-2 px-1 border-b-2 text-sm ${activeTab === tab.key
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    }`}
+                  className={`py-2 px-1 border-b-2 text-sm ${
+                    activeTab === tab.key
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
                 >
                   {tab.label}
                 </button>
@@ -1084,7 +1096,9 @@ const ActionDashboard: React.FC = () => {
                         <span className="text-gray-600">
                           {action.usersCompleted} / {action.usersJoined} (
                           {Math.round(
-                            (action.usersCompleted / (action.usersJoined || 1)) * 100
+                            (action.usersCompleted /
+                              (action.usersJoined || 1)) *
+                              100
                           )}
                           %)
                         </span>
@@ -1094,7 +1108,9 @@ const ActionDashboard: React.FC = () => {
                           className="h-full bg-green rounded-full transition-all duration-300"
                           style={{
                             width: `${Math.min(
-                              (action.usersCompleted / (action.usersJoined || 1)) * 100,
+                              (action.usersCompleted /
+                                (action.usersJoined || 1)) *
+                                100,
                               100
                             )}%`,
                           }}
@@ -1113,8 +1129,12 @@ const ActionDashboard: React.FC = () => {
                           <Users className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                          <p className="text-2xl font-bold">{action.usersJoined}</p>
-                          <p className="text-xs text-gray-500">Joined</p>
+                          <p className="text-2xl font-bold">
+                            {action.usersJoined}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Expected to complete
+                          </p>
                         </div>
                       </div>
                     </Card>
@@ -1124,7 +1144,9 @@ const ActionDashboard: React.FC = () => {
                           <UserCheck className="h-5 w-5 text-green-600" />
                         </div>
                         <div>
-                          <p className="text-2xl font-bold">{action.usersCompleted}</p>
+                          <p className="text-2xl font-bold">
+                            {action.usersCompleted}
+                          </p>
                           <p className="text-xs text-gray-500">Completed</p>
                         </div>
                       </div>
@@ -1151,12 +1173,15 @@ const ActionDashboard: React.FC = () => {
                           <p className="text-2xl font-bold">
                             {action.usersJoined > 0
                               ? Math.round(
-                                (action.usersCompleted / action.usersJoined) * 100
-                              )
+                                  (action.usersCompleted / action.usersJoined) *
+                                    100
+                                )
                               : 0}
                             %
                           </p>
-                          <p className="text-xs text-gray-500">Completion Rate</p>
+                          <p className="text-xs text-gray-500">
+                            Completion Rate
+                          </p>
                         </div>
                       </div>
                     </Card>
@@ -1164,15 +1189,21 @@ const ActionDashboard: React.FC = () => {
                       <Card
                         style={CardStyle.White}
                         className="!p-4 cursor-pointer hover:bg-gray-50"
-                        onClick={() => setIncompleteUsersExpanded(!incompleteUsersExpanded)}
+                        onClick={() =>
+                          setIncompleteUsersExpanded(!incompleteUsersExpanded)
+                        }
                       >
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-red-100 rounded-lg">
                             <UserX className="h-5 w-5 text-red-600" />
                           </div>
                           <div>
-                            <p className="text-2xl font-bold">{incompleteUsers.length}</p>
-                            <p className="text-xs text-gray-500">Failed to Complete</p>
+                            <p className="text-2xl font-bold">
+                              {incompleteUsers.length}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Failed to Complete
+                            </p>
                           </div>
                           {incompleteUsersExpanded ? (
                             <ChevronUp className="h-4 w-4 text-gray-400 ml-auto" />
@@ -1198,7 +1229,10 @@ const ActionDashboard: React.FC = () => {
                             href={`/users/${user.id}`}
                             className="flex items-center gap-2 hover:bg-gray-50 px-2 py-1 rounded"
                           >
-                            <ProfileImage pfp={user.profilePicture} size="small" />
+                            <ProfileImage
+                              pfp={user.profilePicture}
+                              size="small"
+                            />
                             <span className="text-sm font-medium text-gray-800 hover:text-blue-600">
                               {user.displayName}
                             </span>
@@ -1234,10 +1268,11 @@ const ActionDashboard: React.FC = () => {
                             className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0"
                           >
                             <div
-                              className={`w-2 h-2 rounded-full flex-shrink-0 ${event.id === currentEventId
-                                ? "bg-blue-500"
-                                : "bg-gray-300"
-                                }`}
+                              className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                event.id === currentEventId
+                                  ? "bg-blue-500"
+                                  : "bg-gray-300"
+                              }`}
                             />
                             <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
@@ -1258,7 +1293,8 @@ const ActionDashboard: React.FC = () => {
                         ))
                     ) : (
                       <div className="text-sm text-gray-500">
-                        No events yet. This action is in Draft status by default.
+                        No events yet. This action is in Draft status by
+                        default.
                       </div>
                     )}
                   </div>
@@ -1327,28 +1363,31 @@ const ActionDashboard: React.FC = () => {
                 )}
 
                 {/* Form Response Statistics - only show after member_action has started */}
-                {hasMemberActionStarted && action.taskFormId && taskForm && formResponses.length > 0 && (
-                  <Card style={CardStyle.White}>
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold">
-                        Response Statistics ({formResponses.length} responses)
-                      </h2>
-                      <Button
-                        onClick={() =>
-                          navigate(`/forms/${action.taskFormId}/responses`)
-                        }
-                        color={ButtonColor.White}
-                        size="small"
-                      >
-                        View All Responses →
-                      </Button>
-                    </div>
-                    <FormResponseStatistics
-                      form={taskForm}
-                      responses={formResponses}
-                    />
-                  </Card>
-                )}
+                {hasMemberActionStarted &&
+                  action.taskFormId &&
+                  taskForm &&
+                  formResponses.length > 0 && (
+                    <Card style={CardStyle.White}>
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold">
+                          Response Statistics ({formResponses.length} responses)
+                        </h2>
+                        <Button
+                          onClick={() =>
+                            navigate(`/forms/${action.taskFormId}/responses`)
+                          }
+                          color={ButtonColor.White}
+                          size="small"
+                        >
+                          View All Responses →
+                        </Button>
+                      </div>
+                      <FormResponseStatistics
+                        form={taskForm}
+                        responses={formResponses}
+                      />
+                    </Card>
+                  )}
               </div>
             )}
 
@@ -1366,9 +1405,7 @@ const ActionDashboard: React.FC = () => {
                           className="mt-0.5 h-5 w-5 text-green"
                           strokeWidth={3}
                         />
-                        <h2 className="text-lg font-semibold">
-                          Checklist
-                        </h2>
+                        <h2 className="text-lg font-semibold">Checklist</h2>
                         {checklistCollapsed ? (
                           <ChevronDown className="h-5 w-5 text-gray-500" />
                         ) : (
@@ -1376,10 +1413,11 @@ const ActionDashboard: React.FC = () => {
                         )}
                       </div>
                       <span
-                        className={`rounded-full px-3 py-1 text-sm font-medium ${readinessComplete
-                          ? "bg-green/20 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                          }`}
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${
+                          readinessComplete
+                            ? "bg-green/20 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
                       >
                         {readinessReadyCount}/{readinessTotalCount} ready
                       </span>
