@@ -4,6 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AiDetectionQueueService } from 'src/ai-detection/ai-detection-queue.service';
+import { DetectableEntity } from 'src/ai-detection/entities/ai-detection-result.entity';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { commentUrl, postUrl } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/dto/user.dto';
@@ -49,6 +51,7 @@ export class ForumService {
     private readonly likeNotificationService: LikeNotificationService,
     private readonly eventLogService: EventLogService,
     private readonly notifsService: NotifsService,
+    private readonly aiDetectionQueueService: AiDetectionQueueService,
   ) { }
 
   async createPost(
@@ -471,6 +474,10 @@ export class ForumService {
       where: { id: reply.id },
       relations: { author: true, editableContent: true },
     });
+    await this.aiDetectionQueueService.addDetectJob({
+      entityType: DetectableEntity.Comment,
+      entityId: replyWithAuthor.id,
+    });
 
     await this.sendNotifsForNewComment(replyWithAuthor);
 
@@ -576,6 +583,10 @@ export class ForumService {
         `Reply with ID "${id}" not found after update`,
       );
     }
+    await this.aiDetectionQueueService.addDetectJob({
+      entityType: DetectableEntity.Comment,
+      entityId: updatedReply.id,
+    });
     return updatedReply;
   }
 

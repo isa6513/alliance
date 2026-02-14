@@ -48,6 +48,7 @@ type FormRendererProps = {
   ) => void;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
+  fieldLabelRightContent?: Record<string, React.ReactNode>;
   onSubmit: ((data: SubmitFormDto) => Promise<void>) | null; // null for admin preview
 };
 
@@ -83,6 +84,7 @@ const FormRenderer = ({
   onAbandonAction,
   renderFormAsCompleted,
   completedFormResponse,
+  fieldLabelRightContent,
   actionId,
   initialPageIndex,
   sessionReplayUrl,
@@ -1036,6 +1038,7 @@ const FormRenderer = ({
           }
           disableOptionRandomization={disableOptionRandomization}
           user={user}
+          labelRightAddon={fieldLabelRightContent?.[field.id]}
         />
         {isOutputField && (
           <label className="mt-2 flex items-center text-sm text-gray-500">

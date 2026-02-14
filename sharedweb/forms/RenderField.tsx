@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, type ReactNode } from "react";
 import type { UserDto } from "@alliance/shared/client";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type {
@@ -31,6 +31,7 @@ export type RenderFieldProps = {
   randomizationKey?: string;
   disableOptionRandomization?: boolean;
   user?: Omit<UserDto, "email">;
+  labelRightAddon?: ReactNode;
 };
 
 const sharedInputClasses =
@@ -73,17 +74,28 @@ const getRangeValues = (field: RangeField): number[] => {
 export function RenderLabel({
   field,
   error,
+  labelRightAddon,
 }: {
   field: AnyField;
   error?: string | null;
+  labelRightAddon?: ReactNode;
 }) {
   const hasError = Boolean(error);
   return (
-    <label className={`block ${hasError ? "text-red-600" : "text-zinc-700"}`}>
-      {field.label !== null && (
-        <FormMarkdownWrapper markdownContent={field.label} inline />
-      )}
-      {field.required && <span className="text-red-500 ml-1">*</span>}
+    <label
+      className={`block ${hasError ? "text-red-600" : "text-zinc-700"} ${
+        labelRightAddon ? "flex items-start justify-between gap-3" : ""
+      }`}
+    >
+      <span>
+        {field.label !== null && (
+          <FormMarkdownWrapper markdownContent={field.label} inline />
+        )}
+        {field.required && <span className="text-red-500 ml-1">*</span>}
+      </span>
+      {labelRightAddon ? (
+        <span className="shrink-0">{labelRightAddon}</span>
+      ) : null}
     </label>
   );
 }
@@ -100,6 +112,7 @@ export function RenderField({
   randomizationKey,
   disableOptionRandomization,
   user,
+  labelRightAddon,
 }: RenderFieldProps) {
   const errorMessage =
     typeof error === "string" && error.trim().length > 0 ? error : null;
@@ -147,7 +160,7 @@ export function RenderField({
     case "text":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <input
             type="text"
             value={(value as string) ?? ""}
@@ -170,7 +183,7 @@ export function RenderField({
     case "textarea":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <textarea
             ref={(el) => {
               if (el) {
@@ -208,7 +221,7 @@ export function RenderField({
     case "email":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <input
             type="email"
             value={(value as string) ?? ""}
@@ -226,7 +239,7 @@ export function RenderField({
     case "phone":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <input
             type="tel"
             value={(value as string) ?? ""}
@@ -253,7 +266,7 @@ export function RenderField({
     case "number":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <input
             type="number"
             value={
@@ -304,7 +317,7 @@ export function RenderField({
 
       return (
         <div className="relative pb-6">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <div className="flex items-center justify-between text-xs text-zinc-500 py-1">
             <span className="text-black">{field.startLabel}</span>
             <span className="text-black">{field.endLabel}</span>
@@ -415,7 +428,7 @@ export function RenderField({
       const options = randomizedOptions ?? field.options;
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <div
             className={`space-y-2 ${hasError ? "border-l-2 border-red-500 pl-3" : ""
               }`}
@@ -459,7 +472,7 @@ export function RenderField({
       const options = randomizedOptions ?? field.options;
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <select
             value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
@@ -498,7 +511,7 @@ export function RenderField({
 
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <div
             className={`space-y-2 ${hasError ? "border-l-2 border-red-500 pl-3" : ""
               }`}
@@ -565,7 +578,7 @@ export function RenderField({
     case "date":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <input
             type="date"
             value={(value as string) ?? ""}
@@ -587,13 +600,14 @@ export function RenderField({
           onChange={onChange}
           disabled={disabled}
           baseError={errorMessage}
+          labelRightAddon={labelRightAddon}
         />
       );
 
     case "timezone": {
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           <TimeZoneSelect
             value={(value as string) ?? "America/Los_Angeles"}
             onChange={onChange ? (tz) => onChange(tz) : undefined}
@@ -646,7 +660,7 @@ export function RenderField({
           : null;
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} error={errorMessage} />
+          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
           {imageUrl && (
             <div className="mb-2">
               <ImageLightbox
@@ -703,7 +717,7 @@ export function RenderField({
       if (!definition) {
         return (
           <div className="space-y-2 border border-red-200 bg-red-50 p-3 rounded">
-            <RenderLabel field={field} error={errorMessage} />
+            <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
             <p className="text-sm text-red-700">
               Unable to render this field because the selected custom component
               is not registered.
@@ -739,6 +753,7 @@ type TimeInputFieldProps = {
   onChange?: (value: FormValue) => void;
   disabled?: boolean;
   baseError: string | null;
+  labelRightAddon?: ReactNode;
 };
 
 export function TimeInputField({
@@ -747,6 +762,7 @@ export function TimeInputField({
   onChange,
   disabled,
   baseError,
+  labelRightAddon,
 }: TimeInputFieldProps) {
   const normalizedValue = typeof value === "string" && value ? value : "";
   const [inputValue, setInputValue] = useState<string>(() =>
@@ -822,7 +838,11 @@ export function TimeInputField({
 
   return (
     <div className="space-y-1 relative">
-      <RenderLabel field={field} error={effectiveError} />
+      <RenderLabel
+        field={field}
+        error={effectiveError}
+        labelRightAddon={labelRightAddon}
+      />
       <div className="relative">
         <input
           ref={inputRef}

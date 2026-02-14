@@ -2,6 +2,7 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDefined, IsEnum, IsOptional, IsString } from 'class-validator';
+import { AiDetectionResultDto } from 'src/ai-detection/dto/ai-detection-result.dto';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { UserDto } from 'src/user/dto/user.dto';
 import { Form } from './entities/form.entity';
@@ -65,4 +66,9 @@ export class FormResponseDto extends PickType(FormResponse, [
   @IsOptional()
   @Type(() => UserDto)
   user?: UserDto;
+
+  @ApiPropertyOptional({ type: () => AiDetectionResultDto, isArray: true })
+  @IsOptional()
+  @Type(() => AiDetectionResultDto)
+  aiDetectionResults?: AiDetectionResultDto[];
 }

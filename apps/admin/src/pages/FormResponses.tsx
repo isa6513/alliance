@@ -53,9 +53,21 @@ const FILTERABLE_FIELD_KINDS = new Set<FieldKind>([
   "range",
 ]);
 
+const AI_SCORE_FIELD_KINDS = new Set<FieldKind>(["text", "textarea"]);
+
 type Tab = "responses" | "stats";
 
 type ResponseFilterOp = "equals" | "includes" | "no-response";
+
+type FormResponseAiDetection = {
+  fieldPath: string;
+  status: string;
+  aiProbability: number | null;
+};
+
+type FormResponseWithAi = FormResponseDto & {
+  aiDetectionResults?: FormResponseAiDetection[];
+};
 
 export type FormResponseFilter = {
   fieldId: string;
@@ -118,6 +130,11 @@ const getOptionLabel = (
     (field as { options?: Array<{ value: string; label: string }> }).options ??
     [];
   return options.find((option) => String(option.value) === value)?.label;
+};
+
+const formatAiScore = (value: number | null): string => {
+  if (typeof value !== "number" || Number.isNaN(value)) return "--";
+  return `${Math.round(value * 100)}%`;
 };
 
 const matchesResponseFilter = (
@@ -334,6 +351,39 @@ const FormResponses: React.FC = () => {
   const filteredTotal = filteredResponses.length;
   const totalPages = Math.max(1, filteredTotal);
   const currentResponse = filteredResponses[page - 1];
+
+  const currentResponseAiInlineLabels = useMemo<
+    Record<string, React.ReactNode>
+  >(() => {
+    const response = currentResponse as FormResponseWithAi | undefined;
+    const detections = response?.aiDetectionResults ?? [];
+    const inlineScores: Record<string, React.ReactNode> = {};
+
+    for (const detection of detections) {
+      if (!detection.fieldPath.startsWith("answers.")) {
+        continue;
+      }
+      const fieldId = detection.fieldPath.slice("answers.".length);
+      const field = fieldsById[fieldId];
+      if (!field || !AI_SCORE_FIELD_KINDS.has(field.kind)) {
+        continue;
+      }
+      if (
+        typeof detection.aiProbability !== "number" ||
+        Number.isNaN(detection.aiProbability) ||
+        detection.aiProbability <= 0
+      ) {
+        continue;
+      }
+      inlineScores[fieldId] = (
+        <span className="text-sm font-semibold text-red-600">
+          {formatAiScore(detection.aiProbability)}
+        </span>
+      );
+    }
+
+    return inlineScores;
+  }, [currentResponse, fieldsById]);
 
   const filterSummary = useMemo(() => {
     if (!activeFilter || !activeFilterField) return null;
@@ -680,6 +730,7 @@ const FormResponses: React.FC = () => {
                           userId={currentResponse?.user?.id}
                           user={currentResponse?.user ?? undefined}
                           disableOptionRandomization
+                          fieldLabelRightContent={currentResponseAiInlineLabels}
                         />
                       </div>
                     );

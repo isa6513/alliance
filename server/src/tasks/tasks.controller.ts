@@ -77,7 +77,9 @@ export class TasksController {
   @Get('responses/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [FormResponseDto] })
-  async getFormResponses(@Param('id', ParseIntPipe) id: number) {
+  async getFormResponses(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<FormResponseDto[]> {
     return this.tasksService.getFormResponses(id);
   }
 

@@ -8,6 +8,9 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
+import { AiDetectionQueryService } from 'src/ai-detection/ai-detection-query.service';
+import { AiDetectionQueueService } from 'src/ai-detection/ai-detection-queue.service';
+import { DetectableEntity } from 'src/ai-detection/entities/ai-detection-result.entity';
 import { ActionsService } from 'src/actions/actions.service';
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import { Action } from 'src/actions/entities/action.entity';
@@ -76,6 +79,8 @@ export class TasksService {
     private actionShareUrlRepository: Repository<ActionShareUrl>,
     private eventLogService: EventLogService,
     private videosService: VideosService,
+    private aiDetectionQueueService: AiDetectionQueueService,
+    private aiDetectionQueryService: AiDetectionQueryService,
   ) { }
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
@@ -368,6 +373,10 @@ export class TasksService {
       user,
     });
     const savedForm = await this.formResponseRepository.save(formResponse);
+    await this.aiDetectionQueueService.addDetectJob({
+      entityType: DetectableEntity.FormResponse,
+      entityId: savedForm.id,
+    });
 
     await this.actionsService.completeAction(submitFormDto.actionId, userId, {
       taskFormResponse: savedForm,
@@ -392,6 +401,10 @@ export class TasksService {
       publicAnswers: submitFormDto.publicAnswers ?? {},
     });
     const savedForm = await this.formResponseRepository.save(formResponse);
+    await this.aiDetectionQueueService.addDetectJob({
+      entityType: DetectableEntity.FormResponse,
+      entityId: savedForm.id,
+    });
 
     return savedForm;
   }
@@ -419,6 +432,10 @@ export class TasksService {
       user,
     });
     const savedForm = await this.formResponseRepository.save(formResponse);
+    await this.aiDetectionQueueService.addDetectJob({
+      entityType: DetectableEntity.FormResponse,
+      entityId: savedForm.id,
+    });
 
     return this.actionsService.createActionActivity({
       actionId,
@@ -568,7 +585,20 @@ export class TasksService {
       where: { formId },
       relations: { user: true },
     });
-    return responses;
+    if (!responses.length) {
+      return responses;
+    }
+
+    const aiDetectionByResponseId =
+      await this.aiDetectionQueryService.findForEntities(
+        DetectableEntity.FormResponse,
+        responses.map((response) => response.id),
+      );
+
+    return responses.map((response) => ({
+      ...response,
+      aiDetectionResults: aiDetectionByResponseId.get(response.id) ?? [],
+    }));
   }
 
   async getMyFormResponse(

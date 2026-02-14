@@ -2372,6 +2372,18 @@ export type SubmitFormDto = {
     sid?: string;
 };
 
+export type DetectionStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+export type AiDetectionResultDto = {
+    id: number;
+    fieldPath: string;
+    status: DetectionStatus;
+    aiProbability?: number;
+    modelVersion?: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type FormResponseDto = {
     id: number;
     formId: number;
@@ -2393,6 +2405,7 @@ export type FormResponseDto = {
     };
     sid?: string;
     user?: UserDto;
+    aiDetectionResults?: Array<AiDetectionResultDto>;
 };
 
 export type CreateFormDto = {

@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AiDetectionModule } from 'src/ai-detection/ai-detection.module';
 import { ForumService } from './forum.service';
 import { ForumController } from './forum.controller';
 import { Post } from './entities/post.entity';
@@ -32,6 +33,7 @@ import { UserModule } from 'src/user/user.module';
     forwardRef(() => NotifsModule),
     forwardRef(() => EventLogModule),
     forwardRef(() => UserModule),
+    AiDetectionModule,
   ],
   controllers: [ForumController],
   providers: [ForumService, ForumDigestService],
