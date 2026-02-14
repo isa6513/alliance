@@ -59,15 +59,6 @@ type Tab = "responses" | "stats";
 
 type ResponseFilterOp = "equals" | "includes" | "no-response";
 
-type FormResponseAiDetection = {
-  fieldPath: string;
-  status: string;
-  aiProbability: number | null;
-};
-
-type FormResponseWithAi = FormResponseDto & {
-  aiDetectionResults?: FormResponseAiDetection[];
-};
 
 export type FormResponseFilter = {
   fieldId: string;
@@ -355,7 +346,7 @@ const FormResponses: React.FC = () => {
   const currentResponseAiInlineLabels = useMemo<
     Record<string, React.ReactNode>
   >(() => {
-    const response = currentResponse as FormResponseWithAi | undefined;
+    const response = currentResponse as FormResponseDto | undefined;
     const detections = response?.aiDetectionResults ?? [];
     const inlineScores: Record<string, React.ReactNode> = {};
 
