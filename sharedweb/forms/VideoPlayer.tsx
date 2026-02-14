@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
+import posthog from "posthog-js";
 import { getApiUrl } from "../lib/config";
 
 type VideoPlayerProps = {
@@ -66,6 +67,39 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
       if (cleanupInterval) clearInterval(cleanupInterval);
     };
   }, [videoId, status]);
+
+  useEffect(() => {
+    posthog.capture("video_seen", { videoId });
+  }, [videoId]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let hasTrackedPlay = false;
+    let hasTrackedComplete = false;
+
+    const onPlay = () => {
+      if (hasTrackedPlay) return;
+      hasTrackedPlay = true;
+      posthog.capture("video_started", { videoId, src });
+    };
+
+    const onTimeUpdate = () => {
+      if (hasTrackedComplete || !video.duration) return;
+      if (video.duration - video.currentTime <= 3) {
+        hasTrackedComplete = true;
+        posthog.capture("video_fully_watched", { videoId, src });
+      }
+    };
+
+    video.addEventListener("play", onPlay);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    return () => {
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+    };
+  }, [videoId, src]);
 
   // Initialize HLS playback
   useEffect(() => {
