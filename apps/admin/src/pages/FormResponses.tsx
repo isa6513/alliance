@@ -59,7 +59,6 @@ type Tab = "responses" | "stats" | "questions";
 
 type ResponseFilterOp = "equals" | "includes" | "no-response";
 
-
 export type FormResponseFilter = {
   fieldId: string;
   op: ResponseFilterOp;
@@ -412,7 +411,10 @@ const FormResponses: React.FC = () => {
         return null;
       }
       case "multiselect": {
-        const optionLabel = getOptionLabel(activeFilterField, activeFilter.value);
+        const optionLabel = getOptionLabel(
+          activeFilterField,
+          activeFilter.value
+        );
         return {
           fieldLabel,
           description: `Includes ${optionLabel ?? valueLabel}`,
@@ -420,7 +422,10 @@ const FormResponses: React.FC = () => {
       }
       case "radio":
       case "select": {
-        const optionLabel = getOptionLabel(activeFilterField, activeFilter.value);
+        const optionLabel = getOptionLabel(
+          activeFilterField,
+          activeFilter.value
+        );
         return { fieldLabel, description: optionLabel ?? valueLabel };
       }
       case "range":
@@ -475,7 +480,8 @@ const FormResponses: React.FC = () => {
   const questionResponses = useMemo(() => {
     if (!selectedQuestionFieldId) return [];
     return responses.filter(
-      (response) => !isNoResponseValue(response.answers?.[selectedQuestionFieldId])
+      (response) =>
+        !isNoResponseValue(response.answers?.[selectedQuestionFieldId])
     );
   }, [responses, selectedQuestionFieldId]);
 
@@ -486,9 +492,12 @@ const FormResponses: React.FC = () => {
       switch (selectedQuestionField.kind) {
         case "radio":
         case "select": {
-          const normalized = value === null || value === undefined ? "" : String(value);
+          const normalized =
+            value === null || value === undefined ? "" : String(value);
           if (!normalized) return "No response";
-          return getOptionLabel(selectedQuestionField, normalized) ?? normalized;
+          return (
+            getOptionLabel(selectedQuestionField, normalized) ?? normalized
+          );
         }
         case "multiselect": {
           const selections = getSelections(value);
@@ -567,10 +576,10 @@ const FormResponses: React.FC = () => {
 
   const respondentName = currentResponse
     ? currentResponse.user?.name ??
-    (sidsToUserMap[currentResponse.sid ?? ""]
-      ? "anonymous invited by " +
-      sidsToUserMap[currentResponse.sid ?? ""]?.displayName
-      : "anonymous")
+      (sidsToUserMap[currentResponse.sid ?? ""]
+        ? "anonymous invited by " +
+          sidsToUserMap[currentResponse.sid ?? ""]?.displayName
+        : "anonymous")
     : "";
 
   const getRespondentName = useCallback(
@@ -762,11 +771,11 @@ const FormResponses: React.FC = () => {
                           onClick={() =>
                             window.open(
                               "https://us.posthog.com/project/188181/replay/home?sessionRecordingId=" +
-                              currentResponse.sessionReplayUrl!.substring(
-                                currentResponse.sessionReplayUrl!.lastIndexOf(
-                                  "/"
-                                ) + 1
-                              ),
+                                currentResponse.sessionReplayUrl!.substring(
+                                  currentResponse.sessionReplayUrl!.lastIndexOf(
+                                    "/"
+                                  ) + 1
+                                ),
                               "_blank"
                             )
                           }
@@ -833,29 +842,27 @@ const FormResponses: React.FC = () => {
             </Card>
           ) : (
             <div className="space-y-3">
-              <div className="rounded-lg border border-gray-200 bg-white px-3 py-3">
-                <div className="flex flex-col gap-2">
-                  <label
-                    htmlFor="question-field-select"
-                    className="text-xs font-semibold tracking-wide text-gray-600 uppercase"
-                  >
-                    Question
-                  </label>
-                  <select
-                    id="question-field-select"
-                    value={selectedQuestionFieldId}
-                    onChange={(event) =>
-                      updateParams({ questionField: event.target.value })
-                    }
-                    className="w-full max-w-xl rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-black focus:outline-none"
-                  >
-                    {orderedFieldIds.map((fieldId) => (
-                      <option key={fieldId} value={fieldId}>
-                        {fieldLabels[fieldId] || fieldId}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="flex flex-col gap-2 mt-3">
+                <label
+                  htmlFor="question-field-select"
+                  className="text-xs font-semibold tracking-wide text-gray-600 uppercase"
+                >
+                  Question
+                </label>
+                <select
+                  id="question-field-select"
+                  value={selectedQuestionFieldId}
+                  onChange={(event) =>
+                    updateParams({ questionField: event.target.value })
+                  }
+                  className="w-full max-w-xl rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-black focus:outline-none"
+                >
+                  {orderedFieldIds.map((fieldId) => (
+                    <option key={fieldId} value={fieldId}>
+                      {fieldLabels[fieldId] || fieldId}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {questionResponses.length === 0 ? (
@@ -878,7 +885,9 @@ const FormResponses: React.FC = () => {
                       <div
                         key={
                           response.id ??
-                          `${response.sid ?? "anonymous"}-${response.createdAt}-${index}`
+                          `${response.sid ?? "anonymous"}-${
+                            response.createdAt
+                          }-${index}`
                         }
                         className="grid grid-cols-1 gap-1 border-b border-gray-100 px-3 py-2 last:border-b-0 md:grid-cols-[260px_minmax(0,1fr)] md:gap-3"
                       >
