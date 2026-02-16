@@ -1,4 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Action } from './action.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Allow } from 'class-validator';
@@ -46,7 +52,7 @@ export class ActionSuite {
   @Type(() => Action)
   actions: Ty<Action>[];
 
-  @OneToMany(() => GeneralUpdate, (generalUpdate) => generalUpdate.suite)
+  @ManyToMany(() => GeneralUpdate, (generalUpdate) => generalUpdate.suites)
   @ApiProperty({ type: () => GeneralUpdate, isArray: true })
   @Allow()
   @Type(() => GeneralUpdate)

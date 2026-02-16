@@ -6,7 +6,6 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -96,11 +95,12 @@ export class GeneralUpdate {
   @Type(() => Tag)
   tags: Tag[];
 
-  @ManyToOne(() => ActionSuite, (suite) => suite.generalUpdates, {
+  @ManyToMany(() => ActionSuite, (suite) => suite.generalUpdates, {
     nullable: true,
   })
-  @ApiPropertyOptional({ type: () => ActionSuite })
+  @ApiPropertyOptional({ type: () => ActionSuite, isArray: true })
   @Type(() => ActionSuite)
+  @JoinTable()
   @IsOptional()
-  suite?: ActionSuite | null;
+  suites?: Ty<ActionSuite>[];
 }
