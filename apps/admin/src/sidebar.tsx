@@ -26,6 +26,7 @@ import {
   Calendar,
   ImageUp,
   BarChart2,
+  Newspaper,
   ChevronDown,
   ChevronRight,
   MessageSquare,
@@ -128,41 +129,41 @@ const Sidebar: React.FC = () => {
     name: string;
     actions: Action[];
   }[] = [
-      {
-        name: "Active",
-        actions: filteredActions.filter(
-          (action) =>
-            (action.status === "member_action" ||
-              action.status === "gathering_commitments") &&
-            !action.onboarding
-        ),
-      },
-      {
-        name: "Pending",
-        actions: filteredActions.filter(
-          (action) =>
-            action.status !== "draft" &&
-            action.status !== "member_action" &&
-            action.status !== "gathering_commitments" &&
-            !action.onboarding &&
-            action.status !== "completed"
-        ),
-      },
-      {
-        name: "Draft",
-        actions: filteredActions.filter((action) => action.status === "draft"),
-      },
-      {
-        name: "Onboarding",
-        actions: filteredActions.filter((action) => action.onboarding),
-      },
-      {
-        name: "Completed",
-        actions: filteredActions.filter(
-          (action) => action.status === "completed"
-        ),
-      },
-    ];
+    {
+      name: "Active",
+      actions: filteredActions.filter(
+        (action) =>
+          (action.status === "member_action" ||
+            action.status === "gathering_commitments") &&
+          !action.onboarding
+      ),
+    },
+    {
+      name: "Pending",
+      actions: filteredActions.filter(
+        (action) =>
+          action.status !== "draft" &&
+          action.status !== "member_action" &&
+          action.status !== "gathering_commitments" &&
+          !action.onboarding &&
+          action.status !== "completed"
+      ),
+    },
+    {
+      name: "Draft",
+      actions: filteredActions.filter((action) => action.status === "draft"),
+    },
+    {
+      name: "Onboarding",
+      actions: filteredActions.filter((action) => action.onboarding),
+    },
+    {
+      name: "Completed",
+      actions: filteredActions.filter(
+        (action) => action.status === "completed"
+      ),
+    },
+  ];
 
   const isProd = isProduction();
 
@@ -178,18 +179,25 @@ const Sidebar: React.FC = () => {
         }}
       >
         <div
-          className={`flex flex-col gap-y-3 sticky p-5 py-6 w-[${sidebarWidth}px] ${isSidebarOpen ? "translate-x-0" : "-translate-x-[300px]"
-            }`}
+          className={`flex flex-col gap-y-3 sticky p-5 py-6 w-[${sidebarWidth}px] ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-[300px]"
+          }`}
         >
           <h1
-            className={`text-[14pt] font-bold pb-0 ${isProd ? "text-red-500" : "text-gray-900"
-              }`}
+            className={`text-[14pt] font-bold pb-0 ${
+              isProd ? "text-red-500" : "text-gray-900"
+            }`}
           >
             Alliance Admin
           </h1>
           <nav className="flex flex-col gap-y-1">
             {[
               { to: "/", label: "Actions", icon: <SquareActivity size={16} /> },
+              {
+                to: "/general-updates",
+                label: "General Updates",
+                icon: <Newspaper size={16} />,
+              },
               { to: "/members", label: "Members", icon: <Users size={16} /> },
               {
                 to: "/database",
@@ -354,8 +362,9 @@ const Sidebar: React.FC = () => {
                       <div
                         key={action.id}
                         onClick={() => handleEditAction(action.id)}
-                        className={`cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md ${currentActionId === action.id ? "bg-zinc-200" : ""
-                          }`}
+                        className={`cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md ${
+                          currentActionId === action.id ? "bg-zinc-200" : ""
+                        }`}
                       >
                         <p className="text-xs">{action.name}</p>
                       </div>
@@ -377,7 +386,9 @@ const Sidebar: React.FC = () => {
           </div>
         )}
         <div
-          className={`absolute top-7 ${isSidebarOpen ? "right-7" : "right-1"} cursor-pointer`}
+          className={`absolute top-7 ${
+            isSidebarOpen ? "right-7" : "right-1"
+          } cursor-pointer`}
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
           <SidebarIcon size="large" fill="black" />
