@@ -51,17 +51,19 @@ export class GeneralUpdate {
   @Type(() => Date)
   updatedAt: Date;
 
-  @Column({ type: 'timestamptz' })
-  @ApiProperty()
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiPropertyOptional()
   @Type(() => Date)
   @Allow()
-  startDate: Date;
+  @IsOptional()
+  startDate?: Date;
 
-  @Column({ type: 'timestamptz' })
-  @ApiProperty()
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiPropertyOptional()
   @Type(() => Date)
   @Allow()
-  endDate: Date;
+  @IsOptional()
+  endDate?: Date;
 
   @Column({ default: false })
   @ApiProperty()
