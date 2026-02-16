@@ -32,6 +32,7 @@ export default [
       ),
       route("/posts/:postId?", "pages/PostsManagement.tsx"),
       route("/event-log", "pages/EventLogPage.tsx"),
+      route("/general-updates", "pages/GeneralUpdatesPage.tsx"),
     ]),
     route("/database", "pages/DatabaseViewer.tsx"),
   ]),
