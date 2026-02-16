@@ -55,7 +55,7 @@ const FILTERABLE_FIELD_KINDS = new Set<FieldKind>([
 
 const AI_SCORE_FIELD_KINDS = new Set<FieldKind>(["text", "textarea"]);
 
-type Tab = "responses" | "stats";
+type Tab = "responses" | "stats" | "questions";
 
 type ResponseFilterOp = "equals" | "includes" | "no-response";
 
@@ -81,6 +81,9 @@ const isAnswerField = (
 
 const isResponseFilterOp = (value: string | null): value is ResponseFilterOp =>
   value === "equals" || value === "includes" || value === "no-response";
+
+const isTab = (value: string | null): value is Tab =>
+  value === "responses" || value === "stats" || value === "questions";
 
 const sortResponsesByCreatedAtDesc = (
   list: FormResponseDto[]
@@ -178,10 +181,12 @@ const FormResponses: React.FC = () => {
   >({});
 
   const [params, setParams] = useSearchParams();
-  const tab = (params.get("tab") as Tab) ?? "responses";
+  const tabParam = params.get("tab");
+  const tab = isTab(tabParam) ? tabParam : "responses";
   const filterFieldId = params.get("filterField")?.trim() ?? "";
   const filterOpParam = params.get("filterOp");
   const filterValueParam = params.get("filterValue");
+  const questionFieldParam = params.get("questionField")?.trim() ?? "";
 
   const updateParams = useCallback(
     (updates: Record<string, string | null | undefined>) => {
@@ -327,6 +332,13 @@ const FormResponses: React.FC = () => {
       matchesResponseFilter(response, activeFilter, activeFilterField)
     );
   }, [responses, activeFilter, activeFilterField]);
+
+  const selectedQuestionFieldId = useMemo(() => {
+    if (questionFieldParam && orderedFieldIds.includes(questionFieldParam)) {
+      return questionFieldParam;
+    }
+    return orderedFieldIds[0] ?? "";
+  }, [questionFieldParam, orderedFieldIds]);
 
   useEffect(() => {
     setPage(1);
@@ -521,6 +533,19 @@ const FormResponses: React.FC = () => {
       : "anonymous")
     : "";
 
+  const getRespondentName = useCallback(
+    (response: FormResponseDto): string => {
+      return (
+        response.user?.name ??
+        (sidsToUserMap[response.sid ?? ""]
+          ? "anonymous invited by " +
+            sidsToUserMap[response.sid ?? ""]?.displayName
+          : "anonymous")
+      );
+    },
+    [sidsToUserMap]
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -552,9 +577,22 @@ const FormResponses: React.FC = () => {
                     tab === "stats" ? ButtonColor.Black : ButtonColor.White
                   }
                   size="small"
-                  disabled={tab === "stats"}
                 >
                   Stats
+                </Button>
+                <Button
+                  onClick={() =>
+                    updateParams({
+                      tab: "questions",
+                      questionField: selectedQuestionFieldId || null,
+                    })
+                  }
+                  color={
+                    tab === "questions" ? ButtonColor.Black : ButtonColor.White
+                  }
+                  size="small"
+                >
+                  Questions
                 </Button>
               </div>
             </div>
@@ -738,6 +776,93 @@ const FormResponses: React.FC = () => {
           responses={responses}
           onFilterSelect={handleStatFilter}
         />
+      )}
+      {tab === "questions" && (
+        <div className="px-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-gray-500">Loading responses...</p>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-red-500">{error}</p>
+            </div>
+          ) : orderedFieldIds.length === 0 ? (
+            <Card style={CardStyle.White}>
+              <p className="text-gray-600">No answerable questions found.</p>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-gray-200 bg-white px-3 py-3">
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="question-field-select"
+                    className="text-xs font-semibold tracking-wide text-gray-600 uppercase"
+                  >
+                    Question
+                  </label>
+                  <select
+                    id="question-field-select"
+                    value={selectedQuestionFieldId}
+                    onChange={(event) =>
+                      updateParams({ questionField: event.target.value })
+                    }
+                    className="w-full max-w-xl rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-black focus:outline-none"
+                  >
+                    {orderedFieldIds.map((fieldId) => (
+                      <option key={fieldId} value={fieldId}>
+                        {fieldLabels[fieldId] || fieldId}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {responses.length === 0 ? (
+                <Card style={CardStyle.White}>
+                  <p className="text-gray-600">No responses yet for this form.</p>
+                </Card>
+              ) : (
+                <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+                  <div className="grid grid-cols-1 gap-2 border-b border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold tracking-wide text-gray-600 uppercase md:grid-cols-[260px_minmax(0,1fr)]">
+                    <div>Respondent</div>
+                    <div>Answer</div>
+                  </div>
+                  {responses.map((response, index) => {
+                    const answerValue = selectedQuestionFieldId
+                      ? response.answers?.[selectedQuestionFieldId]
+                      : null;
+                    return (
+                      <div
+                        key={
+                          response.id ??
+                          `${response.sid ?? "anonymous"}-${response.createdAt}-${index}`
+                        }
+                        className="grid grid-cols-1 gap-1 border-b border-gray-100 px-3 py-2 last:border-b-0 md:grid-cols-[260px_minmax(0,1fr)] md:gap-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-gray-900">
+                            {getRespondentName(response)}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {new Date(response.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm text-gray-800 whitespace-pre-wrap break-words leading-5">
+                            {isNoResponseValue(answerValue)
+                              ? "No response"
+                              : formatValue(answerValue)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
