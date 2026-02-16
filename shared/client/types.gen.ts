@@ -1353,6 +1353,51 @@ export type GeneralUpdateDto = {
     endDate?: string;
 };
 
+export type GeneralUpdateAdminDto = {
+    id: number;
+    name: string;
+    schema: {
+        [key: string]: unknown;
+    };
+    createdAt: string;
+    updatedAt: string;
+    startDate?: string;
+    endDate?: string;
+    useManualCohort: boolean;
+    /**
+     * User IDs in the manual cohort
+     */
+    manualCohortUserIds?: Array<number> | null;
+    tags: Array<Tag>;
+    suites?: Array<ActionSuite>;
+};
+
+export type CreateGeneralUpdateDto = {
+    name: string;
+    startDate?: string;
+    endDate?: string;
+    useManualCohort: boolean;
+    /**
+     * User IDs in the manual cohort
+     */
+    manualCohortUserIds?: Array<number> | null;
+    tagIds?: Array<string>;
+    suiteIds?: Array<number>;
+};
+
+export type UpdateGeneralUpdateDto = {
+    name: string;
+    startDate?: string;
+    endDate?: string;
+    useManualCohort: boolean;
+    /**
+     * User IDs in the manual cohort
+     */
+    manualCohortUserIds?: Array<number> | null;
+    tagIds?: Array<string>;
+    suiteIds?: Array<number>;
+};
+
 export type LatLonDto = {
     latitude: number;
     longitude: number;
@@ -4506,19 +4551,6 @@ export type ActionsAllGeneralUpdatesResponses = {
 
 export type ActionsAllGeneralUpdatesResponse = ActionsAllGeneralUpdatesResponses[keyof ActionsAllGeneralUpdatesResponses];
 
-export type ActionsAllGeneralUpdatesAdminData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/actions/generalUpdates/admin';
-};
-
-export type ActionsAllGeneralUpdatesAdminResponses = {
-    200: Array<GeneralUpdateDto>;
-};
-
-export type ActionsAllGeneralUpdatesAdminResponse = ActionsAllGeneralUpdatesAdminResponses[keyof ActionsAllGeneralUpdatesAdminResponses];
-
 export type ActionsUnreadGeneralUpdatesData = {
     body?: never;
     path?: never;
@@ -4544,6 +4576,75 @@ export type ActionsDismissGeneralUpdateData = {
 export type ActionsDismissGeneralUpdateResponses = {
     200: unknown;
 };
+
+export type ActionsAllGeneralUpdatesAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/generalUpdates/admin';
+};
+
+export type ActionsAllGeneralUpdatesAdminResponses = {
+    200: Array<GeneralUpdateAdminDto>;
+};
+
+export type ActionsAllGeneralUpdatesAdminResponse = ActionsAllGeneralUpdatesAdminResponses[keyof ActionsAllGeneralUpdatesAdminResponses];
+
+export type ActionsFindOneGeneralUpdateData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/generalUpdates/admin/{id}';
+};
+
+export type ActionsFindOneGeneralUpdateResponses = {
+    200: GeneralUpdateAdminDto;
+};
+
+export type ActionsFindOneGeneralUpdateResponse = ActionsFindOneGeneralUpdateResponses[keyof ActionsFindOneGeneralUpdateResponses];
+
+export type ActionsCreateGeneralUpdateData = {
+    body: CreateGeneralUpdateDto;
+    path?: never;
+    query?: never;
+    url: '/actions/generalUpdates/create';
+};
+
+export type ActionsCreateGeneralUpdateResponses = {
+    200: GeneralUpdateAdminDto;
+};
+
+export type ActionsCreateGeneralUpdateResponse = ActionsCreateGeneralUpdateResponses[keyof ActionsCreateGeneralUpdateResponses];
+
+export type ActionsDeleteGeneralUpdateData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/generalUpdates/{id}';
+};
+
+export type ActionsDeleteGeneralUpdateResponses = {
+    200: unknown;
+};
+
+export type ActionsUpdateGeneralUpdateData = {
+    body: UpdateGeneralUpdateDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/generalUpdates/{id}';
+};
+
+export type ActionsUpdateGeneralUpdateResponses = {
+    200: GeneralUpdateAdminDto;
+};
+
+export type ActionsUpdateGeneralUpdateResponse = ActionsUpdateGeneralUpdateResponses[keyof ActionsUpdateGeneralUpdateResponses];
 
 export type ActionsUserLocationsData = {
     body?: never;

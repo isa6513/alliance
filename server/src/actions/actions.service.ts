@@ -617,7 +617,84 @@ export class ActionsService {
   }
 
   async findAllGeneralUpdatesAdmin(): Promise<GeneralUpdate[]> {
-    return await this.generalUpdateRepository.find();
+    return await this.generalUpdateRepository.find({
+      relations: { tags: true, suites: true },
+    });
+  }
+
+  async findOneGeneralUpdate(id: number): Promise<GeneralUpdate> {
+    return await this.generalUpdateRepository.findOneOrFail({
+      where: { id },
+      relations: { tags: true, suites: true },
+    });
+  }
+
+  async createGeneralUpdate(dto: {
+    name: string;
+    startDate?: Date;
+    endDate?: Date;
+    useManualCohort: boolean;
+    manualCohortUserIds?: number[] | null;
+    tagIds?: string[];
+    suiteIds?: number[];
+  }): Promise<GeneralUpdate> {
+    const { tagIds, suiteIds, ...rest } = dto;
+    const generalUpdate = this.generalUpdateRepository.create({
+      ...rest,
+      schema: {},
+    });
+
+    if (tagIds && tagIds.length > 0) {
+      generalUpdate.tags = await this.tagRepository.findBy({
+        id: In(tagIds),
+      });
+    }
+
+    if (suiteIds && suiteIds.length > 0) {
+      generalUpdate.suites = await this.actionSuiteRepository.findBy({
+        id: In(suiteIds),
+      });
+    }
+
+    return this.generalUpdateRepository.save(generalUpdate);
+  }
+
+  async updateGeneralUpdate(
+    id: number,
+    dto: {
+      name?: string;
+      startDate?: Date;
+      endDate?: Date;
+      useManualCohort?: boolean;
+      manualCohortUserIds?: number[] | null;
+      tagIds?: string[];
+      suiteIds?: number[];
+    },
+  ): Promise<GeneralUpdate> {
+    const generalUpdate = await this.findOneGeneralUpdate(id);
+    const { tagIds, suiteIds, ...rest } = dto;
+
+    Object.assign(generalUpdate, rest);
+
+    if (tagIds !== undefined) {
+      generalUpdate.tags =
+        tagIds.length > 0
+          ? await this.tagRepository.findBy({ id: In(tagIds) })
+          : [];
+    }
+
+    if (suiteIds !== undefined) {
+      generalUpdate.suites =
+        suiteIds.length > 0
+          ? await this.actionSuiteRepository.findBy({ id: In(suiteIds) })
+          : [];
+    }
+
+    return this.generalUpdateRepository.save(generalUpdate);
+  }
+
+  async deleteGeneralUpdate(id: number): Promise<void> {
+    await this.generalUpdateRepository.delete(id);
   }
 
   async findUnreadGeneralUpdates(params: {

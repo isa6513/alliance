@@ -83,7 +83,12 @@ import { Action } from './entities/action.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { ForumActionCompleterWorker } from './forum-action-completer.worker';
-import { GeneralUpdateDto } from './dto/general-update.dto';
+import {
+  CreateGeneralUpdateDto,
+  GeneralUpdateAdminDto,
+  GeneralUpdateDto,
+  UpdateGeneralUpdateDto,
+} from './dto/general-update.dto';
 
 @Controller('actions')
 export class ActionsController {
@@ -205,15 +210,6 @@ export class ActionsController {
     );
   }
 
-  @Get('generalUpdates/admin')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: [GeneralUpdateDto] })
-  async allGeneralUpdatesAdmin(): Promise<GeneralUpdateDto[]> {
-    return (await this.actionsService.findAllGeneralUpdatesAdmin()).map(
-      (generalUpdate) => new GeneralUpdateDto(generalUpdate),
-    );
-  }
-
   @Get('generalUpdates/unread')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [GeneralUpdateDto] })
@@ -240,6 +236,58 @@ export class ActionsController {
       req.user.sub,
       generalUpdateId,
     );
+  }
+
+  @Get('generalUpdates/admin')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [GeneralUpdateAdminDto] })
+  async allGeneralUpdatesAdmin(): Promise<GeneralUpdateAdminDto[]> {
+    return (await this.actionsService.findAllGeneralUpdatesAdmin()).map(
+      (generalUpdate) => new GeneralUpdateAdminDto(generalUpdate),
+    );
+  }
+
+  @Get('generalUpdates/admin/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: GeneralUpdateAdminDto })
+  async findOneGeneralUpdate(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GeneralUpdateAdminDto> {
+    return new GeneralUpdateAdminDto(
+      await this.actionsService.findOneGeneralUpdate(id),
+    );
+  }
+
+  @Post('generalUpdates/create')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: GeneralUpdateAdminDto })
+  async createGeneralUpdate(
+    @Body() dto: CreateGeneralUpdateDto,
+  ): Promise<GeneralUpdateAdminDto> {
+    return new GeneralUpdateAdminDto(
+      await this.actionsService.createGeneralUpdate(dto),
+    );
+  }
+
+  @Patch('generalUpdates/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: GeneralUpdateAdminDto })
+  async updateGeneralUpdate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateGeneralUpdateDto,
+  ): Promise<GeneralUpdateAdminDto> {
+    return new GeneralUpdateAdminDto(
+      await this.actionsService.updateGeneralUpdate(id, dto),
+    );
+  }
+
+  @Delete('generalUpdates/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async deleteGeneralUpdate(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    return this.actionsService.deleteGeneralUpdate(id);
   }
 
   @Get('userlocations/:id')
