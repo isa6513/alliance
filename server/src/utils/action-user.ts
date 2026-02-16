@@ -39,24 +39,57 @@ export function computeIsAwayDuringAnyOfLastMemberAction(params: {
   });
 }
 
-export function computeIsTaggedOrInManualCohort(params: {
+export function computeIsTaggedOrInManualCohortAction(params: {
   user: User;
   action: Action;
   includeSuspended: boolean;
 }): boolean {
   const { user, action, includeSuspended } = params;
 
-  if (action.useManualCohort) {
-    return !!action.manualCohortUserIdSet?.has(user.id);
+  return computeIsTaggedOrInManualCohort({
+    user,
+    useManualCohort: action.useManualCohort,
+    manualCohortUserIdSet: action.manualCohortUserIdSet,
+    participatingTagIdSet: action.participatingTagIdSet,
+    everyoneShouldComplete: action.everyoneShouldComplete,
+    latestMemberActionEventDate: action.latestMemberActionEvent?.event?.date,
+    latestMemberActionEventDeadline: action.latestMemberActionEvent?.deadline,
+    includeSuspended,
+  });
+}
+
+export function computeIsTaggedOrInManualCohort(params: {
+  user: Pick<User, 'id' | 'tags' | 'hasActiveContractInFullRange'>;
+  useManualCohort: Action['useManualCohort'];
+  manualCohortUserIdSet: Action['manualCohortUserIdSet'];
+  participatingTagIdSet: Action['participatingTagIdSet'];
+  everyoneShouldComplete: Action['everyoneShouldComplete'];
+  latestMemberActionEventDate: Date | undefined | null;
+  latestMemberActionEventDeadline: Date | undefined | null;
+  includeSuspended: boolean;
+}): boolean {
+  const {
+    user,
+    useManualCohort,
+    manualCohortUserIdSet,
+    participatingTagIdSet,
+    everyoneShouldComplete,
+    latestMemberActionEventDate,
+    latestMemberActionEventDeadline,
+    includeSuspended,
+  } = params;
+
+  if (useManualCohort) {
+    return !!manualCohortUserIdSet?.has(user.id);
   }
 
   return (
-    user.tags.some((tag) => action.participatingTagIdSet.has(tag.id)) &&
+    user.tags.some((tag) => participatingTagIdSet.has(tag.id)) &&
     (includeSuspended ||
-      action.everyoneShouldComplete ||
+      everyoneShouldComplete ||
       user.hasActiveContractInFullRange({
-        startDate: action.latestMemberActionEvent?.event?.date,
-        endDate: action.latestMemberActionEvent?.deadline,
+        startDate: latestMemberActionEventDate,
+        endDate: latestMemberActionEventDeadline,
       }))
   );
 }

@@ -212,10 +212,11 @@ export class ActionsController {
     @Request() req: JwtRequest,
   ): Promise<GeneralUpdateDto[]> {
     return (
-      await this.actionsService.findUnreadGeneralUpdates(
-        req.user.sub,
-        new Date(),
-      )
+      await this.actionsService.findUnreadGeneralUpdates({
+        userId: req.user.sub,
+        now: new Date(),
+        allowExpired: false,
+      })
     ).map((generalUpdate) => new GeneralUpdateDto(generalUpdate));
   }
 

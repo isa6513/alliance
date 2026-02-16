@@ -47,7 +47,15 @@ import {
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import { ProfileDto } from 'src/user/dto/user.dto';
-import { ILike, In, LessThan, MoreThan, type Repository } from 'typeorm';
+import {
+  ILike,
+  In,
+  IsNull,
+  LessThan,
+  MoreThan,
+  Or,
+  type Repository,
+} from 'typeorm';
 import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
@@ -107,6 +115,7 @@ import { findLeast } from 'src/utils/filter';
 import {
   computeIsAwayDuringAnyOfLastMemberAction,
   computeIsTaggedOrInManualCohort,
+  computeIsTaggedOrInManualCohortAction,
 } from 'src/utils/action-user';
 import { computeIsAwayInRange } from 'src/utils/user';
 import { CommunityService } from 'src/community/community.service';
@@ -483,7 +492,7 @@ export class ActionsService {
             (event) => event.newStatus === ActionStatus.MemberAction,
           ) &&
           !actionsDismissed.has(action.id) &&
-          computeIsTaggedOrInManualCohort({
+          computeIsTaggedOrInManualCohortAction({
             action,
             user,
             includeSuspended: false,
@@ -602,33 +611,53 @@ export class ActionsService {
     return await this.generalUpdateRepository.find();
   }
 
-  async findUnreadGeneralUpdates(
-    userId: number,
-    now?: Date,
-  ): Promise<GeneralUpdate[]> {
+  async findUnreadGeneralUpdates(params: {
+    userId: number;
+    now: Date;
+    allowExpired: boolean;
+  }): Promise<GeneralUpdate[]> {
+    const { userId, now, allowExpired } = params;
+
     const updates = await this.generalUpdateRepository.find({
       where: {
-        ...(now && { startDate: LessThan(now), endDate: MoreThan(now) }),
+        startDate: LessThan(now),
+        ...(!allowExpired && { endDate: Or(IsNull(), MoreThan(now)) }),
       },
       relations: {
-        activities: true,
+        activities: { user: true },
       },
     });
-    return updates.filter(
-      (update) =>
-        !update.activities!.some(
-          (activity) =>
-            activity.type === GeneralUpdateActivityType.DISMISSED &&
-            activity.userId === userId,
-        ),
-    );
+    return updates.filter((update) => {
+      const activity = update.activities!.find(
+        (activity) =>
+          activity.type === GeneralUpdateActivityType.DISMISSED &&
+          activity.userId === userId,
+      );
+      if (!activity) {
+        return false;
+      }
+      return computeIsTaggedOrInManualCohort({
+        user: activity.user,
+        useManualCohort: update.useManualCohort,
+        manualCohortUserIdSet: new Set(update.manualCohortUserIds),
+        participatingTagIdSet: new Set(update.tags.map((tag) => tag.id)),
+        everyoneShouldComplete: false,
+        latestMemberActionEventDate: update.startDate,
+        latestMemberActionEventDeadline: update.endDate,
+        includeSuspended: false,
+      });
+    });
   }
 
   async dismissGeneralUpdate(
     userId: number,
     generalUpdateId: number,
   ): Promise<void> {
-    const generalUpdates = await this.findUnreadGeneralUpdates(userId);
+    const generalUpdates = await this.findUnreadGeneralUpdates({
+      userId,
+      now: new Date(),
+      allowExpired: true,
+    });
     const generalUpdate = generalUpdates.find(
       (update) => update.id === generalUpdateId,
     );
@@ -2376,7 +2405,7 @@ export class ActionsService {
             user: userCachedFilter.filtered({ id: userId })[0]!,
             action,
           }) &&
-          computeIsTaggedOrInManualCohort({
+          computeIsTaggedOrInManualCohortAction({
             action,
             user: userCachedFilter.filtered({ id: userId })[0]!,
             includeSuspended: false,
