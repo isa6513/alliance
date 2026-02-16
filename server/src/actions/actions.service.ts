@@ -624,20 +624,26 @@ export class ActionsService {
         ...(!allowExpired && { endDate: Or(IsNull(), MoreThan(now)) }),
       },
       relations: {
-        activities: { user: true },
+        activities: true,
       },
     });
+    const user = await this.userService.findOneOrFail(userId, {
+      tags: true,
+      contractEvents: true,
+    });
+
     return updates.filter((update) => {
-      const activity = update.activities!.find(
-        (activity) =>
-          activity.type === GeneralUpdateActivityType.DISMISSED &&
-          activity.userId === userId,
-      );
-      if (!activity) {
+      if (
+        update.activities!.some(
+          (activity) =>
+            activity.type === GeneralUpdateActivityType.DISMISSED &&
+            activity.userId === userId,
+        )
+      ) {
         return false;
       }
       return computeIsTaggedOrInManualCohort({
-        user: activity.user,
+        user,
         useManualCohort: update.useManualCohort,
         manualCohortUserIdSet: new Set(update.manualCohortUserIds),
         participatingTagIdSet: new Set(update.tags.map((tag) => tag.id)),
