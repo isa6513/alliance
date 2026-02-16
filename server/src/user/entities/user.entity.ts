@@ -362,7 +362,7 @@ export class User {
   })
   @Type(() => Community)
   @IsOptional()
-  pendingCommunity?: Community | null;
+  pendingCommunity?: Ty<Community> | null;
 
   @ManyToMany(() => Community, (community) => community.users, {
     onDelete: 'CASCADE',
