@@ -608,6 +608,15 @@ export class ActionsService {
   }
 
   async findAllGeneralUpdates(): Promise<GeneralUpdate[]> {
+    const now = new Date();
+    return await this.generalUpdateRepository.find({
+      where: {
+        startDate: LessThan(now),
+      },
+    });
+  }
+
+  async findAllGeneralUpdatesAdmin(): Promise<GeneralUpdate[]> {
     return await this.generalUpdateRepository.find();
   }
 

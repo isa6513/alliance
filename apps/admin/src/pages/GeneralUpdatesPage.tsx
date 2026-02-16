@@ -1,5 +1,5 @@
 import {
-  actionsAllGeneralUpdates,
+  actionsAllGeneralUpdatesAdmin,
   GeneralUpdateDto,
 } from "@alliance/shared/client";
 import React, { useCallback, useEffect, useState } from "react";
@@ -13,7 +13,7 @@ const GeneralUpdatesPage: React.FC = () => {
 
   const loadUpdates = useCallback(async () => {
     try {
-      const response = await actionsAllGeneralUpdates();
+      const response = await actionsAllGeneralUpdatesAdmin();
       if (response.data) {
         setUpdates(response.data);
       }

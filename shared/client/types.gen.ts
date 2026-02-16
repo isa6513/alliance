@@ -207,15 +207,15 @@ export type GeneralUpdate = {
     };
     createdAt: string;
     updatedAt: string;
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
     useManualCohort: boolean;
     /**
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number> | null;
     tags: Array<Tag>;
-    suite?: ActionSuite;
+    suites?: Array<ActionSuite>;
 };
 
 export type Tag = {
@@ -1349,8 +1349,8 @@ export type GeneralUpdateDto = {
     schema: {
         [key: string]: unknown;
     };
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
 };
 
 export type LatLonDto = {
@@ -4505,6 +4505,19 @@ export type ActionsAllGeneralUpdatesResponses = {
 };
 
 export type ActionsAllGeneralUpdatesResponse = ActionsAllGeneralUpdatesResponses[keyof ActionsAllGeneralUpdatesResponses];
+
+export type ActionsAllGeneralUpdatesAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/generalUpdates/admin';
+};
+
+export type ActionsAllGeneralUpdatesAdminResponses = {
+    200: Array<GeneralUpdateDto>;
+};
+
+export type ActionsAllGeneralUpdatesAdminResponse = ActionsAllGeneralUpdatesAdminResponses[keyof ActionsAllGeneralUpdatesAdminResponses];
 
 export type ActionsUnreadGeneralUpdatesData = {
     body?: never;
