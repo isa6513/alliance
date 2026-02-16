@@ -50,7 +50,10 @@ import { UserDevice } from './entities/user-device.entity';
 import { PushService } from 'src/push/push.service';
 import { Push } from 'src/push/push.entity';
 import { EventLogService } from 'src/eventlog/eventlog.service';
-import { type CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
+import {
+  type CreateNotifParams,
+  NotifsService,
+} from 'src/notifs/notifs.service';
 import { CommunityService } from 'src/community/community.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 
@@ -91,10 +94,12 @@ export class UserService {
     private readonly eventLogService: EventLogService,
     private readonly notifsService: NotifsService,
     private readonly communityService: CommunityService,
-  ) { }
+  ) {}
 
   async create(data: DeepPartial<User>): Promise<User> {
-    const user = await this.userRepository.save(this.userRepository.create(data));
+    const user = await this.userRepository.save(
+      this.userRepository.create(data),
+    );
     await this.eventLogService.sendMessage({
       type: EventType.AccountCreated,
       message: `${user.name} created an account.`,
@@ -113,8 +118,8 @@ export class UserService {
         const city =
           (data.cityId
             ? await this.cityRepository.findOne({
-              where: { id: data.cityId },
-            })
+                where: { id: data.cityId },
+              })
             : undefined) ?? undefined;
 
         if (data.cityId && !city) {
@@ -472,23 +477,23 @@ export class UserService {
     const users =
       direction === 'sent'
         ? (
-          await this.friendRepository.find({
-            where: {
-              requester: { id: userId },
-              status: FriendStatus.Pending,
-            },
-            relations: { addressee: true },
-          })
-        ).map((r) => r.addressee!)
+            await this.friendRepository.find({
+              where: {
+                requester: { id: userId },
+                status: FriendStatus.Pending,
+              },
+              relations: { addressee: true },
+            })
+          ).map((r) => r.addressee!)
         : (
-          await this.friendRepository.find({
-            where: {
-              addressee: { id: userId },
-              status: FriendStatus.Pending,
-            },
-            relations: { requester: true },
-          })
-        ).map((r) => r.requester!);
+            await this.friendRepository.find({
+              where: {
+                addressee: { id: userId },
+                status: FriendStatus.Pending,
+              },
+              relations: { requester: true },
+            })
+          ).map((r) => r.requester!);
 
     return users.map((u) => new ProfileDto(u));
   }
@@ -653,9 +658,9 @@ export class UserService {
         if (
           user.pendingCommunity.maxCapacity !== null &&
           user.pendingCommunity.maxCapacity -
-          (user.pendingCommunity.users.length -
-            user.pendingCommunity.leaders!.length) >
-          0
+            (user.pendingCommunity.users.length -
+              user.pendingCommunity.leaders!.length) >
+            0
         ) {
           promises.push(
             this.communityService.addUsersToCommunityAndRefreshConversation({
@@ -699,7 +704,7 @@ export class UserService {
           return {
             user: leader,
             category: NotificationCategory.MemberJoinedCommunity,
-            message: `${user.name} (referred by ${user.referredBy!.name}) joined the Alliance and your group (${community.name})`,
+            message: `${user.name} (invited by ${user.referredBy!.name}) joined the Alliance and your group (${community.name})`,
             webAppLocation: groupUrl({
               tab: 'members',
               communityId: community.id,
@@ -737,7 +742,7 @@ export class UserService {
             notifForLeader: ({ leader }) => ({
               user: leader,
               category: NotificationCategory.MemberJoinedCommunity,
-              message: `${user.name} (referred by ${referredBy.name}) joined the Alliance and your group (${community.name})`,
+              message: `${user.name} (invited by ${referredBy.name}) joined the Alliance and your group (${community.name})`,
               webAppLocation: groupUrl({
                 tab: 'members',
                 communityId: community.id,
@@ -767,7 +772,7 @@ export class UserService {
       this.notifsService.sendNotifs(notifs),
       this.eventLogService.sendMessage({
         type: EventType.ContractSigned,
-        message: `${user.name} ${user.referredBy ? `(referred by ${user.referredBy.name}) ` : ''}signed their contract :)`,
+        message: `${user.name} ${user.referredBy ? `(invited by ${user.referredBy.name}) ` : ''}signed their contract :)`,
         userId: user.id,
       }),
       ...promises,
@@ -1061,8 +1066,8 @@ export class UserService {
     const communityP =
       communityId !== undefined
         ? this.communityRepository.findOne({
-          where: { id: communityId },
-        })
+            where: { id: communityId },
+          })
         : undefined;
 
     const user = await userP;
@@ -1519,8 +1524,10 @@ export class UserService {
   }
 
   async signedMembersCount(): Promise<number> {
-    return (await this.userRepository.find({
-      relations: { contractEvents: true },
-    })).filter((user) => user.hasActiveContract).length;
+    return (
+      await this.userRepository.find({
+        relations: { contractEvents: true },
+      })
+    ).filter((user) => user.hasActiveContract).length;
   }
 }

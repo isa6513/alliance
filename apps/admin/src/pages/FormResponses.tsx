@@ -340,6 +340,11 @@ const FormResponses: React.FC = () => {
     return orderedFieldIds[0] ?? "";
   }, [questionFieldParam, orderedFieldIds]);
 
+  const selectedQuestionField = useMemo(
+    () => fieldsById[selectedQuestionFieldId],
+    [fieldsById, selectedQuestionFieldId]
+  );
+
   useEffect(() => {
     setPage(1);
   }, [filterFieldId, filterOpParam, filterValueParam]);
@@ -466,6 +471,41 @@ const FormResponses: React.FC = () => {
     }
     return String(v);
   }, []);
+
+  const questionResponses = useMemo(() => {
+    if (!selectedQuestionFieldId) return [];
+    return responses.filter(
+      (response) => !isNoResponseValue(response.answers?.[selectedQuestionFieldId])
+    );
+  }, [responses, selectedQuestionFieldId]);
+
+  const formatSelectedQuestionAnswer = useCallback(
+    (value: unknown): string => {
+      if (!selectedQuestionField) return formatValue(value);
+
+      switch (selectedQuestionField.kind) {
+        case "radio":
+        case "select": {
+          const normalized = value === null || value === undefined ? "" : String(value);
+          if (!normalized) return "No response";
+          return getOptionLabel(selectedQuestionField, normalized) ?? normalized;
+        }
+        case "multiselect": {
+          const selections = getSelections(value);
+          if (selections.length === 0) return "No response";
+          return selections
+            .map(
+              (selection) =>
+                getOptionLabel(selectedQuestionField, selection) ?? selection
+            )
+            .join(", ");
+        }
+        default:
+          return formatValue(value);
+      }
+    },
+    [selectedQuestionField, formatValue]
+  );
 
   const csvEscape = (s: string): string => {
     const needsQuotes = /[",\n\r]/.test(s);
@@ -818,9 +858,11 @@ const FormResponses: React.FC = () => {
                 </div>
               </div>
 
-              {responses.length === 0 ? (
+              {questionResponses.length === 0 ? (
                 <Card style={CardStyle.White}>
-                  <p className="text-gray-600">No responses yet for this form.</p>
+                  <p className="text-gray-600">
+                    No users responded to this question.
+                  </p>
                 </Card>
               ) : (
                 <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
@@ -828,7 +870,7 @@ const FormResponses: React.FC = () => {
                     <div>Respondent</div>
                     <div>Answer</div>
                   </div>
-                  {responses.map((response, index) => {
+                  {questionResponses.map((response, index) => {
                     const answerValue = selectedQuestionFieldId
                       ? response.answers?.[selectedQuestionFieldId]
                       : null;
@@ -850,9 +892,7 @@ const FormResponses: React.FC = () => {
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm text-gray-800 whitespace-pre-wrap break-words leading-5">
-                            {isNoResponseValue(answerValue)
-                              ? "No response"
-                              : formatValue(answerValue)}
+                            {formatSelectedQuestionAnswer(answerValue)}
                           </p>
                         </div>
                       </div>
