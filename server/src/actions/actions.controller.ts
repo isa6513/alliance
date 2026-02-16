@@ -206,7 +206,7 @@ export class ActionsController {
   }
 
   @Get('generalUpdates/admin')
-  @UseGuards(AuthGuard)
+  @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [GeneralUpdateDto] })
   async allGeneralUpdatesAdmin(): Promise<GeneralUpdateDto[]> {
     return (await this.actionsService.findAllGeneralUpdatesAdmin()).map(
