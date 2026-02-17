@@ -6,10 +6,18 @@ import { AiDetectionJobData } from './ai-detection.types';
 export class AiDetectionQueueService {
   private readonly logger = new Logger(AiDetectionQueueService.name);
 
-  constructor(private readonly detectionProcessor: AiDetectionProcessor) { }
+  constructor(private readonly detectionProcessor: AiDetectionProcessor) {}
 
   async addDetectJob(job: AiDetectionJobData): Promise<void> {
-    this.logger.log(`Adding AI detection job for ${job.entityType}:${job.entityId}`);
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      !process.env.USE_DEV_AI_DETECTION
+    ) {
+      return;
+    }
+    this.logger.log(
+      `Adding AI detection job for ${job.entityType}:${job.entityId}`,
+    );
     setImmediate(() => {
       void this.detectionProcessor.handleDetection(job).catch((error) => {
         this.logger.error(
