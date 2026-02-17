@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import { EllipsisVertical } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 interface CommentActionsMenuProps {
   replyId: number;
@@ -14,6 +15,7 @@ const CommentActionsMenu: React.FC<CommentActionsMenuProps> = ({
   onDelete,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [copied, setCopied] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,26 +35,33 @@ const CommentActionsMenu: React.FC<CommentActionsMenuProps> = ({
     }
   }, [showDropdown]);
 
+  const handleCopyLink = useCallback(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("replyId", replyId.toString());
+    navigator.clipboard.writeText(url.toString());
+    setShowDropdown(false);
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 1000);
+  }, [replyId]);
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="text-gray-500 hover:text-gray-700 p-1"
+        className="text-gray-500 hover:text-gray-700 p-1 flex items-center gap-1"
         aria-label="More options"
       >
-        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-        </svg>
+        {copied && (
+          <span className="text-green text-sm -my-1 font-medium">Copied!</span>
+        )}
+        <EllipsisVertical size={16} />
       </button>
       {showDropdown && (
         <div className="absolute right-0 bottom-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[140px]">
           <button
-            onClick={() => {
-              const url = new URL(window.location.href);
-              url.searchParams.set("replyId", replyId.toString());
-              navigator.clipboard.writeText(url.toString());
-              setShowDropdown(false);
-            }}
+            onClick={handleCopyLink}
             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
           >
             Copy link

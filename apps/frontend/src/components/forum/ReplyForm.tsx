@@ -44,28 +44,39 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   );
 
   const { confirm } = useToast();
-  const cancelRef = useRef<HTMLButtonElement>(null);
+  const cancelRef = useRef<HTMLDivElement>(null);
 
   const handleCancel = useCallback(async () => {
-    const ok = editableContent.body.length < 10 ? true : await confirm({
-      title: "Discard draft?",
-      confirmLabel: "Discard",
-      cancelLabel: "Keep writing",
-      anchorEl: cancelRef.current,
-      placement: "top",
-    });
+    const ok =
+      editableContent.body.length < 10
+        ? true
+        : await confirm({
+            title: "Discard draft?",
+            confirmLabel: "Discard",
+            cancelLabel: "Keep writing",
+            anchorEl: cancelRef.current,
+            placement: "topleft",
+          });
     if (!ok) return;
     setEditableContent({ body: "", attachments: [] });
     setExpanded(false);
     setReplyingTo(null);
     onCancel?.();
-  }, [onCancel, confirm, setEditableContent, setReplyingTo, editableContent.body]);
-
+  }, [
+    onCancel,
+    confirm,
+    setEditableContent,
+    setReplyingTo,
+    editableContent.body,
+  ]);
 
   return (
     <div
-      className={`rounded relative border border-zinc-200 ${className ?? ""} ${parentId ? "mt-0" : "mt-3"
-        } ${compact ? "p-1 md:p-2 bg-zinc-100" : "p-2 md:p-4 bg-white"}`}
+      className={`rounded relative border border-zinc-200 ${className ?? ""} ${
+        parentId ? "mt-0" : "mt-3"
+      } ${compact ? "p-1 md:p-2" : "p-2 md:p-4"}
+        bg-zinc-100
+       `}
     >
       <form onSubmit={handleSubmit}>
         <EditableContentForm
@@ -88,19 +99,10 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
           placeholder={"Add a comment..."}
         />
         {expanded && (
-          <div className="mt-3 flex justify-end space-x-2 items-center">
-            <p className="text-sm text-zinc-500 pr-2 hidden sm:block">
-              Drag an image to attach
-            </p>
-            <Button
-              ref={cancelRef}
-              type="button"
-              color={ButtonColor.Grey}
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-
+          <div
+            className="mt-3 flex justify-start gap-x-2 items-center flex-row-reverse"
+            ref={cancelRef}
+          >
             <Button
               type="submit"
               color={ButtonColor.Stone}
@@ -113,6 +115,16 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
             >
               {isSubmitting ? "Posting..." : "Post"}
             </Button>
+            <Button
+              type="button"
+              color={ButtonColor.Grey}
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+            <p className="text-sm text-zinc-500 pr-2 hidden sm:block">
+              Drag an image to attach
+            </p>
           </div>
         )}
       </form>

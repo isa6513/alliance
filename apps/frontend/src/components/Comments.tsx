@@ -1,7 +1,4 @@
-import {
-  CommentDto,
-  CommentParentObject,
-} from "@alliance/shared/client";
+import { CommentDto, CommentParentObject } from "@alliance/shared/client";
 import { Link, href } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ReplyComponent from "./forum/ReplyComponent";
@@ -90,11 +87,9 @@ const Comments = ({
         ) : null}
         {tree.error && <div className="text-red-500">{tree.error}</div>}
         {tree.comments && tree.comments.length > 0 ? (
-          <div className="space-y-2 mt-3">
+          <div className="mt-3">
             {tree.comments
-              .filter(
-                (comment) => !comment.deleted || comment.children?.length
-              )
+              .filter((comment) => !comment.deleted || comment.children?.length)
               .filter((comment) => {
                 if (commentFilter === "all") return true;
                 const isAnswered = hasExpertReply(comment, expertIds);

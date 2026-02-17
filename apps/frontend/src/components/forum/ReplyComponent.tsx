@@ -1,6 +1,4 @@
 import { CommentDto } from "@alliance/shared/client";
-import Card from "@alliance/sharedweb/ui/Card";
-import { CardStyle } from "@alliance/shared/styles/card";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { formatDistanceToNow } from "date-fns";
@@ -16,7 +14,7 @@ import { useCommentEditing } from "../../hooks/useCommentEditing";
 import { Link, href } from "react-router";
 import { ChevronDown } from "lucide-react";
 
-const INDENT_PX = 24;
+const INDENT_PX = 40;
 
 const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
@@ -63,7 +61,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   return (
     <div className={`flex ${compact ? "gap-x-2" : "gap-x-2.5"} relative`}>
       {isHighlighted && (
-        <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded transition-all duration-1000" />
+        <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded" />
       )}
 
       <div className="flex-shrink-0">
@@ -85,7 +83,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
 
       <div className="flex-1">
         <div className="flex justify-between items-center overflow-visible">
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
             <Link
               to={href("/member/:id", { id: reply.author.id.toString() })}
               className="text-zinc-800 font-medium"
@@ -98,7 +96,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                 {reply.author.displayName}
               </UserDisplayName>
             </Link>
-            <span className="text-zinc-500 text-xs sm:text-sm">
+            <span className="text-zinc-500 text-sm">
               {formatDistanceToNow(new Date(reply.createdAt), {
                 addSuffix: true,
               })}
@@ -125,7 +123,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
           {reply.pinned && <PinnedIcon size="small" />}
         </div>
 
-        <div className="text-sm sm:text-base mb-1">
+        <div className="text-base mb-1">
           {!editing.isEditing && (
             <EditableContentRenderer
               content={reply.editableContent}
@@ -186,7 +184,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                   onClick={() => {
                     ctx.setReplyingTo(isReplyingToThis ? null : reply.id);
                   }}
-                  className="text-zinc-500 hover:text-zinc-700 hover:underline text-xs sm:text-sm"
+                  className="text-zinc-500 hover:text-zinc-700 hover:underline text-sm"
                 >
                   {!isReplyingToThis && "Reply"}
                 </button>
@@ -239,7 +237,7 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
           <div key={childReply.id}>
             <div
               className={`${
-                ctx.compact ? "my-3" : "border-t border-zinc-200 my-3 sm:my-4"
+                ctx.compact ? "my-3" : "my-3 sm:my-4"
               } -mx-2 sm:-mx-4`}
             />
             <ReplyComponent reply={childReply} depth={depth + 1} />
@@ -288,21 +286,15 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
 
   if (isTopLevel) {
     return (
-      <div>
-        <Card
-          key={reply.id}
-          className={`!display-block transition-colors duration-1000 ${newReplyClass} ${
-            ctx.compact ? "!p-1 !border-none" : "!p-2 sm:!p-4"
-          } ${
-            ctx.user && isReplyingToThis && !isCollapsed && "rounded-b-none"
-          }`}
-          flex={false}
-          style={CardStyle.White}
-        >
-          <div id={`reply-${reply.id}`}>{replyContent}</div>
-          {replyForm}
-          {renderChildren()}
-        </Card>
+      <div
+        key={reply.id}
+        className={`!display-block transition-colors duration-1000 ${newReplyClass} ${
+          ctx.compact ? "!p-1 !border-none" : "!p-2 sm:!p-4"
+        } ${ctx.user && isReplyingToThis && !isCollapsed && "rounded-b-none"}`}
+      >
+        <div id={`reply-${reply.id}`}>{replyContent}</div>
+        {replyForm}
+        {renderChildren()}
       </div>
     );
   }
@@ -312,7 +304,7 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
   return (
     <div>
       <div
-        className={`rounded border-transparent ${newReplyClass} duration-1000`}
+        className={`rounded border-transparent ${newReplyClass}`}
         id={`reply-${reply.id}`}
         style={{ marginLeft: indent }}
       >

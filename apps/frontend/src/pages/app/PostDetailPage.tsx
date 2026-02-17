@@ -127,10 +127,7 @@ const PostDetailPage: React.FC = () => {
               </span>
             </Card>
           )}
-          <Card
-            className="py-3 sm:py-6 px-3 sm:px-5 mb-3"
-            style={CardStyle.White}
-          >
+          <div className="py-3 sm:py-6 px-3 sm:px-5 mb-3">
             <div className="flex justify-between items-start">
               <div className="flex flex-row gap-x-1 items-center w-full ">
                 {post.pinned && <PinnedIcon size="large" />}
@@ -139,7 +136,7 @@ const PostDetailPage: React.FC = () => {
                 </h1>
               </div>
             </div>
-            <div className="flex flex-row gap-x-2 mb-2 sm:mb-4 mt-1 items-center text-sm sm:text-base flex-wrap">
+            <div className="flex flex-row gap-x-2 mb-2 sm:mb-4 mt-1 items-center text-base flex-wrap">
               {(post.authors?.length ? post.authors : [post.author]).map(
                 (author) => (
                   <React.Fragment key={author.id}>
@@ -187,9 +184,7 @@ const PostDetailPage: React.FC = () => {
                 </Link>
               )}
             </div>
-            <div className="text-sm sm:text-base">
-              <EditableContentRenderer content={post.editableContent} />
-            </div>
+            <EditableContentRenderer content={post.editableContent} />
             <div className="flex items-center mt-2 sm:mt-4 gap-x-1.5 sm:-mb-2">
               <div className="">
                 <PostLikeButton
@@ -219,7 +214,7 @@ const PostDetailPage: React.FC = () => {
                 </>
               )}
             </div>
-          </Card>
+          </div>
         </div>
         {post.qaMode && (
           <div className="flex items-center gap-3 mb-3">
