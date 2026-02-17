@@ -214,6 +214,7 @@ export type GeneralUpdate = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number> | null;
+    priority: number;
     tags: Array<Tag>;
     suites?: Array<ActionSuite>;
 };
@@ -1368,6 +1369,7 @@ export type GeneralUpdateAdminDto = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number> | null;
+    priority: number;
     tags: Array<Tag>;
     suites?: Array<ActionSuite>;
 };
@@ -1381,6 +1383,7 @@ export type CreateGeneralUpdateDto = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number> | null;
+    priority: number;
     tagIds?: Array<string>;
     suiteIds?: Array<number>;
 };
@@ -1397,6 +1400,7 @@ export type UpdateGeneralUpdateDto = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number> | null;
+    priority?: number;
     tagIds?: Array<string>;
     suiteIds?: Array<number>;
 };

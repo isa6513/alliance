@@ -40,6 +40,7 @@ export class GeneralUpdateAdminDto extends PickType(GeneralUpdate, [
   'updatedAt',
   'useManualCohort',
   'manualCohortUserIds',
+  'priority',
 ]) {
   @ApiProperty({ type: () => Tag, isArray: true })
   @Type(() => Tag)
@@ -61,6 +62,7 @@ export class GeneralUpdateAdminDto extends PickType(GeneralUpdate, [
       updatedAt: generalUpdate.updatedAt,
       useManualCohort: generalUpdate.useManualCohort,
       manualCohortUserIds: generalUpdate.manualCohortUserIds,
+      priority: generalUpdate.priority,
       tags: generalUpdate.tags ?? [],
       suites: generalUpdate.suites ?? [],
     });

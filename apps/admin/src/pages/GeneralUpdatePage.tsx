@@ -38,6 +38,7 @@ type Tab = "details" | "form";
 
 type GeneralUpdateForm = {
   name: string;
+  priority: number;
   startDate: string;
   endDate: string;
   useManualCohort: boolean;
@@ -48,6 +49,7 @@ type GeneralUpdateForm = {
 
 const emptyForm: GeneralUpdateForm = {
   name: "",
+  priority: 0,
   startDate: "",
   endDate: "",
   useManualCohort: false,
@@ -176,6 +178,7 @@ const GeneralUpdatePage: React.FC = () => {
     const load = async () => {
       try {
         const response = await actionsFindOneGeneralUpdate({ path: { id } });
+
         if (cancelled) return;
         const data = response.data;
         if (!data) {
@@ -186,6 +189,7 @@ const GeneralUpdatePage: React.FC = () => {
         setUpdate(data);
         setForm({
           name: data.name,
+          priority: data.priority,
           startDate: data.startDate
             ? new Date(data.startDate).toISOString().slice(0, 16)
             : "",
@@ -223,6 +227,7 @@ const GeneralUpdatePage: React.FC = () => {
         if (isNew) {
           const body: CreateGeneralUpdateDto = {
             name: form.name,
+            priority: form.priority,
             startDate:
               !hasSuites && form.startDate
                 ? new Date(form.startDate).toISOString()
@@ -244,6 +249,7 @@ const GeneralUpdatePage: React.FC = () => {
         } else if (id != null && update) {
           const body: UpdateGeneralUpdateDto = {
             name: form.name,
+            priority: form.priority,
             startDate:
               !hasSuites && form.startDate
                 ? new Date(form.startDate).toISOString()
@@ -342,6 +348,29 @@ const GeneralUpdatePage: React.FC = () => {
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
             />
+          </div>
+          <div>
+            <label
+              htmlFor="priority"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Priority
+            </label>
+            <input
+              type="number"
+              id="priority"
+              value={form.priority}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  priority: parseInt(e.target.value, 10) || 0,
+                }))
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+            />
+            <p className="text-xs text-gray-500 mt-0.5">
+              Higher numbers shown first
+            </p>
           </div>
         </div>
       </FormSection>

@@ -79,6 +79,11 @@ export class GeneralUpdate {
   @IsOptional()
   manualCohortUserIds?: number[] | null;
 
+  @Column({ default: 0 })
+  @ApiProperty()
+  @IsDefined()
+  priority: number;
+
   // Relations
 
   @OneToMany(() => GeneralUpdateActivity, (activity) => activity.generalUpdate)
