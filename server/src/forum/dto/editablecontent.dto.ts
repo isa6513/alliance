@@ -5,6 +5,7 @@ import { EditableContent } from '../entities/editablecontent.entity';
 export class EditableContentDto extends PickType(EditableContent, [
   'body',
   'attachments',
+  'id',
 ] as const) {
   constructor(editableContent: EditableContent) {
     super();

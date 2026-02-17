@@ -52,7 +52,7 @@ export class ForumService {
     private readonly eventLogService: EventLogService,
     private readonly notifsService: NotifsService,
     private readonly aiDetectionQueueService: AiDetectionQueueService,
-  ) { }
+  ) {}
 
   async createPost(
     createPostDto: CreatePostDto,
@@ -105,8 +105,8 @@ export class ForumService {
         Comment,
         'comment',
         'comment.parentObjectId = post.id ' +
-        'AND comment.parentObjectType = :parentType ' +
-        'AND comment.deleted = false',
+          'AND comment.parentObjectType = :parentType ' +
+          'AND comment.deleted = false',
         { parentType: CommentParentObject.Post },
       )
       .where('post.deleted = :deleted', { deleted: false })
@@ -208,22 +208,33 @@ export class ForumService {
     return postsWithComments;
   }
 
-  async findOnePost(id: number, userId?: number): Promise<Post> {
-    const post = await this.postRepository.findOne({
-      where: { id },
-      relations: {
-        author: true,
-        action: true,
-        editableContent: true,
-        authors: true,
-      },
-    });
+  async findOnePost(id: number, userId?: number): Promise<PostDto> {
+    const [post, comments] = await Promise.all([
+      this.postRepository.findOne({
+        where: { id },
+        relations: {
+          author: true,
+          action: true,
+          editableContent: true,
+          authors: true,
+        },
+      }),
+      this.commentRepository.find({
+        where: {
+          parentObjectId: id,
+          parentObjectType: CommentParentObject.Post,
+        },
+        order: { createdAt: 'ASC' },
+      }),
+    ]);
+
+    const commentCount = comments.filter((comment) => !comment.deleted).length;
 
     if (!post || !this.postIsVisible(post, userId)) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
 
-    return post;
+    return new PostDto(post, { commentCount });
   }
 
   async findCommentsForPostRaw(postId: number): Promise<Comment[]> {
@@ -370,7 +381,7 @@ export class ForumService {
     id: number,
     updatePostDto: UpdatePostDto,
     userId: number,
-  ): Promise<Post> {
+  ): Promise<PostDto> {
     const post = await this.findOnePost(id, userId);
 
     if (post.authorId !== userId) {
@@ -608,13 +619,13 @@ export class ForumService {
     const object =
       type === 'comment'
         ? await this.commentRepository.findOne({
-          where: { id },
-          relations: { likes: true, author: true },
-        })
+            where: { id },
+            relations: { likes: true, author: true },
+          })
         : await this.postRepository.findOne({
-          where: { id },
-          relations: { likes: true, author: true, authors: true },
-        });
+            where: { id },
+            relations: { likes: true, author: true, authors: true },
+          });
 
     if (!object) {
       throw new NotFoundException(`${type} with ID "${id}" not found`);
@@ -820,7 +831,7 @@ export class ForumService {
             ? posts.find((post) => post.id === comment.parentObjectId)?.title
             : comment.parentObjectType === CommentParentObject.Action
               ? actions.find((action) => action.id === comment.parentObjectId)
-                ?.name
+                  ?.name
               : undefined,
         ),
     );
@@ -862,8 +873,8 @@ export class ForumService {
     const experts =
       expertIds.length > 0
         ? await this.userRepository.find({
-          where: { id: In(expertIds) },
-        })
+            where: { id: In(expertIds) },
+          })
         : [];
 
     post.experts = experts;
@@ -894,8 +905,8 @@ export class ForumService {
     const authors =
       authorIds.length > 0
         ? await this.userRepository.find({
-          where: { id: In(authorIds) },
-        })
+            where: { id: In(authorIds) },
+          })
         : [];
 
     post.authors = authors;

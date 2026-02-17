@@ -20,6 +20,7 @@ import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 
 type CommentFilter = "all" | "answered" | "unanswered";
 
@@ -114,10 +115,10 @@ const PostDetailPage: React.FC = () => {
         <div className="relative">
           <Link
             to={href("/forum")}
-            className="absolute -left-10 top-6 text-blue text-lg"
+            className="absolute -left-10 top-7 text-blue"
             title="Back to Forum"
           >
-            &larr;
+            <ArrowLeft size={18} />
           </Link>
           {post.visibleAt && new Date(post.visibleAt) > new Date() && (
             <Card style={CardStyle.Alert} className="mb-2 border-none">
@@ -186,15 +187,19 @@ const PostDetailPage: React.FC = () => {
             </div>
             <EditableContentRenderer content={post.editableContent} />
             <div className="flex items-center mt-2 sm:mt-4 gap-x-1.5 sm:-mb-2">
-              <div className="">
-                <PostLikeButton
-                  liked={
-                    post.likes?.some((like) => like.id === user?.id) ?? false
-                  }
-                  likes={post.likes?.length ?? 0}
-                  handleLike={handleLike}
-                />
-              </div>
+              <PostLikeButton
+                liked={
+                  post.likes?.some((like) => like.id === user?.id) ?? false
+                }
+                likes={post.likes?.length ?? 0}
+                handleLike={handleLike}
+              />
+              {post.commentCount && (
+                <span className="text-zinc-500 text-[14px] mx-2">
+                  {post.commentCount} comment
+                  {post.commentCount === 1 ? "" : "s"}
+                </span>
+              )}
               {post.author.id === user?.id && (
                 <>
                   <Link
