@@ -63,27 +63,18 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
       {isHighlighted && (
         <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded" />
       )}
-
-      <div className="flex-shrink-0">
-        <Link to={href("/member/:id", { id: reply.author.id.toString() })}>
-          <div className="hidden sm:inline">
-            <ProfileImage
-              pfp={reply.author.profilePicture}
-              size={compact ? "small" : "medium"}
-            />
-          </div>
-          <div className="inline sm:hidden">
-            <ProfileImage
-              pfp={reply.author.profilePicture}
-              size={compact ? "mini" : "small"}
-            />
-          </div>
-        </Link>
-      </div>
-
+      <Link
+        to={href("/member/:id", { id: reply.author.id.toString() })}
+        className="flex-shrink-0 pt-1"
+      >
+        <ProfileImage
+          pfp={reply.author.profilePicture}
+          size={compact ? "small" : "medium"}
+        />
+      </Link>
       <div className="flex-1">
         <div className="flex justify-between items-center overflow-visible">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center gap-2 text-zinc-500">
             <Link
               to={href("/member/:id", { id: reply.author.id.toString() })}
               className="text-zinc-800 font-medium"
@@ -160,7 +151,7 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
               <button
                 onClick={editing.cancelEdit}
                 disabled={editing.isUpdating}
-                className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 bg-zinc-300 text-zinc-700 text-sm rounded hover:bg-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
