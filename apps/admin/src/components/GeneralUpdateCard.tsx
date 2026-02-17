@@ -1,4 +1,3 @@
-import { GeneralUpdateAdminDto } from "@alliance/shared/client";
 import { useNavigate } from "react-router";
 
 const formatDate = (dateStr: string | undefined | null): string => {
@@ -12,8 +11,17 @@ const formatDate = (dateStr: string | undefined | null): string => {
   });
 };
 
+/** Minimal shape for display; compatible with GeneralUpdateAdminDto and suite.generalUpdates */
+export type GeneralUpdateCardUpdate = {
+  id: number;
+  name: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  suites?: Array<{ name: string }>;
+};
+
 export interface GeneralUpdateCardProps {
-  update: GeneralUpdateAdminDto;
+  update: GeneralUpdateCardUpdate;
   navigate: ReturnType<typeof useNavigate>;
 }
 

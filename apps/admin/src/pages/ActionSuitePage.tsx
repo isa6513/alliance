@@ -11,6 +11,7 @@ import { useNavigate, useParams } from "react-router";
 import ActionListCard from "../components/ActionListCard";
 import ActionRemindersTab from "../components/reminders/ActionRemindersTab";
 import ActionTimeline from "../components/ActionTimeline";
+import GeneralUpdateCard from "../components/GeneralUpdateCard";
 import SuiteEventList from "../components/SuiteEventList";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -73,7 +74,7 @@ const ActionSuitePage = () => {
       } else {
         setError(
           ((resp.error as Error).message as string) +
-          " (events will fail to delete if reminders depend on their existence)"
+            " (events will fail to delete if reminders depend on their existence)"
         );
       }
     });
@@ -112,6 +113,32 @@ const ActionSuitePage = () => {
         onEdit={handleEditEvent}
         onDelete={handleDeleteEvent}
       />
+      <Card className="!p-0">
+        <div className="p-3 border-b border-zinc-200 flex items-center justify-between gap-2">
+          <h2 className="font-semibold text-sm">General updates</h2>
+          <Button
+            color={ButtonColor.Black}
+            onClick={() => navigate(`/general-updates/new?suiteId=${suiteId}`)}
+          >
+            Create general update
+          </Button>
+        </div>
+        {(suite.generalUpdates?.length ?? 0) > 0 ? (
+          <div className="divide-y divide-zinc-100">
+            {(suite.generalUpdates ?? []).map((update) => (
+              <GeneralUpdateCard
+                key={update.id}
+                update={update}
+                navigate={navigate}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="p-4 text-sm text-zinc-500">
+            No general updates for this suite yet.
+          </p>
+        )}
+      </Card>
       {error && <p className="text-red-500">{error}</p>}
       <div className="space-y-5 flex-1 overflow-y-auto pt-0">
         <p className="text-sm text-gray-500">Actions ordered by priority</p>

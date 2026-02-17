@@ -79,6 +79,19 @@ const GeneralUpdatePage: React.FC = () => {
   const [availableUsers, setAvailableUsers] = useState<UserSelectUser[]>([]);
   const [usersLoading, setUsersLoading] = useState<boolean>(true);
 
+  useEffect(() => {
+    if (!isNew) return;
+    const suiteIdParam = searchParams.get("suiteId");
+    if (!suiteIdParam) return;
+    const suiteId = parseInt(suiteIdParam, 10);
+    if (isNaN(suiteId)) return;
+    setForm((prev) =>
+      prev.suiteIds.includes(suiteId)
+        ? prev
+        : { ...prev, suiteIds: [...prev.suiteIds, suiteId] }
+    );
+  }, [isNew, searchParams]);
+
   const onTabChange = useCallback(
     (t: Tab) => {
       setSearchParams((prev) => {
@@ -605,7 +618,7 @@ const GeneralUpdatePage: React.FC = () => {
           onClick={() => navigate("/general-updates")}
           className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 text-nowrap mr-5"
         >
-          ← Back
+          ← Back to General Updates
         </button>
       </div>
 

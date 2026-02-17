@@ -2039,6 +2039,7 @@ export class ActionsService {
       relations: {
         actions: { events: true, participatingTags: true, activities: true },
         reminderGroups: { memberActionEvent: true, deadlineEvent: true },
+        generalUpdates: true,
       },
     });
 
@@ -3404,9 +3405,7 @@ export class ActionsService {
         const actionUpdateDto: GlobalFeedActionUpdateDto = {
           id: update.id,
           title: update.title,
-          content: update.content
-            ? new EditableContentDto(update.content)
-            : { body: '', attachments: [] },
+          content: new EditableContentDto(update.content),
           date: update.date,
           actionId: update.actionId,
           actionName: update.action?.name || 'Unknown Action',
