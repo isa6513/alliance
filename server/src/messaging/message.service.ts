@@ -190,8 +190,8 @@ export class MessageService {
       return [];
     }
 
-    if (attachments.length > 10) {
-      throw new BadRequestException('Too many attachments (max 10).');
+    if (attachments.length > 30) {
+      throw new BadRequestException('Too many attachments (max 30).');
     }
 
     const storedKeys: string[] = [];
