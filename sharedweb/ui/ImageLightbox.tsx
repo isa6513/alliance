@@ -88,7 +88,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({
               )}
               <button
                 onClick={closeLightbox}
-                className="absolute -right-5 -top-5 hover:bg-black text-white rounded-full w-9 h-9 flex items-center justify-center font-avenir"
+                className="absolute right-5 -top-5 hover:bg-black text-white rounded-full w-9 h-9 flex items-center justify-center font-avenir"
                 aria-label="Close"
               >
                 <X size={18} strokeWidth={3} />

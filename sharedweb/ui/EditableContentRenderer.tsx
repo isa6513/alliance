@@ -33,22 +33,18 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
     );
   }
 
-  if (collapsed) {
-    return (
-      <div className={`line-clamp-1 ${className ?? ""}`}>
-        <AppMarkdownWrapper markdownContent={content.body} />
-      </div>
-    );
-  }
-
   return (
     <div className={className}>
       {content && (
-        <div className={`${truncated ? "line-clamp-3" : ""}`}>
+        <div
+          className={`${
+            collapsed ? "line-clamp-1" : truncated ? "line-clamp-3" : ""
+          }`}
+        >
           <AppMarkdownWrapper markdownContent={content.body} />
         </div>
       )}
-      {attachments.length > 0 && (
+      {attachments.length > 0 && !collapsed && (
         <ImageLightbox
           images={attachments}
           renderPreview={(openLightbox) => (
