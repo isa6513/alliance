@@ -65,7 +65,7 @@ import {
 } from "./form-fields/customValidatorDrafts";
 
 interface FormBuilderProps {
-  onSave?: (schema: FormSchema) => void;
+  onSave?: (schema: FormSchema) => Promise<void>;
   initialSchema?: FormSchema;
   formId?: number;
   setFormId: (formId: number) => void;
@@ -1010,9 +1010,9 @@ export function FormBuilder({
 
       // displayBlocksOnly mode: save via onSave only (e.g. general update schema)
       if (displayBlocksOnly && onSave) {
-        onSave(schemaForSave);
         setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
         setHasUnsavedChanges(false);
+        await onSave(schemaForSave);
         showSuccessToast("Saved successfully");
         return;
       }
