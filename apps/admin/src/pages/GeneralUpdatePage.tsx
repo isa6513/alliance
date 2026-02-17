@@ -335,7 +335,7 @@ const GeneralUpdatePage: React.FC = () => {
 
       <FormSection
         title="Suites"
-        description="Assign this general update to one or more suites. When assigned to a suite, the start and end dates are inherited from the suite schedule."
+        description="Assign this general update to one or more suites. When assigned to a suite, the start and end dates are inherited from some action in the suite."
       >
         <div className="space-y-3">
           {form.suiteIds.length > 0 && (

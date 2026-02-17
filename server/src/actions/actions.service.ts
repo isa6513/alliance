@@ -207,7 +207,9 @@ export class ActionsService {
         : [];
     }
 
-    return this.actionRepository.save(action);
+    const saved = await this.actionRepository.save(action);
+    await this.syncGeneralUpdateDatesForSuites([saved.suite?.id]);
+    return saved;
   }
 
   findAll(): Promise<Action[]> {
@@ -654,7 +656,15 @@ export class ActionsService {
       });
     }
 
-    return this.generalUpdateRepository.save(generalUpdate);
+    const saved = await this.generalUpdateRepository.save(generalUpdate);
+
+    if (generalUpdate.suites) {
+      await this.syncGeneralUpdateDatesForSuites(
+        generalUpdate.suites.map((suite) => suite.id),
+      );
+    }
+
+    return saved;
   }
 
   async updateGeneralUpdate(
@@ -680,11 +690,59 @@ export class ActionsService {
           : [];
     }
 
-    return this.generalUpdateRepository.save(generalUpdate);
+    const update = await this.generalUpdateRepository.save(generalUpdate);
+
+    if (generalUpdate.suites) {
+      await this.syncGeneralUpdateDatesForSuites(
+        generalUpdate.suites.map((suite) => suite.id),
+      );
+    }
+
+    return update;
   }
 
   async deleteGeneralUpdate(id: number): Promise<void> {
     await this.generalUpdateRepository.delete(id);
+  }
+
+  async syncGeneralUpdateDatesForSuites(
+    suiteIds: (number | null | undefined)[],
+  ): Promise<void> {
+    suiteIds = suiteIds.filter(
+      (id): id is number => id != null && id != undefined,
+    );
+    if (suiteIds.length === 0) {
+      return;
+    }
+
+    const generalUpdates = await this.generalUpdateRepository.find({
+      where: {
+        suites: {
+          id: In(suiteIds),
+        },
+      },
+      relations: {
+        suites: {
+          actions: { events: true },
+        },
+      },
+    });
+
+    for (const generalUpdate of generalUpdates) {
+      if (generalUpdate.suites!.length === 0) {
+        continue;
+      }
+
+      const action = generalUpdate.suites![0]?.actions![0];
+      if (!action) {
+        continue;
+      }
+
+      generalUpdate.startDate = action.latestMemberActionEvent.event?.date;
+      generalUpdate.endDate =
+        action.latestMemberActionEvent.deadline ?? undefined;
+    }
+    await this.generalUpdateRepository.save(generalUpdates);
   }
 
   async findUnreadGeneralUpdates(params: {
@@ -971,12 +1029,14 @@ export class ActionsService {
       relations: {
         participatingTags: true,
         authors: true,
+        suite: true,
       },
     });
 
     if (!action) {
       throw new NotFoundException('Action not found');
     }
+    const oldSuiteId = action.suite?.id;
 
     const { participatingTags, suiteId, authorIds, ...rest } = updateActionDto;
 
@@ -1005,6 +1065,9 @@ export class ActionsService {
     }
 
     await this.actionRepository.save(action);
+    const newSuiteId = action.suite?.id;
+    await this.syncGeneralUpdateDatesForSuites([oldSuiteId, newSuiteId]);
+
     return this.findOne(id, userId);
   }
 
@@ -1024,11 +1087,17 @@ export class ActionsService {
 
     await this.reloadUsersJoinedForAction(action.id);
 
+    await this.syncGeneralUpdateDatesForSuites([action.suite?.id]);
     return savedEvent;
   }
 
   async remove(id: number) {
+    const action = await this.actionRepository.findOne({
+      where: { id },
+      relations: { suite: true },
+    });
     await this.actionRepository.delete(id);
+    await this.syncGeneralUpdateDatesForSuites([action?.suite?.id]);
   }
 
   countCommitted(actionId: number): Observable<number> {
@@ -1500,6 +1569,7 @@ export class ActionsService {
     });
 
     await this.actionEventRepository.save(newEvent);
+    await this.syncGeneralUpdateDatesForSuites([action.suite?.id]);
   }
 
   async clearDb() {
@@ -1982,7 +2052,9 @@ export class ActionsService {
     createActionSuiteDto: CreateActionSuiteDto,
   ): Promise<ActionSuite> {
     const suite = this.actionSuiteRepository.create(createActionSuiteDto);
-    return this.actionSuiteRepository.save(suite);
+    const saved = await this.actionSuiteRepository.save(suite);
+    await this.syncGeneralUpdateDatesForSuites([suite.id]);
+    return saved;
   }
 
   async batchUpdateSuiteEvents(
@@ -2023,6 +2095,7 @@ export class ActionsService {
     for (const id of eventsToUpdate) {
       await this.actionEventRepository.update(id, body);
     }
+    await this.syncGeneralUpdateDatesForSuites([suiteId]);
     return this.getSuite(suiteId);
   }
 
@@ -2043,6 +2116,7 @@ export class ActionsService {
 
       await this.reloadUsersJoinedForAction(action.id);
     }
+    await this.syncGeneralUpdateDatesForSuites([suiteId]);
     return this.getSuite(suiteId);
   }
 
@@ -2076,6 +2150,7 @@ export class ActionsService {
         await this.actionEventRepository.delete(possibleEvent.id);
       }
     }
+    await this.syncGeneralUpdateDatesForSuites([suiteId]);
     return this.getSuite(suiteId);
   }
 
@@ -2231,78 +2306,84 @@ export class ActionsService {
       ...actionCols
     } = importaction;
 
-    return await this.actionRepository.manager.transaction(async (em) => {
-      const actionRepo = em.getRepository(Action);
-      const suiteRepo = em.getRepository(ActionSuite);
-      const formRepo = em.getRepository(Form);
-      const eventRepo = em.getRepository(ActionEvent);
-      const tagRepo = em.getRepository(Tag);
+    let suiteIdToSync: number | undefined;
+    const result = await this.actionRepository.manager.transaction(
+      async (em) => {
+        const actionRepo = em.getRepository(Action);
+        const suiteRepo = em.getRepository(ActionSuite);
+        const formRepo = em.getRepository(Form);
+        const eventRepo = em.getRepository(ActionEvent);
+        const tagRepo = em.getRepository(Tag);
 
-      const inserted = await actionRepo.insert({
-        ...actionCols,
-        id: undefined,
-      });
-
-      const actionId = inserted.identifiers[0].id as number;
-
-      if (suite) {
-        let foundSuite = await suiteRepo.findOne({
-          where: { name: suite.name },
+        const inserted = await actionRepo.insert({
+          ...actionCols,
+          id: undefined,
         });
-        if (!foundSuite) {
-          foundSuite = await suiteRepo.save(
-            suiteRepo.create({ name: suite.name }),
-          );
+
+        const actionId = inserted.identifiers[0].id as number;
+
+        if (suite) {
+          let foundSuite = await suiteRepo.findOne({
+            where: { name: suite.name },
+          });
+          if (!foundSuite) {
+            foundSuite = await suiteRepo.save(
+              suiteRepo.create({ name: suite.name }),
+            );
+          }
+          await actionRepo.update(actionId, { suite: { id: foundSuite.id } });
+          suiteIdToSync = foundSuite.id;
         }
-        await actionRepo.update(actionId, { suite: { id: foundSuite.id } });
-      }
 
-      if (authors?.length) {
-        await actionRepo
-          .createQueryBuilder()
-          .relation(Action, 'authors')
-          .of(actionId)
-          .add(authors.map((a) => ({ id: a.id })));
-      }
-
-      if (taskForm) {
-        const newTaskForm = await formRepo.save(
-          formRepo.create({ ...taskForm, id: undefined }),
-        );
-        await actionRepo.update(actionId, { taskFormId: newTaskForm.id });
-      }
-
-      if (events?.length) {
-        await eventRepo.insert(
-          events.map((e) => ({
-            ...e,
-            updates: undefined,
-            id: undefined,
-            action: { id: actionId },
-          })),
-        );
-      }
-
-      if (participatingTags?.length) {
-        const tagIds = (
-          await tagRepo.findBy({ id: In(participatingTags.map((t) => t.id)) })
-        ).map((t) => t.id);
-
-        if (tagIds.length) {
+        if (authors?.length) {
           await actionRepo
             .createQueryBuilder()
-            .relation(Action, 'participatingTags')
+            .relation(Action, 'authors')
             .of(actionId)
-            .add(tagIds);
+            .add(authors.map((a) => ({ id: a.id })));
         }
-      }
 
-      const saved = await actionRepo.findOneOrFail({
-        where: { id: actionId },
-      });
+        if (taskForm) {
+          const newTaskForm = await formRepo.save(
+            formRepo.create({ ...taskForm, id: undefined }),
+          );
+          await actionRepo.update(actionId, { taskFormId: newTaskForm.id });
+        }
 
-      return new ActionDto(saved);
-    });
+        if (events?.length) {
+          await eventRepo.insert(
+            events.map((e) => ({
+              ...e,
+              updates: undefined,
+              id: undefined,
+              action: { id: actionId },
+            })),
+          );
+        }
+
+        if (participatingTags?.length) {
+          const tagIds = (
+            await tagRepo.findBy({ id: In(participatingTags.map((t) => t.id)) })
+          ).map((t) => t.id);
+
+          if (tagIds.length) {
+            await actionRepo
+              .createQueryBuilder()
+              .relation(Action, 'participatingTags')
+              .of(actionId)
+              .add(tagIds);
+          }
+        }
+
+        const saved = await actionRepo.findOneOrFail({
+          where: { id: actionId },
+        });
+
+        return new ActionDto(saved);
+      },
+    );
+    await this.syncGeneralUpdateDatesForSuites([suiteIdToSync]);
+    return result;
   }
 
   // TODO move ==================================
