@@ -7,6 +7,7 @@ import {
 } from '@nestjs/swagger';
 import { GeneralUpdate } from '../entities/general-update.entity';
 import { Type } from 'class-transformer';
+import { IsArray, IsInt, IsOptional, IsUUID } from 'class-validator';
 import { Tag } from 'src/user/entities/tag.entity';
 import { ActionSuite } from '../entities/action-suite.entity';
 
@@ -76,9 +77,15 @@ export class CreateGeneralUpdateDto extends OmitType(GeneralUpdate, [
   'schema',
 ]) {
   @ApiPropertyOptional({ type: String, isArray: true })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
   tagIds?: string[];
 
   @ApiPropertyOptional({ type: Number, isArray: true })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
   suiteIds?: number[];
 }
 
@@ -93,8 +100,14 @@ export class UpdateGeneralUpdateDto extends PartialType(
   ]),
 ) {
   @ApiPropertyOptional({ type: String, isArray: true })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
   tagIds?: string[];
 
   @ApiPropertyOptional({ type: Number, isArray: true })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
   suiteIds?: number[];
 }
