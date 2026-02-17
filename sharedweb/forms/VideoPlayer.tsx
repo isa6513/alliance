@@ -122,7 +122,24 @@ export default function VideoPlayer({
     video.addEventListener("error", onError);
 
     if (Hls.isSupported()) {
-      const hls = new Hls();
+      const hls = new Hls({
+        fragLoadPolicy: {
+          default: {
+            maxTimeToFirstByteMs: 10000,
+            maxLoadTimeMs: 10000,
+            timeoutRetry: {
+              maxNumRetry: 3,
+              retryDelayMs: 1000,
+              maxRetryDelayMs: 1000,
+            },
+            errorRetry: {
+              maxNumRetry: 3,
+              retryDelayMs: 1000,
+              maxRetryDelayMs: 1000,
+            },
+          },
+        },
+      });
       hlsRef.current = hls;
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (data.fatal) setStatus("failed");
