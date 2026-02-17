@@ -30,7 +30,6 @@ export interface CommentsProps {
   objectId: number;
   type: CommentParentObject;
   compact?: boolean;
-  homeStyle?: boolean;
   autofocus?: boolean;
   showForm?: boolean;
   initialComments?: CommentDto[];
@@ -85,9 +84,7 @@ const ReplyForm = ({
   onSubmit,
 }: ReplyFormProps) => {
   return (
-    <View
-      className={`p-4 bg-zinc-100`}
-    >
+    <View className={`p-4 bg-zinc-100`}>
       <EditableContentForm
         value={content}
         onChange={setContent}
@@ -105,7 +102,6 @@ const ReplyForm = ({
 
 type ReplyItemSharedProps = {
   compact?: boolean;
-  homeStyle?: boolean;
   autofocus?: boolean;
   objectId: number;
   replyingTo: number | null;
@@ -147,7 +143,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
   const isHighlighted = shared.highlightedId === reply.id;
   const isNewlyAdded = shared.newlyAddedReplies.has(reply.id);
   const containerSpacing = depth === 0 ? "p-3" : "p-2";
-  const containerBorder = shared.homeStyle ? "" : "border border-zinc-200";
+  const containerBorder = "border border-zinc-200";
   const containerBg = isNewlyAdded ? "bg-green/10" : "bg-white";
 
   useEffect(() => {
@@ -165,8 +161,9 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
   return (
     <View
       style={{ marginLeft: Math.min(depth * 12, maxDepth * 12) }}
-      className={`rounded ${containerBorder} ${containerBg} ${containerSpacing} ${isHighlighted ? "border-l-2 border-blue-500" : ""
-        }`}
+      className={`rounded ${containerBorder} ${containerBg} ${containerSpacing} ${
+        isHighlighted ? "border-l-2 border-blue-500" : ""
+      }`}
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-x-2">
@@ -226,10 +223,10 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
             onPress={
               shared.user
                 ? () =>
-                  shared.onLikeReply(
-                    reply.id,
-                    reply.likes.some((like) => like.id === shared.user?.id)
-                  )
+                    shared.onLikeReply(
+                      reply.id,
+                      reply.likes.some((like) => like.id === shared.user?.id)
+                    )
                 : undefined
             }
           />
@@ -312,7 +309,6 @@ export default function Comments({
   objectId,
   type,
   compact,
-  homeStyle,
   autofocus,
   showForm: showFormProp = true,
   initialComments,
@@ -542,7 +538,6 @@ export default function Comments({
               key={reply.id}
               reply={reply}
               compact={compact}
-              homeStyle={homeStyle}
               autofocus={autofocus}
               objectId={objectId}
               replyingTo={replyingTo}

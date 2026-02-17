@@ -1,45 +1,42 @@
 import { Meta, StoryObj } from "@storybook/react";
 import ForumListPost from "../components/ForumListPost";
 import { PostDto } from "@alliance/shared/client";
+import List from "@alliance/sharedweb/ui/List";
 
 const samplePost: PostDto = {
   id: 1,
   title: "How should the alliance handle forum post styling?",
-  content:
-    "We need to discuss how we should handle forum post styling. I think we should use the same styling as the website.",
+  editableContent: {
+    body: "We need to discuss how we should handle forum post styling. I think we should use the same styling as the website.",
+    attachments: [],
+  },
   author: {
-    name: "John Doe",
-    email: "john.doe@example.com",
+    displayName: "John Doe",
     id: 0,
+    profilePicture: "",
+    admin: false,
+    staff: false,
+    profileDescription: null,
+    hasActiveContract: false,
+    isCommunityLeader: false,
   },
-  action: {
-    id: 1,
-    name: "Nestle Rainforest Purchase",
-    category: "Climate",
-    image: "",
-    status: "upcoming",
-    usersJoined: 0,
-    timeEstimate: "",
-    shortDescription: "",
-    body: "",
-    type: "Funding",
-    events: [],
-    usersCompleted: 0,
-  },
-  replies: [],
   authorId: 1,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  pinned: false,
+  qaMode: false,
+  expertIds: [],
+  authorIds: [],
 };
 
 export const ManyPosts: Story = {
   render: () => {
     return (
-      <div className="flex flex-col min-w-[800px]">
+      <List className="min-w-[800px]">
         {Array.from({ length: 10 }).map((_, index) => (
           <ForumListPost key={index} post={samplePost} />
         ))}
-      </div>
+      </List>
     );
   },
 };

@@ -5,6 +5,7 @@ import {
 import React from "react";
 import type { Preview } from "@storybook/react";
 import "../src/index.css";
+import { ToastProvider } from "@alliance/sharedweb/ui/ToastProvider";
 import { initialize, mswLoader } from "msw-storybook-addon";
 
 initialize({
@@ -40,7 +41,7 @@ const preview: Preview = {
     }),
   },
   loaders: [mswLoader],
-  decorators: [withRouter, (Story: React.ComponentType) => <Story />],
+  decorators: [withRouter, (Story: React.ComponentType) => <ToastProvider><Story /></ToastProvider>],
 };
 
 export default preview;

@@ -9,7 +9,11 @@ type VideoPlayerProps = {
   caption?: string;
 };
 
-export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps) {
+export default function VideoPlayer({
+  src,
+  videoId,
+  caption,
+}: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">(
@@ -115,6 +119,7 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
     video.addEventListener("loadeddata", onLoadedData);
 
     const onError = () => setStatus("failed");
+    video.addEventListener("error", onError);
 
     if (Hls.isSupported()) {
       const hls = new Hls();
@@ -147,9 +152,7 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
     return (
       <figure className="mx-auto max-w-full text-center">
         <div className="flex items-center justify-center h-48 bg-red-50 rounded">
-          <p className="text-sm text-red-600">
-            Could not load video.
-          </p>
+          <p className="text-sm text-red-600">Could not load video.</p>
         </div>
         {caption && (
           <figcaption className="mt-2 text-sm text-gray-600">
@@ -168,9 +171,7 @@ export default function VideoPlayer({ src, videoId, caption }: VideoPlayerProps)
         <div className="flex items-center justify-center h-48 bg-gray-100 rounded">
           <div className="text-center">
             <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2" />
-            <p className="text-sm text-gray-600">
-              {"Loading video..."}
-            </p>
+            <p className="text-sm text-gray-600">{"Loading video..."}</p>
           </div>
         </div>
       )}

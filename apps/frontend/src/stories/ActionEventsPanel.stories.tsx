@@ -10,7 +10,7 @@ const meta = {
     layout: "centered",
   },
   args: {
-    events: testActions[0].events,
+    action: testActions[0],
   },
 } satisfies Meta<typeof ActionEventsPanel>;
 

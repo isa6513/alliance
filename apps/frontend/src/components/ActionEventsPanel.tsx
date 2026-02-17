@@ -25,7 +25,10 @@ const ActionEventsPanel = ({ action }: ActionEventsPanelProps) => {
             {isActionEvent(item) ? (
               <TimelineItem
                 title={item.title}
-                showCompletedBar={item.newStatus === "member_action" && action.status !== "member_action"}
+                showCompletedBar={
+                  item.newStatus === "member_action" &&
+                  action.status !== "member_action"
+                }
                 action={action}
                 description={item.description}
                 highlighted={item.id === highlightedId}

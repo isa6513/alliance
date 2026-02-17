@@ -1,0 +1,291 @@
+import {
+  CommentDto,
+  CommentParentObject,
+  CreateCommentDto,
+  CreateEditableContentDto,
+  forumCreateComment,
+  forumDeleteComment,
+  forumFindCommentsForAction,
+  forumFindCommentsForActivity,
+  forumFindCommentsForPost,
+  forumLikeComment,
+  forumUnlikeComment,
+  forumUpdateComment,
+  UserDto,
+} from "@alliance/shared/client";
+import posthog from "posthog-js";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
+import { uploadAttachments } from "../../lib/uploadAttachments";
+
+interface CommentsContextValue {
+  user?: UserDto;
+  replyingTo: number | null;
+  setReplyingTo: (id: number | null) => void;
+  handleSubmitReply: (content: CreateEditableContentDto, onSuccess?: () => void) => Promise<void>;
+  handleDeleteReply: (id: number) => Promise<void>;
+  onUpdateReply: (id: number, content: CreateEditableContentDto) => Promise<void>;
+  onLikeReply: (id: number, unlike?: boolean) => Promise<void>;
+  isSubmitting: boolean;
+  newlyAddedReplies: Set<number>;
+  highlightedReplyId: number | null;
+  expertIds: number[];
+  expertLabel?: string;
+  compact?: boolean;
+}
+
+const CommentsContext = createContext<CommentsContextValue | null>(null);
+
+export function useCommentsContext(): CommentsContextValue {
+  const ctx = useContext(CommentsContext);
+  if (!ctx) {
+    throw new Error("useCommentsContext must be used within a CommentsProvider");
+  }
+  return ctx;
+}
+
+export interface UseCommentTreeResult {
+  comments: CommentDto[] | null;
+  error: string | null;
+  fetchComments: () => Promise<void>;
+  handleSubmitReply: (content: CreateEditableContentDto, onSuccess?: () => void) => Promise<void>;
+  handleDeleteReply: (id: number) => Promise<void>;
+  handleUpdateReply: (id: number, content: CreateEditableContentDto) => Promise<void>;
+  handleLikeReply: (id: number, unlike?: boolean) => Promise<void>;
+  replyingTo: number | null;
+  setReplyingTo: (id: number | null) => void;
+  isSubmitting: boolean;
+  newlyAddedReplies: Set<number>;
+  highlightedReplyId: number | null;
+  editableContent: CreateEditableContentDto;
+  setEditableContent: (val: CreateEditableContentDto) => void;
+}
+
+export function useCommentTree(
+  objectId: number,
+  type: CommentParentObject,
+  initialComments?: CommentDto[]
+): UseCommentTreeResult {
+  const [comments, setComments] = useState<CommentDto[] | null>(
+    initialComments ?? null
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [editableContent, setEditableContent] =
+    useState<CreateEditableContentDto>({ body: "", attachments: [] });
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newlyAddedReplies, setNewlyAddedReplies] = useState<Set<number>>(
+    new Set()
+  );
+  const [lastAddedReplyId, setLastAddedReplyId] = useState<number | null>(null);
+  const [highlightedReplyId, setHighlightedReplyId] = useState<number | null>(
+    null
+  );
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const fetchComments = useCallback(async () => {
+    let response;
+    if (type === "post") {
+      response = await forumFindCommentsForPost({
+        path: { id: objectId.toString() },
+      });
+    } else if (type === "activity") {
+      response = await forumFindCommentsForActivity({
+        path: { id: objectId.toString() },
+      });
+    } else {
+      response = await forumFindCommentsForAction({
+        path: { id: objectId.toString() },
+      });
+    }
+    setComments(response.data ?? null);
+  }, [objectId, type]);
+
+  useEffect(() => {
+    if (initialComments) {
+      setComments(initialComments);
+      return;
+    }
+    fetchComments();
+  }, [initialComments, fetchComments]);
+
+  // Handle highlighted reply from URL parameters
+  useEffect(() => {
+    const replyId = searchParams.get("replyId");
+    if (replyId) {
+      const replyIdNumber = parseInt(replyId, 10);
+      if (!isNaN(replyIdNumber)) {
+        setHighlightedReplyId(replyIdNumber);
+
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete("replyId");
+        setSearchParams(newSearchParams, { replace: true });
+
+        setTimeout(() => {
+          const replyElement = document.getElementById(
+            `reply-${replyIdNumber}`
+          );
+          if (replyElement) {
+            replyElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }, 500);
+
+        setTimeout(() => {
+          setHighlightedReplyId(null);
+        }, 5000);
+      }
+    }
+  }, [searchParams, setSearchParams]);
+
+  // After comments refresh, scroll the newly added reply into view
+  useEffect(() => {
+    if (!lastAddedReplyId || !comments) return;
+    const timeout = setTimeout(() => {
+      const el = document.getElementById(`reply-${lastAddedReplyId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setLastAddedReplyId(null);
+      }
+    }, 50);
+    return () => clearTimeout(timeout);
+  }, [comments, lastAddedReplyId]);
+
+  const handleSubmitReply = async (
+    contentDto: CreateEditableContentDto,
+    onSuccess?: () => void
+  ) => {
+    try {
+      setIsSubmitting(true);
+      let attachmentKeys: string[] = [];
+      if (contentDto.attachments.length > 0) {
+        attachmentKeys = await uploadAttachments(contentDto.attachments);
+      }
+      const commentDto: CreateCommentDto = {
+        parentObjectId: Number(objectId),
+        parentId: replyingTo ?? undefined,
+        parentObjectType: type,
+        editableContent: { body: contentDto.body, attachments: attachmentKeys },
+      };
+
+      const response = await forumCreateComment({ body: commentDto });
+
+      if (response.data) {
+        const newReplyId = response.data.id;
+
+        setNewlyAddedReplies((prev) => new Set(prev).add(newReplyId));
+        setLastAddedReplyId(newReplyId);
+
+        setTimeout(() => {
+          setNewlyAddedReplies((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(newReplyId);
+            return newSet;
+          });
+        }, 3000);
+
+        fetchComments();
+        onSuccess?.();
+      }
+
+      setEditableContent({ body: "", attachments: [] });
+      setReplyingTo(null);
+      setError(null);
+    } catch (err) {
+      console.error("Error posting reply:", err);
+      posthog.capture("error", { error: err });
+      setError("Failed to submit reply");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteReply = async (replyId: number) => {
+    if (window.confirm("Are you sure you want to delete this reply?")) {
+      try {
+        await forumDeleteComment({ path: { id: replyId } });
+        fetchComments();
+      } catch (err) {
+        console.error("Error deleting reply:", err);
+        setError("Failed to delete reply");
+      }
+    }
+  };
+
+  const handleUpdateReply = async (
+    replyId: number,
+    content: CreateEditableContentDto
+  ) => {
+    try {
+      await forumUpdateComment({
+        path: { id: replyId },
+        body: { editableContent: content },
+      });
+
+      setComments((prevComments) => {
+        if (!prevComments) return null;
+
+        const updateRecursively = (comments: CommentDto[]): CommentDto[] => {
+          return comments.map((comment) => {
+            if (comment.id === replyId) {
+              return { ...comment, editableContent: { ...content, id: -1 } };
+            }
+            if (comment.children) {
+              return {
+                ...comment,
+                children: updateRecursively(comment.children),
+              };
+            }
+            return comment;
+          });
+        };
+
+        return updateRecursively(prevComments);
+      });
+    } catch (error) {
+      console.error("Failed to update comment:", error);
+      throw error;
+    }
+  };
+
+  const handleLikeReply = async (replyId: number, unlike = false) => {
+    if (unlike) {
+      await forumUnlikeComment({ path: { id: replyId } });
+    } else {
+      await forumLikeComment({ path: { id: replyId } });
+    }
+    fetchComments();
+  };
+
+  return {
+    comments,
+    error,
+    fetchComments,
+    handleSubmitReply,
+    handleDeleteReply,
+    handleUpdateReply,
+    handleLikeReply,
+    replyingTo,
+    setReplyingTo,
+    isSubmitting,
+    newlyAddedReplies,
+    highlightedReplyId,
+    editableContent,
+    setEditableContent,
+  };
+}
+
+interface CommentsProviderProps {
+  value: CommentsContextValue;
+  children: React.ReactNode;
+}
+
+export function CommentsProvider({ value, children }: CommentsProviderProps) {
+  return (
+    <CommentsContext.Provider value={value}>
+      {children}
+    </CommentsContext.Provider>
+  );
+}
