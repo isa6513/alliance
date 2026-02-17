@@ -122,6 +122,10 @@ import { CommunityService } from 'src/community/community.service';
 import { GeneralUpdate } from './entities/general-update.entity';
 import { GeneralUpdateActivity } from './entities/general-update-activity.entity';
 import { GeneralUpdateActivityType } from './entities/general-update-activity.entity';
+import {
+  CreateGeneralUpdateDto,
+  UpdateGeneralUpdateDto,
+} from './dto/general-update.dto';
 
 const MS_IN_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -629,15 +633,9 @@ export class ActionsService {
     });
   }
 
-  async createGeneralUpdate(dto: {
-    name: string;
-    startDate?: Date;
-    endDate?: Date;
-    useManualCohort: boolean;
-    manualCohortUserIds?: number[] | null;
-    tagIds?: string[];
-    suiteIds?: number[];
-  }): Promise<GeneralUpdate> {
+  async createGeneralUpdate(
+    dto: CreateGeneralUpdateDto,
+  ): Promise<GeneralUpdate> {
     const { tagIds, suiteIds, ...rest } = dto;
     const generalUpdate = this.generalUpdateRepository.create({
       ...rest,
@@ -661,15 +659,7 @@ export class ActionsService {
 
   async updateGeneralUpdate(
     id: number,
-    dto: {
-      name?: string;
-      startDate?: Date;
-      endDate?: Date;
-      useManualCohort?: boolean;
-      manualCohortUserIds?: number[] | null;
-      tagIds?: string[];
-      suiteIds?: number[];
-    },
+    dto: UpdateGeneralUpdateDto,
   ): Promise<GeneralUpdate> {
     const generalUpdate = await this.findOneGeneralUpdate(id);
     const { tagIds, suiteIds, ...rest } = dto;
