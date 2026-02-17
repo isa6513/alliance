@@ -11,9 +11,11 @@ import {
   userGetTags,
   userMembers,
 } from "@alliance/shared/client";
+import type { FormSchema } from "@alliance/shared/forms/formschema";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
+import { FormBuilder } from "../components/FormBuilder";
 
 const FormSection: React.FC<{
   title: string;
@@ -284,6 +286,20 @@ const GeneralUpdatePage: React.FC = () => {
       manualCohortUserIds: ids,
     }));
   }, []);
+
+  const handleSaveSchema = useCallback(
+    async (schema: FormSchema) => {
+      if (id == null) return;
+      const response = await actionsUpdateGeneralUpdate({
+        path: { id },
+        body: {
+          schema: schema as unknown as Record<string, unknown>,
+        } as unknown as UpdateGeneralUpdateDto,
+      });
+      if (response.data) setUpdate(response.data);
+    },
+    [id]
+  );
 
   const formContent = (
     <>
@@ -605,21 +621,12 @@ const GeneralUpdatePage: React.FC = () => {
           )}
 
           {!isNew && selectedTab === "form" && update && (
-            <div className="border border-gray-200 rounded-lg bg-white">
-              <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-                <h3 className="text-sm font-semibold text-gray-900">
-                  Form schema
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  JSON schema for the general update form (read-only).
-                </p>
-              </div>
-              <div className="p-4 overflow-x-auto">
-                <pre className="text-xs bg-gray-50 p-4 rounded-md border border-gray-200 overflow-x-auto">
-                  {JSON.stringify(update.schema, null, 2)}
-                </pre>
-              </div>
-            </div>
+            <FormBuilder
+              displayBlocksOnly
+              initialSchema={(update.schema ?? {}) as unknown as FormSchema}
+              setFormId={() => {}}
+              onSave={handleSaveSchema}
+            />
           )}
         </div>
       </div>

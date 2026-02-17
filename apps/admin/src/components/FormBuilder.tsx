@@ -70,12 +70,28 @@ interface FormBuilderProps {
   formId?: number;
   setFormId: (formId: number) => void;
   actionName?: string;
+  displayBlocksOnly?: boolean;
 }
 
 const ensureOutputViews = (schema: FormSchema): FormSchema => ({
   ...schema,
   outputViews: schema.outputViews ?? [],
 });
+
+const ensurePages = (schema: FormSchema): FormSchema => {
+  const withOutputViews = ensureOutputViews(schema);
+  if (
+    !withOutputViews.pages ||
+    !Array.isArray(withOutputViews.pages) ||
+    withOutputViews.pages.length === 0
+  ) {
+    return {
+      ...withOutputViews,
+      pages: [{ id: "page-1", title: "Page 1", fields: [] }],
+    };
+  }
+  return withOutputViews;
+};
 
 const buildValueCounts = (values: string[]) => {
   const counts = new Map<string, number>();
@@ -135,9 +151,8 @@ const findSingleOptionValueChange = (
   return null;
 };
 
-const isSchemaFormField = (
-  field: AnyField | DisplayBlock
-): field is AnyField => "label" in field;
+const isSchemaFormField = (field: AnyField | DisplayBlock): field is AnyField =>
+  "label" in field;
 
 const getUpdatedVisibilityConditions = (
   visibleIf: Condition[] | Condition | undefined,
@@ -195,7 +210,7 @@ const applyOptionValueToConditionalVisibility = (
 
     const result = getUpdatedVisibilityConditions(
       (candidate as AnyField).visibleIf ??
-      (candidate as DisplayBlock).visibleIf,
+        (candidate as DisplayBlock).visibleIf,
       controllerId,
       previousValue,
       nextValue
@@ -221,23 +236,24 @@ export function FormBuilder({
   formId,
   setFormId,
   actionName,
+  displayBlocksOnly = false,
 }: FormBuilderProps) {
   const buildInitialSchema = () =>
     initialSchema
-      ? ensureOutputViews(initialSchema)
+      ? ensurePages(initialSchema)
       : {
-        title: !!actionName ? actionName + " form" : "Untitled Form",
-        description: "",
-        pages: [
-          {
-            id: "page-1",
-            title: "Page 1",
-            fields: [],
-          },
-        ],
-        submit: { label: "Complete" },
-        outputViews: [],
-      };
+          title: !!actionName ? actionName + " form" : "Untitled Form",
+          description: "",
+          pages: [
+            {
+              id: "page-1",
+              title: "Page 1",
+              fields: [],
+            },
+          ],
+          submit: { label: "Complete" },
+          outputViews: [],
+        };
 
   const [schema, setSchema] = useState<FormSchema>(buildInitialSchema);
   const [lastSavedSchemaJSON, setLastSavedSchemaJSON] = useState<string>(() =>
@@ -330,7 +346,8 @@ export function FormBuilder({
   );
   const contentScrollRef = useRef<HTMLDivElement | null>(null);
 
-  const currentPage = schema.pages[selectedPageIndex];
+  const currentPage = schema.pages[selectedPageIndex] ??
+    schema.pages?.[0] ?? { id: "page-1", title: "Page 1", fields: [] };
   const resolvedPreviewUser = useMemo(() => {
     if (previewUserId === "preview") {
       return FORM_BUILDER_PREVIEW_USER;
@@ -357,7 +374,10 @@ export function FormBuilder({
       if (!visibleIf) return;
       const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
       conditions.forEach((condition) => {
-        if ("validatorId" in condition && isDraftValidatorId(condition.validatorId)) {
+        if (
+          "validatorId" in condition &&
+          isDraftValidatorId(condition.validatorId)
+        ) {
           activeDraftIds.add(condition.validatorId);
         }
       });
@@ -481,36 +501,35 @@ export function FormBuilder({
 
   // Load form data when formId changes
   useEffect(() => {
-    if (formId && !initialSchema) {
-      setIsLoading(true);
-      setLoadError(null);
+    if (displayBlocksOnly || !formId || initialSchema) return;
+    setIsLoading(true);
+    setLoadError(null);
 
-      tasksGetForm({ path: { id: formId } })
-        .then((response) => {
-          if (response.data) {
-            // Convert the form entity back to FormSchema
-            const form = response.data as any;
-            if (form.schema) {
-              const nextSchema = ensureOutputViews(
-                form.schema as unknown as FormSchema
-              );
-              setSchema(nextSchema);
-              setLastSavedSchemaJSON(JSON.stringify(nextSchema));
-              setHasUnsavedChanges(false);
-            }
+    tasksGetForm({ path: { id: formId } })
+      .then((response) => {
+        if (response.data) {
+          // Convert the form entity back to FormSchema
+          const form = response.data as any;
+          if (form.schema) {
+            const nextSchema = ensurePages(
+              form.schema as unknown as FormSchema
+            );
+            setSchema(nextSchema);
+            setLastSavedSchemaJSON(JSON.stringify(nextSchema));
+            setHasUnsavedChanges(false);
           }
-        })
-        .catch((error) => {
-          console.error("Failed to load form:", error);
-          setLoadError(
-            error instanceof Error ? error.message : "Failed to load form"
-          );
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [formId, initialSchema]);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load form:", error);
+        setLoadError(
+          error instanceof Error ? error.message : "Failed to load form"
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [formId, initialSchema, displayBlocksOnly]);
 
   const addField = (kind: FieldKind, insertIndex?: number) => {
     const fieldId = `field-${Date.now()}`;
@@ -854,7 +873,7 @@ export function FormBuilder({
                 field.customValidatorId
               )
                 ? resolvedIds.get(field.customValidatorId) ??
-                field.customValidatorId
+                  field.customValidatorId
                 : field.customValidatorId;
               return {
                 ...field,
@@ -988,6 +1007,16 @@ export function FormBuilder({
       if (resolvedDraftIds.length > 0) {
         setSchema(schemaForSave);
       }
+
+      // displayBlocksOnly mode: save via onSave only (e.g. general update schema)
+      if (displayBlocksOnly && onSave) {
+        onSave(schemaForSave);
+        setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
+        setHasUnsavedChanges(false);
+        showSuccessToast("Saved successfully");
+        return;
+      }
+
       let response;
 
       if (formId) {
@@ -1045,6 +1074,7 @@ export function FormBuilder({
       setIsSaving(false);
     }
   }, [
+    displayBlocksOnly,
     formId,
     onSave,
     resolveCustomValidatorDrafts,
@@ -1261,10 +1291,11 @@ export function FormBuilder({
                         {element.name}
                       </span>
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${element.type === "field"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-green-100 text-green-800"
-                          }`}
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          element.type === "field"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
                       >
                         {element.type === "field" ? "Field" : "Block"}
                       </span>
@@ -1302,12 +1333,12 @@ export function FormBuilder({
     const updateField = (updates: Partial<AnyField | DisplayBlock>) => {
       const optionValueChange =
         (field as AnyField).kind === "multiselect" &&
-          "options" in updates &&
-          updates.options
+        "options" in updates &&
+        updates.options
           ? findSingleOptionValueChange(
-            (field as MultiSelectField).options,
-            updates.options as MultiSelectField["options"]
-          )
+              (field as MultiSelectField).options,
+              updates.options as MultiSelectField["options"]
+            )
           : null;
 
       const nextPages = schema.pages.map((page, pageIndex) => {
@@ -1409,204 +1440,204 @@ export function FormBuilder({
           {/* Check if it's a form field (has 'label' property) vs display block */}
           {"label" in field
             ? (() => {
-              const formField = field as AnyField;
-              switch (formField.kind) {
-                case "text":
-                  return (
-                    <EditableTextField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "textarea":
-                  return (
-                    <EditableTextareaField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "email":
-                  return (
-                    <EditableEmailField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "phone":
-                  return (
-                    <EditablePhoneField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "number":
-                  return (
-                    <EditableNumberField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "range":
-                  return (
-                    <EditableRangeField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "checkbox":
-                  return (
-                    <EditableCheckboxField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "radio":
-                  return (
-                    <EditableRadioField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "select":
-                  return (
-                    <EditableSelectField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "multiselect":
-                  return (
-                    <EditableMultiSelectField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "date":
-                  return (
-                    <EditableDateField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "time":
-                  return (
-                    <EditableTimeField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "timezone":
-                  return (
-                    <EditableTimezoneField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "city":
-                  return (
-                    <EditableCityField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "file":
-                  return (
-                    <EditableFileField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                case "custom":
-                  return (
-                    <EditableCustomComponentField
-                      field={formField as any}
-                      {...commonProps}
-                    />
-                  );
-                default:
-                  return null;
-              }
-            })()
+                const formField = field as AnyField;
+                switch (formField.kind) {
+                  case "text":
+                    return (
+                      <EditableTextField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "textarea":
+                    return (
+                      <EditableTextareaField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "email":
+                    return (
+                      <EditableEmailField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "phone":
+                    return (
+                      <EditablePhoneField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "number":
+                    return (
+                      <EditableNumberField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "range":
+                    return (
+                      <EditableRangeField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "checkbox":
+                    return (
+                      <EditableCheckboxField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "radio":
+                    return (
+                      <EditableRadioField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "select":
+                    return (
+                      <EditableSelectField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "multiselect":
+                    return (
+                      <EditableMultiSelectField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "date":
+                    return (
+                      <EditableDateField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "time":
+                    return (
+                      <EditableTimeField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "timezone":
+                    return (
+                      <EditableTimezoneField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "city":
+                    return (
+                      <EditableCityField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "file":
+                    return (
+                      <EditableFileField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "custom":
+                    return (
+                      <EditableCustomComponentField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  default:
+                    return null;
+                }
+              })()
             : (() => {
-              const block = field as DisplayBlock;
-              switch (block.kind) {
-                case "header":
-                  return (
-                    <EditableHeaderBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                case "text":
-                  return (
-                    <EditableTextBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                case "label":
-                  return (
-                    <EditableLabelBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                case "divider":
-                  return (
-                    <EditableDividerBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                case "spacer":
-                  return (
-                    <EditableSpacerBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                case "html":
-                  return (
-                    <EditableHtmlBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                case "image":
-                  return (
-                    <EditableImageBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                case "video":
-                  return (
-                    <EditableVideoBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                case "quote":
-                  return (
-                    <EditableQuoteBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                case "biglink":
-                  return (
-                    <EditableBigLinkBlock
-                      block={block as any}
-                      {...commonProps}
-                    />
-                  );
-                default:
-                  console.error(
-                    `Unknown block kind: ${block satisfies never}`
-                  );
-                  return null;
-              }
-            })()}
+                const block = field as DisplayBlock;
+                switch (block.kind) {
+                  case "header":
+                    return (
+                      <EditableHeaderBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "text":
+                    return (
+                      <EditableTextBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "label":
+                    return (
+                      <EditableLabelBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "divider":
+                    return (
+                      <EditableDividerBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "spacer":
+                    return (
+                      <EditableSpacerBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "html":
+                    return (
+                      <EditableHtmlBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "image":
+                    return (
+                      <EditableImageBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "video":
+                    return (
+                      <EditableVideoBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "quote":
+                    return (
+                      <EditableQuoteBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "biglink":
+                    return (
+                      <EditableBigLinkBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  default:
+                    console.error(
+                      `Unknown block kind: ${block satisfies never}`
+                    );
+                    return null;
+                }
+              })()}
         </div>
 
         {/* Insertion bar after */}
@@ -1626,6 +1657,7 @@ export function FormBuilder({
           <ElementSelect
             onAddField={addField}
             onAddDisplayBlock={addDisplayBlock}
+            displayBlocksOnly={displayBlocksOnly}
           />
         )}
 
@@ -1664,32 +1696,36 @@ export function FormBuilder({
                   {isSaving
                     ? "Saving..."
                     : hasUnsavedChanges
-                      ? "Save Form"
-                      : "No changes"}
+                    ? "Save Form"
+                    : "No changes"}
                 </Button>
               </div>
-              <div className="inline-flex rounded-md bg-gray-200 p-0.5 text-sm font-medium text-gray-600">
-                <button
-                  type="button"
-                  className={`px-3 py-2 rounded-md text-nowrap ${activeEditor === "form"
-                    ? "bg-white shadow text-gray-900"
-                    : "text-gray-600"
+              {!displayBlocksOnly && (
+                <div className="inline-flex rounded-md bg-gray-200 p-0.5 text-sm font-medium text-gray-600">
+                  <button
+                    type="button"
+                    className={`px-3 py-2 rounded-md text-nowrap ${
+                      activeEditor === "form"
+                        ? "bg-white shadow text-gray-900"
+                        : "text-gray-600"
                     }`}
-                  onClick={() => setActiveEditor("form")}
-                >
-                  Form builder
-                </button>
-                <button
-                  type="button"
-                  className={`px-3 py-1 rounded-md text-nowrap ${activeEditor === "outputs"
-                    ? "bg-white shadow text-gray-900"
-                    : "text-gray-600"
+                    onClick={() => setActiveEditor("form")}
+                  >
+                    Form builder
+                  </button>
+                  <button
+                    type="button"
+                    className={`px-3 py-1 rounded-md text-nowrap ${
+                      activeEditor === "outputs"
+                        ? "bg-white shadow text-gray-900"
+                        : "text-gray-600"
                     }`}
-                  onClick={() => setActiveEditor("outputs")}
-                >
-                  Output views
-                </button>
-              </div>
+                    onClick={() => setActiveEditor("outputs")}
+                  >
+                    Output views
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Page tabs - only show in edit mode */}
@@ -1778,10 +1814,11 @@ export function FormBuilder({
                         onDragEnd={handlePageDragEnd}
                         onDragOver={handlePageDragOver(index)}
                         onDrop={handlePageDrop(index)}
-                        className={`flex items-center rounded-md text-sm font-medium cursor-move pr-2 transition-all border ${selectedPageIndex === index
-                          ? "bg-blue-100 text-blue-700 border-blue-200"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent"
-                          } ${isDragging ? "opacity-50 scale-95" : ""}`}
+                        className={`flex items-center rounded-md text-sm font-medium cursor-move pr-2 transition-all border ${
+                          selectedPageIndex === index
+                            ? "bg-blue-100 text-blue-700 border-blue-200"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent"
+                        } ${isDragging ? "opacity-50 scale-95" : ""}`}
                       >
                         {/* Drag handle */}
                         <div
@@ -1865,7 +1902,7 @@ export function FormBuilder({
             ref={contentScrollRef}
             className="flex-1 p-6 overflow-y-auto min-h-0"
           >
-            {activeEditor === "outputs" ? (
+            {activeEditor === "outputs" && !displayBlocksOnly ? (
               <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
             ) : isPreviewMode ? (
               <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
@@ -1992,7 +2029,10 @@ export function FormBuilder({
                         }
 
                         const currentFields = [...currentPage.fields];
-                        const [draggedField] = currentFields.splice(dragIndex, 1);
+                        const [draggedField] = currentFields.splice(
+                          dragIndex,
+                          1
+                        );
                         currentFields.push(draggedField);
 
                         updateSchema({

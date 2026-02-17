@@ -2,6 +2,7 @@ import {
   ApiProperty,
   ApiPropertyOptional,
   OmitType,
+  PartialType,
   PickType,
 } from '@nestjs/swagger';
 import { GeneralUpdate } from '../entities/general-update.entity';
@@ -81,15 +82,16 @@ export class CreateGeneralUpdateDto extends OmitType(GeneralUpdate, [
   suiteIds?: number[];
 }
 
-export class UpdateGeneralUpdateDto extends OmitType(GeneralUpdate, [
-  'id',
-  'createdAt',
-  'updatedAt',
-  'activities',
-  'tags',
-  'suites',
-  'schema',
-]) {
+export class UpdateGeneralUpdateDto extends PartialType(
+  OmitType(GeneralUpdate, [
+    'id',
+    'createdAt',
+    'updatedAt',
+    'activities',
+    'tags',
+    'suites',
+  ]),
+) {
   @ApiPropertyOptional({ type: String, isArray: true })
   tagIds?: string[];
 

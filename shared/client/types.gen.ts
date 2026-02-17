@@ -1386,10 +1386,13 @@ export type CreateGeneralUpdateDto = {
 };
 
 export type UpdateGeneralUpdateDto = {
-    name: string;
+    name?: string;
+    schema?: {
+        [key: string]: unknown;
+    };
     startDate?: string;
     endDate?: string;
-    useManualCohort: boolean;
+    useManualCohort?: boolean;
     /**
      * User IDs in the manual cohort
      */
