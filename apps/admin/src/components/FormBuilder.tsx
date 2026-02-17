@@ -1010,9 +1010,9 @@ export function FormBuilder({
 
       // displayBlocksOnly mode: save via onSave only (e.g. general update schema)
       if (displayBlocksOnly && onSave) {
+        await onSave(schemaForSave);
         setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
         setHasUnsavedChanges(false);
-        await onSave(schemaForSave);
         showSuccessToast("Saved successfully");
         return;
       }
@@ -1060,7 +1060,7 @@ export function FormBuilder({
 
       // Call the optional onSave callback if provided
       if (onSave) {
-        onSave(schemaForSave);
+        await onSave(schemaForSave);
       }
 
       // Clear success message after 3 seconds
