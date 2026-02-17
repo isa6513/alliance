@@ -209,32 +209,21 @@ export class ForumService {
   }
 
   async findOnePost(id: number, userId?: number): Promise<PostDto> {
-    const [post, comments] = await Promise.all([
-      this.postRepository.findOne({
-        where: { id },
-        relations: {
-          author: true,
-          action: true,
-          editableContent: true,
-          authors: true,
-        },
-      }),
-      this.commentRepository.find({
-        where: {
-          parentObjectId: id,
-          parentObjectType: CommentParentObject.Post,
-        },
-        order: { createdAt: 'ASC' },
-      }),
-    ]);
-
-    const commentCount = comments.filter((comment) => !comment.deleted).length;
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: {
+        author: true,
+        action: true,
+        editableContent: true,
+        authors: true,
+      },
+    });
 
     if (!post || !this.postIsVisible(post, userId)) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
 
-    return new PostDto(post, { commentCount });
+    return new PostDto(post);
   }
 
   async findCommentsForPostRaw(postId: number): Promise<Comment[]> {

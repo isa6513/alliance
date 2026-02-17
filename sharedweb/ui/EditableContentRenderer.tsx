@@ -25,9 +25,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
 
   if (deleted) {
     return (
-      <div
-        className={`${className ?? ""} ${sharedClasses} text-gray-400 text-sm`}
-      >
+      <div className={`${className ?? ""} ${sharedClasses} text-gray-400`}>
         Content has been deleted
       </div>
     );

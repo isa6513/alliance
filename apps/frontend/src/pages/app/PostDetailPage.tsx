@@ -22,12 +22,9 @@ import { CardStyle } from "@alliance/shared/styles/card";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 
-type CommentFilter = "all" | "answered" | "unanswered";
-
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
   const [error, setError] = useState<string | null>(null);
-  const [commentFilter, setCommentFilter] = useState<CommentFilter>("all");
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -194,12 +191,6 @@ const PostDetailPage: React.FC = () => {
                 likes={post.likes?.length ?? 0}
                 handleLike={handleLike}
               />
-              {post.commentCount && (
-                <span className="text-zinc-500 text-[14px] mx-2">
-                  {post.commentCount} comment
-                  {post.commentCount === 1 ? "" : "s"}
-                </span>
-              )}
               {post.author.id === user?.id && (
                 <>
                   <Link
@@ -221,32 +212,12 @@ const PostDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
-        {post.qaMode && (
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-sm font-medium text-zinc-700">Q&A mode</span>
-            <div className="flex gap-1 bg-zinc-100 p-px rounded">
-              {(["all", "answered", "unanswered"] as const).map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setCommentFilter(filter)}
-                  className={`px-3 py-1 text-sm rounded border border-transparent ${
-                    commentFilter === filter
-                      ? "bg-white border-zinc-300 text-black"
-                      : "text-zinc-600 hover:text-zinc-900"
-                  }`}
-                >
-                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
         <Comments
           objectId={post.id}
           type={"post"}
+          qaMode={post.qaMode}
           expertIds={post.qaMode ? post.expertIds ?? [] : []}
           expertLabel={post.qaMode ? post.expertLabel : undefined}
-          commentFilter={post.qaMode ? commentFilter : "all"}
         />
       </div>
     </div>
