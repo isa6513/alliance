@@ -34,9 +34,16 @@ const PostDetailPage: React.FC = () => {
 
   useCIDFromParams();
 
-  const { data: post = null, isLoading: loading, error: queryError } = useQuery({
+  const {
+    data: post = null,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
     queryKey: ["forumFindOnePost", postId],
-    queryFn: () => forumFindOnePost({ path: { id: postId! } }).then(res => res.data ?? null),
+    queryFn: () =>
+      forumFindOnePost({ path: { id: postId! } }).then(
+        (res) => res.data ?? null
+      ),
     enabled: !!postId,
   });
 
@@ -74,7 +81,8 @@ const PostDetailPage: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ["forumFindOnePost", postId] });
   }, [post, queryClient, postId, user]);
 
-  const displayError = error || (queryError ? "Failed to load post details" : null);
+  const displayError =
+    error || (queryError ? "Failed to load post details" : null);
 
   if (displayError) {
     return (
@@ -102,7 +110,7 @@ const PostDetailPage: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="container max-w-4xl mx-auto px-8 py-4 md:py-8">
+      <div className="container max-w-4xl mx-auto px-2 py-4 md:py-8">
         <div className="relative">
           <Link
             to={href("/forum")}
@@ -163,7 +171,7 @@ const PostDetailPage: React.FC = () => {
                       </UserDisplayName>
                     </Link>
                   </React.Fragment>
-                ),
+                )
               )}
               <span className="text-zinc-500">
                 {formatTime(new Date(post.createdAt), {
@@ -221,10 +229,11 @@ const PostDetailPage: React.FC = () => {
                 <button
                   key={filter}
                   onClick={() => setCommentFilter(filter)}
-                  className={`px-3 py-1 text-sm rounded border border-transparent ${commentFilter === filter
-                    ? "bg-white border-zinc-300 text-black"
-                    : "text-zinc-600 hover:text-zinc-900"
-                    }`}
+                  className={`px-3 py-1 text-sm rounded border border-transparent ${
+                    commentFilter === filter
+                      ? "bg-white border-zinc-300 text-black"
+                      : "text-zinc-600 hover:text-zinc-900"
+                  }`}
                 >
                   {filter.charAt(0).toUpperCase() + filter.slice(1)}
                 </button>

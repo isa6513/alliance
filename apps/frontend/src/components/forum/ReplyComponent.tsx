@@ -14,6 +14,7 @@ import CommentActionsMenu from "./CommentActionsMenu";
 import { useCommentsContext } from "./CommentsContext";
 import { useCommentEditing } from "../../hooks/useCommentEditing";
 import { Link, href } from "react-router";
+import { ChevronDown } from "lucide-react";
 
 const INDENT_PX = 24;
 
@@ -40,6 +41,8 @@ interface ReplyContentProps {
   hasChildren: boolean;
   isCollapsed?: boolean;
   isHighlighted: boolean;
+  isCollapsible?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 const ReplyContent: React.FC<ReplyContentProps> = ({
@@ -49,6 +52,8 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
   hasChildren,
   isCollapsed = false,
   isHighlighted,
+  isCollapsible = false,
+  onToggleCollapse,
 }) => {
   const ctx = useCommentsContext();
   const { user, compact = false, expertIds = [], expertLabel } = ctx;
@@ -98,6 +103,17 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                 addSuffix: true,
               })}
             </span>
+            {isCollapsible && onToggleCollapse && (
+              <button
+                onClick={onToggleCollapse}
+                className={`text-black cursor-pointer transition-transform duration-200 ${
+                  isCollapsed ? "-rotate-90" : "rotate-0"
+                }`}
+                aria-label={isCollapsed ? "Expand" : "Collapse"}
+              >
+                <ChevronDown size={18} />
+              </button>
+            )}
             {hasChildren && isCollapsed && reply.children !== undefined && (
               <span className="text-xs bg-zinc-200 px-2 py-1 -my-1 rounded">
                 {countAllReplies(reply.children)}{" "}
@@ -249,6 +265,12 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
       />
     ) : null;
 
+  const isCollapsible =
+    hasChildren ||
+    reply.editableContent.body.includes("\n") ||
+    reply.editableContent.body.length > 100 ||
+    reply.editableContent.attachments.length > 0;
+
   const replyContent = (
     <ReplyContent
       reply={reply}
@@ -257,54 +279,30 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
       hasChildren={hasChildren}
       isCollapsed={isTopLevel ? isCollapsed : undefined}
       isHighlighted={isHighlighted}
+      isCollapsible={isTopLevel && !ctx.compact && isCollapsible}
+      onToggleCollapse={
+        isTopLevel ? () => setIsCollapsed(!isCollapsed) : undefined
+      }
     />
   );
 
   if (isTopLevel) {
     return (
-      <div className="relative">
-        {hasChildren && !ctx.compact && (
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`absolute top-6 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer ${
-              ctx.compact ? "left-0" : "-left-6"
-            }`}
-            aria-label={isCollapsed ? "Expand replies" : "Collapse replies"}
-          >
-            <svg
-              className={`w-4 h-4 transition-transform duration-200 ${
-                isCollapsed ? "-rotate-90" : "rotate-0"
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-        )}
-
-        <div className="border-transparent duration-1000 rounded">
-          <Card
-            key={reply.id}
-            className={`!display-block transition-colors duration-1000 ${newReplyClass} ${
-              ctx.compact ? "!p-1 !border-none" : "!p-2 sm:!p-4"
-            } ${
-              ctx.user && isReplyingToThis && !isCollapsed && "rounded-b-none"
-            }`}
-            flex={false}
-            style={CardStyle.White}
-          >
-            <div id={`reply-${reply.id}`}>{replyContent}</div>
-            {replyForm}
-            {renderChildren()}
-          </Card>
-        </div>
+      <div>
+        <Card
+          key={reply.id}
+          className={`!display-block transition-colors duration-1000 ${newReplyClass} ${
+            ctx.compact ? "!p-1 !border-none" : "!p-2 sm:!p-4"
+          } ${
+            ctx.user && isReplyingToThis && !isCollapsed && "rounded-b-none"
+          }`}
+          flex={false}
+          style={CardStyle.White}
+        >
+          <div id={`reply-${reply.id}`}>{replyContent}</div>
+          {replyForm}
+          {renderChildren()}
+        </Card>
       </div>
     );
   }
