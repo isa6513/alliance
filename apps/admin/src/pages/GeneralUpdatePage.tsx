@@ -16,6 +16,7 @@ import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { FormBuilder } from "../components/FormBuilder";
+import { X } from "lucide-react";
 
 const FormSection: React.FC<{
   title: string;
@@ -271,12 +272,18 @@ const GeneralUpdatePage: React.FC = () => {
     }));
   }, []);
 
-  const handleToggleSuite = useCallback((suiteId: number) => {
+  const handleAddSuite = useCallback((suiteId: number) => {
+    setForm((prev) =>
+      prev.suiteIds.includes(suiteId)
+        ? prev
+        : { ...prev, suiteIds: [...prev.suiteIds, suiteId] }
+    );
+  }, []);
+
+  const handleRemoveSuite = useCallback((suiteId: number) => {
     setForm((prev) => ({
       ...prev,
-      suiteIds: prev.suiteIds.includes(suiteId)
-        ? prev.suiteIds.filter((s) => s !== suiteId)
-        : [...prev.suiteIds, suiteId],
+      suiteIds: prev.suiteIds.filter((s) => s !== suiteId),
     }));
   }, []);
 
@@ -294,7 +301,7 @@ const GeneralUpdatePage: React.FC = () => {
         path: { id },
         body: {
           schema: schema as unknown as Record<string, unknown>,
-        } as unknown as UpdateGeneralUpdateDto,
+        },
       });
       if (response.data) setUpdate(response.data);
     },
@@ -331,33 +338,57 @@ const GeneralUpdatePage: React.FC = () => {
         description="Assign this general update to one or more suites. When assigned to a suite, the start and end dates are inherited from the suite schedule."
       >
         <div className="space-y-3">
+          {form.suiteIds.length > 0 && (
+            <ul className="flex flex-wrap gap-2">
+              {form.suiteIds.map((suiteId) => {
+                const suite = availableSuites.find((s) => s.id === suiteId);
+                const name = suite?.name ?? `Suite #${suiteId}`;
+                return (
+                  <li key={suiteId}>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSuite(suiteId)}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-100 hover:border-gray-300 focus:outline-none focus:ring-1 focus:ring-gray-400 cursor-pointer"
+                      aria-label={`Remove ${name}`}
+                    >
+                      {name}
+                      <span aria-hidden className="text-gray-500">
+                        <X className="w-4 h-4" />
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           {suitesLoading ? (
             <p className="text-sm text-gray-500">Loading suites...</p>
           ) : availableSuites.length ? (
-            <div className="grid gap-2 sm:grid-cols-3">
-              {availableSuites.map((suite) => {
-                const checked = form.suiteIds.includes(suite.id);
-                return (
-                  <label
-                    key={suite.id}
-                    className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${
-                      checked
-                        ? "border-blue-400 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      checked={checked}
-                      onChange={() => handleToggleSuite(suite.id)}
-                    />
-                    <span className="font-medium text-gray-800">
+            <div className="flex items-center gap-2">
+              <label htmlFor="add-suite" className="sr-only">
+                Add suite
+              </label>
+              <select
+                id="add-suite"
+                value=""
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v) {
+                    handleAddSuite(Number(v));
+                    e.target.value = "";
+                  }
+                }}
+                className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Add a suite...</option>
+                {availableSuites
+                  .filter((s) => !form.suiteIds.includes(s.id))
+                  .map((suite) => (
+                    <option key={suite.id} value={suite.id}>
                       {suite.name}
-                    </span>
-                  </label>
-                );
-              })}
+                    </option>
+                  ))}
+              </select>
             </div>
           ) : (
             <p className="text-sm text-gray-500">No suites available.</p>
