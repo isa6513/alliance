@@ -793,7 +793,7 @@ export class ActionsService {
           includeSuspended: false,
         });
       })
-      .sort((a, b) => b.priority - a.priority);
+      .sort(startDatePriorityComparator);
   }
 
   async dismissGeneralUpdate(
