@@ -250,6 +250,7 @@ jobs:
             --model claude-opus-4-6 \
             --allowedTools "Read,Write,Bash(git diff:*),Bash(git status:*)" \
             --max-turns 20
+            --dangerously-skip-permissions
 
           # Check if any files were actually changed
           if git diff --quiet; then
