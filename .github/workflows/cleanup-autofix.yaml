@@ -1,0 +1,117 @@
+name: Cleanup stale auto-fix branches
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close stale auto-fix PRs and delete branches
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          cutoff="$(date -u -d '1 day ago' +%Y-%m-%dT%H:%M:%SZ)"
+          echo "Cutoff: $cutoff — closing auto-fix PRs created before this."
+
+          page=1
+          while :; do
+            prs="$(curl -sS \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$REPO/pulls?state=open&per_page=100&page=$page")"
+
+            count="$(printf '%s' "$prs" | jq 'length')"
+            [ "$count" -eq 0 ] && break
+
+            # Filter to auto-fix/* branches created before cutoff
+            printf '%s' "$prs" | jq -c --arg cutoff "$cutoff" '
+              .[] | select(
+                (.head.ref | startswith("auto-fix/")) and
+                (.created_at < $cutoff)
+              ) | { number, head_ref: .head.ref, created_at }
+            ' | while IFS= read -r pr; do
+              number="$(printf '%s' "$pr" | jq -r '.number')"
+              branch="$(printf '%s' "$pr" | jq -r '.head_ref')"
+              created="$(printf '%s' "$pr" | jq -r '.created_at')"
+
+              echo "Closing PR #${number} (branch: ${branch}, created: ${created})"
+
+              # Close the PR with a comment
+              curl -sS -X POST \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/$REPO/issues/${number}/comments" \
+                -d '{"body":"Auto-closing: this auto-fix PR was not acted on within 24 hours."}' \
+                > /dev/null
+
+              curl -sS -X PATCH \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/$REPO/pulls/${number}" \
+                -d '{"state":"closed"}' \
+                > /dev/null
+
+              # Delete the branch
+              echo "Deleting branch: ${branch}"
+              curl -sS -X DELETE \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/$REPO/git/refs/heads/${branch}" \
+                > /dev/null || echo "  (branch may already be deleted)"
+
+            done
+
+            [ "$count" -lt 100 ] && break
+            page=$((page + 1))
+          done
+
+          # Also catch orphan auto-fix/* branches with no open PR
+          echo ""
+          echo "Checking for orphan auto-fix/* branches..."
+
+          page=1
+          while :; do
+            refs="$(curl -sS \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$REPO/git/matching-refs/heads/auto-fix/?per_page=100&page=$page")"
+
+            count="$(printf '%s' "$refs" | jq 'length')"
+            [ "$count" -eq 0 ] && break
+
+            printf '%s' "$refs" | jq -r '.[].ref' | while IFS= read -r ref; do
+              branch="${ref#refs/heads/}"
+
+              # Get the latest commit date on this branch
+              commit_info="$(curl -sS \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/$REPO/commits/${branch}?per_page=1")"
+
+              commit_date="$(printf '%s' "$commit_info" | jq -r '.commit.committer.date // ""')"
+
+              if [ -n "$commit_date" ] && [ "$commit_date" \< "$cutoff" ]; then
+                echo "Deleting orphan branch: ${branch} (last commit: ${commit_date})"
+                curl -sS -X DELETE \
+                  -H "Authorization: Bearer $GITHUB_TOKEN" \
+                  -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/repos/$REPO/git/refs/heads/${branch}" \
+                  > /dev/null || echo "  (already deleted)"
+              fi
+            done
+
+            [ "$count" -lt 100 ] && break
+            page=$((page + 1))
+          done
+
+          echo "Cleanup complete."

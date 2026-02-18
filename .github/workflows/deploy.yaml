@@ -722,7 +722,7 @@ jobs:
             export DB_CA_CERT="${{ secrets.DB_CA_CERT }}"
             export PANGRAM_API_KEY=${{ secrets.PANGRAM_API_KEY }}
             export PANGRAM_API_URL=https://text.api.pangram.com/v3
-            
+
             rm -rf nest-backend-deploy-backup || true
             mv nest-backend nest-backend-deploy-backup || true
 
@@ -759,7 +759,7 @@ jobs:
 
             sleep 10
             curl --silent --fail --show-error "https://${{vars.DOMAIN_NAME}}/api/" > /dev/null
- 
+
   verify-deployment:
     needs:
       - deploy-nest-backend
@@ -841,6 +841,7 @@ jobs:
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"${{ steps.slack_mention.outputs.mention }} Deploy ${{ github.ref_name == 'production' && 'production' || 'staging' }} failed for ${{ github.event.head_commit.message }}. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL_DEPLOYMENT }}
+
   # build-mobile-app:
   #   runs-on: ubuntu-latest
   #   steps:
