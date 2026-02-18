@@ -344,7 +344,7 @@ const UsersList: React.FC = () => {
   );
 
   return (
-    <div className="h-full p-5 flex flex-col items-center gap-y-3 overflow-x-hidden">
+    <div className="h-full p-5 flex flex-col items-center gap-y-3 overflow-x-hidden bg-zinc-50">
       <div className="flex flex-row gap-3 w-full items-center">
         <input
           type="text"

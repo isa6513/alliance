@@ -162,6 +162,18 @@ const UserDetailView: React.FC = () => {
     };
   }, [notifs]);
 
+  const emailClickRate = useMemo(() => {
+    if (!emailNotifs.length) return null;
+    const clicked = emailNotifs.filter((n) => n.mail?.clickedLink).length;
+    return Math.round((clicked / emailNotifs.length) * 100);
+  }, [emailNotifs]);
+
+  const textClickRate = useMemo(() => {
+    if (!textNotifs.length) return null;
+    const clicked = textNotifs.filter((n) => n.mms?.clickedLink).length;
+    return Math.round((clicked / textNotifs.length) * 100);
+  }, [textNotifs]);
+
   const sortedAwayRanges = useMemo(() => {
     return [...awayRanges].sort(
       (a, b) =>
@@ -449,8 +461,13 @@ const UserDetailView: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Texts */}
               <div className="border border-zinc-200 rounded overflow-hidden">
-                <div className="bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200">
-                  Texts ({textNotifs.length})
+                <div className="bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200 flex items-center justify-between">
+                  <span>Texts ({textNotifs.length})</span>
+                  {textClickRate !== null && (
+                    <span className="font-normal text-zinc-500">
+                      {textClickRate}% click rate
+                    </span>
+                  )}
                 </div>
                 {textNotifs.length ? (
                   <div className="max-h-64 overflow-y-auto divide-y divide-zinc-100">
@@ -515,8 +532,13 @@ const UserDetailView: React.FC = () => {
 
               {/* Emails */}
               <div className="border border-zinc-200 rounded overflow-hidden">
-                <div className="bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200">
-                  Emails ({emailNotifs.length})
+                <div className="bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200 flex items-center justify-between">
+                  <span>Emails ({emailNotifs.length})</span>
+                  {emailClickRate !== null && (
+                    <span className="font-normal text-zinc-500">
+                      {emailClickRate}% click rate
+                    </span>
+                  )}
                 </div>
                 {emailNotifs.length ? (
                   <div className="max-h-96 overflow-y-auto divide-y divide-zinc-100">
