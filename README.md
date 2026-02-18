@@ -12,7 +12,7 @@ In root dir: `yarn install` (install yarn version `4.9.1` via corepack if missin
 
 `cd server`
 
-`npm install`
+`bun install`
 
 `cp .env.example .env` (and make necessary edits)
 
@@ -32,7 +32,7 @@ dev: `cd apps/admin && yarn dev` (or `yarn admin:dev` from root dir)
 
 Install bun 1.3.6 on your computer.
 
-dev: `cd server && bun install && bun dev`
+dev: `cd server && bun dev`
 
 When opening the app locally for the first time, you can log in with the account specified by `ADMIN_USER` and `ADMIN_PASSWORD` in your .env file (this account will be automatically added to the db on startup)
 
@@ -50,6 +50,6 @@ build: `yarn eas build --platform [ios|android]`
 
 ### Server migrations
 
-generate migrations (in server/): `npm run migration:generate -- migrations/[name of migration]`
+generate migrations (in server/): `bun migration:generate -- migrations/[name of migration]`
 
-run migrations `npm run migration:run`
+run migrations `bun migration:run`

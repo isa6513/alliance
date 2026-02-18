@@ -51,14 +51,14 @@ jobs:
           Suggest any improvements, potential bugs, or issues. Attend to high level direction also, such as if there might be a better way to accomplish the same objective.
 
           Output a final message with your concise thoughts. Be sure to separate this from your other output as a new message so only the review is sent. Do not summarize the commit, just write one short bullet point for each specific issue you found, if any. Do not list things that do not need fixing. End the message with the phrase "[NEEDS_ATTENTION]" if there is a significant issue or possible improvement that the author should address. If everything is fine, do not include this phrase.
-          Only output [NEEDS_ATTENTION] if you are highly confident there is a substantial issue. Look around at related files to make sure you arent missing anything before doing so. If the changes remove a feature or affordance but this removal was clearly intentional by the author, this does not need attention. For example, if a useful thing was removed as the only change in a commit, the author likely intended to remove it. Include full file paths from repository root as well as line numbers for applicable issues in your review.
+          Only output [NEEDS_ATTENTION] if you are highly confident there is a substantial issue. Look around at related files to make sure you arent missing anything before doing so. If the changes remove a feature or affordance but this removal was clearly intentional by the author, this does not need attention. Do not leave comments of the form "verify that x" or "x needs to be tested" - these are not code issues. Include full file paths from repository root as well as line numbers for applicable issues in your review.
           ${{ (github.ref_name == 'main' || github.ref_name == 'staging' || github.ref_name == 'production') && '' || 'This is a WIP feature branch, do not comment on unimplemented features or clearly in-progress areas.' }}
           PROMPT
 
           raw_json="$(
             claude -p "$(cat "$prompt_file")" \
               --output-format json \
-              --model claude-opus-4-5 \
+              --model claude-opus-4-6 \
               --allowedTools "Read,Bash(git diff:*),Bash(git show:*),Bash(git status:*),Bash(git log:*)" \
               --max-turns 12
           )"
