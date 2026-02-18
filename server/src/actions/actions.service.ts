@@ -126,6 +126,7 @@ import {
   CreateGeneralUpdateDto,
   UpdateGeneralUpdateDto,
 } from './dto/general-update.dto';
+import { startDatePriorityComparator } from 'src/utils/general-update';
 
 const MS_IN_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -615,17 +616,21 @@ export class ActionsService {
 
   async findAllGeneralUpdates(): Promise<GeneralUpdate[]> {
     const now = new Date();
-    return await this.generalUpdateRepository.find({
-      where: {
-        startDate: LessThan(now),
-      },
-    });
+    return (
+      await this.generalUpdateRepository.find({
+        where: {
+          startDate: LessThan(now),
+        },
+      })
+    ).sort(startDatePriorityComparator);
   }
 
   async findAllGeneralUpdatesAdmin(): Promise<GeneralUpdate[]> {
-    return await this.generalUpdateRepository.find({
-      relations: { tags: true, suites: true },
-    });
+    return (
+      await this.generalUpdateRepository.find({
+        relations: { tags: true, suites: true },
+      })
+    ).sort(startDatePriorityComparator);
   }
 
   async findOneGeneralUpdate(id: number): Promise<GeneralUpdate> {
@@ -766,27 +771,29 @@ export class ActionsService {
       contractEvents: true,
     });
 
-    return updates.filter((update) => {
-      if (
-        update.activities!.some(
-          (activity) =>
-            activity.type === GeneralUpdateActivityType.DISMISSED &&
-            activity.userId === userId,
-        )
-      ) {
-        return false;
-      }
-      return computeIsTaggedOrInManualCohort({
-        user,
-        useManualCohort: update.useManualCohort,
-        manualCohortUserIdSet: new Set(update.manualCohortUserIds),
-        participatingTagIdSet: new Set(update.tags.map((tag) => tag.id)),
-        everyoneShouldComplete: false,
-        latestMemberActionEventDate: update.startDate,
-        latestMemberActionEventDeadline: update.endDate,
-        includeSuspended: false,
-      });
-    });
+    return updates
+      .filter((update) => {
+        if (
+          update.activities!.some(
+            (activity) =>
+              activity.type === GeneralUpdateActivityType.DISMISSED &&
+              activity.userId === userId,
+          )
+        ) {
+          return false;
+        }
+        return computeIsTaggedOrInManualCohort({
+          user,
+          useManualCohort: update.useManualCohort,
+          manualCohortUserIdSet: new Set(update.manualCohortUserIds),
+          participatingTagIdSet: new Set(update.tags.map((tag) => tag.id)),
+          everyoneShouldComplete: false,
+          latestMemberActionEventDate: update.startDate,
+          latestMemberActionEventDeadline: update.endDate,
+          includeSuspended: false,
+        });
+      })
+      .sort((a, b) => b.priority - a.priority);
   }
 
   async dismissGeneralUpdate(
