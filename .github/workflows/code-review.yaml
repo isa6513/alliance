@@ -18,6 +18,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Remove AGENTS.md and CLAUDE.md before review
+        run: |
+          set -euo pipefail
+          rm -f AGENTS.md CLAUDE.md
+
       # --- Claude Code (Anthropic) ---
 
       - name: Setup Node (for installing Claude Code CLI)
@@ -87,7 +92,6 @@ jobs:
             Only output [NEEDS_ATTENTION] if you are highly confident there is a substantial issue. Look around at related files to make sure you arent missing anything before doing so. If the changes remove a feature or affordance but this removal was clearly intentional by the author, this does not need attention. For example, if a useful thing was removed as the only change in a commit, the author likely intended to remove it.
             Include full file paths from repository root as well as line numbers for applicable issues in your review.
             ${{ (github.ref_name == 'main' || github.ref_name == 'staging' || github.ref_name == 'production') && '' || 'This is a WIP feature branch, do not comment on unimplemented features or clearly in-progress areas.' }}
-
 
       - name: Combine reviews with OpenAI
         id: combine_reviews
@@ -170,7 +174,6 @@ jobs:
             echo "needs_review=$needs_review"
           } >> "$GITHUB_OUTPUT"
 
-
       - name: Linkify file references for Cursor
         id: linkify_cursors
         env:
@@ -194,7 +197,7 @@ jobs:
           fi
 
           instructions="You will be given a short markdown review message that may mention files like \`apps/frontend/src/pages/app/HomePage.tsx:32\` or \`server/src/foo/bar.ts\`.
-          
+
           Your job is:
           - Turn each file reference into a Slack mrkdwn link that opens Cursor on macOS.
           - Use the URL pattern: <\${CURSOR_FILE_PREFIX}/<repo-relative-path>:<line>|<file-label>>
@@ -336,4 +339,3 @@ jobs:
           curl -s -X POST -H 'Content-type: application/json' \
             --data @slack.json \
             "$SLACK_WEBHOOK_URL"
-
