@@ -13,7 +13,7 @@ import {
   communityGetCommunityInvites,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import List from "@alliance/sharedweb/ui/List";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
@@ -64,6 +64,8 @@ const CommunityInvitesLeaderTab = ({
   const [communityInvites, setCommunityInvites] = useState<
     CommunityInviteDto[]
   >([]);
+  const [copiedInviteId, setCopiedInviteId] = useState<number | null>(null);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { error: errorToast, confirm } = useToast();
 
   const allUsers = useSelectableUserIds();
@@ -154,11 +156,22 @@ const CommunityInvitesLeaderTab = ({
     setInviteNotifCount(onetimeActionable.length);
   }, [onetimeActionable.length, setInviteNotifCount]);
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = useCallback((text: string) => {
     const baseUrl = getBaseUrl();
     const url = `${baseUrl}/signup?ref=${text}`;
     navigator.clipboard.writeText(url);
-  };
+  }, []);
+
+  const handleCopied = useCallback((inviteId: number) => {
+    if (copiedTimeoutRef.current) {
+      clearTimeout(copiedTimeoutRef.current);
+    }
+    setCopiedInviteId(inviteId);
+    copiedTimeoutRef.current = setTimeout(() => {
+      setCopiedInviteId(null);
+      copiedTimeoutRef.current = null;
+    }, 2000);
+  }, []);
 
   const handleInvite = () => {
     if (!user) {
@@ -399,8 +412,10 @@ const CommunityInvitesLeaderTab = ({
                 key={invite.id}
                 invite={invite}
                 selfInvited={!!(user && user.id === invite.invitingUser?.id)}
+                copied={copiedInviteId === invite.id}
                 onDelete={handleDeleteInvite}
                 onCopy={copyToClipboard}
+                onCopied={handleCopied}
               />
             ))}
           </List>
@@ -453,7 +468,9 @@ const CommunityInvitesLeaderTab = ({
                 key={invite.id}
                 invite={invite}
                 selfInvited={!!(user && user.id === invite.invitingUser?.id)}
+                copied={copiedInviteId === invite.id}
                 onCopy={copyToClipboard}
+                onCopied={handleCopied}
               />
             ))}
             {communitySettled.map((invite) => (

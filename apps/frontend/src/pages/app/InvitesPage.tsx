@@ -7,7 +7,7 @@ import {
 } from "@alliance/shared/client";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../lib/AuthContext";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
@@ -26,6 +26,8 @@ const InvitesPage = () => {
   const [loadingInvites, setLoadingInvites] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
+  const [copiedInviteId, setCopiedInviteId] = useState<number | null>(null);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -80,6 +82,17 @@ const InvitesPage = () => {
     const baseUrl = getBaseUrl();
     const url = `${baseUrl}/signup?ref=${text}`;
     navigator.clipboard.writeText(url);
+  }, []);
+
+  const handleCopied = useCallback((inviteId: number) => {
+    if (copiedTimeoutRef.current) {
+      clearTimeout(copiedTimeoutRef.current);
+    }
+    setCopiedInviteId(inviteId);
+    copiedTimeoutRef.current = setTimeout(() => {
+      setCopiedInviteId(null);
+      copiedTimeoutRef.current = null;
+    }, 2000);
   }, []);
 
   const handleApproveInvite = useCallback(
@@ -235,8 +248,10 @@ const InvitesPage = () => {
                   showCommunityLabel={true}
                   communityLabel={invite.community?.name}
                   selfInvited={user.id === invite.invitingUser?.id}
+                  copied={copiedInviteId === invite.id}
                   onDelete={handleDeleteInvite}
                   onCopy={copyToClipboard}
+                  onCopied={handleCopied}
                 />
               ))}
             </List>
@@ -286,7 +301,9 @@ const InvitesPage = () => {
                   showCommunityLabel={true}
                   communityLabel={invite.community?.name}
                   selfInvited={user.id === invite.invitingUser?.id}
+                  copied={copiedInviteId === invite.id}
                   onCopy={copyToClipboard}
+                  onCopied={handleCopied}
                 />
               ))}
             </List>

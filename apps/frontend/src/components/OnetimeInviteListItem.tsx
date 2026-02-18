@@ -3,7 +3,6 @@ import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { Copy } from "lucide-react";
-import { useState } from "react";
 import { href, Link } from "react-router";
 
 type OnetimeInviteListItemProps = {
@@ -11,7 +10,9 @@ type OnetimeInviteListItemProps = {
   showCommunityLabel?: boolean;
   communityLabel?: string | null;
   selfInvited: boolean;
+  copied?: boolean;
   onCopy?: (code: string) => void;
+  onCopied?: (inviteId: number) => void;
   onDelete?: (inviteId: number, event: React.MouseEvent<HTMLElement>) => void;
   onApprove?: (inviteId: number) => void;
   onReject?: (inviteId: number) => void;
@@ -38,20 +39,20 @@ const OnetimeInviteListItem = ({
   showCommunityLabel,
   communityLabel,
   selfInvited,
+  copied = false,
   onCopy,
+  onCopied,
   onDelete,
   onApprove,
   onReject,
 }: OnetimeInviteListItemProps) => {
   const isRequest = invite.status === "request_pending";
   const statusStyle = STATUS_STYLE[invite.status];
-  const [copied, setCopied] = useState(false);
   communityLabel ??= "No group";
 
   const handleCopy = () => {
     onCopy?.(invite.code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    onCopied?.(invite.id);
   };
 
   return (
