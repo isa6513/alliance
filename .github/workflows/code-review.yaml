@@ -281,7 +281,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git checkout -b "$fix_branch"
+
+          git checkout HEAD -- .github/workflows/ 2>/dev/null || true
+          git checkout HEAD -- AGENTS.md CLAUDE.md 2>/dev/null || true
+
           git add -A
+
           git commit -m "Auto-fix: address review issues for ${short_sha}
 
           Generated automatically from review of commit ${COMMIT_SHA}.
