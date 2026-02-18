@@ -11,6 +11,7 @@ import TwoColumnLayout from "../../components/TwoColumnLayout";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
 import LargeActionCard, { LargeActionCardProps } from "./LargeActionCard";
+import LargeGeneralUpdateCard from "./LargeGeneralUpdateCard";
 import useGlobalFeed from "@alliance/shared/lib/useGlobalFeed";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
@@ -34,7 +35,13 @@ import { useTaskActionsData } from "../../lib/useTaskActionsData";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
-  const { actions, loading, handleDismissAction } = useTaskActionsData();
+  const {
+    actions,
+    generalUpdates,
+    loading,
+    handleDismissAction,
+    handleDismissGeneralUpdate,
+  } = useTaskActionsData();
 
   const { user } = useAuth();
 
@@ -70,65 +77,65 @@ const HomePage = () => {
       <>
         {(currentWeekSidebarActions.length > 0 ||
           completedActions.length > 0) && (
-            <div className="flex flex-col gap-y-2">
-              <p className="font-semibold text-base font-serif text-black">
-                Progress
+          <div className="flex flex-col gap-y-2">
+            <p className="font-semibold text-base font-serif text-black">
+              Progress
+            </p>
+            {currentWeekSidebarActions.length + newActions.length > 0 && (
+              <p className="text-zinc-600 mb-2">
+                <span className="text-green font-medium mr-0.5">
+                  {currentWeekSidebarActions.length} task
+                  {currentWeekSidebarActions.length !== 1 ? "s" : ""} left{" "}
+                </span>
+                {numTodo > 0 &&
+                  remainingTasksEstimatedTimeCurrentWeek > 0 &&
+                  `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
               </p>
-              {currentWeekSidebarActions.length + newActions.length > 0 && (
-                <p className="text-zinc-600 mb-2">
-                  <span className="text-green font-medium mr-0.5">
-                    {currentWeekSidebarActions.length} task
-                    {currentWeekSidebarActions.length !== 1 ? "s" : ""} left{" "}
-                  </span>
-                  {numTodo > 0 &&
-                    remainingTasksEstimatedTimeCurrentWeek > 0 &&
-                    `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
-                </p>
+            )}
+            <ul className="space-y-2 list-disc">
+              {completedActions.map((action) => (
+                <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                  <CheckIcon size="line" />
+                  <Link
+                    to={href("/actions/:id", { id: action.id.toString() })}
+                    className="text-zinc-400 line-through"
+                  >
+                    {action.optional && "(Optional) "}
+                    {action.name}
+                  </Link>
+                </div>
+              ))}
+              {currentWeekTodoActions.map((action) => (
+                <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                  <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                  <Link
+                    to={href("/actions/:id", { id: action.id.toString() })}
+                    className="text-zinc-600"
+                  >
+                    {action.optional && "(Optional) "}
+                    {action.name}
+                  </Link>
+                </div>
+              ))}
+              {nextWeekTodoActions.length > 0 && (
+                <>
+                  <p className="text-zinc-500 mt-3 font-medium">Upcoming</p>
+                  {nextWeekTodoActions.map((action) => (
+                    <div key={action.id} className="text-zinc-600 flex gap-x-2">
+                      <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                      <Link
+                        to={href("/actions/:id", { id: action.id.toString() })}
+                        className="text-zinc-600"
+                      >
+                        {action.name}
+                      </Link>
+                    </div>
+                  ))}
+                </>
               )}
-              <ul className="space-y-2 list-disc">
-                {completedActions.map((action) => (
-                  <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                    <CheckIcon size="line" />
-                    <Link
-                      to={href("/actions/:id", { id: action.id.toString() })}
-                      className="text-zinc-400 line-through"
-                    >
-                      {action.optional && "(Optional) "}
-                      {action.name}
-                    </Link>
-                  </div>
-                ))}
-                {currentWeekTodoActions.map((action) => (
-                  <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                    <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                    <Link
-                      to={href("/actions/:id", { id: action.id.toString() })}
-                      className="text-zinc-600"
-                    >
-                      {action.optional && "(Optional) "}
-                      {action.name}
-                    </Link>
-                  </div>
-                ))}
-                {nextWeekTodoActions.length > 0 && (
-                  <>
-                    <p className="text-zinc-500 mt-3 font-medium">Upcoming</p>
-                    {nextWeekTodoActions.map((action) => (
-                      <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                        <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
-                        <Link
-                          to={href("/actions/:id", { id: action.id.toString() })}
-                          className="text-zinc-600"
-                        >
-                          {action.name}
-                        </Link>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </ul>
-            </div>
-          )}
+            </ul>
+          </div>
+        )}
       </>
     );
   }, [
@@ -151,22 +158,23 @@ const HomePage = () => {
       );
     }
 
-    const dismissProps: LargeActionCardProps["dismissProps"] = !currentTask || currentTask.onboarding
-      ? undefined
-      : currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY
+    const dismissProps: LargeActionCardProps["dismissProps"] =
+      !currentTask || currentTask.onboarding
+        ? undefined
+        : currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY
         ? {
-          message: {
-            [TaskAwayStatus.AWAY_CURRENTLY]:
-              TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
-            [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
-            [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
-          }[currentTask?.awayStatus],
-        }
+            message: {
+              [TaskAwayStatus.AWAY_CURRENTLY]:
+                TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
+              [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
+              [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
+            }[currentTask?.awayStatus],
+          }
         : deadlineHasPassed(currentTask, new Date())
-          ? {
+        ? {
             message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
           }
-          : undefined;
+        : undefined;
 
     return (
       <div
@@ -195,58 +203,73 @@ const HomePage = () => {
             )}
           </div>
         )}
-        {currentTask && currentTask.userRelation ? (
-          <LargeActionCard
-            action={currentTask}
-            dismissProps={dismissProps}
-            handleDismiss={() => handleDismissAction(currentTask.id)}
-            userRelation={currentTask.userRelation}
-            onCompleteAction={() => {
-              queryClient.setQueryData<ActionDto[] | undefined>(["actions"], (prev) =>
-                prev?.map((action) =>
-                  action.id === currentTask.id
-                    ? { ...action, userRelation: "completed" as const }
-                    : action
-                )
-              );
-            }}
-            onUpdateActionState={() => {
-              queryClient.invalidateQueries({ queryKey: ["actions"] });
-              mainScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
-              document.scrollingElement?.scrollTo({ top: 0, behavior: "auto" });
-              window.scrollTo({ top: 0, behavior: "auto" });
-            }}
-          />
-        ) : (
-          <div className="w-full flex-1 flex flex-col items-center justify-center gap-y-4">
-            {user && !user.hasActiveContract ? (
-              <p className="text-center text-zinc-500">
-                {noTasksContractSuspended}
-              </p>
-            ) : (
-              <>
-                <div className="flex flex-col items-center justify-evenly max-h-[30%] flex-8 gap-y-4">
-                  <div className="flex flex-col items-center gap-y-4">
-                    <CheckIcon size="large" />
-                    <p className="text-center text-zinc-500 text-lg lg:text-xl">
-                      {noTasksToDoRightNow}
-                    </p>
+        <div className="flex flex-col gap-6">
+          {generalUpdates?.[0] ? (
+            <LargeGeneralUpdateCard
+              key={generalUpdates[0].id}
+              generalUpdate={generalUpdates[0]}
+              onDismiss={() => handleDismissGeneralUpdate(generalUpdates[0].id)}
+            />
+          ) : currentTask && currentTask.userRelation ? (
+            <LargeActionCard
+              action={currentTask}
+              dismissProps={dismissProps}
+              handleDismiss={() => handleDismissAction(currentTask.id)}
+              userRelation={currentTask.userRelation}
+              onCompleteAction={() => {
+                queryClient.setQueryData<ActionDto[] | undefined>(
+                  ["actions"],
+                  (prev) =>
+                    prev?.map((action) =>
+                      action.id === currentTask.id
+                        ? { ...action, userRelation: "completed" as const }
+                        : action
+                    )
+                );
+              }}
+              onUpdateActionState={() => {
+                queryClient.invalidateQueries({ queryKey: ["actions"] });
+                mainScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+                document.scrollingElement?.scrollTo({
+                  top: 0,
+                  behavior: "auto",
+                });
+                window.scrollTo({ top: 0, behavior: "auto" });
+              }}
+            />
+          ) : (
+            <div className="w-full flex-1 flex flex-col items-center justify-center gap-y-4">
+              {user && !user.hasActiveContract ? (
+                <p className="text-center text-zinc-500">
+                  {noTasksContractSuspended}
+                </p>
+              ) : (
+                <>
+                  <div className="flex flex-col items-center justify-evenly max-h-[30%] flex-8 gap-y-4">
+                    <div className="flex flex-col items-center gap-y-4">
+                      <CheckIcon size="large" />
+                      <p className="text-center text-zinc-500 text-lg lg:text-xl">
+                        {noTasksToDoRightNow}
+                      </p>
+                    </div>
+                    <HomeNotifsCard />
                   </div>
-                  <HomeNotifsCard />
-                </div>
-                <div className="flex-2" />
-              </>
-            )}
-          </div>
-        )}
+                  <div className="flex-2" />
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }, [
     actions,
+    generalUpdates,
     loading,
     currentTask,
     user,
     handleDismissAction,
+    handleDismissGeneralUpdate,
     showingTasksList,
     tasksListContent,
     isLargeScreen,
