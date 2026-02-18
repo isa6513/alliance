@@ -2,28 +2,38 @@ import { View, ActivityIndicator } from "react-native";
 import { useCallback, useMemo, useRef } from "react";
 import {
   actionsDismissAction,
+  actionsDismissGeneralUpdate,
   actionsFindAllLoggedIn,
+  actionsUnreadGeneralUpdates,
   userGetAwayRanges,
 } from "@alliance/shared/client";
 import { colors } from "../../lib/style/colors";
 import Text from "../../components/system/Text";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../components/LargeActionCard";
+import LargeGeneralUpdateCard from "../../components/LargeGeneralUpdateCard";
 import GreenHeader from "../../components/GreenHeader";
-import useActivities, {
-  ActivityList,
-} from "@alliance/shared/lib/useActivities";
 import { Check } from "lucide-react-native";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 import {
   ActionWithAwayStatus,
   getAwayStatus,
 } from "@alliance/shared/lib/actionUtils";
-import { useQuery } from "@tanstack/react-query";
-import { KeyboardAwareScrollView, KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
-import { useAuth } from "../../lib/AuthContext";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  KeyboardAwareScrollView,
+  KeyboardAwareScrollViewRef,
+} from "react-native-keyboard-controller";
+import type { GeneralUpdateDto } from "@alliance/shared/client";
+
+const GENERAL_UPDATES_QUERY_KEY = [
+  "actions",
+  "generalUpdates",
+  "unread",
+] as const;
 
 export default function HomeScreen() {
+  const queryClient = useQueryClient();
   const {
     data: actions,
     isPending,
@@ -35,6 +45,12 @@ export default function HomeScreen() {
       actionsFindAllLoggedIn({ query: { sorted: true } }).then(
         (response) => response.data ?? []
       ),
+  });
+
+  const { data: generalUpdates, isPending: generalUpdatesPending } = useQuery({
+    queryKey: GENERAL_UPDATES_QUERY_KEY,
+    queryFn: () =>
+      actionsUnreadGeneralUpdates().then((response) => response.data ?? []),
   });
 
   const handleDismissAction = useCallback(
@@ -58,7 +74,20 @@ export default function HomeScreen() {
     queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
   });
 
-  const loading = isPending || awayRangesPending;
+  const handleDismissGeneralUpdate = useCallback(
+    async (generalUpdateId: number) => {
+      await actionsDismissGeneralUpdate({
+        path: { generalUpdateId },
+      });
+      queryClient.setQueryData<GeneralUpdateDto[]>(
+        GENERAL_UPDATES_QUERY_KEY,
+        (prev) => prev?.filter((u) => u.id !== generalUpdateId) ?? []
+      );
+    },
+    [queryClient]
+  );
+
+  const loading = isPending || awayRangesPending || generalUpdatesPending;
 
   const actionsWithAwayStatus = useMemo((): ActionWithAwayStatus[] => {
     if (!actions || !awayRanges) return [];
@@ -69,11 +98,6 @@ export default function HomeScreen() {
   }, [actions, awayRanges]);
 
   const { currentTask } = useHomePageActions(actionsWithAwayStatus);
-
-  const { activities: friendActivities } = useActivities({
-    list: ActivityList.Friends,
-    limit: 8,
-  });
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
 
@@ -94,7 +118,9 @@ export default function HomeScreen() {
     );
   }
 
-  if (!currentTask) {
+  const firstGeneralUpdate = generalUpdates?.[0];
+
+  if (!firstGeneralUpdate && !currentTask) {
     return (
       <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
         <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
@@ -109,27 +135,45 @@ export default function HomeScreen() {
 
   return (
     <GreenHeader>
-      <KeyboardAwareScrollView ref={scrollViewRef} className="flex-1" bottomOffset={72}>
-        <View className="bg-green p-4 pt-12">
-          <Text className="text-white font-bold text-base mt-2 pb-0">
-            Current task:
-          </Text>
-        </View>
-        <View>
-          {!currentTask ? (
-            <Text className="text-red-500 text-center py-4">
-              {error?.message}
-            </Text>
-          ) : (
-            <LargeActionCard
-              action={currentTask}
-              userRelation={currentTask.userRelation ?? "none"}
-              onUpdateActionState={refetch}
-              scrollPageTo={scrollPageTo}
-              handleDismiss={() => handleDismissAction(currentTask.id)}
+      <KeyboardAwareScrollView
+        ref={scrollViewRef}
+        className="flex-1"
+        bottomOffset={72}
+      >
+        {firstGeneralUpdate ? (
+          <View className="p-4">
+            <LargeGeneralUpdateCard
+              key={firstGeneralUpdate.id}
+              generalUpdate={firstGeneralUpdate}
+              onDismiss={() =>
+                handleDismissGeneralUpdate(firstGeneralUpdate.id)
+              }
             />
-          )}
-        </View>
+          </View>
+        ) : (
+          <>
+            <View className="bg-green p-4 pt-12">
+              <Text className="text-white font-bold text-base mt-2 pb-0">
+                Current task:
+              </Text>
+            </View>
+            <View>
+              {!currentTask ? (
+                <Text className="text-red-500 text-center py-4">
+                  {error?.message}
+                </Text>
+              ) : (
+                <LargeActionCard
+                  action={currentTask}
+                  userRelation={currentTask.userRelation ?? "none"}
+                  onUpdateActionState={refetch}
+                  scrollPageTo={scrollPageTo}
+                  handleDismiss={() => handleDismissAction(currentTask.id)}
+                />
+              )}
+            </View>
+          </>
+        )}
       </KeyboardAwareScrollView>
     </GreenHeader>
   );

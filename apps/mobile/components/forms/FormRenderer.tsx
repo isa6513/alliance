@@ -60,22 +60,23 @@ type FormRendererProps = {
 
 const DEVICE_TYPE: DeviceVisibilityTarget = "mobile";
 
-function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
+export function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
   switch (block.kind) {
     case "header":
       return (
         <Text
           className={`font-semibold text-zinc-900 my-2 ${block.level === 1
-            ? "text-3xl"
-            : block.level === 2
-              ? "text-2xl"
-              : block.level === 3
-                ? "text-xl"
-                : block.level === 4
-                  ? "text-lg"
-                  : "text-base"
+              ? "text-3xl"
+              : block.level === 2
+                ? "text-2xl"
+                : block.level === 3
+                  ? "text-xl"
+                  : block.level === 4
+                    ? "text-lg"
+                    : "text-base"
             }`}
-          selectable>
+          selectable
+        >
           {block.text}
         </Text>
       );
@@ -250,7 +251,9 @@ const FormRenderer = ({
       for (const [fieldId, defaultIsPublic] of outputFieldDefaultPublic) {
         const completedValue = completedPublicAnswers?.[fieldId];
         defaults[fieldId] =
-          typeof completedValue === "boolean" ? completedValue : defaultIsPublic;
+          typeof completedValue === "boolean"
+            ? completedValue
+            : defaultIsPublic;
       }
       return defaults;
     }
@@ -661,8 +664,7 @@ const FormRenderer = ({
   const isLastPage = currentPageIndex === maxPageIndex;
 
   return (
-    <View className="flex flex-col gap-y-2"
-    >
+    <View className="flex flex-col gap-y-2">
       {currentPage?.fields.map((element, idx) => {
         if (!("label" in element)) {
           return (
@@ -773,8 +775,8 @@ const FormRenderer = ({
             <TouchableOpacity
               activeOpacity={0.8}
               className={`border rounded-lg px-3 py-3 ${outOfTimeSelected
-                ? "border-green-600 bg-green/20"
-                : "border-zinc-200"
+                  ? "border-green-600 bg-green/20"
+                  : "border-zinc-200"
                 }`}
               onPress={() => {
                 setOutOfTimeSelected((prev) => !prev);
@@ -790,8 +792,8 @@ const FormRenderer = ({
             <TouchableOpacity
               activeOpacity={0.8}
               className={`border rounded-lg px-3 py-3 ${otherReasonSelected
-                ? "border-green-600 bg-green/20"
-                : "border-zinc-200"
+                  ? "border-green-600 bg-green/20"
+                  : "border-zinc-200"
                 }`}
               onPress={() => {
                 setOtherReasonSelected((prev) => !prev);
