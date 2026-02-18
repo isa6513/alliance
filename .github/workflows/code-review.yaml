@@ -315,7 +315,7 @@ jobs:
               head: $head,
               base: $base,
               body: $body,
-              draft: true
+              draft: false
             }'
           )"
 
@@ -485,7 +485,7 @@ jobs:
             buttons="$(printf '%s' "$buttons" | jq -c --arg pr_url "$PR_URL" '. + [
               {
                 "type": "button",
-                "text": { "type": "plain_text", "text": "View Fix ✨" },
+                "text": { "type": "plain_text", "text": "View Fix" },
                 "url": $pr_url,
                 "style": "primary"
               }
@@ -514,18 +514,6 @@ jobs:
                 else empty end)
               ]
             }' > slack.json
-
-          # If we have a PR, also add a context block noting it
-          if [ "${HAS_PR:-}" = "true" ] && [ -n "${PR_URL:-}" ]; then
-            jq --arg pr_url "$PR_URL" \
-              '.blocks += [{
-                "type": "context",
-                "elements": [{
-                  "type": "mrkdwn",
-                  "text": ("🤖 An auto-fix draft PR was generated: <" + $pr_url + "|View PR>")
-                }]
-              }]' slack.json > slack_tmp.json && mv slack_tmp.json slack.json
-          fi
 
           {
             echo "payload<<EOF"
