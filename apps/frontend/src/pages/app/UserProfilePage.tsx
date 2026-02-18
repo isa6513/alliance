@@ -36,6 +36,7 @@ import {
   useUserFriendsQuery,
   useUserProfileQuery,
 } from "@alliance/shared/lib/user";
+import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -279,6 +280,11 @@ const UserProfilePage: React.FC = () => {
                 <h1 className="font-serif font-semibold text-2xl">
                   {profile.displayName}
                 </h1>
+                {profile.displayName === "Someone" && (
+                  <div className="mt-px">
+                    <InfoTooltip content="Names are hidden for members who have set their account to be anonymous." />
+                  </div>
+                )}
                 {profile.staff && (
                   <div className="text-xs bg-staff text-white px-2 py-0.5 rounded-sm self-center relative group">
                     Staff
