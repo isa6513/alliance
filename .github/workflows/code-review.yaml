@@ -266,11 +266,15 @@ jobs:
         if: ${{ steps.generate_fix.outputs.has_fix == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REVIEW_TEXT: ${{ steps.combine_reviews.outputs.combined_final_message }}
+          COMMIT_SHA: ${{ github.sha }}
+          BASE_BRANCH: ${{ github.ref_name }}
+          SERVER_URL: ${{ github.server_url }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
 
-          short_sha="${{ github.sha }}"
-          short_sha="${short_sha:0:8}"
+          short_sha="${COMMIT_SHA:0:8}"
           fix_branch="auto-fix/${short_sha}"
 
           git config user.name "github-actions[bot]"
@@ -280,29 +284,40 @@ jobs:
           git add -A
           git commit -m "Auto-fix: address review issues for ${short_sha}
 
-          Generated automatically from review of commit ${{ github.sha }}.
-          Source branch: ${{ github.ref_name }}"
+          Generated automatically from review of commit ${COMMIT_SHA}.
+          Source branch: ${BASE_BRANCH}"
 
           git push origin "$fix_branch"
 
+          # Build PR body safely via jq (all user-controlled text passed as --arg)
+          pr_body="$(jq -nc \
+            --arg sha "$short_sha" \
+            --arg full_sha "$COMMIT_SHA" \
+            --arg url "${SERVER_URL}/${REPO}/commit/${COMMIT_SHA}" \
+            --arg review "$REVIEW_TEXT" \
+            '"## Auto-generated fix\n\nThis PR was automatically generated to address review issues found on commit [`" + $sha + "`](" + $url + ").\n\n### Review issues addressed:\n" + $review + "\n\n---\n⚠️ "'
+          )"
+
           # Create draft PR via GitHub API
+          payload="$(jq -nc \
+            --arg title "Auto-fix: review issues on ${short_sha}" \
+            --arg head "$fix_branch" \
+            --arg base "$BASE_BRANCH" \
+            --argjson body "$pr_body" \
+            '{
+              title: $title,
+              head: $head,
+              base: $base,
+              body: $body,
+              draft: true
+            }'
+          )"
+
           pr_response="$(curl -sS -X POST \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls" \
-            -d "$(jq -nc \
-              --arg title "Auto-fix: review issues on ${short_sha}" \
-              --arg head "$fix_branch" \
-              --arg base "${{ github.ref_name }}" \
-              --arg body "## Auto-generated fix\n\nThis PR was automatically generated to address review issues found on commit [\`${short_sha}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}).\n\n### Review issues addressed:\n${{ steps.combine_reviews.outputs.combined_final_message }}\n\n---\n⚠️ **Please review these changes carefully before merging.** This fix was generated automatically." \
-              '{
-                title: $title,
-                head: $head,
-                base: $base,
-                body: $body,
-                draft: true
-              }'
-            )"
+            "https://api.github.com/repos/${REPO}/pulls" \
+            -d "$payload"
           )"
 
           echo "PR API response:"

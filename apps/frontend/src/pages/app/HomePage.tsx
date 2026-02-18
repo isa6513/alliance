@@ -158,7 +158,7 @@ const HomePage = () => {
       );
     }
 
-    // this is a test issue. this is a bad comment that should be removed, and it is easy to do so
+    // this is a test issue. this is a bad comment that should be removed, and it is easy to do so!
 
     const dismissProps: LargeActionCardProps["dismissProps"] =
       !currentTask || currentTask.onboarding
