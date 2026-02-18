@@ -5,7 +5,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 import TaskTimeInfo from "./TaskTimeInfo";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import {
   getLastAndNextEvent,
   LargeActionCardPropsShared,
@@ -81,35 +81,36 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
   const { lastEvent, nextEvent } = getLastAndNextEvent(action);
 
+  const optionalStyle =
+    action.optional || dismissProps
+      ? "border-dashed border-[1.5px] !border-blue-300"
+      : "";
+
   return (
     <>
-      {dismissProps && !action.optional && (
-        <Card
-          style={CardStyle.Grey}
-          className="gap-y-3 rounded-b-none border-b-0"
-        >
-          <div>{dismissProps.message}</div>
-          <Button
-            className="w-full gap-x-1"
-            color={ButtonColor.Grey}
-            onClick={handleDismiss}
-          >
-            <X size={14} className="text-red-500" />
-            Dismiss action
-          </Button>
-        </Card>
-      )}
       <Card
-        className={`p-4 sm:p-6 transition-all duration-300 ${state === LargeActionCardState.Closed
-          ? "opacity-0 overflow-hidden"
-          : "opacity-100"
-          } ${className} w-full relative 
-         ${state === LargeActionCardState.Minified ? "pb-4" : ""} ${dismissProps ? "rounded-t-none" : "rounded"
-          }
-        ${action.optional ? "border-dashed border-[1.5px] !border-blue-300" : ""
-          }`}
+        className={`p-4 sm:p-6 transition-all duration-300 ${
+          state === LargeActionCardState.Closed
+            ? "opacity-0 overflow-hidden"
+            : "opacity-100"
+        } ${className} w-full relative 
+         ${state === LargeActionCardState.Minified ? "pb-4" : ""} rounded
+        ${optionalStyle}`}
       >
-        {action.optional && (
+        {dismissProps && (
+          <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
+            <p className="font-semibold">Away</p>
+            <p className="mb-3">{dismissProps.message}</p>
+            <Button
+              color={ButtonColor.White}
+              onClick={handleDismiss}
+              className="w-full"
+            >
+              Dismiss
+            </Button>
+          </Card>
+        )}
+        {action.optional && !dismissProps && (
           <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
             <p className="font-semibold">This action is optional.</p>
             <p className="mb-3">You can complete as usual or dismiss it.</p>
