@@ -160,7 +160,11 @@ export function RenderField({
     case "text":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <input
             type="text"
             value={(value as string) ?? ""}
@@ -183,7 +187,11 @@ export function RenderField({
     case "textarea":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <textarea
             ref={(el) => {
               if (el) {
@@ -198,6 +206,7 @@ export function RenderField({
               onChange?.(target.value);
             }}
             rows={disabled ? 1 : field.rows || 3}
+            translate="no"
             maxLength={field.maxLength}
             value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
@@ -205,7 +214,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              sharedInputClasses + " resize-none overflow-hidden"
+              sharedInputClasses + " resize-none overflow-hidden notranslate"
             )}
             placeholder={field.placeholder}
           />
@@ -221,7 +230,11 @@ export function RenderField({
     case "email":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <input
             type="email"
             value={(value as string) ?? ""}
@@ -239,17 +252,21 @@ export function RenderField({
     case "phone":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <input
             type="tel"
             value={(value as string) ?? ""}
             onChange={
               onChange
                 ? (e) => {
-                  const raw = e.target.value;
-                  const sanitized = raw.replace(/[^0-9+\-()\s]/g, "");
-                  onChange(sanitized);
-                }
+                    const raw = e.target.value;
+                    const sanitized = raw.replace(/[^0-9+\-()\s]/g, "");
+                    onChange(sanitized);
+                  }
                 : undefined
             }
             required={field.required}
@@ -266,7 +283,11 @@ export function RenderField({
     case "number":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <input
             type="number"
             value={
@@ -277,9 +298,9 @@ export function RenderField({
             onChange={
               onChange
                 ? (e) =>
-                  onChange(
-                    e.target.value === "" ? "" : parseFloat(e.target.value)
-                  )
+                    onChange(
+                      e.target.value === "" ? "" : parseFloat(e.target.value)
+                    )
                 : undefined
             }
             required={field.required}
@@ -296,8 +317,8 @@ export function RenderField({
               {field.min !== undefined && field.max !== undefined
                 ? `Range: ${field.min} - ${field.max}`
                 : field.min !== undefined
-                  ? `Minimum: ${field.min}`
-                  : `Maximum: ${field.max}`}
+                ? `Minimum: ${field.min}`
+                : `Maximum: ${field.max}`}
             </p>
           ) : null}
         </div>
@@ -309,15 +330,19 @@ export function RenderField({
         typeof value === "number"
           ? value
           : typeof value === "string" && value.trim().length > 0
-            ? Number(value)
-            : undefined;
+          ? Number(value)
+          : undefined;
       const normalizedValue = Number.isFinite(numericValue)
         ? Number(numericValue)
         : undefined;
 
       return (
         <div className="relative pb-6">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <div className="flex items-center justify-between text-xs text-zinc-500 py-1">
             <span className="text-black">{field.startLabel}</span>
             <span className="text-black">{field.endLabel}</span>
@@ -328,11 +353,13 @@ export function RenderField({
               return (
                 <label
                   key={optionValue}
-                  className={`flex flex-col items-center text-sm font-medium  flex-1 w-[${100 / values.length
-                    }%] ${disabled
+                  className={`flex flex-col items-center text-sm font-medium  flex-1 w-[${
+                    100 / values.length
+                  }%] ${
+                    disabled
                       ? "opacity-60 cursor-not-allowed"
                       : "cursor-pointer"
-                    }`}
+                  }`}
                 >
                   <input
                     type="radio"
@@ -348,12 +375,13 @@ export function RenderField({
                     disabled={disabled}
                   />
                   <span
-                    className={`w-full rounded-none border-y  px-3 py-1 text-center ${checked
+                    className={`w-full rounded-none border-y  px-3 py-1 text-center ${
+                      checked
                         ? "bg-green text-white border-green"
                         : hasError
-                          ? "border-red-500 text-red-600"
-                          : "border-zinc-300 text-zinc-700"
-                      }`}
+                        ? "border-red-500 text-red-600"
+                        : "border-zinc-300 text-zinc-700"
+                    }`}
                   >
                     {optionValue}
                   </span>
@@ -386,8 +414,10 @@ export function RenderField({
           disabled={disabled}
           aria-invalid={hasError}
           className={composeClassName(
-            `shrink-0 mt-px h-5 w-5 cursor-pointer ${checkboxPosition === "right" ? "ml-2 pr-5" : "mr-2"
-            } ${hasError ? "text-red-600" : "text-blue-600"
+            `shrink-0 mt-px h-5 w-5 cursor-pointer ${
+              checkboxPosition === "right" ? "ml-2 pr-5" : "mr-2"
+            } ${
+              hasError ? "text-red-600" : "text-blue-600"
             } focus:outline-none rounded`,
             {
               normal: "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
@@ -428,10 +458,15 @@ export function RenderField({
       const options = randomizedOptions ?? field.options;
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <div
-            className={`space-y-2 ${hasError ? "border-l-2 border-red-500 pl-3" : ""
-              }`}
+            className={`space-y-2 ${
+              hasError ? "border-l-2 border-red-500 pl-3" : ""
+            }`}
           >
             {options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-start">
@@ -447,7 +482,8 @@ export function RenderField({
                   disabled={disabled}
                   aria-invalid={hasError}
                   className={composeClassName(
-                    `shrink-0 mt-1 mr-2 h-4 w-4 ${hasError ? "text-red-600" : "text-blue-600"
+                    `shrink-0 mt-1 mr-2 h-4 w-4 ${
+                      hasError ? "text-red-600" : "text-blue-600"
                     } focus:outline-none`,
                     {
                       normal:
@@ -472,7 +508,11 @@ export function RenderField({
       const options = randomizedOptions ?? field.options;
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <select
             value={(value as string) ?? ""}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
@@ -481,7 +521,7 @@ export function RenderField({
             aria-invalid={hasError}
             className={composeClassName(
               sharedInputClasses +
-              " has-[option.placeholder:checked]:text-zinc-400"
+                " has-[option.placeholder:checked]:text-zinc-400"
             )}
           >
             <option value="" className="placeholder" disabled>
@@ -511,10 +551,15 @@ export function RenderField({
 
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <div
-            className={`space-y-2 ${hasError ? "border-l-2 border-red-500 pl-3" : ""
-              }`}
+            className={`space-y-2 ${
+              hasError ? "border-l-2 border-red-500 pl-3" : ""
+            }`}
           >
             {options.map((option, optIndex) => (
               <label key={optIndex} className="flex">
@@ -525,17 +570,17 @@ export function RenderField({
                   onChange={
                     onChange
                       ? (e) => {
-                        const currentValues = Array.isArray(value)
-                          ? value
-                          : [];
-                        if (e.target.checked) {
-                          onChange([...currentValues, option.value]);
-                        } else {
-                          onChange(
-                            currentValues.filter((v) => v !== option.value)
-                          );
+                          const currentValues = Array.isArray(value)
+                            ? value
+                            : [];
+                          if (e.target.checked) {
+                            onChange([...currentValues, option.value]);
+                          } else {
+                            onChange(
+                              currentValues.filter((v) => v !== option.value)
+                            );
+                          }
                         }
-                      }
                       : undefined
                   }
                   required={
@@ -548,7 +593,8 @@ export function RenderField({
                   aria-invalid={hasError}
                   style={{ marginTop: "4px" }}
                   className={composeClassName(
-                    `shrink-0 mr-2 h-4 w-4 disabled:ring-1 disabled:ring-zinc-400 ${hasError ? "text-red-600" : "text-blue-600"
+                    `shrink-0 mr-2 h-4 w-4 disabled:ring-1 disabled:ring-zinc-400 ${
+                      hasError ? "text-red-600" : "text-blue-600"
                     } focus:outline-none rounded`,
                     {
                       normal:
@@ -578,7 +624,11 @@ export function RenderField({
     case "date":
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <input
             type="date"
             value={(value as string) ?? ""}
@@ -607,7 +657,11 @@ export function RenderField({
     case "timezone": {
       return (
         <div className="space-y-1">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           <TimeZoneSelect
             value={(value as string) ?? "America/Los_Angeles"}
             onChange={onChange ? (tz) => onChange(tz) : undefined}
@@ -625,8 +679,8 @@ export function RenderField({
         cityValue !== undefined
           ? formatCityValue(cityValue)
           : typeof value === "string"
-            ? value
-            : "";
+          ? value
+          : "";
       return (
         <div className="space-y-1">
           <RenderLabel field={field as CityField} error={errorMessage} />
@@ -660,7 +714,11 @@ export function RenderField({
           : null;
       return (
         <div className="space-y-2">
-          <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
           {imageUrl && (
             <div className="mb-2">
               <ImageLightbox
@@ -696,7 +754,7 @@ export function RenderField({
                 aria-invalid={hasError}
                 className={composeClassName(
                   sharedInputClasses +
-                  " max-w-full flex-1 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                    " max-w-full flex-1 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
                 )}
               />
               {isUploading && (
@@ -717,7 +775,11 @@ export function RenderField({
       if (!definition) {
         return (
           <div className="space-y-2 border border-red-200 bg-red-50 p-3 rounded">
-            <RenderLabel field={field} error={errorMessage} labelRightAddon={labelRightAddon} />
+            <RenderLabel
+              field={field}
+              error={errorMessage}
+              labelRightAddon={labelRightAddon}
+            />
             <p className="text-sm text-red-700">
               Unable to render this field because the selected custom component
               is not registered.
@@ -872,10 +934,11 @@ export function TimeInputField({
           required={field.required}
           disabled={disabled}
           aria-invalid={hasError}
-          className={`w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent ${hasError
+          className={`w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent ${
+            hasError
               ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
               : "border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            }`}
+          }`}
           inputMode="text"
         />
 
@@ -900,8 +963,9 @@ export function TimeInputField({
                 key={t}
                 type="button"
                 onClick={() => handleSelectTime(t)}
-                className={`w-full text-left px-3 py-2 bg-white text-sm hover:bg-zinc-50 ${t === inputValue ? "bg-zinc-50 font-medium" : ""
-                  }`}
+                className={`w-full text-left px-3 py-2 bg-white text-sm hover:bg-zinc-50 ${
+                  t === inputValue ? "bg-zinc-50 font-medium" : ""
+                }`}
               >
                 {t}
               </button>
