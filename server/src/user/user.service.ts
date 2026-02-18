@@ -347,7 +347,11 @@ export class UserService {
       });
     }
     if (rel.sentNotif) {
-      await this.notifsService.setRead(rel.sentNotif.id, addresseeId);
+      try {
+        await this.notifsService.setRead(rel.sentNotif.id, addresseeId);
+      } catch (error) {
+        console.error('Error setting read status for friend request:', error);
+      }
     }
 
     return this.friendRepository.save({ ...rel, sentNotif: undefined });
