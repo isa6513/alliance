@@ -764,6 +764,7 @@ export class ActionsService {
       },
       relations: {
         activities: true,
+        tags: true,
       },
     });
     const user = await this.userService.findOneOrFail(userId, {
