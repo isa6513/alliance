@@ -115,6 +115,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
       confirmLabel: "Yes",
       cancelLabel: "No",
       anchorEl: e.currentTarget,
+      placement: "topleft",
     });
     if (!ok) {
       return;

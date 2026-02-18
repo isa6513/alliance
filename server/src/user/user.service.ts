@@ -328,7 +328,7 @@ export class UserService {
         addressee: { id: addresseeId },
         status: FriendStatus.Pending,
       },
-      relations: { requester: true, addressee: true },
+      relations: { requester: true, addressee: true, sentNotif: true },
     });
 
     if (!rel || !rel.requester || !rel.addressee) {
@@ -346,7 +346,11 @@ export class UserService {
         associatedUsers: [rel.addressee],
       });
     }
-    return this.friendRepository.save(rel);
+    if (rel.sentNotif) {
+      await this.notifsService.setRead(rel.sentNotif.id, addresseeId);
+    }
+
+    return this.friendRepository.save({ ...rel, sentNotif: undefined });
   }
 
   /** Cancel a request OR un-friend an accepted friend in either direction. */

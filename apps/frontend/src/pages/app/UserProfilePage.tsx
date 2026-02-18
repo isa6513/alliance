@@ -165,6 +165,7 @@ const UserProfilePage: React.FC = () => {
         confirmLabel: "Yes",
         cancelLabel: "No",
         anchorEl: e.currentTarget,
+        placement: "bottomleft",
       });
 
       if (!ok) return;
