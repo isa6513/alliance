@@ -2,16 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   View,
+  FlatList,
 } from "react-native";
-import {
-  RelativePathString,
-  router,
-  useLocalSearchParams,
-} from "expo-router";
+import { RelativePathString, router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { UpdateProfileDto } from "@alliance/shared/client";
 import {
@@ -30,9 +26,11 @@ import {
   useUserReceivedFriendRequestsQuery,
   useUserSentFriendRequestsQuery,
 } from "@alliance/shared/lib/user";
-import useActivities, { ActivityList } from "@alliance/shared/lib/useActivities";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { Edit, Pencil } from "lucide-react-native";
+import { Edit } from "lucide-react-native";
 import AppMarkdownWrapper from "../../../components/AppMarkdownWrapper";
 import EditableContentRenderer from "../../../components/EditableContentRenderer";
 import ProfileImage from "../../../components/ProfileImage";
@@ -44,7 +42,6 @@ import Button, {
 import Text from "../../../components/system/Text";
 import { useAuth } from "../../../lib/AuthContext";
 import { colors } from "../../../lib/style/colors";
-import { LegendList } from "@legendapp/list";
 
 type ProfileTab = "actions" | "forum" | "friends";
 type FriendsTab = "friends" | "received" | "sent";
@@ -178,13 +175,7 @@ export default function UserProfileScreen() {
     } catch (error) {
       console.error("Failed to save profile", error);
     }
-  }, [
-    isMe,
-    updateProfileMutation,
-    editName,
-    editBio,
-    editAvatarUrl,
-  ]);
+  }, [isMe, updateProfileMutation, editName, editBio, editAvatarUrl]);
 
   const handleCancelEdit = useCallback(() => {
     if (!profile) return;
@@ -221,43 +212,21 @@ export default function UserProfileScreen() {
     }
   }, [userId, declineFriendRequest]);
 
-  const confirmRemoveFriend = useCallback(
-    (targetId: number) => {
-      Alert.alert(
-        "Remove friend",
-        "Are you sure you want to remove this friend?",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Remove",
-            style: "destructive",
-            onPress: () => removeFriend.mutate(targetId),
-          },
-        ]
-      );
-    },
-    [removeFriend]
-  );
-
   const confirmCancelRequest = useCallback(
     (targetId: number) => {
-      Alert.alert(
-        "Cancel request",
-        "Cancel this friend request?",
-        [
-          { text: "Keep", style: "cancel" },
-          {
-            text: "Cancel request",
-            style: "destructive",
-            onPress: () => removeFriend.mutate(targetId),
-          },
-        ]
-      );
+      Alert.alert("Cancel request", "Cancel this friend request?", [
+        { text: "Keep", style: "cancel" },
+        {
+          text: "Cancel request",
+          style: "destructive",
+          onPress: () => removeFriend.mutate(targetId),
+        },
+      ]);
     },
     [removeFriend]
   );
 
-  const renderFriendAction = () => {
+  const renderFriendAction = useCallback(() => {
     if (!isAuthenticated || isMe || !friendStatus) return null;
 
     if (friendStatus.status === "none") {
@@ -304,72 +273,243 @@ export default function UserProfileScreen() {
       );
     }
 
-    return (
-      null
-    );
-  };
+    return null;
+  }, [
+    isAuthenticated,
+    isMe,
+    friendStatus,
+    handleSendFriendRequest,
+    handleAcceptFriendRequest,
+    handleDeclineFriendRequest,
+  ]);
 
-  const renderForumItem = (item: ForumActivityItem) => {
-    if (item.type === "post") {
+  const renderActionItem = useCallback(
+    ({ item: activity }: { item: (typeof completedActions)[number] }) => (
+      <View className="border-b border-zinc-200">
+        <UserActivityCard
+          activity={activity}
+          handleLike={handleLikeActivity}
+          onActivityUpdate={updateActivity}
+          canEdit={isMe}
+        />
+      </View>
+    ),
+    [handleLikeActivity, updateActivity, isMe]
+  );
+
+  const renderForumItem = useCallback(
+    ({ item }: { item: ForumActivityItem }) => {
+      if (item.type === "post") {
+        return (
+          <TouchableOpacity
+            onPress={() =>
+              router.push(`/forum/post/${item.post.id}` as RelativePathString)
+            }
+            className="px-4 py-4 border-b border-zinc-200"
+            activeOpacity={0.8}
+          >
+            <Text className="text-sm text-zinc-900">{item.post.title}</Text>
+            <View className="flex-row items-center gap-2 mt-1">
+              <ProfileImage
+                pfp={item.post.author.profilePicture}
+                size="small"
+              />
+              <Text className="text-sm text-zinc-500">
+                {formatTime(new Date(item.post.createdAt), { addSuffix: true })}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        );
+      }
+
+      const parentRoute =
+        item.comment.parentObjectType === "post"
+          ? `/forum/post/${item.comment.parentObjectId}`
+          : item.comment.parentObjectType === "action"
+          ? `/actions/${item.comment.parentObjectId}`
+          : null;
+
+      if (!parentRoute) return null;
+
       return (
         <TouchableOpacity
-          key={`post-${item.post.id}`}
-          onPress={() =>
-            router.push(`/forum/post/${item.post.id}` as RelativePathString)
-          }
-          className="py-4 border-b border-zinc-200"
+          onPress={() => router.push(parentRoute as RelativePathString)}
+          className="px-4 py-4 border-b border-zinc-200"
           activeOpacity={0.8}
         >
-          <Text className="text-sm text-zinc-900">{item.post.title}</Text>
+          <EditableContentRenderer
+            content={item.comment.editableContent}
+            truncated
+          />
           <View className="flex-row items-center gap-2 mt-1">
             <ProfileImage
-              pfp={item.post.author.profilePicture}
+              pfp={item.comment.author.profilePicture}
               size="small"
             />
             <Text className="text-sm text-zinc-500">
-              {formatTime(new Date(item.post.createdAt), { addSuffix: true })}
+              commented{" "}
+              {formatTime(new Date(item.comment.createdAt), {
+                addSuffix: true,
+              })}{" "}
+              in{" "}
+              <Text className="text-sm text-green font-medium">
+                {item.comment.parentTitle}
+              </Text>
             </Text>
           </View>
         </TouchableOpacity>
       );
-    }
+    },
+    []
+  );
 
-    const parentRoute =
-      item.comment.parentObjectType === "post"
-        ? `/forum/post/${item.comment.parentObjectId}`
-        : item.comment.parentObjectType === "action"
-        ? `/actions/${item.comment.parentObjectId}`
-        : null;
-
-    if (!parentRoute) return null;
-
-    return (
-      <TouchableOpacity
-        key={`comment-${item.comment.id}`}
-        onPress={() => router.push(parentRoute as RelativePathString)}
-        className="py-4 border-b border-zinc-200"
-        activeOpacity={0.8}
-      >
-        <EditableContentRenderer
-          content={item.comment.editableContent}
-          truncated
-        />
-        <View className="flex-row items-center gap-2 mt-1">
-          <ProfileImage
-            pfp={item.comment.author.profilePicture}
-            size="small"
-          />
-          <Text className="text-sm text-zinc-500">
-            commented{" "}
-            {formatTime(new Date(item.comment.createdAt), { addSuffix: true })} in{" "}
-            <Text className="text-sm text-green font-medium">
-              {item.comment.parentTitle}
-            </Text>
+  const renderReceivedItem = useCallback(
+    ({ item: request }: { item: any }) => (
+      <View className="px-4 py-3 border-b border-zinc-200">
+        <View className="flex-row items-center gap-3">
+          <ProfileImage pfp={request.profilePicture} size="small" />
+          <Text className="text-zinc-900 font-medium flex-1">
+            {request.displayName}
           </Text>
+          <View className="flex-row gap-2">
+            <Button
+              title="Accept"
+              color={ButtonColor.Green}
+              size={ButtonSize.Small}
+              onPress={() => acceptFriendRequest.mutate(request.id)}
+            />
+            <Button
+              title="Decline"
+              color={ButtonColor.Light}
+              size={ButtonSize.Small}
+              onPress={() => declineFriendRequest.mutate(request.id)}
+            />
+          </View>
         </View>
-      </TouchableOpacity>
+      </View>
+    ),
+    [acceptFriendRequest, declineFriendRequest]
+  );
+
+  const renderSentItem = useCallback(
+    ({ item: request }: { item: any }) => (
+      <View className="px-4 py-3 border-b border-zinc-200">
+        <View className="flex-row items-center gap-3">
+          <ProfileImage pfp={request.profilePicture} size="small" />
+          <Text className="text-zinc-900 font-medium flex-1">
+            {request.displayName}
+          </Text>
+          <Button
+            title="Cancel"
+            color={ButtonColor.Light}
+            size={ButtonSize.Small}
+            onPress={() => confirmCancelRequest(request.id)}
+          />
+        </View>
+      </View>
+    ),
+    [confirmCancelRequest]
+  );
+
+  const renderFriendItem = useCallback(
+    ({ item: friend }: { item: any }) => (
+      <View className="px-4 py-3 border-b border-zinc-200 flex-row items-center justify-between">
+        <TouchableOpacity
+          className="flex-row items-center gap-3 flex-1"
+          onPress={() =>
+            router.push(`/user/${friend.id}` as RelativePathString)
+          }
+          activeOpacity={0.8}
+        >
+          <ProfileImage pfp={friend.profilePicture} size="small" />
+          <Text className="text-zinc-900 font-medium">
+            {friend.displayName}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    ),
+    []
+  );
+
+  const listData = useMemo((): any[] => {
+    if (selectedTab === "actions") return completedActions;
+    if (selectedTab === "forum") return forumActivityItems;
+    if (friendsTab === "received" && isMe) return receivedRequests;
+    if (friendsTab === "sent" && isMe) return sentRequests;
+    return friends;
+  }, [
+    selectedTab,
+    friendsTab,
+    isMe,
+    completedActions,
+    forumActivityItems,
+    receivedRequests,
+    sentRequests,
+    friends,
+  ]);
+
+  const listKeyExtractor = useCallback(
+    (item: any) => {
+      if (selectedTab === "forum") {
+        return item.type === "post"
+          ? `post-${item.post.id}`
+          : `comment-${item.comment.id}`;
+      }
+      return item.id.toString();
+    },
+    [selectedTab]
+  );
+
+  const listRenderItem = useCallback(
+    ({ item }: { item: any }) => {
+      if (selectedTab === "actions") return renderActionItem({ item });
+      if (selectedTab === "forum") return renderForumItem({ item });
+      if (friendsTab === "received" && isMe)
+        return renderReceivedItem({ item });
+      if (friendsTab === "sent" && isMe) return renderSentItem({ item });
+      return renderFriendItem({ item });
+    },
+    [
+      selectedTab,
+      friendsTab,
+      isMe,
+      renderActionItem,
+      renderForumItem,
+      renderReceivedItem,
+      renderSentItem,
+      renderFriendItem,
+    ]
+  );
+
+  const listEmptyComponent = useMemo(() => {
+    if (selectedTab === "actions") return undefined;
+    if (selectedTab === "forum") {
+      return (
+        <Text className="text-center text-zinc-500 py-6 px-4">
+          No forum activity yet
+        </Text>
+      );
+    }
+    if (friendsTab === "received" && isMe) {
+      return (
+        <Text className="text-center text-zinc-500 py-6 px-4">
+          No incoming requests.
+        </Text>
+      );
+    }
+    if (friendsTab === "sent" && isMe) {
+      return (
+        <Text className="text-center text-zinc-500 py-6 px-4">
+          No outgoing requests.
+        </Text>
+      );
+    }
+    return (
+      <Text className="text-center text-zinc-500 py-6 px-4">
+        No friends yet.
+      </Text>
     );
-  };
+  }, [selectedTab, friendsTab, isMe]);
 
   if (!userId) {
     return (
@@ -404,26 +544,22 @@ export default function UserProfileScreen() {
   }
 
   const badgeStyles = "text-xs text-white px-2 py-0.5 rounded";
-
-  return (
-    <ScrollView className="flex-1 bg-white">
+  const profileHeader = (
+    <>
       <View className="p-4 pt-24 gap-4">
         <View className="items-center gap-3">
           {isEditing ? (
-            <TouchableOpacity onPress={handlePickAvatar} className="border-zinc-200 rounded-lg p-1 border-dashed border-2 relative">
-              <ProfileImage
-                pfp={editAvatarUrl}
-                size="huge"
-              />
+            <TouchableOpacity
+              onPress={handlePickAvatar}
+              className="border-zinc-200 rounded-lg p-1 border-dashed border-2 relative"
+            >
+              <ProfileImage pfp={editAvatarUrl} size="huge" />
               <View className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center ">
                 <Edit size={24} color="#fff" />
               </View>
             </TouchableOpacity>
           ) : (
-            <ProfileImage
-              pfp={profile.profilePicture}
-              size="huge"
-            />
+            <ProfileImage pfp={profile.profilePicture} size="huge" />
           )}
         </View>
 
@@ -480,39 +616,40 @@ export default function UserProfileScreen() {
               multiline
             />
           ) : profile.profileDescription ? (
-            <AppMarkdownWrapper>{profile.profileDescription}</AppMarkdownWrapper>
-          ) : (
-          null
-          )}
+            <AppMarkdownWrapper>
+              {profile.profileDescription}
+            </AppMarkdownWrapper>
+          ) : null}
         </View>
 
-      {(!isMe || isEditing) && (
-        <View className="flex-row items-center justify-end gap-3">
-          {isMe ? (
-            isEditing ? (
-              <>
-                <Button
-                  title="Cancel"
-                  color={ButtonColor.Light}
-                  size={ButtonSize.Medium}
-                  onPress={handleCancelEdit}
-                />
-                <Button
-                  title={
-                    updateProfileMutation.isPending ? "Saving..." : "Save"
-                  }
-                  color={ButtonColor.Black}
-                  size={ButtonSize.Medium}
-                  onPress={handleSaveProfile}
-                  disabled={updateProfileMutation.isPending}
-                />
-              </>
-            ) : null
-          ) : (
-            renderFriendAction()
-          )}
-        </View>
+        {(!isMe || isEditing) && (
+          <View className="flex-row items-center justify-end gap-3">
+            {isMe ? (
+              isEditing ? (
+                <>
+                  <Button
+                    title="Cancel"
+                    color={ButtonColor.Light}
+                    size={ButtonSize.Medium}
+                    onPress={handleCancelEdit}
+                  />
+                  <Button
+                    title={
+                      updateProfileMutation.isPending ? "Saving..." : "Save"
+                    }
+                    color={ButtonColor.Black}
+                    size={ButtonSize.Medium}
+                    onPress={handleSaveProfile}
+                    disabled={updateProfileMutation.isPending}
+                  />
+                </>
+              ) : null
+            ) : (
+              renderFriendAction()
+            )}
+          </View>
         )}
+
         <View className="flex-row bg-zinc-100 rounded-lg p-1">
           {tabs.map((tab) => {
             const isSelected = selectedTab === tab.id;
@@ -538,170 +675,52 @@ export default function UserProfileScreen() {
           })}
         </View>
       </View>
+      <View className="border-t border-zinc-200" />
+    </>
+  );
 
-      <View className="border-t border-zinc-200">
-        {selectedTab === "actions" && (
-          <View>
-            {completedActions.map((activity) => (
-              <View key={activity.id} className="border-b border-zinc-200">
-                <UserActivityCard
-                  activity={activity}
-                  handleLike={handleLikeActivity}
-                  onActivityUpdate={updateActivity}
-                  canEdit={isMe}
-                />
-              </View>
+  const listHeader =
+    selectedTab === "friends" && isMe ? (
+      <View>
+        {profileHeader}
+        <View className="px-4">
+          <View className="flex-row bg-zinc-100 rounded-lg p-1 my-4">
+            {friendsTabs.map((tab) => (
+              <TouchableOpacity
+                key={tab.id}
+                onPress={() => setFriendsTab(tab.id)}
+                activeOpacity={0.7}
+                className={`flex-1 px-3 py-2 rounded-md items-center ${
+                  friendsTab === tab.id ? "bg-white" : ""
+                }`}
+              >
+                <Text
+                  className={`text-sm font-medium ${
+                    friendsTab === tab.id ? "text-zinc-900" : "text-zinc-500"
+                  }`}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
-        )}
-
-        {selectedTab === "forum" && (
-          <View className="px-4">
-            {forumActivityItems.length === 0 ? (
-              <Text className="text-center text-zinc-500 py-6">
-                No forum activity yet
-              </Text>
-            ) : (
-              forumActivityItems.map(renderForumItem)
-            )}
-          </View>
-        )}
-
-        {selectedTab === "friends" && (
-          <View className="px-4">
-            {isMe && (
-              <View className="flex-row bg-zinc-100 rounded-lg p-1 my-4">
-                {friendsTabs.map((tab) => (
-                  <TouchableOpacity
-                    key={tab.id}
-                    onPress={() => setFriendsTab(tab.id)}
-                    activeOpacity={0.7}
-                    className={`flex-1 px-3 py-2 rounded-md items-center ${
-                      friendsTab === tab.id ? "bg-white" : ""
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-medium ${
-                        friendsTab === tab.id ? "text-zinc-900" : "text-zinc-500"
-                      }`}
-                    >
-                      {tab.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-
-            {friendsTab === "friends" && (
-              <View>
-                {friends.length === 0 ? (
-                  <Text className="text-center text-zinc-500 py-6">
-                    No friends yet.
-                  </Text>
-                ) : (
-                  friends.map((friend) => (
-                    <View
-                      key={friend.id}
-                      className="py-3 border-b border-zinc-200 flex-row items-center justify-between"
-                    >
-                      <TouchableOpacity
-                        className="flex-row items-center gap-3 flex-1"
-                        onPress={() =>
-                          router.push(`/user/${friend.id}` as RelativePathString)
-                        }
-                        activeOpacity={0.8}
-                      >
-                        <ProfileImage
-                          pfp={friend.profilePicture}
-                          size="small"
-                        />
-                        <Text className="text-zinc-900 font-medium">
-                          {friend.displayName}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))
-                )}
-              </View>
-            )}
-
-            {friendsTab === "received" && isMe && (
-              <View>
-                {receivedRequests.length === 0 ? (
-                  <Text className="text-center text-zinc-500 py-6">
-                    No incoming requests.
-                  </Text>
-                ) : (
-                  receivedRequests.map((request) => (
-                    <View
-                      key={request.id}
-                      className="py-3 border-b border-zinc-200"
-                    >
-                      <View className="flex-row items-center gap-3">
-                        <ProfileImage
-                          pfp={request.profilePicture}
-                          size="small"
-                        />
-                        <Text className="text-zinc-900 font-medium flex-1">
-                          {request.displayName}
-                        </Text>
-                        <View className="flex-row gap-2">
-                          <Button
-                            title="Accept"
-                            color={ButtonColor.Green}
-                            size={ButtonSize.Small}
-                            onPress={() => acceptFriendRequest.mutate(request.id)}
-                          />
-                          <Button
-                            title="Decline"
-                            color={ButtonColor.Light}
-                            size={ButtonSize.Small}
-                            onPress={() => declineFriendRequest.mutate(request.id)}
-                          />
-                        </View>
-                      </View>
-                    </View>
-                  ))
-                )}
-              </View>
-            )}
-
-            {friendsTab === "sent" && isMe && (
-              <View>
-                {sentRequests.length === 0 ? (
-                  <Text className="text-center text-zinc-500 py-6">
-                    No outgoing requests.
-                  </Text>
-                ) : (
-                  sentRequests.map((request) => (
-                    <View
-                      key={request.id}
-                      className="py-3 border-b border-zinc-200"
-                    >
-                      <View className="flex-row items-center gap-3">
-                        <ProfileImage
-                          pfp={request.profilePicture}
-                          size="small"
-                        />
-                        <Text className="text-zinc-900 font-medium flex-1">
-                          {request.displayName}
-                        </Text>
-                        <Button
-                          title="Cancel"
-                          color={ButtonColor.Light}
-                          size={ButtonSize.Small}
-                          onPress={() => confirmCancelRequest(request.id)}
-                        />
-                      </View>
-                    </View>
-                  ))
-                )}
-              </View>
-            )}
-          </View>
-        )}
-        <View className="h-16" />
+        </View>
       </View>
-    </ScrollView>
+    ) : (
+      profileHeader
+    );
+
+  return (
+    <View className="flex-1 bg-white">
+      <FlatList
+        data={listData}
+        keyExtractor={listKeyExtractor}
+        renderItem={listRenderItem}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={listEmptyComponent}
+        ListFooterComponent={<View className="h-16" />}
+        contentContainerStyle={{ backgroundColor: "white" }}
+      />
+    </View>
   );
 }

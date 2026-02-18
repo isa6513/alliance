@@ -19,7 +19,7 @@ export default function LikeButton({
   const borderClasses = bordered
     ? "border border-zinc-300 rounded px-2 py-1"
     : "";
-  const iconColor = liked ? "#ef4444" : "#222";
+  const iconColor = liked ? "#ef4444" : "#888";
 
   return (
     <TouchableOpacity
