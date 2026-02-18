@@ -3,6 +3,7 @@ import { usePathname, router } from "expo-router";
 import { Bell, Layers, ListTodo, User } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
 import { useAuth } from "../lib/AuthContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const tabs = [
   {
@@ -30,6 +31,7 @@ const tabs = [
 export default function TabBar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const isActive = (matchPaths: string[]) => {
     return matchPaths.some((path) => {
@@ -41,7 +43,10 @@ export default function TabBar() {
   };
 
   return (
-    <View className="flex-row bg-white border-t border-zinc-200 pb-6 pt-3">
+    <View
+      className="flex-row bg-white border-t border-zinc-200 pt-3"
+      style={{ paddingBottom: insets.bottom }}
+    >
       {tabs.map((tab) => {
         const active = isActive(tab.matchPaths);
         const Icon = tab.icon;

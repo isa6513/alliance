@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Alliance",
-    "slug": "Alliance",
+    "slug": "alliance-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/bridge.png",
@@ -24,7 +24,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.alliancefoundation.alliance"
+      "package": "com.alliance.alliancemobile",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

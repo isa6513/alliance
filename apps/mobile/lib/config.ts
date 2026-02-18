@@ -1,4 +1,4 @@
-import { NativeModules } from 'react-native';
+import { NativeModules } from "react-native";
 
 export const getApiUrl = (): string => {
   if (__DEV__) {
