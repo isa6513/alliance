@@ -19,6 +19,7 @@ import { Type } from 'class-transformer';
 import type { Ty } from 'src/tasks/entities/type';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import type { Push } from 'src/push/push.entity';
+import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 
 export enum NotificationCategory {
   ActionEvent = 'action_event',
@@ -80,18 +81,11 @@ export const NOTIFICATION_CATEGORY_PRIORITIES = {
 
 @Entity()
 export class Notification {
+  // Fields
+
   @PrimaryGeneratedColumn()
   @ApiProperty()
   id: number;
-
-  @ManyToOne(() => User, (user) => user.notifications, {
-    onDelete: 'CASCADE',
-  })
-  user: Ty<User>;
-
-  @ManyToMany(() => User)
-  @JoinTable({ name: 'notification_associated_users' })
-  associatedUsers?: Ty<User>[];
 
   @Column({ type: 'enum', enum: NotificationCategory })
   @ApiProperty({ enum: NotificationCategory, enumName: 'NotificationCategory' })
@@ -134,12 +128,6 @@ export class Notification {
   @Type(() => Date)
   sendTime: Date;
 
-  @OneToMany('Push', 'notification', {
-    nullable: true,
-    onDelete: 'CASCADE',
-  })
-  pushes: Ty<Push>[];
-
   @Column({ nullable: true })
   @ApiPropertyOptional()
   groupingKey?: string;
@@ -147,6 +135,40 @@ export class Notification {
   @Column({ nullable: true })
   @ApiPropertyOptional()
   groupingCount?: number;
+
+  @Column({ default: true })
+  @ApiProperty()
+  shouldPush: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiPropertyOptional({ type: Date })
+  @Type(() => Date)
+  pushDispatchedAt?: Date;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  pushClaimedBy?: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  pushClaimedAt?: Date;
+
+  // Relations
+
+  @ManyToOne(() => User, (user) => user.notifications, {
+    onDelete: 'CASCADE',
+  })
+  user: Ty<User>;
+
+  @ManyToMany(() => User)
+  @JoinTable({ name: 'notification_associated_users' })
+  associatedUsers?: Ty<User>[];
+
+  @OneToMany('Push', 'notification', {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  pushes: Ty<Push>[];
 
   @ApiPropertyOptional({ type: () => ActionUpdate })
   @ManyToOne(() => ActionUpdate, (actionUpdate) => actionUpdate.notifs, {
@@ -169,20 +191,10 @@ export class Notification {
   })
   onetimeInvite?: Ty<OnetimeInvite>;
 
-  @Column({ default: true })
-  @ApiProperty()
-  shouldPush: boolean;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  @ApiPropertyOptional({ type: Date })
-  @Type(() => Date)
-  pushDispatchedAt?: Date;
-
-  @Column({ nullable: true })
-  @ApiPropertyOptional()
-  pushClaimedBy?: string;
-
-  @Column({ nullable: true })
-  @ApiPropertyOptional()
-  pushClaimedAt?: Date;
+  @ApiPropertyOptional({type: () => CommunityInvite})
+  @ManyToOne(() => CommunityInvite, (invite) => invite.notifs, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  communityInvite?: Ty<CommunityInvite>;
 }

@@ -12,7 +12,10 @@ import { ImagesService } from 'src/images/images.service';
 import { ConversationService } from 'src/messaging/conversation.service';
 import { CreateCommunityDto, UpdateCommunityDto } from './dto/community.dto';
 import { DEFAULT_TIME_ZONE, User } from 'src/user/entities/user.entity';
-import { type CreateNotifParams, NotifsService } from 'src/notifs/notifs.service';
+import {
+  type CreateNotifParams,
+  NotifsService,
+} from 'src/notifs/notifs.service';
 import { run } from 'src/utils/promise';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { groupUrl } from 'src/search/approutes';
@@ -725,6 +728,7 @@ export class CommunityService {
         tab: 'groups',
       }),
       associatedUsers: [invitingUser],
+      communityInvite: invite,
     };
 
     const [savedInvite] = await Promise.all([
@@ -843,6 +847,7 @@ export class CommunityService {
                 communityId: community.id,
               }),
               associatedUsers: [invitingUser, invitedUser],
+              communityInvite: invite,
             }) satisfies CreateNotifParams,
         ),
       );
@@ -891,6 +896,7 @@ export class CommunityService {
           tab: 'groups',
         }),
         associatedUsers: [invite.invitingUser ?? user],
+        communityInvite: invite,
       } satisfies CreateNotifParams,
       ...(invite.invitingUser
         ? [
@@ -903,6 +909,7 @@ export class CommunityService {
                 communityId: invite.community.id,
               }),
               associatedUsers: [],
+              communityInvite: invite,
             } satisfies CreateNotifParams,
           ]
         : []),
@@ -951,6 +958,7 @@ export class CommunityService {
           tab: 'groups',
         }),
         associatedUsers: [user],
+        communityInvite: invite,
       });
     }
   }
@@ -1063,6 +1071,7 @@ export class CommunityService {
           communityId: community.id,
         }),
         associatedUsers: [invite.invitedUser],
+        communityInvite: invite,
       }),
     ]);
   }
@@ -1090,6 +1099,7 @@ export class CommunityService {
         communityId: invite.community.id,
       }),
       associatedUsers: [invite.invitedUser],
+      communityInvite: invite,
     });
   }
 

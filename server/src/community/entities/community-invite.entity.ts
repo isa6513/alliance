@@ -3,6 +3,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
@@ -15,6 +16,7 @@ import {
 } from 'src/datasources/basecolumns';
 import { Community } from './community.entity';
 import type { Ty } from 'src/tasks/entities/type';
+import { Notification } from 'src/notifs/entities/notification.entity';
 
 export enum CommunityInviteStatus {
   RequestPending = 'request_pending',
@@ -72,7 +74,9 @@ export class CommunityInvite {
   @IsOptional()
   invitingUser?: Ty<User>;
 
-  @ManyToOne(() => User, (user) => user.invitedCommunities, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.invitedCommunities, {
+    onDelete: 'CASCADE',
+  })
   @ApiProperty({ type: () => User })
   @Type(() => User)
   @JoinColumn({ name: 'invitedUserId' })
@@ -87,4 +91,11 @@ export class CommunityInvite {
   @JoinColumn({ name: 'communityId' })
   @IsDefined()
   community: Ty<Community>;
+
+  @OneToMany(() => Notification, (notif) => notif.communityInvite)
+  @Type(() => Notification)
+  @ApiPropertyOptional({ type: () => Notification, isArray: true })
+  @Allow()
+  @IsOptional()
+  notifs?: Ty<Notification>[];
 }
