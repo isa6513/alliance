@@ -120,8 +120,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url("/assets/fonts/source-sans-3-v19-latin-500.woff2")
-    format("woff2");
+  src: url("/assets/fonts/source-sans-3-v19-latin-500.woff2") format("woff2");
 }
 
 @font-face {
@@ -129,8 +128,7 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url("/assets/fonts/source-sans-3-v19-latin-600.woff2")
-    format("woff2");
+  src: url("/assets/fonts/source-sans-3-v19-latin-600.woff2") format("woff2");
 }
 
 @font-face {
@@ -138,8 +136,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("/assets/fonts/source-sans-3-v19-latin-700.woff2")
-    format("woff2");
+  src: url("/assets/fonts/source-sans-3-v19-latin-700.woff2") format("woff2");
 }
 
 @font-face {
@@ -147,12 +144,12 @@
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url("/assets/fonts/source-sans-3-v19-latin-italic.woff2")
-    format("woff2");
+  src: url("/assets/fonts/source-sans-3-v19-latin-italic.woff2") format("woff2");
 }
 
 @font-face {
   font-family: "Libre Baskerville";
+  font-display: swap;
   src: url("/assets/fonts/LibreBaskerville-VariableFont_wght.ttf")
     format("truetype");
 }
