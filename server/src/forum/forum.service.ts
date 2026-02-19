@@ -556,7 +556,7 @@ export class ForumService {
     );
 
     const cid = generateCIDForNotif();
-    if (parentAuthor) {
+    if (parentAuthor && parentAuthor.id !== comment.authorId) {
       await this.notifsService.sendNotifs([
         { ...baseNotif, user: parentAuthor, cid },
       ]);
@@ -917,14 +917,6 @@ export class ForumService {
     expertLabel?: string,
     notifyForReplies?: boolean,
   ): Promise<Post> {
-    console.log(
-      'updatePostExperts',
-      postId,
-      expertIds,
-      qaMode,
-      expertLabel,
-      notifyForReplies,
-    );
     const post = await this.postRepository.findOne({
       where: { id: postId },
       relations: { author: true, action: true, editableContent: true },
