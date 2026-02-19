@@ -69,20 +69,12 @@ export function priorityComparator(
   }
 
   // Sort by earliest deadline first
-  if (
-    Number.isFinite(aPriority.deadlineTimestamp) &&
-    Number.isFinite(bPriority.deadlineTimestamp) &&
-    aPriority.deadlineTimestamp !== bPriority.deadlineTimestamp
-  ) {
+  if (aPriority.deadlineTimestamp !== bPriority.deadlineTimestamp) {
     return aPriority.deadlineTimestamp - bPriority.deadlineTimestamp;
   }
 
   // Sort by earliest start date
-  if (
-    Number.isFinite(aPriority.startTimestamp) &&
-    Number.isFinite(bPriority.startTimestamp) &&
-    aPriority.startTimestamp !== bPriority.startTimestamp
-  ) {
+  if (aPriority.startTimestamp !== bPriority.startTimestamp) {
     return aPriority.startTimestamp - bPriority.startTimestamp;
   }
 
