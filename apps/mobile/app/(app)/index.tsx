@@ -9,16 +9,18 @@ import {
 } from "@alliance/shared/client";
 import { colors } from "../../lib/style/colors";
 import Text from "../../components/system/Text";
+import {
+  ActionWithAwayStatus,
+  getAwayStatus,
+  isGeneralUpdate,
+  priorityComparator,
+} from "@alliance/shared/lib/actionUtils";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../components/LargeActionCard";
 import LargeGeneralUpdateCard from "../../components/LargeGeneralUpdateCard";
 import GreenHeader from "../../components/GreenHeader";
 import { Check } from "lucide-react-native";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
-import {
-  ActionWithAwayStatus,
-  getAwayStatus,
-} from "@alliance/shared/lib/actionUtils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   KeyboardAwareScrollView,
@@ -97,7 +99,13 @@ export default function HomeScreen() {
     }));
   }, [actions, awayRanges]);
 
-  const { currentTask } = useHomePageActions(actionsWithAwayStatus);
+  const { todoActions } = useHomePageActions(actionsWithAwayStatus);
+
+  const currentTaskOrGeneralUpdate = useMemo(() => {
+    return [...todoActions, ...(generalUpdates ?? [])].sort(
+      priorityComparator
+    )[0];
+  }, [todoActions, generalUpdates]);
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
 
@@ -118,9 +126,7 @@ export default function HomeScreen() {
     );
   }
 
-  const firstGeneralUpdate = generalUpdates?.[0];
-
-  if (!firstGeneralUpdate && !currentTask) {
+  if (!currentTaskOrGeneralUpdate) {
     return (
       <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
         <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
@@ -140,13 +146,14 @@ export default function HomeScreen() {
         className="flex-1"
         bottomOffset={72}
       >
-        {firstGeneralUpdate ? (
+        {currentTaskOrGeneralUpdate &&
+        isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
           <View className="p-4">
             <LargeGeneralUpdateCard
-              key={firstGeneralUpdate.id}
-              generalUpdate={firstGeneralUpdate}
+              key={currentTaskOrGeneralUpdate.id}
+              generalUpdate={currentTaskOrGeneralUpdate}
               onDismiss={() =>
-                handleDismissGeneralUpdate(firstGeneralUpdate.id)
+                handleDismissGeneralUpdate(currentTaskOrGeneralUpdate.id)
               }
             />
           </View>
@@ -158,17 +165,21 @@ export default function HomeScreen() {
               </Text>
             </View>
             <View>
-              {!currentTask ? (
+              {!currentTaskOrGeneralUpdate ? (
                 <Text className="text-red-500 text-center py-4">
                   {error?.message}
                 </Text>
               ) : (
                 <LargeActionCard
-                  action={currentTask}
-                  userRelation={currentTask.userRelation ?? "none"}
+                  action={currentTaskOrGeneralUpdate}
+                  userRelation={
+                    currentTaskOrGeneralUpdate.userRelation ?? "none"
+                  }
                   onUpdateActionState={refetch}
                   scrollPageTo={scrollPageTo}
-                  handleDismiss={() => handleDismissAction(currentTask.id)}
+                  handleDismiss={() =>
+                    handleDismissAction(currentTaskOrGeneralUpdate.id)
+                  }
                 />
               )}
             </View>

@@ -1355,6 +1355,7 @@ export type GeneralUpdateDto = {
     };
     startDate?: string;
     endDate?: string;
+    priority: number;
 };
 
 export type GeneralUpdateAdminDto = {

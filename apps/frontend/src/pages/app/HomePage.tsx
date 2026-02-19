@@ -14,6 +14,10 @@ import LargeActionCard, { LargeActionCardProps } from "./LargeActionCard";
 import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
 import useGlobalFeed from "@alliance/shared/lib/useGlobalFeed";
 import { useMediaQuery } from "../../lib/useMediaQuery";
+import {
+  isGeneralUpdate,
+  priorityComparator,
+} from "@alliance/shared/lib/actionUtils";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import {
   noTasksContractSuspended,
@@ -147,6 +151,12 @@ const HomePage = () => {
     remainingTasksEstimatedTimeCurrentWeek,
   ]);
 
+  const currentTaskOrGeneralUpdate = useMemo(() => {
+    return [...todoActions, ...(generalUpdates ?? [])].sort(
+      priorityComparator
+    )[0];
+  }, [todoActions, generalUpdates]);
+
   const mainContent = useMemo(() => {
     if (actions === null) {
       return loading ? (
@@ -204,25 +214,31 @@ const HomePage = () => {
           </div>
         )}
         <div className="flex flex-col gap-6 flex-1">
-          {generalUpdates?.[0] ? (
+          {currentTaskOrGeneralUpdate &&
+          isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
             <LargeGeneralUpdateCard
-              key={generalUpdates[0].id}
-              title={generalUpdates[0].name}
-              schema={generalUpdates[0].schema}
-              onDismiss={() => handleDismissGeneralUpdate(generalUpdates[0].id)}
+              key={currentTaskOrGeneralUpdate.id}
+              title={currentTaskOrGeneralUpdate.name}
+              schema={currentTaskOrGeneralUpdate.schema}
+              onDismiss={() =>
+                handleDismissGeneralUpdate(currentTaskOrGeneralUpdate.id)
+              }
             />
-          ) : currentTask && currentTask.userRelation ? (
+          ) : currentTaskOrGeneralUpdate &&
+            currentTaskOrGeneralUpdate.userRelation ? (
             <LargeActionCard
-              action={currentTask}
+              action={currentTaskOrGeneralUpdate}
               dismissProps={dismissProps}
-              handleDismiss={() => handleDismissAction(currentTask.id)}
-              userRelation={currentTask.userRelation}
+              handleDismiss={() =>
+                handleDismissAction(currentTaskOrGeneralUpdate.id)
+              }
+              userRelation={currentTaskOrGeneralUpdate.userRelation}
               onCompleteAction={() => {
                 queryClient.setQueryData<ActionDto[] | undefined>(
                   ["actions"],
                   (prev) =>
                     prev?.map((action) =>
-                      action.id === currentTask.id
+                      action.id === currentTaskOrGeneralUpdate.id
                         ? { ...action, userRelation: "completed" as const }
                         : action
                     )
@@ -265,9 +281,9 @@ const HomePage = () => {
     );
   }, [
     actions,
-    generalUpdates,
     loading,
     currentTask,
+    currentTaskOrGeneralUpdate,
     user,
     handleDismissAction,
     handleDismissGeneralUpdate,

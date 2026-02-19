@@ -3,59 +3,15 @@ import { ActionDto } from "../client";
 import {
   ActionWithAwayStatus,
   canJoinAction,
-  getDeadlineTimestamp,
   isCurrentlyCompletedAction,
+  priorityComparator,
   shouldCompleteAction,
   showActionInSidebarList,
 } from "./actionUtils";
 
-export function actionPriorityComparator(
-  actionA: ActionDto,
-  actionB: ActionDto
-): number {
-  // Sort by priority
-  if (actionA.priority !== actionB.priority) {
-    return actionB.priority - actionA.priority;
-  }
-
-  // Sort by earliest deadline first
-  const deadlineA = getDeadlineTimestamp(actionA);
-  const deadlineB = getDeadlineTimestamp(actionB);
-  if (deadlineA !== Infinity || deadlineB !== Infinity) {
-    return deadlineA - deadlineB;
-  }
-
-  // Both do not have deadlines: sort by earliest member action
-  const memberActionA = actionA.events.find(
-    (event) =>
-      event.newStatus === "member_action" ||
-      event.newStatus === "gathering_commitments"
-  );
-  const memberActionB = actionB.events.find(
-    (event) =>
-      event.newStatus === "member_action" ||
-      event.newStatus === "gathering_commitments"
-  );
-  if (!memberActionA && !memberActionB) {
-    return 0;
-  }
-  if (!memberActionA) {
-    return 1;
-  }
-  if (!memberActionB) {
-    return -1;
-  }
-  return (
-    new Date(memberActionA.date).getTime() -
-    new Date(memberActionB.date).getTime()
-  );
-}
-
 export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
   const todoActions = useMemo(() => {
-    return (
-      actions?.filter(shouldCompleteAction).sort(actionPriorityComparator) ?? []
-    );
+    return actions?.filter(shouldCompleteAction).sort(priorityComparator) ?? [];
   }, [actions]);
 
   const newActions =

@@ -2,10 +2,92 @@ import {
   ActionDto,
   ActionEventDto,
   CommunityUserInfoDto,
+  GeneralUpdateDto,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
   UserAwayRangeDto,
 } from "../client";
+
+type TaskPriority = {
+  priority: number;
+  deadlineTimestamp: number;
+  startTimestamp: number;
+};
+
+export function isGeneralUpdate(
+  a: GeneralUpdateDto | ActionDto
+): a is GeneralUpdateDto {
+  return !("events" in a);
+}
+
+function generalUpdatePriority(generalUpdate: GeneralUpdateDto): TaskPriority {
+  return {
+    priority: generalUpdate.priority,
+    deadlineTimestamp: generalUpdate.endDate
+      ? new Date(generalUpdate.endDate).getTime()
+      : Infinity,
+    startTimestamp: generalUpdate.startDate
+      ? new Date(generalUpdate.startDate).getTime()
+      : -Infinity,
+  };
+}
+
+function actionPriority(action: ActionDto): TaskPriority {
+  const startDateString = action.events.find(
+    (event) =>
+      event.newStatus === "member_action" ||
+      event.newStatus === "gathering_commitments"
+  )?.date;
+  return {
+    priority: action.priority,
+    deadlineTimestamp: getDeadlineTimestamp(action),
+    startTimestamp: startDateString
+      ? new Date(startDateString).getTime()
+      : -Infinity,
+  };
+}
+
+function generalUpdateOrActionPriority(
+  a: GeneralUpdateDto | ActionDto
+): TaskPriority {
+  if (isGeneralUpdate(a)) {
+    return generalUpdatePriority(a);
+  }
+  return actionPriority(a);
+}
+
+export function priorityComparator(
+  a: GeneralUpdateDto | ActionDto,
+  b: GeneralUpdateDto | ActionDto
+): number {
+  const aPriority = generalUpdateOrActionPriority(a);
+  const bPriority = generalUpdateOrActionPriority(b);
+
+  // Sort by priority, highest priority first
+  if (aPriority.priority !== bPriority.priority) {
+    return bPriority.priority - aPriority.priority;
+  }
+
+  // Sort by earliest deadline first
+  if (
+    Number.isFinite(aPriority.deadlineTimestamp) &&
+    Number.isFinite(bPriority.deadlineTimestamp) &&
+    aPriority.deadlineTimestamp !== bPriority.deadlineTimestamp
+  ) {
+    return aPriority.deadlineTimestamp - bPriority.deadlineTimestamp;
+  }
+
+  // Sort by earliest start date
+  if (
+    Number.isFinite(aPriority.startTimestamp) &&
+    Number.isFinite(bPriority.startTimestamp) &&
+    aPriority.startTimestamp !== bPriority.startTimestamp
+  ) {
+    return aPriority.startTimestamp - bPriority.startTimestamp;
+  }
+
+  return 0;
+}
 
 export enum FilterMode {
   All = "All",

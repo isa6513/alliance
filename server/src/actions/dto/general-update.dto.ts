@@ -17,6 +17,7 @@ export class GeneralUpdateDto extends PickType(GeneralUpdate, [
   'schema',
   'startDate',
   'endDate',
+  'priority',
 ]) {
   constructor(generalUpdate: GeneralUpdate) {
     super();
@@ -26,6 +27,7 @@ export class GeneralUpdateDto extends PickType(GeneralUpdate, [
       schema: generalUpdate.schema,
       startDate: generalUpdate.startDate,
       endDate: generalUpdate.endDate,
+      priority: generalUpdate.priority,
     });
   }
 }
