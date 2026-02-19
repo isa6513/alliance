@@ -410,7 +410,7 @@ jobs:
           fi
         working-directory: ./server
 
-visual-regression:
+  visual-regression:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     services:
@@ -687,7 +687,8 @@ visual-regression:
           TEXT+="*Commit:* \`${SHA}\`${NL}"
           TEXT+="<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>${NL}"
 
-          echo "$AI_APPROVED" | jq -c '.[]' | while IFS= read -r item; do
+          ITEMS=$(echo "$AI_APPROVED" | jq -c '.[]')
+          while IFS= read -r item; do
             PAGE=$(echo "$item" | jq -r '.page')
             REASON=$(echo "$item" | jq -r '.reason')
             FILE="${PAGE}.png"
@@ -705,7 +706,7 @@ visual-regression:
             fi
 
             [ -n "$GALLERY" ] && TEXT+="${NL}${GALLERY}${NL}"
-          done
+          done <<< "$ITEMS"
 
           curl -s -X POST \
             -H "Authorization: Bearer ${TOKEN}" \
@@ -727,7 +728,7 @@ visual-regression:
         run: |
           echo "AI review detected visual regressions — blocking deploy"
           exit 1
-          
+
   deploy-nest-backend:
     runs-on: ubuntu-latest
     needs:
