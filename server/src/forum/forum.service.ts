@@ -383,7 +383,10 @@ export class ForumService {
   ): Promise<PostDto> {
     const post = await this.findOnePost(id, userId);
 
-    if (post.authorId !== userId) {
+    if (
+      post.authorId !== userId &&
+      !post.authors?.some((author) => author.id === userId)
+    ) {
       throw new NotFoundException('You can only edit your own posts');
     }
 
@@ -409,7 +412,10 @@ export class ForumService {
   async removePost(id: number, userId: number): Promise<void> {
     const post = await this.findOnePost(id, userId);
 
-    if (post.authorId !== userId) {
+    if (
+      post.authorId !== userId &&
+      !post.authors?.some((author) => author.id === userId)
+    ) {
       throw new NotFoundException('You can only delete your own posts');
     }
 

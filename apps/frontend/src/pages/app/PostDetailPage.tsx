@@ -46,7 +46,7 @@ const PostDetailPage: React.FC = () => {
   });
 
   const handleDeletePost = async () => {
-    if (!post || post.author.id !== user?.id) {
+    if (!post || !amAuthor) {
       return;
     }
 
@@ -105,6 +105,10 @@ const PostDetailPage: React.FC = () => {
       </div>
     );
   }
+
+  const amAuthor =
+    post.author.id === user?.id ||
+    post.authors?.some((author) => author.id === user?.id);
 
   return (
     <div className="w-full">
@@ -191,7 +195,7 @@ const PostDetailPage: React.FC = () => {
                 likes={post.likes?.length ?? 0}
                 handleLike={handleLike}
               />
-              {post.author.id === user?.id && (
+              {amAuthor && (
                 <>
                   <Link
                     to={href("/forum/edit/:postId", {
