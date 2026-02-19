@@ -39,8 +39,7 @@ function FormTextarea({ value, onChange, ...props }: FormTextareaProps) {
 
   useEffect(() => {
     if (ref.current && value !== null) {
-      ref.current.style.height = "auto";
-      ref.current.style.height = 2 + ref.current.scrollHeight + "px";
+      ref.current.style.height = ref.current.scrollHeight + "px";
     }
     if (ref.current && !value) {
       ref.current.style.height = "auto";
