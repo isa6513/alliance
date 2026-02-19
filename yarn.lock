@@ -175,6 +175,7 @@ __metadata:
     react-easy-crop: "npm:^5.2.0"
     react-markdown: "npm:^10.1.0"
     react-router: "npm:^7.6.2"
+    react-textarea-autosize: "npm:^8.5.9"
     recharts: "npm:^2.15.3"
     remark-gfm: "npm:^4.0.1"
     socket.io-client: "npm:^4.8.1"
@@ -281,6 +282,7 @@ __metadata:
     hls.js: "npm:^1.6.15"
     lucide-react: "npm:^0.555.0"
     react-router: "npm:7.6.2"
+    react-textarea-autosize: "npm:^8.5.9"
     remark-gfm: "npm:^4.0.1"
     tailwind-merge: "npm:^3.4.0"
   peerDependencies:
