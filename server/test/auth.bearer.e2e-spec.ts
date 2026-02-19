@@ -278,6 +278,61 @@ describe('Auth (e2e)', () => {
       expect(newUser?.referredByInvite).toBeNull();
       expect(newUser?.referredBy).toBeNull();
     });
+
+    it('registers a user with a user referral code (not OnetimeInvite)', async () => {
+      // Create a user with a referral code
+      const referringUser = await userRepository.save(
+        userRepository.create({
+          email: 'referrer@test.com',
+          password: 'password',
+          name: 'Referrer User',
+        }),
+      );
+      // referralCode is generated automatically, but let's ensure it exists
+      if (!referringUser.referralCode) {
+        await referringUser.generateReferralCode();
+        await userRepository.save(referringUser);
+      }
+
+      // Register with the user's referral code
+      await request(ctx.app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'referred@test.com',
+          password: 'password',
+          name: 'Referred User',
+          referralCode: referringUser.referralCode,
+          mode: 'header',
+        } satisfies SignUpDto)
+        .expect(201);
+
+      // Verify the user was created with referredBy set
+      const newUser = await userRepository.findOne({
+        where: { email: 'referred@test.com' },
+        relations: { referredByInvite: true, referredBy: true },
+      });
+
+      expect(newUser).not.toBeNull();
+      expect(newUser?.referredByInvite).toBeNull(); // Should not have OnetimeInvite
+      expect(newUser?.referredBy?.id).toBe(referringUser.id); // Should have referring user
+
+      // Verify friendship was created
+      const friendRepo = ctx.dataSource.getRepository(Friend);
+      const friendship = await friendRepo.findOne({
+        where: [
+          {
+            requester: { id: referringUser.id },
+            addressee: { id: newUser!.id },
+          },
+          {
+            requester: { id: newUser!.id },
+            addressee: { id: referringUser.id },
+          },
+        ],
+      });
+
+      expect(friendship).not.toBeNull();
+    });
   });
 
   afterEach(async () => {

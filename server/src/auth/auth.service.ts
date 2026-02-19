@@ -20,7 +20,7 @@ export class AuthService {
     private usersService: UserService,
     private jwtService: JwtService,
     private mailService: MailService,
-  ) { }
+  ) {}
 
   public static ACCESS_COOKIE = 'access_token';
   public static REFRESH_COOKIE = 'refresh_token';
@@ -57,6 +57,7 @@ export class AuthService {
     }
 
     let invite: OnetimeInvite | null = null;
+    let referringUser: User | null = null;
     if (signUp.referralCode) {
       invite = await this.usersService.findInviteByCode(signUp.referralCode, {
         invitingUser: { communities: true },
@@ -66,12 +67,17 @@ export class AuthService {
       if (invite?.invitedUser) {
         throw new BadRequestException('This invite code has already been used');
       }
-      if (!invite) {
-        if (process.env.NODE_ENV !== 'test') {
+      if (invite) {
+        await this.usersService.invalidateInvite(invite.id);
+        referringUser = invite.invitingUser;
+      } else {
+        // If no OnetimeInvite found, check if it's a user's referral code
+        referringUser = await this.usersService.findOneByReferralCode(
+          signUp.referralCode,
+        );
+        if (!referringUser && process.env.NODE_ENV !== 'test') {
           throw new BadRequestException('invalid referral code'); //TODO: feature flag
         }
-      } else {
-        await this.usersService.invalidateInvite(invite.id);
       }
     }
 
@@ -79,16 +85,13 @@ export class AuthService {
 
     const user = await this.usersService.create({
       ...signUp,
-      referredBy: invite?.invitingUser ?? null,
+      referredBy: referringUser ?? null,
       referredByInvite: invite ?? null,
       tags: defaultTag ? [defaultTag] : undefined,
     });
 
-    if (invite?.invitingUser) {
-      await this.usersService.makeFriendsAutomated(
-        invite.invitingUser.id,
-        user.id,
-      );
+    if (referringUser) {
+      await this.usersService.makeFriendsAutomated(referringUser.id, user.id);
     }
 
     await this.usersService.sendWelcomeEmail(user.id);
