@@ -873,14 +873,27 @@ const FormResponses: React.FC = () => {
                 </Card>
               ) : (
                 <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-                  <div className="grid grid-cols-1 gap-2 border-b border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold tracking-wide text-gray-600 uppercase md:grid-cols-[260px_minmax(0,1fr)]">
+                  <div className="grid grid-cols-1 gap-2 border-b border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold tracking-wide text-gray-600 uppercase md:grid-cols-[260px_minmax(0,1fr)_auto]">
                     <div>Respondent</div>
                     <div>Answer</div>
+                    {selectedQuestionField &&
+                      AI_SCORE_FIELD_KINDS.has(selectedQuestionField.kind) && (
+                        <div>AI Score</div>
+                      )}
                   </div>
                   {questionResponses.map((response, index) => {
                     const answerValue = selectedQuestionFieldId
                       ? response.answers?.[selectedQuestionFieldId]
                       : null;
+                    const aiDetection =
+                      selectedQuestionField &&
+                      AI_SCORE_FIELD_KINDS.has(selectedQuestionField.kind)
+                        ? (response.aiDetectionResults ?? []).find(
+                            (d) =>
+                              d.fieldPath ===
+                              `answers.${selectedQuestionFieldId}`
+                          )
+                        : null;
                     return (
                       <div
                         key={
@@ -889,7 +902,12 @@ const FormResponses: React.FC = () => {
                             response.createdAt
                           }-${index}`
                         }
-                        className="grid grid-cols-1 gap-1 border-b border-gray-100 px-3 py-2 last:border-b-0 md:grid-cols-[260px_minmax(0,1fr)] md:gap-3"
+                        className={`grid grid-cols-1 gap-1 border-b border-gray-100 px-3 py-2 last:border-b-0 md:gap-3 ${
+                          selectedQuestionField &&
+                          AI_SCORE_FIELD_KINDS.has(selectedQuestionField.kind)
+                            ? "md:grid-cols-[260px_minmax(0,1fr)_auto]"
+                            : "md:grid-cols-[260px_minmax(0,1fr)]"
+                        }`}
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-gray-900">
@@ -904,6 +922,27 @@ const FormResponses: React.FC = () => {
                             {formatSelectedQuestionAnswer(answerValue)}
                           </p>
                         </div>
+                        {selectedQuestionField &&
+                          AI_SCORE_FIELD_KINDS.has(
+                            selectedQuestionField.kind
+                          ) && (
+                            <div className="flex items-start">
+                              <span
+                                className={`text-sm font-semibold ${
+                                  aiDetection &&
+                                  typeof aiDetection.aiProbability ===
+                                    "number" &&
+                                  aiDetection.aiProbability > 0
+                                    ? "text-red-600"
+                                    : "text-gray-400"
+                                }`}
+                              >
+                                {formatAiScore(
+                                  aiDetection?.aiProbability ?? null
+                                )}
+                              </span>
+                            </div>
+                          )}
                       </div>
                     );
                   })}
