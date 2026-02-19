@@ -363,7 +363,7 @@ const GeneralUpdatePage: React.FC = () => {
               onChange={(e) =>
                 setForm((prev) => ({
                   ...prev,
-                  priority: parseInt(e.target.value, 10) || 2,
+                  priority: parseInt(e.target.value, 10) || 0,
                 }))
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
