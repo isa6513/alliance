@@ -5,12 +5,14 @@ import {
   userListFriends,
 } from "@alliance/shared/client";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, href } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ReplyComponent from "./forum/ReplyComponent";
 import ReplyForm from "./forum/ReplyForm";
 import { CommentsProvider, useCommentTree } from "./forum/CommentsContext";
+import { ArrowUpDown } from "lucide-react";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 
 export type CommentFilter =
   | "all"
@@ -42,6 +44,80 @@ const hasExpertReply = (comment: CommentDto, expertIds: number[]): boolean => {
   return false;
 };
 
+type CommentSort = "newest" | "discussion" | "random";
+
+const sortLabels: Record<CommentSort, string> = {
+  newest: "Newest",
+  discussion: "Most discussion",
+  random: "Random",
+};
+
+const sortOrder: CommentSort[] = ["newest", "discussion", "random"];
+
+const countAllReplies = (children: CommentDto[]): number => {
+  let count = 0;
+  for (const child of children) {
+    count += 1;
+    if (child.children?.length) {
+      count += countAllReplies(child.children);
+    }
+  }
+  return count;
+};
+
+const SortDropdown = ({
+  commentSort,
+  onChange,
+}: {
+  commentSort: CommentSort;
+  onChange: (sort: CommentSort) => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <Button
+        color={ButtonColor.Transparent}
+        onClick={() => setOpen(!open)}
+        className="text-zinc-600 hover:text-zinc-900"
+      >
+        <ArrowUpDown size={18} />
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 bg-white border border-zinc-200 rounded-md z-10 min-w-[160px]">
+          {sortOrder.map((sort) => (
+            <button
+              key={sort}
+              onClick={() => {
+                onChange(sort);
+                setOpen(false);
+              }}
+              className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
+                commentSort === sort
+                  ? "font-medium text-black"
+                  : "text-zinc-700"
+              }`}
+            >
+              {sortLabels[sort]}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Comments = ({
   objectId,
   type,
@@ -55,6 +131,7 @@ const Comments = ({
 }: CommentsProps) => {
   const { user } = useAuth();
   const [commentFilter, setCommentFilter] = useState<CommentFilter>("all");
+  const [commentSort, setCommentSort] = useState<CommentSort>("newest");
 
   const tree = useCommentTree(objectId, type, initialComments);
   const isPostComments = type === "post";
@@ -114,12 +191,6 @@ const Comments = ({
     }
     return base;
   }, [activeQaMode, hasMineComments]);
-
-  useEffect(() => {
-    if (!filterOptions.includes(commentFilter)) {
-      setCommentFilter("all");
-    }
-  }, [filterOptions, commentFilter]);
 
   const commentFilterLabels: Record<CommentFilter, string> = {
     all: "All",
@@ -184,28 +255,54 @@ const Comments = ({
       .filter((comment) => matchesFilter(comment, commentFilter))
       .sort((a, b) => {
         if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+        if (commentSort === "discussion") {
+          const countA = countAllReplies(a.children ?? []);
+          const countB = countAllReplies(b.children ?? []);
+          return countB - countA;
+        }
+        if (commentSort === "random") {
+          return Math.random() - 0.5;
+        }
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
         return dateB - dateA;
       });
-  }, [topLevelComments, commentFilter, matchesFilter]);
+  }, [topLevelComments, commentFilter, commentSort, matchesFilter]);
 
-  const ctxValue = {
-    user,
-    replyingTo: tree.replyingTo,
-    setReplyingTo: tree.setReplyingTo,
-    handleSubmitReply: tree.handleSubmitReply,
-    handleDeleteReply: tree.handleDeleteReply,
-    onUpdateReply: tree.handleUpdateReply,
-    onLikeReply: tree.handleLikeReply,
-    onPinReply: tree.handlePinReply,
-    isSubmitting: tree.isSubmitting,
-    newlyAddedReplies: tree.newlyAddedReplies,
-    highlightedReplyId: tree.highlightedReplyId,
-    expertIds,
-    expertLabel,
-    compact,
-  };
+  const ctxValue = useMemo(
+    () => ({
+      user,
+      replyingTo: tree.replyingTo,
+      setReplyingTo: tree.setReplyingTo,
+      handleSubmitReply: tree.handleSubmitReply,
+      handleDeleteReply: tree.handleDeleteReply,
+      onUpdateReply: tree.handleUpdateReply,
+      onLikeReply: tree.handleLikeReply,
+      onPinReply: tree.handlePinReply,
+      isSubmitting: tree.isSubmitting,
+      newlyAddedReplies: tree.newlyAddedReplies,
+      highlightedReplyId: tree.highlightedReplyId,
+      expertIds,
+      expertLabel,
+      compact,
+    }),
+    [
+      user,
+      tree.replyingTo,
+      tree.setReplyingTo,
+      tree.handleSubmitReply,
+      tree.handleDeleteReply,
+      tree.handleUpdateReply,
+      tree.handleLikeReply,
+      tree.handlePinReply,
+      tree.isSubmitting,
+      tree.newlyAddedReplies,
+      tree.highlightedReplyId,
+      expertIds,
+      expertLabel,
+      compact,
+    ]
+  );
 
   return (
     <CommentsProvider value={ctxValue}>
@@ -233,25 +330,31 @@ const Comments = ({
           </div>
         ) : null}
         {isPostComments && topLevelComments.length > 0 && (
-          <div className="flex items-center gap-3 mt-3 mb-2">
-            <span className="text-sm font-medium text-zinc-700">
-              {activeQaMode ? "Q&A mode" : "Comments"}
-            </span>
-            <div className="flex gap-1 bg-zinc-100 p-px rounded">
-              {filterOptions.map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setCommentFilter(filter)}
-                  className={`px-3 py-1 text-sm rounded border border-transparent ${
-                    commentFilter === filter
-                      ? "bg-white border-zinc-300 text-black"
-                      : "text-zinc-600 hover:text-zinc-900"
-                  }`}
-                >
-                  {commentFilterLabels[filter]} ({commentCounts[filter] ?? 0})
-                </button>
-              ))}
+          <div className="flex items-center justify-between gap-3 my-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-zinc-700">
+                {activeQaMode ? "Q&A mode" : "Filter"}
+              </span>
+              <div className="flex gap-1 bg-zinc-100 p-px rounded">
+                {filterOptions.map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setCommentFilter(filter)}
+                    className={`px-3 py-1 text-sm rounded border border-transparent ${
+                      commentFilter === filter
+                        ? "bg-white border-zinc-300 text-black"
+                        : "text-zinc-600 hover:text-zinc-900"
+                    }`}
+                  >
+                    {commentFilterLabels[filter]} ({commentCounts[filter] ?? 0})
+                  </button>
+                ))}
+              </div>
             </div>
+            <SortDropdown
+              commentSort={commentSort}
+              onChange={setCommentSort}
+            />
           </div>
         )}
         {tree.error && <div className="text-red-500">{tree.error}</div>}
