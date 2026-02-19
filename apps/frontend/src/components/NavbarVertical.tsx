@@ -262,8 +262,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
   const currentLocation: NavbarPage | null =
     navSections
       .flatMap((section) => section.items)
-      .find((item) => item.destination === location.pathname)?.page ||
-    null;
+      .find((item) => item.destination === location.pathname)?.page || null;
 
   useEffect(() => {
     if (currentLocation !== NavbarPage.Messages && hasUpdates) {
@@ -307,7 +306,9 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
       return;
     }
 
-    if (document.documentElement.style.getPropertyValue("--nav-width") === "0px") {
+    if (
+      document.documentElement.style.getPropertyValue("--nav-width") === "0px"
+    ) {
       requestAnimationFrame(() => {
         updateNavWidth();
         updateMobileNavHeight();
@@ -386,7 +387,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                     >
                       <div className="text-zinc-700 flex items-center gap-x-2.5">
                         <ProfileImage pfp={profilePicture} size="small" />
-                        <span>{user?.displayName ?? user?.name ?? "Profile"}</span>
+                        <span>{user?.name ?? "Profile"}</span>
                       </div>
                     </Link>
                   ) : (

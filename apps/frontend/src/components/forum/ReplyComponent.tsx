@@ -280,7 +280,7 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
       <div
         key={reply.id}
         className={`!display-block transition-colors duration-1000 ${newReplyClass} ${
-          ctx.compact ? "!p-1 !border-none" : "!p-2 sm:!p-4"
+          ctx.compact ? "!p-1 !border-none" : "!py-2 sm:!py-4"
         } ${ctx.user && isReplyingToThis && !isCollapsed && "rounded-b-none"}`}
       >
         <div id={`reply-${reply.id}`}>{replyContent}</div>
