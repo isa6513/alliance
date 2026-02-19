@@ -182,12 +182,14 @@ const SignupPage: React.FC = () => {
                 You will be added as friends automatically.
               </p>
             </div>
-            <p className="flex flex-row flex-wrap gap-x-1 items-center">
-              Hi {inviteeName},
-            </p>
+            {inviteeName && (
+              <p className="flex flex-row flex-wrap gap-x-1 items-center">
+                Hi {inviteeName},
+              </p>
+            )}
             <p>
               I invite you to join me as a member of the Alliance. We are an
-              online community of about 75 people cooperating to improve the
+              online community of about 95 people cooperating to improve the
               world.
             </p>
             <ol className="list-decimal list-inside space-y-3 pl-2">
