@@ -74,17 +74,23 @@ export class OnetimeInviteDto extends PickType(OnetimeInvite, [
   'createdAt',
   'community',
   'invitedUserId',
-  'invitedUser',
 ]) {
   @ApiPropertyOptional({ type: ProfileDto })
   @Type(() => ProfileDto)
   invitingUser?: ProfileDto;
+
+  @ApiPropertyOptional({ type: ProfileDto })
+  @Type(() => ProfileDto)
+  invitedUser?: ProfileDto;
 
   constructor(onetimeInvite: OnetimeInvite) {
     super();
     Object.assign(this, onetimeInvite);
     this.invitingUser = onetimeInvite.invitingUser
       ? new ProfileDto(onetimeInvite.invitingUser)
+      : undefined;
+    this.invitedUser = onetimeInvite.invitedUser
+      ? new ProfileDto(onetimeInvite.invitedUser)
       : undefined;
   }
 }
