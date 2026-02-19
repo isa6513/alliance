@@ -4,15 +4,21 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 interface CommentActionsMenuProps {
   replyId: number;
   isOwner: boolean;
+  isAdmin: boolean;
+  isPinned: boolean;
   onEdit: () => void;
   onDelete: (id: number) => void;
+  onPin: (id: number) => void;
 }
 
 const CommentActionsMenu: React.FC<CommentActionsMenuProps> = ({
   replyId,
   isOwner,
+  isAdmin,
+  isPinned,
   onEdit,
   onDelete,
+  onPin,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -66,6 +72,17 @@ const CommentActionsMenu: React.FC<CommentActionsMenuProps> = ({
           >
             Copy link
           </button>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                onPin(replyId);
+                setShowDropdown(false);
+              }}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              {isPinned ? "Unpin comment" : "Pin comment"}
+            </button>
+          )}
           {isOwner && (
             <>
               <button

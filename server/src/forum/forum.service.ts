@@ -902,4 +902,15 @@ export class ForumService {
 
     return this.postRepository.save(post);
   }
+
+  async togglePinComment(commentId: number): Promise<Comment> {
+    const comment = await this.commentRepository.findOneOrFail({
+      where: { id: commentId },
+      relations: { author: true, editableContent: true, likes: true },
+    });
+
+    comment.pinned = !comment.pinned;
+
+    return this.commentRepository.save(comment);
+  }
 }

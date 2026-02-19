@@ -9,6 +9,7 @@ import {
   forumFindCommentsForActivity,
   forumFindCommentsForPost,
   forumLikeComment,
+  forumPinComment,
   forumUnlikeComment,
   forumUpdateComment,
   UserDto,
@@ -26,6 +27,7 @@ interface CommentsContextValue {
   handleDeleteReply: (id: number) => Promise<void>;
   onUpdateReply: (id: number, content: CreateEditableContentDto) => Promise<void>;
   onLikeReply: (id: number, unlike?: boolean) => Promise<void>;
+  onPinReply: (id: number) => Promise<void>;
   isSubmitting: boolean;
   newlyAddedReplies: Set<number>;
   highlightedReplyId: number | null;
@@ -52,6 +54,7 @@ export interface UseCommentTreeResult {
   handleDeleteReply: (id: number) => Promise<void>;
   handleUpdateReply: (id: number, content: CreateEditableContentDto) => Promise<void>;
   handleLikeReply: (id: number, unlike?: boolean) => Promise<void>;
+  handlePinReply: (id: number) => Promise<void>;
   replyingTo: number | null;
   setReplyingTo: (id: number | null) => void;
   isSubmitting: boolean;
@@ -259,6 +262,11 @@ export function useCommentTree(
     fetchComments();
   };
 
+  const handlePinReply = async (replyId: number) => {
+    await forumPinComment({ path: { id: replyId } });
+    fetchComments();
+  };
+
   return {
     comments,
     error,
@@ -267,6 +275,7 @@ export function useCommentTree(
     handleDeleteReply,
     handleUpdateReply,
     handleLikeReply,
+    handlePinReply,
     replyingTo,
     setReplyingTo,
     isSubmitting,

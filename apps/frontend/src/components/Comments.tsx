@@ -183,6 +183,7 @@ const Comments = ({
     return topLevelComments
       .filter((comment) => matchesFilter(comment, commentFilter))
       .sort((a, b) => {
+        if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
         return dateB - dateA;
@@ -197,6 +198,7 @@ const Comments = ({
     handleDeleteReply: tree.handleDeleteReply,
     onUpdateReply: tree.handleUpdateReply,
     onLikeReply: tree.handleLikeReply,
+    onPinReply: tree.handlePinReply,
     isSubmitting: tree.isSubmitting,
     newlyAddedReplies: tree.newlyAddedReplies,
     highlightedReplyId: tree.highlightedReplyId,

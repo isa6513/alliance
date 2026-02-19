@@ -77,6 +77,7 @@ const defaultCtx = {
   handleDeleteReply: fn() as (id: number) => Promise<void>,
   onUpdateReply: fn() as (id: number, content: CreateEditableContentDto) => Promise<void>,
   onLikeReply: fn() as (id: number, unlike?: boolean) => Promise<void>,
+  onPinReply: fn() as (id: number) => Promise<void>,
   isSubmitting: false,
   newlyAddedReplies: new Set<number>(),
   highlightedReplyId: null as number | null,

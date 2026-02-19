@@ -298,4 +298,14 @@ export class ForumController {
     );
     return new PostDto(post);
   }
+
+  @Patch('admin/comments/:id/pin')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Toggle pin status of a comment' })
+  @ApiOkResponse({ type: CommentDto })
+  async pinComment(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CommentDto> {
+    return new CommentDto(await this.forumService.togglePinComment(id));
+  }
 }

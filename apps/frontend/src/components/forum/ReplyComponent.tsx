@@ -110,8 +110,8 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
                 hidden
               </span>
             )}
+            {reply.pinned && <PinnedIcon size="small" />}
           </div>
-          {reply.pinned && <PinnedIcon size="small" />}
         </div>
 
         <div className="text-base mb-1">
@@ -185,8 +185,11 @@ const ReplyContent: React.FC<ReplyContentProps> = ({
               <CommentActionsMenu
                 replyId={reply.id}
                 isOwner={!!user && reply.author.id === user.id}
+                isAdmin={!!user?.admin}
+                isPinned={reply.pinned}
                 onEdit={editing.startEdit}
                 onDelete={ctx.handleDeleteReply}
+                onPin={ctx.onPinReply}
               />
             )}
           </div>

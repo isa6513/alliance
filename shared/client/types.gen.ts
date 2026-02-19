@@ -803,10 +803,10 @@ export type OnetimeInviteDto = {
     code: string;
     createdAt: string;
     status: OnetimeInviteStatus;
-    invitedUser: User | null;
     invitedUserId?: number;
     community?: Community | null;
     invitingUser?: ProfileDto;
+    invitedUser?: ProfileDto;
 };
 
 export type RequestOnetimeInviteDto = {
@@ -5927,6 +5927,21 @@ export type ForumUpdatePostAuthorsResponses = {
 };
 
 export type ForumUpdatePostAuthorsResponse = ForumUpdatePostAuthorsResponses[keyof ForumUpdatePostAuthorsResponses];
+
+export type ForumPinCommentData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/forum/admin/comments/{id}/pin';
+};
+
+export type ForumPinCommentResponses = {
+    200: CommentDto;
+};
+
+export type ForumPinCommentResponse = ForumPinCommentResponses[keyof ForumPinCommentResponses];
 
 export type VideosUploadVideoData = {
     body: {
