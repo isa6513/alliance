@@ -508,9 +508,7 @@ const ConversationDetailPanel = ({
                     {selectedConvo.type === "direct"
                       ? `You have received a message request from ${
                           selectedConvo.participants.find(
-                            (participant) =>
-                              participant.user.id !== user?.id &&
-                              participant.state === "invited"
+                            (participant) => participant.user.id !== user?.id
                           )?.user.displayName
                         }`
                       : "You have been invited to the group chat"}
