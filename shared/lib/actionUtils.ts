@@ -12,6 +12,7 @@ type TaskPriority = {
   priority: number;
   deadlineTimestamp: number;
   startTimestamp: number;
+  typePriority: number;
 };
 
 export function isGeneralUpdate(
@@ -29,6 +30,7 @@ function generalUpdatePriority(generalUpdate: GeneralUpdateDto): TaskPriority {
     startTimestamp: generalUpdate.startDate
       ? new Date(generalUpdate.startDate).getTime()
       : -Infinity,
+    typePriority: 1,
   };
 }
 
@@ -44,6 +46,7 @@ function actionPriority(action: ActionDto): TaskPriority {
     startTimestamp: startDateString
       ? new Date(startDateString).getTime()
       : -Infinity,
+    typePriority: 0,
   };
 }
 
@@ -76,6 +79,11 @@ export function priorityComparator(
   // Sort by earliest start date
   if (aPriority.startTimestamp !== bPriority.startTimestamp) {
     return aPriority.startTimestamp - bPriority.startTimestamp;
+  }
+
+  // Sort by type priority, highest priority first
+  if (aPriority.typePriority !== bPriority.typePriority) {
+    return bPriority.typePriority - aPriority.typePriority;
   }
 
   return 0;
