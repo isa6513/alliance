@@ -58,6 +58,7 @@ export default [
       route("/contract", "pages/app/ContractPage.tsx"),
       route("/commit", "pages/app/CommitActionPage.tsx"),
       route("/information", "pages/app/InformationPage.tsx"),
+      route("/general-updates", "pages/app/GeneralUpdatesPage.tsx"),
       route("/members", "pages/app/MembersListPage.tsx"),
 
       route("/flyerexport", "pages/app/FlyerExportPage.tsx"),

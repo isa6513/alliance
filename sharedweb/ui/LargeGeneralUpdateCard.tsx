@@ -10,7 +10,7 @@ import { CardStyle } from "@alliance/shared/styles/card";
 export interface LargeGeneralUpdateCardProps {
   title: string;
   schema: Record<string, unknown>;
-  onDismiss: () => void;
+  onDismiss?: () => void;
 }
 
 function isDisplayBlock(element: unknown): element is DisplayBlock {
@@ -57,12 +57,14 @@ const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
 
   return (
     <Card className="p-4 sm:p-6 w-full relative border-dashed border-[1.5px] !border-blue-300 rounded">
-      <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
-        <p className="font-semibold">General update</p>
-        <p className="mb-0 text-zinc-700">
-          This is an update for you to read. No action required.
-        </p>
-      </Card>
+      {onDismiss && (
+        <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
+          <p className="font-semibold">General update</p>
+          <p className="mb-0 text-zinc-700">
+            This is an update for you to read. No action required.
+          </p>
+        </Card>
+      )}
       <div className="p-0 sm:p-2">
         <div className="flex flex-row gap-4 items-start mb-4">
           <div className="flex flex-col flex-1 gap-y-2">
@@ -74,15 +76,17 @@ const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
             <RenderDisplayBlock key={block.id ?? index} block={block} />
           ))}
         </div>
-        <div className="border-t border-zinc-200 pt-6">
-          <Button
-            color={ButtonColor.LightHover}
-            onClick={onDismiss}
-            className="w-full gap-x-1"
-          >
-            Dismiss
-          </Button>
-        </div>
+        {onDismiss && (
+          <div className="border-t border-zinc-200 pt-6">
+            <Button
+              color={ButtonColor.LightHover}
+              onClick={onDismiss}
+              className="w-full gap-x-1"
+            >
+              Dismiss
+            </Button>
+          </div>
+        )}
       </div>
     </Card>
   );
