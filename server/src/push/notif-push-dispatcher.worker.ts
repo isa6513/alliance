@@ -7,7 +7,7 @@ import {
 } from 'src/notifs/entities/notification.entity';
 import { CreatePushMessage, PushService } from './push.service';
 import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+// import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class NotifPushDispatcherWorker {
@@ -17,7 +17,7 @@ export class NotifPushDispatcherWorker {
     private readonly pushService: PushService,
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  // @Cron(CronExpression.EVERY_MINUTE)
   async dispatchPushes() {
     const dispatchID = v4().replace(/-/g, '');
 

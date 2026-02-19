@@ -191,10 +191,14 @@ export class Notification {
   })
   onetimeInvite?: Ty<OnetimeInvite>;
 
-  @ApiPropertyOptional({type: () => CommunityInvite})
+  @ApiPropertyOptional({ type: () => CommunityInvite })
   @ManyToOne(() => CommunityInvite, (invite) => invite.notifs, {
     nullable: true,
     onDelete: 'CASCADE',
   })
   communityInvite?: Ty<CommunityInvite>;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional()
+  cid?: string;
 }

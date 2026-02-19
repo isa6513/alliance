@@ -15,7 +15,13 @@ import {
   UserDto,
 } from "@alliance/shared/client";
 import posthog from "posthog-js";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useSearchParams } from "react-router";
 import { uploadAttachments } from "../../lib/uploadAttachments";
 
@@ -23,9 +29,15 @@ interface CommentsContextValue {
   user?: UserDto;
   replyingTo: number | null;
   setReplyingTo: (id: number | null) => void;
-  handleSubmitReply: (content: CreateEditableContentDto, onSuccess?: () => void) => Promise<void>;
+  handleSubmitReply: (
+    content: CreateEditableContentDto,
+    onSuccess?: () => void
+  ) => Promise<void>;
   handleDeleteReply: (id: number) => Promise<void>;
-  onUpdateReply: (id: number, content: CreateEditableContentDto) => Promise<void>;
+  onUpdateReply: (
+    id: number,
+    content: CreateEditableContentDto
+  ) => Promise<void>;
   onLikeReply: (id: number, unlike?: boolean) => Promise<void>;
   onPinReply: (id: number) => Promise<void>;
   isSubmitting: boolean;
@@ -41,7 +53,9 @@ const CommentsContext = createContext<CommentsContextValue | null>(null);
 export function useCommentsContext(): CommentsContextValue {
   const ctx = useContext(CommentsContext);
   if (!ctx) {
-    throw new Error("useCommentsContext must be used within a CommentsProvider");
+    throw new Error(
+      "useCommentsContext must be used within a CommentsProvider"
+    );
   }
   return ctx;
 }
@@ -50,9 +64,15 @@ export interface UseCommentTreeResult {
   comments: CommentDto[] | null;
   error: string | null;
   fetchComments: () => Promise<void>;
-  handleSubmitReply: (content: CreateEditableContentDto, onSuccess?: () => void) => Promise<void>;
+  handleSubmitReply: (
+    content: CreateEditableContentDto,
+    onSuccess?: () => void
+  ) => Promise<void>;
   handleDeleteReply: (id: number) => Promise<void>;
-  handleUpdateReply: (id: number, content: CreateEditableContentDto) => Promise<void>;
+  handleUpdateReply: (
+    id: number,
+    content: CreateEditableContentDto
+  ) => Promise<void>;
   handleLikeReply: (id: number, unlike?: boolean) => Promise<void>;
   handlePinReply: (id: number) => Promise<void>;
   replyingTo: number | null;

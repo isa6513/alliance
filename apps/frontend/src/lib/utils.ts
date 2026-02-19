@@ -1,10 +1,12 @@
 import { notifsLinkClick } from "@alliance/shared/client";
+import { useNotifications } from "@alliance/shared/lib/useNotifications";
 import { posthog } from "posthog-js";
 import { useEffect } from "react";
 import { useSearchParams } from "react-router";
 
 export const useCIDFromParams = (actionId?: number) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { refreshNotifications } = useNotifications();
   const cid = searchParams.get("cid");
 
   useEffect(() => {
@@ -25,9 +27,10 @@ export const useCIDFromParams = (actionId?: number) => {
           platform,
           actionId,
         });
+        refreshNotifications();
       });
     }
-  }, [cid, setSearchParams, searchParams, actionId]);
+  }, [cid, setSearchParams, searchParams, actionId, refreshNotifications]);
 
   const sid = searchParams.get("sid");
   useEffect(() => {

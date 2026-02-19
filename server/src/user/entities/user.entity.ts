@@ -294,6 +294,11 @@ export class User {
   @Allow()
   remindAboutUncompletedGroupMembers: boolean;
 
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  receiveReplyNotifications: boolean;
+
   // Relations
 
   @OneToMany(() => ContractEvent, (event) => event.user, { cascade: true })

@@ -37,7 +37,9 @@ export function processKeywordReplacements(
   let str = text
     .replaceAll('#{fullname}', context.user.name)
     .replaceAll('#{firstname}', firstname)
-    .replaceAll('#{nmembers}', () => context.uncompletedMembersInGroupCount!.toString())
+    .replaceAll('#{nmembers}', () =>
+      context.uncompletedMembersInGroupCount!.toString(),
+    )
     .replaceAll('#{grouplink}', withCid(groupMembersListUrl(true), context.cid))
     .replaceAll('#{lastname}', lastname)
     .replaceAll('#{action}', context.action.name)
@@ -100,6 +102,7 @@ export class MailService {
     [EmailType.CommitmentReminder]: 'commitmentreminder',
     [EmailType.MemberActionReminder]: 'memberactionreminder',
     [EmailType.ForumDigest]: 'forumdigest',
+    [EmailType.ForumReply]: 'forumreply',
     [EmailType.MissedDeadline]: 'misseddeadline',
     [EmailType.MissedSecondDeadline]: 'missedseconddeadline',
     [EmailType.CustomActionReminder]: 'customactionreminder',

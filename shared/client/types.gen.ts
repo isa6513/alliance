@@ -102,7 +102,7 @@ export type ReminderCohortType = 'all_uncompleted' | 'group_leads_with_uncomplet
 
 export type ActionEventNotifType = 'announcement' | 'misseddeadline' | 'reminder' | 'personalreminder';
 
-export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'missed_deadline' | 'missed_second_deadline' | 'custom_action_reminder' | 'contract_suspended';
+export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'forum_reply' | 'missed_deadline' | 'missed_second_deadline' | 'custom_action_reminder' | 'contract_suspended';
 
 export type Mail = {
     id: number;
@@ -590,6 +590,7 @@ export type User = {
     pushesForFriendRequests: boolean;
     undergoingGroupAssignment: boolean;
     remindAboutUncompletedGroupMembers: boolean;
+    receiveReplyNotifications: boolean;
     contractEvents?: Array<ContractEvent>;
     referredByInvite: OnetimeInvite | null;
     /**
@@ -649,6 +650,7 @@ export type UserDto = {
     pushesForFriendRequests: boolean;
     undergoingGroupAssignment: boolean;
     remindAboutUncompletedGroupMembers: boolean;
+    receiveReplyNotifications: boolean;
     contractEvents?: Array<ContractEvent>;
     communities: Array<Community>;
     leaderOfIds: Array<number>;
@@ -734,6 +736,7 @@ export type UpdateProfileDto = {
     pushesForComments?: boolean;
     pushesForFriendRequests?: boolean;
     remindAboutUncompletedGroupMembers?: boolean;
+    receiveReplyNotifications?: boolean;
     cityId?: number | null;
 };
 
@@ -2097,6 +2100,7 @@ export type PostDto = {
     expertLabel?: string;
     expertIds: Array<number>;
     authorIds: Array<number>;
+    notifyForReplies: boolean;
     action?: ActionDto;
     author: ProfileDto;
     commentCount?: number;
@@ -2142,6 +2146,7 @@ export type UpdatePostExpertsDto = {
     expertIds: Array<number>;
     qaMode: boolean;
     expertLabel?: string;
+    notifyForReplies?: boolean;
 };
 
 export type UpdatePostAuthorsDto = {

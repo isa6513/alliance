@@ -65,7 +65,7 @@ export class NotifsService {
     private readonly actionEventNotifsRepository: Repository<ActionEventNotif>,
     private readonly mailService: MailService,
     private readonly mmsService: MmsService,
-  ) { }
+  ) {}
 
   async findAll(userId: number) {
     const notifs = await this.notifsRepository.find({
@@ -117,11 +117,19 @@ export class NotifsService {
   }
 
   async notifLinkClick(body: NotifClickDto): Promise<NotifClickResponseDto> {
+    const notif = await this.notifsRepository.findOne({
+      where: { cid: body.cid },
+    });
+    if (notif) {
+      await this.notifsRepository.update(notif.id, { readAt: new Date() });
+    }
+
     const mms = await this.mmsService.setClickedLinkByCid(body.cid);
     if (mms) {
       return { mms: true };
     }
     await this.mailService.setClickedLinkByCid(body.cid);
+
     return { mms: false };
   }
 

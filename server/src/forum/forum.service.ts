@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AiDetectionQueueService } from 'src/ai-detection/ai-detection-queue.service';
 import { DetectableEntity } from 'src/ai-detection/entities/ai-detection-result.entity';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
-import { commentUrl, postUrl } from 'src/search/approutes';
+import { commentUrl, postUrl, withCid } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/dto/user.dto';
 import { ILike, In, Not, type Repository } from 'typeorm';
 import {
@@ -28,8 +28,16 @@ import { Post } from './entities/post.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
 import { EventLogService } from 'src/eventlog/eventlog.service';
-import { NotifsService } from 'src/notifs/notifs.service';
+import {
+  NotifsService,
+  shouldEmailUser,
+  shouldTextUser,
+} from 'src/notifs/notifs.service';
 import { EventType } from 'src/eventlog/event-log.entity';
+import { MailService } from 'src/mail/mail.service';
+import { MmsService } from 'src/mms/mms.service';
+import { generateCIDForNotif } from 'src/notifs/notif-utils';
+import { EmailType } from 'src/mail/mail.entity';
 
 @Injectable()
 export class ForumService {
@@ -52,6 +60,8 @@ export class ForumService {
     private readonly eventLogService: EventLogService,
     private readonly notifsService: NotifsService,
     private readonly aiDetectionQueueService: AiDetectionQueueService,
+    private readonly mailService: MailService,
+    private readonly mmsService: MmsService,
   ) {}
 
   async createPost(
@@ -488,12 +498,13 @@ export class ForumService {
     const usersToNotify: User[] = [];
     const actionIds: Map<number, number> = new Map();
 
+    let parentAuthor: User | undefined;
     if (comment.parentId) {
       const parentReply = await this.commentRepository.findOneOrFail({
         where: { id: comment.parentId, deleted: false },
-        relations: { author: true },
+        relations: { author: { contractEvents: true } },
       });
-      usersToNotify.push(parentReply.author);
+      parentAuthor = parentReply.author;
     }
 
     if (comment.parentObjectType === CommentParentObject.Post) {
@@ -521,27 +532,82 @@ export class ForumService {
       seenIds.add(user.id);
       return true;
     });
+    const authorDto = new ProfileDto(comment.author);
+
+    const baseNotif = {
+      message: `New reply from ${authorDto.displayName}`,
+      category: NotificationCategory.ForumReply,
+      webAppLocation: commentUrl(
+        comment,
+        comment.parentObjectType === CommentParentObject.Activity
+          ? actionIds.get(comment.parentObjectId)
+          : undefined,
+      ),
+      associatedUsers: [comment.author],
+      comment,
+    };
 
     await this.notifsService.sendNotifs(
       uniqueUsersToNotify
         .filter((user) => user.id !== comment.authorId)
         .map((user) => {
-          const authorDto = new ProfileDto(comment.author);
-          return {
-            user,
-            message: `New reply from ${authorDto.displayName}`,
-            category: NotificationCategory.ForumReply,
-            webAppLocation: commentUrl(
-              comment,
-              comment.parentObjectType === CommentParentObject.Activity
-                ? actionIds.get(comment.parentObjectId)
-                : undefined,
-            ),
-            associatedUsers: [comment.author],
-            comment,
-          };
+          return { ...baseNotif, user };
         }),
     );
+
+    const cid = generateCIDForNotif();
+    if (parentAuthor) {
+      await this.notifsService.sendNotifs([
+        { ...baseNotif, user: parentAuthor, cid },
+      ]);
+
+      // special text/email notifs
+      if (comment.parentObjectType === CommentParentObject.Post) {
+        const post = await this.postRepository.findOneOrFail({
+          where: { id: comment.parentObjectId },
+          select: {
+            id: true,
+            title: true,
+            notifyForReplies: true,
+          },
+        });
+        if (post.notifyForReplies && parentAuthor.receiveReplyNotifications) {
+          const url = withCid(commentUrl(comment, undefined, true), cid);
+          if (shouldTextUser(parentAuthor)) {
+            await this.mmsService.sendMms(
+              parentAuthor.phoneNumber!,
+              `${authorDto.displayName} replied to your comment on ${post.title}: ${url}`,
+              [],
+              cid,
+            );
+          } else if (shouldEmailUser(parentAuthor)) {
+            await this.mailService.sendMail(
+              parentAuthor.email!,
+              EmailType.ForumReply,
+              `${authorDto.displayName} replied to your comment on ${post.title}`,
+              {
+                url,
+                displayName: authorDto.displayName,
+                postTitle: post.title,
+              },
+              cid,
+            );
+          } else {
+            this.eventLogService.sendMessage({
+              type: EventType.ForumReplyNotifFailure,
+              message: `Did not notify ${parentAuthor.name} on ${post.title} because they have not enabled text/email notifications`,
+              userId: comment.authorId,
+              blob: {
+                postId: post.id,
+                commentId: comment.id,
+                parentAuthorName: parentAuthor.name,
+                authorName: authorDto.displayName,
+              },
+            });
+          }
+        }
+      }
+    }
   }
 
   async updateComment(
@@ -849,7 +915,16 @@ export class ForumService {
     expertIds: number[],
     qaMode: boolean,
     expertLabel?: string,
+    notifyForReplies?: boolean,
   ): Promise<Post> {
+    console.log(
+      'updatePostExperts',
+      postId,
+      expertIds,
+      qaMode,
+      expertLabel,
+      notifyForReplies,
+    );
     const post = await this.postRepository.findOne({
       where: { id: postId },
       relations: { author: true, action: true, editableContent: true },
@@ -869,6 +944,9 @@ export class ForumService {
     post.experts = experts;
     post.qaMode = qaMode;
     post.expertLabel = expertLabel;
+    if (notifyForReplies !== undefined) {
+      post.notifyForReplies = notifyForReplies;
+    }
 
     return this.postRepository.save(post);
   }

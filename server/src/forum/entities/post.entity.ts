@@ -143,4 +143,9 @@ export class Post {
   @ApiProperty({ type: () => Number, isArray: true })
   @Allow()
   authorIds: number[];
+
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  notifyForReplies: boolean;
 }

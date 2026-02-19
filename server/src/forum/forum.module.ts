@@ -16,6 +16,7 @@ import { ForumDigestService } from './forum-digest.service';
 import { ForumDigestLog } from './entities/forum-digest-log.entity';
 import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { UserModule } from 'src/user/user.module';
+import { MmsModule } from 'src/mms/mms.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { UserModule } from 'src/user/user.module';
       ForumDigestLog,
     ]),
     MailModule,
+    MmsModule,
     forwardRef(() => NotifsModule),
     forwardRef(() => EventLogModule),
     forwardRef(() => UserModule),
@@ -39,4 +41,4 @@ import { UserModule } from 'src/user/user.module';
   providers: [ForumService, ForumDigestService],
   exports: [ForumService],
 })
-export class ForumModule { }
+export class ForumModule {}

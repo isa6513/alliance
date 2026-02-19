@@ -54,19 +54,25 @@ export function postUrl(postId: number) {
 export function commentUrl(
   comment: Pick<Comment, 'parentObjectType' | 'parentObjectId' | 'id'>,
   actionId?: number,
+  full = false,
 ) {
+  let path = '';
   switch (comment.parentObjectType) {
     case CommentParentObject.Post:
-      return `/forum/post/${comment.parentObjectId}?replyId=${comment.id}`;
+      path = `/forum/post/${comment.parentObjectId}?replyId=${comment.id}`;
+      break;
     case CommentParentObject.Action:
-      return `/actions/${comment.parentObjectId}?replyId=${comment.id}`;
+      path = `/actions/${comment.parentObjectId}?replyId=${comment.id}`;
+      break;
     case CommentParentObject.Activity:
-      return `/actions/${actionId}/activity/${comment.parentObjectId}?replyId=${comment.id}`;
+      path = `/actions/${actionId}/activity/${comment.parentObjectId}?replyId=${comment.id}`;
+      break;
     default:
       throw new Error(
         `Invalid parent object type: ${comment.parentObjectType satisfies never}`,
       );
   }
+  return full ? `${process.env.APP_URL}${path}` : path;
 }
 
 export function withCid(url: string, cid: string) {

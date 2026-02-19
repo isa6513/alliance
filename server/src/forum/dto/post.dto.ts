@@ -5,7 +5,7 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDefined, ValidateNested } from 'class-validator';
+import { IsDefined, IsOptional, ValidateNested } from 'class-validator';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { ProfileDto } from '../../user/dto/user.dto';
 import { Post } from '../entities/post.entity';
@@ -30,6 +30,7 @@ export class PostDto extends PickType(Post, [
   'expertIds',
   'expertLabel',
   'authorIds',
+  'notifyForReplies',
 ]) {
   //redefine to use compacted dto types
   @ApiPropertyOptional({ type: () => ActionDto })
@@ -100,7 +101,7 @@ export class CreatePostDto extends PickType(Post, [
 export class UpdatePostDto extends PartialType(CreatePostDto) {}
 
 export class UpdatePostExpertsDto {
-  @ApiProperty({ type: [Number] })
+  @ApiProperty({ type: Number, isArray: true })
   @IsDefined()
   expertIds: number[];
 
@@ -109,11 +110,16 @@ export class UpdatePostExpertsDto {
   qaMode: boolean;
 
   @ApiPropertyOptional()
+  @IsOptional()
   expertLabel?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  notifyForReplies?: boolean;
 }
 
 export class UpdatePostAuthorsDto {
-  @ApiProperty({ type: [Number] })
+  @ApiProperty({ type: Number, isArray: true })
   @IsDefined()
   authorIds: number[];
 }

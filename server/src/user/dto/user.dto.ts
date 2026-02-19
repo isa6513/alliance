@@ -68,8 +68,8 @@ export class ProfileDto extends PickType(User, [
     this.isCommunityLeader = user.isCommunityLeader;
     this.lastContractEvent = user.contractEvents?.length
       ? user.contractEvents?.sort(
-        (a, b) => b.date.getTime() - a.date.getTime(),
-      )[0]
+          (a, b) => b.date.getTime() - a.date.getTime(),
+        )[0]
       : undefined;
     if (user.anonymous) {
       this.displayName = 'Someone';
@@ -129,6 +129,7 @@ export class UserDto extends PickType(User, [
   'shareInfoPublicly',
   'customCityString',
   'undergoingGroupAssignment',
+  'receiveReplyNotifications',
 ]) {
   @ApiPropertyOptional()
   @IsOptional()
@@ -171,6 +172,7 @@ export class UpdateProfileDto extends PartialType(
     'textNotifsEnabled',
     'shareEmailWithCommunityLead',
     'remindAboutUncompletedGroupMembers',
+    'receiveReplyNotifications',
     'sharePhoneNumberWithCommunityLead',
     'forumDigestPreference',
     'preferredActionReminderChannel',

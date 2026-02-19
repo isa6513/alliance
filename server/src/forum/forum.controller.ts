@@ -280,6 +280,7 @@ export class ForumController {
       updatePostExpertsDto.expertIds,
       updatePostExpertsDto.qaMode,
       updatePostExpertsDto.expertLabel,
+      updatePostExpertsDto.notifyForReplies,
     );
     return new PostDto(post);
   }

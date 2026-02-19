@@ -23,6 +23,7 @@ import TimeZoneSelect from "@alliance/sharedweb/forms/TimeZoneSelect";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { isFeatureEnabled } from "../../lib/config";
 import { Features } from "@alliance/shared/lib/features";
+import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 
 const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -224,8 +225,8 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="bg-page py-4 md:py-20 px-4 md:px-16">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-6 relative flex flex-col gap-y-4">
-          <div className="flex justify-between mb-2">
+        <div className="mb-6 relative flex flex-col">
+          <div className="flex justify-between mb-2 sticky top-0 bg-page z-10 p-3">
             <div className="gap-x-2">
               <h1 className="text-2xl sm:text-4xl font-serif !font-semibold mb-2">
                 Settings
@@ -236,8 +237,8 @@ const SettingsPage: React.FC = () => {
                 {saving
                   ? "Saving..."
                   : hasChanges
-                    ? "Unsaved changes"
-                    : "All changes saved"}
+                  ? "Unsaved changes"
+                  : "All changes saved"}
               </p>
               <Button
                 onClick={handleLogout}
@@ -276,7 +277,7 @@ const SettingsPage: React.FC = () => {
                     name="email"
                     type="email"
                     value={user.email || ""}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     disabled
                   />
                 </div>
@@ -386,12 +387,12 @@ const SettingsPage: React.FC = () => {
                   // editableUser.pushNotifsEnabled ||
                   editableUser.textNotifsEnabled
                 ) && (
-                    <p className="text-sm text-zinc-500">
-                      You will not receive any notifications. Please keep a
-                      notification channel enabled if you need reminders to
-                      complete actions on time.
-                    </p>
-                  )}
+                  <p className="text-sm text-zinc-500">
+                    You will not receive any notifications. Please keep a
+                    notification channel enabled if you need reminders to
+                    complete actions on time.
+                  </p>
+                )}
               </div>
               <div className="flex flex-row gap-6 mt-2">
                 <LargeCheckbox
@@ -419,17 +420,22 @@ const SettingsPage: React.FC = () => {
                 )}
               </div>
               {user.leaderOfIds.length > 0 ? (
-                <div><p className="!font-medium mb-0 mt-5">
-                  Receive reminders for group members with uncompleted tasks?
-                </p>
+                <div>
+                  <p className="!font-medium mb-0 mt-5">
+                    Receive reminders for group members with uncompleted tasks?
+                  </p>
                   <div className="flex flex-row gap-6 mt-2">
                     <select
                       className="border border-zinc-300 rounded px-3 py-2 self-start"
-                      value={editableUser.remindAboutUncompletedGroupMembers ? "yes" : "no"}
+                      value={
+                        editableUser.remindAboutUncompletedGroupMembers
+                          ? "yes"
+                          : "no"
+                      }
                       onChange={(event) =>
                         updateEditableUser({
-                          remindAboutUncompletedGroupMembers: event.target
-                            .value === "yes",
+                          remindAboutUncompletedGroupMembers:
+                            event.target.value === "yes",
                         })
                       }
                     >
@@ -437,7 +443,31 @@ const SettingsPage: React.FC = () => {
                       <option value={"no"}>No</option>
                     </select>
                   </div>
-                </div>) : null}
+                </div>
+              ) : null}
+              <div>
+                <p className="!font-medium mb-0 mt-5 flex flex-row items-center gap-x-1">
+                  Allow notifications when you receive a reply in an ongoing
+                  action discussion?
+                  <InfoTooltip content="Keeping this enabled will send a text or email notification for specific discussions, like when you get an expert reply to a question you asked." />
+                </p>
+                <div className="flex flex-row gap-6 mt-2">
+                  <select
+                    className="border border-zinc-300 rounded px-3 py-2 self-start"
+                    value={
+                      editableUser.receiveReplyNotifications ? "yes" : "no"
+                    }
+                    onChange={(event) =>
+                      updateEditableUser({
+                        receiveReplyNotifications: event.target.value === "yes",
+                      })
+                    }
+                  >
+                    <option value={"yes"}>Yes</option>
+                    <option value={"no"}>No</option>
+                  </select>
+                </div>
+              </div>
             </div>
             <div className="flex flex-col md:flex-row gap-y-2 gap-x-12 font-medium">
               <div>

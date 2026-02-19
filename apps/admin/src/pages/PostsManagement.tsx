@@ -27,6 +27,7 @@ const PostsManagementPage: React.FC = () => {
   const [authorSelection, setAuthorSelection] = useState<number[]>([]);
   const [qaMode, setQaMode] = useState(false);
   const [expertLabel, setExpertLabel] = useState("");
+  const [notifyForReplies, setNotifyForReplies] = useState(false);
   const { success, error: pushError } = useToast();
 
   useEffect(() => {
@@ -54,6 +55,7 @@ const PostsManagementPage: React.FC = () => {
         setAuthorSelection(match.authorIds ?? []);
         setQaMode(match.qaMode ?? false);
         setExpertLabel(match.expertLabel ?? "");
+        setNotifyForReplies(match.notifyForReplies ?? false);
       }
     }
   }, [postId, posts, selectedPost?.id]);
@@ -83,6 +85,7 @@ const PostsManagementPage: React.FC = () => {
     setAuthorSelection(post.authorIds ?? []);
     setQaMode(post.qaMode ?? false);
     setExpertLabel(post.expertLabel ?? "");
+    setNotifyForReplies(post.notifyForReplies ?? false);
     navigate(href(`/posts/:postId?`, { postId: post.id.toString() }));
   };
 
@@ -97,6 +100,7 @@ const PostsManagementPage: React.FC = () => {
             expertIds: expertSelection,
             qaMode,
             expertLabel: expertLabel || undefined,
+            notifyForReplies,
           },
         }),
         forumUpdatePostAuthors({
@@ -151,10 +155,11 @@ const PostsManagementPage: React.FC = () => {
                       key={post.id}
                       type="button"
                       onClick={() => handleSelectPost(post)}
-                      className={`text-left border rounded px-3 py-2 ${selectedPost?.id === post.id
-                        ? "border-blue bg-blue/10"
-                        : "border-zinc-200 hover:bg-zinc-50"
-                        }`}
+                      className={`text-left border rounded px-3 py-2 ${
+                        selectedPost?.id === post.id
+                          ? "border-blue bg-blue/10"
+                          : "border-zinc-200 hover:bg-zinc-50"
+                      }`}
                     >
                       <div className="flex flex-col gap-0.5">
                         <span className="font-medium text-sm">
@@ -166,6 +171,11 @@ const PostsManagementPage: React.FC = () => {
                         {post.qaMode && (
                           <span className="text-xs text-orange-600 font-medium">
                             Q&A Mode Active
+                          </span>
+                        )}
+                        {post.notifyForReplies && (
+                          <span className="text-xs text-purple-600 font-medium">
+                            Reply Notifications On
                           </span>
                         )}
                         {(post.authorIds?.length ?? 0) > 1 && (
@@ -229,6 +239,24 @@ const PostsManagementPage: React.FC = () => {
                     When enabled, designated experts will have a special badge
                     on their replies and users can filter comments by
                     answered/unanswered.
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={notifyForReplies}
+                        onChange={(e) => setNotifyForReplies(e.target.checked)}
+                        className="w-4 h-4 rounded border-zinc-300"
+                      />
+                      <span className="text-sm font-medium">
+                        Notify for Replies
+                      </span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-zinc-500">
+                    When enabled, commenters will receive text/email
+                    notifications when someone replies to their comment.
                   </p>
 
                   <div>
