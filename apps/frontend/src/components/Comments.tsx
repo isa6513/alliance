@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, href } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import ReplyComponent from "./forum/ReplyComponent";
+import ReplyComponent, { countAllReplies } from "./forum/ReplyComponent";
 import ReplyForm from "./forum/ReplyForm";
 import { CommentsProvider, useCommentTree } from "./forum/CommentsContext";
 import { ArrowUpDown } from "lucide-react";
@@ -54,17 +54,6 @@ const sortLabels: Record<CommentSort, string> = {
 
 const sortOrder: CommentSort[] = ["newest", "discussion", "random"];
 
-const countAllReplies = (children: CommentDto[]): number => {
-  let count = 0;
-  for (const child of children) {
-    count += 1;
-    if (child.children?.length) {
-      count += countAllReplies(child.children);
-    }
-  }
-  return count;
-};
-
 const SortDropdown = ({
   commentSort,
   onChange,
@@ -90,8 +79,9 @@ const SortDropdown = ({
       <Button
         color={ButtonColor.Transparent}
         onClick={() => setOpen(!open)}
-        className="text-zinc-600 hover:text-zinc-900"
+        className="text-zinc-600 hover:text-zinc-900 text-[14px] gap-2"
       >
+        {sortLabels[commentSort]}
         <ArrowUpDown size={18} />
       </Button>
       {open && (
@@ -103,7 +93,7 @@ const SortDropdown = ({
                 onChange(sort);
                 setOpen(false);
               }}
-              className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
+              className={`block w-full text-left px-4 py-2 text-[14px] hover:bg-gray-100 ${
                 commentSort === sort
                   ? "font-medium text-black"
                   : "text-zinc-700"
@@ -332,10 +322,10 @@ const Comments = ({
         {isPostComments && topLevelComments.length > 0 && (
           <div className="flex items-center justify-between gap-3 my-3">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-zinc-700">
+              <span className="text-[14px] font-medium text-zinc-600">
                 {activeQaMode ? "Q&A mode" : "Filter"}
               </span>
-              <div className="flex gap-1 bg-zinc-100 p-px rounded">
+              <div className="flex gap-1 bg-zinc-100 rounded">
                 {filterOptions.map((filter) => (
                   <button
                     key={filter}
@@ -351,10 +341,7 @@ const Comments = ({
                 ))}
               </div>
             </div>
-            <SortDropdown
-              commentSort={commentSort}
-              onChange={setCommentSort}
-            />
+            <SortDropdown commentSort={commentSort} onChange={setCommentSort} />
           </div>
         )}
         {tree.error && <div className="text-red-500">{tree.error}</div>}

@@ -16,7 +16,7 @@ import { ChevronDown } from "lucide-react";
 
 const INDENT_PX = 40;
 
-const countAllReplies = (replies: CommentDto[]): number => {
+export const countAllReplies = (replies: CommentDto[]): number => {
   let count = 0;
   for (const reply of replies) {
     count += 1;
@@ -43,165 +43,161 @@ interface ReplyContentProps {
   onToggleCollapse?: () => void;
 }
 
-const ReplyContent = React.memo(
-  ({
-    reply,
-    canNest,
-    isReplyingToThis,
-    hasChildren,
-    isCollapsed = false,
-    isHighlighted,
-    isCollapsible = false,
-    onToggleCollapse,
-  }: ReplyContentProps) => {
-    const ctx = useCommentsContext();
-    const { user, compact = false, expertIds = [], expertLabel } = ctx;
-    const isExpert = expertIds.includes(reply.author.id);
-    const editing = useCommentEditing(reply, ctx.onUpdateReply);
+const ReplyContent = ({
+  reply,
+  canNest,
+  isReplyingToThis,
+  hasChildren,
+  isCollapsed = false,
+  isHighlighted,
+  isCollapsible = false,
+  onToggleCollapse,
+}: ReplyContentProps) => {
+  const ctx = useCommentsContext();
+  const { user, compact = false, expertIds = [], expertLabel } = ctx;
+  const isExpert = expertIds.includes(reply.author.id);
+  const editing = useCommentEditing(reply, ctx.onUpdateReply);
 
-    return (
-      <div className={`flex ${compact ? "gap-x-2" : "gap-x-2.5"} relative`}>
-        {isHighlighted && (
-          <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded" />
-        )}
-        <Link
-          to={href("/member/:id", { id: reply.author.id.toString() })}
-          className="flex-shrink-0 pt-1"
-        >
-          <ProfileImage
-            pfp={reply.author.profilePicture}
-            size={compact ? "small" : "medium"}
-          />
-        </Link>
-        <div className="flex-1">
-          <div className="flex justify-between items-center overflow-visible">
-            <div className="flex items-center gap-2 text-zinc-500">
-              <Link
-                to={href("/member/:id", { id: reply.author.id.toString() })}
-                className="text-zinc-800 font-medium"
+  return (
+    <div className={`flex ${compact ? "gap-x-2" : "gap-x-2.5"} relative`}>
+      {isHighlighted && (
+        <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded" />
+      )}
+      <Link
+        to={href("/member/:id", { id: reply.author.id.toString() })}
+        className="flex-shrink-0 pt-1"
+      >
+        <ProfileImage
+          pfp={reply.author.profilePicture}
+          size={compact ? "small" : "medium"}
+        />
+      </Link>
+      <div className="flex-1">
+        <div className="flex justify-between items-center overflow-visible">
+          <div className="flex items-center gap-2 text-zinc-500">
+            <Link
+              to={href("/member/:id", { id: reply.author.id.toString() })}
+              className="text-zinc-800 font-medium"
+            >
+              <UserDisplayName
+                staff={reply.author.staff}
+                expert={isExpert}
+                expertLabel={expertLabel}
               >
-                <UserDisplayName
-                  staff={reply.author.staff}
-                  expert={isExpert}
-                  expertLabel={expertLabel}
-                >
-                  {reply.author.displayName}
-                </UserDisplayName>
-              </Link>
-              <span className="text-zinc-500 text-sm">
-                {formatDistanceToNow(new Date(reply.createdAt), {
-                  addSuffix: true,
-                })}
+                {reply.author.displayName}
+              </UserDisplayName>
+            </Link>
+            <span className="text-zinc-500 text-sm">
+              {formatDistanceToNow(new Date(reply.createdAt), {
+                addSuffix: true,
+              })}
+            </span>
+            {isCollapsible && onToggleCollapse && (
+              <button
+                onClick={onToggleCollapse}
+                className={`text-black cursor-pointer transition-transform duration-200 ${
+                  isCollapsed ? "-rotate-90" : "rotate-0"
+                }`}
+                aria-label={isCollapsed ? "Expand" : "Collapse"}
+              >
+                <ChevronDown size={18} />
+              </button>
+            )}
+            {hasChildren && isCollapsed && reply.children !== undefined && (
+              <span className="text-xs bg-zinc-200 px-2 py-1 -my-1 rounded">
+                {countAllReplies(reply.children)}{" "}
+                {countAllReplies(reply.children) === 1 ? "reply" : "replies"}{" "}
+                hidden
               </span>
-              {isCollapsible && onToggleCollapse && (
+            )}
+          </div>
+          {reply.pinned && <PinnedIcon size="small" />}
+        </div>
+
+        <div className="text-base mb-1">
+          {!editing.isEditing && (
+            <EditableContentRenderer
+              content={reply.editableContent}
+              collapsed={isCollapsed}
+              deleted={reply.deleted}
+            />
+          )}
+        </div>
+
+        {editing.isEditing ? (
+          <div className="rounded p-3 bg-zinc-100">
+            <EditableContentForm
+              value={{
+                body: editing.editContent,
+                attachments: editing.editAttachments,
+              }}
+              onChange={(val) => {
+                editing.setEditContent(val.body);
+                editing.setEditAttachments(val.attachments);
+              }}
+              placeholder="Edit your reply..."
+            />
+            <div className="flex gap-2 mt-2 justify-end items-center">
+              <span className="text-sm text-zinc-500">
+                Drag an image to attach
+              </span>
+              <button
+                onClick={editing.saveEdit}
+                disabled={editing.isUpdating || !editing.editContent.trim()}
+                className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {editing.isUpdating ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={editing.cancelEdit}
+                disabled={editing.isUpdating}
+                className="px-3 py-1 bg-zinc-300 text-zinc-700 text-sm rounded hover:bg-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center gap-1.5 sm:gap-3">
+              <CommentLikeButton
+                liked={reply.likes.some((like) => like.id === user?.id)}
+                likes={reply.likes.length}
+                handleLike={() =>
+                  ctx.onLikeReply(
+                    reply.id,
+                    reply.likes.some((like) => like.id === user?.id)
+                  )
+                }
+              />
+              {user && canNest && (
                 <button
-                  onClick={onToggleCollapse}
-                  className={`text-black cursor-pointer transition-transform duration-200 ${
-                    isCollapsed ? "-rotate-90" : "rotate-0"
-                  }`}
-                  aria-label={isCollapsed ? "Expand" : "Collapse"}
+                  onClick={() => {
+                    ctx.setReplyingTo(isReplyingToThis ? null : reply.id);
+                  }}
+                  className="text-zinc-500 hover:text-zinc-700 hover:underline text-sm"
                 >
-                  <ChevronDown size={18} />
+                  {!isReplyingToThis && "Reply"}
                 </button>
               )}
-              {hasChildren && isCollapsed && reply.children !== undefined && (
-                <span className="text-xs bg-zinc-200 px-2 py-1 -my-1 rounded">
-                  {countAllReplies(reply.children)}{" "}
-                  {countAllReplies(reply.children) === 1 ? "reply" : "replies"}{" "}
-                  hidden
-                </span>
-              )}
             </div>
-            {reply.pinned && <PinnedIcon size="small" />}
-          </div>
-
-          <div className="text-base mb-1">
-            {!editing.isEditing && (
-              <EditableContentRenderer
-                content={reply.editableContent}
-                collapsed={isCollapsed}
-                deleted={reply.deleted}
+            {!reply.deleted && (
+              <CommentActionsMenu
+                replyId={reply.id}
+                isOwner={!!user && reply.author.id === user.id}
+                isAdmin={!!user?.admin}
+                isPinned={reply.pinned}
+                onEdit={editing.startEdit}
+                onDelete={ctx.handleDeleteReply}
+                onPin={ctx.onPinReply}
               />
             )}
           </div>
-
-          {editing.isEditing ? (
-            <div className="rounded p-3 bg-zinc-100">
-              <EditableContentForm
-                value={{
-                  body: editing.editContent,
-                  attachments: editing.editAttachments,
-                }}
-                onChange={(val) => {
-                  editing.setEditContent(val.body);
-                  editing.setEditAttachments(val.attachments);
-                }}
-                placeholder="Edit your reply..."
-              />
-              <div className="flex gap-2 mt-2 justify-end items-center">
-                <span className="text-sm text-zinc-500">
-                  Drag an image to attach
-                </span>
-                <button
-                  onClick={editing.saveEdit}
-                  disabled={editing.isUpdating || !editing.editContent.trim()}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {editing.isUpdating ? "Saving..." : "Save"}
-                </button>
-                <button
-                  onClick={editing.cancelEdit}
-                  disabled={editing.isUpdating}
-                  className="px-3 py-1 bg-zinc-300 text-zinc-700 text-sm rounded hover:bg-zinc-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-between items-center text-sm">
-              <div className="flex items-center gap-1.5 sm:gap-3">
-                <CommentLikeButton
-                  liked={reply.likes.some((like) => like.id === user?.id)}
-                  likes={reply.likes.length}
-                  handleLike={() =>
-                    ctx.onLikeReply(
-                      reply.id,
-                      reply.likes.some((like) => like.id === user?.id)
-                    )
-                  }
-                />
-                {user && canNest && (
-                  <button
-                    onClick={() => {
-                      ctx.setReplyingTo(isReplyingToThis ? null : reply.id);
-                    }}
-                    className="text-zinc-500 hover:text-zinc-700 hover:underline text-sm"
-                  >
-                    {!isReplyingToThis && "Reply"}
-                  </button>
-                )}
-              </div>
-              {!reply.deleted && (
-                <CommentActionsMenu
-                  replyId={reply.id}
-                  isOwner={!!user && reply.author.id === user.id}
-                  isAdmin={!!user?.admin}
-                  isPinned={reply.pinned}
-                  onEdit={editing.startEdit}
-                  onDelete={ctx.handleDeleteReply}
-                  onPin={ctx.onPinReply}
-                />
-              )}
-            </div>
-          )}
-        </div>
+        )}
       </div>
-    );
-  }
-);
-
-ReplyContent.displayName = "ReplyContent";
+    </div>
+  );
+};
 
 const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
   const ctx = useCommentsContext();
