@@ -203,7 +203,7 @@ const HomePage = () => {
             )}
           </div>
         )}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 flex-1">
           {generalUpdates?.[0] ? (
             <LargeGeneralUpdateCard
               key={generalUpdates[0].id}

@@ -25,7 +25,7 @@ const HomeNotifsCard = () => {
   return (
     <Card
       style={CardStyle.White}
-      className="gap-2 max-w-[500px] lg:max-w-[550px] mt-5 p-2!"
+      className="gap-2 max-w-[500px] lg:max-w-[550px] md:min-w-[450px] mt-5 p-2!"
     >
       <div className="flex flex-row justify-between items-center p-3 pb-0">
         <p className="text-zinc-500 text-base">Recent events</p>
