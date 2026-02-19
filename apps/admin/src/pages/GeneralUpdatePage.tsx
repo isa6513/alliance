@@ -49,7 +49,7 @@ type GeneralUpdateForm = {
 
 const emptyForm: GeneralUpdateForm = {
   name: "",
-  priority: 0,
+  priority: 2,
   startDate: "",
   endDate: "",
   useManualCohort: false,
@@ -336,7 +336,7 @@ const GeneralUpdatePage: React.FC = () => {
               htmlFor="name"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Name
+              Title
             </label>
             <textarea
               id="name"
@@ -363,13 +363,14 @@ const GeneralUpdatePage: React.FC = () => {
               onChange={(e) =>
                 setForm((prev) => ({
                   ...prev,
-                  priority: parseInt(e.target.value, 10) || 0,
+                  priority: parseInt(e.target.value, 10) || 2,
                 }))
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
             />
             <p className="text-xs text-gray-500 mt-0.5">
-              Higher numbers shown first
+              General updates are always shown before tasks. Higher numbers
+              shown first
             </p>
           </div>
         </div>
