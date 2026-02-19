@@ -1,6 +1,6 @@
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { ProfileDto } from "@alliance/shared/client/types.gen";
-import { Link, Outlet, href, useOutletContext } from "react-router";
+import { Link, Outlet, href, useLocation, useOutletContext } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
 import { getLastAndNextEvent } from "@alliance/shared/lib/largeActionCard";
@@ -10,18 +10,28 @@ import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
 import Card from "@alliance/sharedweb/ui/Card";
 import { shuffleWithSeed } from "../lib/utils";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { externalOnly } from "@alliance/shared/lib/copy";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
+  const location = useLocation();
 
   const action = context.action;
 
   const { isAuthenticated } = useAuth();
   const loggedInMode = !action.publicOnly;
+
+  useEffect(() => {
+    if (location.hash === "#description") {
+      const el = document.getElementById("description");
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
+      }
+    }
+  }, [location.hash]);
 
   const shuffledAuthors = useMemo(() => {
     if (!action.authors) {
@@ -132,7 +142,7 @@ const ActionContents = () => {
         )}
         {loggedInMode && (
           <>
-            <div>
+            <div id="description">
               <p className="font-semibold text-xl mb-4">Description</p>
               <AppMarkdownWrapper markdownContent={action?.body} />
             </div>

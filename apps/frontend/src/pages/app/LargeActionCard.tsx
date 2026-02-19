@@ -74,7 +74,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const goToActionPage = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      navigate(href("/actions/:id", { id: action.id.toString() }));
+      navigate(href("/actions/:id", { id: action.id.toString() }) + "#description");
     },
     [navigate, action]
   );
