@@ -5,7 +5,6 @@ import type { FormSchema } from "@alliance/shared/forms/formschema";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import Card from "@alliance/sharedweb/ui/Card";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { CardStyle } from "@alliance/shared/styles/card";
 
 export interface LargeGeneralUpdateCardProps {
   title: string;
@@ -56,36 +55,25 @@ const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
   );
 
   return (
-    <Card className="p-4 sm:p-6 w-full relative border-dashed border-[1.5px] !border-blue-300 rounded">
-      {onDismiss && (
-        <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
-          <p className="font-semibold">General update</p>
-          <p className="mb-0 text-zinc-700">
-            This is an update for you to read. No action required.
-          </p>
-        </Card>
-      )}
-      <div className="p-0 sm:p-2">
-        <div className="flex flex-row gap-4 items-start mb-4">
-          <div className="flex flex-col flex-1 gap-y-2">
-            <p className="font-semibold text-2xl font-serif">{title}</p>
-          </div>
+    <Card className="p-6 sm:p-8 w-full relative border-[1.5px] rounded">
+      <div className="gap-y-4 flex flex-col">
+        <div className="flex flex-col">
+          {onDismiss && <p>General update</p>}
+          <p className="font-semibold text-2xl font-serif">{title}</p>
         </div>
-        <div className="space-y-4 mb-8">
+        <div className="space-y-4">
           {displayBlocks.map((block, index) => (
             <RenderDisplayBlock key={block.id ?? index} block={block} />
           ))}
         </div>
         {onDismiss && (
-          <div className="border-t border-zinc-200 pt-6">
-            <Button
-              color={ButtonColor.LightHover}
-              onClick={onDismiss}
-              className="w-full gap-x-1"
-            >
-              Dismiss
-            </Button>
-          </div>
+          <Button
+            color={ButtonColor.LightHover}
+            onClick={onDismiss}
+            className="w-full"
+          >
+            Dismiss
+          </Button>
         )}
       </div>
     </Card>
