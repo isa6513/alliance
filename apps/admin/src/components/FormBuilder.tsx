@@ -11,6 +11,7 @@ import type {
   DisplayKind,
 } from "@alliance/shared/forms/display-blocks";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
+import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
 import type {
   AnyField,
   Condition,
@@ -70,7 +71,7 @@ interface FormBuilderProps {
   formId?: number;
   setFormId: (formId: number) => void;
   actionName?: string;
-  displayBlocksOnly?: boolean;
+  generalUpdateName?: string;
 }
 
 const ensureOutputViews = (schema: FormSchema): FormSchema => ({
@@ -236,7 +237,7 @@ export function FormBuilder({
   formId,
   setFormId,
   actionName,
-  displayBlocksOnly = false,
+  generalUpdateName,
 }: FormBuilderProps) {
   const buildInitialSchema = () =>
     initialSchema
@@ -501,7 +502,7 @@ export function FormBuilder({
 
   // Load form data when formId changes
   useEffect(() => {
-    if (displayBlocksOnly || !formId || initialSchema) return;
+    if (generalUpdateName || !formId || initialSchema) return;
     setIsLoading(true);
     setLoadError(null);
 
@@ -529,7 +530,7 @@ export function FormBuilder({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [formId, initialSchema, displayBlocksOnly]);
+  }, [formId, initialSchema, generalUpdateName]);
 
   const addField = (kind: FieldKind, insertIndex?: number) => {
     const fieldId = `field-${Date.now()}`;
@@ -1009,7 +1010,7 @@ export function FormBuilder({
       }
 
       // displayBlocksOnly mode: save via onSave only (e.g. general update schema)
-      if (displayBlocksOnly && onSave) {
+      if (generalUpdateName && onSave) {
         await onSave(schemaForSave);
         setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
         setHasUnsavedChanges(false);
@@ -1074,7 +1075,7 @@ export function FormBuilder({
       setIsSaving(false);
     }
   }, [
-    displayBlocksOnly,
+    generalUpdateName,
     formId,
     onSave,
     resolveCustomValidatorDrafts,
@@ -1657,7 +1658,7 @@ export function FormBuilder({
           <ElementSelect
             onAddField={addField}
             onAddDisplayBlock={addDisplayBlock}
-            displayBlocksOnly={displayBlocksOnly}
+            displayBlocksOnly={!!generalUpdateName}
           />
         )}
 
@@ -1700,7 +1701,7 @@ export function FormBuilder({
                     : "No changes"}
                 </Button>
               </div>
-              {!displayBlocksOnly && (
+              {!generalUpdateName && (
                 <div className="inline-flex rounded-md bg-gray-200 p-0.5 text-sm font-medium text-gray-600">
                   <button
                     type="button"
@@ -1902,8 +1903,16 @@ export function FormBuilder({
             ref={contentScrollRef}
             className="flex-1 p-6 overflow-y-auto min-h-0"
           >
-            {activeEditor === "outputs" && !displayBlocksOnly ? (
+            {activeEditor === "outputs" && !generalUpdateName ? (
               <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
+            ) : isPreviewMode && generalUpdateName ? (
+              <div className="max-w-3xl mx-auto bg-white p-6">
+                <LargeGeneralUpdateCard
+                  title={generalUpdateName}
+                  schema={schema as unknown as Record<string, unknown>}
+                  onDismiss={() => {}}
+                />
+              </div>
             ) : isPreviewMode ? (
               <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
                 <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

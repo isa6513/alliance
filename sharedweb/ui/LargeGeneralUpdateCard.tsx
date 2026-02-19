@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useMemo } from "react";
 import type { GeneralUpdateDto } from "@alliance/shared/client";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
@@ -9,7 +8,8 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { CardStyle } from "@alliance/shared/styles/card";
 
 export interface LargeGeneralUpdateCardProps {
-  generalUpdate: GeneralUpdateDto;
+  title: string;
+  schema: Record<string, unknown>;
   onDismiss: () => void;
 }
 
@@ -46,12 +46,13 @@ function getDisplayBlocksFromSchema(
 }
 
 const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
-  generalUpdate,
+  title,
+  schema,
   onDismiss,
 }) => {
   const displayBlocks = useMemo(
-    () => getDisplayBlocksFromSchema(generalUpdate.schema),
-    [generalUpdate.schema]
+    () => getDisplayBlocksFromSchema(schema),
+    [schema]
   );
 
   return (
@@ -65,9 +66,7 @@ const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
       <div className="p-0 sm:p-2">
         <div className="flex flex-row gap-4 items-start mb-4">
           <div className="flex flex-col flex-1 gap-y-2">
-            <p className="font-semibold text-2xl font-serif">
-              {generalUpdate.name}
-            </p>
+            <p className="font-semibold text-2xl font-serif">{title}</p>
           </div>
         </div>
         <div className="space-y-4 mb-8">

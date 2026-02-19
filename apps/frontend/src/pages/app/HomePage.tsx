@@ -11,7 +11,7 @@ import TwoColumnLayout from "../../components/TwoColumnLayout";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
 import LargeActionCard, { LargeActionCardProps } from "./LargeActionCard";
-import LargeGeneralUpdateCard from "./LargeGeneralUpdateCard";
+import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
 import useGlobalFeed from "@alliance/shared/lib/useGlobalFeed";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
@@ -207,7 +207,8 @@ const HomePage = () => {
           {generalUpdates?.[0] ? (
             <LargeGeneralUpdateCard
               key={generalUpdates[0].id}
-              generalUpdate={generalUpdates[0]}
+              title={generalUpdates[0].name}
+              schema={generalUpdates[0].schema}
               onDismiss={() => handleDismissGeneralUpdate(generalUpdates[0].id)}
             />
           ) : currentTask && currentTask.userRelation ? (

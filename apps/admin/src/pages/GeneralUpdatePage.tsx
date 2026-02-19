@@ -695,7 +695,7 @@ const GeneralUpdatePage: React.FC = () => {
 
           {!isNew && selectedTab === "form" && update && (
             <FormBuilder
-              displayBlocksOnly
+              generalUpdateName={update.name}
               initialSchema={(update.schema ?? {}) as unknown as FormSchema}
               setFormId={() => {}}
               onSave={handleSaveSchema}
