@@ -184,12 +184,15 @@ const StatsPage: React.FC = () => {
       end: formatDateAsLocal(end),
     };
   });
-  const [inviteFunnel, setInviteFunnel] = useState<InviteFunnelDto | null>(null);
-  const [inviteFunnelLoading, setInviteFunnelLoading] = useState<boolean>(false);
+  const [inviteFunnel, setInviteFunnel] = useState<InviteFunnelDto | null>(
+    null
+  );
+  const [inviteFunnelLoading, setInviteFunnelLoading] =
+    useState<boolean>(false);
   const [inviteFunnelRange, setInviteFunnelRange] = useState(() => {
-    const end = new Date();
+    const end = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const start = new Date();
-    start.setDate(end.getDate() - 7);
+    start.setDate(end.getDate() - 14);
     return { start: formatDateAsLocal(start), end: formatDateAsLocal(end) };
   });
   const [assumedHourlyRate, setAssumedHourlyRate] = useState<number>(15);
@@ -407,10 +410,8 @@ const StatsPage: React.FC = () => {
 
     const maxCompleted = max(chartActionStats, (d) => d.usersCompleted) ?? 0;
     const maxTotalExpected =
-      max(
-        chartActionStats,
-        (d) => d.usersJoined + (d.usersWithdrawn ?? 0)
-      ) ?? 0;
+      max(chartActionStats, (d) => d.usersJoined + (d.usersWithdrawn ?? 0)) ??
+      0;
     const maxValue = Math.max(maxCompleted, maxTotalExpected, 10);
 
     const xScale = scaleLinear()
@@ -439,7 +440,7 @@ const StatsPage: React.FC = () => {
     const y =
       actionBarsGeometry.margin.top +
       hoveredActionBar.index *
-      (actionBarsGeometry.barHeight + actionBarsGeometry.gap);
+        (actionBarsGeometry.barHeight + actionBarsGeometry.gap);
     const centerY = y + actionBarsGeometry.barHeight / 2;
     return (centerY / actionBarsGeometry.height) * 100;
   }, [hoveredActionBar, actionBarsGeometry]);
@@ -599,10 +600,7 @@ const StatsPage: React.FC = () => {
   }, [filteredRetentionCohorts]);
 
   const retentionHeatmapScale = useMemo(() => {
-    return chroma
-      .scale('RdYlGn')
-      .domain([0, 1])
-      .mode("lab");
+    return chroma.scale("RdYlGn").domain([0, 1]).mode("lab");
   }, []);
 
   const retentionGridData = useMemo<RetentionGridData>(() => {
@@ -618,14 +616,12 @@ const StatsPage: React.FC = () => {
     const rawMax = Math.max(rawMin, Math.ceil(weekRange.max));
     const rangeMin = Math.min(rawMin, maxWeek);
     const rangeMax = Math.min(rawMax, maxWeek);
-    const weeks =
-      rangeMin <= rangeMax ? range(rangeMin, rangeMax + 1) : [];
+    const weeks = rangeMin <= rangeMax ? range(rangeMin, rangeMax + 1) : [];
 
     const rows = [...filteredRetentionCohorts]
       .sort(
         (a, b) =>
-          new Date(b.cohortStart).getTime() -
-          new Date(a.cohortStart).getTime()
+          new Date(b.cohortStart).getTime() - new Date(a.cohortStart).getTime()
       )
       .map((cohort) => ({
         cohort,
@@ -714,10 +710,7 @@ const StatsPage: React.FC = () => {
     const height = 350;
     const margin = { top: 28, right: 32, bottom: 64, left: 72 };
 
-    const dateExtent = extent(
-      parsedContractStatusHistory,
-      (d) => d.parsedDate
-    );
+    const dateExtent = extent(parsedContractStatusHistory, (d) => d.parsedDate);
     if (!dateExtent[0] || !dateExtent[1]) return null;
 
     const xScale = scaleTime()
@@ -770,10 +763,26 @@ const StatsPage: React.FC = () => {
     if (!inviteFunnel) return null;
 
     const bars = [
-      { label: "Invites Created", value: inviteFunnel.invitesCreated, color: "#6366f1" },
-      { label: "Invites Used", value: inviteFunnel.invitesUsed, color: "#8b5cf6" },
-      { label: "Signed Contract", value: inviteFunnel.contractSigned, color: "#a855f7" },
-      { label: "Finished Onboarding", value: inviteFunnel.onboardingCompleted, color: "#c084fc" },
+      {
+        label: "Invites Created",
+        value: inviteFunnel.invitesCreated,
+        color: "#6366f1",
+      },
+      {
+        label: "Invites Used",
+        value: inviteFunnel.invitesUsed,
+        color: "#8b5cf6",
+      },
+      {
+        label: "Signed Contract",
+        value: inviteFunnel.contractSigned,
+        color: "#a855f7",
+      },
+      {
+        label: "Finished Onboarding",
+        value: inviteFunnel.onboardingCompleted,
+        color: "#c084fc",
+      },
     ];
 
     const width = 600;
@@ -793,7 +802,17 @@ const StatsPage: React.FC = () => {
 
     const yTicks = yScale.ticks(5);
 
-    return { bars, width, height, margin, barWidth, offsetX, yScale, yTicks, maxValue };
+    return {
+      bars,
+      width,
+      height,
+      margin,
+      barWidth,
+      offsetX,
+      yScale,
+      yTicks,
+      maxValue,
+    };
   }, [inviteFunnel]);
 
   const handleApplyRange = useCallback(() => {
@@ -910,10 +929,10 @@ const StatsPage: React.FC = () => {
                 <div className="text-3xl font-bold text-gray-900">
                   {cumulativeCompletionData.length > 0
                     ? (
-                      cumulativeCompletionData[
-                        cumulativeCompletionData.length - 1
-                      ].avgRate * 100
-                    ).toFixed(2)
+                        cumulativeCompletionData[
+                          cumulativeCompletionData.length - 1
+                        ].avgRate * 100
+                      ).toFixed(2)
                     : "[No data]"}
                   %
                 </div>
@@ -923,17 +942,17 @@ const StatsPage: React.FC = () => {
                 <div className="text-3xl font-bold text-gray-900">
                   {parsedContractStatusHistory.length > 0
                     ? (() => {
-                      const latest =
-                        parsedContractStatusHistory[
-                        parsedContractStatusHistory.length - 1
-                        ];
-                      return latest.totalEverSigned > 0
-                        ? (
-                          (latest.churnedCount / latest.totalEverSigned) *
-                          100
-                        ).toFixed(1)
-                        : "0";
-                    })()
+                        const latest =
+                          parsedContractStatusHistory[
+                            parsedContractStatusHistory.length - 1
+                          ];
+                        return latest.totalEverSigned > 0
+                          ? (
+                              (latest.churnedCount / latest.totalEverSigned) *
+                              100
+                            ).toFixed(1)
+                          : "0";
+                      })()
                     : "[No data]"}
                   %
                 </div>
@@ -955,7 +974,9 @@ const StatsPage: React.FC = () => {
                   <input
                     type="number"
                     value={assumedHourlyRate}
-                    onChange={(e) => setAssumedHourlyRate(Number(e.target.value))}
+                    onChange={(e) =>
+                      setAssumedHourlyRate(Number(e.target.value))
+                    }
                     className="rounded-md border border-gray-300 px-2 py-1 text-sm bg-white w-16"
                   />{" "}
                   / hour)
@@ -982,7 +1003,9 @@ const StatsPage: React.FC = () => {
           </h3>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-gray-600">From</label>
+              <label className="text-xs font-semibold text-gray-600">
+                From
+              </label>
               <input
                 type="date"
                 value={inviteFunnelRange.start}
@@ -1042,7 +1065,10 @@ const StatsPage: React.FC = () => {
                 <g key={`funnel-y-${tick}`}>
                   <line
                     x1={inviteFunnelGeometry.margin.left}
-                    x2={inviteFunnelGeometry.width - inviteFunnelGeometry.margin.right}
+                    x2={
+                      inviteFunnelGeometry.width -
+                      inviteFunnelGeometry.margin.right
+                    }
                     y1={inviteFunnelGeometry.yScale(tick)}
                     y2={inviteFunnelGeometry.yScale(tick)}
                     stroke="#e5e7eb"
@@ -1090,20 +1116,22 @@ const StatsPage: React.FC = () => {
                       {bar.value}
                     </text>
                     {/* Conversion rate label */}
-                    {idx > 0 && inviteFunnelGeometry.bars[idx - 1].value > 0 && (
-                      <text
-                        x={x + inviteFunnelGeometry.barWidth / 2}
-                        y={y - 18}
-                        textAnchor="middle"
-                        className="fill-gray-400 text-[10px]"
-                      >
-                        {Math.round(
-                          (bar.value / inviteFunnelGeometry.bars[idx - 1].value) *
-                          100
-                        )}
-                        %
-                      </text>
-                    )}
+                    {idx > 0 &&
+                      inviteFunnelGeometry.bars[idx - 1].value > 0 && (
+                        <text
+                          x={x + inviteFunnelGeometry.barWidth / 2}
+                          y={y - 18}
+                          textAnchor="middle"
+                          className="fill-gray-400 text-[10px]"
+                        >
+                          {Math.round(
+                            (bar.value /
+                              inviteFunnelGeometry.bars[idx - 1].value) *
+                              100
+                          )}
+                          %
+                        </text>
+                      )}
                     {/* X-axis label */}
                     <text
                       x={x + inviteFunnelGeometry.barWidth / 2}
@@ -1128,9 +1156,7 @@ const StatsPage: React.FC = () => {
       {/* Members Over Time Chart */}
       <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-4 p-3 border-b border-gray-200">
-          <h3 className="font-semibold text-gray-900">
-            Members over time
-          </h3>
+          <h3 className="font-semibold text-gray-900">Members over time</h3>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <label className="text-xs font-semibold text-gray-600">
@@ -1299,10 +1325,10 @@ const StatsPage: React.FC = () => {
                     >
                       {hoveredContractPoint.totalEverSigned > 0
                         ? `${Math.round(
-                          (hoveredContractPoint.churnedCount /
-                            hoveredContractPoint.totalEverSigned) *
-                          100
-                        )}% churn`
+                            (hoveredContractPoint.churnedCount /
+                              hoveredContractPoint.totalEverSigned) *
+                              100
+                          )}% churn`
                         : "0% churn"}
                     </text>
                     <text
@@ -1530,10 +1556,11 @@ const StatsPage: React.FC = () => {
                       y={y + actionBarsGeometry.barHeight / 2}
                       textAnchor="end"
                       dominantBaseline="middle"
-                      className={`text-xs ${isHovered
-                        ? "fill-gray-900 font-semibold"
-                        : "fill-gray-700"
-                        }`}
+                      className={`text-xs ${
+                        isHovered
+                          ? "fill-gray-900 font-semibold"
+                          : "fill-gray-700"
+                      }`}
                     >
                       {action.actionName.length > 25
                         ? action.actionName.substring(0, 22) + "..."
@@ -1549,13 +1576,13 @@ const StatsPage: React.FC = () => {
                       rx={4}
                       fill={
                         action.memberActionEndDate &&
-                          new Date(action.memberActionEndDate) > new Date()
+                        new Date(action.memberActionEndDate) > new Date()
                           ? isHovered
                             ? "url(#in-progress-stripes-hover)"
                             : "url(#in-progress-stripes)"
                           : isHovered
-                            ? "#d1d5db"
-                            : "#e5e7eb"
+                          ? "#d1d5db"
+                          : "#e5e7eb"
                       }
                     />
 
@@ -1602,7 +1629,10 @@ const StatsPage: React.FC = () => {
                     <text
                       x={
                         actionBarsGeometry.margin.left +
-                        Math.max(expectedWidth, completedWidth + withdrawnWidth) +
+                        Math.max(
+                          expectedWidth,
+                          completedWidth + withdrawnWidth
+                        ) +
                         8
                       }
                       y={y + actionBarsGeometry.barHeight / 2}
@@ -1610,9 +1640,7 @@ const StatsPage: React.FC = () => {
                       className="fill-gray-600 text-xs"
                     >
                       {action.usersCompleted}/{totalExpected}{" "}
-                      {totalExpected > 0
-                        ? `(${displayRate}%)`
-                        : ""}
+                      {totalExpected > 0 ? `(${displayRate}%)` : ""}
                     </text>
                   </g>
                 );
@@ -1656,13 +1684,13 @@ const StatsPage: React.FC = () => {
                   <span className="font-semibold text-gray-900">
                     {hoveredActionBar.action.usersJoined +
                       (hoveredActionBar.action.usersWithdrawn ?? 0) >
-                      0
+                    0
                       ? `${Math.round(
-                        (hoveredActionBar.action.usersCompleted /
-                          (hoveredActionBar.action.usersJoined +
-                            (hoveredActionBar.action.usersWithdrawn ?? 0))) *
-                        100
-                      )}%`
+                          (hoveredActionBar.action.usersCompleted /
+                            (hoveredActionBar.action.usersJoined +
+                              (hoveredActionBar.action.usersWithdrawn ?? 0))) *
+                            100
+                        )}%`
                       : "N/A"}
                   </span>
                 </div>
@@ -1876,7 +1904,7 @@ const StatsPage: React.FC = () => {
                               : "#f8fafc";
                             const textColor =
                               hasValue &&
-                                retentionHeatmapScale(value).luminance() < 0.45
+                              retentionHeatmapScale(value).luminance() < 0.45
                                 ? "#f8fafc"
                                 : "#0f172a";
 
@@ -2072,8 +2100,8 @@ const StatsPage: React.FC = () => {
                 const barWidth = Math.max(
                   0,
                   churnHistogramGeometry.xScale(x1) -
-                  churnHistogramGeometry.xScale(x0) -
-                  2
+                    churnHistogramGeometry.xScale(x0) -
+                    2
                 );
                 const barHeight =
                   churnHistogramGeometry.yScale(0) -
@@ -2104,7 +2132,7 @@ const StatsPage: React.FC = () => {
                   (churnHistogramGeometry.width -
                     churnHistogramGeometry.margin.left -
                     churnHistogramGeometry.margin.right) /
-                  2 +
+                    2 +
                   churnHistogramGeometry.margin.left
                 }
                 y={churnHistogramGeometry.height - 12}
@@ -2127,8 +2155,9 @@ const StatsPage: React.FC = () => {
             Daily Stats ({parsedStats.length} days)
           </span>
           <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${dailyStatsTableOpen ? "rotate-180" : ""
-              }`}
+            className={`w-5 h-5 text-gray-500 transition-transform ${
+              dailyStatsTableOpen ? "rotate-180" : ""
+            }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -2200,8 +2229,9 @@ const StatsPage: React.FC = () => {
               Action Stats ({actionStats.length} actions)
             </span>
             <svg
-              className={`w-5 h-5 text-gray-500 transition-transform ${actionStatsTableOpen ? "rotate-180" : ""
-                }`}
+              className={`w-5 h-5 text-gray-500 transition-transform ${
+                actionStatsTableOpen ? "rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -2256,8 +2286,8 @@ const StatsPage: React.FC = () => {
                               action.completionRate >= 0.9
                                 ? "text-green-600 font-medium"
                                 : action.completionRate >= 0.7
-                                  ? "text-yellow-600"
-                                  : "text-red-600"
+                                ? "text-yellow-600"
+                                : "text-red-600"
                             }
                           >
                             {Math.round(action.completionRate * 100)}%
@@ -2269,8 +2299,8 @@ const StatsPage: React.FC = () => {
                       <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
                         {action.memberActionStartDate
                           ? new Date(
-                            action.memberActionStartDate
-                          ).toLocaleDateString()
+                              action.memberActionStartDate
+                            ).toLocaleDateString()
                           : "N/A"}
                       </td>
                     </tr>
