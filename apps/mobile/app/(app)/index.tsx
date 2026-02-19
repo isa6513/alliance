@@ -13,7 +13,7 @@ import {
   ActionWithAwayStatus,
   getAwayStatus,
   isGeneralUpdate,
-  priorityComparator,
+  homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../components/LargeActionCard";
@@ -103,7 +103,7 @@ export default function HomeScreen() {
 
   const currentTaskOrGeneralUpdate = useMemo(() => {
     return [...todoActions, ...(generalUpdates ?? [])].sort(
-      priorityComparator
+      homePagePriorityComparator
     )[0];
   }, [todoActions, generalUpdates]);
 

@@ -4,14 +4,17 @@ import {
   ActionWithAwayStatus,
   canJoinAction,
   isCurrentlyCompletedAction,
-  priorityComparator,
+  homePagePriorityComparator,
   shouldCompleteAction,
   showActionInSidebarList,
 } from "./actionUtils";
 
 export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
   const todoActions = useMemo(() => {
-    return actions?.filter(shouldCompleteAction).sort(priorityComparator) ?? [];
+    return (
+      actions?.filter(shouldCompleteAction).sort(homePagePriorityComparator) ??
+      []
+    );
   }, [actions]);
 
   const newActions =

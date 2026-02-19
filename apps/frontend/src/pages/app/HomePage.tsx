@@ -16,7 +16,7 @@ import useGlobalFeed from "@alliance/shared/lib/useGlobalFeed";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import {
   isGeneralUpdate,
-  priorityComparator,
+  homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import {
@@ -153,7 +153,7 @@ const HomePage = () => {
 
   const currentTaskOrGeneralUpdate = useMemo(() => {
     return [...todoActions, ...(generalUpdates ?? [])].sort(
-      priorityComparator
+      homePagePriorityComparator
     )[0];
   }, [todoActions, generalUpdates]);
 

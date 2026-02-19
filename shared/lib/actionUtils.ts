@@ -59,7 +59,7 @@ function generalUpdateOrActionPriority(
   return actionPriority(a);
 }
 
-export function priorityComparator(
+export function homePagePriorityComparator(
   a: GeneralUpdateDto | ActionDto,
   b: GeneralUpdateDto | ActionDto
 ): number {
