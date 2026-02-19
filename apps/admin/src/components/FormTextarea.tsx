@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
+import TextareaAutosize, {
+  type TextareaAutosizeProps,
+} from "react-textarea-autosize";
 import { htmlToMarkdownFromDocs } from "@alliance/sharedweb/lib/htmlToMarkdown";
 
-export interface FormTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface FormTextareaProps extends TextareaAutosizeProps {
   value?: string;
 }
 
@@ -37,17 +39,8 @@ function FormTextarea({ value, onChange, ...props }: FormTextareaProps) {
     [onChange]
   );
 
-  useEffect(() => {
-    if (ref.current && value !== null) {
-      ref.current.style.height = ref.current.scrollHeight + "px";
-    }
-    if (ref.current && !value) {
-      ref.current.style.height = "auto";
-    }
-  }, [value, ref]);
-
   return (
-    <textarea
+    <TextareaAutosize
       ref={ref}
       onPaste={onPaste}
       value={value}

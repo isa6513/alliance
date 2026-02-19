@@ -17,6 +17,7 @@ import { getApiUrl } from "../lib/config";
 import TimeZoneSelect from "./TimeZoneSelect";
 import CityAutosuggest from "./CityAutosuggest";
 import ImageLightbox from "../ui/ImageLightbox";
+import TextareaAutosize from "react-textarea-autosize";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -192,20 +193,8 @@ export function RenderField({
             error={errorMessage}
             labelRightAddon={labelRightAddon}
           />
-          <textarea
-            ref={(el) => {
-              if (el) {
-                el.style.height = "auto";
-                el.style.height = `${el.scrollHeight}px`;
-              }
-            }}
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = "auto";
-              target.style.height = `${target.scrollHeight}px`;
-              onChange?.(target.value);
-            }}
-            rows={disabled ? 1 : field.rows || 3}
+          <TextareaAutosize
+            minRows={disabled ? 1 : field.rows || 3}
             translate="no"
             maxLength={field.maxLength}
             value={(value as string) ?? ""}

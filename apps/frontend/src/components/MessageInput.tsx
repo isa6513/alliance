@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import TextareaAutosize from "react-textarea-autosize";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 
 interface MessageInputProps {
@@ -140,20 +141,11 @@ const MessageInput = ({
     fileInputRef.current?.click();
   };
 
-  useEffect(() => {
-    if (inputRef.current && message !== null) {
-      inputRef.current.style.height = "auto";
-      inputRef.current.style.height = inputRef.current.scrollHeight + "px";
-    }
-    if (inputRef.current && !message) {
-      inputRef.current.style.height = "auto";
-    }
-  }, [message, inputRef]);
-
   return (
     <div
-      className={`flex flex-col gap-y-3 bg-white relative ${compact ? "px-4 pb-2" : "px-8 pb-4"
-        }`}
+      className={`flex flex-col gap-y-3 bg-white relative ${
+        compact ? "px-4 pb-2" : "px-8 pb-4"
+      }`}
     >
       {replyingTo && (
         <Card className="p-3 flex flex-row items-center justify-between">
@@ -202,7 +194,7 @@ const MessageInput = ({
       )}
 
       <div className="relative border border-zinc-200 rounded-md bg-zinc-100 focus-within:ring-1 focus-within:ring-zinc-400">
-        <textarea
+        <TextareaAutosize
           ref={inputRef}
           value={message}
           autoFocus={!compact && existingConversation}
@@ -211,7 +203,7 @@ const MessageInput = ({
           onPaste={handlePaste}
           placeholder="Message"
           className="w-full border-none bg-transparent p-3 text-black resize-none focus:outline-none pr-18 text-[16px]"
-          rows={1}
+          minRows={1}
         />
         <div className="absolute right-2 top-0 bottom-0 flex items-center">
           <input

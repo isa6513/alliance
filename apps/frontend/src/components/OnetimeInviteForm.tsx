@@ -1,7 +1,7 @@
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
-import { useEffect, useRef } from "react";
+import TextareaAutosize from "react-textarea-autosize";
 
 type OnetimeInviteFormProps = {
   title?: string;
@@ -28,17 +28,6 @@ const OnetimeInviteForm = ({
   submittingText = "Creating invite...",
   creatingInvite = false,
 }: OnetimeInviteFormProps) => {
-  const infoInputRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    const infoInput = infoInputRef.current;
-    if (!infoInput) {
-      return;
-    }
-    infoInput.style.height = "auto";
-    infoInput.style.height = infoInput.scrollHeight + "px";
-  }, [info]);
-
   return (
     <div className="flex flex-col gap-y-4">
       {title && explanation && (
@@ -60,13 +49,12 @@ const OnetimeInviteForm = ({
         <p className="my-2 text-zinc-500">
           {onetimeInviteCreation.inviteeContextExplanation}
         </p>
-        <textarea
-          ref={infoInputRef}
+        <TextareaAutosize
           className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
           placeholder="Context about the invitation"
           value={info}
           onChange={(e) => setInfo(e.target.value)}
-          rows={2}
+          minRows={2}
           style={{ resize: "none" }}
         />
         {onSubmit && (

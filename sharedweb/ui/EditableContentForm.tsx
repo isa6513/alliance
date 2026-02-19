@@ -1,5 +1,6 @@
 import { CreateEditableContentDto } from "@alliance/shared/client";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import TextareaAutosize from "react-textarea-autosize";
 import { htmlToMarkdownFromDocs } from "../lib/htmlToMarkdown";
 
 interface EditableContentFormProps {
@@ -51,9 +52,6 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   const storageKeyRef = useRef<string>(getStorageKey(draftKey));
   const lastSavedHashRef = useRef<string>("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const pendingScrollRestoreRef = useRef<{ x: number; y: number } | null>(
-    null
-  );
 
   const shouldRestoreDraft = restoreDraft ?? draftKey !== undefined;
 
@@ -120,21 +118,6 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       // ignore
     }
   }, [clearDraftSignal]);
-
-  useLayoutEffect(() => {
-    if (typeof window === "undefined") return;
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-    if (pendingScrollRestoreRef.current) {
-      const { x, y } = pendingScrollRestoreRef.current;
-      if (window.scrollX !== x || window.scrollY !== y) {
-        window.scrollTo(x, y);
-      }
-      pendingScrollRestoreRef.current = null;
-    }
-  }, [value.body, expanded]);
 
   const readImagesFromFiles = async (files: File[]): Promise<string[]> => {
     const readers: Promise<string>[] = [];
@@ -210,12 +193,6 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         if (ta) {
           const before = value.body.slice(0, ta.selectionStart);
           const after = value.body.slice(ta.selectionEnd);
-          if (typeof window !== "undefined") {
-            pendingScrollRestoreRef.current = {
-              x: window.scrollX,
-              y: window.scrollY,
-            };
-          }
           onChange({ ...value, body: before + md + after });
         } else {
           onChange({ ...value, body: value.body + md });
@@ -258,21 +235,14 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-      <textarea
+      <TextareaAutosize
         ref={textareaRef}
-        className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-transparent border-none ${expanded ? "" : "resize-none"
-          }`}
-        rows={expanded ? 2 : 1}
+        className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
+          expanded ? "" : "resize-none"
+        }`}
+        minRows={expanded ? 2 : 1}
         value={value.body}
-        onChange={(e) => {
-          if (typeof window !== "undefined") {
-            pendingScrollRestoreRef.current = {
-              x: window.scrollX,
-              y: window.scrollY,
-            };
-          }
-          onChange({ ...value, body: e.target.value });
-        }}
+        onChange={(e) => onChange({ ...value, body: e.target.value })}
         onPaste={onPaste}
         placeholder={placeholder}
         autoFocus={expanded}
