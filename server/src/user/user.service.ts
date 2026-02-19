@@ -1324,7 +1324,6 @@ export class UserService {
         },
       ],
       relations: {
-        invitingUser: true,
         community: true,
       },
     });

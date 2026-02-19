@@ -301,7 +301,7 @@ jobs:
             --arg full_sha "$COMMIT_SHA" \
             --arg url "${SERVER_URL}/${REPO}/commit/${COMMIT_SHA}" \
             --arg review "$REVIEW_TEXT" \
-            '"## Auto-generated fix\n\nThis PR was automatically generated to address review issues found on commit [`" + $sha + "`](" + $url + ").\n\n### Review issues addressed:\n" + $review + "\n\n---\n⚠️ "'
+            '"## Auto-generated fix\n\nThis PR was automatically generated to address review issues found on commit [`" + $sha + "`](" + $url + ").\n\n### Review issues addressed:\n" + $review'
           )"
 
           # Create draft PR via GitHub API
@@ -329,7 +329,7 @@ jobs:
           echo "PR API response:"
           printf '%s\n' "$pr_response"
 
-          pr_url="$(printf '%s' "$pr_response" | jq -r '.html_url // ""')"
+          pr_url="$(printf '%s' "$pr_response" | jq -r '.html_url // ""')/changes"
           pr_number="$(printf '%s' "$pr_response" | jq -r '.number // ""')"
 
           if [ -z "$pr_url" ] || [ "$pr_url" = "null" ]; then

@@ -475,6 +475,20 @@ export type Comment = {
     likesCount: number;
 };
 
+export type CommunityInviteStatus = 'request_pending' | 'request_rejected' | 'invitee_pending' | 'invitee_accepted' | 'invitee_rejected' | 'cancelled';
+
+export type CommunityInvite = {
+    id: number;
+    status: CommunityInviteStatus;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+    invitingUser?: User;
+    invitedUser: User;
+    community: Community;
+    notifs?: Array<Notification>;
+};
+
 export type Notification = {
     id: number;
     category: NotificationCategory;
@@ -489,13 +503,14 @@ export type Notification = {
     sendTime: string;
     groupingKey?: string;
     groupingCount?: number;
-    actionUpdate?: ActionUpdate;
-    comment?: Comment;
-    onetimeInvite?: OnetimeInvite;
     shouldPush: boolean;
     pushDispatchedAt?: string;
     pushClaimedBy?: string;
     pushClaimedAt?: string;
+    actionUpdate?: ActionUpdate;
+    comment?: Comment;
+    onetimeInvite?: OnetimeInvite;
+    communityInvite?: CommunityInvite;
 };
 
 export type OnetimeInvite = {
@@ -514,19 +529,6 @@ export type OnetimeInvite = {
     community?: Community | null;
     communityId?: number;
     notifs: Array<Notification>;
-};
-
-export type CommunityInviteStatus = 'request_pending' | 'request_rejected' | 'invitee_pending' | 'invitee_accepted' | 'invitee_rejected' | 'cancelled';
-
-export type CommunityInvite = {
-    id: number;
-    status: CommunityInviteStatus;
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
-    invitingUser?: User;
-    invitedUser: User;
-    community: Community;
 };
 
 export type ParticipantRole = 'admin' | 'member' | 'owner';
@@ -801,9 +803,10 @@ export type OnetimeInviteDto = {
     code: string;
     createdAt: string;
     status: OnetimeInviteStatus;
+    invitedUser: User | null;
     invitedUserId?: number;
     community?: Community | null;
-    invitingUser: ProfileDto;
+    invitingUser?: ProfileDto;
 };
 
 export type RequestOnetimeInviteDto = {
