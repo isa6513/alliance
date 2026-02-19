@@ -14,9 +14,13 @@ type ReviewResult = {
   page: string;
   status: "pass" | "fail";
   reason: string;
+  aiReviewed: boolean;
 };
 
-type DiffStats = Record<string, { diffPixels: number; totalPixels: number; pct: number }>;
+type DiffStats = Record<
+  string,
+  { diffPixels: number; totalPixels: number; pct: number }
+>;
 
 const toBase64 = async (filePath: string): Promise<string> => {
   const buf = await fs.readFile(filePath);
@@ -51,8 +55,7 @@ const reviewPage = async (
     tools: [
       {
         name: "report_review",
-        description:
-          "Report the visual regression review result for a page.",
+        description: "Report the visual regression review result for a page.",
         input_schema: {
           type: "object" as const,
           properties: {
@@ -96,11 +99,19 @@ Report "pass" for acceptable changes and "fail" for regressions.`,
           },
           {
             type: "image",
-            source: { type: "base64", media_type: "image/png", data: baselineB64 },
+            source: {
+              type: "base64",
+              media_type: "image/png",
+              data: baselineB64,
+            },
           },
           {
             type: "image",
-            source: { type: "base64", media_type: "image/png", data: currentB64 },
+            source: {
+              type: "base64",
+              media_type: "image/png",
+              data: currentB64,
+            },
           },
           {
             type: "image",
@@ -113,15 +124,25 @@ Report "pass" for acceptable changes and "fail" for regressions.`,
 
   const toolUse = response.content.find((block) => block.type === "tool_use");
   if (toolUse && toolUse.type === "tool_use") {
-    const input = toolUse.input as ReviewResult;
+    const input = toolUse.input as {
+      page?: string;
+      status: "pass" | "fail";
+      reason: string;
+    };
     return {
       page: input.page || pageName,
       status: input.status,
       reason: input.reason,
+      aiReviewed: true,
     };
   }
 
-  return { page: pageName, status: "fail", reason: "Unexpected API response format" };
+  return {
+    page: pageName,
+    status: "fail",
+    reason: "Unexpected API response format",
+    aiReviewed: true,
+  };
 };
 
 const runWithConcurrency = async <T>(
@@ -138,7 +159,9 @@ const runWithConcurrency = async <T>(
     }
   };
 
-  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, () => run()));
+  await Promise.all(
+    Array.from({ length: Math.min(limit, tasks.length) }, () => run())
+  );
   return results;
 };
 
@@ -189,35 +212,65 @@ const main = async () => {
 
     if (!hasBaseline) {
       console.log(`${logPrefix} [PASS] ${pageName} — new page, no baseline`);
-      results.push({ page: pageName, status: "pass", reason: "New page, no baseline to compare" });
+      results.push({
+        page: pageName,
+        status: "pass",
+        reason: "New page, no baseline to compare",
+        aiReviewed: false,
+      });
       continue;
     }
 
     if (!hasDiff) {
       console.log(`${logPrefix} [PASS] ${pageName} — unchanged`);
-      results.push({ page: pageName, status: "pass", reason: "No visual changes detected" });
+      results.push({
+        page: pageName,
+        status: "pass",
+        reason: "No visual changes detected",
+        aiReviewed: false,
+      });
       continue;
     }
 
     // Auto-pass trivial diffs (anti-aliasing, sub-pixel rendering)
     const stat = diffStats[file];
     if (stat && stat.pct < TRIVIAL_DIFF_THRESHOLD) {
-      console.log(`${logPrefix} [PASS] ${pageName} — trivial diff (${stat.pct}%), skipping AI`);
-      results.push({ page: pageName, status: "pass", reason: `Trivial diff (${stat.pct}% pixels changed)` });
+      console.log(
+        `${logPrefix} [PASS] ${pageName} — trivial diff (${stat.pct}%), skipping AI`
+      );
+      results.push({
+        page: pageName,
+        status: "pass",
+        reason: `Trivial diff (${stat.pct}% pixels changed)`,
+        aiReviewed: false,
+      });
       continue;
     }
 
     // Queue for parallel AI review
-    console.log(`${logPrefix} Queuing ${pageName} for AI review (${stat ? stat.pct + "%" : "unknown"} diff)...`);
+    console.log(
+      `${logPrefix} Queuing ${pageName} for AI review (${
+        stat ? stat.pct + "%" : "unknown"
+      } diff)...`
+    );
     apiTasks.push({
       file,
-      task: () => reviewPage(client, pageName, baselinePath, path.join(currentDir, file), diffPath),
+      task: () =>
+        reviewPage(
+          client,
+          pageName,
+          baselinePath,
+          path.join(currentDir, file),
+          diffPath
+        ),
     });
   }
 
   // Run AI reviews in parallel
   if (apiTasks.length > 0) {
-    console.log(`${logPrefix} Sending ${apiTasks.length} pages for AI review (concurrency: ${CONCURRENCY})...`);
+    console.log(
+      `${logPrefix} Sending ${apiTasks.length} pages for AI review (concurrency: ${CONCURRENCY})...`
+    );
     const apiResults = await runWithConcurrency(
       apiTasks.map((t) => t.task),
       CONCURRENCY
@@ -240,7 +293,9 @@ const main = async () => {
   // Summary
   const failures = results.filter((r) => r.status === "fail");
   console.log(
-    `\n${logPrefix} === Summary: ${results.length - failures.length} passed, ${failures.length} failed ===`
+    `\n${logPrefix} === Summary: ${results.length - failures.length} passed, ${
+      failures.length
+    } failed ===`
   );
 
   if (failures.length > 0) {

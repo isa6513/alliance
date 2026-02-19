@@ -410,7 +410,7 @@ jobs:
           fi
         working-directory: ./server
 
-  visual-regression:
+visual-regression:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     services:
@@ -540,9 +540,6 @@ jobs:
           CHANNEL="${{ secrets.SLACK_DEPLOY_CHANNEL_ID }}"
 
           # Upload a file to Slack via v2 API (without channel) and return its permalink
-          # 1. getUploadURLExternal → upload_url + file_id
-          # 2. POST file content to upload_url
-          # 3. completeUploadExternal → permalink
           upload_to_slack() {
             local filepath="$1"
             local title="$2"
@@ -551,7 +548,6 @@ jobs:
             local filename
             filename=$(basename "$filepath")
 
-            # Step 1: Get upload URL
             local url_resp
             url_resp=$(curl -s -X POST \
               -H "Authorization: Bearer ${TOKEN}" \
@@ -569,12 +565,10 @@ jobs:
               return
             fi
 
-            # Step 2: Upload file content
             curl -s -X POST \
               -F "file=@${filepath}" \
               "$upload_url" > /dev/null
 
-            # Step 3: Complete upload (no channel → unpublished)
             local complete_resp
             complete_resp=$(curl -s -X POST \
               -H "Authorization: Bearer ${TOKEN}" \
@@ -588,14 +582,12 @@ jobs:
 
           APPROVE_URL="${{ github.server_url }}/${{ github.repository }}/actions/workflows/approve-visual-baseline.yaml?environment=${ENV_NAME}&sha=${SHA}"
 
-          # Header text
           NL=$'\n'
-          TEXT="*Visual Regression Detected (${ENV_NAME})*${NL}"
+          TEXT=":red_circle: *Visual Regression Detected (${ENV_NAME})*${NL}"
           TEXT+="${ENV_NAME^} deploy blocked by visual regression check.${NL}"
           TEXT+="*Commit:* \`${SHA}\`${NL}"
           TEXT+="<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>  |  <${APPROVE_URL}|Approve baseline>${NL}"
 
-          # Process each failure
           FAILURES=$(cat "$RESULTS" | jq -c '.[] | select(.status == "fail")')
           while IFS= read -r fail; do
             PAGE=$(echo "$fail" | jq -r '.page')
@@ -603,7 +595,6 @@ jobs:
 
             TEXT+="${NL}*${PAGE}*${NL}"
 
-            # Upload baseline and current images → collect permalinks
             GALLERY=""
             if [ -f "$BASELINE_DIR/$FILE" ]; then
               PLINK=$(upload_to_slack "$BASELINE_DIR/$FILE" "${PAGE} — Baseline")
@@ -617,7 +608,105 @@ jobs:
             [ -n "$GALLERY" ] && TEXT+="${NL}${GALLERY}${NL}"
           done <<< "$FAILURES"
 
-          # Post the message with gallery permalinks via chat.postMessage
+          curl -s -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-type: application/json" \
+            --data "$(jq -n --arg channel "$CHANNEL" --arg text "$TEXT" \
+              '{channel: $channel, text: $text, mrkdwn: true, unfurl_links: true, unfurl_media: true}')" \
+            https://slack.com/api/chat.postMessage
+
+      - name: Notify Slack on AI-Approved Changes
+        if: github.ref_name == 'production' && steps.ai-review.outcome != 'failure'
+        run: |
+          RESULTS="${{ github.workspace }}/screenshots/ai-review-results.json"
+
+          # Exit early if no results file or no AI-reviewed passes
+          if [ ! -f "$RESULTS" ]; then
+            echo "No results file — nothing to notify"
+            exit 0
+          fi
+
+          AI_APPROVED=$(cat "$RESULTS" | jq -c '[.[] | select(.aiReviewed == true and .status == "pass")]')
+          COUNT=$(echo "$AI_APPROVED" | jq 'length')
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "No AI-reviewed changes — skipping notification"
+            exit 0
+          fi
+
+          SHA="${{ github.sha }}"
+          ENV_NAME="${{ env.env_name }}"
+          BASELINE_DIR="${{ github.workspace }}/screenshots/baseline"
+          CURRENT_DIR="${{ github.workspace }}/screenshots/current"
+          TOKEN="${{ secrets.SLACK_BOT_TOKEN }}"
+          CHANNEL="${{ secrets.SLACK_DEPLOY_CHANNEL_ID }}"
+
+          upload_to_slack() {
+            local filepath="$1"
+            local title="$2"
+            local filesize
+            filesize=$(stat --printf="%s" "$filepath" 2>/dev/null || stat -f%z "$filepath")
+            local filename
+            filename=$(basename "$filepath")
+
+            local url_resp
+            url_resp=$(curl -s -X POST \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-type: application/x-www-form-urlencoded" \
+              --data-urlencode "filename=${filename}" \
+              --data-urlencode "length=${filesize}" \
+              https://slack.com/api/files.getUploadURLExternal)
+
+            local upload_url file_id
+            upload_url=$(echo "$url_resp" | jq -r '.upload_url // empty')
+            file_id=$(echo "$url_resp" | jq -r '.file_id // empty')
+
+            if [ -z "$upload_url" ] || [ -z "$file_id" ]; then
+              echo ""
+              return
+            fi
+
+            curl -s -X POST \
+              -F "file=@${filepath}" \
+              "$upload_url" > /dev/null
+
+            local complete_resp
+            complete_resp=$(curl -s -X POST \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-type: application/json" \
+              --data "$(jq -n --arg id "$file_id" --arg title "$title" \
+                '{files: [{id: $id, title: $title}]}')" \
+              https://slack.com/api/files.completeUploadExternal)
+
+            echo "$complete_resp" | jq -r '.files[0].permalink // empty'
+          }
+
+          NL=$'\n'
+          TEXT=":large_green_circle: *Auto-accepting visual changes to production*${NL}"
+          TEXT+="AI reviewed ${COUNT} page(s) with visual changes and approved them.${NL}"
+          TEXT+="*Commit:* \`${SHA}\`${NL}"
+          TEXT+="<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>${NL}"
+
+          echo "$AI_APPROVED" | jq -c '.[]' | while IFS= read -r item; do
+            PAGE=$(echo "$item" | jq -r '.page')
+            REASON=$(echo "$item" | jq -r '.reason')
+            FILE="${PAGE}.png"
+
+            TEXT+="${NL}*${PAGE}* — ${REASON}${NL}"
+
+            GALLERY=""
+            if [ -f "$BASELINE_DIR/$FILE" ]; then
+              PLINK=$(upload_to_slack "$BASELINE_DIR/$FILE" "${PAGE} — Baseline")
+              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
+            fi
+            if [ -f "$CURRENT_DIR/$FILE" ]; then
+              PLINK=$(upload_to_slack "$CURRENT_DIR/$FILE" "${PAGE} — Current")
+              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
+            fi
+
+            [ -n "$GALLERY" ] && TEXT+="${NL}${GALLERY}${NL}"
+          done
+
           curl -s -X POST \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-type: application/json" \
@@ -638,7 +727,7 @@ jobs:
         run: |
           echo "AI review detected visual regressions — blocking deploy"
           exit 1
-
+          
   deploy-nest-backend:
     runs-on: ubuntu-latest
     needs:
