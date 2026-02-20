@@ -17,7 +17,7 @@ export class VideosService {
     @InjectRepository(Video)
     private videoRepository: Repository<Video>,
     @Inject('S3_CLIENT') private readonly s3: S3Client,
-  ) { }
+  ) {}
 
   private readonly bucket = process.env.ASSETS_BUCKET!;
 
@@ -139,7 +139,10 @@ export class VideosService {
       }),
     );
 
-    await this.videoRepository.update(video.id, { status: 'ready', processingInfo: null });
+    await this.videoRepository.update(video.id, {
+      status: 'ready',
+      processingInfo: null,
+    });
     return this.videoRepository.findOneBy({ id });
   }
 
@@ -178,18 +181,9 @@ export function getVideoSource(key: string): string {
 
   if (key.startsWith('http')) return key;
 
-  if (
-    process.env.NODE_ENV === 'production' ||
-    process.env.NODE_ENV === 'staging'
-  ) {
-    if (
-      process.env.USE_CLOUDFRONT === 'true' &&
-      process.env.CLOUDFRONT_DOMAIN
-    ) {
-      return `https://${process.env.CLOUDFRONT_DOMAIN}/${key}`;
-    }
-    return `${process.env.APP_URL}/api/videos/${key}`;
-  } else {
-    return `http://localhost:3005/videos/${key}`;
+  if (process.env.USE_CLOUDFRONT === 'true' && process.env.CLOUDFRONT_DOMAIN) {
+    return `https://${process.env.CLOUDFRONT_DOMAIN}/${key}`;
   }
+
+  return key;
 }

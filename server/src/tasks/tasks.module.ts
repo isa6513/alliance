@@ -13,7 +13,6 @@ import { MmsModule } from 'src/mms/mms.module';
 import { CustomValidator } from './entities/customvalidator.entity';
 import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 import { EventLogModule } from 'src/eventlog/eventlog.module';
-import { VideosModule } from 'src/videos/videos.module';
 import { User } from 'src/user/entities/user.entity';
 
 @Module({
@@ -31,10 +30,9 @@ import { User } from 'src/user/entities/user.entity';
     ActionsModule,
     MmsModule,
     EventLogModule,
-    VideosModule,
     AiDetectionModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],
 })
-export class TasksModule { }
+export class TasksModule {}

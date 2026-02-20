@@ -16,6 +16,7 @@ import { ActionActivityType } from 'src/actions/entities/action-activity.entity'
 import { Action } from 'src/actions/entities/action.entity';
 import { ForumService } from 'src/forum/forum.service';
 import { getImageSource } from 'src/images/images.service';
+import { getVideoSource } from 'src/videos/videos.service';
 import { MmsService } from 'src/mms/mms.service';
 import { welcomeMessage } from 'src/notifs/textnotifcontents';
 import { UserService } from 'src/user/user.service';
@@ -100,6 +101,9 @@ export class TasksService {
       for (const field of page.fields) {
         if (field.kind === 'image') {
           field.src = getImageSource(field.src);
+        }
+        if (field.kind === 'video') {
+          field.src = getVideoSource(field.src);
         }
       }
     }
@@ -531,22 +535,6 @@ export class TasksService {
         } satisfies FormDto;
       }),
     );
-  }
-
-  private extractVideoIds(schema: Record<string, unknown>): number[] {
-    const ids: number[] = [];
-    const pages = schema?.pages as Array<{ fields?: Array<unknown> }>;
-    if (!Array.isArray(pages)) return ids;
-    for (const page of pages) {
-      if (!Array.isArray(page?.fields)) continue;
-      for (const field of page.fields) {
-        const f = field as Record<string, unknown>;
-        if (f?.kind === 'video' && typeof f.videoId === 'number') {
-          ids.push(f.videoId);
-        }
-      }
-    }
-    return ids;
   }
 
   async deleteForm(formId: number): Promise<void> {

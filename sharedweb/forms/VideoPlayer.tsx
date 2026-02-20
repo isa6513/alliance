@@ -109,7 +109,9 @@ export default function VideoPlayer({
   useEffect(() => {
     if (status !== "ready" || !videoRef.current) return;
 
-    const manifestUrl = videoId
+    const manifestUrl = src.startsWith("http")
+      ? `${src}/playlist.m3u8`
+      : videoId
       ? `${getApiUrl()}/videos/${videoId}/playlist.m3u8`
       : src;
 
