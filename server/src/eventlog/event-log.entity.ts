@@ -23,6 +23,18 @@ export enum EventType {
   ForumReplyNotifFailure = 'forum_reply_notif_failure',
 }
 
+export const SEND_TO_SLACK: Record<EventType, boolean> = {
+  [EventType.AccountCreated]: true,
+  [EventType.ContractSigned]: true,
+  [EventType.ContractSuspended]: true,
+  [EventType.SmsUnsubscribe]: true,
+  [EventType.SmsInbound]: true,
+  [EventType.SmsFailure]: true,
+  [EventType.ForumActionAutocomplete]: true,
+  [EventType.ActionComment]: true,
+  [EventType.ForumReplyNotifFailure]: false,
+};
+
 @Entity()
 export class EventLog {
   @PrimaryGeneratedColumn('uuid')

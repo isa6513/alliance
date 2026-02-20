@@ -1,9 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EventLog, EventType } from './event-log.entity';
+import { EventLog, EventType, SEND_TO_SLACK } from './event-log.entity';
 import type { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EventLogDto, EventLogListDto, EventLogQueryDto } from './dto/event-log.dto';
+import {
+  EventLogDto,
+  EventLogListDto,
+  EventLogQueryDto,
+} from './dto/event-log.dto';
 import { EventLogEvents } from './eventlog.events';
 
 @Injectable()
@@ -13,7 +17,7 @@ export class EventLogService {
     @InjectRepository(EventLog)
     private readonly eventLogRepository: Repository<EventLog>,
     private readonly eventEmitter: EventEmitter2,
-  ) { }
+  ) {}
 
   private toDto(eventLog: EventLog): EventLogDto {
     const { user, ...rest } = eventLog;
@@ -37,7 +41,9 @@ export class EventLogService {
       .take(limit);
 
     if (query.eventType) {
-      qb.andWhere('eventLog.event = :eventType', { eventType: query.eventType });
+      qb.andWhere('eventLog.event = :eventType', {
+        eventType: query.eventType,
+      });
     }
 
     const [items, totalCount] = await qb.getManyAndCount();
@@ -59,7 +65,12 @@ export class EventLogService {
     return eventLog ? this.toDto(eventLog) : null;
   }
 
-  async sendMessage(data: { type: EventType, message: string, blob?: Record<string, unknown>, userId?: number }) {
+  async sendMessage(data: {
+    type: EventType;
+    message: string;
+    blob?: Record<string, unknown>;
+    userId?: number;
+  }) {
     const { type, message, blob, userId } = data;
 
     const eventLog = this.eventLogRepository.create({
@@ -86,6 +97,10 @@ export class EventLogService {
     }
     if (process.env.NODE_ENV !== 'production') {
       this.logger.log(`Skipping Slack message in development: ${message}`);
+      return;
+    }
+
+    if (!SEND_TO_SLACK[type]) {
       return;
     }
 
