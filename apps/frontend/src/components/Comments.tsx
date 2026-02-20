@@ -75,7 +75,7 @@ const SortDropdown = ({
   }, [open]);
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative ml-auto" ref={ref}>
       <Button
         color={ButtonColor.Transparent}
         onClick={() => setOpen(!open)}
@@ -320,7 +320,7 @@ const Comments = ({
           </div>
         ) : null}
         {isPostComments && topLevelComments.length > 0 && (
-          <div className="flex items-center justify-between gap-3 my-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-3">
             <div className="flex items-center gap-2">
               <span className="text-[14px] font-medium text-zinc-600">
                 {activeQaMode ? "Q&A mode" : "Filter"}
@@ -330,7 +330,7 @@ const Comments = ({
                   <button
                     key={filter}
                     onClick={() => setCommentFilter(filter)}
-                    className={`px-3 py-1 text-sm rounded border border-transparent ${
+                    className={`px-3 py-2 text-sm rounded border border-transparent ${
                       commentFilter === filter
                         ? "bg-white border-zinc-300 text-black"
                         : "text-zinc-600 hover:text-zinc-900"

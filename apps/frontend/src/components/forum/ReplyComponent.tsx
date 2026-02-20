@@ -75,23 +75,25 @@ const ReplyContent = ({
       <div className="flex-1">
         <div className="flex justify-between items-center overflow-visible">
           <div className="flex items-center gap-2 text-zinc-500">
-            <Link
-              to={href("/member/:id", { id: reply.author.id.toString() })}
-              className="text-zinc-800 font-medium"
-            >
-              <UserDisplayName
-                staff={reply.author.staff}
-                expert={isExpert}
-                expertLabel={expertLabel}
+            <div className="inline *:mr-2">
+              <Link
+                to={href("/member/:id", { id: reply.author.id.toString() })}
+                className="text-zinc-800 font-medium inline"
               >
-                {reply.author.displayName}
-              </UserDisplayName>
-            </Link>
-            <span className="text-zinc-500 text-sm">
-              {formatDistanceToNow(new Date(reply.createdAt), {
-                addSuffix: true,
-              })}
-            </span>
+                <UserDisplayName
+                  staff={reply.author.staff}
+                  expert={isExpert}
+                  expertLabel={expertLabel}
+                >
+                  {reply.author.displayName}
+                </UserDisplayName>
+              </Link>
+              <span className="text-zinc-500 text-sm">
+                {formatDistanceToNow(new Date(reply.createdAt), {
+                  addSuffix: true,
+                })}
+              </span>
+            </div>
             {isCollapsible && onToggleCollapse && (
               <button
                 onClick={onToggleCollapse}
