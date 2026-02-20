@@ -122,6 +122,7 @@ const Comments = ({
   const { user } = useAuth();
   const [commentFilter, setCommentFilter] = useState<CommentFilter>("all");
   const [commentSort, setCommentSort] = useState<CommentSort>("newest");
+  const [resortRandomFlag, setResortRandomFlag] = useState(false);
 
   const tree = useCommentTree(objectId, type, initialComments);
   const isPostComments = type === "post";
@@ -241,6 +242,10 @@ const Comments = ({
   }, [filterOptions, topLevelComments, matchesFilter]);
 
   const filteredComments = useMemo(() => {
+    if (resortRandomFlag) {
+      // do nothing, simply rerun this memo if resortRandomFlag changes
+      // This if statement is for exhaustive deps
+    }
     return topLevelComments
       .filter((comment) => matchesFilter(comment, commentFilter))
       .sort((a, b) => {
@@ -257,7 +262,13 @@ const Comments = ({
         const dateB = new Date(b.createdAt).getTime();
         return dateB - dateA;
       });
-  }, [topLevelComments, commentFilter, commentSort, matchesFilter]);
+  }, [
+    topLevelComments,
+    commentFilter,
+    commentSort,
+    matchesFilter,
+    resortRandomFlag,
+  ]);
 
   const ctxValue = useMemo(
     () => ({
@@ -341,7 +352,15 @@ const Comments = ({
                 ))}
               </div>
             </div>
-            <SortDropdown commentSort={commentSort} onChange={setCommentSort} />
+            <SortDropdown
+              commentSort={commentSort}
+              onChange={(sort) => {
+                setCommentSort(sort);
+                if (sort === "random") {
+                  setResortRandomFlag((prev) => !prev);
+                }
+              }}
+            />
           </div>
         )}
         {tree.error && <div className="text-red-500">{tree.error}</div>}
