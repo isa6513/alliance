@@ -21,6 +21,7 @@ export default function VideoPlayer({
   );
   const [mediaReady, setMediaReady] = useState(false);
   const hasVideo = !!(src || videoId);
+  const lastTrackedTimeRef = useRef(0);
 
   // Reset state when video source changes
   useEffect(() => {
@@ -94,6 +95,15 @@ export default function VideoPlayer({
       if (video.duration - video.currentTime <= 3) {
         hasTrackedComplete = true;
         posthog.capture("video_fully_watched", { videoId, src });
+      }
+
+      if (video.currentTime > lastTrackedTimeRef.current + 5) {
+        lastTrackedTimeRef.current = video.currentTime;
+        posthog.capture("video_progress", {
+          videoId,
+          src,
+          progress: Math.floor(video.currentTime),
+        });
       }
     };
 
