@@ -179,6 +179,30 @@ const setupDatabase = async () => {
     { cwd: repoRoot, env: pgEnv }
   );
 
+  // Run migrations to create the schema from source of truth.
+  console.log(`${logPrefix} Running migrations...`);
+  await runCommand(
+    "bunx",
+    [
+      "typeorm-ts-node-commonjs",
+      "--dataSource",
+      "src/datasources/dataSource.ts",
+      "migration:run",
+    ],
+    {
+      cwd: path.join(repoRoot, "server"),
+      env: {
+        ...process.env,
+        DB_HOST: dbHost,
+        DB_PORT: dbPort,
+        DB_USERNAME: dbUser,
+        DB_PASSWORD: dbPass,
+        DB_NAME: dbName,
+        NODE_ENV: "test",
+      },
+    }
+  );
+
   // Load the full dump (schema + data). Using session_replication_role =
   // replica disables FK triggers during the bulk insert so row ordering
   // doesn't matter (handles circular FKs such as comment → comment).

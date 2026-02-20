@@ -456,17 +456,6 @@ jobs:
         run: bun install --frozen-lockfile
         working-directory: ./server
 
-      - name: Run Migrations
-        if: github.ref_name == 'production'
-        run: bunx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts migration:run
-        working-directory: ./server
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USERNAME: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: citesting
-
       - name: Cache Playwright Browsers
         if: github.ref_name == 'production'
         uses: actions/cache@v4
