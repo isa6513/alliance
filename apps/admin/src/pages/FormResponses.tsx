@@ -15,7 +15,7 @@ import type {
 } from "@alliance/shared/forms/formschema";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 import { CirclePlay } from "lucide-react";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -574,6 +574,20 @@ const FormResponses: React.FC = () => {
     URL.revokeObjectURL(url);
   }, [form, responses, orderedFieldIds, fieldLabels, formatValue]);
 
+  const [userSearch, setUserSearch] = useState("");
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userSearchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userSearchRef.current && !userSearchRef.current.contains(e.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const respondentName = currentResponse
     ? currentResponse.user?.name ??
       (sidsToUserMap[currentResponse.sid ?? ""]
@@ -593,6 +607,37 @@ const FormResponses: React.FC = () => {
       );
     },
     [sidsToUserMap]
+  );
+
+  const userSearchResults = useMemo(() => {
+    const query = userSearch.toLowerCase();
+    const items = filteredResponses.map((response, idx) => ({
+      response,
+      idx,
+      name: getRespondentName(response),
+    }));
+    if (!query) return items;
+    const matched = items.filter(({ name }) =>
+      name.toLowerCase().includes(query)
+    );
+    matched.sort((a, b) => {
+      const aStarts = a.name.toLowerCase().startsWith(query) ? 0 : 1;
+      const bStarts = b.name.toLowerCase().startsWith(query) ? 0 : 1;
+      return aStarts - bStarts;
+    });
+    return matched;
+  }, [filteredResponses, userSearch, getRespondentName]);
+
+  const handleUserSearchKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && userSearchResults.length > 0) {
+        e.preventDefault();
+        setPage(userSearchResults[0].idx + 1);
+        setUserSearch("");
+        setUserDropdownOpen(false);
+      }
+    },
+    [userSearchResults]
   );
 
   return (
@@ -661,6 +706,153 @@ const FormResponses: React.FC = () => {
             </div>
           </div>
         </div>
+        {/* Response Navigator (inside header) */}
+        {tab === "responses" && !loading && !error && filteredTotal > 0 && (
+          <div className="px-6 pb-4 border-t border-gray-100 pt-3">
+            {filterSummary && (
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                <div className="text-sm text-gray-600">
+                  Filtered:{" "}
+                  <span className="font-medium text-gray-900">
+                    {filterSummary.fieldLabel}
+                  </span>{" "}
+                  — {filterSummary.description}{" "}
+                  <span className="text-gray-400">
+                    ({filteredTotal} of {total})
+                  </span>
+                </div>
+                <Button
+                  onClick={clearFilter}
+                  color={ButtonColor.White}
+                  size="small"
+                >
+                  Clear filter
+                </Button>
+              </div>
+            )}
+            <div className="flex items-center justify-between flex-wrap md:flex-nowrap gap-3">
+              {/* Pagination Controls */}
+              <div className="flex items-center gap-1">
+                <Button
+                  disabled={page <= 1}
+                  onClick={() => setPage(1)}
+                  color={ButtonColor.Black}
+                  size="small"
+                >
+                  First
+                </Button>
+                <Button
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  color={ButtonColor.Black}
+                  size="small"
+                >
+                  &larr; Prev
+                </Button>
+                <div className="px-4 py-1.5 text-sm font-medium text-gray-700 min-w-[100px] text-center">
+                  {page} of {totalPages}
+                </div>
+                <Button
+                  disabled={page >= totalPages}
+                  onClick={() =>
+                    setPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  color={ButtonColor.Black}
+                  size="small"
+                >
+                  Next &rarr;
+                </Button>
+                <Button
+                  disabled={page >= totalPages}
+                  onClick={() => setPage(totalPages)}
+                  color={ButtonColor.Black}
+                  size="small"
+                >
+                  Last
+                </Button>
+              </div>
+
+              {/* User Search Dropdown */}
+              <div className="relative" ref={userSearchRef}>
+                <input
+                  type="text"
+                  value={userSearch}
+                  onChange={(e) => {
+                    setUserSearch(e.target.value);
+                    setUserDropdownOpen(true);
+                  }}
+                  onFocus={() => setUserDropdownOpen(true)}
+                  onKeyDown={handleUserSearchKeyDown}
+                  placeholder="Search by name..."
+                  className="w-56 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-black focus:outline-none"
+                />
+                {userDropdownOpen && (
+                  <div className="absolute z-30 mt-1 w-72 max-h-64 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg">
+                    {userSearchResults.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-gray-500">
+                        No matching responses
+                      </div>
+                    ) : (
+                      userSearchResults.map(({ response, idx, name }) => (
+                        <button
+                          key={response.id ?? `${response.sid}-${idx}`}
+                          type="button"
+                          className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-b border-gray-50 last:border-b-0 ${
+                            idx + 1 === page ? "bg-blue-50 font-medium" : ""
+                          }`}
+                          onClick={() => {
+                            setPage(idx + 1);
+                            setUserSearch("");
+                            setUserDropdownOpen(false);
+                          }}
+                        >
+                          <div className="truncate text-gray-900">{name}</div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(response.createdAt).toLocaleString()}
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Response Info */}
+              {currentResponse && (
+                <div className="flex items-center gap-4">
+                  <div className="text-right min-w-[200px]">
+                    <p className="font-medium text-gray-900 truncate max-w-[700px]">
+                      {respondentName}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {new Date(currentResponse.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  {currentResponse.sessionReplayUrl && (
+                    <Button
+                      size="small"
+                      color={ButtonColor.BlueOutline}
+                      onClick={() =>
+                        window.open(
+                          "https://us.posthog.com/project/188181/replay/home?sessionRecordingId=" +
+                            currentResponse.sessionReplayUrl!.substring(
+                              currentResponse.sessionReplayUrl!.lastIndexOf(
+                                "/"
+                              ) + 1
+                            ),
+                          "_blank"
+                        )
+                      }
+                    >
+                      <CirclePlay size={14} className="mr-1.5" />
+                      Replay
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {tab === "responses" && (
@@ -688,107 +880,6 @@ const FormResponses: React.FC = () => {
             </Card>
           ) : (
             <>
-              {/* Response Navigator */}
-              <div className="sticky top-[90px] z-20 bg-white rounded-lg border border-gray-200 p-4 mb-6">
-                {filterSummary && (
-                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                    <div className="text-sm text-gray-600">
-                      Filtered:{" "}
-                      <span className="font-medium text-gray-900">
-                        {filterSummary.fieldLabel}
-                      </span>{" "}
-                      — {filterSummary.description}{" "}
-                      <span className="text-gray-400">
-                        ({filteredTotal} of {total})
-                      </span>
-                    </div>
-                    <Button
-                      onClick={clearFilter}
-                      color={ButtonColor.White}
-                      size="small"
-                    >
-                      Clear filter
-                    </Button>
-                  </div>
-                )}
-                <div className="flex items-center justify-between flex-wrap md:flex-nowrap">
-                  {/* Pagination Controls */}
-                  <div className="flex items-center gap-1">
-                    <Button
-                      disabled={page <= 1}
-                      onClick={() => setPage(1)}
-                      color={ButtonColor.Black}
-                      size="small"
-                    >
-                      First
-                    </Button>
-                    <Button
-                      disabled={page <= 1}
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      color={ButtonColor.Black}
-                      size="small"
-                    >
-                      &larr; Prev
-                    </Button>
-                    <div className="px-4 py-1.5 text-sm font-medium text-gray-700 min-w-[100px] text-center">
-                      {page} of {totalPages}
-                    </div>
-                    <Button
-                      disabled={page >= totalPages}
-                      onClick={() =>
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      color={ButtonColor.Black}
-                      size="small"
-                    >
-                      Next &rarr;
-                    </Button>
-                    <Button
-                      disabled={page >= totalPages}
-                      onClick={() => setPage(totalPages)}
-                      color={ButtonColor.Black}
-                      size="small"
-                    >
-                      Last
-                    </Button>
-                  </div>
-
-                  {/* Response Info - Fixed width to prevent layout shift */}
-                  {currentResponse && (
-                    <div className="flex items-center gap-4">
-                      <div className="text-right min-w-[200px]">
-                        <p className="font-medium text-gray-900 truncate max-w-[700px]">
-                          {respondentName}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(currentResponse.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                      {currentResponse.sessionReplayUrl && (
-                        <Button
-                          size="small"
-                          color={ButtonColor.BlueOutline}
-                          onClick={() =>
-                            window.open(
-                              "https://us.posthog.com/project/188181/replay/home?sessionRecordingId=" +
-                                currentResponse.sessionReplayUrl!.substring(
-                                  currentResponse.sessionReplayUrl!.lastIndexOf(
-                                    "/"
-                                  ) + 1
-                                ),
-                              "_blank"
-                            )
-                          }
-                        >
-                          <CirclePlay size={14} className="mr-1.5" />
-                          Replay
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
               {/* Form Response */}
               {form !== null && (
                 <div className="max-w-[600px] mx-auto">
