@@ -81,7 +81,7 @@ export class TasksService {
     private videosService: VideosService,
     private aiDetectionQueueService: AiDetectionQueueService,
     private aiDetectionQueryService: AiDetectionQueryService,
-  ) { }
+  ) {}
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
     return this.formRepository.save(createFormDto);
@@ -203,18 +203,8 @@ export class TasksService {
     updateFormDto: CreateFormDto,
   ): Promise<Form> {
     const form = await this.getForm(formId);
-    const oldVideoIds = new Set(this.extractVideoIds(form.schema));
     Object.assign(form, updateFormDto);
     const saved = await this.formRepository.save(form);
-    const newVideoIds = new Set(
-      this.extractVideoIds(saved.schema),
-    );
-    const removedVideoIds = [...oldVideoIds].filter(
-      (id) => !newVideoIds.has(id),
-    );
-    if (removedVideoIds.length > 0) {
-      void this.cleanupVideos(removedVideoIds);
-    }
     return this.transformImageUrls(saved);
   }
 
@@ -559,25 +549,6 @@ export class TasksService {
       }
     }
     return ids;
-  }
-
-  private async cleanupVideos(videoIds: number[]): Promise<void> {
-    await Promise.all(
-      videoIds.map((id) =>
-        this.videosService.deleteVideo(id).catch((err) => {
-          this.logger.warn(`Failed to clean up video ${id}`, err);
-        }),
-      ),
-    );
-  }
-
-  async deleteForm(formId: number): Promise<void> {
-    const form = await this.getForm(formId);
-    const videoIds = this.extractVideoIds(form.schema);
-    await this.formRepository.remove(form);
-    if (videoIds.length > 0) {
-      void this.cleanupVideos(videoIds);
-    }
   }
 
   async getFormResponses(formId: number): Promise<FormResponseDto[]> {
