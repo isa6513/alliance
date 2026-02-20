@@ -511,6 +511,7 @@ export type Notification = {
     comment?: Comment;
     onetimeInvite?: OnetimeInvite;
     communityInvite?: CommunityInvite;
+    cid?: string;
 };
 
 export type OnetimeInvite = {
@@ -970,7 +971,7 @@ export type CreateMessageDto = {
     replyToId?: string;
 };
 
-export type EventType = 'account_created' | 'contract_signed' | 'contract_suspended' | 'sms_unsubscribe' | 'sms_inbound' | 'sms_failure' | 'forum_action_autocomplete' | 'action_comment';
+export type EventType = 'account_created' | 'contract_signed' | 'contract_suspended' | 'sms_unsubscribe' | 'sms_inbound' | 'sms_failure' | 'forum_action_autocomplete' | 'action_comment' | 'forum_reply_notif_failure';
 
 export type EventLogUserDto = {
     id: number;
@@ -1475,6 +1476,27 @@ export type NotificationScheduleEntryDto = {
     eventId: number;
     recipients: Array<ProfileDto>;
     metadata?: NotificationScheduleMetadataDto;
+};
+
+export type SetActionPriorityDto = {
+    /**
+     * Unique identifier for the action
+     */
+    id: number;
+    /**
+     * Priority of the action
+     */
+    priority: number;
+};
+
+export type SetGeneralUpdatePriorityDto = {
+    id: number;
+    priority: number;
+};
+
+export type SetPriorityDto = {
+    actionPriorities: Array<SetActionPriorityDto>;
+    generalUpdatePriorities: Array<SetGeneralUpdatePriorityDto>;
 };
 
 export type CreateActionDto = {
@@ -4778,6 +4800,17 @@ export type ActionsGetActionActivitiesResponses = {
 };
 
 export type ActionsGetActionActivitiesResponse = ActionsGetActionActivitiesResponses[keyof ActionsGetActionActivitiesResponses];
+
+export type ActionsSetPriorityData = {
+    body: SetPriorityDto;
+    path?: never;
+    query?: never;
+    url: '/actions/priorities';
+};
+
+export type ActionsSetPriorityResponses = {
+    200: unknown;
+};
 
 export type ActionsFindAllWithDraftsData = {
     body?: never;

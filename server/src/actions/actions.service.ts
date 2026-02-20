@@ -79,6 +79,7 @@ import {
   GlobalFeedNewMembersDto,
   LatLonDto,
   ReminderGroupPlanDto,
+  SetPriorityDto,
   SuspensionPlanDto,
   UpdateActionActivityDto,
   UpdateActionDto,
@@ -704,6 +705,21 @@ export class ActionsService {
     }
 
     return update;
+  }
+
+  async setPriorityOrder(dto: SetPriorityDto): Promise<void> {
+    await Promise.all([
+      ...dto.actionPriorities.map((actionPriority) =>
+        this.actionRepository.update(actionPriority.id, {
+          priority: actionPriority.priority,
+        }),
+      ),
+      ...dto.generalUpdatePriorities.map((generalUpdatePriority) =>
+        this.generalUpdateRepository.update(generalUpdatePriority.id, {
+          priority: generalUpdatePriority.priority,
+        }),
+      ),
+    ]);
   }
 
   async deleteGeneralUpdate(id: number): Promise<void> {

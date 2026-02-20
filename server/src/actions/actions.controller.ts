@@ -68,6 +68,7 @@ import {
   PreviewTextMessageResponse,
   ReminderGroupPlanDto,
   ScheduledPlansOverviewDto,
+  SetPriorityDto,
   SuspensionPlanDto,
   UpdateActionActivityDto,
   UpdateActionDto,
@@ -390,6 +391,13 @@ export class ActionsController {
       comments,
       req.user?.sub,
     );
+  }
+
+  @Post('priorities')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async setPriority(@Body() dto: SetPriorityDto): Promise<void> {
+    return this.actionsService.setPriorityOrder(dto);
   }
 
   @Get('all')

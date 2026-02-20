@@ -8,6 +8,7 @@ import {
 import { Type } from 'class-transformer';
 import {
   Allow,
+  IsArray,
   IsBoolean,
   IsDefined,
   IsNumber,
@@ -31,6 +32,7 @@ import { Form } from 'src/tasks/entities/form.entity';
 import { SubmitFormDto } from 'src/tasks/form.dto';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { PreviewNotificationPlan } from 'src/notifs/action-event-reminder.service';
+import { GeneralUpdate } from '../entities/general-update.entity';
 
 export class CreateReminderGroupDto extends PickType(ReminderGroup, [
   'name',
@@ -230,6 +232,28 @@ export class CreateActionDto extends OmitType(ActionDto, [
 }
 
 export class UpdateActionDto extends PartialType(CreateActionDto) {}
+
+export class SetActionPriorityDto extends PickType(Action, [
+  'id',
+  'priority',
+]) {}
+
+export class SetGeneralUpdatePriorityDto extends PickType(GeneralUpdate, [
+  'id',
+  'priority',
+]) {}
+
+export class SetPriorityDto {
+  @ApiProperty({ type: () => SetActionPriorityDto, isArray: true })
+  @Type(() => SetActionPriorityDto)
+  @IsArray()
+  actionPriorities: SetActionPriorityDto[];
+
+  @ApiProperty({ type: () => SetGeneralUpdatePriorityDto, isArray: true })
+  @Type(() => SetGeneralUpdatePriorityDto)
+  @IsArray()
+  generalUpdatePriorities: SetGeneralUpdatePriorityDto[];
+}
 
 export class LatLonDto {
   @ApiProperty({ type: Number })
