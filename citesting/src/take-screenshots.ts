@@ -17,8 +17,7 @@ const backendPort = Number(process.env.BACKEND_PORT ?? "3005");
 const frontendPort = Number(process.env.FRONTEND_PORT ?? "5173");
 const frontendMode = (process.env.FRONTEND_MODE ?? "prod").toLowerCase();
 const frontendBuildMode = process.env.FRONTEND_BUILD_MODE ?? "development";
-const baseUrl =
-  process.env.FRONTEND_URL ?? `http://localhost:${frontendPort}`;
+const baseUrl = process.env.FRONTEND_URL ?? `http://localhost:${frontendPort}`;
 const rawOutputDir =
   process.env.SCREENSHOT_OUTPUT_DIR ??
   path.join(
@@ -43,8 +42,7 @@ const testUserPassword =
 
 const childProcesses: ChildProcessHandle[] = [];
 
-const delay = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const logPrefix = "[citesting:screenshots]";
 
@@ -57,7 +55,11 @@ const sanitizeFileName = (value: string) =>
     .replace(/^-|-$/g, "")
     .toLowerCase() || "page";
 
-const spawnProcess = (command: string, args: string[], options: SpawnOptions) => {
+const spawnProcess = (
+  command: string,
+  args: string[],
+  options: SpawnOptions
+) => {
   const child = spawn(command, args, {
     cwd: options.cwd,
     env: options.env,
@@ -162,7 +164,13 @@ const setupDatabase = async () => {
   // Drop and recreate the database so every run starts clean.
   await runCommand(
     "psql",
-    [...psqlBase, "-d", "postgres", "-c", `DROP DATABASE IF EXISTS "${dbName}"`],
+    [
+      ...psqlBase,
+      "-d",
+      "postgres",
+      "-c",
+      `DROP DATABASE IF EXISTS "${dbName}"`,
+    ],
     { cwd: repoRoot, env: pgEnv }
   );
   await runCommand(
@@ -185,7 +193,12 @@ const setupDatabase = async () => {
 };
 
 const loadSeedData = async (psqlBase: string[], pgEnv: NodeJS.ProcessEnv) => {
-  const seedFile = path.join(repoRoot, "citesting", "fixtures", "seed.sql");
+  const seedFile = path.join(
+    repoRoot,
+    "citesting",
+    "fixtures",
+    "seed_dataonly.sql"
+  );
   let seedContent = await fs.readFile(seedFile, "utf8");
 
   // Strip pg17-only constructs so the dump loads on older Postgres versions.
@@ -217,11 +230,8 @@ const loadSeedData = async (psqlBase: string[], pgEnv: NodeJS.ProcessEnv) => {
 
     child.on("error", (error) => reject(error));
     child.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`psql seed loading failed with exit code ${code}`));
-      }
+      if (code === 0) resolve();
+      else reject(new Error(`psql seed loading failed with exit code ${code}`));
     });
   });
 };
@@ -258,11 +268,10 @@ const shiftTimestamps = async (
     $$;
   `;
 
-  await runCommand(
-    "psql",
-    [...psqlBase, "-d", dbName, "-c", sql],
-    { cwd: repoRoot, env: pgEnv }
-  );
+  await runCommand("psql", [...psqlBase, "-d", dbName, "-c", sql], {
+    cwd: repoRoot,
+    env: pgEnv,
+  });
 };
 
 /* ------------------------------------------------------------------ */
@@ -346,15 +355,12 @@ const ensureFrontendBuild = async () => {
 
   const env: NodeJS.ProcessEnv = {
     ...process.env,
-    VITE_API_URL:
-      process.env.VITE_API_URL ?? `http://localhost:${backendPort}`,
+    VITE_API_URL: process.env.VITE_API_URL ?? `http://localhost:${backendPort}`,
     VITE_APP_GIT_SHA: process.env.VITE_APP_GIT_SHA ?? "local",
     VITE_APP_VERSION: process.env.VITE_APP_VERSION ?? "local",
   };
 
-  console.log(
-    `${logPrefix} Building frontend (mode: ${frontendBuildMode})...`
-  );
+  console.log(`${logPrefix} Building frontend (mode: ${frontendBuildMode})...`);
   await runCommand(
     "yarn",
     ["workspace", "@alliance/frontend", "build", "--mode", frontendBuildMode],
@@ -385,13 +391,7 @@ const startFrontend = async () => {
 
   return spawnProcess(
     "yarn",
-    [
-      "workspace",
-      "@alliance/frontend",
-      "dev",
-      "--port",
-      String(frontendPort),
-    ],
+    ["workspace", "@alliance/frontend", "dev", "--port", String(frontendPort)],
     {
       cwd: repoRoot,
       env,
@@ -453,9 +453,11 @@ const takeScreenshots = async () => {
         timeout: target.waitForTimeoutMs ?? 20000,
       });
     } else {
-      await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => {
-        // Some pages keep background requests open; ignore.
-      });
+      await page
+        .waitForLoadState("networkidle", { timeout: 20000 })
+        .catch(() => {
+          // Some pages keep background requests open; ignore.
+        });
     }
     await page.waitForTimeout(100);
     await page.screenshot({ path: filePath, fullPage: true });
