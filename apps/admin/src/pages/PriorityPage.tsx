@@ -321,8 +321,6 @@ const PriorityPage: React.FC = () => {
     );
   }
 
-  console.log({ draggedIndex }, "asdf");
-
   return (
     <div className="p-5 space-y-4">
       <title>Priority - Admin</title>
