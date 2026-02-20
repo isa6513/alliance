@@ -104,6 +104,24 @@ const PriorityPage: React.FC = () => {
   const listRef = useRef<HTMLUListElement | null>(null);
   const { error: showError } = useToast();
 
+  const cleanupDrag = useCallback(() => {
+    if (dragListenerRef.current) {
+      document.removeEventListener("drag", dragListenerRef.current);
+      dragListenerRef.current = null;
+    }
+    if (dragPreviewRef.current?.parentNode) {
+      dragPreviewRef.current.parentNode.removeChild(dragPreviewRef.current);
+      dragPreviewRef.current = null;
+    }
+    if (transparentDragImageRef.current?.parentNode) {
+      transparentDragImageRef.current.parentNode.removeChild(
+        transparentDragImageRef.current
+      );
+      transparentDragImageRef.current = null;
+    }
+    draggedIndexRef.current = null;
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -128,24 +146,8 @@ const PriorityPage: React.FC = () => {
   }, [load]);
 
   useEffect(() => {
-    return () => {
-      if (dragListenerRef.current) {
-        document.removeEventListener("drag", dragListenerRef.current);
-        dragListenerRef.current = null;
-      }
-      if (dragPreviewRef.current?.parentNode) {
-        dragPreviewRef.current.parentNode.removeChild(dragPreviewRef.current);
-        dragPreviewRef.current = null;
-      }
-      if (transparentDragImageRef.current?.parentNode) {
-        transparentDragImageRef.current.parentNode.removeChild(
-          transparentDragImageRef.current
-        );
-        transparentDragImageRef.current = null;
-      }
-      draggedIndexRef.current = null;
-    };
-  }, []);
+    return () => cleanupDrag();
+  }, [cleanupDrag]);
 
   const handleDragStart = (index: number) => (e: React.DragEvent) => {
     setDraggedIndex(index);
@@ -198,21 +200,7 @@ const PriorityPage: React.FC = () => {
 
   const handleDragEnd = () => {
     setDraggedIndex(null);
-    draggedIndexRef.current = null;
-    if (dragListenerRef.current) {
-      document.removeEventListener("drag", dragListenerRef.current);
-      dragListenerRef.current = null;
-    }
-    if (dragPreviewRef.current?.parentNode) {
-      dragPreviewRef.current.parentNode.removeChild(dragPreviewRef.current);
-      dragPreviewRef.current = null;
-    }
-    if (transparentDragImageRef.current?.parentNode) {
-      transparentDragImageRef.current.parentNode.removeChild(
-        transparentDragImageRef.current
-      );
-      transparentDragImageRef.current = null;
-    }
+    cleanupDrag();
   };
 
   const applyReorder = useCallback((fromIndex: number, toIndex: number) => {
