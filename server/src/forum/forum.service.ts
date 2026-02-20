@@ -218,6 +218,24 @@ export class ForumService {
     return postsWithComments;
   }
 
+  async findOnePostFull(id: number, userId?: number): Promise<Post> {
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: {
+        author: true,
+        action: true,
+        editableContent: true,
+        authors: true,
+      },
+    });
+
+    if (!post || !this.postIsVisible(post, userId)) {
+      throw new NotFoundException(`Post with ID "${id}" not found`);
+    }
+
+    return post;
+  }
+
   async findOnePost(id: number, userId?: number): Promise<PostDto> {
     const post = await this.postRepository.findOne({
       where: { id },

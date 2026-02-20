@@ -373,7 +373,7 @@ export class ActionActivityDto extends PickType(ActionActivity, [
     this.formResponseOutput = extra?.formResponseOutput;
     this.editableContent = actionActivity.editableContent
       ? new EditableContentDto(actionActivity.editableContent)
-      : { body: '', attachments: [] };
+      : { body: '', attachments: [], id: -1 };
   }
 }
 
@@ -422,7 +422,7 @@ export class ActionUpdateDto extends PickType(ActionUpdate, [
     Object.assign(this, actionUpdate);
     this.content = actionUpdate.content
       ? new EditableContentDto(actionUpdate.content)
-      : { body: '', attachments: [] };
+      : { body: '', attachments: [], id: -1 };
     this.actionName = actionUpdate.action?.name;
   }
 }

@@ -63,7 +63,9 @@ export class SearchService {
             );
             return this.actionToSearchItem(action);
           } else if (search.objectType === SearchItemType.Post) {
-            const post = await this.forumService.findOnePost(search.objectId);
+            const post = await this.forumService.findOnePostFull(
+              search.objectId,
+            );
             if (post.deleted) {
               return null;
             }
@@ -133,7 +135,9 @@ export class SearchService {
       secondaryData: [readableActionStatus[action.status]],
     };
   }
-  postToSearchItem(post: Post): SearchItemDto {
+  postToSearchItem(
+    post: Pick<Post, 'id' | 'title' | 'createdAt' | 'likesIds'>,
+  ): SearchItemDto {
     return {
       id: 'p' + post.id,
       name: post.title,

@@ -27,6 +27,7 @@ export class PostDto extends PickType(Post, [
   'updatedAt',
   'pinned',
   'qaMode',
+  'deleted',
   'expertIds',
   'expertLabel',
   'authorIds',

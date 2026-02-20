@@ -79,6 +79,7 @@ export const testUser = new User({
   participants: [],
   phoneNumberUnsubscribed: false,
   remindAboutUncompletedGroupMembers: true,
+  receiveReplyNotifications: true,
 } satisfies Omit<
   User,
   | 'friends'
