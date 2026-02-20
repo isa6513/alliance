@@ -65,10 +65,8 @@ export class SearchService {
           } else if (search.objectType === SearchItemType.Post) {
             const post = await this.forumService.findOnePostFull(
               search.objectId,
+              userId,
             );
-            if (post.deleted) {
-              return null;
-            }
             return this.postToSearchItem(post);
           }
           return null;
