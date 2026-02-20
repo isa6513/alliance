@@ -40,13 +40,11 @@ const reviewPage = async (
   client: Anthropic,
   pageName: string,
   baselinePath: string,
-  currentPath: string,
-  diffPath: string
+  currentPath: string
 ): Promise<ReviewResult> => {
-  const [baselineB64, currentB64, diffB64] = await Promise.all([
+  const [baselineB64, currentB64] = await Promise.all([
     toBase64(baselinePath),
     toBase64(currentPath),
-    toBase64(diffPath),
   ]);
 
   const response = await client.messages.create({
@@ -90,7 +88,6 @@ const reviewPage = async (
 
 The first image is the BASELINE.
 The second image is the CURRENT build.
-The third image is the PIXEL DIFF (red highlights show changed pixels).
 
 Decide whether the visual changes represent a regression (broken layout, missing elements, overlapping text, broken styling) or are acceptable (minor rendering differences, anti-aliasing, expected content changes).
 If the first image (baseline) is broken and the current build is improved, report "pass". report "fail" if both are broken.
@@ -112,10 +109,6 @@ Report "pass" for acceptable changes and "fail" for regressions.`,
               media_type: "image/png",
               data: currentB64,
             },
-          },
-          {
-            type: "image",
-            source: { type: "base64", media_type: "image/png", data: diffB64 },
           },
         ],
       },
@@ -256,13 +249,7 @@ const main = async () => {
     apiTasks.push({
       file,
       task: () =>
-        reviewPage(
-          client,
-          pageName,
-          baselinePath,
-          path.join(currentDir, file),
-          diffPath
-        ),
+        reviewPage(client, pageName, baselinePath, path.join(currentDir, file)),
     });
   }
 
