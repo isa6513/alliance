@@ -51,7 +51,7 @@ const OnetimeInviteForm = ({
         </p>
         <TextareaAutosize
           className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-          placeholder="Context about the invitation"
+          placeholder="Context for the office about the invitation (not included in the invite!)"
           value={info}
           onChange={(e) => setInfo(e.target.value)}
           minRows={2}
