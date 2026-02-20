@@ -4,6 +4,8 @@ import { useActionUpdates } from "@alliance/shared/lib/informationPage";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
+import { isFeatureEnabled } from "../../lib/config";
+import { Features } from "@alliance/shared/lib/features";
 
 const InformationPage: React.FC = () => {
   useWhiteBackground();
@@ -132,6 +134,17 @@ const InformationPage: React.FC = () => {
             <li>Hiring.</li>
           </ul>
         </div>
+
+        {isFeatureEnabled(Features.GeneralUpdatesLink) && (
+          <div className="flex flex-col gap-y-2 mt-4">
+            <h2 className="text-2xl font-semibold">General updates</h2>
+            <p className="text-zinc-500">
+              <Link to={href("/general-updates")} className="text-link">
+                View all general updates
+              </Link>
+            </p>
+          </div>
+        )}
 
         <h2 className="text-2xl font-semibold mt-4">Action updates</h2>
 
