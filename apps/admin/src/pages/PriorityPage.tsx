@@ -14,7 +14,7 @@ import {
   ArrowUpIcon,
   GripVertical,
   Minus,
-  MoveDownIcon,
+  MoveUpIcon,
 } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
@@ -77,7 +77,7 @@ function buildInitialList(
   // Insert "new items" divider above all priority <= 0, below any priority > 0
   const dividerIndex = withRaw.findIndex(({ raw }) => {
     const p = (raw as { priority?: number }).priority;
-    return p === undefined || p <= 0;
+    return p === undefined || p < 0;
   });
   const insertAt = dividerIndex === -1 ? withRaw.length : dividerIndex;
   const above = withRaw.slice(0, insertAt).map((x) => x.item);
@@ -315,8 +315,8 @@ const PriorityPage: React.FC = () => {
                 />
                 {isDivider ? (
                   <div className="flex flex-row text-zinc-600 items-center gap-1">
-                    <MoveDownIcon size={14} />
-                    New actions/general updates will be inserted below
+                    <MoveUpIcon size={14} />
+                    New actions/general updates will be inserted above
                   </div>
                 ) : (
                   <>

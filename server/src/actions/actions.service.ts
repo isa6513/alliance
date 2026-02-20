@@ -52,8 +52,8 @@ import {
   In,
   IsNull,
   LessThan,
-  LessThanOrEqual,
   MoreThan,
+  MoreThanOrEqual,
   Or,
   type Repository,
 } from 'typeorm';
@@ -192,13 +192,13 @@ export class ActionsService {
     const actionsPromise = run(async () => {
       const actions = await this.actionRepository.find({
         where: {
-          priority: LessThanOrEqual(0),
+          priority: MoreThanOrEqual(0),
         },
       });
       await Promise.all(
         actions.map((action) =>
           this.actionRepository.update(action.id, {
-            priority: action.priority - 1,
+            priority: action.priority + 1,
           }),
         ),
       );
@@ -207,13 +207,13 @@ export class ActionsService {
     const generalUpdatesPromise = run(async () => {
       const generalUpdates = await this.generalUpdateRepository.find({
         where: {
-          priority: LessThanOrEqual(0),
+          priority: MoreThanOrEqual(0),
         },
       });
       await Promise.all(
         generalUpdates.map((generalUpdate) =>
           this.generalUpdateRepository.update(generalUpdate.id, {
-            priority: generalUpdate.priority - 1,
+            priority: generalUpdate.priority + 1,
           }),
         ),
       );
