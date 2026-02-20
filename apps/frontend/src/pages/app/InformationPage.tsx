@@ -133,15 +133,6 @@ const InformationPage: React.FC = () => {
           </ul>
         </div>
 
-        <div className="flex flex-col gap-y-2 mt-4">
-          <h2 className="text-2xl font-semibold">General updates</h2>
-          <p className="text-zinc-500">
-            <Link to={href("/general-updates")} className="text-link">
-              View all general updates
-            </Link>
-          </p>
-        </div>
-
         <h2 className="text-2xl font-semibold mt-4">Action updates</h2>
 
         <div className="flex flex-col gap-y-4 text-base">

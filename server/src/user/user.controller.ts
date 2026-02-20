@@ -36,7 +36,6 @@ import {
   UpdateProfileDto,
   UserDto,
 } from './dto/user.dto';
-import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { AddUserToTagDto, CreateTagDto, TagDto } from './dto/tag.dto';
 import {
@@ -65,7 +64,7 @@ class VerifyEmailBody {
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Get('me')
   @UseGuards(AuthGuard)
@@ -316,7 +315,10 @@ export class UserController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserDto })
   async userDetail(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
-    const user = await this.userService.findOne(id, { contractEvents: true, referredBy: true });
+    const user = await this.userService.findOne(id, {
+      contractEvents: true,
+      referredBy: true,
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -400,7 +402,7 @@ export class UserController {
 
   @Post('verifyEmail')
   @Public()
-  @ApiOkResponse({ type: User })
+  @ApiOkResponse()
   async verifyEmail(@Body() body: VerifyEmailBody) {
     return this.userService.verifyEmail(body.token);
   }

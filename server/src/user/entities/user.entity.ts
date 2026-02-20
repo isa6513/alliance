@@ -198,7 +198,7 @@ export class User {
   forumDigestPreference: ForumDigestPreference;
 
   @Column()
-  @ApiProperty()
+  @Exclude()
   @IsNotEmpty()
   password: string;
 
