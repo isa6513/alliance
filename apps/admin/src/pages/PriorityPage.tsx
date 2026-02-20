@@ -127,6 +127,26 @@ const PriorityPage: React.FC = () => {
     load();
   }, [load]);
 
+  useEffect(() => {
+    return () => {
+      if (dragListenerRef.current) {
+        document.removeEventListener("drag", dragListenerRef.current);
+        dragListenerRef.current = null;
+      }
+      if (dragPreviewRef.current?.parentNode) {
+        dragPreviewRef.current.parentNode.removeChild(dragPreviewRef.current);
+        dragPreviewRef.current = null;
+      }
+      if (transparentDragImageRef.current?.parentNode) {
+        transparentDragImageRef.current.parentNode.removeChild(
+          transparentDragImageRef.current
+        );
+        transparentDragImageRef.current = null;
+      }
+      draggedIndexRef.current = null;
+    };
+  }, []);
+
   const handleDragStart = (index: number) => (e: React.DragEvent) => {
     setDraggedIndex(index);
     draggedIndexRef.current = index;
