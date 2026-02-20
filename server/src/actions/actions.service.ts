@@ -53,7 +53,6 @@ import {
   IsNull,
   LessThan,
   MoreThan,
-  MoreThanOrEqual,
   Or,
   type Repository,
 } from 'typeorm';
@@ -189,37 +188,22 @@ export class ActionsService {
   ) {}
 
   async shiftPrioritiesAfterInsertion(): Promise<void> {
-    const actionsPromise = run(async () => {
-      const actions = await this.actionRepository.find({
-        where: {
-          priority: MoreThanOrEqual(0),
-        },
-      });
-      await Promise.all(
-        actions.map((action) =>
-          this.actionRepository.update(action.id, {
-            priority: action.priority + 1,
-          }),
-        ),
-      );
-    });
+    await this.actionRepository.manager.transaction(async (manager) => {
+      const actionsPromise = manager
+        .createQueryBuilder()
+        .update(Action)
+        .set({ priority: () => 'priority + 1' })
+        .where('priority >= :min', { min: 0 })
+        .execute();
+      const generalUpdatesPromise = manager
+        .createQueryBuilder()
+        .update(GeneralUpdate)
+        .set({ priority: () => 'priority + 1' })
+        .where('priority >= :min', { min: 0 })
+        .execute();
 
-    const generalUpdatesPromise = run(async () => {
-      const generalUpdates = await this.generalUpdateRepository.find({
-        where: {
-          priority: MoreThanOrEqual(0),
-        },
-      });
-      await Promise.all(
-        generalUpdates.map((generalUpdate) =>
-          this.generalUpdateRepository.update(generalUpdate.id, {
-            priority: generalUpdate.priority + 1,
-          }),
-        ),
-      );
+      await Promise.all([actionsPromise, generalUpdatesPromise]);
     });
-
-    await Promise.all([actionsPromise, generalUpdatesPromise]);
   }
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
