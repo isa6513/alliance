@@ -218,11 +218,14 @@ const HomePage = () => {
           isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
             <LargeGeneralUpdateCard
               key={currentTaskOrGeneralUpdate.id}
+              id={currentTaskOrGeneralUpdate.id}
               title={currentTaskOrGeneralUpdate.name}
               schema={currentTaskOrGeneralUpdate.schema}
               onDismiss={() =>
                 handleDismissGeneralUpdate(currentTaskOrGeneralUpdate.id)
               }
+              userId={user?.id}
+              user={user}
             />
           ) : currentTaskOrGeneralUpdate &&
             currentTaskOrGeneralUpdate.userRelation ? (

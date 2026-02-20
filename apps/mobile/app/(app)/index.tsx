@@ -27,6 +27,7 @@ import {
   KeyboardAwareScrollViewRef,
 } from "react-native-keyboard-controller";
 import type { GeneralUpdateDto } from "@alliance/shared/client";
+import { useAuth } from "../../lib/AuthContext";
 
 const GENERAL_UPDATES_QUERY_KEY = [
   "actions",
@@ -48,6 +49,8 @@ export default function HomeScreen() {
         (response) => response.data ?? []
       ),
   });
+
+  const { user } = useAuth();
 
   const { data: generalUpdates, isPending: generalUpdatesPending } = useQuery({
     queryKey: GENERAL_UPDATES_QUERY_KEY,
@@ -155,6 +158,8 @@ export default function HomeScreen() {
               onDismiss={() =>
                 handleDismissGeneralUpdate(currentTaskOrGeneralUpdate.id)
               }
+              userId={user?.id}
+              user={user}
             />
           </View>
         ) : (

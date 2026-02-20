@@ -1,9 +1,7 @@
-import { useMemo } from "react";
 import { View } from "react-native";
-import type { GeneralUpdateDto } from "@alliance/shared/client";
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
+import type { GeneralUpdateDto, UserDto } from "@alliance/shared/client";
 import type { FormSchema } from "@alliance/shared/forms/formschema";
-import { RenderDisplayBlockMobile } from "./forms/FormRenderer";
+import FormRenderer from "./forms/FormRenderer";
 import Card from "./system/Card";
 import Button, { ButtonColor } from "./system/Button";
 import Text from "./system/Text";
@@ -11,48 +9,31 @@ import Text from "./system/Text";
 export interface LargeGeneralUpdateCardProps {
   generalUpdate: GeneralUpdateDto;
   onDismiss: () => void;
+  userId?: number | string;
+  user?: UserDto;
 }
 
-function isDisplayBlock(element: unknown): element is DisplayBlock {
-  return (
-    typeof element === "object" &&
-    element !== null &&
-    "kind" in element &&
-    typeof (element as DisplayBlock).kind === "string"
-  );
-}
-
-function getDisplayBlocksFromSchema(
-  schema: GeneralUpdateDto["schema"]
-): DisplayBlock[] {
+function getFormSchema(schema: GeneralUpdateDto["schema"]): FormSchema | null {
   if (
     typeof schema !== "object" ||
     schema === null ||
     !("pages" in schema) ||
-    !Array.isArray((schema as { pages?: unknown[] }).pages)
+    !Array.isArray((schema as { pages?: unknown }).pages) ||
+    (schema as { pages: unknown[] }).pages.length === 0
   ) {
-    return [];
+    return null;
   }
-  const formSchema = schema as unknown as FormSchema;
-  const blocks: DisplayBlock[] = [];
-  for (const page of formSchema.pages ?? []) {
-    for (const element of page.fields ?? []) {
-      if (isDisplayBlock(element)) {
-        blocks.push(element);
-      }
-    }
-  }
-  return blocks;
+  return schema as unknown as FormSchema;
 }
 
 export default function LargeGeneralUpdateCard({
   generalUpdate,
   onDismiss,
+  userId,
+  user,
 }: LargeGeneralUpdateCardProps) {
-  const displayBlocks = useMemo(
-    () => getDisplayBlocksFromSchema(generalUpdate.schema),
-    [generalUpdate.schema]
-  );
+  const formSchema = getFormSchema(generalUpdate.schema);
+  console.dir({ formSchemaasdf: formSchema }, { depth: null });
 
   return (
     <Card className="p-4 sm:p-6 w-full relative border-dashed border-[1.5px] border-blue-300 rounded">
@@ -68,9 +49,16 @@ export default function LargeGeneralUpdateCard({
         </Text>
       </View>
       <View className="gap-4 mb-8">
-        {displayBlocks.map((block, index) => (
-          <RenderDisplayBlockMobile key={block.id ?? index} block={block} />
-        ))}
+        {formSchema ? (
+          <FormRenderer
+            form={formSchema}
+            id={generalUpdate.id}
+            actionId={generalUpdate.id}
+            onSubmit={null}
+            userId={userId}
+            user={user}
+          />
+        ) : null}
       </View>
       <View className="border-t border-zinc-200 pt-6">
         <Button

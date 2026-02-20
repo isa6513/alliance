@@ -1,58 +1,39 @@
-import { useMemo } from "react";
-import type { GeneralUpdateDto } from "@alliance/shared/client";
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type { FormSchema } from "@alliance/shared/forms/formschema";
-import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
+import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import Card from "@alliance/sharedweb/ui/Card";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { UserDto } from "@alliance/shared/client";
 
 export interface LargeGeneralUpdateCardProps {
   title: string;
   schema: Record<string, unknown>;
   onDismiss?: () => void;
+  id?: number;
+  userId?: number | string;
+  user?: UserDto;
 }
 
-function isDisplayBlock(element: unknown): element is DisplayBlock {
-  return (
-    typeof element === "object" &&
-    element !== null &&
-    "kind" in element &&
-    typeof (element as DisplayBlock).kind === "string"
-  );
-}
-
-function getDisplayBlocksFromSchema(
-  schema: GeneralUpdateDto["schema"]
-): DisplayBlock[] {
+function getFormSchema(schema: Record<string, unknown>): FormSchema | null {
   if (
     typeof schema !== "object" ||
     schema === null ||
     !("pages" in schema) ||
-    !Array.isArray((schema as { pages?: unknown[] }).pages)
+    !Array.isArray((schema as { pages?: unknown }).pages) ||
+    (schema as { pages: unknown[] }).pages.length === 0
   ) {
-    return [];
+    return null;
   }
-  const formSchema = schema as unknown as FormSchema;
-  const blocks: DisplayBlock[] = [];
-  for (const page of formSchema.pages ?? []) {
-    for (const element of page.fields ?? []) {
-      if (isDisplayBlock(element)) {
-        blocks.push(element);
-      }
-    }
-  }
-  return blocks;
+  return schema as unknown as FormSchema;
 }
 
 const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
   title,
   schema,
   onDismiss,
+  id: propsId,
+  userId,
+  user,
 }) => {
-  const displayBlocks = useMemo(
-    () => getDisplayBlocksFromSchema(schema),
-    [schema]
-  );
+  const formSchema = getFormSchema(schema);
 
   return (
     <Card className="p-6 sm:p-8 w-full relative border-[1.5px] rounded">
@@ -62,19 +43,19 @@ const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
           <p className="font-semibold text-2xl font-serif">{title}</p>
         </div>
         <div className="space-y-4">
-          {displayBlocks.map((block, index) => (
-            <RenderDisplayBlock key={block.id ?? index} block={block} />
-          ))}
+          {formSchema ? (
+            <FormRenderer
+              form={formSchema}
+              id={propsId ?? 0}
+              actionId={0}
+              onSubmit={null}
+              userId={userId}
+              user={user}
+              isGeneralUpdate
+              onDismiss={onDismiss}
+            />
+          ) : null}
         </div>
-        {onDismiss && (
-          <Button
-            color={ButtonColor.LightHover}
-            onClick={onDismiss}
-            className="w-full"
-          >
-            Dismiss
-          </Button>
-        )}
       </div>
     </Card>
   );

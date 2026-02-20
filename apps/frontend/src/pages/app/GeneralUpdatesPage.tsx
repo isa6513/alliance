@@ -6,6 +6,7 @@ import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { MoveLeft } from "lucide-react";
+import { useAuth } from "../../lib/AuthContext";
 
 const GeneralUpdatesPage: React.FC = () => {
   useWhiteBackground();
@@ -15,6 +16,8 @@ const GeneralUpdatesPage: React.FC = () => {
     queryFn: () =>
       actionsAllGeneralUpdates().then((response) => response.data ?? []),
   });
+
+  const { user } = useAuth();
 
   return (
     <CenterLayout>
@@ -32,8 +35,11 @@ const GeneralUpdatesPage: React.FC = () => {
           {generalUpdates.map((generalUpdate) => (
             <LargeGeneralUpdateCard
               key={generalUpdate.id}
+              id={generalUpdate.id}
               title={generalUpdate.name}
               schema={generalUpdate.schema}
+              userId={user?.id}
+              user={user}
             />
           ))}
         </div>

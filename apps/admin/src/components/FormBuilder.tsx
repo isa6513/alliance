@@ -1910,6 +1910,8 @@ export function FormBuilder({
                 <LargeGeneralUpdateCard
                   title={generalUpdateName}
                   schema={schema as unknown as Record<string, unknown>}
+                  userId={resolvedPreviewUserId}
+                  user={resolvedPreviewUser}
                   onDismiss={() => {}}
                 />
               </div>

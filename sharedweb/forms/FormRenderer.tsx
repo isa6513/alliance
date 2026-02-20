@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { UserDto } from "@alliance/shared/client";
 import {
   FormResponseDto,
@@ -50,7 +56,16 @@ type FormRendererProps = {
   completedFormResponse?: FormResponseDto;
   fieldLabelRightContent?: Record<string, React.ReactNode>;
   onSubmit: ((data: SubmitFormDto) => Promise<void>) | null; // null for admin preview
-};
+} & (
+  | {
+      isGeneralUpdate?: false;
+      onDismiss?: undefined;
+    }
+  | {
+      isGeneralUpdate: true;
+      onDismiss?: () => void;
+    }
+);
 
 export { computeFormStorageKey };
 
@@ -88,6 +103,8 @@ const FormRenderer = ({
   actionId,
   initialPageIndex,
   sessionReplayUrl,
+  isGeneralUpdate,
+  onDismiss,
 }: FormRendererProps) => {
   // Compute schema and a namespaced storage key for persistence (if enabled)
   const schema = form as unknown as FormSchema;
@@ -302,8 +319,8 @@ const FormRenderer = ({
         const conditions = Array.isArray(element.visibleIf)
           ? element.visibleIf
           : element.visibleIf
-            ? [element.visibleIf]
-            : [];
+          ? [element.visibleIf]
+          : [];
         for (const condition of conditions) {
           if ("validatorId" in condition) {
             ids.add(condition.validatorId);
@@ -974,7 +991,10 @@ const FormRenderer = ({
   useEffect(() => {
     if (prevPageIndexRef.current !== currentPageIndex) {
       prevPageIndexRef.current = currentPageIndex;
-      formTopRef.current?.scrollIntoView({ behavior: "instant", block: 'start' });
+      formTopRef.current?.scrollIntoView({
+        behavior: "instant",
+        block: "start",
+      });
     }
   }, [currentPageIndex]);
 
@@ -990,7 +1010,8 @@ const FormRenderer = ({
   }, [defaultValueMap, readOnly]);
 
   const handlePublicToggleChange = (fieldId: string, nextPublic: boolean) => {
-    const defaultPublic = outputFieldDefaultPublic.get(fieldId) ?? userDefaultPublic;
+    const defaultPublic =
+      outputFieldDefaultPublic.get(fieldId) ?? userDefaultPublic;
     setPublicAnswerOverrides((prev) => {
       if (nextPublic === defaultPublic) {
         if (!(fieldId in prev)) {
@@ -1051,11 +1072,11 @@ const FormRenderer = ({
                 readOnly
                   ? undefined
                   : (event) => {
-                    const nextPublic = useMakePublicToggle
-                      ? event.target.checked
-                      : !event.target.checked;
-                    handlePublicToggleChange(field.id, nextPublic);
-                  }
+                      const nextPublic = useMakePublicToggle
+                        ? event.target.checked
+                        : !event.target.checked;
+                      handlePublicToggleChange(field.id, nextPublic);
+                    }
               }
             />
             {toggleLabel}
@@ -1084,8 +1105,9 @@ const FormRenderer = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Page Content */}
         <div
-          className={`space-y-6 ${readOnly && schema.pages.length === 1 ? "mb-0" : ""
-            }`}
+          className={`space-y-6 ${
+            readOnly && schema.pages.length === 1 ? "mb-0" : ""
+          }`}
         >
           {currentPage !== null &&
             currentPage.fields.map((element, index) =>
@@ -1129,7 +1151,17 @@ const FormRenderer = ({
 
             {isLastPage && (
               <>
-                {readOnly ? null : onSubmit ? (
+                {isGeneralUpdate ? (
+                  onDismiss && (
+                    <Button
+                      color={ButtonColor.LightHover}
+                      onClick={onDismiss}
+                      className="w-full"
+                    >
+                      Dismiss
+                    </Button>
+                  )
+                ) : readOnly ? null : onSubmit ? (
                   <div className="flex flex-1 space-x-2 items-center">
                     <Button
                       color={ButtonColor.Black}
@@ -1172,16 +1204,18 @@ const FormRenderer = ({
                 <p className="mb-1 text-center">Withdrawal options</p>
                 <Button
                   color={ButtonColor.White}
-                  className={`!items-start !justify-start text-left !font-normal ${outOfTimeSelected ? "!bg-zinc-200" : ""
-                    }`}
+                  className={`!items-start !justify-start text-left !font-normal ${
+                    outOfTimeSelected ? "!bg-zinc-200" : ""
+                  }`}
                   onClick={handleOutOfTime}
                 >
                   Took more than 15 minutes
                 </Button>
                 <Button
                   color={ButtonColor.White}
-                  className={`!items-start !justify-start text-left !font-normal ${otherReasonSelected ? "!bg-zinc-100" : ""
-                    }`}
+                  className={`!items-start !justify-start text-left !font-normal ${
+                    otherReasonSelected ? "!bg-zinc-100" : ""
+                  }`}
                   onClick={handleOtherReason}
                 >
                   Other reason
