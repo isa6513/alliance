@@ -266,7 +266,6 @@ const ActionDashboard: React.FC = () => {
     publicOnly: false,
     suiteId: undefined,
     optional: false,
-    priority: 0,
     manualCohortUserIds: [],
     useManualCohort: false,
     authorIds: [],
@@ -298,7 +297,6 @@ const ActionDashboard: React.FC = () => {
           ? parseInt(searchParams.get("suiteId")!)
           : undefined,
         optional: false,
-        priority: 0,
         manualCohortUserIds: [],
         useManualCohort: false,
         authorIds: [],

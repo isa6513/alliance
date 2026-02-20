@@ -1391,7 +1391,6 @@ export type CreateGeneralUpdateDto = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number> | null;
-    priority: number;
     tagIds?: Array<string>;
     suiteIds?: Array<number>;
 };

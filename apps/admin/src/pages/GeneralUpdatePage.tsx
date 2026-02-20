@@ -38,7 +38,6 @@ type Tab = "details" | "form";
 
 type GeneralUpdateForm = {
   name: string;
-  priority: number;
   startDate: string;
   endDate: string;
   useManualCohort: boolean;
@@ -49,7 +48,6 @@ type GeneralUpdateForm = {
 
 const emptyForm: GeneralUpdateForm = {
   name: "",
-  priority: 2,
   startDate: "",
   endDate: "",
   useManualCohort: false,
@@ -189,7 +187,6 @@ const GeneralUpdatePage: React.FC = () => {
         setUpdate(data);
         setForm({
           name: data.name,
-          priority: data.priority,
           startDate: data.startDate
             ? new Date(data.startDate).toISOString().slice(0, 16)
             : "",
@@ -227,7 +224,6 @@ const GeneralUpdatePage: React.FC = () => {
         if (isNew) {
           const body: CreateGeneralUpdateDto = {
             name: form.name,
-            priority: form.priority,
             startDate:
               !hasSuites && form.startDate
                 ? new Date(form.startDate).toISOString()

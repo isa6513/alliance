@@ -37,6 +37,7 @@ export const FORM_BUILDER_PREVIEW_USER: UserDto = {
   undergoingGroupAssignment: false,
   remindAboutUncompletedGroupMembers: false,
   leaderOfIds: [],
+  receiveReplyNotifications: false,
 };
 
 export const testActions: CreateActionDto[] = [
@@ -75,7 +76,6 @@ This is our chance to take direct action against environmental destruction. Ever
     participatingTags: [],
     useManualCohort: false,
     everyoneShouldComplete: false,
-    priority: 0,
     preventCompletion: false,
     visibilityMode: "public",
     onboarding: false,
@@ -83,6 +83,7 @@ This is our chance to take direct action against environmental destruction. Ever
     publicOnly: false,
     shouldCompleteAfterDeadline: false,
     isContractSigningAction: false,
+    isForumParticipationAction: false,
   },
   {
     name: "Use public transportation instead of driving",
@@ -136,7 +137,6 @@ Your commitment to public transit is an investment in a sustainable future.`,
     participatingTags: [],
     useManualCohort: false,
     everyoneShouldComplete: false,
-    priority: 0,
     preventCompletion: false,
     visibilityMode: "public",
     onboarding: false,
@@ -144,5 +144,6 @@ Your commitment to public transit is an investment in a sustainable future.`,
     publicOnly: false,
     shouldCompleteAfterDeadline: false,
     isContractSigningAction: false,
+    isForumParticipationAction: false,
   },
 ];

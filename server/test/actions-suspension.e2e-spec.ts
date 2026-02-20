@@ -61,7 +61,6 @@ describe('findUsersToSuspend (e2e)', () => {
         useManualCohort: false,
         everyoneShouldComplete: false,
         visibilityMode: VisibilityMode.Public,
-        priority: 0,
         preventCompletion: false,
         type: ActionTaskType.Activity,
       }),

@@ -79,6 +79,7 @@ export class CreateGeneralUpdateDto extends OmitType(GeneralUpdate, [
   'tags',
   'suites',
   'schema',
+  'priority',
 ]) {
   @ApiPropertyOptional({ type: String, isArray: true })
   @IsOptional()
