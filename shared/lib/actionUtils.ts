@@ -15,13 +15,21 @@ type TaskPriority = {
   typePriority: number;
 };
 
+type GeneralUpdatePriorityFields = Pick<
+  GeneralUpdateDto,
+  "priority" | "endDate" | "startDate"
+>;
+type ActionPriorityFields = Pick<ActionDto, "priority" | "events">;
+
 export function isGeneralUpdate(
-  a: GeneralUpdateDto | ActionDto
-): a is GeneralUpdateDto {
+  a: GeneralUpdatePriorityFields | ActionPriorityFields
+): a is GeneralUpdatePriorityFields {
   return !("events" in a);
 }
 
-function generalUpdatePriority(generalUpdate: GeneralUpdateDto): TaskPriority {
+function generalUpdatePriority(
+  generalUpdate: GeneralUpdatePriorityFields
+): TaskPriority {
   return {
     priority: generalUpdate.priority,
     deadlineTimestamp: generalUpdate.endDate
@@ -34,7 +42,7 @@ function generalUpdatePriority(generalUpdate: GeneralUpdateDto): TaskPriority {
   };
 }
 
-function actionPriority(action: ActionDto): TaskPriority {
+function actionPriority(action: ActionPriorityFields): TaskPriority {
   const startDateString = action.events.find(
     (event) =>
       event.newStatus === "member_action" ||
@@ -51,7 +59,7 @@ function actionPriority(action: ActionDto): TaskPriority {
 }
 
 function generalUpdateOrActionPriority(
-  a: GeneralUpdateDto | ActionDto
+  a: GeneralUpdatePriorityFields | ActionPriorityFields
 ): TaskPriority {
   if (isGeneralUpdate(a)) {
     return generalUpdatePriority(a);
@@ -60,8 +68,8 @@ function generalUpdateOrActionPriority(
 }
 
 export function homePagePriorityComparator(
-  a: GeneralUpdateDto | ActionDto,
-  b: GeneralUpdateDto | ActionDto
+  a: GeneralUpdatePriorityFields | ActionPriorityFields,
+  b: GeneralUpdatePriorityFields | ActionPriorityFields
 ): number {
   const aPriority = generalUpdateOrActionPriority(a);
   const bPriority = generalUpdateOrActionPriority(b);
@@ -173,7 +181,9 @@ export function getAwayStatus(
 
 export type ActionWithAwayStatus = ActionDto & { awayStatus: TaskAwayStatus };
 
-export function getDeadlineTimestamp(action: ActionDto): number {
+export function getDeadlineTimestamp(
+  action: Pick<ActionDto, "events">
+): number {
   let i = 0;
   // Find first 'member_action' or 'gathering_commitments' event
   while (

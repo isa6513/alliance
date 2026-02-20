@@ -34,6 +34,7 @@ export default [
       route("/event-log", "pages/EventLogPage.tsx"),
       route("/general-updates", "pages/GeneralUpdatesPage.tsx"),
       route("/general-updates/:id", "pages/GeneralUpdatePage.tsx"),
+      route("/priority", "pages/PriorityPage.tsx"),
     ]),
     route("/database", "pages/DatabaseViewer.tsx"),
   ]),

@@ -101,6 +101,7 @@ export class UpdateGeneralUpdateDto extends PartialType(
     'activities',
     'tags',
     'suites',
+    'priority',
   ]),
 ) {
   @ApiPropertyOptional({ type: String, isArray: true })

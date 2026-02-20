@@ -52,6 +52,7 @@ import {
   In,
   IsNull,
   LessThan,
+  LessThanOrEqual,
   MoreThan,
   Or,
   type Repository,
@@ -187,6 +188,40 @@ export class ActionsService {
     private readonly forumService: ForumService,
   ) {}
 
+  async shiftPrioritiesAfterInsertion(): Promise<void> {
+    const actionsPromise = run(async () => {
+      const actions = await this.actionRepository.find({
+        where: {
+          priority: LessThanOrEqual(0),
+        },
+      });
+      await Promise.all(
+        actions.map((action) =>
+          this.actionRepository.update(action.id, {
+            priority: action.priority - 1,
+          }),
+        ),
+      );
+    });
+
+    const generalUpdatesPromise = run(async () => {
+      const generalUpdates = await this.generalUpdateRepository.find({
+        where: {
+          priority: LessThanOrEqual(0),
+        },
+      });
+      await Promise.all(
+        generalUpdates.map((generalUpdate) =>
+          this.generalUpdateRepository.update(generalUpdate.id, {
+            priority: generalUpdate.priority - 1,
+          }),
+        ),
+      );
+    });
+
+    await Promise.all([actionsPromise, generalUpdatesPromise]);
+  }
+
   async create(createActionDto: CreateActionDto): Promise<Action> {
     const { participatingTags, suiteId, authorIds, ...rest } = createActionDto;
     const action = this.actionRepository.create(rest);
@@ -210,6 +245,7 @@ export class ActionsService {
     }
 
     const saved = await this.actionRepository.save(action);
+    await this.shiftPrioritiesAfterInsertion();
     await this.syncGeneralUpdateDatesForSuites([saved.suite?.id]);
     return saved;
   }
@@ -664,6 +700,7 @@ export class ActionsService {
 
     const saved = await this.generalUpdateRepository.save(generalUpdate);
 
+    await this.shiftPrioritiesAfterInsertion();
     if (generalUpdate.suites) {
       await this.syncGeneralUpdateDatesForSuites(
         generalUpdate.suites.map((suite) => suite.id),

@@ -249,7 +249,6 @@ const GeneralUpdatePage: React.FC = () => {
         } else if (id != null && update) {
           const body: UpdateGeneralUpdateDto = {
             name: form.name,
-            priority: form.priority,
             startDate:
               !hasSuites && form.startDate
                 ? new Date(form.startDate).toISOString()
@@ -350,28 +349,13 @@ const GeneralUpdatePage: React.FC = () => {
             />
           </div>
           <div>
-            <label
-              htmlFor="priority"
-              className="block text-sm font-medium text-gray-700 mb-1"
+            <p className="text-sm font-medium text-gray-700">Priority</p>
+            <a
+              href="/priority"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Priority
-            </label>
-            <input
-              type="number"
-              id="priority"
-              value={form.priority}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  priority: parseInt(e.target.value, 10) || 0,
-                }))
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
-            />
-            <p className="text-xs text-gray-500 mt-0.5">
-              General updates are always shown before tasks. Higher numbers
-              shown first
-            </p>
+              Manage priority
+            </a>
           </div>
         </div>
       </FormSection>

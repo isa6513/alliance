@@ -1408,7 +1408,6 @@ export type UpdateGeneralUpdateDto = {
      * User IDs in the manual cohort
      */
     manualCohortUserIds?: Array<number> | null;
-    priority?: number;
     tagIds?: Array<string>;
     suiteIds?: Array<number>;
 };
@@ -1573,10 +1572,6 @@ export type CreateActionDto = {
      * Whether the action is an onboarding action (hide for existing members)
      */
     onboarding: boolean;
-    /**
-     * Priority of the action
-     */
-    priority: number;
     optional: boolean;
     /**
      * Prevent completion of the action (for old actions)
@@ -1685,10 +1680,6 @@ export type UpdateActionDto = {
      * Whether the action is an onboarding action (hide for existing members)
      */
     onboarding?: boolean;
-    /**
-     * Priority of the action
-     */
-    priority?: number;
     optional?: boolean;
     /**
      * Prevent completion of the action (for old actions)
@@ -2118,6 +2109,7 @@ export type PostDto = {
     pinned: boolean;
     updatedAt: string;
     visibleAt?: string;
+    deleted: boolean;
     qaMode: boolean;
     expertLabel?: string;
     expertIds: Array<number>;

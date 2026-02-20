@@ -252,14 +252,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
         gridCol: true,
       },
       {
-        name: "priority",
-        label: "Priority",
-        type: "number",
-        section: "settings",
-        helpText: "Higher numbers shown first",
-        gridCol: true,
-      },
-      {
         name: "donationAmount",
         label: "Donation Amount (cents)",
         type: "number",
@@ -282,15 +274,15 @@ const ActionForm: React.FC<ActionFormProps> = ({
         label: "Use Commitment Mode",
         type: "checkbox",
         section: "settings",
-        helpText:
-          "Require users to commit before member action",
+        helpText: "Require users to commit before member action",
         inverted: true, // UI shows "Use Commitment Mode" but field is "commitmentless"
       },
 
       {
         name: "onboarding",
         label: "Onboarding",
-        helpText: "Prevent completion by members who signed their contracts before action",
+        helpText:
+          "Prevent completion by members who signed their contracts before action",
         type: "checkbox",
         section: "settings",
         gridCol: true,
@@ -360,7 +352,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
         label: "Forum Participation Action",
         type: "checkbox",
         section: "settings",
-        helpText: "Autocomplete action for users who leave comment but dont hit complete",
+        helpText:
+          "Autocomplete action for users who leave comment but dont hit complete",
       },
     ],
     [
@@ -517,10 +510,11 @@ const ActionForm: React.FC<ActionFormProps> = ({
       return (
         <label
           key={String(f.name)}
-          className={`flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors ${isChecked
-            ? "border-blue-400 bg-blue-50"
-            : "border-gray-200 hover:border-gray-300 bg-white"
-            }`}
+          className={`flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors ${
+            isChecked
+              ? "border-blue-400 bg-blue-50"
+              : "border-gray-200 hover:border-gray-300 bg-white"
+          }`}
         >
           <input
             type="checkbox"
@@ -613,7 +607,18 @@ const ActionForm: React.FC<ActionFormProps> = ({
 
       {/* SETTINGS SECTION */}
       <FormSection title="Settings">
-        <div className="space-y-4">{renderFieldsWithGrid(settingsFields)}</div>
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm font-medium text-gray-700">Priority</p>
+            <a
+              href="/priority"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Manage priority
+            </a>
+          </div>
+          {renderFieldsWithGrid(settingsFields)}
+        </div>
       </FormSection>
 
       {/* TARGETING SECTION */}
@@ -647,10 +652,11 @@ const ActionForm: React.FC<ActionFormProps> = ({
                   return (
                     <label
                       key={tag.id}
-                      className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${checked
-                        ? "border-blue-400 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
-                        }`}
+                      className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${
+                        checked
+                          ? "border-blue-400 bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
                       <input
                         type="checkbox"
@@ -746,8 +752,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
               ? "Creating..."
               : "Saving..."
             : isNew
-              ? "Create Action"
-              : "Save Changes"}
+            ? "Create Action"
+            : "Save Changes"}
         </button>
       </div>
     </form>
