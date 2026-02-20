@@ -56,7 +56,6 @@ import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import { UpdateProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
-import { VideosService } from 'src/videos/videos.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 
 @Injectable()
@@ -78,7 +77,6 @@ export class TasksService {
     @InjectRepository(ActionShareUrl)
     private actionShareUrlRepository: Repository<ActionShareUrl>,
     private eventLogService: EventLogService,
-    private videosService: VideosService,
     private aiDetectionQueueService: AiDetectionQueueService,
     private aiDetectionQueryService: AiDetectionQueryService,
   ) {}
@@ -549,6 +547,11 @@ export class TasksService {
       }
     }
     return ids;
+  }
+
+  async deleteForm(formId: number): Promise<void> {
+    const form = await this.getForm(formId);
+    await this.formRepository.remove(form);
   }
 
   async getFormResponses(formId: number): Promise<FormResponseDto[]> {
