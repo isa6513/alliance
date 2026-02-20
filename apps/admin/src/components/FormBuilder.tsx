@@ -22,6 +22,7 @@ import type {
 } from "@alliance/shared/forms/formschema";
 import type { UserDto } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PreviewAsUserBar } from "./PreviewAsUserBar";
 import {
   EditableBigLinkBlock,
   EditableDividerBlock,
@@ -1907,36 +1908,14 @@ export function FormBuilder({
               <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
             ) : isPreviewMode && generalUpdateName ? (
               <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
-                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Preview as</span>
-                    <select
-                      value={previewUserId}
-                      onChange={(event) => setPreviewUserId(event.target.value)}
-                      className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    >
-                      <option value="preview">Preview user</option>
-                      {previewUsers.map((user) => (
-                        <option key={user.id} value={String(user.id)}>
-                          {user.name ?? `User #${user.id}`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
-                    {isLoadingPreviewUsers && <span>Loading users…</span>}
-                    {previewUserError && (
-                      <span className="text-red-600">{previewUserError}</span>
-                    )}
-                    <button
-                      type="button"
-                      className="text-blue-600 hover:text-blue-700"
-                      onClick={() => void fetchPreviewUsers()}
-                    >
-                      Refresh users
-                    </button>
-                  </div>
-                </div>
+                <PreviewAsUserBar
+                  previewUserId={previewUserId}
+                  setPreviewUserId={setPreviewUserId}
+                  previewUsers={previewUsers}
+                  isLoadingPreviewUsers={isLoadingPreviewUsers}
+                  previewUserError={previewUserError}
+                  onRefreshUsers={fetchPreviewUsers}
+                />
                 <LargeGeneralUpdateCard
                   title={generalUpdateName}
                   schema={schema as unknown as Record<string, unknown>}
@@ -1947,36 +1926,14 @@ export function FormBuilder({
               </div>
             ) : isPreviewMode ? (
               <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
-                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Preview as</span>
-                    <select
-                      value={previewUserId}
-                      onChange={(event) => setPreviewUserId(event.target.value)}
-                      className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    >
-                      <option value="preview">Preview user</option>
-                      {previewUsers.map((user) => (
-                        <option key={user.id} value={String(user.id)}>
-                          {user.name ?? `User #${user.id}`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
-                    {isLoadingPreviewUsers && <span>Loading users…</span>}
-                    {previewUserError && (
-                      <span className="text-red-600">{previewUserError}</span>
-                    )}
-                    <button
-                      type="button"
-                      className="text-blue-600 hover:text-blue-700"
-                      onClick={() => void fetchPreviewUsers()}
-                    >
-                      Refresh users
-                    </button>
-                  </div>
-                </div>
+                <PreviewAsUserBar
+                  previewUserId={previewUserId}
+                  setPreviewUserId={setPreviewUserId}
+                  previewUsers={previewUsers}
+                  isLoadingPreviewUsers={isLoadingPreviewUsers}
+                  previewUserError={previewUserError}
+                  onRefreshUsers={fetchPreviewUsers}
+                />
                 <FormRenderer
                   id={0}
                   actionId={0}
