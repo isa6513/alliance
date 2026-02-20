@@ -33,7 +33,6 @@ export default function LargeGeneralUpdateCard({
   user,
 }: LargeGeneralUpdateCardProps) {
   const formSchema = getFormSchema(generalUpdate.schema);
-  console.dir({ formSchemaasdf: formSchema }, { depth: null });
 
   return (
     <Card className="p-4 sm:p-6 w-full relative border-dashed border-[1.5px] border-blue-300 rounded">
