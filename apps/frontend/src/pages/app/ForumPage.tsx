@@ -55,7 +55,7 @@ const ForumPage: React.FC = () => {
       >
         <p>Create a new thread...</p>
       </Card>
-      <List className="mb-10">
+      <List className="mb-10 border-none!">
         {sorted.map((post) => (
           <ForumListPost key={post.id} post={post} />
         ))}
