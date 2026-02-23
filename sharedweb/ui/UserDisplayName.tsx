@@ -1,3 +1,6 @@
+import { Earth, User, UserCircle } from "lucide-react";
+import { HoverBadge } from "./HoverBadge";
+
 interface UserDisplayNameProps extends React.PropsWithChildren {
   staff?: boolean;
   grouplead?: boolean;
@@ -22,14 +25,22 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
         {children}
       </span>
       {staff && (
-        <span className="ml-1 text-xs !bg-blue text-white rounded-xs px-1.5">
-          Staff
-        </span>
+        <HoverBadge title="Alliance office member">
+          <Earth
+            size={18}
+            className="ml-1 text-green inline -mt-px"
+            strokeWidth={1.7}
+          />
+        </HoverBadge>
       )}
       {!staff && grouplead && (
-        <span className="ml-1 text-xs !bg-grouplead text-white rounded-xs px-1.5">
-          Lead
-        </span>
+        <HoverBadge title="Leads a member group">
+          <UserCircle
+            size={18}
+            className="ml-1 text-grouplead inline -mt-px"
+            strokeWidth={2}
+          />
+        </HoverBadge>
       )}
       {expert && (
         <span className="ml-1 text-xs !bg-orange-500 text-white rounded-xs px-1.5">

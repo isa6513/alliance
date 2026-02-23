@@ -309,7 +309,7 @@ const Comments = ({
 
   return (
     <CommentsProvider value={ctxValue}>
-      <div className={`${className}`}>
+      <div className={className}>
         {user && !tree.replyingTo && showForm ? (
           <ReplyForm
             parentId={null}

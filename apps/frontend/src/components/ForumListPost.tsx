@@ -87,7 +87,7 @@ const ForumListPost = ({
       <div className="flex flex-col md:flex-row md:justify-between md:items-end text-sm text-zinc-500 gap-y-1 md:gap-y-0">
         <div className="flex flex-row items-center">
           {(post.authors?.length ? post.authors : [post.author]).map((a) => (
-            <span key={a.id} className="mr-1">
+            <span key={a.id} className="mr-2">
               <span
                 onClick={(e) => {
                   e.stopPropagation();
@@ -101,13 +101,13 @@ const ForumListPost = ({
                   size="small"
                   className="mr-1 -mt-1"
                 />
-                <UserDisplayName className="text-green">
+                <UserDisplayName className="text-green" staff={a.staff}>
                   {a.displayName}
                 </UserDisplayName>
               </span>
             </span>
           ))}
-          <span className="text-sm text-zinc-500">
+          <span className="text-sm text-zinc-500 -ml-1">
             posted{" "}
             {`${formatTime(new Date(post.createdAt), {
               addSuffix: true,
