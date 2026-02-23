@@ -1,4 +1,4 @@
-import { Earth, User, UserCircle } from "lucide-react";
+import { Earth, UserCircle } from "lucide-react";
 import { HoverBadge } from "./HoverBadge";
 
 interface UserDisplayNameProps extends React.PropsWithChildren {

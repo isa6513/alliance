@@ -62,7 +62,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
         </h1>
       )}
       <div className="flex flex-row items-center gap-x-5 sm:gap-x-10 text-base sm:text-lg">
-        {links.map((link) => (
+        {links.map((link) =>
           link === NavbarPage.LogIn ? (
             <Link
               to={destinations[link]}
@@ -80,7 +80,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
               {link}
             </Link>
           )
-        ))}
+        )}
       </div>
     </div>
   );
