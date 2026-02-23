@@ -363,7 +363,7 @@ resource "aws_iam_role_policy" "ec2_s3_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Action   = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"]
+      Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket", "s3:AbortMultipartUpload", "s3:DeleteObject"]
       Effect   = "Allow"
       Resource = [
         aws_s3_bucket.assets.arn,
@@ -378,4 +378,88 @@ resource "aws_iam_role_policy" "ec2_s3_policy" {
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "alliance-ec2-profile"
   role = aws_iam_role.ec2_role.name
+}
+
+
+resource "aws_s3_bucket_cors_configuration" "assets" {
+  bucket = aws_s3_bucket.assets.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD", "PUT"]
+    allowed_origins = ["https://worldalliance.org", "https://admin.worldalliance.org"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+resource "aws_s3_bucket_cors_configuration" "dev_assets" {
+  bucket = aws_s3_bucket.dev_assets.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD", "PUT"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+resource "aws_s3_bucket_cors_configuration" "staging_assets" {
+  bucket = aws_s3_bucket.staging_assets.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD", "PUT"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+# ---- Lifecycle configurations ----
+
+resource "aws_s3_bucket_lifecycle_configuration" "assets" {
+  bucket = aws_s3_bucket.assets.id
+
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 3
+    }
+
+    filter {}
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "dev_assets" {
+  bucket = aws_s3_bucket.dev_assets.id
+
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 3
+    }
+
+    filter {}
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "staging_assets" {
+  bucket = aws_s3_bucket.staging_assets.id
+
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 3
+    }
+
+    filter {}
+  }
 }

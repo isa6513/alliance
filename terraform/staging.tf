@@ -177,7 +177,7 @@ resource "aws_iam_role_policy" "ec2_s3_policy_staging" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Action   = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"]
+      Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket", "s3:AbortMultipartUpload"]
       Effect   = "Allow"
       Resource = [
         aws_s3_bucket.staging_assets.arn,
