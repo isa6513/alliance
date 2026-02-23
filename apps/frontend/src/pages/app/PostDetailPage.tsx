@@ -222,6 +222,7 @@ const PostDetailPage: React.FC = () => {
           qaMode={post.qaMode}
           expertIds={post.qaMode ? post.expertIds ?? [] : []}
           expertLabel={post.qaMode ? post.expertLabel : undefined}
+          className="px-2 md:px-4"
         />
       </div>
     </div>

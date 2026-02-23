@@ -32,6 +32,7 @@ export interface CommentsProps {
   expertIds?: number[];
   expertLabel?: string;
   qaMode?: boolean;
+  className?: string;
 }
 
 const hasExpertReply = (comment: CommentDto, expertIds: number[]): boolean => {
@@ -118,6 +119,7 @@ const Comments = ({
   expertIds = [],
   expertLabel,
   qaMode = false,
+  className,
 }: CommentsProps) => {
   const { user } = useAuth();
   const [commentFilter, setCommentFilter] = useState<CommentFilter>("all");
@@ -307,7 +309,7 @@ const Comments = ({
 
   return (
     <CommentsProvider value={ctxValue}>
-      <div className="px-2 md:px-4">
+      <div className={`${className}`}>
         {user && !tree.replyingTo && showForm ? (
           <ReplyForm
             parentId={null}
