@@ -509,9 +509,11 @@ export class ActionsController {
     comments?: boolean,
     @Query('limit', new ParseIntPipe({ optional: true }))
     limit?: string,
+    @Query('before') before?: string,
   ) {
     const limitNum = limit ? parseInt(limit) : 20;
-    return this.actionsService.friendActivity(req.user.sub, comments, limitNum);
+    const beforeDate = before ? new Date(before) : undefined;
+    return this.actionsService.friendActivity(req.user.sub, comments, limitNum, beforeDate);
   }
 
   @Get('communityActivity')

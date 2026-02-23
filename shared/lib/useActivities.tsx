@@ -9,8 +9,13 @@ import {
   actionsUnlikeActivity,
   actionsFriendActivityForAction,
 } from "@alliance/shared/client";
-import { useCallback } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
+import {
+  useQuery,
+  useInfiniteQuery,
+  useQueryClient,
+  InfiniteData,
+} from "@tanstack/react-query";
 import posthog from "posthog-js";
 
 export enum ActivityList {
@@ -41,6 +46,11 @@ export type UseActivitiesProps = {
     }
 );
 
+const supportsCursor = (list: ActivityList) =>
+  list === ActivityList.Global ||
+  list === ActivityList.Friends ||
+  list === ActivityList.Community;
+
 const generateQueryKey = (props: UseActivitiesProps) => {
   return [
     "useActivities",
@@ -52,15 +62,17 @@ const generateQueryKey = (props: UseActivitiesProps) => {
 };
 
 const fetchActivities = async (
-  props: UseActivitiesProps
+  props: UseActivitiesProps,
+  before?: string
 ): Promise<ActionActivityDto[]> => {
   const { list, objectId, limit = 50, comments = false } = props;
+  const beforeStr = before ?? new Date().toISOString();
 
   let apiCall;
   switch (list) {
     case ActivityList.Friends:
       apiCall = actionsFriendActivity({
-        query: { comments, limit: limit.toString() },
+        query: { comments, limit: limit.toString(), before: beforeStr },
       });
       break;
     case ActivityList.User:
@@ -88,7 +100,7 @@ const fetchActivities = async (
       apiCall = actionsCommunityActivity({
         query: {
           limit: limit.toString(),
-          before: new Date().toISOString(),
+          before: beforeStr,
           comments,
           communityId: objectId!,
         },
@@ -98,7 +110,7 @@ const fetchActivities = async (
       apiCall = actionsGetActivityFeed({
         query: {
           limit: limit.toString(),
-          before: new Date().toISOString(),
+          before: beforeStr,
           comments,
         },
       });
@@ -115,22 +127,73 @@ const fetchActivities = async (
   return respActivities;
 };
 
+type InfiniteActivityData = InfiniteData<ActionActivityDto[]>;
+
+/** Map over all activities across pages in an infinite query cache entry */
+const mapInfiniteActivities = (
+  old: InfiniteActivityData | undefined,
+  mapper: (activity: ActionActivityDto) => ActionActivityDto
+): InfiniteActivityData | undefined => {
+  if (!old) return old;
+  return {
+    ...old,
+    pages: old.pages.map((page) => page.map(mapper)),
+  };
+};
+
 const useActivities = (props: UseActivitiesProps) => {
   const queryClient = useQueryClient();
   const queryKey = generateQueryKey(props);
+  const infinite = supportsCursor(props.list);
+  const limit = props.limit ?? 50;
 
-  const { data: activities = [], isLoading: loading } = useQuery({
+  // --- infinite query path (Global, Friends, Community) ---
+  const infiniteResult = useInfiniteQuery({
+    queryKey,
+    queryFn: ({ pageParam }) => fetchActivities(props, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < limit) return undefined;
+      return lastPage[lastPage.length - 1]?.createdAt;
+    },
+    enabled: infinite,
+  });
+
+  // --- simple query path (User, Action, FriendsForAction) ---
+  const simpleResult = useQuery({
     queryKey,
     queryFn: () => fetchActivities(props),
+    enabled: !infinite,
   });
+
+  const activities = useMemo(() => {
+    if (infinite) {
+      return infiniteResult.data?.pages.flat() ?? [];
+    }
+    return simpleResult.data ?? [];
+  }, [infinite, infiniteResult.data, simpleResult.data]);
+
+  const loading = infinite ? infiniteResult.isLoading : simpleResult.isLoading;
 
   const setActivities = useCallback(
     (updater: React.SetStateAction<ActionActivityDto[]>) => {
-      queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) => {
-        return typeof updater === "function" ? updater(old ?? []) : updater;
-      });
+      if (infinite) {
+        queryClient.setQueryData<InfiniteActivityData>(queryKey, (old) => {
+          if (!old) return old;
+          const flat =
+            typeof updater === "function"
+              ? updater(old.pages.flat())
+              : updater;
+          // Put all updated items into the first page, clear the rest
+          return { ...old, pages: [flat, ...old.pages.slice(old.pages.length)] };
+        });
+      } else {
+        queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) => {
+          return typeof updater === "function" ? updater(old ?? []) : updater;
+        });
+      }
     },
-    [queryClient, queryKey]
+    [queryClient, queryKey, infinite]
   );
 
   const handleLikeActivity = useCallback(
@@ -140,25 +203,35 @@ const useActivities = (props: UseActivitiesProps) => {
 
       const isLiked = activity.likedByMe ?? false;
 
+      const updateLikeInCache = (responseData: ActionActivityDto) => {
+        const mapper = (a: ActionActivityDto) =>
+          a.id === activityId
+            ? {
+                ...a,
+                likes: responseData.likes,
+                likesCount: responseData.likesCount,
+                likedByMe: responseData.likedByMe,
+              }
+            : a;
+
+        if (infinite) {
+          queryClient.setQueryData<InfiniteActivityData>(
+            queryKey,
+            (old) => mapInfiniteActivities(old, mapper)
+          );
+        } else {
+          queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
+            old ? old.map(mapper) : []
+          );
+        }
+      };
+
       if (isLiked) {
         const response = await actionsUnlikeActivity({
           path: { id: activityId },
         });
         if (response.response.ok && response.data) {
-          queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
-            old
-              ? old.map((a) =>
-                  a.id === activityId
-                    ? {
-                        ...a,
-                        likes: response.data.likes,
-                        likesCount: response.data.likesCount,
-                        likedByMe: response.data.likedByMe,
-                      }
-                    : a
-                )
-              : []
-          );
+          updateLikeInCache(response.data);
           return response.data;
         }
         return null;
@@ -167,21 +240,7 @@ const useActivities = (props: UseActivitiesProps) => {
           path: { id: activityId },
         });
         if (response.response.ok && response.data) {
-          queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
-            old
-              ? old.map((a) =>
-                  a.id === activityId
-                    ? {
-                        ...a,
-                        likes: response.data.likes,
-                        likesCount: response.data.likesCount,
-                        likedByMe: response.data.likedByMe,
-                      }
-                    : a
-                )
-              : []
-          );
-
+          updateLikeInCache(response.data);
           posthog.capture("activity_liked", {
             activityId: activity.id,
             activityType: activity.type,
@@ -191,21 +250,29 @@ const useActivities = (props: UseActivitiesProps) => {
       }
       return null;
     },
-    [activities, queryClient, queryKey]
+    [activities, queryClient, queryKey, infinite]
   );
 
   const updateActivity = useCallback(
     (updatedActivity: ActionActivityDto) => {
-      queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
-        old
-          ? old.map((a) =>
-              a.id === updatedActivity.id ? { ...a, ...updatedActivity } : a
-            )
-          : []
-      );
+      const mapper = (a: ActionActivityDto) =>
+        a.id === updatedActivity.id ? { ...a, ...updatedActivity } : a;
+
+      if (infinite) {
+        queryClient.setQueryData<InfiniteActivityData>(
+          queryKey,
+          (old) => mapInfiniteActivities(old, mapper)
+        );
+      } else {
+        queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
+          old ? old.map(mapper) : []
+        );
+      }
     },
-    [queryClient, queryKey]
+    [queryClient, queryKey, infinite]
   );
+
+  const noop = useCallback(() => {}, []);
 
   return {
     loading,
@@ -213,6 +280,9 @@ const useActivities = (props: UseActivitiesProps) => {
     handleLikeActivity,
     setActivities,
     updateActivity,
+    fetchNextPage: infinite ? infiniteResult.fetchNextPage : noop,
+    hasNextPage: infinite ? (infiniteResult.hasNextPage ?? false) : false,
+    isFetchingNextPage: infinite ? infiniteResult.isFetchingNextPage : false,
   };
 };
 

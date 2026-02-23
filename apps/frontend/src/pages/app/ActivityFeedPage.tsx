@@ -22,6 +22,9 @@ const ActivityFeedPage = () => {
     updateActivity: updateGlobalActivity,
     loading,
     setActivities: setGlobalActivities,
+    fetchNextPage: fetchNextGlobal,
+    hasNextPage: hasNextGlobal,
+    isFetchingNextPage: isFetchingNextGlobal,
   } = useActivities({
     list: ActivityList.Global,
     comments: true,
@@ -34,6 +37,9 @@ const ActivityFeedPage = () => {
     updateActivity: updateFriendActivity,
     loading: loadingFriend,
     setActivities: setFriendActivities,
+    fetchNextPage: fetchNextFriends,
+    hasNextPage: hasNextFriends,
+    isFetchingNextPage: isFetchingNextFriends,
   } = useActivities({
     list: ActivityList.Friends,
     comments: true,
@@ -79,6 +85,8 @@ const ActivityFeedPage = () => {
 
   const friendsRef = useRef<HTMLDivElement>(null);
   const everyoneRef = useRef<HTMLDivElement>(null);
+  const friendsSentinelRef = useRef<HTMLDivElement>(null);
+  const everyoneSentinelRef = useRef<HTMLDivElement>(null);
 
   const [activeHeight, setActiveHeight] = useState<number | undefined>(
     undefined
@@ -105,8 +113,47 @@ const ActivityFeedPage = () => {
     };
   }, [mode, updateHeight]);
 
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          if (entry.target === friendsSentinelRef.current) {
+            if (hasNextFriends && !isFetchingNextFriends) {
+              fetchNextFriends();
+            }
+          } else if (entry.target === everyoneSentinelRef.current) {
+            if (hasNextGlobal && !isFetchingNextGlobal) {
+              fetchNextGlobal();
+            }
+          }
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    if (friendsSentinelRef.current) observer.observe(friendsSentinelRef.current);
+    if (everyoneSentinelRef.current) observer.observe(everyoneSentinelRef.current);
+
+    return () => observer.disconnect();
+  }, [
+    fetchNextFriends,
+    fetchNextGlobal,
+    hasNextFriends,
+    hasNextGlobal,
+    isFetchingNextFriends,
+    isFetchingNextGlobal,
+  ]);
+
   const renderActivityColumn = (mode: Mode) => {
     const list = mode === "friends" ? friendActivities : activities;
+    const isFetchingNext =
+      mode === "friends" ? isFetchingNextFriends : isFetchingNextGlobal;
+    const hasNext = mode === "friends" ? hasNextFriends : hasNextGlobal;
+    const sentinelRef =
+      mode === "friends" ? friendsSentinelRef : everyoneSentinelRef;
+
     return (
       <div className="w-1/2">
         <div
@@ -133,6 +180,12 @@ const ActivityFeedPage = () => {
               </p>
             </div>
           )}
+          {isFetchingNext && (
+            <div className="flex justify-center py-4 text-zinc-400">
+              Loading more...
+            </div>
+          )}
+          {hasNext && <div ref={sentinelRef} className="h-px" />}
         </div>
       </div>
     );

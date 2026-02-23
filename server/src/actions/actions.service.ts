@@ -1653,6 +1653,7 @@ export class ActionsService {
     userId: number,
     comments?: boolean,
     limit?: number,
+    before?: Date,
   ): Promise<ActionActivityDto[]> {
     const user = await this.userService.findOne(userId, {
       sentFriendRequests: true,
@@ -1669,6 +1670,7 @@ export class ActionsService {
 
     const friendActivities = await this.buildActivityFeedQuery({
       limit: limit ?? 20,
+      before,
       userIds: friends.map((f) => f.id),
     }).getMany();
 
