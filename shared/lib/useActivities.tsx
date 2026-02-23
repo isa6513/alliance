@@ -11,7 +11,6 @@ import {
 } from "@alliance/shared/client";
 import { useCallback, useMemo } from "react";
 import {
-  useQuery,
   useInfiniteQuery,
   useQueryClient,
   InfiniteData,
@@ -130,13 +129,6 @@ const processActivities = (
   );
 };
 
-const fetchActivities = async (
-  props: UseActivitiesProps
-): Promise<ActionActivityDto[]> => {
-  const resp = await callActivityApi(props);
-  return processActivities(resp.data);
-};
-
 /** Page wrapper that preserves the raw server count for accurate pagination */
 type ActivityPage = {
   activities: ActionActivityDto[];
@@ -178,64 +170,53 @@ const useActivities = (props: UseActivitiesProps) => {
   const infinite = supportsCursor(props.list);
   const limit = props.limit ?? 50;
 
-  // --- infinite query path (Global, Friends, Community) ---
-  const infiniteResult = useInfiniteQuery({
+  const {
+    data,
+    isLoading: loading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey,
     queryFn: ({ pageParam }) => fetchActivityPage(props, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
+      // Non-cursor lists (User, Action, FriendsForAction) never paginate
+      if (!infinite) return undefined;
       // Use raw server count to avoid premature stop from client-side filtering
       if (lastPage.serverCount < limit) return undefined;
       const last = lastPage.activities[lastPage.activities.length - 1];
       return last?.createdAt;
     },
-    enabled: infinite,
   });
 
-  // --- simple query path (User, Action, FriendsForAction) ---
-  const simpleResult = useQuery({
-    queryKey,
-    queryFn: () => fetchActivities(props),
-    enabled: !infinite,
-  });
-
-  const activities = useMemo(() => {
-    if (infinite) {
-      return infiniteResult.data?.pages.flatMap((p) => p.activities) ?? [];
-    }
-    return simpleResult.data ?? [];
-  }, [infinite, infiniteResult.data, simpleResult.data]);
-
-  const loading = infinite ? infiniteResult.isLoading : simpleResult.isLoading;
+  const activities = useMemo(
+    () => data?.pages.flatMap((p) => p.activities) ?? [],
+    [data]
+  );
 
   const setActivities = useCallback(
     (updater: React.SetStateAction<ActionActivityDto[]>) => {
-      if (infinite) {
-        queryClient.setQueryData<InfiniteActivityData>(queryKey, (old) => {
-          if (!old) return old;
-          if (typeof updater === "function") {
-            // Apply per-page to preserve page structure and pageParams alignment
-            return {
-              ...old,
-              pages: old.pages.map((page) => ({
-                ...page,
-                activities: updater(page.activities),
-              })),
-            };
-          }
-          // Direct replacement: single page, matching single pageParam
+      queryClient.setQueryData<InfiniteActivityData>(queryKey, (old) => {
+        if (!old) return old;
+        if (typeof updater === "function") {
+          // Apply per-page to preserve page structure and pageParams alignment
           return {
-            pages: [{ activities: updater, serverCount: updater.length }],
-            pageParams: [old.pageParams[0]],
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              activities: updater(page.activities),
+            })),
           };
-        });
-      } else {
-        queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) => {
-          return typeof updater === "function" ? updater(old ?? []) : updater;
-        });
-      }
+        }
+        // Direct replacement: single page, matching single pageParam
+        return {
+          pages: [{ activities: updater, serverCount: updater.length }],
+          pageParams: [old.pageParams[0]],
+        };
+      });
     },
-    [queryClient, queryKey, infinite]
+    [queryClient, queryKey]
   );
 
   const handleLikeActivity = useCallback(
@@ -256,16 +237,10 @@ const useActivities = (props: UseActivitiesProps) => {
               }
             : a;
 
-        if (infinite) {
-          queryClient.setQueryData<InfiniteActivityData>(
-            queryKey,
-            (old) => mapInfiniteActivities(old, mapper)
-          );
-        } else {
-          queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
-            old ? old.map(mapper) : []
-          );
-        }
+        queryClient.setQueryData<InfiniteActivityData>(
+          queryKey,
+          (old) => mapInfiniteActivities(old, mapper)
+        );
       };
 
       if (isLiked) {
@@ -292,7 +267,7 @@ const useActivities = (props: UseActivitiesProps) => {
       }
       return null;
     },
-    [activities, queryClient, queryKey, infinite]
+    [activities, queryClient, queryKey]
   );
 
   const updateActivity = useCallback(
@@ -300,18 +275,12 @@ const useActivities = (props: UseActivitiesProps) => {
       const mapper = (a: ActionActivityDto) =>
         a.id === updatedActivity.id ? { ...a, ...updatedActivity } : a;
 
-      if (infinite) {
-        queryClient.setQueryData<InfiniteActivityData>(
-          queryKey,
-          (old) => mapInfiniteActivities(old, mapper)
-        );
-      } else {
-        queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) =>
-          old ? old.map(mapper) : []
-        );
-      }
+      queryClient.setQueryData<InfiniteActivityData>(
+        queryKey,
+        (old) => mapInfiniteActivities(old, mapper)
+      );
     },
-    [queryClient, queryKey, infinite]
+    [queryClient, queryKey]
   );
 
   const noop = useCallback(() => {}, []);
@@ -322,9 +291,9 @@ const useActivities = (props: UseActivitiesProps) => {
     handleLikeActivity,
     setActivities,
     updateActivity,
-    fetchNextPage: infinite ? infiniteResult.fetchNextPage : noop,
-    hasNextPage: infinite ? (infiniteResult.hasNextPage ?? false) : false,
-    isFetchingNextPage: infinite ? infiniteResult.isFetchingNextPage : false,
+    fetchNextPage: infinite ? fetchNextPage : noop,
+    hasNextPage: infinite ? (hasNextPage ?? false) : false,
+    isFetchingNextPage: infinite ? isFetchingNextPage : false,
   };
 };
 
