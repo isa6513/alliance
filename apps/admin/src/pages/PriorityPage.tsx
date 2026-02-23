@@ -50,34 +50,47 @@ type PriorityItem =
 
 function buildInitialList(
   actions: Action[],
-  generalUpdates: GeneralUpdateAdminDto[]
+  generalUpdates: GeneralUpdateAdminDto[],
+  filterForIncomplete: boolean
 ): PriorityItem[] {
   const withRaw: {
     item: PriorityItem;
     raw: Action | GeneralUpdateAdminDto;
   }[] = [
-    ...actions.map((a) => ({
-      item: {
-        type: "action" as const,
-        id: a.id,
-        name: a.name,
-        priority: a.priority,
-        suiteName: a.suite?.name,
-      },
-      raw: a,
-    })),
-    ...generalUpdates.map((u) => ({
-      item: {
-        type: "generalUpdate" as const,
-        id: u.id,
-        name: u.name,
-        priority: u.priority,
-        suiteName: u.suites?.length
-          ? u.suites.map((s) => s.name).join(", ")
-          : undefined,
-      },
-      raw: u,
-    })),
+    ...actions
+      .filter((a) =>
+        filterForIncomplete
+          ? a.status !== "completed" && a.status !== "office_action"
+          : true
+      )
+      .map((a) => ({
+        item: {
+          type: "action" as const,
+          id: a.id,
+          name: a.name,
+          priority: a.priority,
+          suiteName: a.suite?.name,
+        },
+        raw: a,
+      })),
+    ...generalUpdates
+      .filter((gu) =>
+        filterForIncomplete
+          ? !gu.endDate || new Date(gu.endDate).getTime() > new Date().getTime()
+          : true
+      )
+      .map((gu) => ({
+        item: {
+          type: "generalUpdate" as const,
+          id: gu.id,
+          name: gu.name,
+          priority: gu.priority,
+          suiteName: gu.suites?.length
+            ? gu.suites.map((s) => s.name).join(", ")
+            : undefined,
+        },
+        raw: gu,
+      })),
   ];
   withRaw.sort((a, b) => homePagePriorityComparator(a.raw, b.raw));
   // Insert "new items" divider above all priority <= 0, below any priority > 0
@@ -93,6 +106,11 @@ function buildInitialList(
 
 const PriorityPage: React.FC = () => {
   const [items, setItems] = useState<PriorityItem[]>([]);
+  const [originalActionIndices, setOriginalActionIndices] = useState<
+    Map<number, number>
+  >(new Map());
+  const [originalGeneralUpdateIndices, setOriginalGeneralUpdateIndices] =
+    useState<Map<number, number>>(new Map());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -101,6 +119,11 @@ const PriorityPage: React.FC = () => {
   const [dropPosition, setDropPosition] = useState<"before" | "after" | null>(
     null
   );
+  const [filterForIncomplete, setFilterForIncomplete] = useState(true);
+  const [rawActions, setRawActions] = useState<Action[] | null>(null);
+  const [rawGeneralUpdates, setRawGeneralUpdates] = useState<
+    GeneralUpdateAdminDto[] | null
+  >(null);
   const listRef = useRef<HTMLUListElement>(null);
   const { error: showError } = useToast();
 
@@ -149,9 +172,8 @@ const PriorityPage: React.FC = () => {
         actionsFindAllWithDrafts(),
         actionsAllGeneralUpdatesAdmin(),
       ]);
-      const actions = actionsRes.data ?? [];
-      const updates = updatesRes.data ?? [];
-      setItems(buildInitialList(actions, updates));
+      setRawActions(actionsRes.data ?? []);
+      setRawGeneralUpdates(updatesRes.data ?? []);
     } catch (err) {
       setError("Failed to load actions and general updates");
       console.error(err);
@@ -163,6 +185,27 @@ const PriorityPage: React.FC = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (rawActions === null || rawGeneralUpdates === null) return;
+    const startingItems = buildInitialList(
+      rawActions,
+      rawGeneralUpdates,
+      filterForIncomplete
+    );
+    setItems(startingItems);
+    const actionIndices: [number, number][] = [];
+    const generalUpdateIndices: [number, number][] = [];
+    startingItems.forEach((item, index) => {
+      if (item.type === "action") {
+        actionIndices.push([item.id, index]);
+      } else if (item.type === "generalUpdate") {
+        generalUpdateIndices.push([item.id, index]);
+      }
+    });
+    setOriginalActionIndices(new Map(actionIndices));
+    setOriginalGeneralUpdateIndices(new Map(generalUpdateIndices));
+  }, [rawActions, rawGeneralUpdates, filterForIncomplete]);
 
   const handleDragStart = (index: number) => (e: React.DragEvent) => {
     setDraggedIndex(index);
@@ -238,22 +281,24 @@ const PriorityPage: React.FC = () => {
     [draggedIndex, getDropTargetFromClientY, performDrop]
   );
 
-  const {
-    newPriorities,
-    newActionPriorityById,
-    newGeneralUpdatePriorityById,
-    anyChanged,
-  } = useMemo(() => {
+  const { newPriorities, anyChanged } = useMemo(() => {
     const newPriorities: SetPriorityDto = {
       actionPriorities: [],
       generalUpdatePriorities: [],
     };
-    const newActionPriorityById: Record<number, number> = {};
-    const newGeneralUpdatePriorityById: Record<number, number> = {};
     let anyChanged = false;
 
     const dividerIndex = items.findIndex((i) => i.type === "divider");
     items.forEach((item, index) => {
+      const originalIndex =
+        item.type === "action"
+          ? originalActionIndices.get(item.id)
+          : item.type === "generalUpdate"
+          ? originalGeneralUpdateIndices.get(item.id)
+          : undefined;
+      if (originalIndex !== undefined && index !== originalIndex) {
+        anyChanged = true;
+      }
       if (item.type === "divider") return;
       const newPriority = dividerIndex - index;
       if (item.type === "action") {
@@ -261,30 +306,20 @@ const PriorityPage: React.FC = () => {
           id: item.id,
           priority: newPriority,
         });
-        newActionPriorityById[item.id] = newPriority;
-        if (newPriority !== item.priority) {
-          anyChanged = true;
-        }
       }
       if (item.type === "generalUpdate") {
         newPriorities.generalUpdatePriorities.push({
           id: item.id,
           priority: newPriority,
         });
-        newGeneralUpdatePriorityById[item.id] = newPriority;
-        if (newPriority !== item.priority) {
-          anyChanged = true;
-        }
       }
     });
 
     return {
       newPriorities,
-      newActionPriorityById,
-      newGeneralUpdatePriorityById,
       anyChanged,
     };
-  }, [items]);
+  }, [items, originalActionIndices, originalGeneralUpdateIndices]);
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -333,6 +368,15 @@ const PriorityPage: React.FC = () => {
           {saving ? "Saving…" : anyChanged ? "Save" : "No changes to save"}
         </Button>
       </div>
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={!filterForIncomplete}
+          onChange={(e) => setFilterForIncomplete(!e.target.checked)}
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <span className="text-sm font-medium text-gray-900">Show all</span>
+      </label>
       <p className="text-sm text-zinc-600">
         Actions/general updates at the top are shown first on the home page.
       </p>
@@ -353,15 +397,9 @@ const PriorityPage: React.FC = () => {
           const delta = (() => {
             switch (item.type) {
               case "action":
-                return (
-                  (newActionPriorityById[item.id] ?? item.priority) -
-                  item.priority
-                );
+                return (originalActionIndices.get(item.id) ?? 0) - index;
               case "generalUpdate":
-                return (
-                  (newGeneralUpdatePriorityById[item.id] ?? item.priority) -
-                  item.priority
-                );
+                return (originalGeneralUpdateIndices.get(item.id) ?? 0) - index;
               case "divider":
                 return 0;
               default:
