@@ -274,6 +274,26 @@ resource "aws_cloudfront_origin_access_control" "assets" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_response_headers_policy" "cors" {
+  name = "alliance-cors-policy"
+
+  cors_config {
+    access_control_allow_origins {
+      items = ["https://worldalliance.org", "https://admin.worldalliance.org"]
+    }
+    access_control_allow_methods {
+      items = ["GET", "HEAD", "OPTIONS"]
+    }
+    access_control_allow_headers {
+      items = ["*"]
+    }
+    access_control_max_age_sec = 3000
+    origin_override            = true
+    access_control_allow_credentials = false
+  }
+}
+
+
 # CloudFront distribution
 resource "aws_cloudfront_distribution" "assets" {
   enabled             = true
@@ -297,6 +317,7 @@ resource "aws_cloudfront_distribution" "assets" {
     # Use managed cache policy for optimized caching
     cache_policy_id          = "658327ea-f89d-4fab-a63d-7e88639e58f6"  # CachingOptimized
     origin_request_policy_id = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"  # CORS-S3Origin
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cors.id
 
     compress = true
   }

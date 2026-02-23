@@ -61,10 +61,10 @@ const generateQueryKey = (props: UseActivitiesProps) => {
   ];
 };
 
-const fetchActivities = async (
+const callActivityApi = async (
   props: UseActivitiesProps,
   before?: string
-): Promise<ActionActivityDto[]> => {
+) => {
   const { list, objectId, limit = 50, comments = false } = props;
   const beforeStr = before ?? new Date().toISOString();
 
@@ -117,17 +117,45 @@ const fetchActivities = async (
       break;
   }
 
-  const resp = await apiCall;
-  const data = resp.data?.filter((a) => a.type === "user_completed") ?? [];
-
-  const respActivities = data.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
-  return respActivities;
+  return apiCall;
 };
 
-type InfiniteActivityData = InfiniteData<ActionActivityDto[]>;
+const processActivities = (
+  data: ActionActivityDto[] | undefined
+): ActionActivityDto[] => {
+  const filtered = data?.filter((a) => a.type === "user_completed") ?? [];
+  return filtered.sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+};
+
+const fetchActivities = async (
+  props: UseActivitiesProps
+): Promise<ActionActivityDto[]> => {
+  const resp = await callActivityApi(props);
+  return processActivities(resp.data);
+};
+
+/** Page wrapper that preserves the raw server count for accurate pagination */
+type ActivityPage = {
+  activities: ActionActivityDto[];
+  serverCount: number;
+};
+
+const fetchActivityPage = async (
+  props: UseActivitiesProps,
+  before?: string
+): Promise<ActivityPage> => {
+  const resp = await callActivityApi(props, before);
+  const raw = resp.data ?? [];
+  return {
+    activities: processActivities(raw),
+    serverCount: raw.length,
+  };
+};
+
+type InfiniteActivityData = InfiniteData<ActivityPage>;
 
 /** Map over all activities across pages in an infinite query cache entry */
 const mapInfiniteActivities = (
@@ -137,7 +165,10 @@ const mapInfiniteActivities = (
   if (!old) return old;
   return {
     ...old,
-    pages: old.pages.map((page) => page.map(mapper)),
+    pages: old.pages.map((page) => ({
+      ...page,
+      activities: page.activities.map(mapper),
+    })),
   };
 };
 
@@ -150,11 +181,13 @@ const useActivities = (props: UseActivitiesProps) => {
   // --- infinite query path (Global, Friends, Community) ---
   const infiniteResult = useInfiniteQuery({
     queryKey,
-    queryFn: ({ pageParam }) => fetchActivities(props, pageParam),
+    queryFn: ({ pageParam }) => fetchActivityPage(props, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => {
-      if (lastPage.length < limit) return undefined;
-      return lastPage[lastPage.length - 1]?.createdAt;
+      // Use raw server count to avoid premature stop from client-side filtering
+      if (lastPage.serverCount < limit) return undefined;
+      const last = lastPage.activities[lastPage.activities.length - 1];
+      return last?.createdAt;
     },
     enabled: infinite,
   });
@@ -168,7 +201,7 @@ const useActivities = (props: UseActivitiesProps) => {
 
   const activities = useMemo(() => {
     if (infinite) {
-      return infiniteResult.data?.pages.flat() ?? [];
+      return infiniteResult.data?.pages.flatMap((p) => p.activities) ?? [];
     }
     return simpleResult.data ?? [];
   }, [infinite, infiniteResult.data, simpleResult.data]);
@@ -180,12 +213,21 @@ const useActivities = (props: UseActivitiesProps) => {
       if (infinite) {
         queryClient.setQueryData<InfiniteActivityData>(queryKey, (old) => {
           if (!old) return old;
-          const flat =
-            typeof updater === "function"
-              ? updater(old.pages.flat())
-              : updater;
-          // Put all updated items into the first page, clear the rest
-          return { ...old, pages: [flat, ...old.pages.slice(old.pages.length)] };
+          if (typeof updater === "function") {
+            // Apply per-page to preserve page structure and pageParams alignment
+            return {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                activities: updater(page.activities),
+              })),
+            };
+          }
+          // Direct replacement: single page, matching single pageParam
+          return {
+            pages: [{ activities: updater, serverCount: updater.length }],
+            pageParams: [old.pageParams[0]],
+          };
         });
       } else {
         queryClient.setQueryData<ActionActivityDto[]>(queryKey, (old) => {

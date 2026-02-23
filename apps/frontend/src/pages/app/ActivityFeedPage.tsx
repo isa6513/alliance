@@ -113,19 +113,38 @@ const ActivityFeedPage = () => {
     };
   }, [mode, updateHeight]);
 
-  // Infinite scroll observer
+  // Store volatile pagination state in refs so the observer effect stays stable
+  const paginationRef = useRef({
+    fetchNextFriends,
+    fetchNextGlobal,
+    hasNextFriends,
+    hasNextGlobal,
+    isFetchingNextFriends,
+    isFetchingNextGlobal,
+  });
+  paginationRef.current = {
+    fetchNextFriends,
+    fetchNextGlobal,
+    hasNextFriends,
+    hasNextGlobal,
+    isFetchingNextFriends,
+    isFetchingNextGlobal,
+  };
+
+  // Infinite scroll observer — no volatile deps, created once
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
+        const p = paginationRef.current;
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           if (entry.target === friendsSentinelRef.current) {
-            if (hasNextFriends && !isFetchingNextFriends) {
-              fetchNextFriends();
+            if (p.hasNextFriends && !p.isFetchingNextFriends) {
+              p.fetchNextFriends();
             }
           } else if (entry.target === everyoneSentinelRef.current) {
-            if (hasNextGlobal && !isFetchingNextGlobal) {
-              fetchNextGlobal();
+            if (p.hasNextGlobal && !p.isFetchingNextGlobal) {
+              p.fetchNextGlobal();
             }
           }
         }
@@ -133,24 +152,18 @@ const ActivityFeedPage = () => {
       { rootMargin: "200px" }
     );
 
-    if (friendsSentinelRef.current) observer.observe(friendsSentinelRef.current);
-    if (everyoneSentinelRef.current) observer.observe(everyoneSentinelRef.current);
+    if (friendsSentinelRef.current)
+      observer.observe(friendsSentinelRef.current);
+    if (everyoneSentinelRef.current)
+      observer.observe(everyoneSentinelRef.current);
 
     return () => observer.disconnect();
-  }, [
-    fetchNextFriends,
-    fetchNextGlobal,
-    hasNextFriends,
-    hasNextGlobal,
-    isFetchingNextFriends,
-    isFetchingNextGlobal,
-  ]);
+  }, []);
 
   const renderActivityColumn = (mode: Mode) => {
     const list = mode === "friends" ? friendActivities : activities;
     const isFetchingNext =
       mode === "friends" ? isFetchingNextFriends : isFetchingNextGlobal;
-    const hasNext = mode === "friends" ? hasNextFriends : hasNextGlobal;
     const sentinelRef =
       mode === "friends" ? friendsSentinelRef : everyoneSentinelRef;
 
@@ -185,7 +198,7 @@ const ActivityFeedPage = () => {
               Loading more...
             </div>
           )}
-          {hasNext && <div ref={sentinelRef} className="h-px" />}
+          <div ref={sentinelRef} className="h-px" />
         </div>
       </div>
     );

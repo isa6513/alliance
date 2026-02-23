@@ -46,3 +46,4 @@ uploads/
 db_dumps/
 
 citesting/screenshots/
+terraform/.terraform.tfstate.lock.info
