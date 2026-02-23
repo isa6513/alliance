@@ -103,6 +103,7 @@ export default function VideoPlayer({
           videoId,
           src,
           progress: Math.floor(video.currentTime),
+          duration: Math.floor(video.duration),
         });
       }
     };
