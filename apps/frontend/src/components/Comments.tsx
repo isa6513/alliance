@@ -339,18 +339,16 @@ const Comments = ({
         {isPostComments && topLevelComments.length > 0 && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 my-3">
             <div className="flex items-center gap-2">
-              <span className="text-[14px] font-medium text-zinc-600">
-                {activeQaMode ? "Q&A mode" : "Filter"}
-              </span>
-              <div className="flex gap-1 bg-zinc-100 rounded">
+              <span>{activeQaMode ? "Q&A mode" : "Filter:"}</span>
+              <div className="flex gap-1 rounded text-[14px]">
                 {filterOptions.map((filter) => (
                   <button
                     key={filter}
                     onClick={() => setCommentFilter(filter)}
-                    className={`px-3 py-2 text-sm rounded border border-transparent ${
+                    className={`px-3 py-2 rounded ${
                       commentFilter === filter
-                        ? "bg-white border-zinc-300 text-black"
-                        : "text-zinc-600 hover:text-zinc-900"
+                        ? "bg-zinc-200/70 text-black font-medium"
+                        : "text-zinc-600"
                     }`}
                   >
                     {commentFilterLabels[filter]} ({commentCounts[filter] ?? 0})

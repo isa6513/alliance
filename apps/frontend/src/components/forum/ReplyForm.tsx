@@ -72,9 +72,9 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
 
   return (
     <div
-      className={`rounded-md relative border border-zinc-200/40 ${
-        className ?? ""
-      } ${parentId ? "mt-0" : "mt-3"} ${compact ? "p-1 md:p-2" : "p-2 md:p-3"}
+      className={`rounded-lg relative ${className ?? ""} ${
+        parentId ? "mt-0" : "mt-3"
+      } ${compact ? "p-1 md:p-2" : "p-2 md:p-3"}
         bg-zinc-100
        `}
     >
