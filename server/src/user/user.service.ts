@@ -11,7 +11,17 @@ import { ImagesService } from 'src/images/images.service';
 import { MailService } from 'src/mail/mail.service';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
-import { DeepPartial, ILike, In, IsNull, Not, type Repository } from 'typeorm';
+import {
+  DeepPartial,
+  ILike,
+  In,
+  IsNull,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Not,
+  Or,
+  type Repository,
+} from 'typeorm';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
@@ -56,6 +66,7 @@ import {
 } from 'src/notifs/notifs.service';
 import { CommunityService } from 'src/community/community.service';
 import { EventType } from 'src/eventlog/event-log.entity';
+import { Contract } from 'src/contract/entities/contract.entity';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -87,6 +98,8 @@ export class UserService {
     private readonly communityInviteRepository: Repository<CommunityInvite>,
     @InjectRepository(UserDevice)
     private readonly userDeviceRepository: Repository<UserDevice>,
+    @InjectRepository(Contract)
+    private readonly contractRepository: Repository<Contract>,
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
@@ -636,7 +649,34 @@ export class UserService {
     return users;
   }
 
-  async signContract(userId: number, signedName: string): Promise<Date> {
+  async findNewestActiveContract(): Promise<Contract> {
+    const now = new Date();
+    const contract = await this.contractRepository.findOneOrFail({
+      where: {
+        startDate: LessThanOrEqual(now),
+        endDate: Or(IsNull(), MoreThanOrEqual(now)),
+      },
+      order: {
+        startDate: 'DESC',
+      },
+    });
+
+    return contract;
+  }
+
+  async findContract(id: number): Promise<Contract> {
+    return await this.contractRepository.findOneOrFail({
+      where: { id },
+    });
+  }
+
+  async signContract(params: {
+    userId: number;
+    signedName: string;
+    contractId: number;
+  }): Promise<Date> {
+    const { userId, signedName, contractId } = params;
+
     const user = await this.findOneOrFail(userId, {
       contractEvents: true,
       referredBy: { communities: { leaders: true, users: true } },
@@ -644,15 +684,20 @@ export class UserService {
       communities: true,
       pendingCommunity: { leaders: true, users: true },
     });
-    if (user.hasActiveContract) {
-      throw new BadRequestException('Member already has an active contract.');
-    }
+    const switchingContracts = user.hasActiveContract;
     const contractEvent = this.contractEventRepository.create({
       user,
       type: ContractEventType.SIGNED,
       date: new Date(),
       signedName,
+      contract: { id: contractId },
     });
+    const saveContractEventP = this.contractEventRepository.save(contractEvent);
+
+    if (switchingContracts) {
+      await saveContractEventP;
+      return contractEvent.date;
+    }
 
     const promises: Promise<unknown>[] = [];
 
@@ -776,7 +821,7 @@ export class UserService {
     }
 
     await Promise.all([
-      this.contractEventRepository.save(contractEvent),
+      saveContractEventP,
       this.userRepository.save(userUpdate),
       this.notifsService.sendNotifs(notifs),
       this.eventLogService.sendMessage({

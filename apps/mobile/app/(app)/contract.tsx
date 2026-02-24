@@ -1,6 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, TextInput, View } from "react-native";
 import {
+  userGetContract,
+  userGetCurrentContract,
   userSignContract,
   userSuspendContract,
   authMe,
@@ -10,7 +12,7 @@ import {
   getLastContractEvent,
   getSuspensionMessage,
   getSignedMessage,
-  CONTRACT_TERMS,
+  PLACEHOLDER_CONTRACT_MARKDOWN,
   CONTRACT_NOTES,
 } from "@alliance/shared/lib/contract";
 import { useAuth } from "../../lib/AuthContext";
@@ -19,6 +21,8 @@ import Button, { ButtonColor } from "../../components/system/Button";
 import Card, { CardStyle } from "../../components/system/Card";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { suspendContractConfirmation } from "@alliance/shared/lib/copy";
+import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ContractScreen() {
   const { user } = useAuth();
@@ -27,6 +31,30 @@ export default function ContractScreen() {
   const [lastContractEvent, setLastContractEvent] =
     useState<ContractEventState>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: latestContract } = useQuery({
+    queryKey: ["userGetCurrentContract"],
+    queryFn: () => userGetCurrentContract().then((res) => res.data ?? null),
+    initialData: {
+      id: 1,
+      markdown: PLACEHOLDER_CONTRACT_MARKDOWN,
+    },
+  });
+
+  const signedContractId =
+    lastContractEvent?.contractId !== undefined &&
+    lastContractEvent.contractId !== latestContract?.id
+      ? lastContractEvent.contractId
+      : null;
+  const { data: signedContract } = useQuery({
+    queryKey: ["userGetContract", signedContractId],
+    queryFn: () =>
+      userGetContract({
+        path: { contractId: signedContractId! },
+      }).then((res) => res.data ?? null),
+    initialData: null,
+    enabled: signedContractId != null,
+  });
 
   useEffect(() => {
     if (user) {
@@ -48,11 +76,12 @@ export default function ContractScreen() {
   }, []);
 
   const handleContractSign = useCallback(async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || !latestContract) return;
     setIsSubmitting(true);
 
     try {
       const res = await userSignContract({
+        path: { contractId: latestContract.id },
         body: { signedName: editName },
       });
       if (res.data) {
@@ -60,6 +89,7 @@ export default function ContractScreen() {
           type: "signed",
           date: res.data,
           automatic: false,
+          contractId: latestContract.id,
         });
         await refreshContractState();
       }
@@ -72,7 +102,7 @@ export default function ContractScreen() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [isSubmitting, refreshContractState, editName]);
+  }, [isSubmitting, refreshContractState, editName, latestContract]);
 
   const handleContractSuspend = useCallback(() => {
     Alert.alert("Suspend Contract", suspendContractConfirmation, [
@@ -106,6 +136,15 @@ export default function ContractScreen() {
     ]);
   }, [refreshContractState]);
 
+  const signedContractMessage = useMemo(() => {
+    if (!lastContractEvent) return null;
+    return (
+      <Text className="text-green font-medium mt-2">
+        {getSignedMessage(lastContractEvent.date)}
+      </Text>
+    );
+  }, [lastContractEvent]);
+
   if (!user) {
     return (
       <View className="flex-1 bg-white p-4">
@@ -119,7 +158,7 @@ export default function ContractScreen() {
 
   return (
     <KeyboardAwareScrollView className="flex-1 bg-white" bottomOffset={50}>
-      <View className="p-4 pt-16 gap-y-2">
+      <View className="p-4 pt-16 gap-y-8">
         {/* Header */}
         <View className="flex-row items-center mb-1">
           <Text className="text-2xl font-semibold font-serif">
@@ -150,67 +189,75 @@ export default function ContractScreen() {
           </Card>
         )}
 
-        {/* Contract Terms */}
-        <Card cardStyle={CardStyle.Outline} className="border-zinc-200 border">
+        {/* Signed contract (when user signed an older version) */}
+        {signedContract && (
           <View className="gap-y-2">
-            {CONTRACT_TERMS.map((term: (typeof CONTRACT_TERMS)[number]) => (
-              <View key={term.id}>
-                <View className="flex-row">
-                  <Text className="w-6">{term.id}.</Text>
-                  <Text className="flex-1">{term.text}</Text>
-                </View>
-                {"subItems" in term && term.subItems && (
-                  <View className="ml-6 mt-1 gap-y-1">
-                    {term.subItems.map(
-                      (subItem: { id: string; text: string }) => (
-                        <View key={subItem.id} className="flex-row">
-                          <Text className="w-6">{subItem.id}.</Text>
-                          <Text className="flex-1">{subItem.text}</Text>
-                        </View>
-                      )
-                    )}
-                  </View>
-                )}
+            <Card
+              cardStyle={CardStyle.Outline}
+              className="border-zinc-200 border"
+            >
+              <View className="gap-y-2">
+                <AppMarkdownWrapper>
+                  {signedContract.markdown}
+                </AppMarkdownWrapper>
               </View>
-            ))}
-          </View>
-        </Card>
-
-        {/* Sign Section */}
-        {lastContractEvent?.type !== "signed" && (
-          <View className="flex-row mt-2">
-            <TextInput
-              className={inputClasses}
-              value={editName}
-              onChangeText={setEditName}
-              placeholder="Type your full name"
-              placeholderTextColor="#9ca3af"
-            />
-            <Button
-              onPress={handleContractSign}
-              color={ButtonColor.Black}
-              disabled={isSubmitting || !editName}
-              loading={isSubmitting}
-              title="Sign"
-              className="ml-2"
-            />
+            </Card>
+            {signedContractMessage}
           </View>
         )}
 
-        {/* Signed Section */}
-        {lastContractEvent?.type === "signed" && (
-          <View className="gap-y-4">
-            <Text className="text-green font-medium">
-              {getSignedMessage(lastContractEvent.date)}
-            </Text>
-            <Button
-              onPress={handleContractSuspend}
-              color={ButtonColor.Red}
-              disabled={isSubmitting}
-              loading={isSubmitting}
-              title="Suspend contract"
-            />
+        {/* Latest contract */}
+        {latestContract && (
+          <View className="gap-y-2">
+            {signedContract && (
+              <Text className="font-semibold p-2">
+                An updated contract is available.
+              </Text>
+            )}
+            <Card
+              cardStyle={CardStyle.Outline}
+              className="border-zinc-200 border"
+            >
+              <View className="gap-y-2">
+                <AppMarkdownWrapper>
+                  {latestContract.markdown}
+                </AppMarkdownWrapper>
+              </View>
+            </Card>
+            {lastContractEvent?.type === "signed" &&
+            lastContractEvent.contractId === latestContract.id ? (
+              signedContractMessage
+            ) : (
+              <View className="flex-row mt-2">
+                <TextInput
+                  className={inputClasses}
+                  value={editName}
+                  onChangeText={setEditName}
+                  placeholder="Type your full name"
+                  placeholderTextColor="#9ca3af"
+                />
+                <Button
+                  onPress={handleContractSign}
+                  color={ButtonColor.Black}
+                  disabled={isSubmitting || !editName}
+                  loading={isSubmitting}
+                  title="Sign"
+                  className="ml-2"
+                />
+              </View>
+            )}
           </View>
+        )}
+
+        {/* Suspend (when signed) */}
+        {lastContractEvent?.type === "signed" && (
+          <Button
+            onPress={handleContractSuspend}
+            color={ButtonColor.Red}
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            title="Suspend contract"
+          />
         )}
       </View>
     </KeyboardAwareScrollView>

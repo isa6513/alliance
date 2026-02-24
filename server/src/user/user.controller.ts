@@ -48,7 +48,7 @@ import {
   UpdateAwayRangeDto,
   UserAwayRangeDto,
 } from './dto/away-range.dto';
-import { SignContractDto } from './dto/sign-contract.dto';
+import { ContractDto, SignContractDto } from './dto/contract.dto';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import {
   RegisterDeviceDto,
@@ -79,15 +79,37 @@ export class UserController {
     return new ProfileDto(profile);
   }
 
-  @Post('signcontract')
+  @Get('contract')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ContractDto })
+  @ApiUnauthorizedResponse()
+  async getCurrentContract() {
+    return new ContractDto(await this.userService.findNewestActiveContract());
+  }
+
+  @Get('contract/:contractId')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ContractDto })
+  @ApiUnauthorizedResponse()
+  async getContract(@Param('contractId', ParseIntPipe) id: number) {
+    return new ContractDto(await this.userService.findContract(id));
+  }
+
+  @Post('signcontract/:contractId')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: String })
   @ApiUnauthorizedResponse()
   async signContract(
     @Request() req: JwtRequest,
     @Body() body: SignContractDto,
+    @Param('contractId', ParseIntPipe) contractId: number,
   ) {
-    return this.userService.signContract(req.user.sub, body.signedName);
+    return this.userService.signContract({
+      userId: req.user.sub, signedName: body.signedName,
+      contractId,
+    }
+
+    );
   }
 
   @Post('suspendcontract')

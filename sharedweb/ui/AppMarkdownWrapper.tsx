@@ -38,19 +38,19 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
             />
           ),
           p: ({ ...props }) => <p className="first:mt-0 mt-4" {...props} />,
-          img: ({ ...props }) => (
-            <img className="rounded" {...props} />
-          ),
+          img: ({ ...props }) => <img className="rounded" {...props} />,
           strong: ({ ...props }) => (
             <strong className="!font-semibold" {...props} />
           ),
           ol: ({ ...props }) => (
-            <ol className="list-decimal list-inside pl-2" {...props} />
+            <ol className="list-decimal list-outside pl-6 my-2" {...props} />
           ),
           ul: ({ ...props }) => (
-            <ul className="list-disc list-inside pl-2" {...props} />
+            <ul className="list-disc list-outside pl-6 my-2" {...props} />
           ),
-          li: ({ ...props }) => <li className="my-1" {...props} />,
+          li: ({ ...props }) => (
+            <li className="my-2 pl-1 [&>p]:my-0" {...props} />
+          ),
           a: ({ ...props }) => (
             <a
               className="text-link"

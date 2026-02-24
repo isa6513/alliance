@@ -25,6 +25,7 @@ import { UserDevice } from './entities/user-device.entity';
 import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { CommunityModule } from 'src/community/community.module';
+import { Contract } from 'src/contract/entities/contract.entity';
 
 @Module({
   imports: [
@@ -32,17 +33,18 @@ import { CommunityModule } from 'src/community/community.module';
       User,
       Action,
       ActionActivity,
-      Friend,
-      UserDevice,
       City,
-      Notification,
-      PrefillUser,
-      Tag,
-      OnetimeInvite,
-      UserAwayRange,
-      ContractEvent,
       Community,
       CommunityInvite,
+      Contract,
+      ContractEvent,
+      Friend,
+      Notification,
+      OnetimeInvite,
+      PrefillUser,
+      Tag,
+      UserDevice,
+      UserAwayRange,
     ]),
     JwtModule,
     ImagesModule,
@@ -58,5 +60,5 @@ import { CommunityModule } from 'src/community/community.module';
   exports: [UserService],
 })
 export class UserModule {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 }

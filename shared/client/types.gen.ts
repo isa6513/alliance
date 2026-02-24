@@ -35,12 +35,23 @@ export type PublicFormResponseDefault = 'public' | 'private';
 
 export type ContractEventType = 'signed' | 'suspended';
 
+export type Contract = {
+    id: number;
+    createdAt: string;
+    markdown: string;
+    startDate?: string;
+    endDate?: string;
+    events: Array<ContractEvent>;
+};
+
 export type ContractEvent = {
     type: ContractEventType;
     date: string;
     automatic: boolean;
     autoSuspendKey?: string;
     signedName?: string;
+    contractId?: number;
+    contract?: Contract | null;
 };
 
 export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
@@ -686,6 +697,11 @@ export type ProfileDto = {
     hasActiveContract: boolean;
     isCommunityLeader: boolean;
     lastContractEvent?: ContractEvent;
+};
+
+export type ContractDto = {
+    id: number;
+    markdown: string;
 };
 
 export type SignContractDto = {
@@ -2916,11 +2932,49 @@ export type UserFindMeResponses = {
 
 export type UserFindMeResponse = UserFindMeResponses[keyof UserFindMeResponses];
 
-export type UserSignContractData = {
-    body: SignContractDto;
+export type UserGetCurrentContractData = {
+    body?: never;
     path?: never;
     query?: never;
-    url: '/user/signcontract';
+    url: '/user/contract';
+};
+
+export type UserGetCurrentContractErrors = {
+    401: unknown;
+};
+
+export type UserGetCurrentContractResponses = {
+    200: ContractDto;
+};
+
+export type UserGetCurrentContractResponse = UserGetCurrentContractResponses[keyof UserGetCurrentContractResponses];
+
+export type UserGetContractData = {
+    body?: never;
+    path: {
+        contractId: number;
+    };
+    query?: never;
+    url: '/user/contract/{contractId}';
+};
+
+export type UserGetContractErrors = {
+    401: unknown;
+};
+
+export type UserGetContractResponses = {
+    200: ContractDto;
+};
+
+export type UserGetContractResponse = UserGetContractResponses[keyof UserGetContractResponses];
+
+export type UserSignContractData = {
+    body: SignContractDto;
+    path: {
+        contractId: number;
+    };
+    query?: never;
+    url: '/user/signcontract/{contractId}';
 };
 
 export type UserSignContractErrors = {

@@ -1,6 +1,11 @@
-import { userSignContract, userSuspendContract } from "@alliance/shared/client";
+import {
+  userGetContract,
+  userGetCurrentContract,
+  userSignContract,
+  userSuspendContract,
+} from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import MemberContract from "../../components/MemberContract";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
@@ -12,16 +17,39 @@ import {
   getLastContractEvent,
   getSuspensionMessage,
   getSignedMessage,
+  PLACEHOLDER_CONTRACT_MARKDOWN,
 } from "@alliance/shared/lib/contract";
 import { suspendContractConfirmation } from "@alliance/shared/lib/copy";
+import { useQuery } from "@tanstack/react-query";
 
 const ContractPage: React.FC = () => {
   const { user, refreshUser } = useAuth();
-
   const [editName, setEditName] = useState("");
-
   const [lastContractEvent, setLastContractEvent] =
     useState<ContractEventState>(null);
+  const { data: latestContract } = useQuery({
+    queryKey: ["userGetCurrentContract"],
+    queryFn: () => userGetCurrentContract().then((res) => res.data ?? null),
+    initialData: {
+      id: 1,
+      markdown: PLACEHOLDER_CONTRACT_MARKDOWN,
+    },
+  });
+
+  const signedContractId =
+    lastContractEvent?.contractId !== undefined &&
+    lastContractEvent.contractId !== latestContract?.id
+      ? lastContractEvent.contractId
+      : null;
+  const { data: signedContract } = useQuery({
+    queryKey: ["userGetContract", signedContractId],
+    queryFn: () =>
+      userGetContract({
+        path: { contractId: signedContractId! },
+      }).then((res) => res.data ?? null),
+    initialData: null,
+    enabled: signedContractId != null,
+  });
 
   useEffect(() => {
     if (user) {
@@ -30,8 +58,14 @@ const ContractPage: React.FC = () => {
   }, [user]);
 
   const handleContractSign = async () => {
+    if (!latestContract) {
+      return;
+    }
     try {
       const res = await userSignContract({
+        path: {
+          contractId: latestContract.id,
+        },
         body: { signedName: editName },
       });
       if (res.data) {
@@ -39,6 +73,7 @@ const ContractPage: React.FC = () => {
           type: "signed",
           date: res.data,
           automatic: false,
+          contractId: latestContract.id,
         });
         await refreshUser();
       }
@@ -69,43 +104,67 @@ const ContractPage: React.FC = () => {
     }
   };
 
+  const signedContractMessage = useMemo(() => {
+    if (!lastContractEvent) {
+      return null;
+    }
+
+    return (
+      <div className="mt-4 flex flex-col gap-y-2 sm:flex-row justify-between sm:items-center">
+        <p className="text-green">{getSignedMessage(lastContractEvent.date)}</p>
+      </div>
+    );
+  }, [lastContractEvent]);
+
   return (
     <CenterLayout>
-      <div className="gap-y-2 flex flex-col text-base md:text-lg">
+      <div className="gap-y-8 flex flex-col text-base md:text-lg">
         <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
           Membership contract
         </p>
 
-        <MemberContract />
+        {signedContract && (
+          <div className="flex flex-col">
+            <MemberContract markdown={signedContract.markdown} />
+            {signedContractMessage}
+          </div>
+        )}
 
-        {lastContractEvent?.type !== "signed" && (
-          <div className="flex flex-row mt-2 w-full">
-            <FormInput
-              name="name"
-              type="text"
-              placeholder="Type your full name"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              className="flex-1"
-            />
-            <Button
-              disabled={!editName}
-              onClick={handleContractSign}
-              color={ButtonColor.Black}
-              className="ml-2 !h-auto px-6"
-            >
-              Sign
-            </Button>
+        {latestContract && (
+          <div className="flex flex-col">
+            {signedContract && (
+              <p className="font-semibold p-2">
+                An updated contract is available.
+              </p>
+            )}
+            <MemberContract markdown={latestContract.markdown} />
+            {lastContractEvent?.type === "signed" &&
+            lastContractEvent.contractId === latestContract.id ? (
+              signedContractMessage
+            ) : (
+              <div className="flex flex-row mt-2 w-full">
+                <FormInput
+                  name="name"
+                  type="text"
+                  placeholder="Type your full name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  disabled={!editName}
+                  onClick={handleContractSign}
+                  color={ButtonColor.Black}
+                  className="ml-2 !h-auto px-6"
+                >
+                  Sign
+                </Button>
+              </div>
+            )}
           </div>
         )}
-        {lastContractEvent?.type === "signed" && (
-          <div className="mt-4 flex flex-col gap-y-2 sm:flex-row justify-between sm:items-center">
-            <p className="text-green">
-              {getSignedMessage(lastContractEvent.date)}
-            </p>
-          </div>
-        )}
-        <div className="mt-4 flex flex-col gap-y-2 text-[16px]">
+
+        <div className="flex flex-col gap-y-2 text-[16px]">
           <div>
             <h2 className="font-semibold mt-2 text-black">
               What happens if I don&apos;t follow the contract?
