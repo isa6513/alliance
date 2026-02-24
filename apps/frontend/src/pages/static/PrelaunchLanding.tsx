@@ -32,11 +32,16 @@ const PrelaunchLandingPage: React.FC = () => {
           </div>
         </div>
         <div className="lg:flex-1 lg:flex lg:items-center lg:justify-center lg:py-8">
-          <img
-            src={alliancePeople}
-            alt="Alliance members"
-            className="w-full lg:max-w-full lg:max-h-full object-contain rounded-md"
-          />
+          <div className="flex flex-col gap-y-4">
+            <img
+              src={alliancePeople}
+              alt="Alliance members"
+              className="w-full lg:max-w-full lg:max-h-full object-contain rounded-md"
+            />
+            <p className="text-center text-zinc-500">
+              A few members gathered in San Francisco, California
+            </p>
+          </div>
         </div>
       </div>
     </div>
