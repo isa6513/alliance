@@ -277,6 +277,7 @@ const UserActivityCard = ({
           compact
           showForm={showCommentForm}
           autofocus={showCommentForm}
+          showUserBadges={false}
         />
       )}
     </div>

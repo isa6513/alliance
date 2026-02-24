@@ -81,7 +81,7 @@ const ReplyContent = ({
                 className="text-zinc-800 font-medium inline"
               >
                 <UserDisplayName
-                  staff={reply.author.staff}
+                  staff={ctx.showUserBadges && reply.author.staff}
                   expert={isExpert}
                   expertLabel={expertLabel}
                 >

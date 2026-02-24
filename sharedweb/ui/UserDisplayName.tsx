@@ -27,7 +27,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
       {staff && (
         <HoverBadge title="Alliance staff">
           <Earth
-            size={18}
+            size={16}
             className="ml-1 text-green inline -mt-px"
             strokeWidth={1.7}
           />
@@ -36,7 +36,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
       {!staff && grouplead && (
         <HoverBadge title="Leads a member group">
           <UserCircle
-            size={18}
+            size={16}
             className="ml-1 text-grouplead inline -mt-px"
             strokeWidth={2}
           />

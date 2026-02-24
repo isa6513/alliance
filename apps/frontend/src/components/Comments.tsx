@@ -33,6 +33,7 @@ export interface CommentsProps {
   expertLabel?: string;
   qaMode?: boolean;
   className?: string;
+  showUserBadges?: boolean;
 }
 
 const hasExpertReply = (comment: CommentDto, expertIds: number[]): boolean => {
@@ -120,6 +121,7 @@ const Comments = ({
   expertLabel,
   qaMode = false,
   className,
+  showUserBadges = true,
 }: CommentsProps) => {
   const { user } = useAuth();
   const [commentFilter, setCommentFilter] = useState<CommentFilter>("all");
@@ -288,6 +290,7 @@ const Comments = ({
       expertIds,
       expertLabel,
       compact,
+      showUserBadges,
     }),
     [
       user,
@@ -304,6 +307,7 @@ const Comments = ({
       expertIds,
       expertLabel,
       compact,
+      showUserBadges,
     ]
   );
 

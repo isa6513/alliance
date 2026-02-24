@@ -46,6 +46,7 @@ interface CommentsContextValue {
   expertIds: number[];
   expertLabel?: string;
   compact?: boolean;
+  showUserBadges?: boolean;
 }
 
 const CommentsContext = createContext<CommentsContextValue | null>(null);
