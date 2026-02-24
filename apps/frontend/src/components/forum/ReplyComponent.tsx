@@ -175,7 +175,10 @@ const ReplyContent = ({
               {user && canNest && (
                 <button
                   onClick={() => {
-                    ctx.setReplyingTo(isReplyingToThis ? null : reply.id);
+                    ctx.setReplyingTo(reply.id);
+                    if (isCollapsed && onToggleCollapse) {
+                      onToggleCollapse();
+                    }
                   }}
                   className="text-zinc-500 hover:text-zinc-700 hover:underline text-sm"
                 >
