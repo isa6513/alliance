@@ -278,7 +278,7 @@ describe('findUsersToSuspend (e2e)', () => {
     const afterSuspension = await actionsService.findUsersToSuspend(now);
     expect(afterSuspension.usersToSuspend).toHaveLength(0);
 
-    await userService.signContract(failingUser.id);
+    await userService.signContract(failingUser.id, 'Test Name');
 
     const afterResigning = await actionsService.findUsersToSuspend(now);
     expect(afterResigning.usersToSuspend).toHaveLength(0);

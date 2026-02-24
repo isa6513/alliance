@@ -688,7 +688,7 @@ export type ProfileDto = {
 };
 
 export type SignContractDto = {
-    signedName?: string;
+    signedName: string;
 };
 
 export type UserAwayRangeReason = 'vacation' | 'emergency' | 'other';

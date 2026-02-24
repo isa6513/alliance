@@ -1,4 +1,8 @@
-import { PickType } from '@nestjs/swagger';
-import { ContractEvent } from '../entities/contract-event.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Allow } from 'class-validator';
 
-export class SignContractDto extends PickType(ContractEvent, ['signedName']) {}
+export class SignContractDto {
+  @ApiProperty()
+  @Allow()
+  signedName: string;
+}

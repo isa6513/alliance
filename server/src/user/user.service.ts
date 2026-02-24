@@ -636,7 +636,7 @@ export class UserService {
     return users;
   }
 
-  async signContract(userId: number, signedName?: string): Promise<Date> {
+  async signContract(userId: number, signedName: string): Promise<Date> {
     const user = await this.findOneOrFail(userId, {
       contractEvents: true,
       referredBy: { communities: { leaders: true, users: true } },
