@@ -176,10 +176,14 @@ export const userFindMe = <ThrowOnError extends boolean = false>(options?: Optio
     });
 };
 
-export const userSignContract = <ThrowOnError extends boolean = false>(options?: Options<UserSignContractData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).post<UserSignContractResponse, unknown, ThrowOnError>({
+export const userSignContract = <ThrowOnError extends boolean = false>(options: Options<UserSignContractData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).post<UserSignContractResponse, unknown, ThrowOnError>({
         url: '/user/signcontract',
-        ...options
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options?.headers
+        }
     });
 };
 

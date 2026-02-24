@@ -46,4 +46,8 @@ export class ContractEvent {
   @Column({ nullable: true })
   @ApiPropertyOptional({ type: 'string' })
   autoSuspendKey?: string;
+
+  @Column({ nullable: true })
+  @ApiPropertyOptional({ type: 'string' })
+  signedName?: string;
 }

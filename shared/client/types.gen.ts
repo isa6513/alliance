@@ -40,6 +40,7 @@ export type ContractEvent = {
     date: string;
     automatic: boolean;
     autoSuspendKey?: string;
+    signedName?: string;
 };
 
 export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
@@ -684,6 +685,10 @@ export type ProfileDto = {
     hasActiveContract: boolean;
     isCommunityLeader: boolean;
     lastContractEvent?: ContractEvent;
+};
+
+export type SignContractDto = {
+    signedName?: string;
 };
 
 export type UserAwayRangeReason = 'vacation' | 'emergency' | 'other';
@@ -2900,7 +2905,7 @@ export type UserFindMeResponses = {
 export type UserFindMeResponse = UserFindMeResponses[keyof UserFindMeResponses];
 
 export type UserSignContractData = {
-    body?: never;
+    body: SignContractDto;
     path?: never;
     query?: never;
     url: '/user/signcontract';

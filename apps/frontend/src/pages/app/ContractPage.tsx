@@ -31,7 +31,9 @@ const ContractPage: React.FC = () => {
 
   const handleContractSign = async () => {
     try {
-      const res = await userSignContract();
+      const res = await userSignContract({
+        body: { signedName: editName },
+      });
       if (res.data) {
         setLastContractEvent({
           type: "signed",

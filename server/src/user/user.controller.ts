@@ -48,6 +48,7 @@ import {
   UpdateAwayRangeDto,
   UserAwayRangeDto,
 } from './dto/away-range.dto';
+import { SignContractDto } from './dto/sign-contract.dto';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import {
   RegisterDeviceDto,
@@ -82,8 +83,11 @@ export class UserController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: String })
   @ApiUnauthorizedResponse()
-  async signContract(@Request() req: JwtRequest) {
-    return this.userService.signContract(req.user.sub);
+  async signContract(
+    @Request() req: JwtRequest,
+    @Body() body: SignContractDto,
+  ) {
+    return this.userService.signContract(req.user.sub, body.signedName);
   }
 
   @Post('suspendcontract')
