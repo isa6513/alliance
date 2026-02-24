@@ -6,8 +6,8 @@ const PrelaunchLandingPage: React.FC = () => {
   return (
     <div className="min-h-screen lg:h-screen flex flex-col bg-white lg:overflow-hidden">
       <PrelaunchNavbar transparent={false} absolute={false} showLogo={false} />
-      <div className="flex-1 flex flex-col lg:flex-row-reverse lg:overflow-hidden">
-        <div className="lg:flex-1 flex items-start lg:items-center justify-center px-6 lg:px-24 pt-4 pb-4 lg:py-0">
+      <div className="flex-1 flex flex-col mx-auto gap-x-16 px-6 lg:px-24 lg:flex-row-reverse lg:overflow-hidden">
+        <div className="lg:flex-1 flex items-start lg:items-center justify-center py-4 lg:py-0">
           <div className="flex flex-col gap-y-3 lg:gap-y-8 my-12 max-w-[700px]">
             <p className="font-berlingske uppercase font-medium font-serif text-3xl sm:text-4xl lg:text-5xl text-black">
               The Alliance
@@ -31,7 +31,7 @@ const PrelaunchLandingPage: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="px-6 pb-6 lg:flex-1 lg:flex lg:items-center lg:justify-center lg:pr-4 lg:pl-36 lg:py-8">
+        <div className="lg:flex-1 lg:flex lg:items-center lg:justify-center lg:py-8">
           <img
             src={alliancePeople}
             alt="Alliance members"

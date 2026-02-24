@@ -2,7 +2,9 @@ import { ActionDto, ActionUpdateDto } from "@alliance/shared/client";
 import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 import ActionCompletedBarWithInfo from "../../pages/app/ActionCompletedBarWithInfo";
 import Card from "@alliance/sharedweb/ui/Card";
-import useActivities, { ActivityList } from "@alliance/shared/lib/useActivities";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 
 interface TimelineItemProps {
   highlighted?: boolean;
@@ -26,7 +28,6 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const sortedUpdates = [...(updates ?? [])].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
-
 
   const { activities: friendActivities } = useActivities({
     list: ActivityList.FriendsForAction,
