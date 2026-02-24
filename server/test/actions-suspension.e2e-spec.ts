@@ -116,6 +116,7 @@ describe('findUsersToSuspend (e2e)', () => {
           type: ContractEventType.SIGNED,
           date: contractSignedAt,
           automatic: false,
+          contractId: ctx.defaultContractId,
         },
       ],
     });
@@ -128,6 +129,7 @@ describe('findUsersToSuspend (e2e)', () => {
       contractEvents: [
         {
           type: ContractEventType.SIGNED,
+          contractId: ctx.defaultContractId,
           date: contractSignedAt,
           automatic: false,
         },
@@ -278,7 +280,11 @@ describe('findUsersToSuspend (e2e)', () => {
     const afterSuspension = await actionsService.findUsersToSuspend(now);
     expect(afterSuspension.usersToSuspend).toHaveLength(0);
 
-    await userService.signContract(failingUser.id, 'Test Name');
+    await userService.signContract({
+      userId: failingUser.id,
+      signedName: 'Test Name',
+      contractId: ctx.defaultContractId,
+    });
 
     const afterResigning = await actionsService.findUsersToSuspend(now);
     expect(afterResigning.usersToSuspend).toHaveLength(0);

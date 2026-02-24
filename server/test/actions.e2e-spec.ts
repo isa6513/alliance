@@ -121,7 +121,11 @@ describe('Actions (e2e)', () => {
     const defaultUser = await userRepo.findOneOrFail({
       where: { id: ctx.testUserId },
     });
-    await userService.signContract(defaultUser.id, 'Test Name');
+    await userService.signContract({
+      userId: defaultUser.id,
+      signedName: 'Test Name',
+      contractId: ctx.defaultContractId,
+    });
 
     restrictedTag = await tagRepo.save(
       tagRepo.create({

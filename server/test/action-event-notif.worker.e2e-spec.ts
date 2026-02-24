@@ -77,6 +77,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         type: ContractEventType.SIGNED,
         date: signedDate,
         automatic: false,
+        contractId: ctx.defaultContractId,
       }),
     );
   };
@@ -93,6 +94,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         type: ContractEventType.SIGNED,
         date: signedDate,
         automatic: false,
+        contractId: ctx.defaultContractId,
       }),
       contractEventRepo.create({
         user: { id: userId },
@@ -518,6 +520,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(now - 7 * 24 * 60 * 60 * 1000), // signed 7 days ago
             automatic: false,
+            contractId: ctx.defaultContractId,
           } as ContractEvent,
           {
             type: ContractEventType.SUSPENDED,
@@ -590,6 +593,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(now - 48 * 60 * 60 * 1000),
             automatic: false,
+            contractId: ctx.defaultContractId,
           } as ContractEvent,
         ],
         textNotifsEnabled: true,
@@ -647,6 +651,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(now - 48 * 60 * 60 * 1000),
             automatic: false,
+            contractId: ctx.defaultContractId,
           } as ContractEvent,
         ],
         textNotifsEnabled: true,
@@ -869,6 +874,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
               type: ContractEventType.SIGNED,
               date: new Date(now - 72 * 60 * 60 * 1000),
               automatic: false,
+              contractId: ctx.defaultContractId,
             } as ContractEvent,
           ],
           textNotifsEnabled: true,
@@ -971,6 +977,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(now - 6 * 24 * 60 * 60 * 1000),
             automatic: false,
+            contractId: ctx.defaultContractId,
           } as ContractEvent,
         ],
         textNotifsEnabled: true,
@@ -1051,6 +1058,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
               type: ContractEventType.SIGNED,
               date: new Date(now - 7 * 24 * 60 * 60 * 1000),
               automatic: false,
+              contractId: ctx.defaultContractId,
             } as ContractEvent,
           ],
           textNotifsEnabled: true,
@@ -1237,6 +1245,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
               type: ContractEventType.SIGNED,
               date: new Date(now - 7 * 24 * 60 * 60 * 1000),
               automatic: false,
+              contractId: ctx.defaultContractId,
             } as ContractEvent,
           ],
           textNotifsEnabled: true,

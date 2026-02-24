@@ -17,6 +17,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { testConnectionOptions } from 'src/datasources/dataSourceTest';
 import { Tag } from 'src/user/entities/tag.entity';
 import { ForumModule } from 'src/forum/forum.module';
+import { Contract } from 'src/contract/entities/contract.entity';
 
 export interface TestContext {
   app: INestApplication;
@@ -28,6 +29,7 @@ export interface TestContext {
   adminUserId: number;
   agent: TestAgent;
   defaultTag: Tag;
+  defaultContractId: number;
 }
 
 export async function createTestApp(
@@ -73,6 +75,14 @@ export async function createTestApp(
 
   const defaultTag = await tagRepo.save(
     tagRepo.create({ name: 'Default Tag', description: 'Default Tag' }),
+  );
+
+  const contractRepo = dataSource.getRepository(Contract);
+  const defaultContract = await contractRepo.save(
+    contractRepo.create({
+      markdown: '# Test Contract',
+      startDate: new Date(0),
+    }),
   );
 
   const user = await userRepo.save(
@@ -124,5 +134,6 @@ export async function createTestApp(
     adminUserId: adminUser.id,
     agent,
     defaultTag,
+    defaultContractId: defaultContract.id,
   };
 }

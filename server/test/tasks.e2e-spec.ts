@@ -557,6 +557,7 @@ describe('Tasks (e2e)', () => {
           type: ContractEventType.SIGNED,
           date: new Date(Date.now() - 1000),
           user,
+          contractId: ctx.defaultContractId,
         }),
       );
       result = await runValidator(contractValidatorId);

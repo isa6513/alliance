@@ -1,5 +1,6 @@
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
 import {
+  Check,
   Column,
   Entity,
   Index,
@@ -23,6 +24,7 @@ export enum ContractEventType {
 @Entity()
 @Index(['user', 'date'])
 @Unique(['user', 'autoSuspendKey'])
+@Check(`"type" != 'signed' OR "contractId" IS NOT NULL`)
 export class ContractEvent {
   // Fields
 
@@ -61,7 +63,7 @@ export class ContractEvent {
   @IsOptional()
   signedName?: string;
 
-  @Column()
+  @Column({ nullable: true })
   @ApiPropertyOptional()
   @IsOptional()
   contractId?: number;
