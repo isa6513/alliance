@@ -89,6 +89,7 @@ const ContractPage: React.FC = () => {
               className="flex-1"
             />
             <Button
+              disabled={!editName}
               onClick={handleContractSign}
               color={ButtonColor.Black}
               className="ml-2 !h-auto px-6"

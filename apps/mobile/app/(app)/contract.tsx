@@ -52,7 +52,9 @@ export default function ContractScreen() {
     setIsSubmitting(true);
 
     try {
-      const res = await userSignContract();
+      const res = await userSignContract({
+        body: { signedName: editName },
+      });
       if (res.data) {
         setLastContractEvent({
           type: "signed",
@@ -187,7 +189,7 @@ export default function ContractScreen() {
             <Button
               onPress={handleContractSign}
               color={ButtonColor.Black}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !editName}
               loading={isSubmitting}
               title="Sign"
               className="ml-2"
