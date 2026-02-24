@@ -84,7 +84,7 @@ const ForumListPost = ({
           />
         )}
       </div>
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end text-sm text-zinc-500 gap-y-1 md:gap-y-0">
+      <div className="flex flex-row justify-between md:items-end text-sm text-zinc-500 gap-y-1 flex-wrap gap-x-4">
         <div className="flex flex-row items-center">
           {(post.authors?.length ? post.authors : [post.author]).map((a) => (
             <span key={a.id} className="mr-2">
