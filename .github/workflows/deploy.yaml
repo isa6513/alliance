@@ -694,10 +694,9 @@ jobs:
           ITEMS=$(echo "$AI_APPROVED" | jq -c '.[]')
           while IFS= read -r item; do
             PAGE=$(echo "$item" | jq -r '.page')
-            REASON=$(echo "$item" | jq -r '.reason')
             FILE="${PAGE}.png"
 
-            TEXT+="${NL}*${PAGE}* — ${REASON}${NL}"
+            TEXT+="*${PAGE}* "
 
             GALLERY=""
             if [ -f "$BASELINE_DIR/$FILE" ]; then
