@@ -67,6 +67,7 @@ export class ProfileDto extends PickType(User, [
     this.staff = user.staff;
     this.hasActiveContract = user.hasActiveContract;
     this.isCommunityLeader = user.isCommunityLeader;
+    this.anonymous = user.anonymous;
     this.lastContractEvent = user.contractEvents?.length
       ? user.contractEvents?.sort(
           (a, b) => b.date.getTime() - a.date.getTime(),
