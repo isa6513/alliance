@@ -36,7 +36,7 @@ const PrelaunchLandingPage: React.FC = () => {
             <img
               src={alliancePeople}
               alt="Alliance members"
-              className="w-full lg:max-w-full lg:max-h-full object-contain rounded-md"
+              className="w-full lg:max-w-full lg:max-h-screen object-contain rounded-md"
             />
             <p className="text-center text-zinc-500">
               A few members gathered in San Francisco, California
