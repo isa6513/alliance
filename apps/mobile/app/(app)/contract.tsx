@@ -72,7 +72,7 @@ export default function ContractScreen() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [isSubmitting, refreshContractState]);
+  }, [isSubmitting, refreshContractState, editName]);
 
   const handleContractSuspend = useCallback(() => {
     Alert.alert("Suspend Contract", suspendContractConfirmation, [
