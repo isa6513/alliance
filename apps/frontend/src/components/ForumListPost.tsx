@@ -99,9 +99,12 @@ const ForumListPost = ({
                 <ProfileImage
                   pfp={a.profilePicture}
                   size="small"
-                  className="mr-1 -mt-1"
+                  className="mr-2 -mt-1"
                 />
-                <UserDisplayName className="text-green" staff={a.staff}>
+                <UserDisplayName
+                  className="text-black font-normal"
+                  staff={a.staff}
+                >
                   {a.displayName}
                 </UserDisplayName>
               </span>
