@@ -854,8 +854,61 @@ const ActionDashboard: React.FC = () => {
       });
     }
 
+    // Compute total reading time from task form + action description
+    const countWords = (text: string | null | undefined): number => {
+      if (!text) return 0;
+      return text.trim().split(/\s+/).filter(Boolean).length;
+    };
+
+    let descriptionWords = 0;
+    descriptionWords += countWords(action.body);
+    descriptionWords += countWords(action.shortDescription);
+
+    let formWords = 0;
+    if (taskForm?.schema) {
+      const schema = taskForm.schema;
+      formWords += countWords(schema.title);
+      formWords += countWords(schema.description);
+
+      for (const page of schema.pages) {
+        formWords += countWords(page.title);
+        formWords += countWords(page.description);
+
+        for (const field of page.fields) {
+          if ("label" in field) formWords += countWords(field.label);
+          if ("description" in field)
+            formWords += countWords(field.description as string);
+          if ("options" in field && Array.isArray(field.options)) {
+            for (const option of field.options) {
+              formWords += countWords(option.label);
+            }
+          }
+          if ("text" in field) formWords += countWords(field.text as string);
+          if ("caption" in field)
+            formWords += countWords(field.caption as string);
+          if ("startLabel" in field)
+            formWords += countWords(field.startLabel as string);
+          if ("endLabel" in field)
+            formWords += countWords(field.endLabel as string);
+        }
+      }
+    }
+
+    const totalWords = descriptionWords + formWords;
+    const totalSeconds = Math.round(totalWords * 0.462);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    const readingTimeLabel = `Total reading time: ${timeStr}  - (${descriptionWords} description words + ${formWords} form words)`;
+
+    items.push({
+      id: "readingTime",
+      label: readingTimeLabel,
+      isReady: totalSeconds < 15 * 60,
+    });
+
     return items;
-  }, [action]);
+  }, [action, taskForm]);
 
   const readinessReadyCount = readinessChecklist.filter(
     (item) => item.isReady
