@@ -645,3 +645,34 @@ export class GlobalFeedItemDto {
   @IsOptional()
   forumComments?: GlobalFeedForumCommentsDto;
 }
+
+export enum TimelineFeedItemType {
+  ActionUpdate = 'action_update',
+  ActionEvent = 'action_event',
+}
+
+export class TimelineFeedItemDto {
+  @ApiProperty({ enum: TimelineFeedItemType, enumName: 'TimelineFeedItemType' })
+  @Allow()
+  type: TimelineFeedItemType;
+
+  @ApiProperty()
+  @Type(() => Date)
+  @Allow()
+  date: Date;
+
+  @ApiProperty({ type: () => ActionDto })
+  @Type(() => ActionDto)
+  @Allow()
+  action: ActionDto;
+
+  @ApiPropertyOptional({ type: () => ActionUpdateDto })
+  @Type(() => ActionUpdateDto)
+  @IsOptional()
+  actionUpdate?: ActionUpdateDto;
+
+  @ApiPropertyOptional({ type: () => ActionEventDto })
+  @Type(() => ActionEventDto)
+  @IsOptional()
+  actionEvent?: ActionEventDto;
+}

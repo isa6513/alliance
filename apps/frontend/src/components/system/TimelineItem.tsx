@@ -57,6 +57,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
             textSize="base"
             textColor="zinc-800"
             showInfoTooltip
+            seeAllLink
           />
         </Card>
       )}

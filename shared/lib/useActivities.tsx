@@ -48,7 +48,8 @@ export type UseActivitiesProps = {
 const supportsCursor = (list: ActivityList) =>
   list === ActivityList.Global ||
   list === ActivityList.Friends ||
-  list === ActivityList.Community;
+  list === ActivityList.Community ||
+  list === ActivityList.Action;
 
 const generateQueryKey = (props: UseActivitiesProps) => {
   return [
@@ -83,7 +84,7 @@ const callActivityApi = async (
     case ActivityList.Action:
       apiCall = actionsGetActionActivities({
         path: { id: objectId! },
-        query: { limit: limit, comments },
+        query: { limit: limit, comments, before: beforeStr },
       });
       break;
     case ActivityList.FriendsForAction:

@@ -171,34 +171,36 @@ const ActivityFeedPage = () => {
       <div className="w-1/2">
         <div
           ref={mode === "friends" ? friendsRef : everyoneRef}
-          className="flex flex-col divide-y divide-zinc-200 *:p-4"
+          className="flex flex-col"
         >
-          {list.map((activity) => (
-            <UserActivityCard
-              activity={activity}
-              key={activity.id}
-              handleLike={() => handleLikeActivity(activity.id, mode)}
-              onActivityUpdate={(updatedActivity) =>
-                updateActivity(updatedActivity, mode)
-              }
-              canEdit={activity.user.id === user?.id}
-            />
-          ))}
-          {list.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
-              <p>
-                {(mode === "friends" ? loadingFriend : loading)
-                  ? "Loading..."
-                  : `No ${mode === "friends" ? "friend " : ""}activity yet`}
-              </p>
-            </div>
-          )}
+          <div className="flex flex-col divide-y divide-zinc-200 *:p-4">
+            {list.map((activity) => (
+              <UserActivityCard
+                activity={activity}
+                key={activity.id}
+                handleLike={() => handleLikeActivity(activity.id, mode)}
+                onActivityUpdate={(updatedActivity) =>
+                  updateActivity(updatedActivity, mode)
+                }
+                canEdit={activity.user.id === user?.id}
+              />
+            ))}
+            {list.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
+                <p>
+                  {(mode === "friends" ? loadingFriend : loading)
+                    ? "Loading..."
+                    : `No ${mode === "friends" ? "friend " : ""}activity yet`}
+                </p>
+              </div>
+            )}
+          </div>
           {isFetchingNext && (
             <div className="flex justify-center py-4 text-zinc-400">
               Loading more...
             </div>
           )}
-          <div ref={sentinelRef} className="h-px" />
+          <div ref={sentinelRef} className="h-1" />
         </div>
       </div>
     );

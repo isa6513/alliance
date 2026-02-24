@@ -2095,6 +2095,16 @@ export type CommunityUserInfoDto = {
     users: Array<UserActionRelationsForUserDto>;
 };
 
+export type TimelineFeedItemType = 'action_update' | 'action_event';
+
+export type TimelineFeedItemDto = {
+    type: TimelineFeedItemType;
+    date: string;
+    action: ActionDto;
+    actionUpdate?: ActionUpdateDto;
+    actionEvent?: ActionEventDto;
+};
+
 export type CreatePostDto = {
     title: string;
     actionId?: number;
@@ -4783,6 +4793,7 @@ export type ActionsGetActionActivitiesData = {
     query: {
         limit: number;
         comments: boolean;
+        before: string;
     };
     url: '/actions/{id}/activities';
 };
@@ -5641,6 +5652,21 @@ export type ActionsGetCommunityMemberInfoResponses = {
 };
 
 export type ActionsGetCommunityMemberInfoResponse = ActionsGetCommunityMemberInfoResponses[keyof ActionsGetCommunityMemberInfoResponses];
+
+export type ActionsGetTimelineFeedData = {
+    body?: never;
+    path?: never;
+    query: {
+        limit: number;
+    };
+    url: '/actions/timeline-feed';
+};
+
+export type ActionsGetTimelineFeedResponses = {
+    200: Array<TimelineFeedItemDto>;
+};
+
+export type ActionsGetTimelineFeedResponse = ActionsGetTimelineFeedResponses[keyof ActionsGetTimelineFeedResponses];
 
 export type ForumFindAllPostsData = {
     body?: never;

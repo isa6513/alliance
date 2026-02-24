@@ -1,11 +1,10 @@
 import {
-  ActionActivityDto,
   userListFriends,
   actionsFindOne,
   ActionDto,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
 import useActivities, {
@@ -49,13 +48,20 @@ const ActionActivityFeedPage = () => {
   const modes: Mode[] = ["friends", "everyone"];
   const [mode, setMode] = useState<Mode>("friends");
 
-  const { activities, handleLikeActivity, updateActivity, loading } =
-    useActivities({
-      list: ActivityList.Action,
-      objectId: parseInt(actionId!),
-      comments: true,
-      limit: 50,
-    });
+  const {
+    activities,
+    handleLikeActivity,
+    updateActivity,
+    loading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useActivities({
+    list: ActivityList.Action,
+    objectId: parseInt(actionId!),
+    comments: true,
+    limit: 50,
+  });
 
   const [myFriends, setMyFriends] = useState<number[]>([]);
 
@@ -71,21 +77,19 @@ const ActionActivityFeedPage = () => {
     loadMyFriends();
   }, [user]);
 
-  const [friendsActivities, setFriendsActivities] = useState<
-    ActionActivityDto[]
-  >([]);
-
-  useEffect(() => {
-    setFriendsActivities(
+  const friendsActivities = useMemo(
+    () =>
       activities.filter(
         (activity) =>
           activity.user.id === user?.id || myFriends.includes(activity.user.id)
-      )
-    );
-  }, [activities, user, myFriends]);
+      ),
+    [activities, user, myFriends]
+  );
 
   const friendsRef = useRef<HTMLDivElement>(null);
   const everyoneRef = useRef<HTMLDivElement>(null);
+  const friendsSentinelRef = useRef<HTMLDivElement>(null);
+  const everyoneSentinelRef = useRef<HTMLDivElement>(null);
 
   const [activeHeight, setActiveHeight] = useState<number | undefined>(
     undefined
@@ -112,32 +116,73 @@ const ActionActivityFeedPage = () => {
     };
   }, [mode, updateHeight]);
 
+  // Store volatile pagination state in a ref so the observer stays stable
+  const paginationRef = useRef({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  });
+  paginationRef.current = { fetchNextPage, hasNextPage, isFetchingNextPage };
+
+  // Infinite scroll observer — created once
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const p = paginationRef.current;
+        for (const entry of entries) {
+          if (entry.isIntersecting && p.hasNextPage && !p.isFetchingNextPage) {
+            p.fetchNextPage();
+          }
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    if (friendsSentinelRef.current)
+      observer.observe(friendsSentinelRef.current);
+    if (everyoneSentinelRef.current)
+      observer.observe(everyoneSentinelRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
   const renderActivityColumn = (mode: Mode) => {
     const list = mode === "friends" ? friendsActivities : activities;
     return (
       <div className="w-1/2">
         <div
           ref={mode === "friends" ? friendsRef : everyoneRef}
-          className="flex flex-col divide-y divide-zinc-200 *:p-4"
+          className="flex flex-col"
         >
-          {list.map((activity) => (
-            <UserActivityCard
-              activity={activity}
-              key={activity.id}
-              handleLike={handleLikeActivity}
-              onActivityUpdate={updateActivity}
-              canEdit={activity.user.id === user?.id}
-            />
-          ))}
-          {list.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
-              <p>
-                {loading || actionLoading
-                  ? "Loading..."
-                  : `No ${mode === "friends" ? "friend " : ""}activity yet`}
-              </p>
+          <div className="flex flex-col divide-y divide-zinc-200 *:p-4">
+            {list.map((activity) => (
+              <UserActivityCard
+                activity={activity}
+                key={activity.id}
+                handleLike={handleLikeActivity}
+                onActivityUpdate={updateActivity}
+                canEdit={activity.user.id === user?.id}
+              />
+            ))}
+            {list.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
+                <p>
+                  {loading || actionLoading
+                    ? "Loading..."
+                    : `No ${mode === "friends" ? "friend " : ""}activity yet`}
+                </p>
+              </div>
+            )}
+          </div>
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-4 text-zinc-400">
+              Loading more...
             </div>
           )}
+          <div
+            ref={mode === "friends" ? friendsSentinelRef : everyoneSentinelRef}
+            className="h-1"
+          />
         </div>
       </div>
     );

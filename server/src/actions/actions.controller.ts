@@ -70,6 +70,7 @@ import {
   ScheduledPlansOverviewDto,
   SetPriorityDto,
   SuspensionPlanDto,
+  TimelineFeedItemDto,
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
@@ -384,12 +385,15 @@ export class ActionsController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
     @Query('comments', new ParseBoolPipe({ optional: true }))
     comments?: boolean,
+    @Query('before') before?: string,
   ): Promise<ActionActivityDto[]> {
+    const beforeDate = before ? new Date(before) : undefined;
     return this.actionsService.getActionActivities(
       id,
       limit,
       comments,
       req.user?.sub,
+      beforeDate,
     );
   }
 
@@ -513,7 +517,12 @@ export class ActionsController {
   ) {
     const limitNum = limit ? parseInt(limit) : 20;
     const beforeDate = before ? new Date(before) : undefined;
-    return this.actionsService.friendActivity(req.user.sub, comments, limitNum, beforeDate);
+    return this.actionsService.friendActivity(
+      req.user.sub,
+      comments,
+      limitNum,
+      beforeDate,
+    );
   }
 
   @Get('communityActivity')
@@ -1044,5 +1053,12 @@ export class ActionsController {
     return this.actionsService.findMemberInfo(req.user.sub, communityId);
   }
 
-  // ====================================
+  @Get('timeline-feed')
+  @UseGuards(AuthOptionalGuard)
+  @ApiOkResponse({ type: [TimelineFeedItemDto] })
+  async getTimelineFeed(
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ): Promise<TimelineFeedItemDto[]> {
+    return this.actionsService.getTimelineFeed(limit ?? 15);
+  }
 }

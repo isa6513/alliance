@@ -53,6 +53,7 @@ import {
   IsNull,
   LessThan,
   MoreThan,
+  Not,
   Or,
   type Repository,
 } from 'typeorm';
@@ -81,6 +82,8 @@ import {
   ReminderGroupPlanDto,
   SetPriorityDto,
   SuspensionPlanDto,
+  TimelineFeedItemDto,
+  TimelineFeedItemType,
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
@@ -1300,10 +1303,12 @@ export class ActionsService {
     limit?: number,
     comments?: boolean,
     requestingUserId?: number,
+    before?: Date,
   ): Promise<ActionActivityDto[]> {
     const activities = await this.buildActivityFeedQuery({
       limit: limit ?? 20,
       actionId,
+      before,
       filterFeedTypes: false,
     }).getMany();
 
@@ -3595,6 +3600,50 @@ export class ActionsService {
           forumComments,
         });
       }
+    }
+
+    feedItems.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    return feedItems.slice(0, limit);
+  }
+
+  async getTimelineFeed(limit: number = 15): Promise<TimelineFeedItemDto[]> {
+    const feedItems: TimelineFeedItemDto[] = [];
+
+    const eventsQuery = this.actionEventRepository.find({
+      relations: { action: true },
+      where: { newStatus: Not(ActionStatus.MemberAction) },
+      order: { date: 'DESC' },
+      take: 10,
+    });
+
+    const actionUpdatesQuery = this.actionUpdateRepository.find({
+      relations: { action: true, content: true },
+      order: { date: 'DESC' },
+      take: 10,
+    });
+
+    const [events, actionUpdates] = await Promise.all([
+      eventsQuery,
+      actionUpdatesQuery,
+    ]);
+
+    for (const event of events) {
+      feedItems.push({
+        type: TimelineFeedItemType.ActionEvent,
+        date: event.date,
+        action: new ActionDto(event.action),
+        actionEvent: new ActionEventDto(event),
+      });
+    }
+
+    for (const actionUpdate of actionUpdates) {
+      feedItems.push({
+        type: TimelineFeedItemType.ActionUpdate,
+        date: actionUpdate.date,
+        action: new ActionDto(actionUpdate.action),
+        actionUpdate: new ActionUpdateDto(actionUpdate),
+      });
     }
 
     feedItems.sort((a, b) => b.date.getTime() - a.date.getTime());

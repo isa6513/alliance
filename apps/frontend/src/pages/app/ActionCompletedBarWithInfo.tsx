@@ -5,6 +5,7 @@ import {
   getCompletedPercentage,
 } from "@alliance/shared/lib/actionCompletedBarWithInfo";
 import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
+import { href, Link } from "react-router";
 
 interface ActionCompletedBarWithInfoProps
   extends ActionCompletedBarWithInfoPropsShared {
@@ -12,6 +13,7 @@ interface ActionCompletedBarWithInfoProps
   textSize?: "sm" | "base";
   textColor?: string;
   showInfoTooltip?: boolean;
+  seeAllLink?: boolean;
 }
 
 const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
@@ -21,6 +23,7 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   textSize = "sm",
   textColor = "zinc-500",
   showInfoTooltip = false,
+  seeAllLink = false,
 }: ActionCompletedBarWithInfoProps) => {
   const { labelString, percentage } = getCompletedPercentage(action);
 
@@ -49,6 +52,13 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
                 </p>
               }
             />
+          )}
+          {seeAllLink && (
+            <Link
+              to={href("/feed/:actionId", { actionId: action.id.toString() })}
+            >
+              <p className="text-link">See all</p>
+            </Link>
           )}
         </div>
         {friendActivities !== null && (

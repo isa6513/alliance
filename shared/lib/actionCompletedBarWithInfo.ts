@@ -13,6 +13,7 @@ export interface ActionCompletedBarWithInfoPropsShared {
     | "customStatValue"
     | "customStatGoal"
     | "customStatLabel"
+    | "id"
   >;
   friendActivities: ActionActivityDto[] | null;
 }
