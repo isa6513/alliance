@@ -3610,6 +3610,8 @@ export class ActionsService {
   async getTimelineFeed(limit: number = 15): Promise<TimelineFeedItemDto[]> {
     const feedItems: TimelineFeedItemDto[] = [];
 
+    const now = new Date();
+
     const eventsQuery = this.actionEventRepository.find({
       relations: { action: true },
       where: { newStatus: Not(ActionStatus.MemberAction) },
@@ -3620,6 +3622,7 @@ export class ActionsService {
     const actionUpdatesQuery = this.actionUpdateRepository.find({
       relations: { action: true, content: true },
       order: { date: 'DESC' },
+      where: { visibleAt: LessThan(now) },
       take: 10,
     });
 

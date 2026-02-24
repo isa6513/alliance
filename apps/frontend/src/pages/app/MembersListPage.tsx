@@ -32,7 +32,7 @@ const MembersListPage = () => {
     queryKey: ["userMembersWithFriends", { requireSignedContract: true }],
     queryFn: () =>
       userMembersWithFriends({ query: { requireSignedContract: true } }).then(
-        (res) => res.data ?? []
+        (res) => res.data?.filter((m) => !m.anonymous) ?? []
       ),
   });
 
@@ -45,9 +45,7 @@ const MembersListPage = () => {
   const { data: friendsData = [], isLoading: isLoadingFriends } = useQuery({
     queryKey: ["userListFriends", user?.id],
     queryFn: () =>
-      userListFriends({ path: { id: user!.id } }).then(
-        (res) => res.data ?? []
-      ),
+      userListFriends({ path: { id: user!.id } }).then((res) => res.data ?? []),
     enabled: !!user,
   });
 
@@ -71,7 +69,7 @@ const MembersListPage = () => {
 
   const { allFriendsOfFriends, allOtherMembers, staffMembers } = useMemo(() => {
     const fofs: ProfileDtoWithFriends[] = [];
-    const fofIds = new Set<string>();
+    const fofIds = new Set<number>();
     for (const member of members) {
       if (
         member.id !== user?.id &&
@@ -84,12 +82,20 @@ const MembersListPage = () => {
     }
     const others = members.filter((m) => !fofIds.has(m.id));
     const staff = members.filter((m) => m.staff);
-    return { allFriendsOfFriends: fofs, allOtherMembers: others, staffMembers: staff };
+    return {
+      allFriendsOfFriends: fofs,
+      allOtherMembers: others,
+      staffMembers: staff,
+    };
   }, [members, user?.id, friendIds]);
 
   const { friendsOfFriends, otherMembers } = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return { friendsOfFriends: allFriendsOfFriends, otherMembers: allOtherMembers };
+    if (!query)
+      return {
+        friendsOfFriends: allFriendsOfFriends,
+        otherMembers: allOtherMembers,
+      };
     const filterBySearch = (m: ProfileDtoWithFriends) =>
       m.displayName.toLowerCase().includes(query);
     return {
@@ -149,7 +155,7 @@ const MembersListPage = () => {
                 placeholder="Search members..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full border bg-white border-zinc-200 py-2 px-3 rounded focus:outline-none"
+                className="w-full border border-zinc-200 py-2 px-3 rounded focus:outline-none"
               />
             </div>
           </div>

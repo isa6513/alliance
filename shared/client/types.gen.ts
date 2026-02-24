@@ -681,6 +681,7 @@ export type ProfileDto = {
     staff: boolean;
     profilePicture: string | null;
     profileDescription: string | null;
+    anonymous: boolean;
     displayName: string;
     hasActiveContract: boolean;
     isCommunityLeader: boolean;
@@ -770,6 +771,7 @@ export type ProfileDtoWithFriends = {
     staff: boolean;
     profilePicture: string | null;
     profileDescription: string | null;
+    anonymous: boolean;
     displayName: string;
     hasActiveContract: boolean;
     isCommunityLeader: boolean;

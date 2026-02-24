@@ -30,6 +30,7 @@ export class ProfileDto extends PickType(User, [
   'id',
   'profilePicture',
   'profileDescription',
+  'anonymous',
 ]) {
   @ApiProperty()
   displayName: string;
