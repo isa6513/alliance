@@ -496,6 +496,7 @@ describe('Actions (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(event.date.getTime() + 1000),
             automatic: false,
+            contractId: ctx.defaultContractId,
           },
         ],
         tags: [ctx.defaultTag],
@@ -510,6 +511,7 @@ describe('Actions (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(event.date.getTime() - 1000),
             automatic: false,
+            contractId: ctx.defaultContractId,
           },
         ],
         tags: [ctx.defaultTag],
@@ -1420,6 +1422,7 @@ describe('Actions (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(now - 60_000),
             automatic: false,
+            contractId: ctx.defaultContractId,
           },
         ],
       });
@@ -1434,6 +1437,7 @@ describe('Actions (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(now - 120_000),
             automatic: false,
+            contractId: ctx.defaultContractId,
           },
           {
             type: ContractEventType.SUSPENDED,
@@ -1889,6 +1893,7 @@ describe('Actions (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(actionEventDate.getTime() - 86400000), // 1 day before action
             automatic: false,
+            contractId: ctx.defaultContractId,
           },
         ],
         tags: [ctx.defaultTag],
@@ -1904,6 +1909,7 @@ describe('Actions (e2e)', () => {
             type: ContractEventType.SIGNED,
             date: new Date(actionEventDate.getTime() + 1000), // after action event
             automatic: false,
+            contractId: ctx.defaultContractId,
           },
         ],
         tags: [ctx.defaultTag],
@@ -1929,9 +1935,9 @@ describe('Actions (e2e)', () => {
     });
 
     afterAll(async () => {
-      await actionRepo.delete(onboardingAction.id);
-      await userRepo.delete(existingUser.id);
-      await userRepo.delete(newUser.id);
+      if (onboardingAction?.id) await actionRepo.delete(onboardingAction.id);
+      if (existingUser?.id) await userRepo.delete(existingUser.id);
+      if (newUser?.id) await userRepo.delete(newUser.id);
     });
 
     it('loggedIn endpoint returns canParticipate=false for existing users on onboarding actions', async () => {
