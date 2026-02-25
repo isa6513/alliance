@@ -1,6 +1,5 @@
 import {
   contractGetById,
-  contractGetCurrent,
   contractSignContract,
   contractSuspendContract,
 } from "@alliance/shared/client";
@@ -9,6 +8,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import MemberContract from "../../components/MemberContract";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
 import { useAuth } from "../../lib/AuthContext";
+import { useContract } from "../../lib/useContract";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -17,24 +17,16 @@ import {
   getLastContractEvent,
   getSuspensionMessage,
   getSignedMessage,
-  PLACEHOLDER_CONTRACT_MARKDOWN,
 } from "@alliance/shared/lib/contract";
 import { suspendContractConfirmation } from "@alliance/shared/lib/copy";
 import { useQuery } from "@tanstack/react-query";
 
 const ContractPage: React.FC = () => {
   const { user, refreshUser } = useAuth();
+  const { latestContract } = useContract();
   const [editName, setEditName] = useState("");
   const [lastContractEvent, setLastContractEvent] =
     useState<ContractEventState>(null);
-  const { data: latestContract } = useQuery({
-    queryKey: ["contractGetCurrent"],
-    queryFn: () => contractGetCurrent().then((res) => res.data ?? null),
-    initialData: {
-      id: 1,
-      markdown: PLACEHOLDER_CONTRACT_MARKDOWN,
-    },
-  });
 
   const signedContractId =
     lastContractEvent?.contractId !== undefined &&
@@ -125,7 +117,7 @@ const ContractPage: React.FC = () => {
 
         {signedContract && (
           <div className="flex flex-col">
-            <MemberContract markdown={signedContract.markdown} />
+            <MemberContract markdownOverride={signedContract.markdown} />
             {signedContractMessage}
           </div>
         )}
@@ -137,7 +129,7 @@ const ContractPage: React.FC = () => {
                 An updated contract is available.
               </p>
             )}
-            <MemberContract markdown={latestContract.markdown} />
+            <MemberContract markdownOverride={latestContract.markdown} />
             {lastContractEvent?.type === "signed" &&
             lastContractEvent.contractId === latestContract.id ? (
               signedContractMessage

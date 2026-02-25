@@ -1,17 +1,29 @@
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { useContract } from "../lib/useContract";
+import { PLACEHOLDER_CONTRACT_MARKDOWN } from "@alliance/shared/lib/contract";
 
 interface MemberContractProps {
   id?: string;
   className?: string;
-  markdown: string;
+  markdownOverride?: string;
 }
 
-const MemberContract = ({ id, className, markdown }: MemberContractProps) => {
+const MemberContract = ({
+  id,
+  className,
+  markdownOverride,
+}: MemberContractProps) => {
+  const { latestContract } = useContract();
+  const content =
+    markdownOverride ??
+    latestContract?.markdown ??
+    PLACEHOLDER_CONTRACT_MARKDOWN;
+
   return (
     <Card className={className} style={CardStyle.White} id={id}>
-      <AppMarkdownWrapper markdownContent={markdown} />
+      <AppMarkdownWrapper markdownContent={content} />
     </Card>
   );
 };
