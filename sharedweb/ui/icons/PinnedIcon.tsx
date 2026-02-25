@@ -1,4 +1,10 @@
-const PinnedIcon = ({ size = "small" }: { size?: "small" | "large" }) => {
+const PinnedIcon = ({
+  size = "small",
+  className = "",
+}: {
+  size?: "small" | "large";
+  className?: string;
+}) => {
   const sizeClass = {
     small: "w-6 h-6",
     large: "w-8 h-8",
@@ -11,7 +17,7 @@ const PinnedIcon = ({ size = "small" }: { size?: "small" | "large" }) => {
       x="0px"
       y="0px"
       viewBox="0 0 100 100"
-      className={`${sizeClass[size]}`}
+      className={`${sizeClass[size]} inline ${className}`}
       fill="var(--color-green)"
       aria-label="Pinned"
     >

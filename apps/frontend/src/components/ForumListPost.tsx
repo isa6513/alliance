@@ -94,17 +94,13 @@ const ForumListPost = ({
                   e.preventDefault();
                   navigate(href("/member/:id", { id: a.id.toString() }));
                 }}
-                style={{ fontWeight: 410 }}
               >
                 <ProfileImage
                   pfp={a.profilePicture}
                   size="small"
                   className="mr-2 -mt-1"
                 />
-                <UserDisplayName
-                  className="text-black font-normal"
-                  staff={a.staff}
-                >
+                <UserDisplayName className="text-black" staff={a.staff}>
                   {a.displayName}
                 </UserDisplayName>
               </span>

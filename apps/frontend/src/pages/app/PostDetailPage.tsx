@@ -116,7 +116,7 @@ const PostDetailPage: React.FC = () => {
         <div className="relative">
           <Link
             to={href("/forum")}
-            className="absolute -left-10 top-7 text-blue"
+            className="absolute -left-10 top-[28px] text-link"
             title="Back to Forum"
           >
             <ArrowLeft size={18} />
@@ -130,13 +130,20 @@ const PostDetailPage: React.FC = () => {
             </Card>
           )}
           <div className="py-3 sm:py-6 px-3 sm:px-5 mb-3">
-            <div className="flex justify-between items-start">
-              <div className="flex flex-row gap-x-1 items-center w-full ">
-                {post.pinned && <PinnedIcon size="large" />}
-                <h1 className="!text-lg sm:!text-xl !font-medium -mt-1">
-                  {post.title}
-                </h1>
-              </div>
+            <div className="flex flex-row items-center justify-between">
+              <h1 className="text-2xl font-serif font-semibold mb-3">
+                {post.title}
+                {post.pinned && (
+                  <PinnedIcon size="large" className="ml-2 -mt-1" />
+                )}
+              </h1>
+              <PostLikeButton
+                liked={
+                  post.likes?.some((like) => like.id === user?.id) ?? false
+                }
+                likes={post.likes?.length ?? 0}
+                handleLike={handleLike}
+              />
             </div>
             <div className="flex flex-row gap-x-2 mb-2 sm:mb-4 mt-1 items-center text-base flex-wrap">
               {(post.authors?.length ? post.authors : [post.author]).map(
@@ -187,14 +194,7 @@ const PostDetailPage: React.FC = () => {
               )}
             </div>
             <EditableContentRenderer content={post.editableContent} />
-            <div className="flex items-center mt-2 sm:mt-4 gap-x-1.5 sm:-mb-2">
-              <PostLikeButton
-                liked={
-                  post.likes?.some((like) => like.id === user?.id) ?? false
-                }
-                likes={post.likes?.length ?? 0}
-                handleLike={handleLike}
-              />
+            <div className="flex items-center gap-x-1.5 sm:-mb-2">
               {amAuthor && (
                 <>
                   <Link
