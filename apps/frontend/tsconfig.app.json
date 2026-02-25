@@ -5,19 +5,15 @@
     "incremental": true,
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
     "moduleResolution": "bundler",
+    "noEmit": true,
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "emitDeclarationOnly": true,
     "jsx": "react-jsx",
     "rootDir": "../..",
     /* Linting */
@@ -27,11 +23,5 @@
     "noFallthroughCasesInSwitch": true
     // "noUncheckedSideEffectImports": true
   },
-  "include": [
-    "src",
-    "../../shared",
-    "../../sharedweb",
-    "vite-env.d.ts",
-    ".react-router/types/**/*"
-  ]
+  "include": ["src", "../../shared", "../../sharedweb", "vite-env.d.ts"]
 }

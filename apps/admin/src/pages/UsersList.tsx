@@ -252,6 +252,7 @@ const UsersList: React.FC = () => {
         hasActiveContract: lastEvent?.type === "signed",
         isCommunityLeader: false,
         lastContractEvent: lastEvent,
+        anonymous: user.anonymous,
       };
     });
   }, [modeToUsers, filterMode]);
