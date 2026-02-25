@@ -1,8 +1,8 @@
 import {
-  userGetContract,
-  userGetCurrentContract,
-  userSignContract,
-  userSuspendContract,
+  contractGetById,
+  contractGetCurrent,
+  contractSignContract,
+  contractSuspendContract,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import React, { useEffect, useMemo, useState } from "react";
@@ -28,8 +28,8 @@ const ContractPage: React.FC = () => {
   const [lastContractEvent, setLastContractEvent] =
     useState<ContractEventState>(null);
   const { data: latestContract } = useQuery({
-    queryKey: ["userGetCurrentContract"],
-    queryFn: () => userGetCurrentContract().then((res) => res.data ?? null),
+    queryKey: ["contractGetCurrent"],
+    queryFn: () => contractGetCurrent().then((res) => res.data ?? null),
     initialData: {
       id: 1,
       markdown: PLACEHOLDER_CONTRACT_MARKDOWN,
@@ -42,10 +42,10 @@ const ContractPage: React.FC = () => {
       ? lastContractEvent.contractId
       : null;
   const { data: signedContract } = useQuery({
-    queryKey: ["userGetContract", signedContractId],
+    queryKey: ["contractGetById", signedContractId],
     queryFn: () =>
-      userGetContract({
-        path: { contractId: signedContractId! },
+      contractGetById({
+        path: { id: signedContractId! },
       }).then((res) => res.data ?? null),
     initialData: null,
     enabled: signedContractId != null,
@@ -62,9 +62,9 @@ const ContractPage: React.FC = () => {
       return;
     }
     try {
-      const res = await userSignContract({
+      const res = await contractSignContract({
         path: {
-          contractId: latestContract.id,
+          id: latestContract.id,
         },
         body: { signedName: editName },
       });
@@ -89,7 +89,7 @@ const ContractPage: React.FC = () => {
         return;
       }
 
-      const res = await userSuspendContract();
+      const res = await contractSuspendContract();
       if (res.data) {
         setLastContractEvent({
           type: "suspended",

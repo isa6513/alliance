@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, TextInput, View } from "react-native";
 import {
-  userGetContract,
-  userGetCurrentContract,
-  userSignContract,
-  userSuspendContract,
   authMe,
+  contractGetById,
+  contractGetCurrent,
+  contractSignContract,
+  contractSuspendContract,
 } from "@alliance/shared/client";
 import {
   ContractEventState,
@@ -33,8 +33,8 @@ export default function ContractScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: latestContract } = useQuery({
-    queryKey: ["userGetCurrentContract"],
-    queryFn: () => userGetCurrentContract().then((res) => res.data ?? null),
+    queryKey: ["contractGetCurrent"],
+    queryFn: () => contractGetCurrent().then((res) => res.data ?? null),
     initialData: {
       id: 1,
       markdown: PLACEHOLDER_CONTRACT_MARKDOWN,
@@ -47,10 +47,10 @@ export default function ContractScreen() {
       ? lastContractEvent.contractId
       : null;
   const { data: signedContract } = useQuery({
-    queryKey: ["userGetContract", signedContractId],
+    queryKey: ["contractGetById", signedContractId],
     queryFn: () =>
-      userGetContract({
-        path: { contractId: signedContractId! },
+      contractGetById({
+        path: { id: signedContractId! },
       }).then((res) => res.data ?? null),
     initialData: null,
     enabled: signedContractId != null,
@@ -80,8 +80,8 @@ export default function ContractScreen() {
     setIsSubmitting(true);
 
     try {
-      const res = await userSignContract({
-        path: { contractId: latestContract.id },
+      const res = await contractSignContract({
+        path: { id: latestContract.id },
         body: { signedName: editName },
       });
       if (res.data) {
@@ -113,7 +113,7 @@ export default function ContractScreen() {
         onPress: async () => {
           setIsSubmitting(true);
           try {
-            const res = await userSuspendContract();
+            const res = await contractSuspendContract();
             if (res.data) {
               setLastContractEvent({
                 type: "suspended",
