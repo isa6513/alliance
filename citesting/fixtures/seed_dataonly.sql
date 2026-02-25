@@ -1221,14 +1221,14 @@ COPY public.community_users_user ("communityId", "userId") FROM stdin;
 -- Data for Name: contract_event; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.contract_event (id, type, date, "updatedAt", automatic, "userId", "autoSuspendKey") FROM stdin;
-3	signed	2025-09-17 21:40:27.190213-07	2025-12-09 12:37:46.379183-08	f	11	\N
-14	signed	2025-09-18 17:37:42.493213-07	2025-12-09 12:37:46.379183-08	f	23	\N
-30	signed	2025-09-22 13:37:55.171213-07	2025-12-09 12:37:46.379183-08	f	15	\N
-36	signed	2025-09-18 16:56:53.119213-07	2025-12-09 12:37:46.379183-08	f	24	\N
-37	signed	2025-10-09 19:31:09.587213-07	2025-12-09 12:37:46.379183-08	f	10	\N
-38	signed	2025-10-05 19:18:14.192213-07	2025-12-09 12:37:46.379183-08	f	7	\N
-98	suspended	2026-01-23 17:59:40.056213-08	2026-01-23 17:59:40.056435-08	f	23	\N
+COPY public.contract_event (id, type, date, "updatedAt", automatic, "userId", "autoSuspendKey", "signedName", "contractId") FROM stdin;
+3	signed	2025-09-17 21:40:27.190213-07	2025-12-09 12:37:46.379183-08	f	11	\N	\N	1
+14	signed	2025-09-18 17:37:42.493213-07	2025-12-09 12:37:46.379183-08	f	23	\N	\N	1
+30	signed	2025-09-22 13:37:55.171213-07	2025-12-09 12:37:46.379183-08	f	15	\N	\N	1
+36	signed	2025-09-18 16:56:53.119213-07	2025-12-09 12:37:46.379183-08	f	24	\N	\N	1
+37	signed	2025-10-09 19:31:09.587213-07	2025-12-09 12:37:46.379183-08	f	10	\N	\N	1
+38	signed	2025-10-05 19:18:14.192213-07	2025-12-09 12:37:46.379183-08	f	7	\N	\N	1
+98	suspended	2026-01-23 17:59:40.056213-08	2026-01-23 17:59:40.056435-08	f	23	\N	\N	\N
 \.
 
 
