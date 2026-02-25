@@ -111,6 +111,10 @@ jobs:
         run: corepack yarn install --immutable
         working-directory: ./
 
+      - name: Generate React Router Types
+        run: yarn react-router typegen
+        working-directory: ./apps/frontend
+
       - name: Typecheck
         run: yarn tsc
         working-directory: ./apps/frontend
