@@ -12,6 +12,15 @@ import { ToastProvider } from "@alliance/sharedweb/ui/ToastProvider";
 import { client } from "@alliance/shared/client/client.gen";
 import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import { GroupAssignmentProvider } from "./lib/GroupAssignmentContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+    },
+  },
+});
 
 client.setConfig({
   baseUrl: getApiUrl(),
@@ -66,11 +75,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AuthProvider>
-          <GroupAssignmentProvider>
-            <ToastProvider>{children}</ToastProvider>
-          </GroupAssignmentProvider>
-        </AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <GroupAssignmentProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </GroupAssignmentProvider>
+          </AuthProvider>
+        </QueryClientProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

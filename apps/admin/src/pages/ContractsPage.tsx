@@ -2,13 +2,24 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import ContractCard from "../components/ContractCard";
-import { ContractAdminDto, contractAllAdmin } from "@alliance/shared/client";
+import {
+  ContractAdminDto,
+  contractAllAdmin,
+  contractGetCurrent,
+} from "@alliance/shared/client";
+import { useQuery } from "@tanstack/react-query";
 
 const ContractsPage: React.FC = () => {
   const [contracts, setContracts] = useState<ContractAdminDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const { data: currentContract } = useQuery({
+    queryKey: ["contractGetCurrent"],
+    queryFn: () => contractGetCurrent().then((res) => res.data ?? null),
+  });
+  const activeContractId = currentContract?.id ?? null;
 
   const loadContracts = useCallback(async () => {
     try {
@@ -36,15 +47,10 @@ const ContractsPage: React.FC = () => {
       const inactiveContracts: ContractAdminDto[] = [];
 
       contracts.forEach((c) => {
-        if (!c.startDate && !c.endDate) {
-          inactiveContracts.push(c);
+        if (c.id === activeContractId) {
+          activeContract = c;
         } else if (c.startDate && new Date(c.startDate) > now) {
           scheduledContracts.push(c);
-        } else if (
-          !c.endDate ||
-          (c.endDate && new Date(c.endDate) > now && !activeContract)
-        ) {
-          activeContract = c;
         } else {
           inactiveContracts.push(c);
         }
@@ -60,7 +66,7 @@ const ContractsPage: React.FC = () => {
         scheduledContracts,
         inactiveContracts,
       };
-    }, [contracts]);
+    }, [contracts, activeContractId]);
 
   if (loading) {
     return <p className="p-5">Loading contracts...</p>;

@@ -44,6 +44,7 @@ __metadata:
     "@storybook/react-vite": "npm:^8.6.12"
     "@storybook/test": "npm:^8.6.12"
     "@tailwindcss/vite": "npm:^4.1.4"
+    "@tanstack/react-query": "npm:^5.90.20"
     "@types/chroma-js": "npm:^2.4.4"
     "@types/compression": "npm:^1"
     "@types/d3": "npm:^7.4.3"
