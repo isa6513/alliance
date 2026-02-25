@@ -1,5 +1,4 @@
 {
-  "include": ["./react-router/types/**/*"],
   "extends": "../../tsconfig.base.json",
   "files": [],
   "references": [
@@ -19,6 +18,6 @@
   "compilerOptions": {
     "composite": true,
     "baseUrl": "./src",
-    "rootDirs": [".", "../.react-router/types"]
+    "rootDirs": ["."]
   }
 }
