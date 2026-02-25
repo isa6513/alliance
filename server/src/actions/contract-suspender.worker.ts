@@ -10,6 +10,7 @@ import { DataSource } from 'typeorm';
 import { withPgAdvisoryLock } from '../notifs/lock-utils';
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import { EventType } from 'src/eventlog/event-log.entity';
+import { Cron } from '@nestjs/schedule';
 
 const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
 const PROCESS_ONE_LOCK_KEY2 = 0xce01;
@@ -24,17 +25,14 @@ export class ContractSuspenderWorker {
     private readonly actionsService: ActionsService,
     private readonly contractService: ContractService,
     private readonly eventLogService: EventLogService,
-  ) { }
+  ) {}
 
+  @Cron('*/10 * * * *')
   async processSuspensions() {
     if (
       process.env.NODE_ENV === 'development' &&
       process.env.SEND_DEV_NOTIFS !== '1'
     ) {
-      return;
-    }
-
-    if (process.env.NODE_ENV === 'production') {
       return;
     }
 
