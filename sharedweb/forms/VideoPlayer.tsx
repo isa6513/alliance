@@ -157,6 +157,12 @@ export default function VideoPlayer({
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (data.fatal) setStatus("failed");
       });
+      hls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, () => {
+        if (hls.subtitleTracks.length > 0) {
+          hls.subtitleDisplay = false;
+        }
+      });
+
       hls.loadSource(manifestUrl);
       hls.attachMedia(video);
       return () => {

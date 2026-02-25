@@ -23,7 +23,12 @@ export function EditableVideoBlock({
 
   // Check status immediately, then poll if still processing
   useEffect(() => {
-    if (!block.videoId || processingStatus === "ready" || processingStatus === "failed") return;
+    if (
+      !block.videoId ||
+      processingStatus === "ready" ||
+      processingStatus === "failed"
+    )
+      return;
 
     let cancelled = false;
 
@@ -102,7 +107,7 @@ export function EditableVideoBlock({
       setUploadError("Upload failed");
     }
     setIsUploading(false);
-  }
+  };
 
   return (
     <DisplayBlockWrapper
@@ -122,7 +127,9 @@ export function EditableVideoBlock({
             </label>
             {activeBlock.videoId && (
               <Link
-                to={href(`/videos/:videoId`, { videoId: activeBlock.videoId.toString() })}
+                to={href(`/videos/:videoId`, {
+                  videoId: activeBlock.videoId.toString(),
+                })}
                 className="text-xs text-blue-600"
               >
                 Manage video file
@@ -133,7 +140,7 @@ export function EditableVideoBlock({
             <input
               type="file"
               multiple
-              accept=".m3u8,.ts"
+              accept=".m3u8,.ts,.vtt"
               onChange={(event) => handleFileChange(event, handleUpdate)}
               disabled={isUploading}
               className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
@@ -149,7 +156,9 @@ export function EditableVideoBlock({
             <p className="text-xs text-blue-600">Processing video...</p>
           )}
           {processingStatus === "failed" && (
-            <p className="text-xs text-red-600">Video processing failed. Try again.</p>
+            <p className="text-xs text-red-600">
+              Video processing failed. Try again.
+            </p>
           )}
 
           <div className="space-y-1">

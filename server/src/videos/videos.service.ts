@@ -24,8 +24,10 @@ export class VideosService {
   async uploadVideo(files: Express.Multer.File[]): Promise<Video> {
     const key = `videos/${Date.now()}`;
     const totalSize = files.reduce((sum, f) => sum + f.size, 0);
-    const playlist = files.find((f) => f.originalname.endsWith('.m3u8'));
-
+    const playlist = files.find(
+      (f) =>
+        f.originalname.endsWith('.m3u8') && !f.originalname.includes('_vtt'),
+    );
     const video = await this.videoRepository.save(
       this.videoRepository.create({
         key,
@@ -36,14 +38,15 @@ export class VideosService {
       }),
     );
 
-    // Upload all HLS files directly to S3, renaming the .m3u8 to playlist.m3u8
     await Promise.all(
       files.map(async (file) => {
-        const isPlaylist = file.originalname.endsWith('.m3u8');
-        const filename = isPlaylist ? 'playlist.m3u8' : file.originalname;
-        const contentType = isPlaylist
-          ? 'application/vnd.apple.mpegurl'
-          : 'video/MP2T';
+        const filename = file.originalname;
+        let contentType = 'video/MP2T';
+        if (filename.endsWith('.m3u8')) {
+          contentType = 'application/vnd.apple.mpegurl';
+        } else if (filename.endsWith('.vtt')) {
+          contentType = 'text/vtt';
+        }
 
         await this.s3.send(
           new PutObjectCommand({
