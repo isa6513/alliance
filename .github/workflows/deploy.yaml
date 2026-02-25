@@ -111,6 +111,10 @@ jobs:
         run: corepack yarn install --immutable
         working-directory: ./
 
+      - name: Typecheck
+        run: yarn tsc
+        working-directory: ./apps/frontend
+
       - name: Build React App
         run: corepack yarn workspace @alliance/frontend build --mode "$env_name"
         working-directory: ./

@@ -47,6 +47,15 @@ export const testActions: ActionDto[] = [
     updates: [],
     priority: 0,
     preventCompletion: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isContractSigningAction: false,
+    visibilityMode: "public",
+    onboarding: false,
+    optional: false,
+    publicOnly: false,
+    shouldCompleteAfterDeadline: false,
+    isForumParticipationAction: false,
   },
   {
     name: "Make Target end stocking of Coca-Cola single-use plastic bottles",
@@ -71,6 +80,15 @@ export const testActions: ActionDto[] = [
     priority: 0,
     preventCompletion: false,
     updates: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isContractSigningAction: false,
+    visibilityMode: "public",
+    onboarding: false,
+    optional: false,
+    publicOnly: false,
+    shouldCompleteAfterDeadline: false,
+    isForumParticipationAction: false,
   },
 ];
 
@@ -83,6 +101,8 @@ export const testUser: ProfileDto = {
     "This is a test description of a user thats a sort of medium length. It isn't too long, but it also isn't that short. It has a sort of just right amount of length.",
   staff: false,
   hasActiveContract: false,
+  anonymous: false,
+  isCommunityLeader: false,
 };
 
 export const testUser2: ProfileDto = {
@@ -94,6 +114,8 @@ export const testUser2: ProfileDto = {
     "This is a test description of a user thats a sort of medium length. It isn't too long, but it also isn't that short. It has a sort of just right amount of length.",
   staff: false,
   hasActiveContract: false,
+  anonymous: false,
+  isCommunityLeader: false,
 };
 
 export const testAuthUser: UserDto = {
@@ -115,9 +137,18 @@ export const testAuthUser: UserDto = {
   shareEmailWithCommunityLead: true,
   sharePhoneNumberWithCommunityLead: true,
   profilePicture: null,
+  profileDescription: null,
   communities: [],
   invitedCommunities: [],
   formDataPreference: "public",
+  shareInfoPublicly: true,
+  pushesForLikes: true,
+  pushesForComments: true,
+  pushesForFriendRequests: true,
+  undergoingGroupAssignment: false,
+  remindAboutUncompletedGroupMembers: false,
+  receiveReplyNotifications: true,
+  leaderOfIds: [],
 };
 
 export const testFriends: ProfileDto[] = [testUser, testUser, testUser];
@@ -137,6 +168,11 @@ export const testForumPosts: PostDto[] = [
     updatedAt: new Date().toISOString(),
     author: testUser,
     pinned: false,
+    deleted: false,
+    qaMode: false,
+    expertIds: [],
+    authorIds: [],
+    notifyForReplies: false,
   },
 ];
 
@@ -242,10 +278,13 @@ export const testActivities: ActionActivityDto[] = [
       displayName: "John Doe",
       hasActiveContract: false,
       staff: false,
+      anonymous: false,
+      isCommunityLeader: false,
     },
     actionId: 0,
     actionName: "",
     likes: [],
+    likesCount: 0,
     comments: [],
     editableContent: {
       body: "",
@@ -264,10 +303,13 @@ export const testActivities: ActionActivityDto[] = [
       profileDescription: null,
       displayName: "Some One",
       staff: false,
+      anonymous: false,
+      isCommunityLeader: false,
     },
     actionId: 0,
     actionName: "",
     likes: [],
+    likesCount: 0,
     comments: [],
     editableContent: {
       body: "",

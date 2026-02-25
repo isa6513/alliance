@@ -185,7 +185,7 @@ __metadata:
     tailwind-merge: "npm:^3.3.0"
     tailwind-variants: "npm:^1.0.0"
     tailwindcss: "npm:^4.1.4"
-    typescript: "npm:~5.7.2"
+    typescript: "npm:^5.9.3"
     typescript-eslint: "npm:^8.33.0"
     vite: "npm:^6.3.1"
     web-vitals: "npm:^4.2.4"
@@ -17972,7 +17972,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.6.0":
+"typescript@npm:^5.6.0, typescript@npm:^5.9.3":
   version: 5.9.3
   resolution: "typescript@npm:5.9.3"
   bin:
@@ -18002,7 +18002,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.6.0#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.6.0#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.9.3#optional!builtin<compat/typescript>":
   version: 5.9.3
   resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"
   bin:

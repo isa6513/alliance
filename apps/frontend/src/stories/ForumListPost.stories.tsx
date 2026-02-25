@@ -19,14 +19,17 @@ const samplePost: PostDto = {
     profileDescription: null,
     hasActiveContract: false,
     isCommunityLeader: false,
+    anonymous: false,
   },
   authorId: 1,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   pinned: false,
+  deleted: false,
   qaMode: false,
   expertIds: [],
   authorIds: [],
+  notifyForReplies: false,
 };
 
 export const ManyPosts: Story = {

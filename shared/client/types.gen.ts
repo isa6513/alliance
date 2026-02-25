@@ -3,6 +3,7 @@
 export type SignInDto = {
     mode: 'cookie' | 'header';
     email: string;
+    password: string;
 };
 
 export type SignInResponseDto = {

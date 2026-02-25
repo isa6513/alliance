@@ -1,9 +1,8 @@
-import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
-import { User } from '../../user/entities/user.entity';
-import { IsDefined, IsEmail, IsEnum } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsDefined, IsEmail, IsEnum, IsNotEmpty } from 'class-validator';
 export type TokenMode = 'cookie' | 'header';
 
-export class SignInDto extends PickType(User, ['password']) {
+export class SignInDto {
   @ApiProperty({ enum: ['cookie', 'header'] })
   @IsDefined()
   @IsEnum(['cookie', 'header'])
@@ -13,6 +12,10 @@ export class SignInDto extends PickType(User, ['password']) {
   @IsDefined()
   @IsEmail()
   email: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  password: string;
 }
 
 export class SignInResponseDto {

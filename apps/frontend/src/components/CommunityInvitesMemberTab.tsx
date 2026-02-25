@@ -1,5 +1,4 @@
 import {
-  OnetimeInviteDto,
   RequestOnetimeInviteDto,
   userDeleteOnetimeInvite,
   userGetOnetimeInvitesOverview,
@@ -163,11 +162,10 @@ const CommunityInvitesMemberTab = ({
         <OnetimeInviteForm
           inviteeName={inviteeName}
           setInviteeName={setInviteeName}
-          inviteeDescription={inviteeDescription}
-          setInviteeDescription={setInviteeDescription}
+          info={inviteeDescription}
+          setInfo={setInviteeDescription}
           creatingInvite={creatingInvite}
-          onRequestInvite={handleRequestInvite}
-          isLeader={false}
+          onSubmit={handleRequestInvite}
         />
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>

@@ -16,6 +16,7 @@ const makeAuthor = (
   profileDescription: null,
   hasActiveContract: true,
   isCommunityLeader: false,
+  anonymous: false,
   ...overrides,
 });
 
@@ -63,6 +64,7 @@ const currentUser: UserDto = {
   pushesForFriendRequests: true,
   undergoingGroupAssignment: false,
   remindAboutUncompletedGroupMembers: false,
+  receiveReplyNotifications: true,
   communities: [],
   leaderOfIds: [],
   invitedCommunities: [],

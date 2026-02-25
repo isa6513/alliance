@@ -17,11 +17,19 @@ import { useSearchParams } from "react-router";
 import ConversationDetailPanel from "../../components/ConversationDetailPanel";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useAuth } from "../../lib/AuthContext";
-import useLiveConvoMessages, {
-  useConversations,
-} from "./messages";
+import useLiveConvoMessages, { useConversations } from "./messages";
 import { useMediaQuery } from "../../lib/useMediaQuery";
-import { buildGroupConversationTitle, findMatchingConversation, getConversationPreview, getJoinedConversations, getMessageRequestPreview, getPendingInvites, mergeConversationUpdate, sortConversations, updateConversationsForLastMessage } from "@alliance/shared/lib/messages";
+import {
+  buildGroupConversationTitle,
+  findMatchingConversation,
+  getConversationPreview,
+  getJoinedConversations,
+  getMessageRequestPreview,
+  getPendingInvites,
+  mergeConversationUpdate,
+  sortConversations,
+  updateConversationsForLastMessage,
+} from "@alliance/shared/lib/messages";
 
 const MessagesPage = () => {
   const [params, setParams] = useSearchParams();

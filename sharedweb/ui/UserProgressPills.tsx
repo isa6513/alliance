@@ -4,8 +4,7 @@ import {
   UserActionSummaryDto,
 } from "@alliance/shared/client";
 import { formatDateTime } from "@alliance/shared/lib/dateFormatters";
-import React, { Fragment } from "react";
-import { JSX, ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, JSX, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 export type PillStatusData = {
   pillLabel: string;

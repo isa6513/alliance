@@ -21,10 +21,13 @@ export interface SmallActionCardProps {
     | "everyoneShouldComplete"
     | "userRelation"
     | "commitmentThreshold"
-    | "status"
-    | "everyoneShouldComplete"
     | "usersCompleted"
     | "usersJoined"
+    | "optional"
+    | "customStatType"
+    | "customStatLabel"
+    | "customStatValue"
+    | "customStatGoal"
   >;
   className?: string;
   friendActivities?: ActionActivityDto[];

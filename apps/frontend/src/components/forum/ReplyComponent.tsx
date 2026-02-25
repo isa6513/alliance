@@ -2,7 +2,7 @@ import { CommentDto } from "@alliance/shared/client";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { formatDistanceToNow } from "date-fns";
-import React, { useState } from "react";
+import { useState } from "react";
 import CommentLikeButton from "../CommentLikeButton";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
 import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";

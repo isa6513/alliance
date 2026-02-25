@@ -198,8 +198,9 @@ const InvitePage: React.FC = () => {
                 <LargeActionCard
                   action={exampleTask}
                   userRelation={"joined"}
-                  handleDismiss={() => { }}
-                  onUpdateActionState={() => { }}
+                  handleDismiss={() => {}}
+                  onUpdateActionState={() => {}}
+                  onCompleteAction={() => {}}
                   showDetails={false}
                   className="pointer-events-none transform-[scale(0.9)] bg-white"
                 />

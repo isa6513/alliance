@@ -1,12 +1,11 @@
 import { Link } from "react-router";
 import React, { useState } from "react";
 import dropDownArrow from "../assets/icons8-expand-arrow-96.png";
-import { platformSublinks } from "./Navbar";
 
 interface DropdownLinkProps {
   text: string;
   to: string;
-  sublinks: typeof platformSublinks;
+  sublinks: Array<{ to: string; text: string }>;
   inverted: boolean;
 }
 
