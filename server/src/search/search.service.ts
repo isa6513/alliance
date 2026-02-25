@@ -10,7 +10,7 @@ import { ProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import type { Repository } from 'typeorm';
-import { actionUrl, inviteUrl, postUrl, profileUrl } from './approutes';
+import { actionUrl, postUrl, profileUrl } from './approutes';
 import { RecentSearch } from './recentsearch.entity';
 import { SearchItemDto, SearchItemType } from './searchitem.dto';
 
@@ -76,8 +76,6 @@ export class SearchService {
       return recentSearchesItems.filter((item) => item !== null);
     }
 
-    const user = await this.usersService.findOneOrFail(userId);
-
     const users = await this.usersService.findByUsername(query);
     const friends = await this.usersService.findFriends(userId);
     const userItems = users.slice(0, maxItemsPerType).map((user) =>
@@ -98,19 +96,7 @@ export class SearchService {
       .slice(0, maxItemsPerType)
       .map((post) => this.postToSearchItem(post));
 
-    const extraItems: SearchItemDto[] = user.staff
-      ? [
-          {
-            id: 'invite',
-            name: 'Personal invite page',
-            type: SearchItemType.Other,
-            webAppLocation: inviteUrl(user.referralCode),
-            secondaryData: [],
-          },
-        ]
-      : [];
-
-    return [...userItems, ...actionItems, ...postItems, ...extraItems];
+    return [...userItems, ...actionItems, ...postItems];
   }
 
   userToSearchItem(user: User, friends: boolean, self: boolean): SearchItemDto {
