@@ -35,6 +35,117 @@ jobs:
           fi
           echo "Found $COUNT screenshots for SHA ${{ inputs.sha }}"
 
+      - name: Download old baseline and new screenshots
+        run: |
+          mkdir -p /tmp/vr-baseline /tmp/vr-current
+          aws s3 sync \
+            "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ inputs.environment }}/latest/" \
+            /tmp/vr-baseline/ \
+            || echo "No existing baseline found"
+          aws s3 sync \
+            "s3://${{ secrets.VISUAL_REGRESSION_BUCKET }}/visual-regression/${{ inputs.environment }}/${{ inputs.sha }}/" \
+            /tmp/vr-current/
+
+      - name: Notify visual regression channel
+        run: |
+          SHA="${{ inputs.sha }}"
+          ENV_NAME="${{ inputs.environment }}"
+          BASELINE_DIR="/tmp/vr-baseline"
+          CURRENT_DIR="/tmp/vr-current"
+          TOKEN="${{ secrets.SLACK_BOT_TOKEN }}"
+          CHANNEL="${{ secrets.SLACK_VISUAL_REGRESSION_CHANNEL_ID }}"
+
+          # Find pages with changed screenshots by comparing checksums
+          CHANGED_PAGES=()
+          for file in "$CURRENT_DIR"/*.png; do
+            [ -f "$file" ] || continue
+            filename=$(basename "$file")
+            page="${filename%.png}"
+            if [ -f "$BASELINE_DIR/$filename" ]; then
+              OLD_HASH=$(md5sum "$BASELINE_DIR/$filename" | cut -d' ' -f1)
+              NEW_HASH=$(md5sum "$file" | cut -d' ' -f1)
+              if [ "$OLD_HASH" != "$NEW_HASH" ]; then
+                CHANGED_PAGES+=("$page")
+              fi
+            else
+              CHANGED_PAGES+=("$page")
+            fi
+          done
+
+          if [ ${#CHANGED_PAGES[@]} -eq 0 ]; then
+            echo "No visual changes detected — skipping notification"
+            exit 0
+          fi
+
+          upload_to_slack() {
+            local filepath="$1"
+            local title="$2"
+            local filesize
+            filesize=$(stat --printf="%s" "$filepath" 2>/dev/null || stat -f%z "$filepath")
+            local filename
+            filename=$(basename "$filepath")
+
+            local url_resp
+            url_resp=$(curl -s -X POST \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-type: application/x-www-form-urlencoded" \
+              --data-urlencode "filename=${filename}" \
+              --data-urlencode "length=${filesize}" \
+              https://slack.com/api/files.getUploadURLExternal)
+
+            local upload_url file_id
+            upload_url=$(echo "$url_resp" | jq -r '.upload_url // empty')
+            file_id=$(echo "$url_resp" | jq -r '.file_id // empty')
+
+            if [ -z "$upload_url" ] || [ -z "$file_id" ]; then
+              echo ""
+              return
+            fi
+
+            curl -s -X POST \
+              -F "file=@${filepath}" \
+              "$upload_url" > /dev/null
+
+            local complete_resp
+            complete_resp=$(curl -s -X POST \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -H "Content-type: application/json" \
+              --data "$(jq -n --arg id "$file_id" --arg title "$title" \
+                '{files: [{id: $id, title: $title}]}')" \
+              https://slack.com/api/files.completeUploadExternal)
+
+            echo "$complete_resp" | jq -r '.files[0].permalink // empty'
+          }
+
+          NL=$'\n'
+          TEXT=":large_green_circle: *Visual baseline manually approved (${ENV_NAME})*${NL}"
+          TEXT+="Baseline updated to \`${SHA}\`. ${#CHANGED_PAGES[@]} page(s) changed.${NL}"
+          TEXT+="<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>${NL}"
+
+          for PAGE in "${CHANGED_PAGES[@]}"; do
+            FILE="${PAGE}.png"
+            TEXT+="${NL}*${PAGE}*${NL}"
+
+            GALLERY=""
+            if [ -f "$BASELINE_DIR/$FILE" ]; then
+              PLINK=$(upload_to_slack "$BASELINE_DIR/$FILE" "${PAGE} — Baseline")
+              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
+            fi
+            if [ -f "$CURRENT_DIR/$FILE" ]; then
+              PLINK=$(upload_to_slack "$CURRENT_DIR/$FILE" "${PAGE} — Current")
+              [ -n "$PLINK" ] && GALLERY+="<${PLINK}| >"
+            fi
+
+            [ -n "$GALLERY" ] && TEXT+="${NL}${GALLERY}${NL}"
+          done
+
+          curl -s -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Content-type: application/json" \
+            --data "$(jq -n --arg channel "$CHANNEL" --arg text "$TEXT" \
+              '{channel: $channel, text: $text, mrkdwn: true, unfurl_links: true, unfurl_media: true}')" \
+            https://slack.com/api/chat.postMessage
+
       - name: Promote to baseline
         run: |
           aws s3 sync \
@@ -43,7 +154,7 @@ jobs:
             --delete
           echo "${{ inputs.environment }} baseline updated to SHA ${{ inputs.sha }}"
 
-      - name: Notify Slack
+      - name: Notify deployment channel
         run: |
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"Visual baseline (${{ inputs.environment }}) approved and updated to \`${{ inputs.sha }}\`. Re-run the failed deploy to continue.\"}" \

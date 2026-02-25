@@ -14,6 +14,7 @@ import BasicErrorMessage from "../../components/BasicErrorMessage";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router";
 
 export enum MemberFilterMode {
   All = "All",
@@ -62,9 +63,12 @@ const MembersListPage = () => {
   const loading = isLoadingMembers || isLoadingSentRequests || isLoadingFriends;
   const error = membersError ? "Could not load members" : null;
 
-  const [filterMode, setFilterMode] = useState<MemberFilterMode>(
-    MemberFilterMode.All
-  );
+  const [params, setParams] = useSearchParams();
+
+  const filterMode =
+    (params.get("filter") as MemberFilterMode | undefined) ??
+    MemberFilterMode.All;
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const { allFriendsOfFriends, allOtherMembers, staffMembers } = useMemo(() => {
@@ -134,7 +138,7 @@ const MembersListPage = () => {
           options={MemberFilterMode}
           secondaryLabel={([, mode]) => secondaryLabels[mode]}
           value={filterMode}
-          onChange={([, mode]) => setFilterMode(mode)}
+          onChange={([, mode]) => setParams({ filter: mode })}
         />
       </div>
 

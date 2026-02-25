@@ -643,7 +643,7 @@ jobs:
           BASELINE_DIR="${{ github.workspace }}/screenshots/baseline"
           CURRENT_DIR="${{ github.workspace }}/screenshots/current"
           TOKEN="${{ secrets.SLACK_BOT_TOKEN }}"
-          CHANNEL="${{ secrets.SLACK_DEPLOY_CHANNEL_ID }}"
+          CHANNEL="${{ secrets.SLACK_VISUAL_REGRESSION_CHANNEL_ID }}"
 
           upload_to_slack() {
             local filepath="$1"
