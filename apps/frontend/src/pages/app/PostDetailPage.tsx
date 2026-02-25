@@ -129,7 +129,7 @@ const PostDetailPage: React.FC = () => {
               </span>
             </Card>
           )}
-          <div className="py-3 sm:py-6 px-3 sm:px-5 mb-3">
+          <div className="py-3 sm:pt-6 px-3 sm:px-5 mb-3">
             <div className="flex flex-row items-center justify-between">
               <h1 className="text-2xl font-serif font-semibold mb-3">
                 {post.title}
@@ -137,13 +137,6 @@ const PostDetailPage: React.FC = () => {
                   <PinnedIcon size="large" className="ml-2 -mt-1" />
                 )}
               </h1>
-              <PostLikeButton
-                liked={
-                  post.likes?.some((like) => like.id === user?.id) ?? false
-                }
-                likes={post.likes?.length ?? 0}
-                handleLike={handleLike}
-              />
             </div>
             <div className="flex flex-row gap-x-2 mb-2 sm:mb-4 mt-1 items-center text-base flex-wrap">
               {(post.authors?.length ? post.authors : [post.author]).map(
@@ -194,7 +187,14 @@ const PostDetailPage: React.FC = () => {
               )}
             </div>
             <EditableContentRenderer content={post.editableContent} />
-            <div className="flex items-center gap-x-1.5 sm:-mb-2">
+            <div className="flex items-center gap-x-1.5 sm:-mb-2 mt-2">
+              <PostLikeButton
+                liked={
+                  post.likes?.some((like) => like.id === user?.id) ?? false
+                }
+                likes={post.likes?.length ?? 0}
+                handleLike={handleLike}
+              />
               {amAuthor && (
                 <>
                   <Link
