@@ -4,7 +4,7 @@ Assuming we have some e.g. `mp4` video file, recommended steps are:
 
 **1. Subtitle Generation**
 
-Right now i use _whisper v2_ for this.
+Right now i use `whisper v2` for this.
 
 - Install: `pip3 install openai-whisper`
 
@@ -14,7 +14,7 @@ Move on to step 2 while this runs.
 
 **2. Color grading**
 
-Right now i do this in _Davinci Resolve_. The process looks like:
+Right now i do this in `Davinci Resolve`. The process looks like:
 
 1. drag video into media pool
 
