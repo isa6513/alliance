@@ -1654,7 +1654,7 @@ export function FormBuilder({
 
   return (
     <CustomValidatorDraftsContext.Provider value={customValidatorDraftContext}>
-      <div className="flex h-[calc(100vh-40px)] bg-gray-50">
+      <div className="flex h-[calc(100vh-40px)] bg-zinc-50">
         {!isPreviewMode && activeEditor === "form" && (
           <ElementSelect
             onAddField={addField}
@@ -1667,18 +1667,7 @@ export function FormBuilder({
         <div className="flex-1 flex flex-col">
           {/* Header */}
           <div className="bg-white border-b border-gray-200 p-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap xl:flex-nowrap">
-              <div className="flex items-center space-x-4 flex-1 min-w-[200px]">
-                <input
-                  type="text"
-                  value={schema.title}
-                  onChange={(e) =>
-                    updateSchema({ ...schema, title: e.target.value })
-                  }
-                  className="font-bold px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                  placeholder="Form title"
-                />
-              </div>
+            <div className="flex items-center justify-end gap-4 flex-wrap xl:flex-nowrap">
               <div className="flex items-center space-x-2">
                 {activeEditor === "form" && (
                   <Button
@@ -1907,14 +1896,13 @@ export function FormBuilder({
             {activeEditor === "outputs" && !generalUpdateName ? (
               <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
             ) : isPreviewMode && generalUpdateName ? (
-              <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
+              <div className="max-w-3xl mx-auto bg-white p-6">
                 <PreviewAsUserBar
                   previewUserId={previewUserId}
                   setPreviewUserId={setPreviewUserId}
                   previewUsers={previewUsers}
                   isLoadingPreviewUsers={isLoadingPreviewUsers}
                   previewUserError={previewUserError}
-                  onRefreshUsers={fetchPreviewUsers}
                 />
                 <LargeGeneralUpdateCard
                   title={generalUpdateName}
@@ -1925,14 +1913,13 @@ export function FormBuilder({
                 />
               </div>
             ) : isPreviewMode ? (
-              <div className="max-w-3xl mx-auto bg-white p-6 border border-gray-200 rounded-lg">
+              <div className="max-w-3xl mx-auto bg-white p-6">
                 <PreviewAsUserBar
                   previewUserId={previewUserId}
                   setPreviewUserId={setPreviewUserId}
                   previewUsers={previewUsers}
                   isLoadingPreviewUsers={isLoadingPreviewUsers}
                   previewUserError={previewUserError}
-                  onRefreshUsers={fetchPreviewUsers}
                 />
                 <FormRenderer
                   id={0}

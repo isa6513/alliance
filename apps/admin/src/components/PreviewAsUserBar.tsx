@@ -6,7 +6,6 @@ export interface PreviewAsUserBarProps {
   previewUsers: UserDto[];
   isLoadingPreviewUsers: boolean;
   previewUserError: string | null;
-  onRefreshUsers: () => void;
 }
 
 export function PreviewAsUserBar({
@@ -15,7 +14,6 @@ export function PreviewAsUserBar({
   previewUsers,
   isLoadingPreviewUsers,
   previewUserError,
-  onRefreshUsers,
 }: PreviewAsUserBarProps) {
   return (
     <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -39,13 +37,6 @@ export function PreviewAsUserBar({
         {previewUserError && (
           <span className="text-red-600">{previewUserError}</span>
         )}
-        <button
-          type="button"
-          className="text-blue-600 hover:text-blue-700"
-          onClick={() => void onRefreshUsers()}
-        >
-          Refresh users
-        </button>
       </div>
     </div>
   );

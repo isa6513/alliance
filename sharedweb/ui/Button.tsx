@@ -9,35 +9,35 @@ type ButtonProps = React.PropsWithChildren & {
   size?: "small" | "medium" | "large" | "mediumDynamic";
 } & (
     | ({
-      asDiv?: false;
-      ref?: React.RefObject<HTMLButtonElement | null>;
-    } & Pick<
-      React.HTMLAttributes<HTMLButtonElement>,
-      "onMouseEnter" | "onMouseLeave"
-    > &
-      (
-        | {
-          type: "submit";
-          onClick?: (e: React.FormEvent) => void;
-        }
-        | {
-          type?: "button" | "reset";
-          onClick: (e: React.MouseEvent<HTMLElement>) => void;
-        }
-      ))
+        asDiv?: false;
+        ref?: React.RefObject<HTMLButtonElement | null>;
+      } & Pick<
+        React.HTMLAttributes<HTMLButtonElement>,
+        "onMouseEnter" | "onMouseLeave"
+      > &
+        (
+          | {
+              type: "submit";
+              onClick?: (e: React.FormEvent) => void;
+            }
+          | {
+              type?: "button" | "reset";
+              onClick: (e: React.MouseEvent<HTMLElement>) => void;
+            }
+        ))
     | ({
-      asDiv: true;
-      ref?: React.RefObject<HTMLDivElement | null>;
-      type?: "button" | "reset";
-      onClick: (e: React.MouseEvent<HTMLElement>) => void;
-    } & Pick<
-      React.HTMLAttributes<HTMLDivElement>,
-      "onMouseEnter" | "onMouseLeave"
-    >)
+        asDiv: true;
+        ref?: React.RefObject<HTMLDivElement | null>;
+        type?: "button" | "reset";
+        onClick: (e: React.MouseEvent<HTMLElement>) => void;
+      } & Pick<
+        React.HTMLAttributes<HTMLDivElement>,
+        "onMouseEnter" | "onMouseLeave"
+      >)
   );
 
 export enum ButtonColor {
-  Stone = "bg-gray-4 text-white hover:bg-[#444]",
+  Stone = "bg-gray-4 text-white hover:bg-[#444] border border-[#444]",
   Green = "bg-green text-white hover:bg-[#4d8c1d] border border-green",
   GreenOutLine = "border border-green text-green hover:bg-green/10",
   Red = "bg-red-100 !text-red-500 hover:bg-red-200",
@@ -78,9 +78,11 @@ const Button: React.FC<ButtonProps> = ({
     large: "px-6 py-3 text-lg",
   }[size];
 
-  const baseClassName = `${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box relative group ${disabled ? "opacity-50 !cursor-not-allowed" : ``
-    } ${color} ${color === ButtonColor.Light ? "!text-zinc-800" : ""
-    } ${className} `;
+  const baseClassName = `${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box relative group ${
+    disabled ? "opacity-50 !cursor-not-allowed" : ``
+  } ${color} ${
+    color === ButtonColor.Light ? "!text-zinc-800" : ""
+  } ${className} `;
 
   const baseStyle = {
     fontWeight: 450,
