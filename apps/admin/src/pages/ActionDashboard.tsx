@@ -51,6 +51,7 @@ import {
   UserMinus,
   UserX,
   TrendingUp,
+  InfoIcon,
 } from "lucide-react";
 import ActionCompletionCurveChart from "../components/ActionCompletionCurveChart";
 import { useNavigate, useParams, useSearchParams } from "react-router";
@@ -1184,7 +1185,9 @@ const ActionDashboard: React.FC = () => {
                             {action.usersJoined}
                           </p>
                           <p className="text-xs text-gray-500">
-                            Expected to complete
+                            {action.optional
+                              ? "Able to complete"
+                              : "Expected to complete"}
                           </p>
                         </div>
                       </div>
@@ -1236,7 +1239,7 @@ const ActionDashboard: React.FC = () => {
                         </div>
                       </div>
                     </Card>
-                    {incompleteUsers.length > 0 && (
+                    {incompleteUsers.length > 0 && !action.optional && (
                       <Card
                         style={CardStyle.White}
                         className="!p-4 cursor-pointer hover:bg-gray-50"
@@ -1261,6 +1264,21 @@ const ActionDashboard: React.FC = () => {
                           ) : (
                             <ChevronDown className="h-4 w-4 text-gray-400 ml-auto" />
                           )}
+                        </div>
+                      </Card>
+                    )}
+                    {action.optional && (
+                      <Card
+                        style={CardStyle.White}
+                        className="!p-4 items-center flex-row"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <InfoIcon className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <p className="text font-medium text-gray-800">
+                            Optional action
+                          </p>
                         </div>
                       </Card>
                     )}
@@ -1293,16 +1311,15 @@ const ActionDashboard: React.FC = () => {
                     </ul>
                   </Card>
                 )}
-
-                {/* Completion Curve Chart - only show after member_action has started */}
-                {hasMemberActionStarted && !action.publicOnly && (
-                  <ActionCompletionCurveChart
-                    title="Completion over time"
-                    actionId={action.id}
-                    showSelector={false}
-                  />
-                )}
-
+                {hasMemberActionStarted &&
+                  !action.publicOnly &&
+                  !action.optional && (
+                    <ActionCompletionCurveChart
+                      title="Completion over time"
+                      actionId={action.id}
+                      showSelector={false}
+                    />
+                  )}
                 <Card style={CardStyle.White}>
                   <h2 className="text-lg font-semibold mb-3">Timeline</h2>
                   <div className="space-y-2">

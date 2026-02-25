@@ -18,6 +18,7 @@ export interface ActionListCardProps {
     | "commitmentThreshold"
     | "type"
     | "donationAmount"
+    | "optional"
   >;
 }
 
@@ -31,6 +32,7 @@ const ActionListCard = ({ action }: ActionListCardProps) => {
   );
 
   const lastEventDate = getLastPastEventDate(action);
+  console.log(action.optional);
   return (
     <div key={action.id} className="p-4 group">
       <div
@@ -51,17 +53,24 @@ const ActionListCard = ({ action }: ActionListCardProps) => {
               </p>
             )}
           </div>
-          <span
-            className={`absolute p-2 right-0 top-0 text-zinc-800 
+          <div className="flex flex-row items-center gap-x-2 -my-2">
+            <span
+              className={`p-2 right-0 top-0 text-zinc-800 
                             font-medium text-xs rounded-sm text-nowrap border-zinc-200 border
                             ${
                               action.status === "member_action"
                                 ? "bg-green/20"
                                 : "bg-zinc-50"
                             }`}
-          >
-            {action.status}
-          </span>
+            >
+              {action.status}
+            </span>
+            {action.optional && (
+              <span className="p-2 bg-blue-500 rounded-sm text-xs text-white">
+                Optional
+              </span>
+            )}
+          </div>
         </div>
         <p className="text-xs">{action.shortDescription}</p>
 
