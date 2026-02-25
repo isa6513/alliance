@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AuthModule } from '../src/auth/auth.module';
 import { ActionsModule } from '../src/actions/actions.module';
+import { ContractModule } from '../src/contract/contract.module';
 import { UserModule } from '../src/user/user.module';
 import { User } from '../src/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
@@ -53,6 +54,7 @@ export async function createTestApp(
       AuthModule,
       ForumModule,
       ActionsModule,
+      ContractModule,
       NotifsModule,
       UserModule,
       ...modules,

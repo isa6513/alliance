@@ -16,6 +16,7 @@ import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { ContractEvent } from '../user/entities/contract-event.entity';
 import { Tag } from '../user/entities/tag.entity';
 import { User } from '../user/entities/user.entity';
+import { ContractModule } from 'src/contract/contract.module';
 import { UserModule } from '../user/user.module';
 import { ActionsController } from './actions.controller';
 import { ActionsGateway } from './actions.gateway';
@@ -63,6 +64,7 @@ import { GeneralUpdateActivity } from './entities/general-update-activity.entity
       ReminderGroup,
       Tag,
     ]),
+    ContractModule,
     UserModule,
     CommunityModule,
     NotifsModule,

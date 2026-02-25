@@ -28,6 +28,7 @@ import { MessagingModule } from './messaging/messaging.module';
 import { PushModule } from './push/push.module';
 import { EventLogModule } from './eventlog/eventlog.module';
 import { CommunityModule } from './community/community.module';
+import { ContractModule } from './contract/contract.module';
 import { VideosModule } from './videos/videos.module';
 
 @Module({
@@ -61,6 +62,7 @@ import { VideosModule } from './videos/videos.module';
     AuthModule,
     UserModule,
     CommunityModule,
+    ContractModule,
     TypeOrmModule.forRoot({ ...connectionOptions(), autoLoadEntities: true }),
     ScheduleModule.forRoot(),
     ActionsModule,

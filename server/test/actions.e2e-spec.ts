@@ -1,6 +1,7 @@
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
 import { UserService } from 'src/user/user.service';
+import { ContractService } from 'src/contract/contract.service';
 import request from 'supertest';
 import type { Repository } from 'typeorm';
 import {
@@ -36,6 +37,7 @@ describe('Actions (e2e)', () => {
   let actionRepo: Repository<Action>;
   let eventRepo: Repository<ActionEvent>;
   let userService: UserService;
+  let contractService: ContractService;
   let tagRepo: Repository<Tag>;
   let userRepo: Repository<User>;
   let notifRepo: Repository<Notification>;
@@ -81,6 +83,7 @@ describe('Actions (e2e)', () => {
     actionRepo = ctx.dataSource.getRepository(Action);
     eventRepo = ctx.dataSource.getRepository(ActionEvent);
     userService = ctx.app.get(UserService);
+    contractService = ctx.app.get(ContractService);
     tagRepo = ctx.dataSource.getRepository(Tag);
     userRepo = ctx.dataSource.getRepository(User);
     notifRepo = ctx.dataSource.getRepository(Notification);
@@ -121,7 +124,7 @@ describe('Actions (e2e)', () => {
     const defaultUser = await userRepo.findOneOrFail({
       where: { id: ctx.testUserId },
     });
-    await userService.signContract({
+    await contractService.signContract({
       userId: defaultUser.id,
       signedName: 'Test Name',
       contractId: ctx.defaultContractId,

@@ -19,6 +19,7 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {
   Database,
   Film,
+  FileText,
   SquareActivity,
   Users,
   UserPlus,
@@ -257,6 +258,11 @@ const Sidebar: React.FC = () => {
                     to: "/posts",
                     label: "Forum Posts",
                     icon: <MessageSquare size={16} />,
+                  },
+                  {
+                    to: "/contracts",
+                    label: "Contracts",
+                    icon: <FileText size={16} />,
                   },
                   {
                     to: "/scheduled",

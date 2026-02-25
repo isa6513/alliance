@@ -5,7 +5,7 @@ import { MmsService } from 'src/mms/mms.service';
 import { generateCIDForNotif } from 'src/notifs/notif-utils';
 import { shouldEmailUser, shouldTextUser } from 'src/notifs/notifs.service';
 import { suspensionMessage } from 'src/notifs/textnotifcontents';
-import { UserService } from 'src/user/user.service';
+import { ContractService } from 'src/contract/contract.service';
 import { DataSource } from 'typeorm';
 import { withPgAdvisoryLock } from '../notifs/lock-utils';
 import { EventLogService } from 'src/eventlog/eventlog.service';
@@ -22,7 +22,7 @@ export class ContractSuspenderWorker {
     private readonly mailService: MailService,
     private readonly mmsService: MmsService,
     private readonly actionsService: ActionsService,
-    private readonly userService: UserService,
+    private readonly contractService: ContractService,
     private readonly eventLogService: EventLogService,
   ) { }
 
@@ -56,7 +56,7 @@ export class ContractSuspenderWorker {
         }
 
         for (const user of usersToSuspend) {
-          const res = await this.userService.suspendContract(
+          const res = await this.contractService.suspendContract(
             user.id,
             true,
             suspendReasonKeys.get(user.id),

@@ -37,10 +37,11 @@ export type ContractEventType = 'signed' | 'suspended';
 
 export type Contract = {
     id: number;
+    name: string | null;
     createdAt: string;
     markdown: string;
-    startDate?: string;
-    endDate?: string;
+    startDate: string | null;
+    endDate: string | null;
     events: Array<ContractEvent>;
 };
 
@@ -699,15 +700,6 @@ export type ProfileDto = {
     lastContractEvent?: ContractEvent;
 };
 
-export type ContractDto = {
-    id: number;
-    markdown: string;
-};
-
-export type SignContractDto = {
-    signedName: string;
-};
-
 export type UserAwayRangeReason = 'vacation' | 'emergency' | 'other';
 
 export type CreateAwayRangeDto = {
@@ -1111,6 +1103,37 @@ export type CommunityInviteDto = {
 export type RequestCommunityInviteDto = {
     communityId: number;
     invitedUserId: number;
+};
+
+export type ContractDto = {
+    id: number;
+    markdown: string;
+};
+
+export type ContractAdminDto = {
+    id: number;
+    name: string | null;
+    createdAt: string;
+    markdown: string;
+    startDate: string | null;
+    endDate: string | null;
+};
+
+export type SignContractDto = {
+    signedName: string;
+};
+
+export type CreateContractDto = {
+    name: string | null;
+    markdown: string;
+    startDate: string | null;
+    endDate: string | null;
+};
+
+export type UpdateContractDto = {
+    name: string | null;
+    startDate: string | null;
+    endDate: string | null;
 };
 
 export type EditableContentDto = {
@@ -2932,78 +2955,6 @@ export type UserFindMeResponses = {
 
 export type UserFindMeResponse = UserFindMeResponses[keyof UserFindMeResponses];
 
-export type UserGetCurrentContractData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/user/contract';
-};
-
-export type UserGetCurrentContractErrors = {
-    401: unknown;
-};
-
-export type UserGetCurrentContractResponses = {
-    200: ContractDto;
-};
-
-export type UserGetCurrentContractResponse = UserGetCurrentContractResponses[keyof UserGetCurrentContractResponses];
-
-export type UserGetContractData = {
-    body?: never;
-    path: {
-        contractId: number;
-    };
-    query?: never;
-    url: '/user/contract/{contractId}';
-};
-
-export type UserGetContractErrors = {
-    401: unknown;
-};
-
-export type UserGetContractResponses = {
-    200: ContractDto;
-};
-
-export type UserGetContractResponse = UserGetContractResponses[keyof UserGetContractResponses];
-
-export type UserSignContractData = {
-    body: SignContractDto;
-    path: {
-        contractId: number;
-    };
-    query?: never;
-    url: '/user/signcontract/{contractId}';
-};
-
-export type UserSignContractErrors = {
-    401: unknown;
-};
-
-export type UserSignContractResponses = {
-    200: string;
-};
-
-export type UserSignContractResponse = UserSignContractResponses[keyof UserSignContractResponses];
-
-export type UserSuspendContractData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/user/suspendcontract';
-};
-
-export type UserSuspendContractErrors = {
-    401: unknown;
-};
-
-export type UserSuspendContractResponses = {
-    200: string;
-};
-
-export type UserSuspendContractResponse = UserSuspendContractResponses[keyof UserSuspendContractResponses];
-
 export type UserGetAwayRangesData = {
     body?: never;
     path?: never;
@@ -4517,6 +4468,118 @@ export type CommunityRejectCommunityInviteData = {
 export type CommunityRejectCommunityInviteResponses = {
     200: unknown;
 };
+
+export type ContractGetCurrentData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/contract/current';
+};
+
+export type ContractGetCurrentResponses = {
+    200: ContractDto;
+};
+
+export type ContractGetCurrentResponse = ContractGetCurrentResponses[keyof ContractGetCurrentResponses];
+
+export type ContractAllAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/contract/admin';
+};
+
+export type ContractAllAdminResponses = {
+    200: Array<ContractAdminDto>;
+};
+
+export type ContractAllAdminResponse = ContractAllAdminResponses[keyof ContractAllAdminResponses];
+
+export type ContractFindOneAdminData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/contract/admin/{id}';
+};
+
+export type ContractFindOneAdminResponses = {
+    200: ContractAdminDto;
+};
+
+export type ContractFindOneAdminResponse = ContractFindOneAdminResponses[keyof ContractFindOneAdminResponses];
+
+export type ContractGetByIdData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/contract/detail/{id}';
+};
+
+export type ContractGetByIdResponses = {
+    200: ContractDto;
+};
+
+export type ContractGetByIdResponse = ContractGetByIdResponses[keyof ContractGetByIdResponses];
+
+export type ContractSignContractData = {
+    body: SignContractDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/contract/sign/{id}';
+};
+
+export type ContractSignContractResponses = {
+    200: string;
+};
+
+export type ContractSignContractResponse = ContractSignContractResponses[keyof ContractSignContractResponses];
+
+export type ContractSuspendContractData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/contract/suspend';
+};
+
+export type ContractSuspendContractResponses = {
+    200: string;
+};
+
+export type ContractSuspendContractResponse = ContractSuspendContractResponses[keyof ContractSuspendContractResponses];
+
+export type ContractCreateData = {
+    body: CreateContractDto;
+    path?: never;
+    query?: never;
+    url: '/contract/create';
+};
+
+export type ContractCreateResponses = {
+    200: ContractAdminDto;
+};
+
+export type ContractCreateResponse = ContractCreateResponses[keyof ContractCreateResponses];
+
+export type ContractUpdateData = {
+    body: UpdateContractDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/contract/update/{id}';
+};
+
+export type ContractUpdateResponses = {
+    200: ContractAdminDto;
+};
+
+export type ContractUpdateResponse = ContractUpdateResponses[keyof ContractUpdateResponses];
 
 export type ActionsJoinData = {
     body?: never;

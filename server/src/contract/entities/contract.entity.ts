@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsArray, IsOptional, IsString } from 'class-validator';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
@@ -15,6 +15,11 @@ export class Contract {
   @Allow()
   id: number;
 
+  @Column({ type: 'text', nullable: true })
+  @ApiProperty({ type: String, nullable: true })
+  @IsOptional()
+  name: string | null;
+
   @CreateDateColumnTz()
   @ApiProperty()
   @Allow()
@@ -27,18 +32,16 @@ export class Contract {
   markdown: string;
 
   @Column({ type: 'timestamptz', nullable: true })
-  @ApiPropertyOptional()
-  @Allow()
+  @ApiProperty({ type: Date, nullable: true })
   @Type(() => Date)
   @IsOptional()
-  startDate?: Date;
+  startDate: Date | null;
 
   @Column({ type: 'timestamptz', nullable: true })
-  @ApiPropertyOptional()
-  @Allow()
+  @ApiProperty({ type: Date, nullable: true })
   @IsOptional()
   @Type(() => Date)
-  endDate?: Date;
+  endDate: Date | null;
 
   // Relations
 

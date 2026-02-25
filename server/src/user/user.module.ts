@@ -25,7 +25,6 @@ import { UserDevice } from './entities/user-device.entity';
 import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { CommunityModule } from 'src/community/community.module';
-import { Contract } from 'src/contract/entities/contract.entity';
 
 @Module({
   imports: [
@@ -36,7 +35,6 @@ import { Contract } from 'src/contract/entities/contract.entity';
       City,
       Community,
       CommunityInvite,
-      Contract,
       ContractEvent,
       Friend,
       Notification,

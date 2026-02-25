@@ -14,6 +14,7 @@ import {
   ActionActivityType,
 } from '../src/actions/entities/action-activity.entity';
 import { ContractEventType } from '../src/user/entities/contract-event.entity';
+import { ContractService } from '../src/contract/contract.service';
 import { User } from '../src/user/entities/user.entity';
 import { UserService } from '../src/user/user.service';
 import type { Repository } from 'typeorm';
@@ -26,6 +27,7 @@ const addDays = (date: Date, days: number) =>
 describe('findUsersToSuspend (e2e)', () => {
   let ctx: TestContext;
   let actionsService: ActionsService;
+  let contractService: ContractService;
   let userService: UserService;
   let actionRepo: Repository<Action>;
   let eventRepo: Repository<ActionEvent>;
@@ -96,6 +98,7 @@ describe('findUsersToSuspend (e2e)', () => {
   beforeAll(async () => {
     ctx = await createTestApp([]);
     actionsService = ctx.app.get(ActionsService);
+    contractService = ctx.app.get(ContractService);
     userService = ctx.app.get(UserService);
 
     actionRepo = ctx.dataSource.getRepository(Action);
@@ -275,12 +278,12 @@ describe('findUsersToSuspend (e2e)', () => {
       initialRun.usersToSuspend.some((user) => user.id === completingUser.id),
     ).toBe(false);
 
-    await userService.suspendContract(failingUser.id, true, 'test-auto-key');
+    await contractService.suspendContract(failingUser.id, true, 'test-auto-key');
 
     const afterSuspension = await actionsService.findUsersToSuspend(now);
     expect(afterSuspension.usersToSuspend).toHaveLength(0);
 
-    await userService.signContract({
+    await contractService.signContract({
       userId: failingUser.id,
       signedName: 'Test Name',
       contractId: ctx.defaultContractId,

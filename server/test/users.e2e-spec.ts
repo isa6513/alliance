@@ -9,6 +9,7 @@ import { GeoModule } from '../src/geo/geo.module';
 import { FriendStatus } from '../src/user/entities/friend.entity';
 import { User } from '../src/user/entities/user.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
+import { ContractService } from 'src/contract/contract.service';
 import { UserService } from 'src/user/user.service';
 import { Community } from '../src/community/entities/community.entity';
 import {
@@ -23,6 +24,7 @@ describe('Users (e2e)', () => {
   let communityRepo: Repository<Community>;
   let onetimeInviteRepo: Repository<OnetimeInvite>;
   let userService: UserService;
+  let contractService: ContractService;
 
   let userAId: number;
   let userAToken: string;
@@ -40,6 +42,7 @@ describe('Users (e2e)', () => {
     communityRepo = ctx.dataSource.getRepository(Community);
     onetimeInviteRepo = ctx.dataSource.getRepository(OnetimeInvite);
     userService = ctx.app.get(UserService);
+    contractService = ctx.app.get(ContractService);
     const userA = userRepo.create({
       name: 'Friend A',
       email: 'frienda@example.com',
@@ -285,7 +288,7 @@ describe('Users (e2e)', () => {
 
   it('user can sign and suspend the contract', async () => {
     const sign = await request(ctx.app.getHttpServer())
-      .post(`/user/signcontract/${ctx.defaultContractId}`)
+      .post(`/contract/sign/${ctx.defaultContractId}`)
       .send({ signedName: 'Test Name' })
       .set('Authorization', `Bearer ${userAToken}`)
       .expect(201);
@@ -293,7 +296,7 @@ describe('Users (e2e)', () => {
     expect(typeof sign.text === 'string' || sign.body).toBeTruthy();
 
     const suspend = await request(ctx.app.getHttpServer())
-      .post('/user/suspendcontract')
+      .post('/contract/suspend')
       .set('Authorization', `Bearer ${userAToken}`)
       .expect(201);
 
@@ -343,7 +346,7 @@ describe('Users (e2e)', () => {
       );
 
       // Sign contract
-      await userService.signContract({
+      await contractService.signContract({
         userId: newUser.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
@@ -415,7 +418,7 @@ describe('Users (e2e)', () => {
       );
 
       // Sign contract
-      await userService.signContract({
+      await contractService.signContract({
         userId: newUser.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
@@ -450,7 +453,7 @@ describe('Users (e2e)', () => {
         }),
       );
 
-      await userService.signContract({
+      await contractService.signContract({
         userId: newUser.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
@@ -491,14 +494,14 @@ describe('Users (e2e)', () => {
         }),
       );
 
-      await userService.signContract({
+      await contractService.signContract({
         userId: user.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
       });
 
       // Suspend contract (this should set pendingCommunity)
-      await userService.suspendContract(user.id);
+      await contractService.suspendContract(user.id);
 
       // Set pendingCommunity manually to simulate the suspend flow
       const userWithPending = await userRepo.findOne({
@@ -511,7 +514,7 @@ describe('Users (e2e)', () => {
       }
 
       // Sign contract again
-      await userService.signContract({
+      await contractService.signContract({
         userId: user.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
@@ -570,7 +573,7 @@ describe('Users (e2e)', () => {
       );
 
       // Sign contract (non-first time)
-      await userService.signContract({
+      await contractService.signContract({
         userId: user.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
@@ -618,14 +621,14 @@ describe('Users (e2e)', () => {
       );
 
       // Sign contract first
-      await userService.signContract({
+      await contractService.signContract({
         userId: member.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
       });
 
       // Suspend contract
-      await userService.suspendContract(member.id);
+      await contractService.suspendContract(member.id);
 
       const updatedMember = await userRepo.findOne({
         where: { id: member.id },
@@ -659,14 +662,14 @@ describe('Users (e2e)', () => {
       );
 
       // Sign contract
-      await userService.signContract({
+      await contractService.signContract({
         userId: leader.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
       });
 
       // Suspend contract
-      await userService.suspendContract(leader.id);
+      await contractService.suspendContract(leader.id);
 
       const updatedLeader = await userRepo.findOne({
         where: { id: leader.id },
@@ -717,12 +720,12 @@ describe('Users (e2e)', () => {
         }),
       );
 
-      await userService.signContract({
+      await contractService.signContract({
         userId: member.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
       });
-      await userService.suspendContract(member.id);
+      await contractService.suspendContract(member.id);
 
       const notifRepo = ctx.dataSource.getRepository(Notification);
       const leader1Notifs = await notifRepo.find({
@@ -796,12 +799,12 @@ describe('Users (e2e)', () => {
         }),
       );
 
-      await userService.signContract({
+      await contractService.signContract({
         userId: member.id,
         signedName: 'Test Name',
         contractId: ctx.defaultContractId,
       });
-      await userService.suspendContract(member.id);
+      await contractService.suspendContract(member.id);
 
       const updatedMember = await userRepo.findOne({
         where: { id: member.id },
