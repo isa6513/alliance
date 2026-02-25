@@ -80,7 +80,7 @@ We have also paid attention to the diversity and coherence of our full action se
 
 ## Other updates
 
-The legal entity we use to manage funds and pay members of the office was approved as a U.S. 501(c)(3) non-profit organization.
+The legal entity we use to manage funds and pay members of the office was approved as a U.S. 501(c)&#x2060;(3) non-profit organization.
 
 The office has 5 staff members now. We expect to hire 2 more staff members in early 2026\. These staff members develop action plans and our online platform.
 
