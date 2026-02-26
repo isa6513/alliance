@@ -947,6 +947,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           value={emailSubject}
           onChange={setEmailSubject}
           rows={1}
+          highlightHashPipeSyntax
         />
       </div>
 
@@ -992,6 +993,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
             value={emailMessage}
             onChange={setEmailMessage}
             rows={5}
+            highlightHashPipeSyntax
           />
         )}
       </div>
@@ -1040,6 +1042,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
             value={textMessage}
             onChange={setTextMessage}
             rows={2}
+            highlightHashPipeSyntax
           />
         )}
       </div>
@@ -1087,6 +1090,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
             value={pushMessage}
             onChange={setPushMessage}
             rows={2}
+            highlightHashPipeSyntax
           />
         )}
       </div>

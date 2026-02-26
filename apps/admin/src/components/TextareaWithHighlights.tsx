@@ -11,6 +11,7 @@ export interface TextareaWithHighlightProps {
   rows?: number;
   caseSensitive?: boolean;
   editable?: boolean;
+  highlightHashPipeSyntax?: boolean;
 }
 
 function escapeHtml(s: string) {
@@ -20,6 +21,8 @@ function escapeHtml(s: string) {
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+const HASH_PIPE_SYNTAX_REGEX = /#\{[^}|]*\|[^}]*\}/g;
 
 export default function TextareaWithHighlight({
   value,
@@ -32,6 +35,7 @@ export default function TextareaWithHighlight({
   rows = 4,
   caseSensitive = false,
   editable = true,
+  highlightHashPipeSyntax = false,
 }: TextareaWithHighlightProps) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -57,12 +61,23 @@ export default function TextareaWithHighlight({
 
   const highlightedHtml = useMemo(() => {
     const safe = escapeHtml(value || "");
-    if (!highlightRegex) return safe;
-    return safe.replace(
+
+    const afterHashPipe = highlightHashPipeSyntax
+      ? safe.replace(
+          HASH_PIPE_SYNTAX_REGEX,
+          '<span class="bg-amber-400/20 text-transparent">$&</span>'
+        )
+      : safe;
+    if (highlightHashPipeSyntax) {
+      console.log({ safe, afterHashPipe }, "asdf");
+    }
+
+    if (!highlightRegex) return afterHashPipe;
+    return afterHashPipe.replace(
       highlightRegex,
       `<span class="bg-green/20 text-transparent">$1</span>`
     );
-  }, [value, highlightRegex]);
+  }, [value, highlightRegex, highlightHashPipeSyntax]);
 
   // Sync overlay scroll with textarea scroll.
   useEffect(() => {
