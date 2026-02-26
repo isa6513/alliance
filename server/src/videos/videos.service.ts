@@ -21,14 +21,14 @@ export class VideosService {
 
   private readonly bucket = process.env.ASSETS_BUCKET!;
 
-  contentTypeForFile = (filename: string) => {
+  private contentTypeForFile(filename: string) {
     if (filename.endsWith('.m3u8')) {
       return 'application/vnd.apple.mpegurl';
     } else if (filename.endsWith('.vtt')) {
       return 'text/vtt';
     }
     return 'video/MP2T';
-  };
+  }
 
   async uploadVideo(files: Express.Multer.File[]): Promise<Video> {
     const key = `videos/${Date.now()}`;

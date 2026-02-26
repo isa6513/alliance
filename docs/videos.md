@@ -55,3 +55,7 @@ change any settings as desired, but importantly we hardcode playlist.m3u8 as the
 **4. Upload**
 
 Make a video block in a form and upload all the generated files into it (`.m3u8`, `.ts`, and `.vtt`)
+
+---
+
+At some point we will make a more automated process for this, but doing it on the server is complex as video manipulation requires a decent amount of memory (more memory than our servers have).
