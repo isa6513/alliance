@@ -44,6 +44,10 @@ const ContractPage: React.FC = () => {
   });
 
   useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+
+  useEffect(() => {
     if (user) {
       setLastContractEvent(getLastContractEvent(user.contractEvents));
     }
