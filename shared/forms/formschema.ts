@@ -149,7 +149,7 @@ export type CityField = BaseField<"city"> & {
   autoExtractUserData?: boolean;
 };
 export type ContractField = BaseField<"contract"> & {
-  contractId: number | null;
+  contractId: number;
   contract?: { markdown: string };
 };
 // Persist file answers as string URL/key
