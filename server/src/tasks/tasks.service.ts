@@ -59,6 +59,7 @@ import { UpdateProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
 import { EventType } from 'src/eventlog/event-log.entity';
 import { ContractService } from 'src/contract/contract.service';
+import { ContractDto } from 'src/contract/dto/contract.dto';
 
 @Injectable()
 export class TasksService {
@@ -117,7 +118,9 @@ export class TasksService {
     for (const page of pages) {
       for (const field of page.fields) {
         if (field.kind === 'contract' && field.contractId) {
-          field.contract = await this.contractService.findOne(field.contractId);
+          field.contract = new ContractDto(
+            await this.contractService.findOne(field.contractId),
+          );
         }
       }
     }
