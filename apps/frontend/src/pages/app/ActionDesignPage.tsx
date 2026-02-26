@@ -1,0 +1,450 @@
+import React from "react";
+import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
+
+import { Link, href } from "react-router";
+
+import InfoSubpage from "../../components/InfoSubpage";
+
+const TerminologyPage: React.FC = () => {
+  useWhiteBackground();
+
+  const tocSections = [
+    { id: "designing-actions", label: "Action design", level: 1 },
+    { id: "initial-idea", label: "Initial idea", level: 2 },
+    { id: "making-a-plan", label: "Making a plan", level: 2 },
+    { id: "preparation", label: "Preparation", level: 2 },
+    { id: "task-production", label: "Task production", level: 2 },
+    { id: "launch", label: "Launch", level: 2 },
+    { id: "follow-up", label: "Follow-up", level: 2 },
+    { id: "submit-action-idea", label: "Submit an idea", level: 1 },
+  ];
+
+  return (
+    <InfoSubpage tocSections={tocSections}>
+      <section className="gap-y-4 flex flex-col">
+        <div className="mb-4">
+          <h1
+            id="membership"
+            className="font-serif text-3xl md:text-4xl font-semibold text-black mb-4"
+          >
+            Action design
+          </h1>
+          <p className="text-zinc-500">
+            The following is a simplified version of a guide that the office
+            references internally.
+          </p>
+        </div>
+        <p>
+          We put great effort into designing high-quality actions. The purpose
+          of actions is to use the time and skills of members and the office to
+          advance the goals of the Alliance.
+        </p>
+
+        <p>
+          Running regular actions helps us refine our internal action production
+          process, which we believe must be robust by the time we{" "}
+          <Link to={href("/roadmap")} className="text-link hover:underline">
+            launch publicly.
+          </Link>
+        </p>
+
+        <p>
+          To make the most of our time and members’ time in this early stage, we
+          mostly want to run actions that either:
+        </p>
+        <ul className="list-disc list-inside pl-4 space-y-2">
+          <li>
+            <span className="font-semibold">Teach us something</span>, such as
+            by testing a general action strategy at a small scale.
+          </li>
+          <li>
+            <span className="font-semibold">
+              Help us accomplish a strategic goal
+            </span>
+            , such as by helping us grow.
+          </li>
+        </ul>
+
+        <p>
+          Actions can easily test multiple hypotheses and accomplish multiple
+          strategic goals at once.
+        </p>
+
+        <p>These are examples of actions that tested specific hypotheses:</p>
+        <ul className="list-disc list-inside pl-4 space-y-2">
+          <li>
+            <Link
+              to="https://worldalliance.org/actions/14"
+              className="text-link"
+            >
+              “Sign a letter requesting news coverage of a bring-your-own-cup
+              cafe coalition”
+            </Link>{" "}
+            tested if businesses would make policy changes in exchange for
+            assistance in acquiring media coverage.
+          </li>
+          <li>
+            <Link
+              to="https://worldalliance.org/actions/32"
+              className="text-link"
+            >
+              “Answer questions about nonprofit website copy and design”
+            </Link>{" "}
+            tested if we could build relationships with potential future
+            partners by providing small-scale help.
+          </li>
+          <li>
+            <Link
+              to="https://worldalliance.org/actions/52"
+              className="text-link"
+            >
+              “Participate in an experiment to measure AI + follow-up friends
+              and family campaign”
+            </Link>{" "}
+            tested if simple pilot experiments with members could kickstart
+            external educational campaigns.
+          </li>
+        </ul>
+
+        <p>
+          These are examples of actions that helped us accomplish strategic
+          goals:
+        </p>
+        <ul className="list-disc list-inside pl-4 space-y-2">
+          <li>
+            <Link
+              to="https://worldalliance.org/actions/74"
+              className="text-link"
+            >
+              “Consider inviting new members to the Alliance”
+            </Link>{" "}
+            helped us test a new invite process.
+          </li>
+          <li>
+            <Link
+              to="https://worldalliance.org/actions/71"
+              className="text-link"
+            >
+              “Contribute to a discussion about Alliance culture”
+            </Link>{" "}
+            helped us develop community norms.
+          </li>
+          <li>
+            <Link
+              to="https://worldalliance.org/actions/52"
+              className="text-link"
+            >
+              “Provide a quote about Alliance participation”
+            </Link>{" "}
+            helped us make a more compelling case to prospective external
+            supporters.
+          </li>
+        </ul>
+
+        <p>
+          There are many additional factors that we look for in actions. For
+          instance, we like actions that:
+        </p>
+        <ul className="list-disc list-inside pl-4 space-y-2">
+          <li>Are likely to produce clear, positive results.</li>
+          <li>
+            Are creative and novel, especially by taking advantage of the
+            Alliance’s unique structure.
+          </li>
+          <li>
+            Offer direct benefits to members, such as by providing an
+            educational opportunity.
+          </li>
+          <li>
+            Set up for future actions, such as by building relationships with
+            possible future partners.
+          </li>
+        </ul>
+
+        <p>
+          Action design is open-ended and creative, so we have no standard
+          process. However, actions often go through the following stages.
+        </p>
+
+        <h2
+          id="initial-idea"
+          className="mt-2 text-2xl font-semibold text-black"
+        >
+          Initial idea
+        </h2>
+
+        <p>
+          We often develop action plans around initial “seed” ideas, which are
+          simple observations that could be leveraged by the Alliance. These
+          initial ideas may come from previous knowledge or random inspiration.
+        </p>
+
+        <p>For example:</p>
+        <ul className="list-disc list-inside pl-4 space-y-2">
+          <li>
+            The initial idea behind{" "}
+            <Link
+              to="https://worldalliance.org/actions/75"
+              className="text-link"
+            >
+              “Help inform public comments on U.S. federal AI policy”
+            </Link>{" "}
+            was that federal dockets were typically unused by regular citizens.
+          </li>
+          <li>
+            The initial idea behind{" "}
+            <Link
+              to="https://worldalliance.org/actions/71"
+              className="text-link"
+            >
+              “Participate in an experiment to measure awareness of AI data use
+              practices”
+            </Link>{" "}
+            was that many users of AI services likely wanted more privacy than
+            their default settings provided.
+          </li>
+          <li>
+            The initial idea behind{" "}
+            <Link
+              to="https://worldalliance.org/actions/47"
+              className="text-link"
+            >
+              “Decide how to allocate $1,000 next week”
+            </Link>{" "}
+            was that some donors we knew were experimenting with democratic
+            processes for allocating their funds.
+          </li>
+        </ul>
+
+        <h2
+          id="making-a-plan"
+          className="mt-2 text-2xl font-semibold text-black"
+        >
+          Making a plan
+        </h2>
+
+        <p>
+          Once we are sufficiently interested in an initial idea, we make a plan
+          that outlines the basic steps that each party needs to take.
+        </p>
+
+        <p>
+          As we develop this plan, we think extensively about the various
+          factors that could cause the action to succeed or fail, such as:
+        </p>
+
+        <ul className="list-disc list-inside pl-4 space-y-2">
+          <li>What we believe members and the office are capable of.</li>
+          <li>How long we expect different segments of the action to take.</li>
+          <li>What fallbacks might exist if something goes wrong.</li>
+          <li>What the desired results of the action are.</li>
+        </ul>
+
+        <p>
+          Having a basic plan makes an action more concrete and easy to think
+          about. As a result, we find it useful at this stage to explore ways we
+          can modify or add to the basic plan. For instance, we turned an
+          initial idea to{" "}
+          <Link to="https://worldalliance.org/actions/52" className="text-link">
+            help members adjust their privacy settings
+          </Link>{" "}
+          into an opportunity to recruit new members (by running a follow-up
+          experiment that members sent to their friends and family) and launch a
+          media campaign (by sending the experiment’s results to the media).
+        </p>
+
+        <p>
+          As an example, this was our basic plan for{" "}
+          <Link to="https://worldalliance.org/actions/75" className="text-link">
+            “Help inform public comments on U.S. federal AI policy”
+          </Link>
+          :
+        </p>
+        <ol className="list-decimal list-inside space-y-2 pl-4">
+          <li>Office picks relevant federal dockets.</li>
+          <li>
+            Office emails relevant experts for opinions and sample questions for
+            each docket.
+          </li>
+          <li>
+            Office writes context to docket (background info, summary, and
+            expert opinions) and comes up with relevant, member-friendly
+            questions.
+          </li>
+          <li>Members read context and answer questions.</li>
+          <li>
+            Office writes and integrates member responses into docket comments.
+          </li>
+          <li>Office submits docket comments.</li>
+          <li>Office watches for and analyzes docket results.</li>
+          <li>Office reports back to members on docket results.</li>
+        </ol>
+
+        <h2 id="preparation" className="mt-2 text-2xl font-semibold text-black">
+          Preparation
+        </h2>
+        <p>
+          After we are satisfied with a plan, we execute any steps that are
+          necessary before members can take action. For instance, these
+          sometimes require outreach, research, and small tests.
+        </p>
+
+        <h2
+          id="task-production"
+          className="mt-2 text-2xl font-semibold text-black"
+        >
+          Task production
+        </h2>
+        <p>
+          Eventually, we are ready to help members complete their part of an
+          action. We pay special attention to the experience that members will
+          have when they complete the task.
+        </p>
+
+        <p>
+          We want every member to have an experience that is as simple and
+          straightforward as possible. This includes:
+        </p>
+        <ul className="list-disc list-inside pl-4 space-y-2">
+          <li>
+            Writing clean copy, ordering information logically, and providing
+            straightforward instructions
+          </li>
+          <li>
+            Developing software for task-specific features. For instance, we
+            developed a{" "}
+            <Link
+              to="https://worldalliance.org/flyerexport"
+              className="text-link"
+            >
+              flyer generator
+            </Link>{" "}
+            for{" "}
+            <Link
+              to="https://worldalliance.org/actions/56"
+              className="text-link"
+            >
+              “Invite friends and family to fill out our AI privacy survey”
+            </Link>{" "}
+            so that members could easily share our survey and track which
+            respondents they brought in.
+          </li>
+          <li>
+            Accounting for members’ habits. For instance, when designing a
+            pothole-reporting action, we kept in mind that many members complete
+            tasks at the last minute. We separated the action into a{" "}
+            <Link
+              to="https://worldalliance.org/actions/48"
+              className="text-link"
+            >
+              planning task
+            </Link>{" "}
+            and a{" "}
+            <Link
+              to="https://worldalliance.org/actions/50"
+              className="text-link"
+            >
+              reporting task
+            </Link>{" "}
+            so that members would not realize they needed to go outside the
+            night of the deadline.
+          </li>
+          <li>
+            Accommodating different categories of members. For instance, in{" "}
+            <Link
+              to="https://worldalliance.org/actions/70"
+              className="text-link"
+            >
+              “Collect unclaimed property for a potential future donation,”
+            </Link>{" "}
+            we provided additional information to members who are not U.S.
+            citizens. As another example, we made drop-off optional in{" "}
+            <Link
+              to="https://worldalliance.org/actions/60"
+              className="text-link"
+            >
+              “Collect e-waste for proper disposal”
+            </Link>{" "}
+            for members who lived far away from an e-waste disposal site.
+          </li>
+        </ul>
+
+        <p>
+          After we have a draft of a task, we test it. We repeatedly complete
+          the task ourselves to identify ambiguous instructions, clunky text,
+          and other issues. We also solicit feedback from random members.
+        </p>
+
+        <h2 id="launch" className="mt-2 text-2xl font-semibold text-black">
+          Launch
+        </h2>
+        <p>
+          After launching a task to members, we monitor the first few hours of
+          member completions and fix any problems members encounter. For
+          instance, our initial wording in the task for{" "}
+          <Link to="https://worldalliance.org/actions/49" className="text-link">
+            “Approve proposals for how to spend $1,000”
+          </Link>{" "}
+          confused the first few members who completed it, so we revised it and
+          and followed up with those members to ask if the changes affected
+          their responses.
+        </p>
+        <p>
+          We continue to monitor the task throughout the week, taking care of
+          bugs, special cases, and other problems that arise. We also track the
+          task&apos;s completion rate over time to ensure that we are on track
+          to succeed.
+        </p>
+
+        <h2 id="follow-up" className="mt-2 text-2xl font-semibold text-black">
+          {" "}
+          Follow-up{" "}
+        </h2>
+
+        <p>
+          Once members have completed their part of an action, we ensure that
+          all remaining steps are executed by ourselves or by other parties. For
+          instance, after members completed the task for{" "}
+          <Link to="https://worldalliance.org/actions/14" className="text-link">
+            “Sign a letter requesting news coverage of a bring-your-own-cup cafe
+            coalition,”
+          </Link>{" "}
+          we sent journalists information about the initiative so that we would
+          fulfill our promise to the involved cafés. We continued sending emails
+          to journalists until one of them covered the story.
+        </p>
+
+        <p>We send out updates to members as the action progresses.</p>
+
+        <p>
+          For now, members usually only participate in one step of an action. In
+          the future, we imagine that more complex actions will require members
+          and the office to take multiple, alternating steps.
+        </p>
+      </section>
+
+      <section className="gap-y-4 flex flex-col">
+        <h1
+          id="submit-action-idea"
+          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
+        >
+          Submit an action idea
+        </h1>
+        <p>
+          If you have an idea for an action, or information that might help us
+          develop an action, please email the office at{" "}
+          <Link to="mailto:contact@worldalliance.org" className="text-link">
+            contact@worldalliance.org
+          </Link>{" "}
+          or message a{" "}
+          <Link to={"/members?filter=Staff"} className="text-link">
+            staff member
+          </Link>
+          .
+        </p>
+      </section>
+    </InfoSubpage>
+  );
+};
+
+export default TerminologyPage;

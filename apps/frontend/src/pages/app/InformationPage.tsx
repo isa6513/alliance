@@ -47,11 +47,11 @@ const InformationPage: React.FC = () => {
         "The Alliance is organized into groups that help members hold each other accountable.",
       href: href("/groups-guide"),
     },
-    // {
-    //   title: "How actions are designed",
-    //   description: "How we design actions.",
-    //   href: href("/"),
-    // },
+    {
+      title: "How to design actions",
+      description: "A basic guide that the office uses to design actions.",
+      href: href("/action-design"),
+    },
     {
       title: "Action updates",
       description: "Progress updates on our actions.",

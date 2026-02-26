@@ -51,11 +51,13 @@ export default [
       route("/tasks", "pages/app/HomePage.tsx"),
       route("/groups", "pages/app/CommunityRoute.tsx"),
 
+      // Info pages
       route("/groups-guide", "pages/app/GroupsGuidePage.tsx"),
       route("/priorities", "pages/app/PrioritiesPage.tsx"),
       route("/internal-governance", "pages/app/GovernancePage.tsx"),
       route("/roadmap", "pages/app/RoadmapPage.tsx"),
       route("/terminology", "pages/app/TerminologyPage.tsx"),
+      route("/action-design", "pages/app/ActionDesignPage.tsx"),
 
       route("/invites", "pages/app/InvitesPage.tsx"),
       route("/notifications", "pages/app/NotificationsPage.tsx"),
