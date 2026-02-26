@@ -5,18 +5,11 @@ export const defaultAnnouncementEmailSubject =
 
 export const defaultAnnouncementEmailContents = `Hi #{firstname},
 
-#{n} new Alliance task#{s} #{is|are} ready for you to complete:
+#{n} new Alliance task#{s} #{is|are} ready for you to complete:#{ |\\n\\n}#{formattedtasklist}
 
-1. ACTION1
-2. ACTION2
-3. ...
+Please complete within #{days} at this link: #{link}`;
 
-Please complete the task#{s} at this link: #{link}`;
-
-export const defaultAnnouncementTextMessage = `#{n} new Alliance task#{s} need#{s|} completion within #{days} (#{link}):
-      1. ACTION1
-      2. ACTION2
-      3. ...`;
+export const defaultAnnouncementTextMessage = `New Alliance task#{s}: #{tasknames}. Complete within #{days} (#{link})`;
 
 export const defaultAnnouncementPushMessage = `#{n} new Alliance task#{s} need#{s|} completion within #{days}`;
 
@@ -56,8 +49,7 @@ export const defaultMissedDeadlineTextMessage = `You failed to complete the curr
 
 // group leads reminder
 
-export const defaultGroupLeadsEmailSubject =
-`#{nmembers} of your Alliance group members have not yet completed their upcoming task`;
+export const defaultGroupLeadsEmailSubject = `#{nmembers} of your Alliance group members have not yet completed their upcoming task`;
 
 export const defaultGroupLeadsEmailContents = `Hi #{firstname},
 

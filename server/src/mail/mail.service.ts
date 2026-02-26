@@ -73,7 +73,15 @@ export function processKeywordReplacements(
         ? getTimeLeftString(context.deadlineEvent, dateNow)
         : '[err]',
     )
-    .replaceAll('#{link}', withCid(tasksUrl(true), context.cid));
+    .replaceAll('#{link}', withCid(tasksUrl(true), context.cid))
+    .replaceAll(
+      '#{formattedtasklist}',
+      context.uncompletedTasksCount === 1
+        ? context.uncompletedTasksNames.join(', ')
+        : context.uncompletedTasksNames
+            .map((name, index) => `${index + 1}. ${name}`)
+            .join('\n'),
+    );
 
   while (str.includes('|') && str.includes('#{') && str.includes('}')) {
     const idx_start = str.indexOf('#{');
