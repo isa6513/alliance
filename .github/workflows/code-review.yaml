@@ -378,7 +378,7 @@ jobs:
             Output: <\${CURSOR_FILE_PREFIX}/apps/frontend/src/pages/app/HomePage.tsx:32|HomePage.tsx:32>
           - The file-label should usually be \"HomePage.tsx:32\" or similar.
           - If there is no line number, link the file without a :line suffix in the URL and label.
-          - Do not output line ranges like \`1-3\`, only use single line numbers.
+          - Do not output line ranges like \`1-3\`, only use one single line number for the start of the range.
           - Do NOT change the wording of bullets except wrapping the file references in links.
           - Preserve the overall structure and any trailing token like [NEEDS_ATTENTION] exactly if present.
           - Include the text of the review as well as links to files in the output."

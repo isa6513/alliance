@@ -207,7 +207,6 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     <>
       <div className={`flex mb-3 ${className}`}>
         <span
-          color={ButtonColor.Transparent}
           className={`${baseClasses} ${
             activeTab === "friends" ? activeClasses : inactiveClasses
           }`}
@@ -217,7 +216,6 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
         </span>
         {isMe && (
           <span
-            color={ButtonColor.Transparent}
             className={`${baseClasses} ${
               activeTab === "received" ? activeClasses : inactiveClasses
             }`}
@@ -228,7 +226,6 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
         )}
         {isMe && (
           <span
-            color={ButtonColor.Transparent}
             className={`${baseClasses} ${
               activeTab === "sent" ? activeClasses : inactiveClasses
             }`}
