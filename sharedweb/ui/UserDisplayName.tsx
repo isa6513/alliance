@@ -25,7 +25,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
         {children}
       </span>
       {staff && (
-        <HoverBadge title="Alliance staff">
+        <HoverBadge title="Office member">
           <Earth
             size={16}
             className="ml-1 text-green inline -mt-px"

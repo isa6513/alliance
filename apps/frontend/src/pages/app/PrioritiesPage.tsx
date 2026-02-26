@@ -5,7 +5,7 @@ import { Link, href } from "react-router";
 import groupPillsExample from "../../assets/group-pills-example.png";
 import InfoSubpage from "../../components/InfoSubpage";
 
-const GroupsGuidePage: React.FC = () => {
+const PrioritiesPage: React.FC = () => {
   useWhiteBackground();
 
   const tocSections = [
@@ -275,4 +275,4 @@ const GroupsGuidePage: React.FC = () => {
   );
 };
 
-export default GroupsGuidePage;
+export default PrioritiesPage;

@@ -1,166 +1,115 @@
 import React from "react";
-import { href, Link } from "react-router";
-import { useActionUpdates } from "@alliance/shared/lib/informationPage";
+import { href } from "react-router";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
-import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
+import InfoResourceCard from "../../components/InfoResourceCard";
 import { isFeatureEnabled } from "../../lib/config";
 import { Features } from "@alliance/shared/lib/features";
 
 const InformationPage: React.FC = () => {
   useWhiteBackground();
 
-  const { updates, error } = useActionUpdates();
-
-  const publicResources = [
+  const contacts = [
     {
-      href: href("/guide"),
-      title: "Guide to the Alliance",
+      title: "Email",
+      description: "Email the office with questions, feedback, or ideas.",
+      href: "mailto:contact@worldalliance.org",
     },
     {
-      href: href("/foundation"),
-      title: "Foundation",
-    },
-    {
-      href: href("/governance"),
-      title: "Governance",
-    },
-    {
-      href: href("/faq"),
-      title: "FAQ",
+      title: "Schedule a visit",
+      description:
+        "Schedule a visit to the Alliance's physical office in San Francisco, CA, USA.",
+      href: "mailto:hello@worldalliance.org?subject=Request to visit the office&body=I would like to schedule a visit to the Alliance's physical office on [DATE] at [TIME].",
     },
   ];
 
-  const memberResources = [
+  const resources = [
     {
-      href: href("/members"),
+      title: "What is the Alliance?",
+      description:
+        "The Alliance is a global group of individuals cooperating to improve the world.",
+      href: href("/guide"),
+    },
+    {
       title: "Member directory",
+      description: "A list of all members of the Alliance.",
+      href: href("/members"),
     },
     {
+      title: "Roadmap",
+      description:
+        "The Alliance is in an experimental phase and building up to a public launch.",
+      href: href("/roadmap"),
+    },
+    {
+      title: "How groups work",
+      description:
+        "The Alliance is organized into groups that help members hold each other accountable.",
       href: href("/groups-guide"),
-      title: "About groups",
+    },
+    // {
+    //   title: "How actions are designed",
+    //   description: "How we design actions.",
+    //   href: href("/"),
+    // },
+    {
+      title: "Action updates",
+      description: "Progress updates on our actions.",
+      href: href("/action-updates"),
+    },
+    ...(isFeatureEnabled(Features.GeneralUpdatesLink)
+      ? [
+          {
+            title: "General updates",
+            description:
+              "Updates about the Alliance's progress as an organization.",
+            href: href("/general-updates"),
+          },
+        ]
+      : []),
+    // {
+    //   title: "Priorities",
+    //   description: "Our current priorities.",
+    //   href: href("/priorities"),
+    // },
+    {
+      title: "Governance",
+      description:
+        "The office plans actions, and members participate in a simple oversight process.",
+      href: href("/internal-governance"),
     },
     {
-      title: "Email the office",
-      href: "mailto:contact@worldalliance.org",
+      title: "Terminology",
+      description: "Some terms used in the Alliance.",
+      href: href("/terminology"),
     },
   ];
 
   return (
     <CenterLayout>
-      <div className="gap-y-4 flex flex-col text-base md:text-lg">
-        <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
+      <div className="gap-y-12 flex flex-col text-base md:text-lg">
+        <p className="font-serif text-3xl md:text-4xl font-semibold">
           Information
         </p>
 
-        <h2 className="text-2xl font-semibold">Resources</h2>
+        <div className="flex flex-col gap-y-6">
+          <h2 className="text-2xl font-semibold">Contact the office</h2>
 
-        <div className="flex flex-col gap-y-2">
-          <p className="text-zinc-500">Public resources</p>
-          <div className="grid grid-cols-2 gap-x-2 gap-y-1 grid-flow-row">
-            {publicResources.map((resource) => (
-              <div key={resource.href}>
-                <Link to={resource.href} className="text-link">
-                  {resource.title}
-                </Link>
-              </div>
+          <div className="grid grid-cols-1 gap-6 grid-flow-row">
+            {contacts.map((contact) => (
+              <InfoResourceCard key={contact.href} {...contact} />
             ))}
           </div>
         </div>
 
-        <div className="flex flex-col gap-y-2">
-          <p className="text-zinc-500">Member resources</p>
-          <div className="grid grid-cols-2 gap-x-2 gap-y-1 grid-flow-row">
-            {memberResources.map((resource) => (
-              <div key={resource.href}>
-                <Link to={resource.href} className="text-link">
-                  {resource.title}
-                </Link>
-              </div>
+        <div className="flex flex-col gap-y-6">
+          <h2 className="text-2xl font-semibold">Resources</h2>
+
+          <div className="grid grid-cols-1 gap-6 grid-flow-row">
+            {resources.map((resource) => (
+              <InfoResourceCard key={resource.href} {...resource} />
             ))}
           </div>
-        </div>
-
-        <div className="flex flex-col mt-4">
-          <h2 className="text-2xl font-semibold">Roadmap</h2>
-          <p className="text-zinc-500">Last updated 2/11/2026</p>
-        </div>
-        <div className="flex flex-col gap-y-2">
-          <p>
-            We are in an experimental, invite-only phase. We are working up to a
-            public launch in which we will allow anyone to join the Alliance. In
-            general, this preparation entails:
-          </p>
-
-          <ul className="list-disc list-inside">
-            <li>
-              <span className="font-semibold">
-                Ensuring that our action production process is smooth and
-                reliable.
-              </span>{" "}
-              This includes understanding what makes actions effective and,
-              eventually, hiring experts in fields relevant to our priorities.
-            </li>
-            <li>
-              <span className="font-semibold">
-                Building organizational structures and processes that help
-                members contribute reliably and straightforwardly.
-              </span>{" "}
-              This includes designing Alliance groups and determining our
-              governance procedures.
-            </li>
-            <li>
-              <span className="font-semibold">
-                Developing a functional and accessible online platform.
-              </span>{" "}
-              This includes improving our platform based on early members&apos;
-              feedback and testing it with a wider, more global audience.
-            </li>
-          </ul>
-        </div>
-        <div className="flex flex-col mt-4">
-          <p>Right now, the office is:</p>
-          <ul className="list-disc list-inside">
-            <li>
-              Developing processes so that group leads can help and communicate
-              with other group leads.
-            </li>
-            <li>Developing a mobile app.</li>
-            <li>Reorganizing our information and action pages.</li>
-            <li>
-              Planning videos and textual updates that help members better
-              understand the Alliance.
-            </li>
-            <li>Hiring.</li>
-          </ul>
-        </div>
-
-        {isFeatureEnabled(Features.GeneralUpdatesLink) && (
-          <div className="flex flex-col gap-y-2 mt-4">
-            <h2 className="text-2xl font-semibold">General updates</h2>
-            <p className="text-zinc-500">
-              <Link to={href("/general-updates")} className="text-link">
-                View all general updates
-              </Link>
-            </p>
-          </div>
-        )}
-
-        <h2 className="text-2xl font-semibold mt-4">Action updates</h2>
-
-        <div className="flex flex-col gap-y-4 text-base">
-          {updates
-            .sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-            )
-            .map((update) => (
-              <ActionUpdateCard
-                key={update.id}
-                update={update}
-                onActionPageTimeline={false}
-              />
-            ))}
-          {error && <p className="text-zinc-500">{error}</p>}
         </div>
       </div>
     </CenterLayout>

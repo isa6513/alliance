@@ -50,7 +50,13 @@ export default [
 
       route("/tasks", "pages/app/HomePage.tsx"),
       route("/groups", "pages/app/CommunityRoute.tsx"),
+
       route("/groups-guide", "pages/app/GroupsGuidePage.tsx"),
+      route("/priorities", "pages/app/PrioritiesPage.tsx"),
+      route("/internal-governance", "pages/app/GovernancePage.tsx"),
+      route("/roadmap", "pages/app/RoadmapPage.tsx"),
+      route("/terminology", "pages/app/TerminologyPage.tsx"),
+
       route("/invites", "pages/app/InvitesPage.tsx"),
       route("/notifications", "pages/app/NotificationsPage.tsx"),
       route("/search", "pages/app/SearchPage.tsx"),
@@ -59,6 +65,7 @@ export default [
       route("/commit", "pages/app/CommitActionPage.tsx"),
       route("/information", "pages/app/InformationPage.tsx"),
       route("/general-updates", "pages/app/GeneralUpdatesPage.tsx"),
+      route("/action-updates", "pages/app/ActionUpdatesPage.tsx"),
       route("/members", "pages/app/MembersListPage.tsx"),
 
       route("/flyerexport", "pages/app/FlyerExportPage.tsx"),

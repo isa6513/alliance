@@ -1,5 +1,4 @@
 import React from "react";
-import ExampleActionCategoryCard from "../../components/ExampleActionCategoryCard";
 import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
 import MemberContract from "../../components/MemberContract";
@@ -8,6 +7,7 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { href } from "react-router";
 import ResourceButton from "../../components/ResourceButton";
 import ExampleActionCardList from "../../components/ExampleActionCardList";
+import ExampleActionCategoryList from "../../components/ExampleActionCategoryList";
 
 const GuidePage: React.FC = () => {
   return (
@@ -28,12 +28,12 @@ const GuidePage: React.FC = () => {
               </li>
               <li className="ml-4">
                 <a href="#structure" className="">
-                  Responsibilities
+                  Structure
                 </a>
               </li>
               <li className="ml-4">
                 <a href="#structure-3" className="">
-                  Coordination
+                  Roadmap
                 </a>
               </li>
               <li>
@@ -41,12 +41,12 @@ const GuidePage: React.FC = () => {
               </li>
               <li className="ml-4">
                 <a href="#decisions" className="">
-                  The office plans actions
+                  Action planning
                 </a>
               </li>
               <li className="ml-4">
                 <a href="#decisions-2" className="">
-                  Members oversee the office
+                  Oversight
                 </a>
               </li>
               <li>
@@ -113,12 +113,18 @@ Our immediate goal is to end global crises that harm or will harm billions of cu
 
 # How we work
 
-## Responsibilities
+## Structure
 
-The Alliance is composed of a body of members and a full-time strategic office.
+The Alliance is composed of a general body of members and a full-time office of members.
+1. The office plans actions that advance Alliance priorities.
+2. Members reliably complete these actions on our online platform.
 
-1. The responsibility of the office is to develop plans, and corresponding tasks, that effectively advance Alliance priorities.
-2. The responsibility of members is to reliably complete tasks assigned on our online platform.
+Our strategy depends on members' reliability. With high and predictable levels of participation, we can make precise and effective action plans. For example:
+- We can plan experiments with statistical significance.
+- We can make agreements with external parties, such as businesses, who know exactly what we can offer them or what pressure we can bring to bear.
+- We can coordinate lifestyle changes only when there are enough members to have a sufficiently large impact.
+
+As a result, we restrict membership to those who sign and abide by our membership contract.
 
 "
               />
@@ -134,10 +140,7 @@ The Alliance is composed of a body of members and a full-time strategic office.
                 id="structure-2"
                 markdownContent="
 
-The foundation of the Alliance is trust.
-
-1. The office trusts members to complete tasks, which allows the office to plan effectively. We maintain this trust with our membership contract, which restricts membership to those that can keep their agreements.
-2. Members trust the office to develop effective plans, which makes their duty as simple as completing their assigned tasks. We maintain this trust with governance processes and with regular communication between members and the office.
+Trust is the foundation of the Alliance. The office trusts members to complete tasks, which allows the office to plan effectively. Conversely, the office strives to be as transparent as possible so that members can trust the office to develop effective plans. If members trust the office, then their duty is as simple as completing their assigned tasks.
 
 "
               />
@@ -146,7 +149,7 @@ The foundation of the Alliance is trust.
                 id="structure-3"
                 markdownContent="
 
-## Coordination
+## Roadmap
 
 Right now, we are taking small-scale actions focused on learning, not direct impact. Here are examples of actions we have taken recently:
 
@@ -163,42 +166,13 @@ Right now, we are taking small-scale actions focused on learning, not direct imp
 
 As the Alliance grows, we plan to bring together experts from diverse fields to make increasingly impactful, long-term plans. Our online platform will enable direct communication between these experts and millions of members to enact rapid, large-scale change.
 
-A few broad categories of actions include:
+It is difficult to know exactly which actions we will take after we launch. However, a few broad categories of actions include:
 
 "
               />
 
-              <div className="grid grid-cols-2 rounded border border-zinc-200 mt-8 w-full max-w-5xl mx-auto">
-                <ExampleActionCategoryCard
-                  title="Pooled funding"
-                  description="We can pool funding for ambitious initiatives, some of which would otherwise depend on governments."
-                  example="For example, we could fund and oversee an independent scientific and industrial coalition to decarbonize the global economy."
-                />
-                <ExampleActionCategoryCard
-                  title="Economic pressure"
-                  description="We can shift our consumption to encourage ethical practices and eliminate harmful practices."
-                  example="For example, we could enforce a transparency standard by asking members to only purchase from companies that meet it."
-                />
-                <ExampleActionCategoryCard
-                  title="Social pressure"
-                  description="We can target messages at decision-makers and direct public attention to important issues."
-                  example="For example, we could run an individualized education campaign to support a multilateral AI governance treaty."
-                />
-                <ExampleActionCategoryCard
-                  title="Central communication"
-                  description="We can establish a base of common knowledge to build agreement over time."
-                  example="For example, we could ask members to spend a small amount of time each week reading the same news."
-                />
-                <ExampleActionCategoryCard
-                  title="Direct action"
-                  description="We can use our own skills and resources to advance our priorities."
-                  example="For example, we could design and participate in the largest citizen science projects in history."
-                />
-                <ExampleActionCategoryCard
-                  title="Collective governance"
-                  description="We can maintain, improve, and govern the Alliance."
-                  example="For example, we could use random member assemblies to deliberate contentious issues."
-                />
+              <div className="mt-8">
+                <ExampleActionCategoryList />
               </div>
             </div>
 
@@ -213,7 +187,7 @@ Members provide input and participate in governance that ensures approval of the
 
 Meanwhile, the office has the freedom to make any plans that advance our high-level priorities and make effective use of members’ time and resources.
 
-## The office plans actions
+## Action planning
 Planning actions is a creative, open-ended process that searches for levers of change which members can pull.
 
 In ideation for and development of an action plan, the office weighs many considerations. For instance:
@@ -228,7 +202,7 @@ In ideation for and development of an action plan, the office weighs many consid
                 id="decisions-2"
                 markdownContent="
 
-## Members oversee the office
+## Oversight
 Our governance guarantees that the majority of members believe the majority of their contributions improve the world.
 
 We conduct a membership-wide oversight process that occurs on a regular basis. In the process, the office asks members what they think about the direction of the Alliance and whether or not they have any major concerns. The office collects and responds to feedback until we reach an approval threshold of 75%.

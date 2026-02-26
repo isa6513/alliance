@@ -11,6 +11,7 @@ import List from "@alliance/sharedweb/ui/List";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { ActionDto } from "@alliance/shared/client";
+import { href, Link } from "react-router";
 
 const ActionsListPage = () => {
   const { data: actions, isPending } = useActionsQuery();
@@ -33,14 +34,22 @@ const ActionsListPage = () => {
 
   return (
     <CenterLayout className="gap-y-4" width="4xl">
-      <div className="flex flex-row justify-start items-center w-full gap-x-4">
-        <p>Filter by:</p>
-        <DropdownSelect
-          options={FilterMode}
-          secondaryLabel={([, mode]) => modeToActions[mode].length.toString()}
-          value={filterMode}
-          onChange={([, mode]) => setFilterMode(mode)}
-        />
+      <div className="flex flex-row justify-between w-full items-center">
+        <div className="flex flex-row justify-start items-center w-full gap-x-4">
+          <p>Filter by:</p>
+          <DropdownSelect
+            options={FilterMode}
+            secondaryLabel={([, mode]) => modeToActions[mode].length.toString()}
+            value={filterMode}
+            onChange={([, mode]) => setFilterMode(mode)}
+          />
+        </div>
+        <Link
+          to={href("/action-updates")}
+          className="text-zinc-800 hover:underline rounded font-medium whitespace-nowrap"
+        >
+          Action updates
+        </Link>
       </div>
 
       <List className="w-full">
