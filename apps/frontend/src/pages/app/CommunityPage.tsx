@@ -668,7 +668,7 @@ const CommunityPage = () => {
                   />
                 </div>
               </div>
-              <div className=" mb-4 border-b border-zinc-200 flex flex-row items-end justify-between">
+              <div className="border-b border-zinc-200 flex flex-row items-end justify-between">
                 <div className="flex flex-row gap-x-2 justify-start">
                   {tabs.map((m) => (
                     <Button

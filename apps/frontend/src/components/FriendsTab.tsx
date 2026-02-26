@@ -38,16 +38,13 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     useQuery({
       queryKey: ["userListFriends", userId],
       queryFn: () =>
-        userListFriends({ path: { id: userId } }).then(
-          (res) => res.data ?? []
-        ),
+        userListFriends({ path: { id: userId } }).then((res) => res.data ?? []),
     });
 
   const { data: receivedRequests = [], isLoading: isLoadingReceived } =
     useQuery({
       queryKey: ["userListReceivedRequests"],
-      queryFn: () =>
-        userListReceivedRequests({}).then((res) => res.data ?? []),
+      queryFn: () => userListReceivedRequests({}).then((res) => res.data ?? []),
     });
 
   const { data: sentRequests = [], isLoading: isLoadingSent } = useQuery({
@@ -202,45 +199,43 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
     return friendsList;
   }
 
+  const baseClasses = "px-4 py-2 text-base! cursor-pointer";
+  const activeClasses = "border-b-2 border-green";
+  const inactiveClasses = "text-black";
+
   return (
     <>
       <div className={`flex mb-3 ${className}`}>
-        <Button
+        <span
           color={ButtonColor.Transparent}
-          className={`px-4 py-2 rounded-none  ${
-            activeTab === "friends"
-              ? "border-b-1 border-black font-semibold"
-              : "text-zinc-500"
+          className={`${baseClasses} ${
+            activeTab === "friends" ? activeClasses : inactiveClasses
           }`}
           onClick={() => setActiveTab("friends")}
         >
           Friends ({friends.length})
-        </Button>
+        </span>
         {isMe && (
-          <Button
+          <span
             color={ButtonColor.Transparent}
-            className={`px-4 py-2 rounded-none ${
-              activeTab === "received"
-                ? "border-b-1 border-black font-semibold"
-                : "text-zinc-500"
+            className={`${baseClasses} ${
+              activeTab === "received" ? activeClasses : inactiveClasses
             }`}
             onClick={() => setActiveTab("received")}
           >
             Received Requests ({receivedRequests.length})
-          </Button>
+          </span>
         )}
         {isMe && (
-          <Button
+          <span
             color={ButtonColor.Transparent}
-            className={`px-4 py-2 rounded-none ${
-              activeTab === "sent"
-                ? "border-b-1 border-black font-semibold"
-                : "text-zinc-500"
+            className={`${baseClasses} ${
+              activeTab === "sent" ? activeClasses : inactiveClasses
             }`}
             onClick={() => setActiveTab("sent")}
           >
             Sent Requests ({sentRequests.length})
-          </Button>
+          </span>
         )}
       </div>
 
@@ -250,7 +245,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
         {activeTab === "received" && isMe && (
           <>
             {receivedRequests.length === 0 ? (
-              <p className="text-center text-zinc-500 py-4 text-sm">
+              <p className="text-center text-zinc-500 py-4">
                 No pending friend requests.
               </p>
             ) : (
@@ -311,7 +306,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                     </div>
                     <Button
                       onClick={() => handleCancelRequest(request.id)}
-                      color={ButtonColor.Stone}
+                      color={ButtonColor.Black}
                       disabled={processingIds[request.id]}
                     >
                       {processingIds[request.id]

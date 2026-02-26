@@ -36,6 +36,14 @@ resource "aws_security_group" "ec2_security_group" {
   }
 
   ingress {
+    description = "desktop access"
+    from_port   = 8443
+    to_port     = 8443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "https access"
     from_port   = 443
     to_port     = 443
