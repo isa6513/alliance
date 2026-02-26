@@ -409,9 +409,7 @@ const StatsPage: React.FC = () => {
       margin.top + margin.bottom + chartActionStats.length * (barHeight + gap);
 
     const maxCompleted = max(chartActionStats, (d) => d.usersCompleted) ?? 0;
-    const maxTotalExpected =
-      max(chartActionStats, (d) => d.usersJoined + (d.usersWithdrawn ?? 0)) ??
-      0;
+    const maxTotalExpected = max(chartActionStats, (d) => d.usersJoined) ?? 0;
     const maxValue = Math.max(maxCompleted, maxTotalExpected, 10);
 
     const xScale = scaleLinear()
