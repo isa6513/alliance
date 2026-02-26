@@ -127,9 +127,12 @@ export class VideosService {
     // Upload new files preserving their original filenames
     await Promise.all(
       files.map(async (file) => {
-        const contentType = file.originalname.endsWith('.m3u8')
-          ? 'application/vnd.apple.mpegurl'
-          : 'video/MP2T';
+        let contentType = 'video/MP2T';
+        if (file.originalname.endsWith('.m3u8')) {
+          contentType = 'application/vnd.apple.mpegurl';
+        } else if (file.originalname.endsWith('.vtt')) {
+          contentType = 'text/vtt';
+        }
 
         await this.s3.send(
           new PutObjectCommand({
