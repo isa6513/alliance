@@ -4,7 +4,17 @@ import {
   UserActionSummaryDto,
 } from "@alliance/shared/client";
 import { formatDateTime } from "@alliance/shared/lib/dateFormatters";
-import { Fragment, JSX, ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  JSX,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+const MIN_MAX_WIDTH = "min-w-4 max-w-18";
 
 export type PillStatusData = {
   pillLabel: string;
@@ -111,7 +121,7 @@ export interface UserProgressPillsProps {
 }
 
 function EmptyPill() {
-  return <div className="relative group flex-1 min-w-4" />;
+  return <div className={`relative group flex-1 ${MIN_MAX_WIDTH}`} />;
 }
 function Pill({
   action,
@@ -127,9 +137,9 @@ function Pill({
   const { pillLabel, pillStyle, pillSubtitleText, pillTextStyle } =
     pillStatusData;
   return (
-    <div key={action.id} className="relative group flex-1 min-w-4">
+    <div key={action.id} className={`relative group flex-1 ${MIN_MAX_WIDTH}`}>
       <div
-        className={`rounded flex items-center justify-center text-xs font-semibold min-w-4 ${pillStyle} ${pillHeight}`}
+        className={`rounded flex items-center justify-center text-xs font-semibold ${MIN_MAX_WIDTH} ${pillStyle} ${pillHeight}`}
         aria-label={`${action.name} – ${pillLabel}`}
       ></div>
       {pillStyle && (
@@ -139,7 +149,9 @@ function Pill({
             <p className="text-zinc-500">
               {action.latestMemberActionDeadline === null
                 ? "No deadline"
-                : `Due ${formatDateTime(new Date(action.latestMemberActionDeadline))}`}
+                : `Due ${formatDateTime(
+                    new Date(action.latestMemberActionDeadline)
+                  )}`}
             </p>
             <p className={pillTextStyle}>
               {pillSubtitleText}
@@ -277,7 +289,7 @@ const UserProgressPills = ({
   }, [pills, maxVisiblePills]);
 
   return (
-    <div ref={containerRef} className="flex gap-1 w-full">
+    <div ref={containerRef} className="flex w-full gap-1 justify-end">
       {visiblePills.map((pill, i) => (
         <Fragment key={i}>{pill}</Fragment>
       ))}
