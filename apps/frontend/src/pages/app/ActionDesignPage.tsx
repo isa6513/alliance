@@ -12,10 +12,10 @@ const TerminologyPage: React.FC = () => {
     { id: "designing-actions", label: "Action design", level: 1 },
     { id: "initial-idea", label: "Initial idea", level: 2 },
     { id: "making-a-plan", label: "Making a plan", level: 2 },
-    { id: "preparation", label: "Preparation", level: 2 },
+    { id: "preparation", label: "Preparatory steps", level: 2 },
     { id: "task-production", label: "Task production", level: 2 },
     { id: "launch", label: "Launch", level: 2 },
-    { id: "follow-up", label: "Follow-up", level: 2 },
+    { id: "follow-up", label: "Follow-up steps", level: 2 },
     { id: "submit-action-idea", label: "Submit an idea", level: 1 },
   ];
 
@@ -35,14 +35,9 @@ const TerminologyPage: React.FC = () => {
           </p>
         </div>
         <p>
-          We put great effort into designing high-quality actions. The purpose
-          of actions is to use the time and skills of members and the office to
-          advance the goals of the Alliance.
-        </p>
-
-        <p>
-          Running regular actions helps us refine our internal action production
-          process, which we believe must be robust by the time we{" "}
+          We work hard to design high-quality actions. Running regular actions
+          helps us refine our internal action production process, which we
+          believe must be robust and streamlined by the time we{" "}
           <Link to={href("/roadmap")} className="text-link hover:underline">
             launch publicly.
           </Link>
@@ -50,7 +45,7 @@ const TerminologyPage: React.FC = () => {
 
         <p>
           To make the most of our time and members’ time in this early stage, we
-          mostly want to run actions that either:
+          mostly run actions that either:
         </p>
         <ul className="list-disc list-inside pl-4 space-y-2">
           <li>
@@ -175,8 +170,9 @@ const TerminologyPage: React.FC = () => {
 
         <p>
           We often develop action plans around initial “seed” ideas, which are
-          simple observations that could be leveraged by the Alliance. These
-          initial ideas may come from previous knowledge or random inspiration.
+          simple observations that we think could be leveraged by the Alliance.
+          These initial ideas may come from research, previous knowledge, or
+          random inspiration.
         </p>
 
         <p>For example:</p>
@@ -189,7 +185,7 @@ const TerminologyPage: React.FC = () => {
             >
               “Help inform public comments on U.S. federal AI policy”
             </Link>{" "}
-            was that federal dockets were typically unused by regular citizens.
+            was that federal dockets are typically unused by regular citizens.
           </li>
           <li>
             The initial idea behind{" "}
@@ -200,8 +196,8 @@ const TerminologyPage: React.FC = () => {
               “Participate in an experiment to measure awareness of AI data use
               practices”
             </Link>{" "}
-            was that many users of AI services likely wanted more privacy than
-            their default settings provided.
+            was that many users of AI services likely want more privacy than
+            default settings provide.
           </li>
           <li>
             The initial idea behind{" "}
@@ -225,7 +221,8 @@ const TerminologyPage: React.FC = () => {
 
         <p>
           Once we are sufficiently interested in an initial idea, we make a plan
-          that outlines the basic steps that each party needs to take.
+          that outlines the basic steps that each party needs to take so that
+          the action will achieve concrete results.
         </p>
 
         <p>
@@ -236,8 +233,7 @@ const TerminologyPage: React.FC = () => {
         <ul className="list-disc list-inside pl-4 space-y-2">
           <li>What we believe members and the office are capable of.</li>
           <li>How long we expect different segments of the action to take.</li>
-          <li>What fallbacks might exist if something goes wrong.</li>
-          <li>What the desired results of the action are.</li>
+          <li>What fallbacks exist if something goes wrong.</li>
         </ul>
 
         <p>
@@ -281,7 +277,7 @@ const TerminologyPage: React.FC = () => {
         </ol>
 
         <h2 id="preparation" className="mt-2 text-2xl font-semibold text-black">
-          Preparation
+          Preparatory steps
         </h2>
         <p>
           After we are satisfied with a plan, we execute any steps that are
@@ -379,7 +375,7 @@ const TerminologyPage: React.FC = () => {
           Launch
         </h2>
         <p>
-          After launching a task to members, we monitor the first few hours of
+          After we launch a task to members, we monitor the first few hours of
           member completions and fix any problems members encounter. For
           instance, our initial wording in the task for{" "}
           <Link to="https://worldalliance.org/actions/49" className="text-link">
@@ -397,8 +393,7 @@ const TerminologyPage: React.FC = () => {
         </p>
 
         <h2 id="follow-up" className="mt-2 text-2xl font-semibold text-black">
-          {" "}
-          Follow-up{" "}
+          Follow-up steps
         </h2>
 
         <p>
