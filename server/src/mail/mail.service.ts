@@ -9,6 +9,14 @@ import { getTimeLeftString } from 'src/notifs/textnotifcontents';
 import { User } from 'src/user/entities/user.entity';
 import { Action } from 'src/actions/entities/action.entity';
 
+function interpretEscapes(s: string): string {
+  return s
+    .replace(/\\\\/g, '\\')
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
+    .replace(/\\t/g, '\t');
+}
+
 export function processKeywordReplacements(
   text: string,
   context: {
@@ -71,8 +79,10 @@ export function processKeywordReplacements(
     const idx_start = str.indexOf('#{');
     const idx_separator = str.indexOf('|', idx_start);
     const idx_end = str.indexOf('}', idx_separator);
-    const st_one = str.substring(idx_start + 2, idx_separator);
-    const st_many = str.substring(idx_separator + 1, idx_end);
+    const st_one = interpretEscapes(
+      str.substring(idx_start + 2, idx_separator),
+    );
+    const st_many = interpretEscapes(str.substring(idx_separator + 1, idx_end));
     if (context.uncompletedTasksCount === 1) {
       str = str.substring(0, idx_start) + st_one + str.substring(idx_end + 1);
     } else {
