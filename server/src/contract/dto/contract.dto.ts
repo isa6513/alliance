@@ -1,6 +1,7 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Contract } from '../entities/contract.entity';
+import { ContractField } from 'src/tasks/schema';
 
 export class ContractDto extends PickType(Contract, ['id', 'markdown']) {
   constructor(contract: Contract) {
@@ -52,3 +53,7 @@ export class UpdateContractDto extends PickType(Contract, [
   'startDate',
   'endDate',
 ]) {}
+
+export type ContractFieldDto = ContractField & {
+  contract: ContractDto;
+};

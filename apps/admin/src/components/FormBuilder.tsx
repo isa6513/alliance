@@ -48,6 +48,7 @@ import {
   EditableTimeField,
   EditableTimezoneField,
   EditableCityField,
+  EditableContractField,
   EditableTextField,
   EditableTextareaField,
   EditableCustomComponentField,
@@ -65,6 +66,70 @@ import {
   CustomValidatorDraftsContext,
   isDraftValidatorId,
 } from "./form-fields/customValidatorDrafts";
+
+const FIELD_NAMES = {
+  textarea: "Text Area Field",
+  email: "Email Field",
+  phone: "Phone Field",
+  number: "Number Field",
+  range: "Range Field",
+  checkbox: "Checkbox Field",
+  radio: "Radio Field",
+  select: "Select Field",
+  multiselect: "Multi-select Field",
+  date: "Date Field",
+  time: "Time Field",
+  timezone: "Timezone Field",
+  city: "City Field",
+  file: "File Field",
+  contract: "Contract Field",
+  custom: "Custom Component Field",
+} as const satisfies Record<Exclude<FieldKind, "text">, string>;
+
+const BLOCK_NAMES = {
+  header: "Header Block",
+  "text-block": "Text Block",
+  label: "Label Block",
+  divider: "Divider Block",
+  spacer: "Spacer Block",
+  html: "HTML Block",
+  image: "Image Block",
+  video: "Video Block",
+  quote: "Quote Block",
+  biglink: "Big Link Block",
+} as const satisfies Record<
+  Exclude<DisplayKind, "text"> | "text-block",
+  string
+>;
+
+type AvailableElement =
+  | {
+      [K in keyof typeof FIELD_NAMES]: {
+        id: K;
+        name: (typeof FIELD_NAMES)[K];
+        type: "field";
+      };
+    }[keyof typeof FIELD_NAMES]
+  | {
+      [K in keyof typeof BLOCK_NAMES]: {
+        id: K;
+        name: (typeof BLOCK_NAMES)[K];
+        type: "block";
+      };
+    }[keyof typeof BLOCK_NAMES];
+
+const AVAILABLE_ELEMENTS = [
+  ...Object.entries(FIELD_NAMES).map(([id, name]) => ({
+    id,
+    name,
+    type: "field",
+  })),
+  ...Object.entries(BLOCK_NAMES).map(([id, name]) => ({
+    id,
+    name,
+    type: "block",
+  })),
+] as AvailableElement[];
 
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => Promise<void>;
@@ -309,9 +374,9 @@ export function FormBuilder({
     null
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<
-    Array<{ id: string; name: string; type: "field" | "block" }>
-  >([]);
+  const [searchResults, setSearchResults] = useState<Array<AvailableElement>>(
+    []
+  );
   const [customValidatorDrafts, setCustomValidatorDrafts] = useState<
     Record<number, CustomValidatorDraft>
   >({});
@@ -417,56 +482,20 @@ export function FormBuilder({
     });
   }, [customValidatorDrafts, schema]);
 
-  // Available elements for search
-  const availableElements = useMemo(
-    () => [
-      { id: "textarea", name: "Text Area Field", type: "field" as const },
-      { id: "email", name: "Email Field", type: "field" as const },
-      { id: "phone", name: "Phone Field", type: "field" as const },
-      { id: "number", name: "Number Field", type: "field" as const },
-      { id: "range", name: "Range Field", type: "field" as const },
-      { id: "checkbox", name: "Checkbox Field", type: "field" as const },
-      { id: "radio", name: "Radio Field", type: "field" as const },
-      { id: "select", name: "Select Field", type: "field" as const },
-      { id: "multiselect", name: "Multi-select Field", type: "field" as const },
-      { id: "date", name: "Date Field", type: "field" as const },
-      { id: "time", name: "Time Field", type: "field" as const },
-      { id: "timezone", name: "Timezone Field", type: "field" as const },
-      { id: "city", name: "City Field", type: "field" as const },
-      { id: "file", name: "File Field", type: "field" as const },
-      {
-        id: "custom",
-        name: "Custom Component Field",
-        type: "field" as const,
-      },
-      { id: "header", name: "Header Block", type: "block" as const },
-      { id: "text-block", name: "Text Block", type: "block" as const },
-      { id: "label", name: "Label Block", type: "block" as const },
-      { id: "divider", name: "Divider Block", type: "block" as const },
-      { id: "spacer", name: "Spacer Block", type: "block" as const },
-      { id: "html", name: "HTML Block", type: "block" as const },
-      { id: "image", name: "Image Block", type: "block" as const },
-      { id: "video", name: "Video Block", type: "block" as const },
-      { id: "quote", name: "Quote Block", type: "block" as const },
-      { id: "biglink", name: "Big Link Block", type: "block" as const },
-    ],
-    []
-  );
-
   // Search functionality
   useEffect(() => {
     if (searchQuery.trim()) {
-      const filtered = availableElements.filter((element) =>
+      const filtered = AVAILABLE_ELEMENTS.filter((element) =>
         element.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setSearchResults(filtered);
     } else {
       setSearchResults([]);
     }
-  }, [searchQuery, availableElements]);
+  }, [searchQuery]);
 
   const handleSearchSelect = (
-    element: (typeof availableElements)[0],
+    element: AvailableElement,
     insertIndex: number
   ) => {
     if (element.type === "field") {
@@ -474,7 +503,7 @@ export function FormBuilder({
     } else {
       // Map text-block back to text for DisplayKind
       const blockKind = element.id === "text-block" ? "text" : element.id;
-      addDisplayBlock(blockKind as DisplayKind, insertIndex);
+      addDisplayBlock(blockKind, insertIndex);
     }
     setActiveSearchIndex(null);
     setSearchQuery("");
@@ -672,6 +701,15 @@ export function FormBuilder({
           required: false,
         };
         break;
+      case "contract":
+        newField = {
+          id: fieldId,
+          kind: "contract",
+          label: "Contract Field",
+          required: false,
+          contractId: null,
+        };
+        break;
       case "custom": {
         const defaultComponent = customComponentRegistry[0];
         newField = {
@@ -684,6 +722,7 @@ export function FormBuilder({
         break;
       }
       default:
+        kind satisfies never;
         return;
     }
 
@@ -1545,6 +1584,13 @@ export function FormBuilder({
                   case "file":
                     return (
                       <EditableFileField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "contract":
+                    return (
+                      <EditableContractField
                         field={formField as any}
                         {...commonProps}
                       />

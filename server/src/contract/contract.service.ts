@@ -1,12 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  IsNull,
-  LessThanOrEqual,
-  MoreThanOrEqual,
-  Or,
-  Repository,
-} from 'typeorm';
+import { IsNull, LessThanOrEqual, MoreThan, Or, Repository } from 'typeorm';
 import { Contract } from './entities/contract.entity';
 import { CreateContractDto, UpdateContractDto } from './dto/contract.dto';
 import {
@@ -56,7 +50,7 @@ export class ContractService {
     return this.contractRepository.findOneOrFail({
       where: {
         startDate: LessThanOrEqual(now),
-        endDate: Or(IsNull(), MoreThanOrEqual(now)),
+        endDate: Or(IsNull(), MoreThan(now)),
       },
       order: {
         startDate: 'DESC',
@@ -76,7 +70,7 @@ export class ContractService {
 
   async signContract(params: {
     userId: number;
-    signedName: string;
+    signedName: string | undefined;
     contractId: number;
   }): Promise<Date> {
     const { userId, signedName, contractId } = params;

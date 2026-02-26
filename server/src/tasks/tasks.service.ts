@@ -58,6 +58,7 @@ import { EventLogService } from 'src/eventlog/eventlog.service';
 import { UpdateProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
 import { EventType } from 'src/eventlog/event-log.entity';
+import { ContractService } from 'src/contract/contract.service';
 
 @Injectable()
 export class TasksService {
@@ -77,6 +78,7 @@ export class TasksService {
     private customValidatorRepository: Repository<CustomValidator>,
     @InjectRepository(ActionShareUrl)
     private actionShareUrlRepository: Repository<ActionShareUrl>,
+    private contractService: ContractService,
     private eventLogService: EventLogService,
     private aiDetectionQueueService: AiDetectionQueueService,
     private aiDetectionQueryService: AiDetectionQueryService,
@@ -92,7 +94,7 @@ export class TasksService {
       throw new NotFoundException('Form not found');
     }
 
-    return this.transformImageUrls(form);
+    return this.transformImageUrls(await this.transformContractFields(form));
   }
 
   async transformImageUrls(form: Form): Promise<Form> {
@@ -104,6 +106,18 @@ export class TasksService {
         }
         if (field.kind === 'video') {
           field.src = getVideoSource(field.src);
+        }
+      }
+    }
+    return form;
+  }
+
+  async transformContractFields(form: Form): Promise<Form> {
+    const pages = form.schema.pages as Page[];
+    for (const page of pages) {
+      for (const field of page.fields) {
+        if (field.kind === 'contract' && field.contractId) {
+          field.contract = await this.contractService.findOne(field.contractId);
         }
       }
     }
@@ -165,14 +179,24 @@ export class TasksService {
               submitFormDto.deviceType,
             )
           ) {
-            if (
-              !submitFormDto.answers[field.id] &&
-              !(
-                (field.kind === 'number' || field.kind === 'range') &&
-                submitFormDto.answers[field.id] === 0
-              )
-            ) {
-              throw new BadRequestException(`Field ${field.label} is required`);
+            if (field.kind === 'contract') {
+              if (submitFormDto.answers[field.id] === undefined) {
+                throw new BadRequestException(
+                  `Field ${field.label} is required`,
+                );
+              }
+            } else {
+              if (
+                !submitFormDto.answers[field.id] &&
+                !(
+                  (field.kind === 'number' || field.kind === 'range') &&
+                  submitFormDto.answers[field.id] === 0
+                )
+              ) {
+                throw new BadRequestException(
+                  `Field ${field.label} is required`,
+                );
+              }
             }
           }
           if (
@@ -205,9 +229,30 @@ export class TasksService {
     updateFormDto: CreateFormDto,
   ): Promise<Form> {
     const form = await this.getForm(formId);
+    if (updateFormDto.schema) {
+      this.stripContractFromSchema(
+        updateFormDto.schema as unknown as FormSchema,
+      );
+    }
     Object.assign(form, updateFormDto);
     const saved = await this.formRepository.save(form);
-    return this.transformImageUrls(saved);
+    return this.transformImageUrls(await this.transformContractFields(saved));
+  }
+
+  private stripContractFromSchema(schema: FormSchema): void {
+    for (const page of schema.pages ?? []) {
+      for (const field of page.fields) {
+        if (
+          typeof field === 'object' &&
+          field !== null &&
+          'kind' in field &&
+          (field as { kind?: string }).kind === 'contract' &&
+          'contract' in field
+        ) {
+          delete (field as { contract?: unknown }).contract;
+        }
+      }
+    }
   }
 
   async submitForm(
@@ -353,6 +398,18 @@ export class TasksService {
       await this.userService.update(user.id, userUpdates);
     }
 
+    const contractIdsSigned = this.getContractIdsSigned(
+      form,
+      submitFormDto.answers,
+    );
+    for (const contractId of contractIdsSigned) {
+      await this.contractService.signContract({
+        userId: user.id,
+        signedName: undefined,
+        contractId,
+      });
+    }
+
     const formResponse = this.formResponseRepository.create({
       ...submitFormDto,
       form,
@@ -478,6 +535,31 @@ export class TasksService {
     }
 
     return null;
+  }
+
+  private getContractIdsSigned(
+    form: Form,
+    answers: Record<string, unknown>,
+  ): number[] {
+    const schema = form.schema as unknown as FormSchema;
+    const ids: number[] = [];
+
+    for (const page of schema.pages ?? []) {
+      if (!page.fields) {
+        continue;
+      }
+      for (const field of page.fields) {
+        if (
+          (field as { kind?: string }).kind === 'contract' &&
+          (field as { contractId?: number }).contractId &&
+          answers[(field as { id: string }).id] === true
+        ) {
+          ids.push((field as { contractId: number }).contractId);
+        }
+      }
+    }
+
+    return ids;
   }
 
   private getCheckboxExtractionValue(

@@ -19,6 +19,7 @@ export type FieldKind =
   | 'timezone'
   | 'file'
   | 'city'
+  | 'contract'
   | 'custom';
 
 type Option<V extends string = string> = { label: string; value: V };
@@ -137,6 +138,13 @@ export type CityField = BaseField<'city'> & {
   debounceMs?: number;
   autoExtractUserData?: boolean;
 };
+export type ContractField = BaseField<'contract'> & {
+  contractId: number | null;
+  contract?: {
+    id: number;
+    markdown: string;
+  };
+};
 // Persist file answers as string URL/key
 export type FileField = BaseField<'file'>;
 export type CustomComponentField = BaseField<'custom'> & {
@@ -161,6 +169,7 @@ export type AnyField =
   | TimezoneField
   | CityField
   | FileField
+  | ContractField
   | CustomComponentField;
 
 export class Page {

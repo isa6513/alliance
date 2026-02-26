@@ -8,42 +8,43 @@ interface ElementSelectProps {
   displayBlocksOnly?: boolean;
 }
 
+const FIELD_TYPES: FieldKind[] = [
+  "textarea",
+  "email",
+  "phone",
+  "number",
+  "range",
+  "checkbox",
+  "radio",
+  "select",
+  "multiselect",
+  "date",
+  "time",
+  "timezone",
+  "city",
+  "file",
+  "contract",
+  "custom",
+] as const;
+
+const BLOCK_TYPES: DisplayKind[] = [
+  "header",
+  "text",
+  "label",
+  "divider",
+  "spacer",
+  "html",
+  "image",
+  "video",
+  "quote",
+  "biglink",
+];
+
 export function ElementSelect({
   onAddField,
   onAddDisplayBlock,
   displayBlocksOnly = false,
 }: ElementSelectProps) {
-  const fieldTypes: FieldKind[] = [
-    "textarea",
-    "email",
-    "phone",
-    "number",
-    "range",
-    "checkbox",
-    "radio",
-    "select",
-    "multiselect",
-    "date",
-    "time",
-    "timezone",
-    "city",
-    "file",
-    "custom",
-  ];
-
-  const blockTypes: DisplayKind[] = [
-    "header",
-    "text",
-    "label",
-    "divider",
-    "spacer",
-    "html",
-    "image",
-    "video",
-    "quote",
-    "biglink",
-  ];
-
   return (
     <div className="w-64 bg-white shadow-sm border-r border-gray-200 flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 pb-6">
@@ -52,7 +53,7 @@ export function ElementSelect({
             <div>
               <h4 className="font-medium mb-2">Input Fields</h4>
               <div className="space-y-2">
-                {fieldTypes.map((type) => (
+                {FIELD_TYPES.map((type) => (
                   <button
                     key={type}
                     onClick={() => onAddField(type)}
@@ -72,7 +73,7 @@ export function ElementSelect({
           <div>
             <h4 className="font-medium mb-2">Display Blocks</h4>
             <div className="space-y-2">
-              {blockTypes.map((type) => (
+              {BLOCK_TYPES.map((type) => (
                 <button
                   key={type}
                   onClick={() => onAddDisplayBlock(type)}

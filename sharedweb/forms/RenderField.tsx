@@ -18,6 +18,10 @@ import TimeZoneSelect from "./TimeZoneSelect";
 import CityAutosuggest from "./CityAutosuggest";
 import ImageLightbox from "../ui/ImageLightbox";
 import TextareaAutosize from "react-textarea-autosize";
+import AppMarkdownWrapper from "../ui/AppMarkdownWrapper";
+import Card from "../ui/Card";
+import { CardStyle } from "@alliance/shared/styles/card";
+import YesNoToggle from "../ui/YesNoToggle";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -755,6 +759,46 @@ export function RenderField({
           {renderValidationMessage()}
 
           {err && <p className=" text-red-600">{err}</p>}
+        </div>
+      );
+    }
+
+    case "contract": {
+      const contract = field.contract;
+      const signedValue = typeof value === "boolean" ? value : undefined;
+      return (
+        <div className="space-y-3">
+          {contract?.markdown ? (
+            <>
+              <div className="prose prose-sm max-w-none text-zinc-800 rounded border border-zinc-200 p-4 bg-white">
+                <AppMarkdownWrapper markdownContent={contract.markdown} />
+              </div>
+              <Card
+                style={CardStyle.White}
+                className="flex flex-row gap-x-4 items-center justify-between"
+              >
+                <p className="font-medium">
+                  Do you agree to the terms of the contract above?
+                  {field.required && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
+                </p>
+                <YesNoToggle
+                  value={signedValue}
+                  onChange={(next) => onChange?.(next)}
+                  disabled={disabled}
+                  yesLabel="Sign"
+                  noLabel="Don't sign"
+                  ariaLabel="Sign the contract"
+                />
+              </Card>
+            </>
+          ) : (
+            <p className="text-sm text-zinc-500 italic">
+              Select a contract in the form builder to preview.
+            </p>
+          )}
+          {renderValidationMessage()}
         </div>
       );
     }

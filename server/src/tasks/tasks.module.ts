@@ -14,6 +14,7 @@ import { CustomValidator } from './entities/customvalidator.entity';
 import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { User } from 'src/user/entities/user.entity';
+import { ContractModule } from 'src/contract/contract.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { User } from 'src/user/entities/user.entity';
     MmsModule,
     EventLogModule,
     AiDetectionModule,
+    ContractModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],
