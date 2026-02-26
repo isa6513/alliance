@@ -19,7 +19,7 @@ const InformationPage: React.FC = () => {
       title: "Schedule a visit",
       description:
         "Schedule a visit to the Alliance's physical office in San Francisco, CA, USA.",
-      href: "mailto:hello@worldalliance.org?subject=Request to visit the office&body=I would like to schedule a visit to the Alliance's physical office on [DATE] at [TIME].",
+      href: "mailto:contact@worldalliance.org?subject=Request to visit the office&body=I would like to schedule a visit to the Alliance's physical office on [DATE] at [TIME].",
     },
   ];
 
@@ -59,13 +59,13 @@ const InformationPage: React.FC = () => {
     },
     ...(isFeatureEnabled(Features.GeneralUpdatesLink)
       ? [
-          {
-            title: "General updates",
-            description:
-              "Updates about the Alliance's progress as an organization.",
-            href: href("/general-updates"),
-          },
-        ]
+        {
+          title: "General updates",
+          description:
+            "Updates about the Alliance's progress as an organization.",
+          href: href("/general-updates"),
+        },
+      ]
       : []),
     // {
     //   title: "Priorities",
