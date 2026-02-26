@@ -1,4 +1,4 @@
-# Alliance yeah
+# Alliance
 
 ## Setup
 
