@@ -11,7 +11,7 @@
     "react-markdown": "*"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@google/genai": "^1.0.0",
     "@playwright/test": "^1.50.0",
     "glob": "^11.0.0",
     "pixelmatch": "^5.3.0",
