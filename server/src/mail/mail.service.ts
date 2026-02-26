@@ -11,10 +11,10 @@ import { Action } from 'src/actions/entities/action.entity';
 
 function interpretEscapes(s: string): string {
   return s
-    .replace(/\\\\/g, '\\')
     .replace(/\\n/g, '\n')
     .replace(/\\r/g, '\r')
-    .replace(/\\t/g, '\t');
+    .replace(/\\t/g, '\t')
+    .replace(/\\\\/g, '\\');
 }
 
 export function processKeywordReplacements(
