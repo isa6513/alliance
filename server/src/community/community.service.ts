@@ -714,12 +714,14 @@ export class CommunityService {
       );
     }
 
-    const invite = this.communityInviteRepository.create({
-      invitedUser,
-      community,
-      invitingUser,
-      status: CommunityInviteStatus.InviteePending,
-    });
+    const invite = await this.communityInviteRepository.save(
+      this.communityInviteRepository.create({
+        invitedUser,
+        community,
+        invitingUser,
+        status: CommunityInviteStatus.InviteePending,
+      }),
+    );
     const notif: CreateNotifParams = {
       user: invitedUser,
       category: NotificationCategory.CommunityInviteCreated,
@@ -731,11 +733,8 @@ export class CommunityService {
       communityInvite: invite,
     };
 
-    const [savedInvite] = await Promise.all([
-      this.communityInviteRepository.save(invite),
-      this.notifsService.sendNotif(notif),
-    ]);
-    return savedInvite;
+    await this.notifsService.sendNotif(notif);
+    return invite;
   }
 
   async deleteCommunityInvite(inviteId: number, userId: number): Promise<void> {
@@ -1004,6 +1003,7 @@ export class CommunityService {
         },
         invitingUser: true,
         community: true,
+        notifs: true,
       },
     });
     if (invite.invitedUser.id !== userId) {
@@ -1062,24 +1062,35 @@ export class CommunityService {
             saveAsPendingCommunity: false,
           }),
         ),
-      this.notifsService.sendNotif({
-        user: invite.invitingUser!,
-        category: NotificationCategory.CommunityInviteAccepted,
-        message: `${invite.invitedUser.name} accepted your invitation to join your group (${community.name})`,
-        webAppLocation: groupUrl({
-          tab: 'members',
-          communityId: community.id,
+      Promise.all(
+        invite.notifs!.map((notif) =>
+          this.notifsService.setRead(notif.id, userId),
+        ),
+      ).then(() =>
+        this.notifsService.sendNotif({
+          user: invite.invitingUser!,
+          category: NotificationCategory.CommunityInviteAccepted,
+          message: `${invite.invitedUser.name} accepted your invitation to join your group (${community.name})`,
+          webAppLocation: groupUrl({
+            tab: 'members',
+            communityId: community.id,
+          }),
+          associatedUsers: [invite.invitedUser],
+          communityInvite: invite,
         }),
-        associatedUsers: [invite.invitedUser],
-        communityInvite: invite,
-      }),
+      ),
     ]);
   }
 
   async rejectCommunityInvite(inviteId: number, userId: number): Promise<void> {
     const invite = await this.communityInviteRepository.findOneOrFail({
       where: { id: inviteId, deletedAt: IsNull() },
-      relations: { invitedUser: true, invitingUser: true, community: true },
+      relations: {
+        invitedUser: true,
+        invitingUser: true,
+        community: true,
+        notifs: true,
+      },
     });
     if (invite.invitedUser.id !== userId) {
       throw new BadRequestException();
@@ -1088,7 +1099,12 @@ export class CommunityService {
       throw new BadRequestException();
     }
     invite.status = CommunityInviteStatus.InviteeRejected;
-    await this.communityInviteRepository.save(invite);
+    await Promise.all([
+      this.communityInviteRepository.save(invite),
+      ...invite.notifs!.map((notif) =>
+        this.notifsService.setRead(notif.id, userId),
+      ),
+    ]);
 
     await this.notifsService.sendNotif({
       user: invite.invitingUser!,
