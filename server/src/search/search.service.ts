@@ -13,6 +13,7 @@ import type { Repository } from 'typeorm';
 import { actionUrl, postUrl, profileUrl } from './approutes';
 import { RecentSearch } from './recentsearch.entity';
 import { SearchItemDto, SearchItemType } from './searchitem.dto';
+import { infoPageSearchItems } from './informationpages';
 
 @Injectable()
 export class SearchService {
@@ -96,7 +97,11 @@ export class SearchService {
       .slice(0, maxItemsPerType)
       .map((post) => this.postToSearchItem(post));
 
-    return [...userItems, ...actionItems, ...postItems];
+    const infoPageItems = infoPageSearchItems
+      .filter((item) => item.name.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, maxItemsPerType);
+
+    return [...userItems, ...actionItems, ...postItems, ...infoPageItems];
   }
 
   userToSearchItem(user: User, friends: boolean, self: boolean): SearchItemDto {
@@ -132,7 +137,10 @@ export class SearchService {
   }
 
   async saveSelected(item: SearchItemDto, userId: number): Promise<void> {
-    if (item.type === SearchItemType.Other) {
+    if (
+      item.type === SearchItemType.Other ||
+      item.type === SearchItemType.Page
+    ) {
       return; //TODO
     }
     const existing = await this.searchRepository.findOne({

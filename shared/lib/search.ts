@@ -10,6 +10,7 @@ export const SEARCH_CATEGORIES: SearchItemType[] = [
   "user",
   "action",
   "post",
+  "page",
   "other",
 ];
 
@@ -18,6 +19,7 @@ export const SEARCH_CATEGORY_NAMES: Record<SearchItemType, string> = {
   action: "Actions",
   post: "Posts",
   recent: "Recent Searches",
+  page: "Pages",
   other: "Other",
 };
 
@@ -29,6 +31,7 @@ export const createEmptySearchCategories = (): Record<
   user: [],
   action: [],
   post: [],
+  page: [],
   other: [],
 });
 
@@ -43,6 +46,7 @@ export const groupSearchItems = (items: SearchItemDto[]) => {
     ...grouped.user,
     ...grouped.action,
     ...grouped.post,
+    ...grouped.page,
     ...grouped.other,
   ];
 
@@ -112,7 +116,7 @@ export const useSearchResults = (
 
           setItems(ordered);
           setItemsByCategory(grouped);
-          setSelectedItem(autoselectFirst ? (ordered[0] ?? null) : null);
+          setSelectedItem(autoselectFirst ? ordered[0] ?? null : null);
         })
         .catch((err) => {
           if (cancelled) return;

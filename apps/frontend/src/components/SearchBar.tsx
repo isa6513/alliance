@@ -1,7 +1,4 @@
-import {
-  SearchItemDto,
-  searchSaveSelected,
-} from "@alliance/shared/client";
+import { SearchItemDto, searchSaveSelected } from "@alliance/shared/client";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
@@ -158,7 +155,9 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
                 {SEARCH_CATEGORY_NAMES[category]}
               </p>
               {itemsByCategory[category]?.map((item) => {
-                const secondaryText = getSearchSecondaryText(item.secondaryData);
+                const secondaryText = getSearchSecondaryText(
+                  item.secondaryData
+                );
                 return (
                   <div
                     key={item.id}
@@ -166,8 +165,9 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
                     ref={(el) => {
                       itemRefs.current[item.id] = el;
                     }}
-                    className={`text-black hover:bg-zinc-50 p-3 rounded-md flex flex-row justify-start cursor-pointer items-center ${selectedItem?.id === item.id ? "bg-zinc-50" : ""
-                      }`}
+                    className={`text-black hover:bg-zinc-50 p-3 rounded-md flex flex-row justify-start cursor-pointer items-center ${
+                      selectedItem?.id === item.id ? "bg-zinc-50" : ""
+                    }`}
                   >
                     {item.type === "user" ? (
                       <ProfileImage

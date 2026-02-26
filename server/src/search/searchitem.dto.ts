@@ -7,6 +7,7 @@ export enum SearchItemType {
   Action = 'action',
   Post = 'post',
   Recent = 'recent',
+  Page = 'page',
   Other = 'other',
 }
 
