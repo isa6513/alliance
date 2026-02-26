@@ -1682,13 +1682,10 @@ const StatsPage: React.FC = () => {
                 <div className="flex justify-between border-t pt-1 mt-1">
                   <span className="text-gray-600">Rate:</span>
                   <span className="font-semibold text-gray-900">
-                    {hoveredActionBar.action.usersJoined +
-                      (hoveredActionBar.action.usersWithdrawn ?? 0) >
-                    0
+                    {hoveredActionBar.action.usersJoined > 0
                       ? `${Math.round(
                           (hoveredActionBar.action.usersCompleted /
-                            (hoveredActionBar.action.usersJoined +
-                              (hoveredActionBar.action.usersWithdrawn ?? 0))) *
+                            hoveredActionBar.action.usersJoined) *
                             100
                         )}%`
                       : "N/A"}
