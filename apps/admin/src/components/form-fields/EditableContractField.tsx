@@ -31,12 +31,16 @@ export function EditableContractField({
   // Default to current contract when none selected (once per field)
   const hasDefaulted = useRef(false);
   useEffect(() => {
-    if (hasDefaulted.current || !currentContract) {
+    if (
+      hasDefaulted.current ||
+      !currentContract ||
+      (field.contractId !== null && field.contractId !== undefined)
+    ) {
       return;
     }
     hasDefaulted.current = true;
     onUpdate({ contractId: currentContract.id });
-  }, [currentContract, onUpdate]);
+  }, [currentContract, field.contractId, onUpdate]);
 
   const contractOptions = useMemo(
     () =>
@@ -73,8 +77,10 @@ export function EditableContractField({
           Contract
         </label>
         <select
-          value={field.contractId}
-          onChange={(e) => onUpdate({ contractId: Number(e.target.value) })}
+          value={field.contractId ?? currentContract?.id ?? ""}
+          onChange={(e) =>
+            onUpdate({ contractId: Number(e.target.value) })
+          }
           className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           {contractOptions.map((opt) => (

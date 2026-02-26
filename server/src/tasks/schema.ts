@@ -139,7 +139,7 @@ export type CityField = BaseField<'city'> & {
   autoExtractUserData?: boolean;
 };
 export type ContractField = BaseField<'contract'> & {
-  contractId: number;
+  contractId: number | null;
   contract?: {
     id: number;
     markdown: string;
