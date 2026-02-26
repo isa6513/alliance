@@ -778,7 +778,7 @@ export function RenderField({
                 className="flex flex-row gap-x-4 items-center justify-between"
               >
                 <p className="font-medium">
-                  Do you agree to the terms of the contract above?
+                  {field.signQuestion.trim()}
                   {field.required && (
                     <span className="text-red-500 ml-1">*</span>
                   )}
@@ -787,9 +787,9 @@ export function RenderField({
                   value={signedValue}
                   onChange={(next) => onChange?.(next)}
                   disabled={disabled}
-                  yesLabel="Sign"
-                  noLabel="Don't sign"
-                  ariaLabel="Sign the contract"
+                  yesLabel={field.yesLabel.trim()}
+                  noLabel={field.noLabel.trim()}
+                  ariaLabel={field.signQuestion.trim()}
                 />
               </Card>
             </>

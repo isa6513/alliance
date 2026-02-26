@@ -56,6 +56,22 @@ export function EditableContractField({
     [contracts, field.contractId]
   );
 
+  // Sync contract markdown into parent state so Preview mode has access to it
+  useEffect(() => {
+    if (!selectedContract) {
+      return;
+    }
+    if (selectedContract.id === field.contract?.id) {
+      return;
+    }
+    onUpdate({
+      contract: {
+        id: selectedContract.id,
+        markdown: selectedContract.markdown,
+      },
+    });
+  }, [selectedContract, field.contract?.id, onUpdate]);
+
   // Merge selected contract onto field so RenderField (existing preview) can show markdown + sign toggle
   const fieldWithContract = useMemo(
     () => (selectedContract ? { ...field, contract: selectedContract } : field),
@@ -78,9 +94,7 @@ export function EditableContractField({
         </label>
         <select
           value={field.contractId ?? currentContract?.id ?? ""}
-          onChange={(e) =>
-            onUpdate({ contractId: Number(e.target.value) })
-          }
+          onChange={(e) => onUpdate({ contractId: Number(e.target.value) })}
           className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           {contractOptions.map((opt) => (
@@ -89,6 +103,46 @@ export function EditableContractField({
             </option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Sign question
+        </label>
+        <input
+          type="text"
+          value={field.signQuestion ?? ""}
+          onChange={(e) => onUpdate({ signQuestion: e.target.value })}
+          placeholder="Sign the contract?"
+          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Yes option label
+          </label>
+          <input
+            type="text"
+            value={field.yesLabel ?? ""}
+            onChange={(e) => onUpdate({ yesLabel: e.target.value })}
+            placeholder="Yes"
+            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            No option label
+          </label>
+          <input
+            type="text"
+            value={field.noLabel ?? ""}
+            onChange={(e) => onUpdate({ noLabel: e.target.value })}
+            placeholder="No"
+            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
       </div>
 
       <RequiredToggle

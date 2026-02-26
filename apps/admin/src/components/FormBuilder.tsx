@@ -708,6 +708,9 @@ export function FormBuilder({
           label: "Contract Field",
           required: false,
           contractId: null,
+          signQuestion: "Sign the contract?",
+          yesLabel: "Yes",
+          noLabel: "No",
         };
         break;
       case "custom": {

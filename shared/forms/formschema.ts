@@ -150,7 +150,10 @@ export type CityField = BaseField<"city"> & {
 };
 export type ContractField = BaseField<"contract"> & {
   contractId: number | null;
-  contract?: { markdown: string };
+  contract?: { id: number; markdown: string };
+  signQuestion: string;
+  yesLabel: string;
+  noLabel: string;
 };
 // Persist file answers as string URL/key
 export type FileField = BaseField<"file">;

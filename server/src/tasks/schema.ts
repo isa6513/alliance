@@ -144,6 +144,9 @@ export type ContractField = BaseField<'contract'> & {
     id: number;
     markdown: string;
   };
+  signQuestion: string;
+  yesLabel: string;
+  noLabel: string;
 };
 // Persist file answers as string URL/key
 export type FileField = BaseField<'file'>;
