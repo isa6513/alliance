@@ -16,9 +16,6 @@ const GuidePage: React.FC = () => {
       <div className="flex flex-col md:flex-row mx-6 md:mx-12 lg:mr-40 gap-8 lg:gap-18 pt-8 md:pt-32 pb-56 justify-center">
         <aside className="min-w-80">
           <div className="md:px-3 flex flex-col md:sticky top-12 md:pr-8 lg:pr-18 md:border-r border-zinc-200">
-            <h2 className="!font-semibold !text-lg md:!text-xl max-w-2xl mb-4">
-              Table of contents
-            </h2>
             <ol className="flex flex-col gap-y-1 *:hover:underline text-zinc-900">
               <li>
                 <a href="#priorities">Priorities</a>

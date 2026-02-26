@@ -4,6 +4,20 @@ import ExampleActionCard from "./ExampleActionCard";
 const ExampleActionCardList: React.FC = () => {
   const exampleActions = [
     {
+      name: "Discuss the repeal of the endangerment finding with current and former U.S. EPA employees",
+      description:
+        "Members discussed the repeal of the EPA's endanderment finding, as well as the current state of the EPA, with current and former EPA employees.",
+      purpose:
+        "Members and government employees had the opportunity to learn from each other directly, rather than through media reports or other indirect channels.",
+    },
+    {
+      name: "Help inform public comments on U.S. federal AI policy",
+      description:
+        "Members were asked questions about personal experiences and beliefs related to three federal dockets on AI policy. After the members took action, the office wrote and posted three official comments summarizing members' answers.",
+      purpose:
+        "Our goal was to help agencies to incorporate citizens' perspectives into a decision-making process that usually only considers experts and industry representatives.",
+    },
+    {
       name: "Participate in an experiment to measure awareness of AI data use practices",
       description:
         "Members were asked about their AI privacy preferences. The office will use the results to plan a follow-up awareness campaign in favor of opt-in, rather than opt-out, data use practices.",
@@ -13,13 +27,6 @@ const ExampleActionCardList: React.FC = () => {
       imgAlt: "A survey flyer that a member displayed in their community",
     },
     {
-      name: "Approve proposals for how to spend $1,000",
-      description:
-        "Members sent in and voted on proposals for how to spend $1,000 provided by a one-time donor. The $1,000 was ultimately split between Cool Earth and GiveDirectly.",
-      purpose:
-        "We tested a process for rapidly reaching agreement in a low-stakes setting. The resulting donations offset a year of CO2 emissions for all participating members and covered about 5 months of expenditure for a household living in extreme poverty.",
-    },
-    {
       name: "Report a pothole in your community",
       description:
         "Members found and reported a pothole to their local government, most of which were repaired within a week.",
@@ -27,13 +34,6 @@ const ExampleActionCardList: React.FC = () => {
         "Members learned about one way that local governments can respond quickly to citizen concerns. We reported 19 potholes and 1 broken wall in total.",
       imgSrc: "https://worldalliance.org/api/images/1765911493684.webp",
       imgAlt: "A pothole reported by a member",
-    },
-    {
-      name: "Answer questions about nonprofit website copy and design",
-      description:
-        "Members provided feedback on the copy and design of three nonprofit websites. The office sent the results to the nonprofits to help them increase their donation conversion rates.",
-      purpose:
-        "The survey introduced members to some effective non-profits. Delivering the results to the non-profits showed that they respond positively to thoughtful feedback.",
     },
     {
       name: "Sign a letter requesting news coverage of a bring-your-own-cup cafe coalition",
