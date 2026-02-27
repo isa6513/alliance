@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 import { promises as fs } from "fs";
 import path from "path";
 
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { PNG } = require("pngjs");
 const pixelmatch = require("pixelmatch");
 
@@ -29,10 +29,7 @@ const main = async () => {
   }
 
   let totalDiffs = 0;
-  const stats: Record<
-    string,
-    { diffPixels: number; totalPixels: number; pct: number }
-  > = {};
+  const stats: Record<string, { diffPixels: number; totalPixels: number; pct: number }> = {};
 
   const padToSize = (img: any, w: number, h: number): any => {
     if (img.width === w && img.height === h) return img;
