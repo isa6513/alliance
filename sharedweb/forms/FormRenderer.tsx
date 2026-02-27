@@ -33,6 +33,7 @@ import {
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
 import { useSearchParams } from "react-router";
+import { useFormPageDurationTracking, useFormValidationErrorTracking } from "./formAnalytics";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -735,6 +736,7 @@ const FormRenderer = ({
     if (!isLastPage) {
       const result = await validatePage(currentPageIndex, true);
       if (!result.isValid) {
+        trackValidationError(result.firstInvalidFieldId);
         return;
       }
       setCurrentPageIndex((prev) => prev + 1);
@@ -768,13 +770,16 @@ const FormRenderer = ({
       const result = await validatePage(currentPageIndex, true);
       if (result.isValid) {
         setCurrentPageIndex((prev) => prev + 1);
+      } else {
+        trackValidationError(result.firstInvalidFieldId);
       }
       setSubmitting(false);
       return;
     }
 
-    const { isValid, firstInvalidPageIndex } = await validateAllPages();
+    const { isValid, firstInvalidPageIndex, firstInvalidFieldId } = await validateAllPages();
     if (!isValid) {
+      trackValidationError(firstInvalidFieldId);
       if (
         typeof firstInvalidPageIndex === "number" &&
         firstInvalidPageIndex !== currentPageIndex
@@ -997,6 +1002,17 @@ const FormRenderer = ({
       });
     }
   }, [currentPageIndex]);
+
+  const formTrackingParams = {
+    formId: id,
+    actionId,
+    currentPageIndex,
+    pageCount: schema.pages.length,
+    enabled: !!onSubmit && !readOnly,
+  };
+
+  useFormPageDurationTracking(formTrackingParams);
+  const trackValidationError = useFormValidationErrorTracking(formTrackingParams);
 
   useEffect(() => {
     setFieldErrors({});
