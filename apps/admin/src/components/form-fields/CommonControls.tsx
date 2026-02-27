@@ -22,6 +22,7 @@ import {
   type AnyField,
   type CheckboxField,
   type Condition,
+  type ContractField,
   type DeviceVisibilityTarget,
   type EmailField,
   type MultiSelectField,
@@ -163,6 +164,7 @@ type TextContentControllerField =
 
 type ControllerField =
   | CheckboxField
+  | ContractField
   | RadioField
   | SelectField
   | MultiSelectField
@@ -181,6 +183,7 @@ function isTextContentController(f: AnyField): f is TextContentControllerField {
 function isConditionalController(f: AnyField): f is ControllerField {
   return (
     f.kind === "checkbox" ||
+    f.kind === "contract" ||
     f.kind === "radio" ||
     f.kind === "select" ||
     f.kind === "multiselect" ||
@@ -283,6 +286,12 @@ export function ConditionalVisibility({
           equals: true,
         };
       }
+      if (controller.kind === "contract") {
+        return {
+          when: controller.id,
+          equals: true,
+        };
+      }
       if (controller.kind === "multiselect") {
         return {
           when: controller.id,
@@ -343,7 +352,7 @@ export function ConditionalVisibility({
     const condition = createDefaultFieldCondition();
     if (!condition) {
       setConditionError(
-        "Add a checkbox, select, radio, multiselect, range, or text field earlier on this page first."
+        "Add a checkbox, contract, select, radio, multiselect, range, or text field earlier on this page first."
       );
       return false;
     }
@@ -527,6 +536,11 @@ export function ConditionalVisibility({
           when: controller.id,
           equals: value === "true",
         };
+      } else if (controller.kind === "contract") {
+        next[index] = {
+          when: controller.id,
+          equals: value === "true",
+        };
       } else if (controller.kind === "multiselect") {
         next[index] =
           value === ANY_SELECTED_VALUE
@@ -682,6 +696,26 @@ export function ConditionalVisibility({
                 <option value="true">Checked</option>
                 <option value="false">Unchecked</option>
               </select>
+            ) : controller.kind === "contract" ? (
+              <select
+                className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                value={String(
+                  isEqualsCondition(condition) &&
+                    typeof condition.equals === "boolean"
+                    ? condition.equals
+                    : true
+                )}
+                onChange={(event) =>
+                  handleConditionValueChange(index, event.target.value)
+                }
+              >
+                <option value="true">
+                  {controller.yesLabel?.trim() || "Yes"}
+                </option>
+                <option value="false">
+                  {controller.noLabel?.trim() || "No"}
+                </option>
+              </select>
             ) : controller.kind === "multiselect" ? (
               <select
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -833,7 +867,7 @@ export function ConditionalVisibility({
 
       {noControllerOrValidatorOptions && (
         <p className="mt-1 text-[11px] text-gray-400">
-          No earlier checkbox/select/radio/multiselect/range/text fields or
+          No earlier checkbox/contract/select/radio/multiselect/range/text fields or
           visibility validators are available. You can still add device type
           rules below.
         </p>
@@ -912,7 +946,7 @@ export function ConditionalVisibility({
         </div>
         {!canUseFieldControllers && (
           <p className="text-[11px] text-gray-400">
-            Add a checkbox, select, radio, multiselect, range, or text field
+            Add a checkbox, contract, select, radio, multiselect, range, or text field
             earlier on this page to use answer-based visibility. Device-type
             rules are always available.
           </p>

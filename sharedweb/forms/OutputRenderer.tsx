@@ -122,7 +122,10 @@ const evaluateCondition = (
   }
   const equals = cond.equals;
   if (typeof equals === "boolean") {
-    return Boolean(val) === equals;
+    if (val === undefined || val === null) {
+      return false;
+    }
+    return val === equals;
   }
   if (Array.isArray(val) && equals !== null && equals !== undefined) {
     return val.includes(equals as string);
