@@ -174,6 +174,43 @@ const parseIsoDate = (value?: string | null): Date | null => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
+const parseLocalDateInput = (
+  value?: string | null,
+  endOfDay = false
+): Date | null => {
+  if (!value) return null;
+  const [yearRaw, monthRaw, dayRaw] = value.split("-");
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const day = Number(dayRaw);
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(month) ||
+    !Number.isInteger(day)
+  ) {
+    return null;
+  }
+  const parsed = new Date(
+    year,
+    month - 1,
+    day,
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 999 : 0
+  );
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const getWeekStartDate = (value: Date): Date => {
+  const date = new Date(value);
+  date.setHours(0, 0, 0, 0);
+  const dayOfWeek = date.getDay();
+  const daysFromMonday = (dayOfWeek + 6) % 7;
+  date.setDate(date.getDate() - daysFromMonday);
+  return date;
+};
+
 const runInBatches = async <T, R>(
   items: T[],
   batchSize: number,
@@ -641,63 +678,199 @@ const StatsPage: React.FC = () => {
     return (centerY / actionBarsGeometry.height) * 100;
   }, [hoveredActionBar, actionBarsGeometry]);
 
-  // Cumulative average completion rate data
+  // Cumulative average completion rate data.
   const cumulativeCompletionData = useMemo(() => {
-    // Filter actions that have ended (have memberActionEndDate)
+    const now = new Date();
     const completedActions = actionStats
       .filter((a) => a.memberActionEndDate && a.showInChart && !a.onboarding)
       .map((a) => ({
         ...a,
         endDate: new Date(a.memberActionEndDate!),
       }))
+      .filter((a) => a.endDate <= now)
       .sort((a, b) => a.endDate.getTime() - b.endDate.getTime());
 
     if (completedActions.length === 0) return [];
 
-    const rangeStart = new Date(completionRateRange.start);
-    const rangeEnd = new Date(completionRateRange.end);
+    const rangeStart = parseLocalDateInput(completionRateRange.start);
+    const rangeEnd = parseLocalDateInput(completionRateRange.end, true);
+    if (!rangeStart || !rangeEnd || rangeStart > rangeEnd) {
+      return [];
+    }
 
-    // Generate data points for each day an action ended
-    const dataPoints: { date: Date; avgRate: number; actionCount: number }[] =
-      [];
+    const dataPoints: {
+      date: Date;
+      avgRate: number;
+      actionCount: number;
+      actionsInPoint: number;
+      dayKey: string;
+    }[] = [];
     let runningSum = 0;
     let count = 0;
 
     for (const action of completedActions) {
       if (action.endDate < rangeStart) {
-        // Include in running average but don't plot
         runningSum += action.completionRate;
-        count++;
+        count += 1;
         continue;
       }
       if (action.endDate > rangeEnd) break;
 
       runningSum += action.completionRate;
-      count++;
+      count += 1;
+      const dayKey = formatDateAsLocal(action.endDate);
+      const existingPoint = dataPoints[dataPoints.length - 1];
+
+      if (existingPoint && existingPoint.dayKey === dayKey) {
+        // Keep one visual point per day, but preserve cumulative value
+        // after all same-day actions have been included.
+        existingPoint.date = action.endDate;
+        existingPoint.avgRate = runningSum / count;
+        existingPoint.actionCount = count;
+        existingPoint.actionsInPoint += 1;
+        continue;
+      }
+
       dataPoints.push({
         date: action.endDate,
         avgRate: runningSum / count,
         actionCount: count,
+        actionsInPoint: 1,
+        dayKey,
       });
     }
 
-    return dataPoints;
+    return dataPoints.map(({ dayKey: _dayKey, ...point }) => point);
   }, [actionStats, completionRateRange]);
 
-  const completionRateChartData: DataPoint[] = useMemo(() => {
+  const cumulativeCompletionChartData: DataPoint[] = useMemo(() => {
     return cumulativeCompletionData.map((d) => ({
       date: d.date,
       avgRate: d.avgRate,
       actionCount: d.actionCount,
+      actionsInPoint: d.actionsInPoint,
     }));
   }, [cumulativeCompletionData]);
+
+  const cumulativeCompletionYDomain = useMemo(() => {
+    if (completionRateAbsolute) {
+      return [0, 1] as [number, number];
+    }
+    const values = cumulativeCompletionChartData
+      .map((d) => d.avgRate)
+      .filter((value): value is number => typeof value === "number")
+      .filter((value) => Number.isFinite(value));
+    if (values.length === 0) {
+      return undefined;
+    }
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const range = Math.max(0, maxValue - minValue);
+    const padding = Math.max(0.01, range * 0.1);
+    let paddedMin = Math.max(0, minValue - padding);
+    let paddedMax = Math.min(1, maxValue + padding);
+    if (paddedMax === paddedMin) {
+      const bump = Math.min(0.05, Math.max(0.01, paddedMax * 0.1));
+      paddedMin = Math.max(0, paddedMin - bump);
+      paddedMax = Math.min(1, paddedMax + bump);
+    }
+    return [paddedMin, paddedMax] as [number, number];
+  }, [completionRateAbsolute, cumulativeCompletionChartData]);
+
+  const cumulativeCompletionSeries: ChartSeries[] = useMemo(
+    () => [
+      {
+        key: "avgRate",
+        label: "Avg Rate",
+        color: "#15803d",
+        getValue: (d) => (d.avgRate as number) ?? 0,
+      },
+    ],
+    []
+  );
+
+  // Weekly (non-cumulative) completion rate data.
+  const weeklyCompletionData = useMemo(() => {
+    const now = new Date();
+    const rangeStart = parseLocalDateInput(completionRateRange.start);
+    const rangeEnd = parseLocalDateInput(completionRateRange.end, true);
+    if (!rangeStart || !rangeEnd || rangeStart > rangeEnd) {
+      return [];
+    }
+
+    const weeklyBuckets = new Map<
+      string,
+      {
+        date: Date;
+        actionCount: number;
+        completedCount: number;
+        joinedCount: number;
+        actionNames: string[];
+      }
+    >();
+    for (const action of actionStats) {
+      if (
+        !action.memberActionEndDate ||
+        !action.showInChart ||
+        action.onboarding
+      ) {
+        continue;
+      }
+      const endDate = parseIsoDate(action.memberActionEndDate);
+      if (!endDate || endDate < rangeStart || endDate > rangeEnd) {
+        continue;
+      }
+
+      const weekStart = getWeekStartDate(endDate);
+      const bucketKey = formatDateAsLocal(weekStart);
+      const existingBucket = weeklyBuckets.get(bucketKey) ?? {
+        date: weekStart,
+        actionCount: 0,
+        completedCount: 0,
+        joinedCount: 0,
+        actionNames: [],
+      };
+      if (endDate > now) {
+        continue;
+      }
+
+      existingBucket.actionCount += 1;
+      existingBucket.completedCount += Math.max(0, action.usersCompleted);
+      existingBucket.joinedCount += Math.max(0, action.usersJoined);
+      existingBucket.actionNames.push(action.actionName);
+      weeklyBuckets.set(bucketKey, existingBucket);
+    }
+
+    return Array.from(weeklyBuckets.values())
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .map((bucket) => ({
+        date: bucket.date,
+        weekRate:
+          bucket.joinedCount > 0 ? bucket.completedCount / bucket.joinedCount : 0,
+        actionCount: bucket.actionCount,
+        completedCount: bucket.completedCount,
+        joinedCount: bucket.joinedCount,
+        actionNames: bucket.actionNames.sort((a, b) => a.localeCompare(b)),
+      }));
+  }, [actionStats, completionRateRange]);
+
+  const completionRateChartData: DataPoint[] = useMemo(() => {
+    return weeklyCompletionData.map((d) => ({
+      date: d.date,
+      weekRate: d.weekRate,
+      actionCount: d.actionCount,
+      completedCount: d.completedCount,
+      joinedCount: d.joinedCount,
+      actionNames: d.actionNames,
+    }));
+  }, [weeklyCompletionData]);
 
   const completionRateYDomain = useMemo(() => {
     if (completionRateAbsolute) {
       return [0, 1] as [number, number];
     }
     const values = completionRateChartData
-      .map((d) => d.avgRate)
+      .map((d) => d.weekRate)
       .filter((value): value is number => typeof value === "number")
       .filter((value) => Number.isFinite(value));
     if (values.length === 0) {
@@ -720,10 +893,10 @@ const StatsPage: React.FC = () => {
   const completionRateSeries: ChartSeries[] = useMemo(
     () => [
       {
-        key: "avgRate",
-        label: "Avg Rate",
+        key: "weekRate",
+        label: "Weekly Rate",
         color: "#16a34a",
-        getValue: (d) => (d.avgRate as number) ?? 0,
+        getValue: (d) => (d.weekRate as number) ?? 0,
       },
     ],
     []
@@ -1285,11 +1458,10 @@ const StatsPage: React.FC = () => {
                   Completion reliability
                 </div>
                 <div className="text-3xl font-bold text-gray-900">
-                  {cumulativeCompletionData.length > 0
+                  {weeklyCompletionData.length > 0
                     ? (
-                        cumulativeCompletionData[
-                          cumulativeCompletionData.length - 1
-                        ].avgRate * 100
+                        weeklyCompletionData[weeklyCompletionData.length - 1]
+                          .weekRate * 100
                       ).toFixed(2)
                     : "[No data]"}
                   %
@@ -2092,17 +2264,16 @@ const StatsPage: React.FC = () => {
       {/* Action Completion Curves */}
       <ActionCompletionCurveChart refreshKey={completionCurveRefreshKey} />
 
-      {/* Cumulative Average Completion Rate Chart */}
       <TimeSeriesChart
         title="Cumulative Completion Rate"
-        data={completionRateChartData}
-        series={completionRateSeries}
+        data={cumulativeCompletionChartData}
+        series={cumulativeCompletionSeries}
         loading={actionStatsLoading}
         emptyMessage="No completed actions in this date range."
         showArea
         areaSeriesKey="avgRate"
-        areaColor="rgba(22, 163, 74, 0.12)"
-        yDomain={completionRateYDomain}
+        areaColor="rgba(21, 128, 61, 0.14)"
+        yDomain={cumulativeCompletionYDomain}
         yAxisFormat={(v) => `${Math.round(v * 100)}%`}
         showHoverOnlyOnHover
         yTickLabelDedup
@@ -2127,13 +2298,71 @@ const StatsPage: React.FC = () => {
             {
               label: "Avg Rate",
               value: `${((point.avgRate as number) * 100).toFixed(2)}%`,
-              color: "#16a34a",
+              color: "#15803d",
             },
             {
               label: "Actions",
               value: point.actionCount as number,
             },
+            {
+              label: "Actions in point",
+              value: point.actionsInPoint as number,
+            },
           ],
+        })}
+      />
+
+      {/* Weekly (non-cumulative) completion rate chart */}
+      <TimeSeriesChart
+        title="Non-Cumulative Completion Rate (Weekly)"
+        data={completionRateChartData}
+        series={completionRateSeries}
+        loading={actionStatsLoading}
+        emptyMessage="No completed actions in this date range."
+        yDomain={completionRateYDomain}
+        yAxisFormat={(v) => `${Math.round(v * 100)}%`}
+        showHoverOnlyOnHover
+        yTickLabelDedup
+        dateRange={completionRateRange}
+        onDateRangeChange={setCompletionRateRange}
+        headerContent={
+          <label className="flex items-center gap-2 text-xs font-semibold text-gray-600 md:ml-auto">
+            <input
+              type="checkbox"
+              checked={completionRateAbsolute}
+              onChange={(event) =>
+                setCompletionRateAbsolute(event.target.checked)
+              }
+              className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-400"
+            />
+            Absolute
+          </label>
+        }
+        getHoverContent={(point) => ({
+          title: `Week of ${fullDateFormatter.format(point.date)}`,
+          items: (() => {
+            const actionNames = (point.actionNames as string[] | undefined) ?? [];
+            const actionItems = actionNames.map((name, index) => ({
+              label: `Action ${index + 1}`,
+              value: name.length > 40 ? `${name.slice(0, 40).trimEnd()}...` : name,
+            }));
+            return [
+              {
+                label: "Weekly Rate",
+                value: `${((point.weekRate as number) * 100).toFixed(2)}%`,
+                color: "#16a34a",
+              },
+              {
+                label: "Actions",
+                value: point.actionCount as number,
+              },
+              {
+                label: "Completed / Joined",
+                value: `${point.completedCount as number}/${point.joinedCount as number}`,
+              },
+              ...actionItems,
+            ];
+          })(),
         })}
       />
 

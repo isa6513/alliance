@@ -508,10 +508,10 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
                     <rect
                       x={Math.min(
                         dateGeometry.xScale(activePoint.date!) + 12,
-                        dateGeometry.width - 210
+                        dateGeometry.width - 334
                       )}
                       y={dateGeometry.margin.top + 12}
-                      width={196}
+                      width={320}
                       height={hoverContent.items.length * 24 + 42}
                       rx={10}
                       fill="white"
@@ -521,7 +521,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
                     <text
                       x={Math.min(
                         dateGeometry.xScale(activePoint.date!) + 24,
-                        dateGeometry.width - 196
+                        dateGeometry.width - 320
                       )}
                       y={dateGeometry.margin.top + 32}
                       className="fill-gray-900 text-sm font-semibold"
@@ -533,7 +533,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
                         key={`label-${item.label}`}
                         transform={`translate(${Math.min(
                           dateGeometry.xScale(activePoint.date!) + 24,
-                          dateGeometry.width - 196
+                          dateGeometry.width - 320
                         )}, ${dateGeometry.margin.top + 52 + idx * 24})`}
                       >
                         {item.color && (
@@ -554,7 +554,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
                           {item.label}
                         </text>
                         <text
-                          x={164}
+                          x={288}
                           y={0}
                           textAnchor="end"
                           className="fill-gray-900 text-xs font-semibold"
