@@ -7,6 +7,10 @@ import {
   UpdateContractDto,
 } from "@alliance/shared/client";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import {
+  formatLocalDateTime,
+  resolveDateValue,
+} from "@alliance/sharedweb/ui/DateTimePicker";
 import FormTextarea from "../components/FormTextarea";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -63,10 +67,13 @@ const ContractPage: React.FC = () => {
           name: data.name ?? "",
           markdown: data.markdown,
           startDate: data.startDate
-            ? new Date(data.startDate).toISOString().slice(0, 16)
+            ? formatLocalDateTime(
+                resolveDateValue(data.startDate),
+                "minute"
+              )
             : "",
           endDate: data.endDate
-            ? new Date(data.endDate).toISOString().slice(0, 16)
+            ? formatLocalDateTime(resolveDateValue(data.endDate), "minute")
             : "",
         });
       } catch (err) {
