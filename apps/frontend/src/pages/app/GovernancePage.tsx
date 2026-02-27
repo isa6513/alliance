@@ -52,24 +52,23 @@ const GovernancePage: React.FC = () => {
 
             <div className="flex flex-col gap-y-2 bg-zinc-50 p-6 rounded border border-zinc-200 my-2">
               <p>
-                Do you want the Alliance to continue to operate as it currently does?
+                Which do you prefer?
               </p>
               <ul className="list-disc list-inside pl-4 space-y-2">
                 <li>
-                  Yes, I want the Alliance to continue to operate as it currently does.
+                  I prefer the Alliance to continue to operate.
                 </li>
                 <li>
-                  No, I want the Alliance to stop planning and running all actions until it changes how it operates.
+                  I prefer the Alliance to stop planning and running all actions until it changes how it operates.
                 </li>
               </ul>
             </div>
             <p>
-              If more than 1/4th of members answer “no” to our oversight
-              question, the Alliance will pause actions and focus on changing
-              our operations until less than 1/4th of members answer “no.” In
+              If more than 1/4th of members prefer the Alliance to stop planning and running all actions until it changes how it operates, the Alliance will pause actions and focus on changing
+              our operations until less than 1/4th of members prefer the Alliance to stop planning and running all actions until it changes how it operates. In
               extreme cases, this might involve the office, and approving
               members, concluding that it is better to part ways with
-              disapproving members than to continue to pause actions.
+              those members than to continue to pause actions.
             </p>
             <p>
               It is inevitable that some members will be assigned tasks whose
