@@ -60,7 +60,9 @@ function buildInitialList(
     ...actions
       .filter((a) =>
         filterForIncomplete
-          ? a.status !== "completed" && a.status !== "office_action"
+          ? a.status !== "completed" &&
+            a.status !== "office_action" &&
+            !a.archived
           : true
       )
       .map((a) => ({
