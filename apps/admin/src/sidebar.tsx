@@ -34,6 +34,7 @@ import {
   MoreHorizontal,
   ScrollText,
   TowerControl,
+  ListOrdered,
 } from "lucide-react";
 import { useGroupAssignment } from "./lib/GroupAssignmentContext";
 
@@ -288,6 +289,11 @@ const Sidebar: React.FC = () => {
                     to: "/event-log",
                     label: "Event Log",
                     icon: <ScrollText size={16} />,
+                  },
+                  {
+                    to: "/priority",
+                    label: "Priority",
+                    icon: <ListOrdered size={16} />,
                   },
                 ].map((link) => (
                   <Link
