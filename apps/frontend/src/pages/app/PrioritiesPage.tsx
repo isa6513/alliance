@@ -1,275 +1,216 @@
 import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
-
-import { Link, href } from "react-router";
-import groupPillsExample from "../../assets/group-pills-example.png";
+import { Link } from "react-router";
 import InfoSubpage from "../../components/InfoSubpage";
 
 const PrioritiesPage: React.FC = () => {
   useWhiteBackground();
 
   const tocSections = [
-    { id: "about", label: "About groups", level: 1 },
-    { id: "leading-a-group", label: "Group leads", level: 2 },
-    { id: "responsibilities", label: "Responsibilities", level: 3 },
-    { id: "should-i-lead", label: "Should I lead a group?", level: 3 },
-    { id: "being-a-member", label: "Group members", level: 2 },
-    { id: "joining-leaving", label: "Joining and leaving groups", level: 3 },
-    { id: "group-assignment", label: "Group assignment", level: 3 },
-    { id: "how-to-lead", label: "How to lead", level: 1 },
-    { id: "lead-recommendations", label: "Recommendations", level: 2 },
-    { id: "lead-recommendations-1", label: "Sending reminders", level: 3 },
-    { id: "lead-recommendations-2", label: "Checking in", level: 3 },
+    { id: "extreme-poverty", label: "Extreme poverty", level: 2 },
+    {
+      id: "environmental-destruction",
+      label: "Environmental destruction",
+      level: 2,
+    },
+    {
+      id: "decline-of-democratic-institutions",
+      label: "The decline of democratic institutions",
+      level: 2,
+    },
+    {
+      id: "dangerous-technological-development",
+      label: "Dangerous technological development",
+      level: 2,
+    },
   ];
 
   return (
     <InfoSubpage tocSections={tocSections}>
       <section className="gap-y-4 flex flex-col">
-        <p
-          id="about"
+        <h1
+          id="priorities"
           className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
         >
-          About groups
-        </p>
+          Priorities
+        </h1>
         <p>
-          The Alliance is organized into{" "}
-          <span className="font-semibold">accountability groups</span>.
+          The Alliance is founded on a moral principle shared by nearly all
+          cultures: one should not treat others in ways that one does not want
+          to be treated.
         </p>
+
         <p>
-          <span className="font-semibold">Group leads</span> are responsible for
-          ensuring <span className="font-semibold">group members</span> complete
-          their tasks on time. Group members are accountable to their lead.
+          Our modern, interconnected world is shaped by decisions made by
+          billions of people. If we do not want others to disregard how their
+          decisions impact us, we cannot disregard how our decisions impact
+          them.
         </p>
+
         <p>
-          Accountability groups are intended to help the Alliance build a
-          culture of trust and reliability, as well as to provide support to
-          members.
+          We decided, with twenty-five founding members, to focus the Alliance’s
+          efforts on four global crises:
         </p>
-        <div className="flex flex-col items-center justify-center gap-y-2">
-          <div className="flex flex-col items-center justify-center p-6 md:p-8 bg-zinc-50 rounded">
-            <img
-              src={groupPillsExample}
-              alt="Group pills example"
-              className="w-full h-auto border border-zinc-200 rounded"
-            />
-          </div>
-          <p className="text-zinc-500 text-sm text-center">
-            Group leads can easily view the progress of their group members.
-          </p>
-        </div>
+
+        <ul className="list-disc list-inside space-y-2 pl-4">
+          <li>Extreme poverty</li>
+          <li>Environmental destruction</li>
+          <li>The decline of democratic institutions</li>
+          <li>Dangerous technological development</li>
+        </ul>
+
+        <p>
+          To us, these crises represent the most egregious violations of our
+          foundational moral principle. They cause, or have the potential to
+          cause, enormous harm to billions of people. We believe that these
+          crises persist because most people disregard how their decisions
+          contribute to them, and some people sustain them intentionally.
+        </p>
 
         <h2
-          id="leading-a-group"
+          id="extreme-poverty"
           className="mt-2 text-2xl font-semibold text-black"
         >
-          Group leads
-        </h2>
-        <h3
-          id="responsibilities"
-          className="text-xl font-semibold text-black mt-2"
-        >
-          Responsibilities
-        </h3>
-        <p>
-          The main responsibility of a group lead is to ensure the members of
-          their group complete their tasks on time.
-        </p>
-        <p>
-          Group leads also serve as informal guides to the Alliance for their
-          group members. For example, they sometimes clarify tasks or tell
-          members about features on the platform.
-        </p>
-        <p>
-          Any member of the Alliance can create and lead an accountability
-          group. Group leads can, but are not expected to, be members of another
-          accountability group.
-        </p>
-        <h3
-          id="should-i-lead"
-          className="text-xl font-semibold mt-2 text-black"
-        >
-          Should I lead a group?
-        </h3>
-
-        <p>There are two main reasons to lead a group:</p>
-        <ol className="list-decimal list-inside pl-4 space-y-1">
-          <li>
-            <span className="font-semibold">
-              You want to invite new members.
-            </span>{" "}
-            In this case, your group can be temporary: once your members become
-            familiar with the Alliance, they can transfer to other groups or
-            start their own.
-          </li>
-          <li>
-            <span className="font-semibold">
-              You want to help the Alliance.
-            </span>{" "}
-            In this case, you can start a long-term group that anyone can join.
-          </li>
-        </ol>
-        <p>
-          Running a small, temporary group is a good way to learn whether you
-          are interested in running a larger, long-term group.
-        </p>
-        <p>
-          Current group leads report spending{" "}
-          <span className="font-semibold">5–30 minutes</span> running their
-          groups per week.
-        </p>
-        <h2
-          id="being-a-member"
-          className="mt-2 text-2xl font-semibold text-black"
-        >
-          Group members
+          Extreme poverty
         </h2>
 
         <p>
-          You can only be a member of one accountability group. Being a member
-          of an accountability group is strongly encouraged, but not required.
-        </p>
-        <h3
-          id="joining-leaving"
-          className="text-xl font-semibold mt-2 text-black"
-        >
-          Joining and leaving groups
-        </h3>
-
-        <p>
-          When a new member joins the Alliance, they are placed in an
-          accountability group. The inviting member may either add them to their
-          own group or request that they be assigned to another group.
-        </p>
-
-        <p>
-          At any time (
-          <Link to={href("/groups")} className="text-link hover:underline">
-            Groups
+          More than{" "}
+          <Link
+            to="https://blogs.worldbank.org/en/opendata/behind-the-numbers--how-we-measure-global-poverty"
+            className="text-link"
+          >
+            800 million people
           </Link>{" "}
-          &gt; My groups &gt; Manage groups ), you can:
+          live in extreme poverty, defined by the World Bank as living on less
+          than $3 a day. At these income levels,{" "}
+          <Link
+            to="https://www.nature.com/articles/s41598-024-53280-0"
+            className="text-link"
+          >
+            malnutrition
+          </Link>
+          ,{" "}
+          <Link
+            to="https://pmc.ncbi.nlm.nih.gov/articles/PMC8366975/"
+            className="text-link"
+          >
+            preventable diseases
+          </Link>
+          , and{" "}
+          <Link
+            to="https://www.thelancet.com/journals/langlo/article/PIIS2214-109X(18)30059-7/fulltext"
+            className="text-link"
+          >
+            child mortality
+          </Link>{" "}
+          are widespread. Progress on extreme poverty has{" "}
+          <Link to="https://www.worldbank.org/en/publication/poverty-prosperity-and-planet">
+            slowed
+          </Link>{" "}
+          for the first time since the 1990s because of the COVID-19 pandemic,
+          increased conflict, and other factors.
         </p>
-        <ol className="list-decimal list-inside pl-4 space-y-1">
-          <li>Leave your current group.</li>
-          <li>Join a public group.</li>
-          <li>Request to be assigned to different group.</li>
-        </ol>
 
-        <h3
-          id="group-assignment"
-          className="text-xl font-semibold mt-2 text-black"
-        >
-          Group assignment
-        </h3>
-        <p>
-          A semi-automatic assignment process runs when a group member asks to
-          be reassigned, or a new member joins the Alliance and the inviting
-          member does not lead a group.
-        </p>
-        <p>
-          In most cases, a staff member will manually assign the member to a
-          group with available space. This may take 3-5 days. If there are no
-          groups with available space, then the member will not be assigned to a
-          group until space becomes available.
-        </p>
-        <p>
-          If a new member joins the Alliance and the inviting member does not
-          lead a group, we will first check whether there is space in the
-          inviting member’s lead’s group.
-        </p>
-      </section>
-
-      <section className="gap-y-4 flex flex-col">
-        <p
-          id="how-to-lead"
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-        >
-          How to lead
-        </p>
-        <p>
-          As a group lead, you are responsible for ensuring that your group
-          members complete their tasks on time. You can do this however you see
-          fit.
-        </p>
-        <p>
-          The goal is not for group members to rely on you, but to feel
-          accountable to and supported by you.
-        </p>
         <h2
-          id="lead-recommendations"
+          id="environmental-destruction"
           className="mt-2 text-2xl font-semibold text-black"
         >
-          Recommendations
+          Environmental destruction
         </h2>
-        <h3
-          id="lead-recommendations-1"
-          className="text-xl font-semibold mt-2 text-black"
-        >
-          Sending reminders
-        </h3>
+
         <p>
-          Throughout the week, check in on the Members tab (
-          <Link to={href("/groups")} className="text-link hover:underline">
-            Groups
+          The{" "}
+          <Link to="https://zenodo.org/records/3553579" className="text-link">
+            primary drivers of environmental destruction
           </Link>{" "}
-          &gt; Members) to see which of your group members have completed their
-          current tasks.
+          are: the clearing and degradation of forests, wetlands, grasslands,
+          coastal ecosystems, and other land for development and agriculture;
+          overexploitation of wild plants and animals from legal and illegal
+          harvesting; ecosystem disruptions from rising temperatures and
+          changing weather patterns; pollution from agricultural, commercial,
+          and industrial waste; and the introduction and spread of invasive
+          species. The global rate of species extinction is at least{" "}
+          <Link to="https://zenodo.org/records/5517457" className="text-link">
+            tens to hundreds of times higher
+          </Link>{" "}
+          than the average rate over the past 10 million years.
         </p>
-        <p>
-          While you can send reminders whenever it makes sense, here is a
-          typical schedule:
-        </p>
-        <ol className="list-decimal list-inside pl-4 space-y-1">
-          <li>
-            The day before the deadline, text a reminder at their preferred
-            contact time.
-          </li>
-          <li>
-            The day of the deadline, text or call at their preferred contact
-            time.
-          </li>
-          <li>
-            The day after the deadline, reach out to anyone who did not complete
-            the action and gently remind them of the importance of their
-            commitment. You can ask them if they encountered any difficulties
-            completing the action and offer to pass along feedback.
-          </li>
-        </ol>
-        <h3
-          id="lead-recommendations-2"
-          className="text-xl font-semibold mt-2 text-black"
+
+        <h2
+          id="decline-of-democratic-institutions"
+          className="mt-2 text-2xl font-semibold text-black"
         >
-          Checking in
-        </h3>
-        <p>These are some extra ways you can check in on your group members:</p>
-        <ol className="list-decimal list-inside pl-4 space-y-1">
-          <li>
-            Engage with your group members&apos; activities (
-            <Link to={href("/groups")} className="text-link hover:underline">
-              Groups
-            </Link>{" "}
-            &gt; Activity).
-          </li>
-          <li>
-            Help any members who have difficulty completing their tasks. If they
-            have pressing questions that you cannot answer, feel free to reach
-            out to a staff member via{" "}
-            <Link to={href("/messages")} className="text-link hover:underline">
-              Messages
-            </Link>
-            .
-          </li>
-          <li>
-            Host small discussions in your group chat, available on the{" "}
-            <Link to={href("/groups")} className="text-link hover:underline">
-              Groups
-            </Link>{" "}
-            page and{" "}
-            <Link to={href("/messages")} className="text-link hover:underline">
-              Messages
-            </Link>{" "}
-            page.
-          </li>
-        </ol>
+          The decline of democratic institutions
+        </h2>
+
+        <p>
+          The number of countries{" "}
+          <Link
+            to="https://www.tandfonline.com/doi/full/10.1080/13510347.2019.1582029#d1e407"
+            className="text-link"
+          >
+            losing democratic qualities
+          </Link>{" "}
+          is higher than any period since the early 1940s. Measures of global
+          freedom have declined for{" "}
+          <Link
+            to="https://freedomhouse.org/report/freedom-world/2025/uphill-battle-to-safeguard-rights"
+            className="text-link"
+          >
+            19 consecutive years
+          </Link>
+          , with political rights assessed as decreasing for over 3 billion
+          people in 2024. These declines typically involve the erosion of
+          judicial independence, freedom of the press, and civil liberties,
+          including{" "}
+          <Link
+            to="https://www.tandfonline.com/doi/full/10.1080/14754835.2023.2295878"
+            className="text-link"
+          >
+            measurable increases
+          </Link>{" "}
+          in human rights violations.
+        </p>
+
+        <h2
+          id="dangerous-technological-development"
+          className="mt-2 text-2xl font-semibold text-black"
+        >
+          Dangerous technological development
+        </h2>
+
+        <p>
+          Several emerging technologies pose potentially catastrophic risks.
+          Advances in biotechnology are{" "}
+          <Link
+            to="https://www.armscontrol.org/blog/2025-11-24/regulatory-gaps-benchtop-nucleic-acid-synthesis-create-biosecurity-vulnerabilities"
+            className="text-link"
+          >
+            lowering the barriers
+          </Link>{" "}
+          to engineering deadly pathogens. Artificial intelligence systems
+          <Link
+            to="https://www.weforum.org/publications/global-risks-report-2026/in-full/global-risks-report-2026-chapter-2/#2-7-ai-at-large"
+            className="text-link"
+          >
+            undermine
+          </Link>{" "}
+          trusted information and could{" "}
+          <Link
+            to="https://internationalaisafetyreport.org/publication/international-ai-safety-report-2025"
+            className="text-link"
+          >
+            accelerate biological and cyber threats
+          </Link>
+          . A{" "}
+          <Link to="https://aistatement.com/" className="text-link">
+            statement
+          </Link>{" "}
+          signed by leading AI researchers states: “[m]itigating the risk of
+          extinction from AI should be a global priority alongside other
+          societal-scale risks such as pandemics and nuclear war.”
+        </p>
       </section>
     </InfoSubpage>
   );

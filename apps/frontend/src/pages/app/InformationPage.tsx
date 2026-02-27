@@ -59,19 +59,19 @@ const InformationPage: React.FC = () => {
     },
     ...(isFeatureEnabled(Features.GeneralUpdatesLink)
       ? [
-        {
-          title: "General updates",
-          description:
-            "Updates about the Alliance's progress as an organization.",
-          href: href("/general-updates"),
-        },
-      ]
+          {
+            title: "General updates",
+            description:
+              "Updates about the Alliance's progress as an organization.",
+            href: href("/general-updates"),
+          },
+        ]
       : []),
-    // {
-    //   title: "Priorities",
-    //   description: "Our current priorities.",
-    //   href: href("/priorities"),
-    // },
+    {
+      title: "Priorities",
+      description: "An overview of our current priorities.",
+      href: href("/priorities"),
+    },
     {
       title: "Governance",
       description:
