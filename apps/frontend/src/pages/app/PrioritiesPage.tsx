@@ -189,7 +189,7 @@ const PrioritiesPage: React.FC = () => {
           >
             lowering the barriers
           </Link>{" "}
-          to engineering deadly pathogens. Artificial intelligence systems
+          to engineering deadly pathogens. Artificial intelligence systems{" "}
           <Link
             to="https://www.weforum.org/publications/global-risks-report-2026/in-full/global-risks-report-2026-chapter-2/#2-7-ai-at-large"
             className="text-link"
