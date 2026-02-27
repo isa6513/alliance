@@ -55,29 +55,26 @@ The office of the Alliance is the set of members responsible for ensuring the Al
 In particular, the office is responsible for:
 1. The development of and maintenance of a plan for the Alliance.
 2. The decomposition of this plan into tasks.
-3. The assignment and delivery of these tasks to members. In a corollary to the terms of the current membership contract, the office assigns each 15-minute block of tasks a 7-day window that does not overlap with the 7-day window of any other block.
+3. The assignment and delivery of these tasks to members. As per the terms of the current membership contract, the office assigns each 15-minute block of tasks a 7-day window that does not overlap with the 7-day window of any other block.
 
 In designing actions, the office aims to satisfy both:
 1. The collective interests of members, as can be reasonably determined through internal democratic processes.
 2. The collective interests of humanity, as can be reasonably determined using available data about global preferences.
 
 ## Oversight
-These procedures are in effect until they are modified by a governance review process that will require the participation of all members. The office will schedule this review process at its discretion.
+These procedures are in effect until they are modified by a governance review process that requires the participation of all members. The office will schedule this review process at its discretion.
 
-The Alliance meets its approval threshold when more than 75% of members indicate that they expect more than 80% of their contributions to the Alliance will result in outcomes they approve of.
+The Alliance meets its approval threshold when more than 3/4 of members indicate that they want the Alliance to continue to operate as it currently does.
 
 To ensure the Alliance meets its approval threshold, the office will run a periodic oversight process. During an oversight process, the office will:
 
 1. Conduct a membership-wide survey to evaluate if the Alliance meets its approval threshold.
-2. If it does not, then the office will repeat the following steps until the approval threshold is met:
-   - Collect feedback from members about the direction of the Alliance and other major concerns.
-   - Develop and communicate plans to address common feedback.
-   - Re-evaluate whether the Alliance meets its approval threshold.
+2. If it does not, then the office will stop planning and running all actions until it changes how it operates.
 
-The office will run an oversight process if either of the following conditions have been met:
+The office will run an oversight process if either:
 
-1. 3 months have passed and 10 tasks have been completed by Alliance members since the last oversight process.
-2. More than 50% of Alliance members request an oversight process.
+1. 6 months have passed since the last oversight process.
+2. More than 1/4 of Alliance members request an oversight process.
 "
             />
           </div>
