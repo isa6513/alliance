@@ -52,17 +52,14 @@ const GovernancePage: React.FC = () => {
 
             <div className="flex flex-col gap-y-2 bg-zinc-50 p-6 rounded border border-zinc-200 my-2">
               <p>
-                Do you approve of the Alliance continuing to operate as it
-                currently does?
+                Do you want the Alliance to continue to operate as it currently does?
               </p>
               <ul className="list-disc list-inside pl-4 space-y-2">
                 <li>
-                  Yes, I approve of the Alliance continuing to operate as it
-                  currently does.
+                  Yes, I want the Alliance to continue to operate as it currently does.
                 </li>
                 <li>
-                  No, the Alliance should stop planning and running all actions
-                  until it changes how it operates.
+                  No, I want the Alliance to stop planning and running all actions until it changes how it operates.
                 </li>
               </ul>
             </div>
