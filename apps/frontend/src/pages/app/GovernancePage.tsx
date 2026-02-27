@@ -64,8 +64,7 @@ const GovernancePage: React.FC = () => {
               </ul>
             </div>
             <p>
-              If more than 1/4th of members prefer the Alliance to stop planning and running all actions until it changes how it operates, the Alliance will pause actions and focus on changing
-              our operations until less than 1/4th of members have this preference. In extreme cases, this might involve the office, and approving
+              If more than 1/4th of members prefer the Alliance to stop planning and running all actions until it changes how it operates, the Alliance will do so until less than 1/4th of members have this preference. In extreme cases, this might involve the office, and approving
               members, concluding that it is better to part ways with
               those members than to continue to pause actions.
             </p>
