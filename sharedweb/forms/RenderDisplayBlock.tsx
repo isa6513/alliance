@@ -4,18 +4,24 @@ import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import { getApiUrl } from "../lib/config";
 import { Link } from "react-router";
 import Card from "../ui/Card";
-import { MessagesSquare, File, FileText, FileCheck, Signature } from "lucide-react";
+import {
+  MessagesSquare,
+  File,
+  FileText,
+  FileCheck,
+  Signature,
+} from "lucide-react";
 import type { BigLinkIcon } from "@alliance/shared/forms/display-blocks";
+import { CardStyle } from "@alliance/shared/styles/card";
+import VideoPlayer from "./VideoPlayer";
 
 const bigLinkIcons: Record<BigLinkIcon, React.FC<{ size?: number }>> = {
   "messages-square": MessagesSquare,
-  "file": File,
+  file: File,
   "file-text": FileText,
   "file-check": FileCheck,
-  "signature": Signature,
+  signature: Signature,
 };
-import { CardStyle } from "@alliance/shared/styles/card";
-import VideoPlayer from "./VideoPlayer";
 
 type Props = {
   block: DisplayBlock;
@@ -27,18 +33,19 @@ export default function RenderDisplayBlock({ block }: Props) {
       return React.createElement(
         `h${block.level || 2}`,
         {
-          className: `!font-semibold text-zinc-900 ${(block.level || 2) === 1
-            ? "text-3xl"
-            : (block.level || 2) === 2
+          className: `!font-semibold text-zinc-900 ${
+            (block.level || 2) === 1
+              ? "text-3xl"
+              : (block.level || 2) === 2
               ? "text-2xl"
               : (block.level || 2) === 3
-                ? "text-xl"
-                : (block.level || 2) === 4
-                  ? "text-lg"
-                  : (block.level || 2) === 5
-                    ? "text-base"
-                    : ""
-            }`,
+              ? "text-xl"
+              : (block.level || 2) === 4
+              ? "text-lg"
+              : (block.level || 2) === 5
+              ? "text-base"
+              : ""
+          }`,
         },
         block.text
       );
@@ -58,34 +65,36 @@ export default function RenderDisplayBlock({ block }: Props) {
     case "divider":
       return (
         <hr
-          className={`border-gray-300 ${block.thickness === "hairline"
-            ? "border-t"
-            : block.thickness === "thin"
+          className={`border-gray-300 ${
+            block.thickness === "hairline"
+              ? "border-t"
+              : block.thickness === "thin"
               ? "border-t"
               : block.thickness === "medium"
-                ? "border-t-2"
-                : block.thickness === "thick"
-                  ? "border-t-4"
-                  : "border-t"
-            }`}
+              ? "border-t-2"
+              : block.thickness === "thick"
+              ? "border-t-4"
+              : "border-t"
+          }`}
         />
       );
 
     case "spacer":
       return (
         <div
-          className={`${block.size === "xs"
-            ? "h-2"
-            : block.size === "sm"
+          className={`${
+            block.size === "xs"
+              ? "h-2"
+              : block.size === "sm"
               ? "h-4"
               : block.size === "md"
-                ? "h-8"
-                : block.size === "lg"
-                  ? "h-16"
-                  : block.size === "xl"
-                    ? "h-24"
-                    : "h-8"
-            }`}
+              ? "h-8"
+              : block.size === "lg"
+              ? "h-16"
+              : block.size === "xl"
+              ? "h-24"
+              : "h-8"
+          }`}
         />
       );
 
@@ -137,19 +146,17 @@ export default function RenderDisplayBlock({ block }: Props) {
     case "biglink": {
       const IconComponent = bigLinkIcons[block.icon || "messages-square"];
       return (
-        <Link
-          to={block.url}
-          className="block group text-black "
-        >
-          <Card className="flex flex-row items-center gap-3 hover:bg-zinc-100" style={CardStyle.Grey}>
+        <Link to={block.url} className="block group text-black ">
+          <Card
+            className="flex flex-row items-center gap-3 hover:bg-zinc-100"
+            style={CardStyle.Grey}
+          >
             <IconComponent size={20} />
             <div>
               <p className="text-base" style={{ fontWeight: 450 }}>
                 {block.text}
               </p>
-              <p className="text-sm text-green">
-                {block.url}
-              </p>
+              <p className="text-sm text-green">{block.url}</p>
             </div>
           </Card>
         </Link>
