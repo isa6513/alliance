@@ -1,8 +1,17 @@
-import type { BigLinkBlock } from "@alliance/shared/forms/display-blocks";
+import type { BigLinkBlock, BigLinkIcon } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { useState } from "react";
+import { MessagesSquare, File, FileText, FileCheck, Signature } from "lucide-react";
+
+const iconOptions: { value: BigLinkIcon; label: string; Icon: React.FC<{ size?: number }> }[] = [
+  { value: "messages-square", label: "Messages", Icon: MessagesSquare },
+  { value: "file", label: "File", Icon: File },
+  { value: "file-text", label: "File Text", Icon: FileText },
+  { value: "file-check", label: "File Check", Icon: FileCheck },
+  { value: "signature", label: "Signature", Icon: Signature },
+];
 
 export function EditableBigLinkBlock({
   block,
@@ -41,6 +50,25 @@ export function EditableBigLinkBlock({
             className="w-full text-zinc-600 text-sm border border-zinc-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="/path or https://..."
           />
+
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-zinc-500 mr-1">Icon:</span>
+            {iconOptions.map(({ value, label, Icon }) => (
+              <button
+                key={value}
+                type="button"
+                title={label}
+                onClick={() => handleUpdate({ icon: value })}
+                className={`p-1.5 rounded border ${
+                  (activeBlock.icon || "messages-square") === value
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                }`}
+              >
+                <Icon size={16} />
+              </button>
+            ))}
+          </div>
 
           <div className="flex items-center justify-end gap-2">
             <button

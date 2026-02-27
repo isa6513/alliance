@@ -46,6 +46,14 @@ const hasExpertReply = (comment: CommentDto, expertIds: number[]): boolean => {
   return false;
 };
 
+const hasExpertChildReply = (
+  comment: CommentDto,
+  expertIds: number[]
+): boolean => {
+  if (!comment.children) return false;
+  return comment.children.some((child) => hasExpertReply(child, expertIds));
+};
+
 type CommentSort = "newest" | "discussion" | "random";
 
 const sortLabels: Record<CommentSort, string> = {
@@ -207,8 +215,13 @@ const Comments = ({
       }
 
       if (activeQaMode && (filter === "answered" || filter === "unanswered")) {
-        const isAnswered = hasExpertReply(comment, expertIds);
-        return filter === "answered" ? isAnswered : !isAnswered;
+        const isExpert = expertIds.includes(comment.author.id);
+        const hasExpertChild = hasExpertChildReply(comment, expertIds);
+        if (filter === "answered") {
+          return hasExpertChild;
+        }
+        // "unanswered": exclude expert-authored comments with no expert replies
+        return !isExpert && !hasExpertChild;
       }
 
       if (

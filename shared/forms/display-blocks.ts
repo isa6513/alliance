@@ -76,10 +76,13 @@ export type VideoBlock = BaseBlock & {
   caption?: string;
 };
 
+export type BigLinkIcon = "messages-square" | "file" | "file-text" | "file-check" | "signature";
+
 export type BigLinkBlock = BaseBlock & {
   kind: "biglink";
   text: string;
   url: string;
+  icon?: BigLinkIcon;
 };
 
 export type DisplayBlock =

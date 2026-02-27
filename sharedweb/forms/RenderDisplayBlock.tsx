@@ -4,7 +4,16 @@ import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import { getApiUrl } from "../lib/config";
 import { Link } from "react-router";
 import Card from "../ui/Card";
-import { MessagesSquare } from "lucide-react";
+import { MessagesSquare, File, FileText, FileCheck, Signature } from "lucide-react";
+import type { BigLinkIcon } from "@alliance/shared/forms/display-blocks";
+
+const bigLinkIcons: Record<BigLinkIcon, React.FC<{ size?: number }>> = {
+  "messages-square": MessagesSquare,
+  "file": File,
+  "file-text": FileText,
+  "file-check": FileCheck,
+  "signature": Signature,
+};
 import { CardStyle } from "@alliance/shared/styles/card";
 import VideoPlayer from "./VideoPlayer";
 
@@ -125,14 +134,15 @@ export default function RenderDisplayBlock({ block }: Props) {
         </div>
       );
 
-    case "biglink":
+    case "biglink": {
+      const IconComponent = bigLinkIcons[block.icon || "messages-square"];
       return (
         <Link
           to={block.url}
           className="block group text-black "
         >
-          <Card className="flex flex-row items-center gap-2 hover:bg-zinc-100" style={CardStyle.Grey}>
-            <MessagesSquare size={16} />
+          <Card className="flex flex-row items-center gap-3 hover:bg-zinc-100" style={CardStyle.Grey}>
+            <IconComponent size={20} />
             <div>
               <p className="text-base" style={{ fontWeight: 450 }}>
                 {block.text}
@@ -144,6 +154,7 @@ export default function RenderDisplayBlock({ block }: Props) {
           </Card>
         </Link>
       );
+    }
 
     default:
       return null;
