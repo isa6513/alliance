@@ -7,6 +7,7 @@ import {
   GlobalFeedActivityGroupDto,
   GlobalFeedForumCommentsDto,
   GlobalFeedItemDto,
+  GlobalFeedNewMembersDto,
   // GlobalFeedNewMembersDto,
   ProfileDto,
 } from "@alliance/shared/client";
@@ -111,68 +112,68 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
 //   );
 // };
 
-// interface NewMembersItemProps {
-//   item: GlobalFeedNewMembersDto;
-//   date: string;
-// }
+interface NewMembersItemProps {
+  item: GlobalFeedNewMembersDto;
+  date: string;
+}
 
-// const NewMembersItem = ({ item }: NewMembersItemProps) => {
-//   const [expanded, setExpanded] = useState(false);
-//   const contentRef = useRef<HTMLDivElement>(null);
-//   const isSingle = item.count === 1 && item.users.length > 0;
+const NewMembersItem = ({ item }: NewMembersItemProps) => {
+  const [expanded, setExpanded] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const isSingle = item.count === 1 && item.users.length > 0;
 
-//   return (
-//     <div className="py-3">
-//       <div className="text-zinc-700 mt-1.5">
-//         <ProfilePicRow users={item.users} maxDisplay={8} />
-//         {isSingle ? (
-//           <>
-//             <Link
-//               to={href("/member/:id", { id: item.users[0].id.toString() })}
-//               className="font-medium hover:underline"
-//             >
-//               {item.users[0].displayName}
-//             </Link>
-//             <span className="text-zinc-500">{" joined the Alliance"}</span>
-//           </>
-//         ) : (
-//           <span
-//             onClick={() => setExpanded(!expanded)}
-//             className="cursor-pointer text-left hover:text-zinc-900"
-//           >
-//             <span className="font-medium">{item.count} new members</span>
-//             <span className="text-zinc-500"> joined the Alliance</span>
-//           </span>
-//         )}
-//       </div>
-//       {!isSingle && (
-//         <div
-//           className="overflow-hidden transition-all duration-300 ease-in-out"
-//           style={{
-//             maxHeight: expanded ? contentRef.current?.scrollHeight ?? 0 : 0,
-//             opacity: expanded ? 1 : 0,
-//           }}
-//         >
-//           <div
-//             ref={contentRef}
-//             className="pt-3 pl-2 space-y-1 max-h-80 overflow-y-auto"
-//           >
-//             {item.users.map((user) => (
-//               <Link
-//                 key={user.id}
-//                 to={href("/member/:id", { id: user.id.toString() })}
-//                 className="flex items-center gap-2 hover:bg-zinc-50 rounded py-2 -ml-2"
-//               >
-//                 <ProfileImage pfp={user.profilePicture ?? null} size="small" />
-//                 <span className="text-zinc-700">{user.displayName}</span>
-//               </Link>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
+  return (
+    <div className="py-3">
+      <div className="text-zinc-700 mt-1.5">
+        <ProfilePicRow users={item.users} maxDisplay={8} />
+        {isSingle ? (
+          <>
+            <Link
+              to={href("/member/:id", { id: item.users[0].id.toString() })}
+              className="font-medium hover:underline"
+            >
+              {item.users[0].displayName}
+            </Link>
+            <span className="text-zinc-500">{" joined the Alliance"}</span>
+          </>
+        ) : (
+          <span
+            onClick={() => setExpanded(!expanded)}
+            className="cursor-pointer text-left hover:text-zinc-900"
+          >
+            <span className="font-medium">{item.count} new members</span>
+            <span className="text-zinc-500"> joined the Alliance</span>
+          </span>
+        )}
+      </div>
+      {!isSingle && (
+        <div
+          className="overflow-hidden transition-all duration-300 ease-in-out"
+          style={{
+            maxHeight: expanded ? contentRef.current?.scrollHeight ?? 0 : 0,
+            opacity: expanded ? 1 : 0,
+          }}
+        >
+          <div
+            ref={contentRef}
+            className="pt-3 pl-2 space-y-1 max-h-80 overflow-y-auto"
+          >
+            {item.users.map((user) => (
+              <Link
+                key={user.id}
+                to={href("/member/:id", { id: user.id.toString() })}
+                className="flex items-center gap-2 hover:bg-zinc-50 rounded py-2 -ml-2"
+              >
+                <ProfileImage pfp={user.profilePicture ?? null} size="small" />
+                <span className="text-zinc-700">{user.displayName}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface ForumCommentsItemProps {
   item: GlobalFeedForumCommentsDto;
@@ -320,9 +321,9 @@ const GlobalFeed = ({
                 {/* {item.type === "action_update" && item.actionUpdate && (
               <ActionUpdateItem item={item.actionUpdate} />
             )} */}
-                {/* {item.type === "new_members" && item.newMembers && (
+                {item.type === "new_members" && item.newMembers && (
                   <NewMembersItem item={item.newMembers} date={item.date} />
-                )} */}
+                )}
                 {item.type === "forum_comments" && item.forumComments && (
                   <ForumCommentsItem
                     item={item.forumComments}

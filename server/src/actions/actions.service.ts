@@ -3471,13 +3471,29 @@ export class ActionsService {
       }
     }
 
-    const signedEvents = await this.contractEventRepository.find({
-      where: {
-        type: ContractEventType.SIGNED,
-        date: MoreThan(oneWeekAgo),
-      },
-      relations: { user: { contractEvents: true } },
-      order: { date: 'DESC' },
+    const signedEvents = (
+      await this.contractEventRepository.find({
+        where: {
+          type: ContractEventType.SIGNED,
+          date: MoreThan(oneWeekAgo),
+        },
+        relations: { user: { contractEvents: true } },
+        order: { date: 'DESC' },
+      })
+    ).filter((event) => {
+      const eventIndex = event.user.contractEvents!.findIndex(
+        (e) => e.id === event.id,
+      );
+      if (eventIndex === -1) {
+        // should never occur
+        return false;
+      }
+
+      return (
+        eventIndex === 0 ||
+        event.user.contractEvents![eventIndex - 1].type ===
+          ContractEventType.SUSPENDED
+      );
     });
 
     // Combine all new members into one feed item
