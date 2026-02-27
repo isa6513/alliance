@@ -608,7 +608,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     if (error) {
       setCreateError("Failed to create reminders.");
     }
-    if (reminders.every((reminder) => reminder.data) && reminders.length) {
+    if (
+      reminders.every((reminder) => reminder.data) &&
+      reminders.length > lengthBeforeDeadlineReminders
+    ) {
       setCreateSuccess("Reminders created successfully.");
     }
     if (reminders.length === lengthBeforeDeadlineReminders) {
