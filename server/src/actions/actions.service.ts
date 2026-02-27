@@ -2284,11 +2284,13 @@ export class ActionsService {
     userId: number,
     suiteId?: number,
   ): Promise<ActionDto[]> {
-    const actions = (await this.findPublic(userId)).filter(
-      (action) =>
-        action.shouldParticipate &&
-        action.userRelation !== UserActionRelation.Completed,
-    );
+    const actions = (await this.findPublic(userId))
+      .filter(
+        (action) =>
+          action.shouldParticipate &&
+          action.userRelation !== UserActionRelation.Completed,
+      )
+      .sort((a, b) => b.priority - a.priority);
     if (!suiteId) {
       return actions;
     }

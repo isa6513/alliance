@@ -529,6 +529,17 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     const reminders: Awaited<ReturnType<typeof actionsCreateReminderGroup>>[] =
       [];
 
+    reminders.push(
+      await actionsCreateReminderGroup({
+        path: { eventId: selectedEventId },
+        body: {
+          suiteId: suite.id,
+          ...reminderPresets["Announcement"],
+        },
+      })
+    );
+
+    const lengthBeforeDeadlineReminders = reminders.length;
     const deadlineEvent = nextEventById.get(selectedEventId);
     if (deadlineEvent) {
       reminders.push(
@@ -600,9 +611,11 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     if (reminders.every((reminder) => reminder.data) && reminders.length) {
       setCreateSuccess("Reminders created successfully.");
     }
-    if (reminders.length === 0) {
-      console.log("no reminders created");
-      setCreateError("No reminders created - does this event have a deadline?");
+    if (reminders.length === lengthBeforeDeadlineReminders) {
+      console.log("no deadline reminders created");
+      setCreateError(
+        "No deadline reminders created - does this event have a deadline?"
+      );
     }
     setReminderGroups((prev) => [
       ...prev,
