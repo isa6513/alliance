@@ -17,7 +17,11 @@ interface ProfilePicRowProps {
   showExtraCount?: boolean;
 }
 
-const ProfilePicRow = ({ users, maxDisplay = 20, showExtraCount = false }: ProfilePicRowProps) => {
+const ProfilePicRow = ({
+  users,
+  maxDisplay = 20,
+  showExtraCount = false,
+}: ProfilePicRowProps) => {
   const displayUsers = users.slice(0, maxDisplay);
   const extraCount = users.length > maxDisplay ? users.length - maxDisplay : 0;
 
@@ -149,7 +153,10 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
             opacity: expanded ? 1 : 0,
           }}
         >
-          <div ref={contentRef} className="pt-3 pl-2 space-y-1 max-h-80 overflow-y-auto">
+          <div
+            ref={contentRef}
+            className="pt-3 pl-2 space-y-1 max-h-80 overflow-y-auto"
+          >
             {item.users.map((user) => (
               <Link
                 key={user.id}
@@ -176,8 +183,9 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
   const isSingle = item.count === 1 && item.users.length > 0;
   const postUrl =
     isSingle && item.commentId
-      ? `${href("/forum/post/:id", { id: item.postId.toString() })}?replyId=${item.commentId
-      }`
+      ? `${href("/forum/post/:id", { id: item.postId.toString() })}?replyId=${
+          item.commentId
+        }`
       : href("/forum/post/:id", { id: item.postId.toString() });
 
   return (
@@ -312,9 +320,9 @@ const GlobalFeed = ({
                 {/* {item.type === "action_update" && item.actionUpdate && (
               <ActionUpdateItem item={item.actionUpdate} />
             )} */}
-                {item.type === "new_members" && item.newMembers && (
+                {/* {item.type === "new_members" && item.newMembers && (
                   <NewMembersItem item={item.newMembers} date={item.date} />
-                )}
+                )} */}
                 {item.type === "forum_comments" && item.forumComments && (
                   <ForumCommentsItem
                     item={item.forumComments}
