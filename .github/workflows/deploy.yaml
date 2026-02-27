@@ -538,6 +538,7 @@ jobs:
           fi
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AI_REVIEW_OUTPUT: ${{ github.workspace }}/screenshots/ai-review-results.json
 
       - name: Notify Slack on Visual Regression
