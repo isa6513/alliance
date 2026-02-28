@@ -206,14 +206,14 @@ export class ContractService {
         );
       } else {
         userUpdate.undergoingGroupAssignment = true;
-        notifs.push({
-          user: referredBy,
-          category: NotificationCategory.NewMemberReferred,
-          message: `${user.name} joined the Alliance`,
-          webAppLocation: profileUrl(user.id),
-          associatedUsers: [user],
-        });
       }
+      notifs.push({
+        user: referredBy,
+        category: NotificationCategory.NewMemberReferred,
+        message: `${user.name} joined the Alliance`,
+        webAppLocation: profileUrl(user.id),
+        associatedUsers: [user],
+      });
     } else {
       // no community and no referrer
       userUpdate.undergoingGroupAssignment = true;
