@@ -15,7 +15,7 @@ import ActionEventsPanel from "./ActionEventsPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
 import Card from "@alliance/sharedweb/ui/Card";
-import { shuffleWithSeed } from "../lib/utils";
+import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
 import { useEffect, useMemo } from "react";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import { CardStyle } from "@alliance/shared/styles/card";

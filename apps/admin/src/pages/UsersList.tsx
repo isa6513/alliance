@@ -23,10 +23,11 @@ import UserCard from "../components/UserCard";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import { href, Link, useSearchParams } from "react-router";
-import { LayoutGrid, List } from "lucide-react";
+import { LayoutGrid, List, Shuffle } from "lucide-react";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
 import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
 import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
+import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
 
 type ViewMode = "cards" | "rows";
 
@@ -73,6 +74,8 @@ const UsersList: React.FC = () => {
 
   const [params, setParams] = useSearchParams();
   const viewMode = (params.get("viewMode") as ViewMode | undefined) ?? "cards";
+
+  const [shuffledIds, setShuffledIds] = useState<number[] | null>(null);
 
   useEffect(() => {
     analyticsGetTimeSpentPerUser().then((res) => {
@@ -197,11 +200,27 @@ const UsersList: React.FC = () => {
     }, {} as Record<UserFilterMode, UserDto[]>);
   }, [filteredBySearch]);
 
+  const handleShuffle = useCallback(() => {
+    const current = modeToUsers[filterMode] ?? [];
+
+    const seed = Math.random().toString(36).substring(2, 15);
+    setShuffledIds(
+      shuffleWithSeed(
+        current.map((u) => u.id),
+        seed
+      )
+    );
+  }, [filterMode, modeToUsers]);
+
   const selectedTagNames = useMemo(() => {
     if (!selectedTagIds.length) return [] as string[];
     const selected = new Set(selectedTagIds);
     return tags.filter((tag) => selected.has(tag.id)).map((tag) => tag.name);
   }, [tags, selectedTagIds]);
+
+  useEffect(() => {
+    setShuffledIds(null);
+  }, [filterMode, selectedTagIds, searchQuery]);
 
   const groupFilterLabel = useMemo(() => {
     if (!selectedTagIds.length) {
@@ -256,6 +275,32 @@ const UsersList: React.FC = () => {
       };
     });
   }, [modeToUsers, filterMode]);
+
+  const displayedUsers = useMemo(() => {
+    const list = modeToUsers[filterMode] ?? [];
+    if (
+      shuffledIds != null &&
+      shuffledIds.length === list.length &&
+      list.every((u) => shuffledIds!.includes(u.id))
+    ) {
+      const byId = Object.fromEntries(list.map((u) => [u.id, u]));
+      return shuffledIds.map((id) => byId[id]).filter(Boolean);
+    }
+    return list;
+  }, [filterMode, modeToUsers, shuffledIds]);
+
+  const displayedProfiles = useMemo((): ProfileDto[] => {
+    const list = usersAsProfiles;
+    if (
+      shuffledIds != null &&
+      shuffledIds.length === list.length &&
+      list.every((p) => shuffledIds!.includes(p.id))
+    ) {
+      const byId = Object.fromEntries(list.map((p) => [p.id, p]));
+      return shuffledIds.map((id) => byId[id]).filter(Boolean);
+    }
+    return list;
+  }, [usersAsProfiles, shuffledIds]);
 
   const [memberContactInfo, setMemberContactInfo] = useState<
     Record<number, CommunityMemberContactInfoDto>
@@ -440,6 +485,14 @@ const UsersList: React.FC = () => {
         <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
+            onClick={handleShuffle}
+            className={`p-2 rounded hover:bg-zinc-100`}
+            title="Shuffle view"
+          >
+            <Shuffle size={18} className="text-zinc-600" />
+          </button>
+          <button
+            type="button"
             onClick={() => setParams({ viewMode: "cards" })}
             className={`p-2 rounded ${
               viewMode === "cards" ? "bg-zinc-200" : "hover:bg-zinc-100"
@@ -467,7 +520,7 @@ const UsersList: React.FC = () => {
       )}
       {viewMode === "cards" ? (
         <div className="grid gap-3 w-full [grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]">
-          {(modeToUsers[filterMode] ?? []).map((user) => (
+          {displayedUsers.map((user) => (
             <UserCard
               key={user.id}
               user={user}
@@ -489,7 +542,7 @@ const UsersList: React.FC = () => {
         <div className="w-full">
           <CommunityMembersTable
             leaders={[]}
-            members={usersAsProfiles}
+            members={displayedProfiles}
             amLeader={true}
             userActionRelations={userActionRelations}
             memberContactInfo={memberContactInfo}
