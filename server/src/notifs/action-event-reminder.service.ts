@@ -493,6 +493,7 @@ export class ActionEventReminderService {
         dto.taskCount,
       ),
       dateNow: sendTime,
+      uncompletedMembersInGroupCount: dto.uncompletedMembersInGroupCount,
     };
   }
 

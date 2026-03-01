@@ -11,6 +11,7 @@ import {
   IsArray,
   IsBoolean,
   IsDefined,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
@@ -26,7 +27,7 @@ import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
 import { Action } from '../entities/action.entity';
 import { getImageSource } from 'src/images/images.service';
 import { ActionUpdate } from '../entities/action-update.entity';
-import { ReminderGroup } from '../entities/reminder-group.entity';
+import { ReminderGroup, ReminderCohortType } from '../entities/reminder-group.entity';
 import { ActionSuite } from '../entities/action-suite.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 import { SubmitFormDto } from 'src/tasks/form.dto';
@@ -71,6 +72,16 @@ export class PreviewEmailHtmlDto extends PickType(CreateReminderGroupDto, [
   @IsDefined()
   @IsNumber()
   taskCount: number;
+
+  @ApiPropertyOptional({ enum: ReminderCohortType })
+  @IsOptional()
+  @IsEnum(ReminderCohortType)
+  cohortType?: ReminderCohortType;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
+  uncompletedMembersInGroupCount?: number;
 }
 
 export class PreviewTextDto extends PickType(CreateReminderGroupDto, [
@@ -80,6 +91,16 @@ export class PreviewTextDto extends PickType(CreateReminderGroupDto, [
   @IsDefined()
   @IsNumber()
   taskCount: number;
+
+  @ApiPropertyOptional({ enum: ReminderCohortType })
+  @IsOptional()
+  @IsEnum(ReminderCohortType)
+  cohortType?: ReminderCohortType;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
+  uncompletedMembersInGroupCount?: number;
 }
 
 export class PreviewTextMessageResponse {

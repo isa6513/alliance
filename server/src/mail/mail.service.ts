@@ -46,7 +46,9 @@ export function processKeywordReplacements(
     .replaceAll('#{fullname}', context.user.name)
     .replaceAll('#{firstname}', firstname)
     .replaceAll('#{nmembers}', () =>
-      context.uncompletedMembersInGroupCount!.toString(),
+      context.uncompletedMembersInGroupCount === undefined
+        ? '0'
+        : context.uncompletedMembersInGroupCount.toString(),
     )
     .replaceAll('#{grouplink}', withCid(groupMembersListUrl(true), context.cid))
     .replaceAll('#{lastname}', lastname)

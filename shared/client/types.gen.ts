@@ -1883,6 +1883,8 @@ export type PreviewEmailHtmlDto = {
     emailMessage: string;
     emailSubject: string;
     taskCount: number;
+    cohortType?: 'all_uncompleted' | 'group_leads_with_uncompleted' | 'tag' | 'custom';
+    uncompletedMembersInGroupCount?: number;
 };
 
 export type PreviewEmailHtmlResponse = {
@@ -1893,6 +1895,8 @@ export type PreviewEmailHtmlResponse = {
 export type PreviewTextDto = {
     textMessage: string;
     taskCount: number;
+    cohortType?: 'all_uncompleted' | 'group_leads_with_uncompleted' | 'tag' | 'custom';
+    uncompletedMembersInGroupCount?: number;
 };
 
 export type PreviewTextMessageResponse = {

@@ -935,6 +935,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             handleEditGroupSubmit={handleEditGroupSubmit}
             reminderPlans={reminderPlansByGroup[group.id]}
             sentReminders={sentRemindersByGroup[group.id]}
+            suiteTaskCount={suite.actions?.length}
           />
         );
       })}

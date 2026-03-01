@@ -1,4 +1,6 @@
 import {
+  actionsPreviewEmailHtml,
+  actionsPreviewTextMessage,
   PreviewNotificationPlan,
   ReminderGroup,
 } from "@alliance/shared/client";
@@ -15,7 +17,7 @@ import ActionReminderGroupForm, {
 import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
 import { Link } from "react-router";
 import { formatDate, formatDistanceToNow } from "date-fns";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import { GroupScheduleLabels } from "./ActionRemindersTab";
 
@@ -47,6 +49,7 @@ interface ActionReminderCardProps {
   ) => (payload: ActionReminderGroupFormSubmitPayload) => Promise<void>;
   reminderPlans?: PreviewNotificationPlan[];
   sentReminders?: ActionEventNotifDto[];
+  suiteTaskCount: number;
 }
 const ActionReminderCard = ({
   group,
@@ -71,10 +74,73 @@ const ActionReminderCard = ({
   handleEditGroupSubmit,
   reminderPlans,
   sentReminders,
+  suiteTaskCount,
 }: ActionReminderCardProps) => {
   const [minified, setMinified] = useState(true);
   const [showPlans, setShowPlans] = useState(false);
   const [showSentReminders, setShowSentReminders] = useState(false);
+
+  const [emailPreview, setEmailPreview] = useState<{
+    subject: string;
+    html: string;
+  } | null>(null);
+  const [textPreview, setTextPreview] = useState<string | null>(null);
+  const [pushPreview, setPushPreview] = useState<string | null>(null);
+  const eventId = group.memberActionEvent?.id;
+
+  useEffect(() => {
+    if (editing || minified || eventId == null) {
+      setEmailPreview(null);
+      setTextPreview(null);
+      setPushPreview(null);
+      return;
+    }
+    actionsPreviewEmailHtml({
+      path: { eventId },
+      body: {
+        emailMessage: group.emailMessage,
+        emailSubject: group.emailSubject,
+        taskCount: suiteTaskCount,
+        cohortType: group.cohortType,
+      },
+    }).then((res) => {
+      if (!res.error && res.data)
+        setEmailPreview({
+          subject: res.data.subject,
+          html: res.data.html,
+        });
+    });
+    actionsPreviewTextMessage({
+      path: { eventId },
+      body: {
+        textMessage: group.textMessage,
+        taskCount: suiteTaskCount,
+        cohortType: group.cohortType,
+      },
+    }).then((res) => {
+      if (!res.error && res.data) setTextPreview(res.data.text);
+    });
+    actionsPreviewTextMessage({
+      path: { eventId },
+      body: {
+        textMessage: group.pushMessage,
+        taskCount: suiteTaskCount,
+        cohortType: group.cohortType,
+      },
+    }).then((res) => {
+      if (!res.error && res.data) setPushPreview(res.data.text);
+    });
+  }, [
+    editing,
+    minified,
+    eventId,
+    group.emailMessage,
+    group.emailSubject,
+    group.textMessage,
+    group.pushMessage,
+    group.cohortType,
+    suiteTaskCount,
+  ]);
 
   const handleEditGroup = () => {
     setMinified(false);
@@ -96,8 +162,9 @@ const ActionReminderCard = ({
     <Card
       key={group.id}
       ref={highlightedReminder === group.id ? ref : undefined}
-      className={`bg-white text-sm !p-0 overflow-hidden transition-all duration-300 ${highlightedReminder === group.id ? "!border-red-500" : ""
-        }`}
+      className={`bg-white text-sm !p-0 overflow-hidden transition-all duration-300 ${
+        highlightedReminder === group.id ? "!border-red-500" : ""
+      }`}
     >
       <div className="flex flex-row gap-2 w-full bg-zinc-100 p-4 items-center justify-between">
         <div className="flex flex-row gap-4 items-center">
@@ -105,8 +172,9 @@ const ActionReminderCard = ({
             type="button"
             color={ButtonColor.Transparent}
             onClick={() => setMinified(!minified)}
-            className={`!p-2 -my-1 transition-transform duration-100 ${minified ? "rotate-180" : ""
-              }`}
+            className={`!p-2 -my-1 transition-transform duration-100 ${
+              minified ? "rotate-180" : ""
+            }`}
           >
             <DropdownIcon size="small" fill="black" />
           </Button>
@@ -114,8 +182,9 @@ const ActionReminderCard = ({
             <div className="flex flex-row gap-2 items-center">
               {relativeSendLabel && (
                 <p
-                  className={`text-sm ${isFinished ? "text-gray-500" : "text-blue-500"
-                    }`}
+                  className={`text-sm ${
+                    isFinished ? "text-gray-500" : "text-blue-500"
+                  }`}
                 >
                   {relativeSendLabel}
                 </p>
@@ -213,18 +282,43 @@ const ActionReminderCard = ({
                 <TextareaWithHighlights
                   value={group.emailMessage}
                   editable={false}
-                  onChange={() => { }}
+                  onChange={() => {}}
                   keywords={[]}
                   textareaClassName="!border-0 border-transparent"
                 />
+                {emailPreview && (
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {emailPreview.subject}
+                    </p>
+                    <div
+                      className="text-sm text-gray-700 whitespace-pre-wrap break-words"
+                      dangerouslySetInnerHTML={{ __html: emailPreview.html }}
+                    />
+                  </div>
+                )}
               </Card>
               <p className="text-sm font-semibold">Text message:</p>
               <Card className="flex flex-col gap-1 !p-2">
                 <p>{group.textMessage}</p>
+                {textPreview != null && (
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                      {textPreview}
+                    </p>
+                  </div>
+                )}
               </Card>
               <p className="text-sm font-semibold">Push message:</p>
               <Card className="flex flex-col gap-1 !p-2">
                 <p>{group.pushMessage}</p>
+                {pushPreview != null && (
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                      {pushPreview}
+                    </p>
+                  </div>
+                )}
               </Card>
             </>
           )}
@@ -250,8 +344,9 @@ const ActionReminderCard = ({
           </div>
           <div
             className={`divide-y divide-gray-200 border-t border-gray-200 
-                    overflow-y-auto transition-[max-height] duration-300 ${showPlans ? "max-h-[300px]" : "max-h-[0px]"
-              }`}
+                    overflow-y-auto transition-[max-height] duration-300 ${
+                      showPlans ? "max-h-[300px]" : "max-h-[0px]"
+                    }`}
           >
             {reminderPlans === undefined ? (
               <p className="text-sm text-zinc-500 p-5">
@@ -278,8 +373,9 @@ const ActionReminderCard = ({
           </div>
           <div
             className={`divide-y divide-gray-200 border-t border-gray-200 
-                    overflow-y-auto transition-[max-height] duration-300 ${showSentReminders ? "max-h-[300px]" : "max-h-[0px]"
-              }`}
+                    overflow-y-auto transition-[max-height] duration-300 ${
+                      showSentReminders ? "max-h-[300px]" : "max-h-[0px]"
+                    }`}
           >
             {sentReminders === undefined ? (
               <p className="text-sm text-zinc-500 p-5">
@@ -309,10 +405,11 @@ const ActionReminderCard = ({
                     </Link>
                   </div>
                   <p
-                    className={`text-sm ${notif.mms?.status === "undelivered"
-                      ? "text-red-500"
-                      : "text-zinc-500"
-                      }`}
+                    className={`text-sm ${
+                      notif.mms?.status === "undelivered"
+                        ? "text-red-500"
+                        : "text-zinc-500"
+                    }`}
                   >
                     {notif.channel === "text"
                       ? notif.mms?.status
