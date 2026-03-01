@@ -95,6 +95,7 @@ const ActionReminderCard = ({
       setPushPreview(null);
       return;
     }
+    let ignored = false;
     actionsPreviewEmailHtml({
       path: { eventId },
       body: {
@@ -104,11 +105,15 @@ const ActionReminderCard = ({
         cohortType: group.cohortType,
       },
     }).then((res) => {
-      if (!res.error && res.data)
+      if (ignored) {
+        return;
+      }
+      if (!res.error && res.data) {
         setEmailPreview({
           subject: res.data.subject,
           html: res.data.html,
         });
+      }
     });
     actionsPreviewTextMessage({
       path: { eventId },
@@ -118,7 +123,12 @@ const ActionReminderCard = ({
         cohortType: group.cohortType,
       },
     }).then((res) => {
-      if (!res.error && res.data) setTextPreview(res.data.text);
+      if (ignored) {
+        return;
+      }
+      if (!res.error && res.data) {
+        setTextPreview(res.data.text);
+      }
     });
     actionsPreviewTextMessage({
       path: { eventId },
@@ -128,8 +138,16 @@ const ActionReminderCard = ({
         cohortType: group.cohortType,
       },
     }).then((res) => {
-      if (!res.error && res.data) setPushPreview(res.data.text);
+      if (ignored) {
+        return;
+      }
+      if (!res.error && res.data) {
+        setPushPreview(res.data.text);
+      }
     });
+    return () => {
+      ignored = true;
+    };
   }, [
     editing,
     minified,
