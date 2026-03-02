@@ -19,8 +19,9 @@ const ProfileImage = ({
     <img
       src={!!pfp ? pfp : "/noun-user-icon.svg"}
       loading="lazy"
-      className={`object-cover bg-white shrink-0 inline ${sizeClass[size]} ${!pfp ? "border border-zinc-300" : ""
-        } ${className ?? ""}`}
+      className={`object-cover bg-white shrink-0 inline ${sizeClass[size]} ${
+        !pfp ? "ring-1 ring-zinc-300 ring-inset" : ""
+      } ${className ?? ""}`}
     />
   );
 };
