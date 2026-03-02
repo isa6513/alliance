@@ -6,7 +6,11 @@ const CommunityRoute = () => {
   const { user } = useAuth();
 
   if (!user) {
-    return <Spinner />;
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center">
+        <Spinner size="large" />
+      </div>
+    );
   }
 
   return <CommunityPage />;
