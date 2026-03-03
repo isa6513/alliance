@@ -164,32 +164,34 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
         </p>
       ) : (
         <List>
-          {friends.map((friend) => (
-            <div
-              key={friend.id}
-              className="flex items-center p-3 hover:bg-zinc-100 group"
-            >
-              <Link
-                className="flex items-center flex-1"
-                to={href("/member/:id", { id: String(friend.id) })}
+          {friends
+            .filter((friend) => typeof friend.id === "number")
+            .map((friend) => (
+              <div
+                key={friend.id}
+                className="flex items-center p-3 hover:bg-zinc-100 group"
               >
-                <ProfileImage className="mr-3" pfp={friend.profilePicture} />
-                <div className="flex-grow">
-                  <p className="">{friend.displayName}</p>
-                </div>
-              </Link>
-              {isMe && (
-                <Button
-                  onClick={(e) => handleRemoveFriend(e, friend.id)}
-                  color={ButtonColor.Red}
-                  disabled={processingIds[friend.id]}
-                  className="text-sm bg-transparent hover:!text-red-700 hidden group-hover:block"
+                <Link
+                  className="flex items-center flex-1"
+                  to={href("/member/:id", { id: friend.id.toString() })}
                 >
-                  {processingIds[friend.id] ? "Removing..." : "Remove friend"}
-                </Button>
-              )}
-            </div>
-          ))}
+                  <ProfileImage className="mr-3" pfp={friend.profilePicture} />
+                  <div className="flex-grow">
+                    <p className="">{friend.displayName}</p>
+                  </div>
+                </Link>
+                {isMe && (
+                  <Button
+                    onClick={(e) => handleRemoveFriend(e, friend.id)}
+                    color={ButtonColor.Red}
+                    disabled={processingIds[friend.id]}
+                    className="text-sm bg-transparent hover:!text-red-700 hidden group-hover:block"
+                  >
+                    {processingIds[friend.id] ? "Removing..." : "Remove friend"}
+                  </Button>
+                )}
+              </div>
+            ))}
         </List>
       )}
     </>
