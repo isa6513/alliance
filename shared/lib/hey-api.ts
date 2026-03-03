@@ -29,8 +29,8 @@ export const createClientConfig: CreateClientConfig = (config) => {
     if (
       res.status !== 401 ||
       req.url.includes("auth/refresh") ||
-      window.location.pathname.includes("/login") ||
-      window.location.pathname.includes("/signup")
+      window?.location?.pathname?.includes("/login") ||
+      window?.location?.pathname?.includes("/signup")
     ) {
       return res;
     }
