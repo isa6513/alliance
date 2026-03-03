@@ -171,7 +171,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
             >
               <Link
                 className="flex items-center flex-1"
-                to={href("/member/:id", { id: friend.id.toString() })}
+                to={href("/member/:id", { id: String(friend.id) })}
               >
                 <ProfileImage className="mr-3" pfp={friend.profilePicture} />
                 <div className="flex-grow">
