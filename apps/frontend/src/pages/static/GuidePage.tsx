@@ -8,68 +8,31 @@ import { href } from "react-router";
 import ResourceButton from "../../components/ResourceButton";
 import ExampleActionCardList from "../../components/ExampleActionCardList";
 import ExampleActionCategoryList from "../../components/ExampleActionCategoryList";
+import TableOfContents from "../../components/TableOfContents";
 
 const GuidePage: React.FC = () => {
+  const tocSections = [
+    { id: "priorities", label: "Priorities", level: 2 },
+    { id: "structure", label: "How we work", level: 2 },
+    { id: "structure-2", label: "Structure", level: 3 },
+    { id: "structure-3", label: "Roadmap", level: 3 },
+    { id: "decisions", label: "How we make decisions", level: 2 },
+    { id: "action-planning", label: "Action planning", level: 3 },
+    { id: "oversight", label: "Oversight", level: 3 },
+    { id: "resources", label: "Resources", level: 2 },
+    { id: "foundation", label: "Foundation", level: 3 },
+    { id: "governance", label: "Governance", level: 3 },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
-      <div className="flex flex-col md:flex-row mx-6 md:mx-12 lg:mr-40 gap-8 lg:gap-18 pt-8 md:pt-32 pb-56 justify-center">
-        <aside className="min-w-80">
-          <div className="md:px-3 flex flex-col md:sticky top-12 md:pr-8 lg:pr-18 md:border-r border-zinc-200">
-            <ol className="flex flex-col gap-y-1 *:hover:underline text-zinc-900">
-              <li>
-                <a href="#priorities">Priorities</a>
-              </li>
-              <li>
-                <a href="#structure">How we work</a>
-              </li>
-              <li className="ml-4">
-                <a href="#structure" className="">
-                  Structure
-                </a>
-              </li>
-              <li className="ml-4">
-                <a href="#structure-3" className="">
-                  Roadmap
-                </a>
-              </li>
-              <li>
-                <a href="#decisions">How we make decisions</a>
-              </li>
-              <li className="ml-4">
-                <a href="#decisions" className="">
-                  Action planning
-                </a>
-              </li>
-              <li className="ml-4">
-                <a href="#decisions-2" className="">
-                  Oversight
-                </a>
-              </li>
-              <li>
-                <a href="#resources">Resources</a>
-              </li>
-              <li className="ml-4">
-                <a href="#governance" className="">
-                  Foundation
-                </a>
-              </li>
-              <li className="ml-4">
-                <a href="#governance" className="">
-                  Governance
-                </a>
-              </li>
-              <li className="ml-4">
-                <a href="#faq" className="">
-                  FAQ
-                </a>
-              </li>
-            </ol>
-          </div>
-        </aside>
+      <div className="flex flex-row md:gap-8 lg:gap-12 justify-center mx-6 md:mx-12 pt-8 md:pt-32 pb-56">
+        <TableOfContents tocSections={tocSections} />
+
         <div className="flex flex-col max-w-[46rem]">
           <div className="mx-auto w-full mb-4 md:mb-6">
-            <h2 className="font-semibold text-3xl md:text-5xl mb-3 text-black">
+            <h2 className="font-semibold text-3xl md:text-5xl font-serif mb-3 text-black">
               Guide to the Alliance
             </h2>
           </div>
@@ -184,6 +147,13 @@ Members provide input and participate in governance that ensures approval of the
 
 Meanwhile, the office has the freedom to make any plans that advance our high-level priorities and make effective use of members’ time and resources.
 
+"
+              />
+
+              <MarkdownWrapper
+                id="action-planning"
+                markdownContent="
+
 ## Action planning
 Planning actions is a creative, open-ended process that searches for levers of change which members can pull.
 
@@ -196,7 +166,7 @@ In ideation for and development of an action plan, the office weighs many consid
               />
 
               <MarkdownWrapper
-                id="decisions-2"
+                id="oversight"
                 markdownContent="
 
 ## Oversight

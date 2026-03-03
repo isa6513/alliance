@@ -6,7 +6,7 @@ const PrelaunchLandingPage: React.FC = () => {
   return (
     <div className="min-h-screen lg:h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} showLogo={false} />
-      <div className="flex-1 flex flex-col mx-auto gap-y-8 lg:gap-y-16 py-8 lg:py-20 px-8">
+      <div className="flex-1 flex flex-col mx-auto gap-y-8 lg:gap-y-16 py-8 lg:pt-20 lg:pb-36 px-8">
         <div className="flex items-start justify-center py-4 lg:py-0">
           <div className="flex flex-col gap-y-3 lg:gap-y-8 max-w-[700px]">
             <p className="font-berlingske uppercase font-medium font-serif text-3xl lg:text-4xl text-black text-center">
