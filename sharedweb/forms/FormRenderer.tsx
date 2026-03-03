@@ -33,7 +33,10 @@ import {
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
 import { useSearchParams } from "react-router";
-import { useFormPageDurationTracking, useFormValidationErrorTracking } from "./formAnalytics";
+import {
+  useFormPageDurationTracking,
+  useFormValidationErrorTracking,
+} from "./formAnalytics";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -69,6 +72,37 @@ type FormRendererProps = {
 );
 
 export { computeFormStorageKey };
+
+type FieldKind = FormSchema["pages"][number]["fields"][number]["kind"];
+const KNOWN_FIELD_KINDS_RECORD: Record<FieldKind, unknown> = {
+  text: true,
+  textarea: true,
+  email: true,
+  number: true,
+  range: true,
+  phone: true,
+  checkbox: true,
+  radio: true,
+  select: true,
+  multiselect: true,
+  date: true,
+  time: true,
+  timezone: true,
+  file: true,
+  city: true,
+  contract: true,
+  custom: true,
+  header: true,
+  label: true,
+  divider: true,
+  spacer: true,
+  html: true,
+  image: true,
+  video: true,
+  quote: true,
+  biglink: true,
+} satisfies Record<FieldKind, unknown>;
+const KNOWN_FIELD_KINDS = new Set(Object.keys(KNOWN_FIELD_KINDS_RECORD));
 
 const DEFAULT_DEVICE_TYPE: DeviceVisibilityTarget = "desktop";
 
@@ -163,6 +197,17 @@ const FormRenderer = ({
     }
 
     return { fieldLookup: lookup, defaultValueMap: defaults };
+  }, [schema]);
+
+  const unknownKind = useMemo(() => {
+    for (const page of schema.pages ?? []) {
+      for (const element of page.fields ?? []) {
+        if (!KNOWN_FIELD_KINDS.has(element.kind)) {
+          return element.kind;
+        }
+      }
+    }
+    return null;
   }, [schema]);
 
   const pageCount = schema.pages?.length ?? 0;
@@ -777,7 +822,8 @@ const FormRenderer = ({
       return;
     }
 
-    const { isValid, firstInvalidPageIndex, firstInvalidFieldId } = await validateAllPages();
+    const { isValid, firstInvalidPageIndex, firstInvalidFieldId } =
+      await validateAllPages();
     if (!isValid) {
       trackValidationError(firstInvalidFieldId);
       if (
@@ -1012,7 +1058,8 @@ const FormRenderer = ({
   };
 
   useFormPageDurationTracking(formTrackingParams);
-  const trackValidationError = useFormValidationErrorTracking(formTrackingParams);
+  const trackValidationError =
+    useFormValidationErrorTracking(formTrackingParams);
 
   useEffect(() => {
     setFieldErrors({});
@@ -1115,6 +1162,18 @@ const FormRenderer = ({
     }
     return <RenderDisplayBlock key={index} block={resolvedBlock} />;
   };
+
+  if (unknownKind) {
+    return (
+      <div
+        className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800"
+        role="alert"
+      >
+        <p className="font-medium">This form can&apos;t be displayed</p>
+        <p className="mt-1 text-sm">Refreshing the page may fix the issue.</p>
+      </div>
+    );
+  }
 
   return (
     <div ref={formTopRef} className="mx-auto scroll-mt-24">
