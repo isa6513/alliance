@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
-const APP_VERSION = process.env.APP_VERSION ?? 'dev';
+const APP_VERSION = process.env.VITE_APP_VERSION ?? 'dev';
 
 @Injectable()
 export class AppVersionInterceptor implements NestInterceptor {
