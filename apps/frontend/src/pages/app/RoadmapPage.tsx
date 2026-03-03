@@ -8,21 +8,27 @@ const RoadmapPage: React.FC = () => {
   useWhiteBackground();
 
   const tocSections = [
-    { id: "experimental-phase", label: "Experimental phase", level: 1 },
-    { id: "public-launch", label: "Public launch", level: 1 },
-    { id: "current-activities", label: "Current activities", level: 1 },
+    { id: "experimental-phase", label: "Experimental phase", level: 2 },
+    { id: "public-launch", label: "Public launch", level: 2 },
+    { id: "current-activities", label: "Current activities", level: 2 },
   ];
 
   return (
     <InfoSubpage tocSections={tocSections}>
       <p className="text-zinc-500">Last updated: February 25, 2026</p>
       <section className="gap-y-4 flex flex-col">
-        <p
+        <h1
           id="experimental-phase"
           className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
         >
+          Roadmap
+        </h1>
+        <h2
+          id="experimental-phase"
+          className="mt-2 text-2xl font-semibold text-black"
+        >
           Experimental phase
-        </p>
+        </h2>
         <p>
           We are in an experimental, invite-only phase, in which our primary
           focus is learning.
@@ -61,12 +67,9 @@ const RoadmapPage: React.FC = () => {
         </p>
       </section>
       <section className="gap-y-4 flex flex-col">
-        <p
-          id="public-launch"
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-        >
+        <h2 id="public-launch" className="text-2xl font-semibold text-black">
           Public launch
-        </p>
+        </h2>
         <p>
           After we launch publicly, our actions will primarily aim to make rapid
           and significant progress on our priorities. This will involve:
@@ -98,12 +101,12 @@ const RoadmapPage: React.FC = () => {
         <ExampleActionCategoryList />
       </section>
       <section className="gap-y-4 flex flex-col">
-        <p
+        <h2
           id="current-activities"
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
+          className="mt-2 text-2xl font-semibold text-black"
         >
           Current activities
-        </p>
+        </h2>
         <p>Right now, the office is:</p>
         <ul className="list-disc list-inside pl-4 space-y-2">
           <li>Planning weekly actions that test specific hypotheses.</li>
