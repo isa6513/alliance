@@ -1,5 +1,5 @@
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ActionDto } from "@alliance/shared/client";
 import { Link, href } from "react-router";
@@ -47,7 +47,11 @@ const HomePage = () => {
     handleDismissGeneralUpdate,
   } = useTaskActionsData();
 
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
   const [showingTasksList, setShowingTasksList] = useState(false);
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
