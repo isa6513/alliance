@@ -121,7 +121,10 @@ const ContractPage: React.FC = () => {
 
         {signedContract && (
           <div className="flex flex-col">
-            <MemberContract markdownOverride={signedContract.markdown} />
+            <MemberContract
+              markdownOverride={signedContract.markdown}
+              className="p-6"
+            />
             {signedContractMessage}
           </div>
         )}
@@ -133,7 +136,10 @@ const ContractPage: React.FC = () => {
                 An updated contract is available.
               </p>
             )}
-            <MemberContract markdownOverride={latestContract.markdown} />
+            <MemberContract
+              markdownOverride={latestContract.markdown}
+              className="p-6"
+            />
             {lastContractEvent?.type === "signed" &&
             lastContractEvent.contractId === latestContract.id ? (
               signedContractMessage

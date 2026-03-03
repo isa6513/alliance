@@ -127,7 +127,7 @@ As a result, we restrict membership to those who sign and abide by our membershi
               />
 
               <div className="my-12 flex flex-col gap-y-4">
-                <MemberContract id="contract" className="bg-zinc-50" />
+                <MemberContract id="contract" className="bg-zinc-50 p-6" />
                 <p className="text-center text-zinc-500">
                   Our current membership contract
                 </p>

@@ -43,13 +43,19 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
             <strong className="!font-semibold" {...props} />
           ),
           ol: ({ ...props }) => (
-            <ol className="list-decimal list-outside pl-6 my-2" {...props} />
+            <ol
+              className="list-decimal list-outside pl-6 first:mt-0 mt-2"
+              {...props}
+            />
           ),
           ul: ({ ...props }) => (
-            <ul className="list-disc list-outside pl-6 my-2" {...props} />
+            <ul
+              className="list-disc list-outside pl-6 first:mt-0 mt-2"
+              {...props}
+            />
           ),
           li: ({ ...props }) => (
-            <li className="my-2 pl-1 [&>p]:my-0" {...props} />
+            <li className="first:mt-0 mt-2 pl-1 [&>p]:my-0" {...props} />
           ),
           a: ({ ...props }) => (
             <a
