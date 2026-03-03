@@ -1,4 +1,5 @@
 import { CreateClientConfig } from "../client/client.gen";
+import { getAppVersion } from "./app-version";
 
 export const AuthEvents = {
   onUnauthorized: () => {
@@ -14,6 +15,20 @@ export const AuthEvents = {
   },
 };
 
+let versionMismatchFired = false;
+
+function checkAppVersion(res: Response): void {
+  if (typeof window === "undefined") return;
+  const clientVersion = getAppVersion();
+  if (clientVersion == undefined) return;
+  const serverVersion = res.headers.get("X-App-Version");
+  if (serverVersion == null) return;
+  if (serverVersion === clientVersion) return;
+  if (versionMismatchFired) return;
+  versionMismatchFired = true;
+  window.location.reload();
+}
+
 export const createClientConfig: CreateClientConfig = (config) => {
   const originalFetch = (config?.fetch ?? fetch).bind(globalThis);
 
@@ -26,11 +41,14 @@ export const createClientConfig: CreateClientConfig = (config) => {
 
     const res = await originalFetch(req);
 
+    checkAppVersion(res);
+
     if (
       res.status !== 401 ||
       req.url.includes("auth/refresh") ||
-      window.location.pathname.includes("/login") ||
-      window.location.pathname.includes("/signup")
+      (typeof window !== "undefined" &&
+        (window.location.pathname.includes("/login") ||
+          window.location.pathname.includes("/signup")))
     ) {
       return res;
     }

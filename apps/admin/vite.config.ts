@@ -16,6 +16,11 @@ const sharedWebPkg = path.resolve(monorepoRoot, "sharedweb");
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [!isStorybook && reactRouter(), tailwindcss()],
+  define: {
+    "import.meta.env.VITE_APP_VERSION": JSON.stringify(
+      process.env.APP_VERSION ?? "dev"
+    ),
+  },
   optimizeDeps: {
     exclude: ["@alliance/shared", "@alliance/sharedweb"],
     include: ["style-to-js", "hast-util-to-jsx-runtime", "debug"],

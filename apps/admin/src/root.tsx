@@ -9,10 +9,13 @@ import {
 import { Route } from "../.react-router/types/src/+types/root";
 import { AuthProvider } from "./lib/AuthContext";
 import { ToastProvider } from "@alliance/sharedweb/ui/ToastProvider";
+import { setAppVersion } from "@alliance/shared/lib/app-version";
 import { client } from "@alliance/shared/client/client.gen";
 import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import { GroupAssignmentProvider } from "./lib/GroupAssignmentContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+setAppVersion(import.meta.env.VITE_APP_VERSION ?? "dev");
 
 const queryClient = new QueryClient({
   defaultOptions: {
