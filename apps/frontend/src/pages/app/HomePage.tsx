@@ -48,10 +48,14 @@ const HomePage = () => {
   } = useTaskActionsData();
 
   const { user, refreshUser } = useAuth();
+  const hasRefreshedForNoContract = useRef(false);
 
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    if (user && !user.hasActiveContract && !hasRefreshedForNoContract.current) {
+      hasRefreshedForNoContract.current = true;
+      refreshUser();
+    }
+  }, [user, refreshUser]);
 
   const [showingTasksList, setShowingTasksList] = useState(false);
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
