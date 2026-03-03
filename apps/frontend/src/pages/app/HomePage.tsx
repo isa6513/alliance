@@ -334,7 +334,7 @@ const HomePage = () => {
   ) : (
     <div
       ref={mainScrollRef}
-      className="w-full h-[calc(100vh-var(--mobile-nav-height))] bg-white"
+      className="w-full h-[calc(100vh-var(--mobile-nav-height))] overflow-y-auto bg-white [scrollbar-gutter:stable]"
     >
       {mainContent}
     </div>
