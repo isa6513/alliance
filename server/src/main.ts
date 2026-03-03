@@ -9,7 +9,6 @@ import cookieParser from 'cookie-parser';
 import { PostHog, setupExpressErrorHandler } from 'posthog-node';
 import type { ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
-import { AppVersionInterceptor } from './app-version.interceptor';
 import { PosthogExceptionFilter } from './posthog.filter';
 import { MetricsInterceptor } from './metrics';
 
@@ -76,13 +75,11 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new MetricsInterceptor());
-  app.useGlobalInterceptors(new AppVersionInterceptor());
   app.use(cookieParser());
   app.enableCors({
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
-    exposedHeaders: ['X-App-Version'],
   });
   app.useWebSocketAdapter(new SocketIoAdapter(app));
   app.set('trust proxy', 'loopback');
