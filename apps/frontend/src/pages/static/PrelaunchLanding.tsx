@@ -26,7 +26,7 @@ const PrelaunchLandingPage: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-y-4">
+        <div className="flex flex-col items-center gap-y-4">
           <img
             src={alliancePeople}
             alt="Alliance members"

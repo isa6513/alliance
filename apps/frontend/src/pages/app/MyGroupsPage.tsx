@@ -187,7 +187,6 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
         onSelectCommunity(null);
         setLeavingCommunityId(null);
         removeCommunity(community.id);
-
       }
     },
     [onSelectCommunity, removeCommunity]
@@ -369,7 +368,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
                 ? "Cancel reassignment"
                 : "Cancel assignment"}
             </Button>
-          ) : (
+          ) : nonLeaderCommunities.length ? (
             <Button
               className="justify-self-end"
               color={ButtonColor.Grey}
@@ -377,11 +376,9 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
                 void handleRequestAssignment(event.currentTarget)
               }
             >
-              {nonLeaderCommunities.length
-                ? "Request reassignment"
-                : "Request assignment"}
+              Request reassignment
             </Button>
-          )}
+          ) : null}
         </div>
         {nonLeaderCommunities.length ? (
           <List>
@@ -492,7 +489,24 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
             })}
           </List>
         ) : (
-          <span>You are not a member of any group</span>
+          <div className="flex flex-col gap-y-2 mx-auto items-center py-4">
+            <span>
+              You are not a member of any group.
+              {user &&
+                user.undergoingGroupAssignment &&
+                " Staff will assign you to a group in a few days."}
+            </span>
+            {user && !user.undergoingGroupAssignment && (
+              <Button
+                color={ButtonColor.Black}
+                onClick={(event) =>
+                  void handleRequestAssignment(event.currentTarget)
+                }
+              >
+                Request assignment
+              </Button>
+            )}
+          </div>
         )}
       </div>
 
