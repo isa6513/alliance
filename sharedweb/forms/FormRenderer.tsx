@@ -74,7 +74,7 @@ type FormRendererProps = {
 export { computeFormStorageKey };
 
 type FieldKind = FormSchema["pages"][number]["fields"][number]["kind"];
-const KNOWN_FIELD_KINDS_RECORD: Record<FieldKind, unknown> = {
+const KNOWN_FIELD_KINDS_RECORD = {
   text: true,
   textarea: true,
   email: true,
@@ -101,8 +101,10 @@ const KNOWN_FIELD_KINDS_RECORD: Record<FieldKind, unknown> = {
   video: true,
   quote: true,
   biglink: true,
-} satisfies Record<FieldKind, unknown>;
-const KNOWN_FIELD_KINDS = new Set(Object.keys(KNOWN_FIELD_KINDS_RECORD));
+} as const satisfies Record<FieldKind, unknown>;
+const KNOWN_FIELD_KINDS = new Set(
+  Object.keys(KNOWN_FIELD_KINDS_RECORD)
+) as Set<FieldKind>;
 
 const DEFAULT_DEVICE_TYPE: DeviceVisibilityTarget = "desktop";
 
