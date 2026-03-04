@@ -19,6 +19,7 @@ import { useSearchParams } from "react-router";
 export enum MemberFilterMode {
   All = "All",
   FriendsOfFriends = "Friends of friends",
+  Leads = "Leads",
   Staff = "Staff",
 }
 
@@ -71,27 +72,30 @@ const MembersListPage = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { allFriendsOfFriends, allOtherMembers, staffMembers } = useMemo(() => {
-    const fofs: ProfileDtoWithFriends[] = [];
-    const fofIds = new Set<number>();
-    for (const member of members) {
-      if (
-        member.id !== user?.id &&
-        !friendIds.has(member.id) &&
-        member.friends.some((f) => friendIds.has(f.id))
-      ) {
-        fofs.push(member);
-        fofIds.add(member.id);
+  const { allFriendsOfFriends, allOtherMembers, staffMembers, leadsMembers } =
+    useMemo(() => {
+      const fofs: ProfileDtoWithFriends[] = [];
+      const fofIds = new Set<number>();
+      for (const member of members) {
+        if (
+          member.id !== user?.id &&
+          !friendIds.has(member.id) &&
+          member.friends.some((f) => friendIds.has(f.id))
+        ) {
+          fofs.push(member);
+          fofIds.add(member.id);
+        }
       }
-    }
-    const others = members.filter((m) => !fofIds.has(m.id));
-    const staff = members.filter((m) => m.staff);
-    return {
-      allFriendsOfFriends: fofs,
-      allOtherMembers: others,
-      staffMembers: staff,
-    };
-  }, [members, user?.id, friendIds]);
+      const others = members.filter((m) => !fofIds.has(m.id));
+      const staff = members.filter((m) => m.staff);
+      const leads = members.filter((m) => m.isCommunityLeader);
+      return {
+        allFriendsOfFriends: fofs,
+        allOtherMembers: others,
+        staffMembers: staff,
+        leadsMembers: leads,
+      };
+    }, [members, user?.id, friendIds]);
 
   const { friendsOfFriends, otherMembers } = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -112,6 +116,7 @@ const MembersListPage = () => {
     [MemberFilterMode.All]: members.length.toString(),
     [MemberFilterMode.FriendsOfFriends]: friendsOfFriends.length.toString(),
     [MemberFilterMode.Staff]: staffMembers.length.toString(),
+    [MemberFilterMode.Leads]: leadsMembers.length.toString(),
   };
 
   const renderMembers = (list: ProfileDtoWithFriends[]) => (
@@ -178,6 +183,16 @@ const MembersListPage = () => {
             <>
               {friendsOfFriends.length > 0 ? (
                 renderMembers(friendsOfFriends)
+              ) : (
+                <p className="text-center text-zinc-500 py-4">None found</p>
+              )}
+            </>
+          )}
+
+          {filterMode === MemberFilterMode.Leads && (
+            <>
+              {leadsMembers.length > 0 ? (
+                renderMembers(leadsMembers)
               ) : (
                 <p className="text-center text-zinc-500 py-4">None found</p>
               )}
