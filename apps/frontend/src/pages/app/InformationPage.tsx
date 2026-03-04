@@ -7,7 +7,7 @@ import {
   Flag,
   Info,
   Mail,
-  Map,
+  Map as MapIcon,
   Megaphone,
   Scale,
   Users,
@@ -60,7 +60,7 @@ const InformationPage: React.FC = () => {
       description:
         "The Alliance is in an experimental phase and building up to a public launch.",
       href: href("/roadmap"),
-      icon: Map,
+      icon: MapIcon,
     },
     {
       title: "How groups work",
