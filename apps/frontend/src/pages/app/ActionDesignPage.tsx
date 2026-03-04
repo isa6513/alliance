@@ -1,30 +1,41 @@
 import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
-
 import { Link, href } from "react-router";
+import InfoSubpage, {
+  type InfoSubpageTocSections,
+} from "../../components/InfoSubpage";
 
-import InfoSubpage from "../../components/InfoSubpage";
+enum Section {
+  DesigningActions = "designing-actions",
+  InitialIdea = "initial-idea",
+  MakingAPlan = "making-a-plan",
+  Preparation = "preparation",
+  TaskProduction = "task-production",
+  Launch = "launch",
+  FollowUp = "follow-up",
+  SubmitActionIdea = "submit-action-idea",
+}
+
+const SECTIONS: InfoSubpageTocSections = [
+  { id: Section.DesigningActions, label: "Action design", level: 1 },
+  { id: Section.InitialIdea, label: "Initial idea", level: 2 },
+  { id: Section.MakingAPlan, label: "Making a plan", level: 2 },
+  { id: Section.Preparation, label: "Preparatory steps", level: 2 },
+  { id: Section.TaskProduction, label: "Task production", level: 2 },
+  { id: Section.Launch, label: "Launch", level: 2 },
+  { id: Section.FollowUp, label: "Follow-up steps", level: 2 },
+  { id: Section.SubmitActionIdea, label: "Submit an idea", level: 1 },
+];
 
 const TerminologyPage: React.FC = () => {
   useWhiteBackground();
 
-  const tocSections = [
-    { id: "designing-actions", label: "Action design", level: 1 },
-    { id: "initial-idea", label: "Initial idea", level: 2 },
-    { id: "making-a-plan", label: "Making a plan", level: 2 },
-    { id: "preparation", label: "Preparatory steps", level: 2 },
-    { id: "task-production", label: "Task production", level: 2 },
-    { id: "launch", label: "Launch", level: 2 },
-    { id: "follow-up", label: "Follow-up steps", level: 2 },
-    { id: "submit-action-idea", label: "Submit an idea", level: 1 },
-  ];
-
   return (
-    <InfoSubpage tocSections={tocSections}>
+    <InfoSubpage tocSections={SECTIONS}>
       <section className="gap-y-4 flex flex-col">
         <div className="mb-4">
           <h1
-            id="membership"
+            id={Section.DesigningActions}
             className="font-serif text-3xl md:text-4xl font-semibold text-black mb-4"
           >
             Action design
@@ -162,7 +173,7 @@ const TerminologyPage: React.FC = () => {
         </p>
 
         <h2
-          id="initial-idea"
+          id={Section.InitialIdea}
           className="mt-2 text-2xl font-semibold text-black"
         >
           Initial idea
@@ -213,7 +224,7 @@ const TerminologyPage: React.FC = () => {
         </ul>
 
         <h2
-          id="making-a-plan"
+          id={Section.MakingAPlan}
           className="mt-2 text-2xl font-semibold text-black"
         >
           Making a plan
@@ -276,7 +287,10 @@ const TerminologyPage: React.FC = () => {
           <li>Office reports back to members on docket results.</li>
         </ol>
 
-        <h2 id="preparation" className="mt-2 text-2xl font-semibold text-black">
+        <h2
+          id={Section.Preparation}
+          className="mt-2 text-2xl font-semibold text-black"
+        >
           Preparatory steps
         </h2>
         <p>
@@ -286,7 +300,7 @@ const TerminologyPage: React.FC = () => {
         </p>
 
         <h2
-          id="task-production"
+          id={Section.TaskProduction}
           className="mt-2 text-2xl font-semibold text-black"
         >
           Task production
@@ -326,7 +340,7 @@ const TerminologyPage: React.FC = () => {
             respondents they brought in.
           </li>
           <li>
-            Accounting for members’ habits. For instance, when designing a
+            Accounting for members&apos; habits. For instance, when designing a
             pothole-reporting action, we kept in mind that many members complete
             tasks at the last minute. We separated the action into a{" "}
             <Link
@@ -371,7 +385,10 @@ const TerminologyPage: React.FC = () => {
           and other issues. We also solicit feedback from random members.
         </p>
 
-        <h2 id="launch" className="mt-2 text-2xl font-semibold text-black">
+        <h2
+          id={Section.Launch}
+          className="mt-2 text-2xl font-semibold text-black"
+        >
           Launch
         </h2>
         <p>
@@ -392,7 +409,10 @@ const TerminologyPage: React.FC = () => {
           to succeed.
         </p>
 
-        <h2 id="follow-up" className="mt-2 text-2xl font-semibold text-black">
+        <h2
+          id={Section.FollowUp}
+          className="mt-2 text-2xl font-semibold text-black"
+        >
           Follow-up steps
         </h2>
 
@@ -420,7 +440,7 @@ const TerminologyPage: React.FC = () => {
 
       <section className="gap-y-4 flex flex-col">
         <h1
-          id="submit-action-idea"
+          id={Section.SubmitActionIdea}
           className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
         >
           Submit an action idea

@@ -1,8 +1,14 @@
 import React from "react";
 import TableOfContents from "./TableOfContents";
 
+export type InfoSubpageTocSections = {
+  id: string;
+  label: string;
+  level: number;
+}[];
+
 interface InfoSubpageProps {
-  tocSections?: { id: string; label: string; level: number }[];
+  tocSections?: InfoSubpageTocSections;
   children: React.ReactNode;
 }
 
