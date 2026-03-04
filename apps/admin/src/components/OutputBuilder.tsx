@@ -543,7 +543,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                           : "bg-gray-100 text-gray-500 hover:text-red-500 hover:bg-red-50 border-gray-200"
                       }`}
                     >
-                      ×
+                      <X size={20} />
                     </button>
                   </div>
                 );
