@@ -374,7 +374,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
             {navSections.map((section) => (
               <nav
                 key={section.title}
-                className="flex flex-col py-4 w-full text-base md:text-lg"
+                className="flex flex-col py-4 w-full text-base"
               >
                 {section.items.map((item) =>
                   item.page === NavbarPage.Profile ? (
