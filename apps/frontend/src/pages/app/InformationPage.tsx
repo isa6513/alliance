@@ -4,7 +4,6 @@ import {
   BookUser,
   CalendarCheck,
   ClipboardList,
-  Flag,
   Info,
   Mail,
   Map as MapIcon,
@@ -12,7 +11,8 @@ import {
   Scale,
   Users,
   PenTool,
-  List,
+  ListOrdered,
+  BookOpenText,
 } from "lucide-react";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
@@ -96,7 +96,7 @@ const InformationPage: React.FC = () => {
       title: "Priorities",
       description: "An overview of our current priorities.",
       href: href("/priorities"),
-      icon: Flag,
+      icon: ListOrdered,
     },
     {
       title: "Governance",
@@ -109,7 +109,7 @@ const InformationPage: React.FC = () => {
       title: "Terminology",
       description: "Some terms used in the Alliance.",
       href: href("/terminology"),
-      icon: List,
+      icon: BookOpenText,
     },
   ];
 
