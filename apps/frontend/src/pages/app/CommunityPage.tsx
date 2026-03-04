@@ -642,6 +642,7 @@ const CommunityPage = () => {
                       </p>
                       <AppMarkdownWrapper
                         markdownContent={community.description}
+                        className="text-base md:text-lg"
                       />
                     </>
                   )}

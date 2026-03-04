@@ -69,10 +69,12 @@ const ActionContents = () => {
             </p>
             {loggedInMode ? (
               <div>
-                <p>{action.shortDescription}</p>
+                <p className="text-base md:text-lg">
+                  {action.shortDescription}
+                </p>
                 {!!action.authors?.length && (
                   <div className="mt-1">
-                    <div className="flex flex-row gap-x-1 text-zinc-500">
+                    <div className="flex flex-row gap-x-1 text-zinc-500 text-base md:text-lg">
                       <p>By</p>
                       {shuffledAuthors.map((author: ProfileDto, i: number) => (
                         <span key={author.id} className="text-nowrap">

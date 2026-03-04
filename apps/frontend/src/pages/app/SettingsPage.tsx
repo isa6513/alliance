@@ -226,7 +226,7 @@ const SettingsPage: React.FC = () => {
     <div className="bg-page py-4 md:py-20 px-4 md:px-16">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6 relative flex flex-col">
-          <div className="flex justify-between mb-2 sticky top-0 bg-page z-10 p-3">
+          <div className="flex justify-between bg-page z-10">
             <div className="gap-x-2">
               <h1 className="text-2xl sm:text-4xl font-serif !font-semibold mb-2">
                 Settings
