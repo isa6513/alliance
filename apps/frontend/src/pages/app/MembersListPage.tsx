@@ -125,7 +125,7 @@ const MembersListPage = () => {
 
   const secondaryLabels = {
     [MemberFilterMode.All]: members.length.toString(),
-    [MemberFilterMode.FriendsOfFriends]: friendsOfFriends.length.toString(),
+    [MemberFilterMode.FriendsOfFriends]: allFriendsOfFriends.length.toString(),
     [MemberFilterMode.Staff]: staffMembers.length.toString(),
     [MemberFilterMode.Leads]: leadsMembers.length.toString(),
   };
