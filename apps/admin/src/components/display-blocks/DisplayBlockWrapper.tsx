@@ -14,7 +14,7 @@ import type { AnyField, Condition } from "@alliance/shared/forms/formschema";
 import type { UserDto } from "@alliance/shared/client";
 import { userList } from "@alliance/shared/client";
 import { ConditionalVisibility } from "../form-fields/CommonControls";
-import { CheckCircle2, Circle, HelpCircle } from "lucide-react";
+import { CheckCircle2, Circle } from "lucide-react";
 
 type ManualUserListEntry = Pick<UserDto, "id" | "name" | "hasActiveContract">;
 
@@ -782,23 +782,13 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
               {filteredManualUsers.map((entry) => {
                 const userId = String(entry.id);
                 const name = entry.name ?? `User ${entry.id}`;
-                const isActiveContract =
-                  entry.hasActiveContract === undefined
-                    ? null
-                    : entry.hasActiveContract;
                 const hasContent = Boolean(manualUserContent[userId]);
-                const StatusIcon =
-                  isActiveContract === null
-                    ? HelpCircle
-                    : isActiveContract
-                    ? CheckCircle2
-                    : Circle;
-                const statusColor =
-                  isActiveContract === null
-                    ? "text-gray-500"
-                    : isActiveContract
-                    ? "text-emerald-600"
-                    : "text-amber-600";
+                const StatusIcon = entry.hasActiveContract
+                  ? CheckCircle2
+                  : Circle;
+                const statusColor = entry.hasActiveContract
+                  ? "text-emerald-600"
+                  : "text-amber-600";
                 return (
                   <button
                     key={userId}
