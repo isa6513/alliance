@@ -17,7 +17,7 @@ const InfoResourceCard = ({
   return (
     <Link
       to={href}
-      className="flex flex-row gap-x-2 justify-between items-center group hover:cursor-pointer border-l-2 border-transparent pl-3 hover:border-green"
+      className="flex flex-row gap-x-2 justify-between items-center group hover:cursor-pointer"
     >
       <div className="flex flex-row gap-x-5 items-center">
         <Icon className="text-green w-6 h-6 md:w-8 md:h-8 shrink-0" />
@@ -29,10 +29,7 @@ const InfoResourceCard = ({
           <p className="text-zinc-500">{description}</p>
         </div>
       </div>
-      <ArrowRight
-        size={20}
-        className="text-green opacity-0 group-hover:opacity-100 transition-opacity"
-      />
+      <ArrowRight className="text-green opacity-0 group-hover:opacity-100 w-4 h-4 md:w-6 md:h-6" />
     </Link>
   );
 };
