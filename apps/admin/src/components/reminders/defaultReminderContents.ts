@@ -58,4 +58,4 @@ export const defaultGroupLeadsEmailContents = `Hi #{firstname},
 See the full list of members here: #{grouplink}
 `;
 
-export const defaultGroupLeadsTextMessage = `#{nmembers} of your Alliance group members have not yet completed their upcoming task. See here: #{grouplink}`;
+export const defaultGroupLeadsTextMessage = `#{nmembers} of your Alliance group members have #{timeremaining} left to complete their upcoming task. See here: #{grouplink}`;
