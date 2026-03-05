@@ -110,7 +110,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const IconLeft = isNullReactNode(iconLeft)
     ? null
-    : (iconRight as React.FC<{ size?: number }>);
+    : (iconLeft as React.FC<{ size?: number }>);
   const IconRight = isNullReactNode(iconRight)
     ? null
     : (iconRight as React.FC<{ size?: number }>);
@@ -118,7 +118,9 @@ const Button: React.FC<ButtonProps> = ({
   const buttonChildren = (
     <>
       {IconLeft && <IconLeft size={ICON_SIZE[size]} />}
-      <div className="w-full">{children}</div>
+      {isNullReactNode(children) ? null : (
+        <div className="w-full">{children}</div>
+      )}
       {IconRight && <IconRight size={ICON_SIZE[size]} />}
       {hoverText && <div className={TOOLTIP_CLASSNAME}>{hoverText}</div>}
     </>

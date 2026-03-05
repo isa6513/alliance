@@ -1,5 +1,7 @@
 import { MessageDto } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import NewButton, {
+  ButtonColor,
+} from "@alliance/sharedweb/ui/NewButton";
 import Card from "@alliance/sharedweb/ui/Card";
 import { Plus, Send, X } from "lucide-react";
 import {
@@ -160,13 +162,13 @@ const MessageInput = ({
               <div className="text-black">image</div>
             )}
           </div>
-          <Button
+          <NewButton
             color={ButtonColor.Transparent}
             onClick={clearReplyingTo}
             className="!p-2 -m-2"
           >
             <X size={18} />
-          </Button>
+          </NewButton>
         </Card>
       )}
       {attachments.length > 0 && (
@@ -227,22 +229,18 @@ const MessageInput = ({
             </div>
           ) : (
             <div className="flex flex-row items-center">
-              <Button
+              <NewButton
                 onClick={triggerFilePicker}
                 color={ButtonColor.Transparent}
-                className="!px-2"
                 hoverText="Add image"
-              >
-                <Plus size={18} />
-              </Button>
-              <Button
+                iconLeft={Plus}
+              />
+              <NewButton
                 onClick={triggerSend}
                 color={ButtonColor.Transparent}
                 hoverText="Send message"
-                className="!px-2 h-full"
-              >
-                <Send size={17} />
-              </Button>
+                iconLeft={Send}
+              />
             </div>
           )}
         </div>
