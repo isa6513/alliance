@@ -12,6 +12,7 @@ type ButtonProps = React.PropsWithChildren & {
   size?: ButtonSize;
   iconLeft?: LucideIcon | NullReactNode;
   iconRight?: LucideIcon | NullReactNode;
+  centerIcon?: boolean;
 } & (
     | ({
         asDiv?: false;
@@ -97,9 +98,11 @@ const Button: React.FC<ButtonProps> = ({
   iconLeft,
   iconRight,
   asDiv,
+  centerIcon,
 }) => {
   const baseClassName = cn(
-    "flex flex-row items-center justify-between",
+    "flex flex-row items-center",
+    centerIcon ? "justify-center" : "justify-between",
     "rounded",
     "font-medium w-fit box-border relative group",
     size,
@@ -119,7 +122,7 @@ const Button: React.FC<ButtonProps> = ({
     <>
       {IconLeft && <IconLeft size={ICON_SIZE[size]} />}
       {isNullReactNode(children) ? null : (
-        <div className="w-full">{children}</div>
+        <div className={cn(!centerIcon && "w-full")}>{children}</div>
       )}
       {IconRight && <IconRight size={ICON_SIZE[size]} />}
       {hoverText && <div className={TOOLTIP_CLASSNAME}>{hoverText}</div>}

@@ -6,6 +6,8 @@ import type {
   CityField,
   CityFieldValue,
   FormValue,
+  ListField,
+  ListFieldValue,
   RangeField,
   TimeField,
 } from "@alliance/shared/forms/formschema";
@@ -23,6 +25,8 @@ import Card from "../ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import YesNoToggle from "../ui/YesNoToggle";
 import { cn } from "@alliance/shared/styles/util";
+import { Plus, X } from "lucide-react";
+import NewButton, { ButtonColor, ButtonSize } from "../ui/NewButton";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -537,7 +541,10 @@ export function RenderField({
     }
 
     case "multiselect": {
-      const selections = Array.isArray(value) ? value : [];
+      const selections: string[] =
+        Array.isArray(value) && value.every((e) => typeof e === "string")
+          ? (value as string[])
+          : [];
       const selectedCount = selections.length;
       const options = randomizedOptions ?? field.options ?? [];
       const maxSelections =
@@ -569,9 +576,11 @@ export function RenderField({
                   onChange={
                     onChange
                       ? (e) => {
-                          const currentValues = Array.isArray(value)
-                            ? value
-                            : [];
+                          const currentValues: string[] =
+                            Array.isArray(value) &&
+                            value.every((e) => typeof e === "string")
+                              ? (value as string[])
+                              : [];
                           if (e.target.checked) {
                             onChange([...currentValues, option.value]);
                           } else {
@@ -765,6 +774,121 @@ export function RenderField({
           {renderValidationMessage()}
 
           {err && <p className=" text-red-600">{err}</p>}
+        </div>
+      );
+    }
+
+    case "list": {
+      const listField = field as ListField;
+      const subFields = listField.fields ?? [];
+      const rawList = Array.isArray(value) ? value : [];
+      const listValue: ListFieldValue = rawList.every(
+        (item): item is Record<string, FormValue> =>
+          item !== null && typeof item === "object" && !Array.isArray(item)
+      )
+        ? rawList
+        : [];
+      const defaultCount = Math.max(
+        0,
+        Math.floor(Number(listField.defaultNumber) || 0)
+      );
+      const minCards = Math.max(0, Math.floor(Number(listField.min) || 0));
+      const maxCards =
+        typeof listField.max === "number" && listField.max >= 0
+          ? Math.floor(listField.max)
+          : Infinity;
+
+      // Only pad to defaultCount when value is undefined (initial load). Otherwise respect user's list length.
+      const cards: ListFieldValue =
+        value === undefined
+          ? Array.from(
+              { length: Math.max(0, defaultCount) },
+              () => ({} as Record<string, FormValue>)
+            )
+          : listValue;
+      const canDelete = cards.length > minCards;
+      const addCard = () => {
+        if (maxCards !== undefined && cards.length >= maxCards) return;
+        // Build next list from current value (or default when value was undefined) so parent always receives the update
+        const nextCards: ListFieldValue =
+          value === undefined
+            ? Array.from(
+                { length: Math.max(0, defaultCount) + 1 },
+                () => ({} as Record<string, FormValue>)
+              )
+            : [...listValue, {} as Record<string, FormValue>];
+        onChange?.(nextCards);
+      };
+      const removeCard = (index: number) => {
+        const next = cards.filter((_, i) => i !== index);
+        onChange?.(next);
+      };
+      const updateCard = (
+        index: number,
+        subFieldId: string,
+        subValue: FormValue
+      ) => {
+        const next = [...cards];
+        const card = { ...(next[index] ?? {}) };
+        card[subFieldId] = subValue;
+        next[index] = card;
+        onChange?.(next);
+      };
+      return (
+        <div className="space-y-3">
+          <RenderLabel
+            field={field}
+            error={errorMessage}
+            labelRightAddon={labelRightAddon}
+          />
+          <div className="space-y-3">
+            {cards.map((card, cardIndex) => (
+              <Card key={cardIndex} style={CardStyle.White}>
+                <div className="flex flex-row gap-x-2 justify-between">
+                  <div className="w-full">
+                    {subFields.map((sub) => (
+                      <RenderField
+                        key={sub.id}
+                        field={sub}
+                        value={card[sub.id]}
+                        onChange={
+                          onChange
+                            ? (val) => updateCard(cardIndex, sub.id, val)
+                            : undefined
+                        }
+                        disabled={disabled}
+                        error={null}
+                        randomizationKey={randomizationKey}
+                        disableOptionRandomization={disableOptionRandomization}
+                        user={user}
+                      />
+                    ))}
+                  </div>
+                  <NewButton
+                    onClick={() => removeCard(cardIndex)}
+                    disabled={disabled || !canDelete}
+                    color={ButtonColor.Red}
+                    size={ButtonSize.Small}
+                    iconLeft={X}
+                  />
+                </div>
+              </Card>
+            ))}
+            {cards.length < maxCards && (
+              <NewButton
+                type="button"
+                onClick={addCard}
+                disabled={disabled}
+                color={ButtonColor.LightHover}
+                iconLeft={Plus}
+                centerIcon
+                className="w-full"
+              >
+                {listField.addButtonLabel?.trim() ?? "Add item"}
+              </NewButton>
+            )}
+          </div>
+          {renderValidationMessage()}
         </div>
       );
     }

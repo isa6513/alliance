@@ -24,6 +24,7 @@ const FIELD_TYPES: FieldKind[] = [
   "city",
   "file",
   "contract",
+  "list",
   "custom",
 ] as const;
 

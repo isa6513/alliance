@@ -92,6 +92,7 @@ const KNOWN_FIELD_KINDS_RECORD = {
   file: true,
   city: true,
   contract: true,
+  list: true,
   custom: true,
   header: true,
   label: true,

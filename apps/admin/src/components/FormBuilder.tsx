@@ -49,6 +49,7 @@ import {
   EditableTimezoneField,
   EditableCityField,
   EditableContractField,
+  EditableListField,
   EditableTextField,
   EditableTextareaField,
   EditableCustomComponentField,
@@ -84,6 +85,7 @@ const FIELD_NAMES = {
   city: "City Field",
   file: "File Field",
   contract: "Contract Field",
+  list: "List Field",
   custom: "Custom Component Field",
 } as const satisfies Record<Exclude<FieldKind, "text">, string>;
 
@@ -712,6 +714,17 @@ export function FormBuilder({
           signQuestion: "Sign the contract?",
           yesLabel: "Yes",
           noLabel: "No",
+        };
+        break;
+      case "list":
+        newField = {
+          id: fieldId,
+          kind: "list",
+          label: "List Field",
+          required: false,
+          fields: [],
+          defaultNumber: 0,
+          min: 0,
         };
         break;
       case "custom": {
@@ -1596,6 +1609,13 @@ export function FormBuilder({
                   case "contract":
                     return (
                       <EditableContractField
+                        field={formField as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "list":
+                    return (
+                      <EditableListField
                         field={formField as any}
                         {...commonProps}
                       />

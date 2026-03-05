@@ -19,13 +19,21 @@ export type FieldKind =
   | "file"
   | "city"
   | "contract"
+  | "list"
   | "custom";
 
 type Option<V extends string = string> = { label: string; value: V };
 
 // Unified value type for answers (persisted)
 export type CityFieldValue = CitySearchDto;
-export type FormValue = string | number | boolean | string[] | CityFieldValue;
+export type ListFieldValue = Record<string, FormValue>[];
+export type FormValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | CityFieldValue
+  | ListFieldValue;
 
 export const DEVICE_VISIBILITY_TARGETS = [
   "mobile",
@@ -155,6 +163,13 @@ export type ContractField = BaseField<"contract"> & {
   yesLabel: string;
   noLabel: string;
 };
+export type ListField = BaseField<"list"> & {
+  fields: AnyField[];
+  defaultNumber?: number;
+  min?: number;
+  max?: number;
+  addButtonLabel?: string;
+};
 // Persist file answers as string URL/key
 export type FileField = BaseField<"file">;
 export type CustomComponentField = BaseField<"custom"> & {
@@ -180,6 +195,7 @@ export type AnyField =
   | CityField
   | FileField
   | ContractField
+  | ListField
   | CustomComponentField;
 
 export interface Page {

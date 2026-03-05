@@ -5,6 +5,7 @@ import type {
   Condition,
   DeviceVisibilityTarget,
   FormValue,
+  ListField,
   NumberField,
   RangeField,
 } from "@alliance/shared/forms/formschema";
@@ -106,8 +107,9 @@ export function resolveFieldDefaultValue(
           return undefined;
         }
         const validValues = field.options?.map((option) => option.value) ?? [];
-        const filtered = rawDefault.filter((value): value is string =>
-          validValues.includes(value)
+        const filtered = rawDefault.filter(
+          (value): value is string =>
+            typeof value === "string" && validValues.includes(value)
         );
         return filtered.length ? filtered : undefined;
       }
@@ -142,6 +144,15 @@ export function resolveFieldDefaultValue(
 
   if (field.kind === "timezone") {
     return FALLBACK_TIMEZONE;
+  }
+
+  if (field.kind === "list") {
+    const listField = field as ListField;
+    const defaultNumber = Math.max(
+      0,
+      Math.floor(Number(listField.defaultNumber) || 0)
+    );
+    return Array.from({ length: defaultNumber }, () => ({})) as FormValue;
   }
 
   return undefined;
@@ -245,7 +256,11 @@ const evaluateValueBasedCondition = (
     if (!cond.includesOption) {
       return false;
     }
-    return Array.isArray(val) && val.includes(cond.includesOption);
+    return (
+      Array.isArray(val) &&
+      val.every((e) => typeof e === "string") &&
+      (val as string[]).includes(cond.includesOption)
+    );
   }
   if (!("equals" in cond)) {
     return true;
@@ -258,7 +273,11 @@ const evaluateValueBasedCondition = (
     return val === equals;
   }
   if (Array.isArray(val) && equals !== null && equals !== undefined) {
-    return val.includes(equals as string);
+    return (
+      Array.isArray(val) &&
+      val.every((e) => typeof e === "string") &&
+      (val as string[]).includes(equals as string)
+    );
   }
   return val === equals;
 };
@@ -466,6 +485,25 @@ export function validateFieldValue(
     case "file":
       if (!required) return null;
       return valueToCheck ? null : "Please upload a file.";
+    case "list": {
+      const listField = field as ListField;
+      const listVal = Array.isArray(valueToCheck) ? valueToCheck : [];
+      const minCards = Math.max(0, Math.floor(Number(listField.min || 0)));
+      const maxCards =
+        typeof listField.max === "number" && listField.max >= 0
+          ? Math.floor(listField.max)
+          : undefined;
+      if (required && listVal.length === 0) {
+        return "Add at least one item.";
+      }
+      if (listVal.length < minCards) {
+        return `Add at least ${minCards} item${minCards === 1 ? "" : "s"}.`;
+      }
+      if (maxCards !== undefined && listVal.length > maxCards) {
+        return `Add no more than ${maxCards} item${maxCards === 1 ? "" : "s"}.`;
+      }
+      return null;
+    }
     default: {
       if (!required) return null;
       if (valueToCheck === undefined || valueToCheck === null) {

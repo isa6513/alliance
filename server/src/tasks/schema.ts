@@ -20,13 +20,21 @@ export type FieldKind =
   | 'file'
   | 'city'
   | 'contract'
+  | 'list'
   | 'custom';
 
 type Option<V extends string = string> = { label: string; value: V };
 
 // Unified value type for answers (persisted)
 export type CityFieldValue = CitySearchDto;
-export type FormValue = string | number | boolean | string[] | CityFieldValue;
+export type ListFieldValue = Record<string, FormValue>[];
+export type FormValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | CityFieldValue
+  | ListFieldValue;
 
 export const DEVICE_VISIBILITY_TARGETS = [
   'mobile',
@@ -148,6 +156,13 @@ export type ContractField = BaseField<'contract'> & {
   yesLabel: string;
   noLabel: string;
 };
+export type ListField = BaseField<'list'> & {
+  fields: AnyField[];
+  defaultNumber?: number;
+  min?: number;
+  max?: number;
+  addButtonLabel?: string;
+};
 // Persist file answers as string URL/key
 export type FileField = BaseField<'file'>;
 export type CustomComponentField = BaseField<'custom'> & {
@@ -173,6 +188,7 @@ export type AnyField =
   | CityField
   | FileField
   | ContractField
+  | ListField
   | CustomComponentField;
 
 export class Page {
@@ -272,7 +288,12 @@ export function isQuestionVisible(
         if (!c.includesOption) {
           return false;
         }
-        return Array.isArray(val) && val.includes(c.includesOption);
+        return (
+          Array.isArray(val) &&
+          val.length > 0 &&
+          typeof val[0] === 'string' &&
+          (val as string[]).includes(c.includesOption)
+        );
       }
       if (!('equals' in c)) {
         return true;
@@ -282,8 +303,11 @@ export function isQuestionVisible(
         return Boolean(val) === c.equals;
       }
       if (Array.isArray(val) && c.equals !== null && c.equals !== undefined) {
-        // multiselect: treat equals as "includes"
-        return val.includes(c.equals as string);
+        // multiselect: treat equals as "includes" (only for string[] values)
+        if (val.length > 0 && typeof val[0] === 'string') {
+          return (val as string[]).includes(c.equals as string);
+        }
+        return false;
       }
       return val === c.equals;
     };
