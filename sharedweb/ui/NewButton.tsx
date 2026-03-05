@@ -1,7 +1,8 @@
-import { type LucideIcon } from "lucide-react";
 import React from "react";
 import { isNullReactNode, NullReactNode } from "@alliance/shared/lib/constants";
 import { cn } from "@alliance/shared/styles/util";
+
+type IconComponent = React.ComponentType<{ size?: number }>;
 
 type ButtonProps = React.PropsWithChildren & {
   className?: string;
@@ -10,8 +11,8 @@ type ButtonProps = React.PropsWithChildren & {
   title?: string;
   disabled?: boolean;
   size?: "small" | "medium" | "large" | "mediumDynamic";
-  iconLeft?: LucideIcon | NullReactNode;
-  iconRight?: LucideIcon | NullReactNode;
+  iconLeft?: IconComponent | NullReactNode;
+  iconRight?: IconComponent | NullReactNode;
 } & (
     | ({
         asDiv?: false;
