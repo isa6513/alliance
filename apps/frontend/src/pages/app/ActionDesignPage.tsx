@@ -318,7 +318,7 @@ const TerminologyPage: React.FC = () => {
         <ul className="list-disc list-inside pl-4 space-y-2">
           <li>
             Writing clean copy, ordering information logically, and providing
-            straightforward instructions
+            straightforward instructions.
           </li>
           <li>
             Developing software for task-specific features. For instance, we
