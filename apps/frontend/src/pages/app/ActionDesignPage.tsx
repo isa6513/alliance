@@ -248,19 +248,6 @@ const TerminologyPage: React.FC = () => {
         </ul>
 
         <p>
-          Having a basic plan makes an action more concrete and easy to think
-          about. As a result, we find it useful at this stage to explore ways we
-          can modify or add to the basic plan. For instance, we turned an
-          initial idea to{" "}
-          <Link to="https://worldalliance.org/actions/52" className="text-link">
-            help members adjust their privacy settings
-          </Link>{" "}
-          into an opportunity to recruit new members (by running a follow-up
-          experiment that members sent to their friends and family) and launch a
-          media campaign (by sending the experiment’s results to the media).
-        </p>
-
-        <p>
           As an example, this was our basic plan for{" "}
           <Link to="https://worldalliance.org/actions/75" className="text-link">
             “Help inform public comments on U.S. federal AI policy”
@@ -274,7 +261,7 @@ const TerminologyPage: React.FC = () => {
             each docket.
           </li>
           <li>
-            Office writes context to docket (background info, summary, and
+            Office writes context for each docket (background info, summary, and
             expert opinions) and comes up with relevant, member-friendly
             questions.
           </li>
@@ -286,6 +273,19 @@ const TerminologyPage: React.FC = () => {
           <li>Office watches for and analyzes docket results.</li>
           <li>Office reports back to members on docket results.</li>
         </ol>
+
+        <p>
+          Having a basic plan makes an action more concrete and easy to think
+          about. As a result, we find it useful at this stage to explore ways we
+          can modify or add to the basic plan. For instance, we turned an
+          initial plan to{" "}
+          <Link to="https://worldalliance.org/actions/52" className="text-link">
+            help members adjust their privacy settings
+          </Link>{" "}
+          into an opportunity to recruit new members (by running a follow-up
+          experiment that members sent to their friends and family) and launch a
+          media campaign (by sending the experiment’s results to the media).
+        </p>
 
         <h2
           id={Section.Preparation}
