@@ -790,15 +790,11 @@ export function RenderField({
         : [];
       const defaultCount = Math.max(
         0,
-        Math.floor(Number(listField.defaultNumber) || 0)
+        Math.floor(listField.defaultNumber ?? 0)
       );
-      const minCards = Math.max(0, Math.floor(Number(listField.min) || 0));
-      const maxCards =
-        typeof listField.max === "number" && listField.max >= 0
-          ? Math.floor(listField.max)
-          : Infinity;
+      const minCards = Math.max(0, listField.min ?? 0);
+      const maxCards = Math.max(0, listField.max ?? Infinity);
 
-      // Only pad to defaultCount when value is undefined (initial load). Otherwise respect user's list length.
       const cards: ListFieldValue =
         value === undefined
           ? Array.from(
@@ -808,8 +804,9 @@ export function RenderField({
           : listValue;
       const canDelete = cards.length > minCards;
       const addCard = () => {
-        if (maxCards !== undefined && cards.length >= maxCards) return;
-        // Build next list from current value (or default when value was undefined) so parent always receives the update
+        if (maxCards !== undefined && cards.length >= maxCards) {
+          return;
+        }
         const nextCards: ListFieldValue =
           value === undefined
             ? Array.from(

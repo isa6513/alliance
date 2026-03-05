@@ -116,7 +116,7 @@ const evaluateCondition = (
     if (!cond.includesOption) {
       return false;
     }
-    return Array.isArray(val) && val.includes(cond.includesOption);
+    return Array.isArray(val) && val.some((e) => e === cond.includesOption);
   }
   if (!("equals" in cond)) {
     return true;
@@ -129,7 +129,7 @@ const evaluateCondition = (
     return val === equals;
   }
   if (Array.isArray(val) && equals !== null && equals !== undefined) {
-    return val.includes(equals as string);
+    return val.some((e) => e === equals);
   }
   return val === equals;
 };
@@ -217,7 +217,10 @@ const isBlockVisible = (
       if (!condition.includesOption) {
         return false;
       }
-      return Array.isArray(value) && value.includes(condition.includesOption);
+      return (
+        Array.isArray(value) &&
+        value.some((e) => e === condition.includesOption)
+      );
     }
     if (!("equals" in condition)) {
       return true;
@@ -230,7 +233,7 @@ const isBlockVisible = (
       condition.equals !== null &&
       condition.equals !== undefined
     ) {
-      return value.includes(condition.equals as string);
+      return value.some((e) => e === condition.equals);
     }
     return value === condition.equals;
   });
