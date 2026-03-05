@@ -1,8 +1,7 @@
 import React from "react";
 import { isNullReactNode, NullReactNode } from "@alliance/shared/lib/constants";
 import { cn } from "@alliance/shared/styles/util";
-
-type IconComponent = React.ComponentType<{ size?: number }>;
+import { LucideIcon } from "lucide-react";
 
 type ButtonProps = React.PropsWithChildren & {
   className?: string;
@@ -10,9 +9,9 @@ type ButtonProps = React.PropsWithChildren & {
   hoverText?: string;
   title?: string;
   disabled?: boolean;
-  size?: "small" | "medium" | "large" | "mediumDynamic";
-  iconLeft?: IconComponent | NullReactNode;
-  iconRight?: IconComponent | NullReactNode;
+  size?: ButtonSize;
+  iconLeft?: LucideIcon | NullReactNode;
+  iconRight?: LucideIcon | NullReactNode;
 } & (
     | ({
         asDiv?: false;
@@ -48,7 +47,7 @@ export enum ButtonColor {
   GreenOutLine = "border border-green text-green hover:bg-green/10",
   Red = "bg-red-100 !text-red-500 hover:bg-red-200",
   RedOutline = "border border-red-500 text-red-500",
-  Light = "bg-zinc-200/60 border border-[#efeff1]",
+  Light = "bg-zinc-200/60 border border-[#efeff1] !text-zinc-800",
   LightHover = "bg-zinc-200/60 hover:bg-zinc-200/80 !text-zinc-500",
   Blue = "bg-[#318dde] text-white border border-[#318dde]",
   BlueOutline = "border border-[#318dde] text-[#318dde] hover:bg-[#318dde]/10",
@@ -64,6 +63,24 @@ export enum ButtonColor {
 const TOOLTIP_CLASSNAME =
   "absolute -top-[110%] left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-black/50 text-white text-sm p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150";
 
+export enum ButtonSize {
+  Small = "px-3 py-1.5 text-sm h-9 gap-x-1",
+  Medium = "px-4 py-2 text-base h-10 gap-x-2",
+  MediumDynamic = "px-2 md:px-4 py-1 md:py-1.5 text-base h-10 gap-x-2",
+  Large = "px-6 py-3 text-lg h-12 gap-x-3",
+}
+
+const ICON_SIZE = {
+  [ButtonSize.Small]: 12,
+  [ButtonSize.Medium]: 18,
+  [ButtonSize.MediumDynamic]: 18,
+  [ButtonSize.Large]: 24,
+};
+
+const BASE_STYLE = {
+  fontWeight: 450,
+};
+
 const Button: React.FC<ButtonProps> = ({
   ref,
   title,
@@ -76,37 +93,36 @@ const Button: React.FC<ButtonProps> = ({
   onMouseEnter,
   hoverText,
   onMouseLeave,
-  size = "medium",
-  iconLeft: IconLeft,
-  iconRight: IconRight,
+  size = ButtonSize.Medium,
+  iconLeft,
+  iconRight,
   asDiv,
 }) => {
-  const sizeClass = {
-    small: "px-3 py-1.5 text-sm h-9 gap-x-1",
-    medium: "px-4 py-2 text-base h-10 gap-x-2",
-    mediumDynamic: "px-2 md:px-4 py-1 md:py-1.5 text-base h-10 gap-x-2",
-    large: "px-6 py-3 text-lg h-12 gap-x-3",
-  }[size];
-
   const baseClassName = cn(
-    sizeClass,
-    "font-medium rounded w-fit flex flex-row items-center justify-between box-border relative group",
+    "flex flex-row items-center justify-between",
+    "rounded",
+    "font-medium w-fit box-border relative group",
+    size,
     disabled && "opacity-50 !cursor-not-allowed",
     color,
-    color === ButtonColor.Light && "!text-zinc-800",
     className
   );
 
-  const iconSize = {
-    small: 12,
-    medium: 18,
-    mediumDynamic: 18,
-    large: 24,
-  }[size];
+  const IconLeft = isNullReactNode(iconLeft)
+    ? null
+    : (iconRight as React.FC<{ size?: number }>);
+  const IconRight = isNullReactNode(iconRight)
+    ? null
+    : (iconRight as React.FC<{ size?: number }>);
 
-  const baseStyle = {
-    fontWeight: 450,
-  };
+  const buttonChildren = (
+    <>
+      {IconLeft && <IconLeft size={ICON_SIZE[size]} />}
+      <div className="w-full">{children}</div>
+      {IconRight && <IconRight size={ICON_SIZE[size]} />}
+      {hoverText && <div className={TOOLTIP_CLASSNAME}>{hoverText}</div>}
+    </>
+  );
 
   if (asDiv) {
     return (
@@ -114,17 +130,12 @@ const Button: React.FC<ButtonProps> = ({
         ref={ref}
         title={title}
         className={cn(baseClassName, !disabled && "cursor-pointer")}
-        style={baseStyle}
+        style={BASE_STYLE}
         onClick={onClick}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        <div>
-          {!isNullReactNode(IconLeft) && <IconLeft size={iconSize} />}
-          {children}
-          {!isNullReactNode(IconRight) && <IconRight size={iconSize} />}
-        </div>
-        {hoverText && <div className={TOOLTIP_CLASSNAME}>{hoverText}</div>}
+        {buttonChildren}
       </div>
     );
   }
@@ -135,16 +146,13 @@ const Button: React.FC<ButtonProps> = ({
       type={type}
       title={title}
       className={baseClassName}
-      style={baseStyle}
+      style={BASE_STYLE}
       onClick={onClick}
       disabled={disabled}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {!isNullReactNode(IconLeft) && <IconLeft size={iconSize} />}
-      <div className="w-full">{children}</div>
-      {!isNullReactNode(IconRight) && <IconRight size={iconSize} />}
-      {hoverText && <div className={TOOLTIP_CLASSNAME}>{hoverText}</div>}
+      {buttonChildren}
     </button>
   );
 };
