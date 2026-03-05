@@ -36,6 +36,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import HomeNotifsCard from "../../components/HomeNotifsCard";
 import { useTaskActionsData } from "../../lib/useTaskActionsData";
+import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -287,6 +288,7 @@ const HomePage = () => {
               )}
             </div>
           )}
+          <BottomSpacer/>
         </div>
       </div>
     );
