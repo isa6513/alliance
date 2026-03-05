@@ -47,6 +47,7 @@ export type RenderFieldProps = {
     element: AnyField,
     data?: Record<string, FormValue>
   ) => boolean;
+  fieldErrors?: Record<string, string | null>;
 };
 
 const sharedInputClasses =
@@ -132,6 +133,7 @@ export function RenderField({
   labelRightAddon,
   formData,
   isElementVisible,
+  fieldErrors,
 }: RenderFieldProps) {
   const errorMessage =
     typeof error === "string" && error.trim().length > 0 ? error : null;
@@ -869,7 +871,10 @@ export function RenderField({
                             : undefined
                         }
                         disabled={disabled}
-                        error={null}
+                        error={
+                          fieldErrors?.[`${field.id}:${cardIndex}:${sub.id}`] ??
+                          null
+                        }
                         randomizationKey={randomizationKey}
                         disableOptionRandomization={disableOptionRandomization}
                         user={user}

@@ -32,6 +32,7 @@ import {
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
   resolveFieldDefaultValue,
   validateFieldValue as validateFieldValueShared,
+  getListSubFieldErrors,
 } from "@alliance/shared/formrenderer";
 import { useSearchParams } from "react-router";
 import {
@@ -487,21 +488,46 @@ const FormRenderer = ({
   }, [visibilityValidatorIds, visibilityValidatorResults, readOnly]);
 
   const applyFieldErrorUpdates = useCallback(
-    (updates: Record<string, string | null>) => {
-      if (!updates || Object.keys(updates).length === 0) return;
+    (
+      updates: Record<string, string | null>,
+      clearKeysWithPrefix?: string | string[]
+    ) => {
+      const hasUpdates = updates && Object.keys(updates).length > 0;
+      const hasClear =
+        clearKeysWithPrefix !== undefined &&
+        (Array.isArray(clearKeysWithPrefix)
+          ? clearKeysWithPrefix.length > 0
+          : true);
+      if (!hasUpdates && !hasClear) return;
 
       setFieldErrors((prev) => {
         let changed = false;
         const next = { ...prev };
-        for (const [fieldId, message] of Object.entries(updates)) {
-          if (message && message.trim().length > 0) {
-            if (next[fieldId] !== message) {
-              next[fieldId] = message;
+        const prefixes = Array.isArray(clearKeysWithPrefix)
+          ? clearKeysWithPrefix
+          : clearKeysWithPrefix
+          ? [clearKeysWithPrefix]
+          : [];
+        for (const prefix of prefixes) {
+          const p = prefix + ":";
+          for (const key of Object.keys(next)) {
+            if (key.startsWith(p)) {
+              delete next[key];
               changed = true;
             }
-          } else if (fieldId in next) {
-            delete next[fieldId];
-            changed = true;
+          }
+        }
+        if (updates) {
+          for (const [fieldId, message] of Object.entries(updates)) {
+            if (message && message.trim().length > 0) {
+              if (next[fieldId] !== message) {
+                next[fieldId] = message;
+                changed = true;
+              }
+            } else if (fieldId in next) {
+              delete next[fieldId];
+              changed = true;
+            }
           }
         }
         return changed ? next : prev;
@@ -560,8 +586,9 @@ const FormRenderer = ({
       validateFieldValueShared(field, fieldValue, data ?? formData, {
         deviceType: effectiveDeviceType,
         visibilityValidatorResults,
+        fieldLookup,
       }),
-    [effectiveDeviceType, formData, visibilityValidatorResults]
+    [effectiveDeviceType, formData, visibilityValidatorResults, fieldLookup]
   );
 
   const runCustomValidatorsForFields = useCallback(
@@ -634,6 +661,19 @@ const FormRenderer = ({
         }
         const fieldValue = formData[field.id];
         updates[field.id] = validateFieldValue(field, fieldValue);
+        if (field.kind === "list") {
+          const subErrors = getListSubFieldErrors(
+            field,
+            fieldValue,
+            formData,
+            {
+              deviceType: effectiveDeviceType,
+              visibilityValidatorResults,
+              fieldLookup,
+            }
+          );
+          Object.assign(updates, subErrors);
+        }
       }
 
       if (includeCustomValidators && !readOnly) {
@@ -646,16 +686,32 @@ const FormRenderer = ({
         }
       }
 
-      applyFieldErrorUpdates(updates);
+      const listFieldIds = visibleFields
+        .filter((f) => f.kind === "list")
+        .map((f) => f.id);
+      applyFieldErrorUpdates(updates, listFieldIds.length > 0 ? listFieldIds : undefined);
 
+      const hasAnyError = Object.values(updates).some(
+        (msg) => msg && msg.trim().length > 0
+      );
       const firstInvalid = visibleFields.find((field) => {
         const message = updates[field.id];
         return !!(message && message.trim().length > 0);
       });
+      const firstInvalidFieldId =
+        firstInvalid?.id ??
+        (hasAnyError
+          ? (() => {
+              const key = Object.keys(updates).find(
+                (k) => updates[k] && updates[k]!.trim().length > 0
+              );
+              return key?.includes(":") ? key.split(":")[0] : key;
+            })()
+          : undefined);
 
       return {
-        isValid: !firstInvalid,
-        firstInvalidFieldId: firstInvalid?.id,
+        isValid: !hasAnyError,
+        firstInvalidFieldId,
       };
     },
     [
@@ -663,6 +719,10 @@ const FormRenderer = ({
       formData,
       isElementCurrentlyVisible,
       validateFieldValue,
+      getListSubFieldErrors,
+      effectiveDeviceType,
+      visibilityValidatorResults,
+      fieldLookup,
       runCustomValidatorsForFields,
       applyFieldErrorUpdates,
       readOnly,
@@ -727,7 +787,24 @@ const FormRenderer = ({
             nextValue,
             next
           );
-          applyFieldErrorUpdates({ [fieldId]: requiredError });
+          if (fieldDefinition.kind === "list") {
+            const subErrors = getListSubFieldErrors(
+              fieldDefinition,
+              nextValue,
+              next,
+              {
+                deviceType: effectiveDeviceType,
+                visibilityValidatorResults,
+                fieldLookup,
+              }
+            );
+            applyFieldErrorUpdates(
+              { [fieldId]: requiredError, ...subErrors },
+              fieldId
+            );
+          } else {
+            applyFieldErrorUpdates({ [fieldId]: requiredError });
+          }
         }
       } else {
         applyFieldErrorUpdates({ [fieldId]: null });
@@ -1150,6 +1227,7 @@ const FormRenderer = ({
           labelRightAddon={fieldLabelRightContent?.[field.id]}
           formData={formData}
           isElementVisible={isElementCurrentlyVisible}
+          fieldErrors={fieldErrors}
         />
         {isOutputField && (
           <label className="mt-2 flex items-center text-sm text-gray-500">

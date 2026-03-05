@@ -43,13 +43,16 @@ import {
   SubmitFormDto,
 } from './form.dto';
 import {
+  type AnyField,
   type CheckboxExtractionTarget,
   type CheckboxField,
   type CityFieldValue,
   type CustomComponentField,
+  type FormValue,
   FormSchema,
   isQuestionField,
   isQuestionVisible,
+  type ListField,
   Page,
 } from './schema';
 import { ActionDto } from 'src/actions/dto/action.dto';
@@ -84,6 +87,29 @@ export class TasksService {
     private aiDetectionQueueService: AiDetectionQueueService,
     private aiDetectionQueryService: AiDetectionQueryService,
   ) {}
+
+  /** Returns true if value satisfies required validation for the field. Used for both top-level and list sub-field validation. */
+  private hasRequiredValue(field: AnyField, value: unknown): boolean {
+    if (field.kind === 'contract') {
+      return value !== undefined;
+    }
+    if (value === undefined || value === null) {
+      return false;
+    }
+    if (field.kind === 'number' || field.kind === 'range') {
+      return typeof value === 'number' && Number.isFinite(value);
+    }
+    if (field.kind === 'checkbox') {
+      return value === true;
+    }
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return true;
+  }
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
     return this.formRepository.save(createFormDto);
@@ -182,24 +208,10 @@ export class TasksService {
               submitFormDto.deviceType,
             )
           ) {
-            if (field.kind === 'contract') {
-              if (submitFormDto.answers[field.id] === undefined) {
-                throw new BadRequestException(
-                  `Field ${field.label} is required`,
-                );
-              }
-            } else {
-              if (
-                !submitFormDto.answers[field.id] &&
-                !(
-                  (field.kind === 'number' || field.kind === 'range') &&
-                  submitFormDto.answers[field.id] === 0
-                )
-              ) {
-                throw new BadRequestException(
-                  `Field ${field.label} is required`,
-                );
-              }
+            if (!this.hasRequiredValue(field, submitFormDto.answers[field.id])) {
+              throw new BadRequestException(
+                `Field ${field.label} is required`,
+              );
             }
           }
           if (
@@ -218,6 +230,79 @@ export class TasksService {
               throw new BadRequestException(
                 `Field ${field.label} allows selecting up to ${field.maxSelections} options.`,
               );
+            }
+          }
+          if (field.kind === 'list') {
+            const listField = field as ListField;
+            if (
+              !isQuestionVisible(
+                listField,
+                submitFormDto.answers,
+                validatorResults,
+                submitFormDto.deviceType,
+              )
+            ) {
+              continue;
+            }
+            const rawList = submitFormDto.answers[listField.id];
+            const listValue: Record<string, FormValue>[] = Array.isArray(rawList)
+              ? (rawList as unknown[]).filter(
+                  (item): item is Record<string, FormValue> =>
+                    item !== null &&
+                    typeof item === 'object' &&
+                    !Array.isArray(item),
+                )
+              : [];
+            const minCards = Math.max(
+              0,
+              Math.floor(Number(listField.min ?? 0)),
+            );
+            const maxCards =
+              typeof listField.max === 'number' && listField.max >= 0
+                ? Math.floor(listField.max)
+                : Infinity;
+            if (listField.required && listValue.length === 0) {
+              throw new BadRequestException(
+                `Field ${listField.label} requires at least one item.`,
+              );
+            }
+            if (listValue.length < minCards) {
+              throw new BadRequestException(
+                `Field ${listField.label}: add at least ${minCards} item${minCards === 1 ? '' : 's'}.`,
+              );
+            }
+            if (listValue.length > maxCards) {
+              throw new BadRequestException(
+                `Field ${listField.label}: add no more than ${maxCards} item${maxCards === 1 ? '' : 's'}.`,
+              );
+            }
+            const subFields = listField.fields ?? [];
+            for (let i = 0; i < listValue.length; i += 1) {
+              const card = listValue[i] ?? {};
+              const mergedData = {
+                ...submitFormDto.answers,
+                ...card,
+              } as Record<string, FormValue>;
+              for (const sub of subFields) {
+                if (
+                  !isQuestionField(sub) ||
+                  !sub.required ||
+                  !isQuestionVisible(
+                    sub,
+                    mergedData,
+                    validatorResults,
+                    submitFormDto.deviceType,
+                  )
+                ) {
+                  continue;
+                }
+                const subValue = card[sub.id];
+                if (!this.hasRequiredValue(sub, subValue)) {
+                  throw new BadRequestException(
+                    `Field ${listField.label} (item ${i + 1}): ${sub.label ?? sub.id} is required.`,
+                  );
+                }
+              }
             }
           }
         }

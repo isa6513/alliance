@@ -488,18 +488,24 @@ export function validateFieldValue(
     case "list": {
       const listField = field as ListField;
       const listVal = Array.isArray(valueToCheck) ? valueToCheck : [];
+      const listValTyped = listVal.every(
+        (item): item is Record<string, FormValue> =>
+          item !== null && typeof item === "object" && !Array.isArray(item)
+      )
+        ? listVal
+        : [];
       const minCards = Math.max(0, Math.floor(Number(listField.min || 0)));
       const maxCards =
         typeof listField.max === "number" && listField.max >= 0
           ? Math.floor(listField.max)
           : Infinity;
-      if (required && listVal.length === 0) {
+      if (required && listValTyped.length === 0) {
         return "Add at least one item.";
       }
-      if (listVal.length < minCards) {
+      if (listValTyped.length < minCards) {
         return `Add at least ${minCards} item${minCards === 1 ? "" : "s"}.`;
       }
-      if (listVal.length > maxCards) {
+      if (listValTyped.length > maxCards) {
         return `Add no more than ${maxCards} item${maxCards === 1 ? "" : "s"}.`;
       }
       return null;
@@ -515,4 +521,36 @@ export function validateFieldValue(
       return null;
     }
   }
+}
+
+export function getListSubFieldErrors(
+  listField: ListField,
+  listValue: FormValue | undefined,
+  data: Record<string, FormValue>,
+  extras: ConditionExtras = {}
+): Record<string, string | null> {
+  const result: Record<string, string | null> = {};
+  const listVal = Array.isArray(listValue) ? listValue : [];
+  const listValTyped = listVal.every(
+    (item): item is Record<string, FormValue> =>
+      item !== null && typeof item === "object" && !Array.isArray(item)
+  )
+    ? listVal
+    : [];
+  const subFields = listField.fields ?? [];
+  for (let cardIndex = 0; cardIndex < listValTyped.length; cardIndex++) {
+    const card = listValTyped[cardIndex] ?? {};
+    const mergedData = { ...data, ...card };
+    for (const sub of subFields) {
+      const key = `${listField.id}:${cardIndex}:${sub.id}`;
+      if (!isElementCurrentlyVisible(sub, mergedData, extras)) {
+        result[key] = null;
+        continue;
+      }
+      const subValue = card[sub.id];
+      const subError = validateFieldValue(sub, subValue, mergedData, extras);
+      result[key] = subError;
+    }
+  }
+  return result;
 }
