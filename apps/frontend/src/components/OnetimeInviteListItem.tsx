@@ -1,8 +1,8 @@
 import { OnetimeInviteDto } from "@alliance/shared/client";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
-import { Copy } from "lucide-react";
+import { Copy as CopyIcon } from "lucide-react";
 import { href, Link } from "react-router";
 
 type OnetimeInviteListItemProps = {
@@ -124,55 +124,49 @@ const OnetimeInviteListItem = ({
         <div className="mt-2 flex flex-row items-center sm:justify-end gap-2">
           {isRequest && onApprove && onReject ? (
             <>
-              <Button
+              <NewButton
                 onClick={() => onApprove(invite.id)}
                 color={ButtonColor.Green}
               >
                 Approve
-              </Button>
-              <Button
+              </NewButton>
+              <NewButton
                 onClick={() => onReject(invite.id)}
-                color={ButtonColor.White}
+                color={ButtonColor.Red}
               >
                 Reject
-              </Button>
+              </NewButton>
             </>
           ) : invite.status === "link_unused" ? (
             <>
               {onCopy && (
-                <Button
+                <NewButton
                   color={copied ? ButtonColor.Green : ButtonColor.White}
                   disabled={copied}
                   onClick={handleCopy}
+                  iconLeft={!copied && CopyIcon}
                 >
-                  {copied ? (
-                    "Copied!"
-                  ) : (
-                    <div className="flex flex-row items-center gap-x-2">
-                      <Copy className="w-4 h-4" />
-                      Share invite link
-                    </div>
-                  )}
-                </Button>
+                  {copied ? "Copied!" : "Share invite link"}
+                </NewButton>
               )}
               {onDelete && (
-                <Button
+                <NewButton
                   color={ButtonColor.Black}
                   onClick={(event) => onDelete(invite.id, event)}
                 >
                   Delete
-                </Button>
+                </NewButton>
               )}
             </>
           ) : (
             onDelete &&
             invite.status === "request_pending" && (
-              <Button
+              <NewButton
                 color={ButtonColor.White}
                 onClick={(event) => onDelete(invite.id, event)}
               >
                 Cancel
-              </Button>
+              </NewButton>
             )
           )}
         </div>

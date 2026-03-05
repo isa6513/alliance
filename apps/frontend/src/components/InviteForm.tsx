@@ -5,7 +5,7 @@ import {
   OnetimeInviteDto,
   userCreateOnetimeInvite,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -204,22 +204,22 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
             />
           </div>
           <div className="flex flex-col md:flex-row gap-2">
-            <Button
+            <NewButton
               color={ButtonColor.Green}
               onClick={() => setResponsibilityChoice("responsible")}
               disabled={responsibilityChoice === "responsible"}
               className="w-full"
             >
               {onetimeInviteCreation.responsible.buttonText}
-            </Button>
-            <Button
+            </NewButton>
+            <NewButton
               color={ButtonColor.Grey}
               onClick={() => setResponsibilityChoice("not_responsible")}
               disabled={responsibilityChoice === "not_responsible"}
               className="w-full"
             >
               {onetimeInviteCreation.not_responsible.buttonText}
-            </Button>
+            </NewButton>
           </div>
         </div>
 
@@ -335,7 +335,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                   }
                 />
                 {!!selectedCommunity && (
-                  <Button
+                  <NewButton
                     color={ButtonColor.Black}
                     onClick={() => handleCreateInvite(selectedCommunityId)}
                     disabled={
@@ -346,7 +346,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                     className="w-full"
                   >
                     {creatingInvite ? "Creating invite..." : "Create invite"}
-                  </Button>
+                  </NewButton>
                 )}
               </div>
             )}
