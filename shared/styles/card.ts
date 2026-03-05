@@ -16,7 +16,7 @@ export enum CardStyle {
 }
 
 export const cardStyleClasses: Record<CardStyle, string> = {
-  [CardStyle.White]: "bg-white border-zinc-200 border-box",
+  [CardStyle.White]: "bg-white border-zinc-200 box-border",
   [CardStyle.WhiteSolid]: "bg-white border-none",
   [CardStyle.Alert]: "bg-sky-100 border-sky-300",
   [CardStyle.Outline]: "bg-transparent border-zinc-200 hover:bg-zinc-100",
@@ -28,7 +28,7 @@ export const cardStyleClasses: Record<CardStyle, string> = {
   [CardStyle.Image]: "bg-transparent border-none",
   [CardStyle.Green]: "bg-green/20 border-green",
   [CardStyle.Transparent]:
-    "bg-transparent border-gray-2 hover:border border-box",
+    "bg-transparent border-gray-2 hover:border box-border",
   [CardStyle.LightGreen]: "bg-green/10 border-green/30",
   [CardStyle.Red]: "bg-red-100 border-red-300",
 };

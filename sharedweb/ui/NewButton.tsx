@@ -1,4 +1,4 @@
-import { LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import React from "react";
 import { isNullReactNode, NullReactNode } from "@alliance/shared/lib/constants";
 import { cn } from "@alliance/shared/styles/util";
@@ -87,11 +87,14 @@ const Button: React.FC<ButtonProps> = ({
     large: "px-6 py-3 text-lg h-12 gap-x-3",
   }[size];
 
-  const baseClassName = `${sizeClass} font-medium rounded w-fit flex flex-row items-center justify-between border-box relative group ${
-    disabled ? "opacity-50 !cursor-not-allowed" : ``
-  } ${color} ${
-    color === ButtonColor.Light ? "!text-zinc-800" : ""
-  } ${className} `;
+  const baseClassName = cn(
+    sizeClass,
+    "font-medium rounded w-fit flex flex-row items-center justify-between border-box relative group",
+    disabled && "opacity-50 !cursor-not-allowed",
+    color,
+    color === ButtonColor.Light && "!text-zinc-800",
+    className
+  );
 
   const iconSize = {
     small: 12,

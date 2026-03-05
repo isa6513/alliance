@@ -79,11 +79,14 @@ const Button: React.FC<ButtonProps> = ({
     large: "px-6 py-3 text-lg",
   }[size];
 
-  const baseClassName = `${sizeClass} font-medium rounded w-fit h-fit flex items-center justify-center border-box relative group ${
-    disabled ? "opacity-50 !cursor-not-allowed" : ``
-  } ${color} ${
-    color === ButtonColor.Light ? "!text-zinc-800" : ""
-  } ${className} `;
+  const baseClassName = cn(
+    sizeClass,
+    "font-medium rounded w-fit h-fit flex items-center justify-center box-border relative group",
+    disabled && "opacity-50 !cursor-not-allowed",
+    color,
+    color === ButtonColor.Light && "!text-zinc-800",
+    className
+  );
 
   const baseStyle = {
     fontWeight: 450,
