@@ -1,6 +1,7 @@
 import { formatShortDate } from "@alliance/shared/lib/dateFormatters";
 import { useCallback, useMemo, useState } from "react";
 import { Link, href } from "react-router";
+import { cn } from "@alliance/shared/styles/util";
 import {
   CommunityMemberContactInfoDto,
   communityRemoveMember,
@@ -116,15 +117,16 @@ const CommunityMemberTableRow = ({
   return (
     <>
       <tr
-        className={`*:py-4 *:px-2 *:md:px-4 bg-white ${
-          canExpand ? "hover:bg-zinc-50 cursor-pointer" : ""
-        }`}
+        className={cn(
+          "*:py-4 *:px-2 *:md:px-4 bg-white",
+          canExpand && "hover:bg-zinc-50 cursor-pointer"
+        )}
         onClick={canExpand ? () => setExpanded(!expanded) : undefined}
       >
         <td>
           <div className="flex flex-row items-center gap-x-1 md:gap-x-3">
             {canExpand && (
-              <div className={`${expanded ? "" : "-rotate-90"}`}>
+              <div className={cn(expanded ? "" : "-rotate-90")}>
                 <DropdownIcon size="mini" fill="black" />
               </div>
             )}
@@ -141,9 +143,10 @@ const CommunityMemberTableRow = ({
               <UserDisplayName
                 staff={profile.staff}
                 underline={false}
-                className={`${
-                  currentAwayRange ? "text-zinc-400" : undefined
-                } group-hover:underline`}
+                className={cn(
+                  currentAwayRange && "text-zinc-400",
+                  "group-hover:underline"
+                )}
               >
                 {profile.displayName}
                 {currentAwayRange && " (away)"}

@@ -1,5 +1,10 @@
 import { MessageDto } from "@alliance/shared/client";
-import { type Dispatch, type SetStateAction, useCallback, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -12,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { ImagePlus, Send, X } from "lucide-react-native";
 import Text from "../system/Text";
 import { colors } from "../../lib/style/colors";
+import { cn } from "@alliance/shared/styles/util";
 
 interface MessageComposerProps {
   message: string;
@@ -43,7 +49,8 @@ export default function MessageComposer({
     if (picking) return;
     setPicking(true);
     try {
-      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
         Alert.alert("Permission required", "Allow photo access to add images.");
         return;
@@ -87,7 +94,11 @@ export default function MessageComposer({
         <View className="flex-row items-center justify-between bg-zinc-100 rounded p-3 mb-3">
           <View className="flex-row items-center gap-2 flex-1">
             <Text className="text-sm text-zinc-500">Replying to:</Text>
-            <Text className="text-sm text-zinc-900 max-w-[250px]" numberOfLines={1} style={{textOverflow: "ellipsis"}}>
+            <Text
+              className="text-sm text-zinc-900 max-w-[250px]"
+              numberOfLines={1}
+              style={{ textOverflow: "ellipsis" }}
+            >
               {replyingTo.body || "image"}
             </Text>
           </View>
@@ -102,7 +113,10 @@ export default function MessageComposer({
       {attachments.length > 0 && (
         <View className="flex-row flex-wrap gap-2 mb-3">
           {attachments.map((attachment, index) => (
-            <View key={`${attachment.slice(0, 12)}-${index}`} className="relative">
+            <View
+              key={`${attachment.slice(0, 12)}-${index}`}
+              className="relative"
+            >
               <Image
                 source={{ uri: attachment }}
                 className="w-16 h-16 rounded border border-zinc-200"
@@ -139,9 +153,10 @@ export default function MessageComposer({
         </View>
         <TouchableOpacity
           onPress={handleSend}
-          className={`w-10 h-10 items-center justify-center rounded ${
+          className={cn(
+            "w-10 h-10 items-center justify-center rounded",
             canSend ? "bg-green" : "bg-zinc-300"
-          }`}
+          )}
           disabled={!canSend || isSending}
         >
           {isSending ? (

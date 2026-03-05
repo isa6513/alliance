@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import chevronRight from "../assets/icons8-expand-arrow-96.png";
 import { Link } from "react-router";
 
@@ -18,7 +19,10 @@ const ResourceButton = ({
     <Link
       to={to}
       id={id}
-      className={`rounded border border-zinc-200 hover:bg-zinc-50 p-4 text-lg w-full ${className}`}
+      className={cn(
+        "rounded border border-zinc-200 hover:bg-zinc-50 p-4 text-lg w-full",
+        className
+      )}
     >
       <div className="flex flex-row items-center justify-between w-full">
         {children}

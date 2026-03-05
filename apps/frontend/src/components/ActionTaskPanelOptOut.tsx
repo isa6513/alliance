@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Dropdown from "@alliance/sharedweb/ui/Dropdown";
@@ -23,7 +24,7 @@ const ActionTaskPanelOptOut = ({
   const ref = useOutsideClick(() => setDropdownOpen(false));
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={cn("relative", className)}>
       <div className="flex flex-row gap-x-1 w-full items-center relative">
         <span className="text-sm">Can&apos;t complete this action?</span>
         <p

@@ -1,4 +1,5 @@
 import { ActionDto, ActionStatus } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
 import React from "react";
 
 export interface ActionProgressBarProps {
@@ -27,7 +28,7 @@ const ProgressBarWrapper: React.FC<ProgressBarWrapperProps> = ({
   className,
   children,
 }) => (
-  <div className={`flex flex-col gap-y-1 flex-1 ${className || ""}`}>
+  <div className={cn("flex flex-col gap-y-1 flex-1", className)}>
     {children}
   </div>
 );
@@ -41,7 +42,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   <>
     <div className="w-full h-2 bg-gray-100 rounded-[2px]">
       <div
-        className={`h-2 rounded-[2px] ${barColor}`}
+        className={cn("h-2 rounded-[2px]", barColor)}
         style={{ width: `${Math.min(percentage, 100)}%` }}
       />
     </div>

@@ -5,6 +5,7 @@ import {
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import UserActivityCard from "../../components/UserActivityCard";
 import { useAuth } from "../../lib/AuthContext";
 import useActivities, {
@@ -211,11 +212,12 @@ const ActionActivityFeedPage = () => {
               key={m}
               onClick={() => setMode(m)}
               aria-pressed={m === mode}
-              className={`!border-b-[2px] rounded-none ${
+              className={cn(
+                "!border-b-[2px] rounded-none",
                 m === mode
                   ? "!border-b-green text-black"
                   : "!border-b-transparent hover:!border-b-zinc-200 text-zinc-500"
-              }`}
+              )}
             >
               <p className="capitalize">{m}</p>
             </Button>

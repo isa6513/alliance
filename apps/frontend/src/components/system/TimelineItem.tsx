@@ -2,6 +2,7 @@ import { ActionDto, ActionUpdateDto } from "@alliance/shared/client";
 import ActionUpdateCard from "@alliance/sharedweb/ui/ActionUpdateCard";
 import ActionCompletedBarWithInfo from "../../pages/app/ActionCompletedBarWithInfo";
 import Card from "@alliance/sharedweb/ui/Card";
+import { cn } from "@alliance/shared/styles/util";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
@@ -40,7 +41,10 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     <div className="flex flex-col gap-y-2">
       <div className="flex flex-row items-center gap-x-2 mt-px">
         <p
-          className={`font-medium ${highlighted ? "text-green" : "text-black"}`}
+          className={cn(
+            "font-medium",
+            highlighted ? "text-green" : "text-black"
+          )}
         >
           {title}
         </p>

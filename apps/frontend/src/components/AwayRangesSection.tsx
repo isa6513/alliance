@@ -15,6 +15,7 @@ import { Pencil, X } from "lucide-react";
 import React, { useState } from "react";
 import { href, Link } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@alliance/shared/styles/util";
 
 enum ReasonDropdownOption {
   UNSELECTED = "Select a reason",
@@ -72,7 +73,7 @@ const AwayRangesSection: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: awayRanges = [], isLoading: loading } = useQuery({
     queryKey: ["userGetAwayRanges"],
-    queryFn: () => userGetAwayRanges().then(res => res.data ?? []),
+    queryFn: () => userGetAwayRanges().then((res) => res.data ?? []),
   });
 
   const [creating, setCreating] = useState(false);
@@ -239,11 +240,12 @@ const AwayRangesSection: React.FC = () => {
           {awayRanges.map((range) => (
             <div
               key={range.id}
-              className={`p-4 rounded-lg border ${
+              className={cn(
+                "p-4 rounded-lg border",
                 isCurrentlyAway(range)
                   ? "bg-yellow-50 border-yellow-200"
                   : "bg-gray-50 border-gray-200"
-              }`}
+              )}
             >
               {editingId === range.id ? (
                 <div className="space-y-3">
@@ -425,7 +427,7 @@ const AwayRangesSection: React.FC = () => {
                 <Link
                   to={href("/contract")}
                   target={"_blank"}
-                  className={"text-green hover:underline"}
+                  className="text-link"
                 >
                   contract
                 </Link>{" "}

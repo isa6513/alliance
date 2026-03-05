@@ -13,6 +13,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { useSearchParams } from "react-router";
 import ConversationDetailPanel from "../../components/ConversationDetailPanel";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
@@ -314,9 +315,10 @@ const MessagesPage = () => {
       ref={containerRef}
     >
       <div
-        className={` overflow-x-hidden flex flex-col bg-zinc-50 border-r border-zinc-200 transition-width duration-100 ease-in-out ${
+        className={cn(
+          "overflow-x-hidden flex flex-col bg-zinc-50 border-r border-zinc-200 transition-width duration-100 ease-in-out",
           !isSmall ? "min-w-[300px] max-w-[300px]" : "max-w-full"
-        }`}
+        )}
         style={{ flex: isSmall && messagesOpen ? 0 : 1 }}
       >
         <div>
@@ -350,11 +352,12 @@ const MessagesPage = () => {
                   {pendingInvites?.map((conversation) => (
                     <div
                       key={conversation.id}
-                      className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3 ${
+                      className={cn(
+                        "p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3",
                         selectedConvoId === conversation.id
                           ? "bg-zinc-100"
                           : "bg-white"
-                      }`}
+                      )}
                       onClick={handleConversationClick(conversation.id)}
                     >
                       <div className="flex flex-row items-center gap-x-3">
@@ -371,10 +374,7 @@ const MessagesPage = () => {
                           </span>
                         </div>
                       </div>
-                      <div
-                        className={`font-semibold text-xs text-white bg-red-500
-                    } rounded-md flex justify-center items-center w-6 h-6 shrink-0`}
-                      >
+                      <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-6 h-6 shrink-0">
                         {conversation.unreadCount || 1}
                       </div>
                     </div>
@@ -388,11 +388,12 @@ const MessagesPage = () => {
             {filteredConversations?.map((conversation) => (
               <div
                 key={conversation.id}
-                className={`p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3 ${
+                className={cn(
+                  "p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3",
                   selectedConvoId === conversation.id
                     ? "bg-zinc-100"
                     : "bg-white"
-                }`}
+                )}
                 onClick={handleConversationClick(conversation.id)}
               >
                 <div className="flex flex-row items-center gap-x-3">
@@ -408,10 +409,7 @@ const MessagesPage = () => {
                 </div>
                 <div>
                   {conversation.unreadCount > 0 && (
-                    <div
-                      className={`font-semibold text-xs text-white bg-red-500
-                    } rounded-md flex justify-center items-center w-6 h-6`}
-                    >
+                    <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-6 h-6">
                       {conversation.unreadCount}
                     </div>
                   )}
@@ -422,9 +420,10 @@ const MessagesPage = () => {
         </div>
       </div>
       <div
-        className={`flex-1 ${
+        className={cn(
+          "flex-1",
           isSmall && !messagesOpen ? "max-w-0" : "max-w-full"
-        }`}
+        )}
       >
         {selectedConvo && !creatingNewConversation && (
           <ConversationDetailPanel

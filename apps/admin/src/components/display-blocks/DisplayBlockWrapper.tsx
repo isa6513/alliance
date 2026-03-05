@@ -15,6 +15,7 @@ import type { UserDto } from "@alliance/shared/client";
 import { userList } from "@alliance/shared/client";
 import { ConditionalVisibility } from "../form-fields/CommonControls";
 import { CheckCircle2, Circle } from "lucide-react";
+import { cn } from "@alliance/shared/styles/util";
 
 type ManualUserListEntry = Pick<UserDto, "id" | "name" | "hasActiveContract">;
 
@@ -421,11 +422,12 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
 
   return (
     <div
-      className={`group relative border rounded-lg p-4 pl-8 transition-all ${
+      className={cn(
+        "group relative border rounded-lg p-4 pl-8 transition-all",
         isDragging
           ? "border-blue-400 shadow-lg opacity-50"
           : "border-gray-200 hover:border-gray-300"
-      }`}
+      )}
     >
       <div
         className="absolute left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity"
@@ -542,11 +544,12 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
                                 : `User ${activeManualUserId}`}
                             </span>
                             <span
-                              className={`rounded-full px-2 py-0.5 text-[11px] ${
+                              className={cn(
+                                "rounded-full px-2 py-0.5 text-[11px]",
                                 hasContentForActiveUser
                                   ? "bg-green-100 text-green-800"
                                   : "bg-yellow-100 text-yellow-800"
-                              }`}
+                              )}
                             >
                               {hasContentForActiveUser
                                 ? "Custom content"
@@ -688,7 +691,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
           ×
         </button>
       </div>
-      <div className={showConditionalControls ? "space-y-3" : undefined}>
+      <div className={cn(showConditionalControls && "space-y-3")}>
         {manualPerUserEnabled && (
           <div className="mb-3 flex items-center justify-between rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-900">
             <div>
@@ -798,25 +801,27 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
                   >
                     <span className="flex items-center gap-2 truncate">
                       <StatusIcon
-                        className={`h-3 w-3 ${statusColor}`}
+                        className={cn("h-3 w-3", statusColor)}
                         strokeWidth={3}
                       />
                       <span
-                        className={`truncate ${
+                        className={cn(
+                          "truncate",
                           activeManualUserId === userId
                             ? "font-semibold text-blue-700"
                             : "text-gray-800"
-                        }`}
+                        )}
                       >
                         {name}
                       </span>
                     </span>
                     <span
-                      className={`text-xs rounded-full px-2 py-0.5 ${
+                      className={cn(
+                        "text-xs rounded-full px-2 py-0.5",
                         hasContent
                           ? "bg-green/10 text-green-800"
                           : "bg-gray-100 text-gray-700"
-                      }`}
+                      )}
                     >
                       {hasContent ? "Set" : "Unset"}
                     </span>

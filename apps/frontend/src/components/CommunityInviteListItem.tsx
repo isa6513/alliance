@@ -2,6 +2,7 @@ import {
   CommunityInviteDto,
   CommunityInviteStatus,
 } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { href, Link } from "react-router";
@@ -93,7 +94,7 @@ const CommunityInviteListItem = ({
         )}
       </div>
       <div className="flex flex-col items-end justify-between gap-2">
-        <span className={`text-sm font-semibold ${statusStyle.textStyle}`}>
+        <span className={cn("text-sm font-semibold", statusStyle.textStyle)}>
           {statusStyle.label}
         </span>
         <div className="flex flex-row items-center justify-end gap-2">

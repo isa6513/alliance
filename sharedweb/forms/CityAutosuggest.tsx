@@ -4,6 +4,7 @@ import {
   formatCityDisplay,
   useCityAutosuggest,
 } from "@alliance/shared/forms/cityAutosuggest";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface CityAutosuggestProps {
   value?: string;
@@ -83,7 +84,7 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
     );
 
   return (
-    <div ref={wrapperRef} className={`relative ${className}`}>
+    <div ref={wrapperRef} className={cn("relative", className)}>
       <input
         type="text"
         value={query}
@@ -100,7 +101,10 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
         aria-autocomplete="list"
         autoComplete="off"
         disabled={disabled}
-        className={`w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500 ${inputClassName}`}
+        className={cn(
+          "w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500",
+          inputClassName
+        )}
       />
 
       {open && results.length > 0 && (
@@ -109,9 +113,10 @@ const CityAutosuggest: React.FC<CityAutosuggestProps> = ({
             <div
               key={`${city.name}-${city.admin1}-${city.countryCode}`}
               onMouseDown={() => selectCity(city)}
-              className={`cursor-pointer px-3 py-2 gap-2 flex flex-row ${
-                idx === highlighted ? "bg-gray-200 " : "hover:bg-gray-100"
-              }`}
+              className={cn(
+                "cursor-pointer px-3 py-2 gap-2 flex flex-row",
+                idx === highlighted ? "bg-gray-200" : "hover:bg-gray-100"
+              )}
             >
               <p>{formatCityDisplay(city)}</p>
             </div>

@@ -4,6 +4,7 @@ import { View, TouchableOpacity } from "react-native";
 import ProfileImage from "../ProfileImage";
 import Text from "../system/Text";
 import { getConversationTimestamp } from "../../lib/messages";
+import { cn } from "@alliance/shared/styles/util";
 
 interface ConversationListItemProps {
   conversation: ConversationDto;
@@ -30,9 +31,10 @@ export default function ConversationListItem({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.85}
-      className={`px-4 py-3 bg-white ${
-        showDivider ? "border-b border-zinc-200" : ""
-      }`}
+      className={cn(
+        "px-4 py-3 bg-white",
+        showDivider && "border-b border-zinc-200"
+      )}
     >
       <View className="flex-row items-center gap-3">
         <ProfileImage pfp={conversation.photo ?? null} size="large" />

@@ -6,6 +6,7 @@ import { useCallback, useState } from "react";
 import { Link, href } from "react-router";
 import notifBell from "../assets/notif-bell.svg";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
+import { cn } from "@alliance/shared/styles/util";
 
 const NotificationsIcon = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,11 +26,12 @@ const NotificationsIcon = () => {
 
   return (
     <div
-      className={`${
+      className={cn(
         unreadCount > 0
           ? "bg-red-500 text-white"
-          : "bg-white text-zinc-600 border-1 border-zinc-200"
-      } w-12 h-8 rounded-full flex items-center justify-center cursor-pointer`}
+          : "bg-white text-zinc-600 border-1 border-zinc-200",
+        "w-12 h-8 rounded-full flex items-center justify-center cursor-pointer"
+      )}
       onClick={toggle}
       ref={ref}
     >
@@ -74,9 +76,10 @@ const NotificationsIcon = () => {
                 notification.id,
                 notification.webAppLocation
               )}
-              className={`text-black hover:bg-zinc-100 p-2 rounded-md flex cursor-pointer flex-col ${
-                notification.readAt ? "" : "bg-red-50"
-              }`}
+              className={cn(
+                "text-black hover:bg-zinc-100 p-2 rounded-md flex cursor-pointer flex-col",
+                !notification.readAt && "bg-red-50"
+              )}
             >
               <p className="text-gray-500 text-xs">
                 {formatDate(notification.updatedAt, "MM/dd/yyyy")}

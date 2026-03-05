@@ -25,6 +25,7 @@ import LikeButton from "./LikeButton";
 import ProfileImage from "./ProfileImage";
 import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface CommentsProps {
   objectId: number;
@@ -84,7 +85,7 @@ const ReplyForm = ({
   onSubmit,
 }: ReplyFormProps) => {
   return (
-    <View className={`p-4 bg-zinc-100`}>
+    <View className="p-4 bg-zinc-100">
       <EditableContentForm
         value={content}
         onChange={setContent}
@@ -161,9 +162,13 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
   return (
     <View
       style={{ marginLeft: Math.min(depth * 12, maxDepth * 12) }}
-      className={`rounded ${containerBorder} ${containerBg} ${containerSpacing} ${
-        isHighlighted ? "border-l-2 border-blue-500" : ""
-      }`}
+      className={cn(
+        "rounded",
+        containerBorder,
+        containerBg,
+        containerSpacing,
+        isHighlighted && "border-l-2 border-blue-500"
+      )}
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-x-2">

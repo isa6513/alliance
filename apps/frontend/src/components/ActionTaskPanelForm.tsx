@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { cn } from "@alliance/shared/styles/util";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -119,9 +120,10 @@ const ActionTaskPanelForm = ({
     if (loading) {
       return (
         <div
-          className={`flex flex-col justify-center items-center ${
-            card ? "p-6 border border-zinc-200" : ""
-          }`}
+          className={cn(
+            "flex flex-col justify-center items-center",
+            card && "p-6 border border-zinc-200"
+          )}
         >
           <Spinner />
         </div>
@@ -129,9 +131,10 @@ const ActionTaskPanelForm = ({
     } else {
       return (
         <div
-          className={`flex flex-col justify-center items-center text-red-500 ${
-            card ? "p-6 border border-zinc-200" : ""
-          }`}
+          className={cn(
+            "flex flex-col justify-center items-center text-red-500",
+            card && "p-6 border border-zinc-200"
+          )}
         >
           <p>Error loading form</p>
           {error && <p>{error}</p>}
@@ -143,7 +146,7 @@ const ActionTaskPanelForm = ({
   const Wrapper = card ? Card : "div";
 
   return (
-    <Wrapper className={!card ? "flex flex-col gap-y-2" : "p-4 sm:p-6"}>
+    <Wrapper className={card ? "p-4 sm:p-6" : "flex flex-col gap-y-2"}>
       <div>
         <FormRenderer
           form={form.schema as unknown as FormSchema}

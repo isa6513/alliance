@@ -1,5 +1,6 @@
 import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
+import { cn } from "@alliance/shared/styles/util";
 
 enum NavbarPage {
   People = "People",
@@ -40,15 +41,17 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
 
   return (
     <div
-      className={`
-      flex flex-col sm:flex-row md:gap-y-4 ${absolute ? "absolute" : "relative"}
-      w-screen ${
-        showLogo ? "justify-between" : "justify-end"
-      } items-center py-4 md:py-5 px-24 top-0 left-0 z-10 text-[14pt] transition-[padding,background-color] duration-300 ${
+      className={cn(
+        "flex flex-col items-center",
+        "sm:flex-row md:gap-y-4 py-4 md:py-5 px-24",
+        "top-0 left-0 z-10 text-[14pt] transition-[padding,background-color] duration-300",
+        absolute ? "absolute" : "relative",
+        "w-screen",
+        showLogo ? "justify-between" : "justify-end",
         transparent
           ? "bg-transparent text-white"
           : "text-black bg-white border-b md:border-none border-zinc-200"
-      }`}
+      )}
       ref={ref}
     >
       {showLogo && (

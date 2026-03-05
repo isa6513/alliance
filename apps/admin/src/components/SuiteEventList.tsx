@@ -3,12 +3,12 @@ import {
   ActionSuiteDto,
   UpdateActionEventDto,
 } from "@alliance/shared/client";
-import clsx from "clsx";
 import SuiteEventCard from "./SuiteEventCard";
 import { useState } from "react";
 import CreateEventForm from "./CreateEventForm";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
+import { cn } from "@alliance/shared/styles/util";
 
 export type SuiteEventListProps = {
   referenceAction: ActionDto;
@@ -34,7 +34,7 @@ const SuiteEventList = ({
 
   return (
     <div>
-      <div className={clsx("flex flex-row gap-4 items-center", className)}>
+      <div className={cn("flex flex-row gap-4 items-center", className)}>
         {events
           .sort((a, b) => a.date.localeCompare(b.date))
           .map((event) => (

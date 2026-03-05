@@ -2,6 +2,7 @@ import { ProfileDto } from "@alliance/shared/client";
 import { useState } from "react";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { cn } from "@alliance/shared/styles/util";
 
 interface PublicMemberDirectoryCardProps {
   member: ProfileDto;
@@ -25,8 +26,10 @@ const PublicMemberDirectoryCard: React.FC<PublicMemberDirectoryCardProps> = ({
       className="p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 cursor-pointer"
     >
       <div
-        className={`flex flex-col md:flex-row ${(showDescription || descriptionOpen) ? "items-start" : "md:items-center"
-          } gap-2`}
+        className={cn(
+          "flex flex-col md:flex-row gap-2",
+          showDescription || descriptionOpen ? "items-start" : "md:items-center"
+        )}
       >
         <ProfileImage pfp={member.profilePicture ?? null} size="medium" />
         <div className="flex-1 min-w-0">

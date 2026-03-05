@@ -220,7 +220,7 @@ const ConversationInfoPanel = ({
                 </Link>
               </p>
             )}
-            <List className={`w-full`}>
+            <List className="w-full">
               {selectedConvo.participants.map((participant) => (
                 <Link
                   key={participant.user.id}

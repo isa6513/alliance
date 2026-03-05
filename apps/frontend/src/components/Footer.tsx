@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import React from "react";
 import { Link, href } from "react-router";
 
@@ -7,7 +8,9 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ className }) => {
   return (
-    <footer className={`w-full text-zinc-500  py-5 md:py-12 px-5 ${className}`}>
+    <footer
+      className={cn("w-full text-zinc-500  py-5 md:py-12 px-5", className)}
+    >
       <div className="container mx-auto flex flex-col">
         <div className="flex flex-col items-center justify-center">
           <div className="flex flex-row flex-wrap gap-4 md:gap-6 text-sm sm:text-base">

@@ -331,7 +331,7 @@ const UserProfilePage: React.FC = () => {
             )
           )}
           {/* stats row */}
-          <div className={`mt-2 flex flex-row gap-x-2 transition-none`}>
+          <div className="mt-2 flex flex-row gap-x-2 transition-none">
             <UserProfileTab
               number={completedActions.length}
               label={`action${

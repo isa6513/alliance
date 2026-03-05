@@ -30,6 +30,7 @@ import { isFeatureEnabled } from "../lib/config";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
 import { useMessagingUnread } from "../pages/app/messages";
 import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
+import { cn } from "@alliance/shared/styles/util";
 
 export enum NavbarPage {
   Tasks = "Tasks",
@@ -347,10 +348,15 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 
       <aside
         id="side-nav"
-        className={`fixed top-0 left-0 h-screen w-screen sm:w-[clamp(14rem,18vw,17rem)] bg-zinc-50 border-r border-zinc-200 flex flex-col transform transition-transform duration-100 ease-in-out z-30 overflow-y-auto
-        ${
-          open ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 md:shadow-none`}
+        className={cn(
+          "fixed top-0 left-0 h-screen w-screen sm:w-[clamp(14rem,18vw,17rem)]",
+          "bg-zinc-50 border-r border-zinc-200",
+          "flex flex-col",
+          "transform transition-transform duration-100 ease-in-out",
+          "z-30 overflow-y-auto",
+          "md:shadow-none",
+          open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )}
         ref={navRef}
       >
         {/* Close button on mobile */}
@@ -382,7 +388,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                       key={item.page}
                       to={destinations[NavbarPage.Profile]}
                       prefetch="render"
-                      className={`hidden md:flex p-3 hover:bg-zinc-100 rounded items-center justify-between w-full`}
+                      className="hidden md:flex p-3 hover:bg-zinc-100 rounded items-center justify-between w-full"
                     >
                       <div className="text-zinc-700 flex items-center gap-x-2.5">
                         <ProfileImage pfp={profilePicture} size="small" />
@@ -394,11 +400,12 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                       key={item.page}
                       to={item.destination}
                       prefetch="render"
-                      className={`px-3 py-1.5 rounded flex items-center justify-between w-full pr-2 ${
+                      className={cn(
+                        "px-3 py-1.5 rounded flex items-center justify-between w-full pr-2",
                         currentLocation === item.page
                           ? "bg-zinc-200/80 text-black"
                           : "text-zinc-700 hover:bg-zinc-100"
-                      }`}
+                      )}
                       onClick={() => setOpen(false)}
                     >
                       <div className="flex items-center gap-x-2">
@@ -407,11 +414,15 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                       </div>
                       {!!unreadNotifsForPage[item.page] && (
                         <div
-                          className={`font-semibold text-xs text-white ${
+                          className={cn(
+                            "font-semibold text-xs text-white",
+                            "rounded-md",
+                            "flex justify-center items-center",
+                            "w-5 h-5",
                             item.page === NavbarPage.Tasks
                               ? "bg-red-500"
                               : "bg-zinc-500"
-                          } rounded-md flex justify-center items-center w-5 h-5`}
+                          )}
                         >
                           {unreadNotifsForPage[item.page]}
                         </div>

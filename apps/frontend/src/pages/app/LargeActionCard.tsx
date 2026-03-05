@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { href, useNavigate } from "react-router";
-
+import { cn } from "@alliance/shared/styles/util";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
@@ -74,7 +74,9 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const goToActionPage = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      navigate(href("/actions/:id", { id: action.id.toString() }) + "#description");
+      navigate(
+        href("/actions/:id", { id: action.id.toString() }) + "#description"
+      );
     },
     [navigate, action]
   );
@@ -89,13 +91,14 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   return (
     <>
       <Card
-        className={`p-4 sm:p-6 transition-all duration-300 ${
-          state === LargeActionCardState.Closed
-            ? "opacity-0 overflow-hidden"
-            : "opacity-100"
-        } ${className} w-full relative 
-         ${state === LargeActionCardState.Minified ? "pb-4" : ""} rounded
-        ${optionalStyle}`}
+        className={cn(
+          "p-4 sm:p-6 transition-all duration-300 w-full relative rounded",
+          state === LargeActionCardState.Closed && "opacity-0 overflow-hidden",
+          state === LargeActionCardState.Minified && "pb-4",
+          state !== LargeActionCardState.Closed && "opacity-100",
+          optionalStyle,
+          className
+        )}
       >
         {dismissProps && (
           <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">

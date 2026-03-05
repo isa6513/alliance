@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import { ReactNode, RefObject } from "react";
 
 export const TWO_COLUMN_LAYOUT_CLASSNAME =
@@ -26,10 +27,8 @@ export default function TwoColumnLayout({
   mainScrollRef,
 }: TwoColumnLayoutProps) {
   return (
-    <div className={`${TWO_COLUMN_LAYOUT_CLASSNAME} ${className}`}>
-      <div
-        className={`absolute rounded-lg top-0 left-0 bottom-0 right-0 flex flex-row items-center overflow-hidden`}
-      >
+    <div className={cn(TWO_COLUMN_LAYOUT_CLASSNAME, className)}>
+      <div className="absolute rounded-lg top-0 left-0 bottom-0 right-0 flex flex-row items-center overflow-hidden">
         <div
           ref={mainScrollRef}
           className="w-full h-full overflow-y-auto [scrollbar-gutter:stable]"
@@ -45,7 +44,7 @@ export default function TwoColumnLayout({
       </div>
       {!!sidebar && (
         <div
-          className={`ml-auto sticky top-0 h-full bg-page flex-col gap-y-5 items-stretch overflow-y-auto transition-all duration-200 ease-in-out overflow-x-hidden`}
+          className="ml-auto sticky top-0 h-full bg-page flex-col gap-y-5 items-stretch overflow-y-auto transition-all duration-200 ease-in-out overflow-x-hidden"
           style={{
             width: `${sidebarWidth}px`,
             overflowY:

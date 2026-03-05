@@ -29,6 +29,7 @@ import {
   InviteFunnelDto,
 } from "@alliance/shared/client/types.gen";
 import chroma from "chroma-js";
+import { cn } from "@alliance/shared/styles/util";
 import {
   max,
   min,
@@ -479,7 +480,9 @@ const StatsPage: React.FC = () => {
             actionId,
             actionName,
             emailClickRate:
-              emailNotifs.length > 0 ? emailClickedCount / emailNotifs.length : 0,
+              emailNotifs.length > 0
+                ? emailClickedCount / emailNotifs.length
+                : 0,
             textClickRate:
               textNotifs.length > 0 ? textClickedCount / textNotifs.length : 0,
             emailSentCount: emailNotifs.length,
@@ -488,9 +491,7 @@ const StatsPage: React.FC = () => {
             textClickedCount,
           };
         })
-        .filter(
-          (point): point is ReminderGroupClickRatePoint => point !== null
-        )
+        .filter((point): point is ReminderGroupClickRatePoint => point !== null)
         .sort(
           (a, b) =>
             a.date.getTime() - b.date.getTime() ||
@@ -740,6 +741,7 @@ const StatsPage: React.FC = () => {
       });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return dataPoints.map(({ dayKey: _dayKey, ...point }) => point);
   }, [actionStats, completionRateRange]);
 
@@ -846,7 +848,9 @@ const StatsPage: React.FC = () => {
       .map((bucket) => ({
         date: bucket.date,
         weekRate:
-          bucket.joinedCount > 0 ? bucket.completedCount / bucket.joinedCount : 0,
+          bucket.joinedCount > 0
+            ? bucket.completedCount / bucket.joinedCount
+            : 0,
         actionCount: bucket.actionCount,
         completedCount: bucket.completedCount,
         joinedCount: bucket.joinedCount,
@@ -2086,11 +2090,12 @@ const StatsPage: React.FC = () => {
                       y={y + actionBarsGeometry.barHeight / 2}
                       textAnchor="end"
                       dominantBaseline="middle"
-                      className={`text-xs ${
+                      className={cn(
+                        "text-xs",
                         isHovered
                           ? "fill-gray-900 font-semibold"
                           : "fill-gray-700"
-                      }`}
+                      )}
                     >
                       {action.actionName.length > 25
                         ? action.actionName.substring(0, 22) + "..."
@@ -2341,10 +2346,12 @@ const StatsPage: React.FC = () => {
         getHoverContent={(point) => ({
           title: `Week of ${fullDateFormatter.format(point.date)}`,
           items: (() => {
-            const actionNames = (point.actionNames as string[] | undefined) ?? [];
+            const actionNames =
+              (point.actionNames as string[] | undefined) ?? [];
             const actionItems = actionNames.map((name, index) => ({
               label: `Action ${index + 1}`,
-              value: name.length > 40 ? `${name.slice(0, 40).trimEnd()}...` : name,
+              value:
+                name.length > 40 ? `${name.slice(0, 40).trimEnd()}...` : name,
             }));
             return [
               {
@@ -2358,7 +2365,9 @@ const StatsPage: React.FC = () => {
               },
               {
                 label: "Completed / Joined",
-                value: `${point.completedCount as number}/${point.joinedCount as number}`,
+                value: `${point.completedCount as number}/${
+                  point.joinedCount as number
+                }`,
               },
               ...actionItems,
             ];
@@ -2373,7 +2382,9 @@ const StatsPage: React.FC = () => {
           </h3>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <label className="text-xs font-semibold text-gray-600">From</label>
+              <label className="text-xs font-semibold text-gray-600">
+                From
+              </label>
               <input
                 type="date"
                 value={reminderClickRateRange.start}
@@ -2410,8 +2421,8 @@ const StatsPage: React.FC = () => {
           {!reminderGroupClickRatesLoading &&
             filteredReminderGroupClickRatePoints.length === 0 && (
               <p className="text-sm text-gray-600">
-                No sent reminder groups with email/text link clicks in this
-                date range.
+                No sent reminder groups with email/text link clicks in this date
+                range.
               </p>
             )}
           {filteredReminderGroupClickRatePoints.length > 0 && (
@@ -2423,7 +2434,8 @@ const StatsPage: React.FC = () => {
                   </h4>
                 </div>
                 <div className="p-3">
-                  {!emailReminderBarGeometry || emailReminderActionBars.length === 0 ? (
+                  {!emailReminderBarGeometry ||
+                  emailReminderActionBars.length === 0 ? (
                     <p className="text-sm text-gray-600">
                       No emailed reminder data in this range.
                     </p>
@@ -2459,36 +2471,44 @@ const StatsPage: React.FC = () => {
                               </text>
                             </g>
                           ))}
-                          {emailReminderBarGeometry.xTickIndexes.map((index) => {
-                            const x = emailReminderBarGeometry.xScale(String(index));
-                            if (x === undefined) return null;
-                            const action = emailReminderActionBars[index];
-                            const label =
-                              action.actionName.length > 16
-                                ? `${action.actionName.slice(0, 16)}...`
-                                : action.actionName;
-                            return (
-                              <text
-                                key={`email-action-x-${action.actionId}`}
-                                x={
-                                  x + emailReminderBarGeometry.xScale.bandwidth() / 2
-                                }
-                                y={
-                                  emailReminderBarGeometry.height -
-                                  emailReminderBarGeometry.margin.bottom +
-                                  24
-                                }
-                                textAnchor="middle"
-                                className="fill-gray-600 text-xs"
-                              >
-                                {label}
-                              </text>
-                            );
-                          })}
+                          {emailReminderBarGeometry.xTickIndexes.map(
+                            (index) => {
+                              const x = emailReminderBarGeometry.xScale(
+                                String(index)
+                              );
+                              if (x === undefined) return null;
+                              const action = emailReminderActionBars[index];
+                              const label =
+                                action.actionName.length > 16
+                                  ? `${action.actionName.slice(0, 16)}...`
+                                  : action.actionName;
+                              return (
+                                <text
+                                  key={`email-action-x-${action.actionId}`}
+                                  x={
+                                    x +
+                                    emailReminderBarGeometry.xScale.bandwidth() /
+                                      2
+                                  }
+                                  y={
+                                    emailReminderBarGeometry.height -
+                                    emailReminderBarGeometry.margin.bottom +
+                                    24
+                                  }
+                                  textAnchor="middle"
+                                  className="fill-gray-600 text-xs"
+                                >
+                                  {label}
+                                </text>
+                              );
+                            }
+                          )}
                         </g>
 
                         {emailReminderActionBars.map((bar, index) => {
-                          const x = emailReminderBarGeometry.xScale(String(index));
+                          const x = emailReminderBarGeometry.xScale(
+                            String(index)
+                          );
                           if (x === undefined) return null;
                           const y = emailReminderBarGeometry.yScale(
                             Math.max(0, Math.min(1, bar.averageRate))
@@ -2528,7 +2548,8 @@ const StatsPage: React.FC = () => {
                   </h4>
                 </div>
                 <div className="p-3">
-                  {!textReminderBarGeometry || textReminderActionBars.length === 0 ? (
+                  {!textReminderBarGeometry ||
+                  textReminderActionBars.length === 0 ? (
                     <p className="text-sm text-gray-600">
                       No texted reminder data in this range.
                     </p>
@@ -2565,7 +2586,9 @@ const StatsPage: React.FC = () => {
                             </g>
                           ))}
                           {textReminderBarGeometry.xTickIndexes.map((index) => {
-                            const x = textReminderBarGeometry.xScale(String(index));
+                            const x = textReminderBarGeometry.xScale(
+                              String(index)
+                            );
                             if (x === undefined) return null;
                             const action = textReminderActionBars[index];
                             const label =
@@ -2575,7 +2598,10 @@ const StatsPage: React.FC = () => {
                             return (
                               <text
                                 key={`text-action-x-${action.actionId}`}
-                                x={x + textReminderBarGeometry.xScale.bandwidth() / 2}
+                                x={
+                                  x +
+                                  textReminderBarGeometry.xScale.bandwidth() / 2
+                                }
                                 y={
                                   textReminderBarGeometry.height -
                                   textReminderBarGeometry.margin.bottom +
@@ -2591,7 +2617,9 @@ const StatsPage: React.FC = () => {
                         </g>
 
                         {textReminderActionBars.map((bar, index) => {
-                          const x = textReminderBarGeometry.xScale(String(index));
+                          const x = textReminderBarGeometry.xScale(
+                            String(index)
+                          );
                           if (x === undefined) return null;
                           const y = textReminderBarGeometry.yScale(
                             Math.max(0, Math.min(1, bar.averageRate))
@@ -2641,17 +2669,21 @@ const StatsPage: React.FC = () => {
                 <div className="flex justify-between gap-4">
                   <span className="text-gray-600">Click rate</span>
                   <span
-                    className={`font-medium ${
+                    className={cn(
+                      "font-medium",
                       hoveredReminderActionBar.channel === "email"
                         ? "text-blue-600"
                         : "text-orange-600"
-                    }`}
+                    )}
                   >
-                    {Math.round(hoveredReminderActionBar.bar.averageRate * 100)}%
+                    {Math.round(hoveredReminderActionBar.bar.averageRate * 100)}
+                    %
                   </span>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span className="text-gray-600">Reminder groups averaged</span>
+                  <span className="text-gray-600">
+                    Reminder groups averaged
+                  </span>
                   <span className="font-medium text-gray-900">
                     {hoveredReminderActionBar.bar.reminderGroupCount}
                   </span>
@@ -3048,9 +3080,10 @@ const StatsPage: React.FC = () => {
             Daily Stats ({parsedStats.length} days)
           </span>
           <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${
-              dailyStatsTableOpen ? "rotate-180" : ""
-            }`}
+            className={cn(
+              "w-5 h-5 text-gray-500 transition-transform",
+              dailyStatsTableOpen && "rotate-180"
+            )}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -3122,9 +3155,10 @@ const StatsPage: React.FC = () => {
               Action Stats ({actionStats.length} actions)
             </span>
             <svg
-              className={`w-5 h-5 text-gray-500 transition-transform ${
-                actionStatsTableOpen ? "rotate-180" : ""
-              }`}
+              className={cn(
+                "w-5 h-5 text-gray-500 transition-transform",
+                actionStatsTableOpen && "rotate-180"
+              )}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import React from "react";
 
 export enum TagStyle {
@@ -44,9 +45,7 @@ const Tag: React.FC<TagProps> = ({
   };
 
   return (
-    <div
-      className={`${className} ${sizeClasses[size]} ${styleClasses[tagStyle]}`}
-    >
+    <div className={(cn(sizeClasses[size], styleClasses[tagStyle]), className)}>
       {children}
     </div>
   );

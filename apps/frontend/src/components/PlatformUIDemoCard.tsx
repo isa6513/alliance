@@ -3,18 +3,19 @@ import { CardStyle } from "@alliance/shared/styles/card";
 import uistuff from "../assets/uistuff.png";
 import uistuff2 from "../assets/uistuff2.png";
 import uistuff3 from "../assets/uistuff3.png";
+import { cn } from "@alliance/shared/styles/util";
 
 const images = [uistuff2, uistuff3, uistuff];
 const titles = [
   "Alliance experts propose an action",
   "Commit to participate",
   "See immediate results",
-];
+] as const;
 
 const cardSizes = {
   small: "w-[300px]",
   large: "w-[600px]",
-};
+} as const;
 
 const PlatformUIDemoCard = ({
   idx,
@@ -24,7 +25,7 @@ const PlatformUIDemoCard = ({
   size: "small" | "large";
 }) => {
   return (
-    <div className={`${cardSizes[size]} items-center`}>
+    <div className={cn(cardSizes[size], "items-center")}>
       <Card
         style={CardStyle.Black}
         className="w-full !p-0 overflow-hidden h-[300px]"

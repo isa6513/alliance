@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import React, { useState, PropsWithChildren } from "react";
 
 export interface ExpandableProps extends PropsWithChildren {
@@ -19,18 +20,18 @@ const Expandable: React.FC<ExpandableProps> = ({
   };
 
   return (
-    <div className={`transition w-full`} ref={ref}>
+    <div className="transition w-full" ref={ref}>
       <div
-        className={`group py-2 
-            border-b border-zinc-200 hover:border-zinc-500 flex items-center justify-between cursor-pointer`}
+        className="group py-2 border-b border-zinc-200 hover:border-zinc-500 flex items-center justify-between cursor-pointer"
         onClick={toggleExpand}
       >
         <h2 className="!font-semibold !text-2xl !my-1">{title}</h2>
         <div className="text-sm text-zinc-500">
           <svg
-            className={`-mr-1 size-7 text-zinc-400 group-hover:text-black transition group-hover:-rotate-90 ${
-              isExpanded ? "-rotate-180" : ""
-            }`}
+            className={cn(
+              "-mr-1 size-7 text-zinc-400 group-hover:text-black transition group-hover:-rotate-90",
+              isExpanded && "-rotate-180"
+            )}
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"

@@ -1,5 +1,6 @@
 import { CardStyle, cardStyleClasses } from "@alliance/shared/styles/card";
 import { PropsWithChildren } from "react";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface CardProps extends PropsWithChildren {
   className?: string;
@@ -26,11 +27,14 @@ const Card: React.FC<CardProps> = ({
   return (
     <div
       id={id || undefined}
-      className={`${flex ? "flex flex-col" : ""} ${
-        cardStyleClasses[cardStyle]
-      } p-4 border ${className} ${
-        onClick ? "cursor-pointer " : ""
-      } bg-cover bg-center rounded`}
+      className={cn(
+        flex && "flex flex-col",
+        cardStyleClasses[cardStyle],
+        "p-4 border",
+        className,
+        onClick && "cursor-pointer",
+        "bg-cover bg-center rounded"
+      )}
       ref={ref}
       style={{
         backgroundImage: bgImage ? `url(${bgImage})` : undefined,

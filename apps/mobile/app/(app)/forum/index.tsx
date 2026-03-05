@@ -13,6 +13,7 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import ProfileImage from "../../../components/ProfileImage";
 import Text from "../../../components/system/Text";
 import { colors } from "../../../lib/style/colors";
+import { cn } from "@alliance/shared/styles/util";
 
 export default function ForumScreen() {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -106,9 +107,11 @@ export default function ForumScreen() {
                   key={post.id}
                   onPress={() => navigateToPost(post.id)}
                   activeOpacity={0.8}
-                  className={`p-4 ${
-                    index === 0 ? "" : "border-t border-zinc-200"
-                  } ${isPrivateFuturePost ? "bg-sky-50" : "bg-white"}`}
+                  className={cn(
+                    "p-4",
+                    index !== 0 && "border-t border-zinc-200",
+                    isPrivateFuturePost ? "bg-sky-50" : "bg-white"
+                  )}
                 >
                   <View className="gap-y-2">
                     <View>

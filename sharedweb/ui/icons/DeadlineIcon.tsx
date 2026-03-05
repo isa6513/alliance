@@ -1,3 +1,5 @@
+import { cn } from "@alliance/shared/styles/util";
+
 const DeadlineIcon = ({
   size = "small",
   fill = "var(--color-green)",
@@ -13,7 +15,7 @@ const DeadlineIcon = ({
   return (
     <svg
       viewBox="0 0 146 146"
-      className={`${sizeClass[size]}`}
+      className={cn(sizeClass[size])}
       fill={fill}
       aria-label="Deadline"
       xmlns="http://www.w3.org/2000/svg"

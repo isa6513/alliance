@@ -1,11 +1,12 @@
 import { DefaultIconProps, sizeClass } from "./icons";
+import { cn } from "@alliance/shared/styles/util";
 
 const CreateIcon = ({ size = "small", fill = "black" }: DefaultIconProps) => {
   return (
     <svg
       width="20"
       height="20"
-      className={`${sizeClass[size]}`}
+      className={cn(sizeClass[size])}
       viewBox="0 0 54 54"
       fill={fill}
       xmlns="http://www.w3.org/2000/svg"

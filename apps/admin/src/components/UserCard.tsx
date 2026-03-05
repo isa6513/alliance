@@ -16,6 +16,7 @@ import UserProgressPills, {
   PILL_STATUS_DATA,
 } from "@alliance/sharedweb/ui/UserProgressPills";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface UserCardProps {
   user: UserDto;
@@ -103,7 +104,7 @@ const UserCard = ({
       <div className="flex flex-row items-center border-b pb-2 mb-2 border-zinc-200">
         <p>
           Contract status:{" "}
-          <span className={`font-medium ${contractStatusColor}`}>
+          <span className={cn("font-medium", contractStatusColor)}>
             {contractStatus}
           </span>
         </p>
@@ -136,9 +137,12 @@ const UserCard = ({
                       return (
                         <label
                           key={tag.id}
-                          className={`flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-50 ${
-                            pending ? "opacity-60" : ""
-                          }`}
+                          className={cn(
+                            "flex items-center gap-2",
+                            "px-3 py-2",
+                            "text-sm hover:bg-zinc-50",
+                            pending && "opacity-60"
+                          )}
                           onClick={(event) => event.stopPropagation()}
                         >
                           <input
@@ -217,7 +221,10 @@ const UserCard = ({
                         {action.name}
                       </span>
                       <span
-                        className={`font-semibold text-nowrap ${pillTextStyle}`}
+                        className={cn(
+                          "font-semibold text-nowrap",
+                          pillTextStyle
+                        )}
                       >
                         {pillLabel}
                       </span>

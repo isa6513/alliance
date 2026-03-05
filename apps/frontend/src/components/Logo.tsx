@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import godImage from "../assets/planet-earth.png";
 import { useNavigate } from "react-router";
+import { cn } from "@alliance/shared/styles/util";
 
 interface LogoProps {
   href?: string;
@@ -21,9 +22,11 @@ const Logo: React.FC<LogoProps> = ({ href, className }) => {
       src={godImage}
       onClick={clickHandler}
       alt="logo"
-      className={`${
-        href ? "cursor-pointer" : ""
-      } ${className} aspect-square w-[30px] `}
+      className={cn(
+        "aspect-square w-[30px]",
+        href && "cursor-pointer",
+        className
+      )}
     />
   );
 };

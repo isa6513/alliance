@@ -18,6 +18,7 @@ import {
 } from "./CommonControls";
 import type { FieldWrapperProps } from "./types";
 import RenderField from "@alliance/sharedweb/forms/RenderField";
+import { cn } from "@alliance/shared/styles/util";
 import {
   CustomValidatorType,
   tasksFindOneCustomValidator,
@@ -101,8 +102,8 @@ export function FieldWrapper<T extends AnyField>({
     isCurrentFormField && Array.isArray(field.visibleIf)
       ? field.visibleIf.length
       : isCurrentFormField && field.visibleIf
-        ? 1
-        : 0;
+      ? 1
+      : 0;
   const [
     showConditionalVisibilityControl,
     setShowConditionalVisibilityControl,
@@ -170,8 +171,8 @@ export function FieldWrapper<T extends AnyField>({
       isCurrentFormField && Array.isArray(field.visibleIf)
         ? field.visibleIf.length
         : isCurrentFormField && field.visibleIf
-          ? 1
-          : 0;
+        ? 1
+        : 0;
 
     if (conditionCount > 0 && !showConditionalVisibilityControl) {
       setShowConditionalVisibilityControl(true);
@@ -212,11 +213,14 @@ export function FieldWrapper<T extends AnyField>({
   const handleValidatorChange = async (
     validatorType: CustomValidatorType | undefined,
     idArgument?: string,
-    expression?: string,
+    expression?: string
   ) => {
     console.log("handlevalidatorchange", validatorType, idArgument);
     if (!validatorType) {
-      if (field.customValidatorId && isDraftValidatorId(field.customValidatorId)) {
+      if (
+        field.customValidatorId &&
+        isDraftValidatorId(field.customValidatorId)
+      ) {
         removeDraft(field.customValidatorId);
       }
       onUpdate({ customValidatorId: undefined } as Partial<T>);
@@ -322,10 +326,12 @@ export function FieldWrapper<T extends AnyField>({
 
   return (
     <div
-      className={`group relative border rounded-lg transition-all [&_input,&_textarea]:bg-white ${isDragging
-        ? "border-blue-400 shadow-lg opacity-50"
-        : "border-gray-200 hover:border-gray-300"
-        }`}
+      className={cn(
+        "group relative border rounded-lg transition-all [&_input,&_textarea]:bg-white",
+        isDragging
+          ? "border-blue-400 shadow-lg opacity-50"
+          : "border-gray-200 hover:border-gray-300"
+      )}
     >
       {/* Drag handle */}
       <div

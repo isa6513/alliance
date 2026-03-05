@@ -19,6 +19,7 @@ import {
   UserDto,
 } from "@alliance/shared/client/types.gen";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import UserCard from "../components/UserCard";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
@@ -486,7 +487,7 @@ const UsersList: React.FC = () => {
           <button
             type="button"
             onClick={handleShuffle}
-            className={`p-2 rounded hover:bg-zinc-100`}
+            className="p-2 rounded hover:bg-zinc-100"
             title="Shuffle view"
           >
             <Shuffle size={18} className="text-zinc-600" />
@@ -494,9 +495,10 @@ const UsersList: React.FC = () => {
           <button
             type="button"
             onClick={() => setParams({ viewMode: "cards" })}
-            className={`p-2 rounded ${
+            className={cn(
+              "p-2 rounded",
               viewMode === "cards" ? "bg-zinc-200" : "hover:bg-zinc-100"
-            }`}
+            )}
             title="Card view"
           >
             <LayoutGrid size={18} className="text-zinc-600" />
@@ -504,9 +506,10 @@ const UsersList: React.FC = () => {
           <button
             type="button"
             onClick={() => setParams({ viewMode: "rows" })}
-            className={`p-2 rounded ${
+            className={cn(
+              "p-2 rounded",
               viewMode === "rows" ? "bg-zinc-200" : "hover:bg-zinc-100"
-            }`}
+            )}
             title="Table view"
           >
             <List size={18} className="text-zinc-600" />

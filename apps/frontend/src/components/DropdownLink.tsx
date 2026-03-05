@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import React, { useState } from "react";
 import dropDownArrow from "../assets/icons8-expand-arrow-96.png";
+import { cn } from "@alliance/shared/styles/util";
 
 interface DropdownLinkProps {
   text: string;
@@ -37,9 +38,10 @@ const DropdownLink: React.FC<DropdownLinkProps> = ({
       </div>
       {isHovered && (
         <div
-          className={`absolute top-full left-0 rounded-b-md z-10 min-w-[150px] ml-[-17px] pt-3 ${
+          className={cn(
+            "absolute top-full left-0 rounded-b-md z-10 min-w-[150px] ml-[-17px] pt-3",
             inverted ? "bg-black" : "bg-transparent"
-          }`}
+          )}
         >
           {sublinks.map((sublink, index) => (
             <Link

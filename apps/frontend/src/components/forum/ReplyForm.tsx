@@ -3,6 +3,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import React, { useCallback, useRef, useState } from "react";
 import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import { cn } from "@alliance/shared/styles/util";
 
 interface ReplyFormProps {
   parentId: number | null;
@@ -72,11 +73,12 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
 
   return (
     <div
-      className={`rounded-lg relative ${className ?? ""} ${
-        parentId ? "mt-0" : "mt-3"
-      } ${compact ? "p-1 md:p-2" : "p-2 md:p-3"}
-        bg-zinc-100
-       `}
+      className={cn(
+        "rounded-lg relative bg-zinc-100",
+        className,
+        parentId ? "mt-0" : "mt-3",
+        compact ? "p-1 md:p-2" : "p-2 md:p-3"
+      )}
     >
       <form onSubmit={handleSubmit}>
         <EditableContentForm
@@ -111,7 +113,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
                 (!editableContent.body.trim() &&
                   editableContent.attachments.length === 0)
               }
-              className={`transition disabled:opacity-50 text-nowrap`}
+              className="transition disabled:opacity-50 text-nowrap"
             >
               {isSubmitting ? "Posting..." : "Post"}
             </Button>

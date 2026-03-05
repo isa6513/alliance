@@ -1,6 +1,7 @@
 import type { HeaderBlock } from "@alliance/shared/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
+import { cn } from "@alliance/shared/styles/util";
 
 export function EditableHeaderBlock({
   block,
@@ -28,7 +29,8 @@ export function EditableHeaderBlock({
             type="text"
             value={activeBlock.text}
             onChange={(e) => handleUpdate({ text: e.target.value })}
-            className={`w-full font-bold text-gray-900 border-none outline-none bg-transparent resize-none ${
+            className={cn(
+              "w-full font-bold text-gray-900 border-none outline-none bg-transparent resize-none",
               (activeBlock.level || 2) === 1
                 ? "text-3xl"
                 : (activeBlock.level || 2) === 2
@@ -40,7 +42,7 @@ export function EditableHeaderBlock({
                 : (activeBlock.level || 2) === 5
                 ? "text-base"
                 : "text-sm"
-            }`}
+            )}
             placeholder="Enter header text"
           />
 

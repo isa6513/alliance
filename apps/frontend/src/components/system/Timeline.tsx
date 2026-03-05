@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { cn } from "@alliance/shared/styles/util";
 
 interface TimelineProps {
   children: ReactNode[];
@@ -62,7 +63,7 @@ const Timeline: React.FC<TimelineProps> = ({
   };
 
   return (
-    <div className={`relative pl-2 ${className ?? ""}`}>
+    <div className={cn("relative pl-2", className)}>
       {/* vertical line */}
       <div className="absolute top-0 bottom-0 -ml-[1px]" style={lineStyle} />
 
@@ -76,9 +77,10 @@ const Timeline: React.FC<TimelineProps> = ({
             {/* timeline dot */}
             <div
               style={{ ...dotBaseStyle }}
-              className={`absolute ${
+              className={cn(
+                "absolute mt-1 flex items-center justify-center",
                 index === currentIdx ? "bg-green" : "bg-zinc-200"
-              } mt-1 flex items-center justify-center`}
+              )}
             ></div>
             {/* content */}
             <div className="pl-4 sm:pl-6">{child}</div>

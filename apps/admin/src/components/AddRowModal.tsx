@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
 import { isTimeOnlyColumn } from "./dbviewer/timeFieldUtils";
+import { cn } from "@alliance/shared/styles/util";
 
 interface AddRowModalProps {
   isOpen: boolean;
@@ -138,7 +139,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
             field = (
               <textarea
                 {...commonInputProps}
-                className={`${inputClasses} h-32 resize-y`}
+                className={cn("h-32 resize-y", inputClasses)}
                 placeholder="Enter JSON"
               />
             );
@@ -152,9 +153,10 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
       return (
         <div
           key={column.name}
-          className={`space-y-1 ${
-            column.dataType === "json" ? "md:col-span-2" : ""
-          }`}
+          className={cn(
+            "space-y-1",
+            column.dataType === "json" && "md:col-span-2"
+          )}
         >
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-gray-700">
@@ -207,14 +209,12 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
           </div>
         )}
         {globalError && (
-          <div className={`px-6 text-sm text-red-600 whitespace-pre-line`}>
+          <div className="px-6 text-sm text-red-600 whitespace-pre-line">
             {globalError}
           </div>
         )}
         {successMessage && (
-          <div
-            className={`px-6 text-sm text-green-600 whitespace-pre-line py-10`}
-          >
+          <div className="px-6 text-sm text-green-600 whitespace-pre-line py-10">
             {successMessage}
           </div>
         )}

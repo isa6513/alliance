@@ -4,6 +4,7 @@ import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import React from "react";
 import { linkClickClasses } from "./EmailNotif";
+import { cn } from "@alliance/shared/styles/util";
 
 function statusClasses(status?: string) {
   const s = (status || "").toString().toLowerCase();
@@ -41,14 +42,15 @@ const TextNotif: React.FC<TextNotifProps> = ({ notif }) => {
           </div>
           <div className="flex items-center gap-2">
             <Badge
-              className={`${statusClasses(status)} !bg-zinc-100 !py-2 !px-3`}
+              className={cn(statusClasses(status), "!bg-zinc-100 !py-2 !px-3")}
             >
               {status}
             </Badge>
             <Badge
-              className={`${linkClickClasses(
-                mms.clickedLink
-              )}  !bg-zinc-100 !py-2 !px-3`}
+              className={cn(
+                linkClickClasses(mms.clickedLink),
+                "!bg-zinc-100 !py-2 !px-3"
+              )}
             >
               {mms.clickedLink ? "Link clicked" : "No link clicked"}
             </Badge>

@@ -4,6 +4,7 @@ import {
   UserActionSummaryDto,
 } from "@alliance/shared/client";
 import { formatDateTime } from "@alliance/shared/lib/dateFormatters";
+import { cn } from "@alliance/shared/styles/util";
 import {
   Fragment,
   JSX,
@@ -121,7 +122,7 @@ export interface UserProgressPillsProps {
 }
 
 function EmptyPill() {
-  return <div className={`relative group flex-1 ${MIN_MAX_WIDTH}`} />;
+  return <div className={cn("relative group flex-1", MIN_MAX_WIDTH)} />;
 }
 function Pill({
   action,
@@ -137,9 +138,14 @@ function Pill({
   const { pillLabel, pillStyle, pillSubtitleText, pillTextStyle } =
     pillStatusData;
   return (
-    <div key={action.id} className={`relative group flex-1 ${MIN_MAX_WIDTH}`}>
+    <div key={action.id} className={cn("relative group flex-1", MIN_MAX_WIDTH)}>
       <div
-        className={`rounded flex items-center justify-center text-xs font-semibold ${MIN_MAX_WIDTH} ${pillStyle} ${pillHeight}`}
+        className={cn(
+          "rounded flex items-center justify-center text-xs font-semibold",
+          MIN_MAX_WIDTH,
+          pillStyle,
+          pillHeight
+        )}
         aria-label={`${action.name} – ${pillLabel}`}
       ></div>
       {pillStyle && (

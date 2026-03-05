@@ -13,6 +13,7 @@ import ReplyForm from "./forum/ReplyForm";
 import { CommentsProvider, useCommentTree } from "./forum/CommentsContext";
 import { ArrowUpDown } from "lucide-react";
 import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
+import { cn } from "@alliance/shared/styles/util";
 
 export type CommentFilter =
   | "all"
@@ -102,11 +103,12 @@ const SortDropdown = ({
                 onChange(sort);
                 setOpen(false);
               }}
-              className={`block w-full text-left px-4 py-2 text-[14px] hover:bg-gray-100 ${
+              className={cn(
+                "block w-full text-left px-4 py-2 text-[14px] hover:bg-gray-100",
                 commentSort === sort
                   ? "font-medium text-black"
                   : "text-zinc-700"
-              }`}
+              )}
             >
               {sortLabels[sort]}
             </button>
@@ -357,11 +359,12 @@ const Comments = ({
                   <button
                     key={filter}
                     onClick={() => setCommentFilter(filter)}
-                    className={`px-3 py-2 rounded ${
+                    className={cn(
+                      "px-3 py-2 rounded",
                       commentFilter === filter
                         ? "bg-zinc-200/70 text-black font-medium"
                         : "text-zinc-600"
-                    }`}
+                    )}
                   >
                     {commentFilterLabels[filter]} ({commentCounts[filter] ?? 0})
                   </button>

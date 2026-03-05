@@ -3,6 +3,7 @@ import Dropdown from "@alliance/sharedweb/ui/Dropdown";
 import { useState } from "react";
 import ActionCommitButton from "./ActionCommitButton";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface ActionTaskPanelCommitProps {
   onCommit: () => void;
@@ -66,18 +67,20 @@ const ActionTaskPanelCommit = ({
         </p>
         <Button
           color={ButtonColor.White}
-          className={`!items-start !justify-start text-left !font-normal ${
-            moralObjectionSelected ? "!bg-zinc-100" : ""
-          }`}
+          className={cn(
+            "!items-start !justify-start text-left !font-normal",
+            moralObjectionSelected && "!bg-zinc-100"
+          )}
           onClick={handleMoralObjection}
         >
           I have a moral objection
         </Button>
         <Button
           color={ButtonColor.White}
-          className={`!items-start !justify-start text-left !font-normal ${
-            otherReasonSelected ? "!bg-zinc-100" : ""
-          }`}
+          className={cn(
+            "!items-start !justify-start text-left !font-normal",
+            otherReasonSelected && "!bg-zinc-100"
+          )}
           onClick={handleOtherReason}
         >
           Other reason

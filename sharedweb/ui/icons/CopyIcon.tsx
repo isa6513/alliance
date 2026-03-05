@@ -3,7 +3,7 @@ import { DefaultIconProps, sizeClass } from "./icons";
 const CopyIcon = ({ size = "small", fill = "black" }: DefaultIconProps) => {
   return (
     <svg
-      className={`${sizeClass[size]}`}
+      className={sizeClass[size]}
       fill={fill}
       viewBox="0 0 130 130"
       strokeWidth={2}

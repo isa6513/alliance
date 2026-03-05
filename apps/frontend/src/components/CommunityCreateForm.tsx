@@ -9,6 +9,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ImageEditor from "./ImageEditor";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import { useCallback, useMemo, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 
 export type CommunityCreateFormProps = {
   name?: string;
@@ -244,7 +245,7 @@ const CommunityCreateForm = ({
       </div>
       <div className="flex flex-row justify-end">
         <div
-          className={`flex gap-x-1 mt-1 ${fullWidthButtons ? "w-full" : ""}`}
+          className={cn("flex gap-x-1 mt-1", fullWidthButtons && "w-full")}
         >
           {onCancel && (
             <Button

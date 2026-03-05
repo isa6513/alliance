@@ -23,6 +23,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { Link } from "react-router";
 
 type PriorityItem =
@@ -422,9 +423,11 @@ const PriorityPage: React.FC = () => {
                 onDragEnd={handleDragEnd}
                 onDragOver={handleDragOver(index)}
                 onDrop={handleDrop(index)}
-                className={`flex items-center gap-3 px-4 py-3 cursor-grab active:cursor-grabbing transition-opacity ${
-                  isDragging ? "opacity-50" : "hover:bg-zinc-50"
-                } ${isDivider ? "bg-zinc-100/80" : ""}`}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 cursor-grab active:cursor-grabbing transition-opacity",
+                  isDragging ? "opacity-50" : "hover:bg-zinc-50",
+                  isDivider && "bg-zinc-100/80"
+                )}
               >
                 <GripVertical
                   size={18}
@@ -446,11 +449,12 @@ const PriorityPage: React.FC = () => {
                       <Minus size={14} className="text-zinc-500" />
                     )}
                     <span
-                      className={`text-xs px-2 py-0.5 rounded shrink-0 ${
+                      className={cn(
+                        "text-xs px-2 py-0.5 rounded shrink-0",
                         item.type === "action"
                           ? "bg-blue-100 text-blue-800"
                           : "bg-amber-100 text-amber-800"
-                      }`}
+                      )}
                     >
                       {item.type === "action" ? "Action" : "General update"}
                     </span>

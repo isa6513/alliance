@@ -196,9 +196,10 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
                 }}
               >
                 {/* <span
-                  className={`w-full whitespace-nowrap fixed user-select-none ${
+                  className={cn(
+                    "w-full whitespace-nowrap fixed user-select-none",
                     hovered ? `z-100 ` : "z-0"
-                  }`}
+                  )}
                   style={
                     {
                       // transform: `translateX(${barLeft}px)`,

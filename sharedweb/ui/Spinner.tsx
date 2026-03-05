@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@alliance/shared/styles/util";
 
 interface SpinnerProps {
   size?: "small" | "medium" | "large";
@@ -19,7 +20,12 @@ const Spinner: React.FC<SpinnerProps> = ({
     <div role="status">
       <svg
         aria-hidden="true"
-        className={`inline ${sizeClass[size]} text-zinc-200 animate-spin ${color}`}
+        className={cn(
+          "inline",
+          sizeClass[size],
+          "text-zinc-200 animate-spin",
+          color
+        )}
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

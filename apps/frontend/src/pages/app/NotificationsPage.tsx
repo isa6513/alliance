@@ -5,6 +5,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import NotificationText from "./NotificationText";
 import { useMemo, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { Heart, ChevronDown, ChevronUp, CheckCheck } from "lucide-react";
 import { formatDate } from "date-fns";
 
@@ -33,7 +34,10 @@ const LikesGroup = ({
   return (
     <div className="flex flex-col">
       <div
-        className={`flex flex-row items-center justify-between p-4 cursor-pointer hover:bg-zinc-100 ${unreadCount > 0 ? "bg-red-50" : "bg-white"}`}
+        className={cn(
+          "flex flex-row items-center justify-between p-4 cursor-pointer hover:bg-zinc-100",
+          unreadCount > 0 ? "bg-red-50" : "bg-white"
+        )}
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex flex-row items-center gap-x-2">
@@ -41,7 +45,9 @@ const LikesGroup = ({
           <span className="text-zinc-600">
             {unreadCount > 0
               ? `${unreadCount} new like${unreadCount !== 1 ? "s" : ""} `
-              : `${bucket.likes.length} like${bucket.likes.length !== 1 ? "s" : ""}`}
+              : `${bucket.likes.length} like${
+                  bucket.likes.length !== 1 ? "s" : ""
+                }`}
           </span>
           {expanded ? (
             <ChevronUp className="text-zinc-400" size={16} />
@@ -69,7 +75,10 @@ const LikesGroup = ({
               key={notification.id}
               notification={notification}
               handleNotifClick={handleNotifClick}
-              className={`hover:bg-zinc-100 px-4 py-3 pl-10 flex cursor-pointer flex-col gap-y-1 ${notification.readAt ? "bg-white" : "bg-red-50"}`}
+              className={cn(
+                "hover:bg-zinc-100 px-4 py-3 pl-10 flex cursor-pointer flex-col gap-y-1",
+                notification.readAt ? "bg-white" : "bg-red-50"
+              )}
             />
           ))}
         </div>
@@ -83,8 +92,12 @@ type RenderItem =
   | { type: "likes-group"; bucket: LikesBucket; time: number };
 
 const NotificationsPage = () => {
-  const { notifications, handleMarkAllAsRead, handleNotifClick, refreshNotifications } =
-    useNotifications();
+  const {
+    notifications,
+    handleMarkAllAsRead,
+    handleNotifClick,
+    refreshNotifications,
+  } = useNotifications();
 
   const unreadCount = notifications.filter(
     (notification) => !notification.readAt
@@ -129,7 +142,11 @@ const NotificationsPage = () => {
   const renderItems = useMemo(() => {
     const items: RenderItem[] = [];
     for (const n of other) {
-      items.push({ type: "notification", data: n, time: new Date(n.sendTime || n.createdAt).getTime() });
+      items.push({
+        type: "notification",
+        data: n,
+        time: new Date(n.sendTime || n.createdAt).getTime(),
+      });
     }
     for (const bucket of likesBuckets) {
       items.push({ type: "likes-group", bucket, time: bucket.time });
@@ -146,7 +163,11 @@ const NotificationsPage = () => {
           time: prev.bucket.time,
           likes: [...prev.bucket.likes, ...item.bucket.likes],
         };
-        merged[merged.length - 1] = { type: "likes-group", bucket: combined, time: combined.time };
+        merged[merged.length - 1] = {
+          type: "likes-group",
+          bucket: combined,
+          time: combined.time,
+        };
       } else {
         merged.push(item);
       }
@@ -157,7 +178,11 @@ const NotificationsPage = () => {
     for (const item of merged) {
       if (item.type === "likes-group" && item.bucket.likes.length === 1) {
         const n = item.bucket.likes[0];
-        final.push({ type: "notification", data: n, time: new Date(n.sendTime || n.createdAt).getTime() });
+        final.push({
+          type: "notification",
+          data: n,
+          time: new Date(n.sendTime || n.createdAt).getTime(),
+        });
       } else {
         final.push(item);
       }
@@ -193,7 +218,10 @@ const NotificationsPage = () => {
                 key={item.data.id}
                 notification={item.data}
                 handleNotifClick={handleNotifClick}
-                className={`hover:bg-zinc-100 p-4 flex cursor-pointer flex-col gap-y-2 ${item.data.readAt ? "bg-white" : "bg-red-50"}`}
+                className={cn(
+                  "hover:bg-zinc-100 p-4 flex cursor-pointer flex-col gap-y-2",
+                  item.data.readAt ? "bg-white" : "bg-red-50"
+                )}
               />
             )
           )}

@@ -15,6 +15,7 @@ import {
 import { useOutsideClick } from "../../sharedweb/lib/useOutsideClick";
 import Button, { ButtonColor } from "../ui/Button";
 import Dropdown from "../ui/Dropdown";
+import { cn } from "@alliance/shared/styles/util";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
@@ -1182,9 +1183,10 @@ const FormRenderer = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Page Content */}
         <div
-          className={`space-y-6 ${
-            readOnly && schema.pages.length === 1 ? "mb-0" : ""
-          }`}
+          className={cn(
+            "space-y-6",
+            readOnly && schema.pages.length === 1 && "mb-0"
+          )}
         >
           {currentPage !== null &&
             currentPage.fields.map((element, index) =>
@@ -1281,18 +1283,20 @@ const FormRenderer = ({
                 <p className="mb-1 text-center">Withdrawal options</p>
                 <Button
                   color={ButtonColor.White}
-                  className={`!items-start !justify-start text-left !font-normal ${
-                    outOfTimeSelected ? "!bg-zinc-200" : ""
-                  }`}
+                  className={cn(
+                    "!items-start !justify-start text-left !font-normal",
+                    outOfTimeSelected && "!bg-zinc-200"
+                  )}
                   onClick={handleOutOfTime}
                 >
                   Took more than 15 minutes
                 </Button>
                 <Button
                   color={ButtonColor.White}
-                  className={`!items-start !justify-start text-left !font-normal ${
-                    otherReasonSelected ? "!bg-zinc-100" : ""
-                  }`}
+                  className={cn(
+                    "!items-start !justify-start text-left !font-normal",
+                    otherReasonSelected && "!bg-zinc-100"
+                  )}
                   onClick={handleOtherReason}
                 >
                   Other reason

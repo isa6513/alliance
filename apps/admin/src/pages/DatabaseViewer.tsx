@@ -6,6 +6,7 @@ import {
 } from "@alliance/shared/client";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { useNavigate, useSearchParams } from "react-router";
 import CellEditor from "../components/CellEditor";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -682,7 +683,9 @@ const DatabaseViewer: React.FC = () => {
         setNewRecordFieldErrors({});
         await refreshTableData();
       } else {
-        setNewRecordError((response.error as Error)?.message || "Failed to create record");
+        setNewRecordError(
+          (response.error as Error)?.message || "Failed to create record"
+        );
       }
     } catch (error) {
       console.error("Failed to create record:", error);
@@ -740,7 +743,7 @@ const DatabaseViewer: React.FC = () => {
       let element: React.ReactNode | null = null;
       if (value === null || value === undefined) {
         element = (
-          <span className={`text-gray-400 ${baseClassName}`}>null</span>
+          <span className={cn("text-gray-400", baseClassName)}>null</span>
         );
       } else {
         switch (column.dataType) {
@@ -760,9 +763,10 @@ const DatabaseViewer: React.FC = () => {
           case "boolean":
             element = (
               <span
-                className={`${
-                  value ? "text-green-600" : "text-red-600"
-                } ${baseClassName}`}
+                className={cn(
+                  value ? "text-green-600" : "text-red-600",
+                  baseClassName
+                )}
               >
                 {value ? "true" : "false"}
               </span>
@@ -771,14 +775,14 @@ const DatabaseViewer: React.FC = () => {
 
           case "number":
             element = (
-              <span className={`text-blue-800 font-mono ${baseClassName}`}>
+              <span className={cn("text-blue-800 font-mono", baseClassName)}>
                 {typeof value === "number" ? value.toLocaleString() : value}
               </span>
             );
             break;
           case "date":
             element = (
-              <span className={`text-purple-600 ${baseClassName}`}>
+              <span className={cn("text-purple-600", baseClassName)}>
                 {new Date(value).toLocaleDateString()}
               </span>
             );
@@ -787,13 +791,13 @@ const DatabaseViewer: React.FC = () => {
             if (isTimeOnlyColumn(column)) {
               const displayTime = formatTimeForDisplayValue(value);
               element = (
-                <span className={`text-purple-600 ${baseClassName}`}>
+                <span className={cn("text-purple-600", baseClassName)}>
                   {displayTime}
                 </span>
               );
             } else {
               element = (
-                <span className={`text-purple-600 ${baseClassName}`}>
+                <span className={cn("text-purple-600", baseClassName)}>
                   {new Date(value).toLocaleString()}
                 </span>
               );
@@ -801,7 +805,7 @@ const DatabaseViewer: React.FC = () => {
             break;
           case "json":
             element = (
-              <div className={`max-w-xs ${baseClassName}`}>
+              <div className={cn("max-w-xs", baseClassName)}>
                 <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto">
                   {typeof value === "object"
                     ? JSON.stringify(value, null, 2)
@@ -813,7 +817,7 @@ const DatabaseViewer: React.FC = () => {
           case "uuid":
             element = (
               <span
-                className={`font-mono text-xs text-gray-600 ${baseClassName}`}
+                className={cn("font-mono text-xs text-gray-600", baseClassName)}
               >
                 {value}
               </span>
@@ -823,7 +827,10 @@ const DatabaseViewer: React.FC = () => {
           case "enum":
             element = (
               <span
-                className={`bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs ${baseClassName}`}
+                className={cn(
+                  "bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs",
+                  baseClassName
+                )}
               >
                 {value}
               </span>
@@ -835,7 +842,7 @@ const DatabaseViewer: React.FC = () => {
             const stringValue = String(value);
             if (stringValue.length > 100) {
               element = (
-                <div className={`max-w-xs ${baseClassName}`}>
+                <div className={cn("max-w-xs", baseClassName)}>
                   <div className="truncate" title={stringValue}>
                     {stringValue}
                   </div>
@@ -849,7 +856,7 @@ const DatabaseViewer: React.FC = () => {
 
       return (
         <div className="relative min-w-10">
-          <div className={`${editor && "opacity-0"}`}>{element}</div>
+          <div className={cn(editor && "opacity-0")}>{element}</div>
           {editor}
         </div>
       );
@@ -877,11 +884,12 @@ const DatabaseViewer: React.FC = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {banner && (
           <div
-            className={`px-4 py-3 text-sm flex items-start justify-between ${
+            className={cn(
+              "px-4 py-3 text-sm flex items-start justify-between",
               banner.type === "success"
                 ? "border-green-200 bg-[#e4ffd1] text-green-900"
                 : "border-red-200 bg-red-50 text-red-900"
-            }`}
+            )}
           >
             <span>{banner.message}</span>
             <button

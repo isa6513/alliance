@@ -1,3 +1,5 @@
+import { cn } from "@alliance/shared/styles/util";
+
 const PinnedIcon = ({
   size = "small",
   className = "",
@@ -17,7 +19,7 @@ const PinnedIcon = ({
       x="0px"
       y="0px"
       viewBox="0 0 100 100"
-      className={`${sizeClass[size]} inline ${className}`}
+      className={cn(sizeClass[size], "inline", className)}
       fill="var(--color-green)"
       aria-label="Pinned"
     >

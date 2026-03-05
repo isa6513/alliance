@@ -15,6 +15,7 @@ import {
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import TextareaWithHighlights from "../TextareaWithHighlights";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import {
@@ -1104,9 +1105,10 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       </div>
 
       <div
-        className={`border border-gray-200 rounded-md bg-zinc-100 ${
-          !keywordsHelpExpanded ? "hover:border-gray-300" : ""
-        }`}
+        className={cn(
+          "border border-gray-200 rounded-md bg-zinc-100",
+          !keywordsHelpExpanded && "hover:border-gray-300"
+        )}
       >
         <button
           type="button"
@@ -1260,11 +1262,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       <div className="flex justify-end gap-3">
         {tentativePlans.length > 0 && (
           <p
-            className={`px-4 py-2 rounded self-start ${
+            className={cn(
+              "px-4 py-2 rounded self-start",
               tentativePlans.length > 0 && isProd
                 ? "bg-yellow-600 text-white"
                 : "border border-gray-200"
-            }`}
+            )}
           >
             {isProd && "⚠️"} This will send <b>{tentativePlans.length}</b>{" "}
             reminders

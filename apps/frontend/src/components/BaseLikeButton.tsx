@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import { Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -40,11 +41,12 @@ const BaseLikeButton = ({
 
   return (
     <div
-      className={`flex flex-row gap-x-1 items-center bg-${backgroundColor} ${
-        border
-          ? "border border-zinc-300 rounded hover:bg-zinc-100 px-2 py-1.5"
-          : ""
-      } cursor-pointer transition-colors duration-100`}
+      className={cn(
+        "flex flex-row gap-x-1 items-center",
+        "cursor-pointer transition-colors duration-100",
+        `bg-${backgroundColor}`,
+        border && "border border-zinc-300 rounded hover:bg-zinc-100 px-2 py-1.5"
+      )}
       onClick={(e) => {
         if (handleLike) {
           e.stopPropagation();

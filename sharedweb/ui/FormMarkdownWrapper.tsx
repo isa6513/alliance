@@ -1,5 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import { cn } from "@alliance/shared/styles/util";
 
 interface FormMarkdownWrapper {
   markdownContent: string;
@@ -16,28 +17,28 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
       components={{
         h1: ({ ...props }) => (
           <h1
-            className={`!font-semibold first:mt-0 mt-6 ${inlineClass}`}
+            className={cn("!font-semibold first:mt-0 mt-6", inlineClass)}
             {...props}
           />
         ),
         h2: ({ ...props }) => (
           <h2
-            className={`!font-semibold first:mt-0 mt-6 ${inlineClass}`}
+            className={cn("!font-semibold first:mt-0 mt-6", inlineClass)}
             {...props}
           />
         ),
         h3: ({ ...props }) => (
           <h3
-            className={`!font-semibold first:mt-0 mt-6 ${inlineClass}`}
+            className={cn("!font-semibold first:mt-0 mt-6", inlineClass)}
             {...props}
           />
         ),
         strong: ({ ...props }) => (
-          <strong className={`!font-semibold ${inlineClass}`} {...props} />
+          <strong className={cn("!font-semibold", inlineClass)} {...props} />
         ),
         p: ({ ...props }) => (
           <p
-            className={`text-zinc-800 first:mt-0 mt-4 ${inlineClass}`}
+            className={cn("text-zinc-800 first:mt-0 mt-4", inlineClass)}
             {...props}
           />
         ),
@@ -53,7 +54,7 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
         li: ({ ...props }) => <li className="text-zinc-800 my-1" {...props} />,
         a: ({ ...props }) => (
           <a
-            className={`text-link ${inlineClass}`}
+            className={cn("text-link", inlineClass)}
             {...props}
             target="_blank"
             rel="noreferrer"

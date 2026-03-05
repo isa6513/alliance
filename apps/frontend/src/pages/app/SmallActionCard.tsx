@@ -5,6 +5,7 @@ import {
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import React, { useCallback } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { href, useNavigate } from "react-router";
 import Tag, { TagStyle } from "../../components/Tag";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
@@ -64,7 +65,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
     action.userRelation === "joined";
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={cn("relative", className)}>
       <Card
         className="block overflow-hidden hover:bg-zinc-50"
         style={CardStyle.White}

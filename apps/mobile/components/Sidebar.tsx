@@ -21,6 +21,7 @@ import {
 } from "lucide-react-native";
 import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
+import { cn } from "@alliance/shared/styles/util";
 
 type NavItem = {
   name: string;
@@ -164,10 +165,11 @@ export default function Sidebar(props: DrawerContentComponentProps) {
           {navSections.map((section, sectionIndex) => (
             <View
               key={section.title || `section-${sectionIndex}`}
-              className={`pb-4 mb-2 ${sectionIndex < navSections.length - 1
-                ? "border-b border-zinc-200"
-                : ""
-                }`}
+              className={cn(
+                "pb-4 mb-2",
+                sectionIndex < navSections.length - 1 &&
+                  "border-b border-zinc-200"
+              )}
             >
               {section.items.map((item) => {
                 const active = isActive(item.matchPaths);
@@ -176,14 +178,18 @@ export default function Sidebar(props: DrawerContentComponentProps) {
                   <TouchableOpacity
                     key={item.name}
                     onPress={() => handleNavigate(item.href)}
-                    className={`flex-row items-center px-3 py-2.5 rounded-lg mb-0.5 ${active ? "bg-zinc-200" : ""
-                      }`}
+                    className={cn(
+                      "flex-row items-center px-3 py-2.5 rounded-lg mb-0.5",
+                      active && "bg-zinc-200"
+                    )}
                     activeOpacity={0.7}
                   >
                     <Icon size={18} color={active ? colors.green : "#52525b"} />
                     <Text
-                      className={`ml-3 ${active ? "font-medium" : "text-zinc-900"
-                        }`}
+                      className={cn(
+                        "ml-3",
+                        active ? "font-medium" : "text-zinc-900"
+                      )}
                     >
                       {item.name}
                     </Text>

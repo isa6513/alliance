@@ -16,7 +16,10 @@ import UserActivityCard from "../../components/UserActivityCard";
 import { LegendList } from "@legendapp/list";
 import ListHeader from "../../components/ListHeader";
 import GreenHeader from "../../components/GreenHeader";
-import { KeyboardAvoidingView, KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import {
+  KeyboardAvoidingView,
+} from "react-native-keyboard-controller";
+import { cn } from "@alliance/shared/styles/util";
 
 type Mode = "friends" | "everyone";
 
@@ -113,14 +116,16 @@ export default function FeedScreen() {
         <TouchableOpacity
           onPress={() => setMode("friends")}
           activeOpacity={0.7}
-          className={`px-3 py-1.5 rounded-md ${
-            mode === "friends" ? "bg-white" : ""
-          }`}
+          className={cn(
+            "px-3 py-1.5 rounded-md",
+            mode === "friends" && "bg-white"
+          )}
         >
           <Text
-            className={`text-sm font-medium ${
+            className={cn(
+              "text-sm font-medium",
               mode === "friends" ? "text-zinc-900" : "text-white"
-            }`}
+            )}
           >
             Friends
           </Text>
@@ -128,14 +133,16 @@ export default function FeedScreen() {
         <TouchableOpacity
           onPress={() => setMode("everyone")}
           activeOpacity={0.7}
-          className={`px-3 py-1.5 rounded-md ${
-            mode === "everyone" ? "bg-white" : ""
-          }`}
+          className={cn(
+            "px-3 py-1.5 rounded-md",
+            mode === "everyone" && "bg-white"
+          )}
         >
           <Text
-            className={`text-sm font-medium ${
+            className={cn(
+              "text-sm font-medium",
               mode === "everyone" ? "text-zinc-900" : "text-white"
-            }`}
+            )}
           >
             Everyone
           </Text>
@@ -167,19 +174,19 @@ export default function FeedScreen() {
         </View>
       ) : (
         <KeyboardAvoidingView behavior="position">
-        <LegendList
-          key={mode}
-          ListHeaderComponent={listHeader}
-          data={activities}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderActivity}
-          refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={() => {}} />
-          }
-          recycleItems
-          contentContainerStyle={{
-            paddingBottom: 40,  
-            backgroundColor: "white",
+          <LegendList
+            key={mode}
+            ListHeaderComponent={listHeader}
+            data={activities}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderActivity}
+            refreshControl={
+              <RefreshControl refreshing={loading} onRefresh={() => {}} />
+            }
+            recycleItems
+            contentContainerStyle={{
+              paddingBottom: 40,
+              backgroundColor: "white",
             }}
           />
         </KeyboardAvoidingView>

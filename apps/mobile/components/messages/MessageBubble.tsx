@@ -2,13 +2,7 @@ import { MessageDto } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { Reply, X } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import {
-  Dimensions,
-  Image,
-  Modal,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Dimensions, Image, Modal, TouchableOpacity, View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -22,6 +16,7 @@ import { getImageSource } from "../../lib/config";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import ProfileImage from "../ProfileImage";
 import Text from "../system/Text";
+import { cn } from "@alliance/shared/styles/util";
 
 interface MessageBubbleProps {
   message: MessageDto;
@@ -56,7 +51,9 @@ export default function MessageBubble({
   const attachments = message.attachments ?? [];
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const lightboxSrc =
-    lightboxIndex !== null ? resolveAttachmentUri(attachments[lightboxIndex]) : null;
+    lightboxIndex !== null
+      ? resolveAttachmentUri(attachments[lightboxIndex])
+      : null;
   const { width, height } = Dimensions.get("window");
   const lightboxSize = Math.min(width * 0.9, height * 0.7);
   const translateX = useSharedValue(0);
@@ -102,7 +99,7 @@ export default function MessageBubble({
   });
 
   return (
-    <View className={`${isFocused ? "bg-green-100" : ""}`}>
+    <View className={cn(isFocused && "bg-green-100")}>
       <View className="overflow-hidden px-4">
         <Animated.View
           style={[actionStyle]}

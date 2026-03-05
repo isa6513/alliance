@@ -1,3 +1,5 @@
+import { cn } from "@alliance/shared/styles/util";
+
 const CheckIcon = ({
   size = "small",
   filled = true,
@@ -16,9 +18,12 @@ const CheckIcon = ({
   return (
     <svg
       viewBox="0 0 88 88"
-      className={`shrink-0 ${sizeClass[size]} ${
-        filled ? "bg-green" : "bg-white"
-      } rounded-full`}
+      className={cn(
+        "shrink-0",
+        sizeClass[size],
+        filled ? "bg-green" : "bg-white",
+        "rounded-full"
+      )}
       fill={filled ? "#fff" : "var(--color-green)"}
       aria-label="Done"
       xmlns="http://www.w3.org/2000/svg"

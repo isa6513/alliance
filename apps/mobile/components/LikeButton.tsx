@@ -1,6 +1,7 @@
 import { TouchableOpacity } from "react-native";
 import { Heart } from "lucide-react-native";
 import Text from "./system/Text";
+import { cn } from "@alliance/shared/styles/util";
 
 interface LikeButtonProps {
   liked: boolean;
@@ -25,7 +26,7 @@ export default function LikeButton({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      className={`${baseClasses} ${borderClasses}`}
+      className={cn(baseClasses, borderClasses)}
       disabled={!onPress}
     >
       <Heart size={19} color={iconColor} fill={liked ? iconColor : "none"} />

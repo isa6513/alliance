@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@alliance/shared/styles/util";
 
 interface FormInputProps
   extends Pick<
@@ -35,7 +36,7 @@ const FormInput: React.FC<FormInputProps> = ({
   inputClassName,
 }) => {
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={cn("flex flex-col gap-1", className)}>
       {label && (
         <label className="text-base mb-1 text-black" htmlFor={name}>
           {label}
@@ -50,18 +51,15 @@ const FormInput: React.FC<FormInputProps> = ({
         placeholder={placeholder}
         required={required}
         disabled={disabled}
-        className={`border ${
-          error ? "border-red-500" : "border-zinc-200"
-        } rounded px-3 py-3 pb-2 bg-white focus:outline-none
-        text-[11pt]  transition-all duration-200 
-        ${
+        className={cn(
+          "border rounded px-3 py-3 pb-2 bg-white focus:outline-none text-[11pt] transition-all duration-200",
+          error ? "border-red-500" : "border-zinc-200",
           disabled
             ? "bg-page text-zinc-500 cursor-not-allowed"
-            : "hover:border-zinc-300"
-        } 
-        ${
-          error ? "focus:border-red-500" : "focus:border-green"
-        } ${inputClassName}`}
+            : "hover:border-zinc-300",
+          error ? "focus:border-red-500" : "focus:border-green",
+          inputClassName
+        )}
         autoComplete={autoComplete}
         min={min}
       />

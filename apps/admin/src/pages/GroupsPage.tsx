@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { href, Link } from "react-router";
 import {
   communityCreateCommunityAdmin,
@@ -401,9 +402,10 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
           </div>
           <div className="flex flex-row items-center gap-3">
             <div
-              className={`flex flex-col items-end gap-1 text-sm ${
+              className={cn(
+                "flex flex-col items-end gap-1 text-sm",
                 community.public ? "text-green" : "text-zinc-400"
-              }`}
+              )}
             >
               {community.public ? "Public" : "Private"}
             </div>
@@ -413,11 +415,12 @@ const CommunityCard: React.FC<CommunityCardProps> = ({
               </p>
             )}
             <p
-              className={`text-sm mr-4 font-medium ${
-                capacity !== null && effectiveMemberCount >= capacity
-                  ? "text-zinc-400"
-                  : ""
-              }`}
+              className={cn(
+                "text-sm mr-4 font-medium",
+                capacity !== null &&
+                  effectiveMemberCount >= capacity &&
+                  "text-zinc-400"
+              )}
             >
               {memberCount}
               {pendingAssignments > 0 ? ` (+${pendingAssignments})` : ""}

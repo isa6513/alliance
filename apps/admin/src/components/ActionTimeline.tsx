@@ -14,6 +14,7 @@ import React, {
 } from "react";
 import ActionTimelineBar from "./ActionTimelineBar";
 import { Link } from "react-router";
+import { cn } from "@alliance/shared/styles/util";
 
 interface ActionTimelineProps {
   actions: Action[];
@@ -425,14 +426,14 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
 
   if (timelineData.length === 0 && normalizedReminders.length === 0) {
     return (
-      <div className={`p-8 text-center text-zinc-500 ${className || ""}`}>
+      <div className={cn("p-8 text-center text-zinc-500", className)}>
         No actions with timeline events found.
       </div>
     );
   }
 
   return (
-    <div className={`bg-white rounded-lg flex flex-col ${className || ""}`}>
+    <div className={cn("bg-white rounded-lg flex flex-col", className)}>
       <div className="flex-shrink-0">
         {/* Gantt chart area with frozen action names */}
         <div className="flex flex-1 min-h-0">

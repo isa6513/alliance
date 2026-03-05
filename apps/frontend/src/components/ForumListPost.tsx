@@ -6,6 +6,7 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
 import { MessageCircle } from "lucide-react";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface ForumListPostProps {
   post: PostDto;
@@ -38,19 +39,19 @@ const ForumListPost = ({
   return (
     <Link
       to={href("/forum/post/:id", { id: post.id.toString() })}
-      className={
-        "w-full mb-0 !gap-y-1 p-4 cursor-pointer " +
-        (isPrivateFuturePost
+      className={cn(
+        "w-full mb-0 !gap-y-1 p-4 cursor-pointer",
+        isPrivateFuturePost
           ? "bg-sky-50 hover:bg-sky-100/60"
-          : "hover:bg-zinc-50 bg-white")
-      }
+          : "hover:bg-zinc-50 bg-white"
+      )}
     >
       <div className="flex flex-col gap-y-0 mb-3">
         <div className="flex flex-row gap-y-1 gap-2 justify-between">
           <div>
             <div className="flex flex-row gap-x-1 items-center">
               {post.pinned && <PinnedIcon size="small" />}
-              <p className={`text-lg font-medium`}>{post.title}</p>
+              <p className="text-lg font-medium">{post.title}</p>
               {post.commentCount != null && post.commentCount > 0 && (
                 <>
                   <MessageCircle

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import type { TableMetadataDto } from "@alliance/shared/client/types.gen";
 import { isProduction } from "@alliance/sharedweb/lib/config";
+import { cn } from "@alliance/shared/styles/util";
 
 interface DatabaseSidebarProps {
   tables: TableMetadataDto[];
@@ -79,9 +80,10 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
             </svg>
           </button>
           <h1
-            className={`!text-xl font-bold ${
+            className={cn(
+              "!text-xl font-bold",
               isProduction() ? "text-red-500" : "text-gray-900"
-            }`}
+            )}
           >
             Database Viewer
           </h1>
@@ -124,11 +126,12 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
               <div
                 key={table.name}
                 onClick={() => onSelectTable(table.name)}
-                className={`w-full text-left p-3 rounded-lg ${
+                className={cn(
+                  "w-full text-left p-3 rounded-lg",
                   selectedTable === table.name
                     ? "bg-blue-200"
                     : "hover:bg-gray-100 text-gray-700 cursor-pointer"
-                }`}
+                )}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1 min-w-0">
@@ -141,11 +144,12 @@ const DatabaseSidebar: React.FC<DatabaseSidebarProps> = ({
                   </div>
                   <div className="ml-2 flex-shrink-0">
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      className={cn(
+                        "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
                         selectedTable === table.name
                           ? " text-black"
                           : "bg-gray-200 text-gray-800"
-                      }`}
+                      )}
                     >
                       {table.recordCount.toLocaleString()}
                     </span>

@@ -7,6 +7,7 @@ import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import { useState } from "react";
 import { formatStatus, getStatusColor } from "../pages/ActionDashboard";
 import CreateEventForm from "./CreateEventForm";
+import { cn } from "@alliance/shared/styles/util";
 
 // Status options for event creation
 
@@ -65,9 +66,10 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                     {event.title}
                   </h3>
                   <span
-                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      event.newStatus
-                    )}`}
+                    className={cn(
+                      "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+                      getStatusColor(event.newStatus)
+                    )}
                   >
                     {formatStatus(event.newStatus)}
                   </span>

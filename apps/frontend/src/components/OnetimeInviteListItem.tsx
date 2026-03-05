@@ -1,4 +1,5 @@
 import { OnetimeInviteDto } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
@@ -117,7 +118,7 @@ const OnetimeInviteListItem = ({
               <span className="text-zinc-400">{communityLabel}</span>
             )}
           </div>
-          <span className={`text-sm font-semibold ${statusStyle.textColor}`}>
+          <span className={cn("text-sm font-semibold", statusStyle.textColor)}>
             {statusStyle.label}
           </span>
         </div>

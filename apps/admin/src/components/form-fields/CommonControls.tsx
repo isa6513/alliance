@@ -39,6 +39,7 @@ import {
 } from "./customValidatorDrafts";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { cn } from "@alliance/shared/styles/util";
 
 const DEVICE_LABELS: Record<DeviceVisibilityTarget, string> = {
   mobile: "Mobile",
@@ -75,7 +76,7 @@ export function RequiredToggle({
   label = "Required",
 }: RequiredToggleProps) {
   return (
-    <label className={`flex items-center text-xs text-gray-700 ${className}`}>
+    <label className={cn("flex items-center text-xs text-gray-700", className)}>
       <input
         type="checkbox"
         checked={!!checked}
@@ -112,7 +113,7 @@ export function OutputFieldToggle({
   className = "",
 }: OutputFieldToggleProps) {
   return (
-    <label className={`flex items-center text-xs text-gray-700 ${className}`}>
+    <label className={cn("flex items-center text-xs text-gray-700", className)}>
       <input
         type="checkbox"
         checked={!!checked}
@@ -136,7 +137,7 @@ export function OutputPrivateByDefaultToggle({
   className = "",
 }: OutputPrivateByDefaultToggleProps) {
   return (
-    <label className={`flex items-center text-xs text-gray-700 ${className}`}>
+    <label className={cn("flex items-center text-xs text-gray-700", className)}>
       <input
         type="checkbox"
         checked={!!checked}
@@ -371,7 +372,10 @@ export function ConditionalVisibility({
   }, [usableValidators]);
 
   const [validatorConfigs, setValidatorConfigs] = useState<
-    Record<number, { type: CustomValidatorType; idArgument?: string; expression?: string }>
+    Record<
+      number,
+      { type: CustomValidatorType; idArgument?: string; expression?: string }
+    >
   >({});
 
   const pendingValidatorFetch = useRef<Set<number>>(new Set());
@@ -545,13 +549,13 @@ export function ConditionalVisibility({
         next[index] =
           value === ANY_SELECTED_VALUE
             ? {
-              when: controller.id,
-              anySelected: true,
-            }
+                when: controller.id,
+                anySelected: true,
+              }
             : {
-              when: controller.id,
-              includesOption: value,
-            };
+                when: controller.id,
+                includesOption: value,
+              };
       } else if (controller.kind === "range") {
         next[index] = {
           when: controller.id,
@@ -632,10 +636,10 @@ export function ConditionalVisibility({
         ? isAnySelectedCondition(condition)
           ? ANY_SELECTED_VALUE
           : isIncludesOptionCondition(condition)
-            ? condition.includesOption ?? ""
-            : isEqualsCondition(condition) && typeof condition.equals === "string"
-              ? condition.equals
-              : ""
+          ? condition.includesOption ?? ""
+          : isEqualsCondition(condition) && typeof condition.equals === "string"
+          ? condition.equals
+          : ""
         : "";
     const rangeValues =
       controller?.kind === "range" ? getRangeValues(controller) : [];
@@ -666,8 +670,8 @@ export function ConditionalVisibility({
               {isTextContentController(controller)
                 ? "has content"
                 : controller.kind === "multiselect"
-                  ? "includes option"
-                  : "equals"}
+                ? "includes option"
+                : "equals"}
             </label>
             {isTextContentController(controller) ? (
               <select
@@ -788,7 +792,12 @@ export function ConditionalVisibility({
           idArgument={config?.idArgument}
           expression={config?.expression}
           onChange={(validatorType, idArgument, expression) =>
-            void handleValidatorSelection(index, validatorType, idArgument, expression)
+            void handleValidatorSelection(
+              index,
+              validatorType,
+              idArgument,
+              expression
+            )
           }
           filter={(validator) => validator.usableForVisibility}
           label="Visibility validator"
@@ -867,9 +876,9 @@ export function ConditionalVisibility({
 
       {noControllerOrValidatorOptions && (
         <p className="mt-1 text-[11px] text-gray-400">
-          No earlier checkbox/contract/select/radio/multiselect/range/text fields or
-          visibility validators are available. You can still add device type
-          rules below.
+          No earlier checkbox/contract/select/radio/multiselect/range/text
+          fields or visibility validators are available. You can still add
+          device type rules below.
         </p>
       )}
 
@@ -946,9 +955,9 @@ export function ConditionalVisibility({
         </div>
         {!canUseFieldControllers && (
           <p className="text-[11px] text-gray-400">
-            Add a checkbox, contract, select, radio, multiselect, range, or text field
-            earlier on this page to use answer-based visibility. Device-type
-            rules are always available.
+            Add a checkbox, contract, select, radio, multiselect, range, or text
+            field earlier on this page to use answer-based visibility.
+            Device-type rules are always available.
           </p>
         )}
         {!canUseValidators && (
@@ -1074,9 +1083,7 @@ function useUsers(enabled: boolean): {
   const [loading, setLoading] = useState<boolean>(
     () => enabled && !cachedUsers && !cachedUsersError
   );
-  const [error, setError] = useState<string | null>(
-    () => cachedUsersError
-  );
+  const [error, setError] = useState<string | null>(() => cachedUsersError);
 
   useEffect(() => {
     if (!enabled) {
@@ -1315,7 +1322,8 @@ export function CustomValidatorSelect({
       });
     } catch (err) {
       const message =
-        (err as { message: string } | undefined)?.message ?? "Expression failed to run.";
+        (err as { message: string } | undefined)?.message ??
+        "Expression failed to run.";
       setExpressionTest({ error: message });
     } finally {
       setIsTesting(false);
@@ -1336,7 +1344,7 @@ export function CustomValidatorSelect({
     !usersError;
 
   return (
-    <div className={`space-y-1 ${className}`}>
+    <div className={cn("space-y-1", className)}>
       <label className="block text-xs font-medium text-gray-700">{label}</label>
       <div className="flex items-center gap-2">
         <select
@@ -1354,15 +1362,19 @@ export function CustomValidatorSelect({
         </select>
         {!!validators.find((validator) => validator.id === type)
           ?.withIdField && (
-            <input
-              type="text"
-              value={idArgument ?? ""}
-              onChange={(e) =>
-                onChange(type, e.target.value === "" ? undefined : e.target.value, expression)
-              }
-              className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-24"
-            />
-          )}
+          <input
+            type="text"
+            value={idArgument ?? ""}
+            onChange={(e) =>
+              onChange(
+                type,
+                e.target.value === "" ? undefined : e.target.value,
+                expression
+              )
+            }
+            className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-24"
+          />
+        )}
       </div>
       {type === "CustomExpression" && (
         <div className="space-y-2">
@@ -1372,7 +1384,6 @@ export function CustomValidatorSelect({
             className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-full font-mono"
           />
           <Card style={CardStyle.Grey} className="p-2! gap-y-2">
-
             <div className="space-y-1">
               <label className="block text-[11px] text-gray-700">
                 Test user (active contracts)
@@ -1386,7 +1397,9 @@ export function CustomValidatorSelect({
                   )
                 }
                 disabled={
-                  usersLoading || Boolean(usersError) || activeUsers.length === 0
+                  usersLoading ||
+                  Boolean(usersError) ||
+                  activeUsers.length === 0
                 }
               >
                 <option value="">Select a user</option>
@@ -1428,7 +1441,10 @@ export function CustomValidatorSelect({
               expressionTest.result !== undefined &&
               !expressionTest.error && (
                 <p
-                  className={`text-[11px] ${expressionTest.result ? "text-green-600" : "text-red-600"}`}
+                  className={cn(
+                    "text-[11px]",
+                    expressionTest.result ? "text-green-600" : "text-red-600"
+                  )}
                 >
                   {expressionTest.selectedUserLabel
                     ? `${expressionTest.selectedUserLabel}: `

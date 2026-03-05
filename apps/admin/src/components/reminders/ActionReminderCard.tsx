@@ -18,6 +18,7 @@ import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
 import { Link } from "react-router";
 import { formatDate, formatDistanceToNow } from "date-fns";
 import { useMemo, useRef, useState, useEffect } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import { GroupScheduleLabels } from "./ActionRemindersTab";
 
@@ -180,9 +181,10 @@ const ActionReminderCard = ({
     <Card
       key={group.id}
       ref={highlightedReminder === group.id ? ref : undefined}
-      className={`bg-white text-sm !p-0 overflow-hidden transition-all duration-300 ${
-        highlightedReminder === group.id ? "!border-red-500" : ""
-      }`}
+      className={cn(
+        "bg-white text-sm !p-0 overflow-hidden transition-all duration-300",
+        highlightedReminder === group.id && "!border-red-500"
+      )}
     >
       <div className="flex flex-row gap-2 w-full bg-zinc-100 p-4 items-center justify-between">
         <div className="flex flex-row gap-4 items-center">
@@ -190,9 +192,10 @@ const ActionReminderCard = ({
             type="button"
             color={ButtonColor.Transparent}
             onClick={() => setMinified(!minified)}
-            className={`!p-2 -my-1 transition-transform duration-100 ${
-              minified ? "rotate-180" : ""
-            }`}
+            className={cn(
+              "!p-2 -my-1 transition-transform duration-100",
+              minified && "rotate-180"
+            )}
           >
             <DropdownIcon size="small" fill="black" />
           </Button>
@@ -200,16 +203,15 @@ const ActionReminderCard = ({
             <div className="flex flex-row gap-2 items-center">
               {relativeSendLabel && (
                 <p
-                  className={`text-sm ${
+                  className={cn(
+                    "text-sm",
                     isFinished ? "text-gray-500" : "text-blue-500"
-                  }`}
+                  )}
                 >
                   {relativeSendLabel}
                 </p>
               )}
-              <p
-                className={`font-semibold ${isFinished ? "text-gray-500" : ""}`}
-              >
+              <p className={cn("font-semibold", isFinished && "text-gray-500")}>
                 {group.name}
               </p>
               <Link
@@ -268,8 +270,8 @@ const ActionReminderCard = ({
           </Button>
         </div>
       </div>
-      <div className={`${minified ? "hidden" : ""}`}>
-        <div className={`flex flex-col gap-2 p-4`}>
+      <div className={cn(minified && "hidden")}>
+        <div className="flex flex-col gap-2 p-4">
           {editing && selectedEventId !== null ? (
             <ActionReminderGroupForm
               memberEvents={memberEvents}
@@ -361,10 +363,10 @@ const ActionReminderCard = ({
             </p>
           </div>
           <div
-            className={`divide-y divide-gray-200 border-t border-gray-200 
-                    overflow-y-auto transition-[max-height] duration-300 ${
-                      showPlans ? "max-h-[300px]" : "max-h-[0px]"
-                    }`}
+            className={cn(
+              "divide-y divide-gray-200 border-t border-gray-200 overflow-y-auto transition-[max-height] duration-300",
+              showPlans ? "max-h-[300px]" : "max-h-[0px]"
+            )}
           >
             {reminderPlans === undefined ? (
               <p className="text-sm text-zinc-500 p-5">
@@ -390,10 +392,10 @@ const ActionReminderCard = ({
             )}
           </div>
           <div
-            className={`divide-y divide-gray-200 border-t border-gray-200 
-                    overflow-y-auto transition-[max-height] duration-300 ${
-                      showSentReminders ? "max-h-[300px]" : "max-h-[0px]"
-                    }`}
+            className={cn(
+              "divide-y divide-gray-200 border-t border-gray-200 overflow-y-auto transition-[max-height] duration-300",
+              showSentReminders ? "max-h-[300px]" : "max-h-[0px]"
+            )}
           >
             {sentReminders === undefined ? (
               <p className="text-sm text-zinc-500 p-5">
@@ -423,11 +425,12 @@ const ActionReminderCard = ({
                     </Link>
                   </div>
                   <p
-                    className={`text-sm ${
+                    className={cn(
+                      "text-sm",
                       notif.mms?.status === "undelivered"
                         ? "text-red-500"
                         : "text-zinc-500"
-                    }`}
+                    )}
                   >
                     {notif.channel === "text"
                       ? notif.mms?.status

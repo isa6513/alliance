@@ -1,6 +1,7 @@
 import { View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { colors } from "../../lib/style/colors";
+import { cn } from "@alliance/shared/styles/util";
 
 const sizeMap = {
   line: 16,
@@ -28,9 +29,12 @@ const CheckIcon = ({
 
   return (
     <View
-      className={`shrink-0 ${sizeClass[size]} ${
-        filled ? "bg-green" : "bg-white"
-      } rounded-full items-center justify-center`}
+      className={cn(
+        "shrink-0",
+        sizeClass[size],
+        filled ? "bg-green" : "bg-white",
+        "rounded-full items-center justify-center"
+      )}
     >
       <Svg
         viewBox="0 0 88 88"

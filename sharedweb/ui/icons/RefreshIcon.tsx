@@ -1,3 +1,5 @@
+import { cn } from "@alliance/shared/styles/util";
+
 const RefreshIcon = ({ size = "small" }: { size?: "small" | "large" }) => {
   const sizeClass = {
     small: "w-6 h-6",
@@ -7,7 +9,7 @@ const RefreshIcon = ({ size = "small" }: { size?: "small" | "large" }) => {
   return (
     <svg
       fill="var(--color-blue)"
-      className={`${sizeClass[size]}`}
+      className={cn(sizeClass[size])}
       viewBox="0 0 32 32"
       xmlns="http://www.w3.org/2000/svg"
     >

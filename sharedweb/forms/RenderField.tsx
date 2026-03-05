@@ -22,6 +22,7 @@ import AppMarkdownWrapper from "../ui/AppMarkdownWrapper";
 import Card from "../ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import YesNoToggle from "../ui/YesNoToggle";
+import { cn } from "@alliance/shared/styles/util";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -88,9 +89,11 @@ export function RenderLabel({
   const hasError = Boolean(error);
   return (
     <label
-      className={`block ${hasError ? "text-red-600" : "text-zinc-700"} ${
-        labelRightAddon ? "flex items-start justify-between gap-3" : ""
-      }`}
+      className={cn(
+        "block",
+        hasError ? "text-red-600" : "text-zinc-700",
+        labelRightAddon && "flex items-start justify-between gap-3"
+      )}
     >
       <span>
         {field.label !== null && (
@@ -346,13 +349,13 @@ export function RenderField({
               return (
                 <label
                   key={optionValue}
-                  className={`flex flex-col items-center text-sm font-medium  flex-1 w-[${
-                    100 / values.length
-                  }%] ${
+                  className={cn(
+                    "flex flex-col items-center text-sm font-medium flex-1",
+                    `w-[${100 / values.length}%]`,
                     disabled
                       ? "opacity-60 cursor-not-allowed"
                       : "cursor-pointer"
-                  }`}
+                  )}
                 >
                   <input
                     type="radio"
@@ -368,13 +371,14 @@ export function RenderField({
                     disabled={disabled}
                   />
                   <span
-                    className={`w-full rounded-none border-y  px-3 py-1 text-center ${
+                    className={cn(
+                      "w-full rounded-none border-y px-3 py-1 text-center",
                       checked
                         ? "bg-green text-white border-green"
                         : hasError
                         ? "border-red-500 text-red-600"
                         : "border-zinc-300 text-zinc-700"
-                    }`}
+                    )}
                   >
                     {optionValue}
                   </span>
@@ -429,7 +433,7 @@ export function RenderField({
       );
       return (
         <div className="space-y-1 pr-5">
-          <label className={`flex items-start`}>
+          <label className="flex items-start">
             {checkboxPosition === "right" ? (
               <>
                 {checkboxLabel}
@@ -457,9 +461,10 @@ export function RenderField({
             labelRightAddon={labelRightAddon}
           />
           <div
-            className={`space-y-2 ${
-              hasError ? "border-l-2 border-red-500 pl-3" : ""
-            }`}
+            className={cn(
+              "space-y-2",
+              hasError && "border-l-2 border-red-500 pl-3"
+            )}
           >
             {options.map((option, optIndex) => (
               <label key={optIndex} className="flex items-start">
@@ -550,9 +555,10 @@ export function RenderField({
             labelRightAddon={labelRightAddon}
           />
           <div
-            className={`space-y-2 ${
-              hasError ? "border-l-2 border-red-500 pl-3" : ""
-            }`}
+            className={cn(
+              "space-y-2",
+              hasError && "border-l-2 border-red-500 pl-3"
+            )}
           >
             {options.map((option, optIndex) => (
               <label key={optIndex} className="flex">
@@ -604,7 +610,7 @@ export function RenderField({
             ))}
           </div>
           {maxSelections !== undefined && (
-            <p className={`text-xs text-gray-500`}>
+            <p className="text-xs text-gray-500">
               Select up to {maxSelections} option
               {maxSelections === 1 ? "" : "s"}
             </p>
@@ -967,11 +973,12 @@ export function TimeInputField({
           required={field.required}
           disabled={disabled}
           aria-invalid={hasError}
-          className={`w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent ${
+          className={cn(
+            "w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent",
             hasError
               ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
               : "border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          }`}
+          )}
           inputMode="text"
         />
 
@@ -996,9 +1003,10 @@ export function TimeInputField({
                 key={t}
                 type="button"
                 onClick={() => handleSelectTime(t)}
-                className={`w-full text-left px-3 py-2 bg-white text-sm hover:bg-zinc-50 ${
-                  t === inputValue ? "bg-zinc-50 font-medium" : ""
-                }`}
+                className={cn(
+                  "w-full text-left px-3 py-2 bg-white text-sm hover:bg-zinc-50",
+                  t === inputValue && "bg-zinc-50 font-medium"
+                )}
               >
                 {t}
               </button>

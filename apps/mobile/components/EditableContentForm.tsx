@@ -13,6 +13,7 @@ import * as FileSystem from "expo-file-system";
 import { CreateEditableContentDto } from "@alliance/shared/client";
 import Text from "./system/Text";
 import { KeyboardExtender } from "react-native-keyboard-controller";
+import { cn } from "@alliance/shared/styles/util";
 
 interface EditableContentFormProps {
   value: CreateEditableContentDto;
@@ -276,9 +277,14 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
             <Pressable
               onPress={onSubmit}
               disabled={!canSubmit || isSubmitting}
-              className={`px-3 py-1.5 bg-zinc-800 rounded-sm ${!canSubmit || isSubmitting ? "opacity-50" : ""}`}
+              className={cn(
+                "px-3 py-1.5 bg-zinc-800 rounded-sm",
+                (!canSubmit || isSubmitting) && "opacity-50"
+              )}
             >
-              <Text className="text-white">{isSubmitting ? "Posting..." : submitLabel}</Text>
+              <Text className="text-white">
+                {isSubmitting ? "Posting..." : submitLabel}
+              </Text>
             </Pressable>
           </View>
         </View>

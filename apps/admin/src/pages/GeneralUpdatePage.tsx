@@ -14,6 +14,7 @@ import {
 import type { FormSchema } from "@alliance/shared/forms/formschema";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import React, { useCallback, useEffect, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { FormBuilder } from "../components/FormBuilder";
 import { X } from "lucide-react";
@@ -489,11 +490,12 @@ const GeneralUpdatePage: React.FC = () => {
                   return (
                     <label
                       key={tag.id}
-                      className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${
+                      className={cn(
+                        "flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors",
                         checked
                           ? "border-blue-400 bg-blue-50"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                      )}
                     >
                       <input
                         type="checkbox"
@@ -644,21 +646,23 @@ const GeneralUpdatePage: React.FC = () => {
             <nav className="-mb-px flex space-x-8">
               <button
                 onClick={() => onTabChange("details")}
-                className={`py-2 px-1 border-b-2 text-sm ${
+                className={cn(
+                  "py-2 px-1 border-b-2 text-sm",
                   selectedTab === "details"
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                )}
               >
                 General Update Details
               </button>
               <button
                 onClick={() => onTabChange("form")}
-                className={`py-2 px-1 border-b-2 text-sm ${
+                className={cn(
+                  "py-2 px-1 border-b-2 text-sm",
                   selectedTab === "form"
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                )}
               >
                 Form Builder
               </button>

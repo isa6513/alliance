@@ -13,6 +13,7 @@ import { useCommentsContext } from "./CommentsContext";
 import { useCommentEditing } from "../../hooks/useCommentEditing";
 import { Link, href } from "react-router";
 import { ChevronDown } from "lucide-react";
+import { cn } from "@alliance/shared/styles/util";
 
 const INDENT_PX = 40;
 
@@ -59,7 +60,7 @@ const ReplyContent = ({
   const editing = useCommentEditing(reply, ctx.onUpdateReply);
 
   return (
-    <div className={`flex ${compact ? "gap-x-2" : "gap-x-2.5"} relative`}>
+    <div className={cn("flex", compact ? "gap-x-2" : "gap-x-2.5", "relative")}>
       {isHighlighted && (
         <div className="absolute -left-4 top-0 bottom-0 w-[3px] bg-blue-500 rounded" />
       )}
@@ -97,9 +98,10 @@ const ReplyContent = ({
             {isCollapsible && onToggleCollapse && (
               <button
                 onClick={onToggleCollapse}
-                className={`text-black cursor-pointer transition-transform duration-200 ${
+                className={cn(
+                  "text-black cursor-pointer transition-transform duration-200",
                   isCollapsed ? "-rotate-90" : "rotate-0"
-                }`}
+                )}
                 aria-label={isCollapsed ? "Expand" : "Collapse"}
               >
                 <ChevronDown size={18} />
@@ -235,9 +237,10 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
         {filteredChildren.map((childReply) => (
           <div key={childReply.id}>
             <div
-              className={`${
-                ctx.compact ? "my-3" : "my-3 sm:my-4"
-              } -mx-2 sm:-mx-4`}
+              className={cn(
+                ctx.compact ? "my-3" : "my-3 sm:my-4",
+                "-mx-2 sm:-mx-4"
+              )}
             />
             <ReplyComponent reply={childReply} depth={depth + 1} />
           </div>
@@ -287,9 +290,12 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
     return (
       <div
         key={reply.id}
-        className={`!display-block transition-colors duration-1000 ${newReplyClass} ${
-          ctx.compact ? "!p-1 !border-none" : "!py-2 sm:!py-4"
-        } ${ctx.user && isReplyingToThis && !isCollapsed && "rounded-b-none"}`}
+        className={cn(
+          "!display-block transition-colors duration-1000",
+          newReplyClass,
+          ctx.compact ? "!p-1 !border-none" : "!py-2 sm:!py-4",
+          ctx.user && isReplyingToThis && !isCollapsed && "rounded-b-none"
+        )}
       >
         <div id={`reply-${reply.id}`}>{replyContent}</div>
         {replyForm}
@@ -303,7 +309,7 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
   return (
     <div>
       <div
-        className={`rounded border-transparent ${newReplyClass}`}
+        className={cn("rounded border-transparent", newReplyClass)}
         id={`reply-${reply.id}`}
         style={{ marginLeft: indent }}
       >

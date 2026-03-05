@@ -11,6 +11,7 @@ import {
 import { RiArrowGoBackLine, RiArrowGoForwardLine } from "@remixicon/react";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { cn } from "@alliance/shared/styles/util";
 
 type ImageEditorProps = {
   initialImageUrl: string | null;
@@ -710,7 +711,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
   const showMobileOverlay = !hasCustomImage && Boolean(previewImage);
 
   const containerClassName = useMemo(() => {
-    return ["relative w-fit", className].filter(Boolean).join(" ");
+    return cn("relative w-fit", className);
   }, [className]);
 
   return (
@@ -734,11 +735,14 @@ const ImageEditor: FC<ImageEditorProps> = ({
             type="button"
             onClick={triggerFileSelect}
             disabled={isUploading}
-            className={`absolute inset-0 flex items-center justify-center bg-white/80 text-xs text-zinc-600 transition-opacity disabled:opacity-40 focus-visible:opacity-100 ${
+            className={cn(
+              "absolute inset-0",
+              "flex items-center justify-center",
+              "bg-white/80 text-xs text-zinc-600 transition-opacity disabled:opacity-40 focus-visible:opacity-100",
               showMobileOverlay
                 ? "opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                 : "opacity-0 group-hover:opacity-100"
-            }`}
+            )}
           >
             {previewImage ? "Change photo" : "Upload photo"}
           </button>

@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import { useEffect, useMemo, useRef } from "react";
 
 export interface TextareaWithHighlightProps {
@@ -152,11 +153,11 @@ export default function TextareaWithHighlight({
   }, []);
 
   return (
-    <div ref={wrapperRef} className={`relative ${className}`}>
+    <div ref={wrapperRef} className={cn("relative", className)}>
       <div
         ref={overlayRef}
         aria-hidden="true"
-        className={[
+        className={cn(
           "absolute",
           "overflow-hidden",
           "pointer-events-none",
@@ -164,8 +165,8 @@ export default function TextareaWithHighlight({
           "break-words",
           "text-transparent",
           "will-change-transform -mx-[0.5px]",
-          "rounded-lg",
-        ].join(" ")}
+          "rounded-lg"
+        )}
         dangerouslySetInnerHTML={{
           __html: highlightedHtml + (value?.endsWith("\n") ? "\n" : ""),
         }}
@@ -176,7 +177,7 @@ export default function TextareaWithHighlight({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={[
+        className={cn(
           "w-full resize-y",
           "rounded-lg border border-zinc-300",
           "text-sm leading-6",
@@ -184,8 +185,8 @@ export default function TextareaWithHighlight({
           "overflow-auto",
           "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
           !editable && "!border-0 !resize-none",
-          textareaClassName,
-        ].join(" ")}
+          textareaClassName
+        )}
         spellCheck={false}
         autoComplete="off"
         disabled={!editable}

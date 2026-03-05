@@ -7,6 +7,7 @@ import {
   ActionSuiteDto,
   CreateActionEventDto,
 } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
 import DateTimePicker, {
   DateTimePickerChange,
 } from "@alliance/sharedweb/ui/DateTimePicker";
@@ -19,16 +20,16 @@ export type CreateEventFormProps = {
   setEventCreatedSuccess: (eventCreatedSuccess: boolean) => void;
   eventCreatedSuccess: boolean;
 } & (
-    | {
+  | {
       suiteMode: false;
       setAction: (action: ActionDto) => void;
     }
-    | {
+  | {
       suiteMode: true;
       suiteId: number;
       setSuite: (suite: ActionSuiteDto) => void;
     }
-  );
+);
 
 const statusOptions: Record<ActionStatus, string> = {
   draft: "Draft",
@@ -69,7 +70,9 @@ const CreateEventForm = (props: CreateEventFormProps) => {
   const [deadlineEventDate, setDeadlineEventDate] = useState<string>(
     new Date(new Date().getTime() + 604800000).toISOString()
   );
-  const [deadlineEventStatus, setDeadlineEventStatus] = useState<"office_action" | "completed">("office_action");
+  const [deadlineEventStatus, setDeadlineEventStatus] = useState<
+    "office_action" | "completed"
+  >("office_action");
   const [error, setError] = useState<string | null>(null);
   const [eventForm, setEventForm] = useState<CreateActionEventDto>({
     title: "",
@@ -180,10 +183,10 @@ const CreateEventForm = (props: CreateEventFormProps) => {
             ...action,
             events: !!addedOfficeActionEvent
               ? [
-                ...action.events,
-                addedOfficeActionEvent,
-                addedEvent as ActionEvent,
-              ]
+                  ...action.events,
+                  addedOfficeActionEvent,
+                  addedEvent as ActionEvent,
+                ]
               : [...action.events, addedEvent as ActionEvent],
           });
         }
@@ -247,7 +250,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
       </div>
 
       <div
-        className={`${useCustomName ? "bg-zinc-100" : ""} p-2 -m-1 rounded-md`}
+        className={cn(useCustomName && "bg-zinc-100", "p-2 -m-1 rounded-md")}
       >
         <div className="flex items-center mb-2">
           <input
@@ -311,8 +314,10 @@ const CreateEventForm = (props: CreateEventFormProps) => {
       </div>
 
       <div
-        className={`${!launchNow ? "bg-zinc-100 mb-2" : ""
-          } p-2 -m-1 rounded-md mt-4`}
+        className={cn(
+          !launchNow && "bg-zinc-100 mb-2",
+          "p-2 -m-1 rounded-md mt-4"
+        )}
       >
         <div className="flex items-center mb-4">
           <input
@@ -347,74 +352,85 @@ const CreateEventForm = (props: CreateEventFormProps) => {
 
       {(eventForm.newStatus === "member_action" ||
         eventForm.newStatus === "gathering_commitments") && (
-          <div
-            className={`${useDeadlineEvent ? "bg-zinc-100 mb-2" : ""
-              } p-2 -m-1 rounded-md`}
-          >
-            <div className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                id="deadlineExists"
-                checked={useDeadlineEvent}
-                onChange={(e) => setUseDeadlineEvent(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="deadlineExists" className="ml-2 block text-black">
-                Automatically create deadline event
-              </label>
-            </div>
-
-            {useDeadlineEvent && (
-              <div>
-                <p className="text-sm text-gray-600 mb-1">
-                  This will create a second action event timed after the launch of
-                  this one, providing a deadline for members.
-                </p>
-                <div>
-                  <label htmlFor="eventDate" className="block text-black mb-1">
-                    Deadline event time (
-                    {Intl.DateTimeFormat().resolvedOptions().timeZone}
-                    ):
-                  </label>
-                  <DateTimePicker
-                    id="eventDate"
-                    name="date"
-                    value={deadlineEventDate}
-                    onChange={(change) =>
-                      setDeadlineEventDate(change.utcValue || "")
-                    }
-                    required
-                    className="max-w-80"
-                  />
-                </div>
-                <div className="mt-2">
-                  <label htmlFor="deadlineEventStatus" className="block text-black mb-1">
-                    Transition to:
-                  </label>
-                  <select
-                    id="deadlineEventStatus"
-                    value={deadlineEventStatus}
-                    onChange={(e) => setDeadlineEventStatus(e.target.value as "office_action" | "completed")}
-                    className="w-full max-w-80 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="office_action">Office Action</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
-              </div>
-            )}
+        <div
+          className={cn(
+            useDeadlineEvent && "bg-zinc-100 mb-2",
+            "p-2 -m-1 rounded-md"
+          )}
+        >
+          <div className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              id="deadlineExists"
+              checked={useDeadlineEvent}
+              onChange={(e) => setUseDeadlineEvent(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="deadlineExists" className="ml-2 block text-black">
+              Automatically create deadline event
+            </label>
           </div>
-        )}
+
+          {useDeadlineEvent && (
+            <div>
+              <p className="text-sm text-gray-600 mb-1">
+                This will create a second action event timed after the launch of
+                this one, providing a deadline for members.
+              </p>
+              <div>
+                <label htmlFor="eventDate" className="block text-black mb-1">
+                  Deadline event time (
+                  {Intl.DateTimeFormat().resolvedOptions().timeZone}
+                  ):
+                </label>
+                <DateTimePicker
+                  id="eventDate"
+                  name="date"
+                  value={deadlineEventDate}
+                  onChange={(change) =>
+                    setDeadlineEventDate(change.utcValue || "")
+                  }
+                  required
+                  className="max-w-80"
+                />
+              </div>
+              <div className="mt-2">
+                <label
+                  htmlFor="deadlineEventStatus"
+                  className="block text-black mb-1"
+                >
+                  Transition to:
+                </label>
+                <select
+                  id="deadlineEventStatus"
+                  value={deadlineEventStatus}
+                  onChange={(e) =>
+                    setDeadlineEventStatus(
+                      e.target.value as "office_action" | "completed"
+                    )
+                  }
+                  className="w-full max-w-80 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="office_action">Office Action</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <button
         type="submit"
         disabled={creatingEvent}
-        className={`w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${creatingEvent
+        className={cn(
+          "w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200",
+          creatingEvent
             ? "bg-gray-400 text-white cursor-not-allowed"
             : eventCreatedSuccess
-              ? "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
-              : "bg-[#333] text-white hover:bg-[#444] focus:ring-blue-500"
-          }`}
+            ? "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
+            : "bg-[#333] text-white hover:bg-[#444] focus:ring-blue-500"
+        )}
       >
         {creatingEvent ? (
           <span className="flex items-center justify-center">

@@ -33,7 +33,7 @@ interface StatusTagProps {
 const StatusTag = ({ status }: StatusTagProps) => {
   return (
     // <div
-    //   className={`px-3 py-1 flex flex-row items-center border ${actionStatusStyles[status]} rounded-lg`}
+    //   className={cn("px-3 py-1 flex flex-row items-center border rounded-lg", actionStatusStyles[status])}
     // >
     <Tag
       style={actionStatusStyles[status]}

@@ -6,6 +6,7 @@ import {
 } from "@alliance/shared/lib/actionCompletedBarWithInfo";
 import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import { href, Link } from "react-router";
+import { cn } from "@alliance/shared/styles/util";
 
 interface ActionCompletedBarWithInfoProps
   extends ActionCompletedBarWithInfoPropsShared {
@@ -32,10 +33,10 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   }
 
   return (
-    <div className={`${className}`}>
+    <div className={className}>
       <div className="flex flex-row items-center justify-between w-full gap-x-2">
         <div className="flex flex-row items-center gap-x-2 mb-1">
-          <p className={`text-${textSize} text-${textColor}`}>
+          <p className={cn(`text-${textSize}`, `text-${textColor}`)}>
             {labelString}{" "}
             {action.status === "gathering_commitments"
               ? "members committed"

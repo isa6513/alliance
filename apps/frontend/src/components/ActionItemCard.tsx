@@ -6,6 +6,7 @@ import {
   ActionItemCardPropsShared,
   showCompletedBar,
 } from "@alliance/shared/lib/actionItemCard";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface ActionItemCardProps extends ActionItemCardPropsShared {
   className?: string;
@@ -19,7 +20,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
   return (
     <Link
       to={href("/actions/:id", { id: action.id.toString() })}
-      className={`relative ${className} p-3 md:p-4  hover:bg-zinc-50`}
+      className={cn("relative p-3 md:p-4 hover:bg-zinc-50", className)}
     >
       <div className="flex flex-row gap-x-3 md:gap-x-4">
         {/* <ActionSquareThumbnail

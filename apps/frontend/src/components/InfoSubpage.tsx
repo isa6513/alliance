@@ -1,5 +1,6 @@
 import React from "react";
 import TableOfContents from "./TableOfContents";
+import { cn } from "@alliance/shared/styles/util";
 
 export type InfoSubpageTocSections = {
   id: string;
@@ -18,9 +19,10 @@ const InfoSubpage: React.FC<InfoSubpageProps> = ({ tocSections, children }) => {
       <div className="flex md:gap-8 lg:gap-12">
         {tocSections && <TableOfContents tocSections={tocSections} />}
         <div
-          className={`min-w-0 flex-1 max-w-3xl flex flex-col ${
-            !tocSections ? "mx-auto" : ""
-          }`}
+          className={cn(
+            "min-w-0 flex-1 max-w-3xl flex flex-col",
+            !tocSections && "mx-auto"
+          )}
         >
           <div className="flex flex-col gap-y-12 text-base md:text-lg text-zinc-900">
             {children}

@@ -1,4 +1,5 @@
 import { EditableContentDto } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
 import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import ImageLightbox from "./ImageLightbox";
 import React from "react";
@@ -25,7 +26,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
 
   if (deleted) {
     return (
-      <div className={`${className ?? ""} ${sharedClasses} text-gray-400`}>
+      <div className={cn(className, sharedClasses, "text-gray-400")}>
         Content has been deleted
       </div>
     );
@@ -35,9 +36,10 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
     <div className={className}>
       {content && (
         <div
-          className={`${
-            collapsed ? "line-clamp-1" : truncated ? "line-clamp-3" : ""
-          }`}
+          className={cn(
+            collapsed && "line-clamp-1",
+            truncated && !collapsed && "line-clamp-3"
+          )}
         >
           <AppMarkdownWrapper markdownContent={content.body} />
         </div>
@@ -46,9 +48,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
         <ImageLightbox
           images={attachments}
           renderPreview={(openLightbox) => (
-            <div
-              className={`flex flex-wrap gap-2 ${content.body ? "mt-2" : ""}`}
-            >
+            <div className={cn("flex flex-wrap gap-2", content.body && "mt-2")}>
               {attachments.map((key, idx) => (
                 <button
                   type="button"

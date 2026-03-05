@@ -9,6 +9,7 @@ import {
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import React, { useMemo, useRef } from "react";
 import FormTextarea from "./FormTextarea";
+import { cn } from "@alliance/shared/styles/util";
 
 interface ActionFormProps {
   form: CreateActionDto;
@@ -510,11 +511,12 @@ const ActionForm: React.FC<ActionFormProps> = ({
       return (
         <label
           key={String(f.name)}
-          className={`flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors ${
+          className={cn(
+            "flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors",
             isChecked
               ? "border-blue-400 bg-blue-50"
               : "border-gray-200 hover:border-gray-300 bg-white"
-          }`}
+          )}
         >
           <input
             type="checkbox"
@@ -652,11 +654,12 @@ const ActionForm: React.FC<ActionFormProps> = ({
                   return (
                     <label
                       key={tag.id}
-                      className={`flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${
+                      className={cn(
+                        "flex items-start gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors",
                         checked
                           ? "border-blue-400 bg-blue-50"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                      )}
                     >
                       <input
                         type="checkbox"

@@ -57,7 +57,7 @@ const FriendRequestButton = ({
     <Button
       color={isHovered ? ButtonColor.RedOutline : ButtonColor.White}
       onClick={handleRemoveFriend}
-      className={`!h-9 transition-all duration-100`}
+      className="!h-9 transition-all duration-100"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

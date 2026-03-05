@@ -2,6 +2,7 @@ import React from "react";
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import Markdown from "react-native-markdown-display";
 import { Check } from "lucide-react-native";
+import { cn } from "@alliance/shared/styles/util";
 
 type CheckboxProps = {
   checked: boolean;
@@ -47,14 +48,17 @@ export default function Checkbox({
       activeOpacity={0.7}
       disabled={disabled}
       onPress={() => onChange?.(!checked)}
-      className={`flex-row items-start ${className || ""}`}
+      className={cn("flex-row items-start", className)}
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}
     >
       <View
-        className={`w-5 h-5 rounded border items-center justify-center mr-2 ${borderClass} ${
-          disabled ? "opacity-60" : ""
-        } ${checked ? "bg-green" : "bg-white"}`}
+        className={cn(
+          "w-5 h-5 rounded border items-center justify-center mr-2",
+          borderClass,
+          disabled && "opacity-60",
+          checked ? "bg-green" : "bg-white"
+        )}
       >
         {checked && <Check size={14} color="#fff" strokeWidth={3} />}
       </View>

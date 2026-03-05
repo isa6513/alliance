@@ -5,6 +5,7 @@ import type {
   EventType,
 } from "@alliance/shared/client/types.gen";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { Link } from "react-router";
 import {
   useEventLogWebSocket,
@@ -41,9 +42,7 @@ function formatEventType(type: string): string {
 }
 
 function timeAgo(dateStr: string): string {
-  const seconds = Math.floor(
-    (Date.now() - new Date(dateStr).getTime()) / 1000
-  );
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
   if (seconds < 60) return `${seconds}s ago`;
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -84,7 +83,9 @@ const EventLogPage: React.FC = () => {
   }, [loadData]);
 
   // Track timeout refs for highlight cleanup
-  const highlightTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const highlightTimeoutsRef = useRef<
+    Map<string, ReturnType<typeof setTimeout>>
+  >(new Map());
 
   useEffect(() => {
     setOnNewEvent((event: EventLogWsEvent) => {
@@ -164,7 +165,6 @@ const EventLogPage: React.FC = () => {
         </div>
       </div>
 
-
       {loading && !data ? (
         <p className="text-sm text-zinc-500">Loading events...</p>
       ) : allEvents.length === 0 ? (
@@ -189,14 +189,19 @@ const EventLogPage: React.FC = () => {
                   return (
                     <React.Fragment key={event.id}>
                       <tr
-                        className={`${isExpanded ? "" : "border-b border-zinc-200"} transition-colors duration-1000 ${isHighlighted ? "bg-blue-50" : "hover:bg-zinc-50"
-                          }`}
+                        className={cn(
+                          isExpanded ? "" : "border-b border-zinc-200",
+                          "transition-colors duration-1000",
+                          isHighlighted ? "bg-blue-50" : "hover:bg-zinc-50"
+                        )}
                       >
                         <td className="py-3 px-2">
                           <span
-                            className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${EVENT_TYPE_COLORS[event.event] ??
-                              "bg-gray-100 text-gray-800"
-                              }`}
+                            className={cn(
+                              "text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap",
+                              EVENT_TYPE_COLORS[event.event] ??
+                                "bg-gray-100 text-gray-800"
+                            )}
                           >
                             {formatEventType(event.event)}
                           </span>

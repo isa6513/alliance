@@ -10,6 +10,7 @@ import type { PostDto } from "@alliance/shared/client/types.gen";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { cn } from "@alliance/shared/styles/util";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 
@@ -155,11 +156,12 @@ const PostsManagementPage: React.FC = () => {
                       key={post.id}
                       type="button"
                       onClick={() => handleSelectPost(post)}
-                      className={`text-left border rounded px-3 py-2 ${
+                      className={cn(
+                        "text-left border rounded px-3 py-2",
                         selectedPost?.id === post.id
                           ? "border-blue bg-blue/10"
                           : "border-zinc-200 hover:bg-zinc-50"
-                      }`}
+                      )}
                     >
                       <div className="flex flex-col gap-0.5">
                         <span className="font-medium text-sm">

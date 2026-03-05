@@ -2,6 +2,7 @@ import { Image, View } from "react-native";
 import { User } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
 import { getApiUrl, getImageSource } from "../lib/config";
+import { cn } from "@alliance/shared/styles/util";
 
 type ProfileImageSize = "mini" | "small" | "medium" | "large" | "huge";
 
@@ -79,7 +80,11 @@ export default function ProfileImage({
 }: ProfileImageProps) {
   const dimension = sizeMap[size];
   const radius = radiusMap[size];
-  const baseStyle = { width: dimension, height: dimension, borderRadius: radius };
+  const baseStyle = {
+    width: dimension,
+    height: dimension,
+    borderRadius: radius,
+  };
 
   if (pfp) {
     return (
@@ -87,7 +92,7 @@ export default function ProfileImage({
         source={{ uri: resolveProfileImageUri(pfp) }}
         resizeMode="cover"
         style={baseStyle}
-        className={`bg-white shrink-0 ${className ?? ""}`}
+        className={cn("bg-white shrink-0", className)}
       />
     );
   }
@@ -95,9 +100,10 @@ export default function ProfileImage({
   return (
     <View
       style={baseStyle}
-      className={`bg-white border border-zinc-300 items-center justify-center shrink-0 ${
-        className ?? ""
-      }`}
+      className={cn(
+        "bg-white border border-zinc-300 items-center justify-center shrink-0",
+        className
+      )}
     >
       <User size={iconSizeMap[size]} color={colors.text.tertiary} />
     </View>

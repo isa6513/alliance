@@ -28,6 +28,7 @@ import {
   parseTimeInput,
 } from "@alliance/shared/forms/timeUtils";
 import InlineLabelMarkdownWrapper from "../InlineLabelMarkdownWrapper";
+import { cn } from "@alliance/shared/styles/util";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -177,7 +178,7 @@ export function RenderField({
         <View>
           <RenderLabel field={field} error={errorMessage} />
           <TextInput
-            className={`${inputBase} min-h-[100px] text-base`}
+            className={cn(inputBase, "min-h-[100px] text-base")}
             value={(value as string) ?? ""}
             onChangeText={(text) => onChange?.(text)}
             onFocus={onFocus}
@@ -294,13 +295,14 @@ export function RenderField({
               return (
                 <TouchableOpacity
                   key={optionValue}
-                  className={`flex-1 items-center border py-2 ${
+                  className={cn(
+                    "flex-1 items-center border py-2",
                     checked
                       ? "bg-green border-green"
                       : hasError
                       ? "border-red-500"
                       : "border-zinc-300"
-                  }`}
+                  )}
                   onPress={
                     disabled
                       ? undefined
@@ -315,9 +317,10 @@ export function RenderField({
                   disabled={disabled}
                 >
                   <Text
-                    className={`text-sm ${
+                    className={cn(
+                      "text-sm",
                       checked ? "text-white font-semibold" : "text-zinc-700"
-                    }`}
+                    )}
                   >
                     {optionValue}
                   </Text>
@@ -351,9 +354,7 @@ export function RenderField({
       return (
         <View>
           <RenderLabel field={field} error={errorMessage} />
-          <View
-            className={`${hasError ? "border-l-2 border-red-500 pl-3" : ""}`}
-          >
+          <View className={cn(hasError && "border-l-2 border-red-500 pl-3")}>
             {options.map((option, optIndex) => {
               const selected = value === option.value;
               return (
@@ -365,13 +366,14 @@ export function RenderField({
                   activeOpacity={0.7}
                 >
                   <View
-                    className={`w-5 h-5 rounded-full border items-center justify-center mr-3 ${
+                    className={cn(
+                      "w-5 h-5 rounded-full border items-center justify-center mr-3",
                       selected
                         ? "border-green"
                         : hasError
                         ? "border-red-500"
                         : "border-zinc-400"
-                    }`}
+                    )}
                   >
                     {selected && (
                       <View className="w-2.5 h-2.5 rounded-full bg-green" />
@@ -398,15 +400,16 @@ export function RenderField({
         <View>
           <RenderLabel field={field} error={errorMessage} />
           <TouchableOpacity
-            className={`${inputBase} flex-row items-center justify-between`}
+            className={cn(inputBase, "flex-row items-center justify-between")}
             onPress={() => setSelectOpen(true)}
             disabled={disabled}
             activeOpacity={0.8}
           >
             <Text
-              className={`text-base ${
+              className={cn(
+                "text-base",
                 selectedLabel ? "text-zinc-900" : "text-zinc-400"
-              }`}
+              )}
             >
               {selectedLabel || "Select an option"}
             </Text>
@@ -434,11 +437,12 @@ export function RenderField({
                   disabled={disabled}
                 >
                   <View
-                    className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${
+                    className={cn(
+                      "w-5 h-5 rounded-full border mr-3 items-center justify-center",
                       value === option.value
                         ? "border-green"
                         : "border-zinc-300"
-                    }`}
+                    )}
                   >
                     {value === option.value && (
                       <View className="w-2.5 h-2.5 rounded-full bg-green" />
@@ -470,9 +474,7 @@ export function RenderField({
       return (
         <View>
           <RenderLabel field={field} error={errorMessage} />
-          <View
-            className={`${hasError ? "border-l-2 border-red-500 pl-3" : ""}`}
-          >
+          <View className={cn(hasError && "border-l-2 border-red-500 pl-3")}>
             {options.map((option, optIndex) => {
               const checked = selections.includes(option.value);
               const disabledOption = disabled || (!checked && maxReached);
@@ -493,13 +495,15 @@ export function RenderField({
                   activeOpacity={0.7}
                 >
                   <View
-                    className={`w-5 h-5 rounded border mr-3 items-center justify-center ${
+                    className={cn(
+                      "w-5 h-5 rounded border mr-3 items-center justify-center",
                       checked
                         ? "border-green bg-green"
                         : hasError
                         ? "border-red-500"
-                        : "border-zinc-400"
-                    } ${disabledOption ? "opacity-60" : ""}`}
+                        : "border-zinc-400",
+                      disabledOption && "opacity-60"
+                    )}
                   >
                     {checked && (
                       <Check size={14} color="#fff" strokeWidth={3} />
@@ -741,9 +745,12 @@ export function TimeInputField({
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => setShowDropdown((prev) => !prev)}
-          className={`flex-row items-center justify-between ${sharedInputClasses} ${
-            hasError ? "border-red-500" : "border-zinc-300"
-          } ${disabled ? "opacity-60" : ""}`}
+          className={cn(
+            "flex-row items-center justify-between",
+            sharedInputClasses,
+            hasError ? "border-red-500" : "border-zinc-300",
+            disabled && "opacity-60"
+          )}
         >
           <TextInput
             className="flex-1 text-base text-zinc-900"
@@ -789,11 +796,12 @@ export function TimeInputField({
                 }}
               >
                 <Text
-                  className={`text-base ${
+                  className={cn(
+                    "text-base",
                     t === inputValue
                       ? "font-semibold text-green-700"
                       : "text-zinc-800"
-                  }`}
+                  )}
                 >
                   {t}
                 </Text>

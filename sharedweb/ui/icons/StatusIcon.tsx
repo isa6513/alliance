@@ -1,5 +1,6 @@
 import { ActionDto } from "@alliance/shared/client";
 import { DefaultIconProps, sizeClass } from "./icons";
+import { cn } from "@alliance/shared/styles/util";
 
 const StatusIcon = ({
   status,
@@ -12,7 +13,7 @@ const StatusIcon = ({
     case "gathering_commitments":
       return (
         <svg
-          className={`mr-2 ${sizeClass[size]} ${fill}`}
+          className={cn("mr-2", sizeClass[size], fill)}
           viewBox="0 0 95 95"
           fill={fill}
           xmlns="http://www.w3.org/2000/svg"
@@ -26,7 +27,7 @@ const StatusIcon = ({
     case "member_action":
       return (
         <svg
-          className={`inline mr-2 ${sizeClass[size]} ${fill}`}
+          className={cn("inline mr-2", sizeClass[size], fill)}
           viewBox="0 0 100 100"
           xmlns="http://www.w3.org/2000/svg"
           aria-label="Action Status"

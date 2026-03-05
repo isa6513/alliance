@@ -6,6 +6,7 @@ import {
 import { View } from "react-native";
 import Text from "./system/Text";
 import { ClockIcon, Calendar } from "lucide-react-native";
+import { cn } from "@alliance/shared/styles/util";
 
 const TaskTimeInfo = ({
   action,
@@ -17,7 +18,7 @@ const TaskTimeInfo = ({
   const color = deadlineColor(nextEvent, action);
 
   return (
-    <View className={`${className}`}>
+    <View className={cn(className)}>
       {!!action.timeEstimate && action.status !== "gathering_commitments" ? (
         <View className="flex-row items-center gap-x-2">
           <ClockIcon size={19} color="rgb(98, 161, 36)" />

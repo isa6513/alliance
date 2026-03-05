@@ -7,6 +7,7 @@ import { Link, href } from "react-router";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
 import { formatTime } from "@alliance/shared/lib/utils";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { cn } from "@alliance/shared/styles/util";
 
 const Message = ({
   message,
@@ -58,8 +59,16 @@ const Message = ({
   return (
     <>
       <div
-        className={`${className} bg-white hover:bg-zinc-100 items-start rounded-md flex flex-col px-2 py-1 group relative ${isFirstInGroup ? "pt-2" : "pt-1 pr-7"
-          } ${isFocused ? "!bg-green/20" : ""}`}
+        className={cn(
+          "bg-white hover:bg-zinc-100",
+          "flex flex-col items-start",
+          "rounded-md",
+          "px-2 py-1",
+          "group relative",
+          isFirstInGroup ? "pt-2" : "pt-1 pr-7",
+          isFocused && "!bg-green/20",
+          className
+        )}
         ref={ref}
       >
         {message.replyTo && isFirstInReplyGroup && (

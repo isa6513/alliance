@@ -1,9 +1,16 @@
 import React from "react";
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ChevronDown, Clock } from "lucide-react-native";
 import { useTimeZoneSelect } from "@alliance/shared/forms/timeZoneSelect";
 import { getTimeZone } from "react-native-localize";
 import FormModal from "./FormModal";
+import { cn } from "@alliance/shared/styles/util";
 
 type Props = {
   value?: string;
@@ -47,9 +54,10 @@ export default function TimeZoneSelect({
         activeOpacity={0.85}
         disabled={disabled}
         onPress={() => setOpen(true)}
-        className={`w-full rounded-lg border px-3 py-3 bg-white flex-row items-center justify-between border-zinc-300 ${
-          disabled ? "opacity-60" : ""
-        }`}
+        className={cn(
+          "w-full rounded-lg border px-3 py-3 bg-white flex-row items-center justify-between border-zinc-300",
+          disabled && "opacity-60"
+        )}
       >
         <View className="flex-1 pr-3">
           <Text className="text-base text-zinc-900" numberOfLines={1}>
@@ -114,11 +122,12 @@ export default function TimeZoneSelect({
                   activeOpacity={0.8}
                   onPress={() => commit(item.tz)}
                   onFocus={() => setActiveIndex(idx)}
-                  className={`px-3 py-3 rounded-lg mb-2 border flex-row justify-between ${
+                  className={cn(
+                    "px-3 py-3 rounded-lg mb-2 border flex-row justify-between",
                     isSelected
                       ? "border-green-600 bg-green-50"
                       : "border-zinc-200 bg-white"
-                  }`}
+                  )}
                 >
                   <Text className="text-base text-zinc-900">
                     {item.labelLeft}

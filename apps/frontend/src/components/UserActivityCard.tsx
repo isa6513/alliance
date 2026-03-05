@@ -16,6 +16,7 @@ import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import OutputRenderer from "@alliance/sharedweb/forms/OutputRenderer";
 import { Edit } from "lucide-react";
+import { cn } from "@alliance/shared/styles/util";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -141,11 +142,11 @@ const UserActivityCard = ({
   return (
     <div className="flex flex-col">
       <div
-        className={`block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white ${
-          !(isEditing || isSaving || showCommentForm)
-            ? "hover:bg-zinc-50 cursor-pointer"
-            : ""
-        }`}
+        className={cn(
+          "block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white",
+          !(isEditing || isSaving || showCommentForm) &&
+            "hover:bg-zinc-50 cursor-pointer"
+        )}
         onClick={handleActivityClick}
       >
         <div className="*:inline">
@@ -227,9 +228,10 @@ const UserActivityCard = ({
             <div className="flex flex-row justify-between w-full items-end">
               <p className="text-zinc-500">{timeSinceCompleted}</p>
               <div
-                className={`flex items-center space-x-2 self-end ${
-                  !activity.editableContent.body ? "mt-2" : ""
-                }`}
+                className={cn(
+                  "flex items-center space-x-2 self-end",
+                  !activity.editableContent.body && "mt-2"
+                )}
               >
                 <ActivityLikeButton
                   liked={activity.likedByMe ?? false}

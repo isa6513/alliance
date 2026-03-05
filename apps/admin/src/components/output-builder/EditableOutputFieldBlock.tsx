@@ -5,6 +5,7 @@ import type {
   OutputFieldBlock,
 } from "@alliance/shared/forms/formschema";
 import { ConditionalVisibility } from "../form-fields/CommonControls";
+import { cn } from "@alliance/shared/styles/util";
 
 interface EditableOutputFieldBlockProps {
   block: OutputFieldBlock;
@@ -56,11 +57,12 @@ export function EditableOutputFieldBlock({
 
   return (
     <div
-      className={`group relative border rounded-lg transition-all ${
+      className={cn(
+        "group relative border rounded-lg transition-all",
         isDragging
           ? "border-blue-400 shadow-lg opacity-50"
           : "border-gray-200 hover:border-gray-300"
-      }`}
+      )}
     >
       <div
         className="absolute -left-3 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing transition-opacity"

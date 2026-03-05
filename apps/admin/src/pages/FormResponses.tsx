@@ -15,7 +15,14 @@ import type {
 } from "@alliance/shared/forms/formschema";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { useParams, useSearchParams } from "react-router";
 import { CirclePlay } from "lucide-react";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -580,7 +587,10 @@ const FormResponses: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (userSearchRef.current && !userSearchRef.current.contains(e.target as Node)) {
+      if (
+        userSearchRef.current &&
+        !userSearchRef.current.contains(e.target as Node)
+      ) {
         setUserDropdownOpen(false);
       }
     };
@@ -754,9 +764,7 @@ const FormResponses: React.FC = () => {
                 </div>
                 <Button
                   disabled={page >= totalPages}
-                  onClick={() =>
-                    setPage((p) => Math.min(totalPages, p + 1))
-                  }
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   color={ButtonColor.Black}
                   size="small"
                 >
@@ -797,9 +805,10 @@ const FormResponses: React.FC = () => {
                         <button
                           key={response.id ?? `${response.sid}-${idx}`}
                           type="button"
-                          className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-b border-gray-50 last:border-b-0 ${
-                            idx + 1 === page ? "bg-blue-50 font-medium" : ""
-                          }`}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-b border-gray-50 last:border-b-0",
+                            idx + 1 === page && "bg-blue-50 font-medium"
+                          )}
                           onClick={() => {
                             setPage(idx + 1);
                             setUserSearch("");
@@ -993,12 +1002,13 @@ const FormResponses: React.FC = () => {
                             response.createdAt
                           }-${index}`
                         }
-                        className={`grid grid-cols-1 gap-1 border-b border-gray-100 px-3 py-2 last:border-b-0 md:gap-3 ${
+                        className={cn(
+                          "grid grid-cols-1 gap-1 border-b border-gray-100 px-3 py-2 last:border-b-0 md:gap-3",
                           selectedQuestionField &&
-                          AI_SCORE_FIELD_KINDS.has(selectedQuestionField.kind)
+                            AI_SCORE_FIELD_KINDS.has(selectedQuestionField.kind)
                             ? "md:grid-cols-[260px_minmax(0,1fr)_auto]"
                             : "md:grid-cols-[260px_minmax(0,1fr)]"
-                        }`}
+                        )}
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-gray-900">
@@ -1019,14 +1029,15 @@ const FormResponses: React.FC = () => {
                           ) && (
                             <div className="flex items-start">
                               <span
-                                className={`text-sm font-semibold ${
+                                className={cn(
+                                  "text-sm font-semibold",
                                   aiDetection &&
-                                  typeof aiDetection.aiProbability ===
-                                    "number" &&
-                                  aiDetection.aiProbability > 0
+                                    typeof aiDetection.aiProbability ===
+                                      "number" &&
+                                    aiDetection.aiProbability > 0
                                     ? "text-red-600"
                                     : "text-gray-400"
-                                }`}
+                                )}
                               >
                                 {formatAiScore(
                                   aiDetection?.aiProbability ?? null

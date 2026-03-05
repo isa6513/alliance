@@ -12,6 +12,7 @@ import {
   useCityAutosuggest,
 } from "@alliance/shared/forms/cityAutosuggest";
 import FormModal from "./FormModal";
+import { cn } from "@alliance/shared/styles/util";
 
 type Props = {
   value?: string;
@@ -63,9 +64,10 @@ export default function CityAutosuggestMobile({
         activeOpacity={0.9}
         onPress={() => setOpen(true)}
         disabled={disabled}
-        className={`w-full rounded-lg border border-zinc-300 px-3 py-3 bg-white ${
-          disabled ? "opacity-60" : ""
-        }`}
+        className={cn(
+          "w-full rounded-lg border border-zinc-300 px-3 py-3 bg-white",
+          disabled && "opacity-60"
+        )}
       >
         <TextInput
           value={query}
@@ -100,9 +102,10 @@ export default function CityAutosuggestMobile({
               return (
                 <TouchableOpacity
                   key={`${city.name}-${city.admin1}-${city.countryCode}`}
-                  className={`px-3 py-3 rounded-lg mb-2 ${
+                  className={cn(
+                    "px-3 py-3 rounded-lg mb-2",
                     isActive ? "bg-zinc-100" : "bg-white"
-                  }`}
+                  )}
                   activeOpacity={0.8}
                   onPress={() => {
                     selectCity(city);

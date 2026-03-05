@@ -14,6 +14,7 @@ import {
 } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { cn } from "@alliance/shared/styles/util";
 
 interface MessageInputProps {
   message: string;
@@ -143,9 +144,10 @@ const MessageInput = ({
 
   return (
     <div
-      className={`flex flex-col gap-y-3 bg-white relative ${
+      className={cn(
+        "flex flex-col gap-y-3 bg-white relative",
         compact ? "px-4 pb-2" : "px-8 pb-4"
-      }`}
+      )}
     >
       {replyingTo && (
         <Card className="p-3 flex flex-row items-center justify-between">

@@ -8,6 +8,7 @@ import {
   SEARCH_CATEGORY_NAMES,
   useSearchResults,
 } from "@alliance/shared/lib/search";
+import { cn } from "@alliance/shared/styles/util";
 
 const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
   const [search, setSearch] = useState("");
@@ -165,9 +166,10 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
                     ref={(el) => {
                       itemRefs.current[item.id] = el;
                     }}
-                    className={`text-black hover:bg-zinc-50 p-3 rounded-md flex flex-row justify-start cursor-pointer items-center ${
-                      selectedItem?.id === item.id ? "bg-zinc-50" : ""
-                    }`}
+                    className={cn(
+                      "text-black hover:bg-zinc-50 p-3 rounded-md flex flex-row justify-start cursor-pointer items-center",
+                      selectedItem?.id === item.id && "bg-zinc-50"
+                    )}
                   >
                     {item.type === "user" ? (
                       <ProfileImage

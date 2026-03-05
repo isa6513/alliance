@@ -5,7 +5,7 @@ const SidebarIcon = ({ size = "small", fill = "black" }: DefaultIconProps) => {
     <svg
       width="20"
       height="20"
-      className={`${sizeClass[size]}`}
+      className={sizeClass[size]}
       viewBox="0 0 20 20"
       fill={fill}
       xmlns="http://www.w3.org/2000/svg"

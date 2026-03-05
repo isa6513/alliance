@@ -10,6 +10,7 @@ import {
 } from "@alliance/shared/client";
 import { groupSettings } from "@alliance/shared/lib/copy";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { useQuery } from "@tanstack/react-query";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -649,9 +650,10 @@ const CommunityPage = () => {
                 </div>
 
                 <div
-                  className={`max-w-[400px] ${
-                    completionData.nTotal === 0 ? " invisible" : ""
-                  }`}
+                  className={cn(
+                    "max-w-[400px]",
+                    completionData.nTotal === 0 && "invisible"
+                  )}
                 >
                   <p className="text-sm">
                     {completionData.nCompleted} / {completionData.nTotal} have
@@ -677,9 +679,10 @@ const CommunityPage = () => {
                       key={m}
                       onClick={() => setParams({ tab: m })}
                       aria-pressed={m === tab}
-                      className={`!border-b-[1.5px] rounded-none ${
+                      className={cn(
+                        "!border-b-[1.5px] rounded-none",
                         m === tab ? "!border-b-green" : "!border-b-transparent"
-                      }`}
+                      )}
                     >
                       <div className="flex flex-row gap-x-2">
                         <span>{TAB_DISPLAY_NAMES[m]}</span>

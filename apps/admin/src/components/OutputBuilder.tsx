@@ -24,6 +24,7 @@ import {
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { EditableOutputFieldBlock } from "./output-builder/EditableOutputFieldBlock";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { cn } from "@alliance/shared/styles/util";
 import { X } from "lucide-react";
 
 const DISPLAY_BLOCK_KINDS = [
@@ -526,11 +527,12 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                     <button
                       type="button"
                       onClick={() => setSelectedViewId(view.id)}
-                      className={`px-3 py-1.5 rounded-l-md border text-sm ${
+                      className={cn(
+                        "px-3 py-1.5 rounded-l-md border text-sm",
                         isActive
                           ? "bg-blue-100 text-blue-700 border-blue-300"
                           : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
-                      }`}
+                      )}
                     >
                       {view.title || "Untitled view"}
                     </button>
@@ -538,11 +540,12 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                       type="button"
                       disabled={(schema.outputViews ?? []).length <= 1}
                       onClick={() => removeView(view.id)}
-                      className={`px-2 py-1.5 rounded-r-md border border-l-0 text-sm ${
+                      className={cn(
+                        "px-2 py-1.5 rounded-r-md border border-l-0 text-sm",
                         (schema.outputViews ?? []).length <= 1
                           ? "bg-gray-50 text-gray-300 cursor-not-allowed"
                           : "bg-gray-100 text-gray-500 hover:text-red-500 hover:bg-red-50 border-gray-200"
-                      }`}
+                      )}
                     >
                       <X size={20} />
                     </button>
@@ -614,11 +617,12 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                     type="button"
                     onClick={addOutputBlock}
                     disabled={!outputFields.length}
-                    className={`px-3 py-2 rounded-md text-sm border ${
+                    className={cn(
+                      "px-3 py-2 rounded-md text-sm border",
                       outputFields.length
                         ? "bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
                         : "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
-                    }`}
+                    )}
                   >
                     Add output field block
                   </button>

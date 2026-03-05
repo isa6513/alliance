@@ -19,6 +19,7 @@ import {
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "./system/Button";
 import { awayRangesDescription } from "@alliance/shared/lib/copy";
+import { cn } from "@alliance/shared/styles/util";
 
 const REASON_OPTIONS: { value: UserAwayRangeReason; label: string }[] = [
   { value: "vacation", label: "Vacation" },
@@ -189,11 +190,12 @@ export default function AwayRangesSection() {
           {awayRanges.map((range) => (
             <View
               key={range.id}
-              className={`p-4 rounded-lg border ${
+              className={cn(
+                "p-4 rounded-lg border",
                 isCurrentlyAway(range)
                   ? "bg-yellow-50 border-yellow-200"
                   : "bg-gray-50 border-gray-200"
-              }`}
+              )}
             >
               <View className="flex-row justify-between items-start">
                 <View className="flex-1">
@@ -264,14 +266,18 @@ export default function AwayRangesSection() {
           <View>
             <Text className="text-sm font-medium mb-1">Reason</Text>
             <TouchableOpacity
-              className={`${inputClasses} flex-row items-center justify-between`}
+              className={cn(
+                inputClasses,
+                "flex-row items-center justify-between"
+              )}
               onPress={() => setReasonModalOpen(true)}
               activeOpacity={0.8}
             >
               <Text
-                className={`text-base ${
+                className={cn(
+                  "text-base",
                   selectedReason ? "text-zinc-900" : "text-zinc-400"
-                }`}
+                )}
               >
                 {selectedReason
                   ? reasonDisplayName(selectedReason)
@@ -347,11 +353,12 @@ export default function AwayRangesSection() {
                   }}
                 >
                   <View
-                    className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${
+                    className={cn(
+                      "w-5 h-5 rounded-full border mr-3 items-center justify-center",
                       selectedReason === option.value
                         ? "border-green-600"
                         : "border-zinc-300"
-                    }`}
+                    )}
                   >
                     {selectedReason === option.value && (
                       <View className="w-2.5 h-2.5 rounded-full bg-green-600" />

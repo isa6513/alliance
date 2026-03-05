@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 
@@ -29,7 +30,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const [viewMode, setViewMode] = useState<MarkdownEditorMode>(initialMode);
 
   return (
-    <div className={`flex flex-col gap-1 w-full ${className}`}>
+    <div className={cn("flex flex-col gap-1 w-full", className)}>
       <div className="flex justify-between items-center">
         <label
           htmlFor="markdown-editor"
@@ -42,33 +43,36 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             <button
               type="button"
               onClick={() => setViewMode("edit")}
-              className={`px-3 py-1 text-xs font-medium ${
+              className={cn(
+                "px-3 py-1 text-xs font-medium",
                 viewMode === "edit"
                   ? "bg-cyan-600 text-white"
                   : "bg-white text-gray-600 hover:bg-gray-50"
-              }`}
+              )}
             >
               Edit
             </button>
             <button
               type="button"
               onClick={() => setViewMode("split")}
-              className={`px-3 py-1 text-xs font-medium ${
+              className={cn(
+                "px-3 py-1 text-xs font-medium",
                 viewMode === "split"
                   ? "bg-cyan-600 text-white"
                   : "bg-white text-gray-600 hover:bg-gray-50"
-              }`}
+              )}
             >
               Split
             </button>
             <button
               type="button"
               onClick={() => setViewMode("preview")}
-              className={`px-3 py-1 text-xs font-medium ${
+              className={cn(
+                "px-3 py-1 text-xs font-medium",
                 viewMode === "preview"
                   ? "bg-cyan-600 text-white"
                   : "bg-white text-gray-600 hover:bg-gray-50"
-              }`}
+              )}
             >
               Preview
             </button>
@@ -76,7 +80,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         </div>
       </div>
 
-      <div className={`${viewMode === "split" ? "flex gap-4" : "block"}`}>
+      <div className={viewMode === "split" ? "flex gap-4" : "block"}>
         {(viewMode === "edit" || viewMode === "split") && (
           <div className={viewMode === "split" ? "flex-1" : "w-full"}>
             {viewMode === "split" && (

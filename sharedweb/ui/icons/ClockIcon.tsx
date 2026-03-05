@@ -1,3 +1,5 @@
+import { cn } from "@alliance/shared/styles/util";
+
 const CheckIcon = ({
   size = "small",
   fill = "var(--color-green)",
@@ -14,7 +16,7 @@ const CheckIcon = ({
   return (
     <svg
       viewBox="0 0 95 95"
-      className={`${sizeClass[size]}`}
+      className={cn(sizeClass[size])}
       fill={fill}
       aria-label="Clock"
       xmlns="http://www.w3.org/2000/svg"

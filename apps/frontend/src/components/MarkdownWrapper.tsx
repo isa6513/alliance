@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 
@@ -16,7 +17,7 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
 }) => {
   return (
     <div
-      className={`markdown-wrapper w-full mx-auto ${maxWidth} ${className}`}
+      className={cn("markdown-wrapper w-full mx-auto", maxWidth, className)}
       id={id}
     >
       <ReactMarkdown

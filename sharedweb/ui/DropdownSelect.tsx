@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useOutsideClick } from "../../sharedweb/lib/useOutsideClick";
 import { ChevronDown } from "lucide-react";
+import { cn } from "@alliance/shared/styles/util";
 
 type EnumType = Record<string, string | number>;
 
@@ -48,7 +49,10 @@ function DropdownSelect<T extends EnumType>({
   return (
     <div className="relative">
       <button
-        className={`border border-gray-2 text-black bg-white hover:bg-zinc-50 px-3 rounded-sm py-2 flex flex-row gap-x-2 items-center ${sizeClass}`}
+        className={cn(
+          "border border-gray-2 text-black bg-white hover:bg-zinc-50 px-3 rounded-sm py-2 flex flex-row gap-x-2 items-center",
+          sizeClass
+        )}
         style={{
           fontWeight: 450,
         }}
@@ -57,11 +61,12 @@ function DropdownSelect<T extends EnumType>({
         <span>{titleOverride ?? value}</span> <ChevronDown size="15" />
       </button>
       <div
-        className={`absolute z-10 top-[calc(100% - 30px)] mt-0.5 ${
-          dropdownAlignment === "left" ? "left-0" : "right-0"
-        } w-[220px] bg-white border border-gray-2 overflow-hidden rounded ${
+        className={cn(
+          "absolute z-10 top-[calc(100% - 30px)] mt-0.5",
+          dropdownAlignment === "left" ? "left-0" : "right-0",
+          "w-[220px] bg-white border border-gray-2 overflow-hidden rounded",
           isOpen ? "flex flex-col" : "hidden"
-        }`}
+        )}
         ref={ref}
       >
         {(Object.entries(options) as KVPair<T>[]).map(([key, value]) => {
@@ -73,11 +78,13 @@ function DropdownSelect<T extends EnumType>({
                 onChange([key, value]);
                 setIsOpen(false);
               }}
-              className={`px-3 pr-3 py-2 text-left ${
+              className={cn(
+                "px-3 pr-3 py-2 text-left",
                 asButton
                   ? "text-green bg-zinc-50 hover:bg-zinc-100 font-medium"
-                  : "hover:bg-zinc-50"
-              } ${sizeClass}`}
+                  : "hover:bg-zinc-50",
+                sizeClass
+              )}
               style={{
                 fontWeight: asButton ? 500 : 450,
               }}

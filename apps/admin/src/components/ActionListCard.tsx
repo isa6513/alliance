@@ -3,6 +3,7 @@ import ActionProgressBar from "./ActionProgressBar";
 import { getLastPastEventDate } from "../pages/Actions";
 import { useCallback } from "react";
 import { useNavigate } from "react-router";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface ActionListCardProps {
   action: Pick<
@@ -54,13 +55,10 @@ const ActionListCard = ({ action }: ActionListCardProps) => {
           </div>
           <div className="flex flex-row items-center gap-x-2 -my-2">
             <span
-              className={`p-2 right-0 top-0 text-zinc-800 
-                            font-medium text-xs rounded-sm text-nowrap border-zinc-200 border
-                            ${
-                              action.status === "member_action"
-                                ? "bg-green/20"
-                                : "bg-zinc-50"
-                            }`}
+              className={cn(
+                "p-2 right-0 top-0 text-zinc-800 font-medium text-xs rounded-sm text-nowrap border-zinc-200 border",
+                action.status === "member_action" ? "bg-green/20" : "bg-zinc-50"
+              )}
             >
               {action.status}
             </span>

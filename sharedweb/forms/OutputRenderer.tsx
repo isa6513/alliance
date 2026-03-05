@@ -6,6 +6,7 @@ import type {
 import { getApiUrl } from "../lib/config";
 import Card from "../ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { cn } from "@alliance/shared/styles/util";
 import ImageLightbox from "../ui/ImageLightbox";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
@@ -431,7 +432,7 @@ export function OutputRenderer({
 
   return (
     <Card style={CardStyle.Grey}>
-      <div className={`space-y-2 ${className}`}>
+      <div className={cn("space-y-2", className)}>
         {visibleBlocks.map((block, index) => {
           const key =
             "kind" in block ? block.id ?? `${block.kind}-${index}` : block.id;

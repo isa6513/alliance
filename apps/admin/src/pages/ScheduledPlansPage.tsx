@@ -7,6 +7,7 @@ import Card from "@alliance/sharedweb/ui/Card";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import { ChevronDown, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { Link } from "react-router";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 
@@ -188,8 +189,10 @@ const ScheduledPlansPage = () => {
                         </div>
                         <ChevronDown
                           size={18}
-                          className={`text-gray-500 transition-transform duration-150 ${isExpanded ? "-rotate-180" : ""
-                            }`}
+                          className={cn(
+                            "text-gray-500 transition-transform duration-150",
+                            isExpanded && "-rotate-180"
+                          )}
                         />
                       </button>
 

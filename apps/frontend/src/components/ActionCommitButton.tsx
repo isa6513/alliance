@@ -3,6 +3,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import { useCallback, useEffect, useRef, useState } from "react";
 import SignupForm from "./SignupForm";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface ActionCommitButtonProps {
   committed: boolean;
@@ -72,14 +73,12 @@ const ActionCommitButton = ({
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={cn("relative", className)}>
       <Button
         onClick={handleClick}
         disabled={committed}
         color={ButtonColor.Black}
-        className={`${
-          committed ? "!bg-[#008000]" : ""
-        } w-full !py-3 !text-base`}
+        className={cn(committed && "!bg-[#008000]", "w-full !py-3 !text-base")}
       >
         {committed
           ? "Participation confirmed"

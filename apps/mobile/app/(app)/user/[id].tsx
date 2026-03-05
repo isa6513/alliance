@@ -42,6 +42,7 @@ import Button, {
 import Text from "../../../components/system/Text";
 import { useAuth } from "../../../lib/AuthContext";
 import { colors } from "../../../lib/style/colors";
+import { cn } from "@alliance/shared/styles/util";
 
 type ProfileTab = "actions" | "forum" | "friends";
 type FriendsTab = "friends" | "received" | "sent";
@@ -578,17 +579,17 @@ export default function UserProfileScreen() {
                 {profile.displayName}
               </Text>
               {profile.staff && (
-                <View className={`bg-amber-600 ${badgeStyles}`}>
+                <View className={cn("bg-amber-600", badgeStyles)}>
                   <Text className="text-white text-xs">Staff</Text>
                 </View>
               )}
               {!profile.staff && profile.isCommunityLeader && (
-                <View className={`bg-green-600 ${badgeStyles}`}>
+                <View className={cn("bg-green-600", badgeStyles)}>
                   <Text className="text-white text-xs">Lead</Text>
                 </View>
               )}
               {!profile.hasActiveContract && (
-                <View className={`bg-zinc-200 ${badgeStyles}`}>
+                <View className={cn("bg-zinc-200", badgeStyles)}>
                   <Text className="text-zinc-700 text-xs">Observer</Text>
                 </View>
               )}
@@ -659,14 +660,16 @@ export default function UserProfileScreen() {
                 key={tab.id}
                 onPress={() => setSelectedTab(tab.id)}
                 activeOpacity={0.7}
-                className={`flex-1 px-3 py-2 rounded-md items-center ${
-                  isSelected ? "bg-white" : ""
-                }`}
+                className={cn(
+                  "flex-1 px-3 py-2 rounded-md items-center",
+                  isSelected && "bg-white"
+                )}
               >
                 <Text
-                  className={`text-sm font-medium ${
+                  className={cn(
+                    "text-sm font-medium",
                     isSelected ? "text-zinc-900" : "text-zinc-500"
-                  }`}
+                  )}
                 >
                   {tab.label}
                 </Text>
@@ -690,14 +693,16 @@ export default function UserProfileScreen() {
                 key={tab.id}
                 onPress={() => setFriendsTab(tab.id)}
                 activeOpacity={0.7}
-                className={`flex-1 px-3 py-2 rounded-md items-center ${
-                  friendsTab === tab.id ? "bg-white" : ""
-                }`}
+                className={cn(
+                  "flex-1 px-3 py-2 rounded-md items-center",
+                  friendsTab === tab.id && "bg-white"
+                )}
               >
                 <Text
-                  className={`text-sm font-medium ${
+                  className={cn(
+                    "text-sm font-medium",
                     friendsTab === tab.id ? "text-zinc-900" : "text-zinc-500"
-                  }`}
+                  )}
                 >
                   {tab.label}
                 </Text>

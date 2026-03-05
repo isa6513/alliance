@@ -1,3 +1,5 @@
+import { cn } from "@alliance/shared/styles/util";
+
 const DatabaseIcon = ({
   size = "small",
   fill = "black",
@@ -13,7 +15,7 @@ const DatabaseIcon = ({
 
   return (
     <svg
-      className={`${sizeClass[size]}`}
+      className={cn(sizeClass[size])}
       fill="none"
       stroke={fill}
       viewBox="0 0 24 24"

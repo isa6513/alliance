@@ -17,6 +17,7 @@ import Text from "./system/Text";
 import ProfileImage from "./ProfileImage";
 import { NotificationDto } from "@alliance/shared/client";
 import { View } from "react-native";
+import { cn } from "@alliance/shared/styles/util";
 
 const SWIPE_THRESHOLD = -80;
 
@@ -100,9 +101,10 @@ function SwipeableNotification({
           <TouchableOpacity
             activeOpacity={0.75}
             onPress={onPress}
-            className={`px-6 py-4 ${
+            className={cn(
+              "px-6 py-4",
               notification.readAt ? "bg-white" : "bg-red-50"
-            }`}
+            )}
           >
             <View className="flex-1">
               <View className="flex-row items-center flex-wrap gap-x-1">

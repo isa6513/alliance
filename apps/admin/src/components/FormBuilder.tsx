@@ -66,6 +66,7 @@ import {
   CustomValidatorDraftsContext,
   isDraftValidatorId,
 } from "./form-fields/customValidatorDrafts";
+import { cn } from "@alliance/shared/styles/util";
 
 const FIELD_NAMES = {
   textarea: "Text Area Field",
@@ -1335,11 +1336,12 @@ export function FormBuilder({
                         {element.name}
                       </span>
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${
+                        className={cn(
+                          "text-xs px-2 py-1 rounded-full",
                           element.type === "field"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-green-100 text-green-800"
-                        }`}
+                        )}
                       >
                         {element.type === "field" ? "Field" : "Block"}
                       </span>
@@ -1744,22 +1746,24 @@ export function FormBuilder({
                 <div className="inline-flex rounded-md bg-gray-200 p-0.5 text-sm font-medium text-gray-600">
                   <button
                     type="button"
-                    className={`px-3 py-2 rounded-md text-nowrap ${
+                    className={cn(
+                      "px-3 py-2 rounded-md text-nowrap",
                       activeEditor === "form"
                         ? "bg-white shadow text-gray-900"
                         : "text-gray-600"
-                    }`}
+                    )}
                     onClick={() => setActiveEditor("form")}
                   >
                     Form builder
                   </button>
                   <button
                     type="button"
-                    className={`px-3 py-1 rounded-md text-nowrap ${
+                    className={cn(
+                      "px-3 py-1 rounded-md text-nowrap",
                       activeEditor === "outputs"
                         ? "bg-white shadow text-gray-900"
                         : "text-gray-600"
-                    }`}
+                    )}
                     onClick={() => setActiveEditor("outputs")}
                   >
                     Output views
@@ -1854,11 +1858,13 @@ export function FormBuilder({
                         onDragEnd={handlePageDragEnd}
                         onDragOver={handlePageDragOver(index)}
                         onDrop={handlePageDrop(index)}
-                        className={`flex items-center rounded-md text-sm font-medium cursor-move pr-2 transition-all border ${
+                        className={cn(
+                          "flex items-center rounded-md text-sm font-medium cursor-move pr-2 transition-all border",
                           selectedPageIndex === index
                             ? "bg-blue-100 text-blue-700 border-blue-200"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent"
-                        } ${isDragging ? "opacity-50 scale-95" : ""}`}
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent",
+                          isDragging && "opacity-50 scale-95"
+                        )}
                       >
                         {/* Drag handle */}
                         <div

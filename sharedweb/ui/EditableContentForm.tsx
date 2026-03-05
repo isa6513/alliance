@@ -1,6 +1,7 @@
 import { CreateEditableContentDto } from "@alliance/shared/client";
 import React, { useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
+import { cn } from "@alliance/shared/styles/util";
 import { htmlToMarkdownFromDocs } from "../lib/htmlToMarkdown";
 
 interface EditableContentFormProps {
@@ -229,7 +230,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
 
   return (
     <div
-      className={`relative ${className ?? ""}`}
+      className={cn("relative", className)}
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
@@ -237,9 +238,10 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
     >
       <TextareaAutosize
         ref={textareaRef}
-        className={`w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-transparent border-none ${
-          expanded ? "" : "resize-none"
-        }`}
+        className={cn(
+          "w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-transparent border-none",
+          !expanded && "resize-none"
+        )}
         minRows={expanded ? 2 : 1}
         value={value.body}
         onChange={(e) => onChange({ ...value, body: e.target.value })}

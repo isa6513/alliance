@@ -33,6 +33,7 @@ import { RenderField } from "./RenderField";
 import FormModal from "./FormModal";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
 import { CircleCheck } from "lucide-react-native";
+import { cn } from "@alliance/shared/styles/util";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -63,18 +64,18 @@ const DEVICE_TYPE: DeviceVisibilityTarget = "mobile";
 export function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
   switch (block.kind) {
     case "header":
+      const headerClass = {
+        1: "text-3xl",
+        2: "text-2xl",
+        3: "text-xl",
+        4: "text-lg",
+        5: "text-base",
+        6: "text-base",
+        none: "text-base",
+      }[block.level ?? "none"];
       return (
         <Text
-          className={`font-semibold text-zinc-900 my-2 ${block.level === 1
-              ? "text-3xl"
-              : block.level === 2
-                ? "text-2xl"
-                : block.level === 3
-                  ? "text-xl"
-                  : block.level === 4
-                    ? "text-lg"
-                    : "text-base"
-            }`}
+          className={cn("font-semibold text-zinc-900 my-2", headerClass)}
           selectable
         >
           {block.text}
@@ -325,8 +326,8 @@ const FormRenderer = ({
         const conditions = Array.isArray(element.visibleIf)
           ? element.visibleIf
           : element.visibleIf
-            ? [element.visibleIf]
-            : [];
+          ? [element.visibleIf]
+          : [];
         for (const condition of conditions) {
           if ("validatorId" in condition) {
             ids.add(condition.validatorId);
@@ -774,10 +775,12 @@ const FormRenderer = ({
           <View className="gap-2 mb-3">
             <TouchableOpacity
               activeOpacity={0.8}
-              className={`border rounded-lg px-3 py-3 ${outOfTimeSelected
+              className={cn(
+                "border rounded-lg px-3 py-3",
+                outOfTimeSelected
                   ? "border-green-600 bg-green/20"
                   : "border-zinc-200"
-                }`}
+              )}
               onPress={() => {
                 setOutOfTimeSelected((prev) => !prev);
                 if (!outOfTimeSelected) {
@@ -791,10 +794,12 @@ const FormRenderer = ({
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}
-              className={`border rounded-lg px-3 py-3 ${otherReasonSelected
+              className={cn(
+                "border rounded-lg px-3 py-3",
+                otherReasonSelected
                   ? "border-green-600 bg-green/20"
                   : "border-zinc-200"
-                }`}
+              )}
               onPress={() => {
                 setOtherReasonSelected((prev) => !prev);
                 if (!otherReasonSelected) {

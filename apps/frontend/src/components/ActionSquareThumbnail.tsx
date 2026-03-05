@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import { MousePointerClick } from "lucide-react";
 
 interface ActionSquareThumbnailProps {
@@ -26,11 +27,14 @@ const ActionSquareThumbnail: React.FC<ActionSquareThumbnailProps> = ({
       src={imgSrc}
       alt={imgAlt || "image"}
       title={imgAlt || "action thumbnail"}
-      className={`${sizeClass[size]} shrink-0 object-cover`}
+      className={cn("shrink-0 object-cover", sizeClass[size])}
     />
   ) : (
     <div
-      className={`${sizeClass[size]} flex items-center justify-center rounded-md bg-zinc-100 text-zinc-300 shrink-0`}
+      className={cn(
+        "flex items-center justify-center rounded-md bg-zinc-100 text-zinc-300 shrink-0",
+        sizeClass[size]
+      )}
     >
       <MousePointerClick className={iconSizeClass[size]} />
     </div>

@@ -3,6 +3,7 @@ import Badge from "@alliance/sharedweb/ui/Badge";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import React from "react";
+import { cn } from "@alliance/shared/styles/util";
 
 function statusClasses(status?: string) {
   const s = (status || "").toString().toLowerCase();
@@ -43,16 +44,18 @@ const EmailNotif: React.FC<EmailNotifProps> = ({ notif }) => {
           </div>
           <div className="flex items-center gap-2">
             <Badge
-              className={`${statusClasses(
-                mail.status
-              )} !bg-zinc-100 !py-2 !px-3`}
+              className={cn(
+                statusClasses(mail.status),
+                "!bg-zinc-100 !py-2 !px-3"
+              )}
             >
               {mail.status}
             </Badge>
             <Badge
-              className={`${linkClickClasses(
-                mail.clickedLink
-              )}  !bg-zinc-100 !py-2 !px-3`}
+              className={cn(
+                linkClickClasses(mail.clickedLink),
+                "!bg-zinc-100 !py-2 !px-3"
+              )}
             >
               {mail.clickedLink ? "Link clicked" : "No link clicked"}
             </Badge>

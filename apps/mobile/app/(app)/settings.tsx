@@ -32,6 +32,7 @@ import TimeZoneSelect from "../../components/forms/TimeZoneSelect";
 import AwayRangesSection from "../../components/AwayRangesSection";
 import { useMutation } from "@tanstack/react-query";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import { cn } from "@alliance/shared/styles/util";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -178,8 +179,8 @@ export default function SettingsPage() {
             {saving
               ? "Saving..."
               : hasChanges
-                ? "Unsaved changes"
-                : "All saved"}
+              ? "Unsaved changes"
+              : "All saved"}
           </Text>
         </View>
         {/* Profile Section */}
@@ -204,7 +205,7 @@ export default function SettingsPage() {
             <View>
               <Text className="mb-1">Email</Text>
               <TextInput
-                className={`${inputClasses} opacity-60`}
+                className={cn(inputClasses, "opacity-60")}
                 value={user.email ?? ""}
                 editable={false}
               />
@@ -273,7 +274,10 @@ export default function SettingsPage() {
           <View className="mb-4">
             <Text className="font-medium mb-2">Send action reminders via:</Text>
             <TouchableOpacity
-              className={`${inputClasses} flex-row items-center justify-between`}
+              className={cn(
+                inputClasses,
+                "flex-row items-center justify-between"
+              )}
               onPress={() => setReminderChannelModalOpen(true)}
               activeOpacity={0.8}
             >
@@ -293,11 +297,11 @@ export default function SettingsPage() {
           {!(
             editableUser.emailNotifsEnabled || editableUser.textNotifsEnabled
           ) && (
-              <Text className="text-sm text-zinc-500 mb-2">
-                You will not receive any notifications. Please keep a notification
-                channel enabled if you need reminders.
-              </Text>
-            )}
+            <Text className="text-sm text-zinc-500 mb-2">
+              You will not receive any notifications. Please keep a notification
+              channel enabled if you need reminders.
+            </Text>
+          )}
 
           <View className="gap-3 mb-4">
             <TouchableOpacity
@@ -456,7 +460,10 @@ export default function SettingsPage() {
               members. Would you like for these to be visible by default?
             </Text>
             <TouchableOpacity
-              className={`${inputClasses} flex-row items-center justify-between`}
+              className={cn(
+                inputClasses,
+                "flex-row items-center justify-between"
+              )}
               onPress={() => setFormDataModalOpen(true)}
               activeOpacity={0.8}
             >
@@ -548,16 +555,18 @@ export default function SettingsPage() {
                     }}
                   >
                     <View
-                      className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${editableUser.preferredActionReminderChannel ===
-                        option.value
-                        ? "border-green-600"
-                        : "border-zinc-300"
-                        }`}
+                      className={cn(
+                        "w-5 h-5 rounded-full border mr-3 items-center justify-center",
+                        editableUser.preferredActionReminderChannel ===
+                          option.value
+                          ? "border-green-600"
+                          : "border-zinc-300"
+                      )}
                     >
                       {editableUser.preferredActionReminderChannel ===
                         option.value && (
-                          <View className="w-2.5 h-2.5 rounded-full bg-green-600" />
-                        )}
+                        <View className="w-2.5 h-2.5 rounded-full bg-green-600" />
+                      )}
                     </View>
                     <Text className="text-base text-zinc-800">
                       {option.label}
@@ -600,10 +609,12 @@ export default function SettingsPage() {
                     }}
                   >
                     <View
-                      className={`w-5 h-5 rounded-full border mr-3 items-center justify-center ${editableUser.formDataPreference === option.value
-                        ? "border-green-600"
-                        : "border-zinc-300"
-                        }`}
+                      className={cn(
+                        "w-5 h-5 rounded-full border mr-3 items-center justify-center",
+                        editableUser.formDataPreference === option.value
+                          ? "border-green-600"
+                          : "border-zinc-300"
+                      )}
                     >
                       {editableUser.formDataPreference === option.value && (
                         <View className="w-2.5 h-2.5 rounded-full bg-green-600" />

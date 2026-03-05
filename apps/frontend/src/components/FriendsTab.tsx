@@ -16,6 +16,7 @@ import React, { useState } from "react";
 import { Link, href } from "react-router";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@alliance/shared/styles/util";
 
 interface FriendsTabProps {
   userId: number;
@@ -207,20 +208,22 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
 
   return (
     <>
-      <div className={`flex mb-3 ${className}`}>
+      <div className={cn("flex mb-3", className)}>
         <span
-          className={`${baseClasses} ${
+          className={cn(
+            baseClasses,
             activeTab === "friends" ? activeClasses : inactiveClasses
-          }`}
+          )}
           onClick={() => setActiveTab("friends")}
         >
           Friends ({friends.length})
         </span>
         {isMe && (
           <span
-            className={`${baseClasses} ${
+            className={cn(
+              baseClasses,
               activeTab === "received" ? activeClasses : inactiveClasses
-            }`}
+            )}
             onClick={() => setActiveTab("received")}
           >
             Received Requests ({receivedRequests.length})
@@ -228,9 +231,10 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
         )}
         {isMe && (
           <span
-            className={`${baseClasses} ${
+            className={cn(
+              baseClasses,
               activeTab === "sent" ? activeClasses : inactiveClasses
-            }`}
+            )}
             onClick={() => setActiveTab("sent")}
           >
             Sent Requests ({sentRequests.length})

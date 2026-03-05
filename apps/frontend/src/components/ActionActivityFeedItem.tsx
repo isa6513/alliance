@@ -3,6 +3,7 @@ import { Link, href, useNavigate } from "react-router";
 import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { cn } from "@alliance/shared/styles/util";
 
 export interface ActionActivityFeedItemProps {
   activity: ActionActivityDto;
@@ -52,9 +53,10 @@ const ActionActivityFeedItem = ({
     return (
       <div
         key={activity.id}
-        className={`rounded-md border-zinc-200 ${
+        className={cn(
+          "rounded-md border-zinc-200",
           activity.type === "user_joined" ? "cursor-default" : "cursor-pointer"
-        }`}
+        )}
         onClick={() => {
           // no detail pages for commitments right now
           if (activity.type === "user_joined") {

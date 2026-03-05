@@ -1,4 +1,5 @@
 import { PropsWithChildren } from "react";
+import { cn } from "@alliance/shared/styles/util";
 
 interface BadgeProps extends PropsWithChildren {
   className?: string;
@@ -12,13 +13,13 @@ const Badge: React.FC<BadgeProps> = ({
 }: BadgeProps) => {
   return (
     <div
-      className={`${
-        className ?? ""
-      } self-start font-medium whitespace-nowrap flex items-center justify-center bg-zinc-200 text-gray-800 ${
+      className={cn(
+        className,
+        "self-start font-medium whitespace-nowrap flex items-center justify-center bg-zinc-200 text-gray-800",
         size === "sm"
           ? "text-xs py-1 px-3 rounded-sm"
           : "py-2 px-3 text-sm rounded-md"
-      }`}
+      )}
     >
       {children}
     </div>

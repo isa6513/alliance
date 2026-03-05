@@ -8,6 +8,7 @@ import type {
   TableDataQueryState,
   ColumnFilterState,
 } from "./DatabaseViewer.hooks";
+import { cn } from "@alliance/shared/styles/util";
 
 interface DatabaseTableProps {
   tableData: TableDataDto;
@@ -212,15 +213,14 @@ const DatabaseTable: React.FC<DatabaseTableProps> = ({
                 return (
                   <th
                     key={`${column.name}-${columnIndex}`}
-                    className={`px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer ${
+                    className={cn(
+                      "px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer",
                       isMenuOpen ? "bg-gray-100" : "hover:bg-gray-100"
-                    }`}
+                    )}
                     onClick={() => handleColumnMenuToggle(columnIndex)}
                   >
                     <div className="relative">
-                      <div
-                        className={`flex w-full items-center py-1 justify-between rounded text-left text-xs font-medium uppercase tracking-wider text-gray-600`}
-                      >
+                      <div className="flex w-full items-center py-1 justify-between rounded text-left text-xs font-medium uppercase tracking-wider text-gray-600">
                         <span className="flex items-center space-x-1">
                           <span>{column.name}</span>
                           {column.isPrimary && (
@@ -324,11 +324,12 @@ const DatabaseTable: React.FC<DatabaseTableProps> = ({
                                   )
                                 }
                                 disabled={!canApplyFilter}
-                                className={`px-3 py-1 text-sm font-medium text-white rounded ${
+                                className={cn(
+                                  "px-3 py-1 text-sm font-medium text-white rounded",
                                   canApplyFilter
                                     ? "bg-blue-600 hover:bg-blue-700"
                                     : "bg-blue-200 cursor-not-allowed"
-                                }`}
+                                )}
                               >
                                 Apply
                               </button>
@@ -398,9 +399,10 @@ const DatabaseTable: React.FC<DatabaseTableProps> = ({
                     return (
                       <td
                         key={cellIndex}
-                        className={`whitespace-nowrap text-sm text-gray-900 max-w-[300px] overflow-x-clip border border-gray-200 ${
-                          isEditable ? "hover:bg-gray-50" : ""
-                        } px-5 py-3`}
+                        className={cn(
+                          "whitespace-nowrap text-sm text-gray-900 max-w-[300px] overflow-x-clip border border-gray-200 px-5 py-3",
+                          isEditable && "hover:bg-gray-50"
+                        )}
                         onClick={() =>
                           isEditable
                             ? handleCellClick(rowIndex, cellIndex, cell, column)
@@ -443,11 +445,12 @@ const DatabaseTable: React.FC<DatabaseTableProps> = ({
                       <button
                         key={page}
                         onClick={() => onPageChange(page)}
-                        className={`px-3 py-1 text-sm border rounded-md ${
+                        className={cn(
+                          "px-3 py-1 text-sm border rounded-md",
                           page === tableData.page
                             ? "bg-blue-600 text-white border-blue-600"
                             : "bg-white border-gray-300 hover:bg-gray-50"
-                        }`}
+                        )}
                       >
                         {page}
                       </button>

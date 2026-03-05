@@ -18,6 +18,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@alliance/shared/styles/util";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
@@ -321,11 +322,12 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
               <Button
                 onClick={() => setShowCreateForm(!showCreateForm)}
                 color={showCreateForm ? ButtonColor.Light : ButtonColor.White}
-                className={`w-full !rounded-none ${
+                className={cn(
+                  "w-full !rounded-none",
                   leaderCommunities.length
                     ? "border-t border-t-zinc-200 border-x-0 border-b-0"
                     : "border-0"
-                }`}
+                )}
               >
                 <div className="w-full flex flex-row gap-x-2 items-center justify-center p-2 text-zinc-500">
                   {showCreateForm ? <Minus size="14" /> : <Plus size="14" />}{" "}

@@ -4,6 +4,7 @@ import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import { getApiUrl } from "../lib/config";
 import { Link } from "react-router";
 import Card from "../ui/Card";
+import { cn } from "@alliance/shared/styles/util";
 import {
   MessagesSquare,
   File,
@@ -30,22 +31,19 @@ type Props = {
 export default function RenderDisplayBlock({ block }: Props) {
   switch (block.kind) {
     case "header":
+      const headerLevel = block.level || 2;
+      const headerClass = {
+        1: "text-3xl",
+        2: "text-2xl",
+        3: "text-xl",
+        4: "text-lg",
+        5: "text-base",
+        6: "",
+      }[headerLevel];
       return React.createElement(
-        `h${block.level || 2}`,
+        `h${headerLevel}`,
         {
-          className: `!font-semibold text-zinc-900 ${
-            (block.level || 2) === 1
-              ? "text-3xl"
-              : (block.level || 2) === 2
-              ? "text-2xl"
-              : (block.level || 2) === 3
-              ? "text-xl"
-              : (block.level || 2) === 4
-              ? "text-lg"
-              : (block.level || 2) === 5
-              ? "text-base"
-              : ""
-          }`,
+          className: cn("!font-semibold text-zinc-900", headerClass),
         },
         block.text
       );
@@ -65,36 +63,28 @@ export default function RenderDisplayBlock({ block }: Props) {
     case "divider":
       return (
         <hr
-          className={`border-gray-300 ${
-            block.thickness === "hairline"
-              ? "border-t"
-              : block.thickness === "thin"
-              ? "border-t"
-              : block.thickness === "medium"
-              ? "border-t-2"
-              : block.thickness === "thick"
-              ? "border-t-4"
-              : "border-t"
-          }`}
+          className={cn(
+            "border-gray-300",
+            block.thickness === "hairline" && "border-t",
+            block.thickness === "thin" && "border-t",
+            block.thickness === "medium" && "border-t-2",
+            block.thickness === "thick" && "border-t-4",
+            !block.thickness && "border-t"
+          )}
         />
       );
 
     case "spacer":
       return (
         <div
-          className={`${
-            block.size === "xs"
-              ? "h-2"
-              : block.size === "sm"
-              ? "h-4"
-              : block.size === "md"
-              ? "h-8"
-              : block.size === "lg"
-              ? "h-16"
-              : block.size === "xl"
-              ? "h-24"
-              : "h-8"
-          }`}
+          className={cn(
+            "h-8",
+            block.size === "xs" && "h-2",
+            block.size === "sm" && "h-4",
+            block.size === "md" && "h-8",
+            block.size === "lg" && "h-16",
+            block.size === "xl" && "h-24"
+          )}
         />
       );
 

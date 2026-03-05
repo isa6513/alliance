@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@alliance/shared/styles/util";
 
 type ButtonProps = React.PropsWithChildren & {
   className?: string;
@@ -95,7 +96,7 @@ const Button: React.FC<ButtonProps> = ({
       <div
         ref={ref}
         title={title}
-        className={`${baseClassName} ${disabled ? "" : "cursor-pointer"}`}
+        className={cn(baseClassName, !disabled && "cursor-pointer")}
         style={baseStyle}
         onClick={onClick}
         onMouseEnter={onMouseEnter}

@@ -1,3 +1,5 @@
+import { cn } from "@alliance/shared/styles/util";
+
 interface ExampleActionCategoryListProps {
   textSize?: "base" | "lg";
 }
@@ -11,7 +13,7 @@ const ExampleActionCategoryList: React.FC<ExampleActionCategoryListProps> = ({
   };
 
   return (
-    <table className={`w-full ${textSizeClasses[textSize]} border-collapse`}>
+    <table className={cn("w-full border-collapse", textSizeClasses[textSize])}>
       <thead>
         <tr className="text-left text-zinc-900 border border-zinc-200">
           <th className="font-semibold p-4 border border-zinc-200 text-green">

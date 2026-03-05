@@ -1,4 +1,5 @@
 import { Earth, UserCircle } from "lucide-react";
+import { cn } from "@alliance/shared/styles/util";
 import { HoverBadge } from "./HoverBadge";
 
 interface UserDisplayNameProps extends React.PropsWithChildren {
@@ -21,7 +22,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
 }: React.PropsWithChildren<UserDisplayNameProps>) => {
   return (
     <span>
-      <span className={`${underline ? "hover:underline" : ""} ${className}`}>
+      <span className={cn(underline && "hover:underline", className)}>
         {children}
       </span>
       {staff && (
