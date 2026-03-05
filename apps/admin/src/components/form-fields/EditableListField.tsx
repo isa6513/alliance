@@ -7,7 +7,19 @@ import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
-import { X } from "lucide-react";
+import { EditableCheckboxField } from "./EditableCheckboxField";
+import { EditableChoiceField } from "./EditableChoiceField";
+import { EditableCityField } from "./EditableCityField";
+import { EditableDateField } from "./EditableDateField";
+import { EditableEmailField } from "./EditableEmailField";
+import { EditableFileField } from "./EditableFileField";
+import { EditableNumberField } from "./EditableNumberField";
+import { EditablePhoneField } from "./EditablePhoneField";
+import { EditableRangeField } from "./EditableRangeField";
+import { EditableTextField } from "./EditableTextField";
+import { EditableTextareaField } from "./EditableTextareaField";
+import { EditableTimeField } from "./EditableTimeField";
+import { EditableTimezoneField } from "./EditableTimezoneField";
 
 const SUB_FIELD_KINDS_OPTIONS = {
   text: true,
@@ -102,6 +114,56 @@ function createDefaultSubField(parentId: string, kind: SubFieldKind): AnyField {
   }
 }
 
+function renderEditableSubField(
+  sub: AnyField,
+  index: number,
+  updateSubField: (index: number, updates: Partial<AnyField>) => void,
+  removeSubField: (index: number) => void,
+  previousFields: AnyField[]
+) {
+  const commonProps = {
+    field: sub as never,
+    onUpdate: (updates: Partial<AnyField>) => updateSubField(index, updates),
+    onRemove: () => removeSubField(index),
+    previousFields,
+    onDragStart: undefined,
+    onDragEnd: undefined,
+    isDragging: false,
+  };
+  switch (sub.kind) {
+    case "text":
+      return <EditableTextField {...commonProps} />;
+    case "textarea":
+      return <EditableTextareaField {...commonProps} />;
+    case "email":
+      return <EditableEmailField {...commonProps} />;
+    case "phone":
+      return <EditablePhoneField {...commonProps} />;
+    case "number":
+      return <EditableNumberField {...commonProps} />;
+    case "range":
+      return <EditableRangeField {...commonProps} />;
+    case "checkbox":
+      return <EditableCheckboxField {...commonProps} />;
+    case "radio":
+    case "select":
+    case "multiselect":
+      return <EditableChoiceField {...commonProps} />;
+    case "date":
+      return <EditableDateField {...commonProps} />;
+    case "time":
+      return <EditableTimeField {...commonProps} />;
+    case "timezone":
+      return <EditableTimezoneField {...commonProps} />;
+    case "city":
+      return <EditableCityField {...commonProps} />;
+    case "file":
+      return <EditableFileField {...commonProps} />;
+    default:
+      return null;
+  }
+}
+
 export function EditableListField({
   field,
   onUpdate,
@@ -126,6 +188,9 @@ export function EditableListField({
     const next = (field.fields ?? []).filter((_, i) => i !== index);
     onUpdate({ fields: next });
   };
+
+  const subFields = field.fields ?? [];
+  const previousFieldsFor = (index: number) => subFields.slice(0, index);
 
   return (
     <FieldWrapper
@@ -216,32 +281,16 @@ export function EditableListField({
         <label className="block text-xs font-medium text-gray-700 mb-1">
           Fields in each card
         </label>
-        <div className="space-y-2">
-          {(field.fields ?? []).map((sub, index) => (
-            <div
-              key={sub.id}
-              className="flex items-center gap-2 rounded border border-gray-200 bg-white p-2"
-            >
-              <span className="text-xs font-medium text-gray-500 shrink-0 w-20 capitalize">
-                {sub.kind}
-              </span>
-              <input
-                type="text"
-                value={sub.label ?? ""}
-                onChange={(e) =>
-                  updateSubField(index, { label: e.target.value })
-                }
-                placeholder="Label"
-                className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <button
-                type="button"
-                onClick={() => removeSubField(index)}
-                className="shrink-0 w-7 h-7 flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-red-50 rounded"
-                title="Remove field"
-              >
-                <X size={16} />
-              </button>
+        <div className="space-y-3">
+          {subFields.map((sub, index) => (
+            <div key={sub.id}>
+              {renderEditableSubField(
+                sub,
+                index,
+                updateSubField,
+                removeSubField,
+                previousFieldsFor(index)
+              )}
             </div>
           ))}
           <div className="relative">

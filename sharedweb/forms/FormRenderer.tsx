@@ -196,6 +196,12 @@ const FormRenderer = ({
           if (defaultValue !== undefined) {
             defaults.set(field.id, defaultValue);
           }
+          // Include list sub-fields so conditional visibility can reference them
+          if (field.kind === "list" && Array.isArray(field.fields)) {
+            for (const sub of field.fields) {
+              lookup.set(sub.id, sub);
+            }
+          }
         }
       }
     }
@@ -1127,6 +1133,8 @@ const FormRenderer = ({
           disableOptionRandomization={disableOptionRandomization}
           user={user}
           labelRightAddon={fieldLabelRightContent?.[field.id]}
+          formData={formData}
+          isElementVisible={isElementCurrentlyVisible}
         />
         {isOutputField && (
           <label className="mt-2 flex items-center text-sm text-gray-500">

@@ -42,6 +42,11 @@ export type RenderFieldProps = {
   disableOptionRandomization?: boolean;
   user?: Omit<UserDto, "email">;
   labelRightAddon?: ReactNode;
+  formData?: Record<string, FormValue>;
+  isElementVisible?: (
+    element: AnyField,
+    data?: Record<string, FormValue>
+  ) => boolean;
 };
 
 const sharedInputClasses =
@@ -125,6 +130,8 @@ export function RenderField({
   disableOptionRandomization,
   user,
   labelRightAddon,
+  formData,
+  isElementVisible,
 }: RenderFieldProps) {
   const errorMessage =
     typeof error === "string" && error.trim().length > 0 ? error : null;
@@ -834,6 +841,11 @@ export function RenderField({
         next[index] = card;
         onChange?.(next);
       };
+      const visibleSubFieldsForCard = (card: Record<string, FormValue>) => {
+        if (!isElementVisible || !formData) return subFields;
+        const mergedData = { ...formData, ...card };
+        return subFields.filter((sub) => isElementVisible(sub, mergedData));
+      };
       return (
         <div className="space-y-3">
           <RenderLabel
@@ -844,9 +856,9 @@ export function RenderField({
           <div className="space-y-3">
             {cards.map((card, cardIndex) => (
               <Card key={cardIndex} style={CardStyle.White}>
-                <div className="flex flex-row gap-x-2 justify-between">
+                <div className="flex flex-row gap-x-4 justify-between">
                   <div className="w-full">
-                    {subFields.map((sub) => (
+                    {visibleSubFieldsForCard(card).map((sub) => (
                       <RenderField
                         key={sub.id}
                         field={sub}
