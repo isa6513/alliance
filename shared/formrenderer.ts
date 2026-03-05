@@ -492,14 +492,14 @@ export function validateFieldValue(
       const maxCards =
         typeof listField.max === "number" && listField.max >= 0
           ? Math.floor(listField.max)
-          : undefined;
+          : Infinity;
       if (required && listVal.length === 0) {
         return "Add at least one item.";
       }
       if (listVal.length < minCards) {
         return `Add at least ${minCards} item${minCards === 1 ? "" : "s"}.`;
       }
-      if (maxCards !== undefined && listVal.length > maxCards) {
+      if (listVal.length > maxCards) {
         return `Add no more than ${maxCards} item${maxCards === 1 ? "" : "s"}.`;
       }
       return null;

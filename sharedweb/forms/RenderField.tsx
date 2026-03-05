@@ -792,8 +792,11 @@ export function RenderField({
         0,
         Math.floor(listField.defaultNumber ?? 0)
       );
-      const minCards = Math.max(0, listField.min ?? 0);
-      const maxCards = Math.max(0, listField.max ?? Infinity);
+      const minCards = Math.max(0, Math.floor(Number(listField.min || 0)));
+      const maxCards =
+        typeof listField.max === "number" && listField.max >= 0
+          ? Math.floor(listField.max)
+          : Infinity;
 
       const cards: ListFieldValue =
         value === undefined
