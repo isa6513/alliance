@@ -1,7 +1,6 @@
 export enum Features {
   Forum = "forum",
   PublicSignup = "public_signup",
-  BugReporting = "bug_reporting",
   Messaging = "messaging",
   PushNotifications = "push_notifications",
   GeneralUpdatesLink = "general_updates_link",
@@ -10,7 +9,6 @@ export enum Features {
 export const PROD_FLAGS: Record<Features, boolean> = {
   [Features.Forum]: true,
   [Features.PublicSignup]: false,
-  [Features.BugReporting]: false,
   [Features.Messaging]: true,
   [Features.PushNotifications]: false,
   [Features.GeneralUpdatesLink]: false,
@@ -19,7 +17,6 @@ export const PROD_FLAGS: Record<Features, boolean> = {
 export const DEV_FLAGS: Record<Features, boolean> = {
   [Features.Forum]: true,
   [Features.PublicSignup]: false,
-  [Features.BugReporting]: false,
   [Features.Messaging]: true,
   [Features.PushNotifications]: true,
   [Features.GeneralUpdatesLink]: true,

@@ -1,11 +1,8 @@
 import { isStaging } from "@alliance/sharedweb/lib/config";
-import { Features } from "@alliance/shared/lib/features";
 import { useEffect } from "react";
 import { href, Outlet, useNavigate, useNavigation } from "react-router";
-import BugReportButton from "./components/BugReportButton";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useAuth } from "./lib/AuthContext";
-import { isFeatureEnabled } from "./lib/config";
 
 export function HydrateFallback() {
   return (
@@ -71,7 +68,6 @@ export default function AppLayout() {
   return (
     <>
       <Outlet />
-      {isFeatureEnabled(Features.BugReporting) && <BugReportButton />}
       {isStaging() && (
         <div className="fixed top-0 left-0 right-0 h-6 bg-green z-50 flex flex-row gap-1">
           {[...Array(100)].map((_, index) => (
