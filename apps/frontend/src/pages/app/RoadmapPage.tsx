@@ -86,11 +86,9 @@ const RoadmapPage: React.FC = () => {
           people around the world coordinate effectively and routinely.
         </p>
         <p>
-          A large, global member body will multiply our impact. We will also be
-          able to coordinate in more complex ways. For instance, different
-          cohorts of members – depending on skills, interests, and demographics
-          – could be asked to pressure their local governments in different
-          ways.
+          A large, global member body will multiply our impact and enable us to
+          coordinate in more complex ways. For instance, we will be able to
+          tailor our actions to different geographies.
         </p>
         <p>
           We cannot yet describe the precise actions that we will take at
