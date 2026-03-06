@@ -274,7 +274,10 @@ const mapConditionForOptionValue = (
     "includesOption" in condition &&
     condition.includesOption === previousValue
   ) {
-    return { condition: { ...condition, includesOption: nextValue }, updated: true };
+    return {
+      condition: { ...condition, includesOption: nextValue },
+      updated: true,
+    };
   }
   if ("equals" in condition && condition.equals === previousValue) {
     return { condition: { ...condition, equals: nextValue }, updated: true };
@@ -837,6 +840,7 @@ export function FormBuilder({
           fields: [],
           defaultNumber: 0,
           min: 0,
+          required: false,
         };
         break;
       case "custom": {
