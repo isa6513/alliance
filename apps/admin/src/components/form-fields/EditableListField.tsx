@@ -22,7 +22,6 @@ import { EditableTimeField } from "./EditableTimeField";
 import { EditableTimezoneField } from "./EditableTimezoneField";
 
 const SUB_FIELD_KINDS_OPTIONS = {
-  text: true,
   textarea: true,
   number: true,
   email: true,
@@ -38,7 +37,7 @@ const SUB_FIELD_KINDS_OPTIONS = {
   file: true,
   range: true,
 } as const satisfies Record<
-  Exclude<FieldKind, "list" | "contract" | "custom">,
+  Exclude<FieldKind, "list" | "contract" | "custom" | "text">,
   unknown
 >;
 type SubFieldKind = keyof typeof SUB_FIELD_KINDS_OPTIONS;
@@ -56,10 +55,8 @@ function createDefaultSubField(parentId: string, kind: SubFieldKind): AnyField {
     required: false,
   };
   switch (kind) {
-    case "text":
-      return { ...base, kind: "text" };
     case "textarea":
-      return { ...base, kind: "textarea", rows: 3 };
+      return { ...base, kind: "textarea", rows: 1 };
     case "number":
       return { ...base, kind: "number" };
     case "email":
@@ -110,7 +107,7 @@ function createDefaultSubField(parentId: string, kind: SubFieldKind): AnyField {
       };
     default:
       kind satisfies never;
-      return { ...base, kind: "text" };
+      return { ...base, kind: "textarea", rows: 1 };
   }
 }
 
