@@ -51,6 +51,7 @@ const sharedInputClasses =
 const DEFAULT_RANGE_OPTION_COUNT = 10;
 const MIN_RANGE_OPTION_COUNT = 2;
 const MAX_RANGE_OPTION_COUNT = 50;
+type ChoiceOption = { label: string; value: string };
 
 const formatCityValue = (city: CityFieldValue): string => {
   const region = city.admin1?.trim();
@@ -352,12 +353,12 @@ export function RenderField({
       );
 
     case "radio": {
-      const options = randomizedOptions ?? field.options;
+      const options = (randomizedOptions ?? field.options) as ChoiceOption[];
       return (
         <View>
           <RenderLabel field={field} error={errorMessage} />
           <View className={cn(hasError && "border-l-2 border-red-500 pl-3")}>
-            {options.map((option, optIndex) => {
+            {options.map((option: ChoiceOption, optIndex: number) => {
               const selected = value === option.value;
               return (
                 <TouchableOpacity
@@ -394,9 +395,9 @@ export function RenderField({
     }
 
     case "select": {
-      const options = randomizedOptions ?? field.options;
+      const options = (randomizedOptions ?? field.options) as ChoiceOption[];
       const selectedLabel =
-        options.find((opt) => opt.value === value)?.label || null;
+        options.find((opt: ChoiceOption) => opt.value === value)?.label || null;
 
       return (
         <View>
@@ -428,7 +429,7 @@ export function RenderField({
               </Text>
             </View>
             <ScrollView>
-              {options.map((option, optIndex) => (
+              {options.map((option: ChoiceOption, optIndex: number) => (
                 <TouchableOpacity
                   key={optIndex}
                   className="py-3 flex-row items-center"
@@ -463,21 +464,22 @@ export function RenderField({
     }
 
     case "multiselect": {
-      const selections = Array.isArray(value) ? value : [];
+      const selections = Array.isArray(value)
+        ? value.filter((item): item is string => typeof item === "string")
+        : [];
       const selectedCount = selections.length;
-      const options = randomizedOptions ?? field.options ?? [];
-      const maxSelections =
-        typeof field.maxSelections === "number" && field.maxSelections > 0
-          ? field.maxSelections
-          : undefined;
+      const options = (randomizedOptions ??
+        field.options ??
+        []) as ChoiceOption[];
+
       const maxReached =
-        maxSelections !== undefined && selectedCount >= maxSelections;
+        !field.maxSelections || selectedCount >= field.maxSelections;
 
       return (
         <View>
           <RenderLabel field={field} error={errorMessage} />
           <View className={cn(hasError && "border-l-2 border-red-500 pl-3")}>
-            {options.map((option, optIndex) => {
+            {options.map((option: ChoiceOption, optIndex: number) => {
               const checked = selections.includes(option.value);
               const disabledOption = disabled || (!checked && maxReached);
               return (
@@ -486,7 +488,11 @@ export function RenderField({
                   className="flex-row items-center py-2"
                   onPress={() => {
                     if (!onChange || disabledOption) return;
-                    const currentValues = Array.isArray(value) ? value : [];
+                    const currentValues = Array.isArray(value)
+                      ? value.filter(
+                          (item): item is string => typeof item === "string"
+                        )
+                      : [];
                     if (checked) {
                       onChange(currentValues.filter((v) => v !== option.value));
                     } else {
@@ -518,10 +524,10 @@ export function RenderField({
               );
             })}
           </View>
-          {maxSelections !== undefined && (
+          {field.maxSelections !== undefined && (
             <Text className="text-xs text-gray-500">
-              Select up to {maxSelections} option
-              {maxSelections === 1 ? "" : "s"}
+              Select up to {field.maxSelections} option
+              {field.maxSelections === 1 ? "" : "s"}
             </Text>
           )}
           {renderValidationMessage(errorMessage)}
