@@ -102,7 +102,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
       >
         {dismissProps && (
           <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
-            <p className="font-semibold">Away</p>
+            <p className="font-semibold">{dismissProps.header}</p>
             <p className="mb-3">{dismissProps.message}</p>
             <Button
               color={ButtonColor.White}

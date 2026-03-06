@@ -182,6 +182,7 @@ const HomePage = () => {
         ? undefined
         : currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY
         ? {
+            header: "Away",
             message: {
               [TaskAwayStatus.AWAY_CURRENTLY]:
                 TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
@@ -191,6 +192,7 @@ const HomePage = () => {
           }
         : deadlineHasPassed(currentTask, new Date())
         ? {
+            header: "Deadline passed",
             message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
           }
         : undefined;
@@ -288,7 +290,7 @@ const HomePage = () => {
               )}
             </div>
           )}
-          <BottomSpacer/>
+          <BottomSpacer />
         </div>
       </div>
     );

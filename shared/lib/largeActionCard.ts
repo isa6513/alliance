@@ -6,6 +6,7 @@ export interface LargeActionCardPropsShared {
   userRelation: UserActionRelation;
   onUpdateActionState: () => void;
   dismissProps?: {
+    header: string;
     message: string;
   };
   handleDismiss: () => void;
