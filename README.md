@@ -44,6 +44,8 @@ Running on a physical device:
 - `cd ios && pod install`
 - `cd .. && npx expo run:ios --device [YOUR DEVICE ID]`
 
+(can find device id via `xcrun xctrace list devices`)
+
 Running dev server for expo / development build: (once you've made a development build once, you should just be able to run this for hot reload updates)
 
 - `yarn start`
