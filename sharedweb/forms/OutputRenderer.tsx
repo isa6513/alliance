@@ -340,8 +340,9 @@ export function OutputRenderer({
             <div key={key} className="space-y-1">
               <RenderField
                 field={withLabel}
-                disabled={true}
                 value={resolvedAnswers[block.fieldId]}
+                disabled
+                isOutputView
               />
             </div>
           );

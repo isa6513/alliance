@@ -49,6 +49,7 @@ export type RenderFieldProps = {
   ) => boolean;
   fieldErrors?: Record<string, string | null>;
   responseHiddenFromOthers?: boolean;
+  isOutputView?: boolean;
 };
 
 const sharedInputClasses =
@@ -136,6 +137,7 @@ export function RenderField({
   isElementVisible,
   fieldErrors,
   responseHiddenFromOthers,
+  isOutputView,
 }: RenderFieldProps) {
   const errorMessage =
     typeof error === "string" && error.trim().length > 0 ? error : null;
@@ -855,7 +857,7 @@ export function RenderField({
       );
       const subFieldsForCard = (card: Record<string, FormValue>) => {
         const visible = visibleSubFieldsForCard(card);
-        if (disabled && hiddenInOutputIds.size > 0) {
+        if (isOutputView && hiddenInOutputIds.size > 0) {
           return visible.filter((sub) => !hiddenInOutputIds.has(sub.id));
         }
         return visible;
