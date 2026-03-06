@@ -48,6 +48,7 @@ export type RenderFieldProps = {
     data?: Record<string, FormValue>
   ) => boolean;
   fieldErrors?: Record<string, string | null>;
+  responseHiddenFromOthers?: boolean;
 };
 
 const sharedInputClasses =
@@ -134,6 +135,7 @@ export function RenderField({
   formData,
   isElementVisible,
   fieldErrors,
+  responseHiddenFromOthers,
 }: RenderFieldProps) {
   const errorMessage =
     typeof error === "string" && error.trim().length > 0 ? error : null;
@@ -848,6 +850,16 @@ export function RenderField({
         const mergedData = { ...formData, ...card };
         return subFields.filter((sub) => isElementVisible(sub, mergedData));
       };
+      const hiddenInOutputIds = new Set(
+        listField.outputViewHiddenFieldIds ?? []
+      );
+      const subFieldsForCard = (card: Record<string, FormValue>) => {
+        const visible = visibleSubFieldsForCard(card);
+        if (disabled && hiddenInOutputIds.size > 0) {
+          return visible.filter((sub) => !hiddenInOutputIds.has(sub.id));
+        }
+        return visible;
+      };
       return (
         <div className="space-y-3">
           <RenderLabel
@@ -860,26 +872,40 @@ export function RenderField({
               <Card key={cardIndex} style={CardStyle.White}>
                 <div className="flex flex-row gap-x-4 justify-between">
                   <div className="w-full space-y-6">
-                    {visibleSubFieldsForCard(card).map((sub) => (
-                      <RenderField
-                        key={sub.id}
-                        field={sub}
-                        value={card[sub.id]}
-                        onChange={
-                          onChange
-                            ? (val) => updateCard(cardIndex, sub.id, val)
-                            : undefined
-                        }
-                        disabled={disabled}
-                        error={
-                          fieldErrors?.[`${field.id}:${cardIndex}:${sub.id}`] ??
-                          null
-                        }
-                        randomizationKey={randomizationKey}
-                        disableOptionRandomization={disableOptionRandomization}
-                        user={user}
-                      />
-                    ))}
+                    {subFieldsForCard(card).map((sub) => {
+                      const isHiddenInOutput = hiddenInOutputIds.has(sub.id);
+                      return (
+                        <div key={sub.id}>
+                          <RenderField
+                            field={sub}
+                            value={card[sub.id]}
+                            onChange={
+                              onChange
+                                ? (val) => updateCard(cardIndex, sub.id, val)
+                                : undefined
+                            }
+                            disabled={disabled}
+                            error={
+                              fieldErrors?.[
+                                `${field.id}:${cardIndex}:${sub.id}`
+                              ] ?? null
+                            }
+                            randomizationKey={randomizationKey}
+                            disableOptionRandomization={
+                              disableOptionRandomization
+                            }
+                            user={user}
+                          />
+                          {!disabled &&
+                            isHiddenInOutput &&
+                            !responseHiddenFromOthers && (
+                              <p className="text-xs text-gray-500">
+                                This will not be shown to other members.
+                              </p>
+                            )}
+                        </div>
+                      );
+                    })}
                   </div>
                   {!disabled && (
                     <NewButton

@@ -1226,6 +1226,7 @@ const FormRenderer = ({
           formData={formData}
           isElementVisible={isElementCurrentlyVisible}
           fieldErrors={fieldErrors}
+          responseHiddenFromOthers={isOutputField && !sharePublicly}
         />
         {isOutputField && (
           <label className="mt-2 flex items-center text-sm text-gray-500">

@@ -176,6 +176,7 @@ export type ListField = BaseField<'list'> & {
   min?: number;
   max?: number;
   addButtonLabel?: string;
+  outputViewHiddenFieldIds?: string[];
 };
 // Persist file answers as string URL/key
 export type FileField = BaseField<'file'>;

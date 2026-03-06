@@ -308,6 +308,46 @@ export function EditableListField({
           </div>
         </div>
       </div>
+
+      {subFields.length > 0 && field.output?.output && (
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Hide in output view
+          </label>
+          <p className="text-xs text-gray-500 mb-2">
+            Selected fields will not appear when this list is shown in output
+            views.
+          </p>
+          <div className="space-y-1.5">
+            {subFields.map((sub) => {
+              const hiddenIds = field.outputViewHiddenFieldIds ?? [];
+              const isHidden = hiddenIds.includes(sub.id);
+              return (
+                <label
+                  key={sub.id}
+                  className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={isHidden}
+                    onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...hiddenIds, sub.id]
+                        : hiddenIds.filter((id) => id !== sub.id);
+                      onUpdate({
+                        outputViewHiddenFieldIds:
+                          next.length > 0 ? next : undefined,
+                      });
+                    }}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>{sub.label || sub.id}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </FieldWrapper>
   );
 }

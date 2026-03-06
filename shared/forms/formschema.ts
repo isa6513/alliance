@@ -184,6 +184,8 @@ export type ListField = BaseField<"list"> & {
   min?: number;
   max?: number;
   addButtonLabel?: string;
+  /** Sub-field ids to hide when rendering this list in an output view. */
+  outputViewHiddenFieldIds?: string[];
 };
 // Persist file answers as string URL/key
 export type FileField = BaseField<"file">;
