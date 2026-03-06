@@ -17,6 +17,7 @@ import type {
   DeviceVisibilityTarget,
   FormSchema,
   FormValue,
+  ListField,
   OutputBlock,
   OutputViewSchema,
 } from "@alliance/shared/forms/formschema";
@@ -480,6 +481,15 @@ export function OutputRenderer({
             label: block.showLabel ? block.labelOverride ?? field.label : null,
             required: false,
           };
+          if (field.kind === "list") {
+            const listField = field as ListField;
+            if (Array.isArray(listField.fields) && listField.fields.length > 0) {
+              (withLabel as ListField).fields = listField.fields.map((sub) => ({
+                ...sub,
+                required: false,
+              }));
+            }
+          }
           return (
             <div key={key} className="space-y-1">
               <RenderField

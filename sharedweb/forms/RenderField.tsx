@@ -881,17 +881,19 @@ export function RenderField({
                       />
                     ))}
                   </div>
-                  <NewButton
-                    onClick={() => removeCard(cardIndex)}
-                    disabled={disabled || !canDelete}
-                    color={ButtonColor.Red}
-                    size={ButtonSize.Small}
-                    iconLeft={X}
-                  />
+                  {!disabled && (
+                    <NewButton
+                      onClick={() => removeCard(cardIndex)}
+                      disabled={disabled || !canDelete}
+                      color={ButtonColor.Red}
+                      size={ButtonSize.Small}
+                      iconLeft={X}
+                    />
+                  )}
                 </div>
               </Card>
             ))}
-            {cards.length < maxCards && (
+            {!disabled && cards.length < maxCards && (
               <NewButton
                 type="button"
                 onClick={addCard}
