@@ -187,6 +187,7 @@ export function EditableListField({
 
   const subFields = field.fields ?? [];
   const previousFieldsFor = (index: number) => subFields.slice(0, index);
+  const hiddenIds = field.outputViewHiddenFieldIds ?? [];
 
   return (
     <FieldWrapper
@@ -320,7 +321,6 @@ export function EditableListField({
           </p>
           <div className="space-y-1.5">
             {subFields.map((sub) => {
-              const hiddenIds = field.outputViewHiddenFieldIds ?? [];
               const isHidden = hiddenIds.includes(sub.id);
               return (
                 <label
