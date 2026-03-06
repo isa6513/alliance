@@ -42,9 +42,8 @@ const preferredSimulatorNames = (
 ).filter(Boolean) as string[];
 const bundleId =
   process.env.IOS_BUNDLE_ID ?? "com.alliancefoundation.alliancemobile";
-const scheme = process.env.IOS_SCHEME ?? "alliancemobile";
-const workspacePath =
-  process.env.IOS_WORKSPACE_PATH ?? "ios/alliancemobile.xcworkspace";
+const configuredScheme = process.env.IOS_SCHEME;
+const configuredWorkspacePath = process.env.IOS_WORKSPACE_PATH;
 const iosConfiguration = process.env.IOS_CONFIGURATION ?? "Release";
 const shouldCleanDerivedData =
   process.env.IOS_CLEAN_BUILD === "true" || process.env.CI === "true";
@@ -72,6 +71,7 @@ const childProcesses: ChildProcessHandle[] = [];
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const logPrefix = "[citesting:mobile-ios]";
+const mobileAppRoot = path.join(repoRoot, "apps", "mobile");
 
 const sanitizeFileName = (value: string) =>
   value
@@ -169,6 +169,77 @@ const fileExists = async (filePath: string) => {
   } catch {
     return false;
   }
+};
+
+const findFirstMatch = async (directory: string, suffix: string) => {
+  try {
+    const entries = await fs.readdir(directory, { withFileTypes: true });
+    const match = entries.find(
+      (entry) => entry.isDirectory() && entry.name.endsWith(suffix)
+    );
+    return match ? path.join(directory, match.name) : null;
+  } catch {
+    return null;
+  }
+};
+
+const resolveWorkspacePath = async () => {
+  if (configuredWorkspacePath) {
+    return path.join(mobileAppRoot, configuredWorkspacePath);
+  }
+
+  const workspace = await findFirstMatch(path.join(mobileAppRoot, "ios"), ".xcworkspace");
+  if (workspace) {
+    return workspace;
+  }
+
+  const project = await findFirstMatch(path.join(mobileAppRoot, "ios"), ".xcodeproj");
+  if (project) {
+    return project;
+  }
+
+  throw new Error("Could not find an iOS workspace or Xcode project under apps/mobile/ios");
+};
+
+const resolveScheme = async (resolvedWorkspacePath: string) => {
+  if (configuredScheme) {
+    return configuredScheme;
+  }
+
+  const targetFlag = resolvedWorkspacePath.endsWith(".xcworkspace")
+    ? "-workspace"
+    : "-project";
+  const targetPath = path.relative(mobileAppRoot, resolvedWorkspacePath);
+  const output = await execFileCapture(
+    "xcodebuild",
+    [targetFlag, targetPath, "-list", "-json"],
+    {
+      cwd: mobileAppRoot,
+      env: process.env,
+    }
+  );
+  const parsed = JSON.parse(output) as {
+    workspace?: { schemes?: string[] };
+    project?: { schemes?: string[] };
+  };
+  const schemes =
+    parsed.workspace?.schemes ?? parsed.project?.schemes ?? [];
+  const preferredSchemes = ["alliancemobile", "Alliance"];
+
+  for (const preferred of preferredSchemes) {
+    const match = schemes.find((scheme) => scheme === preferred);
+    if (match) {
+      return match;
+    }
+  }
+
+  if (schemes.length > 0) {
+    return schemes[0];
+  }
+
+  throw new Error(
+    `Could not find an Xcode scheme for ${resolvedWorkspacePath}`
+  );
 };
 
 const killProcess = async (child: ChildProcessHandle) => {
@@ -510,6 +581,12 @@ const buildIosApp = async (udid: string) => {
   if (shouldCleanDerivedData) {
     await fs.rm(derivedDataPath, { recursive: true, force: true });
   }
+  const resolvedWorkspacePath = await resolveWorkspacePath();
+  const resolvedScheme = await resolveScheme(resolvedWorkspacePath);
+  const buildTargetFlag = resolvedWorkspacePath.endsWith(".xcworkspace")
+    ? "-workspace"
+    : "-project";
+  const buildTargetPath = path.relative(mobileAppRoot, resolvedWorkspacePath);
 
   const env: NodeJS.ProcessEnv = {
     ...process.env,
@@ -525,10 +602,10 @@ const buildIosApp = async (udid: string) => {
   };
 
   const buildArgs = [
-    "-workspace",
-    workspacePath,
+    buildTargetFlag,
+    buildTargetPath,
     "-scheme",
-    scheme,
+    resolvedScheme,
     "-configuration",
     iosConfiguration,
     "-destination",
@@ -540,7 +617,7 @@ const buildIosApp = async (udid: string) => {
 
   try {
     await runCommand("xcodebuild", buildArgs, {
-      cwd: path.join(repoRoot, "apps", "mobile"),
+      cwd: mobileAppRoot,
       env,
     });
   } catch (error) {
@@ -553,7 +630,7 @@ const buildIosApp = async (udid: string) => {
       );
       await fs.rm(derivedDataPath, { recursive: true, force: true });
       await runCommand("xcodebuild", buildArgs, {
-        cwd: path.join(repoRoot, "apps", "mobile"),
+        cwd: mobileAppRoot,
         env,
       });
     } else {
@@ -563,6 +640,45 @@ const buildIosApp = async (udid: string) => {
 
   if (!(await fileExists(appBinaryPath))) {
     throw new Error(`Built app not found at ${appBinaryPath}`);
+  }
+};
+
+const ensureIosWorkspace = async () => {
+  const iosDir = path.join(mobileAppRoot, "ios");
+  const existingWorkspace = await findFirstMatch(iosDir, ".xcworkspace");
+  const existingProject = await findFirstMatch(iosDir, ".xcodeproj");
+  if (existingWorkspace || existingProject) {
+    return;
+  }
+
+  console.log(
+    `${logPrefix} Native iOS workspace missing. Running Expo prebuild...`
+  );
+  await runCommand(
+    "corepack",
+    [
+      "yarn",
+      "workspace",
+      "@alliance/mobile",
+      "exec",
+      "expo",
+      "prebuild",
+      "--platform",
+      "ios",
+      "--non-interactive",
+    ],
+    {
+      cwd: repoRoot,
+      env: process.env,
+    }
+  );
+
+  const generatedWorkspace = await findFirstMatch(iosDir, ".xcworkspace");
+  const generatedProject = await findFirstMatch(iosDir, ".xcodeproj");
+  if (!generatedWorkspace && !generatedProject) {
+    throw new Error(
+      `Expo prebuild completed but no Xcode workspace/project was generated under ${iosDir}`
+    );
   }
 };
 
@@ -625,6 +741,7 @@ const captureScreenshots = async (udid: string, simulatorName: string) => {
   startBackend();
   await waitForHttp(`http://127.0.0.1:${backendPort}/`, 60000);
 
+  await ensureIosWorkspace();
   await bootSimulator(udid, simulatorName);
   await buildIosApp(udid);
   await installApp(udid);

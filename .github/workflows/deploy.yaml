@@ -744,7 +744,7 @@ jobs:
           exit 1
 
   mobile-visual-regression-ios:
-    runs-on: macos-15
+    runs-on: macos-26
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
 
     steps:
@@ -795,6 +795,10 @@ jobs:
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Prebuild iOS Project
+        if: github.ref_name == 'production'
+        run: corepack yarn workspace @alliance/mobile exec expo prebuild --platform ios --non-interactive
 
       - name: Take iOS Screenshots
         if: github.ref_name == 'production'
