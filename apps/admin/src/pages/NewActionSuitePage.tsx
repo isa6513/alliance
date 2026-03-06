@@ -9,7 +9,7 @@ const NewActionSuitePage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleCancel = () => {
-    navigate("/");
+    navigate("/actions");
   };
 
   const handleCreateSuite = async (event: React.FormEvent<HTMLFormElement>) => {

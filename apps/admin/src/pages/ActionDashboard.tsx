@@ -535,11 +535,11 @@ const ActionDashboard: React.FC = () => {
   }, [form]);
 
   const handleActionDeleted = useCallback(() => {
-    navigate("/");
+    navigate("/actions");
   }, [navigate]);
 
   const handleCancel = useCallback(() => {
-    navigate("/");
+    navigate("/actions");
   }, [navigate]);
 
   const handleInputChange = (
