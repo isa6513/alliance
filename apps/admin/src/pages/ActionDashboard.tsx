@@ -998,13 +998,13 @@ const ActionDashboard: React.FC = () => {
         <div className="space-y-4 flex-1 min-h-0 mx-5">
           {/* Tab Navigation */}
           <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+            <nav className="-mb-px flex space-x-8 flex-wrap">
               {tabData.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => onTabChange(tab.key)}
                   className={cn(
-                    "py-2 px-1 border-b-2 text-sm",
+                    "py-2 px-1 border-b-2 text-sm text-nowrap",
                     activeTab === tab.key
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -1018,7 +1018,7 @@ const ActionDashboard: React.FC = () => {
                 onClick={() =>
                   navigate(`/forms/${action?.taskFormId}/responses`)
                 }
-                className="py-2 px-1 border-b-2 text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                className="py-2 px-1 border-b-2 text-sm text-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               >
                 Responses
               </button>
@@ -1026,7 +1026,7 @@ const ActionDashboard: React.FC = () => {
                 href={getBaseUrl() + `/actions/${action?.id}`}
                 target="_blank"
                 rel="noreferrer"
-                className="py-2 px-1 border-b-2 font-medium text-sm border-transparent text-blue-500 hover:text-blue-600 hover:border-blue-300"
+                className="py-2 px-1 border-b-2 font-medium text-sm text-nowrap border-transparent text-blue-500 hover:text-blue-600 hover:border-blue-300"
               >
                 View Action Page →
               </a>
