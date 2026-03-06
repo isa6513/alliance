@@ -887,6 +887,7 @@ export function RenderField({
                                 : undefined
                             }
                             disabled={disabled}
+                            isOutputView={isOutputView}
                             error={
                               fieldErrors?.[
                                 `${field.id}:${cardIndex}:${sub.id}`
