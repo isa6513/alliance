@@ -130,9 +130,7 @@ export function getImageSource(string: string) {
     }
     return `${process.env.APP_URL}/api/images/${string}`;
   } else {
-    const appUrl =
-      process.env.APP_URL ??
-      `http://localhost:${process.env.PORT ?? '3005'}`;
-    return `${appUrl}/images/${string}`;
+    const port = process.env.PORT ?? '3005';
+    return `http://localhost:${port}/images/${string}`;
   }
 }
