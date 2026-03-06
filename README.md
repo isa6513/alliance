@@ -48,6 +48,11 @@ Running dev server for expo / development build: (once you've made a development
 
 - `yarn start`
 
+Running on an ios simulator:
+
+- one way to do this is `yarn build:ios`, which uses eas instead of building locally so i have less trouble with
+- this creates a development build and installs it on simulator, after which you can use `yarn start` to attach it to the dev server
+
 build: `yarn eas build --platform [ios|android]`
 
 ## Miscellaneous commands
