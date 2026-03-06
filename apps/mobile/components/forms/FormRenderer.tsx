@@ -21,6 +21,7 @@ import type {
   DeviceVisibilityTarget,
   FormSchema,
   FormValue,
+  VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
 import {
   applyDefaultValues,
@@ -321,16 +322,43 @@ const FormRenderer = ({
 
   const visibilityValidatorIds = useMemo(() => {
     const ids = new Set<number>();
+    const collectFromConditions = (visibleIf: unknown) => {
+      const conditions = Array.isArray(visibleIf)
+        ? visibleIf
+        : visibleIf
+        ? [visibleIf]
+        : [];
+      for (const condition of conditions) {
+        if (
+          condition &&
+          typeof condition === "object" &&
+          "validatorId" in condition
+        ) {
+          ids.add((condition as { validatorId: number }).validatorId);
+        }
+      }
+    };
+    const collectFromVisibleIfFormula = (visibleIfFormula: VisibleIfFormula | undefined) => {
+      if (!visibleIfFormula?.conditions) {
+        return;
+      }
+      for (const condition of Object.values(visibleIfFormula.conditions)) {
+        if (condition && "validatorId" in condition) {
+          ids.add(condition.validatorId);
+        }
+      }
+    };
     for (const page of schema.pages) {
       for (const element of page.fields) {
-        const conditions = Array.isArray(element.visibleIf)
-          ? element.visibleIf
-          : element.visibleIf
-          ? [element.visibleIf]
-          : [];
-        for (const condition of conditions) {
-          if ("validatorId" in condition) {
-            ids.add(condition.validatorId);
+        collectFromConditions(element.visibleIf);
+        collectFromVisibleIfFormula(element.visibleIfFormula);
+        if ("label" in element && (element as AnyField).kind === "list") {
+          const listField = element as AnyField & { fields?: AnyField[] };
+          if (Array.isArray(listField.fields)) {
+            for (const sub of listField.fields) {
+              collectFromConditions(sub.visibleIf);
+              collectFromVisibleIfFormula(sub.visibleIfFormula);
+            }
           }
         }
       }

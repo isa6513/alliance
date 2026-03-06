@@ -24,6 +24,7 @@ import type {
   DeviceVisibilityTarget,
   FormSchema,
   FormValue,
+  VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
 import {
   applyDefaultValues,
@@ -387,14 +388,26 @@ const FormRenderer = ({
         }
       }
     };
+    const collectFromVisibleIfFormula = (visibleIfFormula: VisibleIfFormula | undefined) => {
+      if (!visibleIfFormula?.conditions) {
+        return;
+      }
+      for (const condition of Object.values(visibleIfFormula.conditions)) {
+        if (condition && "validatorId" in condition) {
+          ids.add(condition.validatorId);
+        }
+      }
+    };
     for (const page of schema.pages) {
       for (const element of page.fields) {
         collectFromConditions(element.visibleIf);
+        collectFromVisibleIfFormula(element.visibleIfFormula);
         if ("label" in element && (element as AnyField).kind === "list") {
           const listField = element as AnyField & { fields?: AnyField[] };
           if (Array.isArray(listField.fields)) {
             for (const sub of listField.fields) {
               collectFromConditions(sub.visibleIf);
+              collectFromVisibleIfFormula(sub.visibleIfFormula);
             }
           }
         }

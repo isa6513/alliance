@@ -261,6 +261,27 @@ const findSingleOptionValueChange = (
 const isSchemaFormField = (field: AnyField | DisplayBlock): field is AnyField =>
   "label" in field;
 
+const mapConditionForOptionValue = (
+  condition: Condition,
+  controllerId: string,
+  previousValue: string,
+  nextValue: string
+): { condition: Condition; updated: boolean } => {
+  if (!("when" in condition) || condition.when !== controllerId) {
+    return { condition, updated: false };
+  }
+  if (
+    "includesOption" in condition &&
+    condition.includesOption === previousValue
+  ) {
+    return { condition: { ...condition, includesOption: nextValue }, updated: true };
+  }
+  if ("equals" in condition && condition.equals === previousValue) {
+    return { condition: { ...condition, equals: nextValue }, updated: true };
+  }
+  return { condition, updated: false };
+};
+
 const getUpdatedVisibilityConditions = (
   visibleIf: Condition[] | Condition | undefined,
   controllerId: string,
@@ -273,21 +294,14 @@ const getUpdatedVisibilityConditions = (
 
   const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
   let updated = false;
-  const nextConditions = conditions.map((condition) => {
-    if (!("when" in condition) || condition.when !== controllerId) {
-      return condition;
-    }
-    if (
-      "includesOption" in condition &&
-      condition.includesOption === previousValue
-    ) {
-      updated = true;
-      return { ...condition, includesOption: nextValue };
-    }
-    if ("equals" in condition && condition.equals === previousValue) {
-      updated = true;
-      return { ...condition, equals: nextValue };
-    }
+  const nextConditions = conditions.map((c) => {
+    const { condition, updated: u } = mapConditionForOptionValue(
+      c,
+      controllerId,
+      previousValue,
+      nextValue
+    );
+    if (u) updated = true;
     return condition;
   });
 
@@ -298,6 +312,39 @@ const getUpdatedVisibilityConditions = (
   return {
     changed: true,
     visibleIf: nextConditions,
+  };
+};
+
+const getUpdatedVisibilityFormula = (
+  visibleIfFormula: VisibleIfFormula | undefined,
+  controllerId: string,
+  previousValue: string,
+  nextValue: string
+): { changed: boolean; visibleIfFormula?: VisibleIfFormula } => {
+  if (!visibleIfFormula?.conditions) {
+    return { changed: false };
+  }
+
+  let updated = false;
+  const nextConditions: Record<string, Condition> = {};
+  for (const [name, cond] of Object.entries(visibleIfFormula.conditions)) {
+    const { condition, updated: u } = mapConditionForOptionValue(
+      cond,
+      controllerId,
+      previousValue,
+      nextValue
+    );
+    nextConditions[name] = condition;
+    if (u) updated = true;
+  }
+
+  if (!updated) {
+    return { changed: false };
+  }
+
+  return {
+    changed: true,
+    visibleIfFormula: { ...visibleIfFormula, conditions: nextConditions },
   };
 };
 
@@ -315,23 +362,36 @@ const applyOptionValueToConditionalVisibility = (
       return candidate;
     }
 
+    const visibleIf = candidate.visibleIf;
+    const visibleIfFormula = candidate.visibleIfFormula;
+
     const result = getUpdatedVisibilityConditions(
-      (candidate as AnyField).visibleIf ??
-        (candidate as DisplayBlock).visibleIf,
+      visibleIf,
+      controllerId,
+      previousValue,
+      nextValue
+    );
+    const formulaResult = getUpdatedVisibilityFormula(
+      visibleIfFormula,
       controllerId,
       previousValue,
       nextValue
     );
 
-    if (!result.changed || !result.visibleIf) {
+    if (!result.changed && !formulaResult.changed) {
       return candidate;
     }
 
     hasChanges = true;
     return {
       ...candidate,
-      visibleIf: result.visibleIf,
-    } as AnyField | DisplayBlock;
+      ...(result.changed && result.visibleIf != null
+        ? { visibleIf: result.visibleIf }
+        : {}),
+      ...(formulaResult.changed && formulaResult.visibleIfFormula != null
+        ? { visibleIfFormula: formulaResult.visibleIfFormula }
+        : {}),
+    };
   });
 
   return hasChanges ? nextFields : fields;
@@ -1012,8 +1072,7 @@ export function FormBuilder({
           fields: page.fields.map((field) => {
             const nextVisibleIf = mapVisibleIf(field.visibleIf);
             const nextVisibleIfFormula = mapVisibleIfFormula(
-              (field as { visibleIfFormula?: VisibleIfFormula })
-                .visibleIfFormula
+              field.visibleIfFormula
             );
             if (isSchemaFormField(field)) {
               const nextValidatorId = isDraftValidatorId(

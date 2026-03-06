@@ -7,8 +7,8 @@ import type {
   FormValue,
   ListField,
   NumberField,
+  OutputFieldBlock,
   RangeField,
-  VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
 import { parseTimeToMinutes } from "@alliance/shared/forms/timeUtils";
 import { evaluateVisibilityFormula } from "@alliance/shared/forms/visibilityFormula";
@@ -239,7 +239,7 @@ export function evaluateCondition(
     return actual === expected;
   }
   const val = data[cond.when];
-  return evaluateValueBasedCondition(cond, val as FormValue | undefined);
+  return evaluateValueBasedCondition(cond, val);
 }
 
 const evaluateValueBasedCondition = (
@@ -247,7 +247,7 @@ const evaluateValueBasedCondition = (
   val: FormValue | undefined
 ): boolean => {
   if ("hasValue" in cond) {
-    const present = hasContent(val as FormValue | undefined);
+    const present = hasContent(val);
     return cond.hasValue ? present : !present;
   }
   if ("anySelected" in cond) {
@@ -285,12 +285,11 @@ const evaluateValueBasedCondition = (
 };
 
 export function isElementCurrentlyVisible(
-  element: AnyField | DisplayBlock,
+  element: AnyField | DisplayBlock | OutputFieldBlock,
   data: Record<string, FormValue>,
   extras: ConditionExtras & { readOnly?: boolean } = {}
 ): boolean {
-  const formula = (element as { visibleIfFormula?: VisibleIfFormula })
-    .visibleIfFormula;
+  const formula = element.visibleIfFormula;
   const conditions = Array.isArray(element.visibleIf)
     ? element.visibleIf
     : element.visibleIf
@@ -352,8 +351,8 @@ export function isElementCurrentlyVisible(
       if ("expr" in cond || "deviceType" in cond || "validatorId" in cond) {
         results[name] = evaluateCondition(cond, data, extras);
       } else {
-        const value = isReferencedFieldVisible((cond as { when: string }).when)
-          ? (data[(cond as { when: string }).when] as FormValue | undefined)
+        const value = isReferencedFieldVisible(cond.when)
+          ? data[cond.when]
           : undefined;
         results[name] = evaluateValueBasedCondition(cond, value);
       }
@@ -371,7 +370,7 @@ export function isElementCurrentlyVisible(
     }
 
     const value = isReferencedFieldVisible(condition.when)
-      ? (data[condition.when] as FormValue | undefined)
+      ? data[condition.when]
       : undefined;
     return evaluateValueBasedCondition(condition, value);
   });

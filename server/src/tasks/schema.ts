@@ -336,8 +336,7 @@ export function isQuestionVisible(
     return val === c.equals;
   };
 
-  const formula = (element as { visibleIfFormula?: VisibleIfFormula })
-    .visibleIfFormula;
+  const formula = element.visibleIfFormula;
   if (
     formula?.conditions &&
     Object.keys(formula.conditions).length > 0 &&

@@ -20,7 +20,6 @@ import type {
   OutputBlock,
   OutputViewSchema,
 } from "@alliance/shared/forms/formschema";
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import { isElementCurrentlyVisible } from "@alliance/shared/formrenderer";
 
 type OutputRendererProps = {
@@ -78,7 +77,7 @@ const isBlockVisible = (
   if ("fieldId" in block && !answers[block.fieldId]) {
     return false;
   }
-  return isElementCurrentlyVisible(block as AnyField | DisplayBlock, answers, {
+  return isElementCurrentlyVisible(block, answers, {
     deviceType: deviceType ?? "desktop",
     visibilityValidatorResults: validatorResults ?? {},
   });

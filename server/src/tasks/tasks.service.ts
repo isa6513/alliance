@@ -173,6 +173,47 @@ export class TasksService {
             validatorIds.add(condition.validatorId);
           }
         }
+        const formula = element.visibleIfFormula;
+        if (formula?.conditions) {
+          for (const condition of Object.values(formula.conditions)) {
+            if (
+              condition &&
+              'validatorId' in condition &&
+              condition.validatorId != null
+            ) {
+              validatorIds.add(condition.validatorId);
+            }
+          }
+        }
+        if (isQuestionField(element) && element.kind === 'list') {
+          const listField = element as ListField;
+          if (Array.isArray(listField.fields)) {
+            for (const sub of listField.fields) {
+              const subConditions = Array.isArray(sub.visibleIf)
+                ? sub.visibleIf
+                : sub.visibleIf
+                  ? [sub.visibleIf]
+                  : [];
+              for (const condition of subConditions) {
+                if ('validatorId' in condition) {
+                  validatorIds.add(condition.validatorId);
+                }
+              }
+              const subFormula = sub.visibleIfFormula;
+              if (subFormula?.conditions) {
+                for (const condition of Object.values(subFormula.conditions)) {
+                  if (
+                    condition &&
+                    'validatorId' in condition &&
+                    condition.validatorId != null
+                  ) {
+                    validatorIds.add(condition.validatorId);
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -208,10 +249,10 @@ export class TasksService {
               submitFormDto.deviceType,
             )
           ) {
-            if (!this.hasRequiredValue(field, submitFormDto.answers[field.id])) {
-              throw new BadRequestException(
-                `Field ${field.label} is required`,
-              );
+            if (
+              !this.hasRequiredValue(field, submitFormDto.answers[field.id])
+            ) {
+              throw new BadRequestException(`Field ${field.label} is required`);
             }
           }
           if (
@@ -245,7 +286,9 @@ export class TasksService {
               continue;
             }
             const rawList = submitFormDto.answers[listField.id];
-            const listValue: Record<string, FormValue>[] = Array.isArray(rawList)
+            const listValue: Record<string, FormValue>[] = Array.isArray(
+              rawList,
+            )
               ? (rawList as unknown[]).filter(
                   (item): item is Record<string, FormValue> =>
                     item !== null &&
