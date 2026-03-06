@@ -859,7 +859,7 @@ export function RenderField({
             {cards.map((card, cardIndex) => (
               <Card key={cardIndex} style={CardStyle.White}>
                 <div className="flex flex-row gap-x-4 justify-between">
-                  <div className="w-full">
+                  <div className="w-full space-y-6">
                     {visibleSubFieldsForCard(card).map((sub) => (
                       <RenderField
                         key={sub.id}
