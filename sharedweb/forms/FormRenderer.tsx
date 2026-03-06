@@ -662,16 +662,11 @@ const FormRenderer = ({
         const fieldValue = formData[field.id];
         updates[field.id] = validateFieldValue(field, fieldValue);
         if (field.kind === "list") {
-          const subErrors = getListSubFieldErrors(
-            field,
-            fieldValue,
-            formData,
-            {
-              deviceType: effectiveDeviceType,
-              visibilityValidatorResults,
-              fieldLookup,
-            }
-          );
+          const subErrors = getListSubFieldErrors(field, fieldValue, formData, {
+            deviceType: effectiveDeviceType,
+            visibilityValidatorResults,
+            fieldLookup,
+          });
           Object.assign(updates, subErrors);
         }
       }
@@ -689,7 +684,10 @@ const FormRenderer = ({
       const listFieldIds = visibleFields
         .filter((f) => f.kind === "list")
         .map((f) => f.id);
-      applyFieldErrorUpdates(updates, listFieldIds.length > 0 ? listFieldIds : undefined);
+      applyFieldErrorUpdates(
+        updates,
+        listFieldIds.length > 0 ? listFieldIds : undefined
+      );
 
       const hasAnyError = Object.values(updates).some(
         (msg) => msg && msg.trim().length > 0
@@ -788,20 +786,7 @@ const FormRenderer = ({
             next
           );
           if (fieldDefinition.kind === "list") {
-            const subErrors = getListSubFieldErrors(
-              fieldDefinition,
-              nextValue,
-              next,
-              {
-                deviceType: effectiveDeviceType,
-                visibilityValidatorResults,
-                fieldLookup,
-              }
-            );
-            applyFieldErrorUpdates(
-              { [fieldId]: requiredError, ...subErrors },
-              fieldId
-            );
+            applyFieldErrorUpdates({ [fieldId]: requiredError }, fieldId);
           } else {
             applyFieldErrorUpdates({ [fieldId]: requiredError });
           }
