@@ -19,6 +19,7 @@ import type {
   FormSchema,
   MultiSelectField,
   Page,
+  VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
 import type { UserDto } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -913,6 +914,20 @@ export function FormBuilder({
         });
       };
 
+      const collectFromVisibleIfFormula = (
+        visibleIfFormula?: { conditions: Record<string, Condition> }
+      ) => {
+        if (!visibleIfFormula?.conditions) return;
+        Object.values(visibleIfFormula.conditions).forEach((condition) => {
+          if (
+            "validatorId" in condition &&
+            isDraftValidatorId(condition.validatorId)
+          ) {
+            draftIds.add(condition.validatorId);
+          }
+        });
+      };
+
       schemaToSave.pages.forEach((page) => {
         page.fields.forEach((field) => {
           if (
@@ -922,12 +937,20 @@ export function FormBuilder({
             draftIds.add(field.customValidatorId);
           }
           collectFromConditions(field.visibleIf);
+          collectFromVisibleIfFormula(
+            (field as { visibleIfFormula?: { conditions: Record<string, Condition> } })
+              .visibleIfFormula
+          );
         });
       });
 
       schemaToSave.outputViews.forEach((view) => {
         view.blocks.forEach((block) => {
           collectFromConditions(block.visibleIf);
+          collectFromVisibleIfFormula(
+            (block as { visibleIfFormula?: { conditions: Record<string, Condition> } })
+              .visibleIfFormula
+          );
         });
       });
 
@@ -978,12 +1001,29 @@ export function FormBuilder({
         return conditions.map(mapCondition);
       };
 
+      const mapVisibleIfFormula = (
+        visibleIfFormula?: VisibleIfFormula
+      ): VisibleIfFormula | undefined => {
+        if (!visibleIfFormula?.conditions) return visibleIfFormula;
+        const nextConditions: Record<string, Condition> = {};
+        for (const [name, cond] of Object.entries(visibleIfFormula.conditions)) {
+          nextConditions[name] = mapCondition(cond);
+        }
+        return {
+          ...visibleIfFormula,
+          conditions: nextConditions,
+        };
+      };
+
       const nextSchema: FormSchema = {
         ...schemaToSave,
         pages: schemaToSave.pages.map((page) => ({
           ...page,
           fields: page.fields.map((field) => {
             const nextVisibleIf = mapVisibleIf(field.visibleIf);
+            const nextVisibleIfFormula = mapVisibleIfFormula(
+              (field as { visibleIfFormula?: VisibleIfFormula }).visibleIfFormula
+            );
             if (isSchemaFormField(field)) {
               const nextValidatorId = isDraftValidatorId(
                 field.customValidatorId
@@ -995,11 +1035,13 @@ export function FormBuilder({
                 ...field,
                 customValidatorId: nextValidatorId,
                 visibleIf: nextVisibleIf,
+                visibleIfFormula: nextVisibleIfFormula,
               };
             }
             return {
               ...field,
               visibleIf: nextVisibleIf,
+              visibleIfFormula: nextVisibleIfFormula,
             };
           }),
         })),
@@ -1008,6 +1050,9 @@ export function FormBuilder({
           blocks: view.blocks.map((block) => ({
             ...block,
             visibleIf: mapVisibleIf(block.visibleIf),
+            visibleIfFormula: mapVisibleIfFormula(
+              (block as { visibleIfFormula?: VisibleIfFormula }).visibleIfFormula
+            ),
           })),
         })),
       };
