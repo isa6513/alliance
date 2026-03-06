@@ -1,5 +1,5 @@
 // display-blocks.ts
-import type { Condition } from './schema';
+import type { Condition, VisibleIfFormula } from './schema';
 
 export type DisplayKind =
   | 'header' // H1–H6
@@ -17,6 +17,7 @@ interface BaseBlock {
   /** Optional: display blocks usually don’t need IDs, but you can keep one for analytics/testing */
   id?: string;
   visibleIf?: Condition[];
+  visibleIfFormula?: VisibleIfFormula;
   width?: 'full' | '1/2' | '1/3';
 }
 

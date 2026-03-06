@@ -1,5 +1,5 @@
 // display-blocks.ts
-import { Condition } from "@alliance/shared/forms/formschema";
+import { Condition, VisibleIfFormula } from "@alliance/shared/forms/formschema";
 
 export type DisplayKind =
   | "header" // H1–H6
@@ -16,7 +16,9 @@ export type DisplayKind =
 interface BaseBlock {
   kind: DisplayKind;
   id?: string;
+  /** @deprecated Use visibleIfFormula. */
   visibleIf?: Condition[];
+  visibleIfFormula?: VisibleIfFormula;
   width?: "full" | "1/2" | "1/3";
   manualPerUser?: boolean;
   manualUserContent?: Record<string, ManualDisplayBlockContent>;

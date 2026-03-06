@@ -58,7 +58,9 @@ interface BaseField<TKind extends FieldKind> {
   customValidatorId?: number;
 
   // simple conditions using string IDs
+  /** @deprecated Use visibleIfFormula for new logic. Kept for backward compatibility. */
   visibleIf?: Condition[];
+  visibleIfFormula?: VisibleIfFormula;
   requiredIf?: Condition;
 
   // UI hints
@@ -76,6 +78,19 @@ export type Condition =
   | { expr: string }
   | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
   | { deviceType: DeviceVisibilityTarget[] };
+
+/** Formula tree for visibility: AND/OR of two operands, NOT of one. Leaves are condition names (e.g. condition1, condition2). */
+export type FormulaNode =
+  | { op: "AND"; left: FormulaNode | string; right: FormulaNode | string }
+  | { op: "OR"; left: FormulaNode | string; right: FormulaNode | string }
+  | { op: "NOT"; operand: FormulaNode | string }
+  | string;
+
+/** Named conditions (condition1, condition2, ...) plus a formula tree. Replaces visibleIf when present. */
+export interface VisibleIfFormula {
+  conditions: Record<string, Condition>;
+  formula: FormulaNode;
+}
 
 // Specialized fields:
 
@@ -227,7 +242,9 @@ export interface OutputFieldBlock {
   showLabel?: boolean;
   labelOverride?: string;
   format?: "field" | "textonly" | "card";
+  /** @deprecated Use visibleIfFormula. */
   visibleIf?: Condition[];
+  visibleIfFormula?: VisibleIfFormula;
 }
 
 export interface OutputViewSchema {

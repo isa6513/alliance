@@ -148,6 +148,42 @@ const ensureOutputViews = (schema: FormSchema): FormSchema => ({
   outputViews: schema.outputViews ?? [],
 });
 
+/** Remove deprecated visibleIf from all fields and blocks so only visibleIfFormula is persisted. */
+function stripVisibleIfFromSchema(schema: FormSchema): FormSchema {
+  const stripFromElement = (
+    el: Record<string, unknown>
+  ): Record<string, unknown> => {
+    const out = { ...el };
+    if ("visibleIf" in out) {
+      delete out.visibleIf;
+    }
+    if (out.kind === "list" && Array.isArray(out.fields)) {
+      out.fields = out.fields.map((f: unknown) =>
+        typeof f === "object" && f !== null
+          ? stripFromElement(f as Record<string, unknown>)
+          : f
+      );
+    }
+    return out;
+  };
+
+  return {
+    ...schema,
+    pages: (schema.pages ?? []).map((page) => ({
+      ...page,
+      fields: (page.fields ?? []).map((f) =>
+        stripFromElement(f as unknown as Record<string, unknown>)
+      ) as unknown as Page["fields"],
+    })),
+    outputViews: (schema.outputViews ?? []).map((view) => ({
+      ...view,
+      blocks: (view.blocks ?? []).map((b) =>
+        stripFromElement(b as unknown as Record<string, unknown>)
+      ) as unknown as typeof view.blocks,
+    })),
+  } as FormSchema;
+}
+
 const ensurePages = (schema: FormSchema): FormSchema => {
   const withOutputViews = ensureOutputViews(schema);
   if (
@@ -1066,10 +1102,12 @@ export function FormBuilder({
         setSchema(schemaForSave);
       }
 
+      const schemaToPersist = stripVisibleIfFromSchema(schemaForSave);
+
       // displayBlocksOnly mode: save via onSave only (e.g. general update schema)
       if (generalUpdateName && onSave) {
-        await onSave(schemaForSave);
-        setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
+        await onSave(schemaToPersist);
+        setLastSavedSchemaJSON(JSON.stringify(schemaToPersist));
         setHasUnsavedChanges(false);
         showSuccessToast("Saved successfully");
         return;
@@ -1082,23 +1120,23 @@ export function FormBuilder({
         response = await tasksUpdateForm({
           path: { formId },
           body: {
-            title: schemaForSave.title,
-            schema: schemaForSave as unknown as Record<string, unknown>,
+            title: schemaToPersist.title,
+            schema: schemaToPersist as unknown as Record<string, unknown>,
           },
         });
       } else {
         // Create new form
         response = await tasksCreateForm({
           body: {
-            title: schemaForSave.title,
-            schema: schemaForSave as unknown as Record<string, unknown>,
+            title: schemaToPersist.title,
+            schema: schemaToPersist as unknown as Record<string, unknown>,
           },
         });
       }
 
       if (response.response.ok && response.data) {
         setFormId(response.data.id);
-        setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
+        setLastSavedSchemaJSON(JSON.stringify(schemaToPersist));
         setHasUnsavedChanges(false);
         if (resolvedDraftIds.length > 0) {
           setCustomValidatorDrafts((prev) => {
@@ -1118,7 +1156,7 @@ export function FormBuilder({
 
       // Call the optional onSave callback if provided
       if (onSave) {
-        await onSave(schemaForSave);
+        await onSave(schemaToPersist);
       }
 
       // Clear success message after 3 seconds

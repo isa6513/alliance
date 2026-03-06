@@ -59,7 +59,9 @@ interface BaseField<TKind extends FieldKind> {
   customValidatorId?: number;
 
   // simple conditions using string IDs
+  /** @deprecated Use visibleIfFormula. */
   visibleIf?: Condition[];
+  visibleIfFormula?: VisibleIfFormula;
   requiredIf?: Condition;
 
   // UI hints
@@ -77,6 +79,18 @@ export type Condition =
   | { expr: string }
   | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
   | { deviceType: DeviceVisibilityTarget[] };
+
+/** Formula tree for visibility: AND/OR of two operands, NOT of one. Leaves are condition names. */
+export type FormulaNode =
+  | { op: 'AND'; left: FormulaNode | string; right: FormulaNode | string }
+  | { op: 'OR'; left: FormulaNode | string; right: FormulaNode | string }
+  | { op: 'NOT'; operand: FormulaNode | string }
+  | string;
+
+export interface VisibleIfFormula {
+  conditions: Record<string, Condition>;
+  formula: FormulaNode;
+}
 
 // Specialized fields:
 
@@ -219,7 +233,9 @@ export interface OutputFieldBlock {
   showLabel?: boolean;
   labelOverride?: string;
   format?: 'field' | 'textonly' | 'card';
+  /** @deprecated Use visibleIfFormula. */
   visibleIf?: Condition[];
+  visibleIfFormula?: VisibleIfFormula;
 }
 
 export interface OutputViewSchema {
@@ -234,6 +250,29 @@ export function isQuestionField(
   field: AnyField | DisplayBlock,
 ): field is AnyField {
   return 'label' in field;
+}
+
+function evaluateVisibilityFormulaNode(
+  node: FormulaNode,
+  results: Record<string, boolean>,
+): boolean {
+  if (typeof node === 'string') return results[node] === true;
+  if (node.op === 'NOT') {
+    const operand =
+      typeof node.operand === 'string'
+        ? results[node.operand] === true
+        : evaluateVisibilityFormulaNode(node.operand, results);
+    return !operand;
+  }
+  const left =
+    typeof node.left === 'string'
+      ? results[node.left] === true
+      : evaluateVisibilityFormulaNode(node.left, results);
+  const right =
+    typeof node.right === 'string'
+      ? results[node.right] === true
+      : evaluateVisibilityFormulaNode(node.right, results);
+  return node.op === 'AND' ? left && right : left || right;
 }
 
 export function isQuestionVisible(
@@ -255,67 +294,67 @@ export function isQuestionVisible(
     }
     return true;
   };
+  const evalCond = (c: Condition): boolean => {
+    if ('expr' in c) return true;
+    if ('deviceType' in c) {
+      if (!Array.isArray(c.deviceType) || c.deviceType.length === 0)
+        return false;
+      return c.deviceType.includes(normalizedDeviceType);
+    }
+    if ('validatorId' in c) {
+      const expected = c.resultEquals ?? true;
+      const actual = validatorResults?.[c.validatorId];
+      if (actual === undefined) return false;
+      return actual === expected;
+    }
+    const val = formData[c.when];
+    if ('hasValue' in c) {
+      const present = hasContent(val as FormValue | undefined);
+      return c.hasValue ? present : !present;
+    }
+    if ('anySelected' in c) {
+      const selections = Array.isArray(val) ? val : [];
+      return c.anySelected ? selections.length > 0 : selections.length === 0;
+    }
+    if ('includesOption' in c) {
+      if (!c.includesOption) return false;
+      return (
+        Array.isArray(val) &&
+        val.length > 0 &&
+        typeof val[0] === 'string' &&
+        (val as string[]).includes(c.includesOption)
+      );
+    }
+    if (!('equals' in c)) return true;
+    if (typeof c.equals === 'boolean') return Boolean(val) === c.equals;
+    if (Array.isArray(val) && c.equals !== null && c.equals !== undefined) {
+      if (val.length > 0 && typeof val[0] === 'string') {
+        return (val as string[]).includes(c.equals as string);
+      }
+      return false;
+    }
+    return val === c.equals;
+  };
+
+  const formula = (element as { visibleIfFormula?: VisibleIfFormula })
+    .visibleIfFormula;
+  if (
+    formula?.conditions &&
+    Object.keys(formula.conditions).length > 0 &&
+    formula.formula
+  ) {
+    const results: Record<string, boolean> = {};
+    for (const [name, cond] of Object.entries(formula.conditions)) {
+      results[name] = evalCond(cond);
+    }
+    return evaluateVisibilityFormulaNode(formula.formula, results);
+  }
+
   const raw = element.visibleIf;
   if (raw && (Array.isArray(raw) ? raw.length > 0 : true)) {
-    const evalCond = (c: Condition): boolean => {
-      if ('expr' in c) {
-        return true;
-      }
-      if ('deviceType' in c) {
-        if (!Array.isArray(c.deviceType) || c.deviceType.length === 0) {
-          return false;
-        }
-        return c.deviceType.includes(normalizedDeviceType);
-      }
-      if ('validatorId' in c) {
-        const expected = c.resultEquals ?? true;
-        const actual = validatorResults?.[c.validatorId];
-        if (actual === undefined) {
-          return false;
-        }
-        return actual === expected;
-      }
-      const val = formData[c.when];
-      if ('hasValue' in c) {
-        const present = hasContent(val as FormValue | undefined);
-        return c.hasValue ? present : !present;
-      }
-      if ('anySelected' in c) {
-        const selections = Array.isArray(val) ? val : [];
-        return c.anySelected ? selections.length > 0 : selections.length === 0;
-      }
-      if ('includesOption' in c) {
-        if (!c.includesOption) {
-          return false;
-        }
-        return (
-          Array.isArray(val) &&
-          val.length > 0 &&
-          typeof val[0] === 'string' &&
-          (val as string[]).includes(c.includesOption)
-        );
-      }
-      if (!('equals' in c)) {
-        return true;
-      }
-      // If condition expects a boolean (checkbox controllers), coerce undefined → false
-      if (typeof c.equals === 'boolean') {
-        return Boolean(val) === c.equals;
-      }
-      if (Array.isArray(val) && c.equals !== null && c.equals !== undefined) {
-        // multiselect: treat equals as "includes" (only for string[] values)
-        if (val.length > 0 && typeof val[0] === 'string') {
-          return (val as string[]).includes(c.equals as string);
-        }
-        return false;
-      }
-      return val === c.equals;
-    };
     const conditions = Array.isArray(raw) ? raw : [raw];
     for (const condition of conditions) {
-      if (!evalCond(condition)) {
-        return false;
-      }
+      if (!evalCond(condition)) return false;
     }
   }
   return true;

@@ -99,7 +99,9 @@ export function FieldWrapper<T extends AnyField>({
     () => (isCurrentFormField ? Boolean(field.customValidatorId) : false)
   );
   const initialVisibilityCount =
-    isCurrentFormField && Array.isArray(field.visibleIf)
+    isCurrentFormField && field.visibleIfFormula?.conditions
+      ? Object.keys(field.visibleIfFormula.conditions).length
+      : isCurrentFormField && Array.isArray(field.visibleIf)
       ? field.visibleIf.length
       : isCurrentFormField && field.visibleIf
       ? 1
@@ -168,7 +170,9 @@ export function FieldWrapper<T extends AnyField>({
     }
 
     const conditionCount =
-      isCurrentFormField && Array.isArray(field.visibleIf)
+      isCurrentFormField && field.visibleIfFormula?.conditions
+        ? Object.keys(field.visibleIfFormula.conditions).length
+        : isCurrentFormField && Array.isArray(field.visibleIf)
         ? field.visibleIf.length
         : isCurrentFormField && field.visibleIf
         ? 1
@@ -245,6 +249,7 @@ export function FieldWrapper<T extends AnyField>({
 
   const handleVisibilityChange = (updates: {
     visibleIf?: AnyField["visibleIf"];
+    visibleIfFormula?: AnyField["visibleIfFormula"];
   }) => {
     onUpdate(updates as unknown as Partial<T>);
   };
@@ -259,7 +264,10 @@ export function FieldWrapper<T extends AnyField>({
   const handleConditionalVisibilityToggle = (checked: boolean) => {
     setShowConditionalVisibilityControl(checked);
     if (!checked) {
-      handleVisibilityChange({ visibleIf: undefined });
+      handleVisibilityChange({
+        visibleIf: undefined,
+        visibleIfFormula: undefined,
+      });
     }
   };
 

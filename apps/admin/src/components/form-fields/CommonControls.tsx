@@ -32,7 +32,14 @@ import {
   type SelectField,
   type TextField,
   type TextareaField,
+  type VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
+import {
+  conditionNameForIndex,
+  defaultFormulaForConditionCount,
+  parseVisibilityFormula,
+  serializeVisibilityFormula,
+} from "@alliance/shared/forms/visibilityFormula";
 import {
   isDraftValidatorId,
   useCustomValidatorDrafts,
@@ -40,6 +47,24 @@ import {
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { cn } from "@alliance/shared/styles/util";
+
+function getFormulaConditionRefs(node: VisibleIfFormula["formula"]): string[] {
+  if (typeof node === "string") return [node];
+  if (node.op === "NOT") {
+    return getFormulaConditionRefs(
+      typeof node.operand === "string" ? node.operand : node.operand
+    );
+  }
+  const left =
+    typeof node.left === "string"
+      ? [node.left]
+      : getFormulaConditionRefs(node.left);
+  const right =
+    typeof node.right === "string"
+      ? [node.right]
+      : getFormulaConditionRefs(node.right);
+  return [...left, ...right];
+}
 
 const DEVICE_LABELS: Record<DeviceVisibilityTarget, string> = {
   mobile: "Mobile",
@@ -151,10 +176,15 @@ export function OutputPrivateByDefaultToggle({
 
 // ---------------- Conditional Visibility ----------------
 type ConditionalVisibilityProps = {
-  field: (AnyField | DisplayBlock) & { visibleIf?: Condition[] | Condition };
+  field: (AnyField | DisplayBlock) & {
+    visibleIf?: Condition[] | Condition;
+    visibleIfFormula?: VisibleIfFormula;
+  };
   previousFields: AnyField[];
-  // Only updates the "visibleIf" property for a field
-  onChange: (updates: { visibleIf?: Condition[] }) => void;
+  onChange: (updates: {
+    visibleIf?: Condition[];
+    visibleIfFormula?: VisibleIfFormula;
+  }) => void;
 };
 
 type TextContentControllerField =
@@ -265,9 +295,30 @@ export function ConditionalVisibility({
     [validators]
   );
 
-  const conditions = useMemo(
-    () => normalizeConditions(field.visibleIf),
-    [field.visibleIf]
+  const conditions = useMemo(() => {
+    const formula = field.visibleIfFormula;
+    if (formula?.conditions && Object.keys(formula.conditions).length > 0) {
+      const names = Object.keys(formula.conditions).sort((a, b) => {
+        const na = parseInt(a.replace("condition", ""), 10) || 0;
+        const nb = parseInt(b.replace("condition", ""), 10) || 0;
+        return na - nb;
+      });
+      return names.map((name) => formula.conditions[name]);
+    }
+    return normalizeConditions(field.visibleIf);
+  }, [field.visibleIf, field.visibleIfFormula]);
+
+  const formulaText = useMemo(() => {
+    const formula = field.visibleIfFormula;
+    if (formula?.formula) {
+      return serializeVisibilityFormula(formula.formula);
+    }
+    return defaultFormulaForConditionCount(conditions.length);
+  }, [field.visibleIfFormula, conditions.length]);
+
+  const allowedConditionNames = useMemo(
+    () => new Set(conditions.map((_, i) => conditionNameForIndex(i))),
+    [conditions]
   );
 
   const buildConditionForField = useCallback(
@@ -315,6 +366,11 @@ export function ConditionalVisibility({
   );
 
   const [conditionError, setConditionError] = useState<string | null>(null);
+  const [formulaError, setFormulaError] = useState<string | null>(null);
+  const [formulaInput, setFormulaInput] = useState(formulaText);
+  useEffect(() => {
+    setFormulaInput(formulaText);
+  }, [formulaText]);
 
   const canUseFieldControllers = controllers.length > 0;
   const canUseValidators = usableValidators.length > 0;
@@ -322,11 +378,83 @@ export function ConditionalVisibility({
     !canUseFieldControllers && !canUseValidators;
 
   const updateConditions = useCallback(
-    (next: Condition[]) => {
+    (next: Condition[], preserveFormula?: boolean) => {
       setConditionError(null);
-      onChange({ visibleIf: next.length > 0 ? next : undefined });
+      setFormulaError(null);
+      const names = next.map((_, i) => conditionNameForIndex(i));
+      const conditionsMap: Record<string, Condition> = {};
+      names.forEach((name, i) => {
+        conditionsMap[name] = next[i];
+      });
+      const allowed = new Set(names);
+      let formulaNode: VisibleIfFormula["formula"];
+      if (
+        preserveFormula &&
+        field.visibleIfFormula?.formula &&
+        Object.keys(field.visibleIfFormula.conditions ?? {}).length ===
+          next.length
+      ) {
+        const current = field.visibleIfFormula.formula;
+        const refs = getFormulaConditionRefs(current);
+        if (refs.every((r) => allowed.has(r))) {
+          formulaNode = current;
+        } else {
+          formulaNode = parseOrDefaultFormula(
+            defaultFormulaForConditionCount(next.length),
+            allowed
+          );
+        }
+      } else {
+        formulaNode = parseOrDefaultFormula(
+          defaultFormulaForConditionCount(next.length),
+          allowed
+        );
+      }
+      if (next.length === 0) {
+        onChange({ visibleIfFormula: undefined, visibleIf: undefined });
+        return;
+      }
+      onChange({
+        visibleIfFormula: { conditions: conditionsMap, formula: formulaNode },
+      });
     },
-    [onChange]
+    [onChange, field.visibleIfFormula]
+  );
+
+  function parseOrDefaultFormula(
+    defaultStr: string,
+    allowed: Set<string>
+  ): VisibleIfFormula["formula"] {
+    const parsed = parseVisibilityFormula(defaultStr, allowed);
+    if ("error" in parsed) {
+      const fallback = parseVisibilityFormula(
+        "condition1",
+        new Set(["condition1"])
+      );
+      return "node" in fallback ? fallback.node : "condition1";
+    }
+    return parsed.node;
+  }
+
+  const handleFormulaChange = useCallback(
+    (text: string) => {
+      setFormulaError(null);
+      if (conditions.length === 0) return;
+      const allowed = allowedConditionNames;
+      const parsed = parseVisibilityFormula(text.trim(), allowed);
+      if ("error" in parsed) {
+        setFormulaError(parsed.error);
+        return;
+      }
+      const conditionsMap: Record<string, Condition> = {};
+      conditions.forEach((c, i) => {
+        conditionsMap[conditionNameForIndex(i)] = c;
+      });
+      onChange({
+        visibleIfFormula: { conditions: conditionsMap, formula: parsed.node },
+      });
+    },
+    [conditions, allowedConditionNames, onChange]
   );
 
   const removeCondition = useCallback(
@@ -497,7 +625,7 @@ export function ConditionalVisibility({
           currentSelection.has(type)
         ),
       };
-      updateConditions(next);
+      updateConditions(next, true);
     },
     [conditions, updateConditions]
   );
@@ -514,7 +642,7 @@ export function ConditionalVisibility({
       }
       const next = [...conditions];
       next[index] = nextCondition;
-      updateConditions(next);
+      updateConditions(next, true);
     },
     [buildConditionForField, conditions, controllers, updateConditions]
   );
@@ -567,7 +695,7 @@ export function ConditionalVisibility({
           equals: value,
         };
       }
-      updateConditions(next);
+      updateConditions(next, true);
     },
     [conditions, controllers, updateConditions]
   );
@@ -605,7 +733,7 @@ export function ConditionalVisibility({
         validatorId: draftId,
         resultEquals,
       };
-      updateConditions(next);
+      updateConditions(next, true);
     },
     [conditions, createDraftId, removeCondition, setDraft, updateConditions]
   );
@@ -621,7 +749,7 @@ export function ConditionalVisibility({
         ...condition,
         resultEquals: value === "true",
       };
-      updateConditions(next);
+      updateConditions(next, true);
     },
     [conditions, updateConditions]
   );
@@ -886,6 +1014,37 @@ export function ConditionalVisibility({
         <p className="mt-1 text-[11px] text-red-500">{conditionError}</p>
       )}
 
+      {conditions.length > 0 && (
+        <div className="mt-2">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Visibility formula
+          </label>
+          <p className="text-[11px] text-gray-500 mb-1">
+            Combine conditions with AND, OR, NOT. E.g. condition1 AND
+            (condition2 OR NOT condition3)
+          </p>
+          <input
+            type="text"
+            className={cn(
+              "w-full px-2 py-1.5 text-xs border rounded focus:outline-none focus:ring-1",
+              formulaError
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:ring-blue-500"
+            )}
+            value={formulaInput}
+            onChange={(e) => {
+              setFormulaInput(e.target.value);
+              setFormulaError(null);
+            }}
+            onBlur={() => handleFormulaChange(formulaInput)}
+            placeholder="e.g. condition1 AND condition2"
+          />
+          {formulaError && (
+            <p className="mt-1 text-[11px] text-red-500">{formulaError}</p>
+          )}
+        </div>
+      )}
+
       <div className="mt-2 space-y-3">
         {conditions.map((condition, index) => (
           <div
@@ -895,6 +1054,9 @@ export function ConditionalVisibility({
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-gray-700">
                 Condition {index + 1}
+                <span className="text-gray-400 font-normal ml-1">
+                  ({conditionNameForIndex(index)})
+                </span>
               </span>
               <button
                 type="button"

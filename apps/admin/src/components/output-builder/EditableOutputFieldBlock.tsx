@@ -3,6 +3,7 @@ import type {
   AnyField,
   Condition,
   OutputFieldBlock,
+  VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
 import { ConditionalVisibility } from "../form-fields/CommonControls";
 import { cn } from "@alliance/shared/styles/util";
@@ -30,26 +31,35 @@ export function EditableOutputFieldBlock({
     (field) => field.id === block.fieldId
   );
   const [showVisibilityControls, setShowVisibilityControls] = useState(() =>
-    Array.isArray(block.visibleIf) ? block.visibleIf.length > 0 : false
+    block.visibleIfFormula?.conditions
+      ? Object.keys(block.visibleIfFormula.conditions).length > 0
+      : Array.isArray(block.visibleIf)
+      ? block.visibleIf.length > 0
+      : !!block.visibleIf
   );
 
   useEffect(() => {
-    const hasConditions = Array.isArray(block.visibleIf)
+    const hasConditions = block.visibleIfFormula?.conditions
+      ? Object.keys(block.visibleIfFormula.conditions).length > 0
+      : Array.isArray(block.visibleIf)
       ? block.visibleIf.length > 0
       : !!block.visibleIf;
     if (hasConditions) {
       setShowVisibilityControls(true);
     }
-  }, [block.visibleIf]);
+  }, [block.visibleIf, block.visibleIfFormula]);
 
-  const handleVisibilityChange = (updates: { visibleIf?: Condition[] }) => {
-    onUpdate({ visibleIf: updates.visibleIf });
+  const handleVisibilityChange = (updates: {
+    visibleIf?: Condition[];
+    visibleIfFormula?: VisibleIfFormula;
+  }) => {
+    onUpdate(updates);
   };
 
   const handleVisibilityToggle = (enabled: boolean) => {
     setShowVisibilityControls(enabled);
     if (!enabled) {
-      onUpdate({ visibleIf: undefined });
+      onUpdate({ visibleIf: undefined, visibleIfFormula: undefined });
     }
   };
 

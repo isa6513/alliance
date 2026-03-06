@@ -10,7 +10,11 @@ import type {
   DisplayBlock,
   ManualDisplayBlockContent,
 } from "@alliance/shared/forms/display-blocks";
-import type { AnyField, Condition } from "@alliance/shared/forms/formschema";
+import type {
+  AnyField,
+  Condition,
+  VisibleIfFormula,
+} from "@alliance/shared/forms/formschema";
 import type { UserDto } from "@alliance/shared/client";
 import { userList } from "@alliance/shared/client";
 import { ConditionalVisibility } from "../form-fields/CommonControls";
@@ -69,14 +73,13 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   const [
     showConditionalVisibilityControl,
     setShowConditionalVisibilityControl,
-  ] = useState(() => {
+  ] = useState<boolean>(() => {
     if (!block) return false;
-    const conditions = Array.isArray(block.visibleIf)
-      ? block.visibleIf.length
-      : block?.visibleIf
-      ? 1
-      : 0;
-    return conditions > 0;
+    return block.visibleIfFormula?.conditions
+      ? !!Object.keys(block.visibleIfFormula.conditions).length
+      : Array.isArray(block.visibleIf)
+      ? !!block.visibleIf.length
+      : !!block?.visibleIf;
   });
 
   const manualUserContent = useMemo(
@@ -207,13 +210,13 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   }, [isMenuOpen]);
 
   useEffect(() => {
-    const conditionCount = Array.isArray(block?.visibleIf)
-      ? block?.visibleIf.length
-      : block?.visibleIf
-      ? 1
-      : 0;
+    const useConditions = block?.visibleIfFormula?.conditions
+      ? !!Object.keys(block.visibleIfFormula.conditions).length
+      : Array.isArray(block?.visibleIf)
+      ? !!block?.visibleIf.length
+      : !!block?.visibleIf;
 
-    if (conditionCount > 0 && !showConditionalVisibilityControl) {
+    if (useConditions && !showConditionalVisibilityControl) {
       setShowConditionalVisibilityControl(true);
     }
   }, [block, showConditionalVisibilityControl]);
@@ -290,7 +293,10 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
     [manualUserContent, manualUsers]
   );
 
-  const handleConditionalChange = (updates: { visibleIf?: Condition[] }) => {
+  const handleConditionalChange = (updates: {
+    visibleIf?: Condition[];
+    visibleIfFormula?: VisibleIfFormula;
+  }) => {
     if (!onUpdate || !block) {
       return;
     }
@@ -317,7 +323,10 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   const handleConditionalVisibilityToggle = (checked: boolean) => {
     setShowConditionalVisibilityControl(checked);
     if (!checked) {
-      handleConditionalChange({ visibleIf: undefined });
+      handleConditionalChange({
+        visibleIf: undefined,
+        visibleIfFormula: undefined,
+      });
     }
   };
 

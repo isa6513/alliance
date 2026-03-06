@@ -8,8 +8,10 @@ import type {
   ListField,
   NumberField,
   RangeField,
+  VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
 import { parseTimeToMinutes } from "@alliance/shared/forms/timeUtils";
+import { evaluateVisibilityFormula } from "@alliance/shared/forms/visibilityFormula";
 
 export const FALLBACK_TIMEZONE = "America/Los_Angeles";
 const DEFAULT_RANGE_OPTION_COUNT = 10;
@@ -287,12 +289,18 @@ export function isElementCurrentlyVisible(
   data: Record<string, FormValue>,
   extras: ConditionExtras & { readOnly?: boolean } = {}
 ): boolean {
+  const formula = (element as { visibleIfFormula?: VisibleIfFormula })
+    .visibleIfFormula;
   const conditions = Array.isArray(element.visibleIf)
     ? element.visibleIf
     : element.visibleIf
     ? [element.visibleIf]
     : [];
-  if (conditions.length === 0) {
+  const hasFormula =
+    formula?.conditions &&
+    Object.keys(formula.conditions).length > 0 &&
+    formula.formula;
+  if (conditions.length === 0 && !hasFormula) {
     return true;
   }
   if (extras.readOnly && element.id) {
@@ -337,6 +345,21 @@ export function isElementCurrentlyVisible(
     visibilityMemo.set(fieldId, visible);
     return visible;
   };
+
+  if (hasFormula) {
+    const results: Record<string, boolean> = {};
+    for (const [name, cond] of Object.entries(formula!.conditions)) {
+      if ("expr" in cond || "deviceType" in cond || "validatorId" in cond) {
+        results[name] = evaluateCondition(cond, data, extras);
+      } else {
+        const value = isReferencedFieldVisible((cond as { when: string }).when)
+          ? (data[(cond as { when: string }).when] as FormValue | undefined)
+          : undefined;
+        results[name] = evaluateValueBasedCondition(cond, value);
+      }
+    }
+    return evaluateVisibilityFormula(formula!.formula, results);
+  }
 
   return conditions.every((condition) => {
     if (

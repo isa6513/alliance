@@ -13,7 +13,6 @@ import RenderField from "./RenderField";
 import type {
   AnyField,
   CityFieldValue,
-  Condition,
   DeviceVisibilityTarget,
   FormSchema,
   FormValue,
@@ -21,6 +20,8 @@ import type {
   OutputBlock,
   OutputViewSchema,
 } from "@alliance/shared/forms/formschema";
+import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
+import { isElementCurrentlyVisible } from "@alliance/shared/formrenderer";
 
 type OutputRendererProps = {
   schema?: FormSchema;
@@ -34,28 +35,6 @@ type OutputRendererProps = {
 type SubmissionWithPublicAnswers =
   | (FormResponseOutputDto & { publicAnswers?: Record<string, boolean> })
   | (FormResponseDto & { publicAnswers?: Record<string, boolean> });
-
-const normalizeConditions = (
-  conditions?: Condition[] | Condition
-): Condition[] => {
-  if (!conditions) {
-    return [];
-  }
-  return Array.isArray(conditions) ? conditions : [conditions];
-};
-
-const hasContent = (value: FormValue | undefined): boolean => {
-  if (value === undefined || value === null) {
-    return false;
-  }
-  if (typeof value === "string") {
-    return value.trim().length > 0;
-  }
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-  return true;
-};
 
 const isCityValue = (value: unknown): value is CityFieldValue => {
   if (!value || typeof value !== "object") return false;
@@ -80,80 +59,6 @@ const formatCity = (value: CityFieldValue | string): string => {
   return `${value.name}${suffix}`;
 };
 
-//TODO: refactor to share with FormRenderer.tsx
-const evaluateCondition = (
-  cond: Condition,
-  data: Record<string, FormValue>,
-  deviceType: DeviceVisibilityTarget,
-  visibilityValidatorResults: Record<number, boolean>
-): boolean => {
-  if ("expr" in cond) {
-    return true;
-  }
-  if ("deviceType" in cond) {
-    if (!Array.isArray(cond.deviceType) || cond.deviceType.length === 0) {
-      return false;
-    }
-    return cond.deviceType.includes(deviceType);
-  }
-  if ("validatorId" in cond) {
-    const expected = cond.resultEquals ?? true;
-    const actual = visibilityValidatorResults[cond.validatorId];
-    if (actual === undefined) {
-      return false;
-    }
-    return actual === expected;
-  }
-  const val = data[cond.when];
-  if ("hasValue" in cond) {
-    const present = hasContent(val as FormValue | undefined);
-    return cond.hasValue ? present : !present;
-  }
-  if ("anySelected" in cond) {
-    const selections = Array.isArray(val) ? val : [];
-    return cond.anySelected ? selections.length > 0 : selections.length === 0;
-  }
-  if ("includesOption" in cond) {
-    if (!cond.includesOption) {
-      return false;
-    }
-    return Array.isArray(val) && val.some((e) => e === cond.includesOption);
-  }
-  if (!("equals" in cond)) {
-    return true;
-  }
-  const equals = cond.equals;
-  if (typeof equals === "boolean") {
-    if (val === undefined || val === null) {
-      return false;
-    }
-    return val === equals;
-  }
-  if (Array.isArray(val) && equals !== null && equals !== undefined) {
-    return val.some((e) => e === equals);
-  }
-  return val === equals;
-};
-
-const isElementCurrentlyVisible = (
-  element: AnyField,
-  data: Record<string, FormValue>,
-  deviceType: DeviceVisibilityTarget,
-  visibilityValidatorResults: Record<number, boolean>
-): boolean => {
-  const conditions = Array.isArray(element.visibleIf)
-    ? element.visibleIf
-    : element.visibleIf
-    ? [element.visibleIf]
-    : [];
-  if (conditions.length === 0) {
-    return true;
-  }
-  return conditions.every((condition) =>
-    evaluateCondition(condition, data, deviceType, visibilityValidatorResults)
-  );
-};
-
 const isBlockVisible = (
   block: OutputBlock,
   answers: Record<string, FormValue>,
@@ -162,12 +67,10 @@ const isBlockVisible = (
   inputField?: AnyField
 ): boolean => {
   if (inputField) {
-    const isVisible = isElementCurrentlyVisible(
-      inputField,
-      answers,
-      deviceType ?? "desktop",
-      validatorResults ?? {}
-    );
+    const isVisible = isElementCurrentlyVisible(inputField, answers, {
+      deviceType: deviceType ?? "desktop",
+      visibilityValidatorResults: validatorResults ?? {},
+    });
     if (!isVisible) {
       return false;
     }
@@ -175,68 +78,9 @@ const isBlockVisible = (
   if ("fieldId" in block && !answers[block.fieldId]) {
     return false;
   }
-
-  const conditions = normalizeConditions(block.visibleIf);
-  if (!conditions.length) {
-    return true;
-  }
-  const normalizedDevice: DeviceVisibilityTarget = deviceType ?? "desktop";
-  return conditions.every((condition) => {
-    if ("expr" in condition) {
-      return true;
-    }
-    if ("deviceType" in condition) {
-      if (
-        !Array.isArray(condition.deviceType) ||
-        condition.deviceType.length === 0
-      ) {
-        return false;
-      }
-      return condition.deviceType.includes(normalizedDevice);
-    }
-    if ("validatorId" in condition) {
-      const expected = condition.resultEquals ?? true;
-      const actual = validatorResults?.[condition.validatorId];
-      if (actual === undefined) {
-        return false;
-      }
-      return actual === expected;
-    }
-
-    const value = answers[condition.when];
-    if ("hasValue" in condition) {
-      const present = hasContent(value as FormValue | undefined);
-      return condition.hasValue ? present : !present;
-    }
-    if ("anySelected" in condition) {
-      const selections = Array.isArray(value) ? value : [];
-      return condition.anySelected
-        ? selections.length > 0
-        : selections.length === 0;
-    }
-    if ("includesOption" in condition) {
-      if (!condition.includesOption) {
-        return false;
-      }
-      return (
-        Array.isArray(value) &&
-        value.some((e) => e === condition.includesOption)
-      );
-    }
-    if (!("equals" in condition)) {
-      return true;
-    }
-    if (typeof condition.equals === "boolean") {
-      return Boolean(value) === condition.equals;
-    }
-    if (
-      Array.isArray(value) &&
-      condition.equals !== null &&
-      condition.equals !== undefined
-    ) {
-      return value.some((e) => e === condition.equals);
-    }
-    return value === condition.equals;
+  return isElementCurrentlyVisible(block as AnyField | DisplayBlock, answers, {
+    deviceType: deviceType ?? "desktop",
+    visibilityValidatorResults: validatorResults ?? {},
   });
 };
 
@@ -483,7 +327,10 @@ export function OutputRenderer({
           };
           if (field.kind === "list") {
             const listField = field as ListField;
-            if (Array.isArray(listField.fields) && listField.fields.length > 0) {
+            if (
+              Array.isArray(listField.fields) &&
+              listField.fields.length > 0
+            ) {
               (withLabel as ListField).fields = listField.fields.map((sub) => ({
                 ...sub,
                 required: false,
