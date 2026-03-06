@@ -140,7 +140,7 @@ export class MmsService {
       this.eventLogService.sendMessage({
         type: EventType.SmsFailure,
         message: `MMS to ${mms.to} failed with status ${message.status}. Error code: ${message.errorCode}`,
-        blob: { errorCode: message.errorCode, to: mms.to, from: mms.from },
+        blob: message.toJSON(),
       });
     }
     return this.mmsRepository.save({
