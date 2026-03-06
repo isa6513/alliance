@@ -3,7 +3,7 @@ import { type RouteConfig, layout, route } from "@react-router/dev/routes";
 export default [
   layout("adminlayout.tsx", [
     layout("sidebar.tsx", [
-      route("/", "pages/Actions.tsx"),
+      route("/actions", "pages/Actions.tsx"),
       route("/timeline", "pages/NewTimelinePage.tsx"),
       route("/invites", "pages/InvitesPage.tsx"),
       route("/invites/graph", "pages/InviteGraphPage.tsx"),
@@ -13,7 +13,7 @@ export default [
       route("/scheduled", "pages/ScheduledPlansPage.tsx"),
       route("/suites/:suiteId", "pages/ActionSuitePage.tsx"),
       route("/new-suite", "pages/NewActionSuitePage.tsx"),
-      route("/stats", "pages/StatsPage.tsx"),
+      route("/", "pages/StatsPage.tsx"),
       route("/forms", "pages/FormsList.tsx"),
       route("/forms/:formId/responses", "pages/FormResponses.tsx"),
       route("/forms/:formId", "pages/FormBuilder.tsx"),

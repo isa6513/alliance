@@ -199,7 +199,11 @@ const Sidebar: React.FC = () => {
           </h1>
           <nav className="flex flex-col gap-y-1">
             {[
-              { to: "/", label: "Actions", icon: <SquareActivity size={16} /> },
+              {
+                to: "/actions",
+                label: "Actions",
+                icon: <SquareActivity size={16} />,
+              },
               {
                 to: "/general-updates",
                 label: "General Updates",
@@ -223,7 +227,7 @@ const Sidebar: React.FC = () => {
                 notifCount: membersUndergoingGroupAssignment.length,
               },
               {
-                to: "/stats",
+                to: "/",
                 label: "Stats",
                 icon: <BarChart2 size={16} />,
               },
