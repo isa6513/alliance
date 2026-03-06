@@ -665,11 +665,13 @@ const ensureIosWorkspace = async () => {
       "prebuild",
       "--platform",
       "ios",
-      "--non-interactive",
     ],
     {
       cwd: repoRoot,
-      env: process.env,
+      env: {
+        ...process.env,
+        CI: "true",
+      },
     }
   );
 
