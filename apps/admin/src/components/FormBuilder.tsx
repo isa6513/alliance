@@ -489,6 +489,20 @@ export function FormBuilder({
       });
     };
 
+    const collectFromVisibleIfFormula = (
+      visibleIfFormula?: { conditions: Record<string, Condition> }
+    ) => {
+      if (!visibleIfFormula?.conditions) return;
+      Object.values(visibleIfFormula.conditions).forEach((condition) => {
+        if (
+          "validatorId" in condition &&
+          isDraftValidatorId(condition.validatorId)
+        ) {
+          activeDraftIds.add(condition.validatorId);
+        }
+      });
+    };
+
     schema.pages.forEach((page) => {
       page.fields.forEach((field) => {
         if (isSchemaFormField(field)) {
@@ -497,12 +511,20 @@ export function FormBuilder({
           }
         }
         collectFromConditions(field.visibleIf);
+        collectFromVisibleIfFormula(
+          (field as { visibleIfFormula?: { conditions: Record<string, Condition> } })
+            .visibleIfFormula
+        );
       });
     });
 
     schema.outputViews.forEach((view) => {
       view.blocks.forEach((block) => {
         collectFromConditions(block.visibleIf);
+        collectFromVisibleIfFormula(
+          (block as { visibleIfFormula?: { conditions: Record<string, Condition> } })
+            .visibleIfFormula
+        );
       });
     });
 
