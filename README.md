@@ -38,7 +38,15 @@ When opening the app locally for the first time, you can log in with the account
 
 ### mobile
 
-dev: `cd apps/mobile && yarn start`
+Running on a physical device:
+
+- `npx expo prebuild`
+- `cd ios && pod install`
+- `cd .. && npx expo run:ios --device [YOUR DEVICE ID]`
+
+Running dev server for expo / development build: (once you've made a development build once, you should just be able to run this for hot reload updates)
+
+- `yarn start`
 
 build: `yarn eas build --platform [ios|android]`
 

@@ -63,7 +63,11 @@ export class MmsService {
     mediaUrls: string[],
     cid?: string,
   ): Promise<Mms | null> {
-    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'staging' || to === '15550100') {
+    if (
+      process.env.NODE_ENV === 'test' ||
+      process.env.NODE_ENV === 'staging' ||
+      to === '15550100'
+    ) {
       return null;
     }
     this.logger.log(
@@ -83,12 +87,16 @@ export class MmsService {
     }
 
     try {
-      const message = await withTimeout(this.twilioClient.messages.create({
-        to: to,
-        from: this.twilioPhoneNumber,
-        body: body,
-        mediaUrl: mediaUrls,
-      }), 10000, 'sendMms');
+      const message = await withTimeout(
+        this.twilioClient.messages.create({
+          to: to,
+          from: this.twilioPhoneNumber,
+          body: body,
+          mediaUrl: mediaUrls,
+        }),
+        10000,
+        'sendMms',
+      );
 
       if (!message) {
         throw new Error('Failed to send MMS');
@@ -128,6 +136,13 @@ export class MmsService {
 
   async refreshMmsData(mms: Mms): Promise<Mms> {
     const message = await this.twilioClient.messages.get(mms.twilioSid).fetch();
+    if (message.errorCode) {
+      this.eventLogService.sendMessage({
+        type: EventType.SmsFailure,
+        message: `MMS to ${mms.to} failed with status ${message.status}. Error code: ${message.errorCode}`,
+        blob: { errorCode: message.errorCode, to: mms.to, from: mms.from },
+      });
+    }
     return this.mmsRepository.save({
       ...mms,
       ...message,
