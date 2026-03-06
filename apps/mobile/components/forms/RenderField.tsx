@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  Pressable,
   ScrollView,
   Image,
   Text,
@@ -187,6 +188,7 @@ export function RenderField({
             editable={!disabled}
             multiline
             textAlignVertical="top"
+            scrollEnabled={false}
             maxLength={field.maxLength}
           />
           {field.maxLength && (
@@ -742,9 +744,9 @@ export function TimeInputField({
     <View>
       <RenderLabel field={field} error={effectiveError} />
       <View className="relative">
-        <TouchableOpacity
-          activeOpacity={0.9}
+        <Pressable
           onPress={() => setShowDropdown((prev) => !prev)}
+          disabled={disabled}
           className={cn(
             "flex-row items-center justify-between",
             sharedInputClasses,
@@ -767,7 +769,7 @@ export function TimeInputField({
             onSubmitEditing={commitValue}
           />
           <ChevronDown size={18} color="#52525b" />
-        </TouchableOpacity>
+        </Pressable>
 
         <FormModal
           visible={showDropdown}
