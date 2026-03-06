@@ -168,7 +168,7 @@ export default function SettingsPage() {
   }
 
   const inputClasses =
-    "border border-zinc-300 rounded-lg bg-white px-3 py-3 text-base pt-2";
+    "border border-zinc-300 rounded-lg bg-white px-3 py-3 text-base";
 
   return (
     <ScrollView className="flex-1 bg-white">

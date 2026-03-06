@@ -9,4 +9,21 @@
   --font-serif-semibold: "LibreBaskerville-SemiBold", serif;
   --font-serif-bold: "LibreBaskerville-Bold", serif;
   --color-green: rgb(98, 161, 36);
+
+  /* Strip lineHeight from font-size utilities — RN handles defaults well,
+     and explicit lineHeight on TextInput causes bottom-clipping.
+     Use leading-* utilities when explicit lineHeight is needed. */
+  --text-xs--line-height: initial;
+  --text-sm--line-height: initial;
+  --text-base--line-height: initial;
+  --text-lg--line-height: initial;
+  --text-xl--line-height: initial;
+  --text-2xl--line-height: initial;
+  --text-3xl--line-height: initial;
+  --text-4xl--line-height: initial;
+  --text-5xl--line-height: initial;
+  --text-6xl--line-height: initial;
+  --text-7xl--line-height: initial;
+  --text-8xl--line-height: initial;
+  --text-9xl--line-height: initial;
 }
