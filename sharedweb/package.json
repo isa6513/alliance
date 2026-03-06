@@ -13,6 +13,7 @@
   "dependencies": {
     "@alliance/shared": "workspace:*",
     "@hey-api/client-fetch": "^0.13.1",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "hls.js": "^1.6.15",

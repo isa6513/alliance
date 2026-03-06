@@ -1,12 +1,8 @@
 import { cn } from "@alliance/shared/styles/util";
+import { textClass } from "./typography";
+export { textClass, type TypographyProps } from "./typography";
 
-export const Style = {
-  PageTitle: "font-serif font-semibold text-3xl md:text-4xl",
-};
-
-export const PageTitle: React.FC<React.ComponentPropsWithoutRef<"h1">> = ({
+export const PageTitle: React.FC<React.ComponentProps<"h1">> = ({
   className,
-  ...rest
-}) => {
-  return <h1 className={cn(Style.PageTitle, className)} {...rest} />;
-};
+  ...props
+}) => <h1 className={cn(textClass({ font: "title" }), className)} {...props} />;
