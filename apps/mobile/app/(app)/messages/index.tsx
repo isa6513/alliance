@@ -79,6 +79,7 @@ export default function MessagesScreen() {
   return (
     <GreenHeader>
       <ScrollView
+        testID="vr-messages-ready"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }

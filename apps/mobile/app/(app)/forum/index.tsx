@@ -65,6 +65,7 @@ export default function ForumScreen() {
 
   return (
     <ScrollView
+      testID="vr-forum-ready"
       className="flex-1 bg-white pt-10"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

@@ -171,7 +171,7 @@ export default function SettingsPage() {
     "border border-zinc-300 rounded-lg bg-white px-3 py-3 text-base";
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className="flex-1 bg-white" testID="vr-settings-ready">
       <View className="px-4 pb-12">
         <View>
           <SimplePageTitle title="Settings" />

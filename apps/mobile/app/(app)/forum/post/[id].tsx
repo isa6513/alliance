@@ -124,7 +124,7 @@ export default function PostDetailScreen() {
   const action = post.action;
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className="flex-1 bg-white" testID="vr-forum-post-ready">
       <View className="px-4 pt-4 pb-10">
         <TouchableOpacity
           onPress={() => router.push("/forum")}

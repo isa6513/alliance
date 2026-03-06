@@ -16,6 +16,10 @@ import {
 import { useRouter } from "expo-router";
 import { client } from "@alliance/shared/client/client.gen";
 import { getApiUrl } from "./config";
+import {
+  getVisualTestAutoLoginCredentials,
+  isVisualTestMode,
+} from "./visualTest";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -71,7 +75,9 @@ export const AuthProvider: React.FC<
     authLogout();
     clearTokens();
     setUser(undefined);
-    router.replace("/auth/login");
+    if (!isVisualTestMode) {
+      router.replace("/auth/login");
+    }
   }, [router, clearTokens]);
 
   const refreshAccessToken = useCallback(async () => {
@@ -179,7 +185,9 @@ export const AuthProvider: React.FC<
 
         setUser(userProfile.data?.user);
 
-        router.replace("/");
+        if (!isVisualTestMode) {
+          router.replace("/");
+        }
       } catch (error) {
         throw error;
       } finally {
@@ -190,24 +198,33 @@ export const AuthProvider: React.FC<
   );
 
   useEffect(() => {
-    if (
-      __DEV__ &&
-      process.env.EXPO_PUBLIC_DEV_AUTO_LOGIN === "true" &&
-      process.env.EXPO_PUBLIC_DEV_EMAIL &&
-      process.env.EXPO_PUBLIC_DEV_PASSWORD
-    ) {
-      login(
-        process.env.EXPO_PUBLIC_DEV_EMAIL,
-        process.env.EXPO_PUBLIC_DEV_PASSWORD
-      )
-        .then(() => {
-          console.log("auto login successful");
-        })
-        .catch((error) => {
-          console.error("auto login failed", error);
-        });
+    const visualTestCredentials = getVisualTestAutoLoginCredentials();
+    const devAutoLoginEnabled =
+      __DEV__ && process.env.EXPO_PUBLIC_DEV_AUTO_LOGIN === "true";
+
+    const credentials = visualTestCredentials
+      ? visualTestCredentials
+      : devAutoLoginEnabled &&
+          process.env.EXPO_PUBLIC_DEV_EMAIL &&
+          process.env.EXPO_PUBLIC_DEV_PASSWORD
+        ? {
+            email: process.env.EXPO_PUBLIC_DEV_EMAIL,
+            password: process.env.EXPO_PUBLIC_DEV_PASSWORD,
+          }
+        : null;
+
+    if (!credentials || isLoading || user) {
+      return;
     }
-  }, [login]);
+
+    login(credentials.email, credentials.password)
+      .then(() => {
+        console.log("auto login successful");
+      })
+      .catch((error) => {
+        console.error("auto login failed", error);
+      });
+  }, [isLoading, login, user]);
 
   const value: AuthContextType = {
     isAuthenticated: !!user,

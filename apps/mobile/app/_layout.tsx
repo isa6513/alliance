@@ -17,6 +17,7 @@ import Constants from "expo-constants";
 import { userRegisterDevice } from "@alliance/shared/client";
 import * as SecureStore from "expo-secure-store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { isVisualTestMode } from "../lib/visualTest";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -148,6 +149,10 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    if (isVisualTestMode) {
+      return;
+    }
+
     //TODO: wait for auth
     registerForPushNotificationsAsync()
       .then((token) => registerToken(token))
@@ -157,9 +162,10 @@ export default function RootLayout() {
   const responseSub = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
-    if (Platform.OS === "web") {
+    if (Platform.OS === "web" || isVisualTestMode) {
       return;
     }
+
     Notifications.getLastNotificationResponseAsync().then((response) => {
       const data = response?.notification.request.content.data as
         | PushData

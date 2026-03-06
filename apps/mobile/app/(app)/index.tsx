@@ -131,7 +131,10 @@ export default function HomeScreen() {
 
   if (!currentTaskOrGeneralUpdate) {
     return (
-      <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
+      <View
+        className="flex-1 items-center justify-center py-16 px-5 bg-white"
+        testID="vr-home-ready"
+      >
         <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
           <Check size={32} color="#fff" strokeWidth={3} />
         </View>
@@ -148,6 +151,7 @@ export default function HomeScreen() {
         ref={scrollViewRef}
         className="flex-1"
         bottomOffset={72}
+        testID="vr-home-ready"
       >
         {currentTaskOrGeneralUpdate &&
         isGeneralUpdate(currentTaskOrGeneralUpdate) ? (

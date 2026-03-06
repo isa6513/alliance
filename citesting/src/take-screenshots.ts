@@ -4,6 +4,7 @@ import path from "path";
 import process from "process";
 import { chromium, type Page } from "@playwright/test";
 import { screenshotTargets } from "./screenshot-targets";
+import { testUserEmail, testUserPassword } from "./test-user";
 
 type ChildProcessHandle = ReturnType<typeof spawn>;
 
@@ -36,10 +37,6 @@ const dbUser = process.env.DB_USERNAME ?? "postgres";
 const dbPass = process.env.DB_PASSWORD ?? "postgres";
 const dbName = process.env.DB_NAME ?? "citesting";
 
-const testUserEmail = process.env.TEST_USER_EMAIL ?? "user15@example.com";
-const testUserPassword =
-  process.env.TEST_USER_PASSWORD ?? "Steadying3-Sacrament-Crave";
-
 const childProcesses: ChildProcessHandle[] = [];
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -55,19 +52,30 @@ const sanitizeFileName = (value: string) =>
     .replace(/^-|-$/g, "")
     .toLowerCase() || "page";
 
+const trackChildProcess = (child: ChildProcessHandle) => {
+  childProcesses.push(child);
+  child.on("close", () => {
+    const index = childProcesses.indexOf(child);
+    if (index >= 0) {
+      childProcesses.splice(index, 1);
+    }
+  });
+  return child;
+};
+
 const spawnProcess = (
   command: string,
   args: string[],
   options: SpawnOptions
 ) => {
-  const child = spawn(command, args, {
-    cwd: options.cwd,
-    env: options.env,
-    detached: process.platform !== "win32",
-    stdio: "inherit",
-  });
-  childProcesses.push(child);
-  return child;
+  return trackChildProcess(
+    spawn(command, args, {
+      cwd: options.cwd,
+      env: options.env,
+      detached: process.platform !== "win32",
+      stdio: "inherit",
+    })
+  );
 };
 
 const killProcess = async (child: ChildProcessHandle) => {
@@ -126,11 +134,13 @@ const waitForHttp = async (url: string, timeoutMs: number) => {
 
 const runCommand = (command: string, args: string[], options: SpawnOptions) =>
   new Promise<void>((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd: options.cwd,
-      env: options.env,
-      stdio: "inherit",
-    });
+    const child = trackChildProcess(
+      spawn(command, args, {
+        cwd: options.cwd,
+        env: options.env,
+        stdio: "inherit",
+      })
+    );
 
     child.on("error", (error) => reject(error));
     child.on("close", (code) => {

@@ -6,6 +6,7 @@ import { useAuth } from "../../lib/AuthContext";
 import TabBar from "../../components/TabBar";
 import Sidebar from "../../components/Sidebar";
 import { colors } from "../../lib/style/colors";
+import { isVisualTestMode } from "../../lib/visualTest";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.round(SCREEN_WIDTH * 0.8);
@@ -25,11 +26,18 @@ export default function AppLayout() {
   }
 
   if (!isAuthenticated && canConnectToServer) {
+    if (isVisualTestMode) {
+      return (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color={colors.green} />
+        </View>
+      );
+    }
     return <Redirect href="/auth/login" />;
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white" testID="vr-app-shell-ready">
       <Drawer
         drawerContent={(props) => <Sidebar {...props} />}
         screenOptions={{

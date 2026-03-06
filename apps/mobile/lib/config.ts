@@ -1,6 +1,12 @@
 import { NativeModules } from "react-native";
+import { getVisualTestApiUrl } from "./visualTest";
 
 export const getApiUrl = (): string => {
+  const visualTestApiUrl = getVisualTestApiUrl();
+  if (visualTestApiUrl) {
+    return visualTestApiUrl;
+  }
+
   if (__DEV__) {
     const url = NativeModules.SourceCode.getConstants().scriptURL;
     const ip = !!url ? url.split(":")[1].substring(2) : undefined;

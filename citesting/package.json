@@ -21,6 +21,8 @@
   },
   "scripts": {
     "take": "ts-node src/take-screenshots.ts",
+    "take:mobile": "ts-node src/take-mobile-screenshots.ts",
+    "take:mobile:ios": "ts-node src/take-mobile-screenshots.ts",
     "compare": "ts-node src/compare-screenshots.ts",
     "ai-review": "ts-node src/ai-review.ts"
   }

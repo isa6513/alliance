@@ -172,7 +172,7 @@ export default function NotificationsScreen() {
       </View>
     </View>
   ) : (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white" testID="vr-notifications-ready">
       <LegendList
         ListHeaderComponent={
           <View className="px-4">

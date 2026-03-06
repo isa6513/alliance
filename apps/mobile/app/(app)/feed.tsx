@@ -173,7 +173,7 @@ export default function FeedScreen() {
           </View>
         </View>
       ) : (
-        <KeyboardAvoidingView behavior="position">
+        <KeyboardAvoidingView behavior="position" testID="vr-feed-ready">
           <LegendList
             key={mode}
             ListHeaderComponent={listHeader}

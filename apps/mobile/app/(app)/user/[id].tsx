@@ -716,7 +716,7 @@ export default function UserProfileScreen() {
     );
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white" testID="vr-user-profile-ready">
       <FlatList
         data={listData}
         keyExtractor={listKeyExtractor}

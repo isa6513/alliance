@@ -157,7 +157,11 @@ export default function ContractScreen() {
     "border border-zinc-300 rounded bg-white px-3 py-3 text-base flex-1";
 
   return (
-    <KeyboardAwareScrollView className="flex-1 bg-white" bottomOffset={50}>
+    <KeyboardAwareScrollView
+      className="flex-1 bg-white"
+      bottomOffset={50}
+      testID="vr-contract-ready"
+    >
       <View className="p-4 pt-16 gap-y-8">
         {/* Header */}
         <View className="flex-row items-center mb-1">

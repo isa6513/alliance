@@ -291,6 +291,7 @@ export default function ActionDetailScreen() {
         ref={scrollViewRef}
         bottomOffset={72}
         keyboardShouldPersistTaps="handled"
+        testID="vr-action-detail-ready"
       >
         {action.image && (
           <Image

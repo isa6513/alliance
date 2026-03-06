@@ -43,7 +43,7 @@ export default function ActionsScreen() {
 
   return (
     <GreenHeader>
-        {isPending ? (
+      {isPending ? (
         <View className="flex-1">
           <ListHeader className="pt-12">
             <Text className="text-white font-bold">All Actions</Text>
@@ -53,75 +53,77 @@ export default function ActionsScreen() {
           </View>
         </View>
       ) : (
-        <LegendList
-          contentContainerStyle={{ backgroundColor: "white", minHeight: "80%" }}
-          ListHeaderComponent={
-            <ListHeader>
-              <Text className="text-white font-bold">All Actions</Text>
-              <View className="flex-row items-center gap-x-2">
-                <Text className="text-sm text-white font-medium">
-                  Filter by:
-                </Text>
-                <View className="relative">
-                  <TouchableOpacity
-                    onPress={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex-row items-center gap-x-2 px-3 py-2 bg-white rounded"
-                  >
-                    <Text className="text-sm text-black">{filterMode}</Text>
-                    <ChevronDown size={15} color="black" />
-                  </TouchableOpacity>
-
-                  <Modal
-                    visible={dropdownOpen}
-                    transparent
-                    animationType="fade"
-                    onRequestClose={() => setDropdownOpen(false)}
-                  >
-                    <Pressable
-                      className="flex-1 bg-black/20"
-                      onPress={() => setDropdownOpen(false)}
+        <View className="flex-1" testID="vr-actions-ready">
+          <LegendList
+            contentContainerStyle={{ backgroundColor: "white", minHeight: "80%" }}
+            ListHeaderComponent={
+              <ListHeader>
+                <Text className="text-white font-bold">All Actions</Text>
+                <View className="flex-row items-center gap-x-2">
+                  <Text className="text-sm text-white font-medium">
+                    Filter by:
+                  </Text>
+                  <View className="relative">
+                    <TouchableOpacity
+                      onPress={() => setDropdownOpen(!dropdownOpen)}
+                      className="flex-row items-center gap-x-2 px-3 py-2 bg-white rounded"
                     >
-                      <View className="mx-4 mt-32 bg-white border border-zinc-200 rounded overflow-hidden">
-                        {(Object.values(FilterMode) as FilterMode[]).map(
-                          (mode) => (
-                            <TouchableOpacity
-                              key={mode}
-                              onPress={() => {
-                                setFilterMode(mode);
-                                setDropdownOpen(false);
-                              }}
-                              className="px-4 py-3 border-b border-zinc-100 flex-row justify-between items-center"
-                            >
-                              <Text className="text-sm text-black">{mode}</Text>
-                              <Text className="text-sm text-zinc-500 font-mono">
-                                {counts[mode]}
-                              </Text>
-                            </TouchableOpacity>
-                          )
-                        )}
-                      </View>
-                    </Pressable>
-                  </Modal>
+                      <Text className="text-sm text-black">{filterMode}</Text>
+                      <ChevronDown size={15} color="black" />
+                    </TouchableOpacity>
+
+                    <Modal
+                      visible={dropdownOpen}
+                      transparent
+                      animationType="fade"
+                      onRequestClose={() => setDropdownOpen(false)}
+                    >
+                      <Pressable
+                        className="flex-1 bg-black/20"
+                        onPress={() => setDropdownOpen(false)}
+                      >
+                        <View className="mx-4 mt-32 bg-white border border-zinc-200 rounded overflow-hidden">
+                          {(Object.values(FilterMode) as FilterMode[]).map(
+                            (mode) => (
+                              <TouchableOpacity
+                                key={mode}
+                                onPress={() => {
+                                  setFilterMode(mode);
+                                  setDropdownOpen(false);
+                                }}
+                                className="px-4 py-3 border-b border-zinc-100 flex-row justify-between items-center"
+                              >
+                                <Text className="text-sm text-black">{mode}</Text>
+                                <Text className="text-sm text-zinc-500 font-mono">
+                                  {counts[mode]}
+                                </Text>
+                              </TouchableOpacity>
+                            )
+                          )}
+                        </View>
+                      </Pressable>
+                    </Modal>
+                  </View>
                 </View>
+              </ListHeader>
+            }
+            data={filteredActions}
+            keyExtractor={(item) => item.id.toString()}
+            recycleItems
+            refreshControl={
+              <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+            }
+            renderItem={({ item }) => (
+              <View key={item.id} className="border-b border-zinc-200">
+                <ActionItemCard
+                  action={item}
+                  onPress={() => navigateToAction(item.id)}
+                />
               </View>
-            </ListHeader>
-          }
-          data={filteredActions}
-          keyExtractor={(item) => item.id.toString()}
-          recycleItems
-          refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-          }
-          renderItem={({ item }) => (
-            <View key={item.id} className="border-b border-zinc-200">
-              <ActionItemCard
-                action={item}
-                onPress={() => navigateToAction(item.id)}
-              />
-            </View>
             )}
           />
-        )}
+        </View>
+      )}
     </GreenHeader>
   );
 }
