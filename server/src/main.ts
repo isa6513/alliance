@@ -51,6 +51,7 @@ class SocketIoAdapter extends IoAdapter {
 }
 
 async function bootstrap() {
+  const port = Number(process.env.PORT ?? '3005');
   let client: PostHog | null = null;
 
   if (process.env.NODE_ENV === 'production') {
@@ -108,7 +109,7 @@ async function bootstrap() {
     setupExpressErrorHandler(client, app);
   }
 
-  await app.listen(3005, '0.0.0.0');
+  await app.listen(port, '0.0.0.0');
 }
 
 void bootstrap();

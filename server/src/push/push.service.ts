@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
 import { Push } from './push.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +13,8 @@ import {
 import { PickType } from '@nestjs/swagger';
 import { UserDevice } from 'src/user/entities/user-device.entity';
 
+export const EXPO_CLIENT = Symbol('EXPO_CLIENT');
+
 export class CreatePushMessage extends PickType(Push, [
   'expoPushToken',
   'body',
@@ -23,19 +25,14 @@ export class CreatePushMessage extends PickType(Push, [
 
 @Injectable()
 export class PushService {
-  private expo: Expo;
-
   constructor(
+    @Inject(EXPO_CLIENT)
+    private readonly expo: Expo,
     @InjectRepository(Push)
     private readonly pushRepository: Repository<Push>,
     @InjectRepository(UserDevice)
     private readonly userDeviceRepository: Repository<UserDevice>,
-  ) {
-    this.expo = new Expo({
-      accessToken: process.env.EXPO_ACCESS_TOKEN,
-      useFcmV1: true,
-    });
-  }
+  ) {}
 
   async sendPushNotification(token: string, body: string): Promise<Push> {
     const message: CreatePushMessage = {
