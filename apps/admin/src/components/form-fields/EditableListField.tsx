@@ -3,7 +3,6 @@ import type {
   FieldKind,
   ListField,
 } from "@alliance/shared/forms/formschema";
-import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
 import type { BaseFieldProps } from "./types";
@@ -243,11 +242,13 @@ export function EditableListField({
           <input
             type="number"
             value={field.min ?? 0}
-            onChange={(e) =>
+            onChange={(e) => {
+              const value = e.target.value ? parseInt(e.target.value, 10) : 0;
               onUpdate({
-                min: e.target.value ? parseInt(e.target.value, 10) : undefined,
-              })
-            }
+                min: value,
+                required: value > 0,
+              });
+            }}
             min={0}
             className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
@@ -268,12 +269,6 @@ export function EditableListField({
           />
         </div>
       </div>
-
-      <RequiredToggle
-        checked={field.required}
-        onChange={(checked) => onUpdate({ required: checked })}
-      />
-
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">
           Fields in each card

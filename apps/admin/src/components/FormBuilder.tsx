@@ -834,7 +834,6 @@ export function FormBuilder({
           id: fieldId,
           kind: "list",
           label: "List Field",
-          required: false,
           fields: [],
           defaultNumber: 0,
           min: 0,
