@@ -47,13 +47,13 @@ const typography = cva("", {
   },
 
   compoundVariants: [
-    { font: "title", size: "small", class: TEXT_SIZE_CLASS[0] },
-    { font: "title", size: "normal", class: "text-3xl md:text-4xl" },
-    { font: "title", size: "large", class: "text-4xl md:text-5xl" },
+    { font: "title", size: "small", class: TEXT_SIZE_CLASS[5] },
+    { font: "title", size: "normal", class: TEXT_SIZE_CLASS[6] },
+    { font: "title", size: "large", class: TEXT_SIZE_CLASS[7] },
 
-    { font: "body", size: "small", class: "text-sm" },
-    { font: "body", size: "normal", class: "text-base" },
-    { font: "body", size: "large", class: "text-lg" },
+    { font: "body", size: "small", class: TEXT_SIZE_CLASS[1] },
+    { font: "body", size: "normal", class: TEXT_SIZE_CLASS[2] },
+    { font: "body", size: "large", class: TEXT_SIZE_CLASS[3] },
   ],
 });
 export const textClass: typeof typography = (input) => cn(typography(input));
