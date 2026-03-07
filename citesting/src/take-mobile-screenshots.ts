@@ -587,6 +587,7 @@ const buildIosApp = async (udid: string) => {
     ? "-workspace"
     : "-project";
   const buildTargetPath = path.relative(mobileAppRoot, resolvedWorkspacePath);
+  const simulatorArch = process.arch === "arm64" ? "arm64" : "x86_64";
 
   const env: NodeJS.ProcessEnv = {
     ...process.env,
@@ -612,6 +613,9 @@ const buildIosApp = async (udid: string) => {
     `platform=iOS Simulator,id=${udid}`,
     "-derivedDataPath",
     derivedDataPath,
+    "ONLY_ACTIVE_ARCH=YES",
+    `ARCHS=${simulatorArch}`,
+    "COMPILER_INDEX_STORE_ENABLE=NO",
     "build",
   ];
 
