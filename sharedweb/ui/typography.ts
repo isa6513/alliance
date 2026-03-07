@@ -1,4 +1,3 @@
-import { cn } from "@alliance/shared/styles/util";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const TEXT_SIZE_CLASS = {
@@ -29,7 +28,7 @@ const TEXT_COLOR_CLASS = {
   error: "text-orange-600",
 } as const;
 
-const typography = cva("", {
+export const textClass = cva("", {
   variants: {
     font: TEXT_FONT_CLASS,
     size: {
@@ -56,8 +55,7 @@ const typography = cva("", {
     { font: "body", size: "large", class: TEXT_SIZE_CLASS[3] },
   ],
 });
-export const textClass: typeof typography = (input) => cn(typography(input));
 
-export type TypographyProps = VariantProps<typeof typography> & {
+export type TypographyProps = VariantProps<typeof textClass> & {
   className?: string;
 };
