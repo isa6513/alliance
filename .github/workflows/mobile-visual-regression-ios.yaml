@@ -51,6 +51,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: "yarn"
+
+      - name: Capture Xcode Version
+        id: xcode-version
+        run: |
+          VERSION=$(xcodebuild -version | awk 'NR==1 {print $2 "-" } NR==2 {print $3}')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -63,6 +70,18 @@ jobs:
       - name: Install Backend Dependencies
         run: bun install --frozen-lockfile
         working-directory: ./server
+
+      - name: Restore CocoaPods Cache
+        id: cocoapods-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.cocoapods/repos
+            ~/Library/Caches/CocoaPods
+            ~/Library/Caches/org.cocoapods.CocoaPods
+          key: mobile-ios-cocoapods-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-${{ hashFiles('yarn.lock', 'apps/mobile/package.json', 'apps/mobile/app.json', 'apps/mobile/babel.config.js', 'apps/mobile/metro.config.js') }}
+          restore-keys: |
+            mobile-ios-cocoapods-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-
 
       - name: Install Postgres
         run: |
@@ -85,6 +104,16 @@ jobs:
         env:
           CI: "true"
 
+      - name: Restore DerivedData Cache
+        id: derived-data-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: citesting/ios-derived-data
+          key: mobile-ios-derived-data-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-${{ hashFiles('yarn.lock', 'apps/mobile/package.json', 'apps/mobile/app.json', 'apps/mobile/**/*.ts', 'apps/mobile/**/*.tsx', 'apps/mobile/**/*.js', 'apps/mobile/**/*.jsx', 'apps/mobile/**/*.json', 'citesting/src/take-mobile-screenshots.ts', 'citesting/src/mobile-screenshot-targets.ts') }}
+          restore-keys: |
+            mobile-ios-derived-data-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-${{ hashFiles('yarn.lock', 'apps/mobile/package.json', 'apps/mobile/app.json') }}-
+            mobile-ios-derived-data-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-
+
       - name: Take iOS Screenshots
         run: corepack yarn workspace @alliance/citesting take:mobile:ios
         env:
@@ -96,6 +125,23 @@ jobs:
           ASSETS_BUCKET: ${{ secrets.CI_ASSETS_BUCKET }}
           NODE_ENV: test
           SCREENSHOT_OUTPUT_DIR: ${{ github.workspace }}/screenshots-mobile/current
+
+      - name: Save CocoaPods Cache
+        if: always() && steps.cocoapods-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.cocoapods/repos
+            ~/Library/Caches/CocoaPods
+            ~/Library/Caches/org.cocoapods.CocoaPods
+          key: ${{ steps.cocoapods-cache.outputs.cache-primary-key }}
+
+      - name: Save DerivedData Cache
+        if: always() && steps.derived-data-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: citesting/ios-derived-data
+          key: ${{ steps.derived-data-cache.outputs.cache-primary-key }}
 
       - name: Upload Current iOS Screenshots to S3
         run: |

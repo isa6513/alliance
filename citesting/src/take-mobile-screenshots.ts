@@ -45,8 +45,7 @@ const bundleId =
 const configuredScheme = process.env.IOS_SCHEME;
 const configuredWorkspacePath = process.env.IOS_WORKSPACE_PATH;
 const iosConfiguration = process.env.IOS_CONFIGURATION ?? "Release";
-const shouldCleanDerivedData =
-  process.env.IOS_CLEAN_BUILD === "true" || process.env.CI === "true";
+const shouldCleanDerivedData = process.env.IOS_CLEAN_BUILD === "true";
 const appBinaryPath =
   process.env.IOS_APP_BINARY_PATH ??
   path.join(
