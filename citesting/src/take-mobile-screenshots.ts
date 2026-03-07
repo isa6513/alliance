@@ -590,6 +590,7 @@ const buildIosApp = async (udid: string) => {
 
   const env: NodeJS.ProcessEnv = {
     ...process.env,
+    NODE_ENV: "production",
     RCT_NO_LAUNCH_PACKAGER: "1",
     EXPO_PUBLIC_VISUAL_TEST: "true",
     EXPO_PUBLIC_VISUAL_TEST_API_URL:
