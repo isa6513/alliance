@@ -709,7 +709,12 @@ const launchApp = async (udid: string) => {
   await delay(3000);
 };
 
-const writeMaestroFlow = async (filePath: string, deepLink: string, readyTestId: string) => {
+const writeMaestroFlow = async (
+  filePath: string,
+  deepLink: string,
+  readyTestId: string,
+  screenshotName: string
+) => {
   const contents = `appId: "${bundleId}"
 ---
 - launchApp
@@ -727,6 +732,8 @@ const writeMaestroFlow = async (filePath: string, deepLink: string, readyTestId:
     timeout: 20000
 - assertVisible:
     id: "${readyTestId}"
+- takeScreenshot:
+    path: "${screenshotName}"
 `;
   await fs.writeFile(filePath, contents, "utf8");
 };
@@ -764,21 +771,43 @@ const captureScreenshots = async (udid: string, simulatorName: string) => {
         target.name
       )}.png`;
       const filePath = path.join(outputDir, fileName);
+      const screenshotName = fileName.replace(/\.png$/i, "");
       const flowPath = path.join(flowDir, `${target.name}.yaml`);
 
       console.log(
         `${logPrefix} Capturing ${target.deepLink} -> ${fileName}`
       );
-      await writeMaestroFlow(flowPath, target.deepLink, target.readyTestId);
-      await runCommand(maestro, ["test", "--udid", udid, flowPath], {
-        cwd: repoRoot,
-        env: process.env,
-      });
+      await writeMaestroFlow(
+        flowPath,
+        target.deepLink,
+        target.readyTestId,
+        screenshotName
+      );
+      await runCommand(
+        maestro,
+        [
+          "test",
+          "--udid",
+          udid,
+          "--test-output-dir",
+          outputDir,
+          flowPath,
+        ],
+        {
+          cwd: repoRoot,
+          env: {
+            ...process.env,
+            MAESTRO_CLI_NO_ANALYTICS:
+              process.env.MAESTRO_CLI_NO_ANALYTICS ?? "1",
+          },
+        }
+      );
+      if (!(await fileExists(filePath))) {
+        throw new Error(
+          `Maestro completed but did not write the expected screenshot at ${filePath}`
+        );
+      }
       await delay(target.settleMs ?? 800);
-      await runCommand("xcrun", ["simctl", "io", udid, "screenshot", filePath], {
-        cwd: repoRoot,
-        env: process.env,
-      });
     }
   } finally {
     await fs.rm(flowDir, { recursive: true, force: true });
