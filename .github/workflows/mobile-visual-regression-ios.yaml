@@ -56,7 +56,7 @@ jobs:
       - name: Capture Xcode Version
         id: xcode-version
         run: |
-          VERSION=$(xcodebuild -version | awk 'NR==1 {print $2 "-" } NR==2 {print $3}')
+          VERSION=$(xcodebuild -version | awk 'NR==1 {printf "%s-", $2} NR==2 {printf "%s", $3}')
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Setup Bun
