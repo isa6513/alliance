@@ -11,7 +11,7 @@ import {
 import { groupSettings } from "@alliance/shared/lib/copy";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
@@ -176,6 +176,36 @@ const CommunityPage = () => {
         : null,
     enabled: !!community,
   });
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!communityMemberInfo?.actions?.length || community?.id == null)
+      return;
+
+    const now = Date.now();
+    const futureDeadlines = communityMemberInfo.actions
+      .map((a) => a.latestMemberActionDeadline)
+      .filter((d): d is number => d != null && d > now);
+
+    if (futureDeadlines.length === 0) return;
+
+    const soonestDeadline = Math.min(...futureDeadlines);
+    const delayMs = soonestDeadline - now;
+
+    const timeoutId = window.setTimeout(() => {
+      void queryClient.invalidateQueries({
+        queryKey: ["communityMemberInfo", community.id, user?.id ?? null],
+      });
+    }, delayMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    communityMemberInfo?.actions,
+    community?.id,
+    user?.id,
+    queryClient,
+  ]);
 
   useEffect(() => {
     if (!communityMemberInfo) {
