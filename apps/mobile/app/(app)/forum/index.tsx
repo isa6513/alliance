@@ -14,6 +14,7 @@ import ProfileImage from "../../../components/ProfileImage";
 import Text from "../../../components/system/Text";
 import { colors } from "../../../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
+import PinnedIcon from "../../../components/system/PinnedIcon";
 
 export default function ForumScreen() {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -98,7 +99,7 @@ export default function ForumScreen() {
             <Text className="text-zinc-500">No posts yet.</Text>
           </View>
         ) : (
-          <View className="border border-zinc-200 rounded overflow-hidden bg-white">
+          <View className="overflow-hidden bg-white">
             {sortedPosts.map((post, index) => {
               const isPrivateFuturePost =
                 post.visibleAt && new Date(post.visibleAt) > new Date();
@@ -117,10 +118,8 @@ export default function ForumScreen() {
                   <View className="gap-y-2">
                     <View>
                       <View className="flex-row items-center gap-x-1">
-                        {post.pinned && (
-                          <Pin size={12} color={colors.text.tertiary} />
-                        )}
-                        <Text className="text-base text-zinc-900">
+                        {post.pinned && <PinnedIcon size="small" />}
+                        <Text className="text-base text-black font-medium">
                           {post.title}
                         </Text>
                       </View>
