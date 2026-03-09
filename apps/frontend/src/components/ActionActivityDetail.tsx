@@ -53,7 +53,10 @@ const ActionActivityDetail = () => {
 
   const { data: fetchedActivity } = useQuery({
     queryKey: ["actionsGetActivity", activityId],
-    queryFn: () => actionsGetActivity({ path: { id: activityId } }).then(res => res.data ?? null),
+    queryFn: () =>
+      actionsGetActivity({ path: { id: activityId } }).then(
+        (res) => res.data ?? null
+      ),
     enabled: !!activityId,
   });
 
@@ -115,7 +118,9 @@ const ActionActivityDetail = () => {
       setActivities(
         activities.map((a) => (a.id === activity.id ? newActivity : a))
       );
-      queryClient.invalidateQueries({ queryKey: ["actionsGetActivity", activityId] });
+      queryClient.invalidateQueries({
+        queryKey: ["actionsGetActivity", activityId],
+      });
       setEditing(false);
     } catch (error) {
       console.error("Error updating activity:", error);
@@ -164,7 +169,7 @@ const ActionActivityDetail = () => {
                       />
                     </Link>
                   )}
-                  <p>
+                  <div>
                     <Link
                       to={href("/member/:id", {
                         id: activity.user.id.toString(),
@@ -175,7 +180,7 @@ const ActionActivityDetail = () => {
                       </UserDisplayName>
                     </Link>{" "}
                     <span className="">{verb} this action</span>
-                  </p>
+                  </div>
                 </div>
               </div>
               <div className="flex flex-row items-center gap-x-2">

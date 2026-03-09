@@ -18,6 +18,7 @@ import ProfileImage from "./ProfileImage";
 import { NotificationDto } from "@alliance/shared/client";
 import { View } from "react-native";
 import { cn } from "@alliance/shared/styles/util";
+import { getNotificationTime } from "@alliance/shared/lib/notificationBucketing";
 
 const SWIPE_THRESHOLD = -80;
 
@@ -26,10 +27,6 @@ interface SwipeableNotificationProps {
   onPress: () => void;
   onMarkRead: () => void;
 }
-
-export const getNotifTime = (notification: NotificationDto) => {
-  return new Date(notification.sendTime || notification.createdAt);
-};
 
 function SwipeableNotification({
   notification,
@@ -131,7 +128,7 @@ function SwipeableNotification({
                 </Text>
               </View>
               <Text className="text-xs text-zinc-500 mt-1">
-                {formatTime(getNotifTime(notification), {
+                {formatTime(getNotificationTime(notification), {
                   addSuffix: true,
                 })}
               </Text>

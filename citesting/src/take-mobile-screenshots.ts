@@ -732,6 +732,7 @@ const writeMaestroFlow = async (
     timeout: 20000
 - assertVisible:
     id: "${readyTestId}"
+- waitForAnimationToEnd
 - takeScreenshot:
     path: "${screenshotName}"
 `;
