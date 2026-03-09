@@ -86,7 +86,7 @@ function ActivityTabContent({ actionId }: ActivityTabContentProps) {
     queryFn: () =>
       actionsGetActionActivities({
         path: { id: actionId },
-        query: { limit: 50, comments: false },
+        query: { limit: 50, comments: false, before: new Date().toISOString() },
       }),
   });
 

@@ -41,19 +41,15 @@ export default function ContractScreen() {
     },
   });
 
-  const signedContractId =
-    lastContractEvent?.contractId !== undefined &&
-    lastContractEvent.contractId !== latestContract?.id
-      ? lastContractEvent.contractId
-      : null;
+  const signedContractId = lastContractEvent?.contractId ?? null;
+
   const { data: signedContract } = useQuery({
     queryKey: ["contractGetById", signedContractId],
     queryFn: () =>
       contractGetById({
         path: { id: signedContractId! },
       }).then((res) => res.data ?? null),
-    initialData: null,
-    enabled: signedContractId != null,
+    enabled: signedContractId !== null,
   });
 
   useEffect(() => {
@@ -213,7 +209,7 @@ export default function ContractScreen() {
         {/* Latest contract */}
         {latestContract && (
           <View className="gap-y-2">
-            {signedContract && (
+            {signedContractId && signedContractId !== latestContract.id && (
               <Text className="font-semibold p-2">
                 An updated contract is available.
               </Text>
