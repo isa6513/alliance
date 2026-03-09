@@ -184,8 +184,7 @@ export default function ContractScreen() {
           </Card>
         )}
 
-        {/* Signed contract (when user signed an older version) */}
-        {signedContract && (
+        {signedContract && signedContractId !== latestContract?.id && (
           <View className="gap-y-2">
             <Card
               cardStyle={CardStyle.Outline}
@@ -201,7 +200,6 @@ export default function ContractScreen() {
           </View>
         )}
 
-        {/* Latest contract */}
         {latestContract && (
           <View className="gap-y-2">
             {signedContractId && signedContractId !== latestContract.id && (
