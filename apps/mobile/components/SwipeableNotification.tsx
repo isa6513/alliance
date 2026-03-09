@@ -6,11 +6,7 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
-import {
-  Gesture,
-  GestureDetector,
-  TouchableOpacity,
-} from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Check } from "lucide-react-native";
 import { formatTime } from "@alliance/shared/lib/utils";
 import Text from "./system/Text";

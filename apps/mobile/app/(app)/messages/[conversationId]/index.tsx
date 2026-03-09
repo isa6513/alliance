@@ -269,7 +269,7 @@ export default function ConversationScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pt-16 pb-6 bg-white z-50">
+      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pb-4 pt-1 bg-white z-50">
         <TouchableOpacity onPress={() => router.back()}>
           <ChevronLeft size={22} color="#111827" />
         </TouchableOpacity>
@@ -297,7 +297,6 @@ export default function ConversationScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => router.push(`/messages/${selectedConvo.id}/info`)}
-          className="-mb-2"
         >
           <Info size={20} color="#71717a" />
         </TouchableOpacity>
@@ -305,7 +304,6 @@ export default function ConversationScreen() {
 
       <KeyboardAvoidingView
         behavior="position"
-        style={{ flex: 1 }}
         contentContainerStyle={{ flex: 1 }}
       >
         {otherParticipantInvited && selectedConvo.type === "direct" && (

@@ -15,7 +15,6 @@ import {
   MessageSquare,
   Search,
   Settings,
-  Users,
   X,
   User,
 } from "lucide-react-native";

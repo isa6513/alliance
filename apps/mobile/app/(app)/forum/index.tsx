@@ -7,7 +7,6 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
-import { Pin } from "lucide-react-native";
 import { PostDto, forumFindAllPosts } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
 import ProfileImage from "../../../components/ProfileImage";
@@ -133,13 +132,13 @@ export default function ForumScreen() {
                       )}
                     </View>
                     <View className="flex-row items-center flex-wrap gap-x-2">
-                      <View className="text-sm text-zinc-500 inline flex-row items-center w-full overflow-hidden">
+                      <View className="inline flex-row items-center w-full overflow-hidden">
                         <ProfileImage
                           pfp={post.author.profilePicture}
                           size="small"
                           className="mr-1 inline"
                         />
-                        <Text className="font-medium text-zinc-700">
+                        <Text className="text-sm">
                           {post.author.displayName}
                         </Text>
                         <Text className="text-sm text-zinc-500">
