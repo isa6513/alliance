@@ -40,7 +40,7 @@ const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
       <div className="gap-y-4 flex flex-col">
         <div className="flex flex-col">
           {onDismiss && <p>General update</p>}
-          <p className="text-title">{title}</p>
+          <p className="text-title-small">{title}</p>
         </div>
         <div className="space-y-4">
           {formSchema ? (
