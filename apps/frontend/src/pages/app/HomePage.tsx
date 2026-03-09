@@ -91,9 +91,7 @@ const HomePage = () => {
         {(currentWeekSidebarActions.length > 0 ||
           completedActions.length > 0) && (
           <div className="flex flex-col gap-y-2">
-            <p className="font-semibold text-base font-serif text-black">
-              Progress
-            </p>
+            <p className="font-title">Progress</p>
             {currentWeekSidebarActions.length + newActions.length > 0 && (
               <p className="text-zinc-600 mb-2">
                 <span className="text-green font-medium mr-0.5">
@@ -314,9 +312,7 @@ const HomePage = () => {
         {tasksListContent}
         <div className="flex-1 min-h-0 flex flex-col">
           <div className="flex flex-row justify-between items-center shrink-0">
-            <p className="font-semibold text-base font-serif text-black">
-              Activity
-            </p>
+            <p className="font-title">Activity</p>
             <Link
               to={href("/feed")}
               className="text-zinc-500 text-base hover:underline"

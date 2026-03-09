@@ -1,6 +1,5 @@
 import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
-
 import InfoSubpage from "../../components/InfoSubpage";
 
 const GovernancePage: React.FC = () => {
@@ -11,12 +10,9 @@ const GovernancePage: React.FC = () => {
       <div className="min-w-0 flex-1 max-w-3xl flex flex-col">
         <div className="flex flex-col gap-y-12 text-base md:text-lg text-zinc-900">
           <section className="gap-y-4 flex flex-col">
-            <p
-              id="about"
-              className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-            >
+            <h1 id="about" className="text-title">
               Alliance governance
-            </p>
+            </h1>
             <p>
               Membership in the Alliance is voluntary. All power that the
               Alliance holds is continuously, explicitly entrusted to it by
@@ -51,21 +47,21 @@ const GovernancePage: React.FC = () => {
             </p>
 
             <div className="flex flex-col gap-y-2 bg-zinc-50 p-6 rounded border border-zinc-200 my-2">
-              <p>
-                Which do you prefer?
-              </p>
+              <p>Which do you prefer?</p>
               <ul className="list-disc list-inside pl-4 space-y-2">
+                <li>I prefer the Alliance to continue to operate.</li>
                 <li>
-                  I prefer the Alliance to continue to operate.
-                </li>
-                <li>
-                  I prefer the Alliance to stop planning and running all actions until it changes how it operates.
+                  I prefer the Alliance to stop planning and running all actions
+                  until it changes how it operates.
                 </li>
               </ul>
             </div>
             <p>
-              If more than 1/4th of members prefer the Alliance to stop planning and running all actions until it changes how it operates, the Alliance will do so until less than 1/4th of members have this preference. In extreme cases, this might involve the office, and approving
-              members, concluding that it is better to part ways with
+              If more than 1/4th of members prefer the Alliance to stop planning
+              and running all actions until it changes how it operates, the
+              Alliance will do so until less than 1/4th of members have this
+              preference. In extreme cases, this might involve the office, and
+              approving members, concluding that it is better to part ways with
               those members than to continue to pause actions.
             </p>
             <p>

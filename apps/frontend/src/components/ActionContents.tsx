@@ -64,9 +64,7 @@ const ActionContents = () => {
       <div className="flex flex-row justify-between items-start mb-6">
         {action !== undefined && (
           <div className="flex flex-col gap-y-3">
-            <p className="font-semibold text-3xl font-serif mb-1">
-              {action.name}
-            </p>
+            <p className="text-title">{action.name}</p>
             {loggedInMode ? (
               <div>
                 <p className="text-base md:text-lg">

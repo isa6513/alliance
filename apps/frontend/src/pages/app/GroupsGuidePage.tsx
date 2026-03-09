@@ -25,12 +25,9 @@ const GroupsGuidePage: React.FC = () => {
   return (
     <InfoSubpage tocSections={tocSections}>
       <section className="gap-y-4 flex flex-col">
-        <p
-          id="about"
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-        >
+        <h1 id="about" className="text-title">
           About groups
-        </p>
+        </h1>
         <p>
           The Alliance is organized into{" "}
           <span className="font-semibold">accountability groups</span>.
@@ -114,7 +111,7 @@ const GroupsGuidePage: React.FC = () => {
         </p>
         <p>
           Current group leads report spending{" "}
-          <span className="font-semibold">5–30 minutes</span> running their
+          <span className="font-semibold">5-30 minutes</span> running their
           groups per week.
         </p>
         <h2
@@ -174,17 +171,14 @@ const GroupsGuidePage: React.FC = () => {
         <p>
           If a new member joins the Alliance and the inviting member does not
           lead a group, we will first check whether there is space in the
-          inviting member’s lead’s group.
+          inviting member&rsquo;s lead&rsquo;s group.
         </p>
       </section>
 
       <section className="gap-y-4 flex flex-col">
-        <p
-          id="how-to-lead"
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-        >
+        <h1 id="how-to-lead" className="text-title">
           How to lead
-        </p>
+        </h1>
         <p>
           As a group lead, you are responsible for ensuring that your group
           members complete their tasks on time. You can do this however you see

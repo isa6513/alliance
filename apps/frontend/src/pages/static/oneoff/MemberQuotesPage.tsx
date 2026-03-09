@@ -254,12 +254,12 @@ const MemberQuotesPage: React.FC = () => {
       <div className="flex flex-col flex-grow items-center justify-center">
         <div className="w-full max-w-4xl px-4 md:px-8 py-12 md:py-24">
           {forExternalSharing ? (
-            <h2 className="uppercase font-serif !text-4xl text-center mb-10 mx-4">
+            <h2 className="uppercase text-title text-center mb-10 mx-4">
               Selected quotes
             </h2>
           ) : (
             <>
-              <h2 className="font-serif !text-4xl text-center mb-2 mx-4">
+              <h2 className="text-title text-center mb-2 mx-4">
                 Quotes from members
               </h2>
               <p className="text-center text-lg text-zinc-500 mb-10">

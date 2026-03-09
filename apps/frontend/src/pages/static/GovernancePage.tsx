@@ -10,14 +10,9 @@ const GovernancePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex flex-col md:flex-row mx-2 sm:mx-4 md:mx-12 pt-8 md:pt-32 pb-56 justify-center">
-        <div className="flex flex-col max-w-[46rem]">
-          <div className="mx-auto w-full mb-2">
-            <h2 className="font-serif font-semibold !text-4xl text-black">
-              Governance
-            </h2>
-          </div>
-
-          <p className="text-lg mb-4 text-zinc-500">
+        <div className="flex flex-col gap-y-4 max-w-[46rem]">
+          <h1 className="text-title">Governance</h1>
+          <p className="text-lg text-zinc-500">
             The following governance procedures were{" "}
             <Link
               to={href("/progress/:slug", { slug: "early-governance" })}

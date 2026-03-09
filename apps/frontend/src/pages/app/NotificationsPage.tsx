@@ -110,10 +110,7 @@ const NotificationsPage = () => {
     <CenterLayout>
       <div className="flex flex-col items-center w-[calc(min(650px,100%))] gap-y-6">
         <div className="w-full flex flex-row justify-between items-end">
-          <h2 className="!font-semibold font-serif !text-3xl md:!text-4xl">
-            Notifications
-          </h2>
-
+          <h1 className="text-title">Notifications</h1>
           {unreadCount > 0 && (
             <Button color={ButtonColor.White} onClick={handleMarkAllAsRead}>
               Mark all as read

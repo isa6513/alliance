@@ -203,9 +203,7 @@ const SettingsPage: React.FC = () => {
     return (
       <div className="bg-page pt-20 px-2 md:px-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl sm:text-4xl font-serif !font-semibold mb-2">
-            Settings
-          </h1>
+          <h1 className="text-title">Settings</h1>
           <Card style={CardStyle.White} className="p-8">
             <p className="text-center text-zinc-500">
               Loading your account information...
@@ -228,9 +226,7 @@ const SettingsPage: React.FC = () => {
         <div className="mb-6 relative flex flex-col">
           <div className="flex justify-between bg-page z-10">
             <div className="gap-x-2">
-              <h1 className="text-2xl sm:text-4xl font-serif !font-semibold mb-2">
-                Settings
-              </h1>
+              <h1 className="text-title">Settings</h1>
             </div>
             <div className="flex flex-row gap-x-4 items-center">
               <p className="text-sm text-zinc-500">
@@ -253,14 +249,14 @@ const SettingsPage: React.FC = () => {
             <div className="flex flex-col gap-y-4">
               <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
                 <div className="flex-1 flex flex-col w-full">
-                  <p className="mb-1">
-                    Name{" "}
+                  <div className="flex flex-row items-center gap-x-1">
+                    <span>Name</span>
                     {editableUser.anonymous ? (
                       <i className="text-zinc-500">(Not shown)</i>
                     ) : (
                       ""
                     )}
-                  </p>
+                  </div>
                   <FormInput
                     name="name"
                     type="text"
@@ -446,11 +442,11 @@ const SettingsPage: React.FC = () => {
                 </div>
               ) : null}
               <div>
-                <p className="!font-medium mb-0 mt-5 flex flex-row items-center gap-x-1">
+                <div className="!font-medium mb-0 mt-5 flex flex-row items-center gap-x-1">
                   Allow notifications when you receive a reply in an ongoing
                   action discussion?
                   <InfoTooltip content="Keeping this enabled will send a text or email notification for specific discussions, like when you get an expert reply to a question you asked." />
-                </p>
+                </div>
                 <div className="flex flex-row gap-6 mt-2">
                   <select
                     className="border border-zinc-300 rounded px-3 py-2 self-start"

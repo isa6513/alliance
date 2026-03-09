@@ -60,9 +60,7 @@ const ActionActivityList = ({
     <div className="space-y-3 w-full">
       <div className="mb-2">
         <div className="flex flex-row justify-between items-center mb-2">
-          <p className="font-semibold text-base font-serif text-black">
-            Recently completed
-          </p>
+          <p className="font-title">Recently completed</p>
           <Link
             to={href("/feed/:actionId", {
               actionId: (activities[0]?.actionId ?? "").toString(),

@@ -7,11 +7,11 @@ const SearchPage = () => {
 
   return (
     <CenterLayout>
-      <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
-        Search
-      </p>
-      <div className="flex w-full">
-        <SearchBar autofocus />
+      <div className="flex flex-col gap-y-4">
+        <p className="text-title">Search</p>
+        <div className="flex w-full">
+          <SearchBar autofocus />
+        </div>
       </div>
     </CenterLayout>
   );

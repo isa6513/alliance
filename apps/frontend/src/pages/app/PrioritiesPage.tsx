@@ -28,10 +28,7 @@ const PrioritiesPage: React.FC = () => {
   return (
     <InfoSubpage tocSections={tocSections}>
       <section className="gap-y-4 flex flex-col">
-        <h1
-          id="priorities"
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-        >
+        <h1 id="priorities" className="text-title">
           Priorities
         </h1>
         <p>

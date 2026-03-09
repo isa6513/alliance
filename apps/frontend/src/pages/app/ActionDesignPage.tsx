@@ -33,18 +33,13 @@ const TerminologyPage: React.FC = () => {
   return (
     <InfoSubpage tocSections={SECTIONS}>
       <section className="gap-y-4 flex flex-col">
-        <div className="mb-4">
-          <h1
-            id={Section.DesigningActions}
-            className="font-serif text-3xl md:text-4xl font-semibold text-black mb-4"
-          >
-            Action design
-          </h1>
-          <p className="text-zinc-500">
-            The following is a simplified version of a guide that the office
-            references internally.
-          </p>
-        </div>
+        <h1 id={Section.DesigningActions} className="text-title">
+          Action design
+        </h1>
+        <p className="text-zinc-500">
+          The following is a simplified version of a guide that the office
+          references internally.
+        </p>
         <p>
           We work hard to design high-quality actions. Running regular actions
           helps us refine our internal action production process, which we
@@ -439,10 +434,7 @@ const TerminologyPage: React.FC = () => {
       </section>
 
       <section className="gap-y-4 flex flex-col">
-        <h1
-          id={Section.SubmitActionIdea}
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-        >
+        <h1 id={Section.SubmitActionIdea} className="text-title">
           Submit an action idea
         </h1>
         <p>

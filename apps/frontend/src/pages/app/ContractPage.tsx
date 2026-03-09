@@ -115,9 +115,7 @@ const ContractPage: React.FC = () => {
   return (
     <CenterLayout>
       <div className="gap-y-8 flex flex-col text-base md:text-lg">
-        <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
-          Membership contract
-        </p>
+        <h1 className="text-title">Membership contract</h1>
 
         {signedContract && (
           <div className="flex flex-col">

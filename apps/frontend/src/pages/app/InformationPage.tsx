@@ -116,12 +116,10 @@ const InformationPage: React.FC = () => {
   return (
     <CenterLayout>
       <div className="gap-y-12 flex flex-col text-base md:text-lg">
-        <p className="font-serif text-3xl md:text-4xl font-semibold">
-          Information
-        </p>
+        <h1 className="text-title">Information</h1>
 
         <div className="flex flex-col gap-y-6">
-          <h2 className="text-2xl font-semibold">Contact the office</h2>
+          <h2 className="text-title-small">Contact the office</h2>
 
           <div className="grid grid-cols-1 gap-6 grid-flow-row">
             {contacts.map((contact) => (
@@ -131,7 +129,7 @@ const InformationPage: React.FC = () => {
         </div>
 
         <div className="flex flex-col gap-y-6">
-          <h2 className="text-2xl font-semibold">Resources</h2>
+          <h2 className="text-title-small">Resources</h2>
 
           <div className="grid grid-cols-1 gap-6 grid-flow-row">
             {resources.map((resource) => (

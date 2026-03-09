@@ -181,11 +181,9 @@ const InvitesPage = () => {
   return (
     <CenterLayout>
       <div className="flex flex-col gap-y-12">
-        <div className="flex flex-col gap-y-3">
+        <div className="flex flex-col gap-y-4">
           <div className="flex flex-row justify-between items-center gap-x-2">
-            <p className="font-serif font-semibold text-2xl md:text-3xl">
-              Invites
-            </p>
+            <h1 className="text-title">Invites</h1>
             {acceptedInvites.length > 0 && (
               <p className="text-zinc-500 text-base sm:text-lg">
                 Accepted invites:{" "}

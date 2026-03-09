@@ -57,6 +57,7 @@
 }
 
 @theme {
+  --font-serif: "Libre Baskerville", "Georgia", serif;
   --color-blue: #399ee6;
   /* --color-page: oklch(99% 0 0); */
   --color-page: #fff;
@@ -113,12 +114,16 @@ select {
 }
 
 .font-serif {
-  font-family: "Libre Baskerville", "Georgia", serif;
+  font-family: var(--font-serif);
 }
 
 .font-sans {
   font-family: "Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont,
     sans-serif;
+}
+
+.font-title {
+  @apply font-serif font-semibold;
 }
 
 .font-berlingske {
@@ -164,6 +169,14 @@ select {
   &:hover {
     text-decoration: underline;
   }
+}
+
+.text-title {
+  @apply font-serif font-semibold text-3xl md:text-4xl;
+}
+
+.text-title-small {
+  @apply font-serif font-semibold text-2xl md:text-3xl;
 }
 
 a,

@@ -27,9 +27,7 @@ const GeneralUpdatesPage: React.FC = () => {
             <MoveLeft size={14} /> Information
           </div>
         </Link>
-        <p className="font-serif text-3xl md:text-4xl font-semibold mb-4">
-          General updates
-        </p>
+        <h1 className="text-title">General updates</h1>
 
         <div className="flex flex-col gap-y-4 text-base">
           {generalUpdates.map((generalUpdate) => (

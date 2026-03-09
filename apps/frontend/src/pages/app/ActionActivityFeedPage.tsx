@@ -200,7 +200,7 @@ const ActionActivityFeedPage = () => {
             <img src={chevronLeft} className="w-3 h-3 rotate-90" />
             Back to action
           </Link>
-          <p className="font-semibold text-3xl font-serif">{action.name}</p>
+          <p className="text-title-small">{action.name}</p>
         </div>
       )}
 

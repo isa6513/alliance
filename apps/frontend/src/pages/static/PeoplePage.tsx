@@ -11,8 +11,9 @@ import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { useLoaderData } from "react-router";
 
-export function loader() {
-  return userNmembers().then((res) => res.data);
+export async function loader() {
+  const res = await userNmembers();
+  return res.data;
 }
 
 const PeoplePage: React.FC = () => {
@@ -115,14 +116,10 @@ const PeoplePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 max-w-4xl mx-auto pt-12 md:pt-28 pb-56 flex flex-col gap-y-16 md:gap-y-24 px-5 text-base md:text-lg">
-        <h2 className="font-semibold text-3xl md:text-5xl font-serif text-center">
-          People
-        </h2>
-        <div className="">
-          <h2 className="!font-semibold !text-xl md:!text-3xl font-serif text-left md:text-center mb-4">
-            Office
-          </h2>
-          <p className="mb-6 md:mb-12 text-zinc-900 text-left md:text-center">
+        <h1 className="text-title text-center">People</h1>
+        <div>
+          <h2 className="text-title-small mb-4 text-center">Office</h2>
+          <p className="mb-6 md:mb-12 text-zinc-900 text-center">
             Members of the office plan actions and develop our online platform.
           </p>
           <div className="space-y-8">
@@ -156,15 +153,13 @@ const PeoplePage: React.FC = () => {
               ))}
           </div>
         </div>
-        <div className="">
-          <h2 className="!font-semibold !text-xl md:!text-3xl font-serif text-left md:text-center mb-4">
-            Experts
-          </h2>
-          <p className="text-zinc-900 text-left md:text-center">
+        <div>
+          <h2 className="text-title-small mb-4 text-center">Experts</h2>
+          <p className="text-zinc-900 text-center">
             We are gradually building a group of experts who occasionally lend
             time, knowledge, or resources to the Alliance.
           </p>
-          <p className="text-zinc-500 text-base mb-4 text-left md:text-center">
+          <p className="text-zinc-500 text-base mb-4 text-center">
             This list only includes experts who have chosen to make their
             information public.
           </p>
@@ -177,17 +172,15 @@ const PeoplePage: React.FC = () => {
             ))}
           </div>
         </div>
-        <div className="">
-          <h2 className="!font-semibold !text-xl md:!text-3xl font-serif text-left md:text-center mb-4">
-            Members
-          </h2>
-          {nmembers !== undefined ? (
-            <p className="text-zinc-900 text-left md:text-center">
+        <div>
+          <h2 className="text-title-small mb-4 text-center">Members</h2>
+          {nmembers !== undefined && (
+            <p className="text-zinc-900 text-center">
               The Alliance has {nmembers} members. Membership is currently by
               invitation only.
             </p>
-          ) : null}
-          <p className="text-zinc-500 text-base mb-4 text-left md:text-center">
+          )}
+          <p className="text-zinc-500 text-base mb-4 text-center">
             This directory only includes members who have chosen to make their
             information public.
           </p>

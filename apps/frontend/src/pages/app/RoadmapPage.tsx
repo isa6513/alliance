@@ -17,15 +17,12 @@ const RoadmapPage: React.FC = () => {
     <InfoSubpage tocSections={tocSections}>
       <p className="text-zinc-500">Last updated: February 25, 2026</p>
       <section className="gap-y-4 flex flex-col">
-        <h1
-          id="experimental-phase"
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-        >
+        <h1 id="experimental-phase" className="text-title">
           Roadmap
         </h1>
         <h2
           id="experimental-phase"
-          className="mt-2 text-2xl font-semibold text-black"
+          className="text-2xl font-semibold text-black"
         >
           Experimental phase
         </h2>

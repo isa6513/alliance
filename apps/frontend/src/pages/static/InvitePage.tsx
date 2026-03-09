@@ -141,7 +141,7 @@ const InvitePage: React.FC = () => {
         <div className="w-full max-w-4xl px-4 md:px-8 py-12 md:py-12">
           <div className="p-4 md:p-18 flex flex-col gap-y-6">
             <div className="mb-4">
-              <h2 className="font-serif font-semibold !text-4xl md:!text-5xl text-center mb-4">
+              <h2 className="text-title text-center mb-4">
                 Invitation to the Alliance
               </h2>
               {inviterProfile !== null && (

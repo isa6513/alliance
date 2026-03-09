@@ -274,13 +274,11 @@ const UserProfilePage: React.FC = () => {
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className="w-full border-none !bg-zinc-100 px-2 -mx-2 rounded focus:outline-none text-2xl !font-semibold font-serif"
+                className="text-title-small w-full border-none !bg-zinc-100 px-2 -mx-2 rounded focus:outline-none"
               />
             ) : (
               <div className="flex flex-row gap-3 items-center">
-                <h1 className="font-serif font-semibold text-2xl">
-                  {profile.displayName}
-                </h1>
+                <h1 className="text-title-small">{profile.displayName}</h1>
                 {profile.displayName === "Someone" && (
                   <div className="mt-px">
                     <InfoTooltip content="Names are hidden for members who have set their account to be anonymous." />

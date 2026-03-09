@@ -7,10 +7,8 @@ const ActionUpdatesPage = () => {
 
   return (
     <CenterLayout>
-      <div className="gap-y-4 flex flex-col text-base md:text-lg">
-        <h2 className="font-serif text-3xl md:text-4xl font-semibold mb-4">
-          Action updates
-        </h2>
+      <div className="gap-y-4 flex flex-col">
+        <h1 className="text-title">Action updates</h1>
 
         <div className="flex flex-col gap-y-4 text-base">
           {updates

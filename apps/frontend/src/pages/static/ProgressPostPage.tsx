@@ -44,11 +44,9 @@ const ProgressPostPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
-        <div className="mx-auto w-full max-w-3xl flex flex-col">
-          <h2 className="font-serif !font-semibold text-2xl md:text-4xl mb-4">
-            {frontmatter?.title}
-          </h2>
-          <div className="flex flex-col gap-y-0.5 text-lg  mb-4">
+        <div className="mx-auto w-full max-w-3xl flex flex-col gap-y-4">
+          <h1 className="text-title">{frontmatter?.title}</h1>
+          <div className="flex flex-col gap-y-0.5 text-lg">
             <p className="text-zinc-500">
               By{" "}
               {frontmatter?.authors.map((author: string) => author).join(", ")}

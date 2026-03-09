@@ -408,9 +408,7 @@ const CommunityPage = () => {
       <div className="p-5 xl:p-10 xl:pr-5 max-w-[900px] mx-auto px-0 md:px-3">
         <div className="flex flex-col gap-y-2 my-8 px-5 md:px-0">
           <div className="flex flex-col sm:flex-row justify-between gap-2">
-            <p className="font-serif font-semibold text-3xl md:text-4xl">
-              Manage groups
-            </p>
+            <h1 className="text-title">Manage groups</h1>
             <Link
               to={"/groups-guide"}
               className="text-zinc-500 hover:text-black py-2"
@@ -509,7 +507,7 @@ const CommunityPage = () => {
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="font-serif font-semibold text-3xl md:text-4xl border-none !bg-zinc-100 px-2 -mx-2 rounded focus:outline-none w-full"
+                        className="text-title border-none !bg-zinc-100 px-2 -mx-2 rounded focus:outline-none w-full"
                         placeholder="Enter group name"
                       />
                       <textarea
@@ -638,9 +636,7 @@ const CommunityPage = () => {
                     </div>
                   ) : (
                     <>
-                      <p className="font-serif font-semibold text-3xl md:text-4xl">
-                        {community.name}
-                      </p>
+                      <h1 className="text-title">{community.name}</h1>
                       <AppMarkdownWrapper
                         markdownContent={community.description}
                         className="text-base"

@@ -25,13 +25,11 @@ const TerminologyPage: React.FC = () => {
 
   return (
     <InfoSubpage tocSections={tocSections}>
+      <h1 className="text-title">Terminology</h1>
       <section className="gap-y-4 flex flex-col">
-        <h1
-          id="membership"
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-        >
+        <h2 id="membership" className="text-title-small">
           Membership
-        </h1>
+        </h2>
         <p>
           A <span className="font-semibold">member</span> of the Alliance is
           someone who has signed and abides by a
@@ -61,12 +59,12 @@ const TerminologyPage: React.FC = () => {
           Alliance.
         </p>
 
-        <h2
+        <h3
           id="member-roles"
           className="mt-2 text-2xl font-semibold text-black"
         >
           Roles
-        </h2>
+        </h3>
         <p>
           On the online platform, some people have tags that show particular
           roles they take on in the Alliance.
@@ -89,12 +87,9 @@ const TerminologyPage: React.FC = () => {
       </section>
 
       <section className="gap-y-4 flex flex-col">
-        <p
-          id="actions"
-          className="font-serif text-3xl md:text-4xl font-semibold mb-4 text-black"
-        >
+        <h2 id="actions" className="text-title-small">
           Actions
-        </p>
+        </h2>
         <p>
           An <span className="font-semibold">action</span> is an effort of the
           Alliance to achieve a goal, including both office activity and member
@@ -134,12 +129,12 @@ const TerminologyPage: React.FC = () => {
           ).
         </p>
 
-        <h2
+        <h3
           id="task-assignment"
           className="mt-2 text-2xl font-semibold text-black"
         >
           Task assignment
-        </h2>
+        </h3>
         <p>
           Members are currently assigned up to 15 minutes of tasks each week.
         </p>
@@ -163,12 +158,12 @@ const TerminologyPage: React.FC = () => {
             as members who live in a specific area.
           </li>
         </ul>
-        <h2
+        <h3
           id="away-periods"
           className="mt-2 text-2xl font-semibold text-black"
         >
           Away periods
-        </h2>
+        </h3>
         <p>
           An <span className="font-semibold">away period</span> is a period of
           time when a member is not available to complete tasks. Members can
@@ -182,12 +177,12 @@ const TerminologyPage: React.FC = () => {
           Members who have marked themselves as away will not be assigned a task
           if their away period overlaps the task&apos;s completion period.
         </p>
-        <h2
+        <h3
           id="task-scheduling"
           className="mt-2 text-2xl font-semibold text-black"
         >
           Task scheduling
-        </h2>
+        </h3>
         <p>Tasks are not launched on a consistent day of the week.</p>
 
         <p>
@@ -198,12 +193,12 @@ const TerminologyPage: React.FC = () => {
           period.
         </p>
 
-        <h2
+        <h3
           id="task-completion-fraction"
           className="mt-2 text-2xl font-semibold text-black"
         >
           Task completion fraction
-        </h2>
+        </h3>
         <p>
           Each task is associated with a fraction that measures how many members
           have completed the task out of the total number of members expected to
