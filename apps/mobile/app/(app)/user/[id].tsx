@@ -547,7 +547,7 @@ export default function UserProfileScreen() {
   const badgeStyles = "text-xs text-white px-2 py-0.5 rounded";
   const profileHeader = (
     <>
-      <View className="p-4 pt-24 gap-4">
+      <View className="p-4 pt-12 gap-4">
         <View className="items-center gap-3">
           {isEditing ? (
             <TouchableOpacity

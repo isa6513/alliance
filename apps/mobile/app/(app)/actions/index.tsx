@@ -14,12 +14,11 @@ import {
   useActionsQuery,
 } from "@alliance/shared/lib/actionsListPage";
 import Text from "../../../components/system/Text";
-import GreenHeader from "../../../components/GreenHeader";
-import ListHeader from "../../../components/ListHeader";
 import { ChevronDown } from "lucide-react-native";
 import ActionItemCard from "../../../components/ActionItemCard";
 import { LegendList } from "@legendapp/list";
 import { colors } from "../../../lib/style/colors";
+import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
 
 export default function ActionsScreen() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
@@ -42,12 +41,10 @@ export default function ActionsScreen() {
   }, []);
 
   return (
-    <GreenHeader>
+    <View className="flex-1 bg-white">
       {isPending ? (
         <View className="flex-1">
-          <ListHeader className="pt-12">
-            <Text className="text-white font-bold">All Actions</Text>
-          </ListHeader>
+          <SimplePageTitle title="All Actions" />
           <View className="flex-1 items-center justify-center bg-white">
             <ActivityIndicator size="large" color={colors.green} />
           </View>
@@ -55,9 +52,12 @@ export default function ActionsScreen() {
       ) : (
         <View className="flex-1" testID="vr-actions-ready">
           <LegendList
-            contentContainerStyle={{ backgroundColor: "white", minHeight: "80%" }}
+            contentContainerStyle={{
+              backgroundColor: "white",
+              minHeight: "80%",
+            }}
             ListHeaderComponent={
-              <ListHeader>
+              <SimplePageTitle title="All Actions">
                 <Text className="text-white font-bold">All Actions</Text>
                 <View className="flex-row items-center gap-x-2">
                   <Text className="text-sm text-white font-medium">
@@ -93,7 +93,9 @@ export default function ActionsScreen() {
                                 }}
                                 className="px-4 py-3 border-b border-zinc-100 flex-row justify-between items-center"
                               >
-                                <Text className="text-sm text-black">{mode}</Text>
+                                <Text className="text-sm text-black">
+                                  {mode}
+                                </Text>
                                 <Text className="text-sm text-zinc-500 font-mono">
                                   {counts[mode]}
                                 </Text>
@@ -105,7 +107,7 @@ export default function ActionsScreen() {
                     </Modal>
                   </View>
                 </View>
-              </ListHeader>
+              </SimplePageTitle>
             }
             data={filteredActions}
             keyExtractor={(item) => item.id.toString()}
@@ -124,6 +126,6 @@ export default function ActionsScreen() {
           />
         </View>
       )}
-    </GreenHeader>
+    </View>
   );
 }

@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import {
@@ -34,7 +30,10 @@ export default function ConversationScreen() {
     conversationId?: string | string[];
   }>();
   const convoId = conversationId
-    ? parseInt(Array.isArray(conversationId) ? conversationId[0] : conversationId, 10)
+    ? parseInt(
+        Array.isArray(conversationId) ? conversationId[0] : conversationId,
+        10
+      )
     : NaN;
   const { user } = useAuth();
   const { conversations, setConversations, loading } = useConversations(
@@ -42,20 +41,26 @@ export default function ConversationScreen() {
   );
 
   const selectedConvo = useMemo(
-    () => conversations?.find((conversation) => conversation.id === convoId) ?? null,
+    () =>
+      conversations?.find((conversation) => conversation.id === convoId) ??
+      null,
     [conversations, convoId]
   );
 
   const handleConversationUpdated = useCallback(
     (updatedConversation: ConversationDto) => {
-      setConversations((prev) => mergeConversationUpdate(prev, updatedConversation));
+      setConversations((prev) =>
+        mergeConversationUpdate(prev, updatedConversation)
+      );
     },
     [setConversations]
   );
 
   const handleIncomingMessage = useCallback(
     (incoming: MessageDto) => {
-      setConversations((prev) => updateConversationsForLastMessage(prev, incoming));
+      setConversations((prev) =>
+        updateConversationsForLastMessage(prev, incoming)
+      );
     },
     [setConversations]
   );
@@ -144,6 +149,7 @@ export default function ConversationScreen() {
     if (user) {
       const optimisticAuthor: ProfileDto = {
         id: user.id,
+        anonymous: false,
         admin: user.admin,
         staff: user.staff,
         profilePicture: user.profilePicture,
@@ -344,9 +350,9 @@ export default function ConversationScreen() {
                   prev.author.id !== item.author.id ||
                   Math.abs(
                     new Date(item.createdAt).getTime() -
-                    new Date(prev.createdAt).getTime()
+                      new Date(prev.createdAt).getTime()
                   ) >
-                  1000 * 60 * 60 * 3;
+                    1000 * 60 * 60 * 3;
                 const isFirstInReplyGroup =
                   index === 0 || prev.replyTo?.id !== item.replyTo?.id;
 

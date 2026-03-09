@@ -14,12 +14,9 @@ import { colors } from "../../lib/style/colors";
 import Text from "../../components/system/Text";
 import UserActivityCard from "../../components/UserActivityCard";
 import { LegendList } from "@legendapp/list";
-import ListHeader from "../../components/ListHeader";
-import GreenHeader from "../../components/GreenHeader";
-import {
-  KeyboardAvoidingView,
-} from "react-native-keyboard-controller";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { cn } from "@alliance/shared/styles/util";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 
 type Mode = "friends" | "everyone";
 
@@ -110,8 +107,7 @@ export default function FeedScreen() {
   );
 
   const listHeader = (
-    <ListHeader>
-      <Text className="text-white font-bold">Activity</Text>
+    <SimplePageTitle title="Activity">
       <View className="flex-row bg-white/20 rounded-lg p-1">
         <TouchableOpacity
           onPress={() => setMode("friends")}
@@ -124,7 +120,7 @@ export default function FeedScreen() {
           <Text
             className={cn(
               "text-sm font-medium",
-              mode === "friends" ? "text-zinc-900" : "text-white"
+              mode === "friends" ? "text-green" : "text-black"
             )}
           >
             Friends
@@ -141,19 +137,18 @@ export default function FeedScreen() {
           <Text
             className={cn(
               "text-sm font-medium",
-              mode === "everyone" ? "text-zinc-900" : "text-white"
+              mode === "everyone" ? "text-green" : "text-black"
             )}
           >
             Everyone
           </Text>
         </TouchableOpacity>
       </View>
-    </ListHeader>
+    </SimplePageTitle>
   );
 
   return (
-    <GreenHeader>
-      {/* Content area */}
+    <View>
       {loading ? (
         <View className="flex-1">
           {listHeader}
@@ -191,6 +186,6 @@ export default function FeedScreen() {
           />
         </KeyboardAvoidingView>
       )}
-    </GreenHeader>
+    </View>
   );
 }

@@ -7,6 +7,7 @@ import TabBar from "../../components/TabBar";
 import Sidebar from "../../components/Sidebar";
 import { colors } from "../../lib/style/colors";
 import { isVisualTestMode } from "../../lib/visualTest";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.round(SCREEN_WIDTH * 0.8);
@@ -16,6 +17,7 @@ const Drawer = withLayoutContext(Navigator);
 
 export default function AppLayout() {
   const { isAuthenticated, isLoading, canConnectToServer } = useAuth();
+  const insets = useSafeAreaInsets();
 
   if (isLoading) {
     return (
@@ -37,7 +39,7 @@ export default function AppLayout() {
   }
 
   return (
-    <View className="flex-1 bg-white" testID="vr-app-shell-ready">
+    <View className="flex-1 " testID="vr-app-shell-ready">
       <Drawer
         drawerContent={(props) => <Sidebar {...props} />}
         screenOptions={{
@@ -46,7 +48,8 @@ export default function AppLayout() {
           overlayColor: "rgba(0, 0, 0, 0.5)",
           drawerStyle: { width: DRAWER_WIDTH, backgroundColor: "#fafafa" },
           swipeEdgeWidth: 300,
-          swipeMinDistance: 30
+          swipeMinDistance: 30,
+          sceneStyle: { paddingTop: insets.top, backgroundColor: "white" },
         }}
       >
         <Drawer.Screen name="index" />

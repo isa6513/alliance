@@ -14,7 +14,6 @@ import {
 } from "@alliance/shared/lib/notificationBucketing";
 import { usePostHog } from "posthog-react-native";
 import Text from "../../components/system/Text";
-import ListHeader from "../../components/ListHeader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LegendList } from "@legendapp/list";
 import SwipeableNotification from "../../components/SwipeableNotification";
@@ -165,20 +164,18 @@ export default function NotificationsScreen() {
     [handleMarkAsRead, handleMarkBucketAsRead, handleNotificationPress]
   );
 
+  // const header = useMemo(() => {
+
   return isPending ? (
     <View className="flex-1">
-      <ListHeader className="pt-12">
-        <Text className="text-white font-bold">Notifications</Text>
-      </ListHeader>
+      <SimplePageTitle title="Notifications" />
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#0D1B2A" />
       </View>
     </View>
   ) : error ? (
     <View className="flex-1">
-      <ListHeader className="pt-12">
-        <Text className="text-white font-bold">Notifications</Text>
-      </ListHeader>
+      <SimplePageTitle title="Notifications" />
       <View className="flex-1 items-center justify-center bg-white">
         <Text className="text-center text-red-500">{error.message}</Text>
       </View>
@@ -193,11 +190,7 @@ export default function NotificationsScreen() {
   ) : (
     <View className="flex-1 bg-white" testID="vr-notifications-ready">
       <LegendList
-        ListHeaderComponent={
-          <View className="px-4">
-            <SimplePageTitle title="Notifications" />
-          </View>
-        }
+        ListHeaderComponent={<SimplePageTitle title="Notifications" />}
         data={renderItems}
         keyExtractor={(item) => item.key}
         refreshControl={

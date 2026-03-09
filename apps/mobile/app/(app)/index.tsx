@@ -28,6 +28,7 @@ import {
 } from "react-native-keyboard-controller";
 import type { GeneralUpdateDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 
 const GENERAL_UPDATES_QUERY_KEY = [
   "actions",
@@ -146,55 +147,47 @@ export default function HomeScreen() {
   }
 
   return (
-    <GreenHeader>
-      <KeyboardAwareScrollView
-        ref={scrollViewRef}
-        className="flex-1"
-        bottomOffset={72}
-        testID="vr-home-ready"
-      >
-        {currentTaskOrGeneralUpdate &&
-        isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
-          <View className="p-4">
-            <LargeGeneralUpdateCard
-              key={currentTaskOrGeneralUpdate.id}
-              generalUpdate={currentTaskOrGeneralUpdate}
-              onDismiss={() =>
-                handleDismissGeneralUpdate(currentTaskOrGeneralUpdate.id)
-              }
-              userId={user?.id}
-              user={user}
-            />
-          </View>
-        ) : (
-          <>
-            <View className="bg-green p-4 pt-12">
-              <Text className="text-white font-bold text-base mt-2 pb-0">
-                Current task:
+    <KeyboardAwareScrollView
+      ref={scrollViewRef}
+      className="flex-1 bg-white"
+      bottomOffset={72}
+      testID="vr-home-ready"
+    >
+      {currentTaskOrGeneralUpdate &&
+      isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
+        <View className="p-4">
+          <LargeGeneralUpdateCard
+            key={currentTaskOrGeneralUpdate.id}
+            generalUpdate={currentTaskOrGeneralUpdate}
+            onDismiss={() =>
+              handleDismissGeneralUpdate(currentTaskOrGeneralUpdate.id)
+            }
+            userId={user?.id}
+            user={user}
+          />
+        </View>
+      ) : (
+        <>
+          <SimplePageTitle title="Current task" />
+          <View className="border-t border-zinc-200">
+            {!currentTaskOrGeneralUpdate ? (
+              <Text className="text-red-500 text-center py-4">
+                {error?.message}
               </Text>
-            </View>
-            <View>
-              {!currentTaskOrGeneralUpdate ? (
-                <Text className="text-red-500 text-center py-4">
-                  {error?.message}
-                </Text>
-              ) : (
-                <LargeActionCard
-                  action={currentTaskOrGeneralUpdate}
-                  userRelation={
-                    currentTaskOrGeneralUpdate.userRelation ?? "none"
-                  }
-                  onUpdateActionState={refetch}
-                  scrollPageTo={scrollPageTo}
-                  handleDismiss={() =>
-                    handleDismissAction(currentTaskOrGeneralUpdate.id)
-                  }
-                />
-              )}
-            </View>
-          </>
-        )}
-      </KeyboardAwareScrollView>
-    </GreenHeader>
+            ) : (
+              <LargeActionCard
+                action={currentTaskOrGeneralUpdate}
+                userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
+                onUpdateActionState={refetch}
+                scrollPageTo={scrollPageTo}
+                handleDismiss={() =>
+                  handleDismissAction(currentTaskOrGeneralUpdate.id)
+                }
+              />
+            )}
+          </View>
+        </>
+      )}
+    </KeyboardAwareScrollView>
   );
 }
