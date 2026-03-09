@@ -1,5 +1,10 @@
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
-import { notifsSetRead, NotificationDto } from "@alliance/shared/client";
+import {
+  buildNotificationRenderItems,
+  getUnreadLikesCount,
+  LikesBucket,
+} from "@alliance/shared/lib/notificationBucketing";
+import { notifsSetRead } from "@alliance/shared/client";
 import List from "@alliance/sharedweb/ui/List";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
@@ -7,17 +12,6 @@ import NotificationText from "./NotificationText";
 import { useMemo, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
 import { Heart, ChevronDown, ChevronUp, CheckCheck } from "lucide-react";
-import { formatDate } from "date-fns";
-
-function getDayKey(date: Date): string {
-  return formatDate(date, "yyyy-MM-dd");
-}
-
-type LikesBucket = {
-  dayKey: string;
-  time: number;
-  likes: NotificationDto[];
-};
 
 const LikesGroup = ({
   bucket,
@@ -29,7 +23,7 @@ const LikesGroup = ({
   onMarkAllRead: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const unreadCount = bucket.likes.filter((n) => !n.readAt).length;
+  const unreadCount = getUnreadLikesCount(bucket);
 
   return (
     <div className="flex flex-col">
@@ -87,10 +81,6 @@ const LikesGroup = ({
   );
 };
 
-type RenderItem =
-  | { type: "notification"; data: NotificationDto; time: number }
-  | { type: "likes-group"; bucket: LikesBucket; time: number };
-
 const NotificationsPage = () => {
   const {
     notifications,
@@ -103,32 +93,6 @@ const NotificationsPage = () => {
     (notification) => !notification.readAt
   ).length;
 
-  const { likesBuckets, other } = useMemo(() => {
-    const bucketMap = new Map<string, LikesBucket>();
-    const other: NotificationDto[] = [];
-
-    for (const n of notifications) {
-      if (n.category === "likes") {
-        const date = new Date(n.sendTime || n.createdAt);
-        const key = getDayKey(date);
-        const existing = bucketMap.get(key);
-        if (existing) {
-          existing.likes.push(n);
-          existing.time = Math.max(existing.time, date.getTime());
-        } else {
-          bucketMap.set(key, {
-            dayKey: key,
-            time: date.getTime(),
-            likes: [n],
-          });
-        }
-      } else {
-        other.push(n);
-      }
-    }
-    return { likesBuckets: Array.from(bucketMap.values()), other };
-  }, [notifications]);
-
   const handleMarkBucketAsRead = (bucket: LikesBucket) => async () => {
     const unreadLikes = bucket.likes.filter((n) => !n.readAt);
     await Promise.all(
@@ -137,58 +101,10 @@ const NotificationsPage = () => {
     refreshNotifications();
   };
 
-  // Merge other notifications and likes buckets into a single sorted list,
-  // collapsing adjacent likes buckets and unwrapping single-like buckets
-  const renderItems = useMemo(() => {
-    const items: RenderItem[] = [];
-    for (const n of other) {
-      items.push({
-        type: "notification",
-        data: n,
-        time: new Date(n.sendTime || n.createdAt).getTime(),
-      });
-    }
-    for (const bucket of likesBuckets) {
-      items.push({ type: "likes-group", bucket, time: bucket.time });
-    }
-    items.sort((a, b) => b.time - a.time);
-
-    // Merge adjacent likes-group items into a single bucket
-    const merged: RenderItem[] = [];
-    for (const item of items) {
-      const prev = merged[merged.length - 1];
-      if (item.type === "likes-group" && prev?.type === "likes-group") {
-        const combined: LikesBucket = {
-          dayKey: prev.bucket.dayKey + "+" + item.bucket.dayKey,
-          time: prev.bucket.time,
-          likes: [...prev.bucket.likes, ...item.bucket.likes],
-        };
-        merged[merged.length - 1] = {
-          type: "likes-group",
-          bucket: combined,
-          time: combined.time,
-        };
-      } else {
-        merged.push(item);
-      }
-    }
-
-    // Unwrap single-like buckets into regular notification items
-    const final: RenderItem[] = [];
-    for (const item of merged) {
-      if (item.type === "likes-group" && item.bucket.likes.length === 1) {
-        const n = item.bucket.likes[0];
-        final.push({
-          type: "notification",
-          data: n,
-          time: new Date(n.sendTime || n.createdAt).getTime(),
-        });
-      } else {
-        final.push(item);
-      }
-    }
-    return final;
-  }, [other, likesBuckets]);
+  const renderItems = useMemo(
+    () => buildNotificationRenderItems(notifications),
+    [notifications]
+  );
 
   return (
     <CenterLayout>
@@ -208,19 +124,19 @@ const NotificationsPage = () => {
           {renderItems.map((item) =>
             item.type === "likes-group" ? (
               <LikesGroup
-                key={`likes-${item.bucket.dayKey}`}
+                key={item.key}
                 bucket={item.bucket}
                 handleNotifClick={handleNotifClick}
                 onMarkAllRead={handleMarkBucketAsRead(item.bucket)}
               />
             ) : (
               <NotificationText
-                key={item.data.id}
-                notification={item.data}
+                key={item.key}
+                notification={item.notification}
                 handleNotifClick={handleNotifClick}
                 className={cn(
                   "hover:bg-zinc-100 p-4 flex cursor-pointer flex-col gap-y-2",
-                  item.data.readAt ? "bg-white" : "bg-red-50"
+                  item.notification.readAt ? "bg-white" : "bg-red-50"
                 )}
               />
             )

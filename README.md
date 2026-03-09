@@ -38,24 +38,18 @@ When opening the app locally for the first time, you can log in with the account
 
 ### mobile
 
-Running on a physical device:
+Running the app with expo is a two step process:
 
-- `npx expo prebuild`
-- `cd ios && pod install`
-- `cd .. && npx expo run:ios --device [YOUR DEVICE ID]`
+- prebuilding / creating the development build (`npx expo prebuild`)
+- running the expo dev server which the build connects to. (`npx expo start --dev-client`)
 
-(can find device id via `xcrun xctrace list devices`)
+We have a few scripts that do both of these together, as well as installing needed pods deps:
 
-Running dev server for expo / development build: (once you've made a development build once, you should just be able to run this for hot reload updates)
+- To build and run on a local simulator: `yarn build:simulator`
+- To build into xcode for app store upload: `yarn buildprod`
+- To build and run on a physical device: `npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios --device [your device id]`
 
-- `yarn start`
-
-Running on an ios simulator:
-
-- one way to do this is `yarn build:ios`, which uses eas instead of building locally so i have less trouble with
-- this creates a development build and installs it on simulator, after which you can use `yarn start` to attach it to the dev server
-
-build: `yarn eas build --platform [ios|android]`
+(you can find your device id via `xcrun xctrace list devices`)
 
 ## Miscellaneous commands
 

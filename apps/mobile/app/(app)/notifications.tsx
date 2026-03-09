@@ -5,22 +5,21 @@ import {
   NotificationDto,
   notifsFindAll,
   notifsSetRead,
-  notifsSetReadAll,
 } from "@alliance/shared/client";
+import {
+  buildNotificationRenderItems,
+  getNotificationTime,
+  LikesBucket,
+  NotificationRenderItem,
+} from "@alliance/shared/lib/notificationBucketing";
 import { usePostHog } from "posthog-react-native";
-import Button, {
-  ButtonColor,
-  ButtonSize,
-} from "../../components/system/Button";
 import Text from "../../components/system/Text";
-import GreenHeader from "../../components/GreenHeader";
 import ListHeader from "../../components/ListHeader";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LegendList } from "@legendapp/list";
-import SwipeableNotification, {
-  getNotifTime,
-} from "../../components/SwipeableNotification";
+import SwipeableNotification from "../../components/SwipeableNotification";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import MobileLikesGroup from "../../components/LikesGroup";
 
 const normalizeLocation = (location: string | null) => {
   if (!location) return null;
@@ -53,18 +52,25 @@ export default function NotificationsScreen() {
   const notifications = useMemo(() => {
     if (!response?.data) return [];
     return response.data
-      .sort((a, b) => getNotifTime(b).getTime() - getNotifTime(a).getTime())
-      .filter((notif) => getNotifTime(notif).getTime() <= Date.now());
+      .sort(
+        (a, b) =>
+          getNotificationTime(b).getTime() - getNotificationTime(a).getTime()
+      )
+      .filter((notif) => getNotificationTime(notif).getTime() <= Date.now());
   }, [response]);
 
-  const unreadCount = useMemo(
-    () => notifications.filter((notification) => !notification.readAt).length,
+  const renderItems = useMemo(
+    () => buildNotificationRenderItems(notifications),
     [notifications]
   );
 
-  const handleMarkAsRead = useCallback(
-    (notificationId: number) => {
-      notifsSetRead({ path: { id: notificationId } });
+  const markNotificationsRead = useCallback(
+    (notificationIds: number[]) => {
+      if (notificationIds.length === 0) {
+        return;
+      }
+
+      const ids = new Set(notificationIds);
       const readAt = new Date().toISOString();
       queryClient.setQueryData(
         ["notifications"],
@@ -72,47 +78,49 @@ export default function NotificationsScreen() {
           if (!oldData?.data) return oldData;
           return {
             ...oldData,
-            data: oldData.data.map((n) =>
-              n.id === notificationId ? { ...n, readAt } : n
+            data: oldData.data.map((notification) =>
+              ids.has(notification.id)
+                ? { ...notification, readAt }
+                : notification
             ),
           };
         }
       );
-      posthog?.capture("notification_swiped_read", { notificationId });
     },
-    [posthog, queryClient]
+    [queryClient]
   );
 
-  const handleMarkAllAsRead = useCallback(() => {
-    notifsSetReadAll();
-    const readAt = new Date().toISOString();
-    queryClient.setQueryData(["notifications"], (oldData: typeof response) => {
-      if (!oldData?.data) return oldData;
-      return {
-        ...oldData,
-        data: oldData.data.map((n) => ({ ...n, readAt })),
-      };
-    });
-    posthog?.capture("notifications_marked_all_as_read");
-  }, [posthog, queryClient]);
+  const handleMarkAsRead = useCallback(
+    (notificationId: number) => {
+      notifsSetRead({ path: { id: notificationId } });
+      markNotificationsRead([notificationId]);
+      posthog?.capture("notification_swiped_read", { notificationId });
+    },
+    [markNotificationsRead, posthog]
+  );
+
+  const handleMarkBucketAsRead = useCallback(
+    (bucket: LikesBucket) => {
+      const unreadLikes = bucket.likes.filter(
+        (notification) => !notification.readAt
+      );
+      if (unreadLikes.length === 0) {
+        return;
+      }
+
+      unreadLikes.forEach((notification) => {
+        notifsSetRead({ path: { id: notification.id } });
+      });
+      markNotificationsRead(unreadLikes.map((notification) => notification.id));
+    },
+    [markNotificationsRead]
+  );
 
   const handleNotificationPress = useCallback(
     (notification: NotificationDto) => {
       if (!notification.readAt) {
         notifsSetRead({ path: { id: notification.id } });
-        const readAt = new Date().toISOString();
-        queryClient.setQueryData(
-          ["notifications"],
-          (oldData: typeof response) => {
-            if (!oldData?.data) return oldData;
-            return {
-              ...oldData,
-              data: oldData.data.map((n) =>
-                n.id === notification.id ? { ...n, readAt } : n
-              ),
-            };
-          }
-        );
+        markNotificationsRead([notification.id]);
       }
 
       const destination = normalizeLocation(
@@ -129,21 +137,32 @@ export default function NotificationsScreen() {
         router.push(destination as RelativePathString);
       }
     },
-    [posthog, queryClient]
+    [markNotificationsRead, posthog]
   );
 
   const renderNotification = useCallback(
-    ({ item: notification }: { item: NotificationDto }) => {
+    ({ item }: { item: NotificationRenderItem }) => {
+      if (item.type === "likes-group") {
+        return (
+          <MobileLikesGroup
+            key={item.key}
+            bucket={item.bucket}
+            onMarkBucketRead={handleMarkBucketAsRead}
+            onPressNotification={handleNotificationPress}
+          />
+        );
+      }
+
       return (
         <SwipeableNotification
-          key={notification.id}
-          notification={notification}
-          onPress={() => handleNotificationPress(notification)}
-          onMarkRead={() => handleMarkAsRead(notification.id)}
+          key={item.key}
+          notification={item.notification}
+          onPress={() => handleNotificationPress(item.notification)}
+          onMarkRead={() => handleMarkAsRead(item.notification.id)}
         />
       );
     },
-    [handleNotificationPress, handleMarkAsRead]
+    [handleMarkAsRead, handleMarkBucketAsRead, handleNotificationPress]
   );
 
   return isPending ? (
@@ -164,7 +183,7 @@ export default function NotificationsScreen() {
         <Text className="text-center text-red-500">{error.message}</Text>
       </View>
     </View>
-  ) : notifications.length === 0 ? (
+  ) : renderItems.length === 0 ? (
     <View className="flex-1">
       <SimplePageTitle title="Notifications" />
       <View className="flex-1 items-center justify-center bg-white">
@@ -179,8 +198,8 @@ export default function NotificationsScreen() {
             <SimplePageTitle title="Notifications" />
           </View>
         }
-        data={notifications}
-        keyExtractor={(item) => item.id.toString()}
+        data={renderItems}
+        keyExtractor={(item) => item.key}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
