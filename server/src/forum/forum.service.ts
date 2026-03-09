@@ -495,7 +495,7 @@ export class ForumService {
     ) {
       this.eventLogService.sendMessage({
         type: EventType.ActionComment,
-        message: `New comment on action ${createCommentDto.parentObjectId} <@U0A89S0NM41> <@U08P0TJ283T> <@U08NU231VGS> - <${process.env.APP_URL}/actions/${createCommentDto.parentObjectId}?replyId=${reply.id}|Open action>`,
+        message: `New comment on action ${createCommentDto.parentObjectId} <@U08P0TJ283T> <@U08NU231VGS> - <${process.env.APP_URL}/actions/${createCommentDto.parentObjectId}?replyId=${reply.id}|Open action>`,
         userId: userId,
         blob: {
           actionId: createCommentDto.parentObjectId,
