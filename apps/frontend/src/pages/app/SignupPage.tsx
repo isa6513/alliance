@@ -3,6 +3,7 @@ import {
   authRegister,
   ProfileDto,
   SignUpDto,
+  userNmembers,
   userOnetimeInvite,
   userReferrerProfile,
 } from "@alliance/shared/client";
@@ -11,6 +12,7 @@ import Card from "@alliance/sharedweb/ui/Card";
 import posthog from "posthog-js";
 import React, { useEffect, useState } from "react";
 import { Link, href, useSearchParams } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
 import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
@@ -23,6 +25,11 @@ const SignupPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const referralCode = searchParams.get("ref");
+
+  const { data: memberCount } = useQuery({
+    queryKey: ["userNmembers"],
+    queryFn: () => userNmembers().then((res) => res.data ?? 0),
+  });
 
   const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
   const [inviteeName, setInviteeName] = useState<string | null>(null);
@@ -189,8 +196,9 @@ const SignupPage: React.FC = () => {
             )}
             <p>
               I invite you to join me as a member of the Alliance. We are an
-              online community of about 95 people cooperating to improve the
-              world.
+              online community
+              {memberCount === undefined ? " " : ` of ${memberCount} people `}
+              cooperating to improve the world.
             </p>
             <ol className="list-decimal list-inside space-y-3 pl-2">
               <li>
