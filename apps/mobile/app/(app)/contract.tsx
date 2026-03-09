@@ -23,6 +23,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { suspendContractConfirmation } from "@alliance/shared/lib/copy";
 import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 import { useQuery } from "@tanstack/react-query";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 
 export default function ContractScreen() {
   const { user } = useAuth();
@@ -158,15 +159,9 @@ export default function ContractScreen() {
       bottomOffset={50}
       testID="vr-contract-ready"
     >
-      <View className="p-4 pt-16 gap-y-8">
-        {/* Header */}
-        <View className="flex-row items-center mb-1">
-          <Text className="text-2xl font-semibold font-serif">
-            Membership contract
-          </Text>
-        </View>
+      <View className="p-4 gap-y-4 pt-0">
+        <SimplePageTitle title="Membership contract" />
 
-        {/* Notes */}
         <Text className="text-zinc-900">Notes:</Text>
         <View className="mb-4">
           {CONTRACT_NOTES.map((note: string, index: number) => (
