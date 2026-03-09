@@ -7,7 +7,7 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
-  route("/", "pages/static/PrelaunchLanding.tsx"),
+  route("/", "pages/static/PrelaunchLandingPage.tsx"),
   route("/people", "pages/static/PeoplePage.tsx"),
   route("/guide", "pages/static/GuidePage.tsx"),
   route("/foundation", "pages/static/FoundationPage.tsx"),
