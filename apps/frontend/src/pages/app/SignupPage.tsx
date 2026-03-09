@@ -29,6 +29,7 @@ const SignupPage: React.FC = () => {
   const { data: memberCount } = useQuery({
     queryKey: ["userNmembers"],
     queryFn: () => userNmembers().then((res) => res.data ?? 0),
+    enabled: !!referralCode,
   });
 
   const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
@@ -197,7 +198,9 @@ const SignupPage: React.FC = () => {
             <p>
               I invite you to join me as a member of the Alliance. We are an
               online community
-              {memberCount === undefined ? " " : ` of ${memberCount} people `}
+              {memberCount !== undefined && memberCount > 0
+                ? ` of ${memberCount} people `
+                : " "}
               cooperating to improve the world.
             </p>
             <ol className="list-decimal list-inside space-y-3 pl-2">
