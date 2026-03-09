@@ -713,7 +713,7 @@ const writeMaestroFlow = async (
   filePath: string,
   deepLink: string,
   readyTestId: string,
-  screenshotName: string
+  screenshotPath: string
 ) => {
   const contents = `appId: "${bundleId}"
 ---
@@ -734,7 +734,7 @@ const writeMaestroFlow = async (
     id: "${readyTestId}"
 - waitForAnimationToEnd
 - takeScreenshot:
-    path: "${screenshotName}"
+    path: "${screenshotPath}"
 `;
   await fs.writeFile(filePath, contents, "utf8");
 };
@@ -772,7 +772,6 @@ const captureScreenshots = async (udid: string, simulatorName: string) => {
         target.name
       )}.png`;
       const filePath = path.join(outputDir, fileName);
-      const screenshotName = fileName.replace(/\.png$/i, "");
       const flowPath = path.join(flowDir, `${target.name}.yaml`);
 
       console.log(
@@ -782,7 +781,7 @@ const captureScreenshots = async (udid: string, simulatorName: string) => {
         flowPath,
         target.deepLink,
         target.readyTestId,
-        screenshotName
+        filePath
       );
       await runCommand(
         maestro,
@@ -790,8 +789,6 @@ const captureScreenshots = async (udid: string, simulatorName: string) => {
           "test",
           "--udid",
           udid,
-          "--test-output-dir",
-          outputDir,
           flowPath,
         ],
         {

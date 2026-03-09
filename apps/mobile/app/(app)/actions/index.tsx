@@ -58,7 +58,6 @@ export default function ActionsScreen() {
             }}
             ListHeaderComponent={
               <SimplePageTitle title="All Actions">
-                <Text className="text-white font-bold">All Actions</Text>
                 <View className="flex-row items-center gap-x-2">
                   <Text className="text-sm text-white font-medium">
                     Filter by:

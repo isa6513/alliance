@@ -18,7 +18,6 @@ import {
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../components/LargeActionCard";
 import LargeGeneralUpdateCard from "../../components/LargeGeneralUpdateCard";
-import GreenHeader from "../../components/GreenHeader";
 import { Check } from "lucide-react-native";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

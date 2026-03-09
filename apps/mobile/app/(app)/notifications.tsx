@@ -164,8 +164,6 @@ export default function NotificationsScreen() {
     [handleMarkAsRead, handleMarkBucketAsRead, handleNotificationPress]
   );
 
-  // const header = useMemo(() => {
-
   return isPending ? (
     <View className="flex-1">
       <SimplePageTitle title="Notifications" />
