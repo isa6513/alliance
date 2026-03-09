@@ -176,7 +176,7 @@ export default function AwayRangesSection() {
   }
 
   const inputClasses =
-    "border border-zinc-300 rounded-lg bg-white px-3 py-3 text-base";
+    "border border-zinc-200 rounded-lg bg-white px-3 py-3 text-base";
 
   return (
     <View>
@@ -357,7 +357,7 @@ export default function AwayRangesSection() {
                       "w-5 h-5 rounded-full border mr-3 items-center justify-center",
                       selectedReason === option.value
                         ? "border-green-600"
-                        : "border-zinc-300"
+                        : "border-zinc-200"
                     )}
                   >
                     {selectedReason === option.value && (

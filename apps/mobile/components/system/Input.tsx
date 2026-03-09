@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  TextInput,
-  Text,
-  TextInputProps,
-} from "react-native";
+import { View, TextInput, Text, TextInputProps } from "react-native";
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -29,7 +24,7 @@ export default function Input({
     ? "border-red-500"
     : isFocused
     ? "border-blue-500"
-    : "border-zinc-300";
+    : "border-zinc-200";
 
   const inputContainerClasses = `border rounded-lg bg-white px-3 min-h-11 ${borderColorClass}`;
   const inputClasses = `text-base text-zinc-700 py-3 ${className || ""}`;
@@ -52,9 +47,7 @@ export default function Input({
           {...textInputProps}
         />
       </View>
-      {error && (
-        <Text className="text-xs text-red-500 mt-1">{error}</Text>
-      )}
+      {error && <Text className="text-xs text-red-500 mt-1">{error}</Text>}
       {helperText && !error && (
         <Text className="text-xs text-zinc-500 mt-1">{helperText}</Text>
       )}

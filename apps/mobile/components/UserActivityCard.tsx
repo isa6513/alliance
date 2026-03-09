@@ -81,7 +81,9 @@ export default function UserActivityCard({
           return img;
         })
       );
-      const attachmentKeys = uploads.filter((key) => key !== undefined) as string[];
+      const attachmentKeys = uploads.filter(
+        (key) => key !== undefined
+      ) as string[];
 
       const response = await actionsUpdateActivity({
         path: { id: activity.id },
@@ -164,10 +166,10 @@ export default function UserActivityCard({
           <>
             {(!!activity.editableContent?.body ||
               (activity.editableContent?.attachments?.length ?? 0) > 0) && (
-                <View className="mt-3">
-                  <EditableContentRenderer content={activity.editableContent} />
-                </View>
-              )}
+              <View className="mt-3">
+                <EditableContentRenderer content={activity.editableContent} />
+              </View>
+            )}
           </>
         )}
 
@@ -186,7 +188,7 @@ export default function UserActivityCard({
                 <TouchableOpacity
                   onPress={handleEdit}
                   activeOpacity={0.7}
-                  className="flex-row items-center gap-x-1 border border-zinc-300 rounded px-2 py-1"
+                  className="flex-row items-center gap-x-1 border border-zinc-200 rounded px-2 py-1"
                 >
                   <Edit size={14} color="#52525b" />
                   <Text className="text-sm text-zinc-600">Edit</Text>
@@ -196,7 +198,7 @@ export default function UserActivityCard({
                 <TouchableOpacity
                   onPress={() => setShowCommentForm(true)}
                   activeOpacity={0.7}
-                  className="border border-zinc-300 rounded px-2 py-1"
+                  className="border border-zinc-200 rounded px-2 py-1"
                 >
                   <Text className="text-sm text-zinc-600">Reply</Text>
                 </TouchableOpacity>

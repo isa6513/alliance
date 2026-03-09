@@ -65,7 +65,7 @@ export default function CityAutosuggestMobile({
         onPress={() => setOpen(true)}
         disabled={disabled}
         className={cn(
-          "w-full rounded-lg border border-zinc-300 px-3 py-3 bg-white",
+          "w-full rounded-lg border border-zinc-200 px-3 py-3 bg-white",
           disabled && "opacity-60"
         )}
       >

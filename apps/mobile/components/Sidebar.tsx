@@ -81,7 +81,6 @@ const navSections: NavSection[] = [
         icon: MessagesSquare,
         matchPaths: ["/forum"],
       },
-      { name: "Groups", href: "/groups", icon: Users, matchPaths: ["/groups"] },
       {
         name: "Messages",
         href: "/messages",
@@ -155,7 +154,10 @@ export default function Sidebar(props: DrawerContentComponentProps) {
           onPress={() => handleNavigate("/")}
           className="px-6 mb-8"
         >
-          <Text className="font-serif text-xl uppercase font-bold">
+          <Text
+            className="uppercase text-xl font-bold"
+            style={{ fontFamily: "Berlingske" }}
+          >
             The Alliance
           </Text>
         </TouchableOpacity>

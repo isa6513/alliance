@@ -101,7 +101,7 @@ export default function ProfileImage({
     <View
       style={baseStyle}
       className={cn(
-        "bg-white border border-zinc-300 items-center justify-center shrink-0",
+        "bg-white border border-zinc-200 items-center justify-center shrink-0",
         className
       )}
     >

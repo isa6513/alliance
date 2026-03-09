@@ -74,7 +74,7 @@ export default function LikesGroup({
       : `${bucket.likes.length} like${bucket.likes.length === 1 ? "" : "s"}`;
 
   return (
-    <View className="mx-px overflow-hidden border-t border-zinc-300">
+    <View className="mx-px overflow-hidden border-t border-zinc-200">
       <View
         className={cn(
           "flex-row items-center justify-between px-6 py-4",

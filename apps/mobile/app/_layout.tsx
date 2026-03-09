@@ -97,6 +97,7 @@ export default function RootLayout() {
     "LibreBaskerville-SemiBold": require("../assets/fonts/LibreBaskerville-SemiBold.ttf"),
     "IBMPlexSans-Medium": require("../assets/fonts/IBMPlexSans-Medium.ttf"),
     "IBMPlexSans-Bold": require("../assets/fonts/IBMPlexSans-Bold.ttf"),
+    Berlingske: require("../assets/fonts/BerlingskeSerif-Blk.ttf"),
   });
   useEffect(() => {
     client.setConfig({

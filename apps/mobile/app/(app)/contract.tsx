@@ -151,7 +151,7 @@ export default function ContractScreen() {
   }
 
   const inputClasses =
-    "border border-zinc-300 rounded bg-white px-3 py-3 text-base flex-1";
+    "border border-zinc-200 rounded bg-white px-3 py-3 text-base flex-1";
 
   return (
     <KeyboardAwareScrollView

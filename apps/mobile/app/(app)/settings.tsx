@@ -168,7 +168,7 @@ export default function SettingsPage() {
   }
 
   const inputClasses =
-    "border border-zinc-300 rounded-lg bg-white px-3 py-3 text-base";
+    "border border-zinc-200 rounded-lg bg-white px-3 py-3 text-base";
 
   return (
     <ScrollView className="flex-1 bg-white" testID="vr-settings-ready">
@@ -560,7 +560,7 @@ export default function SettingsPage() {
                         editableUser.preferredActionReminderChannel ===
                           option.value
                           ? "border-green-600"
-                          : "border-zinc-300"
+                          : "border-zinc-200"
                       )}
                     >
                       {editableUser.preferredActionReminderChannel ===
@@ -613,7 +613,7 @@ export default function SettingsPage() {
                         "w-5 h-5 rounded-full border mr-3 items-center justify-center",
                         editableUser.formDataPreference === option.value
                           ? "border-green-600"
-                          : "border-zinc-300"
+                          : "border-zinc-200"
                       )}
                     >
                       {editableUser.formDataPreference === option.value && (

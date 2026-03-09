@@ -55,7 +55,7 @@ export default function TimeZoneSelect({
         disabled={disabled}
         onPress={() => setOpen(true)}
         className={cn(
-          "w-full rounded-lg border px-3 py-3 bg-white flex-row items-center justify-between border-zinc-300",
+          "w-full rounded-lg border px-3 py-3 bg-white flex-row items-center justify-between border-zinc-200",
           disabled && "opacity-60"
         )}
       >

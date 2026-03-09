@@ -16,7 +16,7 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import Text from "./system/Text";
 import ProfileImage from "./ProfileImage";
 import { NotificationDto } from "@alliance/shared/client";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { cn } from "@alliance/shared/styles/util";
 import { getNotificationTime } from "@alliance/shared/lib/notificationBucketing";
 
@@ -78,7 +78,7 @@ function SwipeableNotification({
   });
 
   return (
-    <View className="overflow-hidden border-t mx-px border-zinc-300 p-4">
+    <View className="overflow-hidden border-t mx-px border-zinc-200 p-4">
       {/* Background action area */}
       <Animated.View
         style={[actionStyle]}
@@ -95,13 +95,9 @@ function SwipeableNotification({
       {/* Swipeable content */}
       <GestureDetector gesture={panGesture}>
         <Animated.View style={contentStyle}>
-          <TouchableOpacity
-            activeOpacity={0.75}
+          <Pressable
             onPress={onPress}
-            className={cn(
-              "px-6 py-4",
-              notification.readAt ? "bg-white" : "bg-red-50"
-            )}
+            className={cn(notification.readAt ? "bg-white" : "bg-red-50")}
           >
             <View className="flex-1">
               <View className="flex-row items-center flex-wrap gap-x-1">
@@ -133,7 +129,7 @@ function SwipeableNotification({
                 })}
               </Text>
             </View>
-          </TouchableOpacity>
+          </Pressable>
         </Animated.View>
       </GestureDetector>
     </View>

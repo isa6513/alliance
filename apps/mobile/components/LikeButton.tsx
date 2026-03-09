@@ -18,7 +18,7 @@ export default function LikeButton({
 }: LikeButtonProps) {
   const baseClasses = "flex-row items-center gap-x-1";
   const borderClasses = bordered
-    ? "border border-zinc-300 rounded px-2 py-1"
+    ? "border border-zinc-200 rounded px-2 py-1"
     : "";
   const iconColor = liked ? "#ef4444" : "#888";
 

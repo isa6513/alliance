@@ -128,7 +128,7 @@ export function RenderField({
     typeof error === "string" && error.trim().length > 0 ? error : null;
   const hasError = Boolean(errorMessage);
   const inputBase = `${sharedInputClasses} ${
-    hasError ? "border-red-500" : "border-zinc-300"
+    hasError ? "border-red-500" : "border-zinc-200"
   } ${disabled ? "opacity-60" : ""}`;
 
   const randomizationSeedBase =
@@ -304,7 +304,7 @@ export function RenderField({
                       ? "bg-green border-green"
                       : hasError
                       ? "border-red-500"
-                      : "border-zinc-300"
+                      : "border-zinc-200"
                   )}
                   onPress={
                     disabled
@@ -444,7 +444,7 @@ export function RenderField({
                       "w-5 h-5 rounded-full border mr-3 items-center justify-center",
                       value === option.value
                         ? "border-green"
-                        : "border-zinc-300"
+                        : "border-zinc-200"
                     )}
                   >
                     {value === option.value && (
@@ -757,7 +757,7 @@ export function TimeInputField({
           className={cn(
             "flex-row items-center justify-between",
             sharedInputClasses,
-            hasError ? "border-red-500" : "border-zinc-300",
+            hasError ? "border-red-500" : "border-zinc-200",
             disabled && "opacity-60"
           )}
         >
