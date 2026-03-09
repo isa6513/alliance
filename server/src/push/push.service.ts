@@ -85,7 +85,10 @@ export class PushService {
         to: message.expoPushToken,
         sound: 'default',
         body: message.body,
-        data: { screen: message.screen },
+        data: {
+          screen: message.screen,
+          notificationId: message.notification?.id,
+        },
       });
 
       pushEntities.push(pushEntity);

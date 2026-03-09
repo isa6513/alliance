@@ -1,7 +1,7 @@
-import { RelativePathString, router, Slot } from "expo-router";
+import { Slot } from "expo-router";
 import { AuthProvider } from "../lib/AuthContext";
-import { Platform , View } from "react-native";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { Platform } from "react-native";
+import { useCallback, useEffect, useMemo } from "react";
 import { client } from "@alliance/shared/client/client.gen";
 import WebTokenStore from "../lib/ExpoWebTokenStore";
 import SecureStorage from "../lib/SecureStorage";
@@ -14,10 +14,11 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
-import { userRegisterDevice } from "@alliance/shared/client";
 import * as SecureStore from "expo-secure-store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isVisualTestMode } from "../lib/visualTest";
+import { userRegisterDevice } from "@alliance/shared/client";
+import PushNotificationResponseHandler from "../components/PushNotificationResponseHandler";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,20 +88,6 @@ async function registerForPushNotificationsAsync() {
   }
 }
 
-type PushData = {
-  screen?: string;
-};
-
-function navigateFromNotificationData(data: PushData | undefined) {
-  if (!data) return;
-  // Prefer href if present
-  const href = data.screen;
-  if (typeof href === "string" && href.length > 0) {
-    const normalized = href.startsWith("/") ? href : `/${href}`;
-    router.push(normalized as RelativePathString);
-  }
-}
-
 export default function RootLayout() {
   useFonts({
     SourceSans3: require("../assets/fonts/SourceSans3.ttf"),
@@ -159,39 +146,12 @@ export default function RootLayout() {
       .catch((error: any) => console.error(`${error}`));
   }, [registerToken]);
 
-  const responseSub = useRef<Notifications.EventSubscription | null>(null);
-
-  useEffect(() => {
-    if (Platform.OS === "web" || isVisualTestMode) {
-      return;
-    }
-
-    Notifications.getLastNotificationResponseAsync().then((response) => {
-      const data = response?.notification.request.content.data as
-        | PushData
-        | undefined;
-      navigateFromNotificationData(data);
-    });
-
-    responseSub.current = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const data = response.notification.request.content.data as
-          | PushData
-          | undefined;
-        navigateFromNotificationData(data);
-      }
-    );
-
-    return () => {
-      responseSub.current?.remove();
-    };
-  }, []);
-
   if (Platform.OS === "web") {
     return (
       <QueryClientProvider client={queryClient}>
         <KeyboardProvider>
           <AuthProvider tokenStore={tokenStore}>
+            <PushNotificationResponseHandler queryClient={queryClient} />
             <Slot />
           </AuthProvider>
         </KeyboardProvider>
@@ -205,6 +165,7 @@ export default function RootLayout() {
         <KeyboardProvider>
           <PostHogProvider apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt">
             <AuthProvider tokenStore={tokenStore}>
+              <PushNotificationResponseHandler queryClient={queryClient} />
               <Slot />
             </AuthProvider>
           </PostHogProvider>
