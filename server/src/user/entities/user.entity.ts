@@ -283,6 +283,11 @@ export class User {
   @Allow()
   pushesForFriendRequests: boolean;
 
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  pushesForMessages: boolean;
+
   @Column({ default: false })
   @ApiProperty()
   @Allow()

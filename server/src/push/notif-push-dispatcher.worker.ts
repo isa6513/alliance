@@ -12,6 +12,7 @@ import {
 import { CreatePushMessage, PushService } from './push.service';
 import { Injectable } from '@nestjs/common';
 import { NotifsService } from 'src/notifs/notifs.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class NotifPushDispatcherWorker {
@@ -24,6 +25,7 @@ export class NotifPushDispatcherWorker {
     private readonly pushService: PushService,
   ) {}
 
+  @Cron(CronExpression.EVERY_MINUTE)
   async dispatchPushes() {
     const dispatchID = v4().replace(/-/g, '');
 
@@ -85,7 +87,7 @@ export class NotifPushDispatcherWorker {
       return [];
     }
 
-    console.log(`found ${toSend.length} legacy notifs to send pushes for`);
+    console.log(`found ${toSend.length} notifs to send pushes for`);
 
     const messages: CreatePushMessage[] = [];
     for (const notif of toSend) {

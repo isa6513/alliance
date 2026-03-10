@@ -601,6 +601,7 @@ export type User = {
     pushesForLikes: boolean;
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
+    pushesForMessages: boolean;
     undergoingGroupAssignment: boolean;
     remindAboutUncompletedGroupMembers: boolean;
     receiveReplyNotifications: boolean;
@@ -661,6 +662,7 @@ export type UserDto = {
     pushesForLikes: boolean;
     pushesForComments: boolean;
     pushesForFriendRequests: boolean;
+    pushesForMessages: boolean;
     undergoingGroupAssignment: boolean;
     remindAboutUncompletedGroupMembers: boolean;
     receiveReplyNotifications: boolean;
@@ -749,6 +751,7 @@ export type UpdateProfileDto = {
     pushesForLikes?: boolean;
     pushesForComments?: boolean;
     pushesForFriendRequests?: boolean;
+    pushesForMessages?: boolean;
     remindAboutUncompletedGroupMembers?: boolean;
     receiveReplyNotifications?: boolean;
     cityId?: number | null;

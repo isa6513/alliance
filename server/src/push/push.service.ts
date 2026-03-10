@@ -53,9 +53,9 @@ export class PushService {
     const messages = devices
       .filter((device) => !!device.expoPushToken)
       .map((device) => ({
+        ...message,
         expoPushToken: device.expoPushToken!,
         idempotencyKey: `${message.idempotencyKey}-${device.id}`,
-        ...message,
       }));
     return messages;
   }
@@ -88,8 +88,7 @@ export class PushService {
         body: message.body,
         data: {
           screen: message.screen,
-          notificationId: message.notification?.id
-            ?? message.unreadContent?.id,
+          notificationId: message.notification?.id ?? message.unreadContent?.id,
           notificationSourceType: message.notification
             ? 'notification'
             : message.unreadContent

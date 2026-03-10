@@ -13,6 +13,8 @@ import { MessageService } from './message.service';
 import { MessagingGateway } from './messaging.gateway';
 import { ImagesModule } from 'src/images/images.module';
 import { MessagingOverviewGateway } from './messaging.overview.gateway';
+import { PushModule } from 'src/push/push.module';
+import { MessagePushListener } from './message-push.listener';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { MessagingOverviewGateway } from './messaging.overview.gateway';
     ]),
     forwardRef(() => UserModule),
     ImagesModule,
+    PushModule,
   ],
   controllers: [ConversationController, MessageController],
   providers: [
@@ -32,6 +35,7 @@ import { MessagingOverviewGateway } from './messaging.overview.gateway';
     MessageService,
     MessagingGateway,
     MessagingOverviewGateway,
+    MessagePushListener,
   ],
   exports: [ConversationService],
 })

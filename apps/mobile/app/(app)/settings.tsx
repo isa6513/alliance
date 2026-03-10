@@ -9,8 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { ChevronDown, ChevronLeft } from "lucide-react-native";
+import { ChevronDown } from "lucide-react-native";
 import {
   authForgotPassword,
   authMe,
@@ -36,7 +35,6 @@ import { cn } from "@alliance/shared/styles/util";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
-  const router = useRouter();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -346,6 +344,33 @@ export default function SettingsPage() {
                 trackColor={{ true: "#bbf7d0", false: "#d4d4d8" }}
               />
               <Text className="ml-3 text-base">Text/SMS</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text className="font-medium mb-2 mt-4">
+            Push notification preferences:
+          </Text>
+          <View className="gap-3 mb-4">
+            <TouchableOpacity
+              className="flex-row items-center"
+              onPress={() =>
+                updateEditableUser({
+                  pushesForMessages: !editableUser.pushesForMessages,
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <Switch
+                value={!!editableUser.pushesForMessages}
+                onValueChange={(value) =>
+                  updateEditableUser({ pushesForMessages: value })
+                }
+                thumbColor={
+                  editableUser.pushesForMessages ? "#10b981" : "#f4f4f5"
+                }
+                trackColor={{ true: "#bbf7d0", false: "#d4d4d8" }}
+              />
+              <Text className="ml-3 text-base">Messages</Text>
             </TouchableOpacity>
           </View>
 

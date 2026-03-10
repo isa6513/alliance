@@ -31,6 +31,8 @@ export class MessagingGateway
 
   private readonly logger = new Logger(MessagingGateway.name);
   private readonly clientRooms = new Map<string, Set<number>>();
+  private readonly conversationViewers = new Map<number, Set<number>>();
+  private readonly clientUserIds = new Map<string, number>();
 
   constructor(
     private readonly jwtService: JwtService,
@@ -62,6 +64,7 @@ export class MessagingGateway
 
       client.data.userId = payload.sub;
       this.clientRooms.set(client.id, new Set());
+      this.clientUserIds.set(client.id, payload.sub);
     } catch (error) {
       this.logger.warn(`Messaging gateway auth failed: ${error.message}`);
       client.disconnect(true);
@@ -69,7 +72,15 @@ export class MessagingGateway
   }
 
   handleDisconnect(client: Socket) {
+    const userId = this.clientUserIds.get(client.id);
+    const rooms = this.clientRooms.get(client.id);
+    if (userId && rooms) {
+      for (const conversationId of rooms) {
+        this.removeConversationViewer(conversationId, userId);
+      }
+    }
     this.clientRooms.delete(client.id);
+    this.clientUserIds.delete(client.id);
   }
 
   @SubscribeMessage('join-conversation')
@@ -100,7 +111,7 @@ export class MessagingGateway
     }
 
     client.join(this.roomName(conversationId));
-    this.trackClientRoom(client.id, conversationId);
+    this.trackClientRoom(client.id, conversationId, userId);
     client.emit('conversation-joined', { conversationId });
   }
 
@@ -115,8 +126,9 @@ export class MessagingGateway
       return;
     }
 
+    const userId = client.data.userId as number | undefined;
     client.leave(this.roomName(conversationId));
-    this.untrackClientRoom(client.id, conversationId);
+    this.untrackClientRoom(client.id, conversationId, userId);
     client.emit('conversation-left', { conversationId });
   }
 
@@ -156,13 +168,16 @@ export class MessagingGateway
       });
   }
 
-  private trackClientRoom(clientId: string, conversationId: number) {
+  private trackClientRoom(clientId: string, conversationId: number, userId?: number) {
     const rooms = this.clientRooms.get(clientId) ?? new Set<number>();
     rooms.add(conversationId);
     this.clientRooms.set(clientId, rooms);
+    if (userId) {
+      this.addConversationViewer(conversationId, userId);
+    }
   }
 
-  private untrackClientRoom(clientId: string, conversationId: number) {
+  private untrackClientRoom(clientId: string, conversationId: number, userId?: number) {
     const rooms = this.clientRooms.get(clientId);
     if (!rooms) {
       return;
@@ -174,6 +189,28 @@ export class MessagingGateway
     } else {
       this.clientRooms.set(clientId, rooms);
     }
+    if (userId) {
+      this.removeConversationViewer(conversationId, userId);
+    }
+  }
+
+  private addConversationViewer(conversationId: number, userId: number) {
+    const viewers = this.conversationViewers.get(conversationId) ?? new Set<number>();
+    viewers.add(userId);
+    this.conversationViewers.set(conversationId, viewers);
+  }
+
+  private removeConversationViewer(conversationId: number, userId: number) {
+    const viewers = this.conversationViewers.get(conversationId);
+    if (!viewers) return;
+    viewers.delete(userId);
+    if (!viewers.size) {
+      this.conversationViewers.delete(conversationId);
+    }
+  }
+
+  getUsersViewingConversation(conversationId: number): Set<number> {
+    return this.conversationViewers.get(conversationId) ?? new Set();
   }
 
   private roomName(conversationId: number) {

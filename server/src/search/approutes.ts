@@ -71,6 +71,10 @@ export function commentUrl(
   return full ? `${process.env.APP_URL}${path}` : path;
 }
 
+export function conversationUrl(conversationId: number) {
+  return `/messages/${conversationId}`;
+}
+
 export function withCid(url: string, cid: string) {
   return url.includes('?') ? `${url}&cid=${cid}` : `${url}?cid=${cid}`;
 }

@@ -22,7 +22,10 @@ import ProfileImage from "../../../../components/ProfileImage";
 import Text from "../../../../components/system/Text";
 import Button, { ButtonColor } from "../../../../components/system/Button";
 import { useAuth } from "../../../../lib/AuthContext";
-import { mergeConversationUpdate, useConversations } from "../../../../lib/messages";
+import {
+  mergeConversationUpdate,
+  useConversations,
+} from "../../../../lib/messages";
 import { colors } from "../../../../lib/style/colors";
 
 export default function ConversationInfoScreen() {
@@ -30,7 +33,10 @@ export default function ConversationInfoScreen() {
     conversationId?: string | string[];
   }>();
   const convoId = conversationId
-    ? parseInt(Array.isArray(conversationId) ? conversationId[0] : conversationId, 10)
+    ? parseInt(
+        Array.isArray(conversationId) ? conversationId[0] : conversationId,
+        10
+      )
     : NaN;
   const { user } = useAuth();
   const { conversations, setConversations, loading } = useConversations(
@@ -38,7 +44,9 @@ export default function ConversationInfoScreen() {
   );
 
   const selectedConvo = useMemo(
-    () => conversations?.find((conversation) => conversation.id === convoId) ?? null,
+    () =>
+      conversations?.find((conversation) => conversation.id === convoId) ??
+      null,
     [conversations, convoId]
   );
 
@@ -261,9 +269,7 @@ export default function ConversationInfoScreen() {
           )}
 
           {selectedConvo.type === "direct" && (
-            <Text className="text-sm text-zinc-500 mt-1">
-              Direct message
-            </Text>
+            <Text className="text-sm text-zinc-500 mt-1">Direct message</Text>
           )}
           {selectedConvo.type !== "direct" && (
             <Text className="text-sm text-zinc-500 mt-1">
@@ -335,19 +341,17 @@ export default function ConversationInfoScreen() {
                     )}
                   </View>
                 </View>
-                {isAdmin &&
-                  isGroup &&
-                  participant.user.id !== user?.id && (
-                    <TouchableOpacity
-                      onPress={(event) => {
-                        event.stopPropagation();
-                        handleRemoveMember(participant.user.id);
-                      }}
-                      className="p-2"
-                    >
-                      <X size={16} color={colors.error} />
-                    </TouchableOpacity>
-                  )}
+                {isAdmin && isGroup && participant.user.id !== user?.id && (
+                  <TouchableOpacity
+                    onPress={(event) => {
+                      event.stopPropagation();
+                      handleRemoveMember(participant.user.id);
+                    }}
+                    className="p-2"
+                  >
+                    <X size={16} color={colors.error} />
+                  </TouchableOpacity>
+                )}
               </TouchableOpacity>
             ))}
           </View>
@@ -384,10 +388,7 @@ export default function ConversationInfoScreen() {
                       className="flex-row items-center gap-3 px-3 py-2 border-b border-zinc-200 last:border-b-0"
                       onPress={() => handleAddMember(member.id)}
                     >
-                      <ProfileImage
-                        pfp={member.profilePicture}
-                        size="small"
-                      />
+                      <ProfileImage pfp={member.profilePicture} size="small" />
                       <Text className="text-zinc-900">
                         {member.displayName}
                       </Text>

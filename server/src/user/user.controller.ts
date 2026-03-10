@@ -613,7 +613,6 @@ export class UserController {
     @Body() body: RegisterDeviceDto,
   ) {
     const device = await this.userService.registerDevice(req.user.sub, body);
-    console.log('device: ', device);
     return { id: device.id };
   }
 

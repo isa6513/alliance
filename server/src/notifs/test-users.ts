@@ -80,6 +80,7 @@ export const testUser = new User({
   phoneNumberUnsubscribed: false,
   remindAboutUncompletedGroupMembers: true,
   receiveReplyNotifications: true,
+  pushesForMessages: true,
 } satisfies Omit<
   User,
   | 'friends'

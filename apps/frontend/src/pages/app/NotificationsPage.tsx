@@ -121,7 +121,7 @@ const NotificationsPage = () => {
             </Button>
           )}
         </div>
-        <List className="w-full">
+        <List className="w-full border-none">
           {renderItems.map((item) =>
             item.type === "likes-group" ? (
               <LikesGroup

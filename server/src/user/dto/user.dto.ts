@@ -115,6 +115,7 @@ export class UserDto extends PickType(User, [
   'pushesForLikes',
   'pushesForComments',
   'pushesForFriendRequests',
+  'pushesForMessages',
   'preferredActionReminderChannel',
   'phoneNumber',
   'communities',
@@ -187,6 +188,7 @@ export class UpdateProfileDto extends PartialType(
     'pushesForLikes',
     'pushesForComments',
     'pushesForFriendRequests',
+    'pushesForMessages',
   ]),
 ) {
   @ApiPropertyOptional({ type: Number, nullable: true })

@@ -519,6 +519,15 @@ const SettingsPage: React.FC = () => {
                     }
                   />
                 </div>
+                <div className="flex flex-row gap-6 mt-2">
+                  <LargeCheckbox
+                    label="Messages"
+                    checked={editableUser.pushesForMessages ?? false}
+                    onChange={(checked) =>
+                      updateEditableUser({ pushesForMessages: checked })
+                    }
+                  />
+                </div>
               </div>
             )}
 

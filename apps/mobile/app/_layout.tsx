@@ -24,8 +24,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
       retry: 2,
       refetchOnWindowFocus: false,
     },
@@ -142,7 +142,6 @@ export default function RootLayout() {
       return;
     }
 
-    //TODO: wait for auth
     registerForPushNotificationsAsync()
       .then((token) => registerToken(token))
       .catch((error: any) => console.error(`${error}`));
