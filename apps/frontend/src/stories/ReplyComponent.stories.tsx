@@ -1,7 +1,11 @@
 import { Meta, StoryObj } from "@storybook/react";
 import ReplyComponent from "../components/forum/ReplyComponent";
 import { CommentsProvider } from "../components/forum/CommentsContext";
-import { CommentDto, CreateEditableContentDto, UserDto } from "@alliance/shared/client";
+import {
+  CommentDto,
+  CreateEditableContentDto,
+  UserDto,
+} from "@alliance/shared/client";
 import { fn } from "@storybook/test";
 import React from "react";
 
@@ -69,15 +73,22 @@ const currentUser: UserDto = {
   leaderOfIds: [],
   invitedCommunities: [],
   hasActiveContract: true,
+  pushesForMessages: true,
 };
 
 const defaultCtx = {
   user: currentUser as UserDto | undefined,
   replyingTo: null as number | null,
   setReplyingTo: fn() as (id: number | null) => void,
-  handleSubmitReply: fn() as (content: CreateEditableContentDto, onSuccess?: () => void) => Promise<void>,
+  handleSubmitReply: fn() as (
+    content: CreateEditableContentDto,
+    onSuccess?: () => void
+  ) => Promise<void>,
   handleDeleteReply: fn() as (id: number) => Promise<void>,
-  onUpdateReply: fn() as (id: number, content: CreateEditableContentDto) => Promise<void>,
+  onUpdateReply: fn() as (
+    id: number,
+    content: CreateEditableContentDto
+  ) => Promise<void>,
   onLikeReply: fn() as (id: number, unlike?: boolean) => Promise<void>,
   onPinReply: fn() as (id: number) => Promise<void>,
   isSubmitting: false,
@@ -91,13 +102,14 @@ const defaultCtx = {
 type CtxOverrides = Partial<typeof defaultCtx>;
 
 const withCtx = (overrides: CtxOverrides = {}) => {
-  return (Story: React.ComponentType) => (
+  const WithCtx = (Story: React.ComponentType) => (
     <div className="w-[600px]">
       <CommentsProvider value={{ ...defaultCtx, ...overrides }}>
         <Story />
       </CommentsProvider>
     </div>
   );
+  return WithCtx;
 };
 
 const meta = {

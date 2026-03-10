@@ -149,6 +149,7 @@ export const testAuthUser: UserDto = {
   remindAboutUncompletedGroupMembers: false,
   receiveReplyNotifications: true,
   leaderOfIds: [],
+  pushesForMessages: true,
 };
 
 export const testFriends: ProfileDto[] = [testUser, testUser, testUser];
