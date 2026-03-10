@@ -2,6 +2,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Button as BaseUIButton } from "@base-ui/react/button";
 import { cn } from "@alliance/shared/styles/util";
+import { LucideIcon } from "lucide-react";
 
 export enum BaseButtonVariant {
   Stone = "stone",
@@ -81,22 +82,59 @@ const baseButtonVariants = cva(
 
 export type BaseButtonVariants = VariantProps<typeof baseButtonVariants>;
 
+const ICON_SIZE: Record<BaseButtonSize, number> = {
+  [BaseButtonSize.Small]: 12,
+  [BaseButtonSize.Medium]: 18,
+  [BaseButtonSize.MediumDynamic]: 18,
+  [BaseButtonSize.Large]: 24,
+};
+
 export type BaseButtonProps = Omit<
   React.ComponentProps<typeof BaseUIButton>,
   "className"
 > &
   BaseButtonVariants & {
     className?: string;
+    iconLeft?: LucideIcon;
+    iconRight?: LucideIcon;
   };
 
 const BaseButton = React.forwardRef<HTMLButtonElement, BaseButtonProps>(
-  function BaseButton({ className, variant, size, ...props }, ref) {
+  function BaseButton(
+    {
+      className,
+      variant,
+      size = BaseButtonSize.Medium,
+      iconLeft: IconLeft,
+      iconRight: IconRight,
+      children,
+      ...props
+    },
+    ref
+  ) {
+    size ??= BaseButtonSize.Medium;
+    const iconSize = ICON_SIZE[size];
+
     return (
       <BaseUIButton
         ref={ref}
         className={cn(baseButtonVariants({ variant, size }), className)}
         {...props}
-      />
+      >
+        {IconLeft ? (
+          <span className="shrink-0">
+            <IconLeft size={iconSize} />
+          </span>
+        ) : null}
+
+        {children ? <span>{children}</span> : null}
+
+        {IconRight ? (
+          <span className="shrink-0">
+            <IconRight size={iconSize} />
+          </span>
+        ) : null}
+      </BaseUIButton>
     );
   }
 );

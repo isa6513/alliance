@@ -12,8 +12,10 @@ import ReplyComponent, { countAllReplies } from "./forum/ReplyComponent";
 import ReplyForm from "./forum/ReplyForm";
 import { CommentsProvider, useCommentTree } from "./forum/CommentsContext";
 import { ArrowUpDown } from "lucide-react";
-import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
 import { cn } from "@alliance/shared/styles/util";
+import BaseButton, {
+  BaseButtonVariant,
+} from "@alliance/sharedweb/ui/BaseButton";
 
 export type CommentFilter =
   | "all"
@@ -87,13 +89,13 @@ const SortDropdown = ({
 
   return (
     <div className="relative ml-auto" ref={ref}>
-      <NewButton
-        color={ButtonColor.TransparentMuted}
+      <BaseButton
+        variant={BaseButtonVariant.TransparentMuted}
         iconRight={ArrowUpDown}
         onClick={() => setOpen(!open)}
       >
         {sortLabels[commentSort]}
-      </NewButton>
+      </BaseButton>
       {open && (
         <div className="absolute right-0 top-full mt-1 bg-white border border-zinc-200 rounded-md z-10 min-w-[160px]">
           {sortOrder.map((sort) => (
