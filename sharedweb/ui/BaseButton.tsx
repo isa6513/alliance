@@ -89,54 +89,44 @@ const ICON_SIZE: Record<BaseButtonSize, number> = {
   [BaseButtonSize.Large]: 24,
 };
 
-export type BaseButtonProps = Omit<
-  React.ComponentProps<typeof BaseUIButton>,
-  "className"
-> &
+export type BaseButtonProps = BaseUIButton.Props &
   BaseButtonVariants & {
-    className?: string;
     iconLeft?: LucideIcon;
     iconRight?: LucideIcon;
   };
 
-const BaseButton = React.forwardRef<HTMLButtonElement, BaseButtonProps>(
-  function BaseButton(
-    {
-      className,
-      variant,
-      size = BaseButtonSize.Medium,
-      iconLeft: IconLeft,
-      iconRight: IconRight,
-      children,
-      ...props
-    },
-    ref
-  ) {
-    size ??= BaseButtonSize.Medium;
-    const iconSize = ICON_SIZE[size];
+function BaseButton({
+  className,
+  variant,
+  size = BaseButtonSize.Medium,
+  iconLeft: IconLeft,
+  iconRight: IconRight,
+  children,
+  ...props
+}: BaseButtonProps) {
+  size ??= BaseButtonSize.Medium;
+  const iconSize = ICON_SIZE[size];
 
-    return (
-      <BaseUIButton
-        ref={ref}
-        className={cn(baseButtonVariants({ variant, size }), className)}
-        {...props}
-      >
-        {IconLeft ? (
-          <span className="shrink-0">
-            <IconLeft size={iconSize} />
-          </span>
-        ) : null}
+  return (
+    <BaseUIButton
+      className={cn(baseButtonVariants({ variant, size }), className)}
+      {...props}
+    >
+      {IconLeft ? (
+        <span className="shrink-0">
+          <IconLeft size={iconSize} />
+        </span>
+      ) : null}
 
-        {children ? <span>{children}</span> : null}
+      {children ? <span>{children}</span> : null}
 
-        {IconRight ? (
-          <span className="shrink-0">
-            <IconRight size={iconSize} />
-          </span>
-        ) : null}
-      </BaseUIButton>
-    );
-  }
-);
+      {IconRight ? (
+        <span className="shrink-0">
+          <IconRight size={iconSize} />
+        </span>
+      ) : null}
+    </BaseUIButton>
+  );
+}
 
 export { BaseButton as default, baseButtonVariants };
