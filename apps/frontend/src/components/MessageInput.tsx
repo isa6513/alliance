@@ -1,6 +1,11 @@
 import { MessageDto } from "@alliance/shared/client";
 import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
 import Card from "@alliance/sharedweb/ui/Card";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@alliance/sharedweb/ui/HoverCard";
 import { Plus, Send, X } from "lucide-react";
 import {
   type ClipboardEvent,
@@ -227,18 +232,34 @@ const MessageInput = ({
             </div>
           ) : (
             <div className="flex flex-row items-center">
-              <NewButton
-                onClick={triggerFilePicker}
-                color={ButtonColor.Transparent}
-                hoverText="Add image"
-                iconLeft={Plus}
-              />
-              <NewButton
-                onClick={triggerSend}
-                color={ButtonColor.Transparent}
-                hoverText="Send message"
-                iconLeft={Send}
-              />
+              <HoverCard>
+                <HoverCardTrigger
+                  render={
+                    <span className="inline-block">
+                      <NewButton
+                        onClick={triggerFilePicker}
+                        color={ButtonColor.Transparent}
+                        iconLeft={Plus}
+                      />
+                    </span>
+                  }
+                />
+                <HoverCardContent>Add image</HoverCardContent>
+              </HoverCard>
+              <HoverCard>
+                <HoverCardTrigger
+                  render={
+                    <span className="inline-block">
+                      <NewButton
+                        onClick={triggerSend}
+                        color={ButtonColor.Transparent}
+                        iconLeft={Send}
+                      />
+                    </span>
+                  }
+                />
+                <HoverCardContent>Send message</HoverCardContent>
+              </HoverCard>
             </div>
           )}
         </div>

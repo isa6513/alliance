@@ -6,19 +6,15 @@ type PositionerProps = React.ComponentProps<typeof PreviewCard.Positioner>;
 type Side = NonNullable<PositionerProps["side"]>;
 type Align = NonNullable<PositionerProps["align"]>;
 
-function HoverCard({
-  ...props
-}: React.ComponentProps<typeof PreviewCard.Root>) {
-  return (
-    <PreviewCard.Root data-slot="hover-card" {...props} />
-  );
+function HoverCard({ ...props }: PreviewCard.Root.Props) {
+  return <PreviewCard.Root data-slot="hover-card" {...props} />;
 }
 
 function HoverCardTrigger({
   delay = 0,
   closeDelay = 0,
   ...props
-}: React.ComponentProps<typeof PreviewCard.Trigger>) {
+}: PreviewCard.Trigger.Props) {
   return (
     <PreviewCard.Trigger
       data-slot="hover-card-trigger"
@@ -31,12 +27,12 @@ function HoverCardTrigger({
 
 function HoverCardContent({
   className,
-  side = "bottom",
+  side = "top",
   sideOffset = 4,
   align = "center",
   alignOffset = 0,
   ...props
-}: React.ComponentProps<typeof PreviewCard.Popup> & {
+}: PreviewCard.Popup.Props & {
   align?: Align;
   alignOffset?: number;
   side?: Side;
@@ -54,7 +50,7 @@ function HoverCardContent({
         <PreviewCard.Popup
           data-slot="hover-card-content"
           className={cn(
-            "w-64 rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm font-medium text-zinc-700 shadow-sm outline-none transition-opacity duration-100",
+            "rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm font-medium text-zinc-700 shadow-sm outline-none transition-opacity duration-100",
             className
           )}
           {...props}
