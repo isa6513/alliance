@@ -14,6 +14,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./HoverCard";
 
 const MIN_MAX_WIDTH = "min-w-4 max-w-18";
 
@@ -138,35 +139,41 @@ function Pill({
   const { pillLabel, pillStyle, pillSubtitleText, pillTextStyle } =
     pillStatusData;
   return (
-    <div key={action.id} className={cn("relative group flex-1", MIN_MAX_WIDTH)}>
-      <div
-        className={cn(
-          "rounded flex items-center justify-center text-xs font-semibold",
-          MIN_MAX_WIDTH,
-          pillStyle,
-          pillHeight
-        )}
-        aria-label={`${action.name} – ${pillLabel}`}
-      ></div>
-      {pillStyle && (
-        <div className="pointer-events-none absolute bottom-full mb-1 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded border border-zinc-200 bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100">
-          <div className="flex flex-col items-center justify-center">
-            <p>{action.name}</p>
-            <p className="text-zinc-500">
-              {action.latestMemberActionDeadline === null
-                ? "No deadline"
-                : `Due ${formatDateTime(
-                    new Date(action.latestMemberActionDeadline)
-                  )}`}
-            </p>
-            <p className={pillTextStyle}>
-              {pillSubtitleText}
-              {additionalSubtitleText}
-            </p>
+    <HoverCard key={action.id}>
+      <HoverCardTrigger
+        render={
+          <div
+            className={cn("relative flex-1", MIN_MAX_WIDTH)}
+            aria-label={`${action.name} - ${pillLabel}`}
+          >
+            <div
+              className={cn(
+                "rounded flex items-center justify-center text-xs font-semibold",
+                MIN_MAX_WIDTH,
+                pillStyle,
+                pillHeight
+              )}
+            />
           </div>
+        }
+      />
+      <HoverCardContent side="top" sideOffset={4}>
+        <div className="flex flex-col items-center justify-center text-center">
+          <p>{action.name}</p>
+          <p className="text-zinc-500">
+            {action.latestMemberActionDeadline === null
+              ? "No deadline"
+              : `Due ${formatDateTime(
+                  new Date(action.latestMemberActionDeadline)
+                )}`}
+          </p>
+          <p className={pillTextStyle}>
+            {pillSubtitleText}
+            {additionalSubtitleText}
+          </p>
         </div>
-      )}
-    </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 }
 
