@@ -26,7 +26,7 @@ function Avatar({
       data-slot="avatar"
       data-size={size}
       className={cn(
-        "group/avatar relative flex shrink-0 select-none inline-block overflow-hidden",
+        "group/avatar relative shrink-0 select-none inline-flex overflow-hidden",
         sizeClasses[size],
         className
       )}
@@ -104,6 +104,7 @@ function AvatarProfile({
   );
 }
 
+// unused, default shadcn-like implementation
 function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
