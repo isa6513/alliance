@@ -27,6 +27,9 @@ export class NotifPushDispatcherWorker {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async dispatchPushes() {
+    if (process.env.NODE_ENV !== 'production') {
+      return;
+    }
     const dispatchID = v4().replace(/-/g, '');
 
     const messagesToSend: CreatePushMessage[] = [];
