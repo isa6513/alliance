@@ -28,7 +28,7 @@ const InformationPage: React.FC = () => {
   const contacts: InfoResourceCardProps[] = [
     {
       title: "Email",
-      description: "Email the office with questions, feedback, or ideas.",
+      description: "Email the ofpfice with questions, feedback, or ideas.",
       href: "mailto:contact@worldalliance.org",
       icon: Mail,
     },

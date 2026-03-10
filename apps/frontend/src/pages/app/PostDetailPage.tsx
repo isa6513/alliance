@@ -130,8 +130,8 @@ const PostDetailPage: React.FC = () => {
             </Card>
           )}
           <div className="py-3 sm:pt-6 px-3 sm:px-5 mb-3">
-            <div className="flex flex-row items-center justify-between">
-              <h1 className="text-title-small">
+            <div className="flex flex-row items-center justify-between mb-3">
+              <h1 className="text-title">
                 {post.title}
                 {post.pinned && (
                   <PinnedIcon size="large" className="ml-2 -mt-1" />

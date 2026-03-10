@@ -127,9 +127,9 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           </Card>
         )}
         <div className="p-0 sm:p-2">
-          <div className="flex sm:flex-row gap-4 items-start mb-4 flex-col-reverse">
+          <div className="flex sm:flex-row gap-4 items-start flex-col-reverse">
             <div className="flex flex-col flex-1 gap-y-2">
-              <p className="text-title-small">{action.name}</p>
+              <p className="text-title font-serif text-3xl!">{action.name}</p>
               <TaskTimeInfo
                 action={action}
                 nextEvent={nextEvent}
@@ -147,7 +147,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               </Button>
             )}
           </div>
-          <p className="mb-8">{action.shortDescription}</p>
+          <p className="my-4">{action.shortDescription}</p>
           <ActionCompletedBarWithInfo
             friendActivities={friendActivities}
             action={action}

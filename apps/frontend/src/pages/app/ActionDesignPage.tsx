@@ -167,10 +167,7 @@ const TerminologyPage: React.FC = () => {
           process. However, actions often go through the following stages.
         </p>
 
-        <h2
-          id={Section.InitialIdea}
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h2 id={Section.InitialIdea} className="mt-2 text-title-small">
           Initial idea
         </h2>
 
@@ -218,10 +215,7 @@ const TerminologyPage: React.FC = () => {
           </li>
         </ul>
 
-        <h2
-          id={Section.MakingAPlan}
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h2 id={Section.MakingAPlan} className="mt-2 text-title-small">
           Making a plan
         </h2>
 
@@ -282,10 +276,7 @@ const TerminologyPage: React.FC = () => {
           media campaign (by sending the experiment’s results to the media).
         </p>
 
-        <h2
-          id={Section.Preparation}
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h2 id={Section.Preparation} className="mt-2 text-title-small">
           Preparatory steps
         </h2>
         <p>
@@ -294,10 +285,7 @@ const TerminologyPage: React.FC = () => {
           sometimes require outreach, research, and small tests.
         </p>
 
-        <h2
-          id={Section.TaskProduction}
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h2 id={Section.TaskProduction} className="mt-2 text-title-small">
           Task production
         </h2>
         <p>
@@ -380,10 +368,7 @@ const TerminologyPage: React.FC = () => {
           and other issues. We also solicit feedback from random members.
         </p>
 
-        <h2
-          id={Section.Launch}
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h2 id={Section.Launch} className="mt-2 text-title-small">
           Launch
         </h2>
         <p>
@@ -404,10 +389,7 @@ const TerminologyPage: React.FC = () => {
           to succeed.
         </p>
 
-        <h2
-          id={Section.FollowUp}
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h2 id={Section.FollowUp} className="mt-2 text-title-small">
           Follow-up steps
         </h2>
 
