@@ -30,7 +30,7 @@ const ActionTaskPanelCompleted = ({
         {completedCard}
         <Card
           style={CardStyle.Grey}
-          className="inline-block !p-3 md:!p-6 space-y-4 border-none -mt-3 rounded-t-none"
+          className="inline-block !p-3 md:!p-6 space-y-4 -mt-3 rounded-t-none"
         >
           <FormRenderer
             form={formResponse.schemaSnapshot as unknown as FormSchema}
