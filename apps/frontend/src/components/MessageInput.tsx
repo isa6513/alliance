@@ -1,7 +1,5 @@
 import { MessageDto } from "@alliance/shared/client";
-import NewButton, {
-  ButtonColor,
-} from "@alliance/sharedweb/ui/NewButton";
+import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
 import Card from "@alliance/sharedweb/ui/Card";
 import { Plus, Send, X } from "lucide-react";
 import {
@@ -206,7 +204,7 @@ const MessageInput = ({
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           placeholder="Message"
-          className="w-full border-none bg-transparent p-3 text-black resize-none focus:outline-none pr-18 text-[16px]"
+          className="border-none bg-transparent p-3 text-black resize-none focus:outline-none pr-18 text-[16px]"
           minRows={1}
         />
         <div className="absolute right-2 top-0 bottom-0 flex items-center">
