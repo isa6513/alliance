@@ -2,7 +2,7 @@ import { ActionActivityDto } from "@alliance/shared/client";
 import { Link, href, useNavigate } from "react-router";
 import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikeButton from "./ActivityLikeButton";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { cn } from "@alliance/shared/styles/util";
 
 export interface ActionActivityFeedItemProps {
@@ -72,7 +72,7 @@ const ActionActivityFeedItem = ({
         }}
       >
         <div className="flex flex-row gap-x-2 items-center flex-1 hover:bg-zinc-50 hover:p-2 hover:-m-2 rounded">
-          <ProfileImage
+          <AvatarProfile
             pfp={activity.user.profilePicture}
             size="medium"
             className="self-start mt-1.5"

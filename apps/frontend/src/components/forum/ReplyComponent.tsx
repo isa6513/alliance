@@ -1,6 +1,6 @@
 import { CommentDto } from "@alliance/shared/client";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import CommentLikeButton from "../CommentLikeButton";
@@ -68,7 +68,7 @@ const ReplyContent = ({
         to={href("/member/:id", { id: reply.author.id.toString() })}
         className="flex-shrink-0 pt-1"
       >
-        <ProfileImage
+        <AvatarProfile
           pfp={reply.author.profilePicture}
           size={compact ? "small" : "medium"}
         />

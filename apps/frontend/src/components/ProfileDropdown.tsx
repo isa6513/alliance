@@ -1,5 +1,5 @@
 import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useCallback, useState } from "react";
 import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
@@ -32,14 +32,14 @@ const ProfileDropdown = () => {
         onClick={() => setIsOpen(false)}
         className="hidden md:flex items-center gap-x-1.5"
       >
-        <ProfileImage pfp={profilePicture} size="large" />
+        <AvatarProfile pfp={profilePicture} size="large" />
         <DropdownIcon size="mini" fill="black" />
       </Link>
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className="md:hidden flex items-center gap-x-1.5"
       >
-        <ProfileImage pfp={profilePicture} size="large" />
+        <AvatarProfile pfp={profilePicture} size="large" />
         <DropdownIcon size="mini" fill="black" />
       </button>
       {isOpen && (

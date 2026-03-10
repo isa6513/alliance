@@ -1,6 +1,6 @@
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile, AvatarGroup } from "@alliance/sharedweb/ui/Avatar";
 import { formatDate } from "date-fns";
 import { useCallback, useState } from "react";
 import { Link, href } from "react-router";
@@ -82,13 +82,15 @@ const NotificationsIcon = () => {
                 {formatDate(notification.updatedAt, "MM/dd/yyyy")}
               </p>
               <div className="flex flex-row items-center gap-x-2">
-                {notification.associatedUsers.map((user) => (
-                  <ProfileImage
-                    key={user.id}
-                    pfp={user.profilePicture}
-                    size="small"
-                  />
-                ))}
+                <AvatarGroup>
+                  {notification.associatedUsers.map((user) => (
+                    <AvatarProfile
+                      key={user.id}
+                      pfp={user.profilePicture}
+                      size="small"
+                    />
+                  ))}
+                </AvatarGroup>
                 {notification.message}
               </div>
             </div>

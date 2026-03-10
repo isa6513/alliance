@@ -1,5 +1,5 @@
 import { ProfileDto } from "@alliance/shared/client";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { Link, href } from "react-router";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
 
@@ -21,7 +21,7 @@ export default function MembersListItem({
     >
       <div className="flex flex-row items-center justify-between space-x-2">
         <div className="flex flex-row items-center">
-          <ProfileImage
+          <AvatarProfile
             pfp={profile.profilePicture}
             size="medium"
             className="mr-2"

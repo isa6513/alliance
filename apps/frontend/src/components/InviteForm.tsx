@@ -16,7 +16,7 @@ import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 import { Link } from "react-router";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import OnetimeInviteForm from "./OnetimeInviteForm";
 
@@ -254,7 +254,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                   >
                     <p className="text-sm text-zinc-500">Your current group</p>
                     <div className="flex flex-row justify-between items-center gap-x-1.5">
-                      <ProfileImage
+                      <AvatarProfile
                         pfp={memberCommunities[0].photo ?? null}
                         size="small"
                       />

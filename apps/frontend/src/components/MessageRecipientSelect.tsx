@@ -1,6 +1,6 @@
 import { ProfileDto, userMembers } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { X } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -100,7 +100,7 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
           key={user.id}
         >
           <div className="flex items-center gap-x-2">
-            <ProfileImage pfp={user.profilePicture} size="medium" />
+            <AvatarProfile pfp={user.profilePicture} size="medium" />
             <p className="font-medium">{user.displayName}</p>
           </div>
           <Button
@@ -134,7 +134,7 @@ const MessageRecipientSelect: React.FC<MessageRecipientSelectProps> = ({
                 className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 flex flex-row items-center gap-x-2"
                 onClick={() => addUser(user.id)}
               >
-                <ProfileImage pfp={user.profilePicture} size="medium" />
+                <AvatarProfile pfp={user.profilePicture} size="medium" />
                 <span className="font-medium whitespace-nowrap">
                   {user.displayName}
                 </span>

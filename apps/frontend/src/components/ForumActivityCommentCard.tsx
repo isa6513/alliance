@@ -1,7 +1,7 @@
 import { UserCommentDto } from "@alliance/shared/client";
 import { Link, href, useNavigate } from "react-router";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
 import { formatTime } from "@alliance/shared/lib/utils";
 
@@ -36,7 +36,7 @@ const ForumActivityCommentCard = ({
     >
       <EditableContentRenderer content={comment.editableContent} truncated />
       <div className="flex flex-row items-center gap-x-2 text-sm text-zinc-500">
-        <ProfileImage pfp={comment.author.profilePicture} size="small" />
+        <AvatarProfile pfp={comment.author.profilePicture} size="small" />
         <span>
           <UserDisplayName staff={comment.author.staff}>
             {comment.author.displayName}

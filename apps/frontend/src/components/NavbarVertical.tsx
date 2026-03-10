@@ -1,6 +1,6 @@
 import { Features } from "@alliance/shared/lib/features";
 import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import {
   Bell,
   BookText,
@@ -342,7 +342,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           to={destinations[NavbarPage.Profile]}
           className="flex items-center gap-x-2"
         >
-          <ProfileImage pfp={profilePicture} size="medium" />
+          <AvatarProfile pfp={profilePicture} size="medium" />
         </Link>
       </div>
 
@@ -391,7 +391,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                       className="hidden md:flex p-3 hover:bg-zinc-100 rounded items-center justify-between w-full"
                     >
                       <div className="text-zinc-700 flex items-center gap-x-2.5">
-                        <ProfileImage pfp={profilePicture} size="small" />
+                        <AvatarProfile pfp={profilePicture} size="small" />
                         <span>{user?.name ?? "Profile"}</span>
                       </div>
                     </Link>

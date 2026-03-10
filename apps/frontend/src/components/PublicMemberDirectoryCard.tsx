@@ -1,6 +1,6 @@
 import { ProfileDto } from "@alliance/shared/client";
 import { useState } from "react";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { cn } from "@alliance/shared/styles/util";
 
@@ -31,7 +31,7 @@ const PublicMemberDirectoryCard: React.FC<PublicMemberDirectoryCardProps> = ({
           showDescription || descriptionOpen ? "items-start" : "md:items-center"
         )}
       >
-        <ProfileImage pfp={member.profilePicture ?? null} size="medium" />
+        <AvatarProfile pfp={member.profilePicture ?? null} size="medium" />
         <div className="flex-1 min-w-0">
           <p className="text-zinc-900 text-base">{member.displayName}</p>
           {(showDescription || descriptionOpen) && (

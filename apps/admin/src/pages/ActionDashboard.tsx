@@ -59,7 +59,7 @@ import ActionForm from "../components/ActionForm";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import EventManagementTab from "../components/EventManagementTab";
 import { FormBuilder } from "../components/FormBuilder";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { cn } from "@alliance/shared/styles/util";
@@ -1301,7 +1301,7 @@ const ActionDashboard: React.FC = () => {
                             href={`/users/${user.id}`}
                             className="flex items-center gap-2 hover:bg-gray-50 px-2 py-1 rounded"
                           >
-                            <ProfileImage
+                            <AvatarProfile
                               pfp={user.profilePicture}
                               size="small"
                             />
@@ -1406,7 +1406,7 @@ const ActionDashboard: React.FC = () => {
                               >
                                 <td className="py-2 px-3">
                                   <div className="flex items-center gap-2">
-                                    <ProfileImage
+                                    <AvatarProfile
                                       pfp={stat.user.profilePicture}
                                       size="small"
                                     />

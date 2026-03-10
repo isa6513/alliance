@@ -6,7 +6,7 @@ import {
   userReferrerProfile,
   userOnetimeInvite,
 } from "@alliance/shared/client";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import posthog from "posthog-js";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
@@ -147,7 +147,7 @@ const InvitePage: React.FC = () => {
               {inviterProfile !== null && (
                 <p className="text-center">
                   From {" "}
-                  <ProfileImage
+                  <AvatarProfile
                     pfp={inviterProfile?.profilePicture ?? null}
                     size="small"
                   />

@@ -1,5 +1,5 @@
 import { SearchItemDto, searchSaveSelected } from "@alliance/shared/client";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import {
@@ -172,7 +172,7 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
                     )}
                   >
                     {item.type === "user" ? (
-                      <ProfileImage
+                      <AvatarProfile
                         pfp={item.image ?? null}
                         size="small"
                         className="mr-2"

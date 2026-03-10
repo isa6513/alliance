@@ -10,7 +10,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useAuth } from "../lib/AuthContext";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ConversationInfoPanel from "./ConversationInfoPanel";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { ChevronLeft, Users } from "lucide-react";
 import MessageInput from "./MessageInput";
 import type { MessageDto } from "@alliance/shared/client";
@@ -406,7 +406,7 @@ const ConversationDetailPanel = ({
                 </Button>
               )}
               {selectedConvo?.photo && (
-                <ProfileImage
+                <AvatarProfile
                   pfp={selectedConvo.photo}
                   size="large"
                   className="w-10 h-10"

@@ -4,7 +4,7 @@ import {
 } from "@alliance/shared/client";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Card from "@alliance/sharedweb/ui/Card";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { ChevronDown, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
@@ -204,7 +204,7 @@ const ScheduledPlansPage = () => {
                               className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2 hover:bg-zinc-100"
                               to={`/member/${user.id}`}
                             >
-                              <ProfileImage
+                              <AvatarProfile
                                 pfp={user.profilePicture ?? null}
                                 size="medium"
                               />

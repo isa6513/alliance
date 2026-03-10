@@ -2,7 +2,7 @@ import { OnetimeInviteDto } from "@alliance/shared/client";
 import { cn } from "@alliance/shared/styles/util";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { Copy as CopyIcon } from "lucide-react";
 import { href, Link } from "react-router";
 
@@ -86,7 +86,7 @@ const OnetimeInviteListItem = ({
                 })}
                 className="hover:underline flex flex-row items-center gap-x-1"
               >
-                <ProfileImage
+                <AvatarProfile
                   pfp={invite.invitingUser.profilePicture}
                   size="mini"
                 />

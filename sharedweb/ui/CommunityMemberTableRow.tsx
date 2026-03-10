@@ -10,7 +10,7 @@ import {
   UserActionSummaryDto,
   UserAwayRangeDto,
 } from "@alliance/shared/client";
-import ProfileImage from "./ProfileImage";
+import { AvatarProfile } from "./Avatar";
 import UserProgressPills from "./UserProgressPills";
 import DropdownIcon from "./icons/DropdownIcon";
 import UserDisplayName from "./UserDisplayName";
@@ -135,10 +135,10 @@ const CommunityMemberTableRow = ({
               className="flex-shrink-0 group flex items-center gap-x-1 md:gap-x-2 mr-3 text-ellipsis overflow-hidden line-clamp-2 wrap-words w-full"
             >
               <div className="hidden md:flex shrink-0 items-center justify-center">
-                <ProfileImage pfp={profile.profilePicture} size="medium" />
+                <AvatarProfile pfp={profile.profilePicture} size="medium" />
               </div>
               <div className="md:hidden shrink-0 flex items-center justify-center">
-                <ProfileImage pfp={profile.profilePicture} size="mini" />
+                <AvatarProfile pfp={profile.profilePicture} size="mini" />
               </div>
               <UserDisplayName
                 staff={profile.staff}

@@ -6,7 +6,7 @@ import {
   CreateEditableContentDto,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useEffect, useMemo, useState } from "react";
 import { Link, href, useOutletContext, useParams } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -161,7 +161,7 @@ const ActionActivityDetail = () => {
                       })}
                       className="flex-shrink-0"
                     >
-                      <ProfileImage
+                      <AvatarProfile
                         pfp={activity.user.profilePicture}
                         size="medium"
                       />

@@ -10,7 +10,7 @@ import Card from "@alliance/sharedweb/ui/Card";
 import { useEffect, useState } from "react";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import List from "@alliance/sharedweb/ui/List";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import { Link } from "react-router";
@@ -103,28 +103,36 @@ const InvitesPage = () => {
         </Card>
         <div className="flex flex-row justify-between items-center my-5">
           <p className="font-bold">Past Invites</p>
-          <Link to="/invites/graph" className="text-sm text-blue-600 hover:underline">
+          <Link
+            to="/invites/graph"
+            className="text-sm text-blue-600 hover:underline"
+          >
             View Invite Graph
           </Link>
         </div>
         <List>
           {invites.map((invite) => (
-            <div
-              key={invite.id}
-              className="p-4"
-            >
+            <div key={invite.id} className="p-4">
               <div className="flex flex-row gap-2 justify-between items-center">
                 <div className="flex flex-row gap-2">
-                  <ProfileImage
+                  <AvatarProfile
                     size="small"
                     pfp={invite.invitingUser?.profilePicture ?? null}
                   />
                   <p>
                     {invite.invitingUser?.displayName}{" "}
                     <span className="text-gray-500"> inviting </span>{" "}
-                    {invite.invitedUserId ?
-                      <a href={getBaseUrl() + `/member/${invite.invitedUserId}`} className="underline"> {invite.invitee} </a>
-                      : invite.invitee}
+                    {invite.invitedUserId ? (
+                      <a
+                        href={getBaseUrl() + `/member/${invite.invitedUserId}`}
+                        className="underline"
+                      >
+                        {" "}
+                        {invite.invitee}{" "}
+                      </a>
+                    ) : (
+                      invite.invitee
+                    )}
                   </p>
                 </div>
                 <div className="flex flex-row gap-3 items-center">
@@ -149,7 +157,9 @@ const InvitesPage = () => {
                   )}
                 </div>
                 {invite.createdAt && (
-                  <p className="text-zinc-500 text-sm min-w-24">{new Date(invite.createdAt).toLocaleString()}</p>
+                  <p className="text-zinc-500 text-sm min-w-24">
+                    {new Date(invite.createdAt).toLocaleString()}
+                  </p>
                 )}
               </div>
             </div>

@@ -1,5 +1,5 @@
 import { ProfileDto, userFindOne } from "@alliance/shared/client";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import React, { useEffect, useMemo, useState } from "react";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
@@ -92,7 +92,7 @@ const PeoplePage: React.FC = () => {
                     key={name}
                     className="rounded-lg flex items-center gap-x-2"
                   >
-                    <ProfileImage
+                    <AvatarProfile
                       pfp={authorProfiles[name]?.profilePicture ?? null}
                       size="small"
                     />

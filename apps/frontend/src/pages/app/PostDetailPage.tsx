@@ -6,7 +6,7 @@ import {
 } from "@alliance/shared/client";
 import { formatFullDateTime } from "@alliance/shared/lib/dateFormatters";
 import Card from "@alliance/sharedweb/ui/Card";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
 import React, { useCallback, useState } from "react";
 import { Link, href, useNavigate, useParams } from "react-router";
@@ -149,14 +149,14 @@ const PostDetailPage: React.FC = () => {
                       className="flex items-center"
                     >
                       <div className="hidden sm:inline">
-                        <ProfileImage
+                        <AvatarProfile
                           pfp={author.profilePicture}
                           size="small"
                           className="mr-1.5"
                         />
                       </div>
                       <div className="inline sm:hidden">
-                        <ProfileImage
+                        <AvatarProfile
                           pfp={author.profilePicture}
                           size="small"
                           className="mr-1.5"

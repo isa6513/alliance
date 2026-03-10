@@ -1,6 +1,6 @@
 import { formatTime } from "@alliance/shared/lib/utils";
 import { NotificationDto } from "@alliance/shared/client";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile, AvatarGroup } from "@alliance/sharedweb/ui/Avatar";
 
 export interface NotificationTextProps {
   notification: NotificationDto;
@@ -17,22 +17,18 @@ const NotificationText = ({
     <div className={className} onClick={handleNotifClick(notification)}>
       <h3 className="line-clamp-2">
         {notification.associatedUsers.length > 0 && (
-          <div className="inline mr-1 h-6">
+          <AvatarGroup className="inline-flex mr-1 h-6 align-middle">
             {notification.associatedUsers.map((user) => (
-              <ProfileImage
+              <AvatarProfile
                 key={user.id}
                 pfp={user.profilePicture}
                 size="small"
-                className="mr-1 align-middle"
               />
             ))}
-          </div>
+          </AvatarGroup>
         )}
         {notification.category === "action_update" && (
           <span className="font-semibold">Action update: </span>
-        )}
-        {notification.category === "forum_reply" && (
-          <span>New reply from </span>
         )}
         {notification.message}
       </h3>

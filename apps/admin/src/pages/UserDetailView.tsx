@@ -20,7 +20,7 @@ import {
   UserActionSummaryDto,
   UserAwayRangeDto,
 } from "@alliance/shared/client/types.gen";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
@@ -284,7 +284,7 @@ const UserDetailView: React.FC = () => {
     <div className="p-4 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-start gap-4 pb-4 border-b border-zinc-200 mb-4">
-        <ProfileImage pfp={user.profilePicture} size="huge" />
+        <AvatarProfile pfp={user.profilePicture} size="huge" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-lg font-semibold text-zinc-900">{user.name}</h1>

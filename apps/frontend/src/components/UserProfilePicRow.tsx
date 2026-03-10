@@ -1,5 +1,9 @@
 import { ProfileDto } from "@alliance/shared/client";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import {
+  AvatarProfile,
+  AvatarGroup,
+  AvatarGroupCount,
+} from "@alliance/sharedweb/ui/Avatar";
 import { useState } from "react";
 import { href } from "react-router";
 
@@ -16,26 +20,21 @@ const UserProfilePicRow = ({ users }: { users: ProfileDto[] }) => {
   };
 
   return (
-    <div
-      className="flex flex-row items-center gap-x-0.5 flex-wrap cursor-pointer"
-      onClick={handleClick}
-    >
+    <AvatarGroup className="flex-wrap cursor-pointer" onClick={handleClick}>
       {(expanded ? unique : unique.slice(0, 5)).map((user) => (
         <a
           href={href("/member/:id", { id: user.id.toString() })}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          onClick={(e) => e.stopPropagation()}
           key={user.id}
           className="flex items-center"
         >
-          <ProfileImage pfp={user.profilePicture!} size="small" />
+          <AvatarProfile pfp={user.profilePicture ?? null} size="small" />
         </a>
       ))}
-      {users.length > 5 && !expanded && (
-        <span className="text-sm text-zinc-500">+{users.length - 5} more</span>
+      {unique.length > 5 && !expanded && (
+        <AvatarGroupCount size="small">+{unique.length - 5}</AvatarGroupCount>
       )}
-    </div>
+    </AvatarGroup>
   );
 };
 

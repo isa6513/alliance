@@ -6,7 +6,7 @@ import {
   conversationUpdateInfo,
   ProfileDto,
 } from "@alliance/shared/client";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { Link, href } from "react-router";
 import Card from "@alliance/sharedweb/ui/Card";
 import List from "@alliance/sharedweb/ui/List";
@@ -141,7 +141,7 @@ const ConversationInfoPanel = ({
               allowedMimeTypes={sharp_allowed_mime_types}
             />
           ) : (
-            <ProfileImage
+            <AvatarProfile
               pfp={selectedConvo.photo ?? null}
               size="huge"
               className="mb-2"
@@ -230,7 +230,7 @@ const ConversationInfoPanel = ({
                   className="p-4 hover:bg-zinc-100 flex flex-row items-center gap-x-3 justify-between"
                 >
                   <div className="flex flex-row items-center gap-x-3">
-                    <ProfileImage
+                    <AvatarProfile
                       pfp={participant.user.profilePicture}
                       size="large"
                     />
@@ -285,7 +285,7 @@ const ConversationInfoPanel = ({
                             handleAddMember(friend.id);
                           }}
                         >
-                          <ProfileImage
+                          <AvatarProfile
                             pfp={friend.profilePicture}
                             size="large"
                           />

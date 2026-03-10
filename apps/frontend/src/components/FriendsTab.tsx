@@ -11,7 +11,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import List from "@alliance/sharedweb/ui/List";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import React, { useState } from "react";
 import { Link, href } from "react-router";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
@@ -176,7 +176,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                   className="flex items-center flex-1"
                   to={href("/member/:id", { id: friend.id.toString() })}
                 >
-                  <ProfileImage className="mr-3" pfp={friend.profilePicture} />
+                  <AvatarProfile className="mr-3" pfp={friend.profilePicture} />
                   <div className="flex-grow">
                     <p className="">{friend.displayName}</p>
                   </div>
@@ -262,7 +262,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                       to={href("/member/:id", { id: request.id.toString() })}
                       className="flex flex-row flex-2 items-center hover:underline gap-x-3"
                     >
-                      <ProfileImage pfp={request.profilePicture} />
+                      <AvatarProfile pfp={request.profilePicture} />
                       <p>{request.displayName}</p>
                     </Link>
                     <div className="flex space-x-2 -my-1">
@@ -304,7 +304,7 @@ const FriendsTab: React.FC<FriendsTabProps> = ({
                     className="flex items-center p-3 justify-between"
                   >
                     <div className="flex flex-row items-center gap-x-3">
-                      <ProfileImage pfp={request.profilePicture} />
+                      <AvatarProfile pfp={request.profilePicture} />
                       <p>{request.displayName}</p>
                     </div>
                     <Button

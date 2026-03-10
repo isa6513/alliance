@@ -1,6 +1,6 @@
 import { CommentDto, PostDto } from "@alliance/shared/client";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { Link, href, useNavigate } from "react-router";
 import { formatTime } from "@alliance/shared/lib/utils";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
@@ -96,7 +96,7 @@ const ForumListPost = ({
                   navigate(href("/member/:id", { id: a.id.toString() }));
                 }}
               >
-                <ProfileImage
+                <AvatarProfile
                   pfp={a.profilePicture}
                   size="small"
                   className="mr-2 -mt-1"

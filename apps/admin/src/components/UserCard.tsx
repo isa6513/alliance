@@ -5,7 +5,7 @@ import {
   UserDto,
 } from "@alliance/shared/client/types.gen";
 import Card from "@alliance/sharedweb/ui/Card";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Badge from "@alliance/sharedweb/ui/Badge";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import { useMemo, useState } from "react";
@@ -92,7 +92,7 @@ const UserCard = ({
     <Card style={CardStyle.White} className="flex-1 text-sm">
       <div className="flex flex-row items-center justify-between gap-x-3 border-b pb-2 mb-2 border-zinc-200">
         <div className="flex flex-row items-center gap-x-3">
-          <ProfileImage pfp={user.profilePicture} size="large" />
+          <AvatarProfile pfp={user.profilePicture} size="large" />
           <Link to={`/member/${user.id}`} className="text-base">
             {user.name}
           </Link>

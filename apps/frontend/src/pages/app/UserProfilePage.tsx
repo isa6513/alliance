@@ -2,7 +2,7 @@ import { UpdateProfileDto } from "@alliance/shared/client";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, useLocation, useNavigate, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
@@ -267,7 +267,7 @@ const UserProfilePage: React.FC = () => {
               isUploading={isProfileImageUploadPending}
             />
           ) : (
-            <ProfileImage
+            <AvatarProfile
               pfp={profile.profilePicture}
               size="huge"
               className="mt-[-55px]"
@@ -312,7 +312,7 @@ const UserProfilePage: React.FC = () => {
                         </div>
                       }
                     />
-                    <HoverCardContent  sideOffset={4}>
+                    <HoverCardContent sideOffset={4}>
                       Leads a group of members
                     </HoverCardContent>
                   </HoverCard>

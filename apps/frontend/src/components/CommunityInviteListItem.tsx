@@ -4,7 +4,7 @@ import {
 } from "@alliance/shared/client";
 import { cn } from "@alliance/shared/styles/util";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { href, Link } from "react-router";
 
 type CommunityInviteListItemProps = {
@@ -57,7 +57,7 @@ const CommunityInviteListItem = ({
             })}
             className="flex flex-row items-center gap-x-2 hover:underline"
           >
-            <ProfileImage
+            <AvatarProfile
               pfp={invite.invitedUser.profilePicture}
               size="small"
             />
@@ -79,7 +79,7 @@ const CommunityInviteListItem = ({
                   })}
                   className="hover:underline"
                 >
-                  <ProfileImage
+                  <AvatarProfile
                     pfp={invite.invitingUser.profilePicture}
                     size="small"
                   />

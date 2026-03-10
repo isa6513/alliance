@@ -7,7 +7,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import PublicMemberDirectoryCard from "../../components/PublicMemberDirectoryCard";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { useLoaderData } from "react-router";
 
@@ -128,13 +128,13 @@ const PeoplePage: React.FC = () => {
               .map((member) => (
                 <div key={member.id} className="flex gap-3 md:gap-4">
                   <div className="hidden md:block">
-                    <ProfileImage
+                    <AvatarProfile
                       pfp={member.profilePicture ?? null}
                       size="huge"
                     />
                   </div>
                   <div className="block md:hidden">
-                    <ProfileImage
+                    <AvatarProfile
                       pfp={member.profilePicture ?? null}
                       size="large"
                     />

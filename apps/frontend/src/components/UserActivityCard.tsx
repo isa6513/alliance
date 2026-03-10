@@ -5,7 +5,7 @@ import {
   imagesUploadImage,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useCallback, useState } from "react";
 import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
@@ -156,7 +156,7 @@ const UserActivityCard = ({
               className="mr-2"
               onClick={(e) => e.stopPropagation()}
             >
-              <ProfileImage pfp={activity.user.profilePicture} size="small" />
+              <AvatarProfile pfp={activity.user.profilePicture} size="small" />
             </Link>
           </div>
           <Link

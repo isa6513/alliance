@@ -1,6 +1,6 @@
 import { UserDto, userMembers } from "@alliance/shared/client";
 import React, { useEffect, useMemo, useState } from "react";
-import ProfileImage from "./ProfileImage";
+import { AvatarProfile } from "./Avatar";
 
 export type UserSelectUser = Pick<UserDto, "id" | "name" | "profilePicture">;
 
@@ -101,7 +101,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
               className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 flex flex-row items-center gap-x-2"
               onClick={() => addUser(user.id)}
             >
-              <ProfileImage pfp={user.profilePicture} size="medium" />
+              <AvatarProfile pfp={user.profilePicture} size="medium" />
               <span className="font-medium">
                 {user.name ?? `User #${user.id}`}
               </span>
@@ -121,7 +121,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
             className="flex items-center justify-between border border-zinc-200 rounded px-3 py-2 text-sm bg-zinc-50"
           >
             <div className="flex items-center gap-x-2">
-              <ProfileImage pfp={user.profilePicture} size="medium" />
+              <AvatarProfile pfp={user.profilePicture} size="medium" />
               <p className="font-medium">{user.name ?? `User #${user.id}`}</p>
             </div>
             <button

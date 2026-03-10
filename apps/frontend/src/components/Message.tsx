@@ -1,6 +1,6 @@
 import type { MessageDto } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { Reply, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
@@ -77,7 +77,7 @@ const Message = ({
             onClick={() => handleFocusReply(message.replyTo!.id)}
           >
             <Reply size={15} />
-            <ProfileImage
+            <AvatarProfile
               pfp={message.replyTo.author.profilePicture}
               size="mini"
             />
@@ -90,7 +90,7 @@ const Message = ({
               <Link
                 to={href("/member/:id", { id: message.author.id.toString() })}
               >
-                <ProfileImage
+                <AvatarProfile
                   pfp={message.author.profilePicture}
                   size="medium"
                 />

@@ -15,7 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import ImageEditor from "../../components/ImageEditor";
 import { useAuth } from "../../lib/AuthContext";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
@@ -180,8 +180,9 @@ const CommunityPage = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!communityMemberInfo?.actions?.length || community?.id == null)
+    if (!communityMemberInfo?.actions?.length || community?.id == null) {
       return;
+    }
 
     const now = Date.now();
     const futureDeadlines = communityMemberInfo.actions
@@ -200,12 +201,7 @@ const CommunityPage = () => {
     }, delayMs);
 
     return () => window.clearTimeout(timeoutId);
-  }, [
-    communityMemberInfo?.actions,
-    community?.id,
-    user?.id,
-    queryClient,
-  ]);
+  }, [communityMemberInfo?.actions, community?.id, user?.id, queryClient]);
 
   useEffect(() => {
     if (!communityMemberInfo) {
@@ -475,7 +471,7 @@ const CommunityPage = () => {
                       isUploading={isPhotoUploadPending}
                     />
                   ) : (
-                    <ProfileImage pfp={community.photo ?? null} size="huge" />
+                    <AvatarProfile pfp={community.photo ?? null} size="huge" />
                   )}
                   <div className="flex flex-col gap-y-1 sm:gap-y-2 items-end">
                     <div className="flex flex-col items-end sm:flex-row sm:items-start gap-y-1 gap-x-1">

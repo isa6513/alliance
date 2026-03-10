@@ -8,7 +8,7 @@ import {
 } from "@alliance/shared/client";
 import List from "@alliance/sharedweb/ui/List";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { ChevronDown, ChevronLeft, Minus, Plus } from "lucide-react";
 import {
   Fragment,
@@ -302,7 +302,10 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
                 >
                   <div className={"w-full flex flex-row justify-between"}>
                     <div className="flex flex-row gap-x-3">
-                      <ProfileImage pfp={community.photo ?? null} size="huge" />
+                      <AvatarProfile
+                        pfp={community.photo ?? null}
+                        size="huge"
+                      />
                       <div className="flex flex-col text-left">
                         <p className="text-lg font-semibold">
                           {community.name}
@@ -401,7 +404,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
                   >
                     <div className={"w-full flex flex-row justify-between"}>
                       <div className="flex flex-row gap-x-3">
-                        <ProfileImage
+                        <AvatarProfile
                           pfp={community.photo ?? null}
                           size="huge"
                         />
@@ -572,7 +575,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
                   className="flex flex-col gap-y-2 p-4 md:flex-row md:items-start md:justify-between"
                 >
                   <div className="flex flex-row gap-x-3">
-                    <ProfileImage pfp={community.photo ?? null} size="huge" />
+                    <AvatarProfile pfp={community.photo ?? null} size="huge" />
                     <div className="flex flex-col">
                       <p className="text-lg font-semibold">{community.name}</p>
                       {community.description && (

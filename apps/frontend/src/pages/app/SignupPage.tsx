@@ -15,7 +15,7 @@ import { Link, href, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { CardStyle } from "@alliance/shared/styles/card";
 
 const SignupPage: React.FC = () => {
@@ -177,7 +177,7 @@ const SignupPage: React.FC = () => {
             <div className="flex flex-col gap-y-2 mb-4">
               <div className="flex flex-row gap-x-1 items-center">
                 <span>From </span>
-                <ProfileImage
+                <AvatarProfile
                   pfp={inviterProfile?.profilePicture ?? null}
                   size="small"
                   className="ml-1 inline-block text-green"

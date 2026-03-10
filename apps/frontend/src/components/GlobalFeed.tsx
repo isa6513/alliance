@@ -1,7 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, href } from "react-router";
 import { formatTime } from "@alliance/shared/lib/utils";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import {
+  AvatarProfile,
+  AvatarGroup,
+  AvatarGroupCount,
+} from "@alliance/sharedweb/ui/Avatar";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import {
   GlobalFeedActivityGroupDto,
@@ -27,25 +31,20 @@ const ProfilePicRow = ({
   const extraCount = users.length > maxDisplay ? users.length - maxDisplay : 0;
 
   return (
-    <div className="flex-row items-center inline-flex mr-1">
-      {displayUsers.map((user, i) => (
+    <AvatarGroup className="items-center inline-flex mr-1 ml-1">
+      {displayUsers.map((user) => (
         <Link
           key={user.id}
           to={href("/member/:id", { id: user.id.toString() })}
           className="hover:z-10 transition-transform hover:scale-110 duration-75"
-          style={{ zIndex: displayUsers.length - i }}
         >
-          <ProfileImage
-            pfp={user.profilePicture ?? null}
-            size="small"
-            className="border border-white -mt-1"
-          />
+          <AvatarProfile pfp={user.profilePicture ?? null} size="small" />
         </Link>
       ))}
       {showExtraCount && extraCount > 0 && (
-        <span className="text-zinc-400 ml-1.5">+{extraCount}</span>
+        <AvatarGroupCount size="small">+{extraCount}</AvatarGroupCount>
       )}
-    </div>
+    </AvatarGroup>
   );
 };
 
@@ -164,7 +163,7 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
                 to={href("/member/:id", { id: user.id.toString() })}
                 className="flex items-center gap-2 hover:bg-zinc-50 rounded py-2 -ml-2"
               >
-                <ProfileImage pfp={user.profilePicture ?? null} size="small" />
+                <AvatarProfile pfp={user.profilePicture ?? null} size="small" />
                 <span className="text-zinc-700">{user.displayName}</span>
               </Link>
             ))}

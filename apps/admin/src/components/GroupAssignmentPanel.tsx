@@ -12,7 +12,7 @@ import type {
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import List from "@alliance/sharedweb/ui/List";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { CardStyle } from "@alliance/shared/styles/card";
 import ConfirmDialog from "./ConfirmDialog";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
@@ -402,7 +402,7 @@ const GroupAssignmentPanel: React.FC<GroupAssignmentPanelProps> = ({
                   className="p-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex items-start gap-4">
-                    <ProfileImage pfp={member.profilePicture} size="medium" />
+                    <AvatarProfile pfp={member.profilePicture} size="medium" />
                     <div className="flex flex-col gap-1">
                       <Link
                         to={`/member/${member.id}`}

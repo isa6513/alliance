@@ -10,7 +10,7 @@ import {
   userListMessageableUsers,
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import ProfileImage from "@alliance/sharedweb/ui/ProfileImage";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
@@ -361,7 +361,7 @@ const MessagesPage = () => {
                       onClick={handleConversationClick(conversation.id)}
                     >
                       <div className="flex flex-row items-center gap-x-3">
-                        <ProfileImage
+                        <AvatarProfile
                           pfp={conversation.photo ?? null}
                           size="large"
                         />
@@ -397,7 +397,10 @@ const MessagesPage = () => {
                 onClick={handleConversationClick(conversation.id)}
               >
                 <div className="flex flex-row items-center gap-x-3">
-                  <ProfileImage pfp={conversation.photo ?? null} size="large" />
+                  <AvatarProfile
+                    pfp={conversation.photo ?? null}
+                    size="large"
+                  />
                   <div className="flex flex-col">
                     <span className="font-medium line-clamp-1">
                       {conversation.title}
