@@ -304,6 +304,7 @@ export default function ConversationScreen() {
 
       <KeyboardAvoidingView
         behavior="position"
+        style={{ flex: 1 }}
         contentContainerStyle={{ flex: 1 }}
       >
         {otherParticipantInvited && selectedConvo.type === "direct" && (
@@ -392,18 +393,17 @@ export default function ConversationScreen() {
             </View>
           </View>
         )}
-
-        <MessageComposer
-          message={message}
-          setMessage={setMessage}
-          attachments={attachments}
-          setAttachments={setAttachments}
-          onSend={handleSendMessage}
-          isSending={isSending}
-          replyingTo={replyingToMessage}
-          clearReplyingTo={() => setReplyingTo(null)}
-        />
       </KeyboardAvoidingView>
+      <MessageComposer
+        message={message}
+        setMessage={setMessage}
+        attachments={attachments}
+        setAttachments={setAttachments}
+        onSend={handleSendMessage}
+        isSending={isSending}
+        replyingTo={replyingToMessage}
+        clearReplyingTo={() => setReplyingTo(null)}
+      />
     </View>
   );
 }

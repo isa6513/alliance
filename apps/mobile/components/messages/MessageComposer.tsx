@@ -18,6 +18,7 @@ import { ImagePlus, Send, X } from "lucide-react-native";
 import Text from "../system/Text";
 import { colors } from "../../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
+import { KeyboardStickyView } from "react-native-keyboard-controller";
 
 interface MessageComposerProps {
   message: string;
@@ -89,7 +90,10 @@ export default function MessageComposer({
   }, [canSend, isSending, onSend]);
 
   return (
-    <View className="border-t border-zinc-200 bg-white px-4 py-3">
+    <KeyboardStickyView
+      className="border-t border-zinc-200 bg-white px-4 py-3"
+      offset={{ closed: 0, opened: 90 }}
+    >
       {replyingTo && (
         <View className="flex-row items-center justify-between bg-zinc-100 rounded p-3 mb-3">
           <View className="flex-row items-center gap-2 flex-1">
@@ -166,6 +170,6 @@ export default function MessageComposer({
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardStickyView>
   );
 }
