@@ -144,7 +144,7 @@ export default function MessageComposer({
         >
           <ImagePlus size={21} color={colors.text.secondary} />
         </TouchableOpacity>
-        <View className="flex-1 border border-zinc-200 rounded bg-zinc-50 px-3 pb-2">
+        <View className="flex-1 border border-zinc-200 rounded bg-zinc-50 px-3 h-10 justify-center">
           <TextInput
             value={message}
             onChangeText={setMessage}

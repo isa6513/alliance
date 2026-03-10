@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import {
@@ -122,18 +117,15 @@ export default function NewMessageScreen() {
       }
     }
     return null;
-  }, [
-    conversations,
-    recipients,
-    selectedUserIds,
-    setConversations,
-    user,
-  ]);
+  }, [conversations, recipients, selectedUserIds, setConversations, user]);
 
   const handleSend = useCallback(async () => {
     if (isSending) return;
     if (selectedUserIds.length === 0) {
-      Alert.alert("Select recipients", "Choose at least one person to message.");
+      Alert.alert(
+        "Select recipients",
+        "Choose at least one person to message."
+      );
       return;
     }
 
@@ -172,45 +164,37 @@ export default function NewMessageScreen() {
   return (
     <View className="flex-1 bg-white pt-12">
       <View className="flex-row items-center justify-between px-4 pb-2">
-        <Button
-          color={ButtonColor.Transparent}
-          onPress={() => router.back()}
-        >
+        <Button color={ButtonColor.Transparent} onPress={() => router.back()}>
           <ChevronLeft size={20} color={colors.text.secondary} />
         </Button>
-        <Text className="text-lg font-semibold text-zinc-900">
-          New message
-        </Text>
+        <Text className="text-lg font-semibold text-zinc-900">New message</Text>
         <View className="w-20" />
       </View>
-        <ScrollView className="flex-1 px-4">
-          <View className="border border-zinc-200 rounded bg-white p-4 flex flex-row">
-            <Text className="text-sm text-zinc-600 my-3 mr-2">To</Text>
-            {loadingUsers ? (
-              <ActivityIndicator size="small" color={colors.green} />
-            ) : (
-              <MessageRecipientSelect
-                users={messageableUsers}
-                selectedUserIds={selectedUserIds}
-                onChange={setSelectedUserIds}
-              />
-            )}
-          </View>
-          <View className="h-4" />
-        </ScrollView>
-        <KeyboardAvoidingView
-        behavior="position"
-      >
-        <MessageComposer
-          message={message}
-          setMessage={setMessage}
-          attachments={attachments}
-          setAttachments={setAttachments}
-          onSend={handleSend}
-          isSending={isSending}
-          placeholder="Write a message..."
-        />
-      </KeyboardAvoidingView>
+      <ScrollView className="flex-1 px-4">
+        <View className="border border-zinc-200 rounded bg-white p-4 flex flex-row">
+          <Text className="text-sm text-zinc-600 my-3 mr-2">To</Text>
+          {loadingUsers ? (
+            <ActivityIndicator size="small" color={colors.green} />
+          ) : (
+            <MessageRecipientSelect
+              users={messageableUsers}
+              selectedUserIds={selectedUserIds}
+              onChange={setSelectedUserIds}
+            />
+          )}
+        </View>
+        <View className="h-4" />
+      </ScrollView>
+      <KeyboardAvoidingView behavior="position"></KeyboardAvoidingView>
+      <MessageComposer
+        message={message}
+        setMessage={setMessage}
+        attachments={attachments}
+        setAttachments={setAttachments}
+        onSend={handleSend}
+        isSending={isSending}
+        placeholder="Write a message..."
+      />
     </View>
   );
 }
