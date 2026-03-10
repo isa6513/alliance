@@ -4,7 +4,11 @@ import {
   getUnreadLikesCount,
   LikesBucket,
 } from "@alliance/shared/lib/notificationBucketing";
-import { notifsSetRead } from "@alliance/shared/client";
+import { NotificationDto, notifsSetRead } from "@alliance/shared/client";
+import {
+  getNotificationIdentityKey,
+  getNotificationReadRequest,
+} from "@alliance/shared/lib/notificationIdentity";
 import List from "@alliance/sharedweb/ui/List";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
@@ -19,7 +23,7 @@ const LikesGroup = ({
   onMarkAllRead,
 }: {
   bucket: LikesBucket;
-  handleNotifClick: (id: number, webAppLocation: string | null) => () => void;
+  handleNotifClick: (notification: NotificationDto) => () => void;
   onMarkAllRead: () => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -66,7 +70,7 @@ const LikesGroup = ({
         <div className="flex flex-col divide-y divide-zinc-200 border-t border-zinc-200">
           {bucket.likes.map((notification) => (
             <NotificationText
-              key={notification.id}
+              key={getNotificationIdentityKey(notification)}
               notification={notification}
               handleNotifClick={handleNotifClick}
               className={cn(
@@ -96,7 +100,7 @@ const NotificationsPage = () => {
   const handleMarkBucketAsRead = (bucket: LikesBucket) => async () => {
     const unreadLikes = bucket.likes.filter((n) => !n.readAt);
     await Promise.all(
-      unreadLikes.map((n) => notifsSetRead({ path: { id: n.id } }))
+      unreadLikes.map((n) => notifsSetRead(getNotificationReadRequest(n)))
     );
     refreshNotifications();
   };

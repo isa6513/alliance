@@ -1,14 +1,57 @@
 import { View } from "react-native";
 import { formatDistance } from "date-fns";
-import { ActionUpdateDto } from "@alliance/shared/client";
+import { ActionUpdateDto, NotificationDto } from "@alliance/shared/client";
 import Text from "./system/Text";
 import EditableContentRenderer from "./EditableContentRenderer";
+import { useMarkUnreadContentRead } from "@alliance/shared/lib/useUnreadContentRead";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface ActionUpdateCardProps {
   update: ActionUpdateDto;
 }
 
 export default function ActionUpdateCard({ update }: ActionUpdateCardProps) {
+  const queryClient = useQueryClient();
+
+  useMarkUnreadContentRead({
+    contentType: "action_update",
+    contentIds: [update.id],
+    onMarked: (contentType, contentIds) => {
+      const ids = new Set(contentIds);
+      const readAt = new Date().toISOString();
+      queryClient.setQueryData(
+        ["notifications"],
+        (
+          oldData:
+            | {
+                data?: NotificationDto[];
+              }
+            | undefined
+        ) => {
+          if (!oldData?.data) {
+            return oldData;
+          }
+
+          return {
+            ...oldData,
+            data: oldData.data.map((notification) => {
+              if (
+                notification.readAt ||
+                notification.contentType !== contentType ||
+                typeof notification.contentId !== "number" ||
+                !ids.has(notification.contentId)
+              ) {
+                return notification;
+              }
+
+              return { ...notification, readAt };
+            }),
+          };
+        }
+      );
+    },
+  });
+
   const hasContent =
     !!update.content?.body ||
     (update.content?.attachments?.length ?? 0) > 0;

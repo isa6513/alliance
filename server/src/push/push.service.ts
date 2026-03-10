@@ -21,6 +21,7 @@ export class CreatePushMessage extends PickType(Push, [
   'idempotencyKey',
   'screen',
   'notification',
+  'unreadContent',
 ]) {}
 
 @Injectable()
@@ -87,7 +88,13 @@ export class PushService {
         body: message.body,
         data: {
           screen: message.screen,
-          notificationId: message.notification?.id,
+          notificationId: message.notification?.id
+            ?? message.unreadContent?.id,
+          notificationSourceType: message.notification
+            ? 'notification'
+            : message.unreadContent
+              ? 'unread_content'
+              : undefined,
         },
       });
 

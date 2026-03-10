@@ -12,6 +12,10 @@ import { CreatePostDto } from '../src/forum/dto/post.dto';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { Notification } from 'src/notifs/entities/notification.entity';
+import {
+  UnreadContent,
+  UnreadContentType,
+} from 'src/notifs/entities/unread-content.entity';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 
 describe('Forum (e2e)', () => {
@@ -20,6 +24,7 @@ describe('Forum (e2e)', () => {
   let testAction: Action;
   let userRepo: Repository<User>;
   let notifRepo: Repository<Notification>;
+  let unreadContentRepo: Repository<UnreadContent>;
   let eventRepo: Repository<ActionEvent>;
   let activityRepo: Repository<ActionActivity>;
   let likerCounter = 0;
@@ -51,6 +56,7 @@ describe('Forum (e2e)', () => {
     actionRepo = ctx.dataSource.getRepository(Action);
     userRepo = ctx.dataSource.getRepository(User);
     notifRepo = ctx.dataSource.getRepository(Notification);
+    unreadContentRepo = ctx.dataSource.getRepository(UnreadContent);
     eventRepo = ctx.dataSource.getRepository(ActionEvent);
     activityRepo = ctx.dataSource.getRepository(ActionActivity);
     // Create test action
@@ -1038,30 +1044,24 @@ describe('Forum (e2e)', () => {
       const replyId = commentResponse.body.id;
 
       // Original author should get notified
-      const originalAuthorNotifs = await notifRepo.find({
+      const originalAuthorNotifs = await unreadContentRepo.find({
         where: {
           user: { id: ctx.testUserId },
-          category: NotificationCategory.ForumReply,
+          contentType: UnreadContentType.ForumReply,
+          contentId: replyId,
         },
       });
-      expect(
-        originalAuthorNotifs.some((n) =>
-          n.webAppLocation?.includes(`replyId=${replyId}`),
-        ),
-      ).toBe(true);
+      expect(originalAuthorNotifs.length).toBeGreaterThan(0);
 
       // Co-author should also get notified
-      const coAuthorNotifs = await notifRepo.find({
+      const coAuthorNotifs = await unreadContentRepo.find({
         where: {
           user: { id: coAuthor.id },
-          category: NotificationCategory.ForumReply,
+          contentType: UnreadContentType.ForumReply,
+          contentId: replyId,
         },
       });
-      expect(
-        coAuthorNotifs.some((n) =>
-          n.webAppLocation?.includes(`replyId=${replyId}`),
-        ),
-      ).toBe(true);
+      expect(coAuthorNotifs.length).toBeGreaterThan(0);
     });
 
     it('sends like notifications to all authors', async () => {

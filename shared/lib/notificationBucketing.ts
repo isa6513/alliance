@@ -1,4 +1,5 @@
 import { NotificationDto } from "@alliance/shared/client";
+import { getNotificationIdentityKey } from "./notificationIdentity";
 
 export type LikesBucket = {
   dayKeys: string[];
@@ -41,7 +42,9 @@ function getDayKey(date: Date) {
 }
 
 function getLikesBucketKey(likes: NotificationDto[]) {
-  return `likes-${likes.map((notification) => notification.id).join("-")}`;
+  return `likes-${likes
+    .map((notification) => getNotificationIdentityKey(notification))
+    .join("-")}`;
 }
 
 function createLikesBucket(
@@ -70,7 +73,7 @@ export function buildNotificationRenderItems(
     if (notification.category !== "likes") {
       items.push({
         type: "notification",
-        key: `notification-${notification.id}`,
+        key: `notification-${getNotificationIdentityKey(notification)}`,
         time: getNotificationTime(notification).getTime(),
         notification,
       });
@@ -133,7 +136,7 @@ export function buildNotificationRenderItems(
     const [notification] = item.bucket.likes;
     return {
       type: "notification",
-      key: `notification-${notification.id}`,
+      key: `notification-${getNotificationIdentityKey(notification)}`,
       time: getNotificationTime(notification).getTime(),
       notification,
     };

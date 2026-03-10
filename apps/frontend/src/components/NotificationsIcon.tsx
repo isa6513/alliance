@@ -71,11 +71,8 @@ const NotificationsIcon = () => {
           )}
           {notifications.map((notification) => (
             <div
-              key={notification.id}
-              onClick={handleNotifClick(
-                notification.id,
-                notification.webAppLocation
-              )}
+              key={`${notification.sourceType}:${notification.id}`}
+              onClick={handleNotifClick(notification)}
               className={cn(
                 "text-black hover:bg-zinc-100 p-2 rounded-md flex cursor-pointer flex-col",
                 !notification.readAt && "bg-red-50"

@@ -22,6 +22,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@alliance/sharedweb/ui/DropdownMenu";
+import { useMarkUnreadContentRead } from "@alliance/shared/lib/useUnreadContentRead";
+import { useOptionalNotifications } from "@alliance/shared/lib/useNotifications";
 
 export type CommentFilter =
   | "all"
@@ -61,6 +63,17 @@ const hasExpertChildReply = (
 ): boolean => {
   if (!comment.children) return false;
   return comment.children.some((child) => hasExpertReply(child, expertIds));
+};
+
+const collectCommentIds = (comments: CommentDto[]): number[] => {
+  const ids: number[] = [];
+  for (const comment of comments) {
+    ids.push(comment.id);
+    if (comment.children?.length) {
+      ids.push(...collectCommentIds(comment.children));
+    }
+  }
+  return ids;
 };
 
 type CommentSort = "newest" | "discussion" | "random";
@@ -126,8 +139,23 @@ const Comments = ({
   const [resortRandomFlag, setResortRandomFlag] = useState(false);
 
   const tree = useCommentTree(objectId, type, initialComments);
+  const notifications = useOptionalNotifications();
   const isPostComments = type === "post";
   const activeQaMode = isPostComments && qaMode;
+
+  const commentIds = useMemo(
+    () => collectCommentIds(tree.comments ?? []),
+    [tree.comments]
+  );
+
+  useMarkUnreadContentRead({
+    contentType: "forum_reply",
+    contentIds: commentIds,
+    enabled: !!user && !!notifications && commentIds.length > 0,
+    onMarked: (contentType, contentIds) => {
+      notifications?.applyNotificationsReadByContent(contentType, contentIds);
+    },
+  });
 
   const { data: friendIds = [] } = useQuery({
     queryKey: ["userListFriends", user?.id],

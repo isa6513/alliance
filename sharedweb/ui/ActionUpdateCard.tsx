@@ -9,6 +9,8 @@ import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
 import DatabaseIcon from "./icons/DatabaseIcon";
 import { useState } from "react";
+import { useMarkUnreadContentRead } from "@alliance/shared/lib/useUnreadContentRead";
+import { useOptionalNotifications } from "@alliance/shared/lib/useNotifications";
 
 export interface ActionUpdateCardProps {
   update: ActionUpdateDto;
@@ -35,6 +37,16 @@ const ActionUpdateCard = ({
     update.content
   );
   const [isSaving, setIsSaving] = useState(false);
+  const notifications = useOptionalNotifications();
+
+  useMarkUnreadContentRead({
+    contentType: "action_update",
+    contentIds: [update.id],
+    enabled: !!notifications,
+    onMarked: (contentType, contentIds) => {
+      notifications?.applyNotificationsReadByContent(contentType, contentIds);
+    },
+  });
 
   const handleSave = async () => {
     if (!onEdit) return;
@@ -93,7 +105,7 @@ const ActionUpdateCard = ({
     <div className="flex flex-col border border-zinc-200 rounded divide-y divide-zinc-200 overflow-hidden">
       <div className="p-3 md:px-4 w-full gap-y-1 bg-zinc-50">
         <div className="flex flex-col">
-          <div className="flex flex-col md:flex-row md:gap-x-2 items-start">
+          <div className="flex flex-col md:flex-row md:gap-x-2 items-center">
             <p className="font-semibold">
               {onActionPageTimeline && (
                 <span className="text-green">Update: </span>

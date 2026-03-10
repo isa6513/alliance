@@ -5,6 +5,7 @@ import {
   CommentParentObject,
   CreateCommentDto,
   CreateEditableContentDto,
+  NotificationDto,
   UserDto,
   forumCreateComment,
   forumDeleteComment,
@@ -17,6 +18,7 @@ import {
   imagesUploadImage,
 } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
+import { useMarkUnreadContentRead } from "@alliance/shared/lib/useUnreadContentRead";
 import { Pin } from "lucide-react-native";
 import { useAuth } from "../lib/AuthContext";
 import EditableContentForm from "./EditableContentForm";
@@ -26,6 +28,7 @@ import ProfileImage from "./ProfileImage";
 import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface CommentsProps {
   objectId: number;
@@ -56,6 +59,17 @@ const uploadAttachments = async (attachments: string[]) => {
 
 const shouldShowComment = (comment: CommentDto) => {
   return !comment.deleted || (comment.children?.length ?? 0) > 0;
+};
+
+const collectCommentIds = (comments: CommentDto[]): number[] => {
+  const ids: number[] = [];
+  for (const comment of comments) {
+    ids.push(comment.id);
+    if (comment.children?.length) {
+      ids.push(...collectCommentIds(comment.children));
+    }
+  }
+  return ids;
 };
 
 type ReplyFormProps = {
@@ -320,6 +334,7 @@ export default function Comments({
   highlightedReplyId,
 }: CommentsProps) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [editableContent, setEditableContent] =
     useState<CreateEditableContentDto>({ body: "", attachments: [] });
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
@@ -512,6 +527,48 @@ export default function Comments({
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
   }, [comments]);
+
+  const commentIds = useMemo(() => collectCommentIds(comments ?? []), [comments]);
+
+  useMarkUnreadContentRead({
+    contentType: "forum_reply",
+    contentIds: commentIds,
+    enabled: !!user && commentIds.length > 0,
+    onMarked: (contentType, contentIds) => {
+      const ids = new Set(contentIds);
+      const readAt = new Date().toISOString();
+      queryClient.setQueryData(
+        ["notifications"],
+        (
+          oldData:
+            | {
+                data?: NotificationDto[];
+              }
+            | undefined
+        ) => {
+          if (!oldData || !Array.isArray(oldData.data)) {
+            return oldData;
+          }
+
+          return {
+            ...oldData,
+            data: oldData.data.map((notification) => {
+              if (
+                notification.readAt ||
+                notification.contentType !== contentType ||
+                typeof notification.contentId !== "number" ||
+                !ids.has(notification.contentId)
+              ) {
+                return notification;
+              }
+
+              return { ...notification, readAt };
+            }),
+          };
+        }
+      );
+    },
+  });
 
   return (
     <View className="gap-y-3">

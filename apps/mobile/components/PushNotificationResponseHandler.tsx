@@ -1,4 +1,8 @@
-import { NotificationDto, notifsSetRead } from "@alliance/shared/client";
+import {
+  NotificationDto,
+  NotificationSourceType,
+  notifsSetRead,
+} from "@alliance/shared/client";
 import { QueryClient } from "@tanstack/react-query";
 import * as Notifications from "expo-notifications";
 import { RelativePathString, router } from "expo-router";
@@ -6,10 +10,15 @@ import { useCallback, useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { useAuth } from "../lib/AuthContext";
 import { isVisualTestMode } from "../lib/visualTest";
+import {
+  getNotificationIdentityKey,
+  getNotificationReadRequest,
+} from "@alliance/shared/lib/notificationIdentity";
 
 type PushData = {
   screen?: string;
   notificationId?: number;
+  notificationSourceType?: NotificationSourceType;
 };
 
 type NotificationsQueryData = {
@@ -18,6 +27,7 @@ type NotificationsQueryData = {
 
 type PendingNotificationAction = {
   notificationId?: number;
+  notificationSourceType?: NotificationSourceType;
   screen?: string;
 };
 
@@ -31,7 +41,7 @@ function getPushRoute(screen: string | undefined): RelativePathString | null {
 }
 
 function setNotificationReadOptimistically(
-  notificationId: number,
+  notificationToMark: Pick<NotificationDto, "id" | "sourceType">,
   queryClient: QueryClient
 ) {
   const existingData =
@@ -45,7 +55,10 @@ function setNotificationReadOptimistically(
   const readAt = new Date().toISOString();
   let foundNotification = false;
   const nextData = existingData.data.map((notification) => {
-    if (notification.id !== notificationId) {
+    if (
+      getNotificationIdentityKey(notification) !==
+      getNotificationIdentityKey(notificationToMark)
+    ) {
       return notification;
     }
 
@@ -77,10 +90,10 @@ export default function PushNotificationResponseHandler({
   const responseSub = useRef<Notifications.EventSubscription | null>(null);
 
   const markNotificationReadFromTap = useCallback(
-    (notificationId: number) => {
-      setNotificationReadOptimistically(notificationId, queryClient);
+    (notification: Pick<NotificationDto, "id" | "sourceType">) => {
+      setNotificationReadOptimistically(notification, queryClient);
 
-      void notifsSetRead({ path: { id: notificationId } }).catch((error) => {
+      void notifsSetRead(getNotificationReadRequest(notification)).catch((error) => {
         console.error(
           "failed to mark notification as read from push tap",
           error
@@ -92,8 +105,11 @@ export default function PushNotificationResponseHandler({
 
   const handlePendingNotificationAction = useCallback(
     (pendingAction: PendingNotificationAction) => {
-      if (pendingAction.notificationId) {
-        markNotificationReadFromTap(pendingAction.notificationId);
+      if (pendingAction.notificationId && pendingAction.notificationSourceType) {
+        markNotificationReadFromTap({
+          id: pendingAction.notificationId,
+          sourceType: pendingAction.notificationSourceType,
+        });
       }
 
       const route = getPushRoute(pendingAction.screen);
@@ -124,6 +140,7 @@ export default function PushNotificationResponseHandler({
           typeof data?.notificationId === "number"
             ? data.notificationId
             : undefined,
+        notificationSourceType: data?.notificationSourceType,
         screen: data?.screen,
       };
 

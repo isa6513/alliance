@@ -12,6 +12,10 @@ import {
   LikesBucket,
   NotificationRenderItem,
 } from "@alliance/shared/lib/notificationBucketing";
+import {
+  getNotificationIdentityKey,
+  getNotificationReadRequest,
+} from "@alliance/shared/lib/notificationIdentity";
 import { usePostHog } from "posthog-react-native";
 import Text from "../../components/system/Text";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -64,12 +68,16 @@ export default function NotificationsScreen() {
   );
 
   const markNotificationsRead = useCallback(
-    (notificationIds: number[]) => {
-      if (notificationIds.length === 0) {
+    (notificationsToMark: Pick<NotificationDto, "id" | "sourceType">[]) => {
+      if (notificationsToMark.length === 0) {
         return;
       }
 
-      const ids = new Set(notificationIds);
+      const keys = new Set(
+        notificationsToMark.map((notification) =>
+          getNotificationIdentityKey(notification)
+        )
+      );
       const readAt = new Date().toISOString();
       queryClient.setQueryData(
         ["notifications"],
@@ -78,7 +86,7 @@ export default function NotificationsScreen() {
           return {
             ...oldData,
             data: oldData.data.map((notification) =>
-              ids.has(notification.id)
+              keys.has(getNotificationIdentityKey(notification))
                 ? { ...notification, readAt }
                 : notification
             ),
@@ -90,10 +98,13 @@ export default function NotificationsScreen() {
   );
 
   const handleMarkAsRead = useCallback(
-    (notificationId: number) => {
-      notifsSetRead({ path: { id: notificationId } });
-      markNotificationsRead([notificationId]);
-      posthog?.capture("notification_swiped_read", { notificationId });
+    (notification: NotificationDto) => {
+      notifsSetRead(getNotificationReadRequest(notification));
+      markNotificationsRead([notification]);
+      posthog?.capture("notification_swiped_read", {
+        notificationId: notification.id,
+        notificationSourceType: notification.sourceType,
+      });
     },
     [markNotificationsRead, posthog]
   );
@@ -108,9 +119,9 @@ export default function NotificationsScreen() {
       }
 
       unreadLikes.forEach((notification) => {
-        notifsSetRead({ path: { id: notification.id } });
+        notifsSetRead(getNotificationReadRequest(notification));
       });
-      markNotificationsRead(unreadLikes.map((notification) => notification.id));
+      markNotificationsRead(unreadLikes);
     },
     [markNotificationsRead]
   );
@@ -118,16 +129,17 @@ export default function NotificationsScreen() {
   const handleNotificationPress = useCallback(
     (notification: NotificationDto) => {
       if (!notification.readAt) {
-        notifsSetRead({ path: { id: notification.id } });
-        markNotificationsRead([notification.id]);
+        notifsSetRead(getNotificationReadRequest(notification));
+        markNotificationsRead([notification]);
       }
 
       const destination = normalizeLocation(
-        notification.mobileAppLocation ?? notification.webAppLocation
+        notification.mobileAppLocation ?? notification.webAppLocation ?? null
       );
 
       posthog?.capture("notification_clicked", {
         notificationId: notification.id,
+        notificationSourceType: notification.sourceType,
         category: notification.category ?? "unknown category",
         webAppLocation: destination ?? "",
       });
@@ -157,7 +169,7 @@ export default function NotificationsScreen() {
           key={item.key}
           notification={item.notification}
           onPress={() => handleNotificationPress(item.notification)}
-          onMarkRead={() => handleMarkAsRead(item.notification.id)}
+          onMarkRead={() => handleMarkAsRead(item.notification)}
         />
       );
     },

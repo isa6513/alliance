@@ -5,6 +5,7 @@ import {
 } from 'src/datasources/basecolumns';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { Notification } from 'src/notifs/entities/notification.entity';
+import { UnreadContent } from 'src/notifs/entities/unread-content.entity';
 import type { Ty } from 'src/tasks/entities/type';
 import {
   Column,
@@ -79,6 +80,13 @@ export class Push {
   })
   @JoinColumn({ name: 'notificationId' })
   notification?: Ty<Notification>;
+
+  @ManyToOne(() => UnreadContent, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'unreadContentId' })
+  unreadContent?: Ty<UnreadContent>;
 
   @ManyToOne(
     () => ActionEventNotif,

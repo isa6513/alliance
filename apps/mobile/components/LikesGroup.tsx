@@ -5,6 +5,7 @@ import {
   getUnreadLikesCount,
   LikesBucket,
 } from "@alliance/shared/lib/notificationBucketing";
+import { getNotificationIdentityKey } from "@alliance/shared/lib/notificationIdentity";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { cn } from "@alliance/shared/styles/util";
 import { NotificationDto } from "@alliance/shared/client";
@@ -111,7 +112,7 @@ export default function LikesGroup({
         <View className="border-t border-zinc-200">
           {bucket.likes.map((notification) => (
             <LikesGroupNotification
-              key={notification.id}
+              key={getNotificationIdentityKey(notification)}
               notification={notification}
               onPress={() => onPressNotification(notification)}
             />

@@ -10,10 +10,8 @@ import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { commentUrl, postUrl, withCid } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/dto/user.dto';
 import { ILike, In, Not, type Repository } from 'typeorm';
-import {
-  Notification,
-  NotificationCategory,
-} from '../notifs/entities/notification.entity';
+import { Notification } from '../notifs/entities/notification.entity';
+import { UnreadContentType } from 'src/notifs/entities/unread-content.entity';
 import { User } from '../user/entities/user.entity';
 import {
   CommentDto,
@@ -520,7 +518,6 @@ export class ForumService {
 
   async sendNotifsForNewComment(comment: Comment): Promise<void> {
     const usersToNotify: User[] = [];
-    const actionIds: Map<number, number> = new Map();
 
     let parentAuthor: User | undefined;
     if (comment.parentId) {
@@ -547,7 +544,6 @@ export class ForumService {
         relations: { user: true, action: true },
       });
       usersToNotify.push(activity.user);
-      actionIds.set(activity.id, activity.action.id);
     }
 
     const seenIds = new Set<number>();
@@ -558,32 +554,22 @@ export class ForumService {
     });
     const authorDto = new ProfileDto(comment.author);
 
-    const baseNotif = {
-      message: `New reply from ${authorDto.displayName}`,
-      category: NotificationCategory.ForumReply,
-      webAppLocation: commentUrl(
-        comment,
-        comment.parentObjectType === CommentParentObject.Activity
-          ? actionIds.get(comment.parentObjectId)
-          : undefined,
-      ),
-      associatedUsers: [comment.author],
-      comment,
-    };
-
-    await this.notifsService.sendNotifs(
+    await this.notifsService.sendUnreadContents(
       uniqueUsersToNotify
         .filter((user) => user.id !== comment.authorId)
         .map((user) => {
-          return { ...baseNotif, user };
+          return {
+            user,
+            contentType: UnreadContentType.ForumReply,
+            contentId: comment.id,
+            sendTime: comment.createdAt,
+          };
         }),
     );
 
     const cid = generateCIDForNotif();
     if (parentAuthor && parentAuthor.id !== comment.authorId) {
-      await this.notifsService.sendNotifs([
-        { ...baseNotif, user: parentAuthor, cid },
-      ]);
+      await this.notifsService.createForumReplyNotif(comment, parentAuthor);
 
       // special text/email notifs
       if (comment.parentObjectType === CommentParentObject.Post) {

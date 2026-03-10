@@ -5,22 +5,46 @@ import {
   Notification,
   NotificationCategory,
 } from 'src/notifs/entities/notification.entity';
+import {
+  UnreadContent,
+  UnreadContentType,
+} from 'src/notifs/entities/unread-content.entity';
 import { CreatePushMessage, PushService } from './push.service';
 import { Injectable } from '@nestjs/common';
-// import { Cron, CronExpression } from '@nestjs/schedule';
+import { NotifsService } from 'src/notifs/notifs.service';
 
 @Injectable()
 export class NotifPushDispatcherWorker {
   constructor(
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
+    @InjectRepository(UnreadContent)
+    private readonly unreadContentRepository: Repository<UnreadContent>,
+    private readonly notifsService: NotifsService,
     private readonly pushService: PushService,
   ) {}
 
-  // @Cron(CronExpression.EVERY_MINUTE)
   async dispatchPushes() {
     const dispatchID = v4().replace(/-/g, '');
 
+    const messagesToSend: CreatePushMessage[] = [];
+    messagesToSend.push(
+      ...(await this.dispatchLegacyNotificationPushes(dispatchID)),
+    );
+    messagesToSend.push(
+      ...(await this.dispatchUnreadContentPushes(dispatchID)),
+    );
+
+    if (!messagesToSend.length) {
+      return;
+    }
+
+    await this.pushService.sendMessages(messagesToSend);
+  }
+
+  private async dispatchLegacyNotificationPushes(
+    dispatchID: string,
+  ): Promise<CreatePushMessage[]> {
     const claimed: { id: number }[] = (
       await this.notificationRepository.query(
         `
@@ -47,7 +71,7 @@ export class NotifPushDispatcherWorker {
     )[0];
 
     if (!claimed.length) {
-      return;
+      return [];
     }
 
     const toSend = await this.notificationRepository
@@ -58,12 +82,12 @@ export class NotifPushDispatcherWorker {
       .getMany();
 
     if (toSend.length === 0) {
-      return;
+      return [];
     }
 
-    console.log(`found ${toSend.length} notifs to send pushes for`);
+    console.log(`found ${toSend.length} legacy notifs to send pushes for`);
 
-    const messagesToSend: CreatePushMessage[] = [];
+    const messages: CreatePushMessage[] = [];
     for (const notif of toSend) {
       const notifTypeToSendable: Record<NotificationCategory, boolean> = {
         [NotificationCategory.ActionEvent]: true,
@@ -91,13 +115,12 @@ export class NotifPushDispatcherWorker {
         [NotificationCategory.CommunityInviteRequestRejected]: true,
       };
       if (!notifTypeToSendable[notif.category]) {
-        console.log(`notif ${notif.id} not sendable`);
         await this.notificationRepository.update(notif.id, {
           shouldPush: false,
         });
         continue;
       }
-      messagesToSend.push(
+      messages.push(
         ...(await this.pushService.getPushForAllUserDevices(notif.user.id, {
           body: notif.message,
           screen: notif.mobileAppLocation || notif.webAppLocation,
@@ -107,6 +130,79 @@ export class NotifPushDispatcherWorker {
       );
     }
 
-    await this.pushService.sendMessages(messagesToSend);
+    return messages;
+  }
+
+  private async dispatchUnreadContentPushes(
+    dispatchID: string,
+  ): Promise<CreatePushMessage[]> {
+    const claimed: { id: number }[] = (
+      await this.unreadContentRepository.query(
+        `
+        WITH cte AS (
+          SELECT uc.id
+          FROM unread_content uc
+          WHERE uc."sendTime" <= NOW()
+            AND uc."shouldPush" = true
+            AND uc."pushClaimedBy" IS NULL
+            AND uc."pushDispatchedAt" IS NULL
+          ORDER BY uc."sendTime" ASC
+          LIMIT 500
+          FOR UPDATE SKIP LOCKED
+        )
+        UPDATE unread_content uc
+        SET "pushClaimedBy" = $1,
+            "pushClaimedAt" = NOW()
+        FROM cte
+        WHERE uc.id = cte.id
+        RETURNING uc.id;
+        `,
+        [dispatchID],
+      )
+    )[0];
+
+    if (!claimed.length) {
+      return [];
+    }
+
+    const hydrated = await this.notifsService.getUnreadContentsForPush(
+      claimed.map((content) => content.id),
+    );
+
+    if (hydrated.length === 0) {
+      return [];
+    }
+
+    console.log(
+      `found ${hydrated.length} unread-content notifs to send pushes for`,
+    );
+
+    const messages: CreatePushMessage[] = [];
+    for (const { unreadContent, dto } of hydrated) {
+      const contentTypeToSendable: Record<UnreadContentType, boolean> = {
+        [UnreadContentType.ActionEvent]: true,
+        [UnreadContentType.ActionUpdate]: true,
+        [UnreadContentType.ForumReply]: unreadContent.user.pushesForComments,
+      };
+      if (!contentTypeToSendable[unreadContent.contentType]) {
+        await this.unreadContentRepository.update(unreadContent.id, {
+          shouldPush: false,
+        });
+        continue;
+      }
+      messages.push(
+        ...(await this.pushService.getPushForAllUserDevices(
+          unreadContent.user.id,
+          {
+            body: dto.message,
+            screen: dto.mobileAppLocation ?? dto.webAppLocation ?? undefined,
+            unreadContent,
+            idempotencyKey: `uc-${unreadContent.id}`,
+          },
+        )),
+      );
+    }
+
+    return messages;
   }
 }

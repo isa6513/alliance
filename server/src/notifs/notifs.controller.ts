@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -12,10 +13,16 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
-import { NotificationDto } from './dto/notification.dto';
+import {
+  NotificationDto,
+} from './dto/notification.dto';
 import { ActionEventNotifDto } from './entities/action-event-notif.dto';
 import { NotifsService } from './notifs.service';
 import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
+import {
+  MarkUnreadContentReadDto,
+  ReadNotificationQueryDto,
+} from './dto/unread-content.dto';
 
 @Controller('notifs')
 export class NotifsController {
@@ -25,16 +32,18 @@ export class NotifsController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [NotificationDto] })
   findAll(@Request() req: JwtRequest): Promise<NotificationDto[]> {
-    return this.notifsService
-      .findAll(req.user.sub)
-      .then((notifs) => notifs.map((notif) => new NotificationDto(notif)));
+    return this.notifsService.findAll(req.user.sub);
   }
 
   @Post('read/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse()
-  setRead(@Param('id', ParseIntPipe) id: number, @Request() req: JwtRequest) {
-    return this.notifsService.setRead(id, req.user.sub);
+  setRead(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: ReadNotificationQueryDto,
+    @Request() req: JwtRequest,
+  ) {
+    return this.notifsService.setRead(id, req.user.sub, query.sourceType);
   }
 
   @Post('read-all')
@@ -42,6 +51,19 @@ export class NotifsController {
   @ApiOkResponse()
   setReadAll(@Request() req: JwtRequest) {
     return this.notifsService.setReadAll(req.user.sub);
+  }
+
+  @Post('read-content')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  setReadContent(
+    @Body() body: MarkUnreadContentReadDto,
+    @Request() req: JwtRequest,
+  ) {
+    return this.notifsService.setUnreadContentReadByContent(
+      req.user.sub,
+      body,
+    );
   }
 
   @UseGuards(AdminGuard)

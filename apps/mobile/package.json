@@ -16,7 +16,7 @@
     "gen-api": "yarn openapi-ts",
     "eas-build-pre-install": "corepack enable && corepack prepare yarn@4.9.1 --activate",
     "build:simulator": "npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios",
-    "build:device": "npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios --device 00008030-001514A021B9802E",
+    "build:device": "npx expo prebuild --clean && cd ios && pod install && cd .. && npx expo run:ios --device 00008030-001514A021B9802E",
     "build:android": "npx expo prebuild -p android && npx expo run:android",
     "build:prod": "npx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace"
   },

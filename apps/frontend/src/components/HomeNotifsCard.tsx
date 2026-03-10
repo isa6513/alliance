@@ -41,12 +41,12 @@ const HomeNotifsCard = () => {
           const handleClick = (e: React.MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            handleNotifClick(notification.id, notification.webAppLocation)();
+            handleNotifClick(notification)();
           };
           return (
             <div
               className="flex flex-row items-center justify-between gap-x-2 hover:bg-zinc-50 py-2 text-base cursor-pointer p-3"
-              key={notification.id}
+              key={`${notification.sourceType}:${notification.id}`}
               onClick={handleClick}
             >
               <NotificationText

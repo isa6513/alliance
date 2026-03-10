@@ -11,9 +11,14 @@ import {
   notifsFindAll,
   notifsSetRead,
   notifsSetReadAll,
+  UnreadContentType,
 } from "@alliance/shared/client";
 import { useNavigate } from "react-router";
 import posthog from "posthog-js";
+import {
+  getNotificationIdentityKey,
+  getNotificationReadRequest,
+} from "./notificationIdentity";
 
 export function getWebAppLocation(webAppLocation: string) {
   return webAppLocation.startsWith("/") ? webAppLocation : "/" + webAppLocation;
@@ -22,10 +27,19 @@ export function getWebAppLocation(webAppLocation: string) {
 interface NotificationsContextType {
   notifications: NotificationDto[];
   unreadCount: number;
-  handleNotifClick: (id: number, webAppLocation: string | null) => () => void;
+  handleNotifClick: (
+    notification: Pick<
+      NotificationDto,
+      "id" | "sourceType" | "webAppLocation" | "category"
+    >
+  ) => () => void;
   handleMarkAllAsRead: (e: React.MouseEvent) => void;
   handleClearAll: () => void;
   refreshNotifications: () => Promise<void>;
+  applyNotificationsReadByContent: (
+    contentType: UnreadContentType,
+    contentIds: number[]
+  ) => void;
 }
 
 const NotificationsContext = createContext<NotificationsContextType | null>(
@@ -63,37 +77,51 @@ export const NotificationsProvider = ({
   }, [refreshNotifications]);
 
   const handleNotifClick = useCallback(
-    (id: number, webAppLocation: string | null) => () => {
-      notifsSetRead({ path: { id } });
+    (
+        notification: Pick<
+          NotificationDto,
+          "id" | "sourceType" | "webAppLocation" | "category"
+        >
+      ) =>
+      () => {
+        notifsSetRead(getNotificationReadRequest(notification));
 
-      const clickedNotif = notifications.find((n) => n.id === id);
-      const path = webAppLocation
-        ? getWebAppLocation(webAppLocation)
-        : window.location.pathname;
-
-      posthog.capture("notification_clicked", {
-        notificationId: id,
-        category: clickedNotif?.category ?? "unknown category",
-        webAppLocation: path,
-      });
-
-      if (clickedNotif?.category === "friend_request") {
-        navigate(path, { state: { openFriendRequest: true } });
-      } else if (clickedNotif?.category === "friend_request_accepted") {
-        navigate(path, { state: { openFriends: true } });
-      } else {
-        navigate(path);
-      }
-
-      setNotifications((prev) => {
-        const readAt = new Date().toISOString();
-        return prev.map(
-          (n) => (n.id === id ? { ...n, readAt } : n) satisfies NotificationDto
+        const clickedNotif = notifications.find(
+          (n) =>
+            getNotificationIdentityKey(n) ===
+            getNotificationIdentityKey(notification)
         );
-      });
-      setUnreadCount((prev) => Math.max(prev - 1, 0));
+        const path = notification.webAppLocation
+          ? getWebAppLocation(notification.webAppLocation)
+          : window.location.pathname;
 
-    },
+        posthog.capture("notification_clicked", {
+          notificationId: notification.id,
+          notificationSourceType:
+            clickedNotif?.sourceType ?? notification.sourceType,
+          category: clickedNotif?.category ?? notification.category,
+          webAppLocation: path,
+        });
+
+        if (clickedNotif?.category === "friend_request") {
+          navigate(path, { state: { openFriendRequest: true } });
+        } else if (clickedNotif?.category === "friend_request_accepted") {
+          navigate(path, { state: { openFriends: true } });
+        } else {
+          navigate(path);
+        }
+
+        setNotifications((prev) => {
+          const readAt = new Date().toISOString();
+          return prev.map((n) =>
+            getNotificationIdentityKey(n) ===
+            getNotificationIdentityKey(notification)
+              ? ({ ...n, readAt } satisfies NotificationDto)
+              : n
+          );
+        });
+        setUnreadCount((prev) => Math.max(prev - 1, 0));
+      },
     [navigate, notifications]
   );
 
@@ -114,6 +142,46 @@ export const NotificationsProvider = ({
     setUnreadCount(0);
   }, []);
 
+  const applyNotificationsReadByContent = useCallback(
+    (contentType: UnreadContentType, contentIds: number[]) => {
+      if (contentIds.length === 0) {
+        return;
+      }
+
+      const ids = new Set(contentIds);
+      const markedCount = notifications.filter(
+        (notification) =>
+          !notification.readAt &&
+          notification.contentType === contentType &&
+          notification.contentId !== undefined &&
+          ids.has(notification.contentId)
+      ).length;
+
+      if (markedCount === 0) {
+        return;
+      }
+
+      const readAt = new Date().toISOString();
+
+      setNotifications((prev) =>
+        prev.map((notification) => {
+          if (
+            notification.readAt ||
+            notification.contentType !== contentType ||
+            notification.contentId === undefined ||
+            !ids.has(notification.contentId)
+          ) {
+            return notification;
+          }
+
+          return { ...notification, readAt } satisfies NotificationDto;
+        })
+      );
+      setUnreadCount((prev) => Math.max(prev - markedCount, 0));
+    },
+    [notifications]
+  );
+
   return (
     <NotificationsContext.Provider
       value={{
@@ -123,6 +191,7 @@ export const NotificationsProvider = ({
         handleMarkAllAsRead,
         handleClearAll,
         refreshNotifications,
+        applyNotificationsReadByContent,
       }}
     >
       {children}
@@ -139,3 +208,6 @@ export const useNotifications = (): NotificationsContextType => {
   }
   return ctx;
 };
+
+export const useOptionalNotifications = (): NotificationsContextType | null =>
+  useContext(NotificationsContext);

@@ -164,7 +164,7 @@ const ActionUpdatesTab = ({
               <input
                 type="text"
                 className="p-2 rounded-md bg-white text-base"
-                placeholder="shows in notification bell message"
+                placeholder="shows in notification message"
                 value={newUpdate.shortNotifString}
                 onChange={(e) =>
                   setNewUpdate({
