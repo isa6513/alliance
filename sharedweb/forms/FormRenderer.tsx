@@ -13,7 +13,6 @@ import {
   tasksRunValidator,
 } from "@alliance/shared/client";
 import { useOutsideClick } from "../../sharedweb/lib/useOutsideClick";
-import Button, { ButtonColor } from "../ui/Button";
 import Dropdown from "../ui/Dropdown";
 import { cn } from "@alliance/shared/styles/util";
 import RenderDisplayBlock from "./RenderDisplayBlock";
@@ -40,6 +39,11 @@ import {
   useFormPageDurationTracking,
   useFormValidationErrorTracking,
 } from "./formAnalytics";
+import BaseButton, {
+  BaseButtonSize,
+  BaseButtonVariant,
+} from "../ui/BaseButton";
+import { Ellipsis } from "lucide-react";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -388,7 +392,9 @@ const FormRenderer = ({
         }
       }
     };
-    const collectFromVisibleIfFormula = (visibleIfFormula: VisibleIfFormula | undefined) => {
+    const collectFromVisibleIfFormula = (
+      visibleIfFormula: VisibleIfFormula | undefined
+    ) => {
       if (!visibleIfFormula?.conditions) {
         return;
       }
@@ -1300,15 +1306,13 @@ const FormRenderer = ({
             {schema.pages.length > 1 && (
               <div className="flex items-center space-x-3">
                 {!isFirstPage && (
-                  <Button
-                    color={ButtonColor.LightHover}
-                    type="button"
-                    size="mediumDynamic"
+                  <BaseButton
+                    variant={BaseButtonVariant.LightHover}
+                    size={BaseButtonSize.MediumDynamic}
                     onClick={handlePrevious}
-                    className=""
                   >
                     Previous
-                  </Button>
+                  </BaseButton>
                 )}
                 <div>
                   <span className="text-zinc-500 whitespace-nowrap">
@@ -1316,15 +1320,13 @@ const FormRenderer = ({
                   </span>
                 </div>
                 {!isLastPage && (
-                  <Button
-                    color={ButtonColor.Black}
-                    type="button"
-                    size="mediumDynamic"
+                  <BaseButton
+                    variant={BaseButtonVariant.Black}
+                    size={BaseButtonSize.MediumDynamic}
                     onClick={handleNext}
-                    className=""
                   >
                     Next
-                  </Button>
+                  </BaseButton>
                 )}
               </div>
             )}
@@ -1333,34 +1335,33 @@ const FormRenderer = ({
               <>
                 {isGeneralUpdate ? (
                   onDismiss && (
-                    <Button
-                      color={ButtonColor.LightHover}
+                    <BaseButton
+                      variant={BaseButtonVariant.LightHover}
                       onClick={onDismiss}
                       className="w-full"
                     >
                       Dismiss
-                    </Button>
+                    </BaseButton>
                   )
                 ) : readOnly ? null : onSubmit ? (
                   <div className="flex flex-1 space-x-2 items-center">
-                    <Button
-                      color={ButtonColor.Black}
-                      type="submit"
-                      className="w-full !py-3 !text-base !h-[45px]"
+                    <BaseButton
+                      variant={BaseButtonVariant.Black}
+                      className="w-full"
                       disabled={submitting}
                     >
                       {schema.submit?.label || "Complete"}
-                    </Button>
+                    </BaseButton>
                   </div>
                 ) : (
                   <div className="flex flex-1 space-x-2 items-center">
-                    <Button
-                      color={ButtonColor.Black}
-                      className="!cursor-not-allowed w-full !py-3 !text-base !h-[45px]"
+                    <BaseButton
+                      variant={BaseButtonVariant.Black}
+                      className="!cursor-not-allowed w-full"
                       onClick={validateForPreview}
                     >
                       {schema.submit?.label || "Complete"} (Preview Mode)
-                    </Button>
+                    </BaseButton>
                   </div>
                 )}
               </>
@@ -1369,54 +1370,47 @@ const FormRenderer = ({
 
           {onAbandonAction && !readOnly && !publicAction && (
             <div className="relative">
-              <Button
-                color={ButtonColor.White}
-                className="px-4 flex items-center cursor-pointer justify-center mt-0 text-zinc-800  !w-[45px] !h-[45px]"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                ⋯
-              </Button>
+              <BaseButton onClick={() => setDropdownOpen(!dropdownOpen)}>
+                <Ellipsis size={15} />
+              </BaseButton>
               <Dropdown
                 isOpen={dropdownOpen}
                 className="absolute top-[100%] right-0 gap-y-2 *:w-full w-[300px]"
                 ref={ref}
               >
                 <p className="mb-1 text-center">Withdrawal options</p>
-                <Button
-                  color={ButtonColor.White}
+                <BaseButton
                   className={cn(
-                    "!items-start !justify-start text-left !font-normal",
-                    outOfTimeSelected && "!bg-zinc-200"
+                    "justify-start",
+                    outOfTimeSelected && "bg-zinc-100"
                   )}
                   onClick={handleOutOfTime}
                 >
                   Took more than 15 minutes
-                </Button>
-                <Button
-                  color={ButtonColor.White}
+                </BaseButton>
+                <BaseButton
                   className={cn(
-                    "!items-start !justify-start text-left !font-normal",
-                    otherReasonSelected && "!bg-zinc-100"
+                    "justify-start",
+                    otherReasonSelected && "bg-zinc-100"
                   )}
                   onClick={handleOtherReason}
                 >
                   Other reason
-                </Button>
+                </BaseButton>
                 {(otherReasonSelected || outOfTimeSelected) && (
                   <>
                     <textarea
-                      className="w-full h-20 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
+                      className="w-full h-20 border border-gray-300 rounded-md px-3 py-2 bg-white"
                       value={customReason}
                       onChange={(e) => setCustomReason(e.target.value)}
                       placeholder="Explain in more detail..."
                     />
-                    <Button
-                      color={ButtonColor.Black}
+                    <BaseButton
+                      variant={BaseButtonVariant.Black}
                       onClick={handleAbandon}
-                      className="w-full"
                     >
                       Withdraw
-                    </Button>
+                    </BaseButton>
                   </>
                 )}
               </Dropdown>

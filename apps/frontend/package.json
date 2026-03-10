@@ -47,7 +47,7 @@
     "install": "^0.13.0",
     "isbot": "^5",
     "jspdf": "^3.0.4",
-    "lucide-react": "^0.555.0",
+    "lucide-react": "^0.563.0",
     "morgan": "^1.10.0",
     "msw": "^2.8.4",
     "msw-storybook-addon": "^2.0.4",
