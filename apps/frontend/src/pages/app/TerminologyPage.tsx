@@ -27,7 +27,7 @@ const TerminologyPage: React.FC = () => {
     <InfoSubpage tocSections={tocSections}>
       <h1 className="text-title">Terminology</h1>
       <section className="gap-y-4 flex flex-col">
-        <h2 id="membership" className="text-2xl font-semibold text-black">
+        <h2 id="membership" className="text-title-small">
           Membership
         </h2>
         <p>
@@ -87,7 +87,7 @@ const TerminologyPage: React.FC = () => {
       </section>
 
       <section className="gap-y-4 flex flex-col">
-        <h2 id="actions" className="text-2xl font-semibold text-black">
+        <h2 id="actions" className="text-title-small">
           Actions
         </h2>
         <p>
