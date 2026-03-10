@@ -306,6 +306,7 @@ export default function ConversationScreen() {
         behavior="position"
         style={{ flex: 1 }}
         contentContainerStyle={{ flex: 1 }}
+        keyboardVerticalOffset={130}
       >
         {otherParticipantInvited && selectedConvo.type === "direct" && (
           <View className="px-4 py-3 bg-zinc-50 border-b border-zinc-200">
