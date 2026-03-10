@@ -1,4 +1,3 @@
-import React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Button as BaseUIButton } from "@base-ui/react/button";
 import { cn } from "@alliance/shared/styles/util";
