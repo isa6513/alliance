@@ -1349,6 +1349,7 @@ const FormRenderer = ({
                       variant={BaseButtonVariant.Black}
                       className="w-full"
                       disabled={submitting}
+                      type="submit"
                     >
                       {schema.submit?.label || "Complete"}
                     </BaseButton>
