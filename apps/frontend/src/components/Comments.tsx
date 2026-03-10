@@ -5,7 +5,7 @@ import {
   userListFriends,
 } from "@alliance/shared/client";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, href } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ReplyComponent, { countAllReplies } from "./forum/ReplyComponent";
@@ -16,6 +16,12 @@ import { cn } from "@alliance/shared/styles/util";
 import BaseButton, {
   BaseButtonVariant,
 } from "@alliance/sharedweb/ui/BaseButton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@alliance/sharedweb/ui/DropdownMenu";
 
 export type CommentFilter =
   | "all"
@@ -73,53 +79,33 @@ const SortDropdown = ({
 }: {
   commentSort: CommentSort;
   onChange: (sort: CommentSort) => void;
-}) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  return (
-    <div className="relative ml-auto" ref={ref}>
-      <BaseButton
-        variant={BaseButtonVariant.TransparentMuted}
-        iconRight={ArrowUpDown}
-        onClick={() => setOpen(!open)}
+}) => (
+  <div className="ml-auto">
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <BaseButton
+            variant={BaseButtonVariant.TransparentMuted}
+            iconRight={ArrowUpDown}
+          />
+        }
       >
         {sortLabels[commentSort]}
-      </BaseButton>
-      {open && (
-        <div className="absolute right-0 top-full mt-1 bg-white border border-zinc-200 rounded-md z-10 min-w-[160px]">
-          {sortOrder.map((sort) => (
-            <button
-              key={sort}
-              onClick={() => {
-                onChange(sort);
-                setOpen(false);
-              }}
-              className={cn(
-                "block w-full text-left px-4 py-2 text-[14px] hover:bg-gray-100",
-                commentSort === sort
-                  ? "font-medium text-black"
-                  : "text-zinc-700"
-              )}
-            >
-              {sortLabels[sort]}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" sideOffset={4} className="min-w-[160px]">
+        {sortOrder.map((sort) => (
+          <DropdownMenuItem
+            key={sort}
+            onClick={() => onChange(sort)}
+            className={cn(commentSort === sort && "font-medium text-black")}
+          >
+            {sortLabels[sort]}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
+);
 
 const Comments = ({
   objectId,
