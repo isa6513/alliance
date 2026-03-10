@@ -31,9 +31,9 @@ const Card: React.FC<CardProps> = ({
         flex && "flex flex-col",
         cardStyleClasses[cardStyle],
         "p-4 border",
-        className,
         onClick && "cursor-pointer",
-        "bg-cover bg-center rounded"
+        "bg-cover bg-center rounded",
+        className
       )}
       ref={ref}
       style={{
