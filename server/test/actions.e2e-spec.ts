@@ -202,6 +202,7 @@ describe('Actions (e2e)', () => {
           event: null,
           deadline: null,
         },
+        followUpForms: [],
       };
 
       const res = await request(ctx.app.getHttpServer())

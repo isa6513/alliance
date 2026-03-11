@@ -113,6 +113,7 @@ const InvitePage: React.FC = () => {
       },
     ],
     commitmentless: false,
+    followUpForms: [],
   };
 
   const memberQuotes = [

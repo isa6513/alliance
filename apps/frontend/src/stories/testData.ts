@@ -56,6 +56,7 @@ export const testActions: ActionDto[] = [
     publicOnly: false,
     shouldCompleteAfterDeadline: false,
     isForumParticipationAction: false,
+    followUpForms: [],
   },
   {
     name: "Make Target end stocking of Coca-Cola single-use plastic bottles",
@@ -89,6 +90,7 @@ export const testActions: ActionDto[] = [
     publicOnly: false,
     shouldCompleteAfterDeadline: false,
     isForumParticipationAction: false,
+    followUpForms: [],
   },
 ];
 

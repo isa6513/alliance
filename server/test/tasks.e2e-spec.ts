@@ -153,6 +153,7 @@ describe('Tasks (e2e)', () => {
           event: null,
           deadline: null,
         },
+        followUpForms: [],
       } satisfies CreateActionDto),
     );
 
@@ -335,6 +336,7 @@ describe('Tasks (e2e)', () => {
           event: null,
           deadline: null,
         },
+        followUpForms: [],
       } satisfies CreateActionDto),
     );
 
@@ -469,6 +471,7 @@ describe('Tasks (e2e)', () => {
             deadline: null,
           },
           onboarding: false,
+          followUpForms: [],
         } satisfies CreateActionDto),
       );
 
@@ -915,6 +918,7 @@ describe('Tasks (e2e)', () => {
             deadline: null,
           },
           onboarding: false,
+          followUpForms: [],
         } satisfies CreateActionDto),
       );
 
