@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   IsNull,
   LessThan,
+  LessThanOrEqual,
   Not,
   Or,
   QueryFailedError,
@@ -46,9 +47,13 @@ export class PushService {
   async getPushForAllUserDevices(
     userId: number,
     message: Omit<CreatePushMessage, 'expoPushToken'>,
+    notifCreatedAt?: Date,
   ): Promise<CreatePushMessage[]> {
     const devices = await this.userDeviceRepository.find({
-      where: { user: { id: userId } },
+      where: {
+        user: { id: userId },
+        createdAt: notifCreatedAt ? LessThanOrEqual(notifCreatedAt) : undefined,
+      },
     });
     const messages = devices
       .filter((device) => !!device.expoPushToken)

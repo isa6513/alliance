@@ -33,9 +33,7 @@ export class NotifPushDispatcherWorker {
     const dispatchID = v4().replace(/-/g, '');
 
     const messagesToSend: CreatePushMessage[] = [];
-    messagesToSend.push(
-      ...(await this.dispatchLegacyNotificationPushes(dispatchID)),
-    );
+    messagesToSend.push(...(await this.dispatchNotificationPushes(dispatchID)));
     messagesToSend.push(
       ...(await this.dispatchUnreadContentPushes(dispatchID)),
     );
@@ -47,7 +45,7 @@ export class NotifPushDispatcherWorker {
     await this.pushService.sendMessages(messagesToSend);
   }
 
-  private async dispatchLegacyNotificationPushes(
+  async dispatchNotificationPushes(
     dispatchID: string,
   ): Promise<CreatePushMessage[]> {
     const claimed: { id: number }[] = (
@@ -126,12 +124,16 @@ export class NotifPushDispatcherWorker {
         continue;
       }
       messages.push(
-        ...(await this.pushService.getPushForAllUserDevices(notif.user.id, {
-          body: notif.message,
-          screen: notif.mobileAppLocation || notif.webAppLocation,
-          notification: notif,
-          idempotencyKey: notif.id.toString(),
-        })),
+        ...(await this.pushService.getPushForAllUserDevices(
+          notif.user.id,
+          {
+            body: notif.message,
+            screen: notif.mobileAppLocation || notif.webAppLocation,
+            notification: notif,
+            idempotencyKey: notif.id.toString(),
+          },
+          notif.sendTime,
+        )),
       );
     }
 
@@ -204,6 +206,7 @@ export class NotifPushDispatcherWorker {
             unreadContent,
             idempotencyKey: `uc-${unreadContent.id}`,
           },
+          unreadContent.sendTime,
         )),
       );
     }
