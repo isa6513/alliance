@@ -382,7 +382,11 @@ export function RenderField({
                       <View className="w-2.5 h-2.5 rounded-full bg-green" />
                     )}
                   </View>
-                  <Text className={hasError ? "text-red-600" : "text-zinc-700"}>
+                  <Text
+                    className={
+                      "text-base " + (hasError ? "text-red-600" : "text-black")
+                    }
+                  >
                     {option.label}
                   </Text>
                 </TouchableOpacity>

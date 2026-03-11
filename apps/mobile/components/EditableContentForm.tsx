@@ -83,6 +83,8 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   const shouldRestoreDraft = restoreDraft ?? draftKey !== undefined;
   const minHeight = expanded ? 120 : 32;
 
+  const [showExtend, setShowExtend] = useState(false);
+
   useEffect(() => {
     if (!shouldRestoreDraft || !draftPath) return;
     let canceled = false;
@@ -219,6 +221,8 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         placeholderTextColor="#9ca3af"
         multiline
         autoFocus={expanded}
+        onFocus={() => setShowExtend(true)}
+        onBlur={() => setShowExtend(false)}
         onContentSizeChange={(event) => {
           const nextHeight = event.nativeEvent.contentSize.height;
           setInputHeight(nextHeight);
@@ -251,7 +255,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
           ))}
         </View>
       )}
-      <KeyboardExtender>
+      <KeyboardExtender enabled={showExtend}>
         <View className="p-2 flex-row items-center gap-3 bg-white border-y border-zinc-200 justify-between">
           <Pressable
             onPress={handlePickImages}
