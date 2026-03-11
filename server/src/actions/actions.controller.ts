@@ -91,6 +91,11 @@ import {
   GeneralUpdateDto,
   UpdateGeneralUpdateDto,
 } from './dto/general-update.dto';
+import {
+  CreateFollowUpFormDto,
+  FollowUpFormDto,
+  UpdateFollowUpFormDto,
+} from './dto/follow-up-form.dto';
 
 @Controller('actions')
 export class ActionsController {
@@ -570,7 +575,61 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<Action> {
-    return this.actionsService.findOne(id, req.user.sub);
+    return this.actionsService.findOne({ id, userId: req.user.sub });
+  }
+
+  @Get(':id/follow-up-forms')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [FollowUpFormDto] })
+  async getFollowUpForms(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<FollowUpFormDto[]> {
+    const action = await this.actionsService.findOne({ id, serverSide: true });
+    const list = action.followUpForms ?? [];
+    return list.map((f) => ({
+      ...f,
+      form: f.form,
+    })) as FollowUpFormDto[];
+  }
+
+  @Post(':id/follow-up-forms')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: FollowUpFormDto })
+  async createFollowUpForm(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateFollowUpFormDto,
+  ): Promise<FollowUpFormDto> {
+    const created = await this.actionsService.createFollowUpForm(id, {
+      formId: dto.formId,
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      name: dto.name,
+    });
+    const withForm = await this.actionsService.findOne({
+      id,
+      serverSide: true,
+    });
+    const found = withForm.followUpForms?.find((f) => f.id === created.id);
+    return (found ?? created) as unknown as FollowUpFormDto;
+  }
+
+  @Patch('follow-up-forms/:followUpFormId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: FollowUpFormDto })
+  async updateFollowUpForm(
+    @Param('followUpFormId', ParseIntPipe) followUpFormId: number,
+    @Body() dto: UpdateFollowUpFormDto,
+  ): Promise<FollowUpFormDto> {
+    const updated = await this.actionsService.updateFollowUpForm(
+      followUpFormId,
+      {
+        formId: dto.formId,
+        startDate: dto.startDate,
+        endDate: dto.endDate,
+        name: dto.name,
+      },
+    );
+    return updated as FollowUpFormDto;
   }
 
   @Get(':id/incomplete-users')

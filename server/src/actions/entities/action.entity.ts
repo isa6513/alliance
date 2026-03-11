@@ -25,6 +25,7 @@ import { ActionActivity } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 import { ActionSuite } from './action-suite.entity';
 import { ActionUpdate } from './action-update.entity';
+import { FollowUpForm } from './follow-up-form.entity';
 import { findLeast } from 'src/utils/filter';
 
 export enum CustomActionStat {
@@ -166,7 +167,8 @@ export class Action {
 
   @Column({ default: false })
   @ApiProperty({
-    description: 'special case for contract signing (prevent doing other onboarding actions)',
+    description:
+      'special case for contract signing (prevent doing other onboarding actions)',
   })
   @IsDefined()
   isContractSigningAction: boolean;
@@ -213,7 +215,8 @@ export class Action {
 
   @Column({ default: false })
   @ApiProperty({
-    description: 'Whether the action is an onboarding action (hide for existing members)',
+    description:
+      'Whether the action is an onboarding action (hide for existing members)',
     default: false,
   })
   @Allow()
@@ -261,16 +264,14 @@ export class Action {
 
   @Column({ default: false })
   @ApiProperty({
-    description:
-      'Whether to autocomplete action based on forum participation',
+    description: 'Whether to autocomplete action based on forum participation',
   })
   @Allow()
   isForumParticipationAction: boolean;
 
   @Column({ type: 'timestamptz', nullable: true })
   @ApiPropertyOptional({
-    description:
-      'Date and time when the action was computed for autocomplete',
+    description: 'Date and time when the action was computed for autocomplete',
   })
   @IsOptional()
   @Type(() => Date)
@@ -339,6 +340,15 @@ export class Action {
   @Type(() => ActionUpdate)
   updates: ActionUpdate[];
 
+  @OneToMany(() => FollowUpForm, (followUpForm) => followUpForm.action)
+  @ApiProperty({
+    type: () => FollowUpForm,
+    isArray: true,
+  })
+  @Allow()
+  @Type(() => FollowUpForm)
+  followUpForms: FollowUpForm[];
+
   @ManyToOne(() => ActionSuite, (suite) => suite.actions, { nullable: true })
   @ApiPropertyOptional({ type: () => ActionSuite })
   @Type(() => ActionSuite)
@@ -378,13 +388,13 @@ export class Action {
   @IsOptional()
   private _latestMemberActionEvent:
     | {
-      event: ActionEvent;
-      deadline: Date | null;
-    }
+        event: ActionEvent;
+        deadline: Date | null;
+      }
     | {
-      event: null;
-      deadline: null;
-    }
+        event: null;
+        deadline: null;
+      }
     | null = null;
   get latestMemberActionEvent(): NonNullable<
     typeof this._latestMemberActionEvent

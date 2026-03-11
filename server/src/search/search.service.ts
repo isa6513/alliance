@@ -58,10 +58,10 @@ export class SearchService {
             }
             return this.userToSearchItem(user, false, false);
           } else if (search.objectType === SearchItemType.Action) {
-            const action = await this.actionsService.findOne(
-              search.objectId,
+            const action = await this.actionsService.findOne({
+              id: search.objectId,
               userId,
-            );
+            });
             return this.actionToSearchItem(action);
           } else if (search.objectType === SearchItemType.Post) {
             const post = await this.forumService.findOnePostFull(

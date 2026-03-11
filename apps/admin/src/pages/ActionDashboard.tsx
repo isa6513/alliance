@@ -61,6 +61,7 @@ import ActionForm from "../components/ActionForm";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import EventManagementTab from "../components/EventManagementTab";
 import { FormBuilder } from "../components/FormBuilder";
+import ActionFollowUpFormsTab from "../components/ActionFollowUpFormsTab";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
@@ -100,7 +101,13 @@ export const formatStatus = (status: string) => {
     .join(" ");
 };
 
-type Tab = "overview" | "details" | "events" | "form" | "updates";
+type Tab =
+  | "overview"
+  | "details"
+  | "events"
+  | "form"
+  | "updates"
+  | "follow-up-forms";
 
 type ReadinessCheckItem = {
   id: string;
@@ -310,6 +317,7 @@ const ActionDashboard: React.FC = () => {
     useManualCohort: false,
     authorIds: [],
     onboarding: false,
+    followUpForms: [],
   });
 
   // Reset form when switching to new action mode
@@ -341,6 +349,7 @@ const ActionDashboard: React.FC = () => {
         useManualCohort: false,
         authorIds: [],
         onboarding: false,
+        followUpForms: [],
       });
       setImageKey(null);
       setImagePreview(null);
@@ -838,6 +847,7 @@ const ActionDashboard: React.FC = () => {
     ...(action?.type === "Activity"
       ? [{ key: "form" as Tab, label: "Task Form" }]
       : []),
+    { key: "follow-up-forms", label: "Follow-up Forms" },
   ];
 
   const availableTabs = tabData.map((tab) => tab.key);
@@ -1629,6 +1639,9 @@ const ActionDashboard: React.FC = () => {
                 events={action.events ?? []}
                 availableTags={availableTags}
               />
+            )}
+            {activeTab === "follow-up-forms" && action && (
+              <ActionFollowUpFormsTab action={action} setAction={setAction} />
             )}
           </div>
         </div>

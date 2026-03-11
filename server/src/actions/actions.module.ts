@@ -28,6 +28,7 @@ import { ActionShareUrl } from './entities/action-share-url.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import { ActionUpdate } from './entities/action-update.entity';
 import { Action } from './entities/action.entity';
+import { FollowUpForm } from './entities/follow-up-form.entity';
 import { ForumActionCompleterWorker } from './forum-action-completer.worker';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import { ForumModule } from 'src/forum/forum.module';
@@ -57,6 +58,7 @@ import { GeneralUpdateActivity } from './entities/general-update-activity.entity
       EditableContent,
       Form,
       FormResponse,
+      FollowUpForm,
       GeneralUpdate,
       GeneralUpdateActivity,
       OnetimeInvite,

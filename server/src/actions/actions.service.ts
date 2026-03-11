@@ -107,6 +107,7 @@ import {
   ActionTaskType,
   VisibilityMode,
 } from './entities/action.entity';
+import { FollowUpForm } from './entities/follow-up-form.entity';
 import {
   ReminderGroup,
   ReminderGroupTimingMode,
@@ -180,6 +181,8 @@ export class ActionsService {
     private readonly contractEventRepository: Repository<ContractEvent>,
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
+    @InjectRepository(FollowUpForm)
+    private readonly followUpFormRepository: Repository<FollowUpForm>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
     private readonly communityService: CommunityService,
@@ -594,11 +597,13 @@ export class ActionsService {
     );
   }
 
-  async findOne(
-    id: number,
-    userId?: number,
-    serverSide = false,
-  ): Promise<Action> {
+  async findOne(params: {
+    id: number;
+    userId?: number;
+    serverSide?: boolean;
+  }): Promise<Action> {
+    const { id, userId, serverSide = false } = params;
+
     const user = userId
       ? await this.userService.findOne(userId, {
           tags: true,
@@ -614,6 +619,7 @@ export class ActionsService {
         updates: true,
         suite: true,
         authors: true,
+        followUpForms: { form: true },
       },
     });
 
@@ -635,7 +641,7 @@ export class ActionsService {
     userId?: number,
     serverSide = false,
   ): Promise<ActionDto> {
-    const action = await this.findOne(id, userId, serverSide);
+    const action = await this.findOne({ id, userId, serverSide });
     const user = userId
       ? await this.userService.findOne(userId, {
           tags: true,
@@ -961,7 +967,7 @@ export class ActionsService {
       isOutOfTime,
       adminCreated,
     } = options;
-    const action = await this.findOne(actionId, userId);
+    const action = await this.findOne({ id: actionId, userId });
 
     if (
       (type === ActionActivityType.USER_JOINED ||
@@ -1012,7 +1018,7 @@ export class ActionsService {
     actionId: number,
     userId: number,
   ): Promise<ActionActivityDto> {
-    const action = await this.findOne(actionId, userId);
+    const action = await this.findOne({ id: actionId, userId });
 
     if (action.status !== ActionStatus.GatheringCommitments) {
       throw new BadRequestException(
@@ -1033,7 +1039,7 @@ export class ActionsService {
     reason: string,
     isMoral: boolean,
   ): Promise<ActionActivityDto> {
-    const action = await this.findOne(actionId, userId);
+    const action = await this.findOne({ id: actionId, userId });
     await this.ensureUserEligibleForAction(action, userId);
     const user = await this.userService.findOneOrFail(userId);
 
@@ -1131,7 +1137,7 @@ export class ActionsService {
     const newSuiteId = action.suite?.id;
     await this.syncGeneralUpdateDatesForSuites([oldSuiteId, newSuiteId]);
 
-    return this.findOne(id, userId);
+    return this.findOne({ id, userId });
   }
 
   async addEvent(
@@ -1139,7 +1145,7 @@ export class ActionsService {
     actionEventDto: CreateActionEventDto,
     userId?: number,
   ): Promise<ActionEvent> {
-    const action = await this.findOne(actionId, userId);
+    const action = await this.findOne({ id: actionId, userId });
 
     const newEvent = this.actionEventRepository.create({
       ...actionEventDto,
@@ -1161,6 +1167,58 @@ export class ActionsService {
     });
     await this.actionRepository.delete(id);
     await this.syncGeneralUpdateDatesForSuites([action?.suite?.id]);
+  }
+
+  async createFollowUpForm(
+    actionId: number,
+    dto: { formId: number; startDate?: Date; endDate?: Date; name?: string },
+  ): Promise<FollowUpForm> {
+    const action = await this.findOne({ id: actionId, serverSide: true });
+    const form = await this.formRepository.findOneOrFail({
+      where: { id: dto.formId },
+    });
+    const followUpForm = this.followUpFormRepository.create({
+      actionId,
+      action,
+      formId: dto.formId,
+      form,
+      startDate: dto.startDate ?? undefined,
+      endDate: dto.endDate ?? undefined,
+      name: dto.name ?? undefined,
+    });
+    return this.followUpFormRepository.save(followUpForm);
+  }
+
+  async updateFollowUpForm(
+    followUpFormId: number,
+    dto: {
+      formId?: number;
+      startDate?: Date | null;
+      endDate?: Date | null;
+      name?: string | null;
+    },
+  ): Promise<FollowUpForm> {
+    const followUpForm = await this.followUpFormRepository.findOneOrFail({
+      where: { id: followUpFormId },
+      relations: { form: true, action: true },
+    });
+    if (dto.formId !== undefined) {
+      const form = await this.formRepository.findOneOrFail({
+        where: { id: dto.formId },
+      });
+      followUpForm.formId = dto.formId;
+      followUpForm.form = form;
+    }
+    if (dto.startDate !== undefined) {
+      followUpForm.startDate = dto.startDate ?? undefined;
+    }
+    if (dto.endDate !== undefined) {
+      followUpForm.endDate = dto.endDate ?? undefined;
+    }
+    if (dto.name !== undefined) {
+      followUpForm.name = dto.name === null ? undefined : dto.name;
+    }
+    return this.followUpFormRepository.save(followUpForm);
   }
 
   countCommitted(actionId: number): Observable<number> {
@@ -1524,7 +1582,7 @@ export class ActionsService {
     actionId: number,
     userId: number,
   ): Promise<boolean> {
-    const action = await this.findOne(actionId, userId);
+    const action = await this.findOne({ id: actionId, userId });
     const user = await this.userService.findOne(userId, {
       tags: true,
       contractEvents: true,
@@ -1580,7 +1638,7 @@ export class ActionsService {
   }
 
   async checkAndProcessAutomaticTransitions(actionId: number) {
-    const action = await this.findOne(actionId, undefined, true);
+    const action = await this.findOne({ id: actionId, serverSide: true });
 
     // Check if we should transition from GatheringCommitments to CommitmentsReached
     if (action.status === ActionStatus.GatheringCommitments) {
@@ -1619,7 +1677,7 @@ export class ActionsService {
     title: string,
     description: string,
   ): Promise<void> {
-    const action = await this.findOne(actionId, undefined, true);
+    const action = await this.findOne({ id: actionId, serverSide: true });
 
     const eventData: CreateActionEventDto = {
       title,
@@ -1964,7 +2022,7 @@ export class ActionsService {
   }
 
   async getPaymentAmountForAction(id: number): Promise<number> {
-    const action = await this.findOne(id, undefined, true);
+    const action = await this.findOne({ id, serverSide: true });
     if (action.type !== ActionTaskType.Funding) {
       throw new BadRequestException('Action is not a funding action');
     }
@@ -2373,6 +2431,8 @@ export class ActionsService {
       authors,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       updates,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      followUpForms,
       ...actionCols
     } = importaction;
 

@@ -311,6 +311,15 @@ export type ActionActivity = {
     source: ActivitySource;
 };
 
+export type FollowUpForm = {
+    id: number;
+    name?: string;
+    startDate?: string;
+    endDate?: string;
+    actionId: number;
+    formId: number;
+};
+
 export type Action = {
     /**
      * Unique identifier for the action
@@ -443,6 +452,7 @@ export type Action = {
     participatingTags: Array<Tag>;
     activities: Array<Array<ActionActivity>>;
     updates: Array<ActionUpdate>;
+    followUpForms: Array<FollowUpForm>;
     suite?: ActionSuite;
     authors?: Array<User>;
     status: ActionStatus;
@@ -1400,6 +1410,7 @@ export type ActionDto = {
     customStatGoal?: number;
     participatingTags: Array<Tag>;
     activities: Array<Array<ActionActivity>>;
+    followUpForms: Array<FollowUpForm>;
     suite?: ActionSuite;
     status: ActionStatus;
     events: Array<ActionEventDto>;
@@ -1557,6 +1568,41 @@ export type SetPriorityDto = {
     generalUpdatePriorities: Array<SetGeneralUpdatePriorityDto>;
 };
 
+export type Form = {
+    id: number;
+    title: string;
+    schema: {
+        [key: string]: unknown;
+    };
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type FollowUpFormDto = {
+    id: number;
+    name?: string;
+    startDate?: string;
+    endDate?: string;
+    actionId: number;
+    formId: number;
+    form?: Form;
+};
+
+export type CreateFollowUpFormDto = {
+    name?: string;
+    startDate?: string;
+    endDate?: string;
+    actionId: number;
+    formId: number;
+};
+
+export type UpdateFollowUpFormDto = {
+    name?: string;
+    startDate?: string;
+    endDate?: string;
+    formId?: number;
+};
+
 export type CreateActionDto = {
     /**
      * Name of the action
@@ -1657,6 +1703,7 @@ export type CreateActionDto = {
     customStatValue?: number;
     customStatGoal?: number;
     participatingTags: Array<Tag>;
+    followUpForms: Array<FollowUpForm>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
@@ -1765,6 +1812,7 @@ export type UpdateActionDto = {
     customStatValue?: number;
     customStatGoal?: number;
     participatingTags?: Array<Tag>;
+    followUpForms?: Array<FollowUpForm>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
@@ -1918,16 +1966,6 @@ export type PreviewTextMessageResponse = {
     text: string;
 };
 
-export type Form = {
-    id: number;
-    title: string;
-    schema: {
-        [key: string]: unknown;
-    };
-    createdAt: string;
-    updatedAt: string;
-};
-
 export type ExportActionDto = {
     /**
      * Unique identifier for the action
@@ -2055,6 +2093,7 @@ export type ExportActionDto = {
     participatingTags: Array<Tag>;
     activities: Array<Array<ActionActivity>>;
     updates: Array<ActionUpdate>;
+    followUpForms: Array<FollowUpForm>;
     suite?: ActionSuite;
     authors?: Array<User>;
     taskForm?: Form;
@@ -5096,6 +5135,51 @@ export type ActionsFindOneAdminResponses = {
 };
 
 export type ActionsFindOneAdminResponse = ActionsFindOneAdminResponses[keyof ActionsFindOneAdminResponses];
+
+export type ActionsGetFollowUpFormsData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/{id}/follow-up-forms';
+};
+
+export type ActionsGetFollowUpFormsResponses = {
+    200: Array<FollowUpFormDto>;
+};
+
+export type ActionsGetFollowUpFormsResponse = ActionsGetFollowUpFormsResponses[keyof ActionsGetFollowUpFormsResponses];
+
+export type ActionsCreateFollowUpFormData = {
+    body: CreateFollowUpFormDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/{id}/follow-up-forms';
+};
+
+export type ActionsCreateFollowUpFormResponses = {
+    200: FollowUpFormDto;
+};
+
+export type ActionsCreateFollowUpFormResponse = ActionsCreateFollowUpFormResponses[keyof ActionsCreateFollowUpFormResponses];
+
+export type ActionsUpdateFollowUpFormData = {
+    body: UpdateFollowUpFormDto;
+    path: {
+        followUpFormId: number;
+    };
+    query?: never;
+    url: '/actions/follow-up-forms/{followUpFormId}';
+};
+
+export type ActionsUpdateFollowUpFormResponses = {
+    200: FollowUpFormDto;
+};
+
+export type ActionsUpdateFollowUpFormResponse = ActionsUpdateFollowUpFormResponses[keyof ActionsUpdateFollowUpFormResponses];
 
 export type ActionsGetIncompleteUsersData = {
     body?: never;
