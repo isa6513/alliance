@@ -583,6 +583,16 @@ export class ActionsController {
     return users.map((user) => new ProfileDto(user));
   }
 
+  @Get(':id/completed-users')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [ProfileDto] })
+  async getCompletedUsers(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ProfileDto[]> {
+    const users = await this.actionsService.findCompletedUsersForAction(id);
+    return users.map((user) => new ProfileDto(user));
+  }
+
   @Post('create')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })

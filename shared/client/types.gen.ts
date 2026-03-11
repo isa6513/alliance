@@ -5112,6 +5112,21 @@ export type ActionsGetIncompleteUsersResponses = {
 
 export type ActionsGetIncompleteUsersResponse = ActionsGetIncompleteUsersResponses[keyof ActionsGetIncompleteUsersResponses];
 
+export type ActionsGetCompletedUsersData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/{id}/completed-users';
+};
+
+export type ActionsGetCompletedUsersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type ActionsGetCompletedUsersResponse = ActionsGetCompletedUsersResponses[keyof ActionsGetCompletedUsersResponses];
+
 export type ActionsCreateData = {
     body: CreateActionDto;
     path?: never;

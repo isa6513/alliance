@@ -4,7 +4,9 @@ import {
   actionsArchive,
   actionsCreate,
   actionsExportAction,
+  actionsFindAllWithDrafts,
   actionsFindOneAdmin,
+  actionsGetCompletedUsers,
   actionsGetIncompleteUsers,
   actionsRemove,
   actionsSuites,
@@ -128,6 +130,11 @@ const ActionDashboard: React.FC = () => {
   const [usersLoading, setUsersLoading] = useState<boolean>(true);
   const [manualCohortUserIds, setManualCohortUserIds] = useState<number[]>([]);
 
+  const [allActions, setAllActions] = useState<
+    { id: number; name: string; usersCompleted: number }[]
+  >([]);
+  const [allActionsLoading, setAllActionsLoading] = useState(true);
+
   const [shareUrlStats, setShareUrlStats] = useState<ShareUrlStatsDto[]>([]);
   const [shareUrlStatsLoading, setShareUrlStatsLoading] = useState(false);
   const [actionStats, setActionStats] =
@@ -242,6 +249,37 @@ const ActionDashboard: React.FC = () => {
     };
 
     loadUsers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadAllActions = async () => {
+      try {
+        const response = await actionsFindAllWithDrafts();
+        if (!cancelled && response.data) {
+          setAllActions(
+            response.data.map((a) => ({
+              id: a.id,
+              name: a.name,
+              usersCompleted: a.usersCompleted ?? 0,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Failed to load actions for populate:", err);
+      } finally {
+        if (!cancelled) {
+          setAllActionsLoading(false);
+        }
+      }
+    };
+
+    loadAllActions();
 
     return () => {
       cancelled = true;
@@ -643,6 +681,24 @@ const ActionDashboard: React.FC = () => {
     }));
   }, []);
 
+  const handlePopulateFromAction = useCallback(
+    async (sourceActionId: number) => {
+      const response = await actionsGetCompletedUsers({
+        path: { id: sourceActionId },
+      });
+      if (response.data) {
+        const userIds = response.data.map((u) => u.id);
+        setManualCohortUserIds(userIds);
+        setForm((prev) => ({
+          ...prev,
+          useManualCohort: true,
+          manualCohortUserIds: userIds,
+        }));
+      }
+    },
+    []
+  );
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -991,6 +1047,9 @@ const ActionDashboard: React.FC = () => {
             onManualCohortChange={handleManualCohortChange}
             authorIds={form.authorIds ?? []}
             onAuthorsChange={handleAuthorsChange}
+            allActions={allActions}
+            allActionsLoading={allActionsLoading}
+            onPopulateFromAction={handlePopulateFromAction}
           />
         </div>
       ) : (
@@ -1544,6 +1603,9 @@ const ActionDashboard: React.FC = () => {
                   onManualCohortChange={handleManualCohortChange}
                   authorIds={form.authorIds ?? []}
                   onAuthorsChange={handleAuthorsChange}
+                  allActions={allActions}
+                  allActionsLoading={allActionsLoading}
+                  onPopulateFromAction={handlePopulateFromAction}
                 />
               </div>
             )}

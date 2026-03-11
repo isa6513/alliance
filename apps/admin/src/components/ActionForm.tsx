@@ -7,7 +7,9 @@ import {
   VisibilityMode,
 } from "@alliance/shared/client";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
-import React, { useMemo, useRef } from "react";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import FormTextarea from "./FormTextarea";
 import { cn } from "@alliance/shared/styles/util";
 
@@ -41,6 +43,9 @@ interface ActionFormProps {
   authorIds: number[];
   onAuthorsChange: (ids: number[]) => void;
   actionId?: number;
+  allActions?: { id: number; name: string; usersCompleted: number }[];
+  allActionsLoading?: boolean;
+  onPopulateFromAction?: (actionId: number) => Promise<void>;
 }
 
 // Section wrapper component for visual grouping
@@ -83,8 +88,41 @@ const ActionForm: React.FC<ActionFormProps> = ({
   onManualCohortChange,
   authorIds,
   onAuthorsChange,
+  actionId,
+  allActions = [],
+  allActionsLoading = false,
+  onPopulateFromAction,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [populateDropdownOpen, setPopulateDropdownOpen] = useState(false);
+  const [populateSearchQuery, setPopulateSearchQuery] = useState("");
+  const [populateLoading, setPopulateLoading] = useState(false);
+
+  const populateDropdownRef = useOutsideClick(
+    useCallback(() => setPopulateDropdownOpen(false), [])
+  );
+
+  const filteredActions = useMemo(
+    () =>
+      allActions
+        .filter((a) => a.id !== actionId)
+        .filter((a) =>
+          a.name.toLowerCase().includes(populateSearchQuery.toLowerCase())
+        ),
+    [allActions, actionId, populateSearchQuery]
+  );
+
+  const handlePopulateSelect = async (sourceActionId: number) => {
+    if (!onPopulateFromAction) return;
+    setPopulateLoading(true);
+    try {
+      await onPopulateFromAction(sourceActionId);
+    } finally {
+      setPopulateLoading(false);
+      setPopulateDropdownOpen(false);
+      setPopulateSearchQuery("");
+    }
+  };
 
   const handleToggleTag = (tagId: string) => {
     const nextSelection = selectedTagIds.includes(tagId)
@@ -707,13 +745,73 @@ const ActionForm: React.FC<ActionFormProps> = ({
               </label>
             </div>
             {form.useManualCohort ? (
-              <UserSelect
-                users={availableUsers}
-                selectedUserIds={manualCohortUserIds}
-                onChange={onManualCohortChange}
-                loading={usersLoading}
-                label="Select users"
-              />
+              <>
+                {onPopulateFromAction && (
+                  <div className="relative mb-3" ref={populateDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPopulateDropdownOpen(!populateDropdownOpen)
+                      }
+                      disabled={populateLoading || allActionsLoading}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      {populateLoading
+                        ? "Populating..."
+                        : "Populate from past action"}
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                    {populateDropdownOpen && (
+                      <div className="absolute z-10 mt-1 w-80 bg-white border border-gray-200 rounded-md shadow-lg">
+                        <div className="p-2 border-b border-gray-200">
+                          <input
+                            type="text"
+                            placeholder="Search actions..."
+                            value={populateSearchQuery}
+                            onChange={(e) =>
+                              setPopulateSearchQuery(e.target.value)
+                            }
+                            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            autoFocus
+                          />
+                        </div>
+                        <div className="max-h-60 overflow-y-auto">
+                          {allActionsLoading ? (
+                            <p className="p-3 text-sm text-gray-500">
+                              Loading actions...
+                            </p>
+                          ) : filteredActions.length === 0 ? (
+                            <p className="p-3 text-sm text-gray-500">
+                              No actions found.
+                            </p>
+                          ) : (
+                            filteredActions.map((a) => (
+                              <button
+                                key={a.id}
+                                type="button"
+                                onClick={() => handlePopulateSelect(a.id)}
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex justify-between items-center"
+                              >
+                                <span className="truncate mr-2">{a.name}</span>
+                                <span className="text-xs text-gray-500 whitespace-nowrap">
+                                  {a.usersCompleted} completed
+                                </span>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <UserSelect
+                  users={availableUsers}
+                  selectedUserIds={manualCohortUserIds}
+                  onChange={onManualCohortChange}
+                  loading={usersLoading}
+                  label="Select users"
+                />
+              </>
             ) : (
               <p className="text-xs text-gray-500">
                 Enable to manually select specific users for this action.

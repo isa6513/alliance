@@ -114,22 +114,22 @@ const UserSelect: React.FC<UserSelectProps> = ({
           No users match that search.
         </p>
       )}
-      <div className="my-1 space-y-2">
+      <div className="my-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {selectedUsers.map((user) => (
           <div
             key={user.id}
             className="flex items-center justify-between border border-zinc-200 rounded px-3 py-2 text-sm bg-zinc-50"
           >
-            <div className="flex items-center gap-x-2">
+            <div className="flex items-center gap-x-2 min-w-0">
               <AvatarProfile pfp={user.profilePicture} size="medium" />
-              <p className="font-medium">{user.name ?? `User #${user.id}`}</p>
+              <p className="font-medium truncate">{user.name ?? `User #${user.id}`}</p>
             </div>
             <button
               type="button"
               onClick={() => removeUser(user.id)}
-              className="text-xs text-red-600 hover:text-red-700"
+              className="text-xs text-red-600 hover:text-red-700 flex-shrink-0 ml-1"
             >
-              Remove ✕
+              ✕
             </button>
           </div>
         ))}

@@ -474,6 +474,23 @@ export class ActionsService {
     return this.userService.findByIds(incompleteUserIds);
   }
 
+  async findCompletedUsersForAction(actionId: number): Promise<User[]> {
+    const completedActivities = await this.actionActivityRepository.find({
+      where: {
+        actionId,
+        type: ActionActivityType.USER_COMPLETED,
+      },
+      select: { userId: true },
+    });
+    const completedUserIds = completedActivities.map((a) => a.userId);
+
+    if (completedUserIds.length === 0) {
+      return [];
+    }
+
+    return this.userService.findByIds(completedUserIds);
+  }
+
   async findPublic(userId?: number, sorted?: boolean): Promise<ActionDto[]> {
     const relations: Omit<Relations<Action>, 'usersCompleted' | 'status'> = {
       events: true,
