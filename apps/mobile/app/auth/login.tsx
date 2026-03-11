@@ -36,10 +36,10 @@ const LoginScreen = () => {
   };
 
   return (
-    <View style={styles.inner} className="flex flex-col pt-48 bg-white">
+    <View style={styles.inner} className="flex flex-col pt-48 bg-zinc-50">
       <View className="flex flex-col gap-y-6">
         <View>
-          <Text className="">Email</Text>
+          <Text className="mb-2">Email</Text>
           <Input
             placeholder="Email"
             value={email}
@@ -52,7 +52,7 @@ const LoginScreen = () => {
           />
         </View>
         <View>
-          <Text className="">Password</Text>
+          <Text className="mb-2">Password</Text>
           <Input
             placeholder="Password"
             value={password}
@@ -67,10 +67,9 @@ const LoginScreen = () => {
         <Button
           onPress={handleLogin}
           disabled={isSubmitting || !email || !password}
-          className="rounded-md w-[60%] self-center py-4!"
+          className="rounded-md w-full self-center py-4!"
         >
           <Text className="text-white text-base font-medium">Log in</Text>
-          <ArrowRight size={20} color="white" />
         </Button>
       </View>
     </View>

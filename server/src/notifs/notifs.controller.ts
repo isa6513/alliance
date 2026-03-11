@@ -13,9 +13,7 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
-import {
-  NotificationDto,
-} from './dto/notification.dto';
+import { NotificationDto } from './dto/notification.dto';
 import { ActionEventNotifDto } from './entities/action-event-notif.dto';
 import { NotifsService } from './notifs.service';
 import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
@@ -26,7 +24,7 @@ import {
 
 @Controller('notifs')
 export class NotifsController {
-  constructor(private readonly notifsService: NotifsService) { }
+  constructor(private readonly notifsService: NotifsService) {}
 
   @Get()
   @UseGuards(AuthGuard)
@@ -60,10 +58,7 @@ export class NotifsController {
     @Body() body: MarkUnreadContentReadDto,
     @Request() req: JwtRequest,
   ) {
-    return this.notifsService.setUnreadContentReadByContent(
-      req.user.sub,
-      body,
-    );
+    return this.notifsService.setUnreadContentReadByContent(req.user.sub, body);
   }
 
   @UseGuards(AdminGuard)

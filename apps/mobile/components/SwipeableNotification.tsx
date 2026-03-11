@@ -74,7 +74,7 @@ function SwipeableNotification({
   });
 
   return (
-    <View className="overflow-hidden border-t mx-px border-zinc-200 p-4">
+    <View className="overflow-hidden border-t mx-px border-zinc-200">
       {/* Background action area */}
       <Animated.View
         style={[actionStyle]}
@@ -93,7 +93,10 @@ function SwipeableNotification({
         <Animated.View style={contentStyle}>
           <Pressable
             onPress={onPress}
-            className={cn(notification.readAt ? "bg-white" : "bg-red-50")}
+            className={cn(
+              notification.readAt ? "bg-white" : "bg-red-50",
+              "p-4"
+            )}
           >
             <View className="flex-1">
               <View className="flex-row items-center flex-wrap gap-x-1">

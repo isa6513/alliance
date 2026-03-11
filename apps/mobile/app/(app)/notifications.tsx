@@ -49,12 +49,15 @@ export default function NotificationsScreen() {
     refetch,
   } = useQuery({
     queryKey: ["notifications"],
-    queryFn: () => notifsFindAll(),
+    queryFn: () =>
+      notifsFindAll().then((res) => {
+        return res.data;
+      }),
   });
 
   const notifications = useMemo(() => {
-    if (!response?.data) return [];
-    return response.data
+    if (!response) return [];
+    return response
       .sort(
         (a, b) =>
           getNotificationTime(b).getTime() - getNotificationTime(a).getTime()
@@ -82,15 +85,12 @@ export default function NotificationsScreen() {
       queryClient.setQueryData(
         ["notifications"],
         (oldData: typeof response) => {
-          if (!oldData?.data) return oldData;
-          return {
-            ...oldData,
-            data: oldData.data.map((notification) =>
-              keys.has(getNotificationIdentityKey(notification))
-                ? { ...notification, readAt }
-                : notification
-            ),
-          };
+          if (!oldData) return oldData;
+          return oldData.map((notification) =>
+            keys.has(getNotificationIdentityKey(notification))
+              ? { ...notification, readAt }
+              : notification
+          );
         }
       );
     },
