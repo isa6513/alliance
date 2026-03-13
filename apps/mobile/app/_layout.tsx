@@ -146,7 +146,7 @@ export default function RootLayout() {
 
     registerForPushNotificationsAsync()
       .then((token) => registerToken(token))
-      .catch((error: any) => console.error(`${error}`));
+      .catch((error: any) => console.error(error));
   }, [registerToken]);
 
   if (Platform.OS === "web") {
