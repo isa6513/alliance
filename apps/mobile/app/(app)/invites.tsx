@@ -48,26 +48,11 @@ const normalizeResourceUrl = (href: string) => {
   return `${WEB_BASE_URL}${href}`;
 };
 
-export default function InformationScreen() {
-  const { updates, error } = useActionUpdates();
-
-  const sortedUpdates = useMemo(() => {
-    return [...updates].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-    );
-  }, [updates]);
-
-  const handleOpenResource = useCallback((href: string) => {
-    const url = normalizeResourceUrl(href);
-    Linking.openURL(url).catch((err) => {
-      console.error("Failed to open resource link:", err);
-    });
-  }, []);
-
+export default function InvitesScreen() {
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="px-4 pt-12 pb-10 gap-y-6">
-        <Text className="text-2xl font-semibold text-zinc-900">Groups</Text>
+        <Text className="text-2xl font-semibold text-zinc-900">Invites</Text>
       </View>
     </ScrollView>
   );

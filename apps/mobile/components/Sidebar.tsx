@@ -12,11 +12,11 @@ import {
   Layers,
   ListTodo,
   MessagesSquare,
-  MessageSquare,
   Search,
   Settings,
   X,
   User,
+  UserPlus,
 } from "lucide-react-native";
 import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
@@ -81,10 +81,10 @@ const navSections: NavSection[] = [
         matchPaths: ["/forum"],
       },
       {
-        name: "Messages",
-        href: "/messages",
-        icon: MessageSquare,
-        matchPaths: ["/messages"],
+        name: "Invites",
+        href: "/invites",
+        icon: UserPlus,
+        matchPaths: ["/invites"],
       },
     ],
   },
@@ -169,7 +169,7 @@ export default function Sidebar(props: DrawerContentComponentProps) {
               className={cn(
                 "pb-4 mb-2",
                 sectionIndex < navSections.length - 1 &&
-                  "border-b border-zinc-200"
+                  "border-b border-zinc-200",
               )}
             >
               {section.items.map((item) => {
@@ -181,7 +181,7 @@ export default function Sidebar(props: DrawerContentComponentProps) {
                     onPress={() => handleNavigate(item.href)}
                     className={cn(
                       "flex-row items-center px-3 py-2.5 rounded-lg mb-0.5",
-                      active && "bg-zinc-200"
+                      active && "bg-zinc-200",
                     )}
                     activeOpacity={0.7}
                   >
@@ -189,7 +189,7 @@ export default function Sidebar(props: DrawerContentComponentProps) {
                     <Text
                       className={cn(
                         "ml-3",
-                        active ? "font-medium" : "text-zinc-900"
+                        active ? "font-medium" : "text-zinc-900",
                       )}
                     >
                       {item.name}

@@ -66,10 +66,12 @@ export default function AppLayout() {
         <Drawer.Screen name="notifications" />
         <Drawer.Screen name="feed" />
         <Drawer.Screen name="forum/index" />
-        <Drawer.Screen name="messages" />
+        <Drawer.Screen name="invites" />
         <Drawer.Screen name="contract" />
         <Drawer.Screen name="profile" />
         <Drawer.Screen name="settings" />
+        <Drawer.Screen name="groups/index" />
+        <Drawer.Screen name="groups/manage" />
       </Drawer>
       <TabBar />
     </View>
