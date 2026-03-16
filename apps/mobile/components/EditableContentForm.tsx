@@ -8,8 +8,7 @@ import {
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
-import { Paths } from "expo-file-system";
+import { File, Paths } from "expo-file-system";
 import { CreateEditableContentDto } from "@alliance/shared/client";
 import Text from "./system/Text";
 import { KeyboardExtender } from "react-native-keyboard-controller";
@@ -58,6 +57,40 @@ function getDraftPath(draftKey?: string) {
   return Paths.join(Paths.document, `${safeKey}.json`);
 }
 
+const TAP_SLOP_PX = 10;
+
+function ToolbarButton({
+  onTap,
+  className,
+  children,
+}: {
+  onTap: () => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  return (
+    <View
+      onTouchStart={(e) => {
+        const { pageX, pageY } = e.nativeEvent;
+        touchStart.current = { x: pageX, y: pageY };
+      }}
+      onTouchEnd={(e) => {
+        const start = touchStart.current;
+        touchStart.current = null;
+        if (!start) return;
+        const { pageX, pageY } = e.nativeEvent;
+        const dx = pageX - start.x;
+        const dy = pageY - start.y;
+        if (dx * dx + dy * dy <= TAP_SLOP_PX * TAP_SLOP_PX) onTap();
+      }}
+      className={className}
+    >
+      {children}
+    </View>
+  );
+}
+
 const EditableContentForm: React.FC<EditableContentFormProps> = ({
   value,
   onChange,
@@ -102,9 +135,9 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
 
       const restore = async () => {
         try {
-          const info = await FileSystem.getInfoAsync(draftPath);
-          if (!info.exists) return;
-          const raw = await FileSystem.readAsStringAsync(draftPath);
+          const file = new File(draftPath);
+          if (!file.exists) return;
+          const raw = await file.text();
           if (!raw) return;
           const parsed = JSON.parse(raw) as {
             dto: CreateEditableContentDto;
@@ -147,7 +180,9 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         savedAt: new Date().toISOString(),
       });
       try {
-        await FileSystem.writeAsStringAsync(draftPath, payload);
+        const file = new File(draftPath);
+        if (!file.exists) file.create();
+        file.write(payload);
         lastSavedHashRef.current = hash;
       } catch (err) {
         console.warn("Failed to save draft", err);
@@ -170,15 +205,15 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   useEffect(() => {
     if (!clearDraftSignal) return;
     if (!draftPath) return;
-    const clearDraft = async () => {
+    (() => {
       try {
-        await FileSystem.deleteAsync(draftPath, { idempotent: true });
+        const file = new File(draftPath);
+        if (file.exists) file.delete();
         lastSavedHashRef.current = DRAFT_CLEARED_SENTINEL;
       } catch {
         // ignore
       }
-    };
-    void clearDraft();
+    })();
   }, [clearDraftSignal, draftPath]);
 
   const handlePickImages = async () => {
@@ -290,8 +325,8 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       )}
       <KeyboardExtender enabled={showExtend}>
         <View className="p-2 flex-row items-center gap-3 bg-white border-y border-zinc-200 justify-between">
-          <View
-            onTouchEnd={() =>
+          <ToolbarButton
+            onTap={() =>
               toolbarTap(() => {
                 if (!isPicking) handlePickImages();
               })
@@ -303,21 +338,21 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
             ) : (
               <Text className="text-zinc-800">Add photos</Text>
             )}
-          </View>
+          </ToolbarButton>
           {pickerError ? (
             <Text className="text-xs text-red-500">{pickerError}</Text>
           ) : null}
           <View className="flex-row items-center gap-3">
             {onCancel && (
-              <View
-                onTouchEnd={() => toolbarTap(onCancel)}
+              <ToolbarButton
+                onTap={() => toolbarTap(onCancel)}
                 className="px-3 py-1.5"
               >
                 <Text className="text-zinc-500">Cancel</Text>
-              </View>
+              </ToolbarButton>
             )}
-            <View
-              onTouchEnd={() =>
+            <ToolbarButton
+              onTap={() =>
                 toolbarTap(() => {
                   if (canSubmit && !isSubmitting) onSubmit();
                 })
@@ -330,7 +365,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
               <Text className="text-white">
                 {isSubmitting ? "Posting..." : submitLabel}
               </Text>
-            </View>
+            </ToolbarButton>
           </View>
         </View>
       </KeyboardExtender>
