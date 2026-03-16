@@ -28,8 +28,8 @@ export interface ActionPageTaskPanelProps {
   onJoinAction: () => void;
   onDeclineAction: () => void;
   onOptOutAction: () => void;
-  scrollPageTo: (y: number) => void;
-  scrollToEnd?: (animated?: boolean) => void;
+  scrollPageTo: (y: number, animated?: boolean) => void;
+  scrollToEnd: (animated?: boolean) => void;
 }
 
 const ActionPageTaskPanel = ({

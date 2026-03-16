@@ -7,8 +7,8 @@ import { useCallback } from "react";
 import { usePostHog } from "posthog-react-native";
 
 export interface ActionTaskPanelProps extends ActionTaskPanelPropsShared {
-  scrollPageTo?: (y: number) => void;
-  scrollToEnd?: (animated?: boolean) => void;
+  scrollPageTo: (y: number, animated?: boolean) => void;
+  scrollToEnd: (animated?: boolean) => void;
 }
 
 const ActionTaskPanel = ({

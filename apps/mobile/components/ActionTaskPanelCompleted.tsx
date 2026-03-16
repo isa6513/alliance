@@ -47,6 +47,8 @@ const ActionTaskPanelCompleted = ({
             onSubmit={null}
             userId={formResponse.user?.id}
             user={formResponse.user ?? undefined}
+            scrollPageTo={() => {}}
+            scrollToEnd={() => {}}
           />
         </Card>
       </View>

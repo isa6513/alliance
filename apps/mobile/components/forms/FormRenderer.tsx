@@ -57,8 +57,8 @@ type FormRendererProps = {
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
   onSubmit: ((data: SubmitFormDto) => Promise<void>) | null;
-  scrollPageTo?: (y: number, animated?: boolean) => void;
-  scrollToEnd?: (animated?: boolean) => void;
+  scrollPageTo: (y: number, animated?: boolean) => void;
+  scrollToEnd: (animated?: boolean) => void;
 };
 
 const DEVICE_TYPE: DeviceVisibilityTarget = "mobile";
@@ -287,7 +287,7 @@ const FormRenderer = ({
   const scrollToField = useCallback(
     (fieldId: string) => {
       const yPosition = fieldPositions.current[fieldId];
-      scrollPageTo?.(Math.max(0, yPosition + 100));
+      scrollPageTo(Math.max(0, yPosition + 100));
     },
     [scrollPageTo],
   );
@@ -616,7 +616,7 @@ const FormRenderer = ({
     const result = await validatePage(currentPageIndex, true);
     if (result.isValid) {
       setCurrentPageIndex((prev) => Math.min(prev + 1, maxPageIndex));
-      scrollPageTo?.(0, false);
+      setImmediate(() => scrollPageTo(0, false));
     } else if (result.firstInvalidFieldId) {
       scrollToField(result.firstInvalidFieldId);
     }
@@ -624,7 +624,7 @@ const FormRenderer = ({
 
   const handlePreviousPage = () => {
     setCurrentPageIndex((prev) => Math.max(prev - 1, 0));
-    setTimeout(() => scrollToEnd?.(false), 100);
+    setImmediate(() => scrollToEnd(false));
   };
 
   const handleSubmit = async () => {

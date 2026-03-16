@@ -56,6 +56,8 @@ export default function LargeGeneralUpdateCard({
             onSubmit={null}
             userId={userId}
             user={user}
+            scrollPageTo={() => {}}
+            scrollToEnd={() => {}}
           />
         ) : null}
       </View>

@@ -149,7 +149,11 @@ export default function HomeScreen() {
     }
   }, []);
 
-  const { title, body } = useMemo(() => {
+  const scrollToEnd = useCallback((animated = true) => {
+    scrollViewRef.current?.scrollToEnd({ animated });
+  }, []);
+
+  const { title, body, fullScreen } = useMemo(() => {
     if (!currentTaskOrGeneralUpdate) {
       return {
         title: "Alliance",
@@ -193,6 +197,7 @@ export default function HomeScreen() {
             userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
             onUpdateActionState={refetch}
             scrollPageTo={scrollPageTo}
+            scrollToEnd={scrollToEnd}
             handleDismiss={() =>
               handleDismissAction(currentTaskOrGeneralUpdate.id)
             }
@@ -206,6 +211,7 @@ export default function HomeScreen() {
     handleDismissAction,
     refetch,
     scrollPageTo,
+    scrollToEnd,
   ]);
 
   if (loading) {
