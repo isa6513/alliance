@@ -188,7 +188,6 @@ export default function HomeScreen() {
     return {
       title: "Current task",
       body: (
-        <View className="border-t border-zinc-200">
           <LargeActionCard
             action={currentTaskOrGeneralUpdate}
             userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
@@ -198,7 +197,6 @@ export default function HomeScreen() {
               handleDismissAction(currentTaskOrGeneralUpdate.id)
             }
           />
-        </View>
       ),
     };
   }, [
