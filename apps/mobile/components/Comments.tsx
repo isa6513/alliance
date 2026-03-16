@@ -52,7 +52,7 @@ const uploadAttachments = async (attachments: string[]) => {
         return res.data?.key;
       }
       return file;
-    })
+    }),
   );
   return uploads.filter((key): key is string => Boolean(key));
 };
@@ -83,7 +83,7 @@ type ReplyFormProps = {
   isSubmitting: boolean;
   onSubmit: (
     content: CreateEditableContentDto,
-    parentId?: number | null
+    parentId?: number | null,
   ) => void;
 };
 
@@ -129,11 +129,11 @@ type ReplyItemSharedProps = {
   user: UserDto | undefined;
   onSubmitReply: (
     content: CreateEditableContentDto,
-    parentId?: number | null
+    parentId?: number | null,
   ) => void;
   onUpdateReply: (
     replyId: number,
-    content: CreateEditableContentDto
+    content: CreateEditableContentDto,
   ) => Promise<void>;
   onDeleteReply: (replyId: number) => void;
   onLikeReply: (replyId: number, unlike?: boolean) => void;
@@ -181,7 +181,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
         containerBorder,
         containerBg,
         containerSpacing,
-        isHighlighted && "border-l-2 border-blue-500"
+        isHighlighted && "border-l-2 border-blue-500",
       )}
     >
       <View className="flex-row items-center justify-between">
@@ -215,7 +215,11 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
               placeholder="Edit your reply..."
               expanded
               draftKey={`edit-reply-${reply.id}`}
-              onSubmit={() => shared.onUpdateReply(reply.id, editContent)}
+              onSubmit={() => {
+                void shared
+                  .onUpdateReply(reply.id, editContent)
+                  .then(() => setIsEditing(false));
+              }}
               onCancel={() => {
                 setEditContent({
                   body: reply.editableContent.body ?? "",
@@ -244,7 +248,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
                 ? () =>
                     shared.onLikeReply(
                       reply.id,
-                      reply.likes.some((like) => like.id === shared.user?.id)
+                      reply.likes.some((like) => like.id === shared.user?.id),
                     )
                 : undefined
             }
@@ -340,11 +344,11 @@ export default function Comments({
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newlyAddedReplies, setNewlyAddedReplies] = useState<Set<number>>(
-    new Set()
+    new Set(),
   );
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
   const [comments, setComments] = useState<CommentDto[] | null>(
-    initialComments ?? null
+    initialComments ?? null,
   );
   const [error, setError] = useState<string | null>(null);
   const [nestedDraft, setNestedDraft] = useState<CreateEditableContentDto>({
@@ -393,7 +397,7 @@ export default function Comments({
       try {
         setIsSubmitting(true);
         const attachmentKeys = await uploadAttachments(
-          contentDto.attachments ?? []
+          contentDto.attachments ?? [],
         );
         const commentDto: CreateCommentDto = {
           parentObjectId: Number(objectId),
@@ -434,7 +438,7 @@ export default function Comments({
         setIsSubmitting(false);
       }
     },
-    [fetchComments, objectId, type]
+    [fetchComments, objectId, type],
   );
 
   const handleDeleteReply = useCallback(
@@ -457,10 +461,10 @@ export default function Comments({
               }
             },
           },
-        ]
+        ],
       );
     },
-    [fetchComments]
+    [fetchComments],
   );
 
   const handleUpdateReply = useCallback(
@@ -503,7 +507,7 @@ export default function Comments({
         return updateRecursively(prevComments);
       });
     },
-    []
+    [],
   );
 
   const handleLikeReply = useCallback(
@@ -515,7 +519,7 @@ export default function Comments({
       }
       fetchComments();
     },
-    [fetchComments]
+    [fetchComments],
   );
 
   const sortedComments = useMemo(() => {
@@ -524,11 +528,14 @@ export default function Comments({
       .filter(shouldShowComment)
       .sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
   }, [comments]);
 
-  const commentIds = useMemo(() => collectCommentIds(comments ?? []), [comments]);
+  const commentIds = useMemo(
+    () => collectCommentIds(comments ?? []),
+    [comments],
+  );
 
   useMarkUnreadContentRead({
     contentType: "forum_reply",
@@ -544,7 +551,7 @@ export default function Comments({
             | {
                 data?: NotificationDto[];
               }
-            | undefined
+            | undefined,
         ) => {
           if (!oldData || !Array.isArray(oldData.data)) {
             return oldData;
@@ -565,7 +572,7 @@ export default function Comments({
               return { ...notification, readAt };
             }),
           };
-        }
+        },
       );
     },
   });
