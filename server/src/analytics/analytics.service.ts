@@ -449,6 +449,7 @@ ORDER BY pp.total_session_duration_seconds DESC
 
   async getActionCompletionCurves(
     actionId?: number,
+    granularity: 'daily' | 'hourly' = 'daily',
   ): Promise<ActionCompletionCurveDto[]> {
     const whereClause: { showInChart: boolean; actionId?: number } = {
       showInChart: true,
@@ -526,6 +527,10 @@ ORDER BY pp.total_session_duration_seconds DESC
       completionsByActionId.set(activity.actionId, list);
     }
 
+    const isHourly = granularity === 'hourly';
+    const msPerBucket = isHourly ? 60 * 60 * 1000 : msPerDay;
+    const maxBuckets = isHourly ? 168 : undefined; // 7 days * 24 hours
+
     return eligibleActions.map((record) => {
       const startDate = new Date(record.memberActionStartDate!);
       const plannedEndDate = record.memberActionEndDate
@@ -533,12 +538,15 @@ ORDER BY pp.total_session_duration_seconds DESC
         : null;
       const endDate =
         plannedEndDate && plannedEndDate < now ? plannedEndDate : now;
-      const durationDays = Math.max(
+      let bucketCount = Math.max(
         1,
-        Math.ceil((endDate.getTime() - startDate.getTime()) / msPerDay),
+        Math.ceil((endDate.getTime() - startDate.getTime()) / msPerBucket),
       );
+      if (maxBuckets !== undefined) {
+        bucketCount = Math.min(bucketCount, maxBuckets);
+      }
 
-      const counts = new Array<number>(durationDays).fill(0);
+      const counts = new Array<number>(bucketCount).fill(0);
       const completions = completionsByActionId.get(record.actionId) ?? [];
 
       for (const completionDate of completions) {
@@ -546,16 +554,32 @@ ORDER BY pp.total_session_duration_seconds DESC
           continue;
         }
         const rawIndex = Math.floor(
-          (completionDate.getTime() - startDate.getTime()) / msPerDay,
+          (completionDate.getTime() - startDate.getTime()) / msPerBucket,
         );
         const bucketIndex = Math.max(
           0,
-          Math.min(durationDays - 1, rawIndex),
+          Math.min(bucketCount - 1, rawIndex),
         );
         counts[bucketIndex] += 1;
       }
 
       const fractions = counts.map((count) => count / record.usersJoined);
+
+      if (isHourly) {
+        return {
+          actionId: record.actionId,
+          actionName: record.actionName,
+          usersJoined: record.usersJoined,
+          memberActionStartDate: record.memberActionStartDate!,
+          memberActionEndDate: record.memberActionEndDate ?? undefined,
+          bucketDays: 0,
+          dayOffsets: [],
+          completedCounts: counts,
+          completionFractions: fractions,
+          bucketHours: 1,
+          hourOffsets: Array.from({ length: bucketCount }, (_, index) => index),
+        } satisfies ActionCompletionCurveDto;
+      }
 
       return {
         actionId: record.actionId,
@@ -564,7 +588,7 @@ ORDER BY pp.total_session_duration_seconds DESC
         memberActionStartDate: record.memberActionStartDate!,
         memberActionEndDate: record.memberActionEndDate ?? undefined,
         bucketDays: 1,
-        dayOffsets: Array.from({ length: durationDays }, (_, index) => index),
+        dayOffsets: Array.from({ length: bucketCount }, (_, index) => index),
         completedCounts: counts,
         completionFractions: fractions,
       } satisfies ActionCompletionCurveDto;

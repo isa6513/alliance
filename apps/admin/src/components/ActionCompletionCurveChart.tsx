@@ -16,6 +16,9 @@ type ActionCompletionCurveChartProps = {
 };
 
 const LOCKED_MAX_DAY = 7;
+const LOCKED_MAX_HOUR = 168; // 7 days * 24 hours
+
+type GranularityMode = "daily" | "hourly";
 
 const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
   title = "Completions throughout week",
@@ -30,6 +33,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
   const [selectedActionId, setSelectedActionId] = useState<string>(
     actionId !== undefined ? String(actionId) : "all"
   );
+  const [granularity, setGranularity] = useState<GranularityMode>("hourly");
 
   useEffect(() => {
     if (actionId === undefined) return;
@@ -40,14 +44,16 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
     setLoading(true);
     try {
       // Always fetch all curves - needed to compute the average line
-      const response = await analyticsGetActionCompletionCurves();
+      const response = await analyticsGetActionCompletionCurves({
+        query: { granularity },
+      });
       setActionCompletionCurves(response.data ?? []);
     } catch (err) {
       console.error("Failed to load action completion curves", err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [granularity]);
 
   useEffect(() => {
     void loadActionCompletionCurves();
@@ -105,29 +111,41 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
     }
   }, [actionId, completionCurveActionOptions, selectedActionId]);
 
+  const isHourly = granularity === "hourly";
+
   const actionCompletionCurveChartData = useMemo(() => {
-    const eligibleCurves = actionCompletionCurves.filter(
-      (curve) =>
+    const eligibleCurves = actionCompletionCurves.filter((curve) => {
+      if (isHourly) {
+        const offsets = curve.hourOffsets;
+        return (
+          (offsets?.length ?? 0) > 0 &&
+          (curve.completionFractions?.length ?? 0) === (offsets?.length ?? 0)
+        );
+      }
+      return (
         (curve.dayOffsets?.length ?? 0) > 0 &&
         (curve.completionFractions?.length ?? 0) ===
         (curve.dayOffsets?.length ?? 0)
-    );
+      );
+    });
 
     if (eligibleCurves.length === 0) {
       return {
         multiLineData: [] as MultiLineSeries[],
-        maxDay: 0,
+        maxX: 0,
         yDomain: undefined as [number, number] | undefined,
       };
     }
+
+    const maxX = isHourly ? LOCKED_MAX_HOUR : LOCKED_MAX_DAY;
 
     const colorScale = chroma
       .scale(["#0ea5e9", "#6366f1", "#14b8a6"])
       .mode("lch")
       .domain([0, Math.max(1, eligibleCurves.length - 1)]);
 
-    const sumByDay = new Array<number>(LOCKED_MAX_DAY + 1).fill(0);
-    const countByDay = new Array<number>(LOCKED_MAX_DAY + 1).fill(0);
+    const sumByBucket = new Array<number>(maxX + 1).fill(0);
+    const countByBucket = new Array<number>(maxX + 1).fill(0);
 
     const actionSeries: MultiLineSeries[] = eligibleCurves
       .slice()
@@ -136,15 +154,18 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
         const data: DataPoint[] = [];
         let cumulativeFraction = 0;
         let cumulativeCount = 0;
-        curve.dayOffsets.forEach((offset, idx) => {
-          if (!Number.isFinite(offset) || offset < 0 || offset > LOCKED_MAX_DAY) {
+        const offsets = isHourly
+          ? (curve.hourOffsets!)
+          : curve.dayOffsets;
+        offsets.forEach((offset, idx) => {
+          if (!Number.isFinite(offset) || offset < 0 || offset > maxX) {
             return;
           }
           const completionFraction = curve.completionFractions[idx] ?? 0;
           const completionCount = curve.completedCounts[idx] ?? 0;
           if (Number.isFinite(completionFraction)) {
-            sumByDay[offset] += completionFraction;
-            countByDay[offset] += 1;
+            sumByBucket[offset] += completionFraction;
+            countByBucket[offset] += 1;
             cumulativeFraction += completionFraction;
             cumulativeCount += completionCount;
           }
@@ -176,9 +197,9 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
     };
 
     let avgCumulativeFraction = 0;
-    const averageData = sumByDay
+    const averageData = sumByBucket
       .map((sum, offset) => {
-        const count = countByDay[offset];
+        const count = countByBucket[offset];
         if (!count) return null;
         const fraction = sum / count;
         avgCumulativeFraction += fraction;
@@ -209,9 +230,13 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
 
     const displayedSeries = [...filteredActionSeries, averageSeries];
     const allSeries = [...actionSeries, averageSeries];
+
+    const yValueKey = isHourly
+      ? "cumulativeCompletionFraction"
+      : "completionFraction";
     const allValues = allSeries.flatMap((series) =>
       series.data
-        .map((point) => point.completionFraction as number)
+        .map((point) => point[yValueKey] as number)
         .filter((value) => Number.isFinite(value))
     );
     const maxValue = allValues.length ? Math.max(...allValues) : 0;
@@ -220,12 +245,20 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
 
     return {
       multiLineData: displayedSeries,
-      maxDay: LOCKED_MAX_DAY,
+      maxX,
       yDomain: [0, paddedMax] as [number, number],
     };
-  }, [actionCompletionCurves, actionId, selectedActionId]);
+  }, [actionCompletionCurves, actionId, selectedActionId, isHourly]);
 
   const showDropdown = showSelector && actionId === undefined;
+
+  const formatHourLabel = (hours: number): string => {
+    const days = Math.floor(hours / 24);
+    const h = hours % 24;
+    if (days === 0) return `${h}h`;
+    if (h === 0) return `${days}d`;
+    return `${days}d ${h}h`;
+  };
 
   return (
     <TimeSeriesChart
@@ -235,14 +268,43 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
       emptyMessage="No action completion curves available."
       multiLineData={actionCompletionCurveChartData.multiLineData}
       getXValue={(d) => (d.x as number) ?? 0}
-      getYValue={(d) => (d.completionFraction as number) ?? 0}
-      xAxisFormat={(v) => `${Math.round(v)}d`}
-      xRange={{ min: 0, max: LOCKED_MAX_DAY }}
+      getYValue={(d) =>
+        isHourly
+          ? ((d.cumulativeCompletionFraction as number) ?? 0)
+          : ((d.completionFraction as number) ?? 0)
+      }
+      xAxisFormat={(v) =>
+        isHourly ? formatHourLabel(Math.round(v)) : `${Math.round(v)}d`
+      }
+      xRange={{ min: 0, max: actionCompletionCurveChartData.maxX }}
+      showDataPoints={!isHourly}
       yDomain={actionCompletionCurveChartData.yDomain}
       yAxisFormat={(v) => `${Math.round(v * 100)}%`}
       height={360}
       headerContent={
         <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 md:ml-auto">
+          <div className="flex items-center rounded-md border border-gray-300 bg-white overflow-hidden">
+            <button
+              className={`px-2 py-1 text-xs font-medium transition-colors ${
+                granularity === "daily"
+                  ? "bg-gray-800 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+              onClick={() => setGranularity("daily")}
+            >
+              Daily
+            </button>
+            <button
+              className={`px-2 py-1 text-xs font-medium transition-colors ${
+                granularity === "hourly"
+                  ? "bg-gray-800 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+              onClick={() => setGranularity("hourly")}
+            >
+              Hourly CDF
+            </button>
+          </div>
           {showDropdown && (
             <div className="flex items-center gap-2">
               <label className="text-xs font-semibold text-gray-600">
@@ -285,18 +347,36 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
           typeof point.cumulativeCompletionFraction === "number"
             ? point.cumulativeCompletionFraction
             : 0;
-        const items = [
-          { label: "Day", value: point.x as number },
-          {
-            label: "Completions today",
-            value: `${(completionRate * 100).toFixed(2)}%`,
-            color: series.color,
-          },
-          {
-            label: "Total completed",
-            value: `${(cumulativeRate * 100).toFixed(2)}%`,
-          },
-        ];
+
+        const xValue = point.x as number;
+        const items: { label: string; value: string | number; color?: string }[] = isHourly
+          ? [
+              {
+                label: "Hour",
+                value: formatHourLabel(xValue),
+              },
+              {
+                label: "Completions this hour",
+                value: `${(completionRate * 100).toFixed(2)}%`,
+                color: series.color,
+              },
+              {
+                label: "Cumulative completed",
+                value: `${(cumulativeRate * 100).toFixed(2)}%`,
+              },
+            ]
+          : [
+              { label: "Day", value: xValue },
+              {
+                label: "Completions today",
+                value: `${(completionRate * 100).toFixed(2)}%`,
+                color: series.color,
+              },
+              {
+                label: "Total completed",
+                value: `${(cumulativeRate * 100).toFixed(2)}%`,
+              },
+            ];
 
         if (series.key === "average") {
           items.push({

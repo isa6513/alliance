@@ -77,11 +77,18 @@ export class AnalyticsController {
   @Get('action-completion-curves')
   @ApiOkResponse({ type: [ActionCompletionCurveDto] })
   @ApiQuery({ name: 'actionId', required: false, type: String })
+  @ApiQuery({ name: 'granularity', required: false, enum: ['daily', 'hourly'] })
   getActionCompletionCurves(
     @Query('actionId') actionId?: string,
+    @Query('granularity') granularity?: string,
   ): Promise<ActionCompletionCurveDto[]> {
     const parsedActionId = actionId ? Number(actionId) : undefined;
-    return this.analyticsService.getActionCompletionCurves(parsedActionId);
+    const parsedGranularity =
+      granularity === 'hourly' ? 'hourly' : 'daily';
+    return this.analyticsService.getActionCompletionCurves(
+      parsedActionId,
+      parsedGranularity,
+    );
   }
 
   @UseGuards(AdminGuard)

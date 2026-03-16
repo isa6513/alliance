@@ -1,4 +1,4 @@
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { ActionStatsRecord } from './actionstats.entity';
 
 export class ActionCompletionCurveDto extends PickType(ActionStatsRecord, [
@@ -32,4 +32,17 @@ export class ActionCompletionCurveDto extends PickType(ActionStatsRecord, [
       'Completion fraction per bucket (completedCounts / usersJoined).',
   })
   completionFractions: number[];
+
+  @ApiPropertyOptional({
+    description: 'Bucket size in hours (present when granularity is hourly).',
+    example: 1,
+  })
+  bucketHours?: number;
+
+  @ApiPropertyOptional({
+    type: [Number],
+    description:
+      'Bucket offsets (in hours) from the member_action start date (present when granularity is hourly).',
+  })
+  hourOffsets?: number[];
 }

@@ -97,6 +97,7 @@ type NumericAxisProps = BaseChartProps & {
   getYValue: (d: DataPoint) => number;
   multiLineData: MultiLineSeries[];
   getHoverContent?: (point: DataPoint, series: MultiLineSeries) => HoverContent;
+  showDataPoints?: boolean;
   legendGradient?: string;
   legendLabels?: { left: string; right: string };
 };
@@ -641,7 +642,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
             })}
 
             {/* Data points */}
-            {props.multiLineData.flatMap((s) =>
+            {(props.showDataPoints !== false) && props.multiLineData.flatMap((s) =>
               s.data.map((point, idx) => {
                 const isHovered =
                   hoveredSeries?.key === s.key &&

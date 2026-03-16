@@ -2845,6 +2845,14 @@ export type ActionCompletionCurveDto = {
      * Completion fraction per bucket (completedCounts / usersJoined).
      */
     completionFractions: Array<number>;
+    /**
+     * Bucket size in hours (present when granularity is hourly).
+     */
+    bucketHours?: number;
+    /**
+     * Bucket offsets (in hours) from the member_action start date (present when granularity is hourly).
+     */
+    hourOffsets?: Array<number>;
 };
 
 export type TimeToChurnSampleDto = {
@@ -7038,6 +7046,7 @@ export type AnalyticsGetActionCompletionCurvesData = {
     path?: never;
     query?: {
         actionId?: string;
+        granularity?: 'daily' | 'hourly';
     };
     url: '/analytics/action-completion-curves';
 };
