@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
-import { router, RelativePathString } from "expo-router";
+import { router } from "expo-router";
 import {
   ActionActivityDto,
   actionsUpdateActivity,
@@ -8,7 +8,7 @@ import {
   imagesUploadImage,
 } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { Edit } from "lucide-react-native";
+import { MessageCircleIcon, Edit } from "lucide-react-native";
 import { useAuth } from "../lib/AuthContext";
 import ProfileImage from "./ProfileImage";
 import LikeButton from "./LikeButton";
@@ -191,30 +191,30 @@ export default function UserActivityCard({
         {!isEditing && (
           <View className="flex-row justify-between items-center mt-3">
             <Text className="text-zinc-500 text-sm">{timeSinceCompleted}</Text>
-            <View className="flex-row items-center gap-x-3">
+            <View className="flex-row items-center gap-x-8!">
               <LikeButton
                 liked={activity.likedByMe ?? false}
                 likes={activity.likesCount}
+                iconColor="black"
+                size={20}
                 onPress={() => handleLike(activity.id)}
-                bordered
               />
               {canEdit && (
                 <TouchableOpacity
                   onPress={handleEdit}
                   activeOpacity={0.7}
-                  className="flex-row items-center gap-x-1 border border-zinc-200 rounded px-2 py-1"
+                  className="flex-row items-center gap-x-1 py-3! pb-2!"
                 >
-                  <Edit size={14} color="#52525b" />
-                  <Text className="text-sm text-zinc-600">Edit</Text>
+                  <Edit size={20} color="black" />
                 </TouchableOpacity>
               )}
               {commentable && (
                 <TouchableOpacity
                   onPress={() => setShowCommentForm(true)}
                   activeOpacity={0.7}
-                  className="border border-zinc-200 rounded px-2 py-1"
+                  className="flex-row items-center gap-x-1 py-3! pb-2!"
                 >
-                  <Text className="text-sm text-zinc-600">Reply</Text>
+                  <MessageCircleIcon size={20} />
                 </TouchableOpacity>
               )}
             </View>

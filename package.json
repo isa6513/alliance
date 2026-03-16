@@ -40,6 +40,6 @@
     "react-dom": "19.0.0",
     "react-test-renderer": "19.0.0",
     "react-native-renderer": "19.0.0",
-    "@types/react": "^19.0.10"
+    "@types/react": "19.1.6"
   }
 }

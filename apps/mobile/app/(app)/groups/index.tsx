@@ -240,7 +240,7 @@ function GroupActivityTab({
       data={activities}
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
-        <View className="border-b border-zinc-200">
+        <View className="border-b-2 border-zinc-200">
           <UserActivityCard
             activity={item}
             handleLike={() => handleLikeActivity(item.id)}
