@@ -116,7 +116,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
     return () => {
       canceled = true;
     };
-  }, [shouldRestoreDraft, draftPath]);
+  }, [shouldRestoreDraft, draftPath, value, onChange, onDraftRestored]);
 
   useEffect(() => {
     if (!draftPath) return;
@@ -161,7 +161,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       }
     };
     void clearDraft();
-  }, [clearDraftSignal, draftPath]);
+  }, [clearDraftSignal, draftPath, value]);
 
   const handlePickImages = async () => {
     if (isPicking) return;
@@ -283,7 +283,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
               disabled={!canSubmit || isSubmitting}
               className={cn(
                 "px-3 py-1.5 bg-zinc-800 rounded-sm",
-                (!canSubmit || isSubmitting) && "opacity-50"
+                (!canSubmit || isSubmitting) && "opacity-50",
               )}
             >
               <Text className="text-white">
