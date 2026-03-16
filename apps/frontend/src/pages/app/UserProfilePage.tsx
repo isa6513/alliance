@@ -72,6 +72,9 @@ const UserProfilePage: React.FC = () => {
   const { confirm } = useToast();
 
   const userId = id ? parseInt(id, 10) : undefined;
+  if(!userId) {
+    throw new Error("Invalid user ID");
+  }
 
   const {
     data: profile,
