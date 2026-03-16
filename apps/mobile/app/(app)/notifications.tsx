@@ -60,14 +60,14 @@ export default function NotificationsScreen() {
     return response
       .sort(
         (a, b) =>
-          getNotificationTime(b).getTime() - getNotificationTime(a).getTime()
+          getNotificationTime(b).getTime() - getNotificationTime(a).getTime(),
       )
       .filter((notif) => getNotificationTime(notif).getTime() <= Date.now());
   }, [response]);
 
   const renderItems = useMemo(
     () => buildNotificationRenderItems(notifications),
-    [notifications]
+    [notifications],
   );
 
   const markNotificationsRead = useCallback(
@@ -78,8 +78,8 @@ export default function NotificationsScreen() {
 
       const keys = new Set(
         notificationsToMark.map((notification) =>
-          getNotificationIdentityKey(notification)
-        )
+          getNotificationIdentityKey(notification),
+        ),
       );
       const readAt = new Date().toISOString();
       queryClient.setQueryData(
@@ -89,12 +89,12 @@ export default function NotificationsScreen() {
           return oldData.map((notification) =>
             keys.has(getNotificationIdentityKey(notification))
               ? { ...notification, readAt }
-              : notification
+              : notification,
           );
-        }
+        },
       );
     },
-    [queryClient]
+    [queryClient],
   );
 
   const handleMarkAsRead = useCallback(
@@ -106,13 +106,13 @@ export default function NotificationsScreen() {
         notificationSourceType: notification.sourceType,
       });
     },
-    [markNotificationsRead, posthog]
+    [markNotificationsRead, posthog],
   );
 
   const handleMarkBucketAsRead = useCallback(
     (bucket: LikesBucket) => {
       const unreadLikes = bucket.likes.filter(
-        (notification) => !notification.readAt
+        (notification) => !notification.readAt,
       );
       if (unreadLikes.length === 0) {
         return;
@@ -123,7 +123,7 @@ export default function NotificationsScreen() {
       });
       markNotificationsRead(unreadLikes);
     },
-    [markNotificationsRead]
+    [markNotificationsRead],
   );
 
   const handleNotificationPress = useCallback(
@@ -134,7 +134,7 @@ export default function NotificationsScreen() {
       }
 
       const destination = normalizeLocation(
-        notification.mobileAppLocation ?? notification.webAppLocation ?? null
+        notification.mobileAppLocation ?? notification.webAppLocation ?? null,
       );
 
       posthog?.capture("notification_clicked", {
@@ -148,7 +148,7 @@ export default function NotificationsScreen() {
         router.push(destination as RelativePathString);
       }
     },
-    [markNotificationsRead, posthog]
+    [markNotificationsRead, posthog],
   );
 
   const renderNotification = useCallback(
@@ -173,7 +173,7 @@ export default function NotificationsScreen() {
         />
       );
     },
-    [handleMarkAsRead, handleMarkBucketAsRead, handleNotificationPress]
+    [handleMarkAsRead, handleMarkBucketAsRead, handleNotificationPress],
   );
 
   return isPending ? (
@@ -207,7 +207,11 @@ export default function NotificationsScreen() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
         }
         recycleItems
-        renderItem={renderNotification}
+        renderItem={({ item }) => (
+          <View key={item.key} className="border-b border-zinc-200">
+            {renderNotification({ item })}
+          </View>
+        )}
         contentContainerStyle={{
           paddingBottom: 40,
           backgroundColor: "white",

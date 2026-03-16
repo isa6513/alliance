@@ -21,7 +21,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
     <TouchableOpacity onPress={onPress} className="p-4" activeOpacity={0.7}>
       <View className="flex-row items-start justify-between gap-x-2">
         <View className="flex-1">
-          <View className="flex-row items-center gap-x-2 mb-1">
+          <View className="flex-row items-start gap-x-2 mb-1">
             <Text className="font-medium text-black flex-1" numberOfLines={2}>
               {action.name}
             </Text>

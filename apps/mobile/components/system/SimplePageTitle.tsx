@@ -12,7 +12,7 @@ export const SimplePageTitle = ({
 }) => {
   const navigation = useNavigation();
   return (
-    <View className="flex-row items-center gap-2 p-4 justify-between">
+    <View className="flex-row items-center gap-2 px-4 pb-2 min-h-12 justify-between border-b border-zinc-200">
       <View className="flex-row items-center gap-2">
         <Menu
           size={24}

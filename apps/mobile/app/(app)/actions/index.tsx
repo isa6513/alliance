@@ -51,60 +51,56 @@ export default function ActionsScreen() {
         </View>
       ) : (
         <View className="flex-1" testID="vr-actions-ready">
+          <SimplePageTitle title="Actions">
+            <View className="flex-row items-center gap-x-2">
+              <View className="relative">
+                <TouchableOpacity
+                  onPress={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex-row items-center gap-x-2 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded"
+                >
+                  <Text className="text-sm text-black">{filterMode}</Text>
+                  <ChevronDown size={15} color="black" />
+                </TouchableOpacity>
+
+                <Modal
+                  visible={dropdownOpen}
+                  transparent
+                  animationType="fade"
+                  onRequestClose={() => setDropdownOpen(false)}
+                >
+                  <Pressable
+                    className="flex-1 bg-black/20"
+                    onPress={() => setDropdownOpen(false)}
+                  >
+                    <View className="mx-4 mt-32 bg-white border border-zinc-200 rounded overflow-hidden">
+                      {(Object.values(FilterMode) as FilterMode[]).map(
+                        (mode) => (
+                          <TouchableOpacity
+                            key={mode}
+                            onPress={() => {
+                              setFilterMode(mode);
+                              setDropdownOpen(false);
+                            }}
+                            className="px-4 py-3 border-b border-zinc-100 flex-row justify-between items-center"
+                          >
+                            <Text className="text-sm text-black">{mode}</Text>
+                            <Text className="text-sm text-zinc-500 font-mono">
+                              {counts[mode]}
+                            </Text>
+                          </TouchableOpacity>
+                        ),
+                      )}
+                    </View>
+                  </Pressable>
+                </Modal>
+              </View>
+            </View>
+          </SimplePageTitle>
           <LegendList
             contentContainerStyle={{
               backgroundColor: "white",
               minHeight: "80%",
             }}
-            ListHeaderComponent={
-              <SimplePageTitle title="Actions">
-                <View className="flex-row items-center gap-x-2">
-                  <View className="relative">
-                    <TouchableOpacity
-                      onPress={() => setDropdownOpen(!dropdownOpen)}
-                      className="flex-row items-center gap-x-2 px-3 py-2 bg-white rounded"
-                    >
-                      <Text className="text-sm text-black">{filterMode}</Text>
-                      <ChevronDown size={15} color="black" />
-                    </TouchableOpacity>
-
-                    <Modal
-                      visible={dropdownOpen}
-                      transparent
-                      animationType="fade"
-                      onRequestClose={() => setDropdownOpen(false)}
-                    >
-                      <Pressable
-                        className="flex-1 bg-black/20"
-                        onPress={() => setDropdownOpen(false)}
-                      >
-                        <View className="mx-4 mt-32 bg-white border border-zinc-200 rounded overflow-hidden">
-                          {(Object.values(FilterMode) as FilterMode[]).map(
-                            (mode) => (
-                              <TouchableOpacity
-                                key={mode}
-                                onPress={() => {
-                                  setFilterMode(mode);
-                                  setDropdownOpen(false);
-                                }}
-                                className="px-4 py-3 border-b border-zinc-100 flex-row justify-between items-center"
-                              >
-                                <Text className="text-sm text-black">
-                                  {mode}
-                                </Text>
-                                <Text className="text-sm text-zinc-500 font-mono">
-                                  {counts[mode]}
-                                </Text>
-                              </TouchableOpacity>
-                            )
-                          )}
-                        </View>
-                      </Pressable>
-                    </Modal>
-                  </View>
-                </View>
-              </SimplePageTitle>
-            }
             data={filteredActions}
             keyExtractor={(item) => item.id.toString()}
             recycleItems
@@ -112,7 +108,7 @@ export default function ActionsScreen() {
               <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
             }
             renderItem={({ item }) => (
-              <View key={item.id} className="border-b border-zinc-200">
+              <View key={item.id} className="border-b-2 border-zinc-200">
                 <ActionItemCard
                   action={item}
                   onPress={() => navigateToAction(item.id)}

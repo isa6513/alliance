@@ -36,7 +36,7 @@ function LikesGroupNotification({
       onPress={onPress}
       className={cn(
         "border-t border-zinc-200 px-6 py-4",
-        notification.readAt ? "bg-white" : "bg-red-50"
+        notification.readAt ? "bg-white" : "bg-red-50",
       )}
     >
       <View className="flex-row items-center flex-wrap gap-x-1">
@@ -75,11 +75,11 @@ export default function LikesGroup({
       : `${bucket.likes.length} like${bucket.likes.length === 1 ? "" : "s"}`;
 
   return (
-    <View className="mx-px overflow-hidden border-t border-zinc-200">
+    <View className="mx-px overflow-hidden">
       <View
         className={cn(
           "flex-row items-center justify-between px-6 py-4",
-          unreadCount > 0 ? "bg-red-50" : "bg-white"
+          unreadCount > 0 ? "bg-red-50" : "bg-white",
         )}
       >
         <TouchableOpacity

@@ -132,7 +132,7 @@ export default function HomeScreen() {
   if (!currentTaskOrGeneralUpdate) {
     return (
       <View className="flex-1 ">
-        <SimplePageTitle title="Actions" />
+        <SimplePageTitle title="Alliance" />
 
         <View
           className="flex-1 items-center justify-center py-16 px-5 bg-white"

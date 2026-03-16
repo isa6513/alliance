@@ -59,13 +59,13 @@ function SwipeableNotification({
       translateX.value,
       [SWIPE_THRESHOLD, 0],
       [-SWIPE_THRESHOLD, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     const opacity = interpolate(
       translateX.value,
       [SWIPE_THRESHOLD, -20, 0],
       [1, 0.5, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     return {
       width,
@@ -74,7 +74,7 @@ function SwipeableNotification({
   });
 
   return (
-    <View className="overflow-hidden border-t mx-px border-zinc-200">
+    <View className="overflow-hidden mx-px">
       {/* Background action area */}
       <Animated.View
         style={[actionStyle]}
@@ -95,7 +95,7 @@ function SwipeableNotification({
             onPress={onPress}
             className={cn(
               notification.readAt ? "bg-white" : "bg-red-50",
-              "p-4"
+              "p-4",
             )}
           >
             <View className="flex-1">

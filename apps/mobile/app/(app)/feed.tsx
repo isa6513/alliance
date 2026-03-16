@@ -54,14 +54,14 @@ export default function FeedScreen() {
         const liked = await handleLikeFriendActivity(activityId);
         if (liked) {
           setGlobalActivities((prev) =>
-            prev.map((a) => (a.id === activityId ? liked : a))
+            prev.map((a) => (a.id === activityId ? liked : a)),
           );
         }
       } else {
         const liked = await handleGlobalLikeActivity(activityId);
         if (liked) {
           setFriendActivities((prev) =>
-            prev.map((a) => (a.id === activityId ? liked : a))
+            prev.map((a) => (a.id === activityId ? liked : a)),
           );
         }
       }
@@ -71,7 +71,7 @@ export default function FeedScreen() {
       handleGlobalLikeActivity,
       setGlobalActivities,
       setFriendActivities,
-    ]
+    ],
   );
 
   const updateActivity = useCallback(
@@ -82,7 +82,7 @@ export default function FeedScreen() {
         updateGlobalActivity(activity);
       }
     },
-    [updateFriendActivity, updateGlobalActivity]
+    [updateFriendActivity, updateGlobalActivity],
   );
 
   const activities = mode === "friends" ? friendActivities : globalActivities;
@@ -103,7 +103,7 @@ export default function FeedScreen() {
         </View>
       );
     },
-    [handleLikeActivity, updateActivity, mode, user?.id]
+    [handleLikeActivity, updateActivity, mode, user?.id],
   );
 
   const listHeader = (
@@ -114,13 +114,13 @@ export default function FeedScreen() {
           activeOpacity={0.7}
           className={cn(
             "px-3 py-1.5 rounded-md",
-            mode === "friends" && "bg-white"
+            mode === "friends" && "bg-white",
           )}
         >
           <Text
             className={cn(
               "text-sm font-medium",
-              mode === "friends" ? "text-green" : "text-black"
+              mode === "friends" ? "text-green" : "text-black",
             )}
           >
             Friends
@@ -131,13 +131,13 @@ export default function FeedScreen() {
           activeOpacity={0.7}
           className={cn(
             "px-3 py-1.5 rounded-md",
-            mode === "everyone" && "bg-white"
+            mode === "everyone" && "bg-white",
           )}
         >
           <Text
             className={cn(
               "text-sm font-medium",
-              mode === "everyone" ? "text-green" : "text-black"
+              mode === "everyone" ? "text-green" : "text-black",
             )}
           >
             Everyone

@@ -6,7 +6,7 @@ import {
 } from "react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { router } from "expo-router";
-import { Settings, ChevronDown } from "lucide-react-native";
+import { Settings } from "lucide-react-native";
 import {
   communityGetMyCommunities,
   communityGetCommunityInvites,
