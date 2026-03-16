@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, TouchableOpacity, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   forumFindOnePost,
@@ -22,7 +16,9 @@ import Text from "../../../../components/system/Text";
 import { colors } from "../../../../lib/style/colors";
 import EditableContentRenderer from "../../../../components/EditableContentRenderer";
 import Comments from "../../../../components/Comments";
+import { KEYBOARD_EXTENDER_BAR_HEIGHT } from "../../../../lib/constants";
 import LikeButton from "../../../../components/LikeButton";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 const renderAvatar = (author: PostDto["author"]) => {
   return <ProfileImage pfp={author.profilePicture} size="small" />;
@@ -124,7 +120,11 @@ export default function PostDetailScreen() {
   const action = post.action;
 
   return (
-    <ScrollView className="flex-1 bg-white" testID="vr-forum-post-ready">
+    <KeyboardAwareScrollView
+      className="flex-1 bg-white"
+      testID="vr-forum-post-ready"
+      bottomOffset={KEYBOARD_EXTENDER_BAR_HEIGHT}
+    >
       <View className="px-4 pt-4 pb-10">
         <TouchableOpacity
           onPress={() => router.push("/forum")}
@@ -206,6 +206,6 @@ export default function PostDetailScreen() {
           />
         </View>
       </View>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }

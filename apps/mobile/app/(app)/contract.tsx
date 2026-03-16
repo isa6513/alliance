@@ -20,6 +20,7 @@ import Text from "../../components/system/Text";
 import Button, { ButtonColor } from "../../components/system/Button";
 import Card, { CardStyle } from "../../components/system/Card";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { KEYBOARD_BOTTOM_OFFSET_COMPACT } from "../../lib/constants";
 import { suspendContractConfirmation } from "@alliance/shared/lib/copy";
 import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 import { useQuery } from "@tanstack/react-query";
@@ -156,7 +157,7 @@ export default function ContractScreen() {
   return (
     <KeyboardAwareScrollView
       className="flex-1 bg-white"
-      bottomOffset={50}
+      bottomOffset={KEYBOARD_BOTTOM_OFFSET_COMPACT}
       testID="vr-contract-ready"
     >
       <View className="p-4 gap-y-4 pt-0">

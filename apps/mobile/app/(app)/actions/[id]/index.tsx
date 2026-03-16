@@ -30,6 +30,7 @@ import {
   KeyboardAwareScrollView,
   KeyboardAwareScrollViewRef,
 } from "react-native-keyboard-controller";
+import { KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR } from "../../../../lib/constants";
 
 type TabId = "task" | "activity" | "description" | "comments";
 
@@ -287,7 +288,7 @@ export default function ActionDetailScreen() {
       <KeyboardAwareScrollView
         className="bg-white"
         ref={scrollViewRef}
-        bottomOffset={72}
+        bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
         keyboardShouldPersistTaps="handled"
         testID="vr-action-detail-ready"
       >

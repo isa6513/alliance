@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { RelativePathString, router } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR } from "../../lib/constants";
 import { Search } from "lucide-react-native";
 import { searchSaveSelected, SearchItemDto } from "@alliance/shared/client";
 import {
@@ -109,7 +110,7 @@ export default function SearchScreen() {
     <KeyboardAwareScrollView
       className="flex-1 bg-white"
       contentContainerStyle={{ paddingBottom: 40 }}
-      bottomOffset={72}
+      bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
       keyboardShouldPersistTaps="handled"
     >
       <View className="px-4 pb-8">

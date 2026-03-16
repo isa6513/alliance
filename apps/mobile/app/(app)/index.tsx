@@ -25,6 +25,7 @@ import {
   KeyboardAwareScrollView,
   KeyboardAwareScrollViewRef,
 } from "react-native-keyboard-controller";
+import { KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR } from "../../lib/constants";
 import type { GeneralUpdateDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
@@ -153,7 +154,7 @@ export default function HomeScreen() {
     <KeyboardAwareScrollView
       ref={scrollViewRef}
       className="flex-1 bg-white"
-      bottomOffset={72}
+      bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
       testID="vr-home-ready"
     >
       {currentTaskOrGeneralUpdate &&
