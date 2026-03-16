@@ -16,6 +16,7 @@ import {
   ApiBearerAuth,
   ApiCookieAuth,
   ApiOkResponse,
+  ApiPropertyOptional,
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -31,6 +32,14 @@ import { AuthGuard, extractRefreshTokenFromCookie } from './guards/auth.guard';
 import type { JwtRequest } from './guards/jwtreq';
 import { RefreshTokenGuard } from './guards/refresh.guard';
 import { Public } from './public.decorator';
+import { IsEnum, IsOptional } from 'class-validator';
+
+class TokenModeQuery {
+  @ApiPropertyOptional({ enum: ['cookie', 'header'] })
+  @IsOptional()
+  @IsEnum(['cookie', 'header'])
+  mode?: TokenMode;
+}
 
 @ApiBearerAuth()
 @ApiCookieAuth()
@@ -111,7 +120,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
     @Request() req: JwtRequest,
-    @Query('mode') queryMode: string,
+    @Query() query: TokenModeQuery,
     @Res({ passthrough: true }) res: Response,
   ) {
     const userId: number = req.user.sub;
@@ -121,7 +130,7 @@ export class AuthController {
       isImpersonation,
     );
     const mode: TokenMode =
-      queryMode === 'header'
+      query.mode === 'header'
         ? 'header'
         : extractRefreshTokenFromCookie(req)
           ? 'cookie'

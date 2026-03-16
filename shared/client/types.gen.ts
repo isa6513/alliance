@@ -2987,8 +2987,8 @@ export type AuthRegisterResponse = AuthRegisterResponses[keyof AuthRegisterRespo
 export type AuthRefreshTokensData = {
     body?: never;
     path?: never;
-    query: {
-        mode: string;
+    query?: {
+        mode?: 'cookie' | 'header';
     };
     url: '/auth/refresh';
 };

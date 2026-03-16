@@ -83,8 +83,8 @@ export const authRegister = <ThrowOnError extends boolean = false>(options: Opti
     });
 };
 
-export const authRefreshTokens = <ThrowOnError extends boolean = false>(options: Options<AuthRefreshTokensData, ThrowOnError>) => {
-    return (options.client ?? _heyApiClient).post<AuthRefreshTokensResponse, unknown, ThrowOnError>({
+export const authRefreshTokens = <ThrowOnError extends boolean = false>(options?: Options<AuthRefreshTokensData, ThrowOnError>) => {
+    return (options?.client ?? _heyApiClient).post<AuthRefreshTokensResponse, unknown, ThrowOnError>({
         security: [
             {
                 scheme: 'bearer',
