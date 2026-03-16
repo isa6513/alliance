@@ -85,38 +85,42 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
 
   const [showExtend, setShowExtend] = useState(false);
 
-  useEffect(() => {
-    if (!shouldRestoreDraft || !draftPath) return;
-    let canceled = false;
+  useEffect(
+    () => {
+      if (!shouldRestoreDraft || !draftPath) return;
+      let canceled = false;
 
-    const restore = async () => {
-      try {
-        const info = await FileSystem.getInfoAsync(draftPath);
-        if (!info.exists) return;
-        const raw = await FileSystem.readAsStringAsync(draftPath);
-        if (!raw) return;
-        const parsed = JSON.parse(raw) as {
-          dto: CreateEditableContentDto;
-          savedAt: string;
-        };
-        if (canceled) return;
-        const currentHash = JSON.stringify(value);
-        const storedHash = JSON.stringify(parsed.dto);
-        if (storedHash !== currentHash) {
-          onChange(parsed.dto);
-          onDraftRestored?.(parsed.dto);
+      const restore = async () => {
+        try {
+          const info = await FileSystem.getInfoAsync(draftPath);
+          if (!info.exists) return;
+          const raw = await FileSystem.readAsStringAsync(draftPath);
+          if (!raw) return;
+          const parsed = JSON.parse(raw) as {
+            dto: CreateEditableContentDto;
+            savedAt: string;
+          };
+          if (canceled) return;
+          const currentHash = JSON.stringify(value);
+          const storedHash = JSON.stringify(parsed.dto);
+          if (storedHash !== currentHash) {
+            onChange(parsed.dto);
+            onDraftRestored?.(parsed.dto);
+          }
+          lastSavedHashRef.current = storedHash;
+        } catch (err) {
+          console.warn("Failed to restore draft", err);
         }
-        lastSavedHashRef.current = storedHash;
-      } catch (err) {
-        console.warn("Failed to restore draft", err);
-      }
-    };
+      };
 
-    void restore();
-    return () => {
-      canceled = true;
-    };
-  }, [shouldRestoreDraft, draftPath, value, onChange, onDraftRestored]);
+      void restore();
+      return () => {
+        canceled = true;
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [shouldRestoreDraft, draftPath],
+  );
 
   useEffect(() => {
     if (!draftPath) return;
@@ -149,19 +153,23 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
     };
   }, [value, autosaveMs, draftPath, clearDraftSignal]);
 
-  useEffect(() => {
-    if (!clearDraftSignal) return;
-    if (!draftPath) return;
-    const clearDraft = async () => {
-      try {
-        await FileSystem.deleteAsync(draftPath, { idempotent: true });
-        lastSavedHashRef.current = JSON.stringify(value);
-      } catch {
-        // ignore
-      }
-    };
-    void clearDraft();
-  }, [clearDraftSignal, draftPath, value]);
+  useEffect(
+    () => {
+      if (!clearDraftSignal) return;
+      if (!draftPath) return;
+      const clearDraft = async () => {
+        try {
+          await FileSystem.deleteAsync(draftPath, { idempotent: true });
+          lastSavedHashRef.current = JSON.stringify(value);
+        } catch {
+          // ignore
+        }
+      };
+      void clearDraft();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [clearDraftSignal, draftPath],
+  );
 
   const handlePickImages = async () => {
     if (isPicking) return;
