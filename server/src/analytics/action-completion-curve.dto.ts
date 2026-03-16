@@ -15,19 +15,22 @@ export class ActionCompletionCurveDto extends PickType(ActionStatsRecord, [
   bucketDays: number;
 
   @ApiProperty({
-    type: [Number],
+    type: Number,
+    isArray: true,
     description: 'Bucket offsets (in days) from the member_action start date.',
   })
   dayOffsets: number[];
 
   @ApiProperty({
-    type: [Number],
+    type: Number,
+    isArray: true,
     description: 'Completion counts per bucket.',
   })
   completedCounts: number[];
 
   @ApiProperty({
-    type: [Number],
+    type: Number,
+    isArray: true,
     description:
       'Completion fraction per bucket (completedCounts / usersJoined).',
   })
@@ -40,7 +43,8 @@ export class ActionCompletionCurveDto extends PickType(ActionStatsRecord, [
   bucketHours?: number;
 
   @ApiPropertyOptional({
-    type: [Number],
+    type: Number,
+    isArray: true,
     description:
       'Bucket offsets (in hours) from the member_action start date (present when granularity is hourly).',
   })

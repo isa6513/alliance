@@ -556,11 +556,10 @@ ORDER BY pp.total_session_duration_seconds DESC
         const rawIndex = Math.floor(
           (completionDate.getTime() - startDate.getTime()) / msPerBucket,
         );
-        const bucketIndex = Math.max(
-          0,
-          Math.min(bucketCount - 1, rawIndex),
-        );
-        counts[bucketIndex] += 1;
+        if (rawIndex < 0 || rawIndex >= bucketCount) {
+          continue;
+        }
+        counts[rawIndex] += 1;
       }
 
       const fractions = counts.map((count) => count / record.usersJoined);
