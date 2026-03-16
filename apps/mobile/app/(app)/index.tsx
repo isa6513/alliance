@@ -1,5 +1,10 @@
-import { View, ActivityIndicator } from "react-native";
-import { useCallback, useMemo, useRef } from "react";
+import {
+  View,
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+} from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   actionsDismissAction,
   actionsDismissGeneralUpdate,
@@ -38,6 +43,7 @@ const GENERAL_UPDATES_QUERY_KEY = [
 
 export default function HomeScreen() {
   const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
   const {
     data: actions,
     isPending,
@@ -53,7 +59,11 @@ export default function HomeScreen() {
 
   const { user } = useAuth();
 
-  const { data: generalUpdates, isPending: generalUpdatesPending } = useQuery({
+  const {
+    data: generalUpdates,
+    isPending: generalUpdatesPending,
+    refetch: refetchGeneralUpdates,
+  } = useQuery({
     queryKey: GENERAL_UPDATES_QUERY_KEY,
     queryFn: () =>
       actionsUnreadGeneralUpdates().then((response) => response.data ?? []),
@@ -75,7 +85,11 @@ export default function HomeScreen() {
     [actions, refetch],
   );
 
-  const { data: awayRanges, isPending: awayRangesPending } = useQuery({
+  const {
+    data: awayRanges,
+    isPending: awayRangesPending,
+    refetch: refetchAwayRanges,
+  } = useQuery({
     queryKey: ["awayRanges"],
     queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
   });
@@ -113,6 +127,16 @@ export default function HomeScreen() {
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([
+      refetch(),
+      refetchGeneralUpdates(),
+      refetchAwayRanges(),
+    ]);
+    setRefreshing(false);
+  }, [refetch, refetchGeneralUpdates, refetchAwayRanges]);
+
   const scrollPageTo = useCallback((y: number) => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({
@@ -132,20 +156,25 @@ export default function HomeScreen() {
 
   if (!currentTaskOrGeneralUpdate) {
     return (
-      <View className="flex-1 ">
+      <View className="flex-1">
         <SimplePageTitle title="Alliance" />
-
-        <View
-          className="flex-1 items-center justify-center py-16 px-5 bg-white"
+        <ScrollView
+          className="flex-1 bg-white"
+          contentContainerStyle={{ flex: 1 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           testID="vr-home-ready"
         >
-          <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
-            <Check size={32} color="#fff" strokeWidth={3} />
+          <View className="flex-1 items-center justify-center py-16 px-5">
+            <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
+              <Check size={32} color="#fff" strokeWidth={3} />
+            </View>
+            <Text className="text-zinc-500 text-lg text-center">
+              {noTasksToDoRightNow}
+            </Text>
           </View>
-          <Text className="text-zinc-500 text-lg text-center">
-            {noTasksToDoRightNow}
-          </Text>
-        </View>
+        </ScrollView>
       </View>
     );
   }
@@ -155,6 +184,9 @@ export default function HomeScreen() {
       ref={scrollViewRef}
       className="flex-1 bg-white"
       bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
       testID="vr-home-ready"
     >
       {currentTaskOrGeneralUpdate &&
