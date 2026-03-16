@@ -24,7 +24,6 @@
         "foregroundImage": "./assets/images/bridge.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.alliance.alliancemobile",
       "googleServicesFile": "./google-services.json"
     },

@@ -9,7 +9,8 @@ import {
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from 'expo-file-system';
+import { Paths } from 'expo-file-system';
 import { CreateEditableContentDto } from "@alliance/shared/client";
 import Text from "./system/Text";
 import { KeyboardExtender } from "react-native-keyboard-controller";
@@ -54,9 +55,8 @@ function toSafeFileName(value: string) {
 }
 
 function getDraftPath(draftKey?: string) {
-  if (!FileSystem.documentDirectory) return null;
   const safeKey = toSafeFileName(getStorageKey(draftKey));
-  return `${FileSystem.documentDirectory}${safeKey}.json`;
+  return `${Paths.document}/${safeKey}.json`;
 }
 
 const EditableContentForm: React.FC<EditableContentFormProps> = ({

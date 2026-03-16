@@ -6,6 +6,11 @@ export default tseslint.config([
 	{
         plugins: {'local-rules': eslintPluginExample},
 		files: ["**/*.ts"],
+		languageOptions: {
+			parserOptions: {
+				tsconfigRootDir: import.meta.dirname,
+			},
+		},
 		rules: {
 			"prefer-const": "warn",
 			"no-constant-binary-expression": "error",
