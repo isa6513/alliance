@@ -296,6 +296,96 @@ const waitForHttp = async (url: string, timeoutMs: number) => {
 };
 
 /* ------------------------------------------------------------------ */
+/*  Debug helpers                                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Recursively print a directory tree up to `maxDepth` levels.
+ * Useful for debugging where Maestro actually writes screenshots.
+ */
+const printTree = async (
+  dir: string,
+  prefix: string = "",
+  maxDepth: number = 3,
+  currentDepth: number = 0
+) => {
+  if (currentDepth >= maxDepth) return;
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const isDir = entry.isDirectory();
+      console.log(`${prefix}${isDir ? "📁" : "📄"} ${entry.name}`);
+      if (isDir) {
+        await printTree(fullPath, prefix + "  ", maxDepth, currentDepth + 1);
+      }
+    }
+  } catch {
+    console.log(`${prefix}(unreadable)`);
+  }
+};
+
+/**
+ * Search common locations where Maestro may have written a screenshot
+ * and return the first match found, or null.
+ */
+const findScreenshotFallback = async (
+  fileName: string,
+  cwd: string
+): Promise<string | null> => {
+  const candidateDirs = [
+    cwd, // repo root (Maestro CWD)
+    path.join(os.homedir(), ".maestro", "tests"),
+    os.tmpdir(),
+    outputDir, // in case it landed here under a nested path
+  ];
+
+  for (const dir of candidateDirs) {
+    const candidate = path.join(dir, fileName);
+    if (await fileExists(candidate)) {
+      return candidate;
+    }
+  }
+
+  // Recursive search in the Maestro home directory
+  const maestroHome = path.join(os.homedir(), ".maestro");
+  const found = await findFileRecursive(maestroHome, fileName, 4);
+  if (found) return found;
+
+  return null;
+};
+
+const findFileRecursive = async (
+  dir: string,
+  targetName: string,
+  maxDepth: number,
+  currentDepth: number = 0
+): Promise<string | null> => {
+  if (currentDepth >= maxDepth) return null;
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (!entry.isDirectory() && entry.name === targetName) {
+        return fullPath;
+      }
+      if (entry.isDirectory()) {
+        const found = await findFileRecursive(
+          fullPath,
+          targetName,
+          maxDepth,
+          currentDepth + 1
+        );
+        if (found) return found;
+      }
+    }
+  } catch {
+    // skip unreadable dirs
+  }
+  return null;
+};
+
+/* ------------------------------------------------------------------ */
 /*  Database setup                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -713,8 +803,10 @@ const writeMaestroFlow = async (
   filePath: string,
   deepLink: string,
   readyTestId: string,
-  screenshotPath: string
+  screenshotFileName: string
 ) => {
+  // NOTE: We now pass just the filename, not the full path.
+  // The actual output directory is controlled via `maestro test --output`.
   const contents = `appId: "${bundleId}"
 ---
 - launchApp
@@ -734,7 +826,7 @@ const writeMaestroFlow = async (
     id: "${readyTestId}"
 - waitForAnimationToEnd
 - takeScreenshot:
-    path: "${screenshotPath}"
+    path: "${screenshotFileName}"
 `;
   await fs.writeFile(filePath, contents, "utf8");
 };
@@ -771,24 +863,30 @@ const captureScreenshots = async (udid: string, simulatorName: string) => {
       const fileName = `${String(index + 1).padStart(2, "0")}-${sanitizeFileName(
         target.name
       )}.png`;
-      const filePath = path.join(outputDir, fileName);
+      const expectedPath = path.join(outputDir, fileName);
       const flowPath = path.join(flowDir, `${target.name}.yaml`);
 
       console.log(
         `${logPrefix} Capturing ${target.deepLink} -> ${fileName}`
       );
+
+      // Write flow with just the filename (not the full path)
       await writeMaestroFlow(
         flowPath,
         target.deepLink,
         target.readyTestId,
-        filePath
+        fileName
       );
+
+      // Run Maestro with --output pointing to our output directory
       await runCommand(
         maestro,
         [
           "test",
           "--udid",
           udid,
+          "--output",
+          outputDir,
           flowPath,
         ],
         {
@@ -800,11 +898,54 @@ const captureScreenshots = async (udid: string, simulatorName: string) => {
           },
         }
       );
-      if (!(await fileExists(filePath))) {
-        throw new Error(
-          `Maestro completed but did not write the expected screenshot at ${filePath}`
-        );
+
+      // --- DEBUG: Print file trees so we can see where Maestro wrote ---
+      console.log(`\n${logPrefix} 🔍 DEBUG: File tree of output dir (${outputDir}):`);
+      await printTree(outputDir);
+
+      console.log(`\n${logPrefix} 🔍 DEBUG: File tree of repo root (top-level .png files):`);
+      try {
+        const rootEntries = await fs.readdir(repoRoot);
+        const pngs = rootEntries.filter((e) => e.endsWith(".png"));
+        if (pngs.length > 0) {
+          for (const png of pngs) console.log(`  📄 ${png}`);
+        } else {
+          console.log("  (no .png files at repo root)");
+        }
+      } catch {
+        console.log("  (could not read repo root)");
       }
+
+      console.log(`\n${logPrefix} 🔍 DEBUG: File tree of ~/.maestro:`);
+      await printTree(path.join(os.homedir(), ".maestro"), "", 3);
+
+      console.log(`\n${logPrefix} 🔍 DEBUG: File tree of Maestro flow tmpdir (${flowDir}):`);
+      await printTree(flowDir);
+      console.log(""); // blank line for readability
+      // --- END DEBUG ---
+
+      if (!(await fileExists(expectedPath))) {
+        console.warn(
+          `${logPrefix} Screenshot not at expected path: ${expectedPath}`
+        );
+        console.log(`${logPrefix} 🔍 Searching fallback locations for ${fileName}...`);
+
+        const fallback = await findScreenshotFallback(fileName, repoRoot);
+        if (fallback) {
+          console.log(
+            `${logPrefix} Found screenshot at fallback location: ${fallback}`
+          );
+          console.log(
+            `${logPrefix}    Copying to expected path: ${expectedPath}`
+          );
+          await fs.copyFile(fallback, expectedPath);
+        } else {
+          throw new Error(
+            `Maestro completed but did not write the expected screenshot at ${expectedPath} (also checked fallback locations)`
+          );
+        }
+      }
+
       await delay(target.settleMs ?? 800);
     }
   } finally {
