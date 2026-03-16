@@ -171,6 +171,7 @@ export default function FeedScreen() {
         <KeyboardAvoidingView
           behavior="position"
           className="flex-1"
+          contentContainerStyle={{ flex: 1 }}
           testID="vr-feed-ready"
         >
           {listHeader}
