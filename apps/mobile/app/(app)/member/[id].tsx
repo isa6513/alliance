@@ -62,8 +62,7 @@ const friendsTabs: { id: FriendsTab; label: string }[] = [
 export default function UserProfileScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
-  const parsedUserId = rawId ? Number.parseInt(rawId, 10) : undefined;
-  const userId = Number.isNaN(parsedUserId) ? undefined : parsedUserId;
+  const userId = Number.parseInt(rawId!, 10);
   const { user, isAuthenticated } = useAuth();
   const isMe = !!userId && user?.id === userId;
 
@@ -117,7 +116,11 @@ export default function UserProfileScreen() {
   );
 
   useEffect(() => {
+    console.log('state update')
     if (!profile || !isMe || isEditing) return;
+    console.log("didnt bailout")
+    console.log(profile.profileDescription)
+
     setEditName(profile.displayName || "");
     setEditBio(profile.profileDescription || "");
     setEditAvatarUrl(profile.profilePicture || null);
@@ -308,7 +311,7 @@ export default function UserProfileScreen() {
             onPress={() =>
               router.push(`/forum/post/${item.post.id}` as RelativePathString)
             }
-            className="px-4 py-4 border-b border-zinc-200 text-base"
+            className="px-4 py-4 border-b border-zinc-200"
             activeOpacity={0.8}
           >
             <Text className="text-zinc-900">{item.post.title}</Text>
@@ -727,6 +730,7 @@ export default function UserProfileScreen() {
         ListEmptyComponent={listEmptyComponent}
         ListFooterComponent={<View className="h-16" />}
         contentContainerStyle={{ backgroundColor: "white" }}
+        keyboardShouldPersistTaps="handled"
       />
     </View>
   );
