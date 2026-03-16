@@ -30,6 +30,7 @@ import {
   formatTimeForDisplay,
   parseTimeInput,
 } from "@alliance/shared/forms/timeUtils";
+import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import InlineLabelMarkdownWrapper from "../InlineLabelMarkdownWrapper";
 import { cn } from "@alliance/shared/styles/util";
 import Card, { CardStyle } from "../system/Card";
@@ -785,6 +786,81 @@ export function RenderField({
               />
             )}
           </View>
+          {renderValidationMessage(errorMessage)}
+        </View>
+      );
+    }
+
+    case "contract": {
+      const contract = field.contract;
+      const signedValue = typeof value === "boolean" ? value : undefined;
+      return (
+        <View className="gap-3">
+          {contract?.markdown ? (
+            <>
+              <View className="rounded-lg border border-zinc-200 bg-white p-4">
+                <AppMarkdownWrapper>{contract.markdown}</AppMarkdownWrapper>
+              </View>
+              <Card cardStyle={CardStyle.White} className="p-4">
+                <Text className="font-medium text-zinc-900 mb-3">
+                  {field.signQuestion.trim()}
+                  {field.required && (
+                    <Text className="text-red-500 font-medium"> *</Text>
+                  )}
+                </Text>
+                <View className="flex-row gap-3">
+                  <TouchableOpacity
+                    onPress={() => onChange?.(true)}
+                    disabled={disabled}
+                    className={cn(
+                      "flex-1 py-3 rounded-lg border items-center",
+                      signedValue === true
+                        ? "border-green-600 bg-green-50"
+                        : "border-zinc-200 bg-white"
+                    )}
+                  >
+                    <Text
+                      className={cn(
+                        "font-medium",
+                        signedValue === true
+                          ? "text-green-700"
+                          : "text-zinc-700"
+                      )}
+                    >
+                      {field.yesLabel.trim()}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => onChange?.(false)}
+                    disabled={disabled}
+                    className={cn(
+                      "flex-1 py-3 rounded-lg border items-center",
+                      signedValue === false
+                        ? "border-red-600 bg-red-50"
+                        : "border-zinc-200 bg-white"
+                    )}
+                  >
+                    <Text
+                      className={cn(
+                        "font-medium",
+                        signedValue === false
+                          ? "text-red-700"
+                          : "text-zinc-700"
+                      )}
+                    >
+                      {field.noLabel.trim()}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </Card>
+            </>
+          ) : (
+            <View className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+              <Text className="text-sm text-zinc-500 italic">
+                Select a contract in the form builder to preview.
+              </Text>
+            </View>
+          )}
           {renderValidationMessage(errorMessage)}
         </View>
       );
