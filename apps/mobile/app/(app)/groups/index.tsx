@@ -138,8 +138,8 @@ export default function GroupsScreen() {
         </TouchableOpacity>
       </SimplePageTitle>
 
-      <View className="px-4 mb-4 flex flex-col gap-y-1">
-        <Text className="text-lg font-medium text-zinc-900">
+      <View className="px-4 my-4 flex flex-col gap-y-1">
+        <Text className="text-xl font-medium text-zinc-900">
           {selectedCommunity?.name}
         </Text>
         <Text className="text-sm text-zinc-500">
