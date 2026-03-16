@@ -5,6 +5,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import convert from 'heic-convert';
 import sharp from 'sharp';
 import type { Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
@@ -52,9 +53,27 @@ export class ImagesService {
     return true;
   }
 
-  async processAndUploadProfileImage(image: string): Promise<string> {
-    const spliced = image.substring(image.indexOf(',') + 1);
+  /** Returns a buffer suitable for sharp (HEIC/HEIF converted to JPEG). */
+  private async normalizeToSharpBuffer(file: string): Promise<Buffer> {
+    const commaIdx = file.indexOf(',');
+    if (commaIdx === -1) {
+      throw new BadRequestException('Invalid image data URI');
+    }
+    const prefix = file.substring(0, commaIdx).toLowerCase();
+    const spliced = file.substring(commaIdx + 1);
     const imgBuffer = Buffer.from(spliced, 'base64');
+    if (prefix.includes('heic') || prefix.includes('heif')) {
+      return (await convert({
+        buffer: imgBuffer,
+        format: 'JPEG',
+        quality: 0.9,
+      })) as Buffer;
+    }
+    return imgBuffer;
+  }
+
+  async processAndUploadProfileImage(image: string): Promise<string> {
+    const imgBuffer = await this.normalizeToSharpBuffer(image);
     const processed = await sharp(imgBuffer)
       .rotate()
       .resize({ width: 400 })
@@ -79,8 +98,7 @@ export class ImagesService {
     file: string,
     resize?: { width: number; height: number },
   ): Promise<string> {
-    const spliced = file.substring(file.indexOf(',') + 1);
-    const imgBuffer = Buffer.from(spliced, 'base64');
+    const imgBuffer = await this.normalizeToSharpBuffer(file);
     let processed = await sharp(imgBuffer).rotate().webp({ effort: 3 });
 
     if (resize) {
@@ -103,7 +121,7 @@ export class ImagesService {
       return key;
     } catch {
       throw new BadRequestException(
-        'Failed to process image - try a standard image format',
+        'Failed to process image - try a standard image format (JPEG or PNG). HEIC/HEIF from iPhone may not be supported.',
       );
     }
   }
