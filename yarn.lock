@@ -224,7 +224,6 @@ __metadata:
     expo-symbols: "npm:~55.0.5"
     expo-system-ui: "npm:~55.0.9"
     expo-web-browser: "npm:~55.0.9"
-    expo-widgets: "npm:^55.0.4"
     lucide-react-native: "npm:^0.562.0"
     posthog-react-native: "npm:^4.17.2"
     react: "npm:19.2.0"
@@ -2437,19 +2436,6 @@ __metadata:
   version: 9.3.2
   resolution: "@expo/sudo-prompt@npm:9.3.2"
   checksum: 10c0/032652bf1c3f326c9c194f336de5821b9ece9d48b22e3e277950d939fcd728c85459680a9771705904d375f128221cca2e1e91c5d7a85cf3c07fe6f88c361e9d
-  languageName: node
-  linkType: hard
-
-"@expo/ui@npm:~55.0.2":
-  version: 55.0.2
-  resolution: "@expo/ui@npm:55.0.2"
-  dependencies:
-    sf-symbols-typescript: "npm:^2.1.0"
-  peerDependencies:
-    expo: "*"
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/511308b92d0886045fe82ceae83b2dbb44c4139eb378f06850177d2331fcfee1ae16f28bbcd06fc5eeca31effcb5492c3fede6cd7ca938cdb6ed430863607e21
   languageName: node
   linkType: hard
 
@@ -10665,19 +10651,6 @@ __metadata:
     expo: "*"
     react-native: "*"
   checksum: 10c0/51962633384bbbb52aec2f0a3793e7f5fbd9e485993508751603306dd56b73648c921c83de3ee087e93cddb7ca3e56dac02927514f8e5e37c4e87d4d2ae09cf4
-  languageName: node
-  linkType: hard
-
-"expo-widgets@npm:^55.0.4":
-  version: 55.0.4
-  resolution: "expo-widgets@npm:55.0.4"
-  dependencies:
-    "@expo/plist": "npm:^0.5.2"
-    "@expo/ui": "npm:~55.0.2"
-  peerDependencies:
-    expo: "*"
-    react: "*"
-  checksum: 10c0/fbd3164317be5a4f1f1450552b69fb51103c2156eb5ebaeeafe557163cd9395fd2b0d7dce88b2a812a9d3f3a0ed8ade9dfd753acee846b52497b23aed50cf42b
   languageName: node
   linkType: hard
 

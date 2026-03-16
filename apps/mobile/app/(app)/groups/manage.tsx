@@ -168,7 +168,7 @@ export default function GroupManageScreen() {
               <ArrowLeft size={24} color="#71717a" strokeWidth={2.5} />
             </TouchableOpacity>
             <Text className="text-xl font-semibold text-zinc-900 font-serif">
-              Group Management
+              Manage groups
             </Text>
           </View>
           <View className="flex-1 items-center justify-center">
@@ -188,7 +188,7 @@ export default function GroupManageScreen() {
               <ArrowLeft size={24} color="#71717a" strokeWidth={2.5} />
             </TouchableOpacity>
             <Text className="text-xl font-semibold text-zinc-900 font-serif">
-              Group Management
+              Manage groups
             </Text>
             <View className="flex-1" />
             <TouchableOpacity

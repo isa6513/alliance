@@ -102,7 +102,7 @@ export default function ProfileImage({
       style={baseStyle}
       className={cn(
         "bg-white border border-zinc-200 items-center justify-center shrink-0",
-        className
+        className,
       )}
     >
       <User size={iconSizeMap[size]} color={colors.text.tertiary} />

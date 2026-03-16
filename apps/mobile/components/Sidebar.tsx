@@ -17,6 +17,8 @@ import {
   X,
   User,
   UserPlus,
+  Users,
+  MessageSquare,
 } from "lucide-react-native";
 import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
@@ -79,6 +81,18 @@ const navSections: NavSection[] = [
         href: "/forum",
         icon: MessagesSquare,
         matchPaths: ["/forum"],
+      },
+      {
+        name: "Groups",
+        href: "/groups",
+        icon: Users,
+        matchPaths: ["/groups"],
+      },
+      {
+        name: "Messages",
+        href: "/messages",
+        icon: MessageSquare,
+        matchPaths: ["/messages"],
       },
       {
         name: "Invites",

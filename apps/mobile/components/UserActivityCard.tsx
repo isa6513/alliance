@@ -38,7 +38,7 @@ export default function UserActivityCard({
   const { user: self } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState<CreateEditableContentDto>(
-    activity.editableContent ?? { body: "", attachments: [] }
+    activity.editableContent ?? { body: "", attachments: [] },
   );
   const [isSaving, setIsSaving] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
@@ -53,7 +53,7 @@ export default function UserActivityCard({
   const handleActivityPress = useCallback(() => {
     if (isEditing || isSaving || showCommentForm) return;
     router.push(
-      `/actions/${activity.actionId}/activity/${activity.id}` as RelativePathString
+      `/actions/${activity.actionId}/activity/${activity.id}` as RelativePathString,
     );
   }, [activity.actionId, activity.id, isEditing, isSaving, showCommentForm]);
 
@@ -85,10 +85,10 @@ export default function UserActivityCard({
             return res.data?.key;
           }
           return img;
-        })
+        }),
       );
       const attachmentKeys = uploads.filter(
-        (key) => key !== undefined
+        (key) => key !== undefined,
       ) as string[];
 
       const response = await actionsUpdateActivity({
