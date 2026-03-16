@@ -35,9 +35,14 @@ export default function ConversationScreen() {
         10
       )
     : NaN;
+
+  if(Number.isNaN(convoId)) {
+    throw new Error('Invalid conversation id');
+  }
+
   const { user } = useAuth();
   const { conversations, setConversations, loading } = useConversations(
-    Number.isNaN(convoId) ? null : convoId
+    convoId
   );
 
   const selectedConvo = useMemo(
@@ -69,7 +74,7 @@ export default function ConversationScreen() {
     messages: convoMessages,
     addOptimisticMessage,
     removeOptimisticMessage,
-  } = useLiveConvoMessages(Number.isNaN(convoId) ? null : convoId, {
+  } = useLiveConvoMessages(convoId, {
     onIncomingMessage: handleIncomingMessage,
     onConversationUpdated: handleConversationUpdated,
   });
@@ -83,9 +88,7 @@ export default function ConversationScreen() {
   const listRef = useRef<LegendListRef>(null);
 
   useEffect(() => {
-    if (!Number.isNaN(convoId)) {
-      conversationMarkRead({ path: { conversationId: convoId } });
-    }
+    conversationMarkRead({ path: { conversationId: convoId } });
   }, [convoId]);
 
   useEffect(() => {
@@ -243,14 +246,6 @@ export default function ConversationScreen() {
     });
   }, [selectedConvo, handleConversationUpdated]);
 
-  if (Number.isNaN(convoId)) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text className="text-zinc-500">Invalid conversation.</Text>
-      </View>
-    );
-  }
-
   if (loading && !selectedConvo) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
@@ -269,7 +264,7 @@ export default function ConversationScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pb-4 pt-1 bg-white z-50">
+      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pb-4 pt-3 bg-white z-50">
         <TouchableOpacity onPress={() => router.back()}>
           <ChevronLeft size={22} color="#111827" />
         </TouchableOpacity>

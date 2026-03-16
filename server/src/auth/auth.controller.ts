@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   Request,
   Res,
   UseGuards,
@@ -26,10 +27,7 @@ import ForgotPasswordDto, { ResetPasswordDto } from './dto/forgotpassword.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto, SignInResponseDto, type TokenMode } from './dto/signin.dto';
 import { AdminGuard } from './guards/admin.guard';
-import {
-  AuthGuard,
-  extractRefreshTokenFromCookie,
-} from './guards/auth.guard';
+import { AuthGuard, extractRefreshTokenFromCookie } from './guards/auth.guard';
 import type { JwtRequest } from './guards/jwtreq';
 import { RefreshTokenGuard } from './guards/refresh.guard';
 import { Public } from './public.decorator';
@@ -38,7 +36,7 @@ import { Public } from './public.decorator';
 @ApiCookieAuth()
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
   @Public()
   @HttpCode(HttpStatus.OK)
@@ -113,6 +111,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
     @Request() req: JwtRequest,
+    @Query('mode') queryMode: string,
     @Res({ passthrough: true }) res: Response,
   ) {
     const userId: number = req.user.sub;
@@ -121,9 +120,12 @@ export class AuthController {
       userId,
       isImpersonation,
     );
-    const mode: TokenMode = extractRefreshTokenFromCookie(req)
-      ? 'cookie'
-      : 'header';
+    const mode: TokenMode =
+      queryMode === 'header'
+        ? 'header'
+        : extractRefreshTokenFromCookie(req)
+          ? 'cookie'
+          : 'header';
     if (mode === 'cookie') {
       this.authService.setAuthCookies(res, access_token);
       return;

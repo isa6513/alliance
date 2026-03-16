@@ -86,7 +86,7 @@ export default function ProfileImage({
     borderRadius: radius,
   };
 
-  if (pfp) {
+  if (pfp && resolveProfileImageUri(pfp)) {
     return (
       <Image
         source={{ uri: resolveProfileImageUri(pfp) }}
@@ -96,7 +96,6 @@ export default function ProfileImage({
       />
     );
   }
-
   return (
     <View
       style={baseStyle}

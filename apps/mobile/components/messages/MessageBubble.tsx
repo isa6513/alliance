@@ -131,9 +131,9 @@ export default function MessageBubble({
               <View className="w-8">
                 {isFirstInGroup && (
                   <ProfileImage
-                    pfp={message.author.profilePicture}
-                    size="medium"
-                  />
+                      pfp={message.author.profilePicture}
+                      size="medium"
+                    />
                 )}
               </View>
               <View className="flex-1">

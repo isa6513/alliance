@@ -2,6 +2,7 @@ import {
   ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
@@ -31,7 +32,7 @@ interface MessageCreatedPayload {
   namespace: '/messaging/overview',
 })
 export class MessagingOverviewGateway
-  implements OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -55,29 +56,31 @@ export class MessagingOverviewGateway
     );
   }
 
-  async handleConnection(@ConnectedSocket() client: Socket) {
-    try {
-      const token = extractTokenFromSocket(client);
-      if (!token) {
-        client.disconnect(true);
-        return;
+  afterInit(server: Server) {
+    server.use(async (socket, next) => {
+      try {
+        const token = extractTokenFromSocket(socket);
+        if (!token) {
+          return next(new Error('Unauthorized'));
+        }
+        const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
+          secret: process.env.JWT_SECRET,
+        });
+        socket.data.userId = payload.sub;
+        next();
+      } catch (error) {
+        this.logger.warn(
+          `Messaging overview gateway auth failed: ${(error as Error).message ?? error}`,
+        );
+        next(new Error((error as Error).message));
       }
+    });
+  }
 
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: process.env.JWT_SECRET,
-      });
-
-      const userId = payload.sub;
-      client.data.userId = userId;
-      this.socketUsers.set(client.id, userId);
-      client.join(this.userRoom(userId));
-    } catch (error) {
-      this.logger.warn(
-        `Messaging overview gateway auth failed: ${(error as Error).message ?? error
-        }`,
-      );
-      client.disconnect(true);
-    }
+  handleConnection(@ConnectedSocket() client: Socket) {
+    const userId = client.data.userId as number;
+    this.socketUsers.set(client.id, userId);
+    client.join(this.userRoom(userId));
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket) {

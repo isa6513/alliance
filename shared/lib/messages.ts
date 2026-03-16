@@ -19,6 +19,7 @@ export type ConversationUnreadPayload = {
 export type MessagingConnectionConfig = {
   getWebSocketUrl: () => string;
   getAuthToken?: () => Promise<string | null> | string | null;
+  onRefreshToken?: () => Promise<string | null>;
 };
 
 export interface UseLiveConvoMessagesOptions {
@@ -262,20 +263,51 @@ const resolveAuthToken = async (
   }
 };
 
-const buildSocketOptions = (token: string | null) => {
-  if (!token) {
+const buildSocketOptions = (
+  getAuthToken?: () => Promise<string | null> | string | null
+) => {
+  if (!getAuthToken) {
     return { transports: ["websocket"], withCredentials: true };
   }
   return {
     transports: ["websocket"],
     withCredentials: true,
-    auth: { token },
-    extraHeaders: { Authorization: `Bearer ${token}` },
+    auth: async (cb: (data: Record<string, unknown>) => void) => {
+      const token = await resolveAuthToken(getAuthToken);
+      cb(token ? { token } : {});
+    },
   };
 };
 
+const attachAuthRefresh = (
+  socket: Socket,
+  onRefreshToken?: () => Promise<string | null>
+) => {
+  if (!onRefreshToken) return;
+  let refreshing = false;
+  socket.on("connect_error", async (err) => {
+    if (refreshing) return;
+    if (!err.message?.includes("jwt expired") && !err.message?.includes("Unauthorized")) {
+      return;
+    }
+    refreshing = true;
+    socket.disconnect(); // stop auto-reconnect from racing with the refresh
+    try {
+      const newToken = await onRefreshToken();
+      if (newToken) {
+        socket.auth = { token: newToken };
+        socket.connect();
+      }
+    } catch (refreshErr) {
+      console.error("Socket token refresh failed", refreshErr);
+    } finally {
+      refreshing = false;
+    }
+  });
+};
+
 export const createMessagingHooks = (config: MessagingConnectionConfig) => {
-  const { getWebSocketUrl, getAuthToken } = config;
+  const { getWebSocketUrl, getAuthToken, onRefreshToken } = config;
 
   const useConversations = (activeConversationId?: number | null) => {
     const [conversations, setConversations] = useState<ConversationDto[] | null>(
@@ -319,9 +351,9 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
       let socket: Socket | null = null;
 
       (async () => {
-        const token = await resolveAuthToken(getAuthToken);
         if (cancelled) return;
-        socket = io(`${getWebSocketUrl()}/messaging/overview`, buildSocketOptions(token));
+        socket = io(`${getWebSocketUrl()}/messaging/overview`, buildSocketOptions(getAuthToken));
+        attachAuthRefresh(socket, onRefreshToken);
 
         socket.on("conversation:unread", (payload: ConversationUnreadPayload) => {
           setConversations((prev) =>
@@ -369,10 +401,10 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
       let socket: Socket | null = null;
 
       (async () => {
-        const token = await resolveAuthToken(getAuthToken);
         if (cancelled) return;
 
-        socket = io(`${getWebSocketUrl()}/messaging`, buildSocketOptions(token));
+        socket = io(`${getWebSocketUrl()}/messaging`, buildSocketOptions(getAuthToken));
+        attachAuthRefresh(socket, onRefreshToken);
         socketRef.current = socket;
 
         socket.on("message:new", (incoming: MessageDto) => {
@@ -555,9 +587,9 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
       let socket: Socket | null = null;
 
       (async () => {
-        const token = await resolveAuthToken(getAuthToken);
         if (cancelled) return;
-        socket = io(`${getWebSocketUrl()}/messaging/overview`, buildSocketOptions(token));
+        socket = io(`${getWebSocketUrl()}/messaging/overview`, buildSocketOptions(getAuthToken));
+        attachAuthRefresh(socket, onRefreshToken);
         socketRef.current = socket;
 
         socket.on("conversation:unread", () => {

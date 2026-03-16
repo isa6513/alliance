@@ -3,6 +3,7 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -25,13 +26,13 @@ import { extractTokenFromSocket } from './gateway.utils';
   namespace: '/messaging',
 })
 export class MessagingGateway
-  implements OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
   private readonly logger = new Logger(MessagingGateway.name);
   private readonly clientRooms = new Map<string, Set<number>>();
-  private readonly conversationViewers = new Map<number, Set<number>>();
   private readonly clientUserIds = new Map<string, number>();
 
   constructor(
@@ -49,36 +50,34 @@ export class MessagingGateway
     );
   }
 
-  async handleConnection(client: Socket) {
-    try {
-      const token = extractTokenFromSocket(client);
-      if (!token) {
-        this.logger.warn('Missing token for messaging gateway connection.');
-        client.disconnect(true);
-        return;
+  afterInit(server: Server) {
+    server.use(async (socket, next) => {
+      try {
+        const token = extractTokenFromSocket(socket);
+        if (!token) {
+          return next(new Error('Unauthorized'));
+        }
+        const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
+          secret: process.env.JWT_SECRET,
+        });
+        socket.data.userId = payload.sub;
+        next();
+      } catch (error) {
+        this.logger.warn(
+          `Messaging gateway auth failed: ${(error as Error).message}`,
+        );
+        next(new Error((error as Error).message));
       }
+    });
+  }
 
-      const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
-        secret: process.env.JWT_SECRET,
-      });
-
-      client.data.userId = payload.sub;
-      this.clientRooms.set(client.id, new Set());
-      this.clientUserIds.set(client.id, payload.sub);
-    } catch (error) {
-      this.logger.warn(`Messaging gateway auth failed: ${error.message}`);
-      client.disconnect(true);
-    }
+  handleConnection(client: Socket) {
+    const userId = client.data.userId as number;
+    this.clientRooms.set(client.id, new Set());
+    this.clientUserIds.set(client.id, userId);
   }
 
   handleDisconnect(client: Socket) {
-    const userId = this.clientUserIds.get(client.id);
-    const rooms = this.clientRooms.get(client.id);
-    if (userId && rooms) {
-      for (const conversationId of rooms) {
-        this.removeConversationViewer(conversationId, userId);
-      }
-    }
     this.clientRooms.delete(client.id);
     this.clientUserIds.delete(client.id);
   }
@@ -111,7 +110,7 @@ export class MessagingGateway
     }
 
     client.join(this.roomName(conversationId));
-    this.trackClientRoom(client.id, conversationId, userId);
+    this.trackClientRoom(client.id, conversationId);
     client.emit('conversation-joined', { conversationId });
   }
 
@@ -126,9 +125,8 @@ export class MessagingGateway
       return;
     }
 
-    const userId = client.data.userId as number | undefined;
     client.leave(this.roomName(conversationId));
-    this.untrackClientRoom(client.id, conversationId, userId);
+    this.untrackClientRoom(client.id, conversationId);
     client.emit('conversation-left', { conversationId });
   }
 
@@ -168,16 +166,13 @@ export class MessagingGateway
       });
   }
 
-  private trackClientRoom(clientId: string, conversationId: number, userId?: number) {
+  private trackClientRoom(clientId: string, conversationId: number) {
     const rooms = this.clientRooms.get(clientId) ?? new Set<number>();
     rooms.add(conversationId);
     this.clientRooms.set(clientId, rooms);
-    if (userId) {
-      this.addConversationViewer(conversationId, userId);
-    }
   }
 
-  private untrackClientRoom(clientId: string, conversationId: number, userId?: number) {
+  private untrackClientRoom(clientId: string, conversationId: number) {
     const rooms = this.clientRooms.get(clientId);
     if (!rooms) {
       return;
@@ -189,28 +184,21 @@ export class MessagingGateway
     } else {
       this.clientRooms.set(clientId, rooms);
     }
-    if (userId) {
-      this.removeConversationViewer(conversationId, userId);
+  }
+
+  async getUsersViewingConversation(
+    conversationId: number,
+  ): Promise<Set<number>> {
+    const room = this.roomName(conversationId);
+    const sockets = await this.server.in(room).fetchSockets();
+    if (!sockets) return new Set();
+
+    const userIds = new Set<number>();
+    for (const socket of sockets) {
+      const userId = this.clientUserIds.get(socket.id);
+      if (userId) userIds.add(userId);
     }
-  }
-
-  private addConversationViewer(conversationId: number, userId: number) {
-    const viewers = this.conversationViewers.get(conversationId) ?? new Set<number>();
-    viewers.add(userId);
-    this.conversationViewers.set(conversationId, viewers);
-  }
-
-  private removeConversationViewer(conversationId: number, userId: number) {
-    const viewers = this.conversationViewers.get(conversationId);
-    if (!viewers) return;
-    viewers.delete(userId);
-    if (!viewers.size) {
-      this.conversationViewers.delete(conversationId);
-    }
-  }
-
-  getUsersViewingConversation(conversationId: number): Set<number> {
-    return this.conversationViewers.get(conversationId) ?? new Set();
+    return userIds;
   }
 
   private roomName(conversationId: number) {
