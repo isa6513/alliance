@@ -149,26 +149,11 @@ export default function HomeScreen() {
     }
   }, []);
 
-  if (loading) {
-    return (
-      <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
-        <ActivityIndicator size="large" color={colors.green} />
-      </View>
-    );
-  }
-
-  if (!currentTaskOrGeneralUpdate) {
-    return (
-      <View className="flex-1">
-        <SimplePageTitle title="Alliance" />
-        <ScrollView
-          className="flex-1 bg-white"
-          contentContainerStyle={{ flex: 1 }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          testID="vr-home-ready"
-        >
+  const { title, body } = useMemo(() => {
+    if (!currentTaskOrGeneralUpdate) {
+      return {
+        title: "Alliance",
+        body: (
           <View className="flex-1 items-center justify-center py-16 px-5">
             <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
               <Check size={32} color="#fff" strokeWidth={3} />
@@ -177,25 +162,14 @@ export default function HomeScreen() {
               {noTasksToDoRightNow}
             </Text>
           </View>
-        </ScrollView>
-      </View>
-    );
-  }
+        ),
+      };
+    }
 
-  return (
-    <View className="flex-1 bg-white">
-      <SimplePageTitle title="Current task" />
-      <KeyboardAwareScrollView
-        ref={scrollViewRef}
-        className="flex-1"
-        bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        testID="vr-home-ready"
-      >
-        {currentTaskOrGeneralUpdate &&
-        isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
+    if (isGeneralUpdate(currentTaskOrGeneralUpdate)) {
+      return {
+        title: "General update",
+        body: (
           <View className="p-4">
             <LargeGeneralUpdateCard
               key={currentTaskOrGeneralUpdate.id}
@@ -207,25 +181,56 @@ export default function HomeScreen() {
               user={user}
             />
           </View>
-        ) : (
-          <View className="border-t border-zinc-200">
-            {!currentTaskOrGeneralUpdate ? (
-              <Text className="text-red-500 text-center py-4">
-                {error?.message}
-              </Text>
-            ) : (
-              <LargeActionCard
-                action={currentTaskOrGeneralUpdate}
-                userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
-                onUpdateActionState={refetch}
-                scrollPageTo={scrollPageTo}
-                handleDismiss={() =>
-                  handleDismissAction(currentTaskOrGeneralUpdate.id)
-                }
-              />
-            )}
-          </View>
-        )}
+        ),
+      };
+    }
+
+    return {
+      title: "Current task",
+      body: (
+        <View className="border-t border-zinc-200">
+          <LargeActionCard
+            action={currentTaskOrGeneralUpdate}
+            userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
+            onUpdateActionState={refetch}
+            scrollPageTo={scrollPageTo}
+            handleDismiss={() =>
+              handleDismissAction(currentTaskOrGeneralUpdate.id)
+            }
+          />
+        </View>
+      ),
+    };
+  }, [
+    currentTaskOrGeneralUpdate,
+    user,
+    handleDismissGeneralUpdate,
+    handleDismissAction,
+    refetch,
+    scrollPageTo,
+  ]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
+        <ActivityIndicator size="large" color={colors.green} />
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1 bg-white">
+      <SimplePageTitle title={title} />
+      <KeyboardAwareScrollView
+        ref={scrollViewRef}
+        className="flex-1"
+        bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        testID="vr-home-ready"
+      >
+        {body}
       </KeyboardAwareScrollView>
     </View>
   );
