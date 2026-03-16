@@ -140,11 +140,11 @@ export default function HomeScreen() {
     }
   }, [refetch, refetchGeneralUpdates, refetchAwayRanges]);
 
-  const scrollPageTo = useCallback((y: number) => {
+  const scrollPageTo = useCallback((y: number, animated = true) => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({
-        y: y,
-        animated: true,
+        y,
+        animated,
       });
     }
   }, []);

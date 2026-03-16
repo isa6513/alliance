@@ -52,12 +52,13 @@ type FormRendererProps = {
   onAbandonAction?: (
     outOfTime: boolean,
     reason: string,
-    partialFormData: SubmitFormDto
+    partialFormData: SubmitFormDto,
   ) => void;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
   onSubmit: ((data: SubmitFormDto) => Promise<void>) | null;
-  scrollPageTo?: (y: number) => void;
+  scrollPageTo?: (y: number, animated?: boolean) => void;
+  scrollToEnd?: (animated?: boolean) => void;
 };
 
 const DEVICE_TYPE: DeviceVisibilityTarget = "mobile";
@@ -163,6 +164,7 @@ const FormRenderer = ({
   phDistinctId,
   sessionReplayUrl,
   scrollPageTo,
+  scrollToEnd,
 }: FormRendererProps) => {
   const schema = form as unknown as FormSchema;
   const readOnly = !!renderFormAsCompleted || !onSubmit;
@@ -216,7 +218,7 @@ const FormRenderer = ({
           if (field.output?.output) {
             defaults.set(
               field.id,
-              field.output.privateByDefault ? false : userDefaultPublic
+              field.output.privateByDefault ? false : userDefaultPublic,
             );
           }
         }
@@ -234,7 +236,7 @@ const FormRenderer = ({
   };
 
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(() =>
-    clampPageIndex(initialPageIndex ?? 0)
+    clampPageIndex(initialPageIndex ?? 0),
   );
   const [formData, setFormData] = useState<Record<string, FormValue>>(() => {
     if (readOnly) {
@@ -258,7 +260,7 @@ const FormRenderer = ({
             : defaultIsPublic;
       }
       return defaults;
-    }
+    },
   );
   const [visibilityValidatorResults, setVisibilityValidatorResults] = useState<
     Record<number, boolean>
@@ -287,7 +289,7 @@ const FormRenderer = ({
       const yPosition = fieldPositions.current[fieldId];
       scrollPageTo?.(Math.max(0, yPosition + 100));
     },
-    [scrollPageTo]
+    [scrollPageTo],
   );
 
   useEffect(() => {
@@ -302,7 +304,7 @@ const FormRenderer = ({
         const fallbackValue =
           typeof completedValue === "boolean"
             ? completedValue
-            : prev[fieldId] ?? defaultIsPublic;
+            : (prev[fieldId] ?? defaultIsPublic);
         next[fieldId] = fallbackValue;
       }
 
@@ -326,8 +328,8 @@ const FormRenderer = ({
       const conditions = Array.isArray(visibleIf)
         ? visibleIf
         : visibleIf
-        ? [visibleIf]
-        : [];
+          ? [visibleIf]
+          : [];
       for (const condition of conditions) {
         if (
           condition &&
@@ -338,7 +340,9 @@ const FormRenderer = ({
         }
       }
     };
-    const collectFromVisibleIfFormula = (visibleIfFormula: VisibleIfFormula | undefined) => {
+    const collectFromVisibleIfFormula = (
+      visibleIfFormula: VisibleIfFormula | undefined,
+    ) => {
       if (!visibleIfFormula?.conditions) {
         return;
       }
@@ -371,7 +375,7 @@ const FormRenderer = ({
       return;
     }
     const missingIds = visibilityValidatorIds.filter(
-      (id) => !(id in visibilityValidatorResults)
+      (id) => !(id in visibilityValidatorResults),
     );
     if (!missingIds.length) {
       return;
@@ -393,11 +397,11 @@ const FormRenderer = ({
           } catch (error) {
             console.error(
               `Failed to evaluate visibility validator ${validatorId}`,
-              error
+              error,
             );
             return [validatorId, false] as const;
           }
-        })
+        }),
       );
       if (cancelled) return;
       setVisibilityValidatorResults((prev) => {
@@ -417,7 +421,7 @@ const FormRenderer = ({
   const isElementCurrentlyVisible = useCallback(
     (
       element: AnyField | DisplayBlock,
-      data?: Record<string, FormValue>
+      data?: Record<string, FormValue>,
     ): boolean =>
       isElementCurrentlyVisibleShared(element, data ?? formData, {
         deviceType: DEVICE_TYPE,
@@ -425,20 +429,20 @@ const FormRenderer = ({
         fieldLookup,
         readOnly,
       }),
-    [fieldLookup, formData, visibilityValidatorResults, readOnly]
+    [fieldLookup, formData, visibilityValidatorResults, readOnly],
   );
 
   const validateFieldValue = useCallback(
     (
       field: AnyField,
       fieldValue: FormValue | undefined,
-      data?: Record<string, FormValue>
+      data?: Record<string, FormValue>,
     ): string | null =>
       validateFieldValueShared(field, fieldValue, data ?? formData, {
         deviceType: DEVICE_TYPE,
         visibilityValidatorResults,
       }),
-    [formData, visibilityValidatorResults]
+    [formData, visibilityValidatorResults],
   );
 
   const applyFieldErrorUpdates = useCallback(
@@ -462,12 +466,12 @@ const FormRenderer = ({
         return changed ? next : prev;
       });
     },
-    []
+    [],
   );
 
   const runCustomValidatorsForFields = useCallback(
     async (
-      fieldsToValidate: AnyField[]
+      fieldsToValidate: AnyField[],
     ): Promise<Record<string, string | null>> => {
       if (!fieldsToValidate.length || readOnly) {
         return {};
@@ -493,7 +497,7 @@ const FormRenderer = ({
             const isValid = response.data.isValid;
             return [
               field.id,
-              isValid ? null : response.data.message ?? null,
+              isValid ? null : (response.data.message ?? null),
             ] as const;
           } catch (err) {
             console.error("Failed to run custom validator", err);
@@ -502,18 +506,18 @@ const FormRenderer = ({
               "Unable to validate this field right now. Please try again.",
             ] as const;
           }
-        })
+        }),
       );
 
       return Object.fromEntries(results);
     },
-    [readOnly, formData]
+    [readOnly, formData],
   );
 
   const validatePage = useCallback(
     async (
       pageIndex: number,
-      includeCustomValidators: boolean
+      includeCustomValidators: boolean,
     ): Promise<{ isValid: boolean; firstInvalidFieldId?: string }> => {
       const page = schema.pages[pageIndex];
       if (!page) {
@@ -522,10 +526,10 @@ const FormRenderer = ({
 
       const updates: Record<string, string | null> = {};
       const fieldsOnPage = page.fields.filter(
-        (element): element is AnyField => "label" in element
+        (element): element is AnyField => "label" in element,
       );
       const visibleFields = fieldsOnPage.filter((field) =>
-        isElementCurrentlyVisible(field)
+        isElementCurrentlyVisible(field),
       );
       const visibleFieldIds = new Set(visibleFields.map((field) => field.id));
 
@@ -540,7 +544,7 @@ const FormRenderer = ({
 
       if (includeCustomValidators && !readOnly) {
         const candidates = visibleFields.filter(
-          (field) => field.customValidatorId && !updates[field.id]
+          (field) => field.customValidatorId && !updates[field.id],
         );
         if (candidates.length > 0) {
           const customResults = await runCustomValidatorsForFields(candidates);
@@ -568,7 +572,7 @@ const FormRenderer = ({
       runCustomValidatorsForFields,
       applyFieldErrorUpdates,
       readOnly,
-    ]
+    ],
   );
 
   const validateAllPages = useCallback(async () => {
@@ -612,6 +616,7 @@ const FormRenderer = ({
     const result = await validatePage(currentPageIndex, true);
     if (result.isValid) {
       setCurrentPageIndex((prev) => Math.min(prev + 1, maxPageIndex));
+      scrollPageTo?.(0, false);
     } else if (result.firstInvalidFieldId) {
       scrollToField(result.firstInvalidFieldId);
     }
@@ -619,6 +624,7 @@ const FormRenderer = ({
 
   const handlePreviousPage = () => {
     setCurrentPageIndex((prev) => Math.max(prev - 1, 0));
+    setTimeout(() => scrollToEnd?.(false), 100);
   };
 
   const handleSubmit = async () => {
@@ -807,7 +813,7 @@ const FormRenderer = ({
                 "border rounded-lg px-3 py-3",
                 outOfTimeSelected
                   ? "border-green-600 bg-green/20"
-                  : "border-zinc-200"
+                  : "border-zinc-200",
               )}
               onPress={() => {
                 setOutOfTimeSelected((prev) => !prev);
@@ -826,7 +832,7 @@ const FormRenderer = ({
                 "border rounded-lg px-3 py-3",
                 otherReasonSelected
                   ? "border-green-600 bg-green/20"
-                  : "border-zinc-200"
+                  : "border-zinc-200",
               )}
               onPress={() => {
                 setOtherReasonSelected((prev) => !prev);

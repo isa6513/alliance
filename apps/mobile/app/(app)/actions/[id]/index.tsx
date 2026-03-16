@@ -201,8 +201,12 @@ export default function ActionDetailScreen() {
     );
   }
 
-  const scrollPageTo = (y: number) => {
-    scrollViewRef.current?.scrollTo({ y, animated: true });
+  const scrollPageTo = (y: number, animated = true) => {
+    scrollViewRef.current?.scrollTo({ y, animated });
+  };
+
+  const scrollToEnd = (animated = true) => {
+    scrollViewRef.current?.scrollToEnd({ animated });
   };
 
   const userRelation = action.userRelation as UserActionRelation | undefined;
@@ -230,6 +234,7 @@ export default function ActionDetailScreen() {
                 </View>
                 <ActionPageTaskPanel
                   scrollPageTo={scrollPageTo}
+                  scrollToEnd={scrollToEnd}
                   action={action}
                   userRelation={userRelation ?? null}
                   onCompleteAction={onCompleteAction}

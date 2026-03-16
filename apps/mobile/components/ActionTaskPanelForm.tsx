@@ -25,6 +25,7 @@ interface ActionTaskPanelFormProps {
   actionId: number;
   publicAction?: boolean;
   scrollPageTo?: (y: number) => void;
+  scrollToEnd?: (animated?: boolean) => void;
 }
 
 const ActionTaskPanelForm = ({
@@ -35,6 +36,7 @@ const ActionTaskPanelForm = ({
   actionId,
   publicAction = false,
   scrollPageTo,
+  scrollToEnd,
 }: ActionTaskPanelFormProps) => {
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -124,6 +126,7 @@ const ActionTaskPanelForm = ({
         onAbandonAction={onAbandonAction}
         actionId={actionId}
         scrollPageTo={scrollPageTo}
+        scrollToEnd={scrollToEnd}
       />
       {error ? <Text className="text-red-500">{error}</Text> : null}
       {formError ? (

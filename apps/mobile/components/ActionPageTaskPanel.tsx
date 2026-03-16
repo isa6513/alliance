@@ -29,6 +29,7 @@ export interface ActionPageTaskPanelProps {
   onDeclineAction: () => void;
   onOptOutAction: () => void;
   scrollPageTo: (y: number) => void;
+  scrollToEnd?: (animated?: boolean) => void;
 }
 
 const ActionPageTaskPanel = ({
@@ -39,6 +40,7 @@ const ActionPageTaskPanel = ({
   onDeclineAction,
   onOptOutAction,
   scrollPageTo,
+  scrollToEnd,
 }: ActionPageTaskPanelProps) => {
   const { user } = useAuth();
   const state = getActionPageTaskPanelState(action, userRelation, user?.hasActiveContract ?? false);
@@ -86,6 +88,7 @@ const ActionPageTaskPanel = ({
             action={action}
             userRelation={userRelation ?? "none"}
             scrollPageTo={scrollPageTo}
+            scrollToEnd={scrollToEnd}
             {...panelHandlers}
           />
         </View>
@@ -101,6 +104,7 @@ const ActionPageTaskPanel = ({
             action={action}
             userRelation={userRelation ?? "none"}
             scrollPageTo={scrollPageTo}
+            scrollToEnd={scrollToEnd}
             {...panelHandlers}
             disabled
           />
@@ -111,6 +115,7 @@ const ActionPageTaskPanel = ({
         <ActionTaskPanel
           action={action}
           scrollPageTo={scrollPageTo}
+          scrollToEnd={scrollToEnd}
           userRelation={userRelation ?? "none"}
           {...panelHandlers}
         />

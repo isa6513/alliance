@@ -18,6 +18,7 @@ import useActivities, {
 
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   scrollPageTo: (y: number) => void;
+  scrollToEnd?: (animated?: boolean) => void;
 }
 
 export default function LargeActionCard({
@@ -25,6 +26,7 @@ export default function LargeActionCard({
   userRelation,
   onUpdateActionState,
   scrollPageTo,
+  scrollToEnd,
 }: LargeActionCardProps) {
   const { nextEvent, lastEvent } = getLastAndNextEvent(action);
   const { activities: friendActivities } = useActivities({
@@ -70,6 +72,7 @@ export default function LargeActionCard({
           onDeclineAction={onUpdateActionState}
           onOptOutAction={onUpdateActionState}
           scrollPageTo={scrollPageTo}
+          scrollToEnd={scrollToEnd}
         />
       </View>
     </Card>
