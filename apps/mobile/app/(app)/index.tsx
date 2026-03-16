@@ -129,12 +129,15 @@ export default function HomeScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([
-      refetch(),
-      refetchGeneralUpdates(),
-      refetchAwayRanges(),
-    ]);
-    setRefreshing(false);
+    try {
+      await Promise.all([
+        refetch(),
+        refetchGeneralUpdates(),
+        refetchAwayRanges(),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
   }, [refetch, refetchGeneralUpdates, refetchAwayRanges]);
 
   const scrollPageTo = useCallback((y: number) => {
@@ -180,31 +183,31 @@ export default function HomeScreen() {
   }
 
   return (
-    <KeyboardAwareScrollView
-      ref={scrollViewRef}
-      className="flex-1 bg-white"
-      bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      testID="vr-home-ready"
-    >
-      {currentTaskOrGeneralUpdate &&
-      isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
-        <View className="p-4">
-          <LargeGeneralUpdateCard
-            key={currentTaskOrGeneralUpdate.id}
-            generalUpdate={currentTaskOrGeneralUpdate}
-            onDismiss={() =>
-              handleDismissGeneralUpdate(currentTaskOrGeneralUpdate.id)
-            }
-            userId={user?.id}
-            user={user}
-          />
-        </View>
-      ) : (
-        <>
-          <SimplePageTitle title="Current task" />
+    <View className="flex-1 bg-white">
+      <SimplePageTitle title="Current task" />
+      <KeyboardAwareScrollView
+        ref={scrollViewRef}
+        className="flex-1"
+        bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        testID="vr-home-ready"
+      >
+        {currentTaskOrGeneralUpdate &&
+        isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
+          <View className="p-4">
+            <LargeGeneralUpdateCard
+              key={currentTaskOrGeneralUpdate.id}
+              generalUpdate={currentTaskOrGeneralUpdate}
+              onDismiss={() =>
+                handleDismissGeneralUpdate(currentTaskOrGeneralUpdate.id)
+              }
+              userId={user?.id}
+              user={user}
+            />
+          </View>
+        ) : (
           <View className="border-t border-zinc-200">
             {!currentTaskOrGeneralUpdate ? (
               <Text className="text-red-500 text-center py-4">
@@ -222,8 +225,8 @@ export default function HomeScreen() {
               />
             )}
           </View>
-        </>
-      )}
-    </KeyboardAwareScrollView>
+        )}
+      </KeyboardAwareScrollView>
+    </View>
   );
 }

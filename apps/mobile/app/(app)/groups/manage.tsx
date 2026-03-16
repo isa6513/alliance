@@ -176,14 +176,8 @@ export default function GroupManageScreen() {
           </View>
         </View>
       ) : (
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ paddingBottom: 40 }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
-          <View className="flex-row items-center gap-2 p-4">
+        <>
+          <View className="flex-row items-center gap-2 p-4 border-b border-zinc-200 bg-white">
             <TouchableOpacity onPress={() => router.back()} className="p-1">
               <ArrowLeft size={24} color="#71717a" strokeWidth={2.5} />
             </TouchableOpacity>
@@ -203,8 +197,14 @@ export default function GroupManageScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-
-          {error ? (
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ paddingBottom: 40 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          >
+            {error ? (
             <View className="mx-4 mb-3 p-3 bg-red-50 rounded-lg">
               <Text className="text-sm text-red-500">{error}</Text>
             </View>
@@ -292,7 +292,8 @@ export default function GroupManageScreen() {
               </Text>
             </View>
           )}
-        </ScrollView>
+          </ScrollView>
+        </>
       )}
     </View>
   );

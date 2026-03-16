@@ -14,6 +14,7 @@ import Text from "../../../components/system/Text";
 import { colors } from "../../../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
 import PinnedIcon from "../../../components/system/PinnedIcon";
+import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
 
 export default function ForumScreen() {
   const [posts, setPosts] = useState<PostDto[]>([]);
@@ -64,14 +65,16 @@ export default function ForumScreen() {
   }, [posts]);
 
   return (
-    <ScrollView
-      testID="vr-forum-ready"
-      className="flex-1 bg-white"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <View className="px-4 pt-6 pb-10 gap-y-3">
+    <View className="flex-1 bg-white">
+      <SimplePageTitle title="Forum" />
+      <ScrollView
+        testID="vr-forum-ready"
+        className="flex-1"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View className="px-4 pt-6 pb-10 gap-y-3">
         <TouchableOpacity
           className="border border-zinc-200 rounded p-4 bg-white"
           onPress={navigateToCreatePost}
@@ -154,7 +157,8 @@ export default function ForumScreen() {
             })}
           </View>
         )}
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }

@@ -148,16 +148,16 @@ export default function FeedScreen() {
   );
 
   return (
-    <View>
+    <View className="flex-1">
       {loading ? (
-        <View className="flex-1">
+        <>
           {listHeader}
           <View className="flex-1 items-center justify-center bg-white">
             <ActivityIndicator size="large" color={colors.green} />
           </View>
-        </View>
+        </>
       ) : activities.length === 0 ? (
-        <View className="flex-1">
+        <>
           {listHeader}
           <View className="flex-1 items-center justify-center bg-white">
             <Text className="text-zinc-500">
@@ -166,12 +166,17 @@ export default function FeedScreen() {
                 : "No activity yet"}
             </Text>
           </View>
-        </View>
+        </>
       ) : (
-        <KeyboardAvoidingView behavior="position" testID="vr-feed-ready">
+        <KeyboardAvoidingView
+          behavior="position"
+          className="flex-1"
+          testID="vr-feed-ready"
+        >
+          {listHeader}
           <LegendList
             key={mode}
-            ListHeaderComponent={listHeader}
+            className="flex-1"
             data={activities}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderActivity}

@@ -5,6 +5,7 @@ import { useActionUpdates } from "@alliance/shared/lib/informationPage";
 import Text from "../../components/system/Text";
 import { colors } from "../../lib/style/colors";
 import ActionUpdateCard from "../../components/ActionUpdateCard";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 
 const WEB_BASE_URL = "https://worldalliance.org"; //TODO
 
@@ -65,13 +66,11 @@ export default function InformationScreen() {
   }, []);
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      <View className="px-4 pt-12 pb-10 gap-y-6">
-        <Text className="text-2xl font-semibold text-zinc-900">
-          Information
-        </Text>
-
-        <View className="gap-y-3">
+    <View className="flex-1 bg-white">
+      <SimplePageTitle title="Information" />
+      <ScrollView className="flex-1">
+        <View className="px-4 pt-4 pb-10 gap-y-6">
+          <View className="gap-y-3">
           <Text className="text-lg font-semibold text-zinc-900">Resources</Text>
           <View className="gap-y-2">
             {resources.map((resource) => (
@@ -103,8 +102,9 @@ export default function InformationScreen() {
             ))}
             {error && <Text className="text-zinc-500">{error}</Text>}
           </View>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

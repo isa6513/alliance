@@ -5,6 +5,7 @@ import { useActionUpdates } from "@alliance/shared/lib/informationPage";
 import Text from "../../components/system/Text";
 import { colors } from "../../lib/style/colors";
 import ActionUpdateCard from "../../components/ActionUpdateCard";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 
 const WEB_BASE_URL = "https://worldalliance.org"; //TODO
 
@@ -50,10 +51,11 @@ const normalizeResourceUrl = (href: string) => {
 
 export default function InvitesScreen() {
   return (
-    <ScrollView className="flex-1 bg-white">
-      <View className="px-4 pt-12 pb-10 gap-y-6">
-        <Text className="text-2xl font-semibold text-zinc-900">Invites</Text>
-      </View>
-    </ScrollView>
+    <View className="flex-1 bg-white">
+      <SimplePageTitle title="Invites" />
+      <ScrollView className="flex-1">
+        <View className="px-4 pt-4 pb-10 gap-y-6" />
+      </ScrollView>
+    </View>
   );
 }

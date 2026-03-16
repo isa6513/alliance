@@ -107,15 +107,16 @@ export default function SearchScreen() {
   }, [handleChooseItem, selectedItem]);
 
   return (
-    <KeyboardAwareScrollView
-      className="flex-1 bg-white"
-      contentContainerStyle={{ paddingBottom: 40 }}
-      bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View className="px-4 pb-8">
-        <SimplePageTitle title="Search" />
-        <View>
+    <View className="flex-1 bg-white">
+      <SimplePageTitle title="Search" />
+      <KeyboardAwareScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 40 }}
+        bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="px-4 pb-8">
+          <View>
           <View className="flex-row items-center gap-2 border border-zinc-200 rounded bg-zinc-50 px-3 py-3">
             <Search size={16} color="#71717a" />
             <TextInput
@@ -197,7 +198,8 @@ export default function SearchScreen() {
             ))}
           </View>
         )}
-      </View>
-    </KeyboardAwareScrollView>
+        </View>
+      </KeyboardAwareScrollView>
+    </View>
   );
 }

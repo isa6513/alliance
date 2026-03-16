@@ -155,15 +155,15 @@ export default function ContractScreen() {
     "border border-zinc-200 rounded bg-white px-3 py-3 text-base flex-1";
 
   return (
-    <KeyboardAwareScrollView
-      className="flex-1 bg-white"
-      bottomOffset={KEYBOARD_BOTTOM_OFFSET_COMPACT}
-      testID="vr-contract-ready"
-    >
-      <View className="p-4 gap-y-4 pt-0">
-        <SimplePageTitle title="Membership contract" />
-
-        <Text className="text-zinc-900">Notes:</Text>
+    <View className="flex-1 bg-white">
+      <SimplePageTitle title="Membership contract" />
+      <KeyboardAwareScrollView
+        className="flex-1"
+        bottomOffset={KEYBOARD_BOTTOM_OFFSET_COMPACT}
+        testID="vr-contract-ready"
+      >
+        <View className="p-4 gap-y-4 pt-0">
+          <Text className="text-zinc-900">Notes:</Text>
         <View className="mb-4">
           {CONTRACT_NOTES.map((note: string, index: number) => (
             <View key={index} className="flex-row pl-2">
@@ -253,7 +253,8 @@ export default function ContractScreen() {
             title="Suspend contract"
           />
         )}
-      </View>
-    </KeyboardAwareScrollView>
+        </View>
+      </KeyboardAwareScrollView>
+    </View>
   );
 }

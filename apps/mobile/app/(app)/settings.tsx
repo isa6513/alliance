@@ -169,19 +169,19 @@ export default function SettingsPage() {
     "border border-zinc-200 rounded-lg bg-white px-3 py-3 text-base";
 
   return (
-    <ScrollView className="flex-1 bg-white" testID="vr-settings-ready">
-      <View className="px-4 pb-12">
-        <View>
-          <SimplePageTitle title="Settings" />
-          <Text className="text-sm text-zinc-500 absolute right-4 top-14">
-            {saving
-              ? "Saving..."
-              : hasChanges
-              ? "Unsaved changes"
-              : "All saved"}
-          </Text>
-        </View>
-        {/* Profile Section */}
+    <View className="flex-1 bg-white" testID="vr-settings-ready">
+      <SimplePageTitle title="Settings">
+        <Text className="text-sm text-zinc-500">
+          {saving
+            ? "Saving..."
+            : hasChanges
+            ? "Unsaved changes"
+            : "All saved"}
+        </Text>
+      </SimplePageTitle>
+      <ScrollView className="flex-1">
+        <View className="px-4 pb-12">
+          {/* Profile Section */}
         <View className="mb-6">
           <View className="gap-4">
             <View>
@@ -655,6 +655,7 @@ export default function SettingsPage() {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

@@ -77,13 +77,7 @@ export default function MessagesScreen() {
   }
 
   return (
-    <ScrollView
-      className="bg-white"
-      testID="vr-messages-ready"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
+    <View className="flex-1 bg-white">
       <SimplePageTitle title="Messages">
         <TouchableOpacity
           onPress={handleNewMessage}
@@ -92,8 +86,14 @@ export default function MessagesScreen() {
           <Plus size={18} color="#fff" />
         </TouchableOpacity>
       </SimplePageTitle>
-
-      <View className="px-4 pt-4 pb-2 bg-white">
+      <ScrollView
+        className="flex-1"
+        testID="vr-messages-ready"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
+        <View className="px-4 pt-4 pb-2 bg-white">
         <View className="flex-row items-center gap-2 border border-zinc-200 rounded bg-zinc-50 px-3 py-2">
           <Search size={16} color="#71717a" />
           <TextInput
@@ -147,6 +147,7 @@ export default function MessagesScreen() {
           ))}
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

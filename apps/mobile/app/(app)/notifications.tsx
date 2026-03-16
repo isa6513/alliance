@@ -199,8 +199,8 @@ export default function NotificationsScreen() {
     </View>
   ) : (
     <View className="flex-1 bg-white" testID="vr-notifications-ready">
+      <SimplePageTitle title="Notifications" />
       <LegendList
-        ListHeaderComponent={<SimplePageTitle title="Notifications" />}
         data={renderItems}
         keyExtractor={(item) => item.key}
         refreshControl={
