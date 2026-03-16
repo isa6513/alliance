@@ -12,7 +12,7 @@ export const SimplePageTitle = ({
 }) => {
   const navigation = useNavigation();
   return (
-    <View className="flex-row items-center gap-2 px-4 pb-2 min-h-12 justify-between border-b border-zinc-200">
+    <View className="flex-row items-center gap-2 px-4 justify-between border-b border-zinc-200">
       <View className="flex-row items-center gap-2">
         <Menu
           size={24}
@@ -20,7 +20,7 @@ export const SimplePageTitle = ({
           strokeWidth={2.5}
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
         />
-        <Text className="text-xl font-semibold text-zinc-900 font-serif">
+        <Text className="text-xl font-semibold text-zinc-900 font-serif py-4">
           {title}
         </Text>
       </View>
