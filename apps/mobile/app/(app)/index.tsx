@@ -1,9 +1,4 @@
-import {
-  View,
-  ActivityIndicator,
-  RefreshControl,
-  ScrollView,
-} from "react-native";
+import { View, ActivityIndicator, RefreshControl } from "react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   actionsDismissAction,
@@ -47,7 +42,6 @@ export default function HomeScreen() {
   const {
     data: actions,
     isPending,
-    error,
     refetch,
   } = useQuery({
     queryKey: ["actions"],
@@ -167,6 +161,7 @@ export default function HomeScreen() {
             </Text>
           </View>
         ),
+        fullScreen: true,
       };
     }
 
@@ -186,23 +181,25 @@ export default function HomeScreen() {
             />
           </View>
         ),
+        fullScreen: false,
       };
     }
 
     return {
       title: "Current task",
       body: (
-          <LargeActionCard
-            action={currentTaskOrGeneralUpdate}
-            userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
-            onUpdateActionState={refetch}
-            scrollPageTo={scrollPageTo}
-            scrollToEnd={scrollToEnd}
-            handleDismiss={() =>
-              handleDismissAction(currentTaskOrGeneralUpdate.id)
-            }
-          />
+        <LargeActionCard
+          action={currentTaskOrGeneralUpdate}
+          userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
+          onUpdateActionState={refetch}
+          scrollPageTo={scrollPageTo}
+          scrollToEnd={scrollToEnd}
+          handleDismiss={() =>
+            handleDismissAction(currentTaskOrGeneralUpdate.id)
+          }
+        />
       ),
+      fullScreen: false,
     };
   }, [
     currentTaskOrGeneralUpdate,
@@ -226,8 +223,10 @@ export default function HomeScreen() {
     <View className="flex-1 bg-white">
       <SimplePageTitle title={title} />
       <KeyboardAwareScrollView
+        key={fullScreen ? "fullscreen" : "scroll"}
         ref={scrollViewRef}
         className="flex-1"
+        contentContainerStyle={fullScreen ? { flex: 1 } : undefined}
         bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
