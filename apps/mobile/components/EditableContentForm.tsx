@@ -2,15 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  Pressable,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from 'expo-file-system';
-import { Paths } from 'expo-file-system';
+import * as FileSystem from "expo-file-system";
+import { Paths } from "expo-file-system";
 import { CreateEditableContentDto } from "@alliance/shared/client";
 import Text from "./system/Text";
 import { KeyboardExtender } from "react-native-keyboard-controller";
@@ -80,12 +79,21 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   const [pickerError, setPickerError] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedHashRef = useRef<string>("");
+  const toolbarHideRef = useRef<ReturnType<typeof setImmediate> | null>(null);
 
   const draftPath = useMemo(() => getDraftPath(draftKey), [draftKey]);
   const shouldRestoreDraft = restoreDraft ?? draftKey !== undefined;
   const minHeight = expanded ? 120 : 32;
 
   const [showExtend, setShowExtend] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (toolbarHideRef.current != null) {
+        clearImmediate(toolbarHideRef.current);
+      }
+    };
+  }, []);
 
   useEffect(
     () => {
@@ -221,6 +229,14 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   const canSubmit =
     value.body.trim() !== "" || (value.attachments?.length ?? 0) > 0;
 
+  const toolbarTap = (onTap: () => void) => {
+    if (toolbarHideRef.current != null) {
+      clearImmediate(toolbarHideRef.current);
+      toolbarHideRef.current = null;
+    }
+    onTap();
+  };
+
   return (
     <View className={className}>
       <TextInput
@@ -232,7 +248,14 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         multiline
         autoFocus={expanded}
         onFocus={() => setShowExtend(true)}
-        onBlur={() => setShowExtend(false)}
+        onBlur={() => {
+          if (toolbarHideRef.current != null)
+            clearImmediate(toolbarHideRef.current);
+          toolbarHideRef.current = setImmediate(() => {
+            toolbarHideRef.current = null;
+            setShowExtend(false);
+          });
+        }}
         onContentSizeChange={(event) => {
           const nextHeight = event.nativeEvent.contentSize.height;
           setInputHeight(nextHeight);
@@ -267,30 +290,38 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       )}
       <KeyboardExtender enabled={showExtend}>
         <View className="p-2 flex-row items-center gap-3 bg-white border-y border-zinc-200 justify-between">
-          <Pressable
-            onPress={handlePickImages}
-            disabled={isPicking}
+          <View
+            onTouchEnd={() =>
+              toolbarTap(() => {
+                if (!isPicking) handlePickImages();
+              })
+            }
             className="px-3 py-1.5"
-            onStartShouldSetResponder={() => false}
           >
             {isPicking ? (
               <ActivityIndicator size="small" color="#444" />
             ) : (
               <Text className="text-zinc-800">Add photos</Text>
             )}
-          </Pressable>
+          </View>
           {pickerError ? (
             <Text className="text-xs text-red-500">{pickerError}</Text>
           ) : null}
           <View className="flex-row items-center gap-3">
             {onCancel && (
-              <Pressable onPress={onCancel} className="px-3 py-1.5">
+              <View
+                onTouchEnd={() => toolbarTap(onCancel)}
+                className="px-3 py-1.5"
+              >
                 <Text className="text-zinc-500">Cancel</Text>
-              </Pressable>
+              </View>
             )}
-            <Pressable
-              onPress={onSubmit}
-              disabled={!canSubmit || isSubmitting}
+            <View
+              onTouchEnd={() =>
+                toolbarTap(() => {
+                  if (canSubmit && !isSubmitting) onSubmit();
+                })
+              }
               className={cn(
                 "px-3 py-1.5 bg-zinc-800 rounded-sm",
                 (!canSubmit || isSubmitting) && "opacity-50",
@@ -299,7 +330,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
               <Text className="text-white">
                 {isSubmitting ? "Posting..." : submitLabel}
               </Text>
-            </Pressable>
+            </View>
           </View>
         </View>
       </KeyboardExtender>
