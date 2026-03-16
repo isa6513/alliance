@@ -1353,10 +1353,19 @@ export class UserService {
         where: { id: body.deviceId, user: { id: userId } },
       });
       if (existingDevice) {
-        this.userDeviceRepository.update(existingDevice.id, {
+        await this.userDeviceRepository.update(existingDevice.id, {
           expoPushToken: body.expoPushToken,
         });
         return existingDevice;
+      }
+    }
+
+    if (body.expoPushToken) {
+      const existingByToken = await this.userDeviceRepository.findOne({
+        where: { expoPushToken: body.expoPushToken, user: { id: userId } },
+      });
+      if (existingByToken) {
+        return existingByToken;
       }
     }
 

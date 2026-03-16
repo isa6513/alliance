@@ -4,6 +4,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { User } from './user.entity';
 import type { Ty } from 'src/tasks/entities/type';
@@ -14,6 +15,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
+@Unique(['expoPushToken'])
 export class UserDevice {
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty()
