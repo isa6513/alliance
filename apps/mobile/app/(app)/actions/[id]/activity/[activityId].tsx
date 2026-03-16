@@ -84,7 +84,7 @@ export default function ActivityDetailScreen() {
 
   const handleUserPress = useCallback(() => {
     if (activity?.user.id) {
-      router.push(`/user/${activity.user.id}`);
+      router.push(`/member/${activity.user.id}`);
     }
   }, [activity?.user.id]);
 

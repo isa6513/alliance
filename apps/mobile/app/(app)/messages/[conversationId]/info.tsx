@@ -324,7 +324,7 @@ export default function ConversationInfoScreen() {
               <TouchableOpacity
                 key={participant.user.id}
                 className="flex-row items-center justify-between px-3 py-3 border-t border-zinc-200 last:border-b-0!"
-                onPress={() => router.push(`/user/${participant.user.id}`)}
+                onPress={() => router.push(`/member/${participant.user.id}`)}
                 activeOpacity={0.7}
               >
                 <View className="flex-row items-center gap-3">

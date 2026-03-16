@@ -39,14 +39,14 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
     if (!body) return null;
     if (collapsed) {
       return (
-        <Text className="text-sm text-zinc-800" numberOfLines={1}>
+        <Text className="text-zinc-800" numberOfLines={1}>
           {body}
         </Text>
       );
     }
     if (truncated) {
       return (
-        <Text className="text-sm text-zinc-800" numberOfLines={3}>
+        <Text className="text-zinc-800" numberOfLines={3}>
           {body}
         </Text>
       );

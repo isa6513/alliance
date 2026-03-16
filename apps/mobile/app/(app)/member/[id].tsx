@@ -308,10 +308,10 @@ export default function UserProfileScreen() {
             onPress={() =>
               router.push(`/forum/post/${item.post.id}` as RelativePathString)
             }
-            className="px-4 py-4 border-b border-zinc-200"
+            className="px-4 py-4 border-b border-zinc-200 text-base"
             activeOpacity={0.8}
           >
-            <Text className="text-sm text-zinc-900">{item.post.title}</Text>
+            <Text className="text-zinc-900">{item.post.title}</Text>
             <View className="flex-row items-center gap-2 mt-1">
               <ProfileImage
                 pfp={item.post.author.profilePicture}
@@ -350,7 +350,7 @@ export default function UserProfileScreen() {
               size="small"
             />
             <Text className="text-sm text-zinc-500">
-              commented{" "}
+              {" "}
               {formatTime(new Date(item.comment.createdAt), {
                 addSuffix: true,
               })}{" "}
@@ -420,7 +420,7 @@ export default function UserProfileScreen() {
         <TouchableOpacity
           className="flex-row items-center gap-3 flex-1"
           onPress={() =>
-            router.push(`/user/${friend.id}` as RelativePathString)
+            router.push(`/member/${friend.id}`)
           }
           activeOpacity={0.8}
         >

@@ -53,9 +53,6 @@ const splitPathAndSuffix = (url: string) => {
 const getInternalRoute = (location: string) => {
   if (!location.startsWith("/")) return null;
   const { path, suffix } = splitPathAndSuffix(location);
-  if (path.startsWith("/member/")) {
-    return `/user/${path.slice("/member/".length)}${suffix}`;
-  }
   return `${path}${suffix}`;
 };
 

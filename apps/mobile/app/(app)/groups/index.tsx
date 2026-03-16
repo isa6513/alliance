@@ -350,7 +350,7 @@ function MemberRow({
 }) {
   return (
     <TouchableOpacity
-      onPress={() => router.push(`/user/${profile.id}` as const)}
+      onPress={() => router.push(`/member/${profile.id}`)}
       className="flex-row items-center gap-3 px-4 py-3 border-b border-zinc-100"
     >
       <ProfileImage pfp={profile.profilePicture ?? null} size="large" />

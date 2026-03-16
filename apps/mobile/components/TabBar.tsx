@@ -62,14 +62,11 @@ export default function TabBar() {
       {tabs.map((tab) => {
         const active = isActive(tab.matchPaths);
         const Icon = tab.icon;
-        const isProfileTab = tab.href === "/profile";
-        const targetHref =
-          isProfileTab && user?.id ? (`/user/${user.id}` as const) : tab.href;
         return (
           <TouchableOpacity
             key={tab.href}
             className="flex-1 items-center justify-center py-2"
-            onPress={() => router.push(targetHref)}
+            onPress={() => router.push(tab.href)}
             activeOpacity={0.7}
           >
             <Icon

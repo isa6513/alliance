@@ -47,18 +47,18 @@ export default function UserActivityCard({
   const commentable = actionActivityCommentable[activity.type];
 
   const handleActionPress = useCallback(() => {
-    router.push(`/actions/${activity.actionId}` as RelativePathString);
+    router.push(`/actions/${activity.actionId}`);
   }, [activity.actionId]);
 
   const handleActivityPress = useCallback(() => {
     if (isEditing || isSaving || showCommentForm) return;
     router.push(
-      `/actions/${activity.actionId}/activity/${activity.id}` as RelativePathString,
+      `/actions/${activity.actionId}/activity/${activity.id}`,
     );
   }, [activity.actionId, activity.id, isEditing, isSaving, showCommentForm]);
 
   const handleUserPress = useCallback(() => {
-    router.push(`/user/${activity.user.id}` as RelativePathString);
+    router.push(`/member/${activity.user.id}`);
   }, [activity.user.id]);
 
   const timeSinceCompleted = formatTime(new Date(activity.createdAt), {
