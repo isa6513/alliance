@@ -42,6 +42,8 @@ interface EditableContentFormProps {
 }
 
 const STORAGE_PREFIX = "editablecontent:draft:v1";
+/** Sentinel for lastSavedHashRef when draft was just cleared; suppresses the next autosave. */
+const DRAFT_CLEARED_SENTINEL = "__DRAFT_CLEARED__";
 
 function getStorageKey(draftKey?: string) {
   return `${STORAGE_PREFIX}:${draftKey ?? "default"}`;
@@ -128,6 +130,10 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
     const doSave = async () => {
       const hash = JSON.stringify(value);
       if (hash === lastSavedHashRef.current) return;
+      if (lastSavedHashRef.current === DRAFT_CLEARED_SENTINEL) {
+        lastSavedHashRef.current = hash;
+        return;
+      }
       const payload = JSON.stringify({
         dto: value,
         savedAt: new Date().toISOString(),
@@ -153,23 +159,19 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
     };
   }, [value, autosaveMs, draftPath, clearDraftSignal]);
 
-  useEffect(
-    () => {
-      if (!clearDraftSignal) return;
-      if (!draftPath) return;
-      const clearDraft = async () => {
-        try {
-          await FileSystem.deleteAsync(draftPath, { idempotent: true });
-          lastSavedHashRef.current = JSON.stringify(value);
-        } catch {
-          // ignore
-        }
-      };
-      void clearDraft();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [clearDraftSignal, draftPath],
-  );
+  useEffect(() => {
+    if (!clearDraftSignal) return;
+    if (!draftPath) return;
+    const clearDraft = async () => {
+      try {
+        await FileSystem.deleteAsync(draftPath, { idempotent: true });
+        lastSavedHashRef.current = DRAFT_CLEARED_SENTINEL;
+      } catch {
+        // ignore
+      }
+    };
+    void clearDraft();
+  }, [clearDraftSignal, draftPath]);
 
   const handlePickImages = async () => {
     if (isPicking) return;
