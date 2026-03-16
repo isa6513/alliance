@@ -34,7 +34,7 @@ export default function LikeButton({
       disabled={!onPress}
     >
       <Heart size={size} color={color} fill={liked ? color : "none"} />
-      {likes > 0 && <Text className="">{likes}</Text>}
+      {likes > 0 && <Text>{likes}</Text>}
     </TouchableOpacity>
   );
 }

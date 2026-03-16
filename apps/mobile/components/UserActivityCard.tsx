@@ -196,25 +196,25 @@ export default function UserActivityCard({
                 liked={activity.likedByMe ?? false}
                 likes={activity.likesCount}
                 iconColor="black"
-                size={20}
+                size={22}
                 onPress={() => handleLike(activity.id)}
               />
               {canEdit && (
                 <TouchableOpacity
                   onPress={handleEdit}
                   activeOpacity={0.7}
-                  className="flex-row items-center gap-x-1 py-3! pb-2!"
+                  className="flex-row items-center gap-x-1 py-1!"
                 >
-                  <Edit size={20} color="black" />
+                  <Edit size={22} color="black" />
                 </TouchableOpacity>
               )}
               {commentable && (
                 <TouchableOpacity
-                  onPress={() => setShowCommentForm(true)}
-                  activeOpacity={0.7}
-                  className="flex-row items-center gap-x-1 py-3! pb-2!"
+                  onPress={(e) => {setShowCommentForm(true); e.stopPropagation();}}
+                  activeOpacity={0.4}
+                  className="flex-row items-center gap-x-1 py-1!"
                 >
-                  <MessageCircleIcon size={20} />
+                  <MessageCircleIcon size={22} />
                 </TouchableOpacity>
               )}
             </View>
