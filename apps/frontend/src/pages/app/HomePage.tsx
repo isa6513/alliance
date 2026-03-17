@@ -1,5 +1,5 @@
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ActionDto, FollowUpForm } from "@alliance/shared/client";
 import { Link, href } from "react-router";
@@ -33,12 +33,9 @@ import {
   TaskAwayStatus,
   isFollowUpFormActive,
 } from "@alliance/shared/lib/actionUtils";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import HomeNotifsCard from "../../components/HomeNotifsCard";
 import FollowUpFormPanel from "../../components/FollowUpFormPanel";
 import { useTaskActionsData } from "../../lib/useTaskActionsData";
-import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
+import HomeUpdatesRow from "../../components/HomeUpdatesRow";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -60,7 +57,6 @@ const HomePage = () => {
     }
   }, [user, refreshUser]);
 
-  const [showingTasksList, setShowingTasksList] = useState(false);
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
 
   const { items: globalFeedItems, loading: globalFeedLoading } = useGlobalFeed({
@@ -85,7 +81,7 @@ const HomePage = () => {
 
   const tasksListContent = useMemo(() => {
     const currentWeekSidebarActions = currentWeekTodoActions.filter(
-      showActionInSidebarList
+      showActionInSidebarList,
     );
 
     return (
@@ -120,7 +116,7 @@ const HomePage = () => {
               ))}
               {currentWeekTodoActions.map((action) => (
                 <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                  <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                  <div className="w-4! h-4! shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
                   <Link
                     to={href("/actions/:id", { id: action.id.toString() })}
                     className="text-zinc-600"
@@ -135,7 +131,7 @@ const HomePage = () => {
                   <p className="text-zinc-500 mt-3 font-medium">Upcoming</p>
                   {nextWeekTodoActions.map((action) => (
                     <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                      <div className="!w-4 !h-4 shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
+                      <div className="w-4! h-4! shrink-0 border-2 border-zinc-200 rounded-full mt-[4px]"></div>
                       <Link
                         to={href("/actions/:id", { id: action.id.toString() })}
                         className="text-zinc-600"
@@ -162,7 +158,7 @@ const HomePage = () => {
 
   const currentTaskOrGeneralUpdate = useMemo(() => {
     return [...todoActions, ...(generalUpdates ?? [])].sort(
-      homePagePriorityComparator
+      homePagePriorityComparator,
     )[0];
   }, [todoActions, generalUpdates]);
 
@@ -202,50 +198,36 @@ const HomePage = () => {
       !currentTask || currentTask.onboarding
         ? undefined
         : currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY
-        ? {
-            header: "Away",
-            message: {
-              [TaskAwayStatus.AWAY_CURRENTLY]:
-                TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
-              [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
-              [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
-            }[currentTask?.awayStatus],
-          }
-        : deadlineHasPassed(currentTask, new Date())
-        ? {
-            header: "Deadline passed",
-            message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
-          }
-        : undefined;
+          ? {
+              header: "Away",
+              message: {
+                [TaskAwayStatus.AWAY_CURRENTLY]:
+                  TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
+                [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
+                [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
+              }[currentTask?.awayStatus],
+            }
+          : deadlineHasPassed(currentTask, new Date())
+            ? {
+                header: "Deadline passed",
+                message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
+              }
+            : undefined;
 
     return (
       <div
         className={
-          "flex flex-col py-4 sm:py-8 md:py-18 px-4 lg:pr-0 max-w-3xl mx-auto min-h-full relative"
+          "flex flex-col gap-y-12 lg:gap-y-16 py-4 sm:py-8 md:py-18 px-4 xl:px-0 max-w-3xl mx-auto relative"
         }
       >
-        {!isLargeScreen && (
-          <div className="pb-4">
-            <Button
-              onClick={() => setShowingTasksList(!showingTasksList)}
-              color={ButtonColor.Transparent}
-              className="hover:bg-transparent gap-x-1"
-            >
-              Task list
-              {showingTasksList ? (
-                <ChevronUp size="15" />
-              ) : (
-                <ChevronDown size="15" />
-              )}
-            </Button>
-            {showingTasksList && (
-              <div className="px-2 sm:px-4 flex flex-col *:py-4 *:px-2 divide-y divide-zinc-200">
+        <div className="flex flex-col gap-6 flex-1">
+          {!isLargeScreen && (
+            <div>
+              <div className="flex flex-col divide-y divide-zinc-200">
                 {tasksListContent}
               </div>
-            )}
-          </div>
-        )}
-        <div className="flex flex-col gap-6 flex-1">
+            </div>
+          )}
           {currentTaskOrGeneralUpdate &&
           isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
             <LargeGeneralUpdateCard
@@ -275,8 +257,8 @@ const HomePage = () => {
                     prev?.map((action) =>
                       action.id === currentTaskOrGeneralUpdate.id
                         ? { ...action, userRelation: "completed" as const }
-                        : action
-                    )
+                        : action,
+                    ),
                 );
                 queryClient.invalidateQueries({ queryKey: ["actions"] });
               }}
@@ -291,14 +273,14 @@ const HomePage = () => {
               }}
             />
           ) : (
-            <div className="w-full flex-1 flex flex-col items-center justify-center gap-y-4">
+            <div className="w-full flex flex-col items-center">
               {user && !user.hasActiveContract ? (
                 <p className="text-center text-zinc-500">
                   {noTasksContractSuspended}
                 </p>
               ) : (
                 <>
-                  <div className="flex flex-col items-center justify-evenly max-h-[30%] flex-8 gap-y-4">
+                  <div className="flex flex-col items-center w-full flex-8 gap-y-4">
                     {activeCompletableFollowUpForms.length > 0 ? (
                       <div className="flex flex-col gap-y-4 w-full max-w-2xl">
                         {activeCompletableFollowUpForms.map(
@@ -313,26 +295,24 @@ const HomePage = () => {
                                 });
                               }}
                             />
-                          )
+                          ),
                         )}
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-y-4">
+                      <div className="flex flex-col items-center gap-y-4 rounded border border-zinc-200 w-full py-8 lg:py-12 px-8">
                         <CheckIcon size="large" />
                         <p className="text-center text-zinc-500 text-lg lg:text-xl">
                           {noTasksToDoRightNow}
                         </p>
                       </div>
                     )}
-                    <HomeNotifsCard />
                   </div>
-                  <div className="flex-2" />
                 </>
               )}
             </div>
           )}
-          <BottomSpacer />
         </div>
+        <HomeUpdatesRow />
       </div>
     );
   }, [
@@ -343,7 +323,6 @@ const HomePage = () => {
     user,
     handleDismissAction,
     handleDismissGeneralUpdate,
-    showingTasksList,
     tasksListContent,
     isLargeScreen,
     queryClient,

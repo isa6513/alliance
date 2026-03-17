@@ -902,7 +902,16 @@ export class ActionsController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionUpdateDto, isArray: true })
   async allUpdates(): Promise<ActionUpdateDto[]> {
-    return this.actionsService.getAllActionUpdates();
+    return this.actionsService.getActionUpdates();
+  }
+
+  @Get('updates')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ActionUpdateDto, isArray: true })
+  async recentUpdates(
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ): Promise<ActionUpdateDto[]> {
+    return this.actionsService.getActionUpdates(limit ?? 20);
   }
 
   @Get('suites')

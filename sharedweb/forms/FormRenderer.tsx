@@ -68,7 +68,7 @@ type FormRendererProps = {
   onAbandonAction?: (
     outOfTime: boolean,
     reason: string,
-    partialFormData: SubmitFormDto
+    partialFormData: SubmitFormDto,
   ) => void;
   followUp?: boolean;
   renderFormAsCompleted?: boolean;
@@ -122,7 +122,7 @@ const KNOWN_FIELD_KINDS_RECORD = {
   previousAnswer: true,
 } as const satisfies Record<FieldKind, unknown>;
 const KNOWN_FIELD_KINDS = new Set(
-  Object.keys(KNOWN_FIELD_KINDS_RECORD)
+  Object.keys(KNOWN_FIELD_KINDS_RECORD),
 ) as Set<FieldKind>;
 
 const DEFAULT_DEVICE_TYPE: DeviceVisibilityTarget = "desktop";
@@ -252,7 +252,7 @@ const FormRenderer = ({
           if (field.output?.output) {
             defaults.set(
               field.id,
-              field.output.privateByDefault ? false : userDefaultPublic
+              field.output.privateByDefault ? false : userDefaultPublic,
             );
           }
         }
@@ -263,7 +263,7 @@ const FormRenderer = ({
 
   const outputFieldIds = useMemo(
     () => new Set<string>(outputFieldDefaultPublic.keys()),
-    [outputFieldDefaultPublic]
+    [outputFieldDefaultPublic],
   );
 
   const clampPageIndex = (idx: number): number => {
@@ -348,13 +348,13 @@ const FormRenderer = ({
   ]);
 
   const [uploadingFields, setUploadingFields] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
   const [deviceType, setDeviceType] = useState<DeviceVisibilityTarget>(() =>
-    detectDeviceType()
+    detectDeviceType(),
   );
   const [submitting, setSubmitting] = useState(false);
 
@@ -384,7 +384,7 @@ const FormRenderer = ({
     | undefined;
 
   const effectiveDeviceType = readOnly
-    ? savedDeviceType ?? deviceType
+    ? (savedDeviceType ?? deviceType)
     : deviceType;
 
   const visibilityValidatorIds = useMemo(() => {
@@ -393,8 +393,8 @@ const FormRenderer = ({
       const conditions = Array.isArray(visibleIf)
         ? visibleIf
         : visibleIf
-        ? [visibleIf]
-        : [];
+          ? [visibleIf]
+          : [];
       for (const condition of conditions) {
         if (
           condition &&
@@ -406,7 +406,7 @@ const FormRenderer = ({
       }
     };
     const collectFromVisibleIfFormula = (
-      visibleIfFormula: VisibleIfFormula | undefined
+      visibleIfFormula: VisibleIfFormula | undefined,
     ) => {
       if (!visibleIfFormula?.conditions) {
         return;
@@ -476,7 +476,7 @@ const FormRenderer = ({
       return;
     }
     const missingIds = visibilityValidatorIds.filter(
-      (id) => !(id in visibilityValidatorResults)
+      (id) => !(id in visibilityValidatorResults),
     );
     if (!missingIds.length) {
       return;
@@ -498,11 +498,11 @@ const FormRenderer = ({
           } catch (error) {
             console.error(
               `Failed to evaluate visibility validator ${validatorId}`,
-              error
+              error,
             );
             return [validatorId, false] as const;
           }
-        })
+        }),
       );
       if (cancelled) return;
       setVisibilityValidatorResults((prev) => {
@@ -569,7 +569,7 @@ const FormRenderer = ({
             // form not found or inaccessible
           }
           return null;
-        })
+        }),
       );
       if (cancelled) return;
       const schemas: Record<number, FormSchema> = {};
@@ -595,7 +595,7 @@ const FormRenderer = ({
                 FormResponseDto & { user?: { id: number | string } }
               >;
               const match = allResponses.find(
-                (r) => String(r.user?.id) === previewId
+                (r) => String(r.user?.id) === previewId,
               );
               if (match) {
                 return [
@@ -619,7 +619,7 @@ const FormRenderer = ({
             // user hasn't submitted this form — graceful 404
           }
           return null;
-        })
+        }),
       );
       if (cancelled) return;
       const data: Record<number, Record<string, unknown>> = {};
@@ -662,7 +662,7 @@ const FormRenderer = ({
                 (c: unknown) =>
                   typeof c === "object" &&
                   c !== null &&
-                  Object.keys(c as Record<string, unknown>).length === 0
+                  Object.keys(c as Record<string, unknown>).length === 0,
               ));
           if (!isUntouched) continue;
 
@@ -684,7 +684,7 @@ const FormRenderer = ({
                 card[prefill.targetSubFieldId] = val as FormValue;
               }
               return card;
-            }
+            },
           );
 
           next[field.id] = prefilledCards;
@@ -698,7 +698,7 @@ const FormRenderer = ({
   const applyFieldErrorUpdates = useCallback(
     (
       updates: Record<string, string | null>,
-      clearKeysWithPrefix?: string | string[]
+      clearKeysWithPrefix?: string | string[],
     ) => {
       const hasUpdates = updates && Object.keys(updates).length > 0;
       const hasClear =
@@ -714,8 +714,8 @@ const FormRenderer = ({
         const prefixes = Array.isArray(clearKeysWithPrefix)
           ? clearKeysWithPrefix
           : clearKeysWithPrefix
-          ? [clearKeysWithPrefix]
-          : [];
+            ? [clearKeysWithPrefix]
+            : [];
         for (const prefix of prefixes) {
           const p = prefix + ":";
           for (const key of Object.keys(next)) {
@@ -741,13 +741,13 @@ const FormRenderer = ({
         return changed ? next : prev;
       });
     },
-    []
+    [],
   );
 
   const isElementCurrentlyVisible = useCallback(
     (
       element: AnyField | DisplayBlock,
-      data?: Record<string, FormValue>
+      data?: Record<string, FormValue>,
     ): boolean =>
       isElementCurrentlyVisibleShared(element, data ?? formData, {
         deviceType: effectiveDeviceType,
@@ -761,7 +761,7 @@ const FormRenderer = ({
       formData,
       readOnly,
       visibilityValidatorResults,
-    ]
+    ],
   );
 
   const resolveDisplayBlockForUser = useCallback<
@@ -782,26 +782,26 @@ const FormRenderer = ({
         manualUserContent: candidate.manualUserContent,
       };
     },
-    [activeUserKey]
+    [activeUserKey],
   );
 
   const validateFieldValue = useCallback(
     (
       field: AnyField,
       fieldValue: FormValue | undefined,
-      data?: Record<string, FormValue>
+      data?: Record<string, FormValue>,
     ): string | null =>
       validateFieldValueShared(field, fieldValue, data ?? formData, {
         deviceType: effectiveDeviceType,
         visibilityValidatorResults,
         fieldLookup,
       }),
-    [effectiveDeviceType, formData, visibilityValidatorResults, fieldLookup]
+    [effectiveDeviceType, formData, visibilityValidatorResults, fieldLookup],
   );
 
   const runCustomValidatorsForFields = useCallback(
     async (
-      fieldsToValidate: AnyField[]
+      fieldsToValidate: AnyField[],
     ): Promise<Record<string, string | null>> => {
       if (!fieldsToValidate.length || readOnly) {
         return {};
@@ -826,7 +826,7 @@ const FormRenderer = ({
             const isValid = response.data.isValid;
             return [
               field.id,
-              isValid ? null : response.data.message ?? null,
+              isValid ? null : (response.data.message ?? null),
             ] as const;
           } catch (err) {
             console.error("Failed to run custom validator", err);
@@ -835,18 +835,18 @@ const FormRenderer = ({
               "Unable to validate this field right now. Please try again.",
             ] as const;
           }
-        })
+        }),
       );
 
       return Object.fromEntries(results);
     },
-    [readOnly, formData]
+    [readOnly, formData],
   );
 
   const validatePage = useCallback(
     async (
       pageIndex: number,
-      includeCustomValidators: boolean
+      includeCustomValidators: boolean,
     ): Promise<{ isValid: boolean; firstInvalidFieldId?: string }> => {
       const page = schema.pages[pageIndex];
       if (!page) {
@@ -855,10 +855,10 @@ const FormRenderer = ({
 
       const updates: Record<string, string | null> = {};
       const fieldsOnPage = page.fields.filter(
-        (element): element is AnyField => "label" in element
+        (element): element is AnyField => "label" in element,
       );
       const visibleFields = fieldsOnPage.filter((field) =>
-        isElementCurrentlyVisible(field)
+        isElementCurrentlyVisible(field),
       );
       const visibleFieldIds = new Set(visibleFields.map((field) => field.id));
 
@@ -881,7 +881,7 @@ const FormRenderer = ({
 
       if (includeCustomValidators && !readOnly) {
         const candidates = visibleFields.filter(
-          (field) => field.customValidatorId && !updates[field.id]
+          (field) => field.customValidatorId && !updates[field.id],
         );
         if (candidates.length > 0) {
           const customResults = await runCustomValidatorsForFields(candidates);
@@ -894,11 +894,11 @@ const FormRenderer = ({
         .map((f) => f.id);
       applyFieldErrorUpdates(
         updates,
-        listFieldIds.length > 0 ? listFieldIds : undefined
+        listFieldIds.length > 0 ? listFieldIds : undefined,
       );
 
       const hasAnyError = Object.values(updates).some(
-        (msg) => msg && msg.trim().length > 0
+        (msg) => msg && msg.trim().length > 0,
       );
       const firstInvalid = visibleFields.find((field) => {
         const message = updates[field.id];
@@ -909,7 +909,7 @@ const FormRenderer = ({
         (hasAnyError
           ? (() => {
               const key = Object.keys(updates).find(
-                (k) => updates[k] && updates[k]!.trim().length > 0
+                (k) => updates[k] && updates[k]!.trim().length > 0,
               );
               return key?.includes(":") ? key.split(":")[0] : key;
             })()
@@ -932,7 +932,7 @@ const FormRenderer = ({
       runCustomValidatorsForFields,
       applyFieldErrorUpdates,
       readOnly,
-    ]
+    ],
   );
 
   const validateAllPages = useCallback(async () => {
@@ -991,7 +991,7 @@ const FormRenderer = ({
           const requiredError = validateFieldValue(
             fieldDefinition,
             nextValue,
-            next
+            next,
           );
           if (fieldDefinition.kind === "list") {
             applyFieldErrorUpdates({ [fieldId]: requiredError }, fieldId);
@@ -1195,7 +1195,7 @@ const FormRenderer = ({
         publicAnswers: publicAnswerOverrides,
         currentPageIndex,
         updatedAt: Date.now(),
-      })
+      }),
     );
   }, [
     formData,
@@ -1215,14 +1215,14 @@ const FormRenderer = ({
     if (parsed?.formData && typeof parsed.formData === "object") {
       const filtered = filterAnswersByFieldIds(
         parsed.formData as Record<string, FormValue>,
-        fieldLookup
+        fieldLookup,
       );
       setFormData(applyDefaultValues(filtered, defaultValueMap));
     }
     if (parsed?.publicAnswers && typeof parsed.publicAnswers === "object") {
       const overrides: Record<string, boolean> = {};
       for (const [fieldId, value] of Object.entries(
-        parsed.publicAnswers as Record<string, unknown>
+        parsed.publicAnswers as Record<string, unknown>,
       )) {
         if (outputFieldIds.has(fieldId) && typeof value === "boolean") {
           overrides[fieldId] = value;
@@ -1258,8 +1258,8 @@ const FormRenderer = ({
       setFormData(
         filterAnswersByFieldIds(
           completedFormResponse.answers as Record<string, FormValue>,
-          fieldLookup
-        )
+          fieldLookup,
+        ),
       );
     }
   }, [readOnly, completedFormResponse, fieldLookup]);
@@ -1488,16 +1488,16 @@ const FormRenderer = ({
         <div
           className={cn(
             "space-y-6",
-            readOnly && schema.pages.length === 1 && "mb-0"
+            readOnly && schema.pages.length === 1 && "mb-0",
           )}
         >
           {currentPage !== null &&
             currentPage.fields.map((element, index) =>
-              renderElement(element, index)
+              renderElement(element, index),
             )}
         </div>
         {/* Navigation */}
-        <div className="flex flex-row justify-between items-end gap-x-3">
+        <div className="flex flex-row justify-between items-end gap-x-2">
           <div className="flex flex-col gap-y-4 flex-1">
             {schema.pages.length > 1 && (
               <div className="flex items-center space-x-3">
@@ -1582,7 +1582,7 @@ const FormRenderer = ({
                 <BaseButton
                   className={cn(
                     "justify-start",
-                    outOfTimeSelected && "bg-zinc-100"
+                    outOfTimeSelected && "bg-zinc-100",
                   )}
                   onClick={handleOutOfTime}
                 >
@@ -1591,7 +1591,7 @@ const FormRenderer = ({
                 <BaseButton
                   className={cn(
                     "justify-start",
-                    otherReasonSelected && "bg-zinc-100"
+                    otherReasonSelected && "bg-zinc-100",
                   )}
                   onClick={handleOtherReason}
                 >

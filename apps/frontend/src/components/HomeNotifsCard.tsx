@@ -15,7 +15,7 @@ const HomeNotifsCard = () => {
         !notification.readAt ||
         (notification.category === "action_update" &&
           new Date(notification.sendTime).getTime() >
-            new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).getTime())
+            new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).getTime()),
     );
 
   if (priority.length === 0) {

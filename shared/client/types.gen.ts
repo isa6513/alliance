@@ -5714,6 +5714,21 @@ export type ActionsAllUpdatesResponses = {
 
 export type ActionsAllUpdatesResponse = ActionsAllUpdatesResponses[keyof ActionsAllUpdatesResponses];
 
+export type ActionsRecentUpdatesData = {
+    body?: never;
+    path?: never;
+    query: {
+        limit: number;
+    };
+    url: '/actions/updates';
+};
+
+export type ActionsRecentUpdatesResponses = {
+    200: Array<ActionUpdateDto>;
+};
+
+export type ActionsRecentUpdatesResponse = ActionsRecentUpdatesResponses[keyof ActionsRecentUpdatesResponses];
+
 export type ActionsSuitesData = {
     body?: never;
     path?: never;

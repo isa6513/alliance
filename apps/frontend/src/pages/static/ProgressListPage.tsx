@@ -42,7 +42,7 @@ function PublicActionCard({ action }: { action: ActionDto }) {
     >
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
         {memberActionDate && (
-          <p className="text-xs md:text-sm text-green uppercase font-medium tracking-wide">
+          <p className="text-zinc-500 text-sm md:text-base">
             {formatLongDateEnUS(new Date(memberActionDate))}
           </p>
         )}
@@ -85,7 +85,7 @@ const ProgressListPage: React.FC = () => {
                   className="flex flex-row items-center justify-between hover:bg-zinc-50 p-4"
                 >
                   <div className="flex flex-col gap-1">
-                    <p className="text-xs md:text-sm text-blue uppercase font-medium tracking-wide">
+                    <p className="text-sm md:text-base text-zinc-500">
                       {formatLongDateEnUS(new Date(post.frontmatter.date))}
                     </p>
                     <p className="text-base md:text-lg font-medium">

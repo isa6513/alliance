@@ -2143,9 +2143,10 @@ export class ActionsService {
     return actionUpdate;
   }
 
-  async getAllActionUpdates(limit?: number): Promise<ActionUpdateDto[]> {
+  async getActionUpdates(limit?: number): Promise<ActionUpdateDto[]> {
     const actionUpdates = await this.actionUpdateRepository.find({
       take: limit,
+      order: { date: 'DESC' },
       relations: { action: true },
       select: {
         action: {
