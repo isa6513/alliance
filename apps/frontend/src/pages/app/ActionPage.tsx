@@ -77,7 +77,7 @@ export default function ActionPage() {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <div className="space-y-4">
-          <p>This action is only available to Alliance members.</p>
+          <p>This action is only visible to Alliance members.</p>
           <p>
             Please{" "}
             <Link
