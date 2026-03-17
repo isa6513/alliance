@@ -36,8 +36,10 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   );
 }
 
-export interface TaskPanelContext
-  extends Omit<ActionTaskPanelPropsShared, "userRelation"> {
+export interface TaskPanelContext extends Omit<
+  ActionTaskPanelPropsShared,
+  "userRelation"
+> {
   publicMode: boolean;
   userRelation: UserActionRelation | null;
 }
@@ -51,7 +53,7 @@ const ActionPageTaskPanel = () => {
   const state = getActionPageTaskPanelState(
     action,
     userRelation,
-    user?.hasActiveContract ?? false
+    user?.hasActiveContract ?? false,
   );
 
   const { isAuthenticated } = useAuth();
@@ -71,8 +73,13 @@ const ActionPageTaskPanel = () => {
     case ActionPageTaskPanelState.NotAuthenticated:
       return (
         <div>
-          <Card style={CardStyle.Grey} className="bg-zinc-200 rounded-b-none">
-            Log in to complete this task
+          <Card style={CardStyle.Grey} className="bg-zinc-100 rounded-b-none">
+            <p className="text-center">
+              <Link to="/login" className="text-green">
+                Log in
+              </Link>{" "}
+              to complete this task.
+            </p>
           </Card>
           <Card style={CardStyle.Grey} className="rounded-t-none border-t-0">
             <ActionTaskPanel
@@ -198,7 +205,7 @@ const ActionPageTaskPanel = () => {
       );
     default:
       throw new Error(
-        `Unknown action page task panel state: ${state satisfies never}`
+        `Unknown action page task panel state: ${state satisfies never}`,
       );
   }
 };
