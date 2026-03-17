@@ -35,13 +35,7 @@ export default function LargeGeneralUpdateCard({
   const formSchema = getFormSchema(generalUpdate.schema);
 
   return (
-    <Card className="p-4 sm:p-6 w-full relative border-dashed border-[1.5px] border-blue-300 rounded">
-      <View className="mb-3 p-3 rounded-md bg-blue-50 border border-blue-200">
-        <Text className="font-semibold text-zinc-900">General update</Text>
-        <Text className="text-zinc-700 mt-1">
-          This is an update for you to read. No action required.
-        </Text>
-      </View>
+    <Card className="p-4 sm:p-6 w-full relative rounded">
       <View className="pb-2">
         <Text className="font-semibold text-2xl font-serif text-zinc-900">
           {generalUpdate.name}
