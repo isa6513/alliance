@@ -50,14 +50,8 @@ export default function MessageComposer({
     if (picking) return;
     setPicking(true);
     try {
-      const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        Alert.alert("Permission required", "Allow photo access to add images.");
-        return;
-      }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         allowsMultipleSelection: true,
         base64: true,
         quality: 0.8,
@@ -159,7 +153,7 @@ export default function MessageComposer({
           onPress={handleSend}
           className={cn(
             "w-10 h-10 items-center justify-center rounded",
-            canSend ? "bg-green" : "bg-zinc-300"
+            canSend ? "bg-green" : "bg-zinc-300",
           )}
           disabled={!canSend || isSending}
         >

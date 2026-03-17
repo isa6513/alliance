@@ -35,27 +35,27 @@ export default function ConversationInfoScreen() {
   const convoId = conversationId
     ? parseInt(
         Array.isArray(conversationId) ? conversationId[0] : conversationId,
-        10
+        10,
       )
     : NaN;
   const { user } = useAuth();
   const { conversations, setConversations, loading } = useConversations(
-    Number.isNaN(convoId) ? null : convoId
+    Number.isNaN(convoId) ? null : convoId,
   );
 
   const selectedConvo = useMemo(
     () =>
       conversations?.find((conversation) => conversation.id === convoId) ??
       null,
-    [conversations, convoId]
+    [conversations, convoId],
   );
 
   const participantMe = useMemo(
     () =>
       selectedConvo?.participants.find(
-        (participant) => participant.user.id === user?.id
+        (participant) => participant.user.id === user?.id,
       ) ?? null,
-    [selectedConvo, user?.id]
+    [selectedConvo, user?.id],
   );
 
   const isAdmin =
@@ -95,12 +95,12 @@ export default function ConversationInfoScreen() {
     const term = search.trim().toLowerCase();
     const existing = new Set(
       selectedConvo?.participants.map((participant) => participant.user.id) ??
-        []
+        [],
     );
     return messageableUsers
       .filter((user) => !existing.has(user.id))
       .filter((user) =>
-        `${user.displayName ?? ""}`.toLowerCase().includes(term)
+        `${user.displayName ?? ""}`.toLowerCase().includes(term),
       )
       .slice(0, 8);
   }, [messageableUsers, search, selectedConvo?.participants]);
@@ -108,14 +108,8 @@ export default function ConversationInfoScreen() {
   const handlePickPhoto = useCallback(async () => {
     if (!isAdmin || !isGroup) return;
     try {
-      const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        Alert.alert("Permission required", "Please allow photo access.");
-        return;
-      }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         quality: 0.8,
         base64: true,
       });
@@ -146,7 +140,7 @@ export default function ConversationInfoScreen() {
       });
       if (response.data) {
         setConversations((prev) =>
-          mergeConversationUpdate(prev, response.data!)
+          mergeConversationUpdate(prev, response.data!),
         );
         setIsEditing(false);
       }
@@ -166,12 +160,12 @@ export default function ConversationInfoScreen() {
       });
       if (response.data) {
         setConversations((prev) =>
-          mergeConversationUpdate(prev, response.data!)
+          mergeConversationUpdate(prev, response.data!),
         );
         setSearch("");
       }
     },
-    [selectedConvo, setConversations]
+    [selectedConvo, setConversations],
   );
 
   const handleRemoveMember = useCallback(
@@ -182,11 +176,11 @@ export default function ConversationInfoScreen() {
       });
       if (response.data) {
         setConversations((prev) =>
-          mergeConversationUpdate(prev, response.data!)
+          mergeConversationUpdate(prev, response.data!),
         );
       }
     },
-    [selectedConvo, setConversations]
+    [selectedConvo, setConversations],
   );
 
   const handleLeave = useCallback(async () => {
@@ -226,7 +220,7 @@ export default function ConversationInfoScreen() {
   const directParticipant =
     selectedConvo.type === "direct"
       ? selectedConvo.participants.find(
-          (participant) => participant.user.id !== user?.id
+          (participant) => participant.user.id !== user?.id,
         )
       : null;
 

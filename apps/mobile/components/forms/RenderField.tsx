@@ -63,7 +63,7 @@ const formatCityValue = (city: CityFieldValue): string => {
   const region = city.admin1?.trim();
   const country = city.countryName?.trim();
   const locationParts = [region, country].filter(
-    (part): part is string => !!part && part.length > 0
+    (part): part is string => !!part && part.length > 0,
   );
   const suffix = locationParts.length ? `, ${locationParts.join(", ")}` : "";
   return `${city.name}${suffix}`;
@@ -86,7 +86,7 @@ const getRangeValues = (field: RangeField): number[] => {
     : DEFAULT_RANGE_OPTION_COUNT;
   const optionCount = Math.min(
     MAX_RANGE_OPTION_COUNT,
-    Math.max(MIN_RANGE_OPTION_COUNT, normalized)
+    Math.max(MIN_RANGE_OPTION_COUNT, normalized),
   );
   return Array.from({ length: optionCount }, (_, index) => index + 1);
 };
@@ -272,8 +272,8 @@ export function RenderField({
               {field.min !== undefined && field.max !== undefined
                 ? `Range: ${field.min} - ${field.max}`
                 : field.min !== undefined
-                ? `Minimum: ${field.min}`
-                : `Maximum: ${field.max}`}
+                  ? `Minimum: ${field.min}`
+                  : `Maximum: ${field.max}`}
             </Text>
           ) : null}
           {renderValidationMessage(errorMessage)}
@@ -286,8 +286,8 @@ export function RenderField({
         typeof value === "number"
           ? value
           : typeof value === "string" && value.trim().length > 0
-          ? Number(value)
-          : undefined;
+            ? Number(value)
+            : undefined;
       const normalizedValue = Number.isFinite(numericValue)
         ? Number(numericValue)
         : undefined;
@@ -310,8 +310,8 @@ export function RenderField({
                     checked
                       ? "bg-green border-green"
                       : hasError
-                      ? "border-red-500"
-                      : "border-zinc-200"
+                        ? "border-red-500"
+                        : "border-zinc-200",
                   )}
                   onPress={
                     disabled
@@ -329,7 +329,7 @@ export function RenderField({
                   <Text
                     className={cn(
                       "text-sm",
-                      checked ? "text-white font-semibold" : "text-zinc-700"
+                      checked ? "text-white font-semibold" : "text-zinc-700",
                     )}
                   >
                     {optionValue}
@@ -381,8 +381,8 @@ export function RenderField({
                       selected
                         ? "border-green"
                         : hasError
-                        ? "border-red-500"
-                        : "border-zinc-400"
+                          ? "border-red-500"
+                          : "border-zinc-400",
                     )}
                   >
                     {selected && (
@@ -422,7 +422,7 @@ export function RenderField({
             <Text
               className={cn(
                 "text-base",
-                selectedLabel ? "text-zinc-900" : "text-zinc-400"
+                selectedLabel ? "text-zinc-900" : "text-zinc-400",
               )}
             >
               {selectedLabel || "Select an option"}
@@ -455,7 +455,7 @@ export function RenderField({
                       "w-5 h-5 rounded-full border mr-3 items-center justify-center",
                       value === option.value
                         ? "border-green"
-                        : "border-zinc-200"
+                        : "border-zinc-200",
                     )}
                   >
                     {value === option.value && (
@@ -502,7 +502,7 @@ export function RenderField({
                     if (!onChange || disabledOption) return;
                     const currentValues = Array.isArray(value)
                       ? value.filter(
-                          (item): item is string => typeof item === "string"
+                          (item): item is string => typeof item === "string",
                         )
                       : [];
                     if (checked) {
@@ -520,9 +520,9 @@ export function RenderField({
                       checked
                         ? "border-green bg-green"
                         : hasError
-                        ? "border-red-500"
-                        : "border-zinc-400",
-                      disabledOption && "opacity-60"
+                          ? "border-red-500"
+                          : "border-zinc-400",
+                      disabledOption && "opacity-60",
                     )}
                   >
                     {checked && (
@@ -595,8 +595,8 @@ export function RenderField({
         cityValue !== undefined
           ? formatCityValue(cityValue)
           : typeof value === "string"
-          ? value
-          : "";
+            ? value
+            : "";
       return (
         <View>
           <RenderLabel field={field as CityField} error={errorMessage} />
@@ -622,14 +622,8 @@ export function RenderField({
       const pickImage = async () => {
         if (disabled || uploading) return;
         setPickerError(null);
-        const permission =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permission.granted) {
-          setPickerError("Permission to access photos is required.");
-          return;
-        }
         const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: ["images"],
           allowsEditing: true,
           quality: 0.8,
         });
@@ -685,13 +679,13 @@ export function RenderField({
       const rawList = Array.isArray(value) ? value : [];
       const listValue: ListFieldValue = rawList.every(
         (item): item is Record<string, FormValue> =>
-          item !== null && typeof item === "object" && !Array.isArray(item)
+          item !== null && typeof item === "object" && !Array.isArray(item),
       )
         ? rawList
         : [];
       const defaultCount = Math.max(
         0,
-        Math.floor(listField.defaultNumber ?? 0)
+        Math.floor(listField.defaultNumber ?? 0),
       );
       const minCards = Math.max(0, Math.floor(Number(listField.min || 0)));
       const maxCards =
@@ -703,10 +697,10 @@ export function RenderField({
           ? Array.from({ length: defaultCount }, () => ({}))
           : listValue;
       const hiddenInOutputIds = new Set(
-        isOutputView ? listField.outputViewHiddenFieldIds ?? [] : []
+        isOutputView ? (listField.outputViewHiddenFieldIds ?? []) : [],
       );
       const visibleSubFields = subFields.filter(
-        (subField) => !hiddenInOutputIds.has(subField.id)
+        (subField) => !hiddenInOutputIds.has(subField.id),
       );
       const canDelete = cards.length > minCards;
 
@@ -728,7 +722,7 @@ export function RenderField({
       const updateCard = (
         index: number,
         subFieldId: string,
-        subValue: FormValue
+        subValue: FormValue,
       ) => {
         const nextCards = [...cards];
         nextCards[index] = {
@@ -816,7 +810,7 @@ export function RenderField({
                       "flex-1 py-3 rounded-lg border items-center",
                       signedValue === true
                         ? "border-green-600 bg-green-50"
-                        : "border-zinc-200 bg-white"
+                        : "border-zinc-200 bg-white",
                     )}
                   >
                     <Text
@@ -824,7 +818,7 @@ export function RenderField({
                         "font-medium",
                         signedValue === true
                           ? "text-green-700"
-                          : "text-zinc-700"
+                          : "text-zinc-700",
                       )}
                     >
                       {field.yesLabel.trim()}
@@ -837,7 +831,7 @@ export function RenderField({
                       "flex-1 py-3 rounded-lg border items-center",
                       signedValue === false
                         ? "border-red-600 bg-red-50"
-                        : "border-zinc-200 bg-white"
+                        : "border-zinc-200 bg-white",
                     )}
                   >
                     <Text
@@ -845,7 +839,7 @@ export function RenderField({
                         "font-medium",
                         signedValue === false
                           ? "text-red-700"
-                          : "text-zinc-700"
+                          : "text-zinc-700",
                       )}
                     >
                       {field.noLabel.trim()}
@@ -903,7 +897,7 @@ export function TimeInputField({
 }: TimeInputFieldProps) {
   const normalizedValue = typeof value === "string" && value ? value : "";
   const [inputValue, setInputValue] = useState<string>(() =>
-    formatTimeForDisplay(normalizedValue)
+    formatTimeForDisplay(normalizedValue),
   );
   const [localError, setLocalError] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -942,7 +936,7 @@ export function TimeInputField({
         const displayHours = hours % 12 === 0 ? 12 : hours % 12;
         return `${displayHours}:${minutes} ${ampm}`;
       }),
-    []
+    [],
   );
 
   return (
@@ -956,7 +950,7 @@ export function TimeInputField({
             "flex-row items-center justify-between",
             sharedInputClasses,
             hasError ? "border-red-500" : "border-zinc-200",
-            disabled && "opacity-60"
+            disabled && "opacity-60",
           )}
         >
           <TextInput
@@ -1007,7 +1001,7 @@ export function TimeInputField({
                     "text-base",
                     t === inputValue
                       ? "font-semibold text-green-700"
-                      : "text-zinc-800"
+                      : "text-zinc-800",
                   )}
                 >
                   {t}

@@ -230,14 +230,8 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
     setPickerError(null);
     setIsPicking(true);
     try {
-      const permission =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        setPickerError("Permission to access photos is required.");
-        return;
-      }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         allowsMultipleSelection: true,
         quality: 0.8,
         base64: true,

@@ -9,7 +9,7 @@ import { usePostHog } from "posthog-react-native";
 export interface ActionTaskPanelProps extends ActionTaskPanelPropsShared {
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
-  onSubmitSuccess?: () => void;
+  onSubmitSuccess: () => void;
 }
 
 const ActionTaskPanel = ({
