@@ -13,10 +13,8 @@ import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import OnetimeInviteListItem from "../../components/OnetimeInviteListItem";
 import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
-import {
-  inviteBuckets,
-  deleteInviteConfirmation,
-} from "@alliance/shared/lib/copy";
+import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
+import { inviteBuckets, deleteInviteConfirmation } from "@alliance/shared/lib/copy";
 import InviteForm from "../../components/InviteForm";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 
@@ -43,19 +41,10 @@ const InvitesPage = () => {
     })();
   }, []);
 
-  const leaderCommunityIds = useMemo(() => {
-    if (!user) {
-      return new Set<number>();
-    }
-    return new Set(
-      user.communities
-        .filter(
-          (community) =>
-            community.leaders?.some((leader) => leader.id === user.id) ?? false
-        )
-        .map((community) => community.id)
-    );
-  }, [user]);
+  const leaderCommunityIds = useMemo(
+    () => getLeaderCommunityIds(user ?? undefined),
+    [user],
+  );
 
   const { actionable, unverifiableActionable, waitingForResponse, settled } =
     useMemo(() => {

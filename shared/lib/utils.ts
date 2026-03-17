@@ -38,3 +38,16 @@ export const formatTime = (time: Date, { addSuffix = true }) => {
     addSuffix,
   }).replace("about ", "");
 };
+
+/**
+ * Run an async function without awaiting; use in event handlers to avoid floating promises.
+ * Optionally pass an onError callback for centralised error handling.
+ */
+export function runAsync(
+  fn: () => Promise<void>,
+  onError?: (err: unknown) => void
+): void {
+  void fn().catch((err) => {
+    onError?.(err);
+  });
+}

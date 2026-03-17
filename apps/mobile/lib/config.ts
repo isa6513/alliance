@@ -17,13 +17,17 @@ export const getApiUrl = (): string => {
   }
 };
 
+export const getBaseUrl = (): string => {
+  const apiUrl = getApiUrl();
+  return apiUrl.replace(/\/api\/?$/, "") || "https://worldalliance.org";
+};
+
 export const getImageSource = (string: string) => {
   return `${getApiUrl()}/images/${string}`;
 };
 
 export const getWebSocketUrl = (): string => {
-  const apiUrl = getApiUrl();
-  const baseUrl = apiUrl.replace(/\/api\/?$/, "");
+  const baseUrl = getBaseUrl();
   if (baseUrl.startsWith("https://")) {
     return baseUrl.replace("https://", "wss://");
   }

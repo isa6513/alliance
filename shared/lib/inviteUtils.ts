@@ -1,4 +1,13 @@
-import { CommunityInviteDto, OnetimeInviteDto } from "../client";
+import type { CommunityInviteDto, OnetimeInviteDto } from "../client";
+
+/** Optional callbacks for invite list/section actions; pass a single object to simplify props. */
+export type OnetimeInviteActions = {
+  onApprove?: (inviteId: number) => void;
+  onReject?: (inviteId: number) => void;
+  onDelete?: (inviteId: number, event: unknown) => void;
+  onDeleteWithConfirm?: (inviteId: number, event: unknown) => void;
+  onShared?: (inviteId: number) => void;
+};
 
 const createdAtComparator = (
   a: { createdAt: string },

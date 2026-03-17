@@ -135,6 +135,14 @@ export const inviteBuckets = {
   },
 } as const;
 
+/** Shared labels for onetime invite status; each app maps to its own style (e.g. Tailwind class). */
+export const onetimeInviteStatusLabels = {
+  request_pending: "Request pending",
+  request_rejected: "Rejected",
+  link_used: "Accepted",
+  link_unused: "Pending",
+} as const;
+
 export const deleteInviteConfirmation = {
   message: "Are you sure you want to delete this invite?",
   confirmLabel: "Yes, delete it",

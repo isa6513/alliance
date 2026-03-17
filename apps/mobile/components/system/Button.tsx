@@ -31,7 +31,7 @@ interface ButtonProps extends ViewProps {
 
 const colorClasses: Record<ButtonColor, string> = {
   [ButtonColor.Black]: "bg-zinc-800 border border-zinc-800",
-  [ButtonColor.Green]: "bg-green-600 border border-green-600",
+  [ButtonColor.Green]: "bg-green border border-green",
   [ButtonColor.Blue]: "bg-blue-500 border border-blue-500",
   [ButtonColor.Red]: "bg-red-100 border border-red-500",
   [ButtonColor.Light]: "bg-stone-200 border border-stone-300",

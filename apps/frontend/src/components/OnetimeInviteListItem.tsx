@@ -1,5 +1,6 @@
 import { OnetimeInviteDto } from "@alliance/shared/client";
 import { cn } from "@alliance/shared/styles/util";
+import { onetimeInviteStatusLabels } from "@alliance/shared/lib/copy";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
@@ -19,21 +20,15 @@ type OnetimeInviteListItemProps = {
   onReject?: (inviteId: number) => void;
 };
 
-const STATUS_STYLE = {
-  request_pending: {
-    label: "Request pending",
-    textColor: "text-amber-500",
-  },
-  request_rejected: {
-    label: "Rejected",
-    textColor: "text-orange-600",
-  },
-  link_used: { label: "Accepted", textColor: "text-zinc-600" },
-  link_unused: { label: "Pending", textColor: "text-green" },
-} satisfies Record<
-  OnetimeInviteDto["status"],
-  { label: string; textColor: string }
->;
+const STATUS_TEXT_CLASS: Record<
+  keyof typeof onetimeInviteStatusLabels,
+  string
+> = {
+  request_pending: "text-amber-500",
+  request_rejected: "text-orange-600",
+  link_used: "text-zinc-600",
+  link_unused: "text-green",
+};
 
 const OnetimeInviteListItem = ({
   invite,
@@ -48,7 +43,8 @@ const OnetimeInviteListItem = ({
   onReject,
 }: OnetimeInviteListItemProps) => {
   const isRequest = invite.status === "request_pending";
-  const statusStyle = STATUS_STYLE[invite.status];
+  const statusLabel = onetimeInviteStatusLabels[invite.status];
+  const textColorClass = STATUS_TEXT_CLASS[invite.status];
   communityLabel ??= "No group";
 
   const handleCopy = () => {
@@ -118,8 +114,8 @@ const OnetimeInviteListItem = ({
               <span className="text-zinc-400">{communityLabel}</span>
             )}
           </div>
-          <span className={cn("text-sm font-semibold", statusStyle.textColor)}>
-            {statusStyle.label}
+          <span className={cn("text-sm font-semibold", textColorClass)}>
+            {statusLabel}
           </span>
         </div>
         <div className="mt-2 flex flex-row items-center sm:justify-end gap-2">
