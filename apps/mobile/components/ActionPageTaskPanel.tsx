@@ -43,7 +43,11 @@ const ActionPageTaskPanel = ({
   scrollToEnd,
 }: ActionPageTaskPanelProps) => {
   const { user } = useAuth();
-  const state = getActionPageTaskPanelState(action, userRelation, user?.hasActiveContract ?? false);
+  const state = getActionPageTaskPanelState(
+    action,
+    userRelation,
+    user?.hasActiveContract ?? false,
+  );
 
   const panelHandlers = {
     onCompleteAction,
@@ -68,7 +72,11 @@ const ActionPageTaskPanel = ({
         </Card>
       );
     case ActionPageTaskPanelState.NotAssigned:
-      return <Card cardStyle={CardStyle.Grey}><Text>{taskNotAssigned}</Text></Card>;
+      return (
+        <Card cardStyle={CardStyle.Grey}>
+          <Text>{taskNotAssigned}</Text>
+        </Card>
+      );
     case ActionPageTaskPanelState.MissingDataOrNotActive:
       return null;
     case ActionPageTaskPanelState.Completed:
@@ -89,6 +97,7 @@ const ActionPageTaskPanel = ({
             userRelation={userRelation ?? "none"}
             scrollPageTo={scrollPageTo}
             scrollToEnd={scrollToEnd}
+            onSubmitSuccess={() => {}}
             {...panelHandlers}
           />
         </View>
@@ -97,13 +106,19 @@ const ActionPageTaskPanel = ({
       return (
         <View>
           <Card cardStyle={CardStyle.Grey} className="bg-zinc-100 my-2">
-            <Text className="font-medium">Please sign the contract before continuing with the onboarding process.</Text>
-            <Link href="/" className="text-green flex items-center gap-x-2">Go back</Link>
+            <Text className="font-medium">
+              Please sign the contract before continuing with the onboarding
+              process.
+            </Text>
+            <Link href="/" className="text-green flex items-center gap-x-2">
+              Go back
+            </Link>
           </Card>
           <ActionTaskPanel
             action={action}
             userRelation={userRelation ?? "none"}
             scrollPageTo={scrollPageTo}
+            onSubmitSuccess={() => {}}
             scrollToEnd={scrollToEnd}
             {...panelHandlers}
             disabled
@@ -113,6 +128,7 @@ const ActionPageTaskPanel = ({
     case ActionPageTaskPanelState.ShowTask:
       return (
         <ActionTaskPanel
+          onSubmitSuccess={() => {}}
           action={action}
           scrollPageTo={scrollPageTo}
           scrollToEnd={scrollToEnd}
@@ -122,7 +138,7 @@ const ActionPageTaskPanel = ({
       );
     default:
       throw new Error(
-        `Unknown action page task panel state: ${state satisfies never}`
+        `Unknown action page task panel state: ${state satisfies never}`,
       );
   }
 };
