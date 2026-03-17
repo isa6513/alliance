@@ -20,7 +20,10 @@ const HomeUpdatesRow = () => {
       const res = await actionsRecentUpdates({
         query: { limit: UPDATES_LIMIT },
       });
-      return res;
+      if (res.data) {
+        return res.data;
+      }
+      throw res.error;
     },
   });
 
