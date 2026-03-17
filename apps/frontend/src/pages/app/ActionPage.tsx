@@ -1,6 +1,7 @@
 import { actionsFindOne } from "@alliance/shared/client";
 import {
   href,
+  Link,
   Navigate,
   Outlet,
   useLocation,
@@ -72,13 +73,23 @@ export default function ActionPage() {
 
   const publicMode = !isAuthenticated;
 
-  // TODO: hack because some action pages are public and some are private. we should handle this in a more general way elsehwere (ie applayout.tsx logic)
   if (!action && !loading && !user && !userLoading) {
     return (
-      <Navigate
-        to={href("/login") + `?redirect=${location.pathname}`}
-        replace
-      />
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="space-y-4">
+          <p>This action is only available to Alliance members.</p>
+          <p>
+            Please{" "}
+            <Link
+              to={href("/login") + `?redirect=${location.pathname}`}
+              className="text-link"
+            >
+              log in
+            </Link>{" "}
+            if that&apos;s you.
+          </p>
+        </div>
+      </div>
     );
   }
 
