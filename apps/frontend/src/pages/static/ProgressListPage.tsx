@@ -31,12 +31,21 @@ export async function loader() {
 }
 
 function PublicActionCard({ action }: { action: ActionDto }) {
+  const memberActionDate = action.events.find(
+    (event) => event.newStatus === "member_action",
+  )?.date;
+
   return (
     <Link
       to={href("/actions/:id", { id: action.id.toString() })}
       className="group flex flex-row items-start justify-between gap-4 p-4 hover:bg-zinc-50"
     >
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+        {memberActionDate && (
+          <p className="text-sm md:text-base text-zinc-500">
+            {formatLongDateEnUS(new Date(memberActionDate))}
+          </p>
+        )}
         <p className="text-base md:text-lg font-medium text-black">
           {action.name}
         </p>
@@ -76,15 +85,14 @@ const ProgressListPage: React.FC = () => {
                   className="flex flex-row justify-between hover:bg-zinc-50 p-4"
                 >
                   <div className="">
+                    <p className="text-sm md:text-base text-zinc-500">
+                      {formatLongDateEnUS(new Date(post.frontmatter.date))}
+                    </p>
                     <div className="flex justify-between">
                       <p className="text-base md:text-lg font-medium">
                         {post.frontmatter.title}
                       </p>
                     </div>
-
-                    <p className="text-base md:text-lg text-zinc-500">
-                      {formatLongDateEnUS(new Date(post.frontmatter.date))}
-                    </p>
                   </div>
                 </Link>
               ))}
