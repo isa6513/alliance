@@ -7,7 +7,7 @@ type ScreenWithLoadingProps = {
   title: string;
   loading: boolean;
   headerRight?: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 /**

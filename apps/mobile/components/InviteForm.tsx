@@ -8,6 +8,7 @@ import {
 } from "@alliance/shared/client";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
+import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import Card, { CardStyle } from "./system/Card";
 import Button, { ButtonColor } from "./system/Button";
 import Input from "./system/Input";
@@ -15,6 +16,7 @@ import Text from "./system/Text";
 import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import FormModal from "./forms/FormModal";
 import { colors } from "../lib/style/colors";
+import { useAuth } from "../lib/AuthContext";
 import { useCreateOnetimeInvite } from "../lib/useCreateOnetimeInvite";
 
 type InviteFormProps = {
@@ -22,6 +24,7 @@ type InviteFormProps = {
 };
 
 export default function InviteForm({ onInviteCreated }: InviteFormProps) {
+  const { user } = useAuth();
   const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(
     null,
   );
@@ -31,6 +34,11 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
   const [newGroupDescription, setNewGroupDescription] = useState("");
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [groupSelectModalOpen, setGroupSelectModalOpen] = useState(false);
+
+  const leaderCommunityIds = useMemo(
+    () => getLeaderCommunityIds(user ?? undefined),
+    [user],
+  );
 
   const {
     inviteeName,
@@ -50,20 +58,32 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
     const response = await communityGetMyCommunities();
     if (response.data) {
       setCommunities(response.data);
-      const firstLeader = response.data.find(
-        (c) => (c.leaders?.length ?? 0) > 0,
-      );
-      setSelectedCommunityId(firstLeader?.id ?? null);
+      const firstLeaderId = response.data.find((c) =>
+        leaderCommunityIds.has(c.id),
+      )?.id;
+      setSelectedCommunityId(firstLeaderId ?? null);
     }
-  }, []);
+  }, [leaderCommunityIds]);
 
   useEffect(() => {
     void refreshCommunities();
   }, [refreshCommunities]);
 
-  const leaderCommunities = useMemo(() => {
-    return communities.filter((c) => (c.leaders?.length ?? 0) > 0);
-  }, [communities]);
+  useEffect(() => {
+    if (
+      selectedCommunityId === null &&
+      communities.length > 0 &&
+      leaderCommunityIds.size > 0
+    ) {
+      const first = communities.find((c) => leaderCommunityIds.has(c.id));
+      if (first) setSelectedCommunityId(first.id);
+    }
+  }, [communities, leaderCommunityIds, selectedCommunityId]);
+
+  const leaderCommunities = useMemo(
+    () => communities.filter((c) => leaderCommunityIds.has(c.id)),
+    [communities, leaderCommunityIds],
+  );
 
   const selectedCommunity = useMemo(
     () => leaderCommunities.find((c) => c.id === selectedCommunityId) ?? null,
@@ -331,9 +351,7 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
 
                 {selectedCommunityId !== null && !showCreateGroupForm && (
                   <Button
-                    onPress={() =>
-                      createInvite(selectedCommunityId ?? null)
-                    }
+                    onPress={() => createInvite(selectedCommunityId ?? null)}
                     color={ButtonColor.Black}
                     title={creatingInvite ? "Creating…" : "Create invite"}
                     disabled={

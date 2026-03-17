@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   RefreshControl,
   ScrollView,
   TextInput,
@@ -19,8 +18,8 @@ import {
   getPendingInvites,
   useConversations,
 } from "../../../lib/messages";
-import { colors } from "../../../lib/style/colors";
 import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
+import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
 
 export default function MessagesScreen() {
   const { user } = useAuth();
@@ -61,11 +60,7 @@ export default function MessagesScreen() {
   };
 
   if (!conversations && loading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color={colors.green} />
-      </View>
-    );
+    return <ScreenWithLoading title="Messages" loading />;
   }
 
   if (conversations === null && !loading) {

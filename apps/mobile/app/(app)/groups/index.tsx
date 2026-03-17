@@ -15,12 +15,14 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import type { CommunityDto } from "@alliance/shared/client/types.gen";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
+import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import { LegendList } from "@legendapp/list";
 import Text from "../../../components/system/Text";
 import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
+import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
 import { colors } from "../../../lib/style/colors";
 import UserActivityCard from "../../../components/UserActivityCard";
 import ProfileImage from "../../../components/ProfileImage";
@@ -77,9 +79,14 @@ export default function GroupsScreen() {
     [communities, selectedCommunityId],
   );
 
+  const leaderCommunityIds = useMemo(
+    () => getLeaderCommunityIds(user ?? undefined),
+    [user],
+  );
   const amLeader = useMemo(
-    () => selectedCommunity?.leaders.some((l) => l.id === user?.id) ?? false,
-    [selectedCommunity, user?.id],
+    () =>
+      selectedCommunity != null && leaderCommunityIds.has(selectedCommunity.id),
+    [selectedCommunity, leaderCommunityIds],
   );
 
   const tabs: Tab[] = amLeader
@@ -87,14 +94,7 @@ export default function GroupsScreen() {
     : ["activity", "members"];
 
   if (loading) {
-    return (
-      <View className="flex-1 bg-white">
-        <SimplePageTitle title="Groups" />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={colors.green} />
-        </View>
-      </View>
-    );
+    return <ScreenWithLoading title="Groups" loading />;
   }
 
   if (communities.length === 0) {

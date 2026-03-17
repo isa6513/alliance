@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   TextInput,
   TouchableOpacity,
@@ -40,24 +39,44 @@ import Button, {
   ButtonSize,
 } from "../../../components/system/Button";
 import Text from "../../../components/system/Text";
+import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
+import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
 import { useAuth } from "../../../lib/AuthContext";
-import { colors } from "../../../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
 
-type ProfileTab = "actions" | "forum" | "friends";
-type FriendsTab = "friends" | "received" | "sent";
+enum ProfileTab {
+  Actions = "actions",
+  Forum = "forum",
+  Friends = "friends",
+}
 
-const tabs: { id: ProfileTab; label: string }[] = [
-  { id: "actions", label: "Actions" },
-  { id: "forum", label: "Forum" },
-  { id: "friends", label: "Friends" },
-];
+enum FriendsTab {
+  Friends = "friends",
+  Received = "received",
+  Sent = "sent",
+}
 
-const friendsTabs: { id: FriendsTab; label: string }[] = [
-  { id: "friends", label: "Friends" },
-  { id: "received", label: "Received" },
-  { id: "sent", label: "Sent" },
+const PROFILE_TABS_ORDER: ProfileTab[] = [
+  ProfileTab.Actions,
+  ProfileTab.Forum,
+  ProfileTab.Friends,
 ];
+const PROFILE_TAB_LABELS: Record<ProfileTab, string> = {
+  [ProfileTab.Actions]: "Actions",
+  [ProfileTab.Forum]: "Forum",
+  [ProfileTab.Friends]: "Friends",
+};
+
+const FRIENDS_TABS_ORDER: FriendsTab[] = [
+  FriendsTab.Friends,
+  FriendsTab.Received,
+  FriendsTab.Sent,
+];
+const FRIENDS_TAB_LABELS: Record<FriendsTab, string> = {
+  [FriendsTab.Friends]: "Friends",
+  [FriendsTab.Received]: "Received",
+  [FriendsTab.Sent]: "Sent",
+};
 
 export default function UserProfileScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
@@ -96,8 +115,10 @@ export default function UserProfileScreen() {
     comments: true,
   });
 
-  const [selectedTab, setSelectedTab] = useState<ProfileTab>("actions");
-  const [friendsTab, setFriendsTab] = useState<FriendsTab>("friends");
+  const [selectedTab, setSelectedTab] = useState<ProfileTab>(
+    ProfileTab.Actions,
+  );
+  const [friendsTab, setFriendsTab] = useState<FriendsTab>(FriendsTab.Friends);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editBio, setEditBio] = useState("");
@@ -124,8 +145,8 @@ export default function UserProfileScreen() {
   }, [profile, isMe, isEditing]);
 
   useEffect(() => {
-    setSelectedTab("actions");
-    setFriendsTab("friends");
+    setSelectedTab(ProfileTab.Actions);
+    setFriendsTab(FriendsTab.Friends);
     setIsEditing(false);
   }, [userId]);
 
@@ -426,10 +447,10 @@ export default function UserProfileScreen() {
   );
 
   const listData = useMemo((): any[] => {
-    if (selectedTab === "actions") return completedActions;
-    if (selectedTab === "forum") return forumActivityItems;
-    if (friendsTab === "received" && isMe) return receivedRequests;
-    if (friendsTab === "sent" && isMe) return sentRequests;
+    if (selectedTab === ProfileTab.Actions) return completedActions;
+    if (selectedTab === ProfileTab.Forum) return forumActivityItems;
+    if (friendsTab === FriendsTab.Received && isMe) return receivedRequests;
+    if (friendsTab === FriendsTab.Sent && isMe) return sentRequests;
     return friends;
   }, [
     selectedTab,
@@ -444,7 +465,7 @@ export default function UserProfileScreen() {
 
   const listKeyExtractor = useCallback(
     (item: any) => {
-      if (selectedTab === "forum") {
+      if (selectedTab === ProfileTab.Forum) {
         return item.type === "post"
           ? `post-${item.post.id}`
           : `comment-${item.comment.id}`;
@@ -456,11 +477,12 @@ export default function UserProfileScreen() {
 
   const listRenderItem = useCallback(
     ({ item }: { item: any }) => {
-      if (selectedTab === "actions") return renderActionItem({ item });
-      if (selectedTab === "forum") return renderForumItem({ item });
-      if (friendsTab === "received" && isMe)
+      if (selectedTab === ProfileTab.Actions) return renderActionItem({ item });
+      if (selectedTab === ProfileTab.Forum) return renderForumItem({ item });
+      if (friendsTab === FriendsTab.Received && isMe)
         return renderReceivedItem({ item });
-      if (friendsTab === "sent" && isMe) return renderSentItem({ item });
+      if (friendsTab === FriendsTab.Sent && isMe)
+        return renderSentItem({ item });
       return renderFriendItem({ item });
     },
     [
@@ -476,22 +498,22 @@ export default function UserProfileScreen() {
   );
 
   const listEmptyComponent = useMemo(() => {
-    if (selectedTab === "actions") return undefined;
-    if (selectedTab === "forum") {
+    if (selectedTab === ProfileTab.Actions) return undefined;
+    if (selectedTab === ProfileTab.Forum) {
       return (
         <Text className="text-center text-zinc-500 py-6 px-4">
           No forum activity yet
         </Text>
       );
     }
-    if (friendsTab === "received" && isMe) {
+    if (friendsTab === FriendsTab.Received && isMe) {
       return (
         <Text className="text-center text-zinc-500 py-6 px-4">
           No incoming requests.
         </Text>
       );
     }
-    if (friendsTab === "sent" && isMe) {
+    if (friendsTab === FriendsTab.Sent && isMe) {
       return (
         <Text className="text-center text-zinc-500 py-6 px-4">
           No outgoing requests.
@@ -514,11 +536,7 @@ export default function UserProfileScreen() {
   }
 
   if (profilePending) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color={colors.green} />
-      </View>
-    );
+    return <ScreenWithLoading title="Profile" loading />;
   }
 
   if (profileError) {
@@ -644,63 +662,29 @@ export default function UserProfileScreen() {
           </View>
         )}
 
-        <View className="flex-row bg-zinc-100 rounded-lg p-1">
-          {tabs.map((tab) => {
-            const isSelected = selectedTab === tab.id;
-
-            return (
-              <TouchableOpacity
-                key={tab.id}
-                onPress={() => setSelectedTab(tab.id)}
-                activeOpacity={0.7}
-                className={cn(
-                  "flex-1 px-3 py-2 rounded-md items-center",
-                  isSelected && "bg-white",
-                )}
-              >
-                <Text
-                  className={cn(
-                    "text-sm font-medium",
-                    isSelected ? "text-zinc-900" : "text-zinc-500",
-                  )}
-                >
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        <SegmentedTabs
+          tabs={PROFILE_TABS_ORDER}
+          selectedTab={selectedTab}
+          onSelect={setSelectedTab}
+          labels={PROFILE_TAB_LABELS}
+        />
       </View>
       <View className="border-t border-zinc-200" />
     </>
   );
 
   const listHeader =
-    selectedTab === "friends" && isMe ? (
+    selectedTab === ProfileTab.Friends && isMe ? (
       <View>
         {profileHeader}
         <View className="px-4">
-          <View className="flex-row bg-zinc-100 rounded-lg p-1 my-4">
-            {friendsTabs.map((tab) => (
-              <TouchableOpacity
-                key={tab.id}
-                onPress={() => setFriendsTab(tab.id)}
-                activeOpacity={0.7}
-                className={cn(
-                  "flex-1 px-3 py-2 rounded-md items-center",
-                  friendsTab === tab.id && "bg-white",
-                )}
-              >
-                <Text
-                  className={cn(
-                    "text-sm font-medium",
-                    friendsTab === tab.id ? "text-zinc-900" : "text-zinc-500",
-                  )}
-                >
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View className="my-4">
+            <SegmentedTabs
+              tabs={FRIENDS_TABS_ORDER}
+              selectedTab={friendsTab}
+              onSelect={setFriendsTab}
+              labels={FRIENDS_TAB_LABELS}
+            />
           </View>
         </View>
       </View>

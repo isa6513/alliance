@@ -132,14 +132,17 @@ export default function InvitesScreen() {
     });
   }, []);
 
-  const handleDeleteInvite = useCallback((inviteId: number, _event: unknown) => {
-    runAsync(async () => {
-      const response = await userDeleteOnetimeInvite({ path: { inviteId } });
-      if (!response.error) {
-        setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
-      }
-    });
-  }, []);
+  const handleDeleteInvite = useCallback(
+    (inviteId: number, _event: unknown) => {
+      runAsync(async () => {
+        const response = await userDeleteOnetimeInvite({ path: { inviteId } });
+        if (!response.error) {
+          setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
+        }
+      });
+    },
+    [],
+  );
 
   const handleInviteCreated = useCallback((invite: OnetimeInviteDto) => {
     setInvites((prev) => [invite, ...prev]);
@@ -151,20 +154,8 @@ export default function InvitesScreen() {
     waitingForResponse.length === 0 &&
     settled.length === 0;
 
-  if (!user) {
-    return (
-      <ScreenWithLoading title="Invites" loading>
-        {null}
-      </ScreenWithLoading>
-    );
-  }
-
-  if (loadingInvites) {
-    return (
-      <ScreenWithLoading title="Invites" loading>
-        {null}
-      </ScreenWithLoading>
-    );
+  if (!user || loadingInvites) {
+    return <ScreenWithLoading title="Invites" loading />;
   }
 
   const renderTabContent = () => {
