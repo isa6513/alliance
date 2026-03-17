@@ -9,23 +9,8 @@ import AnimatedSidebar from "../../components/AnimatedSidebar";
 import { colors } from "../../lib/style/colors";
 import { isVisualTestMode } from "../../lib/visualTest";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCallback, useMemo } from "react";
-
-const BASE_ROUTE_NAMES = new Set([
-  "index",
-  "actions/index",
-  "information",
-  "search",
-  "notifications",
-  "feed",
-  "forum/index",
-  "invites",
-  "contract",
-  "profile",
-  "settings",
-  "groups/index",
-  "messages/index",
-]);
+import { useCallback } from "react";
+import { isBaseRoute } from "../../lib/useIsBasePage";
 
 function AppContent() {
   const insets = useSafeAreaInsets();
@@ -33,17 +18,8 @@ function AppContent() {
   const { user } = useAuth();
 
   const isBasePage = useCallback(
-    (name: string, params?: Record<string, any>) => {
-      if (BASE_ROUTE_NAMES.has(name)) {
-        return true;
-      }
-      if (user?.id === undefined) {
-        return false;
-      }
-      return (
-        name === `member/[id]` && Number.parseInt(params?.id, 10) === user?.id
-      );
-    },
+    (name: string, params?: Record<string, any>) =>
+      isBaseRoute(name, params, user?.id),
     [user?.id],
   );
 
