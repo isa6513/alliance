@@ -311,17 +311,17 @@ const SettingsPage: React.FC = () => {
               <div className="flex flex-row gap-x-4 items-center justify-between py-3">
                 <div>
                   <label className="block font-medium mb-0">
-                    Anonymous account
+                    Show my name to other members
                   </label>
                   <p className="text-zinc-500 text-sm mt-0.5">
-                    With an anonymous account, other members will not be able to
-                    see your name.
+                    When off, other members will not be able to see your name
+                    (anonymous).
                   </p>
                 </div>
                 <YesNoToggle
-                  value={editableUser.anonymous}
-                  onChange={(next) => updateEditableUser({ anonymous: next })}
-                  ariaLabel="Anonymous account"
+                  value={!editableUser.anonymous}
+                  onChange={(next) => updateEditableUser({ anonymous: !next })}
+                  ariaLabel="Show my name to other members"
                   yesLabel="On"
                   noLabel="Off"
                   yesColor={ButtonColor.Green}
