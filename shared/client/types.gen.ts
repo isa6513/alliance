@@ -4848,6 +4848,19 @@ export type ActionsFindAllResponses = {
 
 export type ActionsFindAllResponse = ActionsFindAllResponses[keyof ActionsFindAllResponses];
 
+export type ActionsFindPublicListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/public';
+};
+
+export type ActionsFindPublicListResponses = {
+    200: Array<ActionDto>;
+};
+
+export type ActionsFindPublicListResponse = ActionsFindPublicListResponses[keyof ActionsFindPublicListResponses];
+
 export type ActionsFindAllLoggedInData = {
     body?: never;
     path?: never;

@@ -190,7 +190,14 @@ export class ActionsController {
   @UseGuards(AuthOptionalGuard)
   @ApiOkResponse({ type: [ActionDto] })
   async findAll(@Request() req: JwtRequest): Promise<ActionDto[]> {
-    return this.actionsService.findPublic(req.user?.sub);
+    return this.actionsService.findMemberPublic(req.user?.sub);
+  }
+
+  @Get('public')
+  @Public()
+  @ApiOkResponse({ type: [ActionDto] })
+  async findPublicList(): Promise<ActionDto[]> {
+    return this.actionsService.findPublicOnly();
   }
 
   @Get('loggedIn')
@@ -200,7 +207,7 @@ export class ActionsController {
     @Request() req: JwtRequest,
     @Query('sorted', new ParseBoolPipe({ optional: true })) sorted?: boolean,
   ): Promise<ActionDto[]> {
-    return this.actionsService.findPublic(req.user.sub, sorted);
+    return this.actionsService.findMemberPublic(req.user.sub, sorted);
   }
 
   @Get('myActivity')

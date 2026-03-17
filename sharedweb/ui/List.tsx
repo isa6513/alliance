@@ -10,7 +10,7 @@ const List: React.FC<ListProps> = ({ children, className }) => {
   return (
     <div
       className={cn(
-        "flex flex-col divide-y divide-zinc-200 border border-zinc-200 rounded overflow-hidden bg-white",
+        "flex flex-col divide-y divide-zinc-200 bg-white",
         className
       )}
     >

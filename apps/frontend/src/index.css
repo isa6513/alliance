@@ -118,7 +118,11 @@ select {
 }
 
 .font-sans {
-  font-family: "Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont,
+  font-family:
+    "Source Sans 3",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
     sans-serif;
 }
 
@@ -181,6 +185,10 @@ select {
 
 .text-title-small {
   @apply font-semibold text-2xl md:text-2xl;
+}
+
+.text-heading-public {
+  @apply font-medium text-3xl md:text-4xl;
 }
 
 a,

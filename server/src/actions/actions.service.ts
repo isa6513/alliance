@@ -510,7 +510,10 @@ export class ActionsService {
     return this.userService.findByIds(completedUserIds);
   }
 
-  async findPublic(userId?: number, sorted?: boolean): Promise<ActionDto[]> {
+  async findMemberPublic(
+    userId?: number,
+    sorted?: boolean,
+  ): Promise<ActionDto[]> {
     const relations: Omit<Relations<Action>, 'usersCompleted' | 'status'> = {
       events: true,
       followUpForms: true,
@@ -582,6 +585,32 @@ export class ActionsService {
           reqAuthenticated: !!user,
         });
       }),
+    );
+  }
+
+  async findPublicOnly(): Promise<ActionDto[]> {
+    const relations: Omit<Relations<Action>, 'usersCompleted' | 'status'> = {
+      events: true,
+      followUpForms: true,
+    };
+
+    const filterActions = (action: Action) =>
+      action.visibilityMode === VisibilityMode.Public &&
+      action.status !== ActionStatus.Draft &&
+      !action.onboarding &&
+      !action.archived;
+
+    const actions = await this.findAllSorted(relations);
+
+    const filteredActions = actions.filter(filterActions);
+
+    return filteredActions.map(
+      (action) =>
+        new ActionDto(action, {
+          canParticipate: false,
+          shouldParticipate: false,
+          reqAuthenticated: false,
+        }),
     );
   }
 
@@ -2352,7 +2381,7 @@ export class ActionsService {
     userId: number,
     suiteId?: number,
   ): Promise<ActionDto[]> {
-    const actions = (await this.findPublic(userId))
+    const actions = (await this.findMemberPublic(userId))
       .filter(
         (action) =>
           action.shouldParticipate &&

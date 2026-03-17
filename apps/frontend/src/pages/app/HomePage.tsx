@@ -239,7 +239,7 @@ const HomePage = () => {
               )}
             </Button>
             {showingTasksList && (
-              <div className="px-2 sm:px-4 flex flex-col *:py-4 *:px-2 divide-y divide-zinc-200 border border-zinc-200 rounded">
+              <div className="px-2 sm:px-4 flex flex-col *:py-4 *:px-2 divide-y divide-zinc-200">
                 {tasksListContent}
               </div>
             )}

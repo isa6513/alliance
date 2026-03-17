@@ -75,16 +75,16 @@ const PeoplePage: React.FC = () => {
       setStaffProfiles(
         membersRes.data
           ?.filter((member) =>
-            Object.keys(staffIds).includes(member.id.toString())
+            Object.keys(staffIds).includes(member.id.toString()),
           )
           .sort((a, b) =>
             (a.displayName ?? "").localeCompare(
               b.displayName ?? "",
               undefined,
-              { sensitivity: "base" }
-            )
+              { sensitivity: "base" },
+            ),
           )
-          .reverse() ?? []
+          .reverse() ?? [],
       );
     };
 
@@ -97,7 +97,7 @@ const PeoplePage: React.FC = () => {
     }
     const query = searchQuery.toLowerCase().trim();
     return members.filter((member) =>
-      member.displayName?.toLowerCase().includes(query)
+      member.displayName?.toLowerCase().includes(query),
     );
   }, [members, searchQuery]);
 
@@ -118,8 +118,8 @@ const PeoplePage: React.FC = () => {
       <div className="flex-1 max-w-4xl mx-auto pt-12 md:pt-28 pb-56 flex flex-col gap-y-16 md:gap-y-24 px-5 text-base md:text-lg">
         <h1 className="text-title-large text-center">People</h1>
         <div>
-          <h2 className="text-title-small mb-4 text-center">Office</h2>
-          <p className="mb-6 md:mb-12 text-zinc-900 text-center">
+          <h2 className="text-heading-public mb-4 ">Office</h2>
+          <p className="mb-6 md:mb-8 text-zinc-900 text-lg">
             Members of the office plan actions and develop our online platform.
           </p>
           <div className="space-y-8">
@@ -143,7 +143,7 @@ const PeoplePage: React.FC = () => {
                     <h3 className="text-lg md:text-xl font-medium text-zinc-900">
                       {member.displayName}
                     </h3>
-                    <div className="text-zinc-600 text-base md:mt-1">
+                    <div className="text-zinc-500 text-base md:mt-1">
                       <AppMarkdownWrapper
                         markdownContent={member.profileDescription ?? ""}
                       />
@@ -154,16 +154,16 @@ const PeoplePage: React.FC = () => {
           </div>
         </div>
         <div>
-          <h2 className="text-title-small mb-4 text-center">Experts</h2>
-          <p className="text-zinc-900 text-center">
+          <h2 className="text-heading-public mb-4">Experts</h2>
+          <p className="text-zinc-900 text-lg">
             We are gradually building a group of experts who occasionally lend
             time, knowledge, or resources to the Alliance.
           </p>
-          <p className="text-zinc-500 text-base mb-4 text-center">
+          <p className="text-zinc-500 text-lg mb-4">
             This list only includes experts who have chosen to make their
             information public.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-8 mt-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-8 mt-8">
             {experts.map((expert) => (
               <div key={expert.name} className="">
                 <p className="text-zinc-900 text-base">{expert.name}</p>
@@ -173,24 +173,24 @@ const PeoplePage: React.FC = () => {
           </div>
         </div>
         <div>
-          <h2 className="text-title-small mb-4 text-center">Members</h2>
+          <h2 className="text-heading-public mb-4">Members</h2>
           {nmembers !== undefined && (
-            <p className="text-zinc-900 text-center">
+            <p className="text-zinc-900 text-lg">
               The Alliance has {nmembers} members. Membership is currently by
               invitation only.
             </p>
           )}
-          <p className="text-zinc-500 text-base mb-4 text-center">
+          <p className="text-zinc-500 text-lg">
             This directory only includes members who have chosen to make their
             information public.
           </p>
-          <div className="mt-6 md:mt-12 mb-4">
+          <div className="mt-6 md:mt-8 mb-4">
             <input
               type="text"
               placeholder="Search members..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full border bg-white border-zinc-200 py-2 px-3 rounded text-base"
+              className="w-full border bg-white border-zinc-200 py-2 px-3 rounded text-lg"
             />
           </div>
           {filteredMembers.length > 0 ? (

@@ -9,7 +9,7 @@ import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { ChevronRight } from "lucide-react";
 import Footer from "../../components/Footer";
 
-const FEATURED_ACTION_IDS: number[] = [81, 76, 75];
+const FEATURED_ACTION_IDS: number[] = [81, 79, 76, 75];
 
 function usePrelaunchActions() {
   const results = useQueries({
@@ -85,7 +85,7 @@ const PrelaunchLandingPage: React.FC = () => {
         </div>
 
         <section className="w-full max-w-[1000px] mx-auto flex flex-col items-center justify-start gap-y-4 lg:gap-y-6 pt-12">
-          <p className="font-serif text-2xl lg:text-3xl font-medium text-black  w-full">
+          <p className="text-heading-public text-black  w-full">
             Recent actions
           </p>
           {isPending ? (
@@ -93,7 +93,7 @@ const PrelaunchLandingPage: React.FC = () => {
               <Spinner size="large" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 lggap-4 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:gap-4 w-full">
               {actions.map((action) => (
                 <PreviewActionCard key={action.id} action={action} />
               ))}

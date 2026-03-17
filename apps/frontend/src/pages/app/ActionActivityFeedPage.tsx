@@ -225,7 +225,7 @@ const ActionActivityFeedPage = () => {
         </div>
       </div>
       <div
-        className="relative overflow-hidden border border-zinc-200 rounded bg-white"
+        className="relative overflow-hidden bg-white"
         style={{ height: activeHeight }}
       >
         <div
