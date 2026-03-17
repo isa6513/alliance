@@ -4,12 +4,11 @@ import {
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import FormRenderer from "./forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import { ActivityIndicator, View } from "react-native";
 import { usePostHog } from "posthog-react-native";
-import SuccessOverlay from "./SuccessOverlay";
 import Text from "./system/Text";
 import { useQuery } from "@tanstack/react-query";
 
@@ -20,12 +19,13 @@ interface ActionTaskPanelFormProps {
   onAbandonAction: (
     outOfTime: boolean,
     reason: string,
-    partialFormData: SubmitFormDto
+    partialFormData: SubmitFormDto,
   ) => void;
   actionId: number;
   publicAction?: boolean;
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
+  onSubmitSuccess?: () => void;
 }
 
 const ActionTaskPanelForm = ({
@@ -37,18 +37,10 @@ const ActionTaskPanelForm = ({
   publicAction = false,
   scrollPageTo,
   scrollToEnd,
+  onSubmitSuccess,
 }: ActionTaskPanelFormProps) => {
-  const [showSuccess, setShowSuccess] = useState(false);
-
   const posthog = usePostHog();
   const [error, setError] = useState<string | null>(null);
-
-  const handleSuccessComplete = useCallback(() => {
-    setShowSuccess(false);
-    if (onCompleteAction) {
-      onCompleteAction(false);
-    }
-  }, [onCompleteAction]);
 
   const {
     data: form,
@@ -58,7 +50,7 @@ const ActionTaskPanelForm = ({
     queryKey: ["form", taskFormId],
     queryFn: () =>
       tasksGetForm({ path: { id: taskFormId } }).then(
-        (response) => response.data
+        (response) => response.data,
       ),
   });
 
@@ -80,8 +72,7 @@ const ActionTaskPanelForm = ({
           //TODO: better handling of user refresh (things used to break if the user signed a contract in another tab then went back to the first one)
           // refreshUser();
           //   }
-          // Show success overlay - it will call onCompleteAction after animation
-          setShowSuccess(true);
+          onSubmitSuccess?.();
         } else {
           console.error(response.error);
           posthog.captureException(response.error, {
@@ -95,14 +86,6 @@ const ActionTaskPanelForm = ({
         }
       }
     : null;
-
-  const { distinctId, sessionReplayUrl } = useMemo(() => {
-    if (!posthog) return { distinctId: undefined, sessionReplayUrl: undefined };
-    return {
-      distinctId: posthog.getDistinctId(),
-      sessionReplayUrl: undefined, //TODO mobile posthog doesnt have a replay url
-    };
-  }, [posthog]);
 
   if (isPending) {
     return <ActivityIndicator />;
@@ -132,11 +115,6 @@ const ActionTaskPanelForm = ({
       {formError ? (
         <Text className="text-red-500">{formError.message}</Text>
       ) : null}
-      <SuccessOverlay
-        visible={showSuccess}
-        onComplete={handleSuccessComplete}
-        message="Thank you!"
-      />
     </View>
   );
 };

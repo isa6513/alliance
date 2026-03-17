@@ -20,6 +20,7 @@ import LargeActionCard from "../../components/LargeActionCard";
 import LargeGeneralUpdateCard from "../../components/LargeGeneralUpdateCard";
 import { Check } from "lucide-react-native";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
+import SuccessOverlay from "../../components/SuccessOverlay";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   KeyboardAwareScrollView,
@@ -40,6 +41,15 @@ const GENERAL_UPDATES_QUERY_KEY = [
 export default function HomeScreen() {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleSubmitSuccess = useCallback(() => {
+    setShowSuccess(true);
+  }, []);
+
+  const handleSuccessComplete = useCallback(() => {
+    setShowSuccess(false);
+  }, []);
   const {
     data: actions,
     isPending,
@@ -204,6 +214,7 @@ export default function HomeScreen() {
           handleDismiss={() =>
             handleDismissAction(currentTaskOrGeneralUpdate.id)
           }
+          onSubmitSuccess={handleSubmitSuccess}
         />
       ),
       fullScreen: false,
@@ -216,6 +227,7 @@ export default function HomeScreen() {
     refetch,
     scrollPageTo,
     scrollToEnd,
+    handleSubmitSuccess,
   ]);
 
   if (loading) {
@@ -260,6 +272,11 @@ export default function HomeScreen() {
         {optionalBanner}
         {body}
       </KeyboardAwareScrollView>
+      <SuccessOverlay
+        visible={showSuccess}
+        onFadeInComplete={refetch}
+        onComplete={handleSuccessComplete}
+      />
     </View>
   );
 }

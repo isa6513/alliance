@@ -47,7 +47,7 @@ function SwipeableNotification({
       if (translateX.value < SWIPE_THRESHOLD) {
         runOnJS(onMarkRead)();
       }
-      translateX.value = withSpring(0, { damping: 20, stiffness: 200 });
+      translateX.value = withSpring(0, { duration: 300, dampingRatio: 0.8 });
     });
 
   const contentStyle = useAnimatedStyle(() => ({

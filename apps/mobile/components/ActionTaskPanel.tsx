@@ -9,6 +9,7 @@ import { usePostHog } from "posthog-react-native";
 export interface ActionTaskPanelProps extends ActionTaskPanelPropsShared {
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
+  onSubmitSuccess?: () => void;
 }
 
 const ActionTaskPanel = ({
@@ -19,6 +20,7 @@ const ActionTaskPanel = ({
   onOptOutAction,
   scrollPageTo,
   scrollToEnd,
+  onSubmitSuccess,
 }: ActionTaskPanelProps) => {
   const {
     handleCompleteWithTracking,
@@ -55,6 +57,7 @@ const ActionTaskPanel = ({
         onFormStarted={handleFormStarted}
         onAbandonAction={handleAbandonAction}
         actionId={action.id}
+        onSubmitSuccess={onSubmitSuccess}
       />
     );
   }

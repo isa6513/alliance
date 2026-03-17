@@ -14,12 +14,16 @@ import Text from "./system/Text";
 interface SuccessOverlayProps {
   visible: boolean;
   onComplete: () => void;
+  onFadeInComplete?: () => void;
   message?: string;
 }
+
+const FADE_IN_DURATION = 200;
 
 const SuccessOverlay = ({
   visible,
   onComplete,
+  onFadeInComplete,
   message = "Thank you!",
 }: SuccessOverlayProps) => {
   const scale = useSharedValue(0);
@@ -35,20 +39,27 @@ const SuccessOverlay = ({
       checkScale.value = 0;
       textOpacity.value = 0;
 
-      // Animate in
-      opacity.value = withTiming(1, { duration: 200 });
-      scale.value = withSpring(1, {
-        damping: 12,
-        stiffness: 180,
+      // Fade in first, then notify parent and start the rest of the animation
+      opacity.value = withTiming(1, { duration: FADE_IN_DURATION }, (finished) => {
+        if (finished && onFadeInComplete) {
+          runOnJS(onFadeInComplete)();
+        }
       });
-      checkScale.value = withDelay(
-        150,
+      scale.value = withDelay(
+        FADE_IN_DURATION,
         withSpring(1, {
-          damping: 10,
-          stiffness: 200,
+          duration: 600,
+          dampingRatio: 0.7,
         })
       );
-      textOpacity.value = withDelay(300, withTiming(1, { duration: 200 }));
+      checkScale.value = withDelay(
+        FADE_IN_DURATION + 200,
+        withSpring(1, {
+          duration: 500,
+          dampingRatio: 0.65,
+        })
+      );
+      textOpacity.value = withDelay(FADE_IN_DURATION + 400, withTiming(1, { duration: 250 }));
 
       // Auto-dismiss after animation
       const timer = setTimeout(() => {
@@ -57,11 +68,11 @@ const SuccessOverlay = ({
             runOnJS(onComplete)();
           }
         });
-      }, 1500);
+      }, FADE_IN_DURATION + 1500);
 
       return () => clearTimeout(timer);
     }
-  }, [visible, onComplete, scale, opacity, checkScale, textOpacity]);
+  }, [visible, onComplete, onFadeInComplete, scale, opacity, checkScale, textOpacity]);
 
   const containerStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -102,7 +113,7 @@ const SuccessOverlay = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
   },
