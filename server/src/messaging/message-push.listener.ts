@@ -53,8 +53,6 @@ export class MessagePushListener {
       const activeViewers =
         await this.messagingGateway.getUsersViewingConversation(conversationId);
 
-      console.log('active viewers', activeViewers);
-
       const eligibleParticipants = participants.filter((p) => {
         const user = p.user;
         if (user.id === message.author.id) return false;

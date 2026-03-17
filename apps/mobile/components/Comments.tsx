@@ -357,6 +357,10 @@ export default function Comments({
   });
   const [showForm, setShowForm] = useState(showFormProp);
 
+  useEffect(() => {
+    setShowForm(showFormProp);
+  }, [showFormProp]);
+
   const fetchComments = useCallback(async () => {
     let response;
     if (type === "post") {
@@ -601,7 +605,7 @@ export default function Comments({
       {error && <Text className="text-red-500">{error}</Text>}
 
       {sortedComments && sortedComments.length > 0 ? (
-        <View className="gap-y-3 pb-3">
+        <View className="gap-y-3">
           {sortedComments.map((reply) => (
             <ReplyItem
               key={reply.id}

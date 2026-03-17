@@ -52,9 +52,7 @@ export default function UserActivityCard({
 
   const handleActivityPress = useCallback(() => {
     if (isEditing || isSaving || showCommentForm) return;
-    router.push(
-      `/actions/${activity.actionId}/activity/${activity.id}`,
-    );
+    router.push(`/actions/${activity.actionId}/activity/${activity.id}`);
   }, [activity.actionId, activity.id, isEditing, isSaving, showCommentForm]);
 
   const handleUserPress = useCallback(() => {
@@ -210,7 +208,10 @@ export default function UserActivityCard({
               )}
               {commentable && (
                 <TouchableOpacity
-                  onPress={(e) => {setShowCommentForm(true); e.stopPropagation();}}
+                  onPress={(e) => {
+                    setShowCommentForm(true);
+                    e.stopPropagation();
+                  }}
                   activeOpacity={0.4}
                   className="flex-row items-center gap-x-1 py-1!"
                 >
@@ -222,7 +223,6 @@ export default function UserActivityCard({
         )}
       </TouchableOpacity>
 
-      {/* Comments section */}
       {commentable && (
         <Comments
           objectId={activity.id}
