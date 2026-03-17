@@ -219,7 +219,9 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   }, [clearDraftSignal, draftPath]);
 
   const handlePickImages = async () => {
-    if (isPicking) return;
+    if (isPickingRef.current || isPicking) {
+      return;
+    }
     isPickingRef.current = true;
     if (toolbarHideRef.current != null) {
       clearImmediate(toolbarHideRef.current);
@@ -255,13 +257,13 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         ...value,
         attachments: [...(value.attachments ?? []), ...attachments],
       });
+      inputRef.current?.focus();
     } catch (err) {
       console.error("Failed to pick image(s)", err);
       setPickerError("Unable to add that photo.");
     } finally {
       isPickingRef.current = false;
       setIsPicking(false);
-      inputRef.current?.focus();
     }
   };
 
