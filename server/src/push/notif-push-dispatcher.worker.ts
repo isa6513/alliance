@@ -210,8 +210,6 @@ export class NotifPushDispatcherWorker {
         )),
       );
     }
-    console.log('returning messages', messages);
-
     return messages;
   }
 }

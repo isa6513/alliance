@@ -112,14 +112,11 @@ export default function UserProfileScreen() {
 
   const forumActivityItems = useMemo(
     () => buildForumActivityItems(forumPosts, forumComments),
-    [forumPosts, forumComments]
+    [forumPosts, forumComments],
   );
 
   useEffect(() => {
-    console.log('state update')
     if (!profile || !isMe || isEditing) return;
-    console.log("didnt bailout")
-    console.log(profile.profileDescription)
 
     setEditName(profile.displayName || "");
     setEditBio(profile.profileDescription || "");
@@ -229,7 +226,7 @@ export default function UserProfileScreen() {
         },
       ]);
     },
-    [removeFriend]
+    [removeFriend],
   );
 
   const renderFriendAction = useCallback(() => {
@@ -300,7 +297,7 @@ export default function UserProfileScreen() {
         />
       </View>
     ),
-    [handleLikeActivity, updateActivity, isMe]
+    [handleLikeActivity, updateActivity, isMe],
   );
 
   const renderForumItem = useCallback(
@@ -332,8 +329,8 @@ export default function UserProfileScreen() {
         item.comment.parentObjectType === "post"
           ? `/forum/post/${item.comment.parentObjectId}`
           : item.comment.parentObjectType === "action"
-          ? `/actions/${item.comment.parentObjectId}`
-          : null;
+            ? `/actions/${item.comment.parentObjectId}`
+            : null;
 
       if (!parentRoute) return null;
 
@@ -366,7 +363,7 @@ export default function UserProfileScreen() {
         </TouchableOpacity>
       );
     },
-    []
+    [],
   );
 
   const renderReceivedItem = useCallback(
@@ -394,7 +391,7 @@ export default function UserProfileScreen() {
         </View>
       </View>
     ),
-    [acceptFriendRequest, declineFriendRequest]
+    [acceptFriendRequest, declineFriendRequest],
   );
 
   const renderSentItem = useCallback(
@@ -414,7 +411,7 @@ export default function UserProfileScreen() {
         </View>
       </View>
     ),
-    [confirmCancelRequest]
+    [confirmCancelRequest],
   );
 
   const renderFriendItem = useCallback(
@@ -422,9 +419,7 @@ export default function UserProfileScreen() {
       <View className="px-4 py-3 border-b border-zinc-200 flex-row items-center justify-between">
         <TouchableOpacity
           className="flex-row items-center gap-3 flex-1"
-          onPress={() =>
-            router.push(`/member/${friend.id}`)
-          }
+          onPress={() => router.push(`/member/${friend.id}`)}
           activeOpacity={0.8}
         >
           <ProfileImage pfp={friend.profilePicture} size="small" />
@@ -434,7 +429,7 @@ export default function UserProfileScreen() {
         </TouchableOpacity>
       </View>
     ),
-    []
+    [],
   );
 
   const listData = useMemo((): any[] => {
@@ -463,7 +458,7 @@ export default function UserProfileScreen() {
       }
       return item.id.toString();
     },
-    [selectedTab]
+    [selectedTab],
   );
 
   const listRenderItem = useCallback(
@@ -484,7 +479,7 @@ export default function UserProfileScreen() {
       renderReceivedItem,
       renderSentItem,
       renderFriendItem,
-    ]
+    ],
   );
 
   const listEmptyComponent = useMemo(() => {
@@ -667,13 +662,13 @@ export default function UserProfileScreen() {
                 activeOpacity={0.7}
                 className={cn(
                   "flex-1 px-3 py-2 rounded-md items-center",
-                  isSelected && "bg-white"
+                  isSelected && "bg-white",
                 )}
               >
                 <Text
                   className={cn(
                     "text-sm font-medium",
-                    isSelected ? "text-zinc-900" : "text-zinc-500"
+                    isSelected ? "text-zinc-900" : "text-zinc-500",
                   )}
                 >
                   {tab.label}
@@ -700,13 +695,13 @@ export default function UserProfileScreen() {
                 activeOpacity={0.7}
                 className={cn(
                   "flex-1 px-3 py-2 rounded-md items-center",
-                  friendsTab === tab.id && "bg-white"
+                  friendsTab === tab.id && "bg-white",
                 )}
               >
                 <Text
                   className={cn(
                     "text-sm font-medium",
-                    friendsTab === tab.id ? "text-zinc-900" : "text-zinc-500"
+                    friendsTab === tab.id ? "text-zinc-900" : "text-zinc-500",
                   )}
                 >
                   {tab.label}
