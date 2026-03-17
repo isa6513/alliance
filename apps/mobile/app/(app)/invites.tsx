@@ -127,8 +127,10 @@ export default function InvitesScreen() {
 
   const handleRejectInvite = useCallback((inviteId: number) => {
     runAsync(async () => {
-      await userRejectOnetimeInvite({ path: { inviteId } });
-      setInvites((prev) => prev.filter((request) => request.id !== inviteId));
+      const response = await userRejectOnetimeInvite({ path: { inviteId } });
+      if (response.data) {
+        setInvites((prev) => prev.filter((request) => request.id !== inviteId));
+      }
     });
   }, []);
 
