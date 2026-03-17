@@ -19,7 +19,7 @@ import useActivities, {
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
-  onSubmitSuccess?: () => void;
+  onSubmitSuccess: () => void;
 }
 
 export default function LargeActionCard({

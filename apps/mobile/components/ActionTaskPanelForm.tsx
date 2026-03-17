@@ -4,7 +4,7 @@ import {
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import FormRenderer from "./forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import { ActivityIndicator, View } from "react-native";
@@ -25,7 +25,7 @@ interface ActionTaskPanelFormProps {
   publicAction?: boolean;
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
-  onSubmitSuccess?: () => void;
+  onSubmitSuccess: () => void;
 }
 
 const ActionTaskPanelForm = ({
@@ -68,11 +68,7 @@ const ActionTaskPanelForm = ({
               body: data,
             });
         if (response.response.ok) {
-          //   if (user && !user.hasActiveContract) {
-          //TODO: better handling of user refresh (things used to break if the user signed a contract in another tab then went back to the first one)
-          // refreshUser();
-          //   }
-          onSubmitSuccess?.();
+          onSubmitSuccess();
         } else {
           console.error(response.error);
           posthog.captureException(response.error, {
