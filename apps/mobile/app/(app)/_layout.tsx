@@ -73,7 +73,7 @@ export default function AppLayout() {
           drawerType: dimensions.width >= 1024 ? "permanent" : "slide",
           overlayColor: "rgba(0, 0, 0, 0.3)",
           drawerStyle: { width: DRAWER_WIDTH, backgroundColor: "#ffffff" },
-          swipeEdgeWidth: 300,
+          swipeEdgeWidth: 600,
           swipeMinDistance: 30,
           swipeEnabled: isBasePage,
           sceneStyle: { paddingTop: insets.top, backgroundColor: "white" },

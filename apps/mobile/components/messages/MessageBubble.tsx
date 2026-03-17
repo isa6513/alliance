@@ -61,7 +61,7 @@ export default function MessageBubble({
   const timeLabel = useMemo(() => {
     return formatTime(new Date(message.createdAt), { addSuffix: true }).replace(
       "less than a minute ago",
-      "now"
+      "now",
     );
   }, [message.createdAt]);
 
@@ -75,7 +75,7 @@ export default function MessageBubble({
       if (translateX.value < SWIPE_THRESHOLD && onReply) {
         runOnJS(onReply)(message.id);
       }
-      translateX.value = withSpring(0, { damping: 20, stiffness: 200 });
+      translateX.value = withSpring(0);
     });
 
   const contentStyle = useAnimatedStyle(() => ({
@@ -87,13 +87,13 @@ export default function MessageBubble({
       translateX.value,
       [SWIPE_THRESHOLD, 0],
       [-SWIPE_THRESHOLD, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     const opacity = interpolate(
       translateX.value,
       [SWIPE_THRESHOLD, -20, 0],
       [1, 0.4, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     return { width, opacity };
   });
@@ -131,9 +131,9 @@ export default function MessageBubble({
               <View className="w-8">
                 {isFirstInGroup && (
                   <ProfileImage
-                      pfp={message.author.profilePicture}
-                      size="medium"
-                    />
+                    pfp={message.author.profilePicture}
+                    size="medium"
+                  />
                 )}
               </View>
               <View className="flex-1">
