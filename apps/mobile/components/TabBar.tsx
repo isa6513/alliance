@@ -5,11 +5,9 @@ import {
   Layers,
   ListTodo,
   MessageSquare,
-  User,
   Users,
 } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
-import { useAuth } from "../lib/AuthContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const tabs = [
@@ -42,7 +40,6 @@ const tabs = [
 
 export default function TabBar() {
   const pathname = usePathname();
-  const { user } = useAuth();
   const insets = useSafeAreaInsets();
 
   const isActive = (matchPaths: string[]) => {
@@ -66,7 +63,13 @@ export default function TabBar() {
           <TouchableOpacity
             key={tab.href}
             className="flex-1 items-center justify-center py-2"
-            onPress={() => router.push(tab.href)}
+            onPress={() => {
+              if (active) {
+                router.dismissTo(tab.href);
+              } else {
+                router.navigate(tab.href);
+              }
+            }}
             activeOpacity={0.7}
           >
             <Icon

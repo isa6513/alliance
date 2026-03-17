@@ -4,7 +4,7 @@ import {
   Dimensions,
   useWindowDimensions,
 } from "react-native";
-import { Redirect, withLayoutContext } from "expo-router";
+import { Redirect, usePathname, withLayoutContext } from "expo-router";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import { useAuth } from "../../lib/AuthContext";
@@ -20,10 +20,30 @@ const DRAWER_WIDTH = Math.round(SCREEN_WIDTH * 0.8);
 const { Navigator } = createDrawerNavigator();
 const Drawer = withLayoutContext(Navigator);
 
+/** Routes where the drawer swipe gesture should be enabled (base/index pages). */
+const BASE_PATHS = [
+  "/",
+  "/actions",
+  "/information",
+  "/search",
+  "/notifications",
+  "/feed",
+  "/forum",
+  "/invites",
+  "/contract",
+  "/profile",
+  "/settings",
+  "/groups",
+  "/messages",
+];
+
 export default function AppLayout() {
   const { isAuthenticated, isLoading, canConnectToServer } = useAuth();
   const insets = useSafeAreaInsets();
   const dimensions = useWindowDimensions();
+  const pathname = usePathname();
+
+  const isBasePage = BASE_PATHS.includes(pathname);
 
   if (isLoading) {
     return (
@@ -55,23 +75,24 @@ export default function AppLayout() {
           drawerStyle: { width: DRAWER_WIDTH, backgroundColor: "#ffffff" },
           swipeEdgeWidth: 300,
           swipeMinDistance: 30,
+          swipeEnabled: isBasePage,
           sceneStyle: { paddingTop: insets.top, backgroundColor: "white" },
         }}
       >
         <Drawer.Screen name="index" />
-        <Drawer.Screen name="actions/index" />
-        <Drawer.Screen name="actions/[id]/index" />
+        <Drawer.Screen name="actions" />
         <Drawer.Screen name="information" />
         <Drawer.Screen name="search" />
         <Drawer.Screen name="notifications" />
         <Drawer.Screen name="feed" />
-        <Drawer.Screen name="forum/index" />
+        <Drawer.Screen name="forum" />
         <Drawer.Screen name="invites" />
         <Drawer.Screen name="contract" />
         <Drawer.Screen name="profile" />
         <Drawer.Screen name="settings" />
-        <Drawer.Screen name="groups/index" />
-        <Drawer.Screen name="groups/manage" />
+        <Drawer.Screen name="groups" />
+        <Drawer.Screen name="messages" />
+        <Drawer.Screen name="member/[id]" />
       </Drawer>
       <TabBar />
     </View>

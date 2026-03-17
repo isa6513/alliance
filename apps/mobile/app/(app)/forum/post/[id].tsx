@@ -127,7 +127,7 @@ export default function PostDetailScreen() {
     >
       <View className="px-4 pt-4 pb-10">
         <TouchableOpacity
-          onPress={() => router.push("/forum")}
+          onPress={() => router.canGoBack() ? router.back() : router.push("/forum")}
           className="flex-row items-center gap-x-1 mb-4"
           activeOpacity={0.7}
         >

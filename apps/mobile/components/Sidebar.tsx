@@ -1,5 +1,5 @@
 import { View, TouchableOpacity } from "react-native";
-import { usePathname, router, RelativePathString } from "expo-router";
+import { usePathname, router, Route } from "expo-router";
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
@@ -26,7 +26,7 @@ import { cn } from "@alliance/shared/styles/util";
 
 type NavItem = {
   name: string;
-  href: string;
+  href: Route;
   icon: React.ElementType;
   matchPaths: string[];
 };
@@ -78,7 +78,7 @@ const navSections: NavSection[] = [
       { name: "Activity", href: "/feed", icon: Globe, matchPaths: ["/feed"] },
       {
         name: "Forum",
-        href: "/forum",
+        href: "/forum" as const,
         icon: MessagesSquare,
         matchPaths: ["/forum"],
       },
@@ -140,9 +140,13 @@ export default function Sidebar(props: DrawerContentComponentProps) {
     });
   };
 
-  const handleNavigate = (href: string) => {
+  const handleNavigate = (href: Route, matchPaths: string[]) => {
     navigation.closeDrawer();
-    router.push(href as RelativePathString);
+    if (isActive(matchPaths)) {
+      router.dismissTo(href);
+    } else {
+      router.navigate(href);
+    }
   };
 
   return (
@@ -164,7 +168,7 @@ export default function Sidebar(props: DrawerContentComponentProps) {
 
         {/* Logo */}
         <TouchableOpacity
-          onPress={() => handleNavigate("/")}
+          onPress={() => handleNavigate("/", ["/", ""])}
           className="px-6 mb-8"
         >
           <Text
@@ -192,7 +196,7 @@ export default function Sidebar(props: DrawerContentComponentProps) {
                 return (
                   <TouchableOpacity
                     key={item.name}
-                    onPress={() => handleNavigate(item.href)}
+                    onPress={() => handleNavigate(item.href, item.matchPaths)}
                     className={cn(
                       "flex-row items-center px-3 py-2.5 rounded-lg mb-0.5",
                       active && "bg-zinc-200",
