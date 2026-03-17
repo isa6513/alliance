@@ -113,6 +113,8 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedHashRef = useRef<string>("");
   const toolbarHideRef = useRef<ReturnType<typeof setImmediate> | null>(null);
+  const isPickingRef = useRef(false);
+  const inputRef = useRef<TextInput>(null);
 
   const draftPath = useMemo(() => getDraftPath(draftKey), [draftKey]);
   const shouldRestoreDraft = restoreDraft ?? draftKey !== undefined;
@@ -218,6 +220,11 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
 
   const handlePickImages = async () => {
     if (isPicking) return;
+    isPickingRef.current = true;
+    if (toolbarHideRef.current != null) {
+      clearImmediate(toolbarHideRef.current);
+      toolbarHideRef.current = null;
+    }
     setPickerError(null);
     setIsPicking(true);
     try {
@@ -252,7 +259,9 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       console.error("Failed to pick image(s)", err);
       setPickerError("Unable to add that photo.");
     } finally {
+      isPickingRef.current = false;
       setIsPicking(false);
+      inputRef.current?.focus();
     }
   };
 
@@ -275,6 +284,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   return (
     <View className={className}>
       <TextInput
+        ref={inputRef}
         className="w-full px-3 py-2 text-base text-zinc-900"
         value={value.body}
         onChangeText={(text) => onChange({ ...value, body: text })}
@@ -284,6 +294,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         autoFocus={expanded}
         onFocus={() => setShowExtend(true)}
         onBlur={() => {
+          if (isPickingRef.current) return;
           if (toolbarHideRef.current != null)
             clearImmediate(toolbarHideRef.current);
           toolbarHideRef.current = setImmediate(() => {
