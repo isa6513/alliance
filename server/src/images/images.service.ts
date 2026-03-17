@@ -121,7 +121,7 @@ export class ImagesService {
       return key;
     } catch {
       throw new BadRequestException(
-        'Failed to process image - try a standard image format (JPEG or PNG). HEIC/HEIF from iPhone may not be supported.',
+        'Failed to process image - try a standard image format',
       );
     }
   }
