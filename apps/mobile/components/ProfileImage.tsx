@@ -4,13 +4,20 @@ import { colors } from "../lib/style/colors";
 import { getApiUrl, getImageSource } from "../lib/config";
 import { cn } from "@alliance/shared/styles/util";
 
-type ProfileImageSize = "mini" | "small" | "medium" | "large" | "huge";
+type ProfileImageSize =
+  | "mini"
+  | "small"
+  | "medium"
+  | "large"
+  | "larger"
+  | "huge";
 
 const sizeMap: Record<ProfileImageSize, number> = {
   mini: 16,
   small: 24,
   medium: 32,
   large: 36,
+  larger: 48,
   huge: 116,
 };
 
@@ -19,6 +26,7 @@ const radiusMap: Record<ProfileImageSize, number> = {
   small: 3,
   medium: 4,
   large: 4,
+  larger: 6,
   huge: 8,
 };
 
@@ -27,6 +35,7 @@ const iconSizeMap: Record<ProfileImageSize, number> = {
   small: 14,
   medium: 18,
   large: 20,
+  larger: 30,
   huge: 48,
 };
 

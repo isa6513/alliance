@@ -24,7 +24,7 @@ export default function ConversationListItem({
   const timestamp = getConversationTimestamp(conversation);
   const timeLabel = formatTime(timestamp, { addSuffix: true }).replace(
     "less than a minute ago",
-    "now"
+    "now",
   );
 
   return (
@@ -33,11 +33,11 @@ export default function ConversationListItem({
       activeOpacity={0.85}
       className={cn(
         "px-4 py-3 bg-white",
-        showDivider && "border-b border-zinc-200"
+        showDivider && "border-b border-zinc-200",
       )}
     >
       <View className="flex-row items-center gap-3">
-        <ProfileImage pfp={conversation.photo ?? null} size="large" />
+        <ProfileImage pfp={conversation.photo ?? null} size="larger" />
         <View className="flex-1">
           <View className="flex-row items-center">
             <Text
@@ -47,7 +47,7 @@ export default function ConversationListItem({
             >
               {conversation.title}
             </Text>
-            <Text className="text-xs text-zinc-500 ml-2 flex-shrink-0">
+            <Text className="text-xs text-zinc-500 ml-2 shrink-0">
               {timeLabel}
             </Text>
           </View>

@@ -31,18 +31,18 @@ export default function MessagesScreen() {
 
   const joinedConversations = useMemo(
     () => getJoinedConversations(conversations, user?.id) ?? [],
-    [conversations, user?.id]
+    [conversations, user?.id],
   );
   const pendingInvites = useMemo(
     () => getPendingInvites(conversations, user?.id) ?? [],
-    [conversations, user?.id]
+    [conversations, user?.id],
   );
 
   const filteredConversations = useMemo(() => {
     const term = search.trim().toLowerCase();
     if (!term) return joinedConversations;
     return joinedConversations.filter((conversation) =>
-      conversation.title.toLowerCase().includes(term)
+      conversation.title.toLowerCase().includes(term),
     );
   }, [joinedConversations, search]);
 
@@ -94,59 +94,59 @@ export default function MessagesScreen() {
         }
       >
         <View className="px-4 pt-4 pb-2 bg-white">
-        <View className="flex-row items-center gap-2 border border-zinc-200 rounded bg-zinc-50 px-3 py-2">
-          <Search size={16} color="#71717a" />
-          <TextInput
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Search"
-            placeholderTextColor="#9ca3af"
-            className="flex-1 text-base text-zinc-900"
-          />
+          <View className="flex-row items-center gap-2 rounded-md bg-zinc-100 p-3">
+            <Search size={16} color="#71717a" />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search"
+              placeholderTextColor="#9ca3af"
+              className="flex-1 text-base text-zinc-900"
+            />
+          </View>
         </View>
-      </View>
 
-      {pendingInvites.length > 0 && (
-        <View className="px-4">
-          <Text className="text-sm text-zinc-500 font-medium">
-            New message requests
-          </Text>
-          <View className="border border-zinc-200 rounded mt-2 overflow-hidden">
-            {pendingInvites.map((conversation, index) => (
+        {pendingInvites.length > 0 && (
+          <View className="px-4">
+            <Text className="text-sm text-zinc-500 font-medium">
+              New message requests
+            </Text>
+            <View className="border border-zinc-200 rounded mt-2 overflow-hidden">
+              {pendingInvites.map((conversation, index) => (
+                <ConversationListItem
+                  key={conversation.id}
+                  conversation={conversation}
+                  preview={getMessageRequestPreview(conversation)}
+                  unreadCount={conversation.unreadCount || 1}
+                  showDivider={index !== pendingInvites.length - 1}
+                  onPress={() => handleOpenConversation(conversation.id)}
+                />
+              ))}
+            </View>
+            <Text className="text-sm text-zinc-500 font-medium mt-4">
+              Conversations
+            </Text>
+          </View>
+        )}
+
+        {filteredConversations.length === 0 ? (
+          <View className="items-center py-16">
+            <Text className="text-zinc-500">No conversations yet.</Text>
+          </View>
+        ) : (
+          <View className="">
+            {filteredConversations.map((conversation, index) => (
               <ConversationListItem
                 key={conversation.id}
                 conversation={conversation}
-                preview={getMessageRequestPreview(conversation)}
-                unreadCount={conversation.unreadCount || 1}
-                showDivider={index !== pendingInvites.length - 1}
+                preview={getConversationPreview(conversation, user?.id)}
+                unreadCount={conversation.unreadCount}
+                showDivider={index !== filteredConversations.length - 1}
                 onPress={() => handleOpenConversation(conversation.id)}
               />
             ))}
           </View>
-          <Text className="text-sm text-zinc-500 font-medium mt-4">
-            Conversations
-          </Text>
-        </View>
-      )}
-
-      {filteredConversations.length === 0 ? (
-        <View className="items-center py-16">
-          <Text className="text-zinc-500">No conversations yet.</Text>
-        </View>
-      ) : (
-        <View className="">
-          {filteredConversations.map((conversation, index) => (
-            <ConversationListItem
-              key={conversation.id}
-              conversation={conversation}
-              preview={getConversationPreview(conversation, user?.id)}
-              unreadCount={conversation.unreadCount}
-              showDivider={index !== filteredConversations.length - 1}
-              onPress={() => handleOpenConversation(conversation.id)}
-            />
-          ))}
-        </View>
-      )}
+        )}
       </ScrollView>
     </View>
   );
