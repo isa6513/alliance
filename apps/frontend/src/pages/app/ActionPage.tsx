@@ -2,7 +2,6 @@ import { actionsFindOne } from "@alliance/shared/client";
 import {
   href,
   Link,
-  Navigate,
   Outlet,
   useLocation,
   useNavigate,
