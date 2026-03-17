@@ -33,7 +33,7 @@ import {
 import { RenderField } from "./RenderField";
 import FormModal from "./FormModal";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
-import { CircleCheck } from "lucide-react-native";
+import { CircleCheck, Ellipsis } from "lucide-react-native";
 import { cn } from "@alliance/shared/styles/util";
 
 type FormRendererProps = {
@@ -778,11 +778,11 @@ const FormRenderer = ({
               </Button>
               <Button
                 onPress={() => setWithdrawOpen(true)}
-                className="px-5! items-center"
                 color={ButtonColor.Outline}
                 size={ButtonSize.Medium}
-                title="..."
-              />
+              >
+                <Ellipsis size={15} />
+              </Button>
             </View>
           </View>
           {Object.keys(fieldErrors).length > 0 && (
