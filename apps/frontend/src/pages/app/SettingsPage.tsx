@@ -14,7 +14,6 @@ import Card from "@alliance/sharedweb/ui/Card";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { href, useNavigate } from "react-router";
 import CityAutosuggest from "../../components/CityAutosuggest";
-import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
 import YesNoToggle from "@alliance/sharedweb/ui/YesNoToggle";
 import { useAuth } from "../../lib/AuthContext";
@@ -32,7 +31,7 @@ const SettingsPage: React.FC = () => {
 
   const [location, setLocation] = useState<City | null>(null);
   const [editableUser, setEditableUser] = useState<UpdateProfileDto | null>(
-    null
+    null,
   );
   const [initialUser, setInitialUser] = useState<UpdateProfileDto | null>(null);
 
@@ -44,7 +43,7 @@ const SettingsPage: React.FC = () => {
     string | null
   >(null);
   const [passwordResetError, setPasswordResetError] = useState<string | null>(
-    null
+    null,
   );
   const [passwordResetLoading, setPasswordResetLoading] = useState(false);
 
@@ -54,7 +53,7 @@ const SettingsPage: React.FC = () => {
     (updates: Partial<UpdateProfileDto>) => {
       setEditableUser((prev) => (prev ? { ...prev, ...updates } : prev));
     },
-    []
+    [],
   );
 
   const handleLogout = useCallback(async () => {
@@ -70,7 +69,7 @@ const SettingsPage: React.FC = () => {
       }
       updateEditableUser({ cityId: city.id });
     },
-    [updateEditableUser]
+    [updateEditableUser],
   );
 
   const hasChanges = useMemo(() => {
@@ -126,7 +125,7 @@ const SettingsPage: React.FC = () => {
         console.error(resp.error);
       } else {
         setPasswordResetMessage(
-          "A link to reset your password has been sent to your email address."
+          "A link to reset your password has been sent to your email address.",
         );
       }
     } catch (error) {
@@ -178,10 +177,10 @@ const SettingsPage: React.FC = () => {
         setLocation(city);
         const cityId = city.id;
         setEditableUser((prev) =>
-          prev ? { ...prev, cityId } : { ...user, cityId }
+          prev ? { ...prev, cityId } : { ...user, cityId },
         );
         setInitialUser((prev) =>
-          prev ? { ...prev, cityId } : { ...user, cityId }
+          prev ? { ...prev, cityId } : { ...user, cityId },
         );
       }
     });
@@ -223,7 +222,8 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="bg-page py-4 md:py-20 px-4 md:px-16">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-6 relative flex flex-col">
+        <div className="mb-6 relative flex flex-col gap-y-6">
+          {/* Header */}
           <div className="flex justify-between bg-page z-10">
             <div className="gap-x-2">
               <h1 className="text-title">Settings</h1>
@@ -233,8 +233,8 @@ const SettingsPage: React.FC = () => {
                 {saving
                   ? "Saving..."
                   : hasChanges
-                  ? "Unsaved changes"
-                  : "All changes saved"}
+                    ? "Unsaved changes"
+                    : "All changes saved"}
               </p>
               <Button
                 onClick={handleLogout}
@@ -245,7 +245,8 @@ const SettingsPage: React.FC = () => {
               </Button>
             </div>
           </div>
-          <div className="flex flex-col *:py-8 divide-y divide-zinc-200">
+          <Card style={CardStyle.White} className="p-6">
+            <h2 className="!font-semibold !text-2xl mb-4">Profile</h2>
             <div className="flex flex-col gap-y-4">
               <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
                 <div className="flex-1 flex flex-col w-full">
@@ -305,55 +306,53 @@ const SettingsPage: React.FC = () => {
                   />
                 </div>
               </div>
-
-              <Card
-                style={CardStyle.White}
-                className="flex flex-row gap-x-4 items-center justify-between"
-              >
+            </div>
+            <div className="flex flex-col divide-y divide-zinc-200 mt-4 border-t border-zinc-200">
+              <div className="flex flex-row gap-x-4 items-center justify-between py-3">
                 <div>
-                  <label className="block font-medium mb-2">
+                  <label className="block font-medium mb-0">
                     Anonymous account
                   </label>
-                  <p className="text-zinc-500 text-sm">
+                  <p className="text-zinc-500 text-sm mt-0.5">
                     With an anonymous account, other members will not be able to
                     see your name.
                   </p>
                 </div>
-                <div className="flex flex-row gap-x-2">
-                  <YesNoToggle
-                    value={editableUser.anonymous}
-                    onChange={(next) => updateEditableUser({ anonymous: next })}
-                    ariaLabel="Anonymous account"
-                  />
-                </div>
-              </Card>
-
-              <Card
-                style={CardStyle.White}
-                className="flex flex-row gap-x-4 items-center justify-between"
-              >
+                <YesNoToggle
+                  value={editableUser.anonymous}
+                  onChange={(next) => updateEditableUser({ anonymous: next })}
+                  ariaLabel="Anonymous account"
+                  yesLabel="On"
+                  noLabel="Off"
+                  yesColor={ButtonColor.Green}
+                />
+              </div>
+              <div className="flex flex-row gap-x-4 items-center justify-between py-3">
                 <div>
-                  <label className="block font-medium mb-2">
+                  <label className="block font-medium mb-0">
                     Share information publicly
                   </label>
-                  <p className="text-zinc-500 text-sm">
+                  <p className="text-zinc-500 text-sm mt-0.5">
                     Allow your name, profile photo, and bio to be listed in a
                     public member directory.
                   </p>
                 </div>
-                <div className="flex flex-row gap-x-2">
-                  <YesNoToggle
-                    value={editableUser.shareInfoPublicly}
-                    onChange={(next) =>
-                      updateEditableUser({ shareInfoPublicly: next })
-                    }
-                    ariaLabel="Share information publicly"
-                    disabled={editableUser.anonymous}
-                  />
-                </div>
-              </Card>
+                <YesNoToggle
+                  value={editableUser.shareInfoPublicly}
+                  onChange={(next) =>
+                    updateEditableUser({ shareInfoPublicly: next })
+                  }
+                  ariaLabel="Share information publicly"
+                  disabled={editableUser.anonymous}
+                  yesLabel="On"
+                  noLabel="Off"
+                  yesColor={ButtonColor.Green}
+                />
+              </div>
             </div>
+          </Card>
 
+          <Card style={CardStyle.White} className="p-6">
             <div>
               <h2 className="!font-semibold !text-2xl mb-4">Notifications</h2>
 
@@ -390,82 +389,156 @@ const SettingsPage: React.FC = () => {
                   </p>
                 )}
               </div>
-              <div className="flex flex-row gap-6 mt-2">
-                <LargeCheckbox
-                  label="Email"
-                  checked={!!editableUser.emailNotifsEnabled}
-                  onChange={(checked) =>
-                    updateEditableUser({ emailNotifsEnabled: checked })
-                  }
-                />
-                <LargeCheckbox
-                  label="Text/SMS"
-                  checked={!!editableUser.textNotifsEnabled}
-                  onChange={(checked) =>
-                    updateEditableUser({ textNotifsEnabled: checked })
-                  }
-                />
-                {showPushSettings && (
-                  <LargeCheckbox
-                    label="Push"
-                    checked={!!editableUser.pushNotifsEnabled}
-                    onChange={(checked) =>
-                      updateEditableUser({ pushNotifsEnabled: checked })
+              <div className="flex flex-col divide-y divide-zinc-200 mt-2 border-t border-zinc-200">
+                <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                  <span className="font-medium">Email</span>
+                  <YesNoToggle
+                    value={!!editableUser.emailNotifsEnabled}
+                    onChange={(next) =>
+                      updateEditableUser({ emailNotifsEnabled: next })
                     }
+                    ariaLabel="Email notifications"
+                    yesLabel="On"
+                    noLabel="Off"
+                  yesColor={ButtonColor.Green}
                   />
+                </div>
+                <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                  <span className="font-medium">Text/SMS</span>
+                  <YesNoToggle
+                    value={!!editableUser.textNotifsEnabled}
+                    onChange={(next) =>
+                      updateEditableUser({ textNotifsEnabled: next })
+                    }
+                    ariaLabel="Text/SMS notifications"
+                    yesLabel="On"
+                    noLabel="Off"
+                  yesColor={ButtonColor.Green}
+                  />
+                </div>
+                {showPushSettings && (
+                  <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                    <span className="font-medium">Push</span>
+                    <YesNoToggle
+                      value={!!editableUser.pushNotifsEnabled}
+                      onChange={(next) =>
+                        updateEditableUser({ pushNotifsEnabled: next })
+                      }
+                      ariaLabel="Push notifications"
+                      yesLabel="On"
+                      noLabel="Off"
+                    yesColor={ButtonColor.Green}
+                    />
+                  </div>
                 )}
               </div>
-              {user.leaderOfIds.length > 0 ? (
-                <div>
-                  <p className="!font-medium mb-0 mt-5">
-                    Receive reminders for group members with uncompleted tasks?
-                  </p>
-                  <div className="flex flex-row gap-6 mt-2">
-                    <select
-                      className="border border-zinc-300 rounded px-3 py-2 self-start"
-                      value={
-                        editableUser.remindAboutUncompletedGroupMembers
-                          ? "yes"
-                          : "no"
-                      }
-                      onChange={(event) =>
+              <div className="flex flex-col divide-y divide-zinc-200 mt-5 border-t border-zinc-200">
+                {user.leaderOfIds.length > 0 ? (
+                  <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                    <p className="!font-medium mb-0">
+                      Receive reminders for group members with uncompleted
+                      tasks?
+                    </p>
+                    <YesNoToggle
+                      value={!!editableUser.remindAboutUncompletedGroupMembers}
+                      onChange={(next) =>
                         updateEditableUser({
-                          remindAboutUncompletedGroupMembers:
-                            event.target.value === "yes",
+                          remindAboutUncompletedGroupMembers: next,
                         })
                       }
-                    >
-                      <option value={"yes"}>Yes</option>
-                      <option value={"no"}>No</option>
-                    </select>
+                      ariaLabel="Receive reminders for group members with uncompleted tasks"
+                      yesLabel="On"
+                      noLabel="Off"
+                    yesColor={ButtonColor.Green}
+                    />
                   </div>
-                </div>
-              ) : null}
-              <div>
-                <div className="!font-medium mb-0 mt-5 flex flex-row items-center gap-x-1">
-                  Allow notifications when you receive a reply in an ongoing
-                  action discussion?
-                  <InfoTooltip content="Keeping this enabled will send a text or email notification for specific discussions, like when you get an expert reply to a question you asked." />
-                </div>
-                <div className="flex flex-row gap-6 mt-2">
-                  <select
-                    className="border border-zinc-300 rounded px-3 py-2 self-start"
-                    value={
-                      editableUser.receiveReplyNotifications ? "yes" : "no"
-                    }
-                    onChange={(event) =>
+                ) : null}
+                <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                  <div className="!font-medium mb-0 flex flex-row items-center gap-x-1 min-w-0">
+                    Allow notifications when you receive a reply in an ongoing
+                    action discussion?
+                    <InfoTooltip content="Keeping this enabled will send a text or email notification for specific discussions, like when you get an expert reply to a question you asked." />
+                  </div>
+                  <YesNoToggle
+                    value={!!editableUser.receiveReplyNotifications}
+                    onChange={(next) =>
                       updateEditableUser({
-                        receiveReplyNotifications: event.target.value === "yes",
+                        receiveReplyNotifications: next,
                       })
                     }
-                  >
-                    <option value={"yes"}>Yes</option>
-                    <option value={"no"}>No</option>
-                  </select>
+                    ariaLabel="Allow notifications when you receive a reply in an ongoing action discussion"
+                    yesLabel="On"
+                    noLabel="Off"
+                    className="shrink-0"
+                    yesColor={ButtonColor.Green}
+                  />
                 </div>
               </div>
             </div>
-            <div className="flex flex-col md:flex-row gap-y-2 gap-x-12 font-medium">
+
+            {showPushSettings && (
+              <>
+                <p className="!font-medium mt-6 mb-2">
+                  Receive push notifications for:
+                </p>
+                <div className="flex flex-col divide-y divide-zinc-200 border-t border-zinc-200">
+                  <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                    <span className="font-medium">Likes</span>
+                    <YesNoToggle
+                      value={editableUser.pushesForLikes ?? false}
+                      onChange={(next) =>
+                        updateEditableUser({ pushesForLikes: next })
+                      }
+                      ariaLabel="Push notifications for likes"
+                      yesLabel="On"
+                      noLabel="Off"
+                    yesColor={ButtonColor.Green}
+                    />
+                  </div>
+                  <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                    <span className="font-medium">Comments</span>
+                    <YesNoToggle
+                      value={editableUser.pushesForComments ?? false}
+                      onChange={(next) =>
+                        updateEditableUser({ pushesForComments: next })
+                      }
+                      ariaLabel="Push notifications for comments"
+                      yesLabel="On"
+                      noLabel="Off"
+                    yesColor={ButtonColor.Green}
+                    />
+                  </div>
+                  <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                    <span className="font-medium">Friend requests</span>
+                    <YesNoToggle
+                      value={editableUser.pushesForFriendRequests ?? false}
+                      onChange={(next) =>
+                        updateEditableUser({ pushesForFriendRequests: next })
+                      }
+                      ariaLabel="Push notifications for friend requests"
+                      yesLabel="On"
+                      noLabel="Off"
+                    yesColor={ButtonColor.Green}
+                    />
+                  </div>
+                  <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                    <span className="font-medium">Messages</span>
+                    <YesNoToggle
+                      value={editableUser.pushesForMessages ?? false}
+                      onChange={(next) =>
+                        updateEditableUser({ pushesForMessages: next })
+                      }
+                      ariaLabel="Push notifications for messages"
+                      yesLabel="On"
+                      noLabel="Off"
+                    yesColor={ButtonColor.Green}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="flex flex-col md:flex-row gap-y-2 gap-x-12 font-medium mt-6 pt-6 border-t border-zinc-200">
               <div>
                 <p className=" mb-1">Preferred reminder time:</p>
                 <input
@@ -487,108 +560,83 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
             </div>
-            {showPushSettings && (
-              <div>
-                <h2 className="!font-semibold mb-4">
-                  Recieve push notifications for:
-                </h2>
-                <div className="flex flex-row gap-6 mt-2">
-                  <LargeCheckbox
-                    label="Likes"
-                    checked={editableUser.pushesForLikes ?? false}
-                    onChange={(checked) =>
-                      updateEditableUser({ pushesForLikes: checked })
-                    }
-                  />
-                </div>
-                <div className="flex flex-row gap-6 mt-2">
-                  <LargeCheckbox
-                    label="Comments"
-                    checked={editableUser.pushesForComments ?? false}
-                    onChange={(checked) =>
-                      updateEditableUser({ pushesForComments: checked })
-                    }
-                  />
-                </div>
-                <div className="flex flex-row gap-6 mt-2">
-                  <LargeCheckbox
-                    label="Friend requests"
-                    checked={editableUser.pushesForFriendRequests ?? false}
-                    onChange={(checked) =>
-                      updateEditableUser({ pushesForFriendRequests: checked })
-                    }
-                  />
-                </div>
-                <div className="flex flex-row gap-6 mt-2">
-                  <LargeCheckbox
-                    label="Messages"
-                    checked={editableUser.pushesForMessages ?? false}
-                    onChange={(checked) =>
-                      updateEditableUser({ pushesForMessages: checked })
-                    }
-                  />
-                </div>
-              </div>
-            )}
+          </Card>
 
-            {user.communities.length > 0 && (
+          {user.communities.length > 0 && (
+            <Card style={CardStyle.White} className="p-6">
               <div>
                 <h2 className="!font-semibold !text-2xl mb-4">Groups</h2>
-                <p>Contact info shared with your group lead:</p>
-                <div className="flex flex-col gap-y-2 mt-2">
-                  <LargeCheckbox
-                    label="Email"
-                    checked={!!editableUser.shareEmailWithCommunityLead}
-                    onChange={(checked) =>
-                      updateEditableUser({
-                        shareEmailWithCommunityLead: checked,
-                      })
-                    }
-                  />
-                  <LargeCheckbox
-                    label="Phone number"
-                    checked={!!editableUser.sharePhoneNumberWithCommunityLead}
-                    onChange={(checked) =>
-                      updateEditableUser({
-                        sharePhoneNumberWithCommunityLead: checked,
-                      })
-                    }
-                  />
+                <p className="mb-2">
+                  Contact info shared with your group lead:
+                </p>
+                <div className="flex flex-col divide-y divide-zinc-200 mt-2 border-t border-zinc-200">
+                  <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                    <span className="font-medium">Email</span>
+                    <YesNoToggle
+                      value={!!editableUser.shareEmailWithCommunityLead}
+                      onChange={(next) =>
+                        updateEditableUser({
+                          shareEmailWithCommunityLead: next,
+                        })
+                      }
+                      ariaLabel="Share email with community lead"
+                      yesLabel="On"
+                      noLabel="Off"
+                    yesColor={ButtonColor.Green}
+                    />
+                  </div>
+                  <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                    <span className="font-medium">Phone number</span>
+                    <YesNoToggle
+                      value={!!editableUser.sharePhoneNumberWithCommunityLead}
+                      onChange={(next) =>
+                        updateEditableUser({
+                          sharePhoneNumberWithCommunityLead: next,
+                        })
+                      }
+                      ariaLabel="Share phone number with community lead"
+                      yesLabel="On"
+                      noLabel="Off"
+                    yesColor={ButtonColor.Green}
+                    />
+                  </div>
                 </div>
               </div>
-            )}
+            </Card>
+          )}
 
-            <div>
-              <AwayRangesSection />
+          <Card style={CardStyle.White} className="p-6">
+            <AwayRangesSection />
+          </Card>
+
+          <Card style={CardStyle.White} className="p-6">
+            <h2 className="!font-semibold text-2xl mb-4 ">Privacy</h2>
+            <div className="flex flex-col gap-y-2">
+              <p className="mb-0">
+                Some parts of your completed tasks can be visible to other
+                members. Would you like for these to be visible by default?
+              </p>
+              <select
+                className="border border-zinc-300 rounded px-3 py-2 self-start"
+                value={editableUser.formDataPreference}
+                onChange={(event) =>
+                  updateEditableUser({
+                    formDataPreference: event.target
+                      .value as PublicFormResponseDefault,
+                  })
+                }
+              >
+                <option value={"public"}>Default to visible</option>
+                <option value={"private"}>Default to hidden</option>
+              </select>
+              <p className="text-sm text-zinc-500">
+                You will still be able to control visibility for specific tasks.
+              </p>
             </div>
+          </Card>
 
-            <div>
-              <h2 className="!font-semibold text-2xl mb-4 ">Privacy</h2>
-              <div className="flex flex-col gap-y-2">
-                <p className="mb-0">
-                  Some parts of your completed tasks can be visible to other
-                  members. Would you like for these to be visible by default?
-                </p>
-                <select
-                  className="border border-zinc-300 rounded px-3 py-2 self-start"
-                  value={editableUser.formDataPreference}
-                  onChange={(event) =>
-                    updateEditableUser({
-                      formDataPreference: event.target
-                        .value as PublicFormResponseDefault,
-                    })
-                  }
-                >
-                  <option value={"public"}>Default to visible</option>
-                  <option value={"private"}>Default to hidden</option>
-                </select>
-                <p className="text-sm text-zinc-500">
-                  You will still be able to control visibility for specific
-                  tasks.
-                </p>
-              </div>
-            </div>
-
+          <Card style={CardStyle.White} className="p-6">
+            <h2 className="!font-semibold !text-2xl mb-4">Account</h2>
             <div className="flex flex-col md:flex-row w-full items-start gap-4 *:gap-x-1">
               <div className="flex-1 flex flex-col w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -621,8 +669,9 @@ const SettingsPage: React.FC = () => {
                 )}
               </div>
             </div>
+          </Card>
 
-            {/* {paymentMethod !== null && (
+          {/* {paymentMethod !== null && (
               <div>
                 <hr className="border-zinc-300 mt-4" />
                 <h2 className="!font-semibold text-lg mb-4">Payment methods</h2>
@@ -669,7 +718,6 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
             )} */}
-          </div>
         </div>
       </div>
     </div>

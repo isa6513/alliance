@@ -8,6 +8,8 @@ type YesNoToggleProps = {
   disabled?: boolean;
   yesLabel?: string;
   noLabel?: string;
+  yesColor?: ButtonColor;
+  noColor?: ButtonColor;
   className?: string;
   ariaLabel?: string;
   size?: "small" | "medium" | "large" | "mediumDynamic";
@@ -19,6 +21,8 @@ const YesNoToggle: React.FC<YesNoToggleProps> = ({
   disabled = false,
   yesLabel = "Yes",
   noLabel = "No",
+  yesColor = ButtonColor.Black,
+  noColor = ButtonColor.Black,
   className,
   ariaLabel,
   size = "medium",
@@ -35,7 +39,7 @@ const YesNoToggle: React.FC<YesNoToggleProps> = ({
       <Button
         type="button"
         size={size}
-        color={isYes ? ButtonColor.Black : ButtonColor.White}
+        color={isYes ? yesColor : ButtonColor.White}
         onClick={() => onChange(true)}
         disabled={disabled}
         aria-pressed={isYes}
@@ -46,7 +50,7 @@ const YesNoToggle: React.FC<YesNoToggleProps> = ({
       <Button
         type="button"
         size={size}
-        color={isNo ? ButtonColor.Black : ButtonColor.White}
+        color={isNo ? noColor : ButtonColor.White}
         onClick={() => onChange(false)}
         disabled={disabled}
         aria-pressed={isNo}
