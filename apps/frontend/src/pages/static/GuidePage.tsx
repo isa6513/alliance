@@ -257,16 +257,16 @@ const GuidePage: React.FC = () => {
                 </GuideUl>
                 <GuideH2 id="oversight">Oversight</GuideH2>
                 <GuideP>
-                  Our governance guarantees that the majority of members believe
-                  the majority of their contributions improve the world.
+                  Our governance guarantees that the majority of members approve
+                  of the Alliance&apos;s direction.
                 </GuideP>
                 <GuideP>
                   We conduct a membership-wide oversight process that occurs on
-                  a regular basis. In the process, the office asks members what
-                  they think about the direction of the Alliance and whether or
-                  not they have any major concerns. The office collects and
-                  responds to feedback until we reach an approval threshold of
-                  75%.
+                  a regular basis. In the process, the office asks members if
+                  they want the Alliance to continue operating as usual, or to
+                  stop actions and adjust how it operates. The office collects
+                  and responds to feedback until we reach an approval threshold
+                  of 75%.
                 </GuideP>
                 <GuideP>This procedure achieves two goals:</GuideP>
                 <GuideOl>
@@ -285,8 +285,8 @@ const GuidePage: React.FC = () => {
                 <GuideP>
                   It is inevitable, though rare, that some members are assigned
                   tasks whose justifications they do not agree with. Given the
-                  urgency of global crises, it is important that we collectively
-                  prioritize action over perfect consensus.
+                  urgency of global crises, we collectively prioritize action
+                  over perfect consensus.
                 </GuideP>
                 <GuideP>
                   In addition to formal governance, the office incorporates

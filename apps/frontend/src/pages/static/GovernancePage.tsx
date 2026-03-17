@@ -10,8 +10,8 @@ const GovernancePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex flex-col md:flex-row mx-2 sm:mx-4 md:mx-12 pt-8 md:pt-32 pb-56 justify-center">
-        <div className="flex flex-col gap-y-4 max-w-[46rem]">
-          <h1 className="text-title">Governance</h1>
+        <div className="flex flex-col gap-y-4 max-w-184">
+          <h1 className="text-title-large">Governance</h1>
           <p className="text-lg text-zinc-500">
             The following governance procedures were{" "}
             <Link
@@ -23,7 +23,7 @@ const GovernancePage: React.FC = () => {
             by 25 founding members of the Alliance.
           </p>
 
-          <div className="flex flex-col gap-y-6">
+          <div className="flex flex-col gap-y-6 mt-8">
             <MarkdownWrapper
               id="foundation"
               className=""
