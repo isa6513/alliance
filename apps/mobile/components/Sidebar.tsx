@@ -1,9 +1,5 @@
-import { View, TouchableOpacity } from "react-native";
-import { usePathname, router, Route } from "expo-router";
-import {
-  DrawerContentComponentProps,
-  DrawerContentScrollView,
-} from "@react-navigation/drawer";
+import { View, TouchableOpacity, ScrollView } from "react-native";
+import { usePathname, Route, useRouter } from "expo-router";
 import {
   Bell,
   BookText,
@@ -23,6 +19,7 @@ import {
 import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
+import { useAppDrawer } from "../lib/AppDrawerContext";
 
 type NavItem = {
   name: string;
@@ -127,9 +124,10 @@ const navSections: NavSection[] = [
   },
 ];
 
-export default function Sidebar(props: DrawerContentComponentProps) {
-  const { navigation } = props;
+export default function Sidebar() {
+  const { closeDrawer } = useAppDrawer();
   const pathname = usePathname();
+  const router = useRouter();
 
   const isActive = (matchPaths: string[]) => {
     return matchPaths.some((path) => {
@@ -140,35 +138,27 @@ export default function Sidebar(props: DrawerContentComponentProps) {
     });
   };
 
-  const handleNavigate = (href: Route, matchPaths: string[]) => {
-    navigation.closeDrawer();
-    if (isActive(matchPaths)) {
-      router.dismissTo(href);
-    } else {
-      router.navigate(href);
-    }
+  const handleNavigate = (href: Route) => {
+    closeDrawer();
+    router.replace(href);
   };
 
   return (
-    <DrawerContentScrollView
-      {...props}
+    <ScrollView
       contentContainerStyle={{ paddingTop: 48, paddingBottom: 0 }}
       style={{ backgroundColor: "#fafafa" }}
     >
       <View className="flex-1">
         {/* Close button */}
         <View className="flex-row justify-end px-4 mb-4">
-          <TouchableOpacity
-            onPress={() => navigation.closeDrawer()}
-            className="p-2"
-          >
+          <TouchableOpacity onPress={() => closeDrawer()} className="p-2">
             <X size={24} color="#71717a" />
           </TouchableOpacity>
         </View>
 
         {/* Logo */}
         <TouchableOpacity
-          onPress={() => handleNavigate("/", ["/", ""])}
+          onPress={() => handleNavigate("/")}
           className="px-6 mb-8"
         >
           <Text
@@ -196,7 +186,7 @@ export default function Sidebar(props: DrawerContentComponentProps) {
                 return (
                   <TouchableOpacity
                     key={item.name}
-                    onPress={() => handleNavigate(item.href, item.matchPaths)}
+                    onPress={() => handleNavigate(item.href)}
                     className={cn(
                       "flex-row items-center px-3 py-2.5 rounded-lg mb-0.5",
                       active && "bg-zinc-200",
@@ -222,6 +212,6 @@ export default function Sidebar(props: DrawerContentComponentProps) {
           ))}
         </View>
       </View>
-    </DrawerContentScrollView>
+    </ScrollView>
   );
 }

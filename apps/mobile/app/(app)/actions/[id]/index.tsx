@@ -90,7 +90,7 @@ function ActivityTabContent({ actionId }: ActivityTabContentProps) {
   });
 
   const activities = (activitiesResponse?.data ?? []).sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
   const handleLike = useCallback(
@@ -119,14 +119,14 @@ function ActivityTabContent({ actionId }: ActivityTabContentProps) {
                       likesCount: response.data!.likesCount,
                       likedByMe: response.data!.likedByMe,
                     }
-                  : a
+                  : a,
               ),
             };
-          }
+          },
         );
       }
     },
-    [activities, actionId, queryClient]
+    [activities, actionId, queryClient],
   );
 
   if (isPending) {
@@ -285,11 +285,6 @@ export default function ActionDetailScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
       <KeyboardAwareScrollView
         className="bg-white"
         ref={scrollViewRef}
@@ -342,14 +337,14 @@ export default function ActionDetailScreen() {
                 onPress={() => setActiveTab(tab.id)}
                 className={cn(
                   "px-4 py-3 items-center grow",
-                  activeTab === tab.id && "border-b-2 border-green"
+                  activeTab === tab.id && "border-b-2 border-green",
                 )}
                 activeOpacity={0.7}
               >
                 <Text
                   className={cn(
                     "text-sm font-medium",
-                    activeTab === tab.id ? "text-green" : "text-zinc-500"
+                    activeTab === tab.id ? "text-green" : "text-zinc-500",
                   )}
                 >
                   {tab.label}

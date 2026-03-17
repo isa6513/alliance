@@ -1,58 +1,88 @@
-import {
-  View,
-  ActivityIndicator,
-  Dimensions,
-  useWindowDimensions,
-} from "react-native";
-import { Redirect, usePathname, withLayoutContext } from "expo-router";
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import { View, ActivityIndicator, useWindowDimensions } from "react-native";
+import { Redirect, Route, Stack, usePathname } from "expo-router";
 
 import { useAuth } from "../../lib/AuthContext";
+import { AppDrawerProvider, useAppDrawer } from "../../lib/AppDrawerContext";
 import TabBar from "../../components/TabBar";
 import Sidebar from "../../components/Sidebar";
+import AnimatedSidebar from "../../components/AnimatedSidebar";
 import { colors } from "../../lib/style/colors";
 import { isVisualTestMode } from "../../lib/visualTest";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const DRAWER_WIDTH = Math.round(SCREEN_WIDTH * 0.8);
+const BASE_ROUTE_NAMES = new Set([
+  "index",
+  "actions/index",
+  "information",
+  "search",
+  "notifications",
+  "feed",
+  "forum/index",
+  "invites",
+  "contract",
+  "profile",
+  "settings",
+  "groups/index",
+  "messages/index",
+]);
 
-const { Navigator } = createDrawerNavigator();
-const Drawer = withLayoutContext(Navigator);
+function AppContent() {
+  const insets = useSafeAreaInsets();
+  const { isPermanent } = useAppDrawer();
+  const { user } = useAuth();
 
-/** Routes where the drawer swipe gesture should be enabled (base/index pages). */
-const BASE_PATHS = [
-  "/",
-  "/actions",
-  "/information",
-  "/search",
-  "/notifications",
-  "/feed",
-  "/forum",
-  "/invites",
-  "/contract",
-  "/profile",
-  "/settings",
-  "/groups",
-  "/messages",
-];
+  const isBasePage = useCallback(
+    (name: string, params?: Record<string, any>) => {
+      if (BASE_ROUTE_NAMES.has(name)) {
+        return true;
+      }
+      if (user?.id === undefined) {
+        return false;
+      }
+      return (
+        name === `member/[id]` && Number.parseInt(params?.id, 10) === user?.id
+      );
+    },
+    [user?.id],
+  );
+
+  return (
+    <View style={{ flex: 1, flexDirection: "row" }}>
+      {isPermanent && (
+        <View
+          style={{
+            width: 280,
+            borderRightWidth: 1,
+            borderRightColor: "#e4e4e7",
+          }}
+        >
+          <Sidebar />
+        </View>
+      )}
+      <View style={{ flex: 1 }}>
+        <Stack
+          screenOptions={({ route }) => ({
+            headerShown: false,
+            contentStyle: {
+              paddingTop: insets.top,
+              backgroundColor: "white",
+            },
+            ...(isBasePage(route.name, route.params)
+              ? { animation: "none" as const, gestureEnabled: false }
+              : { animation: "default" as const, gestureEnabled: true }),
+          })}
+        />
+        <TabBar />
+      </View>
+      {!isPermanent && <AnimatedSidebar />}
+    </View>
+  );
+}
 
 export default function AppLayout() {
-  const { isAuthenticated, isLoading, canConnectToServer, user } = useAuth();
-  const insets = useSafeAreaInsets();
+  const { isAuthenticated, isLoading, canConnectToServer } = useAuth();
   const dimensions = useWindowDimensions();
-  const pathname = usePathname();
-
-  const isBasePage = useMemo(() => {
-    if (BASE_PATHS.some((path) => path === pathname)) {
-      return true;
-    }
-    if (user?.id === undefined) {
-      return false;
-    }
-    return pathname === `/member/${user?.id}`;
-  }, [pathname, user?.id]);
 
   if (isLoading) {
     return (
@@ -74,36 +104,10 @@ export default function AppLayout() {
   }
 
   return (
-    <View className="flex-1 " testID="vr-app-shell-ready">
-      <Drawer
-        drawerContent={(props) => <Sidebar {...props} />}
-        screenOptions={{
-          headerShown: false,
-          drawerType: dimensions.width >= 1024 ? "permanent" : "slide",
-          overlayColor: "rgba(0, 0, 0, 0.3)",
-          drawerStyle: { width: DRAWER_WIDTH, backgroundColor: "#ffffff" },
-          swipeEdgeWidth: 600,
-          swipeMinDistance: 30,
-          swipeEnabled: isBasePage,
-          sceneStyle: { paddingTop: insets.top, backgroundColor: "white" },
-        }}
-      >
-        <Drawer.Screen name="index" />
-        <Drawer.Screen name="actions" />
-        <Drawer.Screen name="information" />
-        <Drawer.Screen name="search" />
-        <Drawer.Screen name="notifications" />
-        <Drawer.Screen name="feed" />
-        <Drawer.Screen name="forum" />
-        <Drawer.Screen name="invites" />
-        <Drawer.Screen name="contract" />
-        <Drawer.Screen name="profile" />
-        <Drawer.Screen name="settings" />
-        <Drawer.Screen name="groups" />
-        <Drawer.Screen name="messages" />
-        <Drawer.Screen name="member/[id]" />
-      </Drawer>
-      <TabBar />
-    </View>
+    <AppDrawerProvider isPermanent={dimensions.width >= 1024}>
+      <View className="flex-1" testID="vr-app-shell-ready">
+        <AppContent />
+      </View>
+    </AppDrawerProvider>
   );
 }

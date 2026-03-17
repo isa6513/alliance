@@ -1,5 +1,5 @@
 import { View, TouchableOpacity } from "react-native";
-import { usePathname, router } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 import {
   Bell,
   Layers,
@@ -41,6 +41,7 @@ const tabs = [
 export default function TabBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const isActive = (matchPaths: string[]) => {
     return matchPaths.some((path) => {
@@ -64,11 +65,7 @@ export default function TabBar() {
             key={tab.href}
             className="flex-1 items-center justify-center py-2"
             onPress={() => {
-              if (active) {
-                router.dismissTo(tab.href);
-              } else {
-                router.navigate(tab.href);
-              }
+              router.replace(tab.href);
             }}
             activeOpacity={0.7}
           >
