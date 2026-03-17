@@ -13,6 +13,7 @@ import Sidebar from "../../components/Sidebar";
 import { colors } from "../../lib/style/colors";
 import { isVisualTestMode } from "../../lib/visualTest";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMemo } from "react";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.round(SCREEN_WIDTH * 0.8);
@@ -38,12 +39,20 @@ const BASE_PATHS = [
 ];
 
 export default function AppLayout() {
-  const { isAuthenticated, isLoading, canConnectToServer } = useAuth();
+  const { isAuthenticated, isLoading, canConnectToServer, user } = useAuth();
   const insets = useSafeAreaInsets();
   const dimensions = useWindowDimensions();
   const pathname = usePathname();
 
-  const isBasePage = BASE_PATHS.includes(pathname);
+  const isBasePage = useMemo(() => {
+    if (BASE_PATHS.some((path) => path === pathname)) {
+      return true;
+    }
+    if (user?.id === undefined) {
+      return false;
+    }
+    return pathname === `/member/${user?.id}`;
+  }, [pathname, user?.id]);
 
   if (isLoading) {
     return (
