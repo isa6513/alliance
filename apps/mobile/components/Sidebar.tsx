@@ -203,7 +203,10 @@ export default function Sidebar(props: DrawerContentComponentProps) {
                     )}
                     activeOpacity={0.7}
                   >
-                    <Icon size={18} color={active ? colors.green : "#52525b"} />
+                    <Icon
+                      size={18}
+                      color={active ? colors.green : colors.text.icon}
+                    />
                     <Text
                       className={cn(
                         "ml-3",

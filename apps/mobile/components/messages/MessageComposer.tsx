@@ -102,7 +102,7 @@ export default function MessageComposer({
           </View>
           {clearReplyingTo && (
             <TouchableOpacity onPress={clearReplyingTo}>
-              <X size={16} color="#52525b" />
+              <X size={16} color={colors.text.icon} />
             </TouchableOpacity>
           )}
         </View>

@@ -227,7 +227,7 @@ export default function ActivityDetailScreen() {
             activeOpacity={0.7}
             className="flex-row items-center gap-x-1 self-start px-2 py-1 rounded border border-zinc-200 mb-6"
           >
-            <ChevronLeft size={16} color="#52525b" />
+            <ChevronLeft size={16} color={colors.text.icon} />
             <Text className="text-zinc-600 text-sm">Back to action</Text>
           </TouchableOpacity>
 

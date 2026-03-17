@@ -13,6 +13,11 @@ export const colors = {
     secondary: "#444",
     tertiary: "#666",
     light: "#9ca3af",
+    icon: "#52525b",
+  },
+
+  switch: {
+    trackOff: "#e4e4e7",
   },
 
   // Background colors

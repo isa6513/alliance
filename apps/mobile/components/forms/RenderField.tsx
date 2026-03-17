@@ -35,6 +35,7 @@ import InlineLabelMarkdownWrapper from "../InlineLabelMarkdownWrapper";
 import { cn } from "@alliance/shared/styles/util";
 import Card, { CardStyle } from "../system/Card";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
+import { colors } from "../../lib/style/colors";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -427,7 +428,7 @@ export function RenderField({
             >
               {selectedLabel || "Select an option"}
             </Text>
-            <ChevronDown size={18} color="#52525b" />
+            <ChevronDown size={18} color={colors.text.icon} />
           </TouchableOpacity>
           <FormModal
             visible={selectOpen}
@@ -967,7 +968,7 @@ export function TimeInputField({
             editable={!disabled}
             onSubmitEditing={commitValue}
           />
-          <ChevronDown size={18} color="#52525b" />
+          <ChevronDown size={18} color={colors.text.icon} />
         </Pressable>
 
         <FormModal

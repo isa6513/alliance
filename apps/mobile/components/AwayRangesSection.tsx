@@ -20,6 +20,7 @@ import {
 import Button, { ButtonColor } from "./system/Button";
 import { awayRangesDescription } from "@alliance/shared/lib/copy";
 import { cn } from "@alliance/shared/styles/util";
+import { colors } from "../lib/style/colors";
 
 const REASON_OPTIONS: { value: UserAwayRangeReason; label: string }[] = [
   { value: "vacation", label: "Vacation" },
@@ -157,12 +158,12 @@ export default function AwayRangesSection() {
               console.error("Error deleting away range:", err);
               Alert.alert(
                 "Error",
-                "There was an error deleting your away period. Please try again."
+                "There was an error deleting your away period. Please try again.",
               );
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -194,7 +195,7 @@ export default function AwayRangesSection() {
                 "p-4 rounded-lg border",
                 isCurrentlyAway(range)
                   ? "bg-yellow-50 border-yellow-200"
-                  : "bg-gray-50 border-gray-200"
+                  : "bg-gray-50 border-gray-200",
               )}
             >
               <View className="flex-row justify-between items-start">
@@ -268,7 +269,7 @@ export default function AwayRangesSection() {
             <TouchableOpacity
               className={cn(
                 inputClasses,
-                "flex-row items-center justify-between"
+                "flex-row items-center justify-between",
               )}
               onPress={() => setReasonModalOpen(true)}
               activeOpacity={0.8}
@@ -276,14 +277,14 @@ export default function AwayRangesSection() {
               <Text
                 className={cn(
                   "text-base",
-                  selectedReason ? "text-zinc-900" : "text-zinc-400"
+                  selectedReason ? "text-zinc-900" : "text-zinc-400",
                 )}
               >
                 {selectedReason
                   ? reasonDisplayName(selectedReason)
                   : "Select a reason"}
               </Text>
-              <ChevronDown size={18} color="#52525b" />
+              <ChevronDown size={18} color={colors.text.icon} />
             </TouchableOpacity>
           </View>
 
@@ -357,7 +358,7 @@ export default function AwayRangesSection() {
                       "w-5 h-5 rounded-full border mr-3 items-center justify-center",
                       selectedReason === option.value
                         ? "border-green-600"
-                        : "border-zinc-200"
+                        : "border-zinc-200",
                     )}
                   >
                     {selectedReason === option.value && (

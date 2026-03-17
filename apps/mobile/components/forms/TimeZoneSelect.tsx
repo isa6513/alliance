@@ -11,6 +11,7 @@ import { useTimeZoneSelect } from "@alliance/shared/forms/timeZoneSelect";
 import { getTimeZone } from "react-native-localize";
 import FormModal from "./FormModal";
 import { cn } from "@alliance/shared/styles/util";
+import { colors } from "../../lib/style/colors";
 
 type Props = {
   value?: string;
@@ -56,7 +57,7 @@ export default function TimeZoneSelect({
         onPress={() => setOpen(true)}
         className={cn(
           "w-full rounded-lg border px-3 py-3 bg-white flex-row items-center justify-between border-zinc-200",
-          disabled && "opacity-60"
+          disabled && "opacity-60",
         )}
       >
         <View className="flex-1 pr-3">
@@ -67,7 +68,7 @@ export default function TimeZoneSelect({
             {selected.timeLabel}
           </Text>
         </View>
-        <ChevronDown size={18} color="#52525b" />
+        <ChevronDown size={18} color={colors.text.icon} />
       </TouchableOpacity>
 
       <FormModal visible={open} onClose={() => setOpen(false)} maxHeight={520}>
@@ -103,7 +104,7 @@ export default function TimeZoneSelect({
               const approximateItemHeight = 55; // px
               const targetOffset = Math.max(
                 approximateItemHeight * (idx - 1),
-                0
+                0,
               );
               requestAnimationFrame(() => {
                 ref.scrollTo({ y: targetOffset, animated: false });
@@ -126,7 +127,7 @@ export default function TimeZoneSelect({
                     "px-3 py-3 rounded-lg mb-2 border flex-row justify-between",
                     isSelected
                       ? "border-green-600 bg-green-50"
-                      : "border-zinc-200 bg-white"
+                      : "border-zinc-200 bg-white",
                   )}
                 >
                   <Text className="text-base text-zinc-900">
