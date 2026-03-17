@@ -29,6 +29,7 @@ import { KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR } from "../../lib/constants";
 import type { GeneralUpdateDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import Button, { ButtonColor } from "../../components/system/Button";
 
 const GENERAL_UPDATES_QUERY_KEY = [
   "actions",
@@ -147,6 +148,12 @@ export default function HomeScreen() {
     scrollViewRef.current?.scrollToEnd({ animated });
   }, []);
 
+  const isCurrentTaskOptional =
+    !!currentTaskOrGeneralUpdate &&
+    !isGeneralUpdate(currentTaskOrGeneralUpdate) &&
+    "optional" in currentTaskOrGeneralUpdate &&
+    currentTaskOrGeneralUpdate.optional === true;
+
   const { title, body, fullScreen } = useMemo(() => {
     if (!currentTaskOrGeneralUpdate) {
       return {
@@ -219,6 +226,23 @@ export default function HomeScreen() {
     );
   }
 
+  const optionalBanner = isCurrentTaskOptional ? (
+    <View className="bg-sky-100 border-b border-sky-300 px-4 py-3">
+      <Text className="text-sky-800 font-semibold">
+        This action is optional.
+      </Text>
+      <Text className="text-sky-700 mt-1 mb-3">
+        You can complete as usual or dismiss it.
+      </Text>
+      <Button
+        color={ButtonColor.White}
+        title="Dismiss"
+        className="w-full"
+        onPress={() => handleDismissAction(currentTaskOrGeneralUpdate.id)}
+      />
+    </View>
+  ) : null;
+
   return (
     <View className="flex-1 bg-white">
       <SimplePageTitle title={title} />
@@ -233,6 +257,7 @@ export default function HomeScreen() {
         }
         testID="vr-home-ready"
       >
+        {optionalBanner}
         {body}
       </KeyboardAwareScrollView>
     </View>
