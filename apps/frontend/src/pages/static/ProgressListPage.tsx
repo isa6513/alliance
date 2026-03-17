@@ -38,11 +38,11 @@ function PublicActionCard({ action }: { action: ActionDto }) {
   return (
     <Link
       to={href("/actions/:id", { id: action.id.toString() })}
-      className="group flex flex-row items-start justify-between gap-4 p-4 hover:bg-zinc-50"
+      className="group flex flex-row items-center justify-between gap-4 p-4 hover:bg-zinc-50"
     >
       <div className="flex flex-col gap-0.5 min-w-0 flex-1">
         {memberActionDate && (
-          <p className="text-sm md:text-base text-zinc-500">
+          <p className="text-xs md:text-sm text-green uppercase font-medium tracking-wide">
             {formatLongDateEnUS(new Date(memberActionDate))}
           </p>
         )}
@@ -82,18 +82,20 @@ const ProgressListPage: React.FC = () => {
                 <Link
                   to={href("/progress/:slug", { slug: post.slug })}
                   key={post.slug}
-                  className="flex flex-row justify-between hover:bg-zinc-50 p-4"
+                  className="flex flex-row items-center justify-between hover:bg-zinc-50 p-4"
                 >
-                  <div className="">
-                    <p className="text-sm md:text-base text-zinc-500">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs md:text-sm text-blue uppercase font-medium tracking-wide">
                       {formatLongDateEnUS(new Date(post.frontmatter.date))}
                     </p>
-                    <div className="flex justify-between">
-                      <p className="text-base md:text-lg font-medium">
-                        {post.frontmatter.title}
-                      </p>
-                    </div>
+                    <p className="text-base md:text-lg font-medium">
+                      {post.frontmatter.title}
+                    </p>
                   </div>
+                  <ChevronRight
+                    className="h-5 w-5 shrink-0 text-blue"
+                    aria-hidden
+                  />
                 </Link>
               ))}
             </List>
