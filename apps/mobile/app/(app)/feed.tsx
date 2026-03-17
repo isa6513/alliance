@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -30,6 +30,9 @@ export default function FeedScreen() {
     updateActivity: updateGlobalActivity,
     loading: loadingGlobal,
     setActivities: setGlobalActivities,
+    fetchNextPage: fetchNextGlobal,
+    hasNextPage: hasNextGlobal,
+    isFetchingNextPage: isFetchingNextGlobal,
   } = useActivities({
     list: ActivityList.Global,
     comments: true,
@@ -42,6 +45,9 @@ export default function FeedScreen() {
     updateActivity: updateFriendActivity,
     loading: loadingFriend,
     setActivities: setFriendActivities,
+    fetchNextPage: fetchNextFriends,
+    hasNextPage: hasNextFriends,
+    isFetchingNextPage: isFetchingNextFriends,
   } = useActivities({
     list: ActivityList.Friends,
     comments: true,
@@ -87,6 +93,37 @@ export default function FeedScreen() {
 
   const activities = mode === "friends" ? friendActivities : globalActivities;
   const loading = mode === "friends" ? loadingFriend : loadingGlobal;
+  const isFetchingNext =
+    mode === "friends" ? isFetchingNextFriends : isFetchingNextGlobal;
+
+  // Stable ref for onEndReached so the callback doesn't need volatile deps (per frontend pattern)
+  const paginationRef = useRef({
+    fetchNextFriends,
+    fetchNextGlobal,
+    hasNextFriends,
+    hasNextGlobal,
+    isFetchingNextFriends,
+    isFetchingNextGlobal,
+    mode,
+  });
+  paginationRef.current = {
+    fetchNextFriends,
+    fetchNextGlobal,
+    hasNextFriends,
+    hasNextGlobal,
+    isFetchingNextFriends,
+    isFetchingNextGlobal,
+    mode,
+  };
+
+  const onEndReached = useCallback(() => {
+    const p = paginationRef.current;
+    if (p.mode === "friends") {
+      if (p.hasNextFriends && !p.isFetchingNextFriends) p.fetchNextFriends();
+    } else {
+      if (p.hasNextGlobal && !p.isFetchingNextGlobal) p.fetchNextGlobal();
+    }
+  }, []);
 
   const renderActivity = useCallback(
     ({ item: activity }: { item: ActionActivityDto }) => {
@@ -181,6 +218,8 @@ export default function FeedScreen() {
             data={activities}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderActivity}
+            onEndReached={onEndReached}
+            onEndReachedThreshold={0.3}
             refreshControl={
               <RefreshControl refreshing={loading} onRefresh={() => {}} />
             }
@@ -189,6 +228,16 @@ export default function FeedScreen() {
               paddingBottom: 40,
               backgroundColor: "white",
             }}
+            ListFooterComponent={
+              isFetchingNext ? (
+                <View className="py-4 items-center">
+                  <ActivityIndicator size="small" color={colors.green} />
+                  <Text className="text-zinc-400 text-sm mt-2">
+                    Loading more...
+                  </Text>
+                </View>
+              ) : null
+            }
           />
         </KeyboardAvoidingView>
       )}
