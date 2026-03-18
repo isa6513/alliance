@@ -1,4 +1,9 @@
-import { formatShortDate } from "@alliance/shared/lib/dateFormatters";
+import {
+  formatAwayRange,
+  formatAwayReason,
+} from "@alliance/shared/lib/awayRangesFormatters";
+import { formatNextTaskDue } from "@alliance/shared/lib/formatNextTaskDue";
+import { useAwayRanges } from "@alliance/shared/lib/useAwayRanges";
 import { useCallback, useMemo, useState } from "react";
 import { Link, href } from "react-router";
 import { cn } from "@alliance/shared/styles/util";
@@ -8,13 +13,11 @@ import {
   ProfileDto,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
-  UserAwayRangeDto,
 } from "@alliance/shared/client";
 import { AvatarProfile } from "./Avatar";
 import UserProgressPills from "./UserProgressPills";
 import DropdownIcon from "./icons/DropdownIcon";
 import UserDisplayName from "./UserDisplayName";
-import { formatDistance } from "date-fns";
 import Button, { ButtonColor } from "./Button";
 import { useToast } from "./ToastProvider";
 import InfoTooltip from "./InfoTooltip";
@@ -47,47 +50,19 @@ const CommunityMemberTableRow = ({
   showInfoTooltip?: boolean;
 }) => {
   const relationByActionId = useMemo(() => {
-    return actionRelations.reduce((acc, relation) => {
-      acc[relation.actionId] = relation;
-      return acc;
-    }, {} as Record<number, UserActionRelationDetailDto>);
+    return actionRelations.reduce(
+      (acc, relation) => {
+        acc[relation.actionId] = relation;
+        return acc;
+      },
+      {} as Record<number, UserActionRelationDetailDto>,
+    );
   }, [actionRelations]);
 
   const [expanded, setExpanded] = useState(false);
-  const sortedAwayRanges = useMemo(() => {
-    if (!contactInfo?.awayRanges) {
-      return [];
-    }
-    return [...contactInfo.awayRanges].sort(
-      (a, b) =>
-        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-    );
-  }, [contactInfo?.awayRanges]);
-
-  const currentAwayRange = useMemo(() => {
-    const now = new Date();
-    return (
-      sortedAwayRanges.find((range) => {
-        const start = new Date(range.startDate);
-        const end = new Date(range.endDate);
-        return start <= now && now <= end;
-      }) ?? null
-    );
-  }, [sortedAwayRanges]);
-
-  const upcomingOrCurrentAwayRanges = useMemo(() => {
-    const now = new Date();
-    return sortedAwayRanges.filter((range) => new Date(range.endDate) >= now);
-  }, [sortedAwayRanges]);
-
-  const formatAwayRange = (range: UserAwayRangeDto) => {
-    const start = new Date(range.startDate);
-    const end = new Date(range.endDate);
-    return `${formatShortDate(start)} - ${formatShortDate(end)}`;
-  };
-
-  const formatAwayReason = (reason?: string) =>
-    reason ? reason.charAt(0).toUpperCase() + reason.slice(1) : "";
+  const { currentAwayRange, upcomingOrCurrentAwayRanges } = useAwayRanges(
+    contactInfo?.awayRanges,
+  );
 
   const { confirm } = useToast();
 
@@ -119,7 +94,7 @@ const CommunityMemberTableRow = ({
       <tr
         className={cn(
           "*:py-4 *:px-2 *:md:px-4 bg-white",
-          canExpand && "hover:bg-zinc-50 cursor-pointer"
+          canExpand && "hover:bg-zinc-50 cursor-pointer",
         )}
         onClick={canExpand ? () => setExpanded(!expanded) : undefined}
       >
@@ -145,7 +120,7 @@ const CommunityMemberTableRow = ({
                 underline={false}
                 className={cn(
                   currentAwayRange && "text-zinc-400",
-                  "group-hover:underline"
+                  "group-hover:underline",
                 )}
               >
                 {profile.displayName}
@@ -172,17 +147,14 @@ const CommunityMemberTableRow = ({
               <p>{contactInfo?.preferredReminderTimeLeaderTz || "Anytime"}</p>
             </td>
             <td className="w-px whitespace-nowrap text-sm md:text-base table-cell">
-              {Number.isFinite(deadlineTimestamp ?? Infinity) ? (
-                <p>
-                  {formatDistance(
-                    new Date(deadlineTimestamp ?? Infinity),
-                    new Date(),
-                    { addSuffix: true }
-                  )}
-                </p>
-              ) : (
-                <p className="text-green">Complete</p>
-              )}
+              <p
+                className={cn(
+                  !Number.isFinite(deadlineTimestamp ?? Infinity) &&
+                    "text-green",
+                )}
+              >
+                {formatNextTaskDue(deadlineTimestamp ?? undefined)}
+              </p>
             </td>
           </>
         )}

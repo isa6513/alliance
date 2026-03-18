@@ -1,0 +1,298 @@
+import { View, TouchableOpacity, Linking } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { router } from "expo-router";
+import {
+  AlarmClock,
+  CheckCircle,
+  ChevronDown,
+  Circle,
+  Globe,
+  Mail,
+  MessageCircle,
+  MessageSquare,
+  Phone,
+  User,
+} from "lucide-react-native";
+import type { CommunityMemberContactInfoDto } from "@alliance/shared/client/types.gen";
+import {
+  formatAwayRange,
+  formatAwayReason,
+} from "@alliance/shared/lib/awayRangesFormatters";
+import { formatNextTaskDue } from "@alliance/shared/lib/formatNextTaskDue";
+import { useAwayRanges } from "@alliance/shared/lib/useAwayRanges";
+import { getMemberContactActionDescriptors } from "@alliance/shared/lib/memberContactActions";
+import { cn } from "@alliance/shared/styles/util";
+import Text, { TextStyle } from "./system/Text";
+import ProfileImage from "./ProfileImage";
+import { colors } from "../lib/style/colors";
+
+/** Icon sizes: inline with text = 16, row accent = 18, completion = 22, contact actions = 28 */
+const ICON_SIZE_INLINE = 16;
+const ICON_SIZE_CHEVRON = 18;
+const ICON_SIZE_COMPLETION = 22;
+const ICON_SIZE_CONTACT_ACTION = 28;
+
+const CONTACT_ACTION_ICONS = {
+  profile: User,
+  email: Mail,
+  call: Phone,
+  text: MessageCircle,
+  message: MessageSquare,
+} as const;
+
+export type GroupMemberRowProfile = {
+  id: number;
+  displayName: string;
+  profilePicture?: string | null;
+};
+
+export type GroupMemberRowProps = {
+  profile: GroupMemberRowProfile;
+  isLeader: boolean;
+  /** When true, show green checkmark (completed all). When false, show grey circle. Omitted for leaders. */
+  completedAll?: boolean;
+  /** When amLeader and !completedAll, show contact info (expandable block). */
+  contactInfo?: CommunityMemberContactInfoDto | null;
+  /** Next task due timestamp (for "Next task due" in contact block). undefined or Infinity = complete. */
+  deadlineTimestamp?: number;
+};
+
+export function GroupMemberRow({
+  profile,
+  isLeader,
+  completedAll,
+  contactInfo,
+  deadlineTimestamp,
+}: GroupMemberRowProps) {
+  const hasDropdown = contactInfo != null;
+  const [expanded, setExpanded] = useState(hasDropdown && !completedAll);
+
+  useEffect(() => {
+    if (hasDropdown && completedAll === false) {
+      setExpanded(true);
+    }
+  }, [hasDropdown, completedAll]);
+
+  const onTopBarPress = useCallback(() => {
+    if (hasDropdown) {
+      setExpanded((e) => !e);
+    } else {
+      router.push(`/member/${profile.id}`);
+    }
+  }, [hasDropdown, profile.id]);
+
+  return (
+    <View className="border-b border-zinc-200">
+      <TouchableOpacity
+        onPress={onTopBarPress}
+        className="flex-row items-center gap-3 px-4 py-3"
+        activeOpacity={0.7}
+      >
+        <View
+          className="items-center justify-center"
+          style={{ width: ICON_SIZE_COMPLETION }}
+        >
+          {completedAll !== undefined ? (
+            <MemberCompletionIcon completedAll={completedAll} />
+          ) : null}
+        </View>
+        <ProfileImage pfp={profile.profilePicture ?? null} size="large" />
+        <View className="flex-1 min-w-0">
+          <Text className="font-medium text-zinc-900" numberOfLines={1}>
+            {profile.displayName}
+          </Text>
+          {isLeader && (
+            <Text type={TextStyle.Secondary} className="text-xs">
+              Leader
+            </Text>
+          )}
+        </View>
+        {hasDropdown && (
+          <View
+            style={{
+              transform: [{ rotate: expanded ? "180deg" : "0deg" }],
+            }}
+          >
+            <ChevronDown
+              size={ICON_SIZE_CHEVRON}
+              color={colors.text.icon}
+              strokeWidth={2}
+            />
+          </View>
+        )}
+      </TouchableOpacity>
+      {hasDropdown && expanded && contactInfo != null && (
+        <MemberContactBlock
+          profileId={profile.id}
+          contactInfo={contactInfo}
+          displayName={profile.displayName}
+          deadlineTimestamp={deadlineTimestamp}
+        />
+      )}
+    </View>
+  );
+}
+
+function MemberContactBlock({
+  profileId,
+  contactInfo,
+  displayName,
+  deadlineTimestamp,
+}: {
+  profileId: number;
+  contactInfo: CommunityMemberContactInfoDto;
+  displayName: string;
+  deadlineTimestamp?: number;
+}) {
+  const { upcomingOrCurrentAwayRanges, currentAwayRange } = useAwayRanges(
+    contactInfo.awayRanges,
+  );
+  const sameContactTime =
+    contactInfo.preferredReminderTimeUserTz ===
+    contactInfo.preferredReminderTimeLeaderTz;
+  const email = contactInfo.email?.trim() ?? "";
+  const phone = contactInfo.phoneNumber?.trim() ?? "";
+  const hasFiniteDeadline = Number.isFinite(deadlineTimestamp ?? Infinity);
+  const nextTaskDueText = formatNextTaskDue(deadlineTimestamp);
+
+  const descriptors = getMemberContactActionDescriptors({
+    email,
+    phone,
+  });
+
+  const handleActionPress = useCallback(
+    (id: string) => {
+      switch (id) {
+        case "profile":
+          router.push(`/member/${profileId}`);
+          break;
+        case "email":
+          if (email) Linking.openURL(`mailto:${email}`);
+          break;
+        case "call":
+          if (phone) Linking.openURL(`tel:${phone}`);
+          break;
+        case "text":
+          if (phone) Linking.openURL(`sms:${phone}`);
+          break;
+        case "message":
+          router.push(`/messages/new?to=${profileId}`);
+          break;
+      }
+    },
+    [profileId, email, phone],
+  );
+
+  return (
+    <View className="px-4 pt-2 pb-6 gap-y-3">
+      <View className="flex-row items-center gap-x-2">
+        <Text className="text-sm font-semibold text-zinc-700">
+          Next task due:{" "}
+        </Text>
+        <Text className={cn("text-sm", hasFiniteDeadline ? "" : "text-green")}>
+          {nextTaskDueText}
+        </Text>
+      </View>
+      <View className="flex-row items-center gap-x-2">
+        <Globe size={ICON_SIZE_INLINE} color={colors.text.icon} />
+        <Text className="text-sm text-zinc-900 flex-1">
+          {contactInfo.timeZone ?? "Not provided"}
+        </Text>
+      </View>
+      {sameContactTime ? (
+        <View className="flex-row items-center gap-x-2">
+          <AlarmClock size={ICON_SIZE_INLINE} color={colors.text.icon} />
+          <Text className="text-sm text-zinc-900 flex-1">
+            {contactInfo.preferredReminderTimeUserTz ?? "Anytime"}
+            <Text type={TextStyle.Secondary} className="text-sm">
+              {" "}
+              in your time zone
+            </Text>
+          </Text>
+        </View>
+      ) : (
+        <View className="gap-y-1">
+          <View className="flex-row items-center gap-x-2">
+            <AlarmClock size={ICON_SIZE_INLINE} color={colors.text.icon} />
+            <View>
+              <Text className="text-sm text-zinc-900">
+                {contactInfo.preferredReminderTimeUserTz ?? "Anytime"}
+                <Text type={TextStyle.Secondary} className="text-sm">
+                  {" "}
+                  in {displayName}&apos;s time zone
+                </Text>
+              </Text>
+              <Text className="text-sm text-zinc-900">
+                {contactInfo.preferredReminderTimeLeaderTz ?? "Anytime"}
+                <Text type={TextStyle.Secondary} className="text-sm">
+                  {" "}
+                  in your time zone
+                </Text>
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
+      {upcomingOrCurrentAwayRanges.length > 0 && (
+        <View className="gap-y-2">
+          <Text className="text-sm font-semibold text-zinc-700">
+            Away ranges
+          </Text>
+          <View className="gap-y-2">
+            {upcomingOrCurrentAwayRanges.map((range) => (
+              <View key={range.id} className="gap-y-0.5">
+                <Text className="text-sm text-zinc-700">
+                  {formatAwayRange(range)}
+                  {currentAwayRange?.id === range.id ? " (current)" : ""}
+                </Text>
+                <Text type={TextStyle.Secondary} className="text-xs">
+                  {formatAwayReason(range.reason)}
+                  {range.note ? ` — ${range.note}` : ""}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+      <View className="flex-row items-center">
+        {descriptors.map(({ id, label, accessibilityLabel, disabled }) => {
+          const Icon = CONTACT_ACTION_ICONS[id];
+          return (
+            <TouchableOpacity
+              key={id}
+              onPress={() => handleActionPress(id)}
+              activeOpacity={0.7}
+              accessibilityLabel={accessibilityLabel}
+              disabled={disabled}
+              className="flex-1 flex-col items-center gap-y-1"
+            >
+              <Icon size={ICON_SIZE_CONTACT_ACTION} color={colors.text.icon} />
+              <Text type={TextStyle.Secondary} className="text-xs">
+                {label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+function MemberCompletionIcon({ completedAll }: { completedAll: boolean }) {
+  if (completedAll) {
+    return (
+      <CheckCircle
+        size={ICON_SIZE_COMPLETION}
+        color={colors.green}
+        strokeWidth={2}
+      />
+    );
+  }
+  return (
+    <Circle
+      size={ICON_SIZE_COMPLETION}
+      color={colors.text.light}
+      strokeWidth={2}
+    />
+  );
+}

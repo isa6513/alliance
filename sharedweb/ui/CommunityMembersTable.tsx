@@ -3,10 +3,12 @@ import {
   CommunityMemberContactInfoDto,
   ProfileDto,
   UserActionRelationDetailDto,
-  UserActionRelationPillStatus,
   UserActionSummaryDto,
 } from "@alliance/shared/client";
-import { parseTimeInput } from "../forms/timeUtils";
+import {
+  getDeadlineTimestampByUserId,
+  sortMembersByNextTaskDue,
+} from "@alliance/shared/lib/communityMemberActions";
 import CommunityMemberTableRow from "./CommunityMemberTableRow";
 import DropdownSelect from "./DropdownSelect";
 
@@ -15,16 +17,6 @@ export enum CommunityMembersFilterMode {
   Completed = "Completed",
   NotYetCompleted = "Not yet completed",
 }
-
-const DEADLINE_IN_CONSIDERATION = {
-  away: false,
-  completed: false,
-  missed_deadline: false,
-  not_required: false,
-  optional_task: false,
-  todo: true,
-  wont_complete: false,
-} satisfies Record<UserActionRelationPillStatus, boolean>;
 
 type CommunityMembersTableProps = {
   leaders: ProfileDto[];
@@ -59,29 +51,14 @@ const CommunityMembersTable = ({
   const visibleActions = useMemo(() => {
     return actions.filter((action) => action.status !== "planned");
   }, [actions]);
-  const deadlineTimestampByUserId = useMemo(() => {
-    const visibleActionsById = new Map(
-      visibleActions.map((action) => [action.id, action]),
-    );
-
-    return new Map(
-      Object.entries(userActionRelations).map(([userIdKey, relations]) => {
-        let deadline = Infinity;
-        for (const relation of relations) {
-          const action = visibleActionsById.get(relation.actionId);
-          if (
-            !action ||
-            !DEADLINE_IN_CONSIDERATION[relation.status] ||
-            action.latestMemberActionDeadline === null
-          ) {
-            continue;
-          }
-          deadline = Math.min(deadline, action.latestMemberActionDeadline);
-        }
-        return [+userIdKey, deadline];
+  const deadlineTimestampByUserId = useMemo(
+    () =>
+      getDeadlineTimestampByUserId({
+        userActionRelations,
+        actions,
       }),
-    );
-  }, [visibleActions, userActionRelations]);
+    [userActionRelations, actions],
+  );
 
   const membersByFilterMode = useMemo(() => {
     return {
@@ -97,40 +74,12 @@ const CommunityMembersTable = ({
 
   const filteredSortedMembers = useMemo(() => {
     const filtered = membersByFilterMode[filterMode] ?? [];
-
-    return [...filtered].sort((a, b) => {
-      if (!amLeader) {
-        return 0;
-      }
-
-      const deadlineA = deadlineTimestampByUserId.get(a.id) ?? Infinity;
-      const deadlineB = deadlineTimestampByUserId.get(b.id) ?? Infinity;
-      if (deadlineA < deadlineB) {
-        return -1;
-      }
-      if (deadlineA > deadlineB) {
-        return 1;
-      }
-      const preferredTimeA =
-        memberContactInfo?.[a.id]?.preferredReminderTimeLeaderTz ?? "";
-      const preferredTimeB =
-        memberContactInfo?.[b.id]?.preferredReminderTimeLeaderTz ?? "";
-
-      const timeA = parseTimeInput(preferredTimeA);
-      const timeB = parseTimeInput(preferredTimeB);
-
-      if (timeA && timeB) {
-        return timeA.minutes - timeB.minutes;
-      }
-
-      if (!timeA && timeB) {
-        return -1;
-      }
-      if (timeA && !timeB) {
-        return 1;
-      }
-      return 0;
-    });
+    if (!amLeader) return filtered;
+    return sortMembersByNextTaskDue(
+      filtered,
+      deadlineTimestampByUserId,
+      memberContactInfo,
+    );
   }, [
     amLeader,
     filterMode,

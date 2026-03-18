@@ -8,13 +8,22 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { router } from "expo-router";
 import { Settings } from "lucide-react-native";
 import {
-  communityGetMyCommunities,
+  actionsGetCommunityMemberInfo,
   communityGetCommunityInvites,
+  communityGetMemberContactInfo,
+  communityGetMyCommunities,
   userGetOnetimeInvitesByCommunity,
 } from "@alliance/shared/client";
-import { useQueryClient } from "@tanstack/react-query";
-import type { CommunityDto } from "@alliance/shared/client/types.gen";
-import { getMemberCount } from "@alliance/shared/lib/communityUtils";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type {
+  CommunityDto,
+  CommunityMemberContactInfoDto,
+} from "@alliance/shared/client/types.gen";
+import {
+  getDeadlineTimestampByUserId,
+  hasActionsToComplete,
+  sortMembersByNextTaskDue,
+} from "@alliance/shared/lib/communityMemberActions";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import useActivities, {
   ActivityList,
@@ -27,7 +36,7 @@ import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
 import { SectionHeader } from "../../../components/system/SectionHeader";
 import { colors } from "../../../lib/style/colors";
 import UserActivityCard from "../../../components/UserActivityCard";
-import ProfileImage from "../../../components/ProfileImage";
+import { GroupMemberRow } from "../../../components/GroupMemberRow";
 import { useAuth } from "../../../lib/AuthContext";
 
 type Tab = "activity" | "members" | "invites";
@@ -261,89 +270,185 @@ type MembersListItem =
         profilePicture?: string | null;
       };
       isLeader: boolean;
+      completedAll?: boolean;
+      contactInfo?: CommunityMemberContactInfoDto | null;
+      deadlineTimestamp?: number;
     };
 
+function buildMembersListItems(params: {
+  leaders: CommunityDto["leaders"];
+  sortedNonLeaderMembers: CommunityDto["users"];
+  deadlineTimestampByUserId: Map<number, number>;
+  amLeader: boolean;
+  memberContactInfoByUserId?: Record<number, CommunityMemberContactInfoDto>;
+}): MembersListItem[] {
+  const {
+    leaders,
+    sortedNonLeaderMembers,
+    deadlineTimestampByUserId,
+    amLeader,
+    memberContactInfoByUserId,
+  } = params;
+  const items: MembersListItem[] = [];
+  if (leaders.length > 0) {
+    items.push({ type: "header", id: "leaders", label: "Leads" });
+    for (const profile of leaders) {
+      items.push({
+        type: "member",
+        id: profile.id,
+        profile: {
+          id: profile.id,
+          displayName: profile.displayName,
+          profilePicture: profile.profilePicture,
+        },
+        isLeader: true,
+      });
+    }
+  }
+  if (sortedNonLeaderMembers.length > 0) {
+    items.push({ type: "header", id: "members", label: "Members" });
+    for (const profile of sortedNonLeaderMembers) {
+      const completedAll = !hasActionsToComplete(
+        deadlineTimestampByUserId,
+        profile.id,
+      );
+      items.push({
+        type: "member",
+        id: profile.id,
+        profile: {
+          id: profile.id,
+          displayName: profile.displayName,
+          profilePicture: profile.profilePicture,
+        },
+        isLeader: false,
+        completedAll,
+        contactInfo: amLeader
+          ? (memberContactInfoByUserId?.[profile.id] ?? null)
+          : undefined,
+        deadlineTimestamp: deadlineTimestampByUserId.get(profile.id),
+      });
+    }
+  }
+  return items;
+}
+
 function GroupMembersTab({ community }: { community: CommunityDto }) {
+  const { user } = useAuth();
   const leaders = community.leaders;
   const nonLeaderMembers = community.users.filter(
     (u) => !leaders.some((l) => l.id === u.id),
   );
-  const memberCount = getMemberCount(community);
+  const amLeader = leaders.some((l) => l.id === user?.id);
 
-  const data = useMemo<MembersListItem[]>(() => {
-    const items: MembersListItem[] = [];
-    if (leaders.length > 0) {
-      items.push({ type: "header", id: "leaders", label: "Leads" });
-      for (const profile of leaders) {
-        items.push({
-          type: "member",
-          id: profile.id,
-          profile: {
-            id: profile.id,
-            displayName: profile.displayName,
-            profilePicture: profile.profilePicture,
-          },
-          isLeader: true,
-        });
-      }
+  const { data: memberInfo, isPending: memberInfoLoading } = useQuery({
+    queryKey: ["communityMemberInfo", community.id],
+    queryFn: () =>
+      actionsGetCommunityMemberInfo({
+        path: { communityId: community.id },
+      }).then((r) => r.data ?? null),
+    enabled: true,
+  });
+
+  const { data: memberContactInfoList } = useQuery({
+    queryKey: ["communityMemberContactInfo", community.id],
+    queryFn: () =>
+      communityGetMemberContactInfo({
+        path: { communityId: community.id },
+      }).then((r) => r.data ?? []),
+    enabled: amLeader,
+  });
+
+  const memberContactInfoByUserId = useMemo(() => {
+    if (!memberContactInfoList?.length) return undefined;
+    return memberContactInfoList.reduce(
+      (acc, info) => {
+        acc[info.id] = info;
+        return acc;
+      },
+      {} as Record<number, CommunityMemberContactInfoDto>,
+    );
+  }, [memberContactInfoList]);
+
+  const memberContactInfoForSort = useMemo(() => {
+    if (!memberContactInfoByUserId) return undefined;
+    return Object.fromEntries(
+      Object.entries(memberContactInfoByUserId).map(([id, info]) => [
+        id,
+        {
+          preferredReminderTimeLeaderTz:
+            info.preferredReminderTimeLeaderTz ?? null,
+        },
+      ]),
+    );
+  }, [memberContactInfoByUserId]);
+
+  const deadlineTimestampByUserId = useMemo(() => {
+    if (!memberInfo?.users?.length || !memberInfo?.actions?.length) {
+      return new Map<number, number>();
     }
-    if (nonLeaderMembers.length > 0) {
-      items.push({ type: "header", id: "members", label: "Members" });
-      for (const profile of nonLeaderMembers) {
-        items.push({
-          type: "member",
-          id: profile.id,
-          profile: {
-            id: profile.id,
-            displayName: profile.displayName,
-            profilePicture: profile.profilePicture,
-          },
-          isLeader: false,
-        });
-      }
-    }
-    return items;
-  }, [leaders, nonLeaderMembers]);
+    const userActionRelations = Object.fromEntries(
+      memberInfo.users.map(({ userId, relations }) => [userId, relations]),
+    );
+    return getDeadlineTimestampByUserId({
+      userActionRelations,
+      actions: memberInfo.actions,
+    });
+  }, [memberInfo]);
+
+  const sortedNonLeaderMembers = useMemo(() => {
+    return sortMembersByNextTaskDue(
+      nonLeaderMembers,
+      deadlineTimestampByUserId,
+      memberContactInfoForSort,
+    );
+  }, [nonLeaderMembers, deadlineTimestampByUserId, memberContactInfoForSort]);
+
+  const data = useMemo(
+    () =>
+      buildMembersListItems({
+        leaders,
+        sortedNonLeaderMembers,
+        deadlineTimestampByUserId,
+        amLeader,
+        memberContactInfoByUserId,
+      }),
+    [
+      leaders,
+      sortedNonLeaderMembers,
+      deadlineTimestampByUserId,
+      amLeader,
+      memberContactInfoByUserId,
+    ],
+  );
+
+  if (memberInfoLoading && data.length === 0) {
+    return (
+      <View className="flex-1 items-center justify-center py-12">
+        <ActivityIndicator size="large" color={colors.green} />
+      </View>
+    );
+  }
 
   return (
     <LegendList
       data={data}
-      keyExtractor={(item) =>
-        item.type === "header" ? item.id : `member-${item.id}`
-      }
+      keyExtractor={(item) => `${item.type}-${item.id}`}
       renderItem={({ item }) =>
         item.type === "header" ? (
           <SectionHeader label={item.label} />
         ) : (
-          <MemberRow profile={item.profile} isLeader={item.isLeader} />
+          <GroupMemberRow
+            profile={item.profile}
+            isLeader={item.isLeader}
+            completedAll={item.completedAll}
+            contactInfo={item.contactInfo}
+            deadlineTimestamp={item.deadlineTimestamp}
+          />
         )
       }
       recycleItems
       contentContainerStyle={{ paddingBottom: 40, backgroundColor: "white" }}
     />
-  );
-}
-
-function MemberRow({
-  profile,
-  isLeader,
-}: {
-  profile: { id: number; displayName: string; profilePicture?: string | null };
-  isLeader: boolean;
-}) {
-  return (
-    <TouchableOpacity
-      onPress={() => router.push(`/member/${profile.id}`)}
-      className="flex-row items-center gap-3 px-4 py-3 border-b border-zinc-200"
-    >
-      <ProfileImage pfp={profile.profilePicture ?? null} size="large" />
-      <View className="flex-1">
-        <Text className="font-medium text-zinc-900" numberOfLines={1}>
-          {profile.displayName}
-        </Text>
-        {isLeader && <Text className="text-xs text-zinc-500">Leader</Text>}
-      </View>
-    </TouchableOpacity>
   );
 }
 
