@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { Keyboard, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -36,6 +36,9 @@ export default function AnimatedSidebar() {
 
   // Sync animation with context state
   useEffect(() => {
+    if (isOpen) {
+      Keyboard.dismiss();
+    }
     translateX.value = withSpring(isOpen ? 0 : -sidebarWidth, SPRING_CONFIG);
   }, [isOpen]);
 

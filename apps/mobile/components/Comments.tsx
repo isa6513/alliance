@@ -187,7 +187,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-x-2">
           {renderAvatar(reply.author)}
-          <Text className="text-xs text-zinc-500">
+          <Text className="text-sm text-zinc-500">
             <Text className="font-medium text-zinc-700">
               {reply.author.displayName}
             </Text>
@@ -260,7 +260,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
               }
               activeOpacity={0.7}
             >
-              <Text className="text-xs text-zinc-500">
+              <Text className="text-sm text-zinc-500">
                 {isReplyingToThis ? "Cancel reply" : "Reply"}
               </Text>
             </TouchableOpacity>
@@ -273,13 +273,13 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
                   onPress={() => setIsEditing(true)}
                   activeOpacity={0.7}
                 >
-                  <Text className="text-xs text-zinc-500">Edit</Text>
+                  <Text className="text-sm text-zinc-500">Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => shared.onDeleteReply(reply.id)}
                   activeOpacity={0.7}
                 >
-                  <Text className="text-xs text-red-600">Delete</Text>
+                  <Text className="text-sm text-red-600">Delete</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -288,7 +288,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
               onPress={() => setIsCollapsed(!isCollapsed)}
               activeOpacity={0.7}
             >
-              <Text className="text-xs text-zinc-500">
+              <Text className="text-sm text-zinc-500">
                 {isCollapsed ? "Show replies" : "Hide replies"}
               </Text>
             </TouchableOpacity>

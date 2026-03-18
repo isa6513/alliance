@@ -109,7 +109,7 @@ export default function LikesGroup({
       </View>
 
       {expanded && (
-        <View className="border-t border-zinc-200">
+        <View className="">
           {bucket.likes.map((notification) => (
             <LikesGroupNotification
               key={getNotificationIdentityKey(notification)}

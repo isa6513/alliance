@@ -1,12 +1,6 @@
 import { View, TouchableOpacity, Text } from "react-native";
 import { usePathname, useRouter } from "expo-router";
-import {
-  Bell,
-  Layers,
-  ListTodo,
-  MessageSquare,
-  Users,
-} from "lucide-react-native";
+import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -16,12 +10,6 @@ const tabs = [
     icon: ListTodo,
     label: "Tasks",
     matchPaths: ["/", ""],
-  },
-  {
-    href: "/actions" as const,
-    icon: Layers,
-    label: "Actions",
-    matchPaths: ["/actions", "/action"],
   },
   {
     href: "/notifications" as const,
@@ -59,7 +47,7 @@ export default function TabBar() {
 
   return (
     <View
-      className="flex-row bg-white border-t border-zinc-200"
+      className="flex-row bg-white border-t border-zinc-200 px-2"
       style={{ paddingBottom: insets.bottom }}
     >
       {tabs.map((tab) => {

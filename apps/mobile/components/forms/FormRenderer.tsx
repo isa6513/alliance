@@ -776,6 +776,40 @@ const FormRenderer = ({
           </View>
         );
       })}
+      {readOnly && pageCount > 1 && (
+        <View>
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-sm text-zinc-500">
+              Page {currentPageIndex + 1} of {pageCount}
+            </Text>
+          </View>
+          <View className="flex-row gap-3">
+            {!isFirstPage && (
+              <Button
+                onPress={handlePreviousPage}
+                color={ButtonColor.Outline}
+                size={ButtonSize.Medium}
+                className="flex-1"
+                title="Back"
+              />
+            )}
+            {!isLastPage && (
+              <Button
+                onPress={() => {
+                  setCurrentPageIndex((prev) =>
+                    Math.min(prev + 1, maxPageIndex),
+                  );
+                  setImmediate(() => scrollPageTo(0, false));
+                }}
+                color={ButtonColor.Black}
+                size={ButtonSize.Medium}
+                className="flex-1"
+                title="Next"
+              />
+            )}
+          </View>
+        </View>
+      )}
       {!readOnly && (
         <View>
           <View className="">
@@ -842,7 +876,6 @@ const FormRenderer = ({
         <FormModal
           visible={withdrawOpen}
           onClose={() => setWithdrawOpen(false)}
-          maxHeight={420}
         >
           <Text className="text-lg font-semibold text-zinc-900 mb-3">
             Withdraw from action
@@ -896,13 +929,15 @@ const FormRenderer = ({
               className="border border-zinc-200 rounded-lg px-3 py-2 h-24 text-base text-zinc-900 mb-3"
             />
           )}
-          <Button
-            onPress={handleAbandon}
-            color={ButtonColor.Black}
-            size={ButtonSize.Medium}
-            disabled={submitting}
-            title="Withdraw"
-          />
+          <View className="w-1/2 self-center">
+            <Button
+              onPress={handleAbandon}
+              color={ButtonColor.Black}
+              size={ButtonSize.Large}
+              disabled={submitting}
+              title="Withdraw"
+            />
+          </View>
         </FormModal>
       )}
     </View>

@@ -17,10 +17,7 @@ const ActionTaskPanelCompleted = ({
   const formResponse = useCompletedTaskForm(action);
 
   const completedCard = (
-    <Card
-      cardStyle={CardStyle.White}
-      className="border rounded-b-none rounded-sm"
-    >
+    <Card cardStyle={CardStyle.Outline} className="border">
       <View className="flex-row items-center gap-x-2 max-w-[100vw]">
         <View className="w-6 h-6 rounded-full bg-green items-center justify-center">
           <Check size={16} color="#fff" strokeWidth={3} />
