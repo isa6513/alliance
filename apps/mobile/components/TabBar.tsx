@@ -59,7 +59,7 @@ export default function TabBar() {
 
   return (
     <View
-      className="flex-row bg-white border-t border-zinc-200 pt-3"
+      className="flex-row bg-white border-t border-zinc-200"
       style={{ paddingBottom: insets.bottom }}
     >
       {tabs.map((tab) => {
@@ -68,7 +68,7 @@ export default function TabBar() {
         return (
           <TouchableOpacity
             key={tab.href}
-            className="flex-1 items-center gap-0.5"
+            className="flex-1 items-center gap-0.5 pt-3"
             onPress={() => {
               router.replace(tab.href);
             }}
