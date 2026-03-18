@@ -11,6 +11,7 @@ import type {
   RangeField,
   TimeField,
 } from "@alliance/shared/forms/formschema";
+import { isOutputValueMissing } from "@alliance/shared/outputrenderer";
 import { shuffleWithSeed } from "./randomutils";
 import { formatTimeForDisplay, parseTimeInput } from "./timeUtils";
 import DropdownIcon from "../ui/icons/DropdownIcon";
@@ -45,7 +46,7 @@ export type RenderFieldProps = {
   formData?: Record<string, FormValue>;
   isElementVisible?: (
     element: AnyField,
-    data?: Record<string, FormValue>
+    data?: Record<string, FormValue>,
   ) => boolean;
   fieldErrors?: Record<string, string | null>;
   responseHiddenFromOthers?: boolean;
@@ -61,7 +62,7 @@ const formatCityValue = (city: CityFieldValue): string => {
   const region = city.admin1?.trim();
   const country = city.countryName?.trim();
   const locationParts = [region, country].filter(
-    (part): part is string => !!part && part.length > 0
+    (part): part is string => !!part && part.length > 0,
   );
   const suffix = locationParts.length ? `, ${locationParts.join(", ")}` : "";
   return `${city.name}${suffix}`;
@@ -84,7 +85,7 @@ const getRangeValues = (field: RangeField): number[] => {
     : DEFAULT_RANGE_OPTION_COUNT;
   const optionCount = Math.min(
     MAX_RANGE_OPTION_COUNT,
-    Math.max(MIN_RANGE_OPTION_COUNT, normalized)
+    Math.max(MIN_RANGE_OPTION_COUNT, normalized),
   );
   return Array.from({ length: optionCount }, (_, index) => index + 1);
 };
@@ -104,7 +105,7 @@ export function RenderLabel({
       className={cn(
         "block",
         hasError ? "text-red-600" : "text-zinc-700",
-        labelRightAddon && "flex items-start justify-between gap-3"
+        labelRightAddon && "flex items-start justify-between gap-3",
       )}
     >
       <span>
@@ -167,7 +168,7 @@ export function RenderField({
 
   const composeClassName = (
     base: string,
-    overrides: { normal?: string; error?: string } = {}
+    overrides: { normal?: string; error?: string } = {},
   ) => {
     const normal =
       overrides.normal ??
@@ -227,7 +228,7 @@ export function RenderField({
             disabled={disabled}
             aria-invalid={hasError}
             className={composeClassName(
-              sharedInputClasses + " resize-none overflow-hidden notranslate"
+              sharedInputClasses + " resize-none overflow-hidden notranslate",
             )}
             placeholder={field.placeholder}
           />
@@ -312,7 +313,7 @@ export function RenderField({
               onChange
                 ? (e) =>
                     onChange(
-                      e.target.value === "" ? "" : parseFloat(e.target.value)
+                      e.target.value === "" ? "" : parseFloat(e.target.value),
                     )
                 : undefined
             }
@@ -330,8 +331,8 @@ export function RenderField({
               {field.min !== undefined && field.max !== undefined
                 ? `Range: ${field.min} - ${field.max}`
                 : field.min !== undefined
-                ? `Minimum: ${field.min}`
-                : `Maximum: ${field.max}`}
+                  ? `Minimum: ${field.min}`
+                  : `Maximum: ${field.max}`}
             </p>
           ) : null}
         </div>
@@ -343,8 +344,8 @@ export function RenderField({
         typeof value === "number"
           ? value
           : typeof value === "string" && value.trim().length > 0
-          ? Number(value)
-          : undefined;
+            ? Number(value)
+            : undefined;
       const normalizedValue = Number.isFinite(numericValue)
         ? Number(numericValue)
         : undefined;
@@ -371,7 +372,7 @@ export function RenderField({
                     `w-[${100 / values.length}%]`,
                     disabled
                       ? "opacity-60 cursor-not-allowed"
-                      : "cursor-pointer"
+                      : "cursor-pointer",
                   )}
                 >
                   <input
@@ -393,8 +394,8 @@ export function RenderField({
                       checked
                         ? "bg-green text-white border-green"
                         : hasError
-                        ? "border-red-500 text-red-600"
-                        : "border-zinc-300 text-zinc-700"
+                          ? "border-red-500 text-red-600"
+                          : "border-zinc-300 text-zinc-700",
                     )}
                   >
                     {optionValue}
@@ -436,7 +437,7 @@ export function RenderField({
             {
               normal: "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
               error: "border border-red-500 focus:ring-red-500 focus:ring-2",
-            }
+            },
           )}
         />
       );
@@ -480,7 +481,7 @@ export function RenderField({
           <div
             className={cn(
               "space-y-2",
-              hasError && "border-l-2 border-red-500 pl-3"
+              hasError && "border-l-2 border-red-500 pl-3",
             )}
           >
             {options.map((option, optIndex) => (
@@ -505,7 +506,7 @@ export function RenderField({
                         "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
                       error:
                         "border border-red-500 focus:ring-red-500 focus:ring-2",
-                    }
+                    },
                   )}
                 />
                 <span className={hasError ? "text-red-600" : "text-zinc-700"}>
@@ -536,7 +537,7 @@ export function RenderField({
             aria-invalid={hasError}
             className={composeClassName(
               sharedInputClasses +
-                " has-[option.placeholder:checked]:text-zinc-400"
+                " has-[option.placeholder:checked]:text-zinc-400",
             )}
           >
             <option value="" className="placeholder" disabled>
@@ -577,7 +578,7 @@ export function RenderField({
           <div
             className={cn(
               "space-y-2",
-              hasError && "border-l-2 border-red-500 pl-3"
+              hasError && "border-l-2 border-red-500 pl-3",
             )}
           >
             {options.map((option, optIndex) => (
@@ -598,7 +599,7 @@ export function RenderField({
                             onChange([...currentValues, option.value]);
                           } else {
                             onChange(
-                              currentValues.filter((v) => v !== option.value)
+                              currentValues.filter((v) => v !== option.value),
                             );
                           }
                         }
@@ -622,7 +623,7 @@ export function RenderField({
                         "border border-zinc-300 focus:ring-blue-500 focus:ring-2",
                       error:
                         "border border-red-500 focus:ring-red-500 focus:ring-2",
-                    }
+                    },
                   )}
                 />
                 <span className={hasError ? "text-red-600" : "text-zinc-700"}>
@@ -700,8 +701,8 @@ export function RenderField({
         cityValue !== undefined
           ? formatCityValue(cityValue)
           : typeof value === "string"
-          ? value
-          : "";
+            ? value
+            : "";
       return (
         <div className="space-y-1">
           <RenderLabel field={field as CityField} error={errorMessage} />
@@ -775,7 +776,7 @@ export function RenderField({
                 aria-invalid={hasError}
                 className={composeClassName(
                   sharedInputClasses +
-                    " max-w-full flex-1 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                    " max-w-full flex-1 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer disabled:opacity-50 disabled:pointer-events-none",
                 )}
               />
               {isUploading && (
@@ -797,13 +798,13 @@ export function RenderField({
       const rawList = Array.isArray(value) ? value : [];
       const listValue: ListFieldValue = rawList.every(
         (item): item is Record<string, FormValue> =>
-          item !== null && typeof item === "object" && !Array.isArray(item)
+          item !== null && typeof item === "object" && !Array.isArray(item),
       )
         ? rawList
         : [];
       const defaultCount = Math.max(
         0,
-        Math.floor(listField.defaultNumber ?? 0)
+        Math.floor(listField.defaultNumber ?? 0),
       );
       const minCards = Math.max(0, Math.floor(Number(listField.min || 0)));
       const maxCards =
@@ -815,7 +816,7 @@ export function RenderField({
         value === undefined
           ? Array.from(
               { length: Math.max(0, defaultCount) },
-              () => ({} as Record<string, FormValue>)
+              () => ({}) as Record<string, FormValue>,
             )
           : listValue;
       const canDelete = cards.length > minCards;
@@ -827,7 +828,7 @@ export function RenderField({
           value === undefined
             ? Array.from(
                 { length: Math.max(0, defaultCount) + 1 },
-                () => ({} as Record<string, FormValue>)
+                () => ({}) as Record<string, FormValue>,
               )
             : [...listValue, {} as Record<string, FormValue>];
         onChange?.(nextCards);
@@ -839,7 +840,7 @@ export function RenderField({
       const updateCard = (
         index: number,
         subFieldId: string,
-        subValue: FormValue
+        subValue: FormValue,
       ) => {
         const next = [...cards];
         const card = { ...(next[index] ?? {}) };
@@ -853,14 +854,17 @@ export function RenderField({
         return subFields.filter((sub) => isElementVisible(sub, mergedData));
       };
       const hiddenInOutputIds = new Set(
-        listField.outputViewHiddenFieldIds ?? []
+        listField.outputViewHiddenFieldIds ?? [],
       );
       const subFieldsForCard = (card: Record<string, FormValue>) => {
-        const visible = visibleSubFieldsForCard(card);
-        if (isOutputView && hiddenInOutputIds.size > 0) {
-          return visible.filter((sub) => !hiddenInOutputIds.has(sub.id));
+        let fields = visibleSubFieldsForCard(card);
+        if (isOutputView) {
+          if (hiddenInOutputIds.size > 0) {
+            fields = fields.filter((sub) => !hiddenInOutputIds.has(sub.id));
+          }
+          fields = fields.filter((sub) => !isOutputValueMissing(card[sub.id]));
         }
-        return visible;
+        return fields;
       };
       return (
         <div className="space-y-3">
@@ -1039,7 +1043,7 @@ export function TimeInputField({
 }: TimeInputFieldProps) {
   const normalizedValue = typeof value === "string" && value ? value : "";
   const [inputValue, setInputValue] = useState<string>(() =>
-    formatTimeForDisplay(normalizedValue)
+    formatTimeForDisplay(normalizedValue),
   );
   const [localError, setLocalError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -1146,10 +1150,10 @@ export function TimeInputField({
           disabled={disabled}
           aria-invalid={hasError}
           className={cn(
-            "w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:!bg-transparent",
+            "w-full px-3 py-2 rounded-md focus:outline-none bg-white disabled:bg-transparent!",
             hasError
               ? "border border-red-500 focus:ring-1 focus:ring-red-500 focus:border-transparent"
-              : "border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              : "border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent",
           )}
           inputMode="text"
         />
@@ -1177,7 +1181,7 @@ export function TimeInputField({
                 onClick={() => handleSelectTime(t)}
                 className={cn(
                   "w-full text-left px-3 py-2 bg-white text-sm hover:bg-zinc-50",
-                  t === inputValue && "bg-zinc-50 font-medium"
+                  t === inputValue && "bg-zinc-50 font-medium",
                 )}
               >
                 {t}
