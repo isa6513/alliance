@@ -145,6 +145,7 @@ function AvatarGroupCount({
     medium: "text-sm",
     large: "text-sm",
     huge: "text-base",
+    override: "",
   } as const;
   return (
     <div
