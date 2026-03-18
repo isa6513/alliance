@@ -278,6 +278,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
       }
       xRange={{ min: 0, max: actionCompletionCurveChartData.maxX }}
       showDataPoints={!isHourly}
+      getHoverXLabel={isHourly ? (d) => formatHourLabel((d.x as number) ?? 0) : undefined}
       yDomain={actionCompletionCurveChartData.yDomain}
       yAxisFormat={(v) => `${Math.round(v * 100)}%`}
       height={360}
@@ -351,10 +352,6 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
         const xValue = point.x as number;
         const items: { label: string; value: string | number; color?: string }[] = isHourly
           ? [
-              {
-                label: "Hour",
-                value: formatHourLabel(xValue),
-              },
               {
                 label: "Cumulative completed",
                 value: `${(cumulativeRate * 100).toFixed(2)}%`,

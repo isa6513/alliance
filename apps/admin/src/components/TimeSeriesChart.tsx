@@ -98,6 +98,7 @@ type NumericAxisProps = BaseChartProps & {
   multiLineData: MultiLineSeries[];
   getHoverContent?: (point: DataPoint, series: MultiLineSeries) => HoverContent;
   showDataPoints?: boolean;
+  getHoverXLabel?: (point: DataPoint) => string;
   legendGradient?: string;
   legendLabels?: { left: string; right: string };
 };
@@ -687,6 +688,16 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
             {/* Hover indicator when data points are hidden */}
             {props.showDataPoints === false && hoveredPoint && hoveredSeries && (
               <>
+                {props.getHoverXLabel && (
+                  <text
+                    x={numericGeometry.xScale(props.getXValue(hoveredPoint))}
+                    y={numericGeometry.margin.top - 6}
+                    textAnchor="middle"
+                    className="fill-gray-600 text-xs font-medium"
+                  >
+                    {props.getHoverXLabel(hoveredPoint)}
+                  </text>
+                )}
                 <line
                   x1={numericGeometry.xScale(props.getXValue(hoveredPoint))}
                   x2={numericGeometry.xScale(props.getXValue(hoveredPoint))}
@@ -742,14 +753,14 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
 
         {/* Hover tooltip for numeric chart */}
         {isNumericAxis(props) && numericHoverContent && hoveredSeries && (
-          <div className="absolute top-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-[220px] pointer-events-none">
-            <p className="font-semibold text-gray-900 mb-2">
+          <div className="absolute top-4 left-30 pointer-events-none">
+            <p className="font-semibold text-gray-900 mb-1 text-sm">
               {numericHoverContent.title}
             </p>
-            <div className="space-y-1 text-sm">
+            <div className="space-y-0.5 text-sm">
               {numericHoverContent.items.map((item) => (
-                <div key={item.label} className="flex justify-between">
-                  <span className="text-gray-600">{item.label}:</span>
+                <div key={item.label} className="flex items-center gap-1.5">
+                  <span className="text-gray-500">{item.label}:</span>
                   <span
                     className="font-medium"
                     style={{ color: item.color ?? "#111827" }}
