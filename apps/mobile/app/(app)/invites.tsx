@@ -14,10 +14,13 @@ import {
   userRejectOnetimeInvite,
 } from "@alliance/shared/client";
 import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
+import { getOnetimeInviteSignupUrl } from "@alliance/shared/lib/inviteUrls";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import { inviteBuckets } from "@alliance/shared/lib/copy";
 import { runAsync } from "@alliance/shared/lib/utils";
+import QRCode from "react-native-qrcode-svg";
 import { useAuth } from "../../lib/AuthContext";
+import { getBaseUrl } from "../../lib/config";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { SegmentedTabs } from "../../components/system/SegmentedTabs";
 import { ScreenWithLoading } from "../../components/system/ScreenWithLoading";
@@ -27,16 +30,22 @@ import { InviteSection } from "../../components/InviteSection";
 import { colors } from "../../lib/style/colors";
 
 enum InvitesTab {
+  ReferralQr = "referral_qr",
   New = "new",
   Past = "past",
 }
 
 const INVITES_TAB_LABELS: Record<InvitesTab, string> = {
-  [InvitesTab.New]: "New",
+  [InvitesTab.ReferralQr]: "QR code",
+  [InvitesTab.New]: "New link",
   [InvitesTab.Past]: "Past",
 };
 
-const INVITES_TABS_ORDER: InvitesTab[] = [InvitesTab.New, InvitesTab.Past];
+const INVITES_TABS_ORDER: InvitesTab[] = [
+  InvitesTab.ReferralQr,
+  InvitesTab.New,
+  InvitesTab.Past,
+];
 
 export default function InvitesScreen() {
   const { user } = useAuth();
@@ -45,7 +54,9 @@ export default function InvitesScreen() {
   const [error, setError] = useState<string | null>(null);
   const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
   const [sharedInviteId, setSharedInviteId] = useState<number | null>(null);
-  const [selectedTab, setSelectedTab] = useState<InvitesTab>(InvitesTab.New);
+  const [selectedTab, setSelectedTab] = useState<InvitesTab>(
+    InvitesTab.ReferralQr,
+  );
   const sharedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadInvites = useCallback(async () => {
@@ -160,11 +171,34 @@ export default function InvitesScreen() {
     return <ScreenWithLoading title="Invites" loading />;
   }
 
+  const referralLink =
+    user?.referralCode != null
+      ? getOnetimeInviteSignupUrl(getBaseUrl(), user.referralCode)
+      : null;
+
   const renderTabContent = () => {
     const emptyMessage = "Your invites will appear here.";
 
     return (
       <View className="px-4 pt-4 gap-4">
+        {selectedTab === InvitesTab.ReferralQr && (
+          <View className="items-center py-6 gap-4">
+            {referralLink ? (
+              <>
+                <View className="bg-white p-4 rounded-xl">
+                  <QRCode value={referralLink} size={300} />
+                </View>
+                <Text className="text-base text-zinc-600 text-center">
+                  Share this QR code to invite a friend to the Alliance.
+                </Text>
+              </>
+            ) : (
+              <Text className="text-sm text-zinc-500 text-center">
+                Your referral link is not available.
+              </Text>
+            )}
+          </View>
+        )}
         {selectedTab === InvitesTab.New && (
           <>
             <InviteForm onInviteCreated={handleInviteCreated} />
