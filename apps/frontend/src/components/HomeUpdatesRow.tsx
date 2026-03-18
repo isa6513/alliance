@@ -8,8 +8,6 @@ import { cn } from "@alliance/shared/styles/util";
 import { href, useNavigate } from "react-router";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
 
-import SeeAll from "./SeeAll";
-
 const UPDATES_LIMIT = 3;
 
 const HomeUpdatesRow = () => {
