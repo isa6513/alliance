@@ -24,6 +24,7 @@ import Text from "../../../components/system/Text";
 import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
 import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
 import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
+import { SectionHeader } from "../../../components/system/SectionHeader";
 import { colors } from "../../../lib/style/colors";
 import UserActivityCard from "../../../components/UserActivityCard";
 import ProfileImage from "../../../components/ProfileImage";
@@ -106,7 +107,7 @@ export default function GroupsScreen() {
             className="p-2"
             accessibilityLabel="Manage groups"
           >
-            <Settings size={22} color="#71717a" strokeWidth={2} />
+            <Settings size={22} color={colors.text.icon} strokeWidth={2} />
           </TouchableOpacity>
         </SimplePageTitle>
         <View className="flex-1 px-4 py-8 items-center justify-center">
@@ -134,7 +135,7 @@ export default function GroupsScreen() {
           className="p-2"
           accessibilityLabel="Manage groups"
         >
-          <Settings size={22} color="#71717a" strokeWidth={2} />
+          <Settings size={22} color={colors.text.icon} strokeWidth={2} />
         </TouchableOpacity>
       </SimplePageTitle>
 
@@ -226,7 +227,7 @@ function GroupActivityTab({
       data={activities}
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
-        <View className="border-b-2 border-zinc-200">
+        <View className="border-b border-zinc-200">
           <UserActivityCard
             activity={item}
             handleLike={() => handleLikeActivity(item.id)}
@@ -312,11 +313,7 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
       }
       renderItem={({ item }) =>
         item.type === "header" ? (
-          <View className="px-4 pb-2 pt-2 bg-white">
-            <Text className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
-              {item.label}
-            </Text>
-          </View>
+          <SectionHeader label={item.label} />
         ) : (
           <MemberRow profile={item.profile} isLeader={item.isLeader} />
         )
@@ -337,7 +334,7 @@ function MemberRow({
   return (
     <TouchableOpacity
       onPress={() => router.push(`/member/${profile.id}`)}
-      className="flex-row items-center gap-3 px-4 py-3 border-b border-zinc-100"
+      className="flex-row items-center gap-3 px-4 py-3 border-b border-zinc-200"
     >
       <ProfileImage pfp={profile.profilePicture ?? null} size="large" />
       <View className="flex-1">
@@ -463,20 +460,16 @@ function GroupInvitesTab({
       }
       renderItem={({ item }) =>
         item.type === "section" ? (
-          <View className="px-4 pb-2 pt-2 bg-white">
-            <Text className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
-              {item.label}
-            </Text>
-          </View>
+          <SectionHeader label={item.label} />
         ) : item.type === "communityInvite" ? (
-          <View className="py-2 px-4 border-b border-zinc-100 flex-row items-center justify-between bg-white">
+          <View className="px-4 py-3 border-b border-zinc-200 flex-row items-center justify-between bg-white">
             <Text className="text-zinc-900 font-medium">
               {item.displayName}
             </Text>
             <Text className="text-xs text-zinc-500">Pending</Text>
           </View>
         ) : (
-          <View className="py-2 px-4 border-b border-zinc-100 flex-row items-center justify-between bg-white">
+          <View className="px-4 py-3 border-b border-zinc-200 flex-row items-center justify-between bg-white">
             <Text className="text-zinc-900 font-medium" numberOfLines={1}>
               {item.invitee ?? "Unnamed"}
             </Text>

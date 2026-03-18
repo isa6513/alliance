@@ -30,7 +30,7 @@ function AppContent() {
           style={{
             width: 280,
             borderRightWidth: 1,
-            borderRightColor: "#e4e4e7",
+            borderRightColor: colors.borderLight,
           }}
         >
           <Sidebar />

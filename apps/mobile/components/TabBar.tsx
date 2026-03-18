@@ -76,12 +76,12 @@ export default function TabBar() {
           >
             <Icon
               size={26}
-              color={active ? colors.green : "#888"}
+              color={active ? colors.green : colors.text.icon}
               strokeWidth={active ? 2.5 : 2}
             />
             <Text
               className="text-[10px]"
-              style={{ color: active ? colors.green : "#888" }}
+              style={{ color: active ? colors.green : colors.text.icon }}
               numberOfLines={1}
             >
               {tab.label}

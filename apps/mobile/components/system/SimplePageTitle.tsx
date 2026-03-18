@@ -2,6 +2,7 @@ import { Pressable, View } from "react-native";
 import { Menu } from "lucide-react-native";
 import Text from "./Text";
 import { useAppDrawer } from "../../lib/AppDrawerContext";
+import { colors } from "../../lib/style/colors";
 
 export const SimplePageTitle = ({
   title,
@@ -16,7 +17,7 @@ export const SimplePageTitle = ({
       <View className="flex-row items-center">
         {!isPermanent && (
           <Pressable onPress={openDrawer} className="p-2 px-4">
-            <Menu size={24} color="#71717a" strokeWidth={2.5} />
+            <Menu size={24} color={colors.text.icon} strokeWidth={2.5} />
           </Pressable>
         )}
         <Text className="text-xl font-semibold text-zinc-900 font-serif">
