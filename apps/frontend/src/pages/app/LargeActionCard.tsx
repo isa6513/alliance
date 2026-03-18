@@ -83,11 +83,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
 
   const { lastEvent, nextEvent } = getLastAndNextEvent(action);
 
-  const optionalStyle =
-    action.optional || dismissProps
-      ? "border-dashed border-[1.5px] !border-blue-300"
-      : "";
-
   return (
     <>
       <Card
@@ -96,7 +91,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           state === LargeActionCardState.Closed && "opacity-0 overflow-hidden",
           state === LargeActionCardState.Minified && "pb-4",
           state !== LargeActionCardState.Closed && "opacity-100",
-          optionalStyle,
           className,
         )}
       >
@@ -116,9 +110,11 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         {action.optional && !dismissProps && (
           <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
             <p className="font-semibold">This action is optional.</p>
-            <p className="mb-3">You can complete as usual or dismiss it.</p>
+            <p className="mb-3">
+              You can complete the task as usual or dismiss it.
+            </p>
             <Button
-              color={ButtonColor.White}
+              color={ButtonColor.WhiteBorderless}
               onClick={handleDismiss}
               className="w-full"
             >
@@ -138,9 +134,9 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             </div>
             {showDetails && (
               <Button
-                color={ButtonColor.Transparent}
+                color={ButtonColor.Grey}
                 onClick={goToActionPage}
-                className="!px-4 flex gap-x-1 text-sm hover:bg-zinc-50 border border-zinc-200 text-black font-normal"
+                className="!px-4 flex gap-x-1 text-sm font-normal"
               >
                 Details
                 <ChevronRight size="15" className="-mr-1" />

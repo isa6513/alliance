@@ -90,7 +90,6 @@ const HomePage = () => {
         {(currentWeekSidebarActions.length > 0 ||
           completedActions.length > 0) && (
           <div className="flex flex-col gap-y-2">
-            <p className="font-title">Progress</p>
             {currentWeekSidebarActions.length + newActions.length > 0 && (
               <p className="text-zinc-600 mb-2">
                 <span className="text-green font-medium mr-0.5">
@@ -218,17 +217,23 @@ const HomePage = () => {
     return (
       <div
         className={
-          "flex flex-col gap-y-12 lg:gap-y-16 py-4 sm:py-8 md:py-18 px-4 xl:px-0 max-w-3xl mx-auto relative"
+          "flex flex-col gap-y-8 sm:gap-y-12 lg:gap-y-16 py-4 sm:py-8 md:py-18 px-4 xl:px-0 max-w-3xl mx-auto relative"
         }
       >
+        <div>
+          <div className="flex flex-row justify-between items-center mb-4 px-1">
+            <p className="text-title-small">Action updates</p>
+            <SeeAll link="/action-updates" size="lg" />
+          </div>
+          <HomeUpdatesRow />
+        </div>
+
         <div className="flex flex-col gap-6 flex-1">
-          {!isLargeScreen && (
-            <div>
-              <div className="flex flex-col divide-y divide-zinc-200">
-                {tasksListContent}
-              </div>
-            </div>
-          )}
+          <div className="flex flex-col gap-y-1">
+            <p className="text-title-small">Tasks to do</p>
+            {tasksListContent}
+          </div>
+
           {currentTaskOrGeneralUpdate &&
           isGeneralUpdate(currentTaskOrGeneralUpdate) ? (
             <LargeGeneralUpdateCard
@@ -313,7 +318,6 @@ const HomePage = () => {
             </div>
           )}
         </div>
-        <HomeUpdatesRow />
       </div>
     );
   }, [
@@ -325,7 +329,6 @@ const HomePage = () => {
     handleDismissAction,
     handleDismissGeneralUpdate,
     tasksListContent,
-    isLargeScreen,
     queryClient,
     activeCompletableFollowUpForms,
   ]);
@@ -333,7 +336,6 @@ const HomePage = () => {
   const sidebarContent = useMemo(() => {
     return (
       <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-full ">
-        {tasksListContent}
         <div className="flex-1 min-h-0 flex flex-col">
           <div className="flex flex-row justify-between items-center shrink-0">
             <p className="font-title">Activity</p>
@@ -348,7 +350,7 @@ const HomePage = () => {
         </div>
       </div>
     );
-  }, [tasksListContent, globalFeedItems, globalFeedLoading]);
+  }, [globalFeedItems, globalFeedLoading]);
 
   useWhiteBackground();
 

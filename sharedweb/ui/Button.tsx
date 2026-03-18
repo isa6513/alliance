@@ -49,9 +49,10 @@ export enum ButtonColor {
   BlueOutline = "border border-[#318dde] text-[#318dde] hover:bg-[#318dde]/10",
   Yellow = "bg-yellow-600",
   Transparent = "bg-transparent hover:bg-black/5 text-black !px-2",
-  Grey = "bg-zinc-200 !text-black hover:bg-zinc-300",
+  Grey = "bg-grey-1 text-black hover:bg-grey-2",
   Outline = "border border-gray-2 text-black",
   White = "border border-gray-2 text-black bg-white hover:bg-zinc-50",
+  WhiteBorderless = "text-black bg-white hover:bg-zinc-50",
   Black = "bg-zinc-800 hover:bg-zinc-900 text-white border border-zinc-800 active:bg-zinc-700",
 }
 
@@ -85,7 +86,7 @@ const Button: React.FC<ButtonProps> = ({
     disabled && "opacity-50 !cursor-not-allowed",
     color,
     color === ButtonColor.Light && "!text-zinc-800",
-    className
+    className,
   );
 
   const baseStyle = {

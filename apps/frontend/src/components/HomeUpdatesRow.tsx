@@ -78,10 +78,6 @@ const HomeUpdatesRow = () => {
 
   return (
     <div>
-      <div className="flex flex-row justify-between items-center mb-2 px-1">
-        <p className="text-title-small mb-2">Action updates</p>
-        <SeeAll link="/action-updates" size="lg" />
-      </div>
       {isLoading && (
         <p className="text-xs text-zinc-400 col-span-full">Loading updates…</p>
       )}
@@ -132,15 +128,15 @@ const HomeUpdatesRow = () => {
                       : "bg-white hover:bg-green/5",
                   )}
                 >
-                  <p className="text-base font-medium text-green mb-0.5 truncate">
+                  <p className="text-sm md:text-base font-medium text-green mb-0.5 truncate">
                     {update.actionName}
                   </p>
                   {update.title && (
-                    <p className="text-base leading-snug text-zinc-800">
+                    <p className="text-sm md:text-base leading-snug text-zinc-800">
                       {update.title}
                     </p>
                   )}
-                  <p className="text-base text-zinc-400 mt-1">
+                  <p className="text-sm md:text-base text-zinc-400 mt-1">
                     {formatTime(new Date(update.date), { addSuffix: true })}
                   </p>
                 </div>

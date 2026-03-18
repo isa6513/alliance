@@ -63,6 +63,7 @@
 
   --color-grey-0: oklch(98% 0 0);
   --color-grey-1: oklch(95.5% 0 0);
+  --color-grey-2: oklch(93% 0 0);
 
   --color-green: rgb(98, 161, 36);
   --color-navy: rgb(7, 30, 64);
@@ -187,7 +188,7 @@ select {
 }
 
 .text-title-small {
-  @apply font-semibold text-2xl md:text-2xl;
+  @apply font-semibold text-xl sm:text-2xl md:text-2xl;
 }
 
 .text-heading-public {
