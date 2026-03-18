@@ -23,11 +23,11 @@ import { LegendList } from "@legendapp/list";
 import Text from "../../../components/system/Text";
 import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
 import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
+import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
 import { colors } from "../../../lib/style/colors";
 import UserActivityCard from "../../../components/UserActivityCard";
 import ProfileImage from "../../../components/ProfileImage";
 import { useAuth } from "../../../lib/AuthContext";
-import { cn } from "@alliance/shared/styles/util";
 
 type Tab = "activity" | "members" | "invites";
 
@@ -139,7 +139,7 @@ export default function GroupsScreen() {
       </SimplePageTitle>
 
       <View className="px-4 my-4 flex flex-col gap-y-1">
-        <Text className="text-xl font-medium text-zinc-900">
+        <Text className="text-2xl font-semibold text-zinc-900">
           {selectedCommunity?.name}
         </Text>
         <Text className="text-sm text-zinc-500">
@@ -147,27 +147,13 @@ export default function GroupsScreen() {
         </Text>
       </View>
 
-      {/* Tabs */}
-      <View className="border-b border-zinc-200 px-2 flex-row gap-1">
-        {tabs.map((t) => (
-          <TouchableOpacity
-            key={t}
-            onPress={() => setTab(t)}
-            className={cn(
-              "px-3 py-3 border-b-2",
-              t === tab ? "border-green" : "border-transparent",
-            )}
-          >
-            <Text
-              className={cn(
-                "text-sm font-medium",
-                t === tab ? "text-green" : "text-zinc-500",
-              )}
-            >
-              {TAB_DISPLAY_NAMES[t]}
-            </Text>
-          </TouchableOpacity>
-        ))}
+      <View className="px-4 pt-2 pb-4">
+        <SegmentedTabs
+          tabs={tabs}
+          selectedTab={tab}
+          onSelect={setTab}
+          labels={TAB_DISPLAY_NAMES}
+        />
       </View>
 
       {/* Tab content */}
