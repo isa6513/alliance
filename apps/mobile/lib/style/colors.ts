@@ -14,6 +14,7 @@ export const colors = {
     tertiary: "#666",
     light: "#9ca3af",
     icon: "#52525b",
+    disabled: "#d4d4d8",
   },
 
   switch: {

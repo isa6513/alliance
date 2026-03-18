@@ -26,7 +26,9 @@ import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import type { GeneralUpdateDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
+import { useBoundedIndex } from "../../lib/useBoundedIndex";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import { IndexStepper } from "../../components/system/IndexStepper";
 import Button, { ButtonColor } from "../../components/system/Button";
 
 const GENERAL_UPDATES_QUERY_KEY = [
@@ -121,11 +123,21 @@ export default function HomeScreen() {
 
   const { todoActions } = useHomePageActions(actionsWithAwayStatus);
 
-  const currentTaskOrGeneralUpdate = useMemo(() => {
+  const allItems = useMemo(() => {
     return [...todoActions, ...(generalUpdates ?? [])].sort(
       homePagePriorityComparator,
-    )[0];
+    );
   }, [todoActions, generalUpdates]);
+
+  const {
+    index: safeIndex,
+    goNext,
+    goPrev,
+    canGoNext,
+    canGoPrev,
+    hasMultiple: showTaskNav,
+  } = useBoundedIndex(allItems.length);
+  const currentTaskOrGeneralUpdate = allItems[safeIndex] ?? null;
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
 
@@ -254,7 +266,20 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <SimplePageTitle title={title} />
+      <SimplePageTitle title={title}>
+        {showTaskNav && (
+          <IndexStepper
+            index={safeIndex}
+            totalCount={allItems.length}
+            onPrev={goPrev}
+            onNext={goNext}
+            canGoPrev={canGoPrev}
+            canGoNext={canGoNext}
+            previousLabel="Previous task"
+            nextLabel="Next task"
+          />
+        )}
+      </SimplePageTitle>
       <KeyboardAwareScrollView
         key={fullScreen ? "fullscreen" : "scroll"}
         ref={scrollViewRef}
