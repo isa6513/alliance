@@ -31,6 +31,7 @@ import { CommunityModule } from './community/community.module';
 import { ContractModule } from './contract/contract.module';
 import { VideosModule } from './videos/videos.module';
 import { ApnsModule } from './apns/apns.module';
+import { ReferralSource } from './user/entities/user.entity';
 
 @Module({
   imports: [
@@ -101,6 +102,7 @@ export class AppModule implements OnModuleInit {
           password: process.env.ADMIN_PASSWORD,
           name: 'Admin',
           admin: true,
+          referralSource: ReferralSource.ReferralLink,
         });
       }
     }

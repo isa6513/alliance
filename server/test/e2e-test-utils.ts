@@ -6,7 +6,7 @@ import { AuthModule } from '../src/auth/auth.module';
 import { ActionsModule } from '../src/actions/actions.module';
 import { ContractModule } from '../src/contract/contract.module';
 import { UserModule } from '../src/user/user.module';
-import { User } from '../src/user/entities/user.entity';
+import { ReferralSource, User } from '../src/user/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -91,6 +91,7 @@ export async function createTestApp(
       email: 'user@example.com',
       password: 'pass',
       name: 'Test User',
+      referralSource: ReferralSource.ReferralLink,
       tags: [defaultTag],
     }),
   );
@@ -101,6 +102,7 @@ export async function createTestApp(
       password: 'pass',
       name: 'Test Admin',
       admin: true,
+      referralSource: ReferralSource.ReferralLink,
       tags: [defaultTag],
     }),
   );

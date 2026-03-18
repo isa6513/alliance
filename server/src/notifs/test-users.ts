@@ -2,6 +2,7 @@ import {
   ForumDigestPreference,
   NotificationPreference,
   PublicFormResponseDefault,
+  ReferralSource,
   User,
 } from 'src/user/entities/user.entity';
 import { NotificationChannel } from './notif-utils';
@@ -55,6 +56,7 @@ export const testUser = new User({
   undergoingGroupAssignment: false,
   sharePhoneNumberWithCommunityLead: true,
   referralCode: '',
+  referralSource: ReferralSource.ReferralLink,
   hashPassword: function (): Promise<void> {
     throw new Error('Function not implemented.');
   },

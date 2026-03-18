@@ -18,7 +18,15 @@ import { EventLogService } from 'src/eventlog/eventlog.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { Community } from 'src/community/entities/community.entity';
-import { groupUrl, profileUrl } from 'src/search/approutes';
+import { communityHasCapacity } from 'src/community/community.utils';
+import { profileUrl } from 'src/search/approutes';
+import { run } from 'src/utils/promise';
+import {
+  REFERRAL_COMMUNITY_SELECTORS,
+  buildNotifForLeaderWithReferrer,
+  memberJoinedCommunityNotif,
+  newMemberReferredNotif,
+} from './contract.utils';
 
 @Injectable()
 export class ContractService {
@@ -105,115 +113,78 @@ export class ContractService {
       pendingCommunity: null,
     };
     if (!firstSigning) {
-      if (user.pendingCommunity) {
-        if (
-          user.pendingCommunity.maxCapacity !== null &&
-          user.pendingCommunity.maxCapacity -
-            (user.pendingCommunity.users.length -
-              (user.pendingCommunity.leaders?.length ?? 0)) >
-            0
-        ) {
-          promises.push(
-            this.communityService.addUsersToCommunityAndRefreshConversation({
-              user,
-              community: user.pendingCommunity,
-              notifForLeader: ({ leader }) => ({
-                user: leader,
-                category: NotificationCategory.MemberJoinedCommunity,
-                message: `${user.name} signed their contract and was re-added to your group (${user.pendingCommunity!.name})`,
-                webAppLocation: groupUrl({
-                  tab: 'members',
-                  communityId: user.pendingCommunity!.id,
-                }),
-                associatedUsers: [user],
-              }),
-            }),
-          );
-        }
+      if (
+        user.pendingCommunity &&
+        communityHasCapacity(user.pendingCommunity)
+      ) {
+        promises.push(
+          this.communityService.addUsersToCommunityAndRefreshConversation({
+            user,
+            community: user.pendingCommunity,
+            notifForLeader: ({ leader }) =>
+              memberJoinedCommunityNotif(
+                leader,
+                user,
+                user.pendingCommunity!,
+                `${user.name} signed their contract and was re-added to your group (${user.pendingCommunity!.name})`,
+              ),
+          }),
+        );
       }
     } else if (user.referredByInvite?.community) {
-      // Join community from invite
       const community = user.referredByInvite.community;
       let referrerNotified = false;
       await this.communityService.addUsersToCommunityAndRefreshConversation({
         user,
         community,
-        notifForLeader: ({ leader }) => {
-          if (leader.id === user.referredBy?.id) {
-            referrerNotified = true;
-            return {
-              user: leader,
-              category: NotificationCategory.MemberJoinedCommunity,
-              message: `${user.name} joined the Alliance and your group (${community.name})`,
-              webAppLocation: groupUrl({
-                tab: 'members',
-                communityId: community.id,
-              }),
-              associatedUsers: [user],
-            };
-          }
-          return {
-            user: leader,
-            category: NotificationCategory.MemberJoinedCommunity,
-            message: `${user.name} (invited by ${user.referredBy!.name}) joined the Alliance and your group (${community.name})`,
-            webAppLocation: groupUrl({
-              tab: 'members',
-              communityId: community.id,
-            }),
-            associatedUsers: [user, user.referredBy!],
-          };
-        },
+        notifForLeader: user.referredBy
+          ? buildNotifForLeaderWithReferrer(
+              user,
+              community,
+              user.referredBy,
+              (v) => (referrerNotified = v),
+            )
+          : ({ leader }) =>
+              memberJoinedCommunityNotif(
+                leader,
+                user,
+                community,
+                `${user.name} joined the Alliance and your group (${community.name})`,
+              ),
       });
-
       if (user.referredBy && !referrerNotified) {
-        notifs.push({
-          user: user.referredBy,
-          category: NotificationCategory.NewMemberReferred,
-          message: `${user.name} joined the Alliance`,
-          webAppLocation: profileUrl(user.id),
-          associatedUsers: [user],
-        });
+        notifs.push(newMemberReferredNotif(user, user.referredBy));
       }
     } else if (user.referredBy) {
       const referredBy = user.referredBy;
-      // Join some community adjacent to the user
-      const community: Community | null =
-        referredBy.communities?.find(
-          (c: Community) =>
-            c.maxCapacity !== null &&
-            (c.users?.length ?? 0) - (c.leaders?.length ?? 0) < c.maxCapacity &&
-            !c.leaders?.some(
-              (leader: { id: number }) => leader.id === referredBy.id,
-            ),
-        ) ?? null;
+      const community = run(() => {
+        const selector = REFERRAL_COMMUNITY_SELECTORS[user.referralSource];
+        if (!selector) {
+          throw new Error(`Unknown referral source: ${user.referralSource}`);
+        }
+        return selector(referredBy);
+      });
 
+      let referrerNotified = false;
       if (community) {
         promises.push(
           this.communityService.addUsersToCommunityAndRefreshConversation({
             user,
             community,
-            notifForLeader: ({ leader }) => ({
-              user: leader,
-              category: NotificationCategory.MemberJoinedCommunity,
-              message: `${user.name} (invited by ${referredBy.name}) joined the Alliance and your group (${community.name})`,
-              webAppLocation: groupUrl({
-                tab: 'members',
-                communityId: community.id,
-              }),
-              associatedUsers: [user],
-            }),
+            notifForLeader: buildNotifForLeaderWithReferrer(
+              user,
+              community,
+              referredBy,
+              (v) => (referrerNotified = v),
+            ),
           }),
         );
       } else {
         userUpdate.undergoingGroupAssignment = true;
       }
-      notifs.push({
-        user: referredBy,
-        category: NotificationCategory.NewMemberReferred,
-        message: `${user.name} joined the Alliance`,
-        webAppLocation: profileUrl(user.id),
-        associatedUsers: [user],
-      });
+      if (!referrerNotified) {
+        notifs.push(newMemberReferredNotif(user, referredBy));
+      }
     } else {
       // no community and no referrer
       userUpdate.undergoingGroupAssignment = true;

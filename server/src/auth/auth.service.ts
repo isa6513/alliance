@@ -6,7 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import type { Response } from 'express';
 import { MailService } from '../mail/mail.service';
-import { User } from '../user/entities/user.entity';
+import { ReferralSource, User } from '../user/entities/user.entity';
 import { type PWResetJwtPayload, UserService } from '../user/user.service';
 import { AuthTokens } from './dto/authtokens.dto';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -51,35 +51,54 @@ export class AuthService {
     res.clearCookie(AuthService.REFRESH_COOKIE, { path: '/' });
   }
 
+  /**
+   * Resolves a referral code to invite (if onetime invite), referring user, and referral source.
+   * Throws if code is missing, invite already used, or (outside test) invalid referral code.
+   */
+  private async resolveReferralCode(referralCode: string): Promise<{
+    invite: OnetimeInvite | null;
+    referringUser: User | null;
+    referralSource: ReferralSource;
+  }> {
+    const invite = await this.usersService.findInviteByCode(referralCode, {
+      invitingUser: { communities: true },
+      community: true,
+      invitedUser: true,
+    });
+    if (invite?.invitedUser) {
+      throw new BadRequestException('This invite code has already been used');
+    }
+    if (invite) {
+      await this.usersService.invalidateInvite(invite.id);
+      return {
+        invite,
+        referringUser: invite.invitingUser,
+        referralSource: ReferralSource.OnetimeInvite,
+      };
+    }
+    const referringUser =
+      await this.usersService.findOneByReferralCode(referralCode);
+    if (!referringUser && process.env.NODE_ENV !== 'test') {
+      throw new BadRequestException('invalid referral code'); // TODO: feature flag
+    }
+    return {
+      invite: null,
+      referringUser,
+      referralSource: ReferralSource.ReferralLink,
+    };
+  }
+
   async register(signUp: SignUpDto): Promise<User> {
     if (await this.usersService.findOneByEmail(signUp.email)) {
       throw new BadRequestException('User already exists');
     }
 
-    let invite: OnetimeInvite | null = null;
-    let referringUser: User | null = null;
-    if (signUp.referralCode) {
-      invite = await this.usersService.findInviteByCode(signUp.referralCode, {
-        invitingUser: { communities: true },
-        community: true,
-        invitedUser: true,
-      });
-      if (invite?.invitedUser) {
-        throw new BadRequestException('This invite code has already been used');
-      }
-      if (invite) {
-        await this.usersService.invalidateInvite(invite.id);
-        referringUser = invite.invitingUser;
-      } else {
-        // If no OnetimeInvite found, check if it's a user's referral code
-        referringUser = await this.usersService.findOneByReferralCode(
-          signUp.referralCode,
-        );
-        if (!referringUser && process.env.NODE_ENV !== 'test') {
-          throw new BadRequestException('invalid referral code'); //TODO: feature flag
-        }
-      }
+    if (!signUp.referralCode) {
+      throw new BadRequestException('No referral code provided');
     }
+
+    const { invite, referringUser, referralSource } =
+      await this.resolveReferralCode(signUp.referralCode);
 
     const defaultTag = await this.usersService.findTagByName('All Members');
 
@@ -87,6 +106,7 @@ export class AuthService {
       ...signUp,
       referredBy: referringUser ?? null,
       referredByInvite: invite ?? null,
+      referralSource,
       tags: defaultTag ? [defaultTag] : undefined,
     });
 

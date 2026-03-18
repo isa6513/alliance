@@ -111,6 +111,7 @@ export class UserDto extends PickType(User, [
   'turnedOffAllNotifs',
   'invitedCommunities',
   'referralCode',
+  'referralSource',
   'anonymous',
   'pushesForLikes',
   'pushesForComments',

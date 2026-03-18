@@ -69,6 +69,11 @@ export enum PublicFormResponseDefault {
   Private = 'private',
 }
 
+export enum ReferralSource {
+  ReferralLink = 'referral_link',
+  OnetimeInvite = 'onetime_invite',
+}
+
 @Entity()
 export class User {
   // Fields
@@ -339,6 +344,10 @@ export class User {
   @JoinColumn()
   @Type(() => OnetimeInvite)
   referredByInvite: OnetimeInvite | null;
+
+  @Column({ type: 'enum', enum: ReferralSource, default: ReferralSource.ReferralLink })
+  @ApiProperty({ enum: ReferralSource, enumName: 'ReferralSource' })
+  referralSource: ReferralSource;
 
   @OneToMany(() => User, (user) => user.referredBy)
   referredUsers?: User[];

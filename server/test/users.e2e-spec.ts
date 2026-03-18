@@ -7,7 +7,7 @@ import type { Repository } from 'typeorm';
 import { City } from '../src/geo/city.entity';
 import { GeoModule } from '../src/geo/geo.module';
 import { FriendStatus } from '../src/user/entities/friend.entity';
-import { User } from '../src/user/entities/user.entity';
+import { ReferralSource, User } from '../src/user/entities/user.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
 import { ContractService } from 'src/contract/contract.service';
 import { UserService } from 'src/user/user.service';
@@ -407,13 +407,14 @@ describe('Users (e2e)', () => {
         }),
       );
 
-      // Create user with referredBy but no invite
+      // Create user with referredBy but no invite (OnetimeInvite = join adjacent community; referrer is member but not leader)
       const newUser = await userRepo.save(
         userRepo.create({
           name: 'Referred User',
           email: 'referred.user@example.com',
           password: 'Password123!',
           referredBy: referrer,
+          referralSource: ReferralSource.OnetimeInvite,
         }),
       );
 
