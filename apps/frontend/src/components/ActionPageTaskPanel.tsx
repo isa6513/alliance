@@ -18,6 +18,7 @@ import {
   taskNotAssigned,
 } from "@alliance/shared/lib/copy";
 import { ArrowRight } from "lucide-react";
+import { cn } from "@alliance/shared/styles/util";
 
 function ActionPageTaskPanelCardWrapper({
   taskPanelTop = null,
@@ -33,7 +34,10 @@ function ActionPageTaskPanelCardWrapper({
           {taskPanelTop}
         </Card>
       )}
-      <Card style={CardStyle.WhiteBorder} className="p-4 sm:p-6 border-t-0">
+      <Card
+        style={CardStyle.WhiteBorder}
+        className={cn("p-4 sm:p-6", taskPanelTop ? "border-t-0" : "border-t")}
+      >
         {taskPanel}
       </Card>
     </div>
