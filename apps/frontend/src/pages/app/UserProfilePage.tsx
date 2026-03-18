@@ -72,7 +72,7 @@ const UserProfilePage: React.FC = () => {
   const { confirm } = useToast();
 
   const userId = id ? parseInt(id, 10) : undefined;
-  if(!userId) {
+  if (!userId) {
     throw new Error("Invalid user ID");
   }
 
@@ -110,7 +110,7 @@ const UserProfilePage: React.FC = () => {
 
   const forumActivityItems = useMemo(
     () => buildForumActivityItems(forumPosts, forumComments),
-    [forumPosts, forumComments]
+    [forumPosts, forumComments],
   );
 
   const forumActivityCount = forumActivityItems.length;
@@ -185,7 +185,7 @@ const UserProfilePage: React.FC = () => {
         console.error("Error removing friend:", error);
       }
     },
-    [userId, user, confirm, removeFriend]
+    [userId, user, confirm, removeFriend],
   );
 
   const handleSave = async () => {
@@ -442,7 +442,7 @@ const UserProfilePage: React.FC = () => {
         </Card>
         <div className="pb-24 mt-2">
           {selectedTab === ProfileTabs.Activity && (
-            <List className="mb-10 *:p-4">
+            <div className="mb-10 *:p-4 flex flex-col gap-y-2">
               {completedActions.length === 0 && (
                 <p className="my-4 text-center text-zinc-500">
                   No actions completed yet
@@ -457,7 +457,7 @@ const UserProfilePage: React.FC = () => {
                   canEdit={isMe}
                 />
               ))}
-            </List>
+            </div>
           )}
 
           {selectedTab === ProfileTabs.Forum && (

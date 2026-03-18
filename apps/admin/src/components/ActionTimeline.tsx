@@ -112,7 +112,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
       }
 
       const sortedEvents = [...action.events].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       );
 
       sortedEvents.forEach((event, index) => {
@@ -160,7 +160,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
 
             if (deadlineDate) {
               singleDate = new Date(
-                deadlineDate.getTime() - offsetSeconds * 1000
+                deadlineDate.getTime() - offsetSeconds * 1000,
               );
             }
           } else if (timingMode === "event_launch") {
@@ -234,7 +234,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
 
         // Sort events by date
         const sortedEvents = [...action.events].sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         );
 
         const phases: PhaseSegment[] = [];
@@ -279,7 +279,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
       }
 
       const sortedActions = processedActions.sort(
-        (a, b) => a.startDate.getTime() - b.startDate.getTime()
+        (a, b) => a.startDate.getTime() - b.startDate.getTime(),
       );
 
       const boundaryTimestamps: number[] = [];
@@ -287,7 +287,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
       sortedActions.forEach((item) => {
         boundaryTimestamps.push(
           item.startDate.getTime(),
-          item.endDate.getTime()
+          item.endDate.getTime(),
         );
       });
 
@@ -320,7 +320,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
       }
 
       const globalStartDate = new Date(
-        Math.min(minDate.getTime(), Date.now() - 2 * 24 * 60 * 60 * 1000)
+        Math.min(minDate.getTime(), Date.now() - 2 * 24 * 60 * 60 * 1000),
       );
 
       const span = maxDate.getTime() - globalStartDate.getTime();
@@ -376,7 +376,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
 
     const timeout = window.setTimeout(() => {
       setFocusIndicator((prev) =>
-        prev && prev.id === indicatorId ? { ...prev, visible: false } : prev
+        prev && prev.id === indicatorId ? { ...prev, visible: false } : prev,
       );
     }, 1000);
 
@@ -476,7 +476,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
                         e.stopPropagation();
                         window.open(
                           `/database?table=action&id=${action.id}`,
-                          "_blank"
+                          "_blank",
                         );
                       }}
                       className="flex-shrink-0 ml-2 hover:bg-zinc-200 rounded p-1 cursor-pointer"
@@ -588,7 +588,7 @@ const ActionTimeline: React.FC<ActionTimelineProps> = ({
                         reminder.endDate.getTime() - globalStartDate.getTime();
                       const width = Math.max(
                         2,
-                        (endOffset - startOffset) * pixelsPerMillisecond
+                        (endOffset - startOffset) * pixelsPerMillisecond,
                       );
 
                       return (

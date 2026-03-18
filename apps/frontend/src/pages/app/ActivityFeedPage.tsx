@@ -53,14 +53,14 @@ const ActivityFeedPage = () => {
         const liked = await handleLikeFriendActivity(activityId);
         if (liked) {
           setGlobalActivities((prev) =>
-            prev.map((a) => (a.id === activityId ? liked : a))
+            prev.map((a) => (a.id === activityId ? liked : a)),
           );
         }
       } else {
         const liked = await handleGlobalLikeActivity(activityId);
         if (liked) {
           setFriendActivities((prev) =>
-            prev.map((a) => (a.id === activityId ? liked : a))
+            prev.map((a) => (a.id === activityId ? liked : a)),
           );
         }
       }
@@ -70,7 +70,7 @@ const ActivityFeedPage = () => {
       handleGlobalLikeActivity,
       setGlobalActivities,
       setFriendActivities,
-    ]
+    ],
   );
 
   const updateActivity = useCallback(
@@ -81,7 +81,7 @@ const ActivityFeedPage = () => {
         updateGlobalActivity(activity);
       }
     },
-    [updateFriendActivity, updateGlobalActivity]
+    [updateFriendActivity, updateGlobalActivity],
   );
 
   const friendsRef = useRef<HTMLDivElement>(null);
@@ -90,7 +90,7 @@ const ActivityFeedPage = () => {
   const everyoneSentinelRef = useRef<HTMLDivElement>(null);
 
   const [activeHeight, setActiveHeight] = useState<number | undefined>(
-    undefined
+    undefined,
   );
 
   const updateHeight = useCallback(() => {
@@ -150,7 +150,7 @@ const ActivityFeedPage = () => {
           }
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
     if (friendsSentinelRef.current)
@@ -172,9 +172,9 @@ const ActivityFeedPage = () => {
       <div className="w-1/2">
         <div
           ref={mode === "friends" ? friendsRef : everyoneRef}
-          className="flex flex-col"
+          className="flex flex-col bg-page"
         >
-          <div className="flex flex-col divide-y divide-zinc-200 *:p-4">
+          <div className="flex flex-col gap-y-2 *:p-4">
             {list.map((activity) => (
               <UserActivityCard
                 activity={activity}
@@ -220,8 +220,8 @@ const ActivityFeedPage = () => {
               className={cn(
                 "!border-b-[2px] rounded-none",
                 m === mode
-                  ? "!border-b-green text-black"
-                  : "!border-b-transparent hover:!border-b-zinc-200 text-zinc-500"
+                  ? "border-b-green! text-black"
+                  : "border-b-transparent! hover:border-b-zinc-200! text-zinc-500",
               )}
             >
               <p className="capitalize text-base">{m}</p>

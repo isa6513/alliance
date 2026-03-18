@@ -34,9 +34,7 @@ type SubmissionWithPublicAnswers =
   | (FormResponseOutputDto & { publicAnswers?: Record<string, boolean> })
   | (FormResponseDto & { publicAnswers?: Record<string, boolean> });
 
-const renderOutputFieldValue = (
-  item: ResolvedOutputFieldItem
-): ReactNode => {
+const renderOutputFieldValue = (item: ResolvedOutputFieldItem): ReactNode => {
   if (!item.field) {
     return (
       <span className="text-xs text-gray-500">Field removed from form.</span>
@@ -46,7 +44,9 @@ const renderOutputFieldValue = (
     if (!item.fileValues.length) {
       return <span className="text-xs text-gray-500">No file uploaded</span>;
     }
-    const imageUrls = item.fileValues.map((entry) => `${getApiUrl()}/images/${entry}`);
+    const imageUrls = item.fileValues.map(
+      (entry) => `${getApiUrl()}/images/${entry}`,
+    );
     return (
       <ImageLightbox
         images={imageUrls}
@@ -128,7 +128,7 @@ export function OutputRenderer({
       resolvedValidatorResults,
       resolvedDeviceType,
       resolvedPublicAnswers,
-    ]
+    ],
   );
 
   if (!selectedView || !effectiveSchema) {
@@ -146,7 +146,7 @@ export function OutputRenderer({
   }
 
   return (
-    <Card style={CardStyle.Grey}>
+    <Card style={CardStyle.LightGrey}>
       <div className={cn("space-y-2", className)}>
         {resolvedOutput.items.map((item) => {
           if (item.type === "display") {

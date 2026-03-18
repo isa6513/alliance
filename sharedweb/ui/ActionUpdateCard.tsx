@@ -18,7 +18,7 @@ export interface ActionUpdateCardProps {
   onEdit?: (
     id: number,
     title: string,
-    content: CreateEditableContentDto
+    content: CreateEditableContentDto,
   ) => Promise<void>;
   admin?: boolean;
   onActionPageTimeline?: boolean;
@@ -34,7 +34,7 @@ const ActionUpdateCard = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(update.title);
   const [editContent, setEditContent] = useState<CreateEditableContentDto>(
-    update.content
+    update.content,
   );
   const [isSaving, setIsSaving] = useState(false);
   const notifications = useOptionalNotifications();
@@ -102,8 +102,8 @@ const ActionUpdateCard = ({
   }
 
   return (
-    <div className="flex flex-col border border-zinc-200 rounded divide-y divide-zinc-200 overflow-hidden">
-      <div className="p-3 md:px-4 w-full gap-y-1 bg-zinc-50">
+    <div className="flex flex-col rounded overflow-hidden">
+      <div className="px-4 py-3 sm:py-4 sm:px-6 w-full gap-y-1 bg-grey-0 border border-zinc-200 border-b-0">
         <div className="flex flex-col">
           <div className="flex flex-col md:flex-row md:gap-x-2 items-center">
             <p className="font-semibold">
@@ -150,7 +150,7 @@ const ActionUpdateCard = ({
         </div>
       </div>
       {!!update.content.body && (
-        <div className="p-3 md:p-4 w-full gap-y-1 bg-white">
+        <div className="p-4 md:p-6 w-full gap-y-1 bg-white border border-zinc-200">
           <EditableContentRenderer content={update.content} className="" />
         </div>
       )}

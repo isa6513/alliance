@@ -74,7 +74,7 @@ const MessageInput = ({
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
           reader.readAsDataURL(file);
-        })
+        }),
       );
     }
     return Promise.all(readers);
@@ -93,7 +93,7 @@ const MessageInput = ({
         console.error("Failed reading image file(s)", err);
       }
     },
-    [readImagesFromFiles, setAttachments, inputRef]
+    [readImagesFromFiles, setAttachments, inputRef],
   );
 
   const handlePaste = useCallback(
@@ -124,7 +124,7 @@ const MessageInput = ({
         console.error("Failed to paste image(s)", err);
       }
     },
-    [handleFilesSelected]
+    [handleFilesSelected],
   );
 
   const triggerSend = useCallback(() => {
@@ -150,8 +150,8 @@ const MessageInput = ({
   return (
     <div
       className={cn(
-        "flex flex-col gap-y-3 bg-white relative",
-        compact ? "px-4 pb-2" : "px-8 pb-4"
+        "flex flex-col gap-y-3 bg-page relative",
+        compact ? "px-4 pb-2" : "px-8 pb-4",
       )}
     >
       {replyingTo && (

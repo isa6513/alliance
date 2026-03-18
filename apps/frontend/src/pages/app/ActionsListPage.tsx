@@ -19,17 +19,20 @@ const ActionsListPage = () => {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.All);
 
   const modeToActions: Record<FilterMode, ActionDto[]> = useMemo(() => {
-    return Object.values(FilterMode).reduce((acc, mode) => {
-      acc[mode] = filterActions(actions ?? [], mode);
-      return acc;
-    }, {} as Record<FilterMode, ActionDto[]>);
+    return Object.values(FilterMode).reduce(
+      (acc, mode) => {
+        acc[mode] = filterActions(actions ?? [], mode);
+        return acc;
+      },
+      {} as Record<FilterMode, ActionDto[]>,
+    );
   }, [actions]);
 
   useGrayBackground();
 
   const filteredActions = useMemo(
     () => [...modeToActions[filterMode]],
-    [modeToActions, filterMode]
+    [modeToActions, filterMode],
   );
 
   return (
@@ -52,7 +55,7 @@ const ActionsListPage = () => {
         </Link>
       </div>
 
-      <List className="w-full">
+      <div className="w-full flex flex-col gap-y-2 *:bg-white">
         {filteredActions.map((action) => (
           <ActionItemCard key={action.id} action={action} className="w-full " />
         ))}
@@ -69,7 +72,7 @@ const ActionsListPage = () => {
             )}
           </>
         )}
-      </List>
+      </div>
     </CenterLayout>
   );
 };

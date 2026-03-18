@@ -22,7 +22,7 @@ const MemberContract = ({
     PLACEHOLDER_CONTRACT_MARKDOWN;
 
   return (
-    <Card className={className} style={CardStyle.White} id={id}>
+    <Card className={className} style={CardStyle.WhiteBorder} id={id}>
       <AppMarkdownWrapper markdownContent={content} />
     </Card>
   );

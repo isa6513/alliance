@@ -331,7 +331,7 @@ const HomePage = () => {
 
   const sidebarContent = useMemo(() => {
     return (
-      <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-full border-l border-zinc-200">
+      <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-full ">
         {tasksListContent}
         <div className="flex-1 min-h-0 flex flex-col">
           <div className="flex flex-row justify-between items-center shrink-0">
@@ -365,7 +365,7 @@ const HomePage = () => {
   ) : (
     <div
       ref={mainScrollRef}
-      className="w-full h-[calc(100vh-var(--mobile-nav-height))] overflow-y-auto bg-white [scrollbar-gutter:stable]"
+      className="w-full h-[calc(100vh-var(--mobile-nav-height))] bg-page overflow-y-auto [scrollbar-gutter:stable]"
     >
       {mainContent}
     </div>

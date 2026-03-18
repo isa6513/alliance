@@ -45,7 +45,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const navigate = useNavigate();
 
   const [state, setState] = useState<LargeActionCardState>(
-    LargeActionCardState.Default
+    LargeActionCardState.Default,
   );
 
   const { activities: friendActivities } = useActivities({
@@ -75,10 +75,10 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
     (e: React.MouseEvent) => {
       e.stopPropagation();
       navigate(
-        href("/actions/:id", { id: action.id.toString() }) + "#description"
+        href("/actions/:id", { id: action.id.toString() }) + "#description",
       );
     },
-    [navigate, action]
+    [navigate, action],
   );
 
   const { lastEvent, nextEvent } = getLastAndNextEvent(action);
@@ -92,12 +92,12 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
     <>
       <Card
         className={cn(
-          "p-4 sm:p-6 transition-all duration-300 w-full relative rounded",
+          "p-4 sm:p-6 transition-all duration-300 w-full relative rounded-md",
           state === LargeActionCardState.Closed && "opacity-0 overflow-hidden",
           state === LargeActionCardState.Minified && "pb-4",
           state !== LargeActionCardState.Closed && "opacity-100",
           optionalStyle,
-          className
+          className,
         )}
       >
         {dismissProps && (

@@ -79,7 +79,7 @@ const Timeline: React.FC<TimelineProps> = ({
               style={{ ...dotBaseStyle }}
               className={cn(
                 "absolute mt-1 flex items-center justify-center",
-                index === currentIdx ? "bg-green" : "bg-zinc-200"
+                index === currentIdx ? "bg-green" : "bg-grey-1",
               )}
             ></div>
             {/* content */}

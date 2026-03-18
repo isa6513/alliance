@@ -17,7 +17,7 @@ const CenterLayout: React.FC<CenterLayoutProps> = ({
         "flex flex-col",
         width === "4xl" ? "max-w-4xl" : "max-w-3xl",
         "mx-auto px-3 py-6 sm:py-10 md:py-16",
-        className
+        className,
       )}
     >
       {children}

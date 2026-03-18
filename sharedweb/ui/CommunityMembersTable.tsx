@@ -54,14 +54,14 @@ const CommunityMembersTable = ({
   showInfoTooltip = false,
 }: CommunityMembersTableProps) => {
   const [filterMode, setFilterMode] = useState<CommunityMembersFilterMode>(
-    CommunityMembersFilterMode.All
+    CommunityMembersFilterMode.All,
   );
   const visibleActions = useMemo(() => {
     return actions.filter((action) => action.status !== "planned");
   }, [actions]);
   const deadlineTimestampByUserId = useMemo(() => {
     const visibleActionsById = new Map(
-      visibleActions.map((action) => [action.id, action])
+      visibleActions.map((action) => [action.id, action]),
     );
 
     return new Map(
@@ -79,7 +79,7 @@ const CommunityMembersTable = ({
           deadline = Math.min(deadline, action.latestMemberActionDeadline);
         }
         return [+userIdKey, deadline];
-      })
+      }),
     );
   }, [visibleActions, userActionRelations]);
 
@@ -87,10 +87,10 @@ const CommunityMembersTable = ({
     return {
       [CommunityMembersFilterMode.All]: members,
       [CommunityMembersFilterMode.NotYetCompleted]: members.filter(
-        (user) => !completedAllCurrentActions[user.id]
+        (user) => !completedAllCurrentActions[user.id],
       ),
       [CommunityMembersFilterMode.Completed]: members.filter(
-        (user) => completedAllCurrentActions[user.id]
+        (user) => completedAllCurrentActions[user.id],
       ),
     };
   }, [completedAllCurrentActions, members]);
@@ -140,7 +140,7 @@ const CommunityMembersTable = ({
   ]);
 
   return (
-    <div className="flex flex-col py-4">
+    <div className="flex flex-col py-4 mt-4">
       <div className="">
         <table className="w-full border-collapse table-auto overflow-x-clip">
           <colgroup>
@@ -155,9 +155,9 @@ const CommunityMembersTable = ({
           </colgroup>
           {leaders.length > 0 && (
             <>
-              <thead className="text-left bg-white">
+              <thead className="text-left">
                 <tr>
-                  <td colSpan={amLeader ? 4 : 2} className="px-0 pb-6">
+                  <td colSpan={amLeader ? 4 : 2} className="px-0 pb-4">
                     <p className="text-xl md:text-2xl font-semibold px-5 md:px-0">
                       Lead{leaders.length !== 1 ? "s" : ""}
                     </p>

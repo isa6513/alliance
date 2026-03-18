@@ -46,7 +46,7 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
   const calculateStickyLabelPosition = (
     barLeft: number,
     barWidth: number,
-    labelText: string
+    labelText: string,
   ) => {
     // Calculate the visible viewport bounds
     const viewportLeft = scrollLeft;
@@ -84,7 +84,7 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
     const maxLabelWidth = Math.min(barWidth - 8, visibleWidth - 8);
     const clampedPosition = Math.max(
       4,
-      Math.min(labelPosition, barWidth - labelWidth)
+      Math.min(labelPosition, barWidth - labelWidth),
     );
     const finalWidth = Math.min(labelWidth * 1.5, maxLabelWidth);
 
@@ -118,13 +118,13 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
         const barLeft = millisecondsSinceStart * pixelsPerMillisecond + 4;
         const barWidth = Math.max(
           2,
-          phaseDurationMs * pixelsPerMillisecond - 2
+          phaseDurationMs * pixelsPerMillisecond - 2,
         ); // Min 2px width, reduced spacing
         const labelText = STATUS_LABELS[phase.status];
         const stickyLabel = calculateStickyLabelPosition(
           barLeft,
           barWidth,
-          labelText
+          labelText,
         );
 
         // Shared background color
@@ -152,11 +152,11 @@ const ActionTimelineBar: React.FC<ActionTimelineBarProps> = ({
           // Calculate fade percentage within the bar
           const fadeStartPercent = Math.max(
             0,
-            (currentTimePositionInBar / barWidth) * 100
+            (currentTimePositionInBar / barWidth) * 100,
           );
           const fadeEndPercent = Math.min(
             100,
-            ((currentTimePositionInBar + fadeDistancePx) / barWidth) * 100
+            ((currentTimePositionInBar + fadeDistancePx) / barWidth) * 100,
           );
 
           backgroundStyle = {

@@ -59,8 +59,11 @@
 @theme {
   --font-serif: "Libre Baskerville", "Georgia", serif;
   --color-blue: #399ee6;
-  /* --color-page: oklch(99% 0 0); */
-  --color-page: #fff;
+  --color-page: oklch(98% 0 0);
+
+  --color-grey-0: oklch(98% 0 0);
+  --color-grey-1: oklch(95.5% 0 0);
+
   --color-green: rgb(98, 161, 36);
   --color-navy: rgb(7, 30, 64);
   --color-staff: #399ee6;
@@ -101,7 +104,7 @@ html {
 }
 
 html.white {
-  background-color: white !important;
+  background-color: var(--color-page) !important;
 }
 
 img {

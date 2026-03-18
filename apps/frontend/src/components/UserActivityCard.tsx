@@ -39,7 +39,7 @@ const UserActivityCard = ({
   const { user: self } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState<CreateEditableContentDto>(
-    activity.editableContent ?? { body: "", attachments: [] }
+    activity.editableContent ?? { body: "", attachments: [] },
   );
 
   const [isSaving, setIsSaving] = useState(false);
@@ -54,7 +54,7 @@ const UserActivityCard = ({
       e.stopPropagation();
       navigate(href("/actions/:id", { id: activity.actionId.toString() }));
     },
-    [activity.actionId, navigate]
+    [activity.actionId, navigate],
   );
 
   const handleActivityClick = useCallback(() => {
@@ -63,7 +63,7 @@ const UserActivityCard = ({
       href("/actions/:id/activity/:activityId", {
         id: activity.actionId.toString(),
         activityId: activity.id.toString(),
-      })
+      }),
     );
   }, [
     activity.actionId,
@@ -98,7 +98,7 @@ const UserActivityCard = ({
             return res.data?.key;
           }
           return img;
-        })
+        }),
       );
       const attachmentKeys = uploads.filter((key) => key !== undefined);
 
@@ -145,12 +145,12 @@ const UserActivityCard = ({
   }, [activity.editableContent]);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-white">
       <div
         className={cn(
           "block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white",
           !(isEditing || isSaving || showCommentForm) &&
-            "hover:bg-zinc-50 cursor-pointer"
+            "hover:bg-grey-1 cursor-pointer",
         )}
         onClick={handleActivityClick}
       >
@@ -227,7 +227,7 @@ const UserActivityCard = ({
               <div
                 className={cn(
                   "flex items-center space-x-2 self-end",
-                  !activity.editableContent.body && "mt-2"
+                  !activity.editableContent.body && "mt-2",
                 )}
               >
                 <ActivityLikeButton

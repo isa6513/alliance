@@ -50,12 +50,12 @@ const MessagesPage = () => {
       }
       setParams({ chat: convoId.toString() }, { replace: true });
     },
-    [setParams]
+    [setParams],
   );
 
   const selectedConvo = useMemo(
     () => conversations?.find((convo) => convo.id === selectedConvoId),
-    [conversations, selectedConvoId]
+    [conversations, selectedConvoId],
   );
 
   const { user } = useAuth();
@@ -63,19 +63,19 @@ const MessagesPage = () => {
   const setConvoLastMessage = useCallback(
     (message: MessageDto) => {
       setConversations((prev) =>
-        updateConversationsForLastMessage(prev, message)
+        updateConversationsForLastMessage(prev, message),
       );
     },
-    [setConversations]
+    [setConversations],
   );
 
   const handleConversationUpdated = useCallback(
     (updatedConversation: ConversationDto) => {
       setConversations((prev) =>
-        mergeConversationUpdate(prev, updatedConversation)
+        mergeConversationUpdate(prev, updatedConversation),
       );
     },
-    [setConversations]
+    [setConversations],
   );
 
   const {
@@ -88,7 +88,7 @@ const MessagesPage = () => {
   });
 
   const [messageableUsers, setMessageableUsers] = useState<ProfileDto[] | null>(
-    null
+    null,
   );
 
   const [messagesOpen, setMessagesOpen] = useState(!!selectedConvoId);
@@ -158,7 +158,7 @@ const MessagesPage = () => {
         const names = sendingNewMessageToIds
           .map(
             (id) =>
-              messageableUsers?.find((friend) => friend.id === id)?.displayName
+              messageableUsers?.find((friend) => friend.id === id)?.displayName,
           )
           .filter((name) => name !== undefined);
         if (user && !user.anonymous) {
@@ -189,12 +189,12 @@ const MessagesPage = () => {
 
   const joinedConversations = useMemo(
     () => getJoinedConversations(conversations, user?.id),
-    [conversations, user?.id]
+    [conversations, user?.id],
   );
 
   const pendingInvites = useMemo(
     () => getPendingInvites(conversations, user?.id),
-    [conversations, user?.id]
+    [conversations, user?.id],
   );
 
   const handleAcceptMessageRequest = useCallback(() => {
@@ -226,7 +226,7 @@ const MessagesPage = () => {
       setCreatingNewConversation(false);
       setSelectedConvoId(conversationId);
     },
-    [setSelectedConvoId]
+    [setSelectedConvoId],
   );
 
   const handleCreateNewConversation = useCallback(() => {
@@ -252,7 +252,7 @@ const MessagesPage = () => {
       const matching = findMatchingConversation(conversations, user?.id, ids);
       setSelectedConvoId(matching ? matching.id : null);
     },
-    [conversations, setSelectedConvoId, user?.id]
+    [conversations, setSelectedConvoId, user?.id],
   );
 
   useEffect(() => {
@@ -264,8 +264,8 @@ const MessagesPage = () => {
         (convo) =>
           convo.type === "direct" &&
           convo.participants.some(
-            (participant) => participant.user.id === userId
-          )
+            (participant) => participant.user.id === userId,
+          ),
       );
       setMessagesOpen(true);
       if (existing) {
@@ -281,7 +281,7 @@ const MessagesPage = () => {
 
   const filteredConversations = useMemo(() => {
     return joinedConversations?.filter((convo) =>
-      convo.title.toLowerCase().includes(search.toLowerCase())
+      convo.title.toLowerCase().includes(search.toLowerCase()),
     );
   }, [joinedConversations, search]);
 
@@ -316,8 +316,8 @@ const MessagesPage = () => {
     >
       <div
         className={cn(
-          "overflow-x-hidden flex flex-col bg-zinc-50 border-r border-zinc-200 transition-width duration-100 ease-in-out",
-          !isSmall ? "min-w-[300px] max-w-[300px]" : "max-w-full"
+          "overflow-x-hidden flex flex-col bg-page border-x border-zinc-200 transition-width duration-100 ease-in-out",
+          !isSmall ? "min-w-[300px] max-w-[300px]" : "max-w-full",
         )}
         style={{ flex: isSmall && messagesOpen ? 0 : 1 }}
       >
@@ -356,7 +356,7 @@ const MessagesPage = () => {
                         "p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3",
                         selectedConvoId === conversation.id
                           ? "bg-zinc-100"
-                          : "bg-white"
+                          : "bg-white",
                       )}
                       onClick={handleConversationClick(conversation.id)}
                     >
@@ -392,7 +392,7 @@ const MessagesPage = () => {
                   "p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3",
                   selectedConvoId === conversation.id
                     ? "bg-zinc-100"
-                    : "bg-white"
+                    : "bg-white",
                 )}
                 onClick={handleConversationClick(conversation.id)}
               >
@@ -425,7 +425,7 @@ const MessagesPage = () => {
       <div
         className={cn(
           "flex-1",
-          isSmall && !messagesOpen ? "max-w-0" : "max-w-full"
+          isSmall && !messagesOpen ? "max-w-0" : "max-w-full",
         )}
       >
         {selectedConvo && !creatingNewConversation && (

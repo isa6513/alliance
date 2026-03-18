@@ -82,7 +82,7 @@ const Sidebar: React.FC = () => {
     (id: number) => {
       navigate(`/actions/${id}`);
     },
-    [navigate]
+    [navigate],
   );
 
   const [sidebarWidth, setSidebarWidth] = useState<number>(220);
@@ -109,7 +109,7 @@ const Sidebar: React.FC = () => {
       setCreateActionDropdownOpen(!createActionDropdownOpen);
       e.stopPropagation();
     },
-    [createActionDropdownOpen]
+    [createActionDropdownOpen],
   );
 
   const { error, success } = useToast();
@@ -139,7 +139,7 @@ const Sidebar: React.FC = () => {
         (action) =>
           (action.status === "member_action" ||
             action.status === "gathering_commitments") &&
-          !action.onboarding
+          !action.onboarding,
       ),
     },
     {
@@ -154,7 +154,7 @@ const Sidebar: React.FC = () => {
           action.status !== "member_action" &&
           action.status !== "gathering_commitments" &&
           !action.onboarding &&
-          action.status !== "completed"
+          action.status !== "completed",
       ),
     },
     {
@@ -164,7 +164,7 @@ const Sidebar: React.FC = () => {
     {
       name: "Completed",
       actions: filteredActions.filter(
-        (action) => action.status === "completed"
+        (action) => action.status === "completed",
       ),
     },
   ];
@@ -172,7 +172,7 @@ const Sidebar: React.FC = () => {
   const isProd = isProduction();
 
   return (
-    <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-pagebg bg-[#fcfcfc]">
+    <div className="flex flex-row min-h-screen h-fitcontent flex-nowrap bg-page">
       <div
         className="overflow-y-auto max-h-screen overflow-x-hidden flex flex-col justify-between relative transition-all duration-100 bg-[#f4f4f4]"
         style={{
@@ -187,13 +187,13 @@ const Sidebar: React.FC = () => {
             "flex flex-col gap-y-3 sticky",
             "p-5 py-6",
             `w-[${sidebarWidth}px]`,
-            isSidebarOpen ? "translate-x-0" : "-translate-x-[300px]"
+            isSidebarOpen ? "translate-x-0" : "-translate-x-[300px]",
           )}
         >
           <h1
             className={cn(
               "text-[14pt] font-bold pb-0",
-              isProd ? "text-red-500" : "text-gray-900"
+              isProd ? "text-red-500" : "text-gray-900",
             )}
           >
             Alliance Admin
@@ -389,7 +389,7 @@ const Sidebar: React.FC = () => {
                         onClick={() => handleEditAction(action.id)}
                         className={cn(
                           "cursor-pointer hover:bg-zinc-200 p-2 py-3 rounded-md",
-                          currentActionId === action.id && "bg-zinc-200"
+                          currentActionId === action.id && "bg-zinc-200",
                         )}
                       >
                         <p className="text-xs">{action.name}</p>
@@ -415,7 +415,7 @@ const Sidebar: React.FC = () => {
           className={cn(
             "absolute top-7",
             isSidebarOpen ? "right-7" : "right-1",
-            "cursor-pointer"
+            "cursor-pointer",
           )}
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >

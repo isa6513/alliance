@@ -43,7 +43,7 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
       navigate(item.webAppLocation);
       close();
     },
-    [navigate, close]
+    [navigate, close],
   );
 
   useEffect(() => {
@@ -97,7 +97,7 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
         e.preventDefault();
       }
     },
-    [close, selectedItem, items, handleChooseItem, setSelectedItem]
+    [close, selectedItem, items, handleChooseItem, setSelectedItem],
   );
 
   const handleGlobalKeyDown = useCallback(
@@ -109,7 +109,7 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
         setSelectedItem(items[0] ?? null);
       }
     },
-    [items, setSelectedItem]
+    [items, setSelectedItem],
   );
 
   const handleFocus = useCallback(() => {
@@ -134,7 +134,7 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
       <input
         type="text"
         placeholder="Search for members, actions, posts..."
-        className="w-full border bg-white border-zinc-200 py-2 px-4 rounded focus:outline-none text-[16px]"
+        className="w-full bg-white py-3 px-4 rounded-md focus:outline-none text-[16px]"
         value={search}
         onChange={onChange}
         onFocus={handleFocus}
@@ -142,14 +142,14 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
         ref={inputRef}
       />
       {open && items.length === 0 && search.length > 0 && !loading && (
-        <div className="w-full bg-white border border-zinc-200 -mt-[3px] shrink-0 rounded-b-md py-2 px-2 flex flex-col max-h-[min(calc(100vh-50px),400px)] overflow-y-auto">
+        <div className="w-full bg-white -mt-[3px] shrink-0 rounded-b-md py-2 px-2 flex flex-col max-h-[min(calc(100vh-50px),400px)] overflow-y-auto">
           <p className="text-black text-sm font-medium pl-3 pb-1 w-full">
             No results found
           </p>
         </div>
       )}
       {open && items.length > 0 && (
-        <div className="w-full bg-white border border-zinc-200 -mt-[3px] shrink-0 rounded-b-md px-2 flex flex-col overflow-y-auto divide-y divide-zinc-200">
+        <div className="w-full bg-white -mt-[3px] shrink-0 rounded-b-md px-2 flex flex-col overflow-y-auto divide-y divide-zinc-200">
           {categoriesWithItems.map((category) => (
             <div key={category} className=" w-full py-3">
               <p className="text-black text-sm font-medium pl-3 pb-1 w-full">
@@ -157,7 +157,7 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
               </p>
               {itemsByCategory[category]?.map((item) => {
                 const secondaryText = getSearchSecondaryText(
-                  item.secondaryData
+                  item.secondaryData,
                 );
                 return (
                   <div
@@ -168,7 +168,7 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
                     }}
                     className={cn(
                       "text-black hover:bg-zinc-50 p-3 rounded-md flex flex-row justify-start cursor-pointer items-center",
-                      selectedItem?.id === item.id && "bg-zinc-50"
+                      selectedItem?.id === item.id && "bg-zinc-50",
                     )}
                   >
                     {item.type === "user" ? (

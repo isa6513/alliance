@@ -81,7 +81,7 @@ const HomeUpdatesRow = () => {
         <p className="text-title-small mb-2">Action updates</p>
         <Link
           to={href("/action-updates")}
-          className="bg-zinc-100 hover:bg-zinc-200 w-8 h-8 flex items-center justify-center rounded-full shrink-0 "
+          className="bg-zinc-200 hover:bg-zinc-300 w-8 h-8 flex items-center justify-center rounded-full shrink-0 "
         >
           <ChevronRight size="16" className="shrink-0 text-zinc-500 mx-2" />
         </Link>
@@ -130,10 +130,10 @@ const HomeUpdatesRow = () => {
               >
                 <div
                   className={cn(
-                    "rounded border px-3 py-2 h-full border-zinc-200",
+                    "rounded px-4 py-3 h-full ",
                     isUnread
-                      ? "border-green bg-green/10 hover:bg-green/15"
-                      : "bg-white hover:bg-zinc-50",
+                      ? "border border-green bg-green/5 hover:bg-green/10"
+                      : "bg-white hover:bg-green/5",
                   )}
                 >
                   <p className="text-base font-medium text-green mb-0.5 truncate">

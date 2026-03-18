@@ -206,7 +206,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     if (navRef.current) {
       document.documentElement.style.setProperty(
         "--nav-width",
-        `${navRef.current.offsetWidth}px`
+        `${navRef.current.offsetWidth}px`,
       );
     }
   }, []);
@@ -215,7 +215,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     if (mobileNavRef.current) {
       document.documentElement.style.setProperty(
         "--mobile-nav-height",
-        `${mobileNavRef.current.offsetHeight}px`
+        `${mobileNavRef.current.offsetHeight}px`,
       );
     }
   }, []);
@@ -350,12 +350,12 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
         id="side-nav"
         className={cn(
           "fixed top-0 left-0 h-screen w-screen sm:w-[clamp(14rem,18vw,17rem)]",
-          "bg-zinc-50 border-r border-zinc-200",
+          "bg-page",
           "flex flex-col",
           "transform transition-transform duration-100 ease-in-out",
           "z-30 overflow-y-auto",
           "md:shadow-none",
-          open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          open ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
         ref={navRef}
       >
@@ -404,7 +404,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                         "px-3 py-1.5 rounded flex items-center justify-between w-full pr-2",
                         currentLocation === item.page
                           ? "bg-zinc-200/80 text-black"
-                          : "text-zinc-700 hover:bg-zinc-100"
+                          : "text-zinc-700 hover:bg-zinc-100",
                       )}
                       onClick={() => setOpen(false)}
                     >
@@ -421,14 +421,14 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
                             "w-5 h-5",
                             item.page === NavbarPage.Tasks
                               ? "bg-red-500"
-                              : "bg-zinc-500"
+                              : "bg-zinc-500",
                           )}
                         >
                           {unreadNotifsForPage[item.page]}
                         </div>
                       )}
                     </Link>
-                  )
+                  ),
                 )}
               </nav>
             ))}

@@ -41,7 +41,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
         setExpanded(false);
       });
     },
-    [editableContent, onSubmit]
+    [editableContent, onSubmit],
   );
 
   const { confirm } = useToast();
@@ -74,10 +74,10 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   return (
     <div
       className={cn(
-        "rounded-lg relative bg-zinc-100",
+        "rounded-lg relative bg-grey-1",
         className,
         parentId ? "mt-0" : "mt-3",
-        compact ? "p-1 md:p-2" : "p-2 md:p-3"
+        compact ? "p-1 md:p-2" : "p-2 md:p-3",
       )}
     >
       <form onSubmit={handleSubmit}>

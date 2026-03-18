@@ -34,7 +34,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   const [inviteeName, setInviteeName] = useState("");
   const [info, setInfo] = useState("");
   const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(
-    null
+    null,
   );
   const [creatingInvite, setCreatingInvite] = useState(false);
   const [communities, setCommunities] = useState<CommunityDto[]>([]);
@@ -47,13 +47,13 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         if (resetSelectedCommunityId && user) {
           setSelectedCommunityId(
             response.data.find((community) =>
-              community.leaders.some((leader) => leader.id === user.id)
-            )?.id ?? null
+              community.leaders.some((leader) => leader.id === user.id),
+            )?.id ?? null,
           );
         }
       }
     },
-    [user]
+    [user],
   );
   useEffect(() => {
     void refreshCommunities(true);
@@ -85,7 +85,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
 
   const leaderCommunitiesById = useMemo(() => {
     return new Map(
-      leaderCommunities.map((community) => [community.id, community])
+      leaderCommunities.map((community) => [community.id, community]),
     );
   }, [leaderCommunities]);
   const selectedCommunity = useMemo(() => {
@@ -98,11 +98,11 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         leaderCommunities.map((community) => [
           `c${community.id}`,
           community.name,
-        ])
+        ]),
       ),
       new: "Create a new group",
     }),
-    [leaderCommunities]
+    [leaderCommunities],
   );
 
   const handleCreateInvite = useCallback(
@@ -140,7 +140,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
           errorToast(
             `Failed to create invite: ${
               response.response?.statusText || "Unknown error"
-            }`
+            }`,
           );
         }
       } catch {
@@ -156,7 +156,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
       errorToast,
       successToast,
       onInviteCreated,
-    ]
+    ],
   );
 
   const onCreateCommunity = useCallback(
@@ -169,7 +169,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         errorToast("Failed to refresh groups");
       }
     },
-    [errorToast, refreshCommunities, handleCreateInvite]
+    [errorToast, refreshCommunities, handleCreateInvite],
   );
 
   const {
@@ -191,7 +191,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         };
 
   return (
-    <Card style={CardStyle.Grey}>
+    <Card style={CardStyle.White} className="p-6">
       <div className="flex flex-col gap-y-6">
         <div className="flex flex-col gap-y-4">
           <div className="flex flex-col gap-y-2">
@@ -233,7 +233,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 <div className="text-zinc-500">
                   <AppMarkdownWrapper
                     markdownContent={onetimeInviteCreation.not_responsible.explanations.genericGroup.join(
-                      "\n\n"
+                      "\n\n",
                     )}
                   />
                 </div>
@@ -242,7 +242,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                   <div className="text-zinc-500">
                     <AppMarkdownWrapper
                       markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroup.join(
-                        "\n\n"
+                        "\n\n",
                       )}
                     />
                   </div>
@@ -275,7 +275,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                 <div className="text-zinc-500">
                   <AppMarkdownWrapper
                     markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.join(
-                      "\n\n"
+                      "\n\n",
                     )}
                   />
                 </div>
@@ -330,8 +330,8 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
                     typeof selectedCommunityId === "number"
                       ? selectedCommunity?.name || "Select a group"
                       : selectedCommunityId === null
-                      ? "Create a new group"
-                      : "Select a group"
+                        ? "Create a new group"
+                        : "Select a group"
                   }
                 />
                 {!!selectedCommunity && (

@@ -20,7 +20,7 @@ const CommunityActivityTab = ({
     });
 
   return (
-    <div className="flex flex-col divide-y divide-zinc-200 *:p-4">
+    <div className="mt-4 flex flex-col gap-y-2 *:p-4">
       {activities.length === 0 && (
         <div className="flex flex-col items-center justify-center h-64 text-zinc-500 p-8">
           <p>{loading ? "Loading..." : `No activities yet`}</p>

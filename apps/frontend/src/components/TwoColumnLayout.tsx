@@ -2,7 +2,7 @@ import { cn } from "@alliance/shared/styles/util";
 import { ReactNode, RefObject } from "react";
 
 export const TWO_COLUMN_LAYOUT_CLASSNAME =
-  "w-full h-[calc(100vh-var(--mobile-nav-height))] bg-white";
+  "w-full h-[calc(100vh-var(--mobile-nav-height))] bg-page";
 
 interface TwoColumnLayoutProps {
   main: ReactNode; // main content on the left

@@ -19,6 +19,27 @@ import {
 } from "@alliance/shared/lib/copy";
 import { ArrowRight } from "lucide-react";
 
+function ActionPageTaskPanelCardWrapper({
+  taskPanelTop = null,
+  taskPanel,
+}: {
+  taskPanelTop?: React.ReactNode;
+  taskPanel: React.ReactNode;
+}) {
+  return (
+    <div>
+      {taskPanelTop && (
+        <Card style={CardStyle.LightGreyBorder} className="rounded-b-none">
+          {taskPanelTop}
+        </Card>
+      )}
+      <Card style={CardStyle.WhiteBorder} className="p-4 sm:p-6 border-t-0">
+        {taskPanel}
+      </Card>
+    </div>
+  );
+}
+
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
   let errorText: string | undefined = undefined;
@@ -72,16 +93,16 @@ const ActionPageTaskPanel = () => {
       );
     case ActionPageTaskPanelState.NotAuthenticated:
       return (
-        <div>
-          <Card style={CardStyle.Grey} className="bg-zinc-100 rounded-b-none">
+        <ActionPageTaskPanelCardWrapper
+          taskPanelTop={
             <p className="text-center">
               <Link to="/login" className="text-green">
                 Log in
               </Link>{" "}
               to complete this task.
             </p>
-          </Card>
-          <Card style={CardStyle.Grey} className="rounded-t-none border-t-0">
+          }
+          taskPanel={
             <ActionTaskPanel
               userRelation={"none"}
               action={action}
@@ -90,16 +111,16 @@ const ActionPageTaskPanel = () => {
               disabled={true}
               card={false}
             />
-          </Card>
-        </div>
+          }
+        />
       );
     case ActionPageTaskPanelState.NotAssigned:
       return (
-        <div>
-          <Card style={CardStyle.Grey} className="rounded-b-none font-medium">
-            {taskNotAssigned}
-          </Card>
-          <Card style={CardStyle.Grey} className="rounded-t-none border-t-0">
+        <ActionPageTaskPanelCardWrapper
+          taskPanelTop={
+            <p className="text-center text-zinc-500">{taskNotAssigned}</p>
+          }
+          taskPanel={
             <ActionTaskPanel
               userRelation={"none"}
               action={action}
@@ -108,8 +129,8 @@ const ActionPageTaskPanel = () => {
               disabled={true}
               card={false}
             />
-          </Card>
-        </div>
+          }
+        />
       );
     case ActionPageTaskPanelState.MissingDataOrNotActive:
       return null;
@@ -119,14 +140,13 @@ const ActionPageTaskPanel = () => {
       return <ActionTaskPanelDeclined />;
     case ActionPageTaskPanelState.MemberActionClosed:
       return (
-        <div>
-          <Card
-            style={CardStyle.Grey}
-            className=" !bg-zinc-200 rounded-b-none border-t-0 border-x-0"
-          >
-            This action no longer requires member participation.
-          </Card>
-          <Card style={CardStyle.Grey} className="rounded-t-none">
+        <ActionPageTaskPanelCardWrapper
+          taskPanelTop={
+            <p className="text-center text-zinc-500">
+              This action no longer requires member participation.
+            </p>
+          }
+          taskPanel={
             <ActionTaskPanel
               userRelation={"none"}
               action={action}
@@ -135,73 +155,80 @@ const ActionPageTaskPanel = () => {
               disabled={true}
               card={false}
             />
-          </Card>
-        </div>
+          }
+        />
       );
     case ActionPageTaskPanelState.ShowTaskWithMissedDeadline:
       return (
-        <>
-          <Card style={CardStyle.Grey} className="mb-2">
-            <p className="font-medium">{taskDeadlinePassed}</p>
-            <p>{taskDeadlinePassedDescription}</p>
-          </Card>
-          <ActionTaskPanel
-            userRelation={userRelation ?? "none"}
-            action={action}
-            {...panelHandlers}
-            missedDeadline={true}
-            card={true}
-          />
-        </>
-      );
-    case ActionPageTaskPanelState.OnboardingSignContractFirst:
-      return (
-        <>
-          <Card
-            style={CardStyle.White}
-            className="gap-y-2 flex-row justify-between rounded-b-none"
-          >
-            <p className="font-semibold">
-              Please sign the contract before continuing with the onboarding
-              process.
-            </p>
-            <Link to="/tasks" className="text-green flex items-center gap-x-2">
-              Go back
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </Card>
-          <Card style={CardStyle.Grey} className="rounded-t-none border-t-0">
+        <ActionPageTaskPanelCardWrapper
+          taskPanelTop={
+            <div>
+              <p className="font-medium">{taskDeadlinePassed}</p>
+              <p>{taskDeadlinePassedDescription}</p>
+            </div>
+          }
+          taskPanel={
             <ActionTaskPanel
               userRelation={userRelation ?? "none"}
               action={action}
               {...panelHandlers}
-              disabled
+              missedDeadline={true}
+              card={false}
             />
-          </Card>
-        </>
+          }
+        />
+      );
+    case ActionPageTaskPanelState.OnboardingSignContractFirst:
+      return (
+        <ActionPageTaskPanelCardWrapper
+          taskPanelTop={
+            <div className="flex flex-row justify-between items-center gap-x-2">
+              <p className="text-center text-zinc-500">
+                Please sign the contract before continuing with the onboarding
+                process.
+              </p>
+              <Link
+                to="/tasks"
+                className="text-green flex items-center gap-x-2"
+              >
+                Go back
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          }
+          taskPanel={
+            <ActionTaskPanel
+              userRelation={"none"}
+              action={action}
+              {...panelHandlers}
+              missedDeadline={false}
+              disabled={true}
+              card={false}
+            />
+          }
+        />
       );
     case ActionPageTaskPanelState.ShowTask:
       return (
-        <>
-          {action.optional && (
-            <Card
-              style={CardStyle.Alert}
-              className="mb-3 border-none rounded-md"
-            >
-              <p className="font-semibold">This action is optional.</p>
-              <p>
+        <ActionPageTaskPanelCardWrapper
+          taskPanelTop={
+            <div>
+              <p className="font-medium">This action is optional.</p>
+              <p className="text-zinc-500">
                 You are not required to complete the task, but can if you would
                 like.
               </p>
-            </Card>
-          )}
-          <ActionTaskPanel
-            action={action}
-            userRelation={userRelation ?? "none"}
-            card={true}
-            {...panelHandlers}
-          />
-        </>
+            </div>
+          }
+          taskPanel={
+            <ActionTaskPanel
+              action={action}
+              userRelation={userRelation ?? "none"}
+              card={false}
+              {...panelHandlers}
+            />
+          }
+        />
       );
     default:
       throw new Error(

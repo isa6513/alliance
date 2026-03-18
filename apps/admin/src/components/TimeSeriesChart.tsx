@@ -125,7 +125,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [hoveredPoint, setHoveredPoint] = useState<DataPoint | null>(null);
   const [hoveredSeries, setHoveredSeries] = useState<MultiLineSeries | null>(
-    null
+    null,
   );
 
   // Date-based chart geometry
@@ -146,7 +146,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
 
     const maxValue = yDomain
       ? yDomain[1]
-      : max(series, (s) => max(data, (d) => s.getValue(d))) ?? 0;
+      : (max(series, (s) => max(data, (d) => s.getValue(d))) ?? 0);
     const minValue = yDomain ? yDomain[0] : 0;
 
     const yScale = scaleLinear()
@@ -183,15 +183,15 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
     const dedupeLabels = new Set<string>();
     const yTicks = props.yTickLabelDedup
       ? rawYTicks.filter((tick) => {
-        const label = yAxisFormat ? yAxisFormat(tick) : String(tick);
-        const key = label ?? String(tick);
-        if (!key) return true;
-        if (!dedupeLabels.has(key)) {
-          dedupeLabels.add(key);
-          return true;
-        }
-        return false;
-      })
+          const label = yAxisFormat ? yAxisFormat(tick) : String(tick);
+          const key = label ?? String(tick);
+          if (!key) return true;
+          if (!dedupeLabels.has(key)) {
+            dedupeLabels.add(key);
+            return true;
+          }
+          return false;
+        })
       : rawYTicks;
 
     const bisectDate = bisector<DataPoint, Date>((d) => d.date!).center;
@@ -231,7 +231,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
       .domain([xExtent[0], xExtent[1]])
       .range([margin.left, width - margin.right]);
 
-    const maxValue = yDomain ? yDomain[1] : max(allData, getYValue) ?? 0;
+    const maxValue = yDomain ? yDomain[1] : (max(allData, getYValue) ?? 0);
     const minValue = yDomain ? yDomain[0] : 0;
 
     const yScale = scaleLinear()
@@ -254,15 +254,15 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
     const dedupeLabels = new Set<string>();
     const yTicks = props.yTickLabelDedup
       ? rawYTicks.filter((tick) => {
-        const label = yAxisFormat ? yAxisFormat(tick) : String(tick);
-        const key = label ?? String(tick);
-        if (!key) return true;
-        if (!dedupeLabels.has(key)) {
-          dedupeLabels.add(key);
-          return true;
-        }
-        return false;
-      })
+          const label = yAxisFormat ? yAxisFormat(tick) : String(tick);
+          const key = label ?? String(tick);
+          if (!key) return true;
+          if (!dedupeLabels.has(key)) {
+            dedupeLabels.add(key);
+            return true;
+          }
+          return false;
+        })
       : rawYTicks;
 
     return {
@@ -295,20 +295,20 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
 
       setHoveredPoint(props.data[clampedIndex]);
     },
-    [dateGeometry, props]
+    [dateGeometry, props],
   );
 
   const hasData = isNumericAxis(props)
     ? props.multiLineData.length > 0 &&
-    props.multiLineData.some((s) => s.data.length > 0)
+      props.multiLineData.some((s) => s.data.length > 0)
     : props.data.length > 0;
 
   // For date charts
   const activePoint = !isNumericAxis(props)
     ? props.showHoverOnlyOnHover
       ? hoveredPoint
-      : hoveredPoint ??
-      (props.data.length > 0 ? props.data[props.data.length - 1] : null)
+      : (hoveredPoint ??
+        (props.data.length > 0 ? props.data[props.data.length - 1] : null))
     : null;
   const hoverContent =
     activePoint && !isNumericAxis(props) && props.getHoverContent
@@ -318,9 +318,9 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
   // For numeric charts
   const numericHoverContent =
     hoveredPoint &&
-      hoveredSeries &&
-      isNumericAxis(props) &&
-      props.getHoverContent
+    hoveredSeries &&
+    isNumericAxis(props) &&
+    props.getHoverContent
       ? props.getHoverContent(hoveredPoint, hoveredSeries)
       : null;
 
@@ -509,7 +509,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
                     <rect
                       x={Math.min(
                         dateGeometry.xScale(activePoint.date!) + 12,
-                        dateGeometry.width - 334
+                        dateGeometry.width - 334,
                       )}
                       y={dateGeometry.margin.top + 12}
                       width={320}
@@ -522,7 +522,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
                     <text
                       x={Math.min(
                         dateGeometry.xScale(activePoint.date!) + 24,
-                        dateGeometry.width - 320
+                        dateGeometry.width - 320,
                       )}
                       y={dateGeometry.margin.top + 32}
                       className="fill-gray-900 text-sm font-semibold"
@@ -534,7 +534,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
                         key={`label-${item.label}`}
                         transform={`translate(${Math.min(
                           dateGeometry.xScale(activePoint.date!) + 24,
-                          dateGeometry.width - 320
+                          dateGeometry.width - 320,
                         )}, ${dateGeometry.margin.top + 52 + idx * 24})`}
                       >
                         {item.color && (
@@ -642,34 +642,35 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
             })}
 
             {/* Data points */}
-            {(props.showDataPoints !== false) && props.multiLineData.flatMap((s) =>
-              s.data.map((point, idx) => {
-                const isHovered =
-                  hoveredSeries?.key === s.key &&
-                  hoveredPoint &&
-                  props.getXValue(hoveredPoint) === props.getXValue(point);
-                return (
-                  <circle
-                    key={`${s.key}-${idx}`}
-                    cx={numericGeometry.xScale(props.getXValue(point))}
-                    cy={numericGeometry.yScale(props.getYValue(point))}
-                    r={isHovered ? 5 : 3}
-                    fill="white"
-                    stroke={s.color}
-                    strokeWidth={2}
-                    className="cursor-pointer"
-                    onMouseEnter={() => {
-                      setHoveredSeries(s);
-                      setHoveredPoint(point);
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredSeries(null);
-                      setHoveredPoint(null);
-                    }}
-                  />
-                );
-              })
-            )}
+            {props.showDataPoints !== false &&
+              props.multiLineData.flatMap((s) =>
+                s.data.map((point, idx) => {
+                  const isHovered =
+                    hoveredSeries?.key === s.key &&
+                    hoveredPoint &&
+                    props.getXValue(hoveredPoint) === props.getXValue(point);
+                  return (
+                    <circle
+                      key={`${s.key}-${idx}`}
+                      cx={numericGeometry.xScale(props.getXValue(point))}
+                      cy={numericGeometry.yScale(props.getYValue(point))}
+                      r={isHovered ? 5 : 3}
+                      fill="white"
+                      stroke={s.color}
+                      strokeWidth={2}
+                      className="cursor-pointer"
+                      onMouseEnter={() => {
+                        setHoveredSeries(s);
+                        setHoveredPoint(point);
+                      }}
+                      onMouseLeave={() => {
+                        setHoveredSeries(null);
+                        setHoveredPoint(null);
+                      }}
+                    />
+                  );
+                }),
+              )}
           </svg>
         )}
 

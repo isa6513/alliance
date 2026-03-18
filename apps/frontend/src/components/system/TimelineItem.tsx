@@ -6,6 +6,7 @@ import { cn } from "@alliance/shared/styles/util";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
+import { CardStyle } from "@alliance/shared/styles/card";
 
 interface TimelineItemProps {
   highlighted?: boolean;
@@ -27,7 +28,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   time,
 }: TimelineItemProps) => {
   const sortedUpdates = [...(updates ?? [])].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
   const { activities: friendActivities } = useActivities({
@@ -43,7 +44,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         <p
           className={cn(
             "font-medium",
-            highlighted ? "text-green" : "text-black"
+            highlighted ? "text-green" : "text-black",
           )}
         >
           {title}
@@ -54,7 +55,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         <p className="mt-1 text-zinc-500 text-sm">{description}</p>
       )}
       {showCompletedBar && (
-        <Card className="p-5">
+        <Card style={CardStyle.WhiteBorder} className="p-5 mt-2">
           <ActionCompletedBarWithInfo
             friendActivities={friendActivities}
             action={action}

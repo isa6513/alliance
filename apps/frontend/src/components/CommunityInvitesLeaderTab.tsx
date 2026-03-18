@@ -77,15 +77,15 @@ const CommunityInvitesLeaderTab = ({
           !existingMembers.some((member) => member.id === user.id) &&
           !communityInvites
             .filter((invite) => invite.status === "invitee_pending")
-            .some((invite) => invite.invitedUser?.id === user.id)
+            .some((invite) => invite.invitedUser?.id === user.id),
       ),
-    [allUsers, existingMembers, communityInvites]
+    [allUsers, existingMembers, communityInvites],
   );
 
   const [selectedUser, setSelectedUser] = useState<UserSelectUser | null>(null);
 
   const [inviteMode, setInviteMode] = useState<InviteMode>(
-    InviteMode.NewMember
+    InviteMode.NewMember,
   );
 
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +98,7 @@ const CommunityInvitesLeaderTab = ({
         } else {
           setError("Failed to load new member invites");
         }
-      }
+      },
     );
     communityGetCommunityInvites({ path: { communityId } }).then((response) => {
       if (response.data) {
@@ -214,7 +214,7 @@ const CommunityInvitesLeaderTab = ({
           setError(null);
         } else {
           setError(
-            (response.error as Error).message ?? "Failed to invite user"
+            (response.error as Error).message ?? "Failed to invite user",
           );
         }
       })
@@ -234,7 +234,7 @@ const CommunityInvitesLeaderTab = ({
       }
 
       setOnetimeInvites((prev) =>
-        prev.map((invite) => (invite.id === inviteId ? response.data : invite))
+        prev.map((invite) => (invite.id === inviteId ? response.data : invite)),
       );
     })();
   };
@@ -251,14 +251,14 @@ const CommunityInvitesLeaderTab = ({
       }
 
       setOnetimeInvites((prev) =>
-        prev.filter((invite) => invite.id !== inviteId)
+        prev.filter((invite) => invite.id !== inviteId),
       );
     })();
   };
 
   const handleDeleteInvite = (
     inviteId: number,
-    event: React.MouseEvent<HTMLElement>
+    event: React.MouseEvent<HTMLElement>,
   ) => {
     void (async () => {
       const ok = await confirm({
@@ -275,7 +275,7 @@ const CommunityInvitesLeaderTab = ({
       userDeleteOnetimeInvite({ path: { inviteId } }).then((response) => {
         if (!response.error) {
           setOnetimeInvites((prev) =>
-            prev.filter((invite) => invite.id !== inviteId)
+            prev.filter((invite) => invite.id !== inviteId),
           );
         }
       });
@@ -286,7 +286,7 @@ const CommunityInvitesLeaderTab = ({
     communityDeleteCommunityInvite({ path: { inviteId } }).then((response) => {
       if (response.data) {
         setCommunityInvites((prev) =>
-          prev.filter((invite) => invite.id !== inviteId)
+          prev.filter((invite) => invite.id !== inviteId),
         );
       }
     });
@@ -305,7 +305,7 @@ const CommunityInvitesLeaderTab = ({
         />
 
         {inviteMode === InviteMode.NewMember ? (
-          <Card style={CardStyle.Grey}>
+          <Card style={CardStyle.White}>
             <OnetimeInviteForm
               title={onetimeInviteCreation.responsible.leader.invite.title}
               explanation={
@@ -337,8 +337,8 @@ const CommunityInvitesLeaderTab = ({
                     onChange={(userIds) =>
                       setSelectedUser(
                         selectableUsers.find(
-                          (user) => user.id === userIds[0]
-                        ) ?? null
+                          (user) => user.id === userIds[0],
+                        ) ?? null,
                       )
                     }
                     label={null}
