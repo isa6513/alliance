@@ -10,7 +10,17 @@ import {
 } from "@alliance/shared/lib/search";
 import { cn } from "@alliance/shared/styles/util";
 
-const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
+const SearchBar = ({
+  autofocus,
+  inputClassName,
+  containerClassName,
+  onCollapse,
+}: {
+  autofocus: boolean;
+  inputClassName?: string;
+  containerClassName?: string;
+  onCollapse?: () => void;
+}) => {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -31,7 +41,8 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
     setOpen(false);
     setSearch("");
     setSelectedItem(null);
-  }, [setSelectedItem]);
+    onCollapse?.();
+  }, [setSelectedItem, onCollapse]);
 
   const divRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -129,12 +140,18 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
   return (
     <div
       ref={divRef}
-      className="relative flex-1 flex flex-col overflow-visible h-[37.5px] rounded"
+      className={cn(
+        "relative flex-1 flex flex-col overflow-visible",
+        containerClassName ?? "rounded h-10",
+      )}
     >
       <input
         type="text"
         placeholder="Search for members, actions, posts..."
-        className="w-full bg-white py-3 px-4 rounded-md focus:outline-none text-[16px]"
+        className={cn(
+          "w-full h-full py-2 px-3 rounded-md focus:outline-none text-base",
+          inputClassName ?? "bg-white",
+        )}
         value={search}
         onChange={onChange}
         onFocus={handleFocus}
@@ -142,17 +159,17 @@ const SearchBar = ({ autofocus }: { autofocus: boolean }) => {
         ref={inputRef}
       />
       {open && items.length === 0 && search.length > 0 && !loading && (
-        <div className="w-full bg-white -mt-[3px] shrink-0 rounded-b-md py-2 px-2 flex flex-col max-h-[min(calc(100vh-50px),400px)] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 z-10 w-full bg-white -mt-[3px] rounded-b-md py-2 px-2 flex flex-col max-h-[min(calc(100vh-50px),400px)] overflow-y-auto shadow-lg">
           <p className="text-black text-sm font-medium pl-3 pb-1 w-full">
             No results found
           </p>
         </div>
       )}
       {open && items.length > 0 && (
-        <div className="w-full bg-white -mt-[3px] shrink-0 rounded-b-md px-2 flex flex-col overflow-y-auto divide-y divide-zinc-200">
+        <div className="absolute top-full left-0 right-0 z-10 w-full bg-white -mt-[3px] rounded-b-md px-2 flex flex-col overflow-y-auto max-h-[min(calc(100vh-120px),400px)] divide-y divide-zinc-200 shadow-lg">
           {categoriesWithItems.map((category) => (
             <div key={category} className=" w-full py-3">
-              <p className="text-black text-sm font-medium pl-3 pb-1 w-full">
+              <p className="text-zinc-500 uppercase tracking-wide text-xs font-medium pl-3 pb-1 w-full">
                 {SEARCH_CATEGORY_NAMES[category]}
               </p>
               {itemsByCategory[category]?.map((item) => {

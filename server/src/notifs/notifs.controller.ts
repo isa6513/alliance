@@ -9,7 +9,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
@@ -28,9 +28,20 @@ export class NotifsController {
 
   @Get()
   @UseGuards(AuthGuard)
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({ type: [NotificationDto] })
-  findAll(@Request() req: JwtRequest): Promise<NotificationDto[]> {
-    return this.notifsService.findAll(req.user.sub);
+  findAll(
+    @Request() req: JwtRequest,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ): Promise<NotificationDto[]> {
+    return this.notifsService.findAll(req.user.sub, limit);
+  }
+
+  @Get('unread-count')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ schema: { type: 'number' } })
+  getUnreadCount(@Request() req: JwtRequest): Promise<number> {
+    return this.notifsService.getUnreadCount(req.user.sub);
   }
 
   @Post('read/:id')

@@ -93,8 +93,7 @@ const HomePage = () => {
             {currentWeekSidebarActions.length + newActions.length > 0 && (
               <p className="text-zinc-600 mb-2">
                 <span className="text-green font-medium mr-0.5">
-                  {currentWeekSidebarActions.length} task
-                  {currentWeekSidebarActions.length !== 1 ? "s" : ""} left{" "}
+                  {currentWeekSidebarActions.length} left
                 </span>
                 {numTodo > 0 &&
                   remainingTasksEstimatedTimeCurrentWeek > 0 &&
@@ -222,7 +221,7 @@ const HomePage = () => {
       >
         <div>
           <div className="flex flex-row justify-between items-center mb-4 px-1">
-            <p className="text-title-small">Action updates</p>
+            <p className="text-title-small font-serif">Action updates</p>
             <SeeAll link="/action-updates" size="lg" />
           </div>
           <HomeUpdatesRow />
@@ -230,7 +229,7 @@ const HomePage = () => {
 
         <div className="flex flex-col gap-6 flex-1">
           <div className="flex flex-col gap-y-1">
-            <p className="text-title-small">Tasks to do</p>
+            <p className="text-title-small font-serif">Tasks</p>
             {tasksListContent}
           </div>
 
@@ -305,7 +304,7 @@ const HomePage = () => {
                         )}
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-y-4 rounded border border-zinc-200 w-full py-8 lg:py-12 px-8">
+                      <div className="flex flex-col items-center gap-y-4 rounded bg-grey-1 w-full py-8 lg:py-12 px-8">
                         <CheckIcon size="large" />
                         <p className="text-center text-zinc-500 text-lg lg:text-xl">
                           {noTasksToDoRightNow}
@@ -335,13 +334,8 @@ const HomePage = () => {
 
   const sidebarContent = useMemo(() => {
     return (
-      <div className="px-4 pt-12 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-full ">
+      <div className="px-4 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-[calc(100vh-var(--navbar-top-bar-height))]">
         <div className="flex-1 min-h-0 flex flex-col">
-          <div className="flex flex-row justify-between items-center shrink-0">
-            <p className="font-title">Activity</p>
-
-            <SeeAll link={href("/feed")} size="md" />
-          </div>
           <GlobalFeed
             items={globalFeedItems}
             loading={globalFeedLoading}
@@ -364,7 +358,7 @@ const HomePage = () => {
   ) : (
     <div
       ref={mainScrollRef}
-      className="w-full h-[calc(100vh-var(--mobile-nav-height))] bg-page overflow-y-auto [scrollbar-gutter:stable]"
+      className="w-full h-[calc(100vh-var(--navbar-top-bar-height))] bg-page overflow-y-auto [scrollbar-gutter:stable]"
     >
       {mainContent}
     </div>

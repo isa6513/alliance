@@ -106,7 +106,7 @@ export class NotifsService {
     private readonly mmsService: MmsService,
   ) {}
 
-  async findAll(userId: number): Promise<NotificationDto[]> {
+  async findAll(userId: number, limit?: number): Promise<NotificationDto[]> {
     const [notifs, unreadContents] = await Promise.all([
       this.notifsRepository.find({
         where: { user: { id: userId }, sendTime: LessThan(new Date()) },
@@ -118,10 +118,40 @@ export class NotifsService {
       }),
     ]);
 
-    return [
+    const merged = [
       ...notifs.map((notif) => NotificationDto.fromNotification(notif)),
       ...(await this.hydrateUnreadContentDtos(unreadContents)),
-    ];
+    ].sort(
+      (a, b) =>
+        new Date(b.sendTime || b.createdAt).getTime() -
+        new Date(a.sendTime || a.createdAt).getTime(),
+    );
+
+    const filtered = merged.filter(
+      (n) => new Date(n.sendTime).getTime() <= new Date().getTime(),
+    );
+
+    return limit !== undefined ? filtered.slice(0, limit) : filtered;
+  }
+
+  async getUnreadCount(userId: number): Promise<number> {
+    const [notifCount, unreadContentCount] = await Promise.all([
+      this.notifsRepository.count({
+        where: {
+          user: { id: userId },
+          sendTime: LessThan(new Date()),
+          readAt: IsNull(),
+        },
+      }),
+      this.unreadContentRepository.count({
+        where: {
+          user: { id: userId },
+          sendTime: LessThan(new Date()),
+          readAt: IsNull(),
+        },
+      }),
+    ]);
+    return notifCount + unreadContentCount;
   }
 
   findOne(id: number) {

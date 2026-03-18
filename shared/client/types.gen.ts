@@ -4157,7 +4157,9 @@ export type PushMarkOpenedResponse = PushMarkOpenedResponses[keyof PushMarkOpene
 export type NotifsFindAllData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        limit?: number;
+    };
     url: '/notifs';
 };
 
@@ -4166,6 +4168,19 @@ export type NotifsFindAllResponses = {
 };
 
 export type NotifsFindAllResponse = NotifsFindAllResponses[keyof NotifsFindAllResponses];
+
+export type NotifsGetUnreadCountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/notifs/unread-count';
+};
+
+export type NotifsGetUnreadCountResponses = {
+    200: number;
+};
+
+export type NotifsGetUnreadCountResponse = NotifsGetUnreadCountResponses[keyof NotifsGetUnreadCountResponses];
 
 export type NotifsSetReadData = {
     body?: never;

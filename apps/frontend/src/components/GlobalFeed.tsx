@@ -150,7 +150,7 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
         <div
           className="overflow-hidden transition-all duration-300 ease-in-out"
           style={{
-            maxHeight: expanded ? contentRef.current?.scrollHeight ?? 0 : 0,
+            maxHeight: expanded ? (contentRef.current?.scrollHeight ?? 0) : 0,
             opacity: expanded ? 1 : 0,
           }}
         >
@@ -307,7 +307,7 @@ const GlobalFeed = ({
       ref={containerRef}
       className={fitToHeight ? "flex-1 min-h-0 overflow-hidden" : ""}
     >
-      <div className="divide-y divide-zinc-100">
+      <div>
         {displayItems.map(
           (item, index) =>
             item.type !== "action_update" && (
@@ -331,7 +331,7 @@ const GlobalFeed = ({
                   />
                 )}
               </div>
-            )
+            ),
         )}
       </div>
     </div>

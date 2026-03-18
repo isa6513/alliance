@@ -40,7 +40,7 @@ const ActionTaskPanelCompleted = ({
             user={formResponse.user ?? undefined}
           />
         }
-        taskPanelStyle={CardStyle.GreyBorder}
+        taskPanelStyle={CardStyle.LightGreyBorder}
       />
       // <>
       //   {completedCard}

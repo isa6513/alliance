@@ -27,7 +27,7 @@ export const useCIDFromParams = (actionId?: number) => {
           platform,
           actionId,
         });
-        refreshNotifications();
+        refreshNotifications({ limit: 20 });
       });
     }
   }, [cid, setSearchParams, searchParams, actionId, refreshNotifications]);

@@ -89,7 +89,7 @@ const HomeUpdatesRow = () => {
           No recent updates yet.
         </p>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-1">
         {!isLoading &&
           !isError &&
           updates.map((update) => {
@@ -115,20 +115,28 @@ const HomeUpdatesRow = () => {
             return (
               <div
                 key={update.id}
-                className="hover:cursor-pointer"
+                className="hover:cursor-pointer relative"
                 onClick={handleClick}
               >
                 <div
                   className={cn(
                     "flex flex-col justify-between rounded px-4 py-3 h-full ",
                     isUnread
-                      ? "border border-green bg-green/5 hover:bg-green/10"
+                      ? "bg-green/5 hover:bg-green/10"
                       : "bg-white hover:bg-green/5",
                   )}
                 >
                   <div>
-                    <p className="text-sm md:text-base font-medium text-green mb-0.5 truncate">
-                      {update.actionName}
+                    <p className="text-sm md:text-base font-medium text-green mb-0.5 flex items-center gap-2 min-w-0">
+                      {isUnread && (
+                        <span
+                          className="size-2 shrink-0 rounded-full bg-green"
+                          aria-hidden
+                        />
+                      )}
+                      <span className="truncate min-w-0">
+                        {update.actionName}
+                      </span>
                     </p>
                     {update.title && (
                       <p className="text-sm md:text-base leading-snug text-zinc-800">

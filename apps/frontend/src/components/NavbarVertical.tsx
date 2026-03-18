@@ -1,18 +1,12 @@
 import { Features } from "@alliance/shared/lib/features";
 import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import {
-  Bell,
   BookText,
-  FileText,
   Globe,
   Layers,
   ListTodo,
-  Menu,
   MessageSquare,
   MessagesSquare,
-  Search,
-  Settings,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -22,27 +16,20 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import { Link, href, useLocation } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import { isFeatureEnabled } from "../lib/config";
-import { useNotifications } from "@alliance/shared/lib/useNotifications";
 import { useMessagingUnread } from "../pages/app/messages";
 import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
 import { cn } from "@alliance/shared/styles/util";
 
 export enum NavbarPage {
   Tasks = "Tasks",
-  Notifications = "Notifications",
   CurrentActions = "Actions",
   Activity = "Activity",
   Forum = "Forum",
   Information = "Information",
-  Profile = "Profile",
-  Contract = "Contract",
-  Settings = "Settings",
-  Search = "Search",
   Groups = "Groups",
   Messages = "Messages",
   Invite = "Invites",
@@ -50,15 +37,10 @@ export enum NavbarPage {
 
 export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Tasks]: href("/tasks"),
-  [NavbarPage.Notifications]: href("/notifications"),
   [NavbarPage.CurrentActions]: href("/actions"),
-  [NavbarPage.Search]: href("/search"),
   [NavbarPage.Activity]: href("/feed"),
   [NavbarPage.Forum]: href("/forum"),
   [NavbarPage.Information]: href("/information"),
-  [NavbarPage.Profile]: href("/profile"),
-  [NavbarPage.Contract]: href("/contract"),
-  [NavbarPage.Settings]: href("/settings"),
   [NavbarPage.Groups]: href("/groups"),
   [NavbarPage.Messages]: href("/messages"),
   [NavbarPage.Invite]: href("/invites"),
@@ -68,45 +50,44 @@ const getIcon = (page: NavbarPage, size: number) => {
   switch (page) {
     case NavbarPage.Tasks:
       return <ListTodo size={size} />;
-    case NavbarPage.Notifications:
-      return <Bell size={size} />;
     case NavbarPage.CurrentActions:
       return <Layers size={size} />;
-    case NavbarPage.Search:
-      return <Search size={size} />;
     case NavbarPage.Messages:
       return <MessageSquare size={size} />;
     case NavbarPage.Information:
       return <BookText size={size} />;
     case NavbarPage.Forum:
       return <MessagesSquare size={size} />;
-    case NavbarPage.Contract:
-      return <FileText size={size} />;
-    case NavbarPage.Settings:
-      return <Settings size={size} />;
     case NavbarPage.Groups:
       return <Users size={size} />;
     case NavbarPage.Activity:
       return <Globe size={size} />;
     case NavbarPage.Invite:
       return <UserPlus size={size} />;
-    case NavbarPage.Profile:
-      return null;
     default:
       page satisfies never;
       return null;
   }
 };
 
-const NavbarVertical: React.FC<{ todoActions: number }> = ({
+const NavbarVertical: React.FC<{
+  todoActions: number;
+  mobileNavOpen: boolean;
+  onMobileNavOpenChange: (open: boolean) => void;
+  whiteBackground?: boolean;
+}> = ({
   todoActions,
+  mobileNavOpen: open,
+  onMobileNavOpenChange: setOpen,
+  whiteBackground = false,
 }: {
   todoActions: number;
+  mobileNavOpen: boolean;
+  onMobileNavOpenChange: (open: boolean) => void;
+  whiteBackground?: boolean;
 }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
-
-  const { unreadCount } = useNotifications();
 
   const { pendingCommunityInvites } = useIncomingCommunityInvites();
 
@@ -118,87 +99,32 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     refreshUnreadCount,
   } = useMessagingUnread();
 
-  const [open, setOpen] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
-  const mobileNavRef = useRef<HTMLDivElement | null>(null);
 
-  const navSections = [
+  const navItems = [
+    { page: NavbarPage.Tasks, destination: destinations[NavbarPage.Tasks] },
     {
-      title: "",
-      items: [
-        {
-          page: NavbarPage.Tasks,
-          destination: destinations[NavbarPage.Tasks],
-        },
-        {
-          page: NavbarPage.Notifications,
-          destination: destinations[NavbarPage.Notifications],
-        },
-      ],
+      page: NavbarPage.CurrentActions,
+      destination: destinations[NavbarPage.CurrentActions],
     },
     {
-      title: "Platform",
-      items: [
-        {
-          page: NavbarPage.CurrentActions,
-          destination: destinations[NavbarPage.CurrentActions],
-        },
-
-        {
-          page: NavbarPage.Information,
-          destination: destinations[NavbarPage.Information],
-        },
-        {
-          page: NavbarPage.Search,
-          destination: destinations[NavbarPage.Search],
-        },
-      ],
+      page: NavbarPage.Activity,
+      destination: destinations[NavbarPage.Activity],
     },
+    { page: NavbarPage.Forum, destination: destinations[NavbarPage.Forum] },
+    { page: NavbarPage.Groups, destination: destinations[NavbarPage.Groups] },
+    ...(isFeatureEnabled(Features.Messaging)
+      ? [
+          {
+            page: NavbarPage.Messages,
+            destination: destinations[NavbarPage.Messages],
+          },
+        ]
+      : []),
+    { page: NavbarPage.Invite, destination: destinations[NavbarPage.Invite] },
     {
-      title: "Social",
-      items: [
-        {
-          page: NavbarPage.Activity,
-          destination: destinations[NavbarPage.Activity],
-        },
-        {
-          page: NavbarPage.Forum,
-          destination: destinations[NavbarPage.Forum],
-        },
-        {
-          page: NavbarPage.Groups,
-          destination: destinations[NavbarPage.Groups],
-        },
-        ...(isFeatureEnabled(Features.Messaging)
-          ? [
-              {
-                page: NavbarPage.Messages,
-                destination: destinations[NavbarPage.Messages],
-              },
-            ]
-          : []),
-        {
-          page: NavbarPage.Invite,
-          destination: destinations[NavbarPage.Invite],
-        },
-      ],
-    },
-    {
-      title: "Profile",
-      items: [
-        {
-          page: NavbarPage.Profile,
-          destination: destinations[NavbarPage.Profile],
-        },
-        {
-          page: NavbarPage.Contract,
-          destination: destinations[NavbarPage.Contract],
-        },
-        {
-          page: NavbarPage.Settings,
-          destination: destinations[NavbarPage.Settings],
-        },
-      ],
+      page: NavbarPage.Information,
+      destination: destinations[NavbarPage.Information],
     },
   ];
 
@@ -211,29 +137,18 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     }
   }, []);
 
-  const updateMobileNavHeight = useCallback(() => {
-    if (mobileNavRef.current) {
-      document.documentElement.style.setProperty(
-        "--mobile-nav-height",
-        `${mobileNavRef.current.offsetHeight}px`,
-      );
-    }
-  }, []);
-
   useLayoutEffect(() => {
     updateNavWidth();
-    updateMobileNavHeight();
 
     const handleResize = () => {
       updateNavWidth();
-      updateMobileNavHeight();
     };
     window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [updateNavWidth, updateMobileNavHeight]);
+  }, [updateNavWidth]);
 
   useEffect(() => {
     const handleDocumentMouseDown = (event: MouseEvent) => {
@@ -257,9 +172,8 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
   });
 
   const currentLocation: NavbarPage | null =
-    navSections
-      .flatMap((section) => section.items)
-      .find((item) => item.destination === location.pathname)?.page || null;
+    navItems.find((item) => item.destination === location.pathname)?.page ||
+    null;
 
   useEffect(() => {
     if (currentLocation !== NavbarPage.Messages && hasUpdates) {
@@ -278,28 +192,18 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     Record<NavbarPage, number>
   > => {
     return {
-      [NavbarPage.Notifications]: unreadCount,
       [NavbarPage.Tasks]: todoActions,
       [NavbarPage.Groups]: pendingCommunityInvites.length,
       [NavbarPage.Messages]:
         currentLocation !== NavbarPage.Messages ? unreadMessages : 0,
     };
-  }, [
-    unreadCount,
-    todoActions,
-    pendingCommunityInvites,
-    unreadMessages,
-    currentLocation,
-  ]);
-
-  const profilePicture = user?.profilePicture || null;
+  }, [todoActions, pendingCommunityInvites, unreadMessages, currentLocation]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
 
     if (!isAuthenticated) {
       document.documentElement.style.setProperty("--nav-width", "0px");
-      document.documentElement.style.setProperty("--mobile-nav-height", "0px");
       return;
     }
 
@@ -308,10 +212,9 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
     ) {
       requestAnimationFrame(() => {
         updateNavWidth();
-        updateMobileNavHeight();
       });
     }
-  }, [isAuthenticated, updateNavWidth, updateMobileNavHeight]);
+  }, [isAuthenticated, updateNavWidth]);
 
   if (!isAuthenticated) {
     return null;
@@ -319,42 +222,15 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
 
   return (
     <>
-      {/* MOBILE TOP BAR */}
-      <div
-        className="md:hidden flex items-center justify-between px-3 py-4 bg-white border-b border-zinc-200 fixed top-0 left-0 right-0 z-30"
-        ref={mobileNavRef}
-      >
-        <button
-          onClick={() => setOpen(!open)}
-          className="text-xl rounded-md hover:bg-zinc-100 focus:outline-none"
-          aria-label="Toggle navigation"
-        >
-          <div className="relative text-4xl">
-            <Menu size={24} />
-            {(unreadCount > 0 ||
-              (todoActions > 0 && currentLocation !== NavbarPage.Tasks)) && (
-              <div className="absolute -right-0.5 top-0 w-2 h-2 bg-red-500 rounded-full"></div>
-            )}
-          </div>
-        </button>
-
-        <Link
-          to={destinations[NavbarPage.Profile]}
-          className="flex items-center gap-x-2"
-        >
-          <AvatarProfile pfp={profilePicture} size="medium" />
-        </Link>
-      </div>
-
       <aside
         id="side-nav"
         className={cn(
           "fixed top-0 left-0 h-screen w-screen sm:w-[clamp(14rem,18vw,17rem)]",
-          "bg-page",
+          whiteBackground ? "bg-white" : "bg-page",
           "flex flex-col",
           "transform transition-transform duration-100 ease-in-out",
           "z-30 overflow-y-auto",
-          "md:shadow-none border-r border-zinc-200",
+          "md:shadow-none",
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
         ref={navRef}
@@ -376,63 +252,42 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
             </p>
           </Link>
 
-          <div className="flex flex-col w-full divide-y divide-zinc-200">
-            {navSections.map((section) => (
-              <nav
-                key={section.title}
-                className="flex flex-col py-4 w-full text-base"
-              >
-                {section.items.map((item) =>
-                  item.page === NavbarPage.Profile ? (
-                    <Link
-                      key={item.page}
-                      to={destinations[NavbarPage.Profile]}
-                      prefetch="render"
-                      className="hidden md:flex p-3 hover:bg-zinc-100 rounded items-center justify-between w-full"
-                    >
-                      <div className="text-zinc-700 flex items-center gap-x-2.5">
-                        <AvatarProfile pfp={profilePicture} size="small" />
-                        <span>{user?.name ?? "Profile"}</span>
-                      </div>
-                    </Link>
-                  ) : (
-                    <Link
-                      key={item.page}
-                      to={item.destination}
-                      prefetch="render"
-                      className={cn(
-                        "px-3 py-1.5 rounded flex items-center justify-between w-full pr-2",
-                        currentLocation === item.page
-                          ? "bg-zinc-200/80 text-black"
-                          : "text-zinc-700 hover:bg-zinc-100",
-                      )}
-                      onClick={() => setOpen(false)}
-                    >
-                      <div className="flex items-center gap-x-2">
-                        {getIcon(item.page, 16)}
-                        <p>{item.page}</p>
-                      </div>
-                      {!!unreadNotifsForPage[item.page] && (
-                        <div
-                          className={cn(
-                            "font-semibold text-xs text-white",
-                            "rounded-md",
-                            "flex justify-center items-center",
-                            "w-5 h-5",
-                            item.page === NavbarPage.Tasks
-                              ? "bg-red-500"
-                              : "bg-zinc-500",
-                          )}
-                        >
-                          {unreadNotifsForPage[item.page]}
-                        </div>
-                      )}
-                    </Link>
-                  ),
+          <nav className="flex flex-col w-full py-4 gap-y-2 text-lg">
+            {navItems.map((item) => (
+              <Link
+                key={item.page}
+                to={item.destination}
+                prefetch="render"
+                className={cn(
+                  "px-3 py-1.5 rounded-md flex items-center justify-between w-full pr-2",
+                  currentLocation === item.page
+                    ? "bg-zinc-200/80 text-black"
+                    : "text-zinc-700 hover:bg-zinc-100",
                 )}
-              </nav>
+                onClick={() => setOpen(false)}
+              >
+                <div className="flex items-center gap-x-2">
+                  {getIcon(item.page, 16)}
+                  <p>{item.page}</p>
+                </div>
+                {!!unreadNotifsForPage[item.page] && (
+                  <div
+                    className={cn(
+                      "font-semibold text-xs text-white",
+                      "rounded-md",
+                      "flex justify-center items-center",
+                      "w-5 h-5",
+                      item.page === NavbarPage.Tasks
+                        ? "bg-red-500"
+                        : "bg-zinc-500",
+                    )}
+                  >
+                    {unreadNotifsForPage[item.page]}
+                  </div>
+                )}
+              </Link>
             ))}
-          </div>
+          </nav>
 
           <BottomSpacer />
         </div>

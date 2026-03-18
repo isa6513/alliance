@@ -10,6 +10,7 @@ const sizeClasses = {
   medium: "w-8 h-8 rounded",
   large: "w-9 h-9 rounded",
   huge: "w-29 h-29 rounded",
+  override: "rounded",
 } as const;
 
 export type AvatarSize = keyof typeof sizeClasses;
@@ -28,7 +29,7 @@ function Avatar({
       className={cn(
         "group/avatar relative shrink-0 select-none inline-flex align-middle overflow-hidden",
         sizeClasses[size],
-        className
+        className,
       )}
       {...props}
     />
@@ -42,7 +43,7 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
       loading="lazy"
       className={cn(
         "aspect-square size-full min-w-0 min-h-0 max-w-full max-h-full object-cover rounded-[inherit]",
-        className
+        className,
       )}
       {...props}
     />
@@ -58,7 +59,7 @@ function AvatarFallback({
       data-slot="avatar-fallback"
       className={cn(
         "bg-white text-zinc-500 flex size-full min-w-0 min-h-0 max-w-full max-h-full items-center justify-center rounded-[inherit] ring-1 ring-zinc-300 ring-inset overflow-hidden",
-        className
+        className,
       )}
       {...props}
     />
@@ -116,7 +117,7 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
         "group-data-[size=medium]/avatar:size-2.5 group-data-[size=medium]/avatar:[&>svg]:size-2",
         "group-data-[size=large]/avatar:size-2.5 group-data-[size=large]/avatar:[&>svg]:size-2",
         "group-data-[size=huge]/avatar:size-3 group-data-[size=huge]/avatar:[&>svg]:size-2",
-        className
+        className,
       )}
       {...props}
     />
@@ -154,7 +155,7 @@ function AvatarGroupCount({
         sizeClasses[size],
         textSizeClass[size],
         "[&>svg]:size-3 [&>svg]:shrink-0",
-        className
+        className,
       )}
       {...props}
     />

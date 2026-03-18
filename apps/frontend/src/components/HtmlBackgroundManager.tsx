@@ -1,10 +1,6 @@
 import { type ReactNode, useEffect } from "react";
 
-export function HtmlBackgroundManager({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function HtmlBackgroundManager({ children }: { children: ReactNode }) {
   return children;
 }
 

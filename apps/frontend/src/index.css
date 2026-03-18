@@ -64,6 +64,7 @@
   --color-grey-0: oklch(98% 0 0);
   --color-grey-1: oklch(95.5% 0 0);
   --color-grey-2: oklch(93% 0 0);
+  --color-grey-3: oklch(90.5% 0 0);
 
   --color-green: rgb(98, 161, 36);
   --color-navy: rgb(7, 30, 64);
@@ -92,10 +93,6 @@
   font-synthesis: none !important;
 }
 
-:root {
-  --nav-height: 55px;
-}
-
 html {
   overflow-x: hidden;
   font-size: 15px;
@@ -105,7 +102,7 @@ html {
 }
 
 html.white {
-  background-color: var(--color-page) !important;
+  background-color: white !important;
 }
 
 img {

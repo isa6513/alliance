@@ -17,6 +17,7 @@ import { cn } from "@alliance/shared/styles/util";
 import { useSearchParams } from "react-router";
 import ConversationDetailPanel from "../../components/ConversationDetailPanel";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { useAuth } from "../../lib/AuthContext";
 import useLiveConvoMessages, { useConversations } from "./messages";
 import { useMediaQuery } from "../../lib/useMediaQuery";
@@ -33,6 +34,8 @@ import {
 } from "@alliance/shared/lib/messages";
 
 const MessagesPage = () => {
+  useWhiteBackground();
+
   const [params, setParams] = useSearchParams();
   const selectedConvoId = useMemo(() => {
     const convoId = params.get("chat");
@@ -311,7 +314,7 @@ const MessagesPage = () => {
 
   return (
     <div
-      className="flex flex-row w-full h-[calc(100dvh-var(--mobile-nav-height))] overflow-hidden"
+      className="flex flex-row w-full h-[calc(100vh-var(--navbar-top-bar-height))] overflow-hidden"
       ref={containerRef}
     >
       <div

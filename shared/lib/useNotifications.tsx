@@ -9,6 +9,7 @@ import React, {
 import {
   NotificationDto,
   notifsFindAll,
+  notifsGetUnreadCount,
   notifsSetRead,
   notifsSetReadAll,
   UnreadContentType,
@@ -35,7 +36,7 @@ interface NotificationsContextType {
   ) => () => void;
   handleMarkAllAsRead: (e: React.MouseEvent) => void;
   handleClearAll: () => void;
-  refreshNotifications: () => Promise<void>;
+  refreshNotifications: (options?: { limit?: number }) => Promise<void>;
   applyNotificationsReadByContent: (
     contentType: UnreadContentType,
     contentIds: number[]
@@ -56,24 +57,28 @@ export const NotificationsProvider = ({
 
   const navigate = useNavigate();
 
-  const refreshNotifications = useCallback(async () => {
-    const { data } = await notifsFindAll();
-    if (!data) return;
-
-    const sorted = data
-      .sort(
-        (a, b) =>
-          new Date(b.sendTime || b.createdAt).getTime() -
-          new Date(a.sendTime || a.createdAt).getTime()
-      )
-      .filter((n) => new Date(n.sendTime).getTime() <= new Date().getTime());
-
-    setNotifications(sorted);
-    setUnreadCount(sorted.filter((n) => !n.readAt).length);
-  }, []);
+  const refreshNotifications = useCallback(
+    async (options?: { limit?: number }) => {
+      const limit = options?.limit;
+      if (limit !== undefined) {
+        const [{ data }, { data: unreadCountData }] = await Promise.all([
+          notifsFindAll({ query: { limit } }),
+          notifsGetUnreadCount(),
+        ]);
+        if (data) setNotifications(data);
+        if (unreadCountData !== undefined) setUnreadCount(unreadCountData);
+      } else {
+        const { data } = await notifsFindAll();
+        if (!data) return;
+        setNotifications(data);
+        setUnreadCount(data.filter((n) => !n.readAt).length);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    refreshNotifications();
+    refreshNotifications({ limit: 20 });
   }, [refreshNotifications]);
 
   const handleNotifClick = useCallback(

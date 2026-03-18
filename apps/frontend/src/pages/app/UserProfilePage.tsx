@@ -52,7 +52,7 @@ enum ProfileTabs {
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)]">
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-var(--navbar-top-bar-height))]">
       <div>
         <span className="font-bold pb-2 text-red-500">Error</span>
         <p>Failed to load user profile</p>
@@ -253,9 +253,8 @@ const UserProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-[800px] mx-auto">
-      <div className="mx-2 space-y-2">
-        <div className="w-full h-[50px] md:h-[100px]"></div>
+    <div className="max-w-[800px] mx-auto mt-[var(--navbar-top-bar-height)]">
+      <div className="mx-2 space-y-2 mt-8">
         <Card className="px-4 md:px-8 pb-6 relative gap-y-2">
           {/* {isProfileImageUploadPending && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70 backdrop-blur-[1px] rounded-[inherit]">
