@@ -7,9 +7,12 @@ import {
   type GestureResponderEvent,
 } from "react-native";
 import type { OnetimeInviteDto } from "@alliance/shared/client";
-import { onetimeInviteStatusLabels, deleteInviteConfirmation } from "@alliance/shared/lib/copy";
+import {
+  onetimeInviteStatusLabels,
+  deleteInviteConfirmation,
+} from "@alliance/shared/lib/copy";
 import type { OnetimeInviteActions } from "@alliance/shared/lib/inviteUtils";
-import { getOnetimeInviteSignupUrl } from "@alliance/shared/lib/inviteUrls";
+import { getReferralSignupUrl } from "@alliance/shared/lib/inviteUrls";
 import { getBaseUrl } from "../lib/config";
 import Text from "./system/Text";
 import Button, { ButtonColor, ButtonSize } from "./system/Button";
@@ -18,7 +21,10 @@ import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import { router } from "expo-router";
 
 /** Mobile Tailwind classes per status; labels come from shared copy. */
-const STATUS_TEXT_CLASS: Record<keyof typeof onetimeInviteStatusLabels, string> = {
+const STATUS_TEXT_CLASS: Record<
+  keyof typeof onetimeInviteStatusLabels,
+  string
+> = {
   request_pending: "text-amber-500",
   request_rejected: "text-orange-600",
   link_used: "text-zinc-600",
@@ -48,7 +54,7 @@ export default function OnetimeInviteListItem({
   const communityDisplay = communityLabel ?? "No group";
 
   const handleShare = () => {
-    const url = getOnetimeInviteSignupUrl(getBaseUrl(), invite.code);
+    const url = getReferralSignupUrl(getBaseUrl(), invite.code);
     Share.share({
       url,
       title: "Alliance invite",
@@ -59,18 +65,14 @@ export default function OnetimeInviteListItem({
 
   const handleDeletePress = (event: GestureResponderEvent) => {
     if (actions.onDeleteWithConfirm) {
-      Alert.alert(
-        deleteInviteConfirmation.message,
-        undefined,
-        [
-          { text: deleteInviteConfirmation.cancelLabel, style: "cancel" },
-          {
-            text: deleteInviteConfirmation.confirmLabel,
-            style: "destructive",
-            onPress: () => actions.onDeleteWithConfirm!(invite.id, event),
-          },
-        ],
-      );
+      Alert.alert(deleteInviteConfirmation.message, undefined, [
+        { text: deleteInviteConfirmation.cancelLabel, style: "cancel" },
+        {
+          text: deleteInviteConfirmation.confirmLabel,
+          style: "destructive",
+          onPress: () => actions.onDeleteWithConfirm!(invite.id, event),
+        },
+      ]);
     } else {
       actions.onDelete?.(invite.id, event);
     }
@@ -85,12 +87,18 @@ export default function OnetimeInviteListItem({
               onPress={() => router.push(`/member/${invite.invitedUserId}`)}
               activeOpacity={0.7}
             >
-              <Text className="text-base font-semibold text-zinc-900" numberOfLines={1}>
+              <Text
+                className="text-base font-semibold text-zinc-900"
+                numberOfLines={1}
+              >
                 {invite.invitee}
               </Text>
             </TouchableOpacity>
           ) : (
-            <Text className="text-base font-semibold text-zinc-900" numberOfLines={1}>
+            <Text
+              className="text-base font-semibold text-zinc-900"
+              numberOfLines={1}
+            >
               {invite.invitee}
             </Text>
           )}
@@ -114,7 +122,10 @@ export default function OnetimeInviteListItem({
                     pfp={invite.invitingUser.profilePicture ?? null}
                     size="mini"
                   />
-                  <Text className="text-sm font-medium text-zinc-700" numberOfLines={1}>
+                  <Text
+                    className="text-sm font-medium text-zinc-700"
+                    numberOfLines={1}
+                  >
                     {invite.invitingUser.displayName}
                   </Text>
                 </TouchableOpacity>
@@ -124,7 +135,9 @@ export default function OnetimeInviteListItem({
           {(invite.inviteeDescription || invite.info) && (
             <View className="mt-1">
               {invite.inviteeDescription && (
-                <AppMarkdownWrapper>{invite.inviteeDescription}</AppMarkdownWrapper>
+                <AppMarkdownWrapper>
+                  {invite.inviteeDescription}
+                </AppMarkdownWrapper>
               )}
               {invite.info && (
                 <AppMarkdownWrapper>{invite.info}</AppMarkdownWrapper>

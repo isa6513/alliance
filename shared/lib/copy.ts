@@ -149,5 +149,11 @@ export const deleteInviteConfirmation = {
   cancelLabel: "No, keep it",
 } as const;
 
+/** Copy for referral QR code (e.g. invites screen). */
+export const referralQrCopy = {
+  caption: "Share this QR code to invite a friend to the Alliance.",
+  linkUnavailable: "Your referral link is not available.",
+} as const;
+
 export const suspendContractConfirmation =
   "Are you sure you want to suspend your contract? You will be removed from your groups.";

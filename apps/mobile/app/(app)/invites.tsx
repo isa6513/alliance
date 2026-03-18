@@ -14,19 +14,18 @@ import {
   userRejectOnetimeInvite,
 } from "@alliance/shared/client";
 import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
-import { getOnetimeInviteSignupUrl } from "@alliance/shared/lib/inviteUrls";
-import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import { inviteBuckets } from "@alliance/shared/lib/copy";
 import { runAsync } from "@alliance/shared/lib/utils";
-import QRCode from "react-native-qrcode-svg";
+import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import { useAuth } from "../../lib/AuthContext";
-import { getBaseUrl } from "../../lib/config";
+import { useReferralLink } from "../../lib/useReferralLink";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { SegmentedTabs } from "../../components/system/SegmentedTabs";
 import { ScreenWithLoading } from "../../components/system/ScreenWithLoading";
 import Text from "../../components/system/Text";
 import InviteForm from "../../components/InviteForm";
 import { InviteSection } from "../../components/InviteSection";
+import ReferralQrSection from "../../components/ReferralQrSection";
 import { colors } from "../../lib/style/colors";
 
 enum InvitesTab {
@@ -47,6 +46,8 @@ const INVITES_TABS_ORDER: InvitesTab[] = [
   InvitesTab.Past,
 ];
 
+const INVITES_EMPTY_MESSAGE = "Your invites will appear here.";
+
 export default function InvitesScreen() {
   const { user } = useAuth();
   const [loadingInvites, setLoadingInvites] = useState(true);
@@ -58,6 +59,8 @@ export default function InvitesScreen() {
     InvitesTab.ReferralQr,
   );
   const sharedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const referralLink = useReferralLink(user);
 
   const loadInvites = useCallback(async () => {
     const response = await userGetOnetimeInvitesOverview();
@@ -171,108 +174,80 @@ export default function InvitesScreen() {
     return <ScreenWithLoading title="Invites" loading />;
   }
 
-  const referralLink =
-    user?.referralCode != null
-      ? getOnetimeInviteSignupUrl(getBaseUrl(), user.referralCode)
-      : null;
-
-  const renderTabContent = () => {
-    const emptyMessage = "Your invites will appear here.";
-
-    return (
-      <View className="px-4 pt-4 gap-4">
-        {selectedTab === InvitesTab.ReferralQr && (
-          <View className="items-center py-6 gap-4">
-            {referralLink ? (
-              <>
-                <View className="bg-white p-4 rounded-xl">
-                  <QRCode value={referralLink} size={300} />
-                </View>
-                <Text className="text-base text-zinc-600 text-center">
-                  Share this QR code to invite a friend to the Alliance.
-                </Text>
-              </>
-            ) : (
-              <Text className="text-sm text-zinc-500 text-center">
-                Your referral link is not available.
-              </Text>
-            )}
-          </View>
+  const tabContent: Record<InvitesTab, React.ReactNode> = {
+    [InvitesTab.ReferralQr]: <ReferralQrSection referralLink={referralLink} />,
+    [InvitesTab.New]: (
+      <>
+        <InviteForm onInviteCreated={handleInviteCreated} />
+        {error !== null && (
+          <Text className="text-sm text-red-500">{error}</Text>
         )}
-        {selectedTab === InvitesTab.New && (
-          <>
-            <InviteForm onInviteCreated={handleInviteCreated} />
-            {error !== null && (
-              <Text className="text-sm text-red-500">{error}</Text>
-            )}
-            <InviteSection
-              title={inviteBuckets.unverifiableActionable.title}
-              description={inviteBuckets.unverifiableActionable.description}
-              invites={unverifiableActionable}
-              user={user}
-              sharedInviteId={sharedInviteId}
-              actions={{
-                onDeleteWithConfirm: handleDeleteInvite,
-                onShared: handleShared,
-              }}
-            />
-          </>
+        <InviteSection
+          title={inviteBuckets.unverifiableActionable.title}
+          description={inviteBuckets.unverifiableActionable.description}
+          invites={unverifiableActionable}
+          user={user}
+          sharedInviteId={sharedInviteId}
+          actions={{
+            onDeleteWithConfirm: handleDeleteInvite,
+            onShared: handleShared,
+          }}
+        />
+      </>
+    ),
+    [InvitesTab.Past]: (
+      <>
+        {error !== null && (
+          <Text className="text-sm text-red-500">{error}</Text>
         )}
-        {selectedTab === InvitesTab.Past && (
-          <>
-            {error !== null && (
-              <Text className="text-sm text-red-500">{error}</Text>
-            )}
-            {isEmptyPast && (
-              <Text className="text-center text-zinc-500 py-8">
-                {emptyMessage}
-              </Text>
-            )}
-            <InviteSection
-              title={inviteBuckets.actionable.title}
-              invites={actionable}
-              user={user}
-              sharedInviteId={sharedInviteId}
-              actions={{
-                onApprove: handleApproveInvite,
-                onReject: handleRejectInvite,
-                onShared: handleShared,
-              }}
-            />
-            <InviteSection
-              title={inviteBuckets.unverifiableActionable.title}
-              description={inviteBuckets.unverifiableActionable.description}
-              invites={unverifiableActionable}
-              user={user}
-              sharedInviteId={sharedInviteId}
-              actions={{
-                onDeleteWithConfirm: handleDeleteInvite,
-                onShared: handleShared,
-              }}
-            />
-            <InviteSection
-              title={inviteBuckets.waitingForResponse.title}
-              description={inviteBuckets.waitingForResponse.description}
-              invites={waitingForResponse}
-              user={user}
-              sharedInviteId={sharedInviteId}
-              actions={{
-                onDelete: handleDeleteInvite,
-                onShared: handleShared,
-              }}
-            />
-            <InviteSection
-              title={inviteBuckets.settled.title}
-              description={inviteBuckets.settled.description}
-              invites={settled}
-              user={user}
-              sharedInviteId={sharedInviteId}
-              actions={{ onShared: handleShared }}
-            />
-          </>
+        {isEmptyPast && (
+          <Text className="text-center text-zinc-500 py-8">
+            {INVITES_EMPTY_MESSAGE}
+          </Text>
         )}
-      </View>
-    );
+        <InviteSection
+          title={inviteBuckets.actionable.title}
+          invites={actionable}
+          user={user}
+          sharedInviteId={sharedInviteId}
+          actions={{
+            onApprove: handleApproveInvite,
+            onReject: handleRejectInvite,
+            onShared: handleShared,
+          }}
+        />
+        <InviteSection
+          title={inviteBuckets.unverifiableActionable.title}
+          description={inviteBuckets.unverifiableActionable.description}
+          invites={unverifiableActionable}
+          user={user}
+          sharedInviteId={sharedInviteId}
+          actions={{
+            onDeleteWithConfirm: handleDeleteInvite,
+            onShared: handleShared,
+          }}
+        />
+        <InviteSection
+          title={inviteBuckets.waitingForResponse.title}
+          description={inviteBuckets.waitingForResponse.description}
+          invites={waitingForResponse}
+          user={user}
+          sharedInviteId={sharedInviteId}
+          actions={{
+            onDelete: handleDeleteInvite,
+            onShared: handleShared,
+          }}
+        />
+        <InviteSection
+          title={inviteBuckets.settled.title}
+          description={inviteBuckets.settled.description}
+          invites={settled}
+          user={user}
+          sharedInviteId={sharedInviteId}
+          actions={{ onShared: handleShared }}
+        />
+      </>
+    ),
   };
 
   return (
@@ -303,7 +278,7 @@ export default function InvitesScreen() {
           />
         }
       >
-        {renderTabContent()}
+        <View className="px-4 pt-4 gap-4">{tabContent[selectedTab]}</View>
       </ScrollView>
     </View>
   );

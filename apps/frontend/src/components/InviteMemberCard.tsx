@@ -1,4 +1,5 @@
 import { Features } from "@alliance/shared/lib/features";
+import { getOnetimeInviteSignupUrl } from "@alliance/shared/lib/inviteUrls";
 import Button from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import { useCallback } from "react";
@@ -7,9 +8,10 @@ import { isFeatureEnabled } from "../lib/config";
 
 const InviteMemberCard = () => {
   const { user } = useAuth();
-  const referralPath = user?.referralCode ? `/signup?ref=${user.referralCode}` : "";
   const referralLink =
-    typeof window !== "undefined" ? `${window.location.origin}${referralPath}` : referralPath;
+    typeof window !== "undefined" && user?.referralCode
+      ? getOnetimeInviteSignupUrl(window.location.origin, user.referralCode)
+      : "";
 
   const copyReferralLink = useCallback(() => {
     if (user?.referralCode && referralLink) {
