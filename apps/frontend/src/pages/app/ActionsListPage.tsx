@@ -7,7 +7,6 @@ import {
 } from "@alliance/shared/lib/actionsListPage";
 import ActionItemCard from "../../components/ActionItemCard";
 import { useGrayBackground } from "../../components/HtmlBackgroundManager";
-import List from "@alliance/sharedweb/ui/List";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { ActionDto } from "@alliance/shared/client";
