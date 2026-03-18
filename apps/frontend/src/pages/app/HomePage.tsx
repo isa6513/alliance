@@ -36,6 +36,7 @@ import {
 import FollowUpFormPanel from "../../components/FollowUpFormPanel";
 import { useTaskActionsData } from "../../lib/useTaskActionsData";
 import HomeUpdatesRow from "../../components/HomeUpdatesRow";
+import SeeAll from "../../components/SeeAll";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -336,12 +337,8 @@ const HomePage = () => {
         <div className="flex-1 min-h-0 flex flex-col">
           <div className="flex flex-row justify-between items-center shrink-0">
             <p className="font-title">Activity</p>
-            <Link
-              to={href("/feed")}
-              className="text-zinc-500 text-base hover:underline"
-            >
-              See all
-            </Link>
+
+            <SeeAll link={href("/feed")} size="md" />
           </div>
           <GlobalFeed
             items={globalFeedItems}

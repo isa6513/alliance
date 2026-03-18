@@ -5,9 +5,10 @@ import type { ActionsRecentUpdatesResponse } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { cn } from "@alliance/shared/styles/util";
 
-import { Link, href, useNavigate } from "react-router";
+import { href, useNavigate } from "react-router";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
-import { ChevronRight } from "lucide-react";
+
+import SeeAll from "./SeeAll";
 
 const UPDATES_LIMIT = 3;
 
@@ -79,12 +80,7 @@ const HomeUpdatesRow = () => {
     <div>
       <div className="flex flex-row justify-between items-center mb-2 px-1">
         <p className="text-title-small mb-2">Action updates</p>
-        <Link
-          to={href("/action-updates")}
-          className="bg-zinc-200 hover:bg-zinc-300 w-8 h-8 flex items-center justify-center rounded-full shrink-0 "
-        >
-          <ChevronRight size="16" className="shrink-0 text-zinc-500 mx-2" />
-        </Link>
+        <SeeAll link="/action-updates" size="lg" />
       </div>
       {isLoading && (
         <p className="text-xs text-zinc-400 col-span-full">Loading updates…</p>
