@@ -24,12 +24,14 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 interface FollowUpFormPanelProps {
   followUpForm: FollowUpForm;
   actionId: number;
+  border?: boolean;
   onSubmitted?: () => void;
 }
 
 export default function FollowUpFormPanel({
   followUpForm,
   actionId,
+  border = false,
   onSubmitted,
 }: FollowUpFormPanelProps) {
   const [form, setForm] = useState<FormDto | null>(null);
@@ -91,7 +93,7 @@ export default function FollowUpFormPanel({
         setError("Failed to submit. Please try again.");
       }
     },
-    [followUpForm.id, form, actionId, onSubmitted, success]
+    [followUpForm.id, form, actionId, onSubmitted, success],
   );
 
   const { distinctId, sessionReplayUrl } = useMemo(
@@ -99,7 +101,7 @@ export default function FollowUpFormPanel({
       distinctId: posthog.get_distinct_id(),
       sessionReplayUrl: posthog.get_session_replay_url(),
     }),
-    []
+    [],
   );
 
   if (loading || !form) {
@@ -117,7 +119,10 @@ export default function FollowUpFormPanel({
   const formTitle = followUpForm.name ?? form.title;
 
   return (
-    <Card style={CardStyle.White} className="p-4 sm:p-6">
+    <Card
+      style={border ? CardStyle.WhiteBorder : CardStyle.White}
+      className="p-4 sm:p-6"
+    >
       {followUpForm.instructions != null &&
         followUpForm.instructions.trim() !== "" && (
           <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
@@ -147,8 +152,8 @@ export default function FollowUpFormPanel({
       </div>
       {error && (
         <Card
-          style={CardStyle.White}
-          className="mt-4 !border-red-400 !bg-red-50"
+          style={border ? CardStyle.WhiteBorder : CardStyle.White}
+          className="mt-4 border-red-400! bg-red-50!"
         >
           <div className="text-red-500">{error}</div>
         </Card>

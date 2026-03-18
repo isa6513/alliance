@@ -147,6 +147,7 @@ const ActionContents = () => {
                     key={fuf.id}
                     followUpForm={fuf}
                     actionId={action.id}
+                    border={true}
                   />
                 ))}
               </div>
