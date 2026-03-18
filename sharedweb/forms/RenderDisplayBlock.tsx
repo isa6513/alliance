@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import { getApiUrl } from "../lib/config";
@@ -11,6 +11,8 @@ import {
   FileText,
   FileCheck,
   Signature,
+  Copy,
+  Check,
 } from "lucide-react";
 import type { BigLinkIcon } from "@alliance/shared/forms/display-blocks";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -25,6 +27,36 @@ const bigLinkIcons: Record<BigLinkIcon, React.FC<{ size?: number }>> = {
   "file-check": FileCheck,
   signature: Signature,
 };
+
+function CopyTextDisplay({ text, title }: { text: string; title?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div>
+      {title && <span className="text-zinc-500 mb-1 block">{title}</span>}
+      <div
+        className="flex items-center gap-2 rounded-md border border-gray-200 bg-zinc-50 px-3 py-2 cursor-pointer hover:bg-zinc-100 transition-colors"
+        onClick={handleCopy}
+      >
+        <span className="flex-1 text-black truncate">{text}</span>
+        {copied ? (
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-green">Copied! </p>
+            <Check size={16} className="shrink-0 text-green" />
+          </div>
+        ) : (
+          <Copy size={16} className="shrink-0 text-gray-400" />
+        )}
+      </div>
+    </div>
+  );
+}
 
 type Props = {
   block: DisplayBlock;
@@ -53,7 +85,7 @@ export default function RenderDisplayBlock({
         {
           className: cn("!font-semibold text-zinc-900", headerClass),
         },
-        block.text
+        block.text,
       );
 
     case "text":
@@ -77,7 +109,7 @@ export default function RenderDisplayBlock({
             block.thickness === "thin" && "border-t",
             block.thickness === "medium" && "border-t-2",
             block.thickness === "thick" && "border-t-4",
-            !block.thickness && "border-t"
+            !block.thickness && "border-t",
           )}
         />
       );
@@ -91,7 +123,7 @@ export default function RenderDisplayBlock({
             block.size === "sm" && "h-4",
             block.size === "md" && "h-8",
             block.size === "lg" && "h-16",
-            block.size === "xl" && "h-24"
+            block.size === "xl" && "h-24",
           )}
         />
       );
@@ -161,6 +193,9 @@ export default function RenderDisplayBlock({
       );
     }
 
+    case "copytext":
+      return <CopyTextDisplay text={block.text} title={block.title} />;
+
     case "previousAnswer": {
       const answers = previousAnswerData?.[block.sourceFormId];
       const schema = previousAnswerSchemas?.[block.sourceFormId];
@@ -178,11 +213,7 @@ export default function RenderDisplayBlock({
         );
       }
       return (
-        <RenderPreviousAnswer
-          block={block}
-          schema={schema}
-          answers={answers}
-        />
+        <RenderPreviousAnswer block={block} schema={schema} answers={answers} />
       );
     }
 

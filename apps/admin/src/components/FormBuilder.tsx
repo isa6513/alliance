@@ -26,6 +26,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PreviewAsUserBar } from "./PreviewAsUserBar";
 import {
   EditableBigLinkBlock,
+  EditableCopyTextBlock,
   EditableDividerBlock,
   EditableHeaderBlock,
   EditableHtmlBlock,
@@ -102,6 +103,7 @@ const BLOCK_NAMES = {
   video: "Video Block",
   quote: "Quote Block",
   biglink: "Big Link Block",
+  copytext: "Copy Text Block",
   previousAnswer: "Previous Answer Block",
 } as const satisfies Record<
   Exclude<DisplayKind, "text"> | "text-block",
@@ -933,6 +935,13 @@ export function FormBuilder({
           id: blockId,
           text: "Link title",
           url: "/",
+        };
+        break;
+      case "copytext":
+        newBlock = {
+          kind: "copytext",
+          id: blockId,
+          text: "",
         };
         break;
       case "previousAnswer":
@@ -1867,6 +1876,13 @@ export function FormBuilder({
                   case "biglink":
                     return (
                       <EditableBigLinkBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "copytext":
+                    return (
+                      <EditableCopyTextBlock
                         block={block as any}
                         {...commonProps}
                       />

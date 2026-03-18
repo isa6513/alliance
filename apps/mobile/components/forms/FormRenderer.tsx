@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Share,
 } from "react-native";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import type { UserDto } from "@alliance/shared/client";
@@ -62,6 +63,30 @@ type FormRendererProps = {
 };
 
 const DEVICE_TYPE: DeviceVisibilityTarget = "mobile";
+
+function CopyTextDisplayMobile({ text, title }: { text: string; title?: string }) {
+  const handleCopy = () => {
+    Share.share({ message: text });
+  };
+
+  return (
+    <View>
+      {title ? (
+        <Text className="text-xs text-zinc-500 mb-1">{title}</Text>
+      ) : null}
+      <TouchableOpacity
+        className="flex-row items-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2"
+        onPress={handleCopy}
+        activeOpacity={0.7}
+      >
+        <Text className="flex-1 text-sm text-zinc-800" selectable numberOfLines={1}>
+          {text}
+        </Text>
+        <Text className="text-xs text-zinc-400 ml-2">Share</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
 
 export function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
   switch (block.kind) {
@@ -141,6 +166,8 @@ export function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
           </Text>
         </TouchableOpacity>
       );
+    case "copytext":
+      return <CopyTextDisplayMobile text={block.text} title={block.title} />;
     default:
       return null;
   }

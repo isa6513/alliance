@@ -12,6 +12,7 @@ export type DisplayKind =
   | "video" // video player (HLS)
   | "quote" // quote block
   | "biglink" // prominent link card
+  | "copytext" // copiable text snippet (email, URL, etc.)
   | "previousAnswer"; // show a user's answer from another form
 
 interface BaseBlock {
@@ -88,6 +89,12 @@ export type BigLinkBlock = BaseBlock & {
   icon?: BigLinkIcon;
 };
 
+export type CopyTextBlock = BaseBlock & {
+  kind: "copytext";
+  text: string;
+  title?: string;
+};
+
 export type PreviousAnswerBlock = BaseBlock & {
   kind: "previousAnswer";
   sourceFormId: number;
@@ -110,6 +117,7 @@ export type DisplayBlock =
   | ImageBlock
   | VideoBlock
   | BigLinkBlock
+  | CopyTextBlock
   | PreviousAnswerBlock;
 
 export type ManualDisplayBlockContent = Omit<

@@ -119,6 +119,7 @@ const KNOWN_FIELD_KINDS_RECORD = {
   video: true,
   quote: true,
   biglink: true,
+  copytext: true,
   previousAnswer: true,
 } as const satisfies Record<FieldKind, unknown>;
 const KNOWN_FIELD_KINDS = new Set(

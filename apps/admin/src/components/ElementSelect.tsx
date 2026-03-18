@@ -39,6 +39,7 @@ const BLOCK_TYPES: DisplayKind[] = [
   "video",
   "quote",
   "biglink",
+  "copytext",
   "previousAnswer",
 ];
 
@@ -83,6 +84,8 @@ export function ElementSelect({
                 >
                   {type === "previousAnswer"
                     ? "Previous Answer Block"
+                    : type === "copytext"
+                    ? "Copy Text Block"
                     : type.charAt(0).toUpperCase() + type.slice(1) + " Block"}
                 </button>
               ))}

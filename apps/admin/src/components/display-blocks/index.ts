@@ -7,6 +7,7 @@ export { EditableHtmlBlock } from './EditableHtmlBlock';
 export { EditableImageBlock } from './EditableImageBlock';
 export { EditableVideoBlock } from './EditableVideoBlock';
 export { EditableBigLinkBlock } from './EditableBigLinkBlock';
+export { EditableCopyTextBlock } from './EditableCopyTextBlock';
 export { EditablePreviousAnswerBlock } from './EditablePreviousAnswerBlock';
 export type { BaseDisplayBlockProps } from './types';
 export { DisplayBlockWrapper } from './DisplayBlockWrapper';
