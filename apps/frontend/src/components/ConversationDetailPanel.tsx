@@ -27,7 +27,11 @@ type ConversationDetailPanelProps = {
   onOptimisticMessage?: (message: MessageDto) => void;
   onOptimisticMessageFailed?: (
     tempId: string,
-    draft: { message: string; attachments: string[]; replyingTo: string | null }
+    draft: {
+      message: string;
+      attachments: string[];
+      replyingTo: string | null;
+    },
   ) => void;
 } & (
   | {
@@ -110,7 +114,7 @@ const ConversationDetailPanel = ({
           reader.onload = () => resolve(reader.result as string);
           reader.onerror = reject;
           reader.readAsDataURL(file);
-        })
+        }),
       );
     }
     return Promise.all(readers);
@@ -128,7 +132,7 @@ const ConversationDetailPanel = ({
         console.error("Failed reading image file(s)", err);
       }
     },
-    [readImagesFromFiles]
+    [readImagesFromFiles],
   );
 
   function isDraggingImage(e: React.DragEvent) {
@@ -203,7 +207,7 @@ const ConversationDetailPanel = ({
     if (mode === "new") return false;
     return selectedConvo.participants.some(
       (participant) =>
-        participant.user.id === user?.id && participant.state === "invited"
+        participant.user.id === user?.id && participant.state === "invited",
     );
   }, [mode, selectedConvo, user]);
 
@@ -350,7 +354,7 @@ const ConversationDetailPanel = ({
     return selectedConvo.participants.some(
       (participant) =>
         (participant.user.id === user?.id && participant.role === "admin") ||
-        participant.role === "owner"
+        participant.role === "owner",
     );
   }, [mode, selectedConvo, user]);
 
@@ -358,14 +362,14 @@ const ConversationDetailPanel = ({
     () =>
       selectedConvo?.participants.some(
         (participant) =>
-          participant.user.id === user?.id && participant.state === "invited"
+          participant.user.id === user?.id && participant.state === "invited",
       ),
-    [selectedConvo, user]
+    [selectedConvo, user],
   );
 
   return (
     <div
-      className="flex flex-col h-full overflow-hidden relative"
+      className="flex flex-col h-full overflow-hidden relative bg-white"
       onDragEnterCapture={onDragEnterCapture}
       onDragOverCapture={onDragOverCapture}
       onDragLeaveCapture={onDragLeaveCapture}
@@ -451,7 +455,7 @@ const ConversationDetailPanel = ({
               selectedConvo.participants.some(
                 (participant) =>
                   participant.user.id !== user?.id &&
-                  participant.state === "invited"
+                  participant.state === "invited",
               ) && (
                 <div className="flex flex-row items-center gap-x-2 w-full p-5">
                   <p className="text-sm text-zinc-500 mx-auto">
@@ -459,7 +463,7 @@ const ConversationDetailPanel = ({
                       selectedConvo.participants.find(
                         (participant) =>
                           participant.user.id !== user?.id &&
-                          participant.state === "invited"
+                          participant.state === "invited",
                       )?.user.displayName
                     }{" "}
                     has received a message request.
@@ -487,7 +491,7 @@ const ConversationDetailPanel = ({
                       arr[idx - 1].author.id !== message.author.id ||
                       Math.abs(
                         new Date(message.createdAt).getTime() -
-                          new Date(arr[idx - 1].createdAt).getTime()
+                          new Date(arr[idx - 1].createdAt).getTime(),
                       ) >
                         1000 * 60 * 60 * 3 // 3 hours
                     }
@@ -508,7 +512,7 @@ const ConversationDetailPanel = ({
                     {selectedConvo.type === "direct"
                       ? `You have received a message request from ${
                           selectedConvo.participants.find(
-                            (participant) => participant.user.id !== user?.id
+                            (participant) => participant.user.id !== user?.id,
                           )?.user.displayName
                         }`
                       : "You have been invited to the group chat"}

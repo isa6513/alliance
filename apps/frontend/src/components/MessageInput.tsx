@@ -150,7 +150,7 @@ const MessageInput = ({
   return (
     <div
       className={cn(
-        "flex flex-col gap-y-3 bg-page relative",
+        "flex flex-col gap-y-3 bg-white relative",
         compact ? "px-4 pb-2" : "px-8 pb-4",
       )}
     >

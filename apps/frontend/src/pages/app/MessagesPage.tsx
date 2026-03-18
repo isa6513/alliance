@@ -316,7 +316,7 @@ const MessagesPage = () => {
     >
       <div
         className={cn(
-          "overflow-x-hidden flex flex-col bg-page border-x border-zinc-200 transition-width duration-100 ease-in-out",
+          "overflow-x-hidden flex flex-col bg-white border-x border-zinc-200 transition-width duration-100 ease-in-out",
           !isSmall ? "min-w-[300px] max-w-[300px]" : "max-w-full",
         )}
         style={{ flex: isSmall && messagesOpen ? 0 : 1 }}
