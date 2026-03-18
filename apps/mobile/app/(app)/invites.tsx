@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { View, ScrollView, RefreshControl } from "react-native";
+import { View, ScrollView, RefreshControl, Platform } from "react-native";
 import type { OnetimeInviteDto } from "@alliance/shared/client";
 import {
   userApproveOnetimeInvite,
@@ -271,11 +271,7 @@ export default function InvitesScreen() {
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 24, flexGrow: 1 }}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.green}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         <View className="px-4 pt-4 gap-4">{tabContent[selectedTab]}</View>
