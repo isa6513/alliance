@@ -686,37 +686,39 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
             })}
 
             {/* Hover indicator when data points are hidden */}
-            {props.showDataPoints === false && hoveredPoint && hoveredSeries && (
-              <>
-                {props.getHoverXLabel && (
-                  <text
-                    x={numericGeometry.xScale(props.getXValue(hoveredPoint))}
-                    y={numericGeometry.margin.top - 6}
-                    textAnchor="middle"
-                    className="fill-gray-600 text-xs font-medium"
-                  >
-                    {props.getHoverXLabel(hoveredPoint)}
-                  </text>
-                )}
-                <line
-                  x1={numericGeometry.xScale(props.getXValue(hoveredPoint))}
-                  x2={numericGeometry.xScale(props.getXValue(hoveredPoint))}
-                  y1={numericGeometry.margin.top}
-                  y2={numericGeometry.height - numericGeometry.margin.bottom}
-                  stroke="#6b7280"
-                  strokeWidth={1}
-                  strokeDasharray="4 4"
-                />
-                <circle
-                  cx={numericGeometry.xScale(props.getXValue(hoveredPoint))}
-                  cy={numericGeometry.yScale(props.getYValue(hoveredPoint))}
-                  r={5}
-                  fill="white"
-                  stroke={hoveredSeries.color}
-                  strokeWidth={2}
-                />
-              </>
-            )}
+            {props.showDataPoints === false &&
+              hoveredPoint &&
+              hoveredSeries && (
+                <>
+                  {props.getHoverXLabel && (
+                    <text
+                      x={numericGeometry.xScale(props.getXValue(hoveredPoint))}
+                      y={numericGeometry.margin.top - 6}
+                      textAnchor="middle"
+                      className="fill-gray-600 text-xs font-medium"
+                    >
+                      {props.getHoverXLabel(hoveredPoint)}
+                    </text>
+                  )}
+                  <line
+                    x1={numericGeometry.xScale(props.getXValue(hoveredPoint))}
+                    x2={numericGeometry.xScale(props.getXValue(hoveredPoint))}
+                    y1={numericGeometry.margin.top}
+                    y2={numericGeometry.height - numericGeometry.margin.bottom}
+                    stroke="#6b7280"
+                    strokeWidth={1}
+                    strokeDasharray="4 4"
+                  />
+                  <circle
+                    cx={numericGeometry.xScale(props.getXValue(hoveredPoint))}
+                    cy={numericGeometry.yScale(props.getYValue(hoveredPoint))}
+                    r={5}
+                    fill="white"
+                    stroke={hoveredSeries.color}
+                    strokeWidth={2}
+                  />
+                </>
+              )}
 
             {/* Data points */}
             {props.showDataPoints !== false &&
@@ -753,7 +755,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
 
         {/* Hover tooltip for numeric chart */}
         {isNumericAxis(props) && numericHoverContent && hoveredSeries && (
-          <div className="absolute top-4 left-30 pointer-events-none">
+          <div className="absolute top-14 left-30 pointer-events-none">
             <p className="font-semibold text-gray-900 mb-1 text-sm">
               {numericHoverContent.title}
             </p>
