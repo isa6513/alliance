@@ -37,7 +37,7 @@ export default function AnimatedSidebar() {
   // Sync animation with context state
   useEffect(() => {
     translateX.value = withSpring(isOpen ? 0 : -sidebarWidth, SPRING_CONFIG);
-  }, [isOpen, sidebarWidth]);
+  }, [isOpen]);
 
   // Edge swipe gesture to open sidebar
   const openGesture = Gesture.Pan()
