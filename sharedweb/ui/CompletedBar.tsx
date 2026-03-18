@@ -15,16 +15,16 @@ const CompletedBar: React.FC<CompletedBarProps> = ({
   return (
     <div
       className={cn(
-        "w-full rounded-full outline outline-zinc-200 mt-0.5",
+        "w-full rounded-full  mt-0.5",
         height,
-        dark ? "bg-zinc-200" : "bg-zinc-100"
+        dark ? "bg-zinc-200" : "bg-zinc-100",
       )}
     >
       {percentage > 0 && (
         <div
           className={cn(
             height,
-            "bg-green outline outline-green rounded-full overflow-hidden"
+            "bg-green outline outline-green rounded-full overflow-hidden",
           )}
           style={{ width: `${percentage}%` }}
         ></div>

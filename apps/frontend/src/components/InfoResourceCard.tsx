@@ -17,7 +17,7 @@ const InfoResourceCard = ({
   return (
     <Link
       to={href}
-      className="flex flex-row gap-x-2 justify-between items-center group hover:cursor-pointer"
+      className="bg-white p-4 flex flex-row gap-x-2 justify-between items-center group hover:cursor-pointer"
     >
       <div className="flex flex-row gap-x-5 items-center">
         <Icon className="text-green w-6 h-6 md:w-8 md:h-8 shrink-0" />

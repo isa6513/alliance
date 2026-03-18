@@ -148,7 +148,7 @@ const CommunityPage = () => {
       setEditMaxCapacity(
         community.maxCapacity === null
           ? null
-          : Math.max(community.maxCapacity, memberCount)
+          : Math.max(community.maxCapacity, memberCount),
       );
       setEditPhotoUrl(community.photo ?? null);
       setIsEditing(false);
@@ -213,8 +213,8 @@ const CommunityPage = () => {
         communityMemberInfo.users.map(({ userId, relations }) => [
           userId,
           relations,
-        ])
-      )
+        ]),
+      ),
     );
 
     const reversedActions = [...communityMemberInfo.actions].reverse();
@@ -237,10 +237,13 @@ const CommunityPage = () => {
       }).then((resp) => {
         if (resp.data) {
           setMemberContactInfo(
-            resp.data.reduce((acc, contactInfo) => {
-              acc[contactInfo.id] = contactInfo;
-              return acc;
-            }, {} as Record<number, CommunityMemberContactInfoDto>)
+            resp.data.reduce(
+              (acc, contactInfo) => {
+                acc[contactInfo.id] = contactInfo;
+                return acc;
+              },
+              {} as Record<number, CommunityMemberContactInfoDto>,
+            ),
           );
         }
       });
@@ -269,7 +272,7 @@ const CommunityPage = () => {
         });
       })();
     },
-    [setSearchParams, communityIds, refreshCommunities]
+    [setSearchParams, communityIds, refreshCommunities],
   );
 
   const handleSave = useCallback(async () => {
@@ -292,7 +295,7 @@ const CommunityPage = () => {
     }
     if (normalizedMaxCapacity !== null && normalizedMaxCapacity < memberCount) {
       setError(
-        `Capacity cannot be less than the current number of members (${memberCount})`
+        `Capacity cannot be less than the current number of members (${memberCount})`,
       );
       return;
     }
@@ -352,8 +355,8 @@ const CommunityPage = () => {
           ? null
           : Math.max(
               community.maxCapacity,
-              community.users.length - community.leaders.length
-            )
+              community.users.length - community.leaders.length,
+            ),
       );
       setEditPhotoUrl(community.photo ?? null);
     }
@@ -450,7 +453,7 @@ const CommunityPage = () => {
 
   const leaders = community.leaders;
   const nonLeaderMembers = community.users.filter(
-    (user) => !leaders.some((leader) => leader.id === user.id)
+    (user) => !leaders.some((leader) => leader.id === user.id),
   );
   const canDelete = (amLeader && community.users.length === 1) ?? false;
 
@@ -648,7 +651,7 @@ const CommunityPage = () => {
                                 setEditMaxCapacity(
                                   value === "" || Number.isNaN(parsed)
                                     ? null
-                                    : parsed
+                                    : parsed,
                                 );
                               }}
                               className="mt-2 border border-zinc-300 rounded px-3 py-2 w-full bg-white"
@@ -674,7 +677,7 @@ const CommunityPage = () => {
                 <div
                   className={cn(
                     "max-w-[400px]",
-                    completionData.nTotal === 0 && "invisible"
+                    completionData.nTotal === 0 && "invisible",
                   )}
                 >
                   <p className="text-sm">
@@ -703,7 +706,7 @@ const CommunityPage = () => {
                       aria-pressed={m === tab}
                       className={cn(
                         "!border-b-[1.5px] rounded-none",
-                        m === tab ? "!border-b-green" : "!border-b-transparent"
+                        m === tab ? "!border-b-green" : "!border-b-transparent",
                       )}
                     >
                       <div className="flex flex-row gap-x-2">

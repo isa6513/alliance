@@ -115,13 +115,13 @@ const InformationPage: React.FC = () => {
 
   return (
     <CenterLayout>
-      <div className="gap-y-12 flex flex-col text-base md:text-lg">
+      <div className="gap-y-8 md:gap-y-12 flex flex-col text-base md:text-lg">
         <h1 className="text-title">Information</h1>
 
         <div className="flex flex-col gap-y-6">
           <h2 className="text-title-small">Contact the office</h2>
 
-          <div className="grid grid-cols-1 gap-6 grid-flow-row">
+          <div className="grid grid-cols-1 gap-2 grid-flow-row">
             {contacts.map((contact) => (
               <InfoResourceCard key={contact.href} {...contact} />
             ))}
@@ -131,7 +131,7 @@ const InformationPage: React.FC = () => {
         <div className="flex flex-col gap-y-6">
           <h2 className="text-title-small">Resources</h2>
 
-          <div className="grid grid-cols-1 gap-6 grid-flow-row">
+          <div className="grid grid-cols-1 gap-2 grid-flow-row">
             {resources.map((resource) => (
               <InfoResourceCard key={resource.href} {...resource} />
             ))}

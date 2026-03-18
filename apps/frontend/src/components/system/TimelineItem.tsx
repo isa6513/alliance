@@ -69,7 +69,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       {updates && updates.length > 0 && (
         <div className="flex flex-col gap-y-1.5 mt-2">
           {sortedUpdates?.map((update) => (
-            <ActionUpdateCard key={update.id} update={update} />
+            <ActionUpdateCard key={update.id} update={update} border />
           ))}
         </div>
       )}

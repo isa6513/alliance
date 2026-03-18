@@ -122,20 +122,22 @@ const HomeUpdatesRow = () => {
               >
                 <div
                   className={cn(
-                    "rounded px-4 py-3 h-full ",
+                    "flex flex-col justify-between rounded px-4 py-3 h-full ",
                     isUnread
                       ? "border border-green bg-green/5 hover:bg-green/10"
                       : "bg-white hover:bg-green/5",
                   )}
                 >
-                  <p className="text-sm md:text-base font-medium text-green mb-0.5 truncate">
-                    {update.actionName}
-                  </p>
-                  {update.title && (
-                    <p className="text-sm md:text-base leading-snug text-zinc-800">
-                      {update.title}
+                  <div>
+                    <p className="text-sm md:text-base font-medium text-green mb-0.5 truncate">
+                      {update.actionName}
                     </p>
-                  )}
+                    {update.title && (
+                      <p className="text-sm md:text-base leading-snug text-zinc-800">
+                        {update.title}
+                      </p>
+                    )}
+                  </div>
                   <p className="text-sm md:text-base text-zinc-400 mt-1">
                     {formatTime(new Date(update.date), { addSuffix: true })}
                   </p>
