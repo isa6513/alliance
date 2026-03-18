@@ -1,4 +1,4 @@
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Text } from "react-native";
 import { usePathname, useRouter } from "expo-router";
 import {
   Bell,
@@ -14,26 +14,31 @@ const tabs = [
   {
     href: "/" as const,
     icon: ListTodo,
+    label: "Tasks",
     matchPaths: ["/", ""],
   },
   {
     href: "/actions" as const,
     icon: Layers,
+    label: "Actions",
     matchPaths: ["/actions", "/action"],
   },
   {
     href: "/notifications" as const,
     icon: Bell,
+    label: "Notifications",
     matchPaths: ["/notifications"],
   },
   {
     href: "/messages" as const,
     icon: MessageSquare,
+    label: "Messages",
     matchPaths: ["/messages"],
   },
   {
     href: "/groups" as const,
     icon: Users,
+    label: "Groups",
     matchPaths: ["/groups"],
   },
 ];
@@ -63,17 +68,24 @@ export default function TabBar() {
         return (
           <TouchableOpacity
             key={tab.href}
-            className="flex-1 items-center justify-center py-2"
+            className="flex-1 items-center gap-0.5"
             onPress={() => {
               router.replace(tab.href);
             }}
             activeOpacity={0.7}
           >
             <Icon
-              size={24}
+              size={26}
               color={active ? colors.green : "#888"}
               strokeWidth={active ? 2.5 : 2}
             />
+            <Text
+              className="text-[10px]"
+              style={{ color: active ? colors.green : "#888" }}
+              numberOfLines={1}
+            >
+              {tab.label}
+            </Text>
           </TouchableOpacity>
         );
       })}
