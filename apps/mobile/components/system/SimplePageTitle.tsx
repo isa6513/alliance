@@ -12,14 +12,14 @@ export const SimplePageTitle = ({
 }) => {
   const { openDrawer, isPermanent } = useAppDrawer();
   return (
-    <View className="flex-row items-center gap-2 px-4 justify-between border-b border-zinc-200">
-      <View className="flex-row items-center gap-2">
+    <View className="flex-row items-center gap-2 px-2 justify-between border-b border-zinc-200 pb-2">
+      <View className="flex-row items-center">
         {!isPermanent && (
-          <Pressable onPress={openDrawer} className="p-2">
+          <Pressable onPress={openDrawer} className="p-2 px-4">
             <Menu size={24} color="#71717a" strokeWidth={2.5} />
           </Pressable>
         )}
-        <Text className="text-xl font-semibold text-zinc-900 font-serif py-4">
+        <Text className="text-xl font-semibold text-zinc-900 font-serif">
           {title}
         </Text>
       </View>

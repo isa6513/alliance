@@ -22,11 +22,8 @@ import { Check } from "lucide-react-native";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 import SuccessOverlay from "../../components/SuccessOverlay";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  KeyboardAwareScrollView,
-  KeyboardAwareScrollViewRef,
-} from "react-native-keyboard-controller";
-import { KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR } from "../../lib/constants";
+import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
+import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import type { GeneralUpdateDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
@@ -261,9 +258,7 @@ export default function HomeScreen() {
       <KeyboardAwareScrollView
         key={fullScreen ? "fullscreen" : "scroll"}
         ref={scrollViewRef}
-        className="flex-1"
         contentContainerStyle={fullScreen ? { flex: 1 } : undefined}
-        bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }

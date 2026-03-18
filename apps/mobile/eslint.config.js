@@ -7,4 +7,15 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*'],
   },
+  {
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [{
+          name: 'react-native-keyboard-controller',
+          importNames: ['KeyboardAwareScrollView'],
+          message: 'Use @/components/KeyboardAwareScrollView instead.',
+        }],
+      }],
+    },
+  },
 ]);

@@ -16,9 +16,8 @@ import Text from "../../../../components/system/Text";
 import { colors } from "../../../../lib/style/colors";
 import EditableContentRenderer from "../../../../components/EditableContentRenderer";
 import Comments from "../../../../components/Comments";
-import { KEYBOARD_EXTENDER_BAR_HEIGHT } from "../../../../lib/constants";
 import LikeButton from "../../../../components/LikeButton";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
 
 const renderAvatar = (author: PostDto["author"]) => {
   return <ProfileImage pfp={author.profilePicture} size="small" />;
@@ -120,14 +119,12 @@ export default function PostDetailScreen() {
   const action = post.action;
 
   return (
-    <KeyboardAwareScrollView
-      className="flex-1 bg-white"
-      testID="vr-forum-post-ready"
-      bottomOffset={KEYBOARD_EXTENDER_BAR_HEIGHT}
-    >
+    <KeyboardAwareScrollView className="bg-white" testID="vr-forum-post-ready">
       <View className="px-4 pt-4 pb-10">
         <TouchableOpacity
-          onPress={() => router.canGoBack() ? router.back() : router.push("/forum")}
+          onPress={() =>
+            router.canGoBack() ? router.back() : router.push("/forum")
+          }
           className="flex-row items-center gap-x-1 mb-4"
           activeOpacity={0.7}
         >

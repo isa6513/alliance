@@ -26,10 +26,8 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import LikeButton from "../../../../components/LikeButton";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { colors } from "../../../../lib/style/colors";
-import {
-  KeyboardAwareScrollView,
-  KeyboardAwareScrollViewRef,
-} from "react-native-keyboard-controller";
+import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
+import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
 import { KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR } from "../../../../lib/constants";
 
 type TabId = "task" | "activity" | "description" | "comments";
