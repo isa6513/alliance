@@ -12,7 +12,7 @@ import { File, Paths } from "expo-file-system";
 import { CreateEditableContentDto } from "@alliance/shared/client";
 import Text from "./system/Text";
 import { KeyboardExtender } from "react-native-keyboard-controller";
-import { cn } from "@alliance/shared/styles/util";
+import Reanimated from "react-native-reanimated";
 
 interface EditableContentFormProps {
   value: CreateEditableContentDto;
@@ -331,7 +331,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         </View>
       )}
       <KeyboardExtender enabled={showExtend}>
-        <View className="p-2 flex-row items-center gap-3 bg-white border-y border-zinc-200 justify-between">
+        <Reanimated.View className="p-2 flex-row items-center gap-3 justify-between mx-5">
           <ToolbarButton
             onTap={() =>
               toolbarTap(() => {
@@ -349,7 +349,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
           {pickerError ? (
             <Text className="text-xs text-red-500">{pickerError}</Text>
           ) : null}
-          <View className="flex-row items-center gap-3">
+          <View className="flex-row justify-center items-center">
             {onCancel && (
               <ToolbarButton
                 onTap={() => toolbarTap(onCancel)}
@@ -364,17 +364,14 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
                   if (canSubmit && !isSubmitting) onSubmit();
                 })
               }
-              className={cn(
-                "px-3 py-1.5 bg-zinc-800 rounded-sm",
-                (!canSubmit || isSubmitting) && "opacity-50",
-              )}
+              className="px-3 py-1.5 bg-green rounded-full"
             >
               <Text className="text-white">
                 {isSubmitting ? "Posting..." : submitLabel}
               </Text>
             </ToolbarButton>
           </View>
-        </View>
+        </Reanimated.View>
       </KeyboardExtender>
     </View>
   );
