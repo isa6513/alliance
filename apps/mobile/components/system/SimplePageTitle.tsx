@@ -2,7 +2,6 @@ import { Pressable, View } from "react-native";
 import { Menu } from "lucide-react-native";
 import Text from "./Text";
 import { useAppDrawer } from "../../lib/AppDrawerContext";
-import { useCallback } from "react";
 
 export const SimplePageTitle = ({
   title,

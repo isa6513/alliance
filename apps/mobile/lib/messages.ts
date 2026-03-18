@@ -26,7 +26,10 @@ const onRefreshToken = async (): Promise<string | null> => {
   const refreshToken = await tokenStore.getItem(REFRESH_TOKEN_KEY);
   if (!refreshToken) return null;
 
-  const response = await authRefreshTokens({ query: { mode: 'header' } });
+  const response = await authRefreshTokens({
+    query: { mode: "header" },
+    headers: { Authorization: `Bearer ${refreshToken}` }, //TODO: mobile shouldnt have to manually set this - fix non-cookie mode somehow. or maybe use auth context?
+  });
   if (!response.response.ok) return null;
 
   const token = response.data?.access_token;
