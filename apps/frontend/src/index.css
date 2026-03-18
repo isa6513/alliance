@@ -188,7 +188,7 @@ select {
 }
 
 .text-title-small {
-  @apply font-semibold text-xl sm:text-2xl md:text-2xl;
+  @apply font-semibold text-xl md:text-2xl;
 }
 
 .text-heading-public {
