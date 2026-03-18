@@ -25,11 +25,19 @@ export const REFERRAL_COMMUNITY_SELECTORS: Record<
     const led = referredBy.communities?.filter((c) =>
       isCommunityLedBy(c, referredBy.id),
     );
-    if (!led?.length) return null;
+    if (!led?.length) {
+      return null;
+    }
     const byFreeSlots = [...led].sort(
       (a, b) => getCommunityFreeSlots(b) - getCommunityFreeSlots(a),
     );
-    return byFreeSlots[0] ?? null;
+    return (
+      byFreeSlots[0] ??
+      referredBy.communities?.find(
+        (c) => communityHasCapacity(c) && !isCommunityLedBy(c, referredBy.id),
+      ) ??
+      null
+    );
   },
 };
 
