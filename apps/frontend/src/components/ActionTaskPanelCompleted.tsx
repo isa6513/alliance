@@ -5,6 +5,7 @@ import Card from "@alliance/sharedweb/ui/Card";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
+import ActionPageTaskPanelCardWrapper from "./ActionPageTaskPanelCardWrapper";
 
 export interface ActionTaskPanelCompletedProps {
   action: ActionDto | null;
@@ -16,22 +17,18 @@ const ActionTaskPanelCompleted = ({
   const formResponse = useCompletedTaskForm(action);
 
   const completedCard = (
-    <Card style={CardStyle.White} className="mb-2">
-      <div className="flex items-center gap-x-3">
-        <CheckIcon size="small" />
-        <p>You&apos;ve completed this task.</p>
-      </div>
-    </Card>
+    <div className="flex items-center gap-x-3">
+      <CheckIcon size="small" />
+      <p>You&apos;ve completed this task.</p>
+    </div>
   );
 
   if (action?.taskFormId && formResponse) {
     return (
-      <>
-        {completedCard}
-        <Card
-          style={CardStyle.Grey}
-          className="inline-block !p-3 md:!p-6 space-y-4 -mt-3 rounded-t-none"
-        >
+      <ActionPageTaskPanelCardWrapper
+        taskPanelTop={completedCard}
+        taskPanelTopStyle={CardStyle.WhiteBorder}
+        taskPanel={
           <FormRenderer
             form={formResponse.schemaSnapshot as unknown as FormSchema}
             id={formResponse.formId}
@@ -42,11 +39,30 @@ const ActionTaskPanelCompleted = ({
             userId={formResponse.user?.id}
             user={formResponse.user ?? undefined}
           />
-        </Card>
-      </>
+        }
+        taskPanelStyle={CardStyle.GreyBorder}
+      />
+      // <>
+      //   {completedCard}
+      //   <Card
+      //     style={CardStyle.Grey}
+      //     className="inline-block !p-3 md:!p-6 space-y-4 -mt-3 rounded-t-none"
+      //   >
+      //     <FormRenderer
+      //       form={formResponse.schemaSnapshot as unknown as FormSchema}
+      //       id={formResponse.formId}
+      //       actionId={action.id}
+      //       completedFormResponse={formResponse}
+      //       renderFormAsCompleted
+      //       onSubmit={null}
+      //       userId={formResponse.user?.id}
+      //       user={formResponse.user ?? undefined}
+      //     />
+      //   </Card>
+      // </>
     );
   } else {
-    return completedCard;
+    return <Card style={CardStyle.White}>{completedCard}</Card>;
   }
 };
 

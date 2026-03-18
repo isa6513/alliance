@@ -7,7 +7,6 @@ import { ActionTaskPanelPropsShared } from "@alliance/shared/lib/actionTaskPanel
 import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
 import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
 import { useAuth } from "../lib/AuthContext";
-import { CardStyle } from "@alliance/shared/styles/card";
 import {
   ActionPageTaskPanelState,
   getActionPageTaskPanelState,
@@ -18,31 +17,7 @@ import {
   taskNotAssigned,
 } from "@alliance/shared/lib/copy";
 import { ArrowRight } from "lucide-react";
-import { cn } from "@alliance/shared/styles/util";
-
-function ActionPageTaskPanelCardWrapper({
-  taskPanelTop = null,
-  taskPanel,
-}: {
-  taskPanelTop?: React.ReactNode;
-  taskPanel: React.ReactNode;
-}) {
-  return (
-    <div>
-      {taskPanelTop && (
-        <Card style={CardStyle.LightGreyBorder} className="rounded-b-none">
-          {taskPanelTop}
-        </Card>
-      )}
-      <Card
-        style={CardStyle.WhiteBorder}
-        className={cn("p-4 sm:p-6", taskPanelTop ? "border-t-0" : "border-t")}
-      >
-        {taskPanel}
-      </Card>
-    </div>
-  );
-}
+import ActionPageTaskPanelCardWrapper from "./ActionPageTaskPanelCardWrapper";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
