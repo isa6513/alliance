@@ -214,25 +214,42 @@ const ActionPageTaskPanel = () => {
       );
     case ActionPageTaskPanelState.ShowTask:
       return (
-        <ActionPageTaskPanelCardWrapper
-          taskPanelTop={
-            <div>
-              <p className="font-medium">This action is optional.</p>
-              <p className="text-zinc-500">
-                You are not required to complete the task, but can if you would
-                like.
-              </p>
-            </div>
-          }
-          taskPanel={
-            <ActionTaskPanel
-              action={action}
-              userRelation={userRelation ?? "none"}
-              card={false}
-              {...panelHandlers}
+        <>
+          {action.optional ? (
+            <ActionPageTaskPanelCardWrapper
+              taskPanelTop={
+                <div>
+                  <p className="font-medium text-sky-500">
+                    This action is optional.
+                  </p>
+                  <p className="text-zinc-500">
+                    You are not required to complete the task, but can if you
+                    would like.
+                  </p>
+                </div>
+              }
+              taskPanel={
+                <ActionTaskPanel
+                  action={action}
+                  userRelation={userRelation ?? "none"}
+                  card={false}
+                  {...panelHandlers}
+                />
+              }
             />
-          }
-        />
+          ) : (
+            <ActionPageTaskPanelCardWrapper
+              taskPanel={
+                <ActionTaskPanel
+                  action={action}
+                  userRelation={userRelation ?? "none"}
+                  card={false}
+                  {...panelHandlers}
+                />
+              }
+            />
+          )}
+        </>
       );
     default:
       throw new Error(
