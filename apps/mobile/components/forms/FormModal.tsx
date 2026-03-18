@@ -1,17 +1,15 @@
 import React, { type PropsWithChildren } from "react";
-import { Modal, View, Platform, Pressable, ScrollView } from "react-native";
+import { Modal, View, Pressable, ScrollView } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
 interface FormModalProps {
   visible: boolean;
   onClose: () => void;
-  keyboardVerticalOffset?: number;
 }
 
 function FormModal({
   visible,
   onClose,
-  keyboardVerticalOffset = 0,
   children,
 }: PropsWithChildren<FormModalProps>) {
   return (

@@ -430,11 +430,7 @@ export function RenderField({
             </Text>
             <ChevronDown size={18} color={colors.text.icon} />
           </TouchableOpacity>
-          <FormModal
-            visible={selectOpen}
-            onClose={() => setSelectOpen(false)}
-            maxHeight={420}
-          >
+          <FormModal visible={selectOpen} onClose={() => setSelectOpen(false)}>
             <View className="flex-row justify-between items-center mb-2">
               <Text className="text-base font-semibold text-zinc-900">
                 Select
@@ -974,7 +970,6 @@ export function TimeInputField({
         <FormModal
           visible={showDropdown}
           onClose={() => setShowDropdown(false)}
-          maxHeight={420}
         >
           <View className="flex-row justify-between items-center mb-3">
             <Text className="text-lg font-semibold text-zinc-900">

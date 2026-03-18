@@ -71,7 +71,7 @@ export default function TimeZoneSelect({
         <ChevronDown size={18} color={colors.text.icon} />
       </TouchableOpacity>
 
-      <FormModal visible={open} onClose={() => setOpen(false)} maxHeight={520}>
+      <FormModal visible={open} onClose={() => setOpen(false)}>
         <View className="flex-row items-center justify-between mb-3">
           <View className="flex-row items-center gap-2">
             <Clock size={18} color="#0f172a" />

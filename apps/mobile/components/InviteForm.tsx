@@ -266,7 +266,6 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
                 <FormModal
                   visible={groupSelectModalOpen}
                   onClose={() => setGroupSelectModalOpen(false)}
-                  maxHeight={400}
                 >
                   <View className="flex-row items-center justify-between mb-3">
                     <Text className="text-lg font-semibold text-zinc-900">

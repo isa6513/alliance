@@ -66,7 +66,7 @@ export default function CityAutosuggestMobile({
         disabled={disabled}
         className={cn(
           "w-full rounded-lg border border-zinc-200 px-3 py-3 bg-white",
-          disabled && "opacity-60"
+          disabled && "opacity-60",
         )}
       >
         <TextInput
@@ -84,7 +84,7 @@ export default function CityAutosuggestMobile({
         />
       </TouchableOpacity>
 
-      <FormModal visible={open} onClose={() => setOpen(false)} maxHeight={420}>
+      <FormModal visible={open} onClose={() => setOpen(false)}>
         <TextInput
           value={query}
           onChangeText={(text) => setQuery(text)}
@@ -104,7 +104,7 @@ export default function CityAutosuggestMobile({
                   key={`${city.name}-${city.admin1}-${city.countryCode}`}
                   className={cn(
                     "px-3 py-3 rounded-lg mb-2",
-                    isActive ? "bg-zinc-100" : "bg-white"
+                    isActive ? "bg-zinc-100" : "bg-white",
                   )}
                   activeOpacity={0.8}
                   onPress={() => {
