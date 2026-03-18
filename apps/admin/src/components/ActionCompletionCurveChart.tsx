@@ -356,13 +356,9 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
                 value: formatHourLabel(xValue),
               },
               {
-                label: "Completions this hour",
-                value: `${(completionRate * 100).toFixed(2)}%`,
-                color: series.color,
-              },
-              {
                 label: "Cumulative completed",
                 value: `${(cumulativeRate * 100).toFixed(2)}%`,
+                color: series.color,
               },
             ]
           : [
@@ -383,7 +379,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
             label: "Actions",
             value: point.actionCount as number,
           });
-        } else {
+        } else if (!isHourly) {
           items.push(
             {
               label: "Completed",

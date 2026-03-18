@@ -277,6 +277,44 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
     };
   }, [props, height, yDomain]);
 
+  const handleNumericHover = useCallback(
+    (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+      if (!isNumericAxis(props) || !numericGeometry || !svgRef.current) return;
+      const { multiLineData, getXValue, getYValue } = props;
+
+      const rect = svgRef.current.getBoundingClientRect();
+      const scaleX = numericGeometry.width / rect.width;
+      const scaleY = numericGeometry.height / rect.height;
+      const pointerX = (event.clientX - rect.left) * scaleX;
+      const pointerY = (event.clientY - rect.top) * scaleY;
+
+      let bestDist = Infinity;
+      let bestPoint: DataPoint | null = null;
+      let bestSeries: MultiLineSeries | null = null;
+
+      for (const s of multiLineData) {
+        for (const point of s.data) {
+          const px = numericGeometry.xScale(getXValue(point));
+          const py = numericGeometry.yScale(getYValue(point));
+          const dx = pointerX - px;
+          const dy = pointerY - py;
+          const dist = dx * dx + dy * dy;
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestPoint = point;
+            bestSeries = s;
+          }
+        }
+      }
+
+      if (bestPoint && bestSeries) {
+        setHoveredPoint(bestPoint);
+        setHoveredSeries(bestSeries);
+      }
+    },
+    [numericGeometry, props],
+  );
+
   const handleDateHover = useCallback(
     (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
       if (isNumericAxis(props)) return;
@@ -577,6 +615,11 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
             ref={svgRef}
             viewBox={`0 0 ${numericGeometry.width} ${numericGeometry.height}`}
             className="w-full"
+            onMouseMove={handleNumericHover}
+            onMouseLeave={() => {
+              setHoveredPoint(null);
+              setHoveredSeries(null);
+            }}
           >
             {/* Grid lines */}
             <g>
@@ -640,6 +683,29 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
                 />
               );
             })}
+
+            {/* Hover indicator when data points are hidden */}
+            {props.showDataPoints === false && hoveredPoint && hoveredSeries && (
+              <>
+                <line
+                  x1={numericGeometry.xScale(props.getXValue(hoveredPoint))}
+                  x2={numericGeometry.xScale(props.getXValue(hoveredPoint))}
+                  y1={numericGeometry.margin.top}
+                  y2={numericGeometry.height - numericGeometry.margin.bottom}
+                  stroke="#6b7280"
+                  strokeWidth={1}
+                  strokeDasharray="4 4"
+                />
+                <circle
+                  cx={numericGeometry.xScale(props.getXValue(hoveredPoint))}
+                  cy={numericGeometry.yScale(props.getYValue(hoveredPoint))}
+                  r={5}
+                  fill="white"
+                  stroke={hoveredSeries.color}
+                  strokeWidth={2}
+                />
+              </>
+            )}
 
             {/* Data points */}
             {props.showDataPoints !== false &&
