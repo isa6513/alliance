@@ -1,14 +1,7 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Alert,
-} from "react-native";
+import { View, Text, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
-import {
-  forumCreatePost,
-} from "../../../../../shared/client";
+import { forumCreatePost } from "../../../../../shared/client";
 import Button, { ButtonColor } from "../../../components/system/Button";
 import Card, { CardStyle } from "../../../components/system/Card";
 import Input from "../../../components/system/Input";
@@ -59,7 +52,7 @@ export default function CreatePostScreen() {
       Alert.alert("Success", "Post created", [
         {
           text: "OK",
-          onPress: () => router.push(`/forum/post/${response.data.id}`),
+          onPress: () => router.replace(`/forum/post/${response.data.id}`),
         },
       ]);
     } catch (err) {
@@ -82,7 +75,7 @@ export default function CreatePostScreen() {
             style: "destructive",
             onPress: () => router.back(),
           },
-        ]
+        ],
       );
     } else {
       router.back();

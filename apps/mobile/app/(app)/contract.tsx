@@ -20,7 +20,6 @@ import Text from "../../components/system/Text";
 import Button, { ButtonColor } from "../../components/system/Button";
 import Card, { CardStyle } from "../../components/system/Card";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
-import { KEYBOARD_BOTTOM_OFFSET_COMPACT } from "../../lib/constants";
 import { suspendContractConfirmation } from "@alliance/shared/lib/copy";
 import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 import { useQuery } from "@tanstack/react-query";
