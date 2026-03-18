@@ -354,7 +354,7 @@ const NavbarVertical: React.FC<{ todoActions: number }> = ({
           "flex flex-col",
           "transform transition-transform duration-100 ease-in-out",
           "z-30 overflow-y-auto",
-          "md:shadow-none",
+          "md:shadow-none border-r border-zinc-200",
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
         ref={navRef}
