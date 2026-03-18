@@ -17,7 +17,10 @@ import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { isVisualTestMode } from "../lib/visualTest";
-import { userRegisterDevice } from "@alliance/shared/client";
+import {
+  userRegisterDevice,
+  authRefreshTokens,
+} from "@alliance/shared/client";
 import PushNotificationResponseHandler from "../components/PushNotificationResponseHandler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -110,8 +113,45 @@ export default function RootLayout() {
     Berlingske: require("../assets/fonts/BerlingskeSerif-Blk.ttf"),
   });
   useEffect(() => {
+    const tokenStore = Platform.OS === "web" ? WebTokenStore : SecureStorage;
+    const originalFetch = fetch.bind(globalThis);
+
+    const wrappedFetch: typeof fetch = async (input, init) => {
+      const req = new Request(input, init);
+      const retryReq = req.clone();
+      const res = await originalFetch(req);
+
+      if (res.status !== 401 || req.url.includes("auth/refresh")) {
+        return res;
+      }
+
+      const refreshToken = await tokenStore.getItem("refreshToken");
+      if (!refreshToken) return res;
+
+      const refreshRes = await authRefreshTokens({
+        query: { mode: "header" },
+        headers: { Authorization: `Bearer ${refreshToken}` },
+      });
+
+      if (refreshRes.response.ok && refreshRes.data?.access_token) {
+        await tokenStore.setItem("accessToken", refreshRes.data.access_token);
+        client.setConfig({
+          baseUrl: getApiUrl(),
+          headers: { Authorization: `Bearer ${refreshRes.data.access_token}` },
+          fetch: wrappedFetch,
+          throwOnError: true,
+        });
+        const retryHeaders = new Headers(retryReq.headers);
+        retryHeaders.set("Authorization", `Bearer ${refreshRes.data.access_token}`);
+        return originalFetch(new Request(retryReq, { headers: retryHeaders }));
+      }
+
+      return res;
+    };
+
     client.setConfig({
       baseUrl: getApiUrl(),
+      fetch: wrappedFetch,
       throwOnError: true,
     });
   }, []);

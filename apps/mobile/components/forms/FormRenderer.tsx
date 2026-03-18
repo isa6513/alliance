@@ -7,8 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Share,
 } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import type { UserDto } from "@alliance/shared/client";
 import {
@@ -34,7 +34,7 @@ import {
 import { RenderField } from "./RenderField";
 import FormModal from "./FormModal";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
-import { CircleCheck, Ellipsis } from "lucide-react-native";
+import { CircleCheck, Copy, Ellipsis } from "lucide-react-native";
 import { cn } from "@alliance/shared/styles/util";
 
 type FormRendererProps = {
@@ -64,25 +64,39 @@ type FormRendererProps = {
 
 const DEVICE_TYPE: DeviceVisibilityTarget = "mobile";
 
-function CopyTextDisplayMobile({ text, title }: { text: string; title?: string }) {
-  const handleCopy = () => {
-    Share.share({ message: text });
+function CopyTextDisplayMobile({
+  text,
+  title,
+}: {
+  text: string;
+  title?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await Clipboard.setStringAsync(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <View>
       {title ? (
-        <Text className="text-xs text-zinc-500 mb-1">{title}</Text>
+        <Text className="text-sm text-zinc-500 mb-1">{title}</Text>
       ) : null}
       <TouchableOpacity
-        className="flex-row items-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2"
+        className="flex-row items-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3"
         onPress={handleCopy}
         activeOpacity={0.7}
       >
-        <Text className="flex-1 text-sm text-zinc-800" selectable numberOfLines={1}>
+        <Text className="flex-1" numberOfLines={1}>
           {text}
         </Text>
-        <Text className="text-xs text-zinc-400 ml-2">Share</Text>
+        {copied ? (
+          <Text className="text-sm text-green ml-2 font-medium">Copied!</Text>
+        ) : (
+          <Copy size={16} className="shrink-0 text-gray-400" />
+        )}
       </TouchableOpacity>
     </View>
   );
