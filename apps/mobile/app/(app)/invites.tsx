@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { View, ScrollView, RefreshControl, Platform } from "react-native";
+import { View, ScrollView, RefreshControl } from "react-native";
 import type { OnetimeInviteDto } from "@alliance/shared/client";
 import {
   userApproveOnetimeInvite,
@@ -26,7 +26,6 @@ import Text from "../../components/system/Text";
 import InviteForm from "../../components/InviteForm";
 import { InviteSection } from "../../components/InviteSection";
 import ReferralQrSection from "../../components/ReferralQrSection";
-import { colors } from "../../lib/style/colors";
 
 enum InvitesTab {
   ReferralQr = "referral_qr",
