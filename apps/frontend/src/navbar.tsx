@@ -1,7 +1,6 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigation } from "react-router";
 import { cn } from "@alliance/shared/styles/util";
-import { NAV_BAR_TOP_BAR_HEIGHT } from "@alliance/shared/lib/constants";
 import NavbarTopBar from "./components/NavbarTopBar";
 import NavbarVertical from "./components/NavbarVertical";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
@@ -68,11 +67,6 @@ function Navbar() {
         >
           <div className="flex-1 relative">
             <Outlet />
-            {isNavigating && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
-                <Spinner size="large" />
-              </div>
-            )}
           </div>
           {isNavigating && (
             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
