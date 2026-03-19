@@ -79,6 +79,13 @@ const HomePage = () => {
 
   const numTodo = todoActions.filter(showActionInSidebarList).length;
 
+  const hasOnboardingTasks = useMemo(
+    () =>
+      todoActions.some((a) => a.onboarding) ||
+      newActions.some((a) => a.onboarding),
+    [todoActions, newActions],
+  );
+
   const isLargeScreen = useMediaQuery("(min-width: 1150px)");
 
   const tasksListContent = useMemo(() => {
@@ -220,13 +227,15 @@ const HomePage = () => {
           "flex flex-col gap-y-8 sm:gap-y-12 lg:gap-y-16 py-4 sm:py-8 px-4 xl:px-0 max-w-3xl mx-auto relative"
         }
       >
-        <div>
-          <div className="flex flex-row justify-between items-center mb-4 px-1">
-            <p className="text-title">Action updates</p>
-            <SeeAll link="/action-updates" size="lg" />
+        {!hasOnboardingTasks && (
+          <div>
+            <div className="flex flex-row justify-between items-center mb-4 px-1">
+              <p className="text-title">Action updates</p>
+              <SeeAll link="/action-updates" size="lg" />
+            </div>
+            <HomeUpdatesRow />
           </div>
-          <HomeUpdatesRow />
-        </div>
+        )}
 
         <div className="flex flex-col gap-6 flex-1">
           <div className="flex flex-col gap-y-1">
@@ -333,6 +342,7 @@ const HomePage = () => {
     tasksListContent,
     queryClient,
     activeCompletableFollowUpForms,
+    hasOnboardingTasks,
   ]);
 
   const sidebarContent = useMemo(() => {
