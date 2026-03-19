@@ -139,8 +139,6 @@ const ActionActivityDetail = () => {
     return <BasicErrorMessage>Activity not found</BasicErrorMessage>;
   }
 
-  console.log(activity?.likes);
-
   return (
     <>
       <div className="flex flex-col flex-2 pr-0 sm:pr-5 xl:pl-10 pt-5 w-full">
