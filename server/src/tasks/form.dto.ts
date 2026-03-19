@@ -14,8 +14,8 @@ import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
 import type { Ty } from './entities/type';
 import type { AggregateViewSchema } from './schema';
-import { DEVICE_VISIBILITY_TARGETS } from '@alliance/shared/forms/schema/device';
-import type { DeviceVisibilityTarget } from '@alliance/shared/forms/schema/device';
+import { DEVICE_VISIBILITY_TARGETS } from './form-schema/v0/device';
+import type { DeviceVisibilityTarget } from './form-schema/v0/device';
 
 export class CreateFormDto extends PickType(Form, ['title', 'schema']) {}
 
