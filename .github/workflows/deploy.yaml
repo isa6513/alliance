@@ -448,6 +448,7 @@ jobs:
         run: corepack prepare yarn@4.9.1 --activate
 
       - name: Setup Node
+        if: github.ref_name == 'production'
         uses: actions/setup-node@v4
         with:
           node-version: 22
