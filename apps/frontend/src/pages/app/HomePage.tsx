@@ -37,6 +37,7 @@ import FollowUpFormPanel from "../../components/FollowUpFormPanel";
 import { useTaskActionsData } from "../../lib/useTaskActionsData";
 import HomeUpdatesRow from "../../components/HomeUpdatesRow";
 import SeeAll from "../../components/SeeAll";
+import HomeFeed from "../../components/HomeFeed";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -317,6 +318,8 @@ const HomePage = () => {
             </div>
           )}
         </div>
+
+        <HomeFeed />
       </div>
     );
   }, [

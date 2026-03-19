@@ -538,6 +538,34 @@ export class ActionsController {
     );
   }
 
+  @Get('homeFeed')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ActionActivityDto] })
+  @ApiOperation({
+    summary:
+      'Get contentful completions from friends and group members for the home feed',
+  })
+  async homeFeed(
+    @Request() req: JwtRequest,
+    @Query('limit') limit?: string,
+    @Query('before') before?: string,
+    @Query('comments', new ParseBoolPipe({ optional: true }))
+    comments?: boolean,
+  ): Promise<ActionActivityDto[]> {
+    const limitNum = limit ? parseInt(limit) : 20;
+    const beforeDate = before ? new Date(before) : undefined;
+    if (before && isNaN(beforeDate!.getTime())) {
+      throw new BadRequestException('Invalid "before" cursor');
+    }
+
+    return this.actionsService.homeFeed(
+      req.user.sub,
+      limitNum,
+      beforeDate,
+      comments,
+    );
+  }
+
   @Get('communityActivity')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })

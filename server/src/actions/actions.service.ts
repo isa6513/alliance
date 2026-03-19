@@ -1877,6 +1877,84 @@ export class ActionsService {
     );
   }
 
+  async homeFeed(
+    userId: number,
+    limit: number = 20,
+    before?: Date,
+    comments?: boolean,
+  ): Promise<ActionActivityDto[]> {
+    const [friends, user] = await Promise.all([
+      this.userService.findFriends(userId),
+      this.userService.findOne(userId, { communities: true }),
+    ]);
+    if (!user) throw new NotFoundException('User not found');
+
+    const friendIds = friends.map((f) => f.id);
+    const communityIds = (user.communities ?? []).map((c) => c.id);
+
+    // Get community member IDs in batch
+    const communityMemberIds = new Set<number>();
+    if (communityIds.length > 0) {
+      const communities = await Promise.all(
+        communityIds.map((id) => this.communityService.findOneOrFail(id)),
+      );
+      for (const community of communities) {
+        for (const member of community.users ?? []) {
+          communityMemberIds.add(member.id);
+        }
+      }
+    }
+
+    // Combine and deduplicate, excluding self
+    const allUserIds = [
+      ...new Set([...friendIds, ...communityMemberIds]),
+    ].filter((id) => id !== userId);
+
+    if (allUserIds.length === 0) return [];
+
+    // Build query for completions with form responses
+    const qb = this.buildActivityFeedQuery({
+      limit: limit * 4,
+      before,
+      userIds: allUserIds,
+      filterFeedTypes: false,
+    });
+
+    qb.andWhere('activity.type IN (:...completionTypes)', {
+      completionTypes: [
+        ActionActivityType.USER_COMPLETED,
+        ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM,
+      ],
+    });
+    qb.andWhere('taskFormResponse.id IS NOT NULL');
+
+    const activities = await qb.getMany();
+
+    const contentful = activities
+      .filter((a) => this.buildOutputFormResponse(a) !== undefined)
+      .slice(0, limit);
+
+    console.log(contentful);
+    if (contentful.length === 0) return [];
+
+    const likedIds = await this.getLikedActivityIds(
+      contentful.map((a) => a.id),
+      userId,
+    );
+
+    if (comments) {
+      return this.attachComments(contentful, userId);
+    }
+
+    return contentful.map(
+      (activity) =>
+        new ActionActivityDto(activity, {
+          formResponseOutput: this.buildOutputFormResponse(activity),
+          likedByMe: likedIds.has(activity.id),
+        }),
+    );
+  }
+
   async findByName(name: string): Promise<Action[]> {
     const actions = await this.actionRepository.find({
       where: { name: ILike(`%${name}%`) },

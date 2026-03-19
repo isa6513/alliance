@@ -5,6 +5,7 @@ import {
   actionsGetActionActivities,
   actionsGetActivityFeed,
   actionsCommunityActivity,
+  actionsHomeFeed,
   actionsLikeActivity,
   actionsUnlikeActivity,
   actionsFriendActivityForAction,
@@ -25,6 +26,7 @@ export enum ActivityList {
   Action = "action",
   Global = "global",
   Community = "community",
+  HomeFeed = "homeFeed",
 }
 
 export type UseActivitiesProps = {
@@ -40,7 +42,7 @@ export type UseActivitiesProps = {
       limit?: number;
     }
   | {
-      list: ActivityList.Global | ActivityList.Friends;
+      list: ActivityList.Global | ActivityList.Friends | ActivityList.HomeFeed;
       objectId?: never;
       limit?: number;
     }
@@ -50,7 +52,8 @@ const supportsCursor = (list: ActivityList) =>
   list === ActivityList.Global ||
   list === ActivityList.Friends ||
   list === ActivityList.Community ||
-  list === ActivityList.Action;
+  list === ActivityList.Action ||
+  list === ActivityList.HomeFeed;
 
 const generateQueryKey = (props: UseActivitiesProps) => {
   return [
@@ -106,6 +109,15 @@ const callActivityApi = async (props: UseActivitiesProps, before?: string) => {
       break;
     case ActivityList.Global:
       apiCall = actionsGetActivityFeed({
+        query: {
+          limit: limit.toString(),
+          before: beforeStr,
+          comments,
+        },
+      });
+      break;
+    case ActivityList.HomeFeed:
+      apiCall = actionsHomeFeed({
         query: {
           limit: limit.toString(),
           before: beforeStr,

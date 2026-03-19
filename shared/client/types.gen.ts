@@ -56,6 +56,8 @@ export type ContractEvent = {
     contract?: Contract | null;
 };
 
+export type ReferralSource = 'referral_link' | 'onetime_invite';
+
 export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
 
 export type NotificationCategory = 'action_event' | 'forum_reply' | 'friend_request' | 'friend_request_accepted' | 'action_update' | 'likes' | 'removed_from_community' | 'removed_from_community_for_leader' | 'member_left_community' | 'member_suspended_removed_from_community' | 'member_joined_community' | 'community_assigned' | 'new_member_referred' | 'community_invite_created' | 'community_invite_rejected' | 'community_invite_accepted' | 'onetime_invite_request_created' | 'onetime_invite_request_approved' | 'onetime_invite_request_rejected' | 'community_invite_request_created' | 'community_invite_request_rejected';
@@ -615,6 +617,7 @@ export type User = {
     receiveReplyNotifications: boolean;
     contractEvents?: Array<ContractEvent>;
     referredByInvite: OnetimeInvite | null;
+    referralSource: ReferralSource;
     /**
      * The community that the user will join when they sign the contract
      */
@@ -675,6 +678,7 @@ export type UserDto = {
     remindAboutUncompletedGroupMembers: boolean;
     receiveReplyNotifications: boolean;
     contractEvents?: Array<ContractEvent>;
+    referralSource: ReferralSource;
     communities: Array<Community>;
     leaderOfIds: Array<number>;
     invitedCommunities: Array<CommunityInvite>;
@@ -5214,6 +5218,23 @@ export type ActionsFriendActivityResponses = {
 };
 
 export type ActionsFriendActivityResponse = ActionsFriendActivityResponses[keyof ActionsFriendActivityResponses];
+
+export type ActionsHomeFeedData = {
+    body?: never;
+    path?: never;
+    query: {
+        limit: string;
+        before: string;
+        comments: boolean;
+    };
+    url: '/actions/homeFeed';
+};
+
+export type ActionsHomeFeedResponses = {
+    200: Array<ActionActivityDto>;
+};
+
+export type ActionsHomeFeedResponse = ActionsHomeFeedResponses[keyof ActionsHomeFeedResponses];
 
 export type ActionsCommunityActivityData = {
     body?: never;
