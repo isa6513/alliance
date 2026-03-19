@@ -65,7 +65,8 @@
     "socket.io": "^4.8.1",
     "stripe": "^18.0.0",
     "twilio": "^5.9.0",
-    "typeorm": "^0.3.25"
+    "typeorm": "^0.3.25",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@darraghor/eslint-plugin-nestjs-typed": "^6.7.0",

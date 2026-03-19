@@ -11,7 +11,6 @@ import {
 } from "@alliance/shared/outputrenderer";
 import type {
   AnyField,
-  DeviceVisibilityTarget,
   FormSchema,
   FormValue,
 } from "@alliance/shared/forms/formschema";
@@ -21,6 +20,7 @@ import Card, { CardStyle } from "./system/Card";
 import Text from "./system/Text";
 import { RenderDisplayBlockMobile } from "./forms/FormRenderer";
 import { RenderField } from "./forms/RenderField";
+import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
 
 type OutputRendererProps = {
   schema?: FormSchema;
@@ -122,7 +122,7 @@ function OutputRenderer({
       resolvedValidatorResults,
       resolvedDeviceType,
       resolvedPublicAnswers,
-    ]
+    ],
   );
 
   if (!selectedView || !effectiveSchema) {
@@ -181,7 +181,8 @@ function OutputRenderer({
 
           return (
             <View key={item.key} className="gap-1">
-              {item.renderField && canUseMobileFieldRenderer(item.renderField) ? (
+              {item.renderField &&
+              canUseMobileFieldRenderer(item.renderField) ? (
                 <RenderField
                   field={item.renderField}
                   value={item.value}

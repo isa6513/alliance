@@ -3,7 +3,6 @@ import type { DisplayBlock } from "./forms/display-blocks";
 import type {
   AnyField,
   CityFieldValue,
-  DeviceVisibilityTarget,
   FormSchema,
   FormValue,
   ListField,
@@ -11,6 +10,7 @@ import type {
   OutputFieldBlock,
   OutputViewSchema,
 } from "./forms/formschema";
+import { DeviceVisibilityTarget } from "./forms/schema/device";
 
 export type ResolvedOutputDisplayItem = {
   type: "display";

@@ -26,12 +26,12 @@ import type {
 } from "@alliance/shared/forms/display-blocks";
 import type {
   AnyField,
-  DeviceVisibilityTarget,
   FormSchema,
   FormValue,
   ListField,
   VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
+import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
 import {
   applyDefaultValues,
   computeFormStorageKey,

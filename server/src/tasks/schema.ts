@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { CitySearchDto } from 'src/geo/city.dto';
 import type { DisplayBlock } from './display-blocks';
+import { DeviceVisibilityTarget } from './form-schema/device';
 
 // field-kinds.ts
 export type FieldKind =
@@ -35,13 +36,6 @@ export type FormValue =
   | string[]
   | CityFieldValue
   | ListFieldValue;
-
-export const DEVICE_VISIBILITY_TARGETS = [
-  'mobile',
-  'tablet',
-  'desktop',
-] as const;
-export type DeviceVisibilityTarget = (typeof DEVICE_VISIBILITY_TARGETS)[number];
 
 export interface FieldOutputConfig {
   output?: boolean;

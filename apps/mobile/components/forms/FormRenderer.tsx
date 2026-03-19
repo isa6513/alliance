@@ -19,11 +19,11 @@ import {
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import type {
   AnyField,
-  DeviceVisibilityTarget,
   FormSchema,
   FormValue,
   VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
+import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
 import {
   applyDefaultValues,
   filterAnswersByFieldIds,

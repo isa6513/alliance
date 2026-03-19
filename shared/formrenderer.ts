@@ -3,13 +3,13 @@ import type {
   AnyField,
   CityFieldValue,
   Condition,
-  DeviceVisibilityTarget,
   FormValue,
   ListField,
   NumberField,
   OutputFieldBlock,
   RangeField,
 } from "@alliance/shared/forms/formschema";
+import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
 import { parseTimeToMinutes } from "@alliance/shared/forms/timeUtils";
 import { evaluateVisibilityFormula } from "@alliance/shared/forms/visibilityFormula";
 
@@ -54,13 +54,13 @@ export function getRangeOptionCount(field: RangeField): number {
     : DEFAULT_RANGE_OPTION_COUNT;
   return Math.min(
     MAX_RANGE_OPTION_COUNT,
-    Math.max(MIN_RANGE_OPTION_COUNT, normalized)
+    Math.max(MIN_RANGE_OPTION_COUNT, normalized),
   );
 }
 
 export function isValidRangeSelection(
   field: RangeField,
-  value: unknown
+  value: unknown,
 ): value is number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return false;
@@ -86,7 +86,7 @@ export const hasContent = (value: FormValue | undefined): boolean => {
 };
 
 export function resolveFieldDefaultValue(
-  field: AnyField
+  field: AnyField,
 ): FormValue | undefined {
   const rawDefault = field.defaultValue;
 
@@ -111,7 +111,7 @@ export function resolveFieldDefaultValue(
         const validValues = field.options?.map((option) => option.value) ?? [];
         const filtered = rawDefault.filter(
           (value): value is string =>
-            typeof value === "string" && validValues.includes(value)
+            typeof value === "string" && validValues.includes(value),
         );
         return filtered.length ? filtered : undefined;
       }
@@ -152,7 +152,7 @@ export function resolveFieldDefaultValue(
     const listField = field as ListField;
     const defaultNumber = Math.max(
       0,
-      Math.floor(Number(listField.defaultNumber) || 0)
+      Math.floor(Number(listField.defaultNumber) || 0),
     );
     return Array.from({ length: defaultNumber }, () => ({})) as FormValue;
   }
@@ -162,7 +162,7 @@ export function resolveFieldDefaultValue(
 
 export function applyDefaultValues(
   base: Record<string, FormValue> | undefined,
-  defaults: Map<string, FormValue>
+  defaults: Map<string, FormValue>,
 ): Record<string, FormValue> {
   if (!defaults.size) {
     return base ? base : {};
@@ -191,7 +191,7 @@ export function applyDefaultValues(
 
 export function filterAnswersByFieldIds(
   answers: Record<string, FormValue> | null,
-  allowedFields: Map<string, AnyField>
+  allowedFields: Map<string, AnyField>,
 ): Record<string, FormValue> {
   if (!answers) {
     return {};
@@ -217,7 +217,7 @@ export type ConditionExtras = {
 export function evaluateCondition(
   cond: Condition,
   data: Record<string, FormValue>,
-  extras: ConditionExtras = {}
+  extras: ConditionExtras = {},
 ): boolean {
   if ("expr" in cond) {
     return true;
@@ -244,7 +244,7 @@ export function evaluateCondition(
 
 const evaluateValueBasedCondition = (
   cond: Condition,
-  val: FormValue | undefined
+  val: FormValue | undefined,
 ): boolean => {
   if ("hasValue" in cond) {
     const present = hasContent(val);
@@ -287,14 +287,14 @@ const evaluateValueBasedCondition = (
 export function isElementCurrentlyVisible(
   element: AnyField | DisplayBlock | OutputFieldBlock,
   data: Record<string, FormValue>,
-  extras: ConditionExtras & { readOnly?: boolean } = {}
+  extras: ConditionExtras & { readOnly?: boolean } = {},
 ): boolean {
   const formula = element.visibleIfFormula;
   const conditions = Array.isArray(element.visibleIf)
     ? element.visibleIf
     : element.visibleIf
-    ? [element.visibleIf]
-    : [];
+      ? [element.visibleIf]
+      : [];
   const hasFormula =
     formula?.conditions &&
     Object.keys(formula.conditions).length > 0 &&
@@ -379,7 +379,7 @@ export function isElementCurrentlyVisible(
 export function isFieldConditionallyRequired(
   field: AnyField,
   data: Record<string, FormValue>,
-  extras: ConditionExtras = {}
+  extras: ConditionExtras = {},
 ): boolean {
   if (field.requiredIf) {
     return evaluateCondition(field.requiredIf, data, extras);
@@ -391,7 +391,7 @@ export function validateFieldValue(
   field: AnyField,
   fieldValue: FormValue | undefined,
   data: Record<string, FormValue>,
-  extras: ConditionExtras = {}
+  extras: ConditionExtras = {},
 ): string | null {
   const required = isFieldConditionallyRequired(field, data, extras);
 
@@ -454,8 +454,8 @@ export function validateFieldValue(
         typeof valueToCheck === "number"
           ? valueToCheck
           : typeof valueToCheck === "string"
-          ? parseFloat(valueToCheck)
-          : NaN;
+            ? parseFloat(valueToCheck)
+            : NaN;
       const numberField = field as NumberField;
 
       if (Number.isNaN(numValue) && !!valueToCheck) {
@@ -512,7 +512,7 @@ export function validateFieldValue(
       const listVal = Array.isArray(valueToCheck) ? valueToCheck : [];
       const listValTyped = listVal.every(
         (item): item is Record<string, FormValue> =>
-          item !== null && typeof item === "object" && !Array.isArray(item)
+          item !== null && typeof item === "object" && !Array.isArray(item),
       )
         ? listVal
         : [];
@@ -549,13 +549,13 @@ export function getListSubFieldErrors(
   listField: ListField,
   listValue: FormValue | undefined,
   data: Record<string, FormValue>,
-  extras: ConditionExtras = {}
+  extras: ConditionExtras = {},
 ): Record<string, string | null> {
   const result: Record<string, string | null> = {};
   const listVal = Array.isArray(listValue) ? listValue : [];
   const listValTyped = listVal.every(
     (item): item is Record<string, FormValue> =>
-      item !== null && typeof item === "object" && !Array.isArray(item)
+      item !== null && typeof item === "object" && !Array.isArray(item),
   )
     ? listVal
     : [];

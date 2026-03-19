@@ -15,11 +15,8 @@ import { cn } from "@alliance/shared/styles/util";
 import ImageLightbox from "../ui/ImageLightbox";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
-import type {
-  DeviceVisibilityTarget,
-  FormSchema,
-  FormValue,
-} from "@alliance/shared/forms/formschema";
+import type { FormSchema, FormValue } from "@alliance/shared/forms/formschema";
+import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
 
 type OutputRendererProps = {
   schema?: FormSchema;

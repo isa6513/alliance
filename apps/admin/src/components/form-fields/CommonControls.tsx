@@ -20,12 +20,10 @@ import {
 } from "@alliance/shared/client";
 import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
 import {
-  DEVICE_VISIBILITY_TARGETS,
   type AnyField,
   type CheckboxField,
   type Condition,
   type ContractField,
-  type DeviceVisibilityTarget,
   type EmailField,
   type MultiSelectField,
   type PhoneField,
@@ -49,12 +47,16 @@ import {
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { cn } from "@alliance/shared/styles/util";
+import {
+  DEVICE_VISIBILITY_TARGETS,
+  type DeviceVisibilityTarget,
+} from "@alliance/shared/forms/schema/device";
 
 function getFormulaConditionRefs(node: VisibleIfFormula["formula"]): string[] {
   if (typeof node === "string") return [node];
   if (node.op === "NOT") {
     return getFormulaConditionRefs(
-      typeof node.operand === "string" ? node.operand : node.operand
+      typeof node.operand === "string" ? node.operand : node.operand,
     );
   }
   const left =
@@ -84,7 +86,7 @@ const getRangeValues = (field: RangeField): number[] => {
     : DEFAULT_RANGE_OPTIONS;
   const count = Math.min(
     MAX_RANGE_OPTIONS,
-    Math.max(MIN_RANGE_OPTIONS, normalized)
+    Math.max(MIN_RANGE_OPTIONS, normalized),
   );
   return Array.from({ length: count }, (_, index) => index + 1);
 };
@@ -245,25 +247,25 @@ function isDeviceCondition(cond: Condition): cond is DeviceCondition {
 }
 
 function isHasValueCondition(
-  condition: Condition
+  condition: Condition,
 ): condition is Extract<Condition, { hasValue: boolean }> {
   return "hasValue" in condition;
 }
 
 function isIncludesOptionCondition(
-  condition: Condition
+  condition: Condition,
 ): condition is Extract<Condition, { includesOption: string }> {
   return "includesOption" in condition;
 }
 
 function isAnySelectedCondition(
-  condition: Condition
+  condition: Condition,
 ): condition is Extract<Condition, { anySelected: boolean }> {
   return "anySelected" in condition;
 }
 
 function isEqualsCondition(
-  condition: Condition
+  condition: Condition,
 ): condition is Extract<
   Condition,
   { equals: string | number | boolean | null }
@@ -283,7 +285,7 @@ export function ConditionalVisibility({
 }: ConditionalVisibilityProps) {
   const ANY_SELECTED_VALUE = "__ANY_SELECTED__";
   const controllers = (previousFields || []).filter((f): f is ControllerField =>
-    isConditionalController(f)
+    isConditionalController(f),
   );
   const {
     validators,
@@ -294,7 +296,7 @@ export function ConditionalVisibility({
     useCustomValidatorDrafts();
   const usableValidators = useMemo(
     () => validators.filter((validator) => validator.usableForVisibility),
-    [validators]
+    [validators],
   );
 
   const conditions = useMemo(() => {
@@ -320,7 +322,7 @@ export function ConditionalVisibility({
 
   const allowedConditionNames = useMemo(
     () => new Set(conditions.map((_, i) => conditionNameForIndex(i))),
-    [conditions]
+    [conditions],
   );
 
   const buildConditionForField = useCallback(
@@ -364,7 +366,7 @@ export function ConditionalVisibility({
         equals: controller.options?.[0]?.value ?? "",
       };
     },
-    []
+    [],
   );
 
   const [conditionError, setConditionError] = useState<string | null>(null);
@@ -403,13 +405,13 @@ export function ConditionalVisibility({
         } else {
           formulaNode = parseOrDefaultFormula(
             defaultFormulaForConditionCount(next.length),
-            allowed
+            allowed,
           );
         }
       } else {
         formulaNode = parseOrDefaultFormula(
           defaultFormulaForConditionCount(next.length),
-          allowed
+          allowed,
         );
       }
       if (next.length === 0) {
@@ -420,18 +422,18 @@ export function ConditionalVisibility({
         visibleIfFormula: { conditions: conditionsMap, formula: formulaNode },
       });
     },
-    [onChange, field.visibleIfFormula]
+    [onChange, field.visibleIfFormula],
   );
 
   function parseOrDefaultFormula(
     defaultStr: string,
-    allowed: Set<string>
+    allowed: Set<string>,
   ): VisibleIfFormula["formula"] {
     const parsed = parseVisibilityFormula(defaultStr, allowed);
     if ("error" in parsed) {
       const fallback = parseVisibilityFormula(
         "condition1",
-        new Set(["condition1"])
+        new Set(["condition1"]),
       );
       return "node" in fallback ? fallback.node : "condition1";
     }
@@ -456,7 +458,7 @@ export function ConditionalVisibility({
         visibleIfFormula: { conditions: conditionsMap, formula: parsed.node },
       });
     },
-    [conditions, allowedConditionNames, onChange]
+    [conditions, allowedConditionNames, onChange],
   );
 
   const removeCondition = useCallback(
@@ -472,7 +474,7 @@ export function ConditionalVisibility({
       const next = conditions.filter((_, idx) => idx !== index);
       updateConditions(next);
     },
-    [conditions, removeDraft, updateConditions]
+    [conditions, removeDraft, updateConditions],
   );
 
   const createDefaultFieldCondition = useCallback((): FieldCondition | null => {
@@ -483,7 +485,7 @@ export function ConditionalVisibility({
     const condition = createDefaultFieldCondition();
     if (!condition) {
       setConditionError(
-        "Add a checkbox, contract, select, radio, multiselect, range, or text field earlier on this page first."
+        "Add a checkbox, contract, select, radio, multiselect, range, or text field earlier on this page first.",
       );
       return false;
     }
@@ -496,7 +498,7 @@ export function ConditionalVisibility({
     | CustomValidatorType
     | undefined => {
     const withoutId = usableValidators.find(
-      (validator) => !validator.withIdField
+      (validator) => !validator.withIdField,
     );
     return withoutId?.id ?? usableValidators[0]?.id;
   }, [usableValidators]);
@@ -518,7 +520,7 @@ export function ConditionalVisibility({
         (id) =>
           !isDraftValidatorId(id) &&
           validatorConfigs[id] === undefined &&
-          !pendingValidatorFetch.current.has(id)
+          !pendingValidatorFetch.current.has(id),
       );
     if (!missing.length) {
       return;
@@ -546,7 +548,7 @@ export function ConditionalVisibility({
           console.error("Failed to load visibility validator", error);
           return [id, undefined] as const;
         }
-      })
+      }),
     )
       .then((entries) => {
         const resolved = entries.filter((entry) => entry[1] !== undefined);
@@ -578,7 +580,7 @@ export function ConditionalVisibility({
       const desiredType = opts?.type ?? pickDefaultValidatorType();
       if (!desiredType) {
         setConditionError(
-          "No custom validators are available for conditional visibility."
+          "No custom validators are available for conditional visibility.",
         );
         return false;
       }
@@ -602,7 +604,7 @@ export function ConditionalVisibility({
       pickDefaultValidatorType,
       setDraft,
       updateConditions,
-    ]
+    ],
   );
 
   const addDeviceCondition = useCallback(() => {
@@ -628,12 +630,12 @@ export function ConditionalVisibility({
       }
       next[index] = {
         deviceType: DEVICE_VISIBILITY_TARGETS.filter((type) =>
-          currentSelection.has(type)
+          currentSelection.has(type),
         ),
       };
       updateConditions(next, true);
     },
-    [conditions, updateConditions]
+    [conditions, updateConditions],
   );
 
   const handleControllerChange = useCallback(
@@ -650,7 +652,7 @@ export function ConditionalVisibility({
       next[index] = nextCondition;
       updateConditions(next, true);
     },
-    [buildConditionForField, conditions, controllers, updateConditions]
+    [buildConditionForField, conditions, controllers, updateConditions],
   );
 
   const handleConditionValueChange = useCallback(
@@ -703,7 +705,7 @@ export function ConditionalVisibility({
       }
       updateConditions(next, true);
     },
-    [conditions, controllers, updateConditions]
+    [conditions, controllers, updateConditions],
   );
 
   const handleValidatorSelection = useCallback(
@@ -711,7 +713,7 @@ export function ConditionalVisibility({
       index: number,
       validatorType: CustomValidatorType | undefined,
       idArgument?: string,
-      expression?: string
+      expression?: string,
     ) => {
       if (!validatorType) {
         removeCondition(index);
@@ -721,12 +723,12 @@ export function ConditionalVisibility({
         "handleValidatorSelection",
         validatorType,
         idArgument,
-        expression
+        expression,
       );
       const next = [...conditions];
       const existing = next[index];
       const resultEquals = isValidatorCondition(existing)
-        ? existing.resultEquals ?? true
+        ? (existing.resultEquals ?? true)
         : true;
       const existingValidatorId = isValidatorCondition(existing)
         ? existing.validatorId
@@ -741,7 +743,7 @@ export function ConditionalVisibility({
       };
       updateConditions(next, true);
     },
-    [conditions, createDraftId, removeCondition, setDraft, updateConditions]
+    [conditions, createDraftId, removeCondition, setDraft, updateConditions],
   );
 
   const handleValidatorExpectationChange = useCallback(
@@ -757,7 +759,7 @@ export function ConditionalVisibility({
       };
       updateConditions(next, true);
     },
-    [conditions, updateConditions]
+    [conditions, updateConditions],
   );
 
   const renderFieldCondition = (condition: FieldCondition, index: number) => {
@@ -770,10 +772,11 @@ export function ConditionalVisibility({
         ? isAnySelectedCondition(condition)
           ? ANY_SELECTED_VALUE
           : isIncludesOptionCondition(condition)
-          ? condition.includesOption ?? ""
-          : isEqualsCondition(condition) && typeof condition.equals === "string"
-          ? condition.equals
-          : ""
+            ? (condition.includesOption ?? "")
+            : isEqualsCondition(condition) &&
+                typeof condition.equals === "string"
+              ? condition.equals
+              : ""
         : "";
     const rangeValues =
       controller?.kind === "range" ? getRangeValues(controller) : [];
@@ -785,7 +788,7 @@ export function ConditionalVisibility({
           </label>
           <select
             className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-            value={controller ? controller.id : controllers[0]?.id ?? ""}
+            value={controller ? controller.id : (controllers[0]?.id ?? "")}
             onChange={(event) =>
               handleControllerChange(index, event.target.value)
             }
@@ -804,8 +807,8 @@ export function ConditionalVisibility({
               {isTextContentController(controller)
                 ? "has content"
                 : controller.kind === "multiselect"
-                ? "includes option"
-                : "equals"}
+                  ? "includes option"
+                  : "equals"}
             </label>
             {isTextContentController(controller) ? (
               <select
@@ -825,7 +828,7 @@ export function ConditionalVisibility({
                   isEqualsCondition(condition) &&
                     typeof condition.equals === "boolean"
                     ? condition.equals
-                    : false
+                    : false,
                 )}
                 onChange={(event) =>
                   handleConditionValueChange(index, event.target.value)
@@ -841,7 +844,7 @@ export function ConditionalVisibility({
                   isEqualsCondition(condition) &&
                     typeof condition.equals === "boolean"
                     ? condition.equals
-                    : true
+                    : true,
                 )}
                 onChange={(event) =>
                   handleConditionValueChange(index, event.target.value)
@@ -873,7 +876,7 @@ export function ConditionalVisibility({
               <select
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                 value={String(
-                  isEqualsCondition(condition) ? condition.equals ?? "" : ""
+                  isEqualsCondition(condition) ? (condition.equals ?? "") : "",
                 )}
                 onChange={(event) =>
                   handleConditionValueChange(index, event.target.value)
@@ -889,7 +892,7 @@ export function ConditionalVisibility({
               <select
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                 value={String(
-                  isEqualsCondition(condition) ? condition.equals ?? "" : ""
+                  isEqualsCondition(condition) ? (condition.equals ?? "") : "",
                 )}
                 onChange={(event) =>
                   handleConditionValueChange(index, event.target.value)
@@ -914,7 +917,7 @@ export function ConditionalVisibility({
 
   const renderValidatorCondition = (
     condition: ValidatorCondition,
-    index: number
+    index: number,
   ) => {
     const config = isDraftValidatorId(condition.validatorId)
       ? drafts[condition.validatorId]
@@ -930,7 +933,7 @@ export function ConditionalVisibility({
               index,
               validatorType,
               idArgument,
-              expression
+              expression,
             )
           }
           filter={(validator) => validator.usableForVisibility}
@@ -982,7 +985,7 @@ export function ConditionalVisibility({
                     handleDeviceConditionChange(
                       index,
                       target,
-                      event.target.checked
+                      event.target.checked,
                     )
                   }
                 />
@@ -1035,7 +1038,7 @@ export function ConditionalVisibility({
               "w-full px-2 py-1.5 text-xs border rounded focus:outline-none focus:ring-1",
               formulaError
                 ? "border-red-500 focus:ring-red-500"
-                : "border-gray-300 focus:ring-blue-500"
+                : "border-gray-300 focus:ring-blue-500",
             )}
             value={formulaInput}
             onChange={(e) => {
@@ -1170,13 +1173,13 @@ function useCustomValidators(): {
   error: string | null;
 } {
   const [validators, setValidators] = useState<CustomValidatorTypeDto[]>(
-    () => cachedValidators ?? []
+    () => cachedValidators ?? [],
   );
   const [loading, setLoading] = useState<boolean>(
-    () => !cachedValidators && !cachedValidatorsError
+    () => !cachedValidators && !cachedValidatorsError,
   );
   const [error, setError] = useState<string | null>(
-    () => cachedValidatorsError
+    () => cachedValidatorsError,
   );
 
   useEffect(() => {
@@ -1249,7 +1252,7 @@ function useUsers(enabled: boolean): {
 } {
   const [users, setUsers] = useState<UserDto[]>(() => cachedUsers ?? []);
   const [loading, setLoading] = useState<boolean>(
-    () => enabled && !cachedUsers && !cachedUsersError
+    () => enabled && !cachedUsers && !cachedUsersError,
   );
   const [error, setError] = useState<string | null>(() => cachedUsersError);
 
@@ -1326,7 +1329,7 @@ function useTags(enabled: boolean): {
 } {
   const [tags, setTags] = useState<TagDto[]>(() => cachedTags ?? []);
   const [loading, setLoading] = useState<boolean>(
-    () => enabled && !cachedTags && !cachedTagsError
+    () => enabled && !cachedTags && !cachedTagsError,
   );
   const [error, setError] = useState<string | null>(() => cachedTagsError);
 
@@ -1384,7 +1387,7 @@ type CustomValidatorSelectProps = {
   onChange: (
     validatorType: CustomValidatorType | undefined,
     idArgument?: string,
-    expression?: string
+    expression?: string,
   ) => void;
   className?: string;
   label?: string;
@@ -1411,7 +1414,7 @@ export function CustomValidatorSelect({
   } = useUsers(isCustomExpression);
   const activeUsers = useMemo(
     () => users.filter((user) => user.hasActiveContract),
-    [users]
+    [users],
   );
   const [expressionTest, setExpressionTest] = useState<{
     result?: boolean;
@@ -1457,16 +1460,16 @@ export function CustomValidatorSelect({
   const hasValidators = availableValidators.length > 0;
   const sortedTags = useMemo(
     () => [...tags].sort((a, b) => a.name.localeCompare(b.name)),
-    [tags]
+    [tags],
   );
   const hasExpression = Boolean(expression?.trim());
   const sortedUsers = useMemo(
     () => [...activeUsers].sort((a, b) => a.name.localeCompare(b.name)),
-    [activeUsers]
+    [activeUsers],
   );
   const selectedUser = useMemo(
     () => activeUsers.find((user) => user.id === selectedUserId),
-    [selectedUserId, activeUsers]
+    [selectedUserId, activeUsers],
   );
   const selectedUserLabel = useMemo(() => {
     if (!selectedUser) {
@@ -1481,7 +1484,7 @@ export function CustomValidatorSelect({
       return [];
     }
     return [...expressionTest.passUsers].sort((a, b) =>
-      a.name.localeCompare(b.name)
+      a.name.localeCompare(b.name),
     );
   }, [expressionTest?.passUsers]);
   const failUsers = useMemo(() => {
@@ -1489,7 +1492,7 @@ export function CustomValidatorSelect({
       return [];
     }
     return [...expressionTest.failUsers].sort((a, b) =>
-      a.name.localeCompare(b.name)
+      a.name.localeCompare(b.name),
     );
   }, [expressionTest?.failUsers]);
 
@@ -1615,7 +1618,7 @@ export function CustomValidatorSelect({
                 onChange(
                   type,
                   e.target.value === "" ? undefined : e.target.value,
-                  expression
+                  expression,
                 )
               }
               className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-32"
@@ -1638,7 +1641,7 @@ export function CustomValidatorSelect({
                 onChange(
                   type,
                   e.target.value === "" ? undefined : e.target.value,
-                  expression
+                  expression,
                 )
               }
               className="px-2 py-1 text-xs border border-gray-300 rounded bg-white w-24"
@@ -1662,7 +1665,7 @@ export function CustomValidatorSelect({
                 value={selectedUserId ?? ""}
                 onChange={(event) =>
                   setSelectedUserId(
-                    event.target.value ? Number(event.target.value) : null
+                    event.target.value ? Number(event.target.value) : null,
                   )
                 }
                 disabled={
@@ -1712,7 +1715,7 @@ export function CustomValidatorSelect({
                 <p
                   className={cn(
                     "text-[11px]",
-                    expressionTest.result ? "text-green-600" : "text-red-600"
+                    expressionTest.result ? "text-green-600" : "text-red-600",
                   )}
                 >
                   {expressionTest.selectedUserLabel

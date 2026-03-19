@@ -1,5 +1,6 @@
 import type { CitySearchDto } from "../client";
 import type { DisplayBlock, ManualDisplayBlockContent } from "./display-blocks";
+import { DeviceVisibilityTarget } from "./schema/device";
 
 // field-kinds.ts
 export type FieldKind =
@@ -34,13 +35,6 @@ export type FormValue =
   | string[]
   | CityFieldValue
   | ListFieldValue;
-
-export const DEVICE_VISIBILITY_TARGETS = [
-  "mobile",
-  "tablet",
-  "desktop",
-] as const;
-export type DeviceVisibilityTarget = (typeof DEVICE_VISIBILITY_TARGETS)[number];
 
 export interface FieldOutputConfig {
   output?: boolean;
