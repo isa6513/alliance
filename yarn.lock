@@ -212,7 +212,7 @@ __metadata:
     expo-device: "npm:~55.0.9"
     expo-file-system: "npm:~55.0.10"
     expo-font: "npm:~55.0.4"
-    expo-haptics: "npm:~55.0.8"
+    expo-haptics: "npm:^55.0.9"
     expo-image: "npm:~55.0.6"
     expo-image-picker: "npm:~55.0.12"
     expo-linking: "npm:~55.0.7"
@@ -10375,12 +10375,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-haptics@npm:~55.0.8":
-  version: 55.0.8
-  resolution: "expo-haptics@npm:55.0.8"
+"expo-haptics@npm:^55.0.9":
+  version: 55.0.9
+  resolution: "expo-haptics@npm:55.0.9"
   peerDependencies:
     expo: "*"
-  checksum: 10c0/0fa41ddf5fb271fd66b9ea033ec124985b95f5bd3d9e18b488ecf2574cd410c18e861691ac2ac9b87c761dec14d9ac2f31601da6a15434a97802ea0f8bff525a
+  checksum: 10c0/dc0e54069095ce43b01c839914bb21cbd3e0854d9fa251d04507b2bef41a8dcdafd8a0fa0e8631765802f1b63d6807bcf9e0f2f52566fca6c942317d785ec490
   languageName: node
   linkType: hard
 
