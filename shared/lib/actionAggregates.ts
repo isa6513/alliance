@@ -1,5 +1,4 @@
 import type { AggregateViewSchema } from "../forms/formschema";
-import { completedBarPercentage } from "./utils";
 
 export const isAggregateViewSchema = (
   value: unknown,
