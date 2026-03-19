@@ -38,7 +38,7 @@ export default function LargeActionCard({
     limit: 8,
   });
   return (
-    <Card className="p-7!">
+    <Card className="p-4!">
       <View>
         <Text className="font-semibold text-2xl font-serif">{action.name}</Text>
         <View className="flex flex-row items-center justify-between mt-2">

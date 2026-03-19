@@ -25,6 +25,7 @@ import {
 } from "@alliance/shared/lib/settings";
 import { useAuth } from "../../lib/AuthContext";
 import Button, { ButtonColor } from "../../components/system/Button";
+import Card, { CardStyle } from "../../components/system/Card";
 import TimeZoneSelect from "../../components/forms/TimeZoneSelect";
 import AwayRangesSection from "../../components/AwayRangesSection";
 import { useMutation } from "@tanstack/react-query";
@@ -167,16 +168,20 @@ export default function SettingsPage() {
     "border border-zinc-200 rounded-lg bg-white px-3 py-3 text-base";
 
   return (
-    <View className="flex-1 bg-white" testID="vr-settings-ready">
+    <View className="flex-1 bg-white py" testID="vr-settings-ready">
       <SimplePageTitle title="Settings">
         <Text className="text-sm text-zinc-500">
-          {saving ? "Saving..." : hasChanges ? "Unsaved changes" : "All saved"}
+          {saving
+            ? "Saving..."
+            : hasChanges
+              ? "Unsaved changes"
+              : "Changes saved"}
         </Text>
       </SimplePageTitle>
       <ScrollView className="flex-1">
-        <View className="px-4 pb-12">
+        <View className="bg-zinc-100 px-2 pb-8 pt-2 flex flex-col gap-2">
           {/* Profile Section */}
-          <View className="mb-6">
+          <Card cardStyle={CardStyle.White}>
             <View className="gap-4">
               <View>
                 <Text className="mb-1">
@@ -230,10 +235,10 @@ export default function SettingsPage() {
                 />
               </View>
             </View>
-          </View>
+          </Card>
 
           {/* Show name / anonymous — toggle is "show my name" (green when on) */}
-          <View className="mb-6">
+          <Card cardStyle={CardStyle.White}>
             <Text className="font-medium mb-2">Profile visibility</Text>
             <Text className="text-zinc-500 text-sm mb-4">
               When off, other members will not be able to see your name
@@ -263,12 +268,10 @@ export default function SettingsPage() {
                 Show my name to other members
               </Text>
             </TouchableOpacity>
-          </View>
-
-          <View className="h-px bg-zinc-300 my-4" />
+          </Card>
 
           {/* Notifications Section */}
-          <View className="mb-6">
+          <Card cardStyle={CardStyle.White}>
             <Text className="text-2xl font-semibold mb-4">Notifications</Text>
 
             <View className="mb-4">
@@ -402,87 +405,79 @@ export default function SettingsPage() {
                 onChange={(tz) => updateEditableUser({ timeZone: tz })}
               />
             </View>
-          </View>
-
-          <View className="h-px bg-zinc-300 my-4" />
+          </Card>
 
           {/* Groups Section */}
           {user.communities && user.communities.length > 0 && (
-            <>
-              <View className="mb-6">
-                <Text className="text-2xl font-semibold mb-4">Groups</Text>
-                <Text className="mb-2">
-                  Contact info shared with your group lead:
-                </Text>
+            <Card cardStyle={CardStyle.White}>
+              <Text className="text-2xl font-semibold mb-4">Groups</Text>
+              <Text className="mb-2">
+                Contact info shared with your group lead:
+              </Text>
 
-                <View className="gap-3">
-                  <TouchableOpacity
-                    className="flex-row items-center"
-                    onPress={() =>
+              <View className="gap-3">
+                <TouchableOpacity
+                  className="flex-row items-center"
+                  onPress={() =>
+                    updateEditableUser({
+                      shareEmailWithCommunityLead:
+                        !editableUser.shareEmailWithCommunityLead,
+                    })
+                  }
+                  activeOpacity={0.7}
+                >
+                  <Switch
+                    value={!!editableUser.shareEmailWithCommunityLead}
+                    onValueChange={(value) =>
                       updateEditableUser({
-                        shareEmailWithCommunityLead:
-                          !editableUser.shareEmailWithCommunityLead,
+                        shareEmailWithCommunityLead: value,
                       })
                     }
-                    activeOpacity={0.7}
-                  >
-                    <Switch
-                      value={!!editableUser.shareEmailWithCommunityLead}
-                      onValueChange={(value) =>
-                        updateEditableUser({
-                          shareEmailWithCommunityLead: value,
-                        })
-                      }
-                      trackColor={{
-                        true: colors.green,
-                        false: colors.switch.trackOff,
-                      }}
-                      ios_backgroundColor={colors.switch.trackOff}
-                    />
-                    <Text className="ml-3 text-base">Email</Text>
-                  </TouchableOpacity>
+                    trackColor={{
+                      true: colors.green,
+                      false: colors.switch.trackOff,
+                    }}
+                    ios_backgroundColor={colors.switch.trackOff}
+                  />
+                  <Text className="ml-3 text-base">Email</Text>
+                </TouchableOpacity>
 
-                  <TouchableOpacity
-                    className="flex-row items-center"
-                    onPress={() =>
+                <TouchableOpacity
+                  className="flex-row items-center"
+                  onPress={() =>
+                    updateEditableUser({
+                      sharePhoneNumberWithCommunityLead:
+                        !editableUser.sharePhoneNumberWithCommunityLead,
+                    })
+                  }
+                  activeOpacity={0.7}
+                >
+                  <Switch
+                    value={!!editableUser.sharePhoneNumberWithCommunityLead}
+                    onValueChange={(value) =>
                       updateEditableUser({
-                        sharePhoneNumberWithCommunityLead:
-                          !editableUser.sharePhoneNumberWithCommunityLead,
+                        sharePhoneNumberWithCommunityLead: value,
                       })
                     }
-                    activeOpacity={0.7}
-                  >
-                    <Switch
-                      value={!!editableUser.sharePhoneNumberWithCommunityLead}
-                      onValueChange={(value) =>
-                        updateEditableUser({
-                          sharePhoneNumberWithCommunityLead: value,
-                        })
-                      }
-                      trackColor={{
-                        true: colors.green,
-                        false: colors.switch.trackOff,
-                      }}
-                      ios_backgroundColor={colors.switch.trackOff}
-                    />
-                    <Text className="ml-3 text-base">Phone number</Text>
-                  </TouchableOpacity>
-                </View>
+                    trackColor={{
+                      true: colors.green,
+                      false: colors.switch.trackOff,
+                    }}
+                    ios_backgroundColor={colors.switch.trackOff}
+                  />
+                  <Text className="ml-3 text-base">Phone number</Text>
+                </TouchableOpacity>
               </View>
-
-              <View className="h-px bg-zinc-300 my-4" />
-            </>
+            </Card>
           )}
 
           {/* Away Periods Section */}
-          <View className="mb-6">
+          <Card cardStyle={CardStyle.White}>
             <AwayRangesSection />
-          </View>
-
-          <View className="h-px bg-zinc-300 my-4" />
+          </Card>
 
           {/* Privacy Section */}
-          <View className="mb-6">
+          <Card cardStyle={CardStyle.White}>
             <Text className="text-2xl font-semibold mb-4">Privacy</Text>
 
             <Text className="mb-2">
@@ -548,18 +543,14 @@ export default function SettingsPage() {
                 </Text>
               )}
             </View>
-          </View>
-
-          <View className="h-px bg-zinc-300 my-4" />
+          </Card>
 
           {/* Logout */}
-          <View className="mb-8">
-            <Button
-              color={ButtonColor.Red}
-              onPress={handleLogout}
-              title="Log out"
-            />
-          </View>
+          <Button
+            color={ButtonColor.Red}
+            onPress={handleLogout}
+            title="Log out"
+          />
         </View>
 
         {/* Reminder Channel Modal */}
