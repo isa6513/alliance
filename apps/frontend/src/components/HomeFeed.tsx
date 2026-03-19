@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { ActionActivityDto } from "@alliance/shared/client";
 import useActivities, {
   ActivityList,
@@ -7,7 +7,7 @@ import { useAuth } from "../lib/AuthContext";
 import UserActivityCard from "./UserActivityCard";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 
-const LIMIT = 20;
+const LIMIT = 5;
 
 const HomeFeed = () => {
   const { user } = useAuth();
@@ -26,7 +26,7 @@ const HomeFeed = () => {
     limit: LIMIT,
   });
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const paginationRef = useRef({
     fetchNextPage,
@@ -39,8 +39,14 @@ const HomeFeed = () => {
     isFetchingNextPage,
   };
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
+  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+    if (!node) return;
+
+    observerRef.current = new IntersectionObserver(
       (entries) => {
         const p = paginationRef.current;
         for (const entry of entries) {
@@ -51,9 +57,7 @@ const HomeFeed = () => {
       },
       { rootMargin: "200px" },
     );
-
-    if (sentinelRef.current) observer.observe(sentinelRef.current);
-    return () => observer.disconnect();
+    observerRef.current.observe(node);
   }, []);
 
   const handleLike = useCallback(

@@ -1912,27 +1912,42 @@ export class ActionsService {
 
     if (allUserIds.length === 0) return [];
 
-    // Build query for completions with form responses
-    const qb = this.buildActivityFeedQuery({
-      limit: limit * 4,
-      before,
-      userIds: allUserIds,
-      filterFeedTypes: false,
-    });
+    // Page through DB until we collect `limit` contentful results or exhaust data
+    const batchSize = limit * 2;
+    const contentful: ActionActivity[] = [];
+    let cursor = before;
 
-    qb.andWhere('activity.type IN (:...completionTypes)', {
-      completionTypes: [
-        ActionActivityType.USER_COMPLETED,
-        ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM,
-      ],
-    });
-    qb.andWhere('taskFormResponse.id IS NOT NULL');
+    while (contentful.length < limit) {
+      const qb = this.buildActivityFeedQuery({
+        limit: batchSize,
+        before: cursor,
+        userIds: allUserIds,
+        filterFeedTypes: false,
+      });
 
-    const activities = await qb.getMany();
+      qb.andWhere('activity.type IN (:...completionTypes)', {
+        completionTypes: [
+          ActionActivityType.USER_COMPLETED,
+          ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM,
+        ],
+      });
+      qb.andWhere('taskFormResponse.id IS NOT NULL');
 
-    const contentful = activities
-      .filter((a) => this.buildOutputFormResponse(a) !== undefined)
-      .slice(0, limit);
+      const batch = await qb.getMany();
+
+      for (const a of batch) {
+        if (this.buildOutputFormResponse(a) !== undefined) {
+          contentful.push(a);
+          if (contentful.length >= limit) break;
+        }
+      }
+
+      // No more data in DB
+      if (batch.length < batchSize) break;
+
+      // Advance cursor to the last item's createdAt
+      cursor = batch[batch.length - 1].createdAt;
+    }
 
     if (contentful.length === 0) return [];
 
