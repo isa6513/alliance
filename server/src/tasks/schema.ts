@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { CitySearchDto } from 'src/geo/city.dto';
 import type { DisplayBlock } from './display-blocks';
-import { DeviceVisibilityTarget } from './form-schema/device';
+import type { DeviceVisibilityTarget } from './form-schema/v0/device';
 
 // field-kinds.ts
 export type FieldKind =
