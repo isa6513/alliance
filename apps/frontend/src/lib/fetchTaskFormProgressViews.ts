@@ -8,7 +8,7 @@ export async function fetchTaskFormProgressViewsByFormId(
   formIds: number[],
 ): Promise<Record<number, AggregateViewSchema[]>> {
   const uniqueFormIds = [...new Set(formIds)];
-  const fetchedByFormId = await Promise.all(
+  const settled = await Promise.allSettled(
     uniqueFormIds.map(async (formId) => {
       const response = await tasksGetFormAggregateViews({
         path: { id: formId },
@@ -17,6 +17,12 @@ export async function fetchTaskFormProgressViewsByFormId(
       return [formId, views] as const;
     }),
   );
+  const fetchedByFormId = settled.map((result, i) => {
+    if (result.status === "fulfilled") {
+      return result.value;
+    }
+    return [uniqueFormIds[i], []] as const;
+  });
   return Object.fromEntries(fetchedByFormId) as Record<
     number,
     AggregateViewSchema[]
