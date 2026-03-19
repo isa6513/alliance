@@ -56,7 +56,7 @@ const ActionActivityDetail = () => {
     queryKey: ["actionsGetActivity", activityId],
     queryFn: () =>
       actionsGetActivity({ path: { id: activityId } }).then(
-        (res) => res.data ?? null
+        (res) => res.data ?? null,
       ),
     enabled: !!activityId,
   });
@@ -67,9 +67,9 @@ const ActionActivityDetail = () => {
     if (!base || !origactivity) return base;
     return {
       ...base,
-      likes: origactivity.likes,
-      likesCount: origactivity.likesCount,
-      likedByMe: origactivity.likedByMe,
+      likes: origactivity.likes ?? fetchedActivity?.likes,
+      likesCount: origactivity.likesCount ?? fetchedActivity?.likesCount,
+      likedByMe: origactivity.likedByMe ?? fetchedActivity?.likedByMe,
     };
   }, [fetchedActivity, origactivity]);
 
@@ -88,7 +88,7 @@ const ActionActivityDetail = () => {
   const [editing, setEditing] = useState(false);
   const [editContent, setEditContent] =
     useState<CreateEditableContentDto | null>(
-      activity?.editableContent ?? null
+      activity?.editableContent ?? null,
     );
   const [isSaving, setIsSaving] = useState(false);
 
@@ -117,7 +117,7 @@ const ActionActivityDetail = () => {
       }
       const newActivity = resp.data!;
       setActivities(
-        activities.map((a) => (a.id === activity.id ? newActivity : a))
+        activities.map((a) => (a.id === activity.id ? newActivity : a)),
       );
       queryClient.invalidateQueries({
         queryKey: ["actionsGetActivity", activityId],
@@ -138,6 +138,8 @@ const ActionActivityDetail = () => {
   if (activity?.actionId !== action.id) {
     return <BasicErrorMessage>Activity not found</BasicErrorMessage>;
   }
+
+  console.log(activity?.likes);
 
   return (
     <>
@@ -160,7 +162,7 @@ const ActionActivityDetail = () => {
                       to={href("/member/:id", {
                         id: activity.user.id.toString(),
                       })}
-                      className="flex-shrink-0"
+                      className="shrink-0"
                     >
                       <AvatarProfile
                         pfp={activity.user.profilePicture}
