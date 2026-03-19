@@ -279,6 +279,7 @@ function buildMembersListItems(params: {
   leaders: CommunityDto["leaders"];
   sortedNonLeaderMembers: CommunityDto["users"];
   deadlineTimestampByUserId: Map<number, number>;
+  memberInfoReady: boolean;
   amLeader: boolean;
   memberContactInfoByUserId?: Record<number, CommunityMemberContactInfoDto>;
 }): MembersListItem[] {
@@ -286,6 +287,7 @@ function buildMembersListItems(params: {
     leaders,
     sortedNonLeaderMembers,
     deadlineTimestampByUserId,
+    memberInfoReady,
     amLeader,
     memberContactInfoByUserId,
   } = params;
@@ -308,10 +310,9 @@ function buildMembersListItems(params: {
   if (sortedNonLeaderMembers.length > 0) {
     items.push({ type: "header", id: "members", label: "Members" });
     for (const profile of sortedNonLeaderMembers) {
-      const completedAll = !hasActionsToComplete(
-        deadlineTimestampByUserId,
-        profile.id,
-      );
+      const completedAll = memberInfoReady
+        ? !hasActionsToComplete(deadlineTimestampByUserId, profile.id)
+        : undefined;
       items.push({
         type: "member",
         id: profile.id,
@@ -369,19 +370,6 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
     );
   }, [memberContactInfoList]);
 
-  const memberContactInfoForSort = useMemo(() => {
-    if (!memberContactInfoByUserId) return undefined;
-    return Object.fromEntries(
-      Object.entries(memberContactInfoByUserId).map(([id, info]) => [
-        id,
-        {
-          preferredReminderTimeLeaderTz:
-            info.preferredReminderTimeLeaderTz ?? null,
-        },
-      ]),
-    );
-  }, [memberContactInfoByUserId]);
-
   const deadlineTimestampByUserId = useMemo(() => {
     if (!memberInfo?.users?.length || !memberInfo?.actions?.length) {
       return new Map<number, number>();
@@ -399,9 +387,9 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
     return sortMembersByNextTaskDue(
       nonLeaderMembers,
       deadlineTimestampByUserId,
-      memberContactInfoForSort,
+      memberContactInfoByUserId,
     );
-  }, [nonLeaderMembers, deadlineTimestampByUserId, memberContactInfoForSort]);
+  }, [nonLeaderMembers, deadlineTimestampByUserId, memberContactInfoByUserId]);
 
   const data = useMemo(
     () =>
@@ -409,6 +397,7 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
         leaders,
         sortedNonLeaderMembers,
         deadlineTimestampByUserId,
+        memberInfoReady: !memberInfoLoading,
         amLeader,
         memberContactInfoByUserId,
       }),
@@ -416,6 +405,7 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
       leaders,
       sortedNonLeaderMembers,
       deadlineTimestampByUserId,
+      memberInfoLoading,
       amLeader,
       memberContactInfoByUserId,
     ],

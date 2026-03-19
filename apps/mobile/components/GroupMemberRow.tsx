@@ -65,10 +65,17 @@ export function GroupMemberRow({
   deadlineTimestamp,
 }: GroupMemberRowProps) {
   const hasDropdown = contactInfo != null;
-  const [expanded, setExpanded] = useState(hasDropdown && !completedAll);
+  const [expanded, setExpanded] = useState(
+    hasDropdown && completedAll === false,
+  );
 
   useEffect(() => {
-    if (hasDropdown && completedAll === false) {
+    if (!hasDropdown) {
+      return;
+    }
+    if (completedAll === true) {
+      setExpanded(false);
+    } else if (completedAll === false) {
       setExpanded(true);
     }
   }, [hasDropdown, completedAll]);

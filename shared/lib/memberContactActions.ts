@@ -8,7 +8,7 @@ const CONTACT_ACTIONS = [
     id: "profile",
     label: "Profile",
     accessibilityLabel: "View profile",
-    isDisabled: ({}: { email: string; phone: string }) => false,
+    isDisabled: () => false,
   },
   {
     id: "email",
@@ -32,7 +32,7 @@ const CONTACT_ACTIONS = [
     id: "message",
     label: "Message",
     accessibilityLabel: "Message",
-    isDisabled: ({}: { email: string; phone: string }) => false,
+    isDisabled: () => false,
   },
 ] as const satisfies {
   id: string;

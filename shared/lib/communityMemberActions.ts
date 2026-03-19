@@ -87,8 +87,6 @@ export function sortMembersByNextTaskDue<T extends { id: number }>(
       return timeA.minutes - timeB.minutes;
     }
 
-    if (!timeA && timeB) return -1;
-    if (timeA && !timeB) return 1;
-    return 0;
+    return (timeA ? 1 : 0) - (timeB ? 1 : 0);
   });
 }
