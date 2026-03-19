@@ -110,7 +110,7 @@ export default function ActionPage() {
   return (
     <>
       {publicMode && <PrelaunchNavbar transparent={false} absolute={false} />}
-      <div className="w-full flex flex-row justify-between py-10 px-4 md:px-8 xl:px-16 bg-white">
+      <div className="w-full flex flex-row justify-between py-10 px-4 md:px-8 xl:px-16 bg-white min-h-[calc(100vh-var(--navbar-top-bar-height))]">
         <div className="flex flex-col md:pr-4 xl:pr-12 max-w-2xl lg:max-w-3xl mx-auto w-full">
           <Outlet
             context={
