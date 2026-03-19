@@ -2662,6 +2662,12 @@ export type FormDto = {
     usedInAction?: ActionDto;
 };
 
+export type FormAggregateViewsDto = {
+    aggregateViews: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
 export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'RepliedToForumPostOrChild' | 'HasPhoneNumber' | 'IsPhoneNumberValid' | 'MemberTag' | 'MemberCommunity' | 'AnyCommunity' | 'CustomExpression';
 
 export type CustomValidatorTypeDto = {
@@ -6883,6 +6889,21 @@ export type TasksGetFormResponses = {
 };
 
 export type TasksGetFormResponse = TasksGetFormResponses[keyof TasksGetFormResponses];
+
+export type TasksGetFormAggregateViewsData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/aggregateViews/{id}';
+};
+
+export type TasksGetFormAggregateViewsResponses = {
+    200: FormAggregateViewsDto;
+};
+
+export type TasksGetFormAggregateViewsResponse = TasksGetFormAggregateViewsResponses[keyof TasksGetFormAggregateViewsResponses];
 
 export type TasksUpdateFormData = {
     body: CreateFormDto;

@@ -16,18 +16,20 @@ import { CardStyle } from "@alliance/shared/styles/card";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { FormBuilder } from "./FormBuilder";
+import { FormSchema } from "@alliance/shared/forms/formschema";
 
 export interface ActionFollowUpFormsTabProps {
   action: Action;
   setAction: (action: Action) => void;
 }
 
-const emptyFormSchema = {
+const emptyFormSchema: FormSchema = {
   title: "Follow-up form",
   description: "",
   pages: [{ id: "page-1", title: "Page 1", fields: [] }],
   submit: { label: "Submit" },
   outputViews: [],
+  aggregateViews: [],
 };
 
 function followUpFormLabel(fuf: FollowUpFormDto): string {
@@ -41,13 +43,13 @@ export default function ActionFollowUpFormsTab({
 }: ActionFollowUpFormsTabProps) {
   const followUpForms = useMemo(
     () => action.followUpForms ?? [],
-    [action.followUpForms]
+    [action.followUpForms],
   );
   const [creating, setCreating] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [savingFields, setSavingFields] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(
-    followUpForms.length > 0 ? followUpForms[0].id : null
+    followUpForms.length > 0 ? followUpForms[0].id : null,
   );
 
   const selectedForm = followUpForms.find((f) => f.id === selectedId) ?? null;
@@ -76,7 +78,7 @@ export default function ActionFollowUpFormsTab({
       const formRes = await tasksCreateForm({
         body: {
           title: `${action.name} - follow-up`,
-          schema: emptyFormSchema as Record<string, unknown>,
+          schema: emptyFormSchema as unknown as Record<string, unknown>,
         },
       });
       if (!formRes.data?.id) {
@@ -106,7 +108,7 @@ export default function ActionFollowUpFormsTab({
         startDate: string | null;
         endDate: string | null;
         instructions: string | null;
-      }
+      },
     ) => {
       setSavingFields(followUpFormId);
       try {
@@ -132,7 +134,7 @@ export default function ActionFollowUpFormsTab({
         setSavingFields(null);
       }
     },
-    [refetchAction]
+    [refetchAction],
   );
 
   const handleSetFormId = useCallback(
@@ -143,14 +145,14 @@ export default function ActionFollowUpFormsTab({
       });
       await refetchAction();
     },
-    [refetchAction]
+    [refetchAction],
   );
 
   const handleDeleteFollowUpForm = useCallback(
     async (followUpFormId: number) => {
       if (
         !window.confirm(
-          "Delete this follow-up form? Existing responses will remain, but the form will no longer be available."
+          "Delete this follow-up form? Existing responses will remain, but the form will no longer be available.",
         )
       ) {
         return;
@@ -168,7 +170,7 @@ export default function ActionFollowUpFormsTab({
         setDeletingId(null);
       }
     },
-    [refetchAction]
+    [refetchAction],
   );
 
   return (
@@ -252,7 +254,7 @@ interface FollowUpFormCardProps {
       startDate: string | null;
       endDate: string | null;
       instructions: string | null;
-    }
+    },
   ) => Promise<void>;
   onSetFormId: (followUpFormId: number, formId: number) => Promise<void>;
   onDelete: (followUpFormId: number) => Promise<void>;
@@ -270,12 +272,12 @@ function FollowUpFormCard({
   deleting,
 }: FollowUpFormCardProps) {
   const [startDate, setStartDate] = useState<string>(
-    followUpForm.startDate ?? ""
+    followUpForm.startDate ?? "",
   );
   const [endDate, setEndDate] = useState<string>(followUpForm.endDate ?? "");
   const [name, setName] = useState<string>(followUpForm.name ?? "");
   const [instructions, setInstructions] = useState<string>(
-    followUpForm.instructions ?? ""
+    followUpForm.instructions ?? "",
   );
 
   const handleSaveFields = () => {

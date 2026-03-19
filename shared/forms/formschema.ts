@@ -234,6 +234,24 @@ export type ManualDisplayBlockContentMap = Record<
   ManualDisplayBlockContent
 >;
 
+export type AggregateViewValue =
+  | { type: "number"; value: number }
+  | { type: "numberfield"; fieldId: string; value?: number };
+
+export type AggregateViewDisplayType = "number" | "dollars";
+
+export interface AggregateProgressBarView {
+  kind: "progressbar";
+  id: string;
+  title: string;
+  caption: string;
+  numerator: AggregateViewValue;
+  denominator: AggregateViewValue;
+  displayType: AggregateViewDisplayType;
+}
+
+export type AggregateViewSchema = AggregateProgressBarView;
+
 export interface FormSchema {
   title: string;
   description?: string;
@@ -241,6 +259,7 @@ export interface FormSchema {
   submit?: { label?: string };
 
   outputViews: OutputViewSchema[];
+  aggregateViews?: AggregateViewSchema[];
 }
 
 export type OutputBlock = DisplayBlock | OutputFieldBlock;

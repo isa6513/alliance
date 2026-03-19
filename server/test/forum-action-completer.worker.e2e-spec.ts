@@ -150,6 +150,7 @@ describe('ForumActionCompleterWorker (e2e)', () => {
         },
       ],
       outputViews: [],
+      aggregateViews: [],
     };
 
     return formRepo.save(

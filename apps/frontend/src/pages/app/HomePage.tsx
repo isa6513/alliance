@@ -1,5 +1,6 @@
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import { useEffect, useMemo, useRef } from "react";
+import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ActionDto, FollowUpForm } from "@alliance/shared/client";
 import { Link, href } from "react-router";
@@ -38,6 +39,13 @@ import { useTaskActionsData } from "../../lib/useTaskActionsData";
 import HomeUpdatesRow from "../../components/HomeUpdatesRow";
 import SeeAll from "../../components/SeeAll";
 import HomeFeed from "../../components/HomeFeed";
+import type { AggregateViewSchema } from "@alliance/shared/forms/formschema";
+import { runAsync } from "@alliance/shared/lib/utils";
+import {
+  fetchTaskFormProgressViewsByFormId,
+  mapFormViewsToActionIds,
+  sidebarProgressActionCandidates,
+} from "../../lib/fetchTaskFormProgressViews";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -60,6 +68,9 @@ const HomePage = () => {
   }, [user, refreshUser]);
 
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
+  const [actionProgressViews, setActionProgressViews] = useState<
+    Record<number, AggregateViewSchema[]>
+  >({});
 
   const { items: globalFeedItems, loading: globalFeedLoading } = useGlobalFeed({
     limit: 10,
@@ -87,6 +98,53 @@ const HomePage = () => {
   );
 
   const isLargeScreen = useMediaQuery("(min-width: 1150px)");
+
+  useEffect(() => {
+    if (!actions) {
+      setActionProgressViews({});
+      return;
+    }
+
+    const candidates = sidebarProgressActionCandidates(actions);
+    if (candidates.length === 0) {
+      setActionProgressViews({});
+      return;
+    }
+
+    let cancelled = false;
+    const formIds = candidates.map((c) => c.formId);
+
+    runAsync(async () => {
+      const viewsByFormId = await fetchTaskFormProgressViewsByFormId(formIds);
+      if (cancelled) {
+        return;
+      }
+      setActionProgressViews(
+        mapFormViewsToActionIds(candidates, viewsByFormId),
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [actions]);
+
+  const sidebarProgressActions = useMemo(() => {
+    if (!actions) {
+      return [];
+    }
+    return actions
+      .filter(
+        (action) =>
+          action.status === "member_action" &&
+          action.shouldParticipate &&
+          (actionProgressViews[action.id]?.some(
+            (v) => v.kind === "progressbar",
+          ) ??
+            false),
+      )
+      .sort(homePagePriorityComparator);
+  }, [actionProgressViews, actions]);
 
   const tasksListContent = useMemo(() => {
     const currentWeekSidebarActions = currentWeekTodoActions.filter(
@@ -348,6 +406,36 @@ const HomePage = () => {
   const sidebarContent = useMemo(() => {
     return (
       <div className="px-4 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-[calc(100vh-var(--navbar-top-bar-height))]">
+        {sidebarProgressActions.length > 0 && (
+          <div className="flex flex-col gap-y-3">
+            <div className="flex flex-col gap-y-2">
+              {sidebarProgressActions.map((action) => (
+                <Link
+                  key={action.id}
+                  to={href("/actions/:id", { id: action.id.toString() })}
+                  className="block py-1 px-1 -mx-1 rounded-sm hover:bg-zinc-100 transition-colors"
+                >
+                  <p className="font-medium text-zinc-900 mb-2">
+                    {action.name}
+                  </p>
+                  <div className="flex flex-col gap-y-2">
+                    {(actionProgressViews[action.id] ?? [])
+                      .filter((v) => v.kind === "progressbar")
+                      .map((view) => (
+                        <AggregateProgressBarBlock
+                          key={view.id}
+                          view={view}
+                          titleClassName="text-sm font-medium text-zinc-700"
+                          captionClassName="text-xs text-zinc-600"
+                          className="flex flex-col gap-y-1"
+                        />
+                      ))}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="flex-1 min-h-0 flex flex-col">
           <GlobalFeed
             items={globalFeedItems}
@@ -357,7 +445,12 @@ const HomePage = () => {
         </div>
       </div>
     );
-  }, [globalFeedItems, globalFeedLoading]);
+  }, [
+    actionProgressViews,
+    globalFeedItems,
+    globalFeedLoading,
+    sidebarProgressActions,
+  ]);
 
   useWhiteBackground();
 

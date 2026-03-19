@@ -39,12 +39,14 @@ import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
 import {
   CreateFormDto,
+  FormAggregateViewsDto,
   FormDto,
   FormResponseDto,
   SubmitFollowUpFormDto,
   SubmitFormDto,
 } from './form.dto';
 import {
+  type AggregateViewValue,
   type AnyField,
   type CheckboxExtractionTarget,
   type CheckboxField,
@@ -127,6 +129,60 @@ export class TasksService {
     }
 
     return this.transformImageUrls(await this.transformContractFields(form));
+  }
+
+  private resolveAggregateValue(
+    value: AggregateViewValue,
+    totalsByFieldId: Map<string, number>,
+  ): number {
+    if (value.type === 'number') {
+      return value.value;
+    }
+    return totalsByFieldId.get(value.fieldId) ?? 0;
+  }
+
+  async findFormAggregateViews(formId: number): Promise<FormAggregateViewsDto> {
+    const form = await this.formRepository.findOneOrFail({
+      where: { id: formId },
+    });
+
+    const aggregateViews =
+      (form.schema as unknown as FormSchema).aggregateViews ?? [];
+    if (aggregateViews.length === 0) {
+      return { aggregateViews: [] };
+    }
+
+    const responses = await this.formResponseRepository.find({
+      where: { formId },
+      select: ['answers'],
+    });
+
+    const totalsByFieldId = new Map<string, number>();
+    for (const response of responses) {
+      const answers = (response.answers ?? {}) as Record<string, FormValue>;
+      for (const [fieldId, answer] of Object.entries(answers)) {
+        if (typeof answer === 'number' && Number.isFinite(answer)) {
+          totalsByFieldId.set(
+            fieldId,
+            (totalsByFieldId.get(fieldId) ?? 0) + answer,
+          );
+        }
+      }
+    }
+
+    return {
+      aggregateViews: aggregateViews.map((view) => ({
+        ...view,
+        numerator: {
+          ...view.numerator,
+          value: this.resolveAggregateValue(view.numerator, totalsByFieldId),
+        },
+        denominator: {
+          ...view.denominator,
+          value: this.resolveAggregateValue(view.denominator, totalsByFieldId),
+        },
+      })),
+    };
   }
 
   async transformImageUrls(form: Form): Promise<Form> {

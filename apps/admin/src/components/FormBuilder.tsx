@@ -63,6 +63,7 @@ import { useBeforeUnload, useBlocker, useSearchParams } from "react-router";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { customComponentRegistry } from "@alliance/sharedweb/forms/components";
 import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
+import { AggregateBuilder } from "./AggregateBuilder";
 import { OutputBuilder } from "./OutputBuilder";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {
@@ -148,15 +149,16 @@ interface FormBuilderProps {
   generalUpdateName?: string;
 }
 
-const ensureOutputViews = (schema: FormSchema): FormSchema => ({
+const ensureSchemaViews = (schema: FormSchema): FormSchema => ({
   ...schema,
   outputViews: schema.outputViews ?? [],
+  aggregateViews: schema.aggregateViews ?? [],
 });
 
 /** Remove deprecated visibleIf from all fields and blocks so only visibleIfFormula is persisted. */
 function stripVisibleIfFromSchema(schema: FormSchema): FormSchema {
   const stripFromElement = (
-    el: Record<string, unknown>
+    el: Record<string, unknown>,
   ): Record<string, unknown> => {
     const out = { ...el };
     if ("visibleIf" in out) {
@@ -166,7 +168,7 @@ function stripVisibleIfFromSchema(schema: FormSchema): FormSchema {
       out.fields = out.fields.map((f: unknown) =>
         typeof f === "object" && f !== null
           ? stripFromElement(f as Record<string, unknown>)
-          : f
+          : f,
       );
     }
     return out;
@@ -177,20 +179,20 @@ function stripVisibleIfFromSchema(schema: FormSchema): FormSchema {
     pages: (schema.pages ?? []).map((page) => ({
       ...page,
       fields: (page.fields ?? []).map((f) =>
-        stripFromElement(f as unknown as Record<string, unknown>)
+        stripFromElement(f as unknown as Record<string, unknown>),
       ) as unknown as Page["fields"],
     })),
     outputViews: (schema.outputViews ?? []).map((view) => ({
       ...view,
       blocks: (view.blocks ?? []).map((b) =>
-        stripFromElement(b as unknown as Record<string, unknown>)
+        stripFromElement(b as unknown as Record<string, unknown>),
       ) as unknown as typeof view.blocks,
     })),
   } as FormSchema;
 }
 
 const ensurePages = (schema: FormSchema): FormSchema => {
-  const withOutputViews = ensureOutputViews(schema);
+  const withOutputViews = ensureSchemaViews(schema);
   if (
     !withOutputViews.pages ||
     !Array.isArray(withOutputViews.pages) ||
@@ -214,7 +216,7 @@ const buildValueCounts = (values: string[]) => {
 
 const findSingleOptionValueChange = (
   previousOptions: MultiSelectField["options"] | undefined,
-  nextOptions: MultiSelectField["options"] | undefined
+  nextOptions: MultiSelectField["options"] | undefined,
 ): {
   previousValue: string;
   nextValue: string;
@@ -269,7 +271,7 @@ const mapConditionForOptionValue = (
   condition: Condition,
   controllerId: string,
   previousValue: string,
-  nextValue: string
+  nextValue: string,
 ): { condition: Condition; updated: boolean } => {
   if (!("when" in condition) || condition.when !== controllerId) {
     return { condition, updated: false };
@@ -293,7 +295,7 @@ const getUpdatedVisibilityConditions = (
   visibleIf: Condition[] | Condition | undefined,
   controllerId: string,
   previousValue: string,
-  nextValue: string
+  nextValue: string,
 ): { changed: boolean; visibleIf?: Condition[] } => {
   if (!visibleIf) {
     return { changed: false };
@@ -306,7 +308,7 @@ const getUpdatedVisibilityConditions = (
       c,
       controllerId,
       previousValue,
-      nextValue
+      nextValue,
     );
     if (u) updated = true;
     return condition;
@@ -326,7 +328,7 @@ const getUpdatedVisibilityFormula = (
   visibleIfFormula: VisibleIfFormula | undefined,
   controllerId: string,
   previousValue: string,
-  nextValue: string
+  nextValue: string,
 ): { changed: boolean; visibleIfFormula?: VisibleIfFormula } => {
   if (!visibleIfFormula?.conditions) {
     return { changed: false };
@@ -339,7 +341,7 @@ const getUpdatedVisibilityFormula = (
       cond,
       controllerId,
       previousValue,
-      nextValue
+      nextValue,
     );
     nextConditions[name] = condition;
     if (u) updated = true;
@@ -360,7 +362,7 @@ const applyOptionValueToConditionalVisibility = (
   controllerId: string,
   previousValue: string,
   nextValue: string,
-  startIndex: number
+  startIndex: number,
 ) => {
   let hasChanges = false;
 
@@ -376,13 +378,13 @@ const applyOptionValueToConditionalVisibility = (
       visibleIf,
       controllerId,
       previousValue,
-      nextValue
+      nextValue,
     );
     const formulaResult = getUpdatedVisibilityFormula(
       visibleIfFormula,
       controllerId,
       previousValue,
-      nextValue
+      nextValue,
     );
 
     if (!result.changed && !formulaResult.changed) {
@@ -427,11 +429,12 @@ export function FormBuilder({
           ],
           submit: { label: "Complete" },
           outputViews: [],
+          aggregateViews: [],
         };
 
   const [schema, setSchema] = useState<FormSchema>(buildInitialSchema);
   const [lastSavedSchemaJSON, setLastSavedSchemaJSON] = useState<string>(() =>
-    JSON.stringify(buildInitialSchema())
+    JSON.stringify(buildInitialSchema()),
   );
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -440,14 +443,14 @@ export function FormBuilder({
   const activeEditor = searchParams.get("editor") ?? "form";
 
   const setActiveEditor = useCallback(
-    (editor: "form" | "outputs") => {
+    (editor: "form" | "outputs" | "aggregates") => {
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev);
         next.set("editor", editor);
         return next;
       });
     },
-    [setSearchParams]
+    [setSearchParams],
   );
 
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
@@ -457,13 +460,13 @@ export function FormBuilder({
   } | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dropPosition, setDropPosition] = useState<"before" | "after" | null>(
-    null
+    null,
   );
 
   // Page drag and drop state
   const [draggedPageIndex, setDraggedPageIndex] = useState<number | null>(null);
   const [dragOverPageIndex, setDragOverPageIndex] = useState<number | null>(
-    null
+    null,
   );
   const [pageDropPosition, setPageDropPosition] = useState<
     "before" | "after" | null
@@ -478,11 +481,11 @@ export function FormBuilder({
   const [isLoadingPreviewUsers, setIsLoadingPreviewUsers] = useState(false);
   const [previewUserError, setPreviewUserError] = useState<string | null>(null);
   const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(
-    null
+    null,
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Array<AvailableElement>>(
-    []
+    [],
   );
   const [customValidatorDrafts, setCustomValidatorDrafts] = useState<
     Record<number, CustomValidatorDraft>
@@ -497,7 +500,7 @@ export function FormBuilder({
     (draftId: number, draft: CustomValidatorDraft) => {
       setCustomValidatorDrafts((prev) => ({ ...prev, [draftId]: draft }));
     },
-    []
+    [],
   );
   const removeDraft = useCallback((draftId: number) => {
     setCustomValidatorDrafts((prev) => {
@@ -516,7 +519,7 @@ export function FormBuilder({
       removeDraft,
       createDraftId,
     }),
-    [createDraftId, customValidatorDrafts, removeDraft, setDraft]
+    [createDraftId, customValidatorDrafts, removeDraft, setDraft],
   );
   const contentScrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -527,14 +530,14 @@ export function FormBuilder({
       return FORM_BUILDER_PREVIEW_USER;
     }
     const match = previewUsers.find(
-      (candidate) => String(candidate.id) === previewUserId
+      (candidate) => String(candidate.id) === previewUserId,
     );
     return match ?? FORM_BUILDER_PREVIEW_USER;
   }, [previewUserId, previewUsers]);
   const resolvedPreviewUserId =
     previewUserId === "preview"
       ? "preview"
-      : resolvedPreviewUser?.id ?? "preview";
+      : (resolvedPreviewUser?.id ?? "preview");
 
   const { success: showSuccessToast, error: showErrorToast } = useToast();
 
@@ -609,7 +612,7 @@ export function FormBuilder({
   useEffect(() => {
     if (searchQuery.trim()) {
       const filtered = AVAILABLE_ELEMENTS.filter((element) =>
-        element.name.toLowerCase().includes(searchQuery.toLowerCase())
+        element.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setSearchResults(filtered);
     } else {
@@ -619,7 +622,7 @@ export function FormBuilder({
 
   const handleSearchSelect = (
     element: AvailableElement,
-    insertIndex: number
+    insertIndex: number,
   ) => {
     if (element.type === "field") {
       addField(element.id as FieldKind, insertIndex);
@@ -666,7 +669,7 @@ export function FormBuilder({
           const form = response.data as any;
           if (form.schema) {
             const nextSchema = ensurePages(
-              form.schema as unknown as FormSchema
+              form.schema as unknown as FormSchema,
             );
             setSchema(nextSchema);
             setLastSavedSchemaJSON(JSON.stringify(nextSchema));
@@ -677,7 +680,7 @@ export function FormBuilder({
       .catch((error) => {
         console.error("Failed to load form:", error);
         setLoadError(
-          error instanceof Error ? error.message : "Failed to load form"
+          error instanceof Error ? error.message : "Failed to load form",
         );
       })
       .finally(() => {
@@ -870,7 +873,7 @@ export function FormBuilder({
     updateSchema({
       ...schema,
       pages: schema.pages.map((page, idx) =>
-        idx === selectedPageIndex ? { ...page, fields: newFields } : page
+        idx === selectedPageIndex ? { ...page, fields: newFields } : page,
       ),
     });
   };
@@ -965,13 +968,13 @@ export function FormBuilder({
     updateSchema({
       ...schema,
       pages: schema.pages.map((page, idx) =>
-        idx === selectedPageIndex ? { ...page, fields: newFields } : page
+        idx === selectedPageIndex ? { ...page, fields: newFields } : page,
       ),
     });
   };
 
   const updateSchema = (newSchema: FormSchema) => {
-    setSchema(ensureOutputViews(newSchema));
+    setSchema(ensureSchemaViews(newSchema));
   };
 
   const resolveCustomValidatorDrafts = useCallback(
@@ -1047,7 +1050,7 @@ export function FormBuilder({
             throw new Error("createCustomValidator returned no data");
           }
           resolvedIds.set(draftId, response.data.id);
-        })
+        }),
       );
 
       const mapCondition = (condition: Condition): Condition => {
@@ -1065,7 +1068,7 @@ export function FormBuilder({
       };
 
       const mapVisibleIf = (
-        visibleIf?: Condition[] | Condition
+        visibleIf?: Condition[] | Condition,
       ): Condition[] | undefined => {
         if (!visibleIf) return undefined;
         const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
@@ -1073,12 +1076,12 @@ export function FormBuilder({
       };
 
       const mapVisibleIfFormula = (
-        visibleIfFormula?: VisibleIfFormula
+        visibleIfFormula?: VisibleIfFormula,
       ): VisibleIfFormula | undefined => {
         if (!visibleIfFormula?.conditions) return visibleIfFormula;
         const nextConditions: Record<string, Condition> = {};
         for (const [name, cond] of Object.entries(
-          visibleIfFormula.conditions
+          visibleIfFormula.conditions,
         )) {
           nextConditions[name] = mapCondition(cond);
         }
@@ -1095,14 +1098,14 @@ export function FormBuilder({
           fields: page.fields.map((field) => {
             const nextVisibleIf = mapVisibleIf(field.visibleIf);
             const nextVisibleIfFormula = mapVisibleIfFormula(
-              field.visibleIfFormula
+              field.visibleIfFormula,
             );
             if (isSchemaFormField(field)) {
               const nextValidatorId = isDraftValidatorId(
-                field.customValidatorId
+                field.customValidatorId,
               )
-                ? resolvedIds.get(field.customValidatorId) ??
-                  field.customValidatorId
+                ? (resolvedIds.get(field.customValidatorId) ??
+                  field.customValidatorId)
                 : field.customValidatorId;
               return {
                 ...field,
@@ -1133,7 +1136,7 @@ export function FormBuilder({
         resolvedDraftIds: [...resolvedIds.keys()],
       };
     },
-    [customValidatorDrafts]
+    [customValidatorDrafts],
   );
 
   useEffect(() => {
@@ -1148,8 +1151,8 @@ export function FormBuilder({
         event.preventDefault();
         event.returnValue = "";
       },
-      [hasUnsavedChanges]
-    )
+      [hasUnsavedChanges],
+    ),
   );
 
   const navigationBlocker = useBlocker(hasUnsavedChanges);
@@ -1157,7 +1160,7 @@ export function FormBuilder({
   useEffect(() => {
     if (navigationBlocker.state === "blocked") {
       const confirmExit = window.confirm(
-        "You have unsaved changes. Are you sure you want to leave this page?"
+        "You have unsaved changes. Are you sure you want to leave this page?",
       );
 
       if (confirmExit) {
@@ -1169,7 +1172,7 @@ export function FormBuilder({
   }, [navigationBlocker]);
 
   useEffect(() => {
-    if (activeEditor === "outputs" && isPreviewMode) {
+    if (activeEditor !== "form" && isPreviewMode) {
       setIsPreviewMode(false);
     }
   }, [activeEditor, isPreviewMode]);
@@ -1186,7 +1189,7 @@ export function FormBuilder({
     } catch (error) {
       console.error("Failed to load users for preview", error);
       setPreviewUserError(
-        error instanceof Error ? error.message : "Could not load users"
+        error instanceof Error ? error.message : "Could not load users",
       );
     } finally {
       setIsLoadingPreviewUsers(false);
@@ -1485,7 +1488,7 @@ export function FormBuilder({
     updateSchema({
       ...schema,
       pages: schema.pages.map((page, idx) =>
-        idx === selectedPageIndex ? { ...page, fields: currentFields } : page
+        idx === selectedPageIndex ? { ...page, fields: currentFields } : page,
       ),
     });
 
@@ -1529,7 +1532,7 @@ export function FormBuilder({
                           "text-xs px-2 py-1 rounded-full",
                           element.type === "field"
                             ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
+                            : "bg-green-100 text-green-800",
                         )}
                       >
                         {element.type === "field" ? "Field" : "Block"}
@@ -1572,14 +1575,14 @@ export function FormBuilder({
         updates.options
           ? findSingleOptionValueChange(
               (field as MultiSelectField).options,
-              updates.options as MultiSelectField["options"]
+              updates.options as MultiSelectField["options"],
             )
           : null;
 
       const nextPages = schema.pages.map((page, pageIndex) => {
         if (pageIndex === selectedPageIndex) {
           const updatedFields = page.fields.map((f, i) =>
-            i === index ? ({ ...f, ...updates } as AnyField | DisplayBlock) : f
+            i === index ? ({ ...f, ...updates } as AnyField | DisplayBlock) : f,
           );
 
           if (!optionValueChange) {
@@ -1592,7 +1595,7 @@ export function FormBuilder({
               (field as AnyField).id,
               optionValueChange.previousValue,
               optionValueChange.nextValue,
-              index
+              index,
             );
 
           return { ...page, fields: fieldsWithUpdatedConditions };
@@ -1605,7 +1608,7 @@ export function FormBuilder({
               (field as AnyField).id,
               optionValueChange.previousValue,
               optionValueChange.nextValue,
-              -1
+              -1,
             );
 
           if (fieldsWithUpdatedConditions !== page.fields) {
@@ -1628,7 +1631,7 @@ export function FormBuilder({
         pages: schema.pages.map((page, idx) =>
           idx === selectedPageIndex
             ? { ...page, fields: page.fields.filter((_, i) => i !== index) }
-            : page
+            : page,
         ),
       });
     };
@@ -1644,7 +1647,7 @@ export function FormBuilder({
       .slice(0, index)
       .filter(
         (f): f is AnyField =>
-          (f as any)?.kind && (f as any)?.label !== undefined
+          (f as any)?.kind && (f as any)?.label !== undefined,
       );
 
     const commonProps = {
@@ -1896,7 +1899,7 @@ export function FormBuilder({
                     );
                   default:
                     console.error(
-                      `Unknown block kind: ${block satisfies never}`
+                      `Unknown block kind: ${block satisfies never}`,
                     );
                     return null;
                 }
@@ -1948,8 +1951,8 @@ export function FormBuilder({
                   {isSaving
                     ? "Saving..."
                     : hasUnsavedChanges
-                    ? "Save Form"
-                    : "No changes"}
+                      ? "Save Form"
+                      : "No changes"}
                 </Button>
               </div>
               {!generalUpdateName && (
@@ -1960,7 +1963,7 @@ export function FormBuilder({
                       "px-3 py-2 rounded-md text-nowrap",
                       activeEditor === "form"
                         ? "bg-white shadow text-gray-900"
-                        : "text-gray-600"
+                        : "text-gray-600",
                     )}
                     onClick={() => setActiveEditor("form")}
                   >
@@ -1969,14 +1972,26 @@ export function FormBuilder({
                   <button
                     type="button"
                     className={cn(
-                      "px-3 py-1 rounded-md text-nowrap",
+                      "px-3 py-2 rounded-md text-nowrap",
                       activeEditor === "outputs"
                         ? "bg-white shadow text-gray-900"
-                        : "text-gray-600"
+                        : "text-gray-600",
                     )}
                     onClick={() => setActiveEditor("outputs")}
                   >
                     Output views
+                  </button>
+                  <button
+                    type="button"
+                    className={cn(
+                      "px-3 py-2 rounded-md text-nowrap",
+                      activeEditor === "aggregates"
+                        ? "bg-white shadow text-gray-900"
+                        : "text-gray-600",
+                    )}
+                    onClick={() => setActiveEditor("aggregates")}
+                  >
+                    Aggregate views
                   </button>
                 </div>
               )}
@@ -2073,7 +2088,7 @@ export function FormBuilder({
                           selectedPageIndex === index
                             ? "bg-blue-100 text-blue-700 border-blue-200"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200 border-transparent",
-                          isDragging && "opacity-50 scale-95"
+                          isDragging && "opacity-50 scale-95",
                         )}
                       >
                         {/* Drag handle */}
@@ -2160,6 +2175,8 @@ export function FormBuilder({
           >
             {activeEditor === "outputs" && !generalUpdateName ? (
               <OutputBuilder schema={schema} onSchemaChange={updateSchema} />
+            ) : activeEditor === "aggregates" && !generalUpdateName ? (
+              <AggregateBuilder schema={schema} onSchemaChange={updateSchema} />
             ) : isPreviewMode && generalUpdateName ? (
               <div className="max-w-3xl mx-auto bg-white p-6">
                 <PreviewAsUserBar
@@ -2213,7 +2230,7 @@ export function FormBuilder({
                         pages: schema.pages.map((page, idx) =>
                           idx === selectedPageIndex
                             ? { ...page, title: e.target.value }
-                            : page
+                            : page,
                         ),
                       })
                     }
@@ -2282,7 +2299,7 @@ export function FormBuilder({
                         const currentFields = [...currentPage.fields];
                         const [draggedField] = currentFields.splice(
                           dragIndex,
-                          1
+                          1,
                         );
                         currentFields.push(draggedField);
 
@@ -2291,7 +2308,7 @@ export function FormBuilder({
                           pages: schema.pages.map((page, idx) =>
                             idx === selectedPageIndex
                               ? { ...page, fields: currentFields }
-                              : page
+                              : page,
                           ),
                         });
 

@@ -29,6 +29,7 @@ import {
 } from './customvalidator.dto';
 import {
   CreateFormDto,
+  FormAggregateViewsDto,
   FormDto,
   FormResponseDto,
   SubmitFollowUpFormDto,
@@ -113,6 +114,15 @@ export class TasksController {
   @ApiOkResponse({ type: FormDto })
   async getForm(@Param('id', ParseIntPipe) id: number) {
     return this.tasksService.getForm(id);
+  }
+
+  @Get('aggregateViews/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: FormAggregateViewsDto })
+  async getFormAggregateViews(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<FormAggregateViewsDto> {
+    return this.tasksService.findFormAggregateViews(id);
   }
 
   @Put('updateForm/:formId')

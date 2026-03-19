@@ -45,9 +45,21 @@ export const formatTime = (time: Date, { addSuffix = true }) => {
  */
 export function runAsync(
   fn: () => Promise<void>,
-  onError?: (err: unknown) => void
+  onError?: (err: unknown) => void,
 ): void {
   void fn().catch((err) => {
     onError?.(err);
   });
+}
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(value, max));
+}
+
+/** 0–100 width % for progress UI; denominator ≤ 0 is treated as full (100%). */
+export function completedBarPercentage(
+  numerator: number,
+  denominator: number,
+): number {
+  return (denominator > 0 ? clamp(numerator / denominator, 0, 1) : 1) * 100;
 }

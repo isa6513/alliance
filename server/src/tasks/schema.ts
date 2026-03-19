@@ -213,6 +213,24 @@ export class Page {
   fields: Array<AnyField | DisplayBlock>;
 }
 
+export type AggregateViewValue =
+  | { type: 'number'; value: number }
+  | { type: 'numberfield'; fieldId: string; value?: number };
+
+export type AggregateViewDisplayType = 'number' | 'dollars';
+
+export interface AggregateProgressBarView {
+  kind: 'progressbar';
+  id: string;
+  title: string;
+  caption: string;
+  numerator: AggregateViewValue;
+  denominator: AggregateViewValue;
+  displayType: AggregateViewDisplayType;
+}
+
+export type AggregateViewSchema = AggregateProgressBarView;
+
 export class FormSchema {
   @ApiProperty()
   title: string;
@@ -224,6 +242,7 @@ export class FormSchema {
   submit?: { label?: string };
 
   outputViews: OutputViewSchema[];
+  aggregateViews?: AggregateViewSchema[];
 }
 
 export type OutputBlock = DisplayBlock | OutputFieldBlock;

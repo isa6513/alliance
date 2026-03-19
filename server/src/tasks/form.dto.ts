@@ -13,7 +13,7 @@ import { UserDto } from 'src/user/dto/user.dto';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
 import type { Ty } from './entities/type';
-import type { DeviceVisibilityTarget } from './schema';
+import type { AggregateViewSchema, DeviceVisibilityTarget } from './schema';
 import { DEVICE_VISIBILITY_TARGETS } from './schema';
 
 export class CreateFormDto extends PickType(Form, ['title', 'schema']) {}
@@ -56,6 +56,11 @@ export class SubmitFollowUpFormDto extends OmitType(SubmitFormDto, [
 export class FormDto extends PickType(Form, ['id', 'title', 'schema']) {
   @ApiPropertyOptional({ type: () => ActionDto })
   usedInAction?: Ty<ActionDto>;
+}
+
+export class FormAggregateViewsDto {
+  @ApiProperty({ type: Object, isArray: true })
+  aggregateViews: AggregateViewSchema[];
 }
 
 export class FormResponseDto extends PickType(FormResponse, [

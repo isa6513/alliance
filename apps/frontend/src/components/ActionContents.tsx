@@ -22,12 +22,20 @@ import { useEffect, useMemo } from "react";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { externalOnly } from "@alliance/shared/lib/copy";
+import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
+import { useLiveTaskFormAggregateViews } from "../lib/useLiveTaskFormAggregateViews";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
   const location = useLocation();
 
   const action = context.action;
+
+  const aggregateViews = useLiveTaskFormAggregateViews(
+    action.taskFormId,
+    action.usersCompleted,
+    context.userRelation,
+  );
 
   const { isAuthenticated } = useAuth();
   const loggedInMode = !action.publicOnly;
@@ -55,6 +63,11 @@ const ActionContents = () => {
     const list = action.followUpForms;
     return list.filter(isFollowUpFormActive);
   }, [action.followUpForms, context.userRelation]);
+
+  const progressViews = useMemo(
+    () => aggregateViews.filter((view) => view.kind === "progressbar"),
+    [aggregateViews],
+  );
 
   if (!action) {
     return null;
@@ -117,6 +130,23 @@ const ActionContents = () => {
       </div>
       <div className="flex flex-col gap-y-8 sm:gap-y-12">
         {loggedInMode && <ActionEventsPanel action={action} />}
+        {progressViews.length > 0 && (
+          <div className="flex flex-col gap-y-4">
+            {progressViews.map((view) => (
+              <div
+                key={view.id}
+                className="border border-zinc-200 rounded-md p-4 flex flex-col gap-y-2"
+              >
+                <AggregateProgressBarBlock
+                  view={view}
+                  titleClassName="font-semibold text-lg text-zinc-900"
+                  captionClassName="text-sm text-zinc-600"
+                  className="flex flex-col gap-y-2"
+                />
+              </div>
+            ))}
+          </div>
+        )}
         {loggedInMode && action.status === "member_action" && (
           <div className="flex flex-col gap-y-4 md:hidden">
             <ActionCompletedBarWithInfo

@@ -67,6 +67,17 @@ const sampleSchema: FormSchema = {
     },
   ],
   outputViews: [],
+  aggregateViews: [
+    {
+      kind: 'progressbar',
+      id: 'aggregate-1',
+      title: 'Static aggregate',
+      caption: 'Progress',
+      numerator: { type: 'number', value: 10 },
+      denominator: { type: 'number', value: 100 },
+      displayType: 'number',
+    },
+  ],
 };
 
 describe('Tasks (e2e)', () => {
@@ -227,6 +238,16 @@ describe('Tasks (e2e)', () => {
 
     expect(meResponse.body.answers['full-name']).toBe('Member Example');
 
+    const aggregateViewsResponse = await request(ctx.app.getHttpServer())
+      .get(`/tasks/aggregateViews/${formId}`)
+      .set('Authorization', `Bearer ${ctx.accessToken}`)
+      .expect(200);
+
+    expect(aggregateViewsResponse.body.aggregateViews).toHaveLength(1);
+    expect(aggregateViewsResponse.body.aggregateViews[0].numerator.value).toBe(
+      10,
+    );
+
     const user = await userRepo.findOne({ where: { id: ctx.testUserId } });
     expect(user?.phoneNumberValidated).toBe(true);
     expect(user?.phoneNumber).toContain('+1');
@@ -282,6 +303,110 @@ describe('Tasks (e2e)', () => {
       .expect(404);
   });
 
+  it('sums number field answers into aggregate views', async () => {
+    const aggregateSchema: FormSchema = {
+      title: 'Aggregate Number Form',
+      pages: [
+        {
+          id: 'page-1',
+          fields: [
+            {
+              id: 'amount',
+              kind: 'number',
+              label: 'Amount',
+              required: true,
+            },
+          ],
+        },
+      ],
+      outputViews: [],
+      aggregateViews: [
+        {
+          kind: 'progressbar',
+          id: 'raised-vs-goal',
+          title: 'Raised',
+          caption: '',
+          numerator: { type: 'numberfield', fieldId: 'amount' },
+          denominator: { type: 'number', value: 1000 },
+          displayType: 'dollars',
+        },
+      ],
+    };
+
+    const testAction = await actionRepo.save(
+      actionRepo.create({
+        name: 'Aggregate Number Action',
+        category: 'Community',
+        body: 'Body copy',
+        shortDescription: 'Short copy',
+        type: ActionTaskType.Activity,
+        commitmentless: true,
+        isForumParticipationAction: false,
+        everyoneShouldComplete: false,
+        shouldCompleteAfterDeadline: false,
+        visibilityMode: VisibilityMode.Public,
+        preventCompletion: false,
+        optional: false,
+        publicOnly: false,
+        onboarding: false,
+        isContractSigningAction: false,
+        cohortExpression: {
+          type: 'Tag',
+          tagId: ctx.defaultTag.id,
+        },
+        latestMemberActionEvent: {
+          event: null,
+          deadline: null,
+        },
+        followUpForms: [],
+      } satisfies CreateActionDto),
+    );
+
+    await eventRepo.save(
+      eventRepo.create({
+        title: 'Aggregate Number Action',
+        description: 'Make non-draft',
+        newStatus: ActionStatus.MemberAction,
+        date: new Date(Date.now() - 1000),
+        action: testAction,
+      }),
+    );
+
+    const createResponse = await request(ctx.app.getHttpServer())
+      .post('/tasks/createForm')
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .send({
+        title: aggregateSchema.title,
+        schema: aggregateSchema,
+      })
+      .expect(201);
+
+    const aggregateFormId = createResponse.body.id as number;
+
+    await request(ctx.app.getHttpServer())
+      .post(`/tasks/submitForm/${aggregateFormId}`)
+      .set('Authorization', `Bearer ${ctx.accessToken}`)
+      .send({
+        answers: { amount: 250 },
+        schemaSnapshot: aggregateSchema,
+        actionId: testAction.id,
+      })
+      .expect(201);
+
+    const aggregateViewsResponse = await request(ctx.app.getHttpServer())
+      .get(`/tasks/aggregateViews/${aggregateFormId}`)
+      .set('Authorization', `Bearer ${ctx.accessToken}`)
+      .expect(200);
+
+    expect(aggregateViewsResponse.body.aggregateViews).toHaveLength(1);
+    expect(aggregateViewsResponse.body.aggregateViews[0].numerator.value).toBe(
+      250,
+    );
+    expect(aggregateViewsResponse.body.aggregateViews[0].denominator.value).toBe(
+      1000,
+    );
+  });
+
   it('hides privateByDefault output fields in public output while keeping normal output fields visible', async () => {
     const outputSchema: FormSchema = {
       title: 'Output Visibility',
@@ -317,6 +442,7 @@ describe('Tasks (e2e)', () => {
         },
       ],
       outputViews: [],
+      aggregateViews: [],
     };
 
     const action = await actionRepo.save(
@@ -840,6 +966,7 @@ describe('Tasks (e2e)', () => {
           },
         ],
         outputViews: [],
+        aggregateViews: [],
       };
 
       const actionOne = await createAction('Validator Action One');
@@ -994,6 +1121,7 @@ describe('Tasks (e2e)', () => {
           },
         ],
         outputViews: [],
+        aggregateViews: [],
       };
 
       const action = await createAction('Extraction Test Action');
@@ -1058,6 +1186,7 @@ describe('Tasks (e2e)', () => {
           },
         ],
         outputViews: [],
+        aggregateViews: [],
       };
 
       const action = await createAction('Time Extraction Action');
@@ -1117,6 +1246,7 @@ describe('Tasks (e2e)', () => {
           },
         ],
         outputViews: [],
+        aggregateViews: [],
       };
 
       const action = await createAction('No Extraction Action');
@@ -1172,6 +1302,7 @@ describe('Tasks (e2e)', () => {
           },
         ],
         outputViews: [],
+        aggregateViews: [],
       };
 
       const action = await createAction('Invalid Phone Action');
