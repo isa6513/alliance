@@ -1,4 +1,9 @@
-import { View, ActivityIndicator, RefreshControl } from "react-native";
+import {
+  View,
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+} from "react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   actionsDismissAction,
@@ -18,7 +23,7 @@ import {
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../components/LargeActionCard";
 import LargeGeneralUpdateCard from "../../components/LargeGeneralUpdateCard";
-import { Check } from "lucide-react-native";
+import { Check, User } from "lucide-react-native";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 import SuccessOverlay from "../../components/SuccessOverlay";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -30,6 +35,8 @@ import { useBoundedIndex } from "../../lib/useBoundedIndex";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { IndexStepper } from "../../components/system/IndexStepper";
 import Button, { ButtonColor } from "../../components/system/Button";
+import { router } from "expo-router";
+import ProfileImage from "../../components/ProfileImage";
 
 const GENERAL_UPDATES_QUERY_KEY = [
   "actions",
@@ -267,7 +274,7 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-white">
       <SimplePageTitle title={title}>
-        {showTaskNav && (
+        {showTaskNav ? (
           <IndexStepper
             index={safeIndex}
             totalCount={allItems.length}
@@ -278,6 +285,14 @@ export default function HomeScreen() {
             previousLabel="Previous task"
             nextLabel="Next task"
           />
+        ) : (
+          <TouchableOpacity
+            onPress={() => router.push("/profile")}
+            className="px-2"
+            accessibilityLabel="View profile"
+          >
+            <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
+          </TouchableOpacity>
         )}
       </SimplePageTitle>
       <KeyboardAwareScrollView

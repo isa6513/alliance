@@ -1,5 +1,10 @@
 import { useCallback, useMemo } from "react";
-import { ActivityIndicator, RefreshControl, View } from "react-native";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { router, RelativePathString } from "expo-router";
 import {
   NotificationDto,
@@ -23,6 +28,8 @@ import { LegendList } from "@legendapp/list";
 import SwipeableNotification from "../../components/SwipeableNotification";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import MobileLikesGroup from "../../components/LikesGroup";
+import ProfileImage from "../../components/ProfileImage";
+import { useAuth } from "../../lib/AuthContext";
 
 const normalizeLocation = (location: string | null) => {
   if (!location) return null;
@@ -40,6 +47,8 @@ const normalizeLocation = (location: string | null) => {
 export default function NotificationsScreen() {
   const posthog = usePostHog();
   const queryClient = useQueryClient();
+
+  const { user } = useAuth();
 
   const {
     data: response,
@@ -178,28 +187,60 @@ export default function NotificationsScreen() {
 
   return isPending ? (
     <View className="flex-1">
-      <SimplePageTitle title="Notifications" />
+      <SimplePageTitle title="Notifications">
+        <TouchableOpacity
+          onPress={() => router.push("/profile")}
+          className="px-2"
+          accessibilityLabel="View profile"
+        >
+          <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
+        </TouchableOpacity>
+      </SimplePageTitle>
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#0D1B2A" />
       </View>
     </View>
   ) : error ? (
     <View className="flex-1">
-      <SimplePageTitle title="Notifications" />
+      <SimplePageTitle title="Notifications">
+        <TouchableOpacity
+          onPress={() => router.push("/profile")}
+          className="px-2"
+          accessibilityLabel="View profile"
+        >
+          <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
+        </TouchableOpacity>
+      </SimplePageTitle>
       <View className="flex-1 items-center justify-center bg-white">
         <Text className="text-center text-red-500">{error.message}</Text>
       </View>
     </View>
   ) : renderItems.length === 0 ? (
     <View className="flex-1">
-      <SimplePageTitle title="Notifications" />
+      <SimplePageTitle title="Notifications">
+        <TouchableOpacity
+          onPress={() => router.push("/profile")}
+          className="px-2"
+          accessibilityLabel="View profile"
+        >
+          <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
+        </TouchableOpacity>
+      </SimplePageTitle>
       <View className="flex-1 items-center justify-center bg-white">
         <Text className="text-zinc-500">You&apos;re all caught up.</Text>
       </View>
     </View>
   ) : (
     <View className="flex-1 bg-white" testID="vr-notifications-ready">
-      <SimplePageTitle title="Notifications" />
+      <SimplePageTitle title="Notifications">
+        <TouchableOpacity
+          onPress={() => router.push("/profile")}
+          className="px-2"
+          accessibilityLabel="View profile"
+        >
+          <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
+        </TouchableOpacity>
+      </SimplePageTitle>
       <LegendList
         data={renderItems}
         keyExtractor={(item) => item.key}

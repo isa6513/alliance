@@ -168,7 +168,7 @@ export default function SettingsPage() {
     "border border-zinc-200 rounded-lg bg-white px-3 py-3 text-base";
 
   return (
-    <View className="flex-1 bg-white py" testID="vr-settings-ready">
+    <View className="flex-1 bg-white" testID="vr-settings-ready">
       <SimplePageTitle title="Settings">
         <Text className="text-sm text-zinc-500">
           {saving
