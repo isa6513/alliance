@@ -31,8 +31,8 @@ const ProfileDropdown = () => {
   return (
     <div
       ref={ref}
-      onMouseOver={!isMobile ? () => setIsOpen(true) : undefined}
-      onMouseOut={!isMobile ? () => setIsOpen(false) : undefined}
+      onMouseEnter={!isMobile ? () => setIsOpen(true) : undefined}
+      onMouseLeave={!isMobile ? () => setIsOpen(false) : undefined}
       className="relative flex items-center gap-x-1.5"
     >
       {isMobile ? (

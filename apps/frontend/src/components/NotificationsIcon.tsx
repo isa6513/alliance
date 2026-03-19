@@ -79,7 +79,10 @@ const NotificationsIcon = () => {
               <Button
                 color={ButtonColor.Grey}
                 size="mediumDynamic"
-                onClick={() => navigate(href("/notifications"))}
+                onClick={() => {
+                setIsOpen(false);
+                navigate(href("/notifications"));
+              }}
               >
                 See all
               </Button>
