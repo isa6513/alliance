@@ -1934,17 +1934,16 @@ export class ActionsService {
       .filter((a) => this.buildOutputFormResponse(a) !== undefined)
       .slice(0, limit);
 
-    console.log(contentful);
     if (contentful.length === 0) return [];
+
+    if (comments) {
+      return this.attachComments(contentful, userId);
+    }
 
     const likedIds = await this.getLikedActivityIds(
       contentful.map((a) => a.id),
       userId,
     );
-
-    if (comments) {
-      return this.attachComments(contentful, userId);
-    }
 
     return contentful.map(
       (activity) =>

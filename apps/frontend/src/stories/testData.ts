@@ -122,6 +122,7 @@ export const testAuthUser: UserDto = {
   email: "first.lastname@example.com",
   admin: false,
   referralCode: "1234567890",
+  referralSource: "onetime_invite",
   anonymous: false,
   forumDigestPreference: "off",
   emailNotifsEnabled: false,

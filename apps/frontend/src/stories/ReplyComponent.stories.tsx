@@ -10,7 +10,7 @@ import { fn } from "@storybook/test";
 import React from "react";
 
 const makeAuthor = (
-  overrides: Partial<CommentDto["author"]> = {}
+  overrides: Partial<CommentDto["author"]> = {},
 ): CommentDto["author"] => ({
   id: 1,
   displayName: "Jane Smith",
@@ -54,6 +54,7 @@ const currentUser: UserDto = {
   anonymous: false,
   shareInfoPublicly: true,
   emailNotifsEnabled: true,
+  referralSource: "onetime_invite",
   textNotifsEnabled: false,
   pushNotifsEnabled: true,
   shareEmailWithCommunityLead: false,
@@ -82,12 +83,12 @@ const defaultCtx = {
   setReplyingTo: fn() as (id: number | null) => void,
   handleSubmitReply: fn() as (
     content: CreateEditableContentDto,
-    onSuccess?: () => void
+    onSuccess?: () => void,
   ) => Promise<void>,
   handleDeleteReply: fn() as (id: number) => Promise<void>,
   onUpdateReply: fn() as (
     id: number,
-    content: CreateEditableContentDto
+    content: CreateEditableContentDto,
   ) => Promise<void>,
   onLikeReply: fn() as (id: number, unlike?: boolean) => Promise<void>,
   onPinReply: fn() as (id: number) => Promise<void>,
