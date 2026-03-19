@@ -59,7 +59,7 @@ import {
   type ListField,
   Page,
 } from './schema';
-import type { DeviceVisibilityTarget } from './schema';
+import type { DeviceVisibilityTarget } from './form-schema/v0/device';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 import { EventLogService } from 'src/eventlog/eventlog.service';
