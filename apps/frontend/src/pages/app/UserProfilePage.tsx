@@ -52,7 +52,7 @@ enum ProfileTabs {
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-var(--navbar-top-bar-height))]">
+    <div className="flex flex-col items-center justify-center min-h-full">
       <div>
         <span className="font-bold pb-2 text-red-500">Error</span>
         <p>Failed to load user profile</p>

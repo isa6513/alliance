@@ -118,7 +118,7 @@ export function NavbarTopBar({
         <div
           ref={searchContainerRef}
           className={cn(
-            "flex items-center transition-all duration-200",
+            "flex items-center",
             searchExpanded ? "flex-1 min-w-0 max-w-md" : "shrink-0",
           )}
         >

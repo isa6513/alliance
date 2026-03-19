@@ -216,7 +216,7 @@ const HomePage = () => {
     return (
       <div
         className={
-          "flex flex-col gap-y-8 sm:gap-y-12 lg:gap-y-16 py-4 sm:py-8 md:py-18 px-4 xl:px-0 max-w-3xl mx-auto relative"
+          "flex flex-col gap-y-8 sm:gap-y-12 lg:gap-y-16 py-4 sm:py-8 px-4 xl:px-0 max-w-3xl mx-auto relative"
         }
       >
         <div>
