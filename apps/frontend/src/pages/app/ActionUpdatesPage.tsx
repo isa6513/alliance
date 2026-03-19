@@ -8,12 +8,12 @@ const ActionUpdatesPage = () => {
   return (
     <CenterLayout>
       <div className="gap-y-4 flex flex-col">
-        <h1 className="text-title-small mb-3">Action updates</h1>
+        <h1 className="text-title mb-3">Action updates</h1>
 
         <div className="flex flex-col gap-y-4 text-base">
           {updates
             .sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
             )
             .map((update) => (
               <ActionUpdateCard

@@ -6,7 +6,6 @@ import {
   Layers,
   ListTodo,
   MessageSquare,
-  MessagesSquare,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -23,12 +22,13 @@ import { isFeatureEnabled } from "../lib/config";
 import { useMessagingUnread } from "../pages/app/messages";
 import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
 import { cn } from "@alliance/shared/styles/util";
+import { useContext } from "react";
+import { NavbarOptionsContext } from "../lib/NavbarOptionsContext";
 
 export enum NavbarPage {
   Tasks = "Tasks",
   CurrentActions = "Actions",
   Activity = "Activity",
-  Forum = "Forum",
   Information = "Information",
   Groups = "Groups",
   Messages = "Messages",
@@ -39,7 +39,6 @@ export const destinations: Record<NavbarPage, string> = {
   [NavbarPage.Tasks]: href("/tasks"),
   [NavbarPage.CurrentActions]: href("/actions"),
   [NavbarPage.Activity]: href("/feed"),
-  [NavbarPage.Forum]: href("/forum"),
   [NavbarPage.Information]: href("/information"),
   [NavbarPage.Groups]: href("/groups"),
   [NavbarPage.Messages]: href("/messages"),
@@ -56,8 +55,6 @@ const getIcon = (page: NavbarPage, size: number) => {
       return <MessageSquare size={size} />;
     case NavbarPage.Information:
       return <BookText size={size} />;
-    case NavbarPage.Forum:
-      return <MessagesSquare size={size} />;
     case NavbarPage.Groups:
       return <Users size={size} />;
     case NavbarPage.Activity:
@@ -87,6 +84,8 @@ const NavbarVertical: React.FC<{
   whiteBackground?: boolean;
 }) => {
   const { isAuthenticated } = useAuth();
+  const navbarOptions = useContext(NavbarOptionsContext);
+  const noBorder = navbarOptions?.options?.noBorder ?? false;
   const location = useLocation();
 
   const { pendingCommunityInvites } = useIncomingCommunityInvites();
@@ -111,7 +110,6 @@ const NavbarVertical: React.FC<{
       page: NavbarPage.Activity,
       destination: destinations[NavbarPage.Activity],
     },
-    { page: NavbarPage.Forum, destination: destinations[NavbarPage.Forum] },
     { page: NavbarPage.Groups, destination: destinations[NavbarPage.Groups] },
     ...(isFeatureEnabled(Features.Messaging)
       ? [
@@ -228,6 +226,7 @@ const NavbarVertical: React.FC<{
           "fixed top-0 left-0 h-screen w-screen sm:w-[clamp(14rem,18vw,17rem)]",
           whiteBackground ? "bg-white" : "bg-page",
           "flex flex-col",
+          !noBorder && "border-r border-zinc-200",
           "transform transition-transform duration-100 ease-in-out",
           "z-30 overflow-y-auto",
           "md:shadow-none",
@@ -266,8 +265,8 @@ const NavbarVertical: React.FC<{
                 )}
                 onClick={() => setOpen(false)}
               >
-                <div className="flex items-center gap-x-2">
-                  {getIcon(item.page, 16)}
+                <div className="flex items-center gap-x-3">
+                  {getIcon(item.page, 20)}
                   <p>{item.page}</p>
                 </div>
                 {!!unreadNotifsForPage[item.page] && (

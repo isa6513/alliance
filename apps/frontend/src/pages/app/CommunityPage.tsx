@@ -775,7 +775,7 @@ const CommunityPage = () => {
       sidebar={
         messagingEnabled && isLargeScreen ? (
           <div
-            className="p-10 h-screen px-5 transition-all duration-200 ease-in-out"
+            className="p-10 h-full px-5 transition-all duration-200 ease-in-out min-h-0 flex flex-col"
             style={{
               transform: chatOpen ? "translateY(0)" : "translateY(100%)",
             }}

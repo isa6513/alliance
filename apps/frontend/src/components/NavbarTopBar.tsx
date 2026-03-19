@@ -16,18 +16,23 @@ import {
   NAV_BAR_CONTAINER_HEIGHT,
   NAV_BAR_ICON_HEIGHT,
 } from "@alliance/shared/lib/constants";
+import { useContext } from "react";
+import { NavbarOptionsContext } from "../lib/NavbarOptionsContext";
 
 export function NavbarTopBar({
   onMenuClick,
   className,
-  whiteBackground,
-  showNavbarBorder,
+  whiteBackground: whiteBackgroundProp,
 }: {
   onMenuClick?: () => void;
   className?: string;
   whiteBackground?: boolean;
-  showNavbarBorder?: boolean;
 }) {
+  const navbarOptions = useContext(NavbarOptionsContext);
+  const whiteBackground =
+    whiteBackgroundProp ??
+    navbarOptions?.options?.whiteBackground ??
+    false;
   const { isAuthenticated } = useAuth();
   const [searchExpanded, setSearchExpanded] = useState(false);
   const searchContainerRef = useOutsideClick(() => setSearchExpanded(false));
@@ -96,7 +101,6 @@ export function NavbarTopBar({
     <header
       className={cn(
         "z-20 flex items-center justify-between gap-2.5 px-3 py-2 md:px-4",
-        showNavbarBorder && "border-b border-zinc-200",
         whiteBackground ? "bg-white" : "bg-page",
         "fixed top-0 left-0 right-0 md:left-[var(--nav-width)]",
         className,

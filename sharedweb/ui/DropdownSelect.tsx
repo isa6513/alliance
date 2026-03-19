@@ -50,8 +50,8 @@ function DropdownSelect<T extends EnumType>({
     <div className="relative">
       <button
         className={cn(
-          "border border-gray-2 text-black bg-white hover:bg-zinc-50 px-3 rounded-sm py-2 flex flex-row gap-x-2 items-center",
-          sizeClass
+          "border border-grey-2 text-black bg-white hover:bg-zinc-50 px-3 rounded-sm py-2 flex flex-row gap-x-2 items-center",
+          sizeClass,
         )}
         style={{
           fontWeight: 450,
@@ -65,7 +65,7 @@ function DropdownSelect<T extends EnumType>({
           "absolute z-10 top-[calc(100% - 30px)] mt-0.5",
           dropdownAlignment === "left" ? "left-0" : "right-0",
           "w-[220px] bg-white border border-gray-2 overflow-hidden rounded",
-          isOpen ? "flex flex-col" : "hidden"
+          isOpen ? "flex flex-col" : "hidden",
         )}
         ref={ref}
       >
@@ -83,7 +83,7 @@ function DropdownSelect<T extends EnumType>({
                 asButton
                   ? "text-green bg-zinc-50 hover:bg-zinc-100 font-medium"
                   : "hover:bg-zinc-50",
-                sizeClass
+                sizeClass,
               )}
               style={{
                 fontWeight: asButton ? 500 : 450,

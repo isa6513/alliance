@@ -9,7 +9,6 @@ import {
 } from "react-router";
 import ActionActivityList from "../../components/ActionActivityList";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
-import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
@@ -21,6 +20,7 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { useActionHandlers } from "@alliance/shared/lib/actionPage";
 import { useCallback } from "react";
 import { ActionActivityDetailContext } from "../../components/ActionActivityDetail";
+import { useNavbarOptions } from "../../lib/NavbarOptionsContext";
 
 export async function loader({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -42,10 +42,8 @@ export default function ActionPage() {
   const { id: idParam } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-
+  useNavbarOptions({ whiteBackground: true });
   const actionId = parseInt(idParam!);
-
-  useWhiteBackground();
 
   const { isAuthenticated, user, loading: userLoading } = useAuth();
 
@@ -112,7 +110,7 @@ export default function ActionPage() {
   return (
     <>
       {publicMode && <PrelaunchNavbar transparent={false} absolute={false} />}
-      <div className="w-full flex flex-row justify-between py-10 sm:py-20 px-4 md:px-8 xl:px-16 bg-white">
+      <div className="w-full flex flex-row justify-between py-10 px-4 md:px-8 xl:px-16 bg-white">
         <div className="flex flex-col md:pr-4 xl:pr-12 max-w-2xl lg:max-w-3xl mx-auto w-full">
           <Outlet
             context={

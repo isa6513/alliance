@@ -32,10 +32,11 @@ import {
   sortConversations,
   updateConversationsForLastMessage,
 } from "@alliance/shared/lib/messages";
+import { useNavbarOptions } from "../../lib/NavbarOptionsContext";
 
 const MessagesPage = () => {
   useWhiteBackground();
-
+  useNavbarOptions({ noBorder: true });
   const [params, setParams] = useSearchParams();
   const selectedConvoId = useMemo(() => {
     const convoId = params.get("chat");
@@ -314,12 +315,12 @@ const MessagesPage = () => {
 
   return (
     <div
-      className="flex flex-row w-full h-[calc(100vh-var(--navbar-top-bar-height))] overflow-hidden"
+      className="flex flex-row w-full h-[calc(100vh-var(--navbar-top-bar-height))] overflow-hidden gap-3 px-3 sm:gap-4 sm:px-4"
       ref={containerRef}
     >
       <div
         className={cn(
-          "overflow-x-hidden flex flex-col bg-white border-x border-zinc-200 transition-width duration-100 ease-in-out",
+          "overflow-x-hidden flex flex-col bg-white rounded-xl transition-width duration-100 ease-in-out",
           !isSmall ? "min-w-[300px] max-w-[300px]" : "max-w-full",
         )}
         style={{ flex: isSmall && messagesOpen ? 0 : 1 }}
@@ -339,24 +340,24 @@ const MessagesPage = () => {
             </div>
             <input
               placeholder="Search"
-              className="w-full border border-zinc-200 rounded-md p-2 !bg-zinc-100 text-black focus:outline-none text-[16px]"
+              className="w-full rounded-md p-2 !bg-zinc-100 text-black focus:outline-none text-[16px]"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               autoFocus
             />
           </div>
-          <div className="border-t border-zinc-200">
+          <div>
             {pendingInvites && pendingInvites.length > 0 && (
               <div className="mt-2">
                 <p className="text-sm text-zinc-500 font-medium px-4">
                   New message requests
                 </p>
-                <div className="flex flex-col border-t border-zinc-200 mt-2">
+                <div className="flex flex-col mt-2">
                   {pendingInvites?.map((conversation) => (
                     <div
                       key={conversation.id}
                       className={cn(
-                        "p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3",
+                        "p-4 hover:bg-zinc-50 cursor-pointer rounded-lg mx-2 flex flex-row justify-between items-center gap-x-3 transition-colors",
                         selectedConvoId === conversation.id
                           ? "bg-zinc-100"
                           : "bg-white",
@@ -383,7 +384,7 @@ const MessagesPage = () => {
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-zinc-500 font-medium px-4 py-2 border-b border-zinc-200">
+                <p className="text-sm text-zinc-500 font-medium px-4 py-2">
                   Conversations
                 </p>
               </div>
@@ -392,7 +393,7 @@ const MessagesPage = () => {
               <div
                 key={conversation.id}
                 className={cn(
-                  "p-4 hover:bg-zinc-100 cursor-pointer border-b border-zinc-200 flex flex-row justify-between items-center gap-x-3",
+                  "p-4 hover:bg-zinc-50 cursor-pointer rounded-lg mx-2 flex flex-row justify-between items-center gap-x-3 transition-colors",
                   selectedConvoId === conversation.id
                     ? "bg-zinc-100"
                     : "bg-white",
@@ -427,56 +428,65 @@ const MessagesPage = () => {
       </div>
       <div
         className={cn(
-          "flex-1",
-          isSmall && !messagesOpen ? "max-w-0" : "max-w-full",
+          "flex-1 min-w-0 flex",
+          isSmall && !messagesOpen ? "max-w-0 overflow-hidden" : "max-w-full",
         )}
       >
         {selectedConvo && !creatingNewConversation && (
-          <ConversationDetailPanel
-            showCloseButton={isSmall}
-            mode="existing"
-            onClose={() => setMessagesOpen(false)}
-            onLeave={handleLeaveConversation}
-            selectedConvo={selectedConvo}
-            convoMessages={convoMessages}
-            messagesContainerRef={messagesContainerRef}
-            handleAcceptMessageRequest={handleAcceptMessageRequest}
-            handleDeclineMessageRequest={handleDeclineMessageRequest}
-            handleConversationUpdated={handleConversationUpdated}
-            sendingNewMessageToIds={null}
-            setSendingNewMessageToIds={null}
-            handleCreateConversation={null}
-            friends={messageableUsers}
-            onOptimisticMessage={addOptimisticMessage}
-            onOptimisticMessageFailed={(tempId) =>
-              removeOptimisticMessage(tempId)
-            }
-          />
+          <div className="flex-1 min-w-0 flex flex-col bg-white rounded-xl overflow-hidden">
+            <ConversationDetailPanel
+              showCloseButton={isSmall}
+              mode="existing"
+              onClose={() => setMessagesOpen(false)}
+              onLeave={handleLeaveConversation}
+              selectedConvo={selectedConvo}
+              convoMessages={convoMessages}
+              messagesContainerRef={messagesContainerRef}
+              handleAcceptMessageRequest={handleAcceptMessageRequest}
+              handleDeclineMessageRequest={handleDeclineMessageRequest}
+              handleConversationUpdated={handleConversationUpdated}
+              sendingNewMessageToIds={null}
+              setSendingNewMessageToIds={null}
+              handleCreateConversation={null}
+              friends={messageableUsers}
+              onOptimisticMessage={addOptimisticMessage}
+              onOptimisticMessageFailed={(tempId) =>
+                removeOptimisticMessage(tempId)
+              }
+            />
+          </div>
         )}
         {creatingNewConversation && (
-          <ConversationDetailPanel
-            showCloseButton={isSmall}
-            mode="new"
-            onClose={() => setMessagesOpen(false)}
-            onLeave={() => {
-              setSelectedConvoId(null);
-              setMessagesOpen(false);
-            }}
-            selectedConvo={null}
-            convoMessages={convoMessages}
-            messagesContainerRef={messagesContainerRef}
-            handleConversationUpdated={handleConversationUpdated}
-            handleAcceptMessageRequest={null}
-            handleDeclineMessageRequest={null}
-            friends={messageableUsers}
-            sendingNewMessageToIds={sendingNewMessageToIds}
-            setSendingNewMessageToIds={handleUpdateRecipientIds}
-            handleCreateConversation={handleCreateConversation}
-            onOptimisticMessage={addOptimisticMessage}
-            onOptimisticMessageFailed={(tempId) =>
-              removeOptimisticMessage(tempId)
-            }
-          />
+          <div className="flex-1 min-w-0 flex flex-col bg-white rounded-xl overflow-hidden">
+            <ConversationDetailPanel
+              showCloseButton={isSmall}
+              mode="new"
+              onClose={() => setMessagesOpen(false)}
+              onLeave={() => {
+                setSelectedConvoId(null);
+                setMessagesOpen(false);
+              }}
+              selectedConvo={null}
+              convoMessages={convoMessages}
+              messagesContainerRef={messagesContainerRef}
+              handleConversationUpdated={handleConversationUpdated}
+              handleAcceptMessageRequest={null}
+              handleDeclineMessageRequest={null}
+              friends={messageableUsers}
+              sendingNewMessageToIds={sendingNewMessageToIds}
+              setSendingNewMessageToIds={handleUpdateRecipientIds}
+              handleCreateConversation={handleCreateConversation}
+              onOptimisticMessage={addOptimisticMessage}
+              onOptimisticMessageFailed={(tempId) =>
+                removeOptimisticMessage(tempId)
+              }
+            />
+          </div>
+        )}
+        {!selectedConvo && !creatingNewConversation && (
+          <div className="flex-1 min-w-0 flex flex-col bg-white rounded-xl overflow-hidden items-center justify-center">
+            <p className="text-zinc-500">No chat selected</p>
+          </div>
         )}
       </div>
     </div>
