@@ -13,11 +13,11 @@ export interface LargeActionCardPropsShared {
 }
 export function getLastAndNextEvent(action: ActionDto) {
   const pastEvents = action.events.filter(
-    (event) => new Date(event.date) <= new Date()
+    (event) => new Date(event.date) <= new Date(),
   );
 
   const futureEvents = action.events.filter(
-    (event) => new Date(event.date) > new Date()
+    (event) => new Date(event.date) > new Date(),
   );
 
   const lastEvent =

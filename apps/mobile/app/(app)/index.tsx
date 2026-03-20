@@ -16,6 +16,8 @@ import { colors } from "../../lib/style/colors";
 import Text from "../../components/system/Text";
 import {
   ActionWithAwayStatus,
+  TaskAwayStatus,
+  deadlineHasPassed,
   getAwayStatus,
   isGeneralUpdate,
   homePagePriorityComparator,
@@ -24,17 +26,23 @@ import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import LargeActionCard from "../../components/LargeActionCard";
 import LargeGeneralUpdateCard from "../../components/LargeGeneralUpdateCard";
 import { Check, User } from "lucide-react-native";
-import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
+import {
+  noTasksToDoRightNow,
+  TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
+  TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
+  TASK_DISMISS_MESSAGE_WAS_AWAY,
+  TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
+} from "@alliance/shared/lib/copy";
 import SuccessOverlay from "../../components/SuccessOverlay";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import type { GeneralUpdateDto } from "@alliance/shared/client";
+import type { LargeActionCardPropsShared } from "@alliance/shared/lib/largeActionCard";
 import { useAuth } from "../../lib/AuthContext";
 import { useBoundedIndex } from "../../lib/useBoundedIndex";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { IndexStepper } from "../../components/system/IndexStepper";
-import Button, { ButtonColor } from "../../components/system/Button";
 import { router } from "expo-router";
 import ProfileImage from "../../components/ProfileImage";
 
@@ -174,11 +182,33 @@ export default function HomeScreen() {
     scrollViewRef.current?.scrollToEnd({ animated });
   }, []);
 
-  const isCurrentTaskOptional =
-    !!currentTaskOrGeneralUpdate &&
-    !isGeneralUpdate(currentTaskOrGeneralUpdate) &&
-    "optional" in currentTaskOrGeneralUpdate &&
-    currentTaskOrGeneralUpdate.optional === true;
+  const dismissProps: LargeActionCardPropsShared["dismissProps"] = useMemo(
+    () => {
+      const task = currentTaskOrGeneralUpdate;
+      if (!task || isGeneralUpdate(task) || task.onboarding) {
+        return undefined;
+      }
+      if (task.awayStatus !== TaskAwayStatus.NOT_AWAY) {
+        return {
+          header: "Away",
+          message: {
+            [TaskAwayStatus.AWAY_CURRENTLY]:
+              TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
+            [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
+            [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
+          }[task.awayStatus],
+        };
+      }
+      if (deadlineHasPassed(task, new Date())) {
+        return {
+          header: "Deadline passed",
+          message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
+        };
+      }
+      return undefined;
+    },
+    [currentTaskOrGeneralUpdate],
+  );
 
   const { title, body, fullScreen } = useMemo(() => {
     if (!currentTaskOrGeneralUpdate) {
@@ -223,6 +253,7 @@ export default function HomeScreen() {
       body: (
         <LargeActionCard
           action={currentTaskOrGeneralUpdate}
+          dismissProps={dismissProps}
           userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
           onUpdateActionState={refetch}
           scrollPageTo={scrollPageTo}
@@ -237,6 +268,7 @@ export default function HomeScreen() {
     };
   }, [
     currentTaskOrGeneralUpdate,
+    dismissProps,
     user,
     handleDismissGeneralUpdate,
     handleDismissAction,
@@ -253,23 +285,6 @@ export default function HomeScreen() {
       </View>
     );
   }
-
-  const optionalBanner = isCurrentTaskOptional ? (
-    <View className="bg-sky-100 border-b border-sky-300 px-4 py-3">
-      <Text className="text-sky-800 font-semibold">
-        This action is optional.
-      </Text>
-      <Text className="text-sky-700 mt-1 mb-3">
-        You can complete as usual or dismiss it.
-      </Text>
-      <Button
-        color={ButtonColor.White}
-        title="Dismiss"
-        className="w-full"
-        onPress={() => handleDismissAction(currentTaskOrGeneralUpdate.id)}
-      />
-    </View>
-  ) : null;
 
   return (
     <View className="flex-1 bg-white">
@@ -304,7 +319,6 @@ export default function HomeScreen() {
         }
         testID="vr-home-ready"
       >
-        {optionalBanner}
         {body}
       </KeyboardAwareScrollView>
       <SuccessOverlay
