@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
+  Pressable,
   TextInput,
   TouchableOpacity,
   View,
@@ -29,7 +30,7 @@ import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { Edit } from "lucide-react-native";
+import { ChevronDown, Edit } from "lucide-react-native";
 import AppMarkdownWrapper from "../../../components/AppMarkdownWrapper";
 import EditableContentRenderer from "../../../components/EditableContentRenderer";
 import ProfileImage from "../../../components/ProfileImage";
@@ -119,6 +120,7 @@ export default function UserProfileScreen() {
     ProfileTab.Actions,
   );
   const [friendsTab, setFriendsTab] = useState<FriendsTab>(FriendsTab.Friends);
+  const [friendActionsOpen, setFriendActionsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editBio, setEditBio] = useState("");
@@ -229,6 +231,22 @@ export default function UserProfileScreen() {
     }
   }, [userId, declineFriendRequest]);
 
+  const handleRemoveFriend = useCallback(async () => {
+    if (!userId) return;
+    try {
+      await removeFriend.mutateAsync(userId);
+      setFriendActionsOpen(false);
+    } catch (error) {
+      console.error("Failed to remove friend", error);
+    }
+  }, [userId, removeFriend]);
+
+  useEffect(() => {
+    if (friendStatus?.status !== "accepted") {
+      setFriendActionsOpen(false);
+    }
+  }, [friendStatus?.status]);
+
   const confirmCancelRequest = useCallback(
     (targetId: number) => {
       Alert.alert("Cancel request", "Cancel this friend request?", [
@@ -250,10 +268,47 @@ export default function UserProfileScreen() {
       return (
         <Button
           title="Send friend request"
-          color={ButtonColor.Blue}
-          size={ButtonSize.Medium}
+          color={ButtonColor.White}
+          size={ButtonSize.Small}
           onPress={handleSendFriendRequest}
         />
+      );
+    }
+
+    if (friendStatus.status === "accepted") {
+      return (
+        <View className="relative">
+          {friendActionsOpen ? (
+            <Pressable
+              className="absolute -inset-4"
+              onPress={() => setFriendActionsOpen(false)}
+            />
+          ) : null}
+          <Button
+            color={ButtonColor.White}
+            size={ButtonSize.Small}
+            onPress={() => setFriendActionsOpen((prev) => !prev)}
+          >
+            <View className="flex-row items-center gap-1">
+              <Text className="font-medium text-zinc-800">Friends</Text>
+              <ChevronDown size={14} color="#27272a" />
+            </View>
+          </Button>
+          {friendActionsOpen ? (
+            <View className="absolute left-0 top-full z-20 self-start rounded-sm border border-stone-300 bg-white">
+              <TouchableOpacity
+                className="flex-row self-start px-3 py-2"
+                onPress={handleRemoveFriend}
+                activeOpacity={0.8}
+              >
+                <View className="flex-row gap-1">
+                  <Text className="shrink-0 text-sm text-red-600">Remove</Text>
+                  <Text className="shrink-0 text-sm text-red-600">friend</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+        </View>
       );
     }
 
@@ -283,7 +338,7 @@ export default function UserProfileScreen() {
         <Button
           title="Friend request sent"
           color={ButtonColor.Light}
-          size={ButtonSize.Medium}
+          size={ButtonSize.Small}
           onPress={handleSendFriendRequest}
           disabled
         />
@@ -298,6 +353,8 @@ export default function UserProfileScreen() {
     handleSendFriendRequest,
     handleAcceptFriendRequest,
     handleDeclineFriendRequest,
+    handleRemoveFriend,
+    friendActionsOpen,
   ]);
 
   const renderActionItem = useCallback(
@@ -558,84 +615,71 @@ export default function UserProfileScreen() {
   const badgeStyles = "text-xs text-white px-2 py-0.5 rounded";
   const profileHeader = (
     <>
-      <View className="p-4 pt-12 gap-4">
-        <View className="items-center gap-3">
+      <View className="p-4 pt-4 gap-4">
+        <View className="flex flex-row items-center gap-3">
           {isEditing ? (
             <TouchableOpacity
               onPress={handlePickAvatar}
               className="border-zinc-200 rounded-lg p-1 border-dashed border-2 relative"
             >
-              <ProfileImage pfp={editAvatarUrl} size="huge" />
+              <ProfileImage pfp={editAvatarUrl} size="larger" />
               <View className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center ">
                 <Edit size={24} color="#fff" />
               </View>
             </TouchableOpacity>
           ) : (
-            <ProfileImage pfp={profile.profilePicture} size="huge" />
+            <ProfileImage pfp={profile.profilePicture} size="larger" />
           )}
+          <View className="gap-1">
+            {isEditing ? (
+              <TextInput
+                className="border border-zinc-200 rounded-lg px-3 py-2 text-lg w-full"
+                value={editName}
+                onChangeText={setEditName}
+                placeholder="Name"
+                placeholderTextColor="#9ca3af"
+              />
+            ) : (
+              <View className="flex-row items-center flex-wrap gap-2 justify-center">
+                <Text className="text-xl font-semibold text-zinc-900">
+                  {profile.displayName}
+                </Text>
+                {profile.staff && (
+                  <View className={cn("bg-amber-600", badgeStyles)}>
+                    <Text className="text-white text-xs">Staff</Text>
+                  </View>
+                )}
+                {!profile.staff && profile.isCommunityLeader && (
+                  <View className={cn("bg-green-600", badgeStyles)}>
+                    <Text className="text-white text-xs">Lead</Text>
+                  </View>
+                )}
+                {!profile.hasActiveContract && (
+                  <View className={cn("bg-zinc-200", badgeStyles)}>
+                    <Text className="text-zinc-700 text-xs">Observer</Text>
+                  </View>
+                )}
+                {isMe && (
+                  <TouchableOpacity
+                    onPress={() => setIsEditing(true)}
+                    activeOpacity={0.7}
+                    className="ml-2"
+                  >
+                    <Edit size={20} />
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+            <Text className="text-sm text-zinc-500">
+              <Text className="text-sm text-black">
+                {completedActions.length}
+              </Text>{" "}
+              actions
+            </Text>
+          </View>
         </View>
-
-        <View className="items-center gap-2">
-          {isEditing ? (
-            <TextInput
-              className="border border-zinc-200 rounded-lg px-3 py-2 text-lg w-full"
-              value={editName}
-              onChangeText={setEditName}
-              placeholder="Name"
-              placeholderTextColor="#9ca3af"
-            />
-          ) : (
-            <View className="flex-row items-center flex-wrap gap-2 justify-center">
-              <Text className="text-2xl font-semibold text-zinc-900">
-                {profile.displayName}
-              </Text>
-              {profile.staff && (
-                <View className={cn("bg-amber-600", badgeStyles)}>
-                  <Text className="text-white text-xs">Staff</Text>
-                </View>
-              )}
-              {!profile.staff && profile.isCommunityLeader && (
-                <View className={cn("bg-green-600", badgeStyles)}>
-                  <Text className="text-white text-xs">Lead</Text>
-                </View>
-              )}
-              {!profile.hasActiveContract && (
-                <View className={cn("bg-zinc-200", badgeStyles)}>
-                  <Text className="text-zinc-700 text-xs">Observer</Text>
-                </View>
-              )}
-              {isMe && (
-                <TouchableOpacity
-                  onPress={() => setIsEditing(true)}
-                  activeOpacity={0.7}
-                  className="ml-2"
-                >
-                  <Edit size={20} />
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-        </View>
-
-        <View>
-          {isEditing ? (
-            <TextInput
-              className="border border-zinc-200 rounded-lg px-3 py-3 text-base min-h-24"
-              value={editBio}
-              onChangeText={setEditBio}
-              placeholder="Write something about yourself..."
-              placeholderTextColor="#9ca3af"
-              multiline
-            />
-          ) : profile.profileDescription ? (
-            <AppMarkdownWrapper>
-              {profile.profileDescription}
-            </AppMarkdownWrapper>
-          ) : null}
-        </View>
-
         {(!isMe || isEditing) && (
-          <View className="flex-row items-center justify-end gap-3">
+          <View className="flex-row items-center gap-3">
             {isMe ? (
               isEditing ? (
                 <>
@@ -662,6 +706,23 @@ export default function UserProfileScreen() {
           </View>
         )}
 
+        <View>
+          {isEditing ? (
+            <TextInput
+              className="border border-zinc-200 rounded-lg px-3 py-3 text-base min-h-24"
+              value={editBio}
+              onChangeText={setEditBio}
+              placeholder="Write something about yourself..."
+              placeholderTextColor="#9ca3af"
+              multiline
+            />
+          ) : profile.profileDescription ? (
+            <AppMarkdownWrapper>
+              {profile.profileDescription}
+            </AppMarkdownWrapper>
+          ) : null}
+        </View>
+
         <SegmentedTabs
           tabs={PROFILE_TABS_ORDER}
           selectedTab={selectedTab}
@@ -669,7 +730,6 @@ export default function UserProfileScreen() {
           labels={PROFILE_TAB_LABELS}
         />
       </View>
-      <View className="border-t border-zinc-200" />
     </>
   );
 

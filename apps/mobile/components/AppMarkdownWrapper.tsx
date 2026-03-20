@@ -68,8 +68,8 @@ function getInternalRoute(url: string): string | null {
     queryIndex >= 0 && hashIndex >= 0
       ? Math.min(queryIndex, hashIndex)
       : queryIndex >= 0
-      ? queryIndex
-      : hashIndex;
+        ? queryIndex
+        : hashIndex;
   const pathOnly = suffixStart >= 0 ? url.slice(0, suffixStart) : url;
   const suffix = suffixStart >= 0 ? url.slice(suffixStart) : "";
 
@@ -335,7 +335,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         );
       },
     }),
-    [handleLinkPress]
+    [handleLinkPress],
   );
 
   const markdownStyles = useMemo(
@@ -407,7 +407,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
       },
       ...style,
     }),
-    [style]
+    [style],
   );
 
   return (
