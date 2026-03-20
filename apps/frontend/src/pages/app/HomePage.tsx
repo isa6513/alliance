@@ -134,7 +134,6 @@ const HomePage = () => {
   useCIDFromParams();
 
   const {
-    currentTask,
     todoActions,
     newActions,
     currentWeekTodoActions,
@@ -384,9 +383,11 @@ const HomePage = () => {
       );
     }
 
-    const taskDismissInfo = currentTask
-      ? getTaskDismissInfo(currentTask)
-      : undefined;
+    const taskDismissInfo =
+      currentTaskOrGeneralUpdate &&
+      !isGeneralUpdate(currentTaskOrGeneralUpdate)
+        ? getTaskDismissInfo(currentTaskOrGeneralUpdate)
+        : undefined;
 
     return (
       <div
@@ -510,7 +511,6 @@ const HomePage = () => {
   }, [
     actions,
     loading,
-    currentTask,
     currentTaskOrGeneralUpdate,
     user,
     handleDismissAction,

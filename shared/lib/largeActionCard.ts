@@ -26,6 +26,15 @@ export interface LargeActionCardPropsShared {
   };
 }
 
+const AWAY_STATUS_MESSAGES = {
+  [TaskAwayStatus.AWAY_CURRENTLY]: TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
+  [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
+  [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
+} as const satisfies Record<
+  Exclude<TaskAwayStatus, TaskAwayStatus.NOT_AWAY>,
+  string
+>;
+
 /**
  * Pure data computation — returns the banner header/message for a task that can
  * be dismissed (away, deadline passed, or optional).  The caller is responsible
@@ -39,11 +48,7 @@ export function getTaskDismissInfo(
   if (action.awayStatus !== TaskAwayStatus.NOT_AWAY) {
     return {
       header: TASK_DISMISS_HEADER_AWAY,
-      message: {
-        [TaskAwayStatus.AWAY_CURRENTLY]: TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
-        [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
-        [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
-      }[action.awayStatus],
+      message: AWAY_STATUS_MESSAGES[action.awayStatus],
     };
   }
 
