@@ -26,6 +26,7 @@ import {
   type ContractField,
   type EmailField,
   type MultiSelectField,
+  type NumberField,
   type PhoneField,
   type RangeField,
   type RadioField,
@@ -204,6 +205,7 @@ type ControllerField =
   | SelectField
   | MultiSelectField
   | RangeField
+  | NumberField
   | TextContentControllerField;
 
 function isTextContentController(f: AnyField): f is TextContentControllerField {
@@ -223,8 +225,22 @@ function isConditionalController(f: AnyField): f is ControllerField {
     f.kind === "select" ||
     f.kind === "multiselect" ||
     f.kind === "range" ||
+    f.kind === "number" ||
     isTextContentController(f)
   );
+}
+
+function defaultNumberEqualsForVisibility(controller: NumberField): number {
+  if (
+    typeof controller.defaultValue === "number" &&
+    Number.isFinite(controller.defaultValue)
+  ) {
+    return controller.defaultValue;
+  }
+  if (typeof controller.min === "number" && Number.isFinite(controller.min)) {
+    return controller.min;
+  }
+  return 0;
 }
 
 type FieldCondition = Extract<Condition, { when: string }>;
@@ -352,6 +368,12 @@ export function ConditionalVisibility({
         return {
           when: controller.id,
           includesOption: controller.options?.[0]?.value ?? "",
+        };
+      }
+      if (controller.kind === "number") {
+        return {
+          when: controller.id,
+          equals: defaultNumberEqualsForVisibility(controller),
         };
       }
       if (controller.kind === "range") {
@@ -485,7 +507,7 @@ export function ConditionalVisibility({
     const condition = createDefaultFieldCondition();
     if (!condition) {
       setConditionError(
-        "Add a checkbox, contract, select, radio, multiselect, range, or text field earlier on this page first.",
+        "Add a checkbox, contract, select, radio, multiselect, range, number, or text field earlier on this page first.",
       );
       return false;
     }
@@ -655,6 +677,56 @@ export function ConditionalVisibility({
     [buildConditionForField, conditions, controllers, updateConditions],
   );
 
+  const handleNumberConditionModeChange = useCallback(
+    (index: number, mode: "equals" | "has_value" | "empty") => {
+      const next = [...conditions];
+      const current = next[index];
+      if (!isFieldCondition(current)) {
+        return;
+      }
+      const controller = controllers.find((f) => f.id === current.when);
+      if (!controller || controller.kind !== "number") {
+        return;
+      }
+      if (mode === "has_value") {
+        next[index] = { when: controller.id, hasValue: true };
+      } else if (mode === "empty") {
+        next[index] = { when: controller.id, hasValue: false };
+      } else {
+        const existingNum =
+          isEqualsCondition(current) && typeof current.equals === "number"
+            ? current.equals
+            : defaultNumberEqualsForVisibility(controller);
+        next[index] = { when: controller.id, equals: existingNum };
+      }
+      updateConditions(next, true);
+    },
+    [conditions, controllers, updateConditions],
+  );
+
+  const handleNumberEqualsInputChange = useCallback(
+    (index: number, raw: string) => {
+      const next = [...conditions];
+      const current = next[index];
+      if (!isFieldCondition(current)) {
+        return;
+      }
+      const controller = controllers.find((f) => f.id === current.when);
+      if (!controller || controller.kind !== "number") {
+        return;
+      }
+      const prev =
+        isEqualsCondition(current) && typeof current.equals === "number"
+          ? current.equals
+          : defaultNumberEqualsForVisibility(controller);
+      const n = raw.trim() === "" ? NaN : parseFloat(raw);
+      const equals = Number.isFinite(n) ? n : prev;
+      next[index] = { when: controller.id, equals };
+      updateConditions(next, true);
+    },
+    [conditions, controllers, updateConditions],
+  );
+
   const handleConditionValueChange = useCallback(
     (index: number, value: string) => {
       const next = [...conditions];
@@ -696,6 +768,14 @@ export function ConditionalVisibility({
         next[index] = {
           when: controller.id,
           equals: Number(value),
+        };
+      } else if (controller.kind === "number") {
+        const n = parseFloat(value);
+        next[index] = {
+          when: controller.id,
+          equals: Number.isFinite(n)
+            ? n
+            : defaultNumberEqualsForVisibility(controller),
         };
       } else {
         next[index] = {
@@ -808,7 +888,9 @@ export function ConditionalVisibility({
                 ? "has content"
                 : controller.kind === "multiselect"
                   ? "includes option"
-                  : "equals"}
+                  : controller.kind === "number"
+                    ? "when value"
+                    : "equals"}
             </label>
             {isTextContentController(controller) ? (
               <select
@@ -888,6 +970,56 @@ export function ConditionalVisibility({
                   </option>
                 ))}
               </select>
+            ) : controller.kind === "number" ? (
+              <div className="space-y-2">
+                <select
+                  className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  value={
+                    isHasValueCondition(condition)
+                      ? condition.hasValue
+                        ? "has_value"
+                        : "empty"
+                      : "equals"
+                  }
+                  onChange={(event) => {
+                    const v = event.target.value;
+                    handleNumberConditionModeChange(
+                      index,
+                      v === "has_value"
+                        ? "has_value"
+                        : v === "empty"
+                          ? "empty"
+                          : "equals",
+                    );
+                  }}
+                >
+                  <option value="equals">Equals</option>
+                  <option value="has_value">Has any value</option>
+                  <option value="empty">Is empty</option>
+                </select>
+                {!isHasValueCondition(condition) ? (
+                  <input
+                    type="number"
+                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    step={
+                      controller.step !== undefined
+                        ? String(controller.step)
+                        : "any"
+                    }
+                    min={controller.min}
+                    max={controller.max}
+                    value={
+                      isEqualsCondition(condition) &&
+                      typeof condition.equals === "number"
+                        ? condition.equals
+                        : defaultNumberEqualsForVisibility(controller)
+                    }
+                    onChange={(event) =>
+                      handleNumberEqualsInputChange(index, event.target.value)
+                    }
+                  />
+                ) : null}
+              </div>
             ) : (
               <select
                 className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -1126,8 +1258,8 @@ export function ConditionalVisibility({
         </div>
         {!canUseFieldControllers && (
           <p className="text-[11px] text-gray-400">
-            Add a checkbox, contract, select, radio, multiselect, range, or text
-            field earlier on this page to use answer-based visibility.
+            Add a checkbox, contract, select, radio, multiselect, range, number,
+            or text field earlier on this page to use answer-based visibility.
             Device-type rules are always available.
           </p>
         )}

@@ -274,6 +274,19 @@ const evaluateValueBasedCondition = (
     }
     return val === equals;
   }
+  if (typeof equals === "number" && Number.isFinite(equals)) {
+    if (val === "" || val === undefined || val === null) {
+      return false;
+    }
+    if (typeof val === "number" && Number.isFinite(val)) {
+      return val === equals;
+    }
+    if (typeof val === "string" && val.trim() !== "") {
+      const n = Number(val);
+      return Number.isFinite(n) && n === equals;
+    }
+    return false;
+  }
   if (Array.isArray(val) && equals !== null && equals !== undefined) {
     return (
       Array.isArray(val) &&

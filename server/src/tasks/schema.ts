@@ -341,6 +341,16 @@ export function isQuestionVisible(
     }
     if (!('equals' in c)) return true;
     if (typeof c.equals === 'boolean') return Boolean(val) === c.equals;
+    if (typeof c.equals === 'number' && Number.isFinite(c.equals)) {
+      if (val === '' || val === undefined || val === null) return false;
+      if (typeof val === 'number' && Number.isFinite(val))
+        return val === c.equals;
+      if (typeof val === 'string' && val.trim() !== '') {
+        const n = Number(val);
+        return Number.isFinite(n) && n === c.equals;
+      }
+      return false;
+    }
     if (Array.isArray(val) && c.equals !== null && c.equals !== undefined) {
       if (val.length > 0 && typeof val[0] === 'string') {
         return (val as string[]).includes(c.equals as string);
