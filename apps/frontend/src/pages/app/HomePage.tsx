@@ -46,6 +46,68 @@ import {
   mapFormViewsToActionIds,
   sidebarProgressActionCandidates,
 } from "../../lib/fetchTaskFormProgressViews";
+import { CircleChevronRight } from "lucide-react";
+
+function followUpStartTimeMs(f: FollowUpForm): number {
+  return f.startDate ? new Date(f.startDate).getTime() : Infinity;
+}
+
+function compareFollowUpFormsByStartDateDesc(
+  a: FollowUpForm,
+  b: FollowUpForm,
+): number {
+  return followUpStartTimeMs(b) - followUpStartTimeMs(a);
+}
+
+function FollowUpFormBulletRows({
+  actionId,
+  forms,
+}: {
+  actionId: number;
+  forms: FollowUpForm[];
+}) {
+  return forms.map((followUpForm) => (
+    <div
+      key={followUpForm.id}
+      className="flex flex-row items-center gap-x-2 pl-6"
+    >
+      <CircleChevronRight
+        className="h-4 w-4 shrink-0 text-blue-400"
+        aria-hidden
+      />
+      <Link
+        to={href("/actions/:id", { id: actionId.toString() })}
+        className="text-zinc-600"
+      >
+        {followUpForm.name?.trim() ? followUpForm.name : "Follow-up form"}
+      </Link>
+    </div>
+  ));
+}
+
+function SidebarCompletedActionRow({
+  action,
+  followUpForms,
+}: {
+  action: ActionDto;
+  followUpForms: FollowUpForm[];
+}) {
+  return (
+    <div className="text-zinc-600 flex flex-col gap-y-1">
+      <div className="flex gap-x-2">
+        <CheckIcon size="line" />
+        <Link
+          to={href("/actions/:id", { id: action.id.toString() })}
+          className="text-zinc-400 line-through"
+        >
+          {action.optional && "(Optional) "}
+          {action.name}
+        </Link>
+      </div>
+      <FollowUpFormBulletRows actionId={action.id} forms={followUpForms} />
+    </div>
+  );
+}
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -146,6 +208,58 @@ const HomePage = () => {
       .sort(homePagePriorityComparator);
   }, [actionProgressViews, actions]);
 
+  const activeCompletableFollowUpForms = useMemo(() => {
+    if (!actions) {
+      return [];
+    }
+    const list: {
+      followUpForm: FollowUpForm;
+      actionId: number;
+    }[] = [];
+    for (const action of actions) {
+      if (action.userRelation !== "completed") {
+        continue;
+      }
+      for (const f of action.followUpForms) {
+        if (isFollowUpFormActive(f)) {
+          list.push({ followUpForm: f, actionId: action.id });
+        }
+      }
+    }
+    return list.sort(
+      (a, b) =>
+        followUpStartTimeMs(b.followUpForm) -
+        followUpStartTimeMs(a.followUpForm),
+    );
+  }, [actions]);
+
+  const followUpFormsByActionId = useMemo(() => {
+    const map: Record<number, FollowUpForm[]> = {};
+    for (const { followUpForm, actionId } of activeCompletableFollowUpForms) {
+      (map[actionId] ??= []).push(followUpForm);
+    }
+    for (const forms of Object.values(map)) {
+      forms.sort(compareFollowUpFormsByStartDateDesc);
+    }
+    return map;
+  }, [activeCompletableFollowUpForms]);
+
+  const followUpParentActionsNotInCompletedList = useMemo(() => {
+    if (!actions) {
+      return [];
+    }
+    const completedIds = new Set(completedActions.map((a) => a.id));
+    const orphanIds = new Set<number>();
+    for (const { actionId } of activeCompletableFollowUpForms) {
+      if (!completedIds.has(actionId)) {
+        orphanIds.add(actionId);
+      }
+    }
+    return actions
+      .filter((a) => orphanIds.has(a.id))
+      .sort(homePagePriorityComparator);
+  }, [actions, activeCompletableFollowUpForms, completedActions]);
+
   const tasksListContent = useMemo(() => {
     const currentWeekSidebarActions = currentWeekTodoActions.filter(
       showActionInSidebarList,
@@ -154,7 +268,8 @@ const HomePage = () => {
     return (
       <>
         {(currentWeekSidebarActions.length > 0 ||
-          completedActions.length > 0) && (
+          completedActions.length > 0 ||
+          followUpParentActionsNotInCompletedList.length > 0) && (
           <div className="flex flex-col gap-y-2">
             {currentWeekSidebarActions.length + newActions.length > 0 && (
               <p className="text-zinc-600 mb-2">
@@ -167,17 +282,15 @@ const HomePage = () => {
               </p>
             )}
             <ul className="space-y-2 list-disc">
-              {completedActions.map((action) => (
-                <div key={action.id} className="text-zinc-600 flex gap-x-2">
-                  <CheckIcon size="line" />
-                  <Link
-                    to={href("/actions/:id", { id: action.id.toString() })}
-                    className="text-zinc-400 line-through"
-                  >
-                    {action.optional && "(Optional) "}
-                    {action.name}
-                  </Link>
-                </div>
+              {[
+                ...completedActions,
+                ...followUpParentActionsNotInCompletedList,
+              ].map((action) => (
+                <SidebarCompletedActionRow
+                  key={action.id}
+                  action={action}
+                  followUpForms={followUpFormsByActionId[action.id] ?? []}
+                />
               ))}
               {currentWeekTodoActions.map((action) => (
                 <div key={action.id} className="text-zinc-600 flex gap-x-2">
@@ -215,6 +328,8 @@ const HomePage = () => {
   }, [
     completedActions,
     currentWeekTodoActions,
+    followUpFormsByActionId,
+    followUpParentActionsNotInCompletedList,
     newActions,
     nextWeekTodoActions,
     numTodo,
@@ -226,27 +341,6 @@ const HomePage = () => {
       homePagePriorityComparator,
     )[0];
   }, [todoActions, generalUpdates]);
-
-  const activeCompletableFollowUpForms = useMemo(() => {
-    if (!actions) {
-      return [];
-    }
-    const list: {
-      followUpForm: FollowUpForm;
-      actionId: number;
-    }[] = [];
-    for (const action of actions) {
-      if (action.userRelation !== "completed") {
-        continue;
-      }
-      const forms = action.followUpForms;
-      for (const f of forms) {
-        if (isFollowUpFormActive(f))
-          list.push({ followUpForm: f, actionId: action.id });
-      }
-    }
-    return list;
-  }, [actions]);
 
   const mainContent = useMemo(() => {
     if (actions === null) {

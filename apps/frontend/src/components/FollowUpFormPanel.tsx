@@ -117,21 +117,28 @@ export default function FollowUpFormPanel({
   }
 
   const formTitle = followUpForm.name ?? form.title;
+  const hasInstructions =
+    followUpForm.instructions != null &&
+    followUpForm.instructions.trim() !== "";
+  const showIntroCard = hasInstructions || !!formTitle;
 
   return (
     <Card
       style={border ? CardStyle.WhiteBorder : CardStyle.White}
       className="p-4 sm:p-6"
     >
-      {followUpForm.instructions != null &&
-        followUpForm.instructions.trim() !== "" && (
-          <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
-            <p className="font-semibold">{formTitle}</p>
+      {showIntroCard && (
+        <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
+          <p className="font-semibold">{formTitle}</p>
+          {hasInstructions && (
             <div className="mt-1">
-              <AppMarkdownWrapper markdownContent={followUpForm.instructions} />
+              <AppMarkdownWrapper
+                markdownContent={followUpForm.instructions ?? ""}
+              />
             </div>
-          </Card>
-        )}
+          )}
+        </Card>
+      )}
       <div className="w-full">
         <FormRenderer
           key={formInstanceKey}
