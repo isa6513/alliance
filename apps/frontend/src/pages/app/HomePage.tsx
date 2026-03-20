@@ -11,29 +11,22 @@ import Spinner from "@alliance/sharedweb/ui/Spinner";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
-import LargeActionCard, { LargeActionCardProps } from "./LargeActionCard";
+import LargeActionCard from "./LargeActionCard";
+import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
 import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
 import useGlobalFeed from "@alliance/shared/lib/useGlobalFeed";
 import { useMediaQuery } from "../../lib/useMediaQuery";
 import {
   isGeneralUpdate,
   homePagePriorityComparator,
+  showActionInSidebarList,
+  isFollowUpFormActive,
 } from "@alliance/shared/lib/actionUtils";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import {
   noTasksContractSuspended,
   noTasksToDoRightNow,
-  TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
-  TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
-  TASK_DISMISS_MESSAGE_WAS_AWAY,
-  TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
 } from "@alliance/shared/lib/copy";
-import {
-  showActionInSidebarList,
-  deadlineHasPassed,
-  TaskAwayStatus,
-  isFollowUpFormActive,
-} from "@alliance/shared/lib/actionUtils";
 import FollowUpFormPanel from "../../components/FollowUpFormPanel";
 import { useTaskActionsData } from "../../lib/useTaskActionsData";
 import HomeUpdatesRow from "../../components/HomeUpdatesRow";
@@ -391,25 +384,9 @@ const HomePage = () => {
       );
     }
 
-    const dismissProps: LargeActionCardProps["dismissProps"] =
-      !currentTask || currentTask.onboarding
-        ? undefined
-        : currentTask.awayStatus !== TaskAwayStatus.NOT_AWAY
-          ? {
-              header: "Away",
-              message: {
-                [TaskAwayStatus.AWAY_CURRENTLY]:
-                  TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
-                [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
-                [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
-              }[currentTask?.awayStatus],
-            }
-          : deadlineHasPassed(currentTask, new Date())
-            ? {
-                header: "Deadline passed",
-                message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
-              }
-            : undefined;
+    const taskDismissInfo = currentTask
+      ? getTaskDismissInfo(currentTask)
+      : undefined;
 
     return (
       <div
@@ -454,9 +431,14 @@ const HomePage = () => {
             currentTaskOrGeneralUpdate.userRelation ? (
             <LargeActionCard
               action={currentTaskOrGeneralUpdate}
-              dismissProps={dismissProps}
-              handleDismiss={() =>
-                handleDismissAction(currentTaskOrGeneralUpdate.id)
+              dismissProps={
+                taskDismissInfo
+                  ? {
+                      ...taskDismissInfo,
+                      onDismiss: () =>
+                        handleDismissAction(currentTaskOrGeneralUpdate.id),
+                    }
+                  : undefined
               }
               userRelation={currentTaskOrGeneralUpdate.userRelation}
               onCompleteAction={() => {

@@ -16,29 +16,21 @@ import { colors } from "../../lib/style/colors";
 import Text from "../../components/system/Text";
 import {
   ActionWithAwayStatus,
-  TaskAwayStatus,
-  deadlineHasPassed,
   getAwayStatus,
   isGeneralUpdate,
   homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
+import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
 import LargeActionCard from "../../components/LargeActionCard";
 import LargeGeneralUpdateCard from "../../components/LargeGeneralUpdateCard";
 import { Check, User } from "lucide-react-native";
-import {
-  noTasksToDoRightNow,
-  TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
-  TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
-  TASK_DISMISS_MESSAGE_WAS_AWAY,
-  TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
-} from "@alliance/shared/lib/copy";
+import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 import SuccessOverlay from "../../components/SuccessOverlay";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import type { GeneralUpdateDto } from "@alliance/shared/client";
-import type { LargeActionCardPropsShared } from "@alliance/shared/lib/largeActionCard";
 import { useAuth } from "../../lib/AuthContext";
 import { useBoundedIndex } from "../../lib/useBoundedIndex";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
@@ -182,33 +174,16 @@ export default function HomeScreen() {
     scrollViewRef.current?.scrollToEnd({ animated });
   }, []);
 
-  const dismissProps: LargeActionCardPropsShared["dismissProps"] = useMemo(
-    () => {
-      const task = currentTaskOrGeneralUpdate;
-      if (!task || isGeneralUpdate(task) || task.onboarding) {
-        return undefined;
-      }
-      if (task.awayStatus !== TaskAwayStatus.NOT_AWAY) {
-        return {
-          header: "Away",
-          message: {
-            [TaskAwayStatus.AWAY_CURRENTLY]:
-              TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
-            [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
-            [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
-          }[task.awayStatus],
-        };
-      }
-      if (deadlineHasPassed(task, new Date())) {
-        return {
-          header: "Deadline passed",
-          message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
-        };
-      }
-      return undefined;
-    },
-    [currentTaskOrGeneralUpdate],
-  );
+  const dismissProps = useMemo(() => {
+    const task = currentTaskOrGeneralUpdate;
+    if (!task || isGeneralUpdate(task)) return undefined;
+    const info = getTaskDismissInfo(task);
+    if (!info) return undefined;
+    return {
+      ...info,
+      onDismiss: () => handleDismissAction(task.id),
+    };
+  }, [currentTaskOrGeneralUpdate, handleDismissAction]);
 
   const { title, body, fullScreen } = useMemo(() => {
     if (!currentTaskOrGeneralUpdate) {
@@ -258,9 +233,6 @@ export default function HomeScreen() {
           onUpdateActionState={refetch}
           scrollPageTo={scrollPageTo}
           scrollToEnd={scrollToEnd}
-          handleDismiss={() =>
-            handleDismissAction(currentTaskOrGeneralUpdate.id)
-          }
           onSubmitSuccess={handleSubmitSuccess}
         />
       ),

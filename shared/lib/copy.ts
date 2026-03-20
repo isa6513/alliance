@@ -19,6 +19,12 @@ export const TASK_DISMISS_MESSAGE_WILL_BE_AWAY =
 export const TASK_DISMISS_MESSAGE_AFTER_DEADLINE =
   "You have missed this task's deadline. You can either complete it or dismiss it.";
 
+export const TASK_DISMISS_HEADER_AWAY = "Away";
+export const TASK_DISMISS_HEADER_DEADLINE = "Deadline passed";
+export const TASK_OPTIONAL_HEADER = "This action is optional.";
+export const TASK_OPTIONAL_MESSAGE =
+  "You can complete the task as usual or dismiss it.";
+
 export const externalOnly =
   "This action is intended for external participants. Members cannot complete it.";
 

@@ -22,18 +22,18 @@ export interface LargeActionCardProps extends LargeActionCardPropsShared {
   onSubmitSuccess: () => void;
 }
 
-function OptionalStyleBanner({
-  title,
+function DismissBanner({
+  header,
   message,
   onDismiss,
 }: {
-  title: string;
+  header: string;
   message: string;
   onDismiss: () => void;
 }) {
   return (
     <View className="-mx-4 -mt-4 mb-3 bg-sky-100 border-b border-sky-300 px-4 py-3">
-      <Text className="text-sky-800 font-semibold">{title}</Text>
+      <Text className="text-sky-800 font-semibold">{header}</Text>
       <Text className="text-sky-700 mt-1 mb-3">{message}</Text>
       <Button
         color={ButtonColor.White}
@@ -48,7 +48,6 @@ function OptionalStyleBanner({
 export default function LargeActionCard({
   action,
   dismissProps,
-  handleDismiss,
   userRelation,
   onUpdateActionState,
   scrollPageTo,
@@ -65,20 +64,13 @@ export default function LargeActionCard({
   return (
     <Card className="p-4!">
       <View>
-        {dismissProps ? (
-          <OptionalStyleBanner
-            title={dismissProps.header}
+        {dismissProps && (
+          <DismissBanner
+            header={dismissProps.header}
             message={dismissProps.message}
-            onDismiss={handleDismiss}
+            onDismiss={dismissProps.onDismiss}
           />
-        ) : null}
-        {action.optional && !dismissProps ? (
-          <OptionalStyleBanner
-            title="This action is optional."
-            message="You can complete the task as usual or dismiss it."
-            onDismiss={handleDismiss}
-          />
-        ) : null}
+        )}
         <Text className="font-semibold text-2xl font-serif">{action.name}</Text>
         <View className="flex flex-row items-center justify-between mt-2">
           <TaskTimeInfo

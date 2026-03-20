@@ -38,7 +38,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   userRelation,
   onUpdateActionState,
   onCompleteAction,
-  handleDismiss,
   showDetails = true,
   className = "",
 }: LargeActionCardProps) => {
@@ -100,22 +99,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             <p className="mb-3">{dismissProps.message}</p>
             <Button
               color={ButtonColor.White}
-              onClick={handleDismiss}
-              className="w-full"
-            >
-              Dismiss
-            </Button>
-          </Card>
-        )}
-        {action.optional && !dismissProps && (
-          <Card style={CardStyle.Alert} className="mb-3 border-none rounded-md">
-            <p className="font-semibold">This action is optional.</p>
-            <p className="mb-3">
-              You can complete the task as usual or dismiss it.
-            </p>
-            <Button
-              color={ButtonColor.WhiteBorderless}
-              onClick={handleDismiss}
+              onClick={dismissProps.onDismiss}
               className="w-full"
             >
               Dismiss
