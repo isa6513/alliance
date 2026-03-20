@@ -77,7 +77,7 @@ function FollowUpFormBulletRows({
       />
       <Link
         to={href("/actions/:id", { id: actionId.toString() })}
-        className="text-zinc-600"
+        className="text-zinc-600 hover:text-zinc-900"
       >
         {followUpForm.name?.trim() ? followUpForm.name : "Follow-up form"}
       </Link>
@@ -537,6 +537,8 @@ const HomePage = () => {
     queryClient,
     activeCompletableFollowUpForms,
     hasOnboardingTasks,
+    isLargeScreen,
+    sidebarProgressActionProgressBars,
   ]);
 
   const sidebarContent = useMemo(() => {
