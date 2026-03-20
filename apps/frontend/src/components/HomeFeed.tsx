@@ -88,7 +88,7 @@ const HomeFeed = () => {
 
   return (
     <div className="flex flex-col">
-      <p className="text-title-small font-serif mb-4">Activity</p>
+      <p className="text-title font-serif mb-4">Activity</p>
       <div className="flex flex-col gap-y-2 *:p-4">
         {activities.map((activity) => (
           <UserActivityCard

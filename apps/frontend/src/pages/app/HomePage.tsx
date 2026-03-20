@@ -342,6 +342,44 @@ const HomePage = () => {
     )[0];
   }, [todoActions, generalUpdates]);
 
+  const sidebarProgressActionProgressBars = useMemo(() => {
+    if (sidebarProgressActions.length === 0) {
+      return <></>;
+    }
+    return (
+      <>
+        <div className="flex flex-col gap-y-3">
+          <div className="flex flex-col gap-y-2">
+            {sidebarProgressActions.map((action) => (
+              <Link
+                key={action.id}
+                to={href("/actions/:id", { id: action.id.toString() })}
+                className="block p-4 rounded bg-white hover:bg-grey-1 transition-colors"
+              >
+                <p className="text-xs font-medium text-green mb-2">
+                  {action.name}
+                </p>
+                <div className="flex flex-col gap-y-2">
+                  {(actionProgressViews[action.id] ?? [])
+                    .filter((v) => v.kind === "progressbar")
+                    .map((view) => (
+                      <AggregateProgressBarBlock
+                        key={view.id}
+                        view={view}
+                        titleClassName="text-base font-medium text-black"
+                        captionClassName="text-xs text-zinc-600"
+                        className="flex flex-col gap-y-1"
+                      />
+                    ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  }, [sidebarProgressActions, actionProgressViews]);
+
   const mainContent = useMemo(() => {
     if (actions === null) {
       return loading ? (
@@ -386,6 +424,10 @@ const HomePage = () => {
               <SeeAll link="/action-updates" size="lg" />
             </div>
             <HomeUpdatesRow />
+
+            {!isLargeScreen && (
+              <div className="mt-4">{sidebarProgressActionProgressBars}</div>
+            )}
           </div>
         )}
 
@@ -499,37 +541,8 @@ const HomePage = () => {
 
   const sidebarContent = useMemo(() => {
     return (
-      <div className="px-4 flex flex-col *:py-6 *:px-2 divide-y divide-zinc-200 h-[calc(100vh-var(--navbar-top-bar-height))]">
-        {sidebarProgressActions.length > 0 && (
-          <div className="flex flex-col gap-y-3">
-            <div className="flex flex-col gap-y-2">
-              {sidebarProgressActions.map((action) => (
-                <Link
-                  key={action.id}
-                  to={href("/actions/:id", { id: action.id.toString() })}
-                  className="block py-1 px-1 -mx-1 rounded-sm hover:bg-zinc-100 transition-colors"
-                >
-                  <p className="font-medium text-zinc-900 mb-2">
-                    {action.name}
-                  </p>
-                  <div className="flex flex-col gap-y-2">
-                    {(actionProgressViews[action.id] ?? [])
-                      .filter((v) => v.kind === "progressbar")
-                      .map((view) => (
-                        <AggregateProgressBarBlock
-                          key={view.id}
-                          view={view}
-                          titleClassName="text-sm font-medium text-zinc-700"
-                          captionClassName="text-xs text-zinc-600"
-                          className="flex flex-col gap-y-1"
-                        />
-                      ))}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+      <div className="pt-6 px-4 flex flex-col *:pb-4 *:px-2 h-[calc(100vh-var(--navbar-top-bar-height))]">
+        {sidebarProgressActionProgressBars}
         <div className="flex-1 min-h-0 flex flex-col">
           <GlobalFeed
             items={globalFeedItems}
