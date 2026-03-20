@@ -15,6 +15,11 @@ const UtensilWastePage: React.FC = () => {
       url: "https://www.instagram.com/katsuo_and_kombu/",
       img: "https://d2s742iet3d3t1.cloudfront.net/restaurants/restaurant-151140000000000000/restaurant_1684962456.png"
     }
+    {
+      name: "Fambrini's Cafe",
+      url: "http://www.fambriniscafe.com/",
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUXSyeu0IvWJonDnejDguhgYf0hKgeTkpATQ&s"
+    }
   ];
 
   const [searchQuery, setSearchQuery] = useState("");
