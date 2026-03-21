@@ -1318,7 +1318,13 @@ export class ActionsService {
     requestingUserId?: number,
   ): Promise<ActionActivityDto[]> {
     const activities = await this.actionActivityRepository.find({
-      where: { userId, type: ActionActivityType.USER_COMPLETED },
+      where: {
+        userId,
+        type: In([
+          ActionActivityType.USER_COMPLETED,
+          ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM,
+        ]),
+      },
       relations: {
         action: true,
         user: true,

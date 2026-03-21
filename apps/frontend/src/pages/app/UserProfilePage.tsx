@@ -121,9 +121,10 @@ const UserProfilePage: React.FC = () => {
     comments: true,
   });
 
-  const completedActions = useMemo(() => {
+  const completedActionCount = useMemo(() => {
     return (
-      activities?.filter((activity) => activity.type === "user_completed") ?? []
+      activities?.filter((activity) => activity.type === "user_completed")
+        .length ?? 0
     );
   }, [activities]);
 
@@ -358,11 +359,9 @@ const UserProfilePage: React.FC = () => {
           {/* stats row */}
           <div className="mt-2 flex flex-row gap-x-2 transition-none">
             <UserProfileTab
-              number={completedActions.length}
-              label={`action${
-                completedActions.length === 1 ? "" : "s"
-              } completed`}
-              shortLabel={`action${completedActions.length === 1 ? "" : "s"}`}
+              number={completedActionCount}
+              label={`action${completedActionCount === 1 ? "" : "s"} completed`}
+              shortLabel={`action${completedActionCount === 1 ? "" : "s"}`}
               selected={selectedTab === ProfileTabs.Activity}
               onClick={() => setSelectedTab(ProfileTabs.Activity)}
             />
@@ -442,12 +441,12 @@ const UserProfilePage: React.FC = () => {
         <div className="pb-24 mt-2">
           {selectedTab === ProfileTabs.Activity && (
             <div className="mb-10 *:p-4 flex flex-col gap-y-2">
-              {completedActions.length === 0 && (
+              {(!activities || activities.length === 0) && (
                 <p className="my-4 text-center text-zinc-500">
                   No actions completed yet
                 </p>
               )}
-              {completedActions?.map((activity) => (
+              {activities?.map((activity) => (
                 <UserActivityCard
                   activity={activity}
                   key={activity.id}

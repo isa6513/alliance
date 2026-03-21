@@ -127,9 +127,10 @@ export default function UserProfileScreen() {
   const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(null);
   const [isPickingAvatar, setIsPickingAvatar] = useState(false);
 
-  const completedActions = useMemo(() => {
+  const completedActionCount = useMemo(() => {
     return (
-      activities?.filter((activity) => activity.type === "user_completed") ?? []
+      activities?.filter((activity) => activity.type === "user_completed")
+        .length ?? 0
     );
   }, [activities]);
 
@@ -358,7 +359,7 @@ export default function UserProfileScreen() {
   ]);
 
   const renderActionItem = useCallback(
-    ({ item: activity }: { item: (typeof completedActions)[number] }) => (
+    ({ item: activity }: { item: NonNullable<typeof activities>[number] }) => (
       <View className="border-b border-zinc-200">
         <UserActivityCard
           activity={activity}
@@ -504,7 +505,7 @@ export default function UserProfileScreen() {
   );
 
   const listData = useMemo((): any[] => {
-    if (selectedTab === ProfileTab.Actions) return completedActions;
+    if (selectedTab === ProfileTab.Actions) return activities ?? [];
     if (selectedTab === ProfileTab.Forum) return forumActivityItems;
     if (friendsTab === FriendsTab.Received && isMe) return receivedRequests;
     if (friendsTab === FriendsTab.Sent && isMe) return sentRequests;
@@ -513,7 +514,7 @@ export default function UserProfileScreen() {
     selectedTab,
     friendsTab,
     isMe,
-    completedActions,
+    activities,
     forumActivityItems,
     receivedRequests,
     sentRequests,
@@ -671,9 +672,7 @@ export default function UserProfileScreen() {
               </View>
             )}
             <Text className="text-sm text-zinc-500">
-              <Text className="text-sm text-black">
-                {completedActions.length}
-              </Text>{" "}
+              <Text className="text-sm text-black">{completedActionCount}</Text>{" "}
               actions
             </Text>
           </View>
