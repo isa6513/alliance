@@ -13,13 +13,13 @@ const UtensilWastePage: React.FC = () => {
     {
       name: "Katsuo + Kombu",
       url: "https://www.instagram.com/katsuo_and_kombu/",
-      img: "https://d2s742iet3d3t1.cloudfront.net/restaurants/restaurant-151140000000000000/restaurant_1684962456.png"
-    }
+      img: "https://d2s742iet3d3t1.cloudfront.net/restaurants/restaurant-151140000000000000/restaurant_1684962456.png",
+    },
     {
       name: "Fambrini's Cafe",
       url: "http://www.fambriniscafe.com/",
-      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUXSyeu0IvWJonDnejDguhgYf0hKgeTkpATQ&s"
-    }
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUXSyeu0IvWJonDnejDguhgYf0hKgeTkpATQ&s",
+    },
   ];
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -127,7 +127,11 @@ const UtensilWastePage: React.FC = () => {
                   className="border border-zinc-200 p-2 md:p-4 rounded bg-white flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 hover:bg-zinc-50"
                 >
                   <div className="flex flex-row items-center gap-4 sm:flex-shrink-0 w-full">
-                    <img src={restaurant.img} alt={restaurant.name} className="w-16 h-16 rounded-md object-cover shrink-0" />
+                    <img
+                      src={restaurant.img}
+                      alt={restaurant.name}
+                      className="w-16 h-16 rounded-md object-cover shrink-0"
+                    />
 
                     <h3 className="flex-1 text-lg font-medium text-zinc-900">
                       {restaurant.name}
