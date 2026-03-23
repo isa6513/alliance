@@ -11,6 +11,7 @@ interface EditableContentRendererProps {
   deleted?: boolean;
   className?: string;
   truncated?: boolean;
+  small?: boolean;
 }
 
 const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
@@ -19,6 +20,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   deleted = false,
   className,
   truncated = false,
+  small = false,
 }) => {
   const attachments = useMemo(
     () =>
@@ -30,7 +32,9 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   if (deleted) {
     return (
       <View className={className}>
-        <Text className="text-sm text-zinc-400">Content has been deleted</Text>
+        <Text className={cn("text-zinc-400", small ? "text-xs" : "text-sm")}>
+          Content has been deleted
+        </Text>
       </View>
     );
   }
@@ -39,19 +43,34 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
     if (!body) return null;
     if (collapsed) {
       return (
-        <Text className="text-zinc-800" numberOfLines={1}>
+        <Text className={cn("text-zinc-800", small && "text-sm")} numberOfLines={1}>
           {body}
         </Text>
       );
     }
     if (truncated) {
       return (
-        <Text className="text-zinc-800" numberOfLines={3}>
+        <Text className={cn("text-zinc-800", small && "text-sm")} numberOfLines={3}>
           {body}
         </Text>
       );
     }
-    return <AppMarkdownWrapper>{body}</AppMarkdownWrapper>;
+    return (
+      <AppMarkdownWrapper
+        style={
+          small
+            ? {
+                body: {
+                  fontSize: 14,
+                  lineHeight: 20,
+                },
+              }
+            : undefined
+        }
+      >
+        {body}
+      </AppMarkdownWrapper>
+    );
   };
 
   return (

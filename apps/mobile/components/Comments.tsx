@@ -34,6 +34,7 @@ export interface CommentsProps {
   objectId: number;
   type: CommentParentObject;
   compact?: boolean;
+  small?: boolean;
   autofocus?: boolean;
   showForm?: boolean;
   initialComments?: CommentDto[];
@@ -118,6 +119,7 @@ const ReplyForm = ({
 
 type ReplyItemSharedProps = {
   compact?: boolean;
+  small?: boolean;
   autofocus?: boolean;
   objectId: number;
   repliesAsCards: boolean;
@@ -159,6 +161,13 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
   const hasChildren = (reply.children?.length ?? 0) > 0;
   const isHighlighted = shared.highlightedId === reply.id;
   const isNewlyAdded = shared.newlyAddedReplies.has(reply.id);
+  const metaTextClass = shared.small ? "text-xs" : "text-sm";
+  const actionTextClass = shared.small
+    ? "text-xs text-zinc-500"
+    : "text-sm text-zinc-500";
+  const deleteTextClass = shared.small
+    ? "text-xs text-red-600"
+    : "text-sm text-red-600";
   const containerSpacing = shared.repliesAsCards
     ? depth === 0
       ? "p-3"
@@ -199,8 +208,8 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-x-2">
           {renderAvatar(reply.author)}
-          <Text className="text-sm text-zinc-500">
-            <Text className="font-medium text-zinc-700">
+          <Text className={cn("text-zinc-500", metaTextClass)}>
+            <Text className={cn("font-medium text-zinc-700", metaTextClass)}>
               {reply.author.displayName}
             </Text>
             {` ${formatTime(new Date(reply.createdAt), {
@@ -208,7 +217,13 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
             })}`}
           </Text>
           {hasChildren && isCollapsed && (
-            <Text className="text-xs text-zinc-500">
+            <Text
+              className={
+                shared.small
+                  ? "text-[11px] text-zinc-500"
+                  : "text-xs text-zinc-500"
+              }
+            >
               {reply.children?.length ?? 0}{" "}
               {reply.children?.length === 1 ? "reply" : "replies"} hidden
             </Text>
@@ -246,6 +261,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
             content={reply.editableContent}
             deleted={reply.deleted}
             collapsed={isCollapsed}
+            small={shared.small}
           />
         )}
       </View>
@@ -272,7 +288,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
               }
               activeOpacity={0.7}
             >
-              <Text className="text-sm text-zinc-500">
+              <Text className={actionTextClass}>
                 {isReplyingToThis ? "Cancel reply" : "Reply"}
               </Text>
             </TouchableOpacity>
@@ -285,13 +301,13 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
                   onPress={() => setIsEditing(true)}
                   activeOpacity={0.7}
                 >
-                  <Text className="text-sm text-zinc-500">Edit</Text>
+                  <Text className={actionTextClass}>Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => shared.onDeleteReply(reply.id)}
                   activeOpacity={0.7}
                 >
-                  <Text className="text-sm text-red-600">Delete</Text>
+                  <Text className={deleteTextClass}>Delete</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -300,7 +316,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
               onPress={() => setIsCollapsed(!isCollapsed)}
               activeOpacity={0.7}
             >
-              <Text className="text-sm text-zinc-500">
+              <Text className={actionTextClass}>
                 {isCollapsed ? "Show replies" : "Hide replies"}
               </Text>
             </TouchableOpacity>
@@ -344,6 +360,7 @@ export default function Comments({
   objectId,
   type,
   compact,
+  small = false,
   autofocus,
   showForm: showFormProp = true,
   initialComments,
@@ -624,6 +641,7 @@ export default function Comments({
               key={reply.id}
               reply={reply}
               compact={compact}
+              small={small}
               autofocus={autofocus}
               objectId={objectId}
               repliesAsCards={repliesAsCards}

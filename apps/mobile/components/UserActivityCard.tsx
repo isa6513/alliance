@@ -135,7 +135,7 @@ export default function UserActivityCard({
         {/* Header: User info and action */}
         <View className="flex-row items-start flex-wrap">
           <TouchableOpacity onPress={handleUserPress} activeOpacity={0.7}>
-            <ProfileImage pfp={activity.user.profilePicture} size="small" />
+            <ProfileImage pfp={activity.user.profilePicture} size="medium" />
           </TouchableOpacity>
           <View className="flex flex-col gap-y-1 flex-1 ml-2">
             <Text className="text-zinc-900">
@@ -189,7 +189,7 @@ export default function UserActivityCard({
         {/* Footer: pressable icons */}
         {!isEditing && (
           <View className="flex-row justify-between items-center mt-3">
-            <View className="flex-1 flex-row items-center justify-end gap-x-8! w-full">
+            <View className="flex-1 flex-row items-center justify-around gap-x-8! w-full">
               <LikeButton
                 liked={activity.likedByMe ?? false}
                 likes={activity.likesCount}
@@ -224,7 +224,7 @@ export default function UserActivityCard({
         )}
       </TouchableOpacity>
 
-      {commentable && (
+      {commentable && activity.comments.length > 0 && (
         <View className="ml-8 mb-4">
           <Comments
             objectId={activity.id}
@@ -234,6 +234,7 @@ export default function UserActivityCard({
             showForm={showCommentForm}
             autofocus={showCommentForm}
             repliesAsCards={false}
+            small
           />
         </View>
       )}

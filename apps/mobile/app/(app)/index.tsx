@@ -4,13 +4,17 @@ import {
   RefreshControl,
   TouchableOpacity,
 } from "react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   actionsDismissAction,
   actionsDismissGeneralUpdate,
   actionsFindAllLoggedIn,
   actionsUnreadGeneralUpdates,
   userGetAwayRanges,
+} from "@alliance/shared/client";
+import type {
+  ActionActivityDto,
+  GeneralUpdateDto,
 } from "@alliance/shared/client";
 import { colors } from "../../lib/style/colors";
 import Text from "../../components/system/Text";
@@ -20,23 +24,28 @@ import {
   isGeneralUpdate,
   homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
 import LargeActionCard from "../../components/LargeActionCard";
 import LargeGeneralUpdateCard from "../../components/LargeGeneralUpdateCard";
-import { Check, User } from "lucide-react-native";
+import { Check } from "lucide-react-native";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 import SuccessOverlay from "../../components/SuccessOverlay";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
-import type { GeneralUpdateDto } from "@alliance/shared/client";
 import { useAuth } from "../../lib/AuthContext";
 import { useBoundedIndex } from "../../lib/useBoundedIndex";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { IndexStepper } from "../../components/system/IndexStepper";
 import { router } from "expo-router";
 import ProfileImage from "../../components/ProfileImage";
+import UserActivityCard from "../../components/UserActivityCard";
+import { LegendList } from "@legendapp/list";
+import { useHideOnScroll } from "../../lib/useHideOnScroll";
 
 const GENERAL_UPDATES_QUERY_KEY = [
   "actions",
@@ -48,6 +57,12 @@ export default function HomeScreen() {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const {
+    isVisible: isHeaderVisible,
+    onScroll: onListScroll,
+    scrollEventThrottle,
+  } = useHideOnScroll();
 
   const handleSubmitSuccess = useCallback(() => {
     setShowSuccess(true);
@@ -69,6 +84,19 @@ export default function HomeScreen() {
   });
 
   const { user } = useAuth();
+  const {
+    activities: homeFeedActivities,
+    handleLikeActivity: handleLikeHomeFeedActivity,
+    updateActivity: updateHomeFeedActivity,
+    loading: homeFeedLoading,
+    fetchNextPage: fetchNextHomeFeedPage,
+    hasNextPage: homeFeedHasNextPage,
+    isFetchingNextPage: homeFeedFetchingNextPage,
+  } = useActivities({
+    list: ActivityList.HomeFeed,
+    comments: true,
+    limit: 5,
+  });
 
   const {
     data: generalUpdates,
@@ -174,6 +202,57 @@ export default function HomeScreen() {
     scrollViewRef.current?.scrollToEnd({ animated });
   }, []);
 
+  const handleHomeFeedLike = useCallback(
+    async (activityId: number) => {
+      await handleLikeHomeFeedActivity(activityId);
+    },
+    [handleLikeHomeFeedActivity],
+  );
+
+  const handleHomeFeedUpdate = useCallback(
+    (updatedActivity: ActionActivityDto) => {
+      updateHomeFeedActivity(updatedActivity);
+    },
+    [updateHomeFeedActivity],
+  );
+
+  const onHomeFeedEndReached = useCallback(() => {
+    if (homeFeedHasNextPage && !homeFeedFetchingNextPage) {
+      void fetchNextHomeFeedPage();
+    }
+  }, [homeFeedHasNextPage, homeFeedFetchingNextPage, fetchNextHomeFeedPage]);
+
+  const renderHomeFeedActivity = useCallback(
+    ({ item: activity }: { item: ActionActivityDto }) => (
+      <View className="border-b-3 border-zinc-100">
+        <UserActivityCard
+          activity={activity}
+          handleLike={() => handleHomeFeedLike(activity.id)}
+          onActivityUpdate={handleHomeFeedUpdate}
+          canEdit={activity.user.id === user?.id}
+        />
+      </View>
+    ),
+    [handleHomeFeedLike, handleHomeFeedUpdate, user?.id],
+  );
+
+  useEffect(() => {
+    if (currentTaskOrGeneralUpdate) return;
+    if (homeFeedLoading || homeFeedFetchingNextPage) return;
+    if (!homeFeedHasNextPage) return;
+    // Match web behavior where short lists immediately pull the next page.
+    if (homeFeedActivities.length < 5) {
+      void fetchNextHomeFeedPage();
+    }
+  }, [
+    currentTaskOrGeneralUpdate,
+    homeFeedLoading,
+    homeFeedFetchingNextPage,
+    homeFeedHasNextPage,
+    homeFeedActivities.length,
+    fetchNextHomeFeedPage,
+  ]);
+
   const dismissProps = useMemo(() => {
     const task = currentTaskOrGeneralUpdate;
     if (!task || isGeneralUpdate(task)) return undefined;
@@ -190,16 +269,18 @@ export default function HomeScreen() {
       return {
         title: "Alliance",
         body: (
-          <View className="flex-1 items-center justify-center py-16 px-5">
-            <View className="w-12 h-12 rounded-full bg-green items-center justify-center mb-4">
-              <Check size={32} color="#fff" strokeWidth={3} />
+          <View className="gap-y-6">
+            <View className="mx-5 items-center justify-center py-10 px-5 bg-zinc-50 rounded">
+              <View className="w-8 h-8 rounded-full bg-green items-center justify-center mb-4">
+                <Check size={20} color="#fff" strokeWidth={3} />
+              </View>
+              <Text className="text-zinc-500 text-base text-center">
+                {noTasksToDoRightNow}
+              </Text>
             </View>
-            <Text className="text-zinc-500 text-lg text-center">
-              {noTasksToDoRightNow}
-            </Text>
           </View>
         ),
-        fullScreen: true,
+        fullScreen: false,
       };
     }
 
@@ -243,12 +324,16 @@ export default function HomeScreen() {
     dismissProps,
     user,
     handleDismissGeneralUpdate,
-    handleDismissAction,
     refetch,
     scrollPageTo,
     scrollToEnd,
     handleSubmitSuccess,
   ]);
+
+  const showHomeFeedList =
+    !currentTaskOrGeneralUpdate &&
+    !homeFeedLoading &&
+    homeFeedActivities.length > 0;
 
   if (loading) {
     return (
@@ -260,7 +345,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <SimplePageTitle title={title}>
+      <SimplePageTitle title={title} isVisible={isHeaderVisible}>
         {showTaskNav ? (
           <IndexStepper
             index={safeIndex}
@@ -282,17 +367,51 @@ export default function HomeScreen() {
           </TouchableOpacity>
         )}
       </SimplePageTitle>
-      <KeyboardAwareScrollView
-        key={fullScreen ? "fullscreen" : "scroll"}
-        ref={scrollViewRef}
-        contentContainerStyle={fullScreen ? { flex: 1 } : undefined}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        testID="vr-home-ready"
-      >
-        {body}
-      </KeyboardAwareScrollView>
+      {showHomeFeedList ? (
+        <LegendList
+          className="flex-1"
+          data={homeFeedActivities}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderHomeFeedActivity}
+          onEndReached={onHomeFeedEndReached}
+          onEndReachedThreshold={0.3}
+          recycleItems
+          onScroll={onListScroll}
+          scrollEventThrottle={scrollEventThrottle}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          contentContainerStyle={{
+            backgroundColor: "white",
+            paddingBottom: 40,
+          }}
+          ListHeaderComponent={body}
+          ListFooterComponent={
+            homeFeedFetchingNextPage ? (
+              <View className="py-4 items-center">
+                <ActivityIndicator size="small" color={colors.green} />
+                <Text className="text-zinc-400 text-sm mt-2">
+                  Loading more...
+                </Text>
+              </View>
+            ) : null
+          }
+        />
+      ) : (
+        <KeyboardAwareScrollView
+          key={fullScreen ? "fullscreen" : "scroll"}
+          ref={scrollViewRef}
+          contentContainerStyle={fullScreen ? { flex: 1 } : undefined}
+          onScroll={onListScroll}
+          scrollEventThrottle={scrollEventThrottle}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          testID="vr-home-ready"
+        >
+          {body}
+        </KeyboardAwareScrollView>
+      )}
       <SuccessOverlay
         visible={showSuccess}
         onFadeInComplete={refetch}
