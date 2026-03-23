@@ -22,13 +22,13 @@ type GeneralUpdatePriorityFields = Pick<
 type ActionPriorityFields = Pick<ActionDto, "priority" | "events">;
 
 export function isGeneralUpdate(
-  a: GeneralUpdatePriorityFields | ActionPriorityFields
+  a: GeneralUpdatePriorityFields | ActionPriorityFields,
 ): a is GeneralUpdatePriorityFields {
   return !("events" in a);
 }
 
 function generalUpdatePriority(
-  generalUpdate: GeneralUpdatePriorityFields
+  generalUpdate: GeneralUpdatePriorityFields,
 ): TaskPriority {
   return {
     priority: generalUpdate.priority,
@@ -46,7 +46,7 @@ function actionPriority(action: ActionPriorityFields): TaskPriority {
   const startDateString = action.events.find(
     (event) =>
       event.newStatus === "member_action" ||
-      event.newStatus === "gathering_commitments"
+      event.newStatus === "gathering_commitments",
   )?.date;
   return {
     priority: action.priority,
@@ -59,7 +59,7 @@ function actionPriority(action: ActionPriorityFields): TaskPriority {
 }
 
 function generalUpdateOrActionPriority(
-  a: GeneralUpdatePriorityFields | ActionPriorityFields
+  a: GeneralUpdatePriorityFields | ActionPriorityFields,
 ): TaskPriority {
   if (isGeneralUpdate(a)) {
     return generalUpdatePriority(a);
@@ -69,7 +69,7 @@ function generalUpdateOrActionPriority(
 
 export function homePagePriorityComparator(
   a: GeneralUpdatePriorityFields | ActionPriorityFields,
-  b: GeneralUpdatePriorityFields | ActionPriorityFields
+  b: GeneralUpdatePriorityFields | ActionPriorityFields,
 ): number {
   const aPriority = generalUpdateOrActionPriority(a);
   const bPriority = generalUpdateOrActionPriority(b);
@@ -113,7 +113,6 @@ export function isFollowUpFormActive(f: {
 
 export enum FilterMode {
   All = "All",
-  GatheringCommitments = "Gathering commitments",
   MemberAction = "Members taking action",
   PendingOfficeResolution = "Pending office resolution",
   Past = "Past",
@@ -127,14 +126,14 @@ export const getLatestEvent = (action: ActionDto) => {
   const pastEvents = getPastEvents(action);
   return pastEvents.length > 0
     ? pastEvents.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       )[0]
     : null;
 };
 
 export function getActionEventAt(
   action: ActionDto,
-  date: Date
+  date: Date,
 ): { event: ActionEventDto | null; endDate: Date | null } {
   const event = action.events.find((event) => new Date(event.date) <= date);
   const nextEvent = action.events.find((event) => new Date(event.date) > date);
@@ -155,11 +154,11 @@ export enum TaskAwayStatus {
 export function getAwayStatus(
   action: ActionDto,
   awayRanges: UserAwayRangeDto[],
-  date: Date
+  date: Date,
 ): TaskAwayStatus {
   const lastMemberActionEvent = action.events.find(
     (event) =>
-      new Date(event.date) <= date && event.newStatus === "member_action"
+      new Date(event.date) <= date && event.newStatus === "member_action",
   );
   if (!lastMemberActionEvent) {
     return TaskAwayStatus.NOT_AWAY;
@@ -167,7 +166,7 @@ export function getAwayStatus(
 
   const { event, endDate } = getActionEventAt(
     action,
-    new Date(lastMemberActionEvent.date)
+    new Date(lastMemberActionEvent.date),
   );
 
   if (!event) {
@@ -196,7 +195,7 @@ export function getAwayStatus(
 export type ActionWithAwayStatus = ActionDto & { awayStatus: TaskAwayStatus };
 
 export function getDeadlineTimestamp(
-  action: Pick<ActionDto, "events">
+  action: Pick<ActionDto, "events">,
 ): number {
   let i = 0;
   // Find first 'member_action' or 'gathering_commitments' event
@@ -228,7 +227,7 @@ export function getDeadlineTimestamp(
 export function canCompleteAction(action: ActionDto) {
   return (
     getPastEvents(action).some(
-      (event) => event.newStatus === "member_action"
+      (event) => event.newStatus === "member_action",
     ) &&
     (action.userRelation === "joined" ||
       (action.commitmentless && action.userRelation !== "completed")) &&
@@ -284,7 +283,7 @@ export function deadlineHasPassed(action: ActionDto, date: Date): boolean {
       (event) =>
         new Date(event.date) < date &&
         (event.newStatus === "member_action" ||
-          event.newStatus === "gathering_commitments")
+          event.newStatus === "gathering_commitments"),
     )
   );
 }
@@ -323,7 +322,7 @@ export function calculateCompletionData(params: {
   const anyComplete = new Set<number>();
   const anyIncomplete = new Set<number>();
   for (const [userIdKey, relationDetails] of Object.entries(
-    userActionRelations
+    userActionRelations,
   )) {
     const userId = Number(userIdKey);
     for (const relationDetail of relationDetails) {
@@ -387,16 +386,16 @@ export function calculateAllCompletionData(params: {
       }
       return acc;
     },
-    new Map<number, Map<number, UserActionRelationDetailDto>>()
+    new Map<number, Map<number, UserActionRelationDetailDto>>(),
   );
 
   function calculateCompletionData(
-    actionIds: UserActionSummaryDto[]
+    actionIds: UserActionSummaryDto[],
   ): CompletionData {
     const { anyComplete, anyIncomplete } = actionIds.reduce(
       (acc, action) => {
         const relationDetailByUser = relationDetailByActionThenUser.get(
-          action.id
+          action.id,
         );
         if (!relationDetailByUser) {
           return acc;
@@ -415,14 +414,14 @@ export function calculateAllCompletionData(params: {
       {
         anyComplete: new Set<number>(),
         anyIncomplete: new Set<number>(),
-      }
+      },
     );
 
     const completedAllCurrentActions = Object.fromEntries(
       Array.from(new Set([...anyComplete, ...anyIncomplete])).map((userId) => [
         userId,
         !anyIncomplete.has(userId),
-      ])
+      ]),
     );
     const completedAllValues = Object.values(completedAllCurrentActions);
     return {
@@ -435,12 +434,12 @@ export function calculateAllCompletionData(params: {
 
   const actionsWithUserRelations = actions.filter(
     (
-      action
+      action,
     ): action is typeof action & {
       latestMemberActionDeadline: number;
     } =>
       action.latestMemberActionDeadline !== null &&
-      calculateCompletionData([action]).nTotal > 0
+      calculateCompletionData([action]).nTotal > 0,
   );
   if (actionsWithUserRelations.length === 0) {
     return {
@@ -450,11 +449,11 @@ export function calculateAllCompletionData(params: {
   }
 
   const activeActions = actionsWithUserRelations.filter(
-    (action) => action.status === "member_action"
+    (action) => action.status === "member_action",
   );
   if (activeActions.length === 0) {
     const previousActions = actionsWithUserRelations.filter(
-      (action) => action.latestMemberActionDeadline < Date.now()
+      (action) => action.latestMemberActionDeadline < Date.now(),
     );
     if (previousActions.length === 0) {
       return {
@@ -464,12 +463,12 @@ export function calculateAllCompletionData(params: {
     }
 
     const latestPreviousDeadline = Math.max(
-      ...previousActions.map((action) => action.latestMemberActionDeadline)
+      ...previousActions.map((action) => action.latestMemberActionDeadline),
     );
     const selectedPreviousActions = previousActions.filter(
       (action) =>
         action.latestMemberActionDeadline >=
-        latestPreviousDeadline - actionDeadlineWindowMs
+        latestPreviousDeadline - actionDeadlineWindowMs,
     );
     return {
       previous: calculateCompletionData(selectedPreviousActions),
@@ -478,12 +477,12 @@ export function calculateAllCompletionData(params: {
   }
 
   const earliestDeadline = Math.min(
-    ...activeActions.map((action) => action.latestMemberActionDeadline)
+    ...activeActions.map((action) => action.latestMemberActionDeadline),
   );
   const currentActions = activeActions.filter(
     (action) =>
       action.latestMemberActionDeadline <
-      earliestDeadline + actionDeadlineWindowMs
+      earliestDeadline + actionDeadlineWindowMs,
   );
 
   return {
