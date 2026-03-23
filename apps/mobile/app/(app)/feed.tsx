@@ -128,7 +128,7 @@ export default function FeedScreen() {
   const renderActivity = useCallback(
     ({ item: activity }: { item: ActionActivityDto }) => {
       return (
-        <View className="border-b border-zinc-200 ">
+        <View className="border-b-3 border-zinc-100">
           <UserActivityCard
             activity={activity}
             handleLike={() => handleLikeActivity(activity.id, mode)}

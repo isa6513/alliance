@@ -108,7 +108,7 @@ export default function ActionsScreen() {
               <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
             }
             renderItem={({ item }) => (
-              <View key={item.id} className="border-b-2 border-zinc-200">
+              <View key={item.id} className="border-b border-zinc-200">
                 <ActionItemCard
                   action={item}
                   onPress={() => navigateToAction(item.id)}

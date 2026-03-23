@@ -193,6 +193,7 @@ export default function PostDetailScreen() {
             objectId={post.id}
             type="post"
             highlightedReplyId={highlightedReplyId}
+            repliesAsCards={false}
           />
         </View>
       </View>

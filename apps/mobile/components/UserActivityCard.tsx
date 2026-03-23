@@ -137,7 +137,7 @@ export default function UserActivityCard({
           <TouchableOpacity onPress={handleUserPress} activeOpacity={0.7}>
             <ProfileImage pfp={activity.user.profilePicture} size="small" />
           </TouchableOpacity>
-          <View className="flex-1 ml-2">
+          <View className="flex flex-col gap-y-1 flex-1 ml-2">
             <Text className="text-zinc-900">
               <Text className="font-medium" onPress={handleUserPress}>
                 {activity.user.displayName}
@@ -150,6 +150,7 @@ export default function UserActivityCard({
                 {activity.actionName || "this action"}
               </Text>
             </Text>
+            <Text className="text-zinc-500 text-xs">{timeSinceCompleted}</Text>
           </View>
         </View>
 
@@ -185,27 +186,18 @@ export default function UserActivityCard({
           </>
         )}
 
-        {/* Footer: Time and actions */}
+        {/* Footer: pressable icons */}
         {!isEditing && (
           <View className="flex-row justify-between items-center mt-3">
-            <Text className="text-zinc-500 text-sm">{timeSinceCompleted}</Text>
-            <View className="flex-row items-center gap-x-8!">
+            <View className="flex-1 flex-row items-center justify-end gap-x-8! w-full">
               <LikeButton
                 liked={activity.likedByMe ?? false}
                 likes={activity.likesCount}
-                iconColor="black"
+                iconColor="#a1a1aa"
                 size={22}
                 onPress={() => handleLike(activity.id)}
               />
-              {canEdit && (
-                <TouchableOpacity
-                  onPress={handleEdit}
-                  activeOpacity={0.7}
-                  className="flex-row items-center gap-x-1 py-1!"
-                >
-                  <Edit size={22} color="black" />
-                </TouchableOpacity>
-              )}
+
               {commentable && (
                 <TouchableOpacity
                   onPress={(e) => {
@@ -215,7 +207,16 @@ export default function UserActivityCard({
                   activeOpacity={0.4}
                   className="flex-row items-center gap-x-1 py-1!"
                 >
-                  <MessageCircleIcon size={22} />
+                  <MessageCircleIcon size={22} color="#a1a1aa" />
+                </TouchableOpacity>
+              )}
+              {canEdit && (
+                <TouchableOpacity
+                  onPress={handleEdit}
+                  activeOpacity={0.7}
+                  className="flex-row items-center gap-x-1 py-1!"
+                >
+                  <Edit size={22} color="#a1a1aa" />
                 </TouchableOpacity>
               )}
             </View>
@@ -224,14 +225,17 @@ export default function UserActivityCard({
       </TouchableOpacity>
 
       {commentable && (
-        <Comments
-          objectId={activity.id}
-          type="activity"
-          initialComments={activity.comments}
-          compact
-          showForm={showCommentForm}
-          autofocus={showCommentForm}
-        />
+        <View className="ml-8 mb-4">
+          <Comments
+            objectId={activity.id}
+            type="activity"
+            initialComments={activity.comments}
+            compact
+            showForm={showCommentForm}
+            autofocus={showCommentForm}
+            repliesAsCards={false}
+          />
+        </View>
       )}
     </View>
   );

@@ -96,7 +96,7 @@ export default function TabBar() {
 
   return (
     <View
-      className="flex-row bg-white border-t border-zinc-200 px-2"
+      className="flex-row bg-white border-t border-zinc-100 px-2"
       style={{ paddingBottom: insets.bottom }}
     >
       {tabs.map((tab) => {

@@ -144,7 +144,7 @@ export default function MessageComposer({
             placeholder={placeholder}
             placeholderTextColor="#9ca3af"
             multiline
-            className="text-base text-zinc-90"
+            className="text-base text-zinc-900"
             textAlignVertical="center"
             style={{ paddingVertical: 0 }}
           />

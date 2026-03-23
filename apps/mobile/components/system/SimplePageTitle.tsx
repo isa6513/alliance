@@ -13,7 +13,7 @@ export const SimplePageTitle = ({
 }) => {
   const { openDrawer, isPermanent } = useAppDrawer();
   return (
-    <View className="flex-row items-center gap-2 px-2 justify-between border-b border-zinc-200 pb-2">
+    <View className="flex-row items-center gap-2 px-2 justify-between border-b border-zinc-100 pb-2">
       <View className="flex-row items-center">
         {!isPermanent && (
           <Pressable onPress={openDrawer} className="p-2 px-4">

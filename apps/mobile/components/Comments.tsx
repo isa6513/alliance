@@ -38,6 +38,7 @@ export interface CommentsProps {
   showForm?: boolean;
   initialComments?: CommentDto[];
   highlightedReplyId?: number | null;
+  repliesAsCards?: boolean;
 }
 
 const renderAvatar = (user: CommentDto["author"]) => {
@@ -119,6 +120,7 @@ type ReplyItemSharedProps = {
   compact?: boolean;
   autofocus?: boolean;
   objectId: number;
+  repliesAsCards: boolean;
   replyingTo: number | null;
   setReplyingTo: (id: number | null) => void;
   nestedDraft: CreateEditableContentDto;
@@ -157,9 +159,19 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
   const hasChildren = (reply.children?.length ?? 0) > 0;
   const isHighlighted = shared.highlightedId === reply.id;
   const isNewlyAdded = shared.newlyAddedReplies.has(reply.id);
-  const containerSpacing = depth === 0 ? "p-3" : "p-2";
-  const containerBorder = "border border-zinc-200";
-  const containerBg = isNewlyAdded ? "bg-green/10" : "bg-white";
+  const containerSpacing = shared.repliesAsCards
+    ? depth === 0
+      ? "p-3"
+      : "p-2"
+    : "py-1";
+  const containerBorder = shared.repliesAsCards ? "border border-zinc-200" : "";
+  const containerBg = shared.repliesAsCards
+    ? isNewlyAdded
+      ? "bg-green/10"
+      : "bg-white"
+    : isNewlyAdded
+      ? "bg-green/10"
+      : "";
 
   useEffect(() => {
     if (isEditing) return;
@@ -177,7 +189,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
     <View
       style={{ marginLeft: Math.min(depth * 12, maxDepth * 12) }}
       className={cn(
-        "rounded",
+        shared.repliesAsCards && "rounded",
         containerBorder,
         containerBg,
         containerSpacing,
@@ -336,6 +348,7 @@ export default function Comments({
   showForm: showFormProp = true,
   initialComments,
   highlightedReplyId,
+  repliesAsCards = true,
 }: CommentsProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -595,7 +608,7 @@ export default function Comments({
           onSubmit={handleSubmitReply}
         />
       ) : !user && !compact ? (
-        <View className="py-6 bg-zinc-50 rounded border border-zinc-200">
+        <View className="py-6 bg-zinc-50 rounded border border-zinc-100">
           <Text className="text-zinc-600 text-center">
             Please log in to post a reply.
           </Text>
@@ -613,6 +626,7 @@ export default function Comments({
               compact={compact}
               autofocus={autofocus}
               objectId={objectId}
+              repliesAsCards={repliesAsCards}
               replyingTo={replyingTo}
               setReplyingTo={setReplyingTo}
               nestedDraft={nestedDraft}
