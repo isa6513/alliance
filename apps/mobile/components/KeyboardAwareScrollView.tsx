@@ -12,7 +12,7 @@ const KeyboardAwareScrollView = forwardRef<
   KeyboardAwareScrollViewProps
 >((props, ref) => {
   const { className, ...rest } = props;
-  const tabBarHeight = 70;
+  const tabBarHeight = 130;
   return (
     <BaseKeyboardAwareScrollView
       ref={ref}

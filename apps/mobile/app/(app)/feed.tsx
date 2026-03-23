@@ -210,6 +210,7 @@ export default function FeedScreen() {
           className="flex-1"
           contentContainerStyle={{ flex: 1 }}
           testID="vr-feed-ready"
+          keyboardVerticalOffset={80}
         >
           {listHeader}
           <LegendList

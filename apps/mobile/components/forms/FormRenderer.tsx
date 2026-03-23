@@ -207,7 +207,7 @@ export function RenderDisplayBlockMobile({
           caption={block.caption}
         />
       ) : (
-        <p className="text-sm text-red-500">Cold not load video</p>
+        <Text className="text-sm text-red-500">Could not load video</Text>
       );
     case "previousAnswer": {
       const answers = previousAnswerData?.[block.sourceFormId];
