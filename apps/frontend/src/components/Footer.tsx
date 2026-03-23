@@ -26,6 +26,9 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
             <Link to={href("/privacypolicy")} className="hover:underline">
               Privacy
             </Link>
+            <Link to={href("/childsafety")} className="hover:underline">
+              Child safety
+            </Link>
             <Link to={href("/terms")} className="hover:underline">
               Terms
             </Link>

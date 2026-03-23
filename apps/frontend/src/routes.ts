@@ -15,6 +15,7 @@ export default [
   route("/faq", "pages/static/FAQPage.tsx"),
   route("/invite", "pages/static/InvitePage.tsx"),
   route("/privacypolicy", "pages/static/PrivacyPolicyPage.tsx"),
+  route("/childsafety", "pages/static/ChildSafetyPage.tsx"),
   route("/terms", "pages/static/TermsPage.tsx"),
   route("/error", "TestError.tsx"),
   route("/progress", "pages/static/ProgressListPage.tsx"),
