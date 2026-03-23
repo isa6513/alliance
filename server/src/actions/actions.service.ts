@@ -26,7 +26,12 @@ import {
   PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
-import { NotifsService, shouldTextUser } from 'src/notifs/notifs.service';
+import {
+  NotifsService,
+  shouldPushUser,
+  shouldEmailUser,
+  shouldTextUser,
+} from 'src/notifs/notifs.service';
 import { actionActivityUrl, actionUrl, withSid } from 'src/search/approutes';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
@@ -2472,7 +2477,11 @@ export class ActionsService {
 
     return plans.map((plan) => ({
       ...plan,
-      channel: shouldTextUser(plan.user) ? 'text' : 'email',
+      channels: [
+        shouldTextUser(plan.user) ? ('text' as const) : null,
+        shouldEmailUser(plan.user) ? ('email' as const) : null,
+        shouldPushUser(plan.user) ? ('push' as const) : null,
+      ].filter((channel) => channel !== null),
     }));
   }
 

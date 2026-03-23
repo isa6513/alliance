@@ -5,7 +5,6 @@ import {
   ReferralSource,
   User,
 } from 'src/user/entities/user.entity';
-import { NotificationChannel } from './notif-utils';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
 
 export const testUser = new User({
@@ -69,7 +68,6 @@ export const testUser = new User({
   stripeCustomerId: '',
   isNotSignedUpPartialProfile: false,
   over18: false,
-  preferredActionReminderChannel: NotificationChannel.Text,
   awayRanges: [],
   anonymous: false,
   actionEventNotifs: [],

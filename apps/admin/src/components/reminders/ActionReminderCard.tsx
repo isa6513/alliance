@@ -415,7 +415,7 @@ const ActionReminderCard = ({
                     <p className="text-zinc-500">
                       {notif.mms && "text "}
                       {notif.mail && "email "}
-                      {notif.pushes?.length && "push "}
+                      {notif.pushes?.length ? "push " : null}
                     </p>
                     <Link to={`/member/${notif.user.id}`} target="_blank">
                       {notif.user.displayName}
@@ -438,7 +438,11 @@ const ActionReminderCard = ({
                         : "text-zinc-500",
                     )}
                   >
-                    {notif.mms ? notif.mms.status : notif.mail?.status}
+                    {notif.mms ? `text: ${notif.mms.status} ` : null}
+                    {notif.mail ? `email: ${notif.mail.status} ` : null}
+                    {notif.pushes?.length
+                      ? `push: ${notif.pushes[0].receiptStatus}`
+                      : null}
                   </p>
                 </div>
               ))
