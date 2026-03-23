@@ -4,13 +4,13 @@
     "slug": "alliance-mobile",
     "version": "1.1",
     "orientation": "portrait",
-    "icon": "./assets/images/globe.jpg",
+    "icon": "./assets/images/globe-icon.png",
     "scheme": "alliance",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.alliancefoundation.alliancemobile",
+      "bundleIdentifier": "com.alliancefoundation.alliancemobiledev",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
@@ -21,8 +21,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/globe.jpg",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/globe-icon.png",
+        "backgroundColor": "#000000"
       },
       "package": "com.alliance.alliancemobile",
       "googleServicesFile": "./google-services.json"
@@ -30,16 +30,13 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/globe.jpg"
+      "favicon": "./assets/images/globe-icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 100,
-          "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
       ],
@@ -71,8 +68,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/globe.jpg",
-          "color": "#ffffff"
+          "icon": "./assets/images/globe-icon.png",
+          "color": "#000000"
         }
       ],
       "expo-video"

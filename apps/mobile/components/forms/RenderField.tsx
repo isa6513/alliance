@@ -188,7 +188,7 @@ export function RenderField({
         <View>
           <RenderLabel field={field} error={errorMessage} />
           <TextInput
-            className={cn(inputBase, "min-h-[100px] text-base")}
+            className={cn(inputBase, "text-base")}
             value={(value as string) ?? ""}
             onChangeText={(text) => onChange?.(text)}
             onFocus={onFocus}

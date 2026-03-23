@@ -14,9 +14,14 @@ import type { UserDto } from "@alliance/shared/client";
 import {
   FormResponseDto,
   SubmitFormDto,
+  tasksGetForm,
+  tasksGetMyFormResponse,
   tasksRunValidator,
 } from "@alliance/shared/client";
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
+import type {
+  DisplayBlock,
+  PreviousAnswerBlock,
+} from "@alliance/shared/forms/display-blocks";
 import type {
   AnyField,
   FormSchema,
@@ -33,6 +38,7 @@ import {
 } from "@alliance/shared/formrenderer";
 import { RenderField } from "./RenderField";
 import FormModal from "./FormModal";
+import RenderPreviousAnswer from "./RenderPreviousAnswer";
 import VideoPlayer from "./VideoPlayer";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
 import { CircleCheck, Copy, Ellipsis } from "lucide-react-native";
@@ -103,7 +109,17 @@ function CopyTextDisplayMobile({
   );
 }
 
-export function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
+type RenderDisplayBlockMobileProps = {
+  block: DisplayBlock;
+  previousAnswerData?: Record<number, Record<string, unknown>>;
+  previousAnswerSchemas?: Record<number, FormSchema>;
+};
+
+export function RenderDisplayBlockMobile({
+  block,
+  previousAnswerData,
+  previousAnswerSchemas,
+}: RenderDisplayBlockMobileProps) {
   switch (block.kind) {
     case "header":
       const headerClass = {
@@ -190,10 +206,16 @@ export function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
           videoId={block.videoId}
           caption={block.caption}
         />
-      ) : null;
-    case "previousAnswer":
-      //TODO
-      return null;
+      ) : (
+        <p className="text-sm text-red-500">Cold not load video</p>
+      );
+    case "previousAnswer": {
+      const answers = previousAnswerData?.[block.sourceFormId];
+      const schema = previousAnswerSchemas?.[block.sourceFormId];
+      return (
+        <RenderPreviousAnswer block={block} schema={schema} answers={answers} />
+      );
+    }
     default:
       return null;
   }
@@ -202,7 +224,6 @@ export function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
 const FormRenderer = ({
   form,
   id,
-  publicAction,
   onSubmit,
   persistKey,
   userId,
@@ -258,6 +279,104 @@ const FormRenderer = ({
 
     return { fieldLookup: lookup, defaultValueMap: defaults };
   }, [schema]);
+
+  const previousAnswerSourceFormIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const page of schema.pages) {
+      for (const element of page.fields) {
+        if (
+          !("label" in element) &&
+          (element as PreviousAnswerBlock).kind === "previousAnswer"
+        ) {
+          const block = element as PreviousAnswerBlock;
+          if (block.sourceFormId) {
+            ids.add(block.sourceFormId);
+          }
+        }
+      }
+    }
+    return Array.from(ids);
+  }, [schema]);
+
+  const [previousAnswerSchemas, setPreviousAnswerSchemas] = useState<
+    Record<number, FormSchema>
+  >({});
+  const [previousAnswerData, setPreviousAnswerData] = useState<
+    Record<number, Record<string, unknown>>
+  >({});
+
+  useEffect(() => {
+    if (previousAnswerSourceFormIds.length === 0) {
+      setPreviousAnswerSchemas({});
+      setPreviousAnswerData({});
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      const schemaEntries = await Promise.all(
+        previousAnswerSourceFormIds.map(async (formId) => {
+          try {
+            const response = await tasksGetForm({ path: { id: formId } });
+            if (response.data) {
+              const form = response.data as Record<string, unknown>;
+              return [formId, form.schema as FormSchema] as const;
+            }
+          } catch {
+            // Form not found or inaccessible.
+          }
+
+          return null;
+        }),
+      );
+
+      if (cancelled) return;
+
+      const schemas: Record<number, FormSchema> = {};
+      for (const entry of schemaEntries) {
+        if (entry) {
+          schemas[entry[0]] = entry[1];
+        }
+      }
+      setPreviousAnswerSchemas(schemas);
+
+      const dataEntries = await Promise.all(
+        previousAnswerSourceFormIds.map(async (formId) => {
+          try {
+            const response = await tasksGetMyFormResponse({
+              path: { id: formId },
+            });
+            if (response.data) {
+              const formResponse = response.data as Record<string, unknown>;
+              return [
+                formId,
+                (formResponse.answers as Record<string, unknown>) ?? {},
+              ] as const;
+            }
+          } catch {
+            // User has not submitted the source form.
+          }
+
+          return null;
+        }),
+      );
+
+      if (cancelled) return;
+
+      const data: Record<number, Record<string, unknown>> = {};
+      for (const entry of dataEntries) {
+        if (entry) {
+          data[entry[0]] = entry[1];
+        }
+      }
+      setPreviousAnswerData(data);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [previousAnswerSourceFormIds]);
 
   const pageCount = schema.pages?.length ?? 0;
   const maxPageIndex = Math.max(0, (pageCount || 1) - 1);
@@ -757,7 +876,11 @@ const FormRenderer = ({
         if (!("label" in element)) {
           return (
             <View key={`block-${idx}`}>
-              <RenderDisplayBlockMobile block={element as DisplayBlock} />
+              <RenderDisplayBlockMobile
+                block={element as DisplayBlock}
+                previousAnswerData={previousAnswerData}
+                previousAnswerSchemas={previousAnswerSchemas}
+              />
             </View>
           );
         }
@@ -874,7 +997,7 @@ const FormRenderer = ({
           </View>
           {Object.keys(fieldErrors).length > 0 && (
             <View className="flex-row gap-2">
-              {Object.entries(fieldErrors).map(([fieldId, error]) => (
+              {Object.entries(fieldErrors).map(([fieldId]) => (
                 <Text key={fieldId} className="text-red-500 text-base p-2">
                   Your form has errors. Please fix before submitting.
                 </Text>

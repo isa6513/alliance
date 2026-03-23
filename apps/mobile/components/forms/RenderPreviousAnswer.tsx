@@ -1,3 +1,4 @@
+import { Text, View } from "react-native";
 import type { PreviousAnswerBlock } from "@alliance/shared/forms/display-blocks";
 import type {
   FormSchema,
@@ -10,41 +11,44 @@ import {
   getVisiblePreviousAnswerSubFields,
   isPreviousAnswerValueEmpty,
 } from "@alliance/shared/lib/previousAnswers";
-import RenderField from "./RenderField";
+import { RenderField } from "./RenderField";
 
 function EmptyPlaceholder({ block }: { block: PreviousAnswerBlock }) {
   return (
-    <div>
-      {block.title && (
-        <h3 className="text-base font-medium text-zinc-900 mb-2">
+    <View>
+      {block.title ? (
+        <Text className="mb-2 text-base font-medium text-zinc-900">
           {block.title}
-        </h3>
-      )}
-      <p className="text-sm text-gray-400 italic">
+        </Text>
+      ) : null}
+      <Text className="text-sm italic text-zinc-400">
         {block.emptyText || "No previous answer available"}
-      </p>
-    </div>
+      </Text>
+    </View>
   );
 }
 
-type Props = {
+type RenderPreviousAnswerProps = {
   block: PreviousAnswerBlock;
-  schema: FormSchema;
-  answers: Record<string, unknown>;
+  schema?: FormSchema;
+  answers?: Record<string, unknown>;
 };
 
 export default function RenderPreviousAnswer({
   block,
   schema,
   answers,
-}: Props) {
+}: RenderPreviousAnswerProps) {
+  if (!schema || !answers) {
+    return <EmptyPlaceholder block={block} />;
+  }
+
   const field = findFieldInSchema(schema, block.sourceFieldId);
   if (!field) {
     return <EmptyPlaceholder block={block} />;
   }
 
   const value = answers[block.sourceFieldId] as FormValue | undefined;
-
   if (isPreviousAnswerValueEmpty(value)) {
     return <EmptyPlaceholder block={block} />;
   }
@@ -60,14 +64,14 @@ export default function RenderPreviousAnswer({
   }
 
   return (
-    <div>
-      {block.title && (
-        <h3 className="text-base font-medium text-zinc-900 mb-2">
+    <View>
+      {block.title ? (
+        <Text className="mb-2 text-base font-medium text-zinc-900">
           {block.title}
-        </h3>
-      )}
-      <RenderField field={field} value={value} disabled={true} />
-    </div>
+        </Text>
+      ) : null}
+      <RenderField field={field} value={value} disabled />
+    </View>
   );
 }
 
@@ -87,29 +91,29 @@ function RenderPreviousAnswerList({
   }
 
   return (
-    <div>
-      {block.title && (
-        <h3 className="text-base font-medium text-zinc-900 mb-2">
+    <View>
+      {block.title ? (
+        <Text className="mb-2 text-base font-medium text-zinc-900">
           {block.title}
-        </h3>
-      )}
-      <div className="space-y-3">
+        </Text>
+      ) : null}
+      <View className="gap-3">
         {value.map((item, idx) => (
-          <div
+          <View
             key={idx}
-            className="rounded-md border border-gray-200 bg-gray-50 p-3 space-y-2"
+            className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 gap-2"
           >
             {visibleSubFields.map((subField) => (
               <RenderField
                 key={subField.id}
                 field={subField}
                 value={item[subField.id]}
-                disabled={true}
+                disabled
               />
             ))}
-          </div>
+          </View>
         ))}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }

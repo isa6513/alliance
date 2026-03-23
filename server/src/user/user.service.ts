@@ -1362,9 +1362,17 @@ export class UserService {
 
     if (body.expoPushToken) {
       const existingByToken = await this.userDeviceRepository.findOne({
-        where: { expoPushToken: body.expoPushToken, user: { id: userId } },
+        where: { expoPushToken: body.expoPushToken },
+        relations: { user: true },
       });
       if (existingByToken) {
+        if (existingByToken.user?.id !== userId) {
+          console.log('Reassigning device by expo push token to user', userId);
+          await this.userDeviceRepository.update(existingByToken.id, {
+            user: { id: userId },
+            deviceType: body.deviceType ?? existingByToken.deviceType,
+          });
+        }
         return existingByToken;
       }
     }

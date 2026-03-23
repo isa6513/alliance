@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   FlatList,
+  Platform,
 } from "react-native";
 import { RelativePathString, router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -44,6 +45,9 @@ import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
 import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
 import { useAuth } from "../../../lib/AuthContext";
 import { cn } from "@alliance/shared/styles/util";
+import KeyboardAwareScrollView from "../../../components/KeyboardAwareScrollView";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { LegendList } from "@legendapp/list";
 
 enum ProfileTab {
   Actions = "actions",
@@ -752,17 +756,16 @@ export default function UserProfileScreen() {
     );
 
   return (
-    <View className="flex-1 bg-white" testID="vr-user-profile-ready">
-      <FlatList
-        data={listData}
-        keyExtractor={listKeyExtractor}
-        renderItem={listRenderItem}
-        ListHeaderComponent={listHeader}
-        ListEmptyComponent={listEmptyComponent}
-        ListFooterComponent={<View className="h-16" />}
-        contentContainerStyle={{ backgroundColor: "white" }}
-        keyboardShouldPersistTaps="handled"
-      />
-    </View>
+    <FlatList
+      data={listData}
+      keyExtractor={listKeyExtractor}
+      renderItem={listRenderItem}
+      ListHeaderComponent={listHeader}
+      ListEmptyComponent={listEmptyComponent}
+      ListFooterComponent={<View className="h-16" />}
+      renderScrollComponent={(props) => <KeyboardAwareScrollView {...props} />}
+      contentContainerStyle={{ backgroundColor: "white" }}
+      keyboardShouldPersistTaps="handled"
+    />
   );
 }

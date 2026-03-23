@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Pressable,
   RefreshControl,
   TouchableOpacity,
   View,
@@ -56,7 +57,12 @@ function ActivityItem({ activity, onLike }: ActivityItemProps) {
   }
 
   return (
-    <View className="flex-row gap-x-3 py-3 border-b border-zinc-100 items-center">
+    <Pressable
+      onPress={() =>
+        router.push(`/actions/${activity.actionId}/activity/${activity.id}`)
+      }
+      className="flex-row gap-x-3 py-3 border-b border-zinc-100 items-center"
+    >
       <ProfileImage pfp={activity.user.profilePicture} size="medium" />
       <View className="flex-1">
         <Text className="font-medium text-zinc-900">
@@ -72,7 +78,7 @@ function ActivityItem({ activity, onLike }: ActivityItemProps) {
         likes={activity.likesCount}
         onPress={() => onLike(activity.id)}
       />
-    </View>
+    </Pressable>
   );
 }
 
