@@ -34,6 +34,7 @@ import SeeAll from "../../components/SeeAll";
 import HomeFeed from "../../components/HomeFeed";
 import type { AggregateViewSchema } from "@alliance/shared/forms/formschema";
 import { runAsync } from "@alliance/shared/lib/utils";
+import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
 import {
   fetchTaskFormProgressViewsByFormId,
   mapFormViewsToActionIds,
@@ -209,7 +210,6 @@ const HomePage = () => {
   }, [user, refreshUser]);
 
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
-  const [taskNavigatorIndex, setTaskNavigatorIndex] = useState(0);
   const [actionProgressViews, setActionProgressViews] = useState<
     Record<number, AggregateViewSchema[]>
   >({});
@@ -356,6 +356,9 @@ const HomePage = () => {
     return [...actionCards, ...followUpCards];
   }, [todoActions, activeCompletableFollowUpForms]);
 
+  const { index: taskNavigatorIndex, setIndex: setTaskNavigatorIndex } =
+    useBoundedIndex(taskNavigatorItems.length);
+
   const sortedGeneralUpdates = useMemo(
     () => [...(generalUpdates ?? [])].sort(homePagePriorityComparator),
     [generalUpdates],
@@ -500,6 +503,7 @@ const HomePage = () => {
     nextWeekTodoActions,
     numTodo,
     selectedTaskNavigatorItem,
+    setTaskNavigatorIndex,
     taskNavigatorItems,
     remainingTasksEstimatedTimeCurrentWeek,
   ]);

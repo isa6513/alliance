@@ -38,7 +38,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import { useAuth } from "../../lib/AuthContext";
-import { useBoundedIndex } from "../../lib/useBoundedIndex";
+import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { TaskNavigatorStepper } from "../../components/system/TaskNavigatorStepper";
 import { router } from "expo-router";

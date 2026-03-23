@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * Manages an index into a list of length N, clamped to [0, N-1].
