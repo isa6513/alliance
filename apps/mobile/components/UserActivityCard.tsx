@@ -125,12 +125,11 @@ export default function UserActivityCard({
   }, [activity.editableContent]);
 
   return (
-    <View className="bg-white">
+    <View className="bg-white p-4">
       <TouchableOpacity
         activeOpacity={isEditing || isSaving || showCommentForm ? 1 : 0.7}
         onPress={handleActivityPress}
         disabled={isEditing || isSaving || showCommentForm}
-        className="p-4"
       >
         {/* Header: User info and action */}
         <View className="flex-row items-start flex-wrap">
@@ -224,8 +223,8 @@ export default function UserActivityCard({
         )}
       </TouchableOpacity>
 
-      {commentable && activity.comments.length > 0 && (
-        <View className="ml-8 mb-4">
+      {commentable && (
+        <View className="ml-8">
           <Comments
             objectId={activity.id}
             type="activity"

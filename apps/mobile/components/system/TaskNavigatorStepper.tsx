@@ -3,15 +3,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import Text from "./Text";
 import { colors } from "../../lib/style/colors";
 
-export function IndexStepper({
+/** Prev/next control for the home task navigator (matches web task navigator behavior). */
+export function TaskNavigatorStepper({
   index,
   totalCount,
   onPrev,
   onNext,
   canGoPrev,
   canGoNext,
-  previousLabel = "Previous",
-  nextLabel = "Next",
+  previousLabel = "Previous task",
+  nextLabel = "Next task",
 }: {
   index: number;
   totalCount: number;
@@ -41,8 +42,8 @@ export function IndexStepper({
         />
       </Pressable>
       <Text
-        className="text-zinc-500 text-sm min-w-[4rem] text-center"
-        accessibilityLabel={`${index + 1} of ${totalCount}`}
+        className="text-zinc-500 text-sm min-w-16 text-center"
+        accessibilityLabel={`Task ${index + 1} of ${totalCount}`}
       >
         {index + 1} of {totalCount}
       </Text>

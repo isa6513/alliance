@@ -40,7 +40,7 @@ import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import { useAuth } from "../../lib/AuthContext";
 import { useBoundedIndex } from "../../lib/useBoundedIndex";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
-import { IndexStepper } from "../../components/system/IndexStepper";
+import { TaskNavigatorStepper } from "../../components/system/TaskNavigatorStepper";
 import { router } from "expo-router";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
@@ -170,7 +170,7 @@ export default function HomeScreen() {
     goPrev,
     canGoNext,
     canGoPrev,
-    hasMultiple: showTaskNav,
+    hasMultiple: showTaskNavigator,
   } = useBoundedIndex(allItems.length);
   const currentTaskOrGeneralUpdate = allItems[safeIndex] ?? null;
 
@@ -346,16 +346,14 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-white">
       <SimplePageTitle title={title} isVisible={isHeaderVisible}>
-        {showTaskNav ? (
-          <IndexStepper
+        {showTaskNavigator ? (
+          <TaskNavigatorStepper
             index={safeIndex}
             totalCount={allItems.length}
             onPrev={goPrev}
             onNext={goNext}
             canGoPrev={canGoPrev}
             canGoNext={canGoNext}
-            previousLabel="Previous task"
-            nextLabel="Next task"
           />
         ) : (
           <TouchableOpacity

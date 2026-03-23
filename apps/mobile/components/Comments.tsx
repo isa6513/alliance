@@ -101,7 +101,7 @@ const ReplyForm = ({
   onSubmit,
 }: ReplyFormProps) => {
   return (
-    <View className="p-4 bg-zinc-100">
+    <View className="p-2 bg-zinc-100">
       <EditableContentForm
         value={content}
         onChange={setContent}

@@ -98,7 +98,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             <p className="font-semibold">{dismissProps.header}</p>
             <p className="mb-3">{dismissProps.message}</p>
             <Button
-              color={ButtonColor.White}
+              color={ButtonColor.WhiteBorderless}
               onClick={dismissProps.onDismiss}
               className="w-full"
             >
