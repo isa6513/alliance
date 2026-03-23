@@ -68,6 +68,7 @@ export default [
       route("/settings", "pages/app/SettingsPage.tsx"),
       route("/contract", "pages/app/ContractPage.tsx"),
       route("/commit", "pages/app/CommitActionPage.tsx"),
+      route("/deleteaccount", "pages/app/DeleteAccountPage.tsx"),
       route("/information", "pages/app/InformationPage.tsx"),
       route("/general-updates", "pages/app/GeneralUpdatesPage.tsx"),
       route("/action-updates", "pages/app/ActionUpdatesPage.tsx"),

@@ -655,4 +655,11 @@ export class UserController {
   ): Promise<void> {
     await this.userService.registerLiveActivityUpdateToken(req.user.sub, body);
   }
+
+  @Post('requestAccountDeletion')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async requestAccountDeletion(@Request() req: JwtRequest) {
+    await this.userService.requestAccountDeletion(req.user.sub);
+  }
 }

@@ -1075,7 +1075,7 @@ export type NotifClickResponseDto = {
     mms: boolean;
 };
 
-export type EventType = 'account_created' | 'contract_signed' | 'contract_suspended' | 'sms_unsubscribe' | 'sms_inbound' | 'sms_failure' | 'forum_action_autocomplete' | 'action_comment' | 'forum_reply_notif_failure' | 'action_opt_out';
+export type EventType = 'account_created' | 'contract_signed' | 'contract_suspended' | 'sms_unsubscribe' | 'sms_inbound' | 'sms_failure' | 'forum_action_autocomplete' | 'action_comment' | 'forum_reply_notif_failure' | 'action_opt_out' | 'account_deletion_requested';
 
 export type EventLogUserDto = {
     id: number;
@@ -3863,6 +3863,17 @@ export type UserRegisterLiveActivityUpdateTokenData = {
 };
 
 export type UserRegisterLiveActivityUpdateTokenResponses = {
+    200: unknown;
+};
+
+export type UserRequestAccountDeletionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/requestAccountDeletion';
+};
+
+export type UserRequestAccountDeletionResponses = {
     200: unknown;
 };
 

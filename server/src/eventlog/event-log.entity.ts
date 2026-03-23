@@ -22,6 +22,7 @@ export enum EventType {
   ActionComment = 'action_comment',
   ForumReplyNotifFailure = 'forum_reply_notif_failure',
   ActionOptOut = 'action_opt_out',
+  AccountDeletionRequested = 'account_deletion_requested',
 }
 
 export const SEND_TO_SLACK: Record<EventType, boolean> = {
@@ -35,6 +36,7 @@ export const SEND_TO_SLACK: Record<EventType, boolean> = {
   [EventType.ActionComment]: true,
   [EventType.ForumReplyNotifFailure]: false,
   [EventType.ActionOptOut]: true,
+  [EventType.AccountDeletionRequested]: true,
 };
 
 @Entity()

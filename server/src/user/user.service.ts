@@ -1460,4 +1460,12 @@ export class UserService {
       );
     }
   }
+
+  async requestAccountDeletion(userId: number): Promise<void> {
+    this.eventLogService.sendMessage({
+      type: EventType.AccountDeletionRequested,
+      message: `User ${userId} requested account deletion`,
+      userId: userId,
+    });
+  }
 }
