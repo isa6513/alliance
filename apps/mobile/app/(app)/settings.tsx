@@ -14,10 +14,12 @@ import {
   authForgotPassword,
   authMe,
   City,
+  NotificationChannel,
   UpdateProfileDto,
   userMyLocation,
   userUpdate,
 } from "@alliance/shared/client";
+import { Features, isEnabled } from "@alliance/shared/lib/features";
 import {
   hasSettingsChanges,
   NOTIFICATION_CHANNEL_OPTIONS,
@@ -32,6 +34,45 @@ import { useMutation } from "@tanstack/react-query";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { colors } from "../../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
+import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
+
+type SettingsToggleRowProps = {
+  label: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+  description?: string;
+};
+
+function SettingsToggleRow({
+  label,
+  value,
+  onChange,
+  description,
+}: SettingsToggleRowProps) {
+  return (
+    <TouchableOpacity
+      className="flex-row items-start"
+      onPress={() => onChange(!value)}
+      activeOpacity={0.7}
+    >
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        trackColor={{
+          true: colors.green,
+          false: colors.switch.trackOff,
+        }}
+        ios_backgroundColor={colors.switch.trackOff}
+      />
+      <View className="ml-3 flex-1">
+        <Text className="text-base text-zinc-900">{label}</Text>
+        {description ? (
+          <Text className="mt-1 text-sm text-zinc-500">{description}</Text>
+        ) : null}
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -78,6 +119,35 @@ export default function SettingsPage() {
   const hasChanges = useMemo(() => {
     return hasSettingsChanges(editableUser, initialUser);
   }, [editableUser, initialUser]);
+  const showPushSettings = isEnabled(
+    Features.PushNotifications,
+    __DEV__ ? "development" : "production",
+  );
+  const reminderChannelOptions = useMemo<NotificationChannelOption[]>(() => {
+    if (!showPushSettings) {
+      return NOTIFICATION_CHANNEL_OPTIONS;
+    }
+
+    return [
+      ...NOTIFICATION_CHANNEL_OPTIONS,
+      { value: "push" as NotificationChannel, label: "Push" },
+    ];
+  }, [showPushSettings]);
+  const selectedReminderChannelLabel = useMemo(() => {
+    const selectedOption = reminderChannelOptions.find(
+      (option) => option.value === editableUser?.preferredActionReminderChannel,
+    );
+
+    if (selectedOption) {
+      return selectedOption.label;
+    }
+
+    if (editableUser?.preferredActionReminderChannel === "push") {
+      return "Push";
+    }
+
+    return "Email";
+  }, [editableUser?.preferredActionReminderChannel, reminderChannelOptions]);
 
   const forgotPassword = useMutation({
     mutationFn: (email: string) => authForgotPassword({ body: { email } }),
@@ -170,7 +240,7 @@ export default function SettingsPage() {
   return (
     <View className="flex-1 bg-white" testID="vr-settings-ready">
       <SimplePageTitle title="Settings">
-        <Text className="text-sm text-zinc-500">
+        <Text className="text-sm text-zinc-500 mr-4">
           {saving
             ? "Saving..."
             : hasChanges
@@ -178,7 +248,7 @@ export default function SettingsPage() {
               : "Changes saved"}
         </Text>
       </SimplePageTitle>
-      <ScrollView className="flex-1">
+      <KeyboardAwareScrollView className="flex-1">
         <View className="bg-zinc-100 px-2 pb-8 pt-2 flex flex-col gap-2">
           {/* Profile Section */}
           <Card cardStyle={CardStyle.White}>
@@ -287,10 +357,7 @@ export default function SettingsPage() {
                 activeOpacity={0.8}
               >
                 <Text className="text-base text-zinc-900">
-                  {NOTIFICATION_CHANNEL_OPTIONS.find(
-                    (o: NotificationChannelOption) =>
-                      o.value === editableUser.preferredActionReminderChannel,
-                  )?.label ?? "Email"}
+                  {selectedReminderChannelLabel}
                 </Text>
                 <ChevronDown size={18} color={colors.text.icon} />
               </TouchableOpacity>
@@ -304,84 +371,97 @@ export default function SettingsPage() {
             ) && (
               <Text className="text-sm text-zinc-500 mb-2">
                 You will not receive any notifications. Please keep a
-                notification channel enabled if you need reminders.
+                notification channel enabled if you need reminders to complete
+                actions on time.
               </Text>
             )}
 
             <View className="gap-3 mb-4">
-              <TouchableOpacity
-                className="flex-row items-center"
-                onPress={() =>
-                  updateEditableUser({
-                    emailNotifsEnabled: !editableUser.emailNotifsEnabled,
-                  })
+              <SettingsToggleRow
+                label="Email"
+                value={!!editableUser.emailNotifsEnabled}
+                onChange={(value) =>
+                  updateEditableUser({ emailNotifsEnabled: value })
                 }
-                activeOpacity={0.7}
-              >
-                <Switch
-                  value={!!editableUser.emailNotifsEnabled}
-                  onValueChange={(value) =>
-                    updateEditableUser({ emailNotifsEnabled: value })
-                  }
-                  trackColor={{
-                    true: colors.green,
-                    false: colors.switch.trackOff,
-                  }}
-                  ios_backgroundColor={colors.switch.trackOff}
-                />
-                <Text className="ml-3 text-base">Email</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="flex-row items-center"
-                onPress={() =>
-                  updateEditableUser({
-                    textNotifsEnabled: !editableUser.textNotifsEnabled,
-                  })
+              />
+              <SettingsToggleRow
+                label="Text/SMS"
+                value={!!editableUser.textNotifsEnabled}
+                onChange={(value) =>
+                  updateEditableUser({ textNotifsEnabled: value })
                 }
-                activeOpacity={0.7}
-              >
-                <Switch
-                  value={!!editableUser.textNotifsEnabled}
-                  onValueChange={(value) =>
-                    updateEditableUser({ textNotifsEnabled: value })
+              />
+              {showPushSettings ? (
+                <SettingsToggleRow
+                  label="Push"
+                  value={!!editableUser.pushNotifsEnabled}
+                  onChange={(value) =>
+                    updateEditableUser({ pushNotifsEnabled: value })
                   }
-                  trackColor={{
-                    true: colors.green,
-                    false: colors.switch.trackOff,
-                  }}
                 />
-                <Text className="ml-3 text-base">Text/SMS</Text>
-              </TouchableOpacity>
+              ) : null}
             </View>
 
-            <Text className="font-medium mb-2 mt-4">
-              Push notification preferences:
-            </Text>
             <View className="gap-3 mb-4">
-              <TouchableOpacity
-                className="flex-row items-center"
-                onPress={() =>
+              {user.leaderOfIds.length > 0 ? (
+                <SettingsToggleRow
+                  label="Receive reminders for group members with uncompleted tasks?"
+                  value={!!editableUser.remindAboutUncompletedGroupMembers}
+                  onChange={(value) =>
+                    updateEditableUser({
+                      remindAboutUncompletedGroupMembers: value,
+                    })
+                  }
+                />
+              ) : null}
+              <SettingsToggleRow
+                label="Allow notifications when you receive a reply in an ongoing action discussion?"
+                value={!!editableUser.receiveReplyNotifications}
+                onChange={(value) =>
                   updateEditableUser({
-                    pushesForMessages: !editableUser.pushesForMessages,
+                    receiveReplyNotifications: value,
                   })
                 }
-                activeOpacity={0.7}
-              >
-                <Switch
-                  value={!!editableUser.pushesForMessages}
-                  onValueChange={(value) =>
-                    updateEditableUser({ pushesForMessages: value })
-                  }
-                  trackColor={{
-                    true: colors.green,
-                    false: colors.switch.trackOff,
-                  }}
-                  ios_backgroundColor={colors.switch.trackOff}
-                />
-                <Text className="ml-3 text-base">Messages</Text>
-              </TouchableOpacity>
+              />
             </View>
+
+            {showPushSettings ? (
+              <>
+                <Text className="font-medium mb-2 mt-4">
+                  Receive push notifications for:
+                </Text>
+                <View className="gap-3 mb-4">
+                  <SettingsToggleRow
+                    label="Likes"
+                    value={editableUser.pushesForLikes ?? false}
+                    onChange={(value) =>
+                      updateEditableUser({ pushesForLikes: value })
+                    }
+                  />
+                  <SettingsToggleRow
+                    label="Comments"
+                    value={editableUser.pushesForComments ?? false}
+                    onChange={(value) =>
+                      updateEditableUser({ pushesForComments: value })
+                    }
+                  />
+                  <SettingsToggleRow
+                    label="Friend requests"
+                    value={editableUser.pushesForFriendRequests ?? false}
+                    onChange={(value) =>
+                      updateEditableUser({ pushesForFriendRequests: value })
+                    }
+                  />
+                  <SettingsToggleRow
+                    label="Messages"
+                    value={editableUser.pushesForMessages ?? false}
+                    onChange={(value) =>
+                      updateEditableUser({ pushesForMessages: value })
+                    }
+                  />
+                </View>
+              </>
+            ) : null}
 
             <View className="mb-4">
               <Text className="font-medium mb-2">Preferred reminder time:</Text>
@@ -573,7 +653,7 @@ export default function SettingsPage() {
                 </TouchableOpacity>
               </View>
               <ScrollView>
-                {NOTIFICATION_CHANNEL_OPTIONS.map(
+                {reminderChannelOptions.map(
                   (option: NotificationChannelOption) => (
                     <TouchableOpacity
                       key={option.value}
@@ -609,7 +689,7 @@ export default function SettingsPage() {
             </View>
           </View>
         </Modal>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }
