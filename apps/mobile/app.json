@@ -38,6 +38,9 @@
       [
         "expo-splash-screen",
         {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 100,
+          "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
       ],
@@ -60,8 +63,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you upload them when completing actions.",
-          "cameraPermission": false
+          "photosPermission": "The app accesses your photos to let you upload them when completing actions."
         }
       ],
       "expo-localization",
