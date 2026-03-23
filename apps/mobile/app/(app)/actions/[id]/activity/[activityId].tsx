@@ -17,7 +17,6 @@ import {
   imagesUploadImage,
 } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { ChevronLeft } from "lucide-react-native";
 import { useAuth } from "../../../../../lib/AuthContext";
 import { colors } from "../../../../../lib/style/colors";
 import Text from "../../../../../components/system/Text";
@@ -32,6 +31,7 @@ import EditableContentForm from "../../../../../components/EditableContentForm";
 import EditableContentRenderer from "../../../../../components/EditableContentRenderer";
 import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
 import OutputRenderer from "../../../../../components/OutputRenderer";
+import BackButton from "../../../../../components/system/BackButton";
 
 export default function ActivityDetailScreen() {
   const { id, activityId } = useLocalSearchParams<{
@@ -244,16 +244,13 @@ export default function ActivityDetailScreen() {
         }
       >
         {/* Header */}
-        <View className="p-4 pt-12">
+        <View className="p-4">
           {/* Back button */}
-          <TouchableOpacity
-            onPress={handleBack}
-            activeOpacity={0.7}
-            className="flex-row items-center gap-x-1 self-start px-2 py-1 rounded border border-zinc-200 mb-6"
-          >
-            <ChevronLeft size={16} color={colors.text.icon} />
-            <Text className="text-zinc-600 text-sm">Back</Text>
-          </TouchableOpacity>
+          <BackButton
+            fallbackRoute={`/actions/${id}`}
+            className="mb-4"
+            bordered
+          />
 
           {/* Action name */}
           <Text className="text-2xl font-serif font-semibold mb-4">

@@ -10,7 +10,7 @@ import {
   ProfileDto,
   userListMessageableUsers,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "../../../components/system/Button";
+import BackButton from "../../../components/system/BackButton";
 import MessageComposer from "../../../components/messages/MessageComposer";
 import MessageRecipientSelect from "../../../components/messages/MessageRecipientSelect";
 import Text from "../../../components/system/Text";
@@ -22,7 +22,6 @@ import {
   useConversations,
 } from "../../../lib/messages";
 import { colors } from "../../../lib/style/colors";
-import { ChevronLeft } from "lucide-react-native";
 
 export default function NewMessageScreen() {
   const { user } = useAuth();
@@ -68,7 +67,7 @@ export default function NewMessageScreen() {
       selectedUserIds
         .map((id) => messageableUsers.find((user) => user.id === id))
         .filter((user): user is ProfileDto => !!user),
-    [selectedUserIds, messageableUsers]
+    [selectedUserIds, messageableUsers],
   );
 
   const ensureConversation = useCallback(async () => {
@@ -76,7 +75,7 @@ export default function NewMessageScreen() {
     const existing = findMatchingConversation(
       conversations,
       user?.id,
-      selectedUserIds
+      selectedUserIds,
     );
     if (existing) return existing;
 
@@ -124,7 +123,7 @@ export default function NewMessageScreen() {
     if (selectedUserIds.length === 0) {
       Alert.alert(
         "Select recipients",
-        "Choose at least one person to message."
+        "Choose at least one person to message.",
       );
       return;
     }
@@ -162,17 +161,15 @@ export default function NewMessageScreen() {
   }, [attachments, ensureConversation, isSending, message, selectedUserIds]);
 
   return (
-    <View className="flex-1 bg-white pt-12">
+    <View className="flex-1 bg-white">
       <View className="flex-row items-center justify-between px-4 pb-2">
-        <Button color={ButtonColor.Transparent} onPress={() => router.back()}>
-          <ChevronLeft size={20} color={colors.text.secondary} />
-        </Button>
+        <BackButton />
         <Text className="text-lg font-semibold text-zinc-900">New message</Text>
-        <View className="w-20" />
+        <View className="w-25" />
       </View>
       <ScrollView className="flex-1 px-4">
-        <View className="border border-zinc-200 rounded bg-white p-4 flex flex-row">
-          <Text className="text-sm text-zinc-600 my-3 mr-2">To</Text>
+        <View className="border border-zinc-200 rounded bg-white px-4 flex flex-row">
+          <Text className="text-sm text-zinc-600 my-3 mr-2">To:</Text>
           {loadingUsers ? (
             <ActivityIndicator size="small" color={colors.green} />
           ) : (

@@ -50,7 +50,7 @@ export default function MessageRecipientSelect({
     return users
       .filter((user) => !selectedIds.has(user.id))
       .filter((user) =>
-        `${user.displayName ?? ""}`.toLowerCase().includes(term)
+        `${user.displayName ?? ""}`.toLowerCase().includes(term),
       )
       .slice(0, MAX_RESULTS);
   }, [query, users, selectedUserIds, canSelectMore]);
@@ -75,8 +75,8 @@ export default function MessageRecipientSelect({
   const placeholder = loading
     ? "Loading users..."
     : canSelectMore
-    ? "Search by name"
-    : "Remove current selection to choose another";
+      ? "Search by name"
+      : "Remove current selection to choose another";
 
   return (
     <View className="flex-1">
@@ -117,9 +117,7 @@ export default function MessageRecipientSelect({
                 className="flex-row items-center gap-2 px-3 py-2"
               >
                 <ProfileImage pfp={user.profilePicture} size="medium" />
-                <Text className="text-zinc-800">
-                  {user.displayName}
-                </Text>
+                <Text className="text-zinc-800">{user.displayName}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>

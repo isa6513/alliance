@@ -17,6 +17,7 @@ export enum ButtonSize {
   Small = "small",
   Medium = "medium",
   Large = "large",
+  Custom = "custom",
 }
 
 interface ButtonProps extends ViewProps {
@@ -44,6 +45,7 @@ const sizeClasses: Record<ButtonSize, string> = {
   [ButtonSize.Small]: "px-3 py-1.5 min-h-8",
   [ButtonSize.Medium]: "px-4 py-2 min-h-10",
   [ButtonSize.Large]: "px-5 py-3 min-h-12",
+  [ButtonSize.Custom]: "",
 };
 
 const textColorClasses: Record<ButtonColor, string> = {

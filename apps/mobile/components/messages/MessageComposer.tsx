@@ -7,7 +7,6 @@ import {
 } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   TextInput,
   TouchableOpacity,
@@ -138,15 +137,16 @@ export default function MessageComposer({
         >
           <ImagePlus size={21} color={colors.text.secondary} />
         </TouchableOpacity>
-        <View className="flex-1 border border-zinc-200 rounded bg-zinc-50 px-3 min-h-10 justify-center">
+        <View className="flex-1 border border-zinc-200 rounded bg-zinc-50 px-3 py-2 min-h-10 justify-center">
           <TextInput
             value={message}
             onChangeText={setMessage}
             placeholder={placeholder}
             placeholderTextColor="#9ca3af"
             multiline
-            className="text-base text-zinc-900"
-            textAlignVertical="top"
+            className="text-base text-zinc-90"
+            textAlignVertical="center"
+            style={{ paddingVertical: 0 }}
           />
         </View>
         <TouchableOpacity

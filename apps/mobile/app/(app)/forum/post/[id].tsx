@@ -9,7 +9,7 @@ import {
   PostDto,
 } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { ArrowLeft, Pin } from "lucide-react-native";
+import { Pin } from "lucide-react-native";
 import { useAuth } from "../../../../lib/AuthContext";
 import ProfileImage from "../../../../components/ProfileImage";
 import Text from "../../../../components/system/Text";
@@ -18,6 +18,7 @@ import EditableContentRenderer from "../../../../components/EditableContentRende
 import Comments from "../../../../components/Comments";
 import LikeButton from "../../../../components/LikeButton";
 import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
+import BackButton from "../../../../components/system/BackButton";
 
 const renderAvatar = (author: PostDto["author"]) => {
   return <ProfileImage pfp={author.profilePicture} size="small" />;
@@ -120,18 +121,10 @@ export default function PostDetailScreen() {
 
   return (
     <KeyboardAwareScrollView className="bg-white" testID="vr-forum-post-ready">
-      <View className="px-4 pt-4 pb-10">
-        <TouchableOpacity
-          onPress={() =>
-            router.canGoBack() ? router.back() : router.push("/forum")
-          }
-          className="flex-row items-center gap-x-1 mb-4"
-          activeOpacity={0.7}
-        >
-          <ArrowLeft size={16} color={colors.green} />
-          <Text className="text-green text-sm">Back to Forum</Text>
-        </TouchableOpacity>
-
+      <View className="px-4 pb-10">
+        <View className="self-start mb-4">
+          <BackButton fallbackRoute="/forum" bordered />
+        </View>
         {isPrivateFuturePost && (
           <View className="bg-sky-100 border border-sky-300 rounded p-3 mb-3">
             <Text className="text-zinc-700 text-sm">
@@ -141,7 +134,7 @@ export default function PostDetailScreen() {
           </View>
         )}
 
-        <View className="border border-zinc-200 rounded bg-white p-4">
+        <View className="bg-white">
           <View className="flex-row items-start justify-between">
             <View className="flex-row items-center gap-x-1 flex-1">
               {post.pinned && <Pin size={14} color={colors.text.tertiary} />}

@@ -76,7 +76,7 @@ export default function MessagesScreen() {
       <SimplePageTitle title="Messages">
         <TouchableOpacity
           onPress={handleNewMessage}
-          className="w-9 h-9 items-center justify-center bg-green rounded-full"
+          className="w-9 h-9 items-center justify-center bg-green rounded"
         >
           <Plus size={18} color="#fff" />
         </TouchableOpacity>

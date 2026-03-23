@@ -7,7 +7,6 @@ import {
   Globe,
   Layers,
   ListTodo,
-  MessagesSquare,
   Search,
   Settings,
   X,
