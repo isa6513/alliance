@@ -641,7 +641,7 @@ export default function SettingsPage() {
           onRequestClose={() => setReminderChannelModalOpen(false)}
         >
           <View className="flex-1 bg-black/40 justify-end">
-            <View className="bg-white rounded-t-2xl p-4">
+            <View className="bg-white rounded-t-2xl p-8">
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-lg font-semibold text-zinc-900">
                   Reminder Channel
@@ -652,40 +652,38 @@ export default function SettingsPage() {
                   <Text className="text-blue-600 font-medium">Close</Text>
                 </TouchableOpacity>
               </View>
-              <ScrollView>
-                {reminderChannelOptions.map(
-                  (option: NotificationChannelOption) => (
-                    <TouchableOpacity
-                      key={option.value}
-                      className="py-3 flex-row items-center"
-                      onPress={() => {
-                        updateEditableUser({
-                          preferredActionReminderChannel: option.value,
-                        });
-                        setReminderChannelModalOpen(false);
-                      }}
+              {reminderChannelOptions.map(
+                (option: NotificationChannelOption) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    className="py-3 flex-row items-center"
+                    onPress={() => {
+                      updateEditableUser({
+                        preferredActionReminderChannel: option.value,
+                      });
+                      setReminderChannelModalOpen(false);
+                    }}
+                  >
+                    <View
+                      className={cn(
+                        "w-6 h-6 rounded-full border mr-3 items-center justify-center",
+                        editableUser.preferredActionReminderChannel ===
+                          option.value
+                          ? "border-green"
+                          : "border-zinc-200",
+                      )}
                     >
-                      <View
-                        className={cn(
-                          "w-5 h-5 rounded-full border mr-3 items-center justify-center",
-                          editableUser.preferredActionReminderChannel ===
-                            option.value
-                            ? "border-green-600"
-                            : "border-zinc-200",
-                        )}
-                      >
-                        {editableUser.preferredActionReminderChannel ===
-                          option.value && (
-                          <View className="w-2.5 h-2.5 rounded-full bg-green-600" />
-                        )}
-                      </View>
-                      <Text className="text-base text-zinc-800">
-                        {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ),
-                )}
-              </ScrollView>
+                      {editableUser.preferredActionReminderChannel ===
+                        option.value && (
+                        <View className="w-4 h-4 rounded-full bg-green" />
+                      )}
+                    </View>
+                    <Text className="text-base text-zinc-800">
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ),
+              )}
             </View>
           </View>
         </Modal>

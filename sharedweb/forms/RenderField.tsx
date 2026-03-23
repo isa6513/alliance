@@ -326,15 +326,6 @@ export function RenderField({
             className={composeClassName(sharedInputClasses)}
           />
           {renderValidationMessage()}
-          {field.min !== undefined || field.max !== undefined ? (
-            <p className="text-xs text-zinc-500 mt-1">
-              {field.min !== undefined && field.max !== undefined
-                ? `Range: ${field.min} - ${field.max}`
-                : field.min !== undefined
-                  ? `Minimum: ${field.min}`
-                  : `Maximum: ${field.max}`}
-            </p>
-          ) : null}
         </div>
       );
 
