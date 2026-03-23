@@ -25,7 +25,8 @@
         "backgroundColor": "#000000"
       },
       "package": "com.alliance.alliancemobile",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "versionCode": 4
     },
     "web": {
       "bundler": "metro",
@@ -59,7 +60,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you upload them when completing actions."
+          "photosPermission": "The app accesses your photos to let you upload them when completing actions.",
+          "cameraPermission": false
         }
       ],
       "expo-localization",
