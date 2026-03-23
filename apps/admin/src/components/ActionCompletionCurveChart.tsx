@@ -157,29 +157,72 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
         const offsets = isHourly
           ? (curve.hourOffsets!)
           : curve.dayOffsets;
-        offsets.forEach((offset, idx) => {
-          if (!Number.isFinite(offset) || offset < 0 || offset > maxX) {
-            return;
-          }
-          const completionFraction = curve.completionFractions[idx] ?? 0;
-          const completionCount = curve.completedCounts[idx] ?? 0;
-          if (Number.isFinite(completionFraction)) {
-            sumByBucket[offset] += completionFraction;
-            countByBucket[offset] += 1;
-            cumulativeFraction += completionFraction;
-            cumulativeCount += completionCount;
-          }
+
+        if (isHourly) {
+          // Start with a zero point at x=0 ("at the start of hour 0")
           data.push({
-            x: offset,
-            completionFraction,
-            completionCount,
-            cumulativeCompletionFraction: cumulativeFraction,
-            cumulativeCompletionCount: cumulativeCount,
+            x: 0,
+            completionFraction: 0,
+            completionCount: 0,
+            cumulativeCompletionFraction: 0,
+            cumulativeCompletionCount: 0,
             usersJoined: curve.usersJoined,
             actionId: curve.actionId,
             actionName: curve.actionName,
           });
-        });
+          sumByBucket[0] += 0;
+          countByBucket[0] += 1;
+
+          offsets.forEach((offset, idx) => {
+            if (!Number.isFinite(offset) || offset < 0 || offset >= maxX) {
+              return;
+            }
+            const completionFraction = curve.completionFractions[idx] ?? 0;
+            const completionCount = curve.completedCounts[idx] ?? 0;
+            if (Number.isFinite(completionFraction)) {
+              cumulativeFraction += completionFraction;
+              cumulativeCount += completionCount;
+            }
+            // Shift by +1: value at x represents cumulative at the START of hour x
+            const shiftedX = offset + 1;
+            sumByBucket[shiftedX] += cumulativeFraction;
+            countByBucket[shiftedX] += 1;
+            data.push({
+              x: shiftedX,
+              completionFraction,
+              completionCount,
+              cumulativeCompletionFraction: cumulativeFraction,
+              cumulativeCompletionCount: cumulativeCount,
+              usersJoined: curve.usersJoined,
+              actionId: curve.actionId,
+              actionName: curve.actionName,
+            });
+          });
+        } else {
+          offsets.forEach((offset, idx) => {
+            if (!Number.isFinite(offset) || offset < 0 || offset > maxX) {
+              return;
+            }
+            const completionFraction = curve.completionFractions[idx] ?? 0;
+            const completionCount = curve.completedCounts[idx] ?? 0;
+            if (Number.isFinite(completionFraction)) {
+              sumByBucket[offset] += completionFraction;
+              countByBucket[offset] += 1;
+              cumulativeFraction += completionFraction;
+              cumulativeCount += completionCount;
+            }
+            data.push({
+              x: offset,
+              completionFraction,
+              completionCount,
+              cumulativeCompletionFraction: cumulativeFraction,
+              cumulativeCompletionCount: cumulativeCount,
+              usersJoined: curve.usersJoined,
+              actionId: curve.actionId,
+              actionName: curve.actionName,
+            });
+          });
+        }
 
         return {
           key: `action-${curve.actionId}`,
@@ -202,6 +245,15 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
         const count = countByBucket[offset];
         if (!count) return null;
         const fraction = sum / count;
+        if (isHourly) {
+          // sumByBucket already holds cumulative values in hourly mode
+          return {
+            x: offset,
+            completionFraction: fraction,
+            cumulativeCompletionFraction: fraction,
+            actionCount: count,
+          };
+        }
         avgCumulativeFraction += fraction;
         return {
           x: offset,

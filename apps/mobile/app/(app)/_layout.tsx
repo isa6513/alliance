@@ -1,5 +1,5 @@
 import { View, ActivityIndicator, useWindowDimensions } from "react-native";
-import { Redirect, Route, Stack, usePathname } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 
 import { useAuth } from "../../lib/AuthContext";
 import { AppDrawerProvider, useAppDrawer } from "../../lib/AppDrawerContext";
@@ -9,19 +9,10 @@ import AnimatedSidebar from "../../components/AnimatedSidebar";
 import { colors } from "../../lib/style/colors";
 import { isVisualTestMode } from "../../lib/visualTest";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCallback } from "react";
-import { isBaseRoute } from "../../lib/useIsBasePage";
 
 function AppContent() {
   const insets = useSafeAreaInsets();
   const { isPermanent } = useAppDrawer();
-  const { user } = useAuth();
-
-  const isBasePage = useCallback(
-    (name: string, params?: Record<string, any>) =>
-      isBaseRoute(name, params, user?.id),
-    [user?.id],
-  );
 
   return (
     <View style={{ flex: 1, flexDirection: "row" }}>
@@ -38,15 +29,15 @@ function AppContent() {
       )}
       <View style={{ flex: 1 }}>
         <Stack
-          screenOptions={({ route }) => ({
+          screenOptions={({ navigation }) => ({
             headerShown: false,
             contentStyle: {
               paddingTop: insets.top,
               backgroundColor: "white",
             },
-            ...(isBasePage(route.name, route.params)
-              ? { animation: "none" as const, gestureEnabled: false }
-              : { animation: "default" as const, gestureEnabled: true }),
+            ...(navigation.canGoBack()
+              ? { animation: "default" as const, gestureEnabled: true }
+              : { animation: "none" as const, gestureEnabled: false }),
           })}
         />
         <TabBar />

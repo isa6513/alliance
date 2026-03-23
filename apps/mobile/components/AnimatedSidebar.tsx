@@ -1,4 +1,10 @@
-import { Keyboard, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import {
+  Keyboard,
+  Pressable,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,9 +15,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useAppDrawer } from "../lib/AppDrawerContext";
-import { useIsBasePage } from "../lib/useIsBasePage";
 import Sidebar from "./Sidebar";
 import { useEffect, useMemo } from "react";
+import { useNavigationState } from "@react-navigation/native";
 
 const SIDEBAR_RATIO = 0.8;
 const EDGE_WIDTH = 30;
@@ -20,7 +26,13 @@ const SPRING_CONFIG = { duration: 300, dampingRatio: 0.8 };
 export default function AnimatedSidebar() {
   const { isOpen, openDrawer, closeDrawer } = useAppDrawer();
   const { width: screenWidth } = useWindowDimensions();
-  const isBasePage = useIsBasePage();
+
+  //TODO: sync gesture and cangoback with _layout back gesture
+  const canGoBack = useNavigationState((state) => {
+    const appRoute = state.routes[0];
+    const stackState = appRoute?.state;
+    return (stackState?.routes?.length ?? 0) > 1;
+  });
 
   const sidebarWidth = useMemo(
     () => Math.round(screenWidth * SIDEBAR_RATIO),
@@ -105,7 +117,7 @@ export default function AnimatedSidebar() {
       </Animated.View>
 
       {/* Edge gesture catcher — only mounted when closed and on a base page */}
-      {!isOpen && isBasePage && (
+      {!isOpen && !canGoBack && (
         <GestureDetector gesture={openGesture}>
           <View
             style={{
