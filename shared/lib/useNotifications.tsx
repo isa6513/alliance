@@ -32,19 +32,18 @@ interface NotificationsContextType {
     notification: Pick<
       NotificationDto,
       "id" | "sourceType" | "webAppLocation" | "category"
-    >
+    >,
   ) => () => void;
   handleMarkAllAsRead: (e: React.MouseEvent) => void;
-  handleClearAll: () => void;
   refreshNotifications: (options?: { limit?: number }) => Promise<void>;
   applyNotificationsReadByContent: (
     contentType: UnreadContentType,
-    contentIds: number[]
+    contentIds: number[],
   ) => void;
 }
 
 const NotificationsContext = createContext<NotificationsContextType | null>(
-  null
+  null,
 );
 
 export const NotificationsProvider = ({
@@ -74,7 +73,7 @@ export const NotificationsProvider = ({
         setUnreadCount(data.filter((n) => !n.readAt).length);
       }
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -83,18 +82,18 @@ export const NotificationsProvider = ({
 
   const handleNotifClick = useCallback(
     (
-        notification: Pick<
-          NotificationDto,
-          "id" | "sourceType" | "webAppLocation" | "category"
-        >
-      ) =>
+      notification: Pick<
+        NotificationDto,
+        "id" | "sourceType" | "webAppLocation" | "category"
+      >,
+    ) =>
       () => {
         notifsSetRead(getNotificationReadRequest(notification));
 
         const clickedNotif = notifications.find(
           (n) =>
             getNotificationIdentityKey(n) ===
-            getNotificationIdentityKey(notification)
+            getNotificationIdentityKey(notification),
         );
         const path = notification.webAppLocation
           ? getWebAppLocation(notification.webAppLocation)
@@ -122,12 +121,12 @@ export const NotificationsProvider = ({
             getNotificationIdentityKey(n) ===
             getNotificationIdentityKey(notification)
               ? ({ ...n, readAt } satisfies NotificationDto)
-              : n
+              : n,
           );
         });
         setUnreadCount((prev) => Math.max(prev - 1, 0));
       },
-    [navigate, notifications]
+    [navigate, notifications],
   );
 
   const handleMarkAllAsRead = useCallback((e: React.MouseEvent) => {
@@ -135,16 +134,11 @@ export const NotificationsProvider = ({
     notifsSetReadAll();
     const readAt = new Date().toISOString();
     setNotifications((prev) =>
-      prev.map((n) => ({ ...n, readAt } satisfies NotificationDto))
+      prev.map((n) => ({ ...n, readAt }) satisfies NotificationDto),
     );
     setUnreadCount(0);
 
     posthog.capture("notifications_marked_all_as_read");
-  }, []);
-
-  const handleClearAll = useCallback(() => {
-    setNotifications([]);
-    setUnreadCount(0);
   }, []);
 
   const applyNotificationsReadByContent = useCallback(
@@ -159,7 +153,7 @@ export const NotificationsProvider = ({
           !notification.readAt &&
           notification.contentType === contentType &&
           notification.contentId !== undefined &&
-          ids.has(notification.contentId)
+          ids.has(notification.contentId),
       ).length;
 
       if (markedCount === 0) {
@@ -180,11 +174,11 @@ export const NotificationsProvider = ({
           }
 
           return { ...notification, readAt } satisfies NotificationDto;
-        })
+        }),
       );
       setUnreadCount((prev) => Math.max(prev - markedCount, 0));
     },
-    [notifications]
+    [notifications],
   );
 
   return (
@@ -194,7 +188,6 @@ export const NotificationsProvider = ({
         unreadCount,
         handleNotifClick,
         handleMarkAllAsRead,
-        handleClearAll,
         refreshNotifications,
         applyNotificationsReadByContent,
       }}
@@ -208,7 +201,7 @@ export const useNotifications = (): NotificationsContextType => {
   const ctx = useContext(NotificationsContext);
   if (!ctx) {
     throw new Error(
-      "useNotifications must be used within NotificationsProvider"
+      "useNotifications must be used within NotificationsProvider",
     );
   }
   return ctx;

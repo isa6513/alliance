@@ -22,7 +22,6 @@ const NotificationsIcon = () => {
     notifications,
     unreadCount,
     handleMarkAllAsRead,
-    handleClearAll,
     handleNotifClick,
     refreshNotifications,
   } = useNotifications();
@@ -80,9 +79,9 @@ const NotificationsIcon = () => {
                 color={ButtonColor.Grey}
                 size="mediumDynamic"
                 onClick={() => {
-                setIsOpen(false);
-                navigate(href("/notifications"));
-              }}
+                  setIsOpen(false);
+                  navigate(href("/notifications"));
+                }}
               >
                 See all
               </Button>
@@ -92,13 +91,6 @@ const NotificationsIcon = () => {
                 onClick={handleMarkAllAsRead}
               >
                 Mark all as read
-              </Button>
-              <Button
-                color={ButtonColor.Grey}
-                size="mediumDynamic"
-                onClick={handleClearAll}
-              >
-                Clear
               </Button>
             </div>
           </div>
