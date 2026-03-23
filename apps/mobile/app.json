@@ -74,7 +74,8 @@
           "icon": "./assets/images/globe.jpg",
           "color": "#ffffff"
         }
-      ]
+      ],
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true

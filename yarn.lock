@@ -225,6 +225,7 @@ __metadata:
     expo-status-bar: "npm:~55.0.4"
     expo-symbols: "npm:~55.0.5"
     expo-system-ui: "npm:~55.0.9"
+    expo-video: "npm:~55.0.11"
     expo-web-browser: "npm:~55.0.9"
     lucide-react-native: "npm:^0.562.0"
     posthog-react-native: "npm:^4.17.2"
@@ -10663,6 +10664,17 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 10c0/d59ce1f77222717268f820a9874ee7d400f53e94a3d0c3d0a8f10710013cb18b74eb6e7d5b82596581c2fe4123670d522c3c03ed6869123041da1afde9643e48
+  languageName: node
+  linkType: hard
+
+"expo-video@npm:~55.0.11":
+  version: 55.0.11
+  resolution: "expo-video@npm:55.0.11"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/5be5614cc642185f9b02ad12eba6bfde9c49fe6e7b91d416292b6fa9033d4abd4583bd57c74c773579a66e88e014f4e7d72479c0580b4ab4e65b704e0bca7e23
   languageName: node
   linkType: hard
 

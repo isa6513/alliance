@@ -100,11 +100,7 @@ export default function ActivityDetailScreen() {
   }, [fetchActivity]);
 
   const handleBack = useCallback(() => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace(`/actions/${id}`);
-    }
+    router.dismissTo(`/actions/${id}`);
   }, [id]);
 
   const handleUserPress = useCallback(() => {

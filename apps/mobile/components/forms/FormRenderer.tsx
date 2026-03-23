@@ -33,6 +33,7 @@ import {
 } from "@alliance/shared/formrenderer";
 import { RenderField } from "./RenderField";
 import FormModal from "./FormModal";
+import VideoPlayer from "./VideoPlayer";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
 import { CircleCheck, Copy, Ellipsis } from "lucide-react-native";
 import { cn } from "@alliance/shared/styles/util";
@@ -182,6 +183,17 @@ export function RenderDisplayBlockMobile({ block }: { block: DisplayBlock }) {
       );
     case "copytext":
       return <CopyTextDisplayMobile text={block.text} title={block.title} />;
+    case "video":
+      return block.videoId !== undefined ? (
+        <VideoPlayer
+          src={block.src}
+          videoId={block.videoId}
+          caption={block.caption}
+        />
+      ) : null;
+    case "previousAnswer":
+      //TODO
+      return null;
     default:
       return null;
   }
