@@ -99,7 +99,6 @@ export class CommunityUserInfoDto extends UserActionRelationsResponseDto {}
 export class CommunityMemberContactInfoDto extends PickType(User, [
   'id',
   'timeZone',
-  'preferredActionReminderChannel',
 ]) {
   @ApiPropertyOptional()
   email?: string;
@@ -128,7 +127,6 @@ export class CommunityMemberContactInfoDto extends PickType(User, [
       ? user.phoneNumber
       : undefined;
     this.timeZone = user.timeZone?.toString();
-    this.preferredActionReminderChannel = user.preferredActionReminderChannel;
     this.awayRanges = awayRanges;
 
     if (!user.preferredReminderTime) {

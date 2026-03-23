@@ -59,9 +59,9 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   const memberEvents = useMemo(
     () =>
       (action.events || []).filter(
-        (event) => event.newStatus === "member_action"
+        (event) => event.newStatus === "member_action",
       ),
-    [action.events]
+    [action.events],
   );
   const sortedActionEvents = useMemo(() => {
     return (action.events || [])
@@ -80,7 +80,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   }, [sortedActionEvents]);
 
   const [selectedEventId, setSelectedEventId] = useState<number | null>(
-    memberEvents.length > 0 ? memberEvents[0].id : null //TODO: collate or move between events
+    memberEvents.length > 0 ? memberEvents[0].id : null, //TODO: collate or move between events
   );
   const [users, setUsers] = useState<UserSelectUser[]>([]);
   const [userTags, setUserTags] = useState<TagDto[]>([]);
@@ -123,7 +123,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             name: user.name ?? undefined,
             displayName: user.name ?? undefined,
             profilePicture: user.profilePicture ?? null,
-          })
+          }),
         );
         setUsers(mappedUsers);
       })
@@ -143,7 +143,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           throw new Error(
             typeof response.error === "string"
               ? response.error
-              : "Failed to load user groups."
+              : "Failed to load user groups.",
           );
         }
         setUserTags(response.data ?? []);
@@ -151,7 +151,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       .catch((err) => {
         console.error(err);
         setUserTagsError(
-          err instanceof Error ? err.message : "Failed to load user tags."
+          err instanceof Error ? err.message : "Failed to load user tags.",
         );
       })
       .finally(() => setLoadingUserTags(false));
@@ -166,7 +166,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       throw new Error(
         typeof response.error === "string"
           ? response.error
-          : "Failed to load reminders."
+          : "Failed to load reminders.",
       );
     }
 
@@ -188,7 +188,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
   const handleDeleteGroup = async (
     groupId: number,
-    anchor?: HTMLElement | null
+    anchor?: HTMLElement | null,
   ) => {
     const ok = await confirm({
       message:
@@ -236,7 +236,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       }
       return nextEventById.get(memberEventId);
     },
-    [nextEventById]
+    [nextEventById],
   );
 
   useEffect(() => {
@@ -317,7 +317,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           setLoadError(
             err instanceof Error
               ? err.message
-              : "Failed to load reminder details."
+              : "Failed to load reminder details.",
           );
         }
       }
@@ -326,7 +326,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     const pendingGroups = reminderGroups.filter(
       (group) =>
         reminderPlansByGroup[group.id] === undefined ||
-        sentRemindersByGroup[group.id] === undefined
+        sentRemindersByGroup[group.id] === undefined,
     );
 
     if (!pendingGroups.length) {
@@ -376,7 +376,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             primary: `Sends when ${referenceTitle} begins`,
             secondary: `${format(
               sendDate,
-              DISPLAY_DATETIME_FORMAT
+              DISPLAY_DATETIME_FORMAT,
             )} • Deadline ${format(deadlineDate, DISPLAY_DATETIME_FORMAT)}`,
             pastTense: `at ${format(sendDate, DISPLAY_DATETIME_FORMAT)}`,
           };
@@ -390,7 +390,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           } ${referenceTitle}`,
           secondary: `${format(
             sendDate,
-            DISPLAY_DATETIME_FORMAT
+            DISPLAY_DATETIME_FORMAT,
           )} • Deadline ${format(deadlineDate, DISPLAY_DATETIME_FORMAT)}`,
           pastTense: `${distance} ${
             seconds >= 0 ? "before" : "after"
@@ -410,12 +410,12 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         return {
           primary: `Sends between ${format(
             start,
-            DISPLAY_DATETIME_FORMAT
+            DISPLAY_DATETIME_FORMAT,
           )} and ${format(end, DISPLAY_DATETIME_FORMAT)}`,
           secondary: "Personalized window",
           pastTense: `between ${format(
             start,
-            DISPLAY_DATETIME_FORMAT
+            DISPLAY_DATETIME_FORMAT,
           )} and ${format(end, DISPLAY_DATETIME_FORMAT)}`,
         };
       }
@@ -447,7 +447,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         const distance = formatDistanceStrict(
           new Date(0),
           new Date(Math.abs(seconds) * 1000),
-          { roundingMethod: "floor" }
+          { roundingMethod: "floor" },
         );
         return `${distance} ${seconds >= 0 ? "before" : "after"}`;
       };
@@ -468,7 +468,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             : `Sends between ${startLabel} and ${endLabel} ${referenceTitle}`,
         secondary: `${format(startDate, DISPLAY_DATETIME_FORMAT)} – ${format(
           endDate,
-          DISPLAY_DATETIME_FORMAT
+          DISPLAY_DATETIME_FORMAT,
         )} • Deadline ${deadlineLabel}`,
         pastTense:
           startSeconds === endSeconds
@@ -482,14 +482,14 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         primary: launchDate
           ? `Sends when launch event begins (${format(
               launchDate,
-              DISPLAY_DATETIME_FORMAT
+              DISPLAY_DATETIME_FORMAT,
             )})`
           : "Sends when launch event begins",
         secondary: null,
         pastTense: launchDate
           ? `when launch event began (${format(
               launchDate,
-              DISPLAY_DATETIME_FORMAT
+              DISPLAY_DATETIME_FORMAT,
             )})`
           : "when launch event began",
       };
@@ -536,7 +536,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           suiteId: suite.id,
           ...reminderPresets["Announcement"],
         },
-      })
+      }),
     );
 
     const lengthBeforeDeadlineReminders = reminders.length;
@@ -549,7 +549,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             suiteId: suite.id,
             ...reminderPresets["Two Day Range"],
           },
-        })
+        }),
       );
 
       reminders.push(
@@ -559,7 +559,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             suiteId: suite.id,
             ...reminderPresets["One Day Range"],
           },
-        })
+        }),
       );
 
       reminders.push(
@@ -569,7 +569,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             suiteId: suite.id,
             ...reminderPresets["Three Hour"],
           },
-        })
+        }),
       );
 
       reminders.push(
@@ -579,7 +579,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             suiteId: suite.id,
             ...reminderPresets["Missed Deadline"],
           },
-        })
+        }),
       );
 
       reminders.push(
@@ -589,7 +589,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             suiteId: suite.id,
             ...reminderPresets["Group Leads 3 days"],
           },
-        })
+        }),
       );
 
       reminders.push(
@@ -599,11 +599,12 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
             suiteId: suite.id,
             ...reminderPresets["Group Leads 2 days"],
           },
-        })
+        }),
       );
     }
     const error = reminders.some(
-      (reminder) => (reminder as unknown as { error: string | undefined }).error
+      (reminder) =>
+        (reminder as unknown as { error: string | undefined }).error,
     );
     if (error) {
       setCreateError("Failed to create reminders.");
@@ -617,7 +618,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     if (reminders.length === lengthBeforeDeadlineReminders) {
       console.log("no deadline reminders created");
       setCreateError(
-        "No deadline reminders created - does this event have a deadline?"
+        "No deadline reminders created - does this event have a deadline?",
       );
     }
     setReminderGroups((prev) => [
@@ -630,7 +631,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
   const handleCreateGroupSubmit = async (
     payload: ActionReminderGroupFormSubmitPayload,
-    recipientCount: number
+    recipientCount: number,
   ) => {
     const mode = import.meta.env.MODE;
 
@@ -670,7 +671,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
       if (response.error || !response.data) {
         throw new Error(
-          (response.error as string) ?? "Failed to create reminder."
+          (response.error as string) ?? "Failed to create reminder.",
         );
       }
 
@@ -680,7 +681,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     } catch (err) {
       console.error(err);
       setCreateError(
-        err instanceof Error ? err.message : "Failed to create reminder."
+        err instanceof Error ? err.message : "Failed to create reminder.",
       );
     } finally {
       setCreateSubmitting(false);
@@ -710,7 +711,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
         if (!response.data) {
           throw new Error(
-            (response.error as string) ?? "Failed to update reminder."
+            (response.error as string) ?? "Failed to update reminder.",
           );
         }
 
@@ -720,7 +721,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       } catch (err) {
         console.error(err);
         setEditError(
-          err instanceof Error ? err.message : "Failed to update reminder."
+          err instanceof Error ? err.message : "Failed to update reminder.",
         );
       } finally {
         setEditSubmitting(false);
@@ -846,7 +847,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
                             setSelectedPreset(preset);
                             setSelectingPreset(false);
                           }}
-                          className="w-full rounded-none !bg-transparent hover:!bg-zinc-200/60 text-nowrap justify-start"
+                          className="w-full rounded-none bg-transparent! hover:bg-zinc-200/60! text-nowrap justify-start"
                         >
                           {preset}
                         </Button>

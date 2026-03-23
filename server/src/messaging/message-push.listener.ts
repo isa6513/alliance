@@ -56,7 +56,6 @@ export class MessagePushListener {
       const eligibleParticipants = participants.filter((p) => {
         const user = p.user;
         if (user.id === message.author.id) return false;
-        if (user.pushNotifsEnabled === false) return false;
         if (user.pushesForMessages === false) return false;
         if (user.turnedOffAllNotifs === true) return false;
         if (activeViewers.has(user.id)) return false;

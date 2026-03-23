@@ -27,7 +27,6 @@ import {
   UnreadContentType,
 } from './entities/unread-content.entity';
 import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
-import { NotificationChannel } from './notif-utils';
 import {
   Comment,
   CommentParentObject,
@@ -51,7 +50,7 @@ export type CreateUnreadContentParams = Required<
 
 export function shouldEmailUser(user: User) {
   return (
-    user.emailNotifsEnabled &&
+    user.emailNotifsForActions &&
     !user.turnedOffAllNotifs &&
     user.hasActiveContract
   );
@@ -59,21 +58,19 @@ export function shouldEmailUser(user: User) {
 
 export function shouldTextUser(user: User) {
   return (
-    user.textNotifsEnabled &&
+    user.textNotifsForActions &&
     !user.turnedOffAllNotifs &&
     user.phoneNumber &&
     user.hasActiveContract &&
     user.phoneNumberValidated &&
-    !user.phoneNumberUnsubscribed &&
-    user.preferredActionReminderChannel === NotificationChannel.Text
+    !user.phoneNumberUnsubscribed
   );
 }
 
 export function shouldPushUser(user: User) {
   return (
     !user.turnedOffAllNotifs &&
-    user.pushNotifsEnabled &&
-    user.preferredActionReminderChannel === NotificationChannel.Push &&
+    user.pushNotifsForActions &&
     process.env.NODE_ENV === 'development'
   );
 }

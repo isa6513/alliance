@@ -176,25 +176,6 @@ describe('Message Push Notifications (e2e)', () => {
       expect(pushes).toHaveLength(0);
     });
 
-    it('does not push when pushNotifsEnabled is false', async () => {
-      const { token: senderToken } = await createUserWithDevice();
-      const { user: recipient, expoPushToken } = await createUserWithDevice({
-        pushNotifsEnabled: false,
-      });
-
-      const conversationId = await createDirectConversation(
-        senderToken,
-        recipient.id,
-      );
-
-      await sendMessage(senderToken, conversationId, 'Silent message');
-
-      const pushes = await pushRepo.find({
-        where: { expoPushToken },
-      });
-      expect(pushes).toHaveLength(0);
-    });
-
     it('does not push when turnedOffAllNotifs is true', async () => {
       const { token: senderToken } = await createUserWithDevice();
       const { user: recipient, expoPushToken } = await createUserWithDevice({
@@ -217,7 +198,7 @@ describe('Message Push Notifications (e2e)', () => {
 
   describe('group conversations', () => {
     it('sends pushes to all non-sender participants with group format', async () => {
-      const { user: owner, token: ownerToken } = await createUserWithDevice();
+      const { token: ownerToken } = await createUserWithDevice();
       const { user: memberA, expoPushToken: tokenA } =
         await createUserWithDevice();
       const { user: memberB, expoPushToken: tokenB } =
@@ -289,8 +270,7 @@ describe('Message Push Notifications (e2e)', () => {
   describe('multiple devices', () => {
     it('sends a push to each of the recipient devices', async () => {
       const { token: senderToken } = await createUserWithDevice();
-      const { user: recipient, token: recipientToken } =
-        await createUserAndToken();
+      const { user: recipient } = await createUserAndToken();
 
       const token1 = `ExponentPushToken[device1_${recipient.id}]`;
       const token2 = `ExponentPushToken[device2_${recipient.id}]`;

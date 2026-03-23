@@ -3,17 +3,18 @@ import { CreateActionDto, UserDto } from "@alliance/shared/client";
 export const FORM_BUILDER_PREVIEW_USER: UserDto = {
   id: 0,
   name: "Preview User",
-  emailNotifsEnabled: false,
-  textNotifsEnabled: false,
-  pushNotifsEnabled: false,
+  emailNotifsForActions: false,
+  textNotifsForActions: false,
+  pushNotifsForActions: false,
   socialNotifsPreference: "none",
   turnedOffAllNotifs: false,
   forumDigestPreference: "off",
   admin: false,
   staff: false,
+  pushesForMessages: true,
+  referralSource: "onetime_invite",
   shareEmailWithCommunityLead: true,
   sharePhoneNumberWithCommunityLead: true,
-  preferredActionReminderChannel: "text",
   profileDescription: "I am a preview user",
   shareInfoPublicly: true,
   pushesForLikes: true,
@@ -44,6 +45,7 @@ export const testActions: CreateActionDto[] = [
   // Funding Action 1
   {
     name: "Save 2,500 acres of Ecuador cloud forest",
+    followUpForms: [],
     category: "Climate Change",
     body: `Protect Ecuador's Biodiversity Hotspot
 
@@ -85,6 +87,7 @@ This is our chance to take direct action against environmental destruction. Ever
   },
   {
     name: "Use public transportation instead of driving",
+    followUpForms: [],
     category: "Climate Change",
     body: `Transform Your Daily Commute
 

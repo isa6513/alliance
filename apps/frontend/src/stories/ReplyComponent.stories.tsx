@@ -1,13 +1,10 @@
 import { Meta, StoryObj } from "@storybook/react";
 import ReplyComponent from "../components/forum/ReplyComponent";
 import { CommentsProvider } from "../components/forum/CommentsContext";
-import {
-  CommentDto,
-  CreateEditableContentDto,
-  UserDto,
-} from "@alliance/shared/client";
+import { CommentDto, CreateEditableContentDto } from "@alliance/shared/client";
 import { fn } from "@storybook/test";
 import React from "react";
+import { testAuthUser } from "./testData";
 
 const makeAuthor = (
   overrides: Partial<CommentDto["author"]> = {},
@@ -42,43 +39,8 @@ const makeReply = (overrides: Partial<CommentDto> = {}): CommentDto => ({
   ...overrides,
 });
 
-const currentUser: UserDto = {
-  id: 1,
-  name: "Jane Smith",
-  email: "jane@example.com",
-  admin: false,
-  staff: false,
-  profilePicture: "",
-  profileDescription: null,
-  referralCode: null,
-  anonymous: false,
-  shareInfoPublicly: true,
-  emailNotifsEnabled: true,
-  referralSource: "onetime_invite",
-  textNotifsEnabled: false,
-  pushNotifsEnabled: true,
-  shareEmailWithCommunityLead: false,
-  sharePhoneNumberWithCommunityLead: false,
-  socialNotifsPreference: "all",
-  turnedOffAllNotifs: false,
-  forumDigestPreference: "daily",
-  preferredActionReminderChannel: "email",
-  formDataPreference: "public",
-  pushesForLikes: true,
-  pushesForComments: true,
-  pushesForFriendRequests: true,
-  undergoingGroupAssignment: false,
-  remindAboutUncompletedGroupMembers: false,
-  receiveReplyNotifications: true,
-  communities: [],
-  leaderOfIds: [],
-  invitedCommunities: [],
-  hasActiveContract: true,
-  pushesForMessages: true,
-};
-
 const defaultCtx = {
-  user: currentUser as UserDto | undefined,
+  user: testAuthUser,
   replyingTo: null as number | null,
   setReplyingTo: fn() as (id: number | null) => void,
   handleSubmitReply: fn() as (

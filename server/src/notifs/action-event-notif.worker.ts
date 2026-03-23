@@ -22,7 +22,7 @@ import {
   ActionEventNotifType,
 } from './entities/action-event-notif.entity';
 import { withPgAdvisoryLock } from './lock-utils';
-import { generateCIDForNotif, NotificationChannel } from './notif-utils';
+import { generateCIDForNotif } from './notif-utils';
 import { PushService } from 'src/push/push.service';
 import { ReminderCohortType } from 'src/actions/entities/reminder-group.entity';
 
@@ -126,7 +126,6 @@ export class ActionEventNotifWorker {
     const plannedNotif = this.actionEventNotifsRepository.create({
       user: plan.user,
       reminderGroup: plan.group,
-      channel: NotificationChannel.Email,
       sent: false,
       type: ActionEventNotifType.Reminder,
       idempotency_key,
@@ -145,7 +144,6 @@ export class ActionEventNotifWorker {
 
     let sendingAnyNotif = false;
     if (shouldPushUser(plan.user)) {
-      console.log('shouldPushUser', plan.user.name);
       sendingAnyNotif = true;
       const pushMessage = await this.processCustomReminderText(
         plan.group.pushMessage,
@@ -169,7 +167,7 @@ export class ActionEventNotifWorker {
         notif.sent = true;
       }
     }
-    if (!notif.sent && shouldTextUser(plan.user)) {
+    if (shouldTextUser(plan.user)) {
       sendingAnyNotif = true;
       const textMessage = await this.processCustomReminderText(
         plan.group.textMessage,
@@ -186,12 +184,10 @@ export class ActionEventNotifWorker {
       if (result && !result.errorCode) {
         notif.sent = true;
       }
-      notif.channel = NotificationChannel.Text;
       notif.mms = result;
     }
-    if (!notif.sent && shouldEmailUser(plan.user)) {
+    if (shouldEmailUser(plan.user)) {
       sendingAnyNotif = true;
-      notif.channel = NotificationChannel.Email;
 
       const emailMessage = await this.processCustomReminderText(
         plan.group.emailMessage,

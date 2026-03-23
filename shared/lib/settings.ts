@@ -14,11 +14,6 @@ export type FormDataPreferenceOption = {
   label: string;
 };
 
-export const NOTIFICATION_CHANNEL_OPTIONS: NotificationChannelOption[] = [
-  { value: "email", label: "Email" },
-  { value: "text", label: "Text" },
-];
-
 export const FORM_DATA_PREFERENCE_OPTIONS: FormDataPreferenceOption[] = [
   { value: "public", label: "Default to visible" },
   { value: "private", label: "Default to hidden" },
@@ -29,7 +24,7 @@ export const FORM_DATA_PREFERENCE_OPTIONS: FormDataPreferenceOption[] = [
  */
 export function hasSettingsChanges(
   editableUser: UpdateProfileDto | null,
-  initialUser: UpdateProfileDto | null
+  initialUser: UpdateProfileDto | null,
 ): boolean {
   if (!editableUser || !initialUser) {
     return false;
@@ -44,7 +39,7 @@ export function hasSettingsChanges(
 export function updateEditableUserField<K extends keyof UpdateProfileDto>(
   prev: UpdateProfileDto | null,
   key: K,
-  value: UpdateProfileDto[K]
+  value: UpdateProfileDto[K],
 ): UpdateProfileDto | null {
   if (!prev) return prev;
   return { ...prev, [key]: value };

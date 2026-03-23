@@ -1,29 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
-  Modal,
   Switch,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { ChevronDown } from "lucide-react-native";
 import {
   authForgotPassword,
   authMe,
   City,
-  NotificationChannel,
   UpdateProfileDto,
   userMyLocation,
   userUpdate,
 } from "@alliance/shared/client";
 import { Features, isEnabled } from "@alliance/shared/lib/features";
-import {
-  hasSettingsChanges,
-  NOTIFICATION_CHANNEL_OPTIONS,
-  NotificationChannelOption,
-} from "@alliance/shared/lib/settings";
+import { hasSettingsChanges } from "@alliance/shared/lib/settings";
 import { useAuth } from "../../lib/AuthContext";
 import Button, { ButtonColor } from "../../components/system/Button";
 import Card, { CardStyle } from "../../components/system/Card";
@@ -89,10 +82,6 @@ export default function SettingsPage() {
     string | null
   >(null);
 
-  // Modal states
-  const [reminderChannelModalOpen, setReminderChannelModalOpen] =
-    useState(false);
-
   const updateEditableUser = useCallback(
     (updates: Partial<UpdateProfileDto>) => {
       setEditableUser((prev: UpdateProfileDto | null) =>
@@ -122,31 +111,6 @@ export default function SettingsPage() {
     Features.PushNotifications,
     __DEV__ ? "development" : "production",
   );
-  const reminderChannelOptions = useMemo<NotificationChannelOption[]>(() => {
-    if (!showPushSettings) {
-      return NOTIFICATION_CHANNEL_OPTIONS;
-    }
-
-    return [
-      ...NOTIFICATION_CHANNEL_OPTIONS,
-      { value: "push" as NotificationChannel, label: "Push" },
-    ];
-  }, [showPushSettings]);
-  const selectedReminderChannelLabel = useMemo(() => {
-    const selectedOption = reminderChannelOptions.find(
-      (option) => option.value === editableUser?.preferredActionReminderChannel,
-    );
-
-    if (selectedOption) {
-      return selectedOption.label;
-    }
-
-    if (editableUser?.preferredActionReminderChannel === "push") {
-      return "Push";
-    }
-
-    return "Email";
-  }, [editableUser?.preferredActionReminderChannel, reminderChannelOptions]);
 
   const forgotPassword = useMutation({
     mutationFn: (email: string) => authForgotPassword({ body: { email } }),
@@ -343,32 +307,13 @@ export default function SettingsPage() {
           <Card cardStyle={CardStyle.White}>
             <Text className="text-2xl font-semibold mb-4">Notifications</Text>
 
-            <View className="mb-4">
-              <Text className="font-medium mb-2">
-                Send action reminders via:
-              </Text>
-              <TouchableOpacity
-                className={cn(
-                  inputClasses,
-                  "flex-row items-center justify-between",
-                )}
-                onPress={() => setReminderChannelModalOpen(true)}
-                activeOpacity={0.8}
-              >
-                <Text className="text-base text-zinc-900">
-                  {selectedReminderChannelLabel}
-                </Text>
-                <ChevronDown size={18} color={colors.text.icon} />
-              </TouchableOpacity>
-            </View>
-
             <Text className="font-medium mb-2">
-              Allowed notification channels:
+              Receive action announcements / reminders via:
             </Text>
             {!(
-              editableUser.emailNotifsEnabled ||
-              editableUser.textNotifsEnabled ||
-              editableUser.pushNotifsEnabled
+              editableUser.emailNotifsForActions ||
+              editableUser.textNotifsForActions ||
+              editableUser.pushNotifsForActions
             ) && (
               <Text className="text-sm text-zinc-500 mb-2">
                 You will not receive any notifications. Please keep a
@@ -380,24 +325,24 @@ export default function SettingsPage() {
             <View className="gap-3 mb-4">
               <SettingsToggleRow
                 label="Email"
-                value={!!editableUser.emailNotifsEnabled}
+                value={!!editableUser.emailNotifsForActions}
                 onChange={(value) =>
-                  updateEditableUser({ emailNotifsEnabled: value })
+                  updateEditableUser({ emailNotifsForActions: value })
                 }
               />
               <SettingsToggleRow
                 label="Text/SMS"
-                value={!!editableUser.textNotifsEnabled}
+                value={!!editableUser.textNotifsForActions}
                 onChange={(value) =>
-                  updateEditableUser({ textNotifsEnabled: value })
+                  updateEditableUser({ textNotifsForActions: value })
                 }
               />
               {showPushSettings ? (
                 <SettingsToggleRow
                   label="Push"
-                  value={!!editableUser.pushNotifsEnabled}
+                  value={!!editableUser.pushNotifsForActions}
                   onChange={(value) =>
-                    updateEditableUser({ pushNotifsEnabled: value })
+                    updateEditableUser({ pushNotifsForActions: value })
                   }
                 />
               ) : null}
@@ -633,61 +578,6 @@ export default function SettingsPage() {
             title="Log out"
           />
         </View>
-
-        {/* Reminder Channel Modal */}
-        <Modal
-          visible={reminderChannelModalOpen}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setReminderChannelModalOpen(false)}
-        >
-          <View className="flex-1 bg-black/40 justify-end">
-            <View className="bg-white rounded-t-2xl p-8">
-              <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-lg font-semibold text-zinc-900">
-                  Reminder Channel
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setReminderChannelModalOpen(false)}
-                >
-                  <Text className="text-blue-600 font-medium">Close</Text>
-                </TouchableOpacity>
-              </View>
-              {reminderChannelOptions.map(
-                (option: NotificationChannelOption) => (
-                  <TouchableOpacity
-                    key={option.value}
-                    className="py-3 flex-row items-center"
-                    onPress={() => {
-                      updateEditableUser({
-                        preferredActionReminderChannel: option.value,
-                      });
-                      setReminderChannelModalOpen(false);
-                    }}
-                  >
-                    <View
-                      className={cn(
-                        "w-6 h-6 rounded-full border mr-3 items-center justify-center",
-                        editableUser.preferredActionReminderChannel ===
-                          option.value
-                          ? "border-green"
-                          : "border-zinc-200",
-                      )}
-                    >
-                      {editableUser.preferredActionReminderChannel ===
-                        option.value && (
-                        <View className="w-4 h-4 rounded-full bg-green" />
-                      )}
-                    </View>
-                    <Text className="text-base text-zinc-800">
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ),
-              )}
-            </View>
-          </View>
-        </Modal>
       </KeyboardAwareScrollView>
     </View>
   );

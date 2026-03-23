@@ -26,8 +26,6 @@ export type AccessToken = {
     access_token: string;
 };
 
-export type NotificationChannel = 'text' | 'email' | 'push';
-
 export type NotificationPreference = 'all' | 'digest' | 'none';
 
 export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
@@ -274,7 +272,6 @@ export type Push = {
 export type ActionEventNotif = {
     id: number;
     type: ActionEventNotifType;
-    channel: NotificationChannel;
     mail: Mail | null;
     mms: Mms | null;
     pushes?: Array<Push>;
@@ -587,10 +584,9 @@ export type User = {
     emailVerified: boolean;
     preferredReminderTime?: string;
     timeZone?: string;
-    preferredActionReminderChannel: NotificationChannel;
-    emailNotifsEnabled: boolean;
-    textNotifsEnabled: boolean;
-    pushNotifsEnabled: boolean;
+    emailNotifsForActions: boolean;
+    textNotifsForActions: boolean;
+    pushNotifsForActions: boolean;
     shareEmailWithCommunityLead: boolean;
     sharePhoneNumberWithCommunityLead: boolean;
     socialNotifsPreference: NotificationPreference;
@@ -652,10 +648,9 @@ export type UserDto = {
     phoneNumber?: string;
     preferredReminderTime?: string;
     timeZone?: string;
-    preferredActionReminderChannel: NotificationChannel;
-    emailNotifsEnabled: boolean;
-    textNotifsEnabled: boolean;
-    pushNotifsEnabled: boolean;
+    emailNotifsForActions: boolean;
+    textNotifsForActions: boolean;
+    pushNotifsForActions: boolean;
     shareEmailWithCommunityLead: boolean;
     sharePhoneNumberWithCommunityLead: boolean;
     socialNotifsPreference: NotificationPreference;
@@ -746,10 +741,9 @@ export type UpdateProfileDto = {
     phoneNumberValidated?: boolean;
     preferredReminderTime?: string;
     timeZone?: string;
-    preferredActionReminderChannel?: NotificationChannel;
-    emailNotifsEnabled?: boolean;
-    textNotifsEnabled?: boolean;
-    pushNotifsEnabled?: boolean;
+    emailNotifsForActions?: boolean;
+    textNotifsForActions?: boolean;
+    pushNotifsForActions?: boolean;
     shareEmailWithCommunityLead?: boolean;
     sharePhoneNumberWithCommunityLead?: boolean;
     forumDigestPreference?: ForumDigestPreference;
@@ -1053,7 +1047,6 @@ export type MarkUnreadContentReadDto = {
 export type ActionEventNotifDto = {
     id: number;
     type: ActionEventNotifType;
-    channel: NotificationChannel;
     mail: Mail | null;
     mms: Mms | null;
     pushes?: Array<Push>;
@@ -1129,7 +1122,6 @@ export type CommunityMemberDto = {
 export type CommunityMemberContactInfoDto = {
     id: number;
     timeZone?: string;
-    preferredActionReminderChannel: NotificationChannel;
     email?: string;
     phoneNumber?: string;
     preferredReminderTimeUserTz?: string;
@@ -1895,10 +1887,12 @@ export type CreateReminderGroupDto = {
     suiteId?: number;
 };
 
+export type NotificationChannel = 'email' | 'text' | 'push';
+
 export type PreviewNotificationPlan = {
     scheduledFor: string;
     user: User;
-    channel: string;
+    channels: Array<NotificationChannel>;
 };
 
 export type CreateEditableContentDto = {

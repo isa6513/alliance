@@ -68,7 +68,7 @@ const PROFILE_TABS_ORDER: ProfileTab[] = [
 ];
 const PROFILE_TAB_LABELS: Record<ProfileTab, string> = {
   [ProfileTab.Actions]: "Actions",
-  [ProfileTab.Forum]: "Forum",
+  [ProfileTab.Forum]: "Posts",
   [ProfileTab.Friends]: "Friends",
 };
 

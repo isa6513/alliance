@@ -38,7 +38,6 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { Temporal } from '@js-temporal/polyfill';
-import { NotificationChannel } from 'src/notifs/notif-utils';
 import { Community } from 'src/community/entities/community.entity';
 import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 import { Participant } from 'src/messaging/entities/participant.entity';
@@ -120,17 +119,6 @@ export class User {
   @ApiPropertyOptional({ type: 'string' })
   timeZone?: Temporal.TimeZoneLike;
 
-  @Column({
-    type: 'enum',
-    enum: NotificationChannel,
-    default: NotificationChannel.Text,
-  })
-  @ApiProperty({
-    enum: NotificationChannel,
-    enumName: 'NotificationChannel',
-  })
-  preferredActionReminderChannel: NotificationChannel;
-
   // @Column({
   //   type: 'enum',
   //   enum: NotificationChannel,
@@ -148,19 +136,19 @@ export class User {
     default: true,
   })
   @ApiProperty()
-  emailNotifsEnabled: boolean;
+  emailNotifsForActions: boolean;
 
   @Column({
     default: true,
   })
   @ApiProperty()
-  textNotifsEnabled: boolean;
+  textNotifsForActions: boolean;
 
   @Column({
     default: true,
   })
   @ApiProperty()
-  pushNotifsEnabled: boolean;
+  pushNotifsForActions: boolean;
 
   @Column({
     default: true,
@@ -345,7 +333,11 @@ export class User {
   @Type(() => OnetimeInvite)
   referredByInvite: OnetimeInvite | null;
 
-  @Column({ type: 'enum', enum: ReferralSource, default: ReferralSource.ReferralLink })
+  @Column({
+    type: 'enum',
+    enum: ReferralSource,
+    default: ReferralSource.ReferralLink,
+  })
   @ApiProperty({ enum: ReferralSource, enumName: 'ReferralSource' })
   referralSource: ReferralSource;
 

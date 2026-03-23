@@ -29,7 +29,7 @@ interface ActionReminderCardProps {
   ref: React.RefObject<HTMLDivElement | null>;
   handleDeleteGroup: (
     groupId: number,
-    anchor?: HTMLElement | null
+    anchor?: HTMLElement | null,
   ) => Promise<void>;
   groupSchedule: GroupScheduleLabels;
   editing: boolean;
@@ -46,7 +46,7 @@ interface ActionReminderCardProps {
   editError: string | null;
   editSuccess: string | null;
   handleEditGroupSubmit: (
-    groupId: number
+    groupId: number,
   ) => (payload: ActionReminderGroupFormSubmitPayload) => Promise<void>;
   reminderPlans?: PreviewNotificationPlan[];
   sentReminders?: ActionEventNotifDto[];
@@ -183,7 +183,7 @@ const ActionReminderCard = ({
       ref={highlightedReminder === group.id ? ref : undefined}
       className={cn(
         "bg-white text-sm !p-0 overflow-hidden transition-all duration-300",
-        highlightedReminder === group.id && "!border-red-500"
+        highlightedReminder === group.id && "!border-red-500",
       )}
     >
       <div className="flex flex-row gap-2 w-full bg-zinc-100 p-4 items-center justify-between">
@@ -194,7 +194,7 @@ const ActionReminderCard = ({
             onClick={() => setMinified(!minified)}
             className={cn(
               "!p-2 -my-1 transition-transform duration-100",
-              minified && "rotate-180"
+              minified && "rotate-180",
             )}
           >
             <DropdownIcon size="small" fill="black" />
@@ -205,7 +205,7 @@ const ActionReminderCard = ({
                 <p
                   className={cn(
                     "text-sm",
-                    isFinished ? "text-gray-500" : "text-blue-500"
+                    isFinished ? "text-gray-500" : "text-blue-500",
                   )}
                 >
                   {relativeSendLabel}
@@ -365,7 +365,7 @@ const ActionReminderCard = ({
           <div
             className={cn(
               "divide-y divide-gray-200 border-t border-gray-200 overflow-y-auto transition-[max-height] duration-300",
-              showPlans ? "max-h-[300px]" : "max-h-[0px]"
+              showPlans ? "max-h-[300px]" : "max-h-[0px]",
             )}
           >
             {reminderPlans === undefined ? (
@@ -386,7 +386,9 @@ const ActionReminderCard = ({
                   <p className="text-xs text-gray-500">
                     {formatDate(plan.scheduledFor, "MM/dd/yyyy hh:mm a")}
                   </p>
-                  <p className="text-xs text-gray-500">({plan.channel})</p>
+                  <p className="text-xs text-gray-500">
+                    ({plan.channels.join(", ")})
+                  </p>
                 </div>
               ))
             )}
@@ -394,7 +396,7 @@ const ActionReminderCard = ({
           <div
             className={cn(
               "divide-y divide-gray-200 border-t border-gray-200 overflow-y-auto transition-[max-height] duration-300",
-              showSentReminders ? "max-h-[300px]" : "max-h-[0px]"
+              showSentReminders ? "max-h-[300px]" : "max-h-0",
             )}
           >
             {sentReminders === undefined ? (
@@ -410,7 +412,11 @@ const ActionReminderCard = ({
                   className="p-3 flex flex-row gap-2 items-center justify-between"
                 >
                   <div className="flex flex-row gap-2 items-center">
-                    <p className="text-zinc-500">({notif.channel})</p>
+                    <p className="text-zinc-500">
+                      {notif.mms && "text "}
+                      {notif.mail && "email "}
+                      {notif.pushes?.length && "push "}
+                    </p>
                     <Link to={`/member/${notif.user.id}`} target="_blank">
                       {notif.user.displayName}
                     </Link>
@@ -429,12 +435,10 @@ const ActionReminderCard = ({
                       "text-sm",
                       notif.mms?.status === "undelivered"
                         ? "text-red-500"
-                        : "text-zinc-500"
+                        : "text-zinc-500",
                     )}
                   >
-                    {notif.channel === "text"
-                      ? notif.mms?.status
-                      : notif.mail?.status}
+                    {notif.mms ? notif.mms.status : notif.mail?.status}
                   </p>
                 </div>
               ))

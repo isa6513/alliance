@@ -33,7 +33,11 @@ import {
   ActionEventNotifType,
 } from './entities/action-event-notif.entity';
 import { generateCIDForNotif } from './notif-utils';
-import { shouldPushUser, shouldTextUser } from './notifs.service';
+import {
+  shouldEmailUser,
+  shouldPushUser,
+  shouldTextUser,
+} from './notifs.service';
 import { testUser } from './test-users';
 
 export interface MissedDeadlineCandidate {
@@ -64,8 +68,12 @@ export class NotificationPlan {
 }
 
 export class PreviewNotificationPlan extends NotificationPlan {
-  @ApiProperty()
-  channel: 'email' | 'text' | 'push';
+  @ApiProperty({
+    enum: ['email', 'text', 'push'],
+    enumName: 'NotificationChannel',
+    isArray: true,
+  })
+  channels: ('email' | 'text' | 'push')[];
 }
 
 @Injectable()
@@ -318,20 +326,29 @@ export class ActionEventReminderService {
       new Date(Date.now() - NOTIFICATION_LOOKBACK_WINDOW_MS),
       new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
     );
-    return plans.map((plan) => ({
+    const channels = plans.map((plan) => {
+      const channels: ('email' | 'text' | 'push')[] = [];
+      if (shouldPushUser(plan.user)) {
+        channels.push('push');
+      }
+      if (shouldTextUser(plan.user)) {
+        channels.push('text');
+      }
+      if (shouldEmailUser(plan.user)) {
+        channels.push('email');
+      }
+      return channels;
+    });
+    return plans.map((plan, index) => ({
       ...plan,
-      channel: shouldPushUser(plan.user)
-        ? 'push'
-        : shouldTextUser(plan.user)
-          ? 'text'
-          : 'email',
+      channels: channels[index],
     }));
   }
 
   async getSentNotifsForGroup(groupId: number): Promise<ActionEventNotifDto[]> {
     const notifs = await this.actionEventNotifRepository.find({
       where: { reminderGroup: { id: groupId }, sent: true },
-      relations: { user: true, mms: true, mail: true },
+      relations: { user: true, mms: true, mail: true, pushes: true },
     });
     return notifs.map((notif) => new ActionEventNotifDto(notif));
   }

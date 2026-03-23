@@ -11,7 +11,6 @@ import {
 } from 'src/actions/entities/reminder-group.entity';
 import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
-import { NotificationChannel } from 'src/notifs/notif-utils';
 import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Community } from 'src/community/entities/community.entity';
@@ -118,8 +117,8 @@ describe('ActionEventNotifWorker (e2e)', () => {
   const resetPrimaryUser = async () => {
     await userRepo.update(ctx.testUserId, {
       turnedOffAllNotifs: false,
-      emailNotifsEnabled: false,
-      textNotifsEnabled: true,
+      emailNotifsForActions: false,
+      textNotifsForActions: true,
       phoneNumber: '+15555550100',
       phoneNumberValidated: true,
       name: 'Reminder Tester',
@@ -205,7 +204,13 @@ describe('ActionEventNotifWorker (e2e)', () => {
   const fetchNotifsForGroup = async (group: ReminderGroup) =>
     notifRepo.find({
       where: { reminderGroup: { id: group.id } },
-      relations: { user: true, reminderGroup: true },
+      relations: {
+        user: true,
+        reminderGroup: true,
+        pushes: true,
+        mms: true,
+        mail: true,
+      },
     });
 
   const recordCompletion = (user: User, action: Action) =>
@@ -255,7 +260,8 @@ describe('ActionEventNotifWorker (e2e)', () => {
     const notifs = await fetchNotifsForGroup(reminderGroup);
     expect(notifs.map((notif) => notif.user.id)).toHaveLength(1);
     expect(notifs[0].user.id).toBe(user.id);
-    expect(notifs[0].channel).toBe(NotificationChannel.Text);
+
+    expect(notifs[0].mms).toBeTruthy();
   });
 
   it('does not send reminders older than the 3 hour lookback window', async () => {
@@ -333,7 +339,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
 
     const notifs = await fetchNotifsForGroup(reminderGroup);
     expect(notifs.map((notif) => notif.user.id)).toHaveLength(1);
-    expect(notifs[0].channel).toBe(NotificationChannel.Text);
+    expect(notifs[0].mms).toBeTruthy();
   });
 
   it('skips users who have already completed the action', async () => {
@@ -537,10 +543,10 @@ describe('ActionEventNotifWorker (e2e)', () => {
             automatic: false,
           } as ContractEvent,
         ],
-        textNotifsEnabled: true,
+        textNotifsForActions: true,
         phoneNumber: '+15555550201',
         phoneNumberValidated: true,
-        emailNotifsEnabled: false,
+        emailNotifsForActions: false,
       }),
     );
     const suspendedUserWithTags = await userRepo.findOneOrFail({
@@ -605,10 +611,10 @@ describe('ActionEventNotifWorker (e2e)', () => {
             contractId: ctx.defaultContractId,
           } as ContractEvent,
         ],
-        textNotifsEnabled: true,
+        textNotifsForActions: true,
         phoneNumber: '+15555550200',
         phoneNumberValidated: true,
-        emailNotifsEnabled: false,
+        emailNotifsForActions: false,
       }),
     );
     const customUserWithTags = await userRepo.findOneOrFail({
@@ -663,10 +669,10 @@ describe('ActionEventNotifWorker (e2e)', () => {
             contractId: ctx.defaultContractId,
           } as ContractEvent,
         ],
-        textNotifsEnabled: true,
+        textNotifsForActions: true,
         phoneNumber: '+15555550300',
         phoneNumberValidated: true,
-        emailNotifsEnabled: false,
+        emailNotifsForActions: false,
       }),
     );
     const cohortUserWithTags = await userRepo.findOneOrFail({
@@ -778,7 +784,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     const notifs = await fetchNotifsForGroup(reminderGroup);
     expect(notifs).toHaveLength(1);
     expect(notifs[0].user.id).toBe(user.id);
-    expect(notifs[0].channel).toBe(NotificationChannel.Text);
+    expect(notifs[0].mms).toBeTruthy();
   });
 
   it('aligns relative range reminders with deadline offsets', async () => {
@@ -832,7 +838,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     const notifs = await fetchNotifsForGroup(reminderGroup);
     expect(notifs).toHaveLength(1);
     expect(notifs[0].user.id).toBe(user.id);
-    expect(notifs[0].channel).toBe(NotificationChannel.Text);
+    expect(notifs[0].mms).toBeTruthy();
   });
 
   it('sends suite reminders to users missing any suite actions', async () => {
@@ -885,10 +891,10 @@ describe('ActionEventNotifWorker (e2e)', () => {
               contractId: ctx.defaultContractId,
             } as ContractEvent,
           ],
-          textNotifsEnabled: true,
+          textNotifsForActions: true,
           phoneNumber: `+1555555${phoneSuffix}`,
           phoneNumberValidated: true,
-          emailNotifsEnabled: false,
+          emailNotifsForActions: false,
           turnedOffAllNotifs: false,
         }),
       );
@@ -987,10 +993,10 @@ describe('ActionEventNotifWorker (e2e)', () => {
             contractId: ctx.defaultContractId,
           } as ContractEvent,
         ],
-        textNotifsEnabled: true,
+        textNotifsForActions: true,
         phoneNumber: '+15555552005',
         phoneNumberValidated: true,
-        emailNotifsEnabled: false,
+        emailNotifsForActions: false,
         turnedOffAllNotifs: false,
       }),
     );
@@ -1068,12 +1074,11 @@ describe('ActionEventNotifWorker (e2e)', () => {
               contractId: ctx.defaultContractId,
             } as ContractEvent,
           ],
-          textNotifsEnabled: true,
+          textNotifsForActions: true,
           phoneNumber: `+1555555${phoneSuffix}`,
           phoneNumberValidated: true,
-          emailNotifsEnabled: false,
+          emailNotifsForActions: false,
           turnedOffAllNotifs: false,
-          preferredActionReminderChannel: NotificationChannel.Text,
           ...overrides,
         }),
       );
@@ -1108,7 +1113,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       '6103',
       {
         communities: [communityWithGaps],
-        textNotifsEnabled: false,
+        textNotifsForActions: false,
       },
     );
 
@@ -1117,7 +1122,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       '6104',
       {
         communities: [communityWithGaps],
-        textNotifsEnabled: false,
+        textNotifsForActions: false,
       },
     );
 
@@ -1126,7 +1131,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       '6105',
       {
         communities: [communityComplete],
-        textNotifsEnabled: false,
+        textNotifsForActions: false,
       },
     );
 
@@ -1135,7 +1140,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       '6106',
       {
         communities: [communityComplete],
-        textNotifsEnabled: false,
+        textNotifsForActions: false,
       },
     );
 
@@ -1168,7 +1173,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     expect(notifiedIds).toHaveLength(1);
     expect(notifiedIds).toContain(leaderWithGaps.id);
     expect(notifiedIds).not.toContain(leaderComplete.id);
-    expect(notifs[0].channel).toBe(NotificationChannel.Text);
+    expect(notifs[0].mms).toBeTruthy();
 
     const leaderWithGapsForText = await userRepo.findOneOrFail({
       where: { id: leaderWithGaps.id },
@@ -1255,12 +1260,11 @@ describe('ActionEventNotifWorker (e2e)', () => {
               contractId: ctx.defaultContractId,
             } as ContractEvent,
           ],
-          textNotifsEnabled: true,
+          textNotifsForActions: true,
           phoneNumber: `+1555555${phoneSuffix}`,
           phoneNumberValidated: true,
-          emailNotifsEnabled: false,
+          emailNotifsForActions: false,
           turnedOffAllNotifs: false,
-          preferredActionReminderChannel: NotificationChannel.Text,
           ...overrides,
         }),
       );
@@ -1269,7 +1273,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
       remindAboutUncompletedGroupMembers: true,
     });
     const member = await createSignedUser('Member Count', '6202', {
-      textNotifsEnabled: false,
+      textNotifsForActions: false,
     });
 
     const community = await communityRepo.save(
@@ -1543,7 +1547,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         password: 'pass',
         name: 'Non Completer',
         tags: [ctx.defaultTag],
-        textNotifsEnabled: true,
+        textNotifsForActions: true,
         phoneNumber: '+15555550200',
         phoneNumberValidated: true,
       }),
@@ -1600,7 +1604,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         password: 'pass',
         name: 'Non Leader',
         tags: [ctx.defaultTag],
-        textNotifsEnabled: true,
+        textNotifsForActions: true,
         phoneNumber: '+15555550201',
         phoneNumberValidated: true,
       }),
@@ -1673,7 +1677,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         password: 'pass',
         name: 'Non Responder',
         tags: [ctx.defaultTag],
-        textNotifsEnabled: true,
+        textNotifsForActions: true,
         phoneNumber: '+15555550202',
         phoneNumberValidated: true,
       }),

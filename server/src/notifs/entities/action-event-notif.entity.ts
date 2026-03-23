@@ -12,7 +12,6 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { NotificationChannel } from '../notif-utils';
 import { ReminderGroup } from 'src/actions/entities/reminder-group.entity';
 import { Type } from 'class-transformer';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
@@ -44,14 +43,6 @@ export class ActionEventNotif {
   })
   @ApiProperty({ enum: ActionEventNotifType, enumName: 'ActionEventNotifType' })
   type: ActionEventNotifType;
-
-  @Column({
-    type: 'enum',
-    enum: NotificationChannel,
-    enumName: 'NotificationChannel',
-  })
-  @ApiProperty({ enum: NotificationChannel, enumName: 'NotificationChannel' })
-  channel: NotificationChannel;
 
   @ApiProperty({ type: Mail, nullable: true })
   @OneToOne(() => Mail, { nullable: true })

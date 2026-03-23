@@ -68,7 +68,15 @@ export class MmsService {
       process.env.NODE_ENV === 'staging' ||
       to === '15550100'
     ) {
-      return null;
+      const mms = this.mmsRepository.create({
+        to: to,
+        from: '+15555550100',
+        body: body,
+        status: 'sent',
+        twilioSid: 'test-sid',
+        cid: cid,
+      });
+      return this.mmsRepository.save(mms);
     }
     this.logger.log(
       `Attempting to send MMS to ${to} with ${mediaUrls.length} media items.`,

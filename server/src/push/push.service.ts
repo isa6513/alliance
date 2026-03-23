@@ -76,8 +76,6 @@ export class PushService {
     const expoMessages: ExpoPushMessage[] = [];
     const pushEntities: Push[] = [];
 
-    console.log('sending messages', messages);
-
     for (const message of messages) {
       if (!Expo.isExpoPushToken(message.expoPushToken)) {
         console.error(

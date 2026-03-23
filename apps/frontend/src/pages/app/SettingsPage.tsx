@@ -1,7 +1,6 @@
 import {
   City,
   CitySearchDto,
-  NotificationChannel,
   PublicFormResponseDefault,
   userMyLocation,
   userUpdate,
@@ -246,7 +245,7 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
         <Card style={CardStyle.White} className="p-6">
-          <h2 className="!font-semibold !text-2xl mb-4">Profile</h2>
+          <h2 className="font-semibold! text-2xl! mb-4">Profile</h2>
           <div className="flex flex-col gap-y-4">
             <div className="flex flex-col md:flex-row w-full items-center gap-4 *:gap-x-1">
               <div className="flex-1 flex flex-col w-full">
@@ -355,30 +354,14 @@ const SettingsPage: React.FC = () => {
         <Card style={CardStyle.White} className="p-6">
           <div>
             <h2 className="!font-semibold !text-2xl mb-4">Notifications</h2>
-
-            <div className="flex flex-col gap-y-2 mb-4">
-              <p className="!font-medium mb-0">Send action reminders via:</p>
-              <select
-                className="border border-zinc-300 rounded px-3 py-2 self-start"
-                value={editableUser.preferredActionReminderChannel}
-                onChange={(event) =>
-                  updateEditableUser({
-                    preferredActionReminderChannel: event.target
-                      .value as NotificationChannel,
-                  })
-                }
-              >
-                <option value={"email"}>Email</option>
-                <option value={"text"}>Text</option>
-                {showPushSettings && <option value={"push"}>Push</option>}
-              </select>
-            </div>
-            <p className="!font-medium mb-0">Allowed notification channels:</p>
+            <p className="!font-medium mb-0">
+              Receive action announcements / reminders via:
+            </p>
             <div>
               {!(
-                editableUser.emailNotifsEnabled ||
-                // editableUser.pushNotifsEnabled ||
-                editableUser.textNotifsEnabled
+                editableUser.emailNotifsForActions ||
+                editableUser.pushNotifsForActions ||
+                editableUser.textNotifsForActions
               ) && (
                 <p className="text-sm text-zinc-500">
                   You will not receive any notifications. Please keep a
@@ -391,9 +374,9 @@ const SettingsPage: React.FC = () => {
               <div className="flex flex-row items-center justify-between gap-x-4 py-3">
                 <span className="font-medium">Email</span>
                 <YesNoToggle
-                  value={!!editableUser.emailNotifsEnabled}
+                  value={!!editableUser.emailNotifsForActions}
                   onChange={(next) =>
-                    updateEditableUser({ emailNotifsEnabled: next })
+                    updateEditableUser({ emailNotifsForActions: next })
                   }
                   ariaLabel="Email notifications"
                   yesLabel="On"
@@ -404,9 +387,9 @@ const SettingsPage: React.FC = () => {
               <div className="flex flex-row items-center justify-between gap-x-4 py-3">
                 <span className="font-medium">Text/SMS</span>
                 <YesNoToggle
-                  value={!!editableUser.textNotifsEnabled}
+                  value={!!editableUser.textNotifsForActions}
                   onChange={(next) =>
-                    updateEditableUser({ textNotifsEnabled: next })
+                    updateEditableUser({ textNotifsForActions: next })
                   }
                   ariaLabel="Text/SMS notifications"
                   yesLabel="On"
@@ -418,9 +401,9 @@ const SettingsPage: React.FC = () => {
                 <div className="flex flex-row items-center justify-between gap-x-4 py-3">
                   <span className="font-medium">Push</span>
                   <YesNoToggle
-                    value={!!editableUser.pushNotifsEnabled}
+                    value={!!editableUser.pushNotifsForActions}
                     onChange={(next) =>
-                      updateEditableUser({ pushNotifsEnabled: next })
+                      updateEditableUser({ pushNotifsForActions: next })
                     }
                     ariaLabel="Push notifications"
                     yesLabel="On"
@@ -430,7 +413,7 @@ const SettingsPage: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="flex flex-col divide-y divide-zinc-200 mt-5 border-t border-zinc-200">
+            <div className="flex flex-col divide-y divide-zinc-200 mt-12 ">
               {user.leaderOfIds.length > 0 ? (
                 <div className="flex flex-row items-center justify-between gap-x-4 py-3">
                   <p className="!font-medium mb-0">
