@@ -393,7 +393,7 @@ const HomePage = () => {
                 </span>
                 {numTodo > 0 &&
                   remainingTasksEstimatedTimeCurrentWeek > 0 &&
-                  `for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
+                  ` for a total of ${remainingTasksEstimatedTimeCurrentWeek} minutes`}
               </p>
             )}
 
