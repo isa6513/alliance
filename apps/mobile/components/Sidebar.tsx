@@ -74,12 +74,6 @@ const navSections: NavSection[] = [
     items: [
       { name: "Activity", href: "/feed", icon: Globe, matchPaths: ["/feed"] },
       {
-        name: "Forum",
-        href: "/forum",
-        icon: MessagesSquare,
-        matchPaths: ["/forum"],
-      },
-      {
         name: "Groups",
         href: "/groups",
         icon: Users,
