@@ -167,9 +167,13 @@ export default function NewMessageScreen() {
         <Text className="text-lg font-semibold text-zinc-900">New message</Text>
         <View className="w-25" />
       </View>
-      <ScrollView className="flex-1 px-4">
-        <View className="border border-zinc-200 rounded bg-white px-4 flex flex-row">
-          <Text className="text-sm text-zinc-600 my-3 mr-2">To:</Text>
+      <ScrollView
+        className="flex-1 px-4"
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="none"
+      >
+        <View className="border border-zinc-200 rounded bg-white px-4 flex flex-row items-center">
+          <Text className="text-sm text-zinc-600 mr-2">To:</Text>
           {loadingUsers ? (
             <ActivityIndicator size="small" color={colors.green} />
           ) : (

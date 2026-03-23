@@ -2791,6 +2791,10 @@ export type ActionStatsWithOnboardingDto = {
      * Whether the action is marked as onboarding.
      */
     onboarding: boolean;
+    /**
+     * Whether the action is optional.
+     */
+    optional: boolean;
 };
 
 export type MemberCompletionRetentionActionSummaryDto = {

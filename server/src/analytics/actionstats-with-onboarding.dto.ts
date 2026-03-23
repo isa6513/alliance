@@ -9,4 +9,9 @@ export class ActionStatsWithOnboardingDto extends OmitType(
     description: 'Whether the action is marked as onboarding.',
   })
   onboarding: boolean;
+
+  @ApiProperty({
+    description: 'Whether the action is optional.',
+  })
+  optional: boolean;
 }

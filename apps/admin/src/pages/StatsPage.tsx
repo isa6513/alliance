@@ -683,7 +683,7 @@ const StatsPage: React.FC = () => {
   const cumulativeCompletionData = useMemo(() => {
     const now = new Date();
     const completedActions = actionStats
-      .filter((a) => a.memberActionEndDate && a.showInChart && !a.onboarding)
+      .filter((a) => a.memberActionEndDate && a.showInChart && !a.onboarding && !a.optional)
       .map((a) => ({
         ...a,
         endDate: new Date(a.memberActionEndDate!),
@@ -703,7 +703,7 @@ const StatsPage: React.FC = () => {
       date: Date;
       avgRate: number;
       actionCount: number;
-      actionsInPoint: number;
+      actionNames: string[];
       dayKey: string;
     }[] = [];
     let runningSum = 0;
@@ -728,7 +728,7 @@ const StatsPage: React.FC = () => {
         existingPoint.date = action.endDate;
         existingPoint.avgRate = runningSum / count;
         existingPoint.actionCount = count;
-        existingPoint.actionsInPoint += 1;
+        existingPoint.actionNames.push(action.actionName);
         continue;
       }
 
@@ -736,7 +736,7 @@ const StatsPage: React.FC = () => {
         date: action.endDate,
         avgRate: runningSum / count,
         actionCount: count,
-        actionsInPoint: 1,
+        actionNames: [action.actionName],
         dayKey,
       });
     }
@@ -750,7 +750,7 @@ const StatsPage: React.FC = () => {
       date: d.date,
       avgRate: d.avgRate,
       actionCount: d.actionCount,
-      actionsInPoint: d.actionsInPoint,
+      actionNames: d.actionNames,
     }));
   }, [cumulativeCompletionData]);
 
@@ -814,7 +814,8 @@ const StatsPage: React.FC = () => {
       if (
         !action.memberActionEndDate ||
         !action.showInChart ||
-        action.onboarding
+        action.onboarding ||
+        action.optional
       ) {
         continue;
       }
@@ -2299,21 +2300,27 @@ const StatsPage: React.FC = () => {
         }
         getHoverContent={(point) => ({
           title: fullDateFormatter.format(point.date),
-          items: [
-            {
-              label: "Avg Rate",
-              value: `${((point.avgRate as number) * 100).toFixed(2)}%`,
-              color: "#15803d",
-            },
-            {
-              label: "Actions",
-              value: point.actionCount as number,
-            },
-            {
-              label: "Actions in point",
-              value: point.actionsInPoint as number,
-            },
-          ],
+          items: (() => {
+            const actionNames =
+              (point.actionNames as string[] | undefined) ?? [];
+            const actionItems = actionNames.map((name, index) => ({
+              label: `Action ${index + 1}`,
+              value:
+                name.length > 40 ? `${name.slice(0, 40).trimEnd()}...` : name,
+            }));
+            return [
+              {
+                label: "Avg Rate",
+                value: `${((point.avgRate as number) * 100).toFixed(2)}%`,
+                color: "#15803d",
+              },
+              {
+                label: "Total Actions",
+                value: point.actionCount as number,
+              },
+              ...actionItems,
+            ];
+          })(),
         })}
       />
 

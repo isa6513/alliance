@@ -1,6 +1,6 @@
 import { ProfileDto } from "@alliance/shared/client";
 import { useMemo, useState } from "react";
-import { ScrollView, TextInput, TouchableOpacity, View } from "react-native";
+import { TextInput, TouchableOpacity, View } from "react-native";
 import { X } from "lucide-react-native";
 import ProfileImage from "../ProfileImage";
 import Text from "../system/Text";
@@ -109,18 +109,16 @@ export default function MessageRecipientSelect({
       </View>
       {query.length > 0 && filteredUsers.length > 0 && (
         <View className="rounded mt-2 bg-white">
-          <ScrollView className="max-h-48">
-            {filteredUsers.map((user) => (
-              <TouchableOpacity
-                key={user.id}
-                onPress={() => addUser(user.id)}
-                className="flex-row items-center gap-2 px-3 py-2"
-              >
-                <ProfileImage pfp={user.profilePicture} size="medium" />
-                <Text className="text-zinc-800">{user.displayName}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          {filteredUsers.map((user) => (
+            <TouchableOpacity
+              key={user.id}
+              onPress={() => addUser(user.id)}
+              className="flex-row items-center gap-2 px-3 py-2"
+            >
+              <ProfileImage pfp={user.profilePicture} size="medium" />
+              <Text className="text-zinc-800">{user.displayName}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       )}
       {query.length > 0 && filteredUsers.length === 0 && !loading && (

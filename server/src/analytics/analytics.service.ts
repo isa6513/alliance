@@ -412,16 +412,19 @@ ORDER BY pp.total_session_duration_seconds DESC
     const actionIds = records.map((record) => record.actionId);
     const actions = await this.actionRepository.find({
       where: { id: In(actionIds) },
-      select: { id: true, onboarding: true },
+      select: { id: true, onboarding: true, optional: true },
     });
     const onboardingByActionId = new Map<number, boolean>();
+    const optionalByActionId = new Map<number, boolean>();
     for (const action of actions) {
       onboardingByActionId.set(action.id, action.onboarding);
+      optionalByActionId.set(action.id, action.optional);
     }
 
     return records.map((record) => ({
       ...record,
       onboarding: onboardingByActionId.get(record.actionId) ?? false,
+      optional: optionalByActionId.get(record.actionId) ?? false,
     }));
   }
 
@@ -438,12 +441,13 @@ ORDER BY pp.total_session_duration_seconds DESC
 
     const action = await this.actionRepository.findOne({
       where: { id: actionId },
-      select: { id: true, onboarding: true },
+      select: { id: true, onboarding: true, optional: true },
     });
 
     return {
       ...record,
       onboarding: action?.onboarding ?? false,
+      optional: action?.optional ?? false,
     };
   }
 
