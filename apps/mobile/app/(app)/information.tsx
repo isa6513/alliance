@@ -1,44 +1,126 @@
-import { useCallback, useMemo } from "react";
-import { ScrollView, TouchableOpacity, View, Linking } from "react-native";
-import { ChevronRight } from "lucide-react-native";
-import { useActionUpdates } from "@alliance/shared/lib/informationPage";
-import Text from "../../components/system/Text";
-import { colors } from "../../lib/style/colors";
-import ActionUpdateCard from "../../components/ActionUpdateCard";
+import { useCallback, type ComponentType } from "react";
+import { Linking, ScrollView, View } from "react-native";
+import {
+  BookOpenText,
+  BookUser,
+  CalendarCheck,
+  ChevronRight,
+  ClipboardList,
+  Info,
+  ListOrdered,
+  Mail,
+  Map as MapIcon,
+  Megaphone,
+  PenTool,
+  Scale,
+  Users,
+} from "lucide-react-native";
+import { Features, isEnabled } from "@alliance/shared/lib/features";
+import Card from "../../components/system/Card";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import Text from "../../components/system/Text";
+import { getBaseUrl } from "../../lib/config";
+import { colors } from "../../lib/style/colors";
 
-const WEB_BASE_URL = "https://worldalliance.org"; //TODO
+type ResourceIcon = ComponentType<{
+  color?: string;
+  size?: string | number;
+  strokeWidth?: string | number;
+}>;
 
-const resources = [
+type InformationResource = {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  icon: ResourceIcon;
+};
+
+const contacts: InformationResource[] = [
   {
-    id: "guide",
-    title: "Our guide",
-    description: "describes how we work.",
-    href: "/guide",
+    id: "email",
+    title: "Email",
+    description: "Email the office with questions, feedback, or ideas.",
+    href: "mailto:contact@worldalliance.org",
+    icon: Mail,
   },
   {
-    id: "foundation",
-    title: "Our foundation",
-    description: "describes how we derived our priorities.",
-    href: "/foundation",
+    id: "visit",
+    title: "Schedule a visit",
+    description:
+      "Schedule a visit to the Alliance's physical office in San Francisco, CA, USA.",
+    href: "mailto:contact@worldalliance.org?subject=Request to visit the office&body=I would like to schedule a visit to the Alliance's physical office on [DATE] at [TIME].",
+    icon: CalendarCheck,
+  },
+];
+
+const baseResources: InformationResource[] = [
+  {
+    id: "what-is-the-alliance",
+    title: "What is the Alliance?",
+    description:
+      "The Alliance is a global group of individuals cooperating to improve the world.",
+    href: "/guide",
+    icon: Info,
+  },
+  {
+    id: "member-directory",
+    title: "Member directory",
+    description: "A list of all members of the Alliance.",
+    href: "/members",
+    icon: BookUser,
+  },
+  {
+    id: "roadmap",
+    title: "Roadmap",
+    description:
+      "The Alliance is in an experimental phase and building up to a public launch.",
+    href: "/roadmap",
+    icon: MapIcon,
+  },
+  {
+    id: "how-groups-work",
+    title: "How groups work",
+    description:
+      "The Alliance is organized into groups that help members hold each other accountable.",
+    href: "/groups-guide",
+    icon: Users,
+  },
+  {
+    id: "how-to-design-actions",
+    title: "How to design actions",
+    description: "A basic guide that the office uses to design actions.",
+    href: "/action-design",
+    icon: PenTool,
+  },
+  {
+    id: "action-updates",
+    title: "Action updates",
+    description: "Progress updates on our actions.",
+    href: "/action-updates",
+    icon: ClipboardList,
+  },
+  {
+    id: "priorities",
+    title: "Priorities",
+    description: "An overview of our current priorities.",
+    href: "/priorities",
+    icon: ListOrdered,
   },
   {
     id: "governance",
-    title: "Our governance",
-    description: "describes office and member obligations.",
-    href: "/governance",
+    title: "Governance",
+    description:
+      "The office plans actions, and members participate in a simple oversight process.",
+    href: "/internal-governance",
+    icon: Scale,
   },
   {
-    id: "faq",
-    title: "Our FAQ",
-    description: "answers common questions.",
-    href: "/faq",
-  },
-  {
-    id: "contact",
-    title: "Email the office",
-    description: "with questions, feedback, or ideas.",
-    href: "mailto:contact@worldalliance.org",
+    id: "terminology",
+    title: "Terminology",
+    description: "Some terms used in the Alliance.",
+    href: "/terminology",
+    icon: BookOpenText,
   },
 ];
 
@@ -46,22 +128,61 @@ const normalizeResourceUrl = (href: string) => {
   if (href.startsWith("mailto:") || href.startsWith("http")) {
     return href;
   }
-  return `${WEB_BASE_URL}${href}`;
+
+  return `${getBaseUrl()}${href}`;
 };
 
-export default function InformationScreen() {
-  const { updates, error } = useActionUpdates();
+function ResourceCard({
+  resource,
+  onPress,
+}: {
+  resource: InformationResource;
+  onPress: (href: string) => void;
+}) {
+  const Icon = resource.icon;
 
-  const sortedUpdates = useMemo(() => {
-    return [...updates].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-  }, [updates]);
+  return (
+    <Card
+      onPress={() => onPress(resource.href)}
+      className="border border-zinc-200 gap-x-4 flex-row items-center"
+    >
+      <Icon size={24} color={colors.green} strokeWidth={2} />
+      <View className="flex-1 gap-y-1">
+        <Text className="text-lg font-medium text-zinc-800">
+          {resource.title}
+        </Text>
+        <Text className="text-sm leading-5 text-zinc-500">
+          {resource.description}
+        </Text>
+      </View>
+      <ChevronRight size={16} color={colors.green} />
+    </Card>
+  );
+}
+
+export default function InformationScreen() {
+  const resources = isEnabled(
+    Features.GeneralUpdatesLink,
+    __DEV__ ? "development" : "production",
+  )
+    ? [
+        ...baseResources.slice(0, 6),
+        {
+          id: "general-updates",
+          title: "General updates",
+          description:
+            "Updates about the Alliance's progress as an organization.",
+          href: "/general-updates",
+          icon: Megaphone,
+        },
+        ...baseResources.slice(6),
+      ]
+    : baseResources;
 
   const handleOpenResource = useCallback((href: string) => {
     const url = normalizeResourceUrl(href);
-    Linking.openURL(url).catch((err) => {
-      console.error("Failed to open resource link:", err);
+    Linking.openURL(url).catch((error: unknown) => {
+      console.error("Failed to open resource link:", error);
     });
   }, []);
 
@@ -69,39 +190,35 @@ export default function InformationScreen() {
     <View className="flex-1 bg-white">
       <SimplePageTitle title="Information" />
       <ScrollView className="flex-1">
-        <View className="px-4 pt-4 pb-10 gap-y-6">
+        <View className="px-2 pb-8 pt-2 gap-y-6">
           <View className="gap-y-3">
-          <Text className="text-lg font-semibold text-zinc-900">Resources</Text>
-          <View className="gap-y-2">
-            {resources.map((resource) => (
-              <TouchableOpacity
-                key={resource.id}
-                onPress={() => handleOpenResource(resource.href)}
-                activeOpacity={0.8}
-                className="border border-zinc-200 rounded p-4 bg-white"
-              >
-                <View className="flex-row items-center justify-between gap-x-3">
-                  <Text className="text-base text-zinc-900 flex-1">
-                    <Text className="font-semibold">{resource.title}</Text>{" "}
-                    {resource.description}
-                  </Text>
-                  <ChevronRight size={16} color={colors.text.tertiary} />
-                </View>
-              </TouchableOpacity>
-            ))}
+            <Text className="text-lg font-semibold text-zinc-900 font-serif">
+              Contact the office
+            </Text>
+            <View className="gap-y-2">
+              {contacts.map((contact) => (
+                <ResourceCard
+                  key={contact.id}
+                  resource={contact}
+                  onPress={handleOpenResource}
+                />
+              ))}
+            </View>
           </View>
-        </View>
 
-        <View className="gap-y-3">
-          <Text className="text-lg font-semibold text-zinc-900">
-            Action updates
-          </Text>
-          <View className="gap-y-2">
-            {sortedUpdates.map((update) => (
-              <ActionUpdateCard key={update.id} update={update} />
-            ))}
-            {error && <Text className="text-zinc-500">{error}</Text>}
-          </View>
+          <View className="gap-y-3">
+            <Text className="text-lg font-semibold text-zinc-900 font-serif">
+              Resources
+            </Text>
+            <View className="gap-y-2">
+              {resources.map((resource) => (
+                <ResourceCard
+                  key={resource.id}
+                  resource={resource}
+                  onPress={handleOpenResource}
+                />
+              ))}
+            </View>
           </View>
         </View>
       </ScrollView>

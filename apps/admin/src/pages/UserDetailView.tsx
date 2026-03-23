@@ -110,7 +110,7 @@ const UserDetailView: React.FC = () => {
     useState<UserActionRelationDetailDto[]>(actionRelations);
   const [allTags, setAllTags] = useState<TagDto[]>(loaderData.allTags);
   const [pendingTagOps, setPendingTagOps] = useState<Set<string>>(
-    () => new Set()
+    () => new Set(),
   );
   const [tagMutationError, setTagMutationError] = useState<string | null>(null);
   const [expandedEmailId, setExpandedEmailId] = useState<number | null>(null);
@@ -131,7 +131,7 @@ const UserDetailView: React.FC = () => {
 
   const userTags = useMemo(() => {
     return allTags.filter((tag) =>
-      tag.users.some((profile) => profile.id === user.id)
+      tag.users.some((profile) => profile.id === user.id),
     );
   }, [allTags, user.id]);
 
@@ -140,10 +140,13 @@ const UserDetailView: React.FC = () => {
   }, [userTags]);
 
   const relationByActionId = useMemo(() => {
-    return actionRelationsState.reduce((acc, relation) => {
-      acc[relation.actionId] = relation;
-      return acc;
-    }, {} as Record<number, UserActionRelationDetailDto>);
+    return actionRelationsState.reduce(
+      (acc, relation) => {
+        acc[relation.actionId] = relation;
+        return acc;
+      },
+      {} as Record<number, UserActionRelationDetailDto>,
+    );
   }, [actionRelationsState]);
 
   const { emailNotifs, textNotifs, otherNotifs } = useMemo(() => {
@@ -151,9 +154,9 @@ const UserDetailView: React.FC = () => {
     const text: ActionEventNotifDto[] = [];
     const other: ActionEventNotifDto[] = [];
     notifs.forEach((notif) => {
-      if (notif.channel === "email") {
+      if (notif.mail) {
         email.push(notif);
-      } else if (notif.channel === "text") {
+      } else if (notif.mms) {
         text.push(notif);
       } else {
         other.push(notif);
@@ -183,7 +186,7 @@ const UserDetailView: React.FC = () => {
   const sortedAwayRanges = useMemo(() => {
     return [...awayRanges].sort(
       (a, b) =>
-        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
     );
   }, [awayRanges]);
 
@@ -200,14 +203,14 @@ const UserDetailView: React.FC = () => {
 
   const latestEvent = user.contractEvents?.length
     ? user.contractEvents.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       )[0]
     : null;
 
   const sortedFormResponses = useMemo(() => {
     return [...formResponses].sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   }, [formResponses]);
 
@@ -215,18 +218,18 @@ const UserDetailView: React.FC = () => {
     latestEvent === null
       ? "text-zinc-500"
       : latestEvent.type === "signed"
-      ? "text-green"
-      : "text-red-700";
+        ? "text-green"
+        : "text-red-700";
 
   const contractStatus =
     latestEvent === null
       ? "Not signed"
       : latestEvent.type === "signed"
-      ? "Signed"
-      : "Suspended";
+        ? "Signed"
+        : "Suspended";
   const tagKey = useCallback(
     (tagId: string) => `${user.id}-${tagId}`,
-    [user.id]
+    [user.id],
   );
 
   const updateTagInState = useCallback((updatedTag: TagDto) => {
@@ -277,7 +280,7 @@ const UserDetailView: React.FC = () => {
         });
       }
     },
-    [tagKey, updateTagInState, user.id]
+    [tagKey, updateTagInState, user.id],
   );
 
   return (
@@ -329,24 +332,24 @@ const UserDetailView: React.FC = () => {
           <div className="flex items-center gap-3 mt-3 text-sm">
             <span
               className={
-                user.emailNotifsEnabled ? "text-green-600" : "text-zinc-400"
+                user.emailNotifsForActions ? "text-green-600" : "text-zinc-400"
               }
             >
-              Email {user.emailNotifsEnabled ? "on" : "off"}
+              Email {user.emailNotifsForActions ? "on" : "off"}
             </span>
             <span
               className={
-                user.textNotifsEnabled ? "text-green-600" : "text-zinc-400"
+                user.textNotifsForActions ? "text-green-600" : "text-zinc-400"
               }
             >
-              Text {user.textNotifsEnabled ? "on" : "off"}
+              Text {user.textNotifsForActions ? "on" : "off"}
             </span>
             <span
               className={
-                user.pushNotifsEnabled ? "text-green-600" : "text-zinc-400"
+                user.pushNotifsForActions ? "text-green-600" : "text-zinc-400"
               }
             >
-              Push {user.pushNotifsEnabled ? "on" : "off"}
+              Push {user.pushNotifsForActions ? "on" : "off"}
             </span>
             {user.turnedOffAllNotifs && (
               <span className="text-red-500 font-medium">All notifs off</span>
@@ -409,7 +412,7 @@ const UserDetailView: React.FC = () => {
                                     <span
                                       className={cn(
                                         "font-medium cursor-default",
-                                        pillTextStyle
+                                        pillTextStyle,
                                       )}
                                     >
                                       {pillLabel}
@@ -447,7 +450,7 @@ const UserDetailView: React.FC = () => {
                           <td className="px-3 py-2 text-zinc-500">
                             {relation.latestActivityAt
                               ? new Date(
-                                  relation.latestActivityAt
+                                  relation.latestActivityAt,
                                 ).toLocaleDateString()
                               : "—"}
                           </td>
@@ -514,14 +517,14 @@ const UserDetailView: React.FC = () => {
                                 className={cn(
                                   "font-medium",
                                   ["sent", "delivered"].includes(
-                                    status.toLowerCase()
+                                    status.toLowerCase(),
                                   )
                                     ? "text-green-600"
                                     : ["failed", "undelivered"].includes(
-                                        status.toLowerCase()
-                                      )
-                                    ? "text-red-600"
-                                    : "text-amber-600"
+                                          status.toLowerCase(),
+                                        )
+                                      ? "text-red-600"
+                                      : "text-amber-600",
                                 )}
                               >
                                 {status}
@@ -574,7 +577,7 @@ const UserDetailView: React.FC = () => {
                             className="px-3 py-2 text-xs hover:bg-zinc-50 cursor-pointer"
                             onClick={() =>
                               setExpandedEmailId(
-                                isExpanded ? null : mail?.id ?? null
+                                isExpanded ? null : (mail?.id ?? null),
                               )
                             }
                           >
@@ -593,8 +596,8 @@ const UserDetailView: React.FC = () => {
                                     mail?.status?.toLowerCase() === "sent"
                                       ? "text-green-600"
                                       : mail?.status?.toLowerCase() === "failed"
-                                      ? "text-red-600"
-                                      : "text-amber-600"
+                                        ? "text-red-600"
+                                        : "text-amber-600",
                                   )}
                                 >
                                   {mail?.status || "unknown"}
@@ -657,7 +660,7 @@ const UserDetailView: React.FC = () => {
                     key={tag.id}
                     className={cn(
                       "flex items-center gap-2 text-sm cursor-pointer hover:bg-zinc-50 px-1 py-0.5 rounded",
-                      pending && "opacity-50"
+                      pending && "opacity-50",
                     )}
                   >
                     <input
@@ -700,8 +703,8 @@ const UserDetailView: React.FC = () => {
                         status === "current"
                           ? "bg-amber-50 border border-amber-200"
                           : status === "upcoming"
-                          ? "bg-blue-50 border border-blue-200"
-                          : "bg-zinc-50"
+                            ? "bg-blue-50 border border-blue-200"
+                            : "bg-zinc-50",
                       )}
                     >
                       <div className="flex items-center justify-between">
@@ -714,8 +717,8 @@ const UserDetailView: React.FC = () => {
                             status === "current"
                               ? "text-amber-700"
                               : status === "upcoming"
-                              ? "text-blue-700"
-                              : "text-zinc-400"
+                                ? "text-blue-700"
+                                : "text-zinc-400",
                           )}
                         >
                           {status}
@@ -751,7 +754,7 @@ const UserDetailView: React.FC = () => {
                 {[...user.contractEvents]
                   .sort(
                     (a, b) =>
-                      new Date(b.date).getTime() - new Date(a.date).getTime()
+                      new Date(b.date).getTime() - new Date(a.date).getTime(),
                   )
                   .map((event, idx) => (
                     <div
@@ -760,7 +763,7 @@ const UserDetailView: React.FC = () => {
                         "text-xs flex items-center justify-between px-2 py-1 rounded",
                         event.type === "signed"
                           ? "bg-green-50 text-green-700"
-                          : "bg-red-50 text-red-700"
+                          : "bg-red-50 text-red-700",
                       )}
                     >
                       <span className="font-medium capitalize">
@@ -844,7 +847,7 @@ function formatAwayDate(date: string) {
 
 function formatAwayRange(range: UserAwayRangeDto) {
   return `${formatAwayDate(range.startDate)} to ${formatAwayDate(
-    range.endDate
+    range.endDate,
   )}`;
 }
 
@@ -865,8 +868,8 @@ function awayRangeStatus(range: UserAwayRangeDto): AwayRangeStatus {
   return "past";
 }
 
-function notifTimestamp(notif: ActionEventNotifDto) {
-  const source = notif.channel === "email" ? notif.mail : notif.mms;
+function notifTimestamp(notif: ActionEventNotifDto): number {
+  const source = notif.mail ? notif.mail : notif.mms;
   const createdAt = source?.createdAt;
   return createdAt ? new Date(createdAt).getTime() : 0;
 }
@@ -874,9 +877,8 @@ function notifTimestamp(notif: ActionEventNotifDto) {
 function keyForNotif(notif: ActionEventNotifDto) {
   const mailId = notif.mail?.id;
   const mmsId = notif.mms?.id;
-  return `${notif.user.id}-${notif.channel}-${
-    mailId ?? mmsId ?? Math.random()
-  }`;
+  const pushId = notif.pushes?.[0]?.id;
+  return `${notif.user.id}-${mailId ?? mmsId ?? pushId ?? Math.random()}`;
 }
 
 export default UserDetailView;
