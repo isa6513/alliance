@@ -309,7 +309,6 @@ export default function ActionDetailScreen() {
       <KeyboardAwareScrollView
         className="bg-white"
         ref={scrollViewRef}
-        bottomOffset={0}
         keyboardShouldPersistTaps="handled"
         testID="vr-action-detail-ready"
         refreshControl={
