@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  RefreshControl,
   ScrollView,
   TouchableOpacity,
   View,
@@ -49,30 +50,54 @@ export default function ActivityDetailScreen() {
     attachments: [],
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const isEditingRef = useRef(false);
+  isEditingRef.current = isEditing;
 
-  useEffect(() => {
-    if (!activityId) return;
-
-    setLoading(true);
-    actionsGetActivity({ path: { id: parseInt(activityId) } })
-      .then((resp) => {
+  const fetchActivity = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!activityId) return;
+      const silent = options?.silent ?? false;
+      try {
+        if (!silent) {
+          setLoading(true);
+          setError(null);
+        }
+        const resp = await actionsGetActivity({
+          path: { id: parseInt(activityId) },
+        });
         if (resp.data) {
           setActivity(resp.data);
-          setEditContent({
-            body: resp.data.editableContent?.body ?? "",
-            attachments: resp.data.editableContent?.attachments ?? [],
-          });
+          if (!silent || !isEditingRef.current) {
+            setEditContent({
+              body: resp.data.editableContent?.body ?? "",
+              attachments: resp.data.editableContent?.attachments ?? [],
+            });
+          }
         } else {
           setError("Activity not found");
         }
-      })
-      .catch(() => {
-        setError("Failed to load activity");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [activityId]);
+      } catch {
+        if (!silent) setError("Failed to load activity");
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [activityId],
+  );
+
+  useEffect(() => {
+    fetchActivity();
+  }, [fetchActivity]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchActivity({ silent: true });
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchActivity]);
 
   const handleBack = useCallback(() => {
     if (router.canGoBack()) {
@@ -106,7 +131,7 @@ export default function ActivityDetailScreen() {
                 likesCount: response.data!.likesCount,
                 likedByMe: response.data!.likedByMe,
               }
-            : prev
+            : prev,
         );
       }
     } else {
@@ -122,7 +147,7 @@ export default function ActivityDetailScreen() {
                 likesCount: response.data!.likesCount,
                 likedByMe: response.data!.likedByMe,
               }
-            : prev
+            : prev,
         );
       }
     }
@@ -149,7 +174,7 @@ export default function ActivityDetailScreen() {
             return res.data?.key;
           }
           return img;
-        })
+        }),
       );
       const attachmentKeys = uploads.filter((key) => key !== undefined);
 
@@ -218,6 +243,9 @@ export default function ActivityDetailScreen() {
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 40 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         {/* Header */}
         <View className="p-4 pt-12">
@@ -228,7 +256,7 @@ export default function ActivityDetailScreen() {
             className="flex-row items-center gap-x-1 self-start px-2 py-1 rounded border border-zinc-200 mb-6"
           >
             <ChevronLeft size={16} color={colors.text.icon} />
-            <Text className="text-zinc-600 text-sm">Back to action</Text>
+            <Text className="text-zinc-600 text-sm">Back</Text>
           </TouchableOpacity>
 
           {/* Action name */}

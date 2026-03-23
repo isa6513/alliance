@@ -1,7 +1,13 @@
 import { Check } from "lucide-react-native";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
-import { ActivityIndicator, Image, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import AppMarkdownWrapper from "../../../../components/AppMarkdownWrapper";
 import {
   ActionActivityDto,
@@ -28,7 +34,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { colors } from "../../../../lib/style/colors";
 import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
-import { KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR } from "../../../../lib/constants";
 
 type TabId = "task" | "activity" | "description" | "comments";
 
@@ -159,6 +164,8 @@ function ActivityTabContent({ actionId }: ActivityTabContentProps) {
 export default function ActionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<TabId>("task");
+  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
   const reloadTasks = useCallback(() => {
     router.reload();
@@ -167,6 +174,7 @@ export default function ActionDetailScreen() {
   const {
     action,
     loading,
+    refetchAction,
     onCompleteAction,
     onJoinAction,
     onDeclineAction,
@@ -174,6 +182,21 @@ export default function ActionDetailScreen() {
   } = useActionHandlers(parseInt(id), true, reloadTasks);
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
+
+  const onRefresh = useCallback(async () => {
+    if (!action) return;
+    setRefreshing(true);
+    try {
+      await refetchAction({ silent: true });
+      if (activeTab === "activity") {
+        await queryClient.refetchQueries({
+          queryKey: ["actionActivities", action.id],
+        });
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }, [action, refetchAction, queryClient, activeTab]);
 
   if (loading) {
     return (
@@ -286,9 +309,12 @@ export default function ActionDetailScreen() {
       <KeyboardAwareScrollView
         className="bg-white"
         ref={scrollViewRef}
-        bottomOffset={KEYBOARD_BOTTOM_OFFSET_WITH_TAB_BAR}
+        bottomOffset={0}
         keyboardShouldPersistTaps="handled"
         testID="vr-action-detail-ready"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         {action.image && (
           <Image

@@ -4,26 +4,30 @@ import { ActionDto, actionsFindOne } from "../client";
 export function useActionHandlers(
   actionId: number,
   isAuthenticated: boolean,
-  reloadTasks: () => unknown
+  reloadTasks: () => unknown,
 ) {
   const [action, setAction] = useState<ActionDto | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchAction = useCallback(async () => {
-    try {
-      setLoading(true);
-      const actionResponse = await actionsFindOne({
-        path: { id: actionId },
-      });
-      if (actionResponse.data) {
-        setAction(actionResponse.data);
-      } else {
-        setAction(null);
+  const fetchAction = useCallback(
+    async (options?: { silent?: boolean }) => {
+      const silent = options?.silent ?? false;
+      try {
+        if (!silent) setLoading(true);
+        const actionResponse = await actionsFindOne({
+          path: { id: actionId },
+        });
+        if (actionResponse.data) {
+          setAction(actionResponse.data);
+        } else {
+          setAction(null);
+        }
+      } finally {
+        if (!silent) setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [actionId]);
+    },
+    [actionId],
+  );
 
   useEffect(() => {
     fetchAction();
@@ -69,6 +73,7 @@ export function useActionHandlers(
   return {
     action,
     loading,
+    refetchAction: fetchAction,
     onCompleteAction,
     onJoinAction,
     onDeclineAction,
