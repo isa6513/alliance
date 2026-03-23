@@ -48,7 +48,6 @@ If you believe content or behavior on **Alliance** may involve child sexual abus
 Users can report concerns by:
 
 - Contacting us at **[support@worldalliance.org](mailto:support@worldalliance.org)**
-- Visiting **[https://worldalliance.org](https://worldalliance.org)**
 
 Please include as much detail as possible, such as:
 
@@ -83,12 +82,7 @@ We continually review our practices to support child safety on the platform.
 
 ## 7. Scope
 
-These child safety standards apply to all users of **Alliance**, all user-generated content, and all interactions occurring through the app and related services operated by **Alliance Foundation**.
-
-## 8. Contact
-
-**Alliance Foundation**  
-Email: **[support@worldalliance.org](mailto:support@worldalliance.org)**`}
+These child safety standards apply to all users of **Alliance**, all user-generated content, and all interactions occurring through the app and related services operated by **Alliance Foundation**.`}
       />
     </div>
   );
