@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Modal,
-  ScrollView,
   Switch,
   Text,
   TextInput,
@@ -367,7 +366,9 @@ export default function SettingsPage() {
               Allowed notification channels:
             </Text>
             {!(
-              editableUser.emailNotifsEnabled || editableUser.textNotifsEnabled
+              editableUser.emailNotifsEnabled ||
+              editableUser.textNotifsEnabled ||
+              editableUser.pushNotifsEnabled
             ) && (
               <Text className="text-sm text-zinc-500 mb-2">
                 You will not receive any notifications. Please keep a

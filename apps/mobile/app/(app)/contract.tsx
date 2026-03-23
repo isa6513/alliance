@@ -12,7 +12,6 @@ import {
   getLastContractEvent,
   getSuspensionMessage,
   getSignedMessage,
-  PLACEHOLDER_CONTRACT_MARKDOWN,
   CONTRACT_NOTES,
 } from "@alliance/shared/lib/contract";
 import { useAuth } from "../../lib/AuthContext";
@@ -36,10 +35,6 @@ export default function ContractScreen() {
   const { data: latestContract } = useQuery({
     queryKey: ["contractGetCurrent"],
     queryFn: () => contractGetCurrent().then((res) => res.data ?? null),
-    initialData: {
-      id: 1,
-      markdown: PLACEHOLDER_CONTRACT_MARKDOWN,
-    },
   });
 
   const signedContractId = lastContractEvent?.contractId ?? null;
