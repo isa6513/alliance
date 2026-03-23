@@ -11,7 +11,7 @@ const DeleteAccountPage = () => {
       setConfirmed(true);
     } else {
       setError(
-        (resp.error as { message: string }).message ||
+        (resp.error as { message: string })?.message ||
           "Failed to request account deletion",
       );
     }
