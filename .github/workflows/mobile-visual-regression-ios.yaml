@@ -16,8 +16,6 @@ on:
           - production
           - staging
         default: production
-  schedule:
-    - cron: "0 10 * * *"
 
 env:
   AWS_REGION: us-west-2
