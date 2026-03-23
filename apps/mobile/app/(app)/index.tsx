@@ -224,7 +224,7 @@ export default function HomeScreen() {
 
   const renderHomeFeedActivity = useCallback(
     ({ item: activity }: { item: ActionActivityDto }) => (
-      <View className="border-b-3 border-zinc-100">
+      <View className="border-b-3 border-zinc-200">
         <UserActivityCard
           activity={activity}
           handleLike={() => handleHomeFeedLike(activity.id)}
@@ -269,8 +269,8 @@ export default function HomeScreen() {
       return {
         title: "Alliance",
         body: (
-          <View className="gap-y-6">
-            <View className="mx-5 items-center justify-center py-10 px-5 bg-zinc-50 rounded">
+          <View className="border-b-3 border-zinc-200">
+            <View className="bg-white items-center justify-center py-10 px-5">
               <View className="w-8 h-8 rounded-full bg-green items-center justify-center mb-4">
                 <Check size={20} color="#fff" strokeWidth={3} />
               </View>
