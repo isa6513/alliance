@@ -31,7 +31,7 @@ export const colors = {
 
   // Background colors
   background: "#fff",
-  page: "#fcfcfc",
+  page: "#f8f8f8",
 
   // UI colors
   border: "#d6d3d1",
