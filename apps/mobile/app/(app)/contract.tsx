@@ -23,6 +23,7 @@ import { suspendContractConfirmation } from "@alliance/shared/lib/copy";
 import AppMarkdownWrapper from "../../components/AppMarkdownWrapper";
 import { useQuery } from "@tanstack/react-query";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import { colors } from "../../lib/style/colors";
 
 export default function ContractScreen() {
   const { user } = useAuth();
@@ -139,7 +140,7 @@ export default function ContractScreen() {
 
   if (!user) {
     return (
-      <View className="flex-1 bg-white p-4">
+      <View className="flex-1 p-4" style={{ backgroundColor: colors.grey[0] }}>
         <Text className="text-center text-zinc-500">Not found</Text>
       </View>
     );
@@ -149,20 +150,10 @@ export default function ContractScreen() {
     "border border-zinc-200 rounded bg-white px-3 py-3 text-base flex-1";
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1" style={{ backgroundColor: colors.grey[0] }}>
       <SimplePageTitle title="Membership contract" />
       <KeyboardAwareScrollView testID="vr-contract-ready">
         <View className="p-4 gap-y-4 pt-0">
-          <Text className="text-zinc-900">Notes:</Text>
-          <View className="mb-4">
-            {CONTRACT_NOTES.map((note: string, index: number) => (
-              <View key={index} className="flex-row pl-2">
-                <Text className="">• </Text>
-                <Text className="flex-1">{note}</Text>
-              </View>
-            ))}
-          </View>
-
           {/* Suspended Warning */}
           {lastContractEvent?.type === "suspended" && (
             <Card cardStyle={CardStyle.Red}>
@@ -177,10 +168,7 @@ export default function ContractScreen() {
 
           {signedContract && signedContractId !== latestContract?.id && (
             <View className="gap-y-2">
-              <Card
-                cardStyle={CardStyle.Outline}
-                className="border-zinc-200 border"
-              >
+              <Card cardStyle={CardStyle.White}>
                 <View className="gap-y-2">
                   <AppMarkdownWrapper>
                     {signedContract.markdown}
@@ -198,10 +186,7 @@ export default function ContractScreen() {
                   An updated contract is available.
                 </Text>
               )}
-              <Card
-                cardStyle={CardStyle.Outline}
-                className="border-zinc-200 border"
-              >
+              <Card cardStyle={CardStyle.White}>
                 <View className="gap-y-2">
                   <AppMarkdownWrapper>
                     {latestContract.markdown}
@@ -243,6 +228,19 @@ export default function ContractScreen() {
               title="Suspend contract"
             />
           )}
+
+          {/* Notes */}
+          <View>
+            <Text className="text-zinc-900">Notes:</Text>
+            <View>
+              {CONTRACT_NOTES.map((note: string, index: number) => (
+                <View key={index} className="flex-row pl-2">
+                  <Text className="">• </Text>
+                  <Text className="flex-1">{note}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
         </View>
       </KeyboardAwareScrollView>
     </View>

@@ -17,6 +17,14 @@ export const colors = {
     disabled: "#d4d4d8",
   },
 
+  // Greys
+  grey: {
+    0: "#f8f8f8",
+    1: "#f0f0f0",
+    2: "#e8e8e8",
+    3: "#dfdfdf",
+  },
+
   switch: {
     trackOff: "#e4e4e7",
   },

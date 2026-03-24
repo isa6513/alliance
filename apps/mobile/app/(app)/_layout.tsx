@@ -14,6 +14,12 @@ function AppContent() {
   const insets = useSafeAreaInsets();
   const { isPermanent } = useAppDrawer();
 
+  /** Status bar / notch band behind Stack padding — default white; override per route below. */
+  const notchContentStyle = (backgroundColor: string) => ({
+    paddingTop: insets.top,
+    backgroundColor,
+  });
+
   return (
     <View style={{ flex: 1, flexDirection: "row" }}>
       {isPermanent && (
@@ -31,15 +37,17 @@ function AppContent() {
         <Stack
           screenOptions={({ navigation }) => ({
             headerShown: false,
-            contentStyle: {
-              paddingTop: insets.top,
-              backgroundColor: "white",
-            },
+            contentStyle: notchContentStyle(colors.white),
             ...(navigation.canGoBack()
               ? { animation: "default" as const, gestureEnabled: true }
               : { animation: "none" as const, gestureEnabled: false }),
           })}
-        />
+        >
+          <Stack.Screen
+            name="contract"
+            options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
+          />
+        </Stack>
         <TabBar />
       </View>
       {!isPermanent && <AnimatedSidebar />}
