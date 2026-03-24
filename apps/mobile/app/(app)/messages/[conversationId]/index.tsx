@@ -328,8 +328,9 @@ export default function ConversationScreen() {
               contentContainerStyle={{
                 paddingVertical: 12,
                 paddingBottom: 16,
+                flexGrow: 1,
+                justifyContent: "flex-end",
               }}
-              alignItemsAtEnd
               maintainScrollAtEnd
               maintainScrollAtEndThreshold={0.3}
               ListEmptyComponent={
