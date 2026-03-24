@@ -29,10 +29,12 @@ interface MessageComposerProps {
   replyingTo?: MessageDto | null;
   clearReplyingTo?: () => void;
   placeholder?: string;
+  inputRef: React.RefObject<TextInput | null>;
 }
 
 export default function MessageComposer({
   message,
+  inputRef,
   setMessage,
   attachments,
   setAttachments,
@@ -139,6 +141,7 @@ export default function MessageComposer({
         </TouchableOpacity>
         <View className="flex-1 border border-zinc-200 rounded bg-zinc-50 px-3 py-2 min-h-10 justify-center">
           <TextInput
+            ref={inputRef}
             value={message}
             onChangeText={setMessage}
             placeholder={placeholder}

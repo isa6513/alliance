@@ -149,7 +149,7 @@ export default function MessageBubble({
                   <AppMarkdownWrapper>{message.body}</AppMarkdownWrapper>
                 ) : null}
                 {attachments.length > 0 && (
-                  <View className="flex-row flex-wrap gap-2 mt-2">
+                  <View className="flex-row flex-wrap gap-2 mb-2">
                     {attachments.map((attachment, idx) => {
                       const uri = resolveAttachmentUri(attachment);
                       return (

@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import {
@@ -245,6 +250,16 @@ export default function ConversationScreen() {
     });
   }, [selectedConvo, handleConversationUpdated]);
 
+  const inputRef = useRef<TextInput | null>(null);
+
+  const handleReply = useCallback(
+    (messageId: string) => {
+      setReplyingTo(messageId);
+      inputRef.current?.focus();
+    },
+    [handleFocusReply],
+  );
+
   if (loading && !selectedConvo) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
@@ -357,7 +372,7 @@ export default function ConversationScreen() {
                     isFirstInGroup={isFirstInGroup}
                     isFirstInReplyGroup={isFirstInReplyGroup}
                     isFocused={focusedMessageId === item.id}
-                    onReply={(messageId) => setReplyingTo(messageId)}
+                    onReply={handleReply}
                     onFocusReply={handleFocusReply}
                   />
                 );
@@ -392,6 +407,7 @@ export default function ConversationScreen() {
       </KeyboardAvoidingView>
       <MessageComposer
         message={message}
+        inputRef={inputRef}
         setMessage={setMessage}
         attachments={attachments}
         setAttachments={setAttachments}
