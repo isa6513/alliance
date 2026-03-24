@@ -1,4 +1,9 @@
-import { View, ActivityIndicator, useWindowDimensions } from "react-native";
+import {
+  View,
+  ActivityIndicator,
+  Platform,
+  useWindowDimensions,
+} from "react-native";
 import { Redirect, Stack } from "expo-router";
 
 import { useAuth } from "../../lib/AuthContext";
@@ -34,9 +39,11 @@ function AppContent() {
     const stackState = appRoute?.state;
     return (stackState?.routes?.length ?? 0) > 1;
   });
+  // Android has native back button
+  const canOpenDrawerWithSwipe = Platform.OS === "android" || !canGoBack;
 
   const openDrawerGesture = Gesture.Pan()
-    .enabled(!isPermanent && !isOpen && !canGoBack)
+    .enabled(!isPermanent && !isOpen && canOpenDrawerWithSwipe)
     .activeOffsetX(20)
     .failOffsetX(-10)
     .failOffsetY([-15, 15])
