@@ -25,10 +25,9 @@ const LoginScreen = () => {
       await login(email, password);
       router.replace("/");
     } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Login failed. Please try again.";
+      const errorMessage = (error as any)?.message
+        ? `${(error as any).message}`
+        : "Login failed. Please try again.";
       Alert.alert("Login Failed", errorMessage);
     } finally {
       setIsSubmitting(false);
