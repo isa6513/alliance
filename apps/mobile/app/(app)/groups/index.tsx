@@ -3,6 +3,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  FlatList,
 } from "react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { router } from "expo-router";
@@ -232,11 +233,11 @@ function GroupActivityTab({
   }
 
   return (
-    <LegendList
+    <FlatList
       data={activities}
       keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
-        <View className="border-b border-zinc-200">
+        <View className="border-t border-zinc-200" key={item.id}>
           <UserActivityCard
             activity={item}
             handleLike={() => handleLikeActivity(item.id)}
@@ -250,8 +251,6 @@ function GroupActivityTab({
           <Text className="text-zinc-500">No activities yet</Text>
         </View>
       }
-      recycleItems
-      contentContainerStyle={{ paddingBottom: 40, backgroundColor: "white" }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
