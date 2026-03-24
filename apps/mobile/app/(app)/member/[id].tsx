@@ -665,8 +665,8 @@ export default function UserProfileScreen() {
                   {profile.displayName}
                 </Text>
                 {profile.staff && (
-                  <View className={cn("bg-amber-600", badgeStyles)}>
-                    <Text className="text-white text-xs">Staff</Text>
+                  <View className={cn("bg-staff", badgeStyles)}>
+                    <Text className="text-white text-sm">Staff</Text>
                   </View>
                 )}
                 {!profile.staff && profile.isCommunityLeader && (

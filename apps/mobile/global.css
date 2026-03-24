@@ -8,6 +8,7 @@
   --font-serif-semibold: "Libre Baskerville SemiBold";
   --font-serif-bold: "Libre Baskerville Bold";
   --color-green: rgb(98, 161, 36);
+  --color-staff: #399ee6;
   --font-berlingske: "Berlingske";
 
   /* Strip lineHeight from font-size utilities — RN handles defaults well,
