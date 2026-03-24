@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "498109422267",
+    "project_id": "alliance-4bc01",
+    "storage_bucket": "alliance-4bc01.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498109422267:android:ec1509b1496133fc6da79e",
+        "android_client_info": {
+          "package_name": "com.alliance.alliancemobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCDcCg-CHvvA3sOG_SH2NnOzVDxmX0bzk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498109422267:android:32df719b2939a9d56da79e",
+        "android_client_info": {
+          "package_name": "com.alliance.alliancemobile.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCDcCg-CHvvA3sOG_SH2NnOzVDxmX0bzk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

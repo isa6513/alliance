@@ -13,7 +13,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: IS_DEV
-        ? "com.alliancefoundation.alliancemobiledev"
+        ? "com.alliancefoundation.alliancemobile.dev"
         : "com.alliancefoundation.alliancemobile",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
@@ -31,7 +31,9 @@ export default {
       package: IS_DEV
         ? "com.alliance.alliancemobile.dev"
         : "com.alliance.alliancemobile",
-      googleServicesFile: "./google-services.json",
+      googleServicesFile: IS_DEV
+        ? "./google-services-dev.json"
+        : "./google-services.json",
       versionCode: 5,
     },
     web: {
