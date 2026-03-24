@@ -1147,7 +1147,7 @@ const FormRenderer = ({
             <TouchableOpacity
               activeOpacity={0.8}
               className={cn(
-                "border rounded-lg px-3 py-3",
+                "border rounded px-3 py-3",
                 outOfTimeSelected
                   ? "border-blue-600 bg-blue-100"
                   : "border-zinc-200",
@@ -1166,7 +1166,7 @@ const FormRenderer = ({
             <TouchableOpacity
               activeOpacity={0.8}
               className={cn(
-                "border rounded-lg px-3 py-3",
+                "border rounded px-3 py-3",
                 otherReasonSelected
                   ? "border-blue-600 bg-blue-100"
                   : "border-zinc-200",
@@ -1189,10 +1189,10 @@ const FormRenderer = ({
               placeholderTextColor="#9ca3af"
               multiline
               textAlignVertical="top"
-              className="border border-zinc-200 rounded-lg px-3 py-2 h-24 text-base text-zinc-900 mb-3"
+              className="border border-zinc-200 rounded px-3 py-2 h-24 text-base text-zinc-900 mb-3"
             />
           )}
-          <View className="w-1/2 self-center">
+          <View className="w-full self-center">
             <Button
               onPress={handleAbandon}
               color={ButtonColor.Black}
