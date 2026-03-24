@@ -104,6 +104,8 @@ export default function MessageRecipientSelect({
             editable={!inputDisabled}
             className="text-base text-zinc-800 min-w-32 py-2"
             placeholderTextColor="#9ca3af"
+            autoFocus
+            autoCorrect={false}
           />
         )}
       </View>
