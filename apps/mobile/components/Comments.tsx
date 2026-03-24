@@ -388,7 +388,7 @@ export default function Comments({
   initialComments,
   highlightedReplyId,
   scrollViewRef,
-  repliesAsCards = true,
+  repliesAsCards = false,
 }: CommentsProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
