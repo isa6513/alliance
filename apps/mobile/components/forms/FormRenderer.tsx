@@ -1070,8 +1070,8 @@ const FormRenderer = ({
               color={ButtonColor.Black}
               size={ButtonSize.Large}
               disabled={
+                submitting ||
                 !(
-                  submitting ||
                   outOfTimeSelected ||
                   (otherReasonSelected && customReason.trim().length > 0)
                 )
