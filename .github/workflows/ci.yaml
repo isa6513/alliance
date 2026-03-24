@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, production]
+
+jobs:
+  test-backend-e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Backend Dependencies
+        run: bun install --frozen-lockfile
+        working-directory: ./server
+
+      - name: Run E2E Tests
+        run: bun run test:e2e
+        working-directory: ./server
+
+  test-backend-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Backend Dependencies
+        run: bun install --frozen-lockfile
+        working-directory: ./server
+
+      - name: Typecheck
+        run: bun typecheck
+        working-directory: ./server
+
+      - name: Run Unit Tests
+        run: bun test
+        working-directory: ./server
+
+  migrations-drift-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: cd server && bun install --frozen-lockfile
+
+      - run: PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+        working-directory: ./server
+
+      - run: |
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
+          echo "DB_PORT=5432" >> $GITHUB_ENV
+          echo "DB_USERNAME=postgres" >> $GITHUB_ENV
+          echo "DB_PASSWORD=postgres" >> $GITHUB_ENV
+          echo "DB_NAME=postgres" >> $GITHUB_ENV
+          echo "NODE_ENV=test" >> $GITHUB_ENV
+
+      - name: Run migrations on blank DB
+        run: bunx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts migration:run
+        working-directory: ./server
+
+      - name: Schema drift check
+        run: |
+          set -e
+
+          OUT="$(bunx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts schema:log || true)"
+          echo "$OUT"
+
+          if echo "$OUT" | grep -Eiq '^\s*(ALTER|CREATE|DROP|COMMENT|RENAME|TRUNCATE|INSERT INTO|UPDATE |DELETE FROM)\b'; then
+            echo "Schema drift detected (entities != schema after migrations)."
+            exit 1
+          else
+            echo "No drift"
+          fi
+        working-directory: ./server
+
+  typecheck-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate Yarn 4.x
+        run: corepack prepare yarn@4.9.1 --activate
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "yarn"
+
+      - name: Install Dependencies
+        run: corepack yarn install --immutable
+
+      - name: Generate React Router Types
+        run: yarn react-router typegen
+        working-directory: ./apps/frontend
+
+      - name: Typecheck
+        run: yarn tsc
+        working-directory: ./apps/frontend
