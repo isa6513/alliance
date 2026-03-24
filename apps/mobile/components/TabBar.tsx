@@ -150,7 +150,7 @@ export default function TabBar() {
               {tab.label}
             </Text>
             {taskBadgeCount > 0 && (
-              <View className="absolute top-2 -right-1 bg-red-500 rounded-full min-w-5 h-5 px-1 items-center justify-center">
+              <View className="absolute top-2 -right-2.5 bg-red-500 rounded-full min-w-5 h-5 px-1 items-center justify-center">
                 <Text className="text-[10px] text-white font-semibold">
                   {taskBadgeCount}
                 </Text>
