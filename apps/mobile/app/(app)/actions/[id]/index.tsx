@@ -1,5 +1,5 @@
 import { Check } from "lucide-react-native";
-import { Stack, router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -35,6 +35,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { colors } from "../../../../lib/style/colors";
 import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
+import BackButton from "../../../../components/system/BackButton";
 
 type TabId = "task" | "activity" | "description" | "comments";
 
@@ -328,8 +329,11 @@ export default function ActionDetailScreen() {
             resizeMode="cover"
           />
         )}
-        <View className="p-5 pt-15">
-          <Text className="text-[24px] font-bold text-zinc-900 mb-2 font-serif-bold">
+        <View className="p-5">
+          <View className="self-start mb-4">
+            <BackButton fallbackRoute="/actions" bordered />
+          </View>
+          <Text className="text-2xl font-semibold text-zinc-900 mb-2 font-serif">
             {action.name}
           </Text>
           {action.shortDescription && (

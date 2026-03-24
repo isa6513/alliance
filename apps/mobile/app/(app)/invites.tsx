@@ -254,7 +254,7 @@ export default function InvitesScreen() {
     <View className="flex-1" style={{ backgroundColor: colors.grey[0] }}>
       <SimplePageTitle title="Invites">
         {acceptedInvites.length > 0 && (
-          <Text className="text-sm text-zinc-500 py-4">
+          <Text className="text-sm text-zinc-500 py-2 bg-white px-3 rounded-md">
             Accepted: {acceptedInvites.length}
           </Text>
         )}
