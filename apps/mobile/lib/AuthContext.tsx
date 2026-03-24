@@ -10,7 +10,6 @@ import {
   authLogin,
   authLogout,
   authMe,
-  authRefreshTokens,
   UserDto,
 } from "../../../shared/client";
 import { useRouter } from "expo-router";
@@ -20,6 +19,7 @@ import {
   getVisualTestAutoLoginCredentials,
   isVisualTestMode,
 } from "./visualTest";
+import { usePostHog } from "posthog-react-native";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<
       await tokenStore.setItem(ACCESS_TOKEN_KEY, access);
       await tokenStore.setItem(REFRESH_TOKEN_KEY, refresh);
     },
-    [tokenStore]
+    [tokenStore],
   );
 
   const clearTokens = useCallback(async () => {
@@ -67,10 +67,6 @@ export const AuthProvider: React.FC<
   const getAccessToken = useCallback(async () => {
     return await tokenStore.getItem(ACCESS_TOKEN_KEY);
   }, [tokenStore]);
-  const getRefreshToken = useCallback(async () => {
-    return await tokenStore.getItem(REFRESH_TOKEN_KEY);
-  }, [tokenStore]);
-
   const logout = useCallback(async () => {
     authLogout();
     clearTokens();
@@ -80,32 +76,7 @@ export const AuthProvider: React.FC<
     }
   }, [router, clearTokens]);
 
-  const refreshAccessToken = useCallback(async () => {
-    let accessToken = await getAccessToken();
-    const refreshToken = await getRefreshToken();
-    if (refreshToken) {
-      try {
-        client.setConfig({
-          baseUrl: getApiUrl(),
-          headers: {
-            Authorization: `Bearer ${refreshToken}`,
-          },
-        });
-        const response = await authRefreshTokens();
-        if (response.data) {
-          await saveTokens(response.data.access_token, refreshToken);
-          accessToken = response.data.access_token;
-        }
-      } finally {
-        client.setConfig({
-          baseUrl: getApiUrl(),
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-      }
-    }
-  }, [getRefreshToken, getAccessToken, saveTokens]);
+  const posthog = usePostHog();
 
   useEffect(() => {
     (async () => {
@@ -119,23 +90,18 @@ export const AuthProvider: React.FC<
             },
           });
         }
+        // If the access token is expired, the fetch wrapper in _layout.tsx
+        // will intercept the 401 and transparently refresh before retrying.
         const profile = (await authMe()).data;
         setUser(profile?.user);
       } catch {
-        try {
-          console.log("attempting silent refresh");
-          await refreshAccessToken();
-
-          const profile = (await authMe()).data;
-          setUser(profile?.user);
-        } catch {
-          logout();
-        }
+        posthog?.capture("auth_failed_to_refresh");
+        logout();
       } finally {
         setIsLoading(false);
       }
     })();
-  }, [logout, getAccessToken, getRefreshToken, refreshAccessToken]);
+  }, [logout, getAccessToken, posthog]);
 
   useEffect(() => {
     (async () => {
@@ -170,7 +136,7 @@ export const AuthProvider: React.FC<
         if (response.data.access_token && response.data.refresh_token) {
           await saveTokens(
             response.data.access_token,
-            response.data.refresh_token
+            response.data.refresh_token,
           );
         } else {
           console.error("didn't recieve tokens: something went wrong");
@@ -181,7 +147,14 @@ export const AuthProvider: React.FC<
           throw new Error("Failed to fetch user profile");
         }
 
-        setUser(userProfile.data?.user);
+        const user = userProfile.data?.user;
+        setUser(user);
+        if (user) {
+          posthog?.identify(user.id.toString(), {
+            email: user.email,
+            name: user.name,
+          });
+        }
 
         if (!isVisualTestMode) {
           router.replace("/");
@@ -192,7 +165,7 @@ export const AuthProvider: React.FC<
         setIsLoading(false);
       }
     },
-    [router, saveTokens]
+    [router, saveTokens, posthog],
   );
 
   useEffect(() => {
@@ -203,13 +176,13 @@ export const AuthProvider: React.FC<
     const credentials = visualTestCredentials
       ? visualTestCredentials
       : devAutoLoginEnabled &&
-        process.env.EXPO_PUBLIC_DEV_EMAIL &&
-        process.env.EXPO_PUBLIC_DEV_PASSWORD
-      ? {
-          email: process.env.EXPO_PUBLIC_DEV_EMAIL,
-          password: process.env.EXPO_PUBLIC_DEV_PASSWORD,
-        }
-      : null;
+          process.env.EXPO_PUBLIC_DEV_EMAIL &&
+          process.env.EXPO_PUBLIC_DEV_PASSWORD
+        ? {
+            email: process.env.EXPO_PUBLIC_DEV_EMAIL,
+            password: process.env.EXPO_PUBLIC_DEV_PASSWORD,
+          }
+        : null;
 
     if (!credentials || isLoading || user) {
       return;

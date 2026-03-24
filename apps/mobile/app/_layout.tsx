@@ -1,7 +1,7 @@
 import { Slot } from "expo-router";
 import { AuthProvider } from "../lib/AuthContext";
 import { Platform } from "react-native";
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { client } from "@alliance/shared/client/client.gen";
 import WebTokenStore from "../lib/ExpoWebTokenStore";
 import SecureStorage from "../lib/SecureStorage";
@@ -12,16 +12,10 @@ import { PostHogOptions, PostHogProvider } from "posthog-react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import Constants from "expo-constants";
-import * as SecureStore from "expo-secure-store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { isVisualTestMode } from "../lib/visualTest";
-import {
-  userRegisterDevice,
-  authRefreshTokens,
-} from "@alliance/shared/client";
+import { authRefreshTokens } from "@alliance/shared/client";
 import PushNotificationResponseHandler from "../components/PushNotificationResponseHandler";
+import DeviceRegistration from "../components/DeviceRegistration";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const queryClient = new QueryClient({
@@ -44,59 +38,9 @@ Notifications.setNotificationHandler({
   }),
 });
 
-function handleRegistrationError(errorMessage: string) {
-  alert(errorMessage);
-  throw new Error(errorMessage);
-}
-
-async function registerForPushNotificationsAsync() {
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-    });
-  }
-
-  if (Device.isDevice && Platform.OS !== "web") {
-    console.log("registering for push notifications");
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== "granted") {
-      handleRegistrationError(
-        "Permission not granted to get push token for push notification!"
-      );
-      return;
-    }
-    const projectId =
-      Constants?.expoConfig?.extra?.eas?.projectId ??
-      Constants?.easConfig?.projectId;
-    if (!projectId) {
-      handleRegistrationError("Project ID not found");
-    }
-    try {
-      const pushTokenString = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId,
-        })
-      ).data;
-      console.log("push token: ", pushTokenString);
-      return pushTokenString;
-    } catch (e: unknown) {
-      handleRegistrationError(`${e}`);
-    }
-  }
-}
-
 const options: Partial<PostHogOptions> = {
-  host: process.env.EXPO_PUBLIC_POSTHOG_HOST,
   enableSessionReplay: true,
+  captureAppLifecycleEvents: true,
   sessionReplayConfig: {
     maskAllTextInputs: false,
   },
@@ -135,6 +79,12 @@ export default function RootLayout() {
 
       if (refreshRes.response.ok && refreshRes.data?.access_token) {
         await tokenStore.setItem("accessToken", refreshRes.data.access_token);
+        if (refreshRes.data.refresh_token) {
+          await tokenStore.setItem(
+            "refreshToken",
+            refreshRes.data.refresh_token,
+          );
+        }
         client.setConfig({
           baseUrl: getApiUrl(),
           headers: { Authorization: `Bearer ${refreshRes.data.access_token}` },
@@ -142,7 +92,10 @@ export default function RootLayout() {
           throwOnError: true,
         });
         const retryHeaders = new Headers(retryReq.headers);
-        retryHeaders.set("Authorization", `Bearer ${refreshRes.data.access_token}`);
+        retryHeaders.set(
+          "Authorization",
+          `Bearer ${refreshRes.data.access_token}`,
+        );
         return originalFetch(new Request(retryReq, { headers: retryHeaders }));
       }
 
@@ -163,45 +116,12 @@ export default function RootLayout() {
     return SecureStorage;
   }, []);
 
-  const registerToken = useCallback(async (token?: string) => {
-    if (!token) {
-      return;
-    }
-    const deviceId = await SecureStore.getItem("deviceId");
-    // const registeredToken = await SecureStore.getItem("registeredToken");
-    // if (registeredToken === token) {
-    //   return;
-    // }
-    console.log("registering token: ", token);
-    const resp = await userRegisterDevice({
-      body: {
-        deviceType: Device.modelId ?? Device.modelName,
-        expoPushToken: token,
-        deviceId: deviceId ?? undefined,
-      },
-    });
-    if (resp.data) {
-      const id = resp.data.id;
-      await SecureStore.setItemAsync("deviceId", id);
-      await SecureStore.setItemAsync("registeredToken", token);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isVisualTestMode) {
-      return;
-    }
-
-    registerForPushNotificationsAsync()
-      .then((token) => registerToken(token))
-      .catch((error: any) => console.error(error));
-  }, [registerToken]);
-
   if (Platform.OS === "web") {
     return (
       <QueryClientProvider client={queryClient}>
         <KeyboardProvider>
           <AuthProvider tokenStore={tokenStore}>
+            <DeviceRegistration />
             <PushNotificationResponseHandler queryClient={queryClient} />
             <Slot />
           </AuthProvider>
@@ -215,8 +135,12 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <KeyboardProvider>
-            <PostHogProvider apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt" options={options}>
+            <PostHogProvider
+              apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt"
+              options={options}
+            >
               <AuthProvider tokenStore={tokenStore}>
+                <DeviceRegistration />
                 <PushNotificationResponseHandler queryClient={queryClient} />
                 <Slot />
               </AuthProvider>

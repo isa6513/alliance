@@ -22,8 +22,9 @@ export type SignUpDto = {
     referralCode?: string;
 };
 
-export type AccessToken = {
+export type AuthTokens = {
     access_token: string;
+    refresh_token: string;
 };
 
 export type NotificationPreference = 'all' | 'digest' | 'none';
@@ -3002,7 +3003,7 @@ export type AuthRefreshTokensData = {
 };
 
 export type AuthRefreshTokensResponses = {
-    200: AccessToken;
+    200: AuthTokens;
 };
 
 export type AuthRefreshTokensResponse = AuthRefreshTokensResponses[keyof AuthRefreshTokensResponses];

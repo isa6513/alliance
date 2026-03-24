@@ -175,15 +175,18 @@ export class AuthService {
     return this.jwtService.signAsync(payload, { expiresIn: '15m' });
   }
 
-  async refreshAccessToken(
+  async refreshTokens(
     userId: number,
     isImpersonation = false,
-  ): Promise<string> {
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const user = await this.usersService.findOne(userId);
     if (!user) {
       throw new UnauthorizedException('Invalid user id');
     }
-    return await this.generateAccessToken(user, isImpersonation);
+    return {
+      access_token: await this.generateAccessToken(user, isImpersonation),
+      refresh_token: await this.generateRefreshToken(user, isImpersonation),
+    };
   }
 
   async getProfile(email: string): Promise<User> {

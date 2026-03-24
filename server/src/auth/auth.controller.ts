@@ -23,7 +23,7 @@ import {
 import type { Response } from 'express';
 import { UserDto } from '../user/dto/user.dto';
 import { AuthService } from './auth.service';
-import { AccessToken, AuthMeResponseDto } from './dto/authtokens.dto';
+import { AuthTokens, AuthMeResponseDto } from './dto/authtokens.dto';
 import ForgotPasswordDto, { ResetPasswordDto } from './dto/forgotpassword.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto, SignInResponseDto, type TokenMode } from './dto/signin.dto';
@@ -116,7 +116,7 @@ export class AuthController {
 
   @Post('refresh')
   @UseGuards(RefreshTokenGuard)
-  @ApiOkResponse({ type: AccessToken })
+  @ApiOkResponse({ type: AuthTokens })
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
     @Request() req: JwtRequest,
@@ -125,10 +125,8 @@ export class AuthController {
   ) {
     const userId: number = req.user.sub;
     const isImpersonation = req.user.isImpersonation ?? false;
-    const access_token = await this.authService.refreshAccessToken(
-      userId,
-      isImpersonation,
-    );
+    const { access_token, refresh_token } =
+      await this.authService.refreshTokens(userId, isImpersonation);
     const mode: TokenMode =
       query.mode === 'header'
         ? 'header'
@@ -136,10 +134,10 @@ export class AuthController {
           ? 'cookie'
           : 'header';
     if (mode === 'cookie') {
-      this.authService.setAuthCookies(res, access_token);
+      this.authService.setAuthCookies(res, access_token, refresh_token);
       return;
     }
-    return { access_token };
+    return { access_token, refresh_token };
   }
 
   @Get('/me')
