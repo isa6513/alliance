@@ -10,6 +10,7 @@ import {
   authLogin,
   authLogout,
   authMe,
+  authRefreshTokens,
   UserDto,
 } from "../../../shared/client";
 import { useRouter } from "expo-router";
@@ -27,7 +28,7 @@ interface AuthContextType {
   canConnectToServer: boolean;
   user: UserDto | undefined;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -68,9 +69,43 @@ export const AuthProvider: React.FC<
   const getAccessToken = useCallback(async () => {
     return await tokenStore.getItem(ACCESS_TOKEN_KEY);
   }, [tokenStore]);
+
+  const applyAccessToken = useCallback((accessToken: string) => {
+    client.setConfig({
+      baseUrl: getApiUrl(),
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  }, []);
+
+  const refreshSession = useCallback(async () => {
+    const refreshToken = await tokenStore.getItem(REFRESH_TOKEN_KEY);
+    if (!refreshToken) {
+      return null;
+    }
+
+    const refreshResponse = await authRefreshTokens({
+      query: { mode: "header" },
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    });
+
+    if (!refreshResponse.response.ok || !refreshResponse.data?.access_token) {
+      return null;
+    }
+
+    const nextRefreshToken = refreshResponse.data.refresh_token ?? refreshToken;
+    await saveTokens(refreshResponse.data.access_token, nextRefreshToken);
+    applyAccessToken(refreshResponse.data.access_token);
+
+    return refreshResponse.data.access_token;
+  }, [applyAccessToken, saveTokens, tokenStore]);
+
   const logout = useCallback(async () => {
-    authLogout();
-    clearTokens();
+    await authLogout();
+    await clearTokens();
     setUser(undefined);
     if (!isVisualTestMode) {
       router.replace("/auth/login");
@@ -84,25 +119,29 @@ export const AuthProvider: React.FC<
       try {
         const accessToken = await getAccessToken();
         if (accessToken) {
-          client.setConfig({
-            baseUrl: getApiUrl(),
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
+          applyAccessToken(accessToken);
         }
-        // If the access token is expired, the fetch wrapper in _layout.tsx
-        // will intercept the 401 and transparently refresh before retrying.
-        const profile = (await authMe()).data;
+
+        let profile = (await authMe()).data;
+        if (!profile && !accessToken) {
+          await refreshSession();
+          profile = (await authMe()).data;
+        }
         setUser(profile?.user);
       } catch {
-        posthog?.capture("auth_failed_to_refresh");
-        logout();
+        try {
+          await refreshSession();
+          const profile = (await authMe()).data;
+          setUser(profile?.user);
+        } catch {
+          posthog?.capture("auth_failed_to_refresh");
+          await logout();
+        }
       } finally {
         setIsLoading(false);
       }
     })();
-  }, [logout, getAccessToken, posthog]);
+  }, [applyAccessToken, getAccessToken, logout, posthog, refreshSession]);
 
   useEffect(() => {
     let cancelled = false;
@@ -135,14 +174,8 @@ export const AuthProvider: React.FC<
           throw new Error("Login failed");
         }
 
-        client.setConfig({
-          baseUrl: getApiUrl(),
-          headers: {
-            Authorization: `Bearer ${response.data.access_token}`,
-          },
-        });
-
         if (response.data.access_token && response.data.refresh_token) {
+          applyAccessToken(response.data.access_token);
           await saveTokens(
             response.data.access_token,
             response.data.refresh_token,
@@ -174,7 +207,7 @@ export const AuthProvider: React.FC<
         setIsLoading(false);
       }
     },
-    [router, saveTokens, posthog],
+    [applyAccessToken, router, saveTokens, posthog],
   );
 
   useEffect(() => {
