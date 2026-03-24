@@ -63,6 +63,18 @@ const PeoplePage: React.FC = () => {
       name: "Beth Barnes",
       description: "Founder and CEO of METR",
     },
+    {
+      name: "Tom Luben",
+      description: "Former US EPA ORD Scientist",
+    },
+    {
+      name: "Ben Kalina",
+      description: "Filmmaker and Professor",
+    },
+    {
+      name: "Gernot Wagner",
+      description: "Climate economist, Columbia Business School",
+    },
   ];
 
   useEffect(() => {
