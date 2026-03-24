@@ -45,8 +45,6 @@ export default function Checkbox({
       ? "border-green-600"
       : "border-zinc-400";
 
-  console.log("label", label);
-
   return (
     <TouchableOpacity
       activeOpacity={0.7}

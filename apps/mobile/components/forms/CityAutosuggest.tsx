@@ -62,7 +62,10 @@ export default function CityAutosuggestMobile({
     <View>
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => setOpen(true)}
+        onPress={() => {
+          setQuery(query);
+          setOpen(true);
+        }}
         disabled={disabled}
         className={cn(
           "w-full rounded-lg border border-zinc-200 px-3 py-3 bg-white",
@@ -71,15 +74,10 @@ export default function CityAutosuggestMobile({
       >
         <TextInput
           value={query}
-          onChangeText={(text) => setQuery(text)}
-          onFocus={() => {
-            onFocus?.();
-            setOpen(true);
-          }}
-          onBlur={commitCustomValue}
           placeholder={placeholder}
           placeholderTextColor="#9ca3af"
-          editable={!disabled}
+          editable={false}
+          pointerEvents="none"
           className="text-base text-zinc-900"
         />
       </TouchableOpacity>
@@ -94,7 +92,7 @@ export default function CityAutosuggestMobile({
           autoFocus
         />
         <ScrollView keyboardShouldPersistTaps="handled">
-          {results.length === 0 ? (
+          {results.length === 0 && query.trim().length > 0 ? (
             <Text className="text-center text-zinc-500 py-4">No matches</Text>
           ) : (
             results.map((city, idx) => {

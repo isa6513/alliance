@@ -55,15 +55,17 @@ export async function fetchApproximateGeo(): Promise<CityGeo | null> {
 
 export async function fetchCitySuggestions(
   name: string,
-  opts: { minLength?: number; geo?: CityGeo; signal?: AbortSignal } = {}
+  opts: { minLength?: number; geo?: CityGeo; signal?: AbortSignal } = {},
 ): Promise<CitySearchDto[]> {
   const minLength = opts.minLength ?? 1;
   if (name.trim().length < minLength) {
     return [];
   }
+  console.log("name", name);
+  console.log(name.split(",")[0]);
   const res = await geoSearchCity({
     query: {
-      query: name.trim(),
+      query: name.includes(",") ? name.split(",")[0].trim() : name.trim(),
       latitude: opts.geo?.latitude,
       longitude: opts.geo?.longitude,
     },
@@ -124,7 +126,7 @@ export function useCityAutosuggest({
         }
       }
     },
-    [minLength, geo]
+    [minLength, geo],
   );
 
   useEffect(() => {
@@ -155,7 +157,7 @@ export function useCityAutosuggest({
       setResults([]);
       setOpen(false);
     },
-    [onSelect]
+    [onSelect],
   );
 
   return {

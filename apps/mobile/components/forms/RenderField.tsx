@@ -347,20 +347,13 @@ export function RenderField({
     case "checkbox":
       return (
         <View>
-          <Pressable
-            onPress={() => onChange?.(!value)}
-            className="flex flex-row items-center"
-          >
-            <View>
-              <Checkbox
-                checked={!!value}
-                disabled={disabled}
-                error={hasError}
-                onChange={(next) => onChange?.(next)}
-                label={field.label}
-              />
-            </View>
-          </Pressable>
+          <Checkbox
+            checked={!!value}
+            disabled={disabled}
+            error={hasError}
+            onChange={(next) => onChange?.(next)}
+            label={field.label}
+          />
           {renderValidationMessage(errorMessage)}
         </View>
       );
