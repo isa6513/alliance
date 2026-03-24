@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
-  ScrollView,
   TouchableOpacity,
   View,
 } from "react-native";

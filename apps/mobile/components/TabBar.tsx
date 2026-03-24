@@ -4,7 +4,14 @@ import { usePathname, useRouter } from "expo-router";
 import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
+import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
+import {
+  getAwayStatus,
+  showActionInSidebarList,
+} from "@alliance/shared/lib/actionUtils";
+import { useQuery } from "@tanstack/react-query";
+import { userGetAwayRanges } from "@alliance/shared/client";
 
 const tabs = [
   {
@@ -84,6 +91,25 @@ export default function TabBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { data: actions } = useActionsQuery();
+  const { data: awayRanges = [] } = useQuery({
+    queryKey: ["awayRanges"],
+    queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
+  });
+
+  const uncompletedTaskCount = useMemo(() => {
+    if (!actions) {
+      return 0;
+    }
+
+    const now = new Date();
+    return actions.filter((action) =>
+      showActionInSidebarList({
+        ...action,
+        awayStatus: getAwayStatus(action, awayRanges, now),
+      }),
+    ).length;
+  }, [actions, awayRanges]);
 
   const isActive = (matchPaths: string[]) => {
     return matchPaths.some((path) => {
@@ -102,10 +128,11 @@ export default function TabBar() {
       {tabs.map((tab) => {
         const active = isActive(tab.matchPaths);
         const Icon = tab.icon;
+        const taskBadgeCount = tab.href === "/" ? uncompletedTaskCount : 0;
         return (
           <AnimatedTabButton
             key={tab.href}
-            onPress={() => router.replace(tab.href)}
+            onPress={() => router.dismissTo(tab.href)}
             onPressIn={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
@@ -122,6 +149,13 @@ export default function TabBar() {
             >
               {tab.label}
             </Text>
+            {taskBadgeCount > 0 && (
+              <View className="absolute top-2 -right-1 bg-red-500 rounded-full min-w-5 h-5 px-1 items-center justify-center">
+                <Text className="text-[10px] text-white font-semibold">
+                  {taskBadgeCount}
+                </Text>
+              </View>
+            )}
           </AnimatedTabButton>
         );
       })}
