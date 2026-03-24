@@ -147,6 +147,7 @@ export default function MessageComposer({
             className="text-base text-zinc-900"
             textAlignVertical="center"
             style={{ paddingVertical: 0 }}
+            autoFocus
           />
         </View>
         <TouchableOpacity

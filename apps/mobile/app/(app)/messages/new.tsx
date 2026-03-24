@@ -55,12 +55,20 @@ export default function NewMessageScreen() {
 
   useEffect(() => {
     const target = Array.isArray(to) ? to[0] : to;
-    if (!target) return;
+    if (!target || !user?.id) return;
     const userId = parseInt(target, 10);
-    if (!Number.isNaN(userId)) {
-      setSelectedUserIds([userId]);
+    if (Number.isNaN(userId)) return;
+
+    const existing = findMatchingConversation(conversations, user.id, [userId]);
+    if (existing) {
+      router.replace(`/messages/${existing.id}`);
+      return;
     }
-  }, [to]);
+
+    setSelectedUserIds((prev) =>
+      prev.length === 1 && prev[0] === userId ? prev : [userId],
+    );
+  }, [conversations, to, user?.id]);
 
   const recipients = useMemo(
     () =>
