@@ -20,6 +20,7 @@ import {
   tasksRunValidator,
 } from "@alliance/shared/client";
 import type {
+  BigLinkIcon,
   DisplayBlock,
   PreviousAnswerBlock,
 } from "@alliance/shared/forms/display-blocks";
@@ -43,7 +44,16 @@ import FormModal from "./FormModal";
 import RenderPreviousAnswer from "./RenderPreviousAnswer";
 import VideoPlayer from "./VideoPlayer";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
-import { CircleCheck, Copy, Ellipsis } from "lucide-react-native";
+import {
+  CircleCheck,
+  Copy,
+  Ellipsis,
+  MessagesSquare,
+  FileText,
+  FileCheck,
+  Signature,
+  File,
+} from "lucide-react-native";
 import { cn } from "@alliance/shared/styles/util";
 
 type FormRendererProps = {
@@ -111,6 +121,14 @@ function CopyTextDisplayMobile({
   );
 }
 
+const bigLinkIcons: Record<BigLinkIcon, React.FC<{ size?: number }>> = {
+  "messages-square": MessagesSquare,
+  file: File,
+  "file-text": FileText,
+  "file-check": FileCheck,
+  signature: Signature,
+};
+
 type RenderDisplayBlockMobileProps = {
   block: DisplayBlock;
   previousAnswerData?: Record<number, Record<string, unknown>>;
@@ -145,7 +163,7 @@ export function RenderDisplayBlockMobile({
       return <AppMarkdownWrapper>{block.text}</AppMarkdownWrapper>;
     case "label":
       return (
-        <Text className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+        <Text className="text-sm font-semibold text-zinc-500">
           {block.text}
         </Text>
       );
@@ -186,17 +204,22 @@ export function RenderDisplayBlockMobile({
         </View>
       );
     case "biglink":
+      const IconComponent = bigLinkIcons[block.icon || "messages-square"];
       return (
         <TouchableOpacity
-          className="rounded-lg border border-zinc-200 bg-white px-5 py-4"
+          className="flex-row items-center gap-3 rounded-lg border border-zinc-200 bg-white px-5 py-4"
           onPress={() => Linking.openURL(block.url)}
         >
-          <Text className="text-base font-medium text-blue-600">
-            {block.text}
-          </Text>
-          <Text className="mt-1 text-sm text-zinc-500" numberOfLines={1}>
-            {block.url}
-          </Text>
+          <IconComponent size={20} />
+          <View className="">
+            <Text className="text-lg font-medium text-black">{block.text}</Text>
+            <Text
+              className="mt-1 font-medium text-sm text-green"
+              numberOfLines={1}
+            >
+              {block.url}
+            </Text>
+          </View>
         </TouchableOpacity>
       );
     case "copytext":
