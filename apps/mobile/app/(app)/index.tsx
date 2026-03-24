@@ -45,7 +45,6 @@ import { router } from "expo-router";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
 import { LegendList } from "@legendapp/list";
-import { useHideOnScroll } from "../../lib/useHideOnScroll";
 
 const GENERAL_UPDATES_QUERY_KEY = [
   "actions",
@@ -57,12 +56,6 @@ export default function HomeScreen() {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
-  const {
-    isVisible: isHeaderVisible,
-    onScroll: onListScroll,
-    scrollEventThrottle,
-  } = useHideOnScroll();
 
   const handleSubmitSuccess = useCallback(() => {
     setShowSuccess(true);
@@ -335,36 +328,43 @@ export default function HomeScreen() {
     !homeFeedLoading &&
     homeFeedActivities.length > 0;
 
+  const header = (
+    <SimplePageTitle title={title}>
+      {showTaskNavigator ? (
+        <TaskNavigatorStepper
+          index={safeIndex}
+          totalCount={allItems.length}
+          onPrev={goPrev}
+          onNext={goNext}
+          canGoPrev={canGoPrev}
+          canGoNext={canGoNext}
+        />
+      ) : (
+        <TouchableOpacity
+          onPress={() => router.push("/profile")}
+          className="px-2"
+          accessibilityLabel="View profile"
+        >
+          <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
+        </TouchableOpacity>
+      )}
+    </SimplePageTitle>
+  );
+
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
-        <ActivityIndicator size="large" color={colors.green} />
+      <View className="flex-1 bg-white">
+        {header}
+        <View className="flex-1 items-center justify-center py-16 px-5 bg-white">
+          <ActivityIndicator size="large" color={colors.green} />
+        </View>
       </View>
     );
   }
 
   return (
     <View className="flex-1 bg-white">
-      <SimplePageTitle title={title} isVisible={isHeaderVisible}>
-        {showTaskNavigator ? (
-          <TaskNavigatorStepper
-            index={safeIndex}
-            totalCount={allItems.length}
-            onPrev={goPrev}
-            onNext={goNext}
-            canGoPrev={canGoPrev}
-            canGoNext={canGoNext}
-          />
-        ) : (
-          <TouchableOpacity
-            onPress={() => router.push("/profile")}
-            className="px-2"
-            accessibilityLabel="View profile"
-          >
-            <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
-          </TouchableOpacity>
-        )}
-      </SimplePageTitle>
+      {header}
       {showHomeFeedList ? (
         <LegendList
           className="flex-1"
@@ -374,8 +374,6 @@ export default function HomeScreen() {
           onEndReached={onHomeFeedEndReached}
           onEndReachedThreshold={0.3}
           recycleItems
-          onScroll={onListScroll}
-          scrollEventThrottle={scrollEventThrottle}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -400,8 +398,6 @@ export default function HomeScreen() {
           key={fullScreen ? "fullscreen" : "scroll"}
           ref={scrollViewRef}
           contentContainerStyle={fullScreen ? { flex: 1 } : undefined}
-          onScroll={onListScroll}
-          scrollEventThrottle={scrollEventThrottle}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
