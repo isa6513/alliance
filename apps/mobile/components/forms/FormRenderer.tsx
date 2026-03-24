@@ -470,7 +470,6 @@ const FormRenderer = ({
 
   // Restore draft from AsyncStorage on mount
   useEffect(() => {
-    console.log("persistKey", persistKey);
     if (readOnly || !persistKey) {
       draftLoaded.current = true;
       return;

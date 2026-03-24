@@ -207,7 +207,6 @@ __metadata:
     eslint-config-expo: "npm:~55.0.0"
     expo: "npm:^55.0.6"
     expo-application: "npm:~55.0.9"
-    expo-async-storage: "npm:^0.0.0"
     expo-blur: "npm:~55.0.9"
     expo-clipboard: "npm:^55.0.9"
     expo-constants: "npm:~55.0.7"
@@ -10260,13 +10259,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/c84ec0b39b0b1d7e9629f3ad9dba6b652c4a63e58dddda7524d65728ca41b6d8f3b36766aefea4b90d3c581ea9dd9357decff8f4c4d8c398c5e5ac63a5e24ea5
-  languageName: node
-  linkType: hard
-
-"expo-async-storage@npm:^0.0.0":
-  version: 0.0.0
-  resolution: "expo-async-storage@npm:0.0.0"
-  checksum: 10c0/0435dc3505c322ca3b34091e1131cd4eece7446c2fbc44e6106332123f275cc1471872ba0d0e920b8bf948b0c11e0aa53332640b1156cb66458dfbce847100a2
   languageName: node
   linkType: hard
 
