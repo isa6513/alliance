@@ -1,75 +1,37 @@
-import {
-  Keyboard,
-  Pressable,
-  StyleSheet,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { Keyboard, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
-  useSharedValue,
+  type SharedValue,
   useAnimatedStyle,
   withSpring,
-  runOnJS,
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useAppDrawer } from "../lib/AppDrawerContext";
 import Sidebar from "./Sidebar";
-import { useEffect, useMemo } from "react";
-import { useNavigationState } from "@react-navigation/native";
+import { useEffect } from "react";
+import { colors } from "../lib/style/colors";
+import { APP_DRAWER_SPRING_CONFIG } from "../lib/appDrawerConfig";
 
-const SIDEBAR_RATIO = 0.8;
-const EDGE_WIDTH = 30;
-const SPRING_CONFIG = { duration: 300, dampingRatio: 0.8 };
+type AnimatedSidebarProps = {
+  sidebarWidth: number;
+  translateX: SharedValue<number>;
+};
 
-export default function AnimatedSidebar() {
-  const { isOpen, openDrawer, closeDrawer } = useAppDrawer();
-  const { width: screenWidth } = useWindowDimensions();
+export default function AnimatedSidebar({
+  sidebarWidth,
+  translateX,
+}: AnimatedSidebarProps) {
+  const { isOpen, closeDrawer } = useAppDrawer();
 
-  //TODO: sync gesture and cangoback with _layout back gesture
-  const canGoBack = useNavigationState((state) => {
-    const appRoute = state.routes[0];
-    const stackState = appRoute?.state;
-    return (stackState?.routes?.length ?? 0) > 1;
-  });
-
-  const sidebarWidth = useMemo(
-    () => Math.round(screenWidth * SIDEBAR_RATIO),
-    [screenWidth],
-  );
-
-  const translateX = useSharedValue(-sidebarWidth);
-
-  // Keep shared value in sync when sidebarWidth changes (e.g. rotation)
-  useEffect(() => {
-    translateX.value = isOpen ? 0 : -sidebarWidth;
-  }, [sidebarWidth]);
-
-  // Sync animation with context state
   useEffect(() => {
     if (isOpen) {
       Keyboard.dismiss();
     }
-    translateX.value = withSpring(isOpen ? 0 : -sidebarWidth, SPRING_CONFIG);
-  }, [isOpen]);
-
-  // Edge swipe gesture to open sidebar
-  const openGesture = Gesture.Pan()
-    .activeOffsetX(10)
-    .failOffsetX(-5)
-    .failOffsetY([-15, 15])
-    .onUpdate((event) => {
-      translateX.value = Math.min(0, -sidebarWidth + event.translationX);
-    })
-    .onEnd((event) => {
-      if (event.translationX > sidebarWidth / 3) {
-        translateX.value = withSpring(0, SPRING_CONFIG);
-        runOnJS(openDrawer)();
-      } else {
-        translateX.value = withSpring(-sidebarWidth, SPRING_CONFIG);
-      }
-    });
+    translateX.value = withSpring(
+      isOpen ? 0 : -sidebarWidth,
+      APP_DRAWER_SPRING_CONFIG,
+    );
+  }, [isOpen, sidebarWidth, translateX]);
 
   const sidebarStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -108,29 +70,13 @@ export default function AnimatedSidebar() {
             left: 0,
             bottom: 0,
             width: sidebarWidth,
-            backgroundColor: "#ffffff",
+            backgroundColor: colors.grey[0],
           },
           sidebarStyle,
         ]}
       >
         <Sidebar />
       </Animated.View>
-
-      {/* Edge gesture catcher — only mounted when closed and on a base page */}
-      {!isOpen && !canGoBack && (
-        <GestureDetector gesture={openGesture}>
-          <View
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: EDGE_WIDTH,
-            }}
-            collapsable={false}
-          />
-        </GestureDetector>
-      )}
     </View>
   );
 }

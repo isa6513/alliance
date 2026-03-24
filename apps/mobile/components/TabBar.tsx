@@ -16,6 +16,7 @@ import {
   userGetAwayRanges,
 } from "@alliance/shared/client";
 import { useMessagingUnread } from "../lib/messages";
+import { isPathActive } from "../lib/isPathActive";
 
 const tabs = [
   {
@@ -42,7 +43,8 @@ const tabs = [
     label: "Groups",
     matchPaths: ["/groups"],
   },
-];
+] as const;
+type TabPaths = (typeof tabs)[number]["href"];
 
 function AnimatedTabButton({
   onPress,
@@ -143,33 +145,25 @@ export default function TabBar() {
     setMessageHasUpdates(true);
   }, [isOnMessagesTab, setMessageHasUpdates, setUnreadMessages]);
 
-  const isActive = (matchPaths: string[]) => {
-    return matchPaths.some((path) => {
-      if (path === "/" || path === "") {
-        return pathname === "/" || pathname === "";
-      }
-      return pathname.startsWith(path);
-    });
+  const tabBadgeCounts: Record<TabPaths, number> = {
+    "/": uncompletedTaskCount,
+    "/notifications": unreadNotifications,
+    "/messages": isOnMessagesTab ? 0 : unreadMessages,
+    "/groups": 0,
   };
 
   return (
     <View
-      className="flex-row bg-white border-t border-zinc-100 px-2"
-      style={{ paddingBottom: insets.bottom }}
+      className="flex-row bg-white border-t px-2"
+      style={{
+        paddingBottom: insets.bottom,
+        borderTopColor: colors.borderLight,
+      }}
     >
       {tabs.map((tab) => {
-        const active = isActive(tab.matchPaths);
+        const active = isPathActive(pathname, tab.matchPaths);
         const Icon = tab.icon;
-        const badgeCount =
-          tab.href === "/"
-            ? uncompletedTaskCount
-            : tab.href === "/messages"
-              ? isOnMessagesTab
-                ? 0
-                : unreadMessages
-              : tab.href === "/notifications"
-                ? unreadNotifications
-                : 0;
+        const badgeCount = tabBadgeCounts[tab.href];
         const badgeBackgroundColor =
           tab.href === "/" ? colors.error : colors.text.icon;
         const badgeLabel =

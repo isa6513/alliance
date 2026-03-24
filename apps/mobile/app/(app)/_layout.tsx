@@ -9,10 +9,59 @@ import AnimatedSidebar from "../../components/AnimatedSidebar";
 import { colors } from "../../lib/style/colors";
 import { isVisualTestMode } from "../../lib/visualTest";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigationState } from "@react-navigation/native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useSharedValue, withSpring } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
+import {
+  APP_DRAWER_OPEN_DISTANCE_MAX,
+  APP_DRAWER_OPEN_DISTANCE_RATIO,
+  APP_DRAWER_OPEN_VELOCITY,
+  APP_DRAWER_PERMANENT_WIDTH,
+  APP_DRAWER_SIDEBAR_RATIO,
+  APP_DRAWER_SPRING_CONFIG,
+} from "../../lib/appDrawerConfig";
 
 function AppContent() {
   const insets = useSafeAreaInsets();
-  const { isPermanent } = useAppDrawer();
+  const { isPermanent, isOpen, openDrawer } = useAppDrawer();
+  const { width: screenWidth } = useWindowDimensions();
+  const sidebarWidth = Math.round(screenWidth * APP_DRAWER_SIDEBAR_RATIO);
+  const drawerTranslateX = useSharedValue(-sidebarWidth);
+
+  const canGoBack = useNavigationState((state) => {
+    const appRoute = state.routes[0];
+    const stackState = appRoute?.state;
+    return (stackState?.routes?.length ?? 0) > 1;
+  });
+
+  const openDrawerGesture = Gesture.Pan()
+    .enabled(!isPermanent && !isOpen && !canGoBack)
+    .activeOffsetX(20)
+    .failOffsetX(-10)
+    .failOffsetY([-15, 15])
+    .onUpdate((event) => {
+      drawerTranslateX.value = Math.min(0, -sidebarWidth + event.translationX);
+    })
+    .onEnd((event) => {
+      const shouldOpen =
+        event.translationX >
+          Math.min(
+            screenWidth * APP_DRAWER_OPEN_DISTANCE_RATIO,
+            APP_DRAWER_OPEN_DISTANCE_MAX,
+          ) || event.velocityX > APP_DRAWER_OPEN_VELOCITY;
+
+      if (shouldOpen) {
+        drawerTranslateX.value = withSpring(0, APP_DRAWER_SPRING_CONFIG);
+        scheduleOnRN(openDrawer);
+        return;
+      }
+
+      drawerTranslateX.value = withSpring(
+        -sidebarWidth,
+        APP_DRAWER_SPRING_CONFIG,
+      );
+    });
 
   /** Status bar / notch band behind Stack padding — default white; override per route below. */
   const notchContentStyle = (backgroundColor: string) => ({
@@ -25,7 +74,7 @@ function AppContent() {
       {isPermanent && (
         <View
           style={{
-            width: 280,
+            width: APP_DRAWER_PERMANENT_WIDTH,
             borderRightWidth: 1,
             borderRightColor: colors.borderLight,
           }}
@@ -33,32 +82,39 @@ function AppContent() {
           <Sidebar />
         </View>
       )}
-      <View style={{ flex: 1 }}>
-        <Stack
-          screenOptions={({ navigation }) => ({
-            headerShown: false,
-            contentStyle: notchContentStyle(colors.white),
-            ...(navigation.canGoBack()
-              ? { animation: "default" as const, gestureEnabled: true }
-              : { animation: "none" as const, gestureEnabled: false }),
-          })}
-        >
-          <Stack.Screen
-            name="contract"
-            options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
-          />
-          <Stack.Screen
-            name="invites"
-            options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
-          />
-          <Stack.Screen
-            name="index"
-            options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
-          />
-        </Stack>
-        <TabBar />
-      </View>
-      {!isPermanent && <AnimatedSidebar />}
+      <GestureDetector gesture={openDrawerGesture}>
+        <View style={{ flex: 1 }}>
+          <Stack
+            screenOptions={({ navigation }) => ({
+              headerShown: false,
+              contentStyle: notchContentStyle(colors.white),
+              ...(navigation.canGoBack()
+                ? { animation: "default" as const, gestureEnabled: true }
+                : { animation: "none" as const, gestureEnabled: false }),
+            })}
+          >
+            <Stack.Screen
+              name="contract"
+              options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
+            />
+            <Stack.Screen
+              name="invites"
+              options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
+            />
+            <Stack.Screen
+              name="index"
+              options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
+            />
+          </Stack>
+          <TabBar />
+        </View>
+      </GestureDetector>
+      {!isPermanent && (
+        <AnimatedSidebar
+          sidebarWidth={sidebarWidth}
+          translateX={drawerTranslateX}
+        />
+      )}
     </View>
   );
 }

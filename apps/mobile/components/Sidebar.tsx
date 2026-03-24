@@ -16,6 +16,7 @@ import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
 import { useAppDrawer } from "../lib/AppDrawerContext";
+import { isPathActive } from "../lib/isPathActive";
 
 type NavItem = {
   name: string;
@@ -75,15 +76,6 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isActive = (matchPaths: string[]) => {
-    return matchPaths.some((path) => {
-      if (path === "/" || path === "") {
-        return pathname === "/" || pathname === "";
-      }
-      return pathname.startsWith(path);
-    });
-  };
-
   const handleNavigate = (href: Route) => {
     closeDrawer();
     router.replace(href);
@@ -92,13 +84,13 @@ export default function Sidebar() {
   return (
     <ScrollView
       contentContainerStyle={{ paddingTop: 48, paddingBottom: 0 }}
-      style={{ backgroundColor: "#fafafa" }}
+      style={{ backgroundColor: colors.grey[0] }}
     >
       <View className="flex-1">
         {/* Close button */}
         <View className="flex-row justify-end px-4">
-          <TouchableOpacity onPress={() => closeDrawer()} className="p-2">
-            <X size={24} color="#71717a" />
+          <TouchableOpacity onPress={closeDrawer} className="p-2">
+            <X size={24} color={colors.text.icon} />
           </TouchableOpacity>
         </View>
 
@@ -125,16 +117,16 @@ export default function Sidebar() {
 
         <View className="px-4">
           {navItems.map((item) => {
-            const active = isActive(item.matchPaths);
+            const active = isPathActive(pathname, item.matchPaths);
             const Icon = item.icon;
             return (
               <TouchableOpacity
                 key={item.name}
                 onPress={() => handleNavigate(item.href)}
-                className={cn(
-                  "flex-row items-center px-3 py-2.5 rounded-lg mb-0.5",
-                  active && "bg-zinc-200",
-                )}
+                className="flex-row items-center px-3 py-2.5 rounded-lg mb-0.5"
+                style={
+                  active ? { backgroundColor: colors.grey[2] } : undefined
+                }
                 activeOpacity={0.7}
               >
                 <Icon
@@ -142,10 +134,8 @@ export default function Sidebar() {
                   color={active ? colors.green : colors.text.icon}
                 />
                 <Text
-                  className={cn(
-                    "ml-3 text-[17px]",
-                    active ? "font-medium text-black" : "text-zinc-900",
-                  )}
+                  className={cn("ml-3 text-[17px]", active && "font-medium")}
+                  style={{ color: colors.text.primary }}
                 >
                   {item.name}
                 </Text>
