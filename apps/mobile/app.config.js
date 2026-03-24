@@ -22,7 +22,10 @@ export default {
         },
       },
       appleTeamId: "629G87T7R5",
-      associatedDomains: ["applinks:worldalliance.org"],
+      associatedDomains: [
+        "applinks:worldalliance.org",
+        "webcredentials:worldalliance.org",
+      ],
     },
     android: {
       adaptiveIcon: {

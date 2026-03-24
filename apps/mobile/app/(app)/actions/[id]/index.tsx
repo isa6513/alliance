@@ -346,9 +346,13 @@ export default function ActionDetailScreen() {
               By{" "}
               {action.authors.map((author, i) => (
                 <Text key={author.id}>
-                  <Text className="text-zinc-500 underline">
-                    {author.displayName}
-                  </Text>
+                  <Pressable
+                    onPress={() => router.push(`/member/${author.id}`)}
+                  >
+                    <Text className="text-zinc-500 underline">
+                      {author.displayName}
+                    </Text>
+                  </Pressable>
                   {i < action.authors!.length - 2 && ", "}
                   {i === action.authors!.length - 2 &&
                     `${action.authors!.length > 2 ? "," : ""} and `}
