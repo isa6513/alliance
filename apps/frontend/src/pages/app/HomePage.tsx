@@ -20,9 +20,11 @@ import {
   ActionWithAwayStatus,
   homePagePriorityComparator,
   showActionInSidebarList,
-  isFollowUpFormActive,
 } from "@alliance/shared/lib/actionUtils";
-import { useHomePageActions } from "@alliance/shared/lib/homePage";
+import {
+  compareFollowUpFormsByStartDateDesc,
+  useHomePageActions,
+} from "@alliance/shared/lib/homePage";
 import {
   noTasksContractSuspended,
   noTasksToDoRightNow,
@@ -42,17 +44,6 @@ import {
 } from "../../lib/fetchTaskFormProgressViews";
 import { CircleChevronRight } from "lucide-react";
 import { cn } from "@alliance/shared/styles/util";
-
-function followUpStartTimeMs(f: FollowUpForm): number {
-  return f.startDate ? new Date(f.startDate).getTime() : Infinity;
-}
-
-function compareFollowUpFormsByStartDateDesc(
-  a: FollowUpForm,
-  b: FollowUpForm,
-): number {
-  return followUpStartTimeMs(b) - followUpStartTimeMs(a);
-}
 
 /** Ordered queue of main-column cards (action or follow-up) driven by the task navigator list. */
 type TaskNavigatorItem =
@@ -227,6 +218,7 @@ const HomePage = () => {
     nextWeekTodoActions,
     remainingTasksEstimatedTimeCurrentWeek,
     completedActions,
+    activeCompletableFollowUpForms,
   } = useHomePageActions(actions);
 
   const numTodo = todoActions.filter(showActionInSidebarList).length;
@@ -286,31 +278,6 @@ const HomePage = () => {
       )
       .sort(homePagePriorityComparator);
   }, [actionProgressViews, actions]);
-
-  const activeCompletableFollowUpForms = useMemo(() => {
-    if (!actions) {
-      return [];
-    }
-    const list: {
-      followUpForm: FollowUpForm;
-      actionId: number;
-    }[] = [];
-    for (const action of actions) {
-      if (action.userRelation !== "completed") {
-        continue;
-      }
-      for (const f of action.followUpForms) {
-        if (isFollowUpFormActive(f)) {
-          list.push({ followUpForm: f, actionId: action.id });
-        }
-      }
-    }
-    return list.sort(
-      (a, b) =>
-        followUpStartTimeMs(b.followUpForm) -
-        followUpStartTimeMs(a.followUpForm),
-    );
-  }, [actions]);
 
   const followUpFormsByActionId = useMemo(() => {
     const map: Record<number, FollowUpForm[]> = {};

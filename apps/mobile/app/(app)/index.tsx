@@ -14,6 +14,7 @@ import {
 } from "@alliance/shared/client";
 import type {
   ActionActivityDto,
+  FollowUpForm,
   GeneralUpdateDto,
 } from "@alliance/shared/client";
 import { colors } from "../../lib/style/colors";
@@ -21,7 +22,6 @@ import Text from "../../components/system/Text";
 import {
   ActionWithAwayStatus,
   getAwayStatus,
-  isGeneralUpdate,
   homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
 import useActivities, {
@@ -44,7 +44,13 @@ import { TaskNavigatorStepper } from "../../components/system/TaskNavigatorStepp
 import { router } from "expo-router";
 import ProfileImage from "../../components/ProfileImage";
 import UserActivityCard from "../../components/UserActivityCard";
+import FollowUpFormPanel from "../../components/FollowUpFormPanel";
 import { LegendList } from "@legendapp/list";
+
+type HomeScreenItem =
+  | { kind: "action"; action: ActionWithAwayStatus }
+  | { kind: "generalUpdate"; generalUpdate: GeneralUpdateDto }
+  | { kind: "followUpForm"; followUpForm: FollowUpForm; actionId: number };
 
 const GENERAL_UPDATES_QUERY_KEY = [
   "actions",
@@ -149,13 +155,34 @@ export default function HomeScreen() {
     }));
   }, [actions, awayRanges]);
 
-  const { todoActions } = useHomePageActions(actionsWithAwayStatus);
+  const { todoActions, activeCompletableFollowUpForms } = useHomePageActions(
+    actionsWithAwayStatus,
+  );
 
-  const allItems = useMemo(() => {
-    return [...todoActions, ...(generalUpdates ?? [])].sort(
-      homePagePriorityComparator,
+  const allItems = useMemo<HomeScreenItem[]>(() => {
+    const actionAndUpdateItems: HomeScreenItem[] = [
+      ...todoActions.map(
+        (action) => ({ kind: "action", action }) as const,
+      ),
+      ...(generalUpdates ?? []).map(
+        (generalUpdate) =>
+          ({ kind: "generalUpdate", generalUpdate }) as const,
+      ),
+    ].sort((a, b) => {
+      const aVal =
+        a.kind === "action" ? a.action : a.generalUpdate;
+      const bVal =
+        b.kind === "action" ? b.action : b.generalUpdate;
+      return homePagePriorityComparator(aVal, bVal);
+    });
+
+    const followUpItems: HomeScreenItem[] = activeCompletableFollowUpForms.map(
+      ({ followUpForm, actionId }) =>
+        ({ kind: "followUpForm", followUpForm, actionId }) as const,
     );
-  }, [todoActions, generalUpdates]);
+
+    return [...actionAndUpdateItems, ...followUpItems];
+  }, [todoActions, generalUpdates, activeCompletableFollowUpForms]);
 
   const {
     index: safeIndex,
@@ -165,7 +192,7 @@ export default function HomeScreen() {
     canGoPrev,
     hasMultiple: showTaskNavigator,
   } = useBoundedIndex(allItems.length);
-  const currentTaskOrGeneralUpdate = allItems[safeIndex] ?? null;
+  const currentItem = allItems[safeIndex] ?? null;
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
 
@@ -230,7 +257,7 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
-    if (currentTaskOrGeneralUpdate) return;
+    if (currentItem) return;
     if (homeFeedLoading || homeFeedFetchingNextPage) return;
     if (!homeFeedHasNextPage) return;
     // Match web behavior where short lists immediately pull the next page.
@@ -238,7 +265,7 @@ export default function HomeScreen() {
       void fetchNextHomeFeedPage();
     }
   }, [
-    currentTaskOrGeneralUpdate,
+    currentItem,
     homeFeedLoading,
     homeFeedFetchingNextPage,
     homeFeedHasNextPage,
@@ -247,18 +274,17 @@ export default function HomeScreen() {
   ]);
 
   const dismissProps = useMemo(() => {
-    const task = currentTaskOrGeneralUpdate;
-    if (!task || isGeneralUpdate(task)) return undefined;
-    const info = getTaskDismissInfo(task);
+    if (!currentItem || currentItem.kind !== "action") return undefined;
+    const info = getTaskDismissInfo(currentItem.action);
     if (!info) return undefined;
     return {
       ...info,
-      onDismiss: () => handleDismissAction(task.id),
+      onDismiss: () => handleDismissAction(currentItem.action.id),
     };
-  }, [currentTaskOrGeneralUpdate, handleDismissAction]);
+  }, [currentItem, handleDismissAction]);
 
   const { title, body, fullScreen } = useMemo(() => {
-    if (!currentTaskOrGeneralUpdate) {
+    if (!currentItem) {
       return {
         title: "Alliance",
         body: (
@@ -280,19 +306,40 @@ export default function HomeScreen() {
       };
     }
 
-    if (isGeneralUpdate(currentTaskOrGeneralUpdate)) {
+    if (currentItem.kind === "generalUpdate") {
       return {
         title: "General update",
         body: (
           <View className="p-4">
             <LargeGeneralUpdateCard
-              key={currentTaskOrGeneralUpdate.id}
-              generalUpdate={currentTaskOrGeneralUpdate}
+              key={currentItem.generalUpdate.id}
+              generalUpdate={currentItem.generalUpdate}
               onDismiss={() =>
-                handleDismissGeneralUpdate(currentTaskOrGeneralUpdate.id)
+                handleDismissGeneralUpdate(currentItem.generalUpdate.id)
               }
               userId={user?.id}
               user={user}
+            />
+          </View>
+        ),
+        fullScreen: false,
+      };
+    }
+
+    if (currentItem.kind === "followUpForm") {
+      return {
+        title: "Follow-up",
+        body: (
+          <View className="bg-white py-2 px-4">
+            <FollowUpFormPanel
+              key={currentItem.followUpForm.id}
+              followUpForm={currentItem.followUpForm}
+              actionId={currentItem.actionId}
+              scrollPageTo={scrollPageTo}
+              scrollToEnd={scrollToEnd}
+              onSubmitted={() => {
+                queryClient.invalidateQueries({ queryKey: ["actions"] });
+              }}
             />
           </View>
         ),
@@ -305,9 +352,9 @@ export default function HomeScreen() {
       body: (
         <View className="bg-white py-2 px-1">
           <LargeActionCard
-            action={currentTaskOrGeneralUpdate}
+            action={currentItem.action}
             dismissProps={dismissProps}
-            userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
+            userRelation={currentItem.action.userRelation ?? "none"}
             onUpdateActionState={refetch}
             scrollPageTo={scrollPageTo}
             scrollToEnd={scrollToEnd}
@@ -318,10 +365,11 @@ export default function HomeScreen() {
       fullScreen: false,
     };
   }, [
-    currentTaskOrGeneralUpdate,
+    currentItem,
     dismissProps,
     user,
     handleDismissGeneralUpdate,
+    queryClient,
     refetch,
     scrollPageTo,
     scrollToEnd,
@@ -329,7 +377,7 @@ export default function HomeScreen() {
   ]);
 
   const showHomeFeedList =
-    !currentTaskOrGeneralUpdate &&
+    !currentItem &&
     !homeFeedLoading &&
     homeFeedActivities.length > 0;
 
