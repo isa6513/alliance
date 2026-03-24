@@ -31,7 +31,7 @@ import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { ChevronDown, Edit } from "lucide-react-native";
+import { ChevronDown, Edit, Menu } from "lucide-react-native";
 import AppMarkdownWrapper from "../../../components/AppMarkdownWrapper";
 import EditableContentRenderer from "../../../components/EditableContentRenderer";
 import ProfileImage from "../../../components/ProfileImage";
@@ -42,12 +42,13 @@ import Button, {
 } from "../../../components/system/Button";
 import Text from "../../../components/system/Text";
 import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
+import BackButton from "../../../components/system/BackButton";
 import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
 import { useAuth } from "../../../lib/AuthContext";
+import { useAppDrawer } from "../../../lib/AppDrawerContext";
+import { colors } from "../../../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
 import KeyboardAwareScrollView from "../../../components/KeyboardAwareScrollView";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
-import { LegendList } from "@legendapp/list";
 
 enum ProfileTab {
   Actions = "actions",
@@ -88,6 +89,7 @@ export default function UserProfileScreen() {
   const rawId = Array.isArray(params.id) ? params.id[0] : params.id;
   const userId = Number.parseInt(rawId!, 10);
   const { user, isAuthenticated } = useAuth();
+  const { openDrawer, isPermanent } = useAppDrawer();
   const isMe = !!userId && user?.id === userId;
 
   const {
@@ -618,8 +620,21 @@ export default function UserProfileScreen() {
   }
 
   const badgeStyles = "text-xs text-white px-2 py-0.5 rounded";
+  const profileNavBar = (
+    <View className="flex-row items-center px-2 pt-1">
+      {router.canGoBack() ? (
+        <BackButton />
+      ) : !isPermanent ? (
+        <Pressable onPress={openDrawer} className="p-2">
+          <Menu size={25} color={colors.text.icon} strokeWidth={2.5} />
+        </Pressable>
+      ) : null}
+    </View>
+  );
+
   const profileHeader = (
     <>
+      {profileNavBar}
       <View className="p-4 pt-4 gap-4">
         <View className="flex flex-row items-center gap-3">
           {isEditing ? (
