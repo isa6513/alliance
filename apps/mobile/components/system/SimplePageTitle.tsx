@@ -17,7 +17,7 @@ export const SimplePageTitle = ({
   if (!isVisible) return null;
 
   return (
-    <View className="flex-row items-center gap-x-2 px-2 justify-between  pb-2">
+    <View className="flex-row items-center gap-x-2 px-2 justify-between pb-2 pr-4">
       <Pressable onPress={openDrawer} className="p-2 px-2">
         <View className="flex-row items-center gap-2">
           {!isPermanent && (
