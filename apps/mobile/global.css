@@ -3,13 +3,12 @@
 @source "../../shared/styles";
 
 @theme {
-  --font-sans: "SourceSans3", system-ui, -apple-system, BlinkMacSystemFont,
-    sans-serif;
-  --font-serif: "LibreBaskerville", serif;
-  --font-serif-semibold: "LibreBaskerville-SemiBold", serif;
-  --font-serif-bold: "LibreBaskerville-Bold", serif;
+  --font-sans: "Source Sans 3";
+  --font-serif: "Libre Baskerville";
+  --font-serif-semibold: "Libre Baskerville SemiBold";
+  --font-serif-bold: "Libre Baskerville Bold";
   --color-green: rgb(98, 161, 36);
-  --font-berlingske: "Berlingske", serif;
+  --font-berlingske: "Berlingske";
 
   /* Strip lineHeight from font-size utilities — RN handles defaults well,
      and explicit lineHeight on TextInput causes bottom-clipping.

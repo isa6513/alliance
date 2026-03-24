@@ -95,6 +95,9 @@ export function useCityAutosuggest({
 
   useEffect(() => {
     setQuery(value);
+    if (value.trim().length > 0) {
+      setDidSelect(true);
+    }
   }, [value]);
 
   const fetchGeolocation = useCallback(async () => {

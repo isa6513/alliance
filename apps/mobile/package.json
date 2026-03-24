@@ -17,7 +17,7 @@
     "eas-build-pre-install": "corepack enable && corepack prepare yarn@4.9.1 --activate",
     "build:simulator": "npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios",
     "build:simulator:clean": "npx expo prebuild --clean && cd ios && pod install && cd .. && npx expo run:ios",
-    "build:device": "npx expo prebuild --clean && cd ios && pod install && cd .. && npx expo run:ios --device 00008150-001528163445401C",
+    "build:device": "npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios --device 00008150-001528163445401C",
     "build:android": "npx expo prebuild -p android && npx expo run:android",
     "build:prod": "APP_VARIANT=production npx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace"
   },
@@ -25,6 +25,7 @@
     "@alliance/shared": "workspace:*",
     "@hey-api/client-fetch": "^0.10.0",
     "@legendapp/list": "^2.0.19",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/drawer": "^7.3.9",
     "@react-navigation/elements": "^2.9.5",

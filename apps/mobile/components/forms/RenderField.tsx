@@ -268,15 +268,6 @@ export function RenderField({
             keyboardType="numeric"
             editable={!disabled}
           />
-          {field.min !== undefined || field.max !== undefined ? (
-            <Text className="text-xs text-zinc-500 mt-1">
-              {field.min !== undefined && field.max !== undefined
-                ? `Range: ${field.min} - ${field.max}`
-                : field.min !== undefined
-                  ? `Minimum: ${field.min}`
-                  : `Maximum: ${field.max}`}
-            </Text>
-          ) : null}
           {renderValidationMessage(errorMessage)}
         </View>
       );

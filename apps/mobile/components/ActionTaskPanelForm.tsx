@@ -104,6 +104,7 @@ const ActionTaskPanelForm = ({
         onFormStarted={onFormStarted}
         onAbandonAction={onAbandonAction}
         actionId={actionId}
+        persistKey={String(taskFormId)}
         scrollPageTo={scrollPageTo}
         scrollToEnd={scrollToEnd}
       />

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import type { UserDto } from "@alliance/shared/client";
@@ -31,6 +32,7 @@ import type {
 import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
 import {
   applyDefaultValues,
+  computeFormStorageKey,
   filterAnswersByFieldIds,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
   resolveFieldDefaultValue,
@@ -243,6 +245,15 @@ const FormRenderer = ({
   const schema = form as unknown as FormSchema;
   const readOnly = !!renderFormAsCompleted || !onSubmit;
 
+  const storageKey = useMemo(
+    () =>
+      computeFormStorageKey({
+        formId: id,
+        instanceId: persistKey ?? undefined,
+      }),
+    [id, persistKey],
+  );
+
   const randomizationKey = useMemo(() => {
     const base = `form:${id}`;
     const normalizedUserId =
@@ -452,6 +463,95 @@ const FormRenderer = ({
   const [otherReasonSelected, setOtherReasonSelected] = useState(false);
   const [customReason, setCustomReason] = useState("");
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
+
+  // Draft persistence: tracks whether we've loaded a stored draft so the save
+  // effect doesn't overwrite stored data with initial defaults.
+  const draftLoaded = useRef(false);
+
+  // Restore draft from AsyncStorage on mount
+  useEffect(() => {
+    console.log("persistKey", persistKey);
+    if (readOnly || !persistKey) {
+      draftLoaded.current = true;
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(storageKey);
+        if (cancelled || !raw) {
+          draftLoaded.current = true;
+          return;
+        }
+        const parsed = JSON.parse(raw);
+        if (parsed?.formData && typeof parsed.formData === "object") {
+          const filtered = filterAnswersByFieldIds(
+            parsed.formData as Record<string, FormValue>,
+            fieldLookup,
+          );
+          setFormData(applyDefaultValues(filtered, defaultValueMap));
+        }
+        if (parsed?.publicAnswers && typeof parsed.publicAnswers === "object") {
+          const overrides: Record<string, boolean> = {};
+          for (const [fieldId, value] of Object.entries(
+            parsed.publicAnswers as Record<string, unknown>,
+          )) {
+            if (
+              outputFieldDefaultPublic.has(fieldId) &&
+              typeof value === "boolean"
+            ) {
+              overrides[fieldId] = value;
+            }
+          }
+          if (Object.keys(overrides).length > 0) {
+            setPublicAnswers((prev) => ({ ...prev, ...overrides }));
+          }
+        }
+        if (typeof parsed?.currentPageIndex === "number") {
+          setCurrentPageIndex(clampPageIndex(parsed.currentPageIndex));
+        }
+      } catch {
+        // Corrupt or missing draft — ignore.
+      }
+      draftLoaded.current = true;
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // Only run once on mount for a given storageKey
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]);
+
+  // Save draft to AsyncStorage when form state changes
+  useEffect(() => {
+    if (readOnly || !persistKey || !draftLoaded.current) return;
+
+    const timeout = setTimeout(() => {
+      AsyncStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          formData,
+          publicAnswers,
+          currentPageIndex,
+          updatedAt: Date.now(),
+        }),
+      ).catch((e) => {
+        // Storage write failed — non-critical.
+        console.error("Failed to save draft", e);
+      });
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [
+    formData,
+    publicAnswers,
+    currentPageIndex,
+    persistKey,
+    storageKey,
+    readOnly,
+  ]);
 
   const fieldPositions = useRef<Record<string, number>>({});
   const fieldScreenPositions = useRef<Record<string, number>>({});
@@ -847,9 +947,15 @@ const FormRenderer = ({
       sessionReplayUrl,
     };
 
-    onSubmit(submissionPayload).finally(() => {
-      setSubmitting(false);
-    });
+    onSubmit(submissionPayload)
+      .then(() => {
+        if (persistKey) {
+          AsyncStorage.removeItem(storageKey).catch(() => {});
+        }
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
   };
 
   const handleAbandon = () => {

@@ -56,9 +56,6 @@ export default {
         "expo-font",
         {
           fonts: [
-            "./assets/fonts/IBMPlexSans-Regular.ttf",
-            "./assets/fonts/IBMPlexSans-Medium.ttf",
-            "./assets/fonts/IBMPlexSans-Bold.ttf",
             "./assets/fonts/SourceSans3.ttf",
             "./assets/fonts/SourceSans3-Italic.ttf",
             "./assets/fonts/LibreBaskerville.ttf",
