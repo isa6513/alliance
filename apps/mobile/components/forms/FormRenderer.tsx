@@ -1021,7 +1021,7 @@ const FormRenderer = ({
               className={cn(
                 "border rounded-lg px-3 py-3",
                 outOfTimeSelected
-                  ? "border-green-600 bg-green/20"
+                  ? "border-blue-600 bg-blue-100"
                   : "border-zinc-200",
               )}
               onPress={() => {
@@ -1040,7 +1040,7 @@ const FormRenderer = ({
               className={cn(
                 "border rounded-lg px-3 py-3",
                 otherReasonSelected
-                  ? "border-green-600 bg-green/20"
+                  ? "border-blue-600 bg-blue-100"
                   : "border-zinc-200",
               )}
               onPress={() => {
@@ -1069,7 +1069,13 @@ const FormRenderer = ({
               onPress={handleAbandon}
               color={ButtonColor.Black}
               size={ButtonSize.Large}
-              disabled={submitting}
+              disabled={
+                !(
+                  submitting ||
+                  outOfTimeSelected ||
+                  (otherReasonSelected && customReason.trim().length > 0)
+                )
+              }
               title="Withdraw"
             />
           </View>
