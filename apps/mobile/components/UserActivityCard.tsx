@@ -224,7 +224,7 @@ export default function UserActivityCard({
       </TouchableOpacity>
 
       {commentable && (
-        <View className="ml-8">
+        <View className="mx-8 mt-3">
           <Comments
             objectId={activity.id}
             type="activity"

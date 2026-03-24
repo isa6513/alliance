@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, TouchableOpacity, View } from "react-native";
+import type { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import {
   CommentDto,
   CommentParentObject,
@@ -39,6 +40,7 @@ export interface CommentsProps {
   showForm?: boolean;
   initialComments?: CommentDto[];
   highlightedReplyId?: number | null;
+  scrollViewRef?: React.RefObject<KeyboardAwareScrollViewRef | null>;
   repliesAsCards?: boolean;
 }
 
@@ -101,7 +103,7 @@ const ReplyForm = ({
   onSubmit,
 }: ReplyFormProps) => {
   return (
-    <View className="p-2 bg-zinc-100">
+    <View className="p-2 bg-zinc-100 rounded-lg">
       <EditableContentForm
         value={content}
         onChange={setContent}
@@ -129,6 +131,7 @@ type ReplyItemSharedProps = {
   setNestedDraft: (next: CreateEditableContentDto) => void;
   isSubmitting: boolean;
   highlightedId: number | null;
+  scrollViewRef?: React.RefObject<KeyboardAwareScrollViewRef | null>;
   newlyAddedReplies: Set<number>;
   user: UserDto | undefined;
   onSubmitReply: (
@@ -155,6 +158,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
     attachments: reply.editableContent.attachments ?? [],
   });
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const viewRef = useRef<View>(null);
   const maxDepth = 6;
   const canNest = depth < maxDepth;
   const isReplyingToThis = shared.replyingTo === reply.id;
@@ -194,15 +198,32 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
     reply.editableContent.attachments,
   ]);
 
+  useEffect(() => {
+    if (!isHighlighted || !viewRef.current || !shared.scrollViewRef?.current)
+      return;
+    const timer = setTimeout(() => {
+      if (!viewRef.current || !shared.scrollViewRef?.current) return;
+      viewRef.current.measureInWindow((_x, y) => {
+        shared.scrollViewRef!.current?.scrollTo({
+          y: Math.max(0, y - 80),
+          animated: true,
+        });
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [isHighlighted, shared.scrollViewRef]);
+
   return (
     <View
+      ref={viewRef}
+      collapsable={false}
       style={{ marginLeft: Math.min(depth * 12, maxDepth * 12) }}
       className={cn(
         shared.repliesAsCards && "rounded",
         containerBorder,
         containerBg,
         containerSpacing,
-        isHighlighted && "border-l-2 border-blue-500",
+        isHighlighted && "bg-blue-50",
       )}
     >
       <View className="flex-row items-center justify-between">
@@ -288,9 +309,9 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
               }
               activeOpacity={0.7}
             >
-              <Text className={actionTextClass}>
-                {isReplyingToThis ? "Cancel reply" : "Reply"}
-              </Text>
+              {!isReplyingToThis ? (
+                <Text className={actionTextClass}>Reply</Text>
+              ) : null}
             </TouchableOpacity>
           )}
           {shared.user &&
@@ -365,6 +386,7 @@ export default function Comments({
   showForm: showFormProp = true,
   initialComments,
   highlightedReplyId,
+  scrollViewRef,
   repliesAsCards = true,
 }: CommentsProps) {
   const { user } = useAuth();
@@ -651,6 +673,7 @@ export default function Comments({
               setNestedDraft={setNestedDraft}
               isSubmitting={isSubmitting}
               highlightedId={highlightedId}
+              scrollViewRef={scrollViewRef}
               newlyAddedReplies={newlyAddedReplies}
               user={user}
               onSubmitReply={handleSubmitReply}

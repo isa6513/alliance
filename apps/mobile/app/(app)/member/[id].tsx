@@ -405,7 +405,7 @@ export default function UserProfileScreen() {
 
       const parentRoute =
         item.comment.parentObjectType === "post"
-          ? `/forum/post/${item.comment.parentObjectId}`
+          ? `/forum/post/${item.comment.parentObjectId}?replyId=${item.comment.id}`
           : item.comment.parentObjectType === "action"
             ? `/actions/${item.comment.parentObjectId}`
             : null;

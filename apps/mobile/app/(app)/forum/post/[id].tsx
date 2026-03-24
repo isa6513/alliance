@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   forumFindOnePost,
@@ -37,6 +38,7 @@ export default function PostDetailScreen() {
     return Number.isNaN(parsed) ? null : parsed;
   }, [replyId]);
 
+  const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
   const { user } = useAuth();
   const [post, setPost] = useState<PostDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -120,7 +122,7 @@ export default function PostDetailScreen() {
   const action = post.action;
 
   return (
-    <KeyboardAwareScrollView className="bg-white" testID="vr-forum-post-ready">
+    <KeyboardAwareScrollView ref={scrollViewRef} className="bg-white" testID="vr-forum-post-ready">
       <View className="px-4 pb-10">
         <View className="self-start mb-4">
           <BackButton fallbackRoute="/forum" bordered />
@@ -193,6 +195,7 @@ export default function PostDetailScreen() {
             objectId={post.id}
             type="post"
             highlightedReplyId={highlightedReplyId}
+            scrollViewRef={scrollViewRef}
             repliesAsCards={false}
           />
         </View>

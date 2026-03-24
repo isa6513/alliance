@@ -375,6 +375,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
       },
       link: {
         color: colors.green,
+        fontSize: 16,
         textDecorationLine: "underline" as const,
       },
       blockquote: {
