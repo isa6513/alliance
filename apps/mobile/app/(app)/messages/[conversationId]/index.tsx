@@ -252,13 +252,10 @@ export default function ConversationScreen() {
 
   const inputRef = useRef<TextInput | null>(null);
 
-  const handleReply = useCallback(
-    (messageId: string) => {
-      setReplyingTo(messageId);
-      inputRef.current?.focus();
-    },
-    [handleFocusReply],
-  );
+  const handleReply = useCallback((messageId: string) => {
+    setReplyingTo(messageId);
+    inputRef.current?.focus();
+  }, []);
 
   if (loading && !selectedConvo) {
     return (

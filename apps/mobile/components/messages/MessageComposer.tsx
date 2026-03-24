@@ -29,7 +29,7 @@ interface MessageComposerProps {
   replyingTo?: MessageDto | null;
   clearReplyingTo?: () => void;
   placeholder?: string;
-  inputRef: React.RefObject<TextInput | null>;
+  inputRef?: React.RefObject<TextInput | null>;
 }
 
 export default function MessageComposer({
