@@ -19,7 +19,7 @@
     "build:simulator:clean": "npx expo prebuild --clean && cd ios && pod install && cd .. && npx expo run:ios",
     "build:device": "npx expo prebuild --clean && cd ios && pod install && cd .. && npx expo run:ios --device 00008150-001528163445401C",
     "build:android": "npx expo prebuild -p android && npx expo run:android",
-    "build:prod": "npx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace"
+    "build:prod": "APP_VARIANT=production npx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace"
   },
   "dependencies": {
     "@alliance/shared": "workspace:*",
