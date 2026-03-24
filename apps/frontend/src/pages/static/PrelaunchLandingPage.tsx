@@ -9,7 +9,7 @@ import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { ChevronRight } from "lucide-react";
 import Footer from "../../components/Footer";
 
-const FEATURED_ACTION_IDS: number[] = [81, 79, 76, 75];
+const FEATURED_ACTION_IDS: number[] = [84, 81, 76, 75];
 
 function usePrelaunchActions() {
   const results = useQueries({
