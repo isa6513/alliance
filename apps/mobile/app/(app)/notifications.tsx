@@ -102,8 +102,15 @@ export default function NotificationsScreen() {
           );
         },
       );
+      queryClient.setQueryData<number>(["notifications", "unreadCount"], (prev) =>
+        Math.max(
+          (prev ?? notifications.filter((notification) => !notification.readAt).length) -
+            notificationsToMark.length,
+          0,
+        ),
+      );
     },
-    [queryClient],
+    [notifications, queryClient],
   );
 
   const handleMarkAsRead = useCallback(

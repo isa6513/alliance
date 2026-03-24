@@ -348,11 +348,7 @@ export default function ActivityDetailScreen() {
           </View>
 
           <Text className="font-medium text-zinc-900 mb-3">Comments</Text>
-          <Comments
-            objectId={activity.id}
-            type="activity"
-            initialComments={activity.comments}
-          />
+          <Comments objectId={activity.id} type="activity" />
         </View>
       </ScrollView>
     </KeyboardStickyView>

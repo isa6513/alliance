@@ -23,10 +23,6 @@ type PushData = {
   notificationSourceType?: NotificationSourceType;
 };
 
-type NotificationsQueryData = {
-  data?: NotificationDto[];
-} & Record<string, unknown>;
-
 type PendingNotificationAction = {
   cid?: number;
   notificationId?: number;
@@ -47,17 +43,22 @@ function setNotificationReadOptimistically(
   notificationToMark: Pick<NotificationDto, "id" | "sourceType">,
   queryClient: QueryClient
 ) {
-  const existingData =
-    queryClient.getQueryData<NotificationsQueryData>(["notifications"]);
+  const existingData = queryClient.getQueryData<NotificationDto[]>([
+    "notifications",
+  ]);
 
-  if (!existingData?.data) {
+  if (!existingData) {
     void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    void queryClient.invalidateQueries({
+      queryKey: ["notifications", "unreadCount"],
+    });
     return;
   }
 
   const readAt = new Date().toISOString();
   let foundNotification = false;
-  const nextData = existingData.data.map((notification) => {
+  let markedUnreadCount = 0;
+  const nextData = existingData.map((notification) => {
     if (
       getNotificationIdentityKey(notification) !==
       getNotificationIdentityKey(notificationToMark)
@@ -66,17 +67,27 @@ function setNotificationReadOptimistically(
     }
 
     foundNotification = true;
+    if (!notification.readAt) {
+      markedUnreadCount += 1;
+    }
     return { ...notification, readAt };
   });
 
   if (!foundNotification) {
     void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    void queryClient.invalidateQueries({
+      queryKey: ["notifications", "unreadCount"],
+    });
     return;
   }
 
-  queryClient.setQueryData<NotificationsQueryData>(["notifications"], {
-    ...existingData,
-    data: nextData,
+  queryClient.setQueryData<NotificationDto[]>(["notifications"], nextData);
+  queryClient.setQueryData<number>(["notifications", "unreadCount"], (prev) => {
+    if (prev === undefined) {
+      return nextData.filter((notification) => !notification.readAt).length;
+    }
+
+    return Math.max(prev - markedUnreadCount, 0);
   });
 }
 
@@ -96,14 +107,16 @@ export default function PushNotificationResponseHandler({
     (notification: Pick<NotificationDto, "id" | "sourceType">) => {
       setNotificationReadOptimistically(notification, queryClient);
 
-      void notifsSetRead(getNotificationReadRequest(notification)).catch((error) => {
-        console.error(
-          "failed to mark notification as read from push tap",
-          error
-        );
-      });
+      void notifsSetRead(getNotificationReadRequest(notification)).catch(
+        (error) => {
+          console.error(
+            "failed to mark notification as read from push tap",
+            error,
+          );
+        },
+      );
     },
-    [queryClient]
+    [queryClient],
   );
 
   const handlePendingNotificationAction = useCallback(

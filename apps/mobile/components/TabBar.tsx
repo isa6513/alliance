@@ -4,14 +4,18 @@ import { usePathname, useRouter } from "expo-router";
 import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import {
   getAwayStatus,
   showActionInSidebarList,
 } from "@alliance/shared/lib/actionUtils";
 import { useQuery } from "@tanstack/react-query";
-import { userGetAwayRanges } from "@alliance/shared/client";
+import {
+  notifsGetUnreadCount,
+  userGetAwayRanges,
+} from "@alliance/shared/client";
+import { useMessagingUnread } from "../lib/messages";
 
 const tabs = [
   {
@@ -78,7 +82,7 @@ function AnimatedTabButton({
       className="flex-1 items-center"
     >
       <Animated.View
-        className="items-center gap-0.5 pt-3"
+        className="relative items-center gap-0.5 pt-3"
         style={{ transform: [{ scale }] }}
       >
         {children}
@@ -92,9 +96,21 @@ export default function TabBar() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { data: actions } = useActionsQuery();
+  const {
+    unread: unreadMessages,
+    hasUpdates: messageHasUpdates,
+    setUnread: setUnreadMessages,
+    setHasUpdates: setMessageHasUpdates,
+    refreshUnreadCount: refreshUnreadMessages,
+  } = useMessagingUnread();
   const { data: awayRanges = [] } = useQuery({
     queryKey: ["awayRanges"],
     queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
+  });
+  const { data: unreadNotifications = 0 } = useQuery({
+    queryKey: ["notifications", "unreadCount"],
+    queryFn: () =>
+      notifsGetUnreadCount().then((response) => response.data ?? 0),
   });
 
   const uncompletedTaskCount = useMemo(() => {
@@ -110,6 +126,22 @@ export default function TabBar() {
       }),
     ).length;
   }, [actions, awayRanges]);
+  const isOnMessagesTab = pathname.startsWith("/messages");
+
+  useEffect(() => {
+    if (!isOnMessagesTab && messageHasUpdates) {
+      refreshUnreadMessages();
+    }
+  }, [isOnMessagesTab, messageHasUpdates, refreshUnreadMessages]);
+
+  useEffect(() => {
+    if (!isOnMessagesTab) {
+      return;
+    }
+
+    setUnreadMessages(0);
+    setMessageHasUpdates(true);
+  }, [isOnMessagesTab, setMessageHasUpdates, setUnreadMessages]);
 
   const isActive = (matchPaths: string[]) => {
     return matchPaths.some((path) => {
@@ -128,7 +160,22 @@ export default function TabBar() {
       {tabs.map((tab) => {
         const active = isActive(tab.matchPaths);
         const Icon = tab.icon;
-        const taskBadgeCount = tab.href === "/" ? uncompletedTaskCount : 0;
+        const badgeCount =
+          tab.href === "/"
+            ? uncompletedTaskCount
+            : tab.href === "/messages"
+              ? isOnMessagesTab
+                ? 0
+                : unreadMessages
+              : tab.href === "/notifications"
+                ? unreadNotifications
+                : 0;
+        const badgeBackgroundColor =
+          tab.href === "/" ? colors.error : colors.text.icon;
+        const badgeLabel =
+          tab.href === "/notifications" && badgeCount > 99
+            ? "99+"
+            : badgeCount.toString();
         return (
           <AnimatedTabButton
             key={tab.href}
@@ -149,10 +196,13 @@ export default function TabBar() {
             >
               {tab.label}
             </Text>
-            {taskBadgeCount > 0 && (
-              <View className="absolute top-2 -right-2.5 bg-red-500 rounded-full min-w-5 h-5 px-1 items-center justify-center">
+            {badgeCount > 0 && (
+              <View
+                className="absolute top-2 ml-5 rounded-full min-w-5 h-5 px-1 items-center justify-center"
+                style={{ backgroundColor: badgeBackgroundColor }}
+              >
                 <Text className="text-[10px] text-white font-semibold">
-                  {taskBadgeCount}
+                  {badgeLabel}
                 </Text>
               </View>
             )}

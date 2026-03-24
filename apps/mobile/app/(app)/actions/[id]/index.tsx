@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Keyboard,
   Pressable,
   RefreshControl,
   TouchableOpacity,
@@ -371,7 +372,10 @@ export default function ActionDetailScreen() {
             {tabs.map((tab) => (
               <TouchableOpacity
                 key={tab.id}
-                onPress={() => setActiveTab(tab.id)}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setActiveTab(tab.id);
+                }}
                 className={cn(
                   "px-4 py-3 items-center grow",
                   activeTab === tab.id && "border-b-2 border-green",
