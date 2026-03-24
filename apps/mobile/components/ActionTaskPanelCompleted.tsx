@@ -6,7 +6,7 @@ import FormRenderer from "./forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import { View } from "react-native";
 import { taskCompleted } from "@alliance/shared/lib/copy";
-import { Check } from "lucide-react-native";
+import CheckIcon from "./system/CheckIcon";
 
 export interface ActionTaskPanelCompletedProps {
   action: ActionDto | null;
@@ -15,14 +15,19 @@ const ActionTaskPanelCompleted = ({
   action,
 }: ActionTaskPanelCompletedProps) => {
   const formResponse = useCompletedTaskForm(action);
+  const hasCompletedForm = Boolean(action?.taskFormId && formResponse);
 
   const completedCard = (
-    <Card cardStyle={CardStyle.Outline} className="border">
-      <View className="flex-row items-center gap-x-2 max-w-[100vw]">
-        <View className="w-6 h-6 rounded-full bg-green items-center justify-center">
-          <Check size={16} color="#fff" strokeWidth={3} />
-        </View>
-        <Text>{taskCompleted}</Text>
+    <Card
+      cardStyle={CardStyle.White}
+      className={[
+        "border border-zinc-200",
+        hasCompletedForm ? "rounded-b-none" : "",
+      ].join(" ")}
+    >
+      <View className="flex-row items-center gap-x-3">
+        <CheckIcon size="small" />
+        <Text className="text-zinc-900">{taskCompleted}</Text>
       </View>
     </Card>
   );
@@ -33,7 +38,7 @@ const ActionTaskPanelCompleted = ({
         {completedCard}
         <Card
           cardStyle={CardStyle.Grey}
-          className="p-3 space-y-4 border-none rounded-t-none"
+          className="p-3 space-y-4 rounded-t-none border border-zinc-200 border-t-0 bg-zinc-100"
         >
           <FormRenderer
             form={formResponse.schemaSnapshot as unknown as FormSchema}

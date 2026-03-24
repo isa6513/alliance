@@ -6,6 +6,7 @@ import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
 import ActionPageTaskPanelCardWrapper from "./ActionPageTaskPanelCardWrapper";
+import { taskCompleted } from "@alliance/shared/lib/copy";
 
 export interface ActionTaskPanelCompletedProps {
   action: ActionDto | null;
@@ -19,7 +20,7 @@ const ActionTaskPanelCompleted = ({
   const completedCard = (
     <div className="flex items-center gap-x-3">
       <CheckIcon size="small" />
-      <p>You&apos;ve completed this task.</p>
+      <p>{taskCompleted}</p>
     </div>
   );
 
