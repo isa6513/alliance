@@ -48,12 +48,13 @@ const options: Partial<PostHogOptions> = {
 
 export default function RootLayout() {
   useFonts({
-    SourceSans3: require("../assets/fonts/SourceSans3.ttf"),
-    LibreBaskerville: require("../assets/fonts/LibreBaskerville.ttf"),
-    "LibreBaskerville-Bold": require("../assets/fonts/LibreBaskerville-Bold.ttf"),
-    "LibreBaskerville-SemiBold": require("../assets/fonts/LibreBaskerville-SemiBold.ttf"),
+    "Source Sans 3": require("../assets/fonts/SourceSans3.ttf"),
+    "Libre Baskerville": require("../assets/fonts/LibreBaskerville.ttf"),
+    "Libre Baskerville Bold": require("../assets/fonts/LibreBaskerville-Bold.ttf"),
+    "Libre Baskerville SemiBold": require("../assets/fonts/LibreBaskerville-SemiBold.ttf"),
     Berlingske: require("../assets/fonts/BerlingskeSerif-Blk.ttf"),
   });
+
   useEffect(() => {
     const tokenStore = Platform.OS === "web" ? WebTokenStore : SecureStorage;
     const originalFetch = fetch.bind(globalThis);
