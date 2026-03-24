@@ -32,7 +32,6 @@ import EditableContentRenderer from "../../../../../components/EditableContentRe
 import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
 import OutputRenderer from "../../../../../components/OutputRenderer";
 import BackButton from "../../../../../components/system/BackButton";
-import KeyboardAwareScrollView from "../../../../../components/KeyboardAwareScrollView";
 import { KeyboardStickyView } from "react-native-keyboard-controller";
 
 export default function ActivityDetailScreen() {
@@ -248,21 +247,17 @@ export default function ActivityDetailScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Header */}
         <View className="p-4">
-          {/* Back button */}
           <BackButton
             fallbackRoute={`/actions/${id}`}
             className="mb-4"
             bordered
           />
 
-          {/* Action name */}
           <Text className="text-2xl font-serif font-semibold mb-4">
             {activity.actionName}
           </Text>
 
-          {/* User info row */}
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center gap-x-2 flex-1">
               <TouchableOpacity onPress={handleUserPress} activeOpacity={0.7}>
@@ -290,7 +285,6 @@ export default function ActivityDetailScreen() {
               </View>
             )}
 
-          {/* Timestamp and edit button */}
           <View className="flex-row items-center justify-between mb-4">
             <Text className="text-zinc-500 text-sm">
               {formatTime(new Date(activity.createdAt), { addSuffix: true })}
@@ -344,7 +338,6 @@ export default function ActivityDetailScreen() {
             </>
           )}
 
-          {/* Like button */}
           <View className="flex-row items-center mb-6">
             <LikeButton
               liked={activity.likedByMe ?? false}
@@ -354,15 +347,12 @@ export default function ActivityDetailScreen() {
             />
           </View>
 
-          {/* Comments */}
-          <View>
-            <Text className="font-medium text-zinc-900 mb-3">Comments</Text>
-            <Comments
-              objectId={activity.id}
-              type="activity"
-              initialComments={activity.comments}
-            />
-          </View>
+          <Text className="font-medium text-zinc-900 mb-3">Comments</Text>
+          <Comments
+            objectId={activity.id}
+            type="activity"
+            initialComments={activity.comments}
+          />
         </View>
       </ScrollView>
     </KeyboardStickyView>
