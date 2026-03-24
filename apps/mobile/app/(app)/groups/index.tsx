@@ -270,6 +270,7 @@ type MembersListItem =
         profilePicture?: string | null;
       };
       isLeader: boolean;
+      isLastInSection: boolean;
       completedAll?: boolean;
       contactInfo?: CommunityMemberContactInfoDto | null;
       deadlineTimestamp?: number;
@@ -294,7 +295,7 @@ function buildMembersListItems(params: {
   const items: MembersListItem[] = [];
   if (leaders.length > 0) {
     items.push({ type: "header", id: "leaders", label: "Leads" });
-    for (const profile of leaders) {
+    leaders.forEach((profile, index) => {
       items.push({
         type: "member",
         id: profile.id,
@@ -304,12 +305,13 @@ function buildMembersListItems(params: {
           profilePicture: profile.profilePicture,
         },
         isLeader: true,
+        isLastInSection: index === leaders.length - 1,
       });
-    }
+    });
   }
   if (sortedNonLeaderMembers.length > 0) {
     items.push({ type: "header", id: "members", label: "Members" });
-    for (const profile of sortedNonLeaderMembers) {
+    sortedNonLeaderMembers.forEach((profile, index) => {
       const completedAll = memberInfoReady
         ? !hasActionsToComplete(deadlineTimestampByUserId, profile.id)
         : undefined;
@@ -322,13 +324,14 @@ function buildMembersListItems(params: {
           profilePicture: profile.profilePicture,
         },
         isLeader: false,
+        isLastInSection: index === sortedNonLeaderMembers.length - 1,
         completedAll,
         contactInfo: amLeader
           ? (memberContactInfoByUserId?.[profile.id] ?? null)
           : undefined,
         deadlineTimestamp: deadlineTimestampByUserId.get(profile.id),
       });
-    }
+    });
   }
   return items;
 }
@@ -430,6 +433,7 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
           <GroupMemberRow
             profile={item.profile}
             isLeader={item.isLeader}
+            isLastInSection={item.isLastInSection}
             completedAll={item.completedAll}
             contactInfo={item.contactInfo}
             deadlineTimestamp={item.deadlineTimestamp}

@@ -10,12 +10,7 @@ export function SectionHeader({
   className?: string;
 }) {
   return (
-    <View
-      className={cn(
-        "px-4 pb-2 pt-2 bg-white",
-        className,
-      )}
-    >
+    <View className={cn("px-4 py-2 bg-zinc-50 mt-2", className)}>
       <Text className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
         {label}
       </Text>

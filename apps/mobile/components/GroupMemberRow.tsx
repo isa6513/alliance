@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { router } from "expo-router";
 import {
   AlarmClock,
-  CheckCircle,
+  Check,
   ChevronDown,
   Circle,
   Globe,
@@ -26,11 +26,11 @@ import Text, { TextStyle } from "./system/Text";
 import ProfileImage from "./ProfileImage";
 import { colors } from "../lib/style/colors";
 
-/** Icon sizes: inline with text = 16, row accent = 18, completion = 22, contact actions = 28 */
+/** Icon sizes: inline with text = 16, row accent = 18, completion = 22, contact actions = 18 */
 const ICON_SIZE_INLINE = 16;
 const ICON_SIZE_CHEVRON = 18;
 const ICON_SIZE_COMPLETION = 22;
-const ICON_SIZE_CONTACT_ACTION = 28;
+const ICON_SIZE_CONTACT_ACTION = 18;
 
 const CONTACT_ACTION_ICONS = {
   profile: User,
@@ -49,6 +49,8 @@ export type GroupMemberRowProfile = {
 export type GroupMemberRowProps = {
   profile: GroupMemberRowProfile;
   isLeader: boolean;
+  /** When true, omit bottom border (last row before next section header or list end). */
+  isLastInSection?: boolean;
   /** When true, show green checkmark (completed all). When false, show grey circle. Omitted for leaders. */
   completedAll?: boolean;
   /** When amLeader and !completedAll, show contact info (expandable block). */
@@ -60,6 +62,7 @@ export type GroupMemberRowProps = {
 export function GroupMemberRow({
   profile,
   isLeader,
+  isLastInSection,
   completedAll,
   contactInfo,
   deadlineTimestamp,
@@ -89,20 +92,12 @@ export function GroupMemberRow({
   }, [hasDropdown, profile.id]);
 
   return (
-    <View className="border-b border-zinc-200">
+    <View className={cn(!isLastInSection && "border-b border-zinc-200")}>
       <TouchableOpacity
         onPress={onTopBarPress}
         className="flex-row items-center gap-3 px-4 py-3"
         activeOpacity={0.7}
       >
-        <View
-          className="items-center justify-center"
-          style={{ width: ICON_SIZE_COMPLETION }}
-        >
-          {completedAll !== undefined ? (
-            <MemberCompletionIcon completedAll={completedAll} />
-          ) : null}
-        </View>
         <ProfileImage pfp={profile.profilePicture ?? null} size="large" />
         <View className="flex-1 min-w-0">
           <Text className="font-medium text-zinc-900" numberOfLines={1}>
@@ -114,6 +109,17 @@ export function GroupMemberRow({
             </Text>
           )}
         </View>
+        {completedAll !== undefined ? (
+          <View
+            className="items-center justify-center"
+            style={{
+              width: ICON_SIZE_COMPLETION,
+              height: ICON_SIZE_COMPLETION,
+            }}
+          >
+            <MemberCompletionIcon completedAll={completedAll} />
+          </View>
+        ) : null}
         {hasDropdown && (
           <View
             style={{
@@ -191,8 +197,8 @@ function MemberContactBlock({
   );
 
   return (
-    <View className="px-4 pt-2 pb-6 gap-y-3">
-      <View className="flex-row items-center gap-x-2">
+    <View className="px-4 py-2 gap-y-3">
+      <View className="flex-row items-center">
         <Text className="text-sm font-semibold text-zinc-700">
           Next task due:{" "}
         </Text>
@@ -261,7 +267,7 @@ function MemberContactBlock({
           </View>
         </View>
       )}
-      <View className="flex-row items-center">
+      <View className="flex-row items-center gap-x-1">
         {descriptors.map(({ id, label, accessibilityLabel, disabled }) => {
           const Icon = CONTACT_ACTION_ICONS[id];
           return (
@@ -271,7 +277,7 @@ function MemberContactBlock({
               activeOpacity={0.7}
               accessibilityLabel={accessibilityLabel}
               disabled={disabled}
-              className="flex-1 flex-col items-center gap-y-1"
+              className="flex-1 flex-col items-center gap-y-1 bg-zinc-50 rounded p-2"
             >
               <Icon size={ICON_SIZE_CONTACT_ACTION} color={colors.text.icon} />
               <Text type={TextStyle.Secondary} className="text-xs">
@@ -288,11 +294,19 @@ function MemberContactBlock({
 function MemberCompletionIcon({ completedAll }: { completedAll: boolean }) {
   if (completedAll) {
     return (
-      <CheckCircle
-        size={ICON_SIZE_COMPLETION}
-        color={colors.green}
-        strokeWidth={2}
-      />
+      <View
+        className="bg-green rounded-full items-center justify-center"
+        style={{
+          width: ICON_SIZE_COMPLETION,
+          height: ICON_SIZE_COMPLETION,
+        }}
+      >
+        <Check
+          size={Math.round(ICON_SIZE_COMPLETION * 0.55)}
+          color={colors.white}
+          strokeWidth={3}
+        />
+      </View>
     );
   }
   return (

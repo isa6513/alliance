@@ -122,7 +122,7 @@ function TaskNavigatorTodoActionRow({
   return (
     <li
       className={cn(
-        "rounded-lg px-2 py-1.5 -mx-0.5 transition-colors",
+        "rounded-lg px-2 py-1.5 -mx-0.5",
         isActive ? "bg-green/10" : "hover:bg-grey-2",
       )}
       aria-current={isActive ? "true" : undefined}
@@ -520,7 +520,7 @@ const HomePage = () => {
               <Link
                 key={action.id}
                 to={href("/actions/:id", { id: action.id.toString() })}
-                className="block p-4 rounded bg-white hover:bg-grey-1 transition-colors"
+                className="block p-4 rounded bg-white hover:bg-grey-1"
               >
                 <p className="text-sm font-medium text-green mb-2">
                   {action.name}
