@@ -122,7 +122,11 @@ export default function PostDetailScreen() {
   const action = post.action;
 
   return (
-    <KeyboardAwareScrollView ref={scrollViewRef} className="bg-white" testID="vr-forum-post-ready">
+    <KeyboardAwareScrollView
+      ref={scrollViewRef}
+      className="bg-white"
+      testID="vr-forum-post-ready"
+    >
       <View className="px-4 pb-10">
         <View className="self-start mb-4">
           <BackButton fallbackRoute="/forum" bordered />
@@ -171,12 +175,11 @@ export default function PostDetailScreen() {
             <EditableContentRenderer content={post.editableContent} />
           </View>
 
-          <View className="flex-row items-center gap-x-2 mt-3">
+          <View className="flex-row items-center gap-x-2 mt-1">
             <LikeButton
               liked={likedByMe}
               likes={likeCount}
               onPress={user ? handleLike : undefined}
-              bordered
             />
             {post.author.id === user?.id && (
               <TouchableOpacity
