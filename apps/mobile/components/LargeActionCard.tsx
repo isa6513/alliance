@@ -71,7 +71,7 @@ export default function LargeActionCard({
             onDismiss={dismissProps.onDismiss}
           />
         )}
-        <Text className="font-semibold text-2xl font-serif">{action.name}</Text>
+        <Text className="text-2xl font-serif font-bold">{action.name}</Text>
         <View className="flex flex-row items-center justify-between mt-2">
           <TaskTimeInfo
             action={action}

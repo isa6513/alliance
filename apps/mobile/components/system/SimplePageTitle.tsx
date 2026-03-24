@@ -23,9 +23,7 @@ export const SimplePageTitle = ({
           {!isPermanent && (
             <Menu size={25} color={colors.text.icon} strokeWidth={2.5} />
           )}
-          <Text className="text-xl font-semibold text-zinc-900 font-serif">
-            {title}
-          </Text>
+          <Text className="text-2xl font-semibold text-zinc-900">{title}</Text>
         </View>
       </Pressable>
       {children}

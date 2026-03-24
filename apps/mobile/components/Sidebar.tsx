@@ -201,8 +201,8 @@ export default function Sidebar() {
                     />
                     <Text
                       className={cn(
-                        "ml-3",
-                        active ? "font-medium" : "text-zinc-900",
+                        "ml-3 text-[17px]",
+                        active ? "font-medium text-black" : "text-zinc-900",
                       )}
                     >
                       {item.name}
