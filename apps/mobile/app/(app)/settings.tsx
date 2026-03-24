@@ -54,6 +54,7 @@ function SettingsToggleRow({
           true: colors.green,
           false: colors.switch.trackOff,
         }}
+        thumbColor={colors.white}
         ios_backgroundColor={colors.switch.trackOff}
       />
       <View className="ml-3 flex-1">
@@ -277,30 +278,11 @@ export default function SettingsPage() {
               When off, other members will not be able to see your name
               (anonymous).
             </Text>
-            <TouchableOpacity
-              className="flex-row items-center"
-              onPress={() =>
-                updateEditableUser({
-                  anonymous: !editableUser.anonymous,
-                })
-              }
-              activeOpacity={0.7}
-            >
-              <Switch
-                value={!editableUser.anonymous}
-                onValueChange={(value) =>
-                  updateEditableUser({ anonymous: !value })
-                }
-                trackColor={{
-                  true: colors.green,
-                  false: colors.switch.trackOff,
-                }}
-                ios_backgroundColor={colors.switch.trackOff}
-              />
-              <Text className="ml-3 text-base">
-                Show my name to other members
-              </Text>
-            </TouchableOpacity>
+            <SettingsToggleRow
+              label="Show my name to other members"
+              value={!editableUser.anonymous}
+              onChange={(value) => updateEditableUser({ anonymous: !value })}
+            />
           </Card>
 
           {/* Notifications Section */}
@@ -442,57 +424,25 @@ export default function SettingsPage() {
               </Text>
 
               <View className="gap-3">
-                <TouchableOpacity
-                  className="flex-row items-center"
-                  onPress={() =>
+                <SettingsToggleRow
+                  label="Email"
+                  value={!!editableUser.shareEmailWithCommunityLead}
+                  onChange={(value) =>
                     updateEditableUser({
-                      shareEmailWithCommunityLead:
-                        !editableUser.shareEmailWithCommunityLead,
+                      shareEmailWithCommunityLead: value,
                     })
                   }
-                  activeOpacity={0.7}
-                >
-                  <Switch
-                    value={!!editableUser.shareEmailWithCommunityLead}
-                    onValueChange={(value) =>
-                      updateEditableUser({
-                        shareEmailWithCommunityLead: value,
-                      })
-                    }
-                    trackColor={{
-                      true: colors.green,
-                      false: colors.switch.trackOff,
-                    }}
-                    ios_backgroundColor={colors.switch.trackOff}
-                  />
-                  <Text className="ml-3 text-base">Email</Text>
-                </TouchableOpacity>
+                />
 
-                <TouchableOpacity
-                  className="flex-row items-center"
-                  onPress={() =>
+                <SettingsToggleRow
+                  label="Phone number"
+                  value={!!editableUser.sharePhoneNumberWithCommunityLead}
+                  onChange={(value) =>
                     updateEditableUser({
-                      sharePhoneNumberWithCommunityLead:
-                        !editableUser.sharePhoneNumberWithCommunityLead,
+                      sharePhoneNumberWithCommunityLead: value,
                     })
                   }
-                  activeOpacity={0.7}
-                >
-                  <Switch
-                    value={!!editableUser.sharePhoneNumberWithCommunityLead}
-                    onValueChange={(value) =>
-                      updateEditableUser({
-                        sharePhoneNumberWithCommunityLead: value,
-                      })
-                    }
-                    trackColor={{
-                      true: colors.green,
-                      false: colors.switch.trackOff,
-                    }}
-                    ios_backgroundColor={colors.switch.trackOff}
-                  />
-                  <Text className="ml-3 text-base">Phone number</Text>
-                </TouchableOpacity>
+                />
               </View>
             </Card>
           )}
@@ -510,33 +460,15 @@ export default function SettingsPage() {
               Some parts of your completed tasks can be visible to other
               members.
             </Text>
-            <TouchableOpacity
-              className="flex-row items-center"
-              onPress={() =>
+            <SettingsToggleRow
+              label="Default to visible"
+              value={editableUser.formDataPreference === "public"}
+              onChange={(value) =>
                 updateEditableUser({
-                  formDataPreference:
-                    editableUser.formDataPreference === "public"
-                      ? "private"
-                      : "public",
+                  formDataPreference: value ? "public" : "private",
                 })
               }
-              activeOpacity={0.7}
-            >
-              <Switch
-                value={editableUser.formDataPreference === "public"}
-                onValueChange={(value) =>
-                  updateEditableUser({
-                    formDataPreference: value ? "public" : "private",
-                  })
-                }
-                trackColor={{
-                  true: colors.green,
-                  false: colors.switch.trackOff,
-                }}
-                ios_backgroundColor={colors.switch.trackOff}
-              />
-              <Text className="ml-3 text-base">Default to visible</Text>
-            </TouchableOpacity>
+            />
             <Text className="text-sm text-zinc-500 mt-2">
               You will still be able to control visibility for specific tasks.
             </Text>
