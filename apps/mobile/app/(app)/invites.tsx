@@ -26,6 +26,7 @@ import Text from "../../components/system/Text";
 import InviteForm from "../../components/InviteForm";
 import { InviteSection } from "../../components/InviteSection";
 import ReferralQrSection from "../../components/ReferralQrSection";
+import { colors } from "../../lib/style/colors";
 
 enum InvitesTab {
   ReferralQr = "referral_qr",
@@ -250,7 +251,7 @@ export default function InvitesScreen() {
   };
 
   return (
-    <View className="flex-1 bg-zinc-50">
+    <View className="flex-1" style={{ backgroundColor: colors.grey[0] }}>
       <SimplePageTitle title="Invites">
         {acceptedInvites.length > 0 && (
           <Text className="text-sm text-zinc-500 py-4">

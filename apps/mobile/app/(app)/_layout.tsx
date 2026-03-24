@@ -47,6 +47,10 @@ function AppContent() {
             name="contract"
             options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
           />
+          <Stack.Screen
+            name="invites"
+            options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
+          />
         </Stack>
         <TabBar />
       </View>
