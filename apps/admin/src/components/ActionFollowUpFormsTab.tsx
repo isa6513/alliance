@@ -123,6 +123,7 @@ export default function ActionFollowUpFormsTab({
         startDate: string | null;
         endDate: string | null;
         instructions: string | null;
+        cohortExpression: CohortExpression | null;
       },
     ) => {
       setSavingFields(followUpFormId);
@@ -140,6 +141,9 @@ export default function ActionFollowUpFormsTab({
             startDate: startIso || null,
             endDate: endIso || null,
             instructions: fields.instructions?.trim() || null,
+            cohortExpression:
+              (fields.cohortExpression as Record<string, unknown> | null) ??
+              null,
           },
         });
         if (res.data) {
@@ -257,16 +261,6 @@ export default function ActionFollowUpFormsTab({
           availableActions={availableActions}
           availableForms={availableForms}
           availableUsers={availableUsers}
-          onCohortExpressionChange={async (
-            followUpFormId: number,
-            expr: CohortExpression | null,
-          ) => {
-            await actionsUpdateFollowUpForm({
-              path: { followUpFormId },
-              body: { cohortExpression: expr as Record<string, unknown> | null },
-            });
-            await refetchAction();
-          }}
         />
       )}
     </div>
@@ -283,14 +277,11 @@ interface FollowUpFormCardProps {
       startDate: string | null;
       endDate: string | null;
       instructions: string | null;
+      cohortExpression: CohortExpression | null;
     },
   ) => Promise<void>;
   onSetFormId: (followUpFormId: number, formId: number) => Promise<void>;
   onDelete: (followUpFormId: number) => Promise<void>;
-  onCohortExpressionChange: (
-    followUpFormId: number,
-    expr: CohortExpression | null,
-  ) => Promise<void>;
   savingFields: boolean;
   deleting: boolean;
   availableTags: TagDto[];
@@ -305,7 +296,6 @@ function FollowUpFormCard({
   onSaveFields,
   onSetFormId,
   onDelete,
-  onCohortExpressionChange,
   savingFields,
   deleting,
   availableTags,
@@ -321,6 +311,10 @@ function FollowUpFormCard({
   const [instructions, setInstructions] = useState<string>(
     followUpForm.instructions ?? "",
   );
+  const [cohortExpr, setCohortExpr] = useState<CohortExpression | null>(
+    (followUpForm.cohortExpression as unknown as CohortExpression | null) ??
+      null,
+  );
 
   const handleSaveFields = () => {
     onSaveFields(followUpForm.id, {
@@ -328,6 +322,7 @@ function FollowUpFormCard({
       startDate: startDate || null,
       endDate: endDate || null,
       instructions: instructions.trim() === "" ? null : instructions.trim(),
+      cohortExpression: cohortExpr,
     });
   };
 
@@ -370,12 +365,8 @@ function FollowUpFormCard({
             to all completers.
           </p>
           <CohortExpressionBuilder
-            value={
-              (followUpForm.cohortExpression as CohortExpression | null) ?? null
-            }
-            onChange={(expr) =>
-              onCohortExpressionChange(followUpForm.id, expr)
-            }
+            value={cohortExpr}
+            onChange={setCohortExpr}
             availableTags={availableTags}
             availableActions={availableActions}
             availableForms={availableForms}

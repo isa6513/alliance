@@ -183,6 +183,9 @@ export type FollowUpForm = {
     startDate?: string | null;
     endDate?: string | null;
     instructions?: string | null;
+    cohortExpression?: {
+        [key: string]: unknown;
+    };
     actionId: number;
     formId: number;
 };
@@ -1602,6 +1605,9 @@ export type FollowUpFormDto = {
     startDate?: string | null;
     endDate?: string | null;
     instructions?: string | null;
+    cohortExpression?: {
+        [key: string]: unknown;
+    };
     actionId: number;
     formId: number;
     form?: Form;
@@ -1612,6 +1618,9 @@ export type CreateFollowUpFormDto = {
     startDate?: string | null;
     endDate?: string | null;
     instructions?: string | null;
+    cohortExpression?: {
+        [key: string]: unknown;
+    };
     actionId: number;
     formId: number;
 };
@@ -1621,6 +1630,9 @@ export type UpdateFollowUpFormDto = {
     startDate?: string | null;
     endDate?: string | null;
     instructions?: string | null;
+    cohortExpression?: {
+        [key: string]: unknown;
+    };
     formId?: number;
 };
 
