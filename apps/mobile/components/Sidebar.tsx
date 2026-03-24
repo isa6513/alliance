@@ -14,6 +14,7 @@ import {
   UserPlus,
   Users,
   MessageSquare,
+  QrCode,
 } from "lucide-react-native";
 import Text from "./system/Text";
 import { colors } from "../lib/style/colors";
@@ -143,24 +144,32 @@ export default function Sidebar() {
     >
       <View className="flex-1">
         {/* Close button */}
-        <View className="flex-row justify-end px-4 mb-4">
+        <View className="flex-row justify-end px-4">
           <TouchableOpacity onPress={() => closeDrawer()} className="p-2">
             <X size={24} color="#71717a" />
           </TouchableOpacity>
         </View>
 
         {/* Logo */}
-        <TouchableOpacity
-          onPress={() => handleNavigate("/")}
-          className="px-6 mb-8"
-        >
-          <Text
-            className="uppercase text-xl font-bold"
-            style={{ fontFamily: "Berlingske" }}
+        <View className="px-6 mb-8">
+          <TouchableOpacity
+            onPress={() => handleNavigate("/invites")}
+            className="mb-3 self-start p-1 -ml-1"
+            accessibilityRole="button"
+            accessibilityLabel="Invites"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            The Alliance
-          </Text>
-        </TouchableOpacity>
+            <QrCode size={26} color={colors.text.icon} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleNavigate("/")}>
+            <Text
+              className="uppercase text-xl font-bold"
+              style={{ fontFamily: "Berlingske" }}
+            >
+              The Alliance
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Navigation sections */}
         <View className="px-4">

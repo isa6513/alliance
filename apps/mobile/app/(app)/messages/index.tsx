@@ -88,7 +88,7 @@ export default function MessagesScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
-        <View className="px-4 pt-4 pb-2 bg-white">
+        <View className="px-4 pb-2 bg-white">
           <View className="flex-row items-center gap-2 rounded-md bg-zinc-100 p-3">
             <Search size={16} color="#71717a" />
             <TextInput
