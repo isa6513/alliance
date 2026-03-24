@@ -5,6 +5,7 @@ import {
   ImageBackground,
   ImageSourcePropType,
   ViewProps,
+  TouchableOpacityProps,
 } from "react-native";
 import { cardStyleClasses } from "@alliance/shared/styles/card";
 
@@ -20,7 +21,7 @@ export enum CardStyle {
   Red = "red",
 }
 
-interface CardProps extends ViewProps {
+interface CardProps extends TouchableOpacityProps {
   children: React.ReactNode;
   cardStyle?: CardStyle;
   onPress?: () => void;

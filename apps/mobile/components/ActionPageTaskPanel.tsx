@@ -73,9 +73,23 @@ const ActionPageTaskPanel = ({
       );
     case ActionPageTaskPanelState.NotAssigned:
       return (
-        <Card cardStyle={CardStyle.Grey}>
-          <Text>{taskNotAssigned}</Text>
-        </Card>
+        <View className="gap-y-2">
+          <Card cardStyle={CardStyle.Grey}>
+            <Text>{taskNotAssigned}</Text>
+          </Card>
+          <ActionTaskPanel
+            action={action}
+            userRelation={userRelation ?? "none"}
+            scrollPageTo={scrollPageTo}
+            scrollToEnd={scrollToEnd}
+            disabled
+            onSubmitSuccess={() => {}}
+            onCompleteAction={() => {}}
+            onJoinAction={() => {}}
+            onDeclineAction={() => {}}
+            onOptOutAction={() => {}}
+          />
+        </View>
       );
     case ActionPageTaskPanelState.MissingDataOrNotActive:
       return null;

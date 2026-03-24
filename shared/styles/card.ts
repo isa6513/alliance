@@ -24,7 +24,7 @@ export const cardStyleClasses: Record<CardStyle, string> = {
   [CardStyle.WhiteSolid]: "bg-white border-none",
   [CardStyle.Alert]: "bg-sky-100 border-sky-300",
   [CardStyle.Outline]: "bg-transparent border-zinc-200 hover:bg-zinc-100",
-  [CardStyle.Grey]: "bg-grey-1 border-none",
+  [CardStyle.Grey]: "bg-zinc-100 border-none",
   [CardStyle.GreyBorder]: "bg-grey-1 border-zinc-200 box-border",
   [CardStyle.LightGreyBorder]: "bg-grey-0 border-zinc-200 box-border",
   [CardStyle.Navy]: "bg-navy text-white border-none rounded-none",

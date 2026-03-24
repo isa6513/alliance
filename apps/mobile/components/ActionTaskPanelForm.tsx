@@ -26,6 +26,7 @@ interface ActionTaskPanelFormProps {
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
   onSubmitSuccess: () => void;
+  disabled?: boolean;
 }
 
 const ActionTaskPanelForm = ({
@@ -38,6 +39,7 @@ const ActionTaskPanelForm = ({
   scrollPageTo,
   scrollToEnd,
   onSubmitSuccess,
+  disabled,
 }: ActionTaskPanelFormProps) => {
   const posthog = usePostHog();
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +109,7 @@ const ActionTaskPanelForm = ({
         persistKey={String(taskFormId)}
         scrollPageTo={scrollPageTo}
         scrollToEnd={scrollToEnd}
+        renderFormAsCompleted={disabled}
       />
       {error ? <Text className="text-red-500">{error}</Text> : null}
       {formError ? (

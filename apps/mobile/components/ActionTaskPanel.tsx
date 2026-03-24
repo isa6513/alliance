@@ -20,6 +20,7 @@ const ActionTaskPanel = ({
   onOptOutAction,
   scrollPageTo,
   scrollToEnd,
+  disabled,
   onSubmitSuccess,
 }: ActionTaskPanelProps) => {
   const {
@@ -58,6 +59,7 @@ const ActionTaskPanel = ({
         onAbandonAction={handleAbandonAction}
         actionId={action.id}
         onSubmitSuccess={onSubmitSuccess}
+        disabled={disabled}
       />
     );
   }
