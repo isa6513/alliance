@@ -133,12 +133,17 @@ type RenderDisplayBlockMobileProps = {
   block: DisplayBlock;
   previousAnswerData?: Record<number, Record<string, unknown>>;
   previousAnswerSchemas?: Record<number, FormSchema>;
+  /** Used for video spacing: margin only when another visible block/field is above on the page */
+  hasRenderedNeighborAbove?: boolean;
+  hasRenderedNeighborBelow?: boolean;
 };
 
 export function RenderDisplayBlockMobile({
   block,
   previousAnswerData,
   previousAnswerSchemas,
+  hasRenderedNeighborAbove = false,
+  hasRenderedNeighborBelow = false,
 }: RenderDisplayBlockMobileProps) {
   switch (block.kind) {
     case "header":
@@ -224,16 +229,24 @@ export function RenderDisplayBlockMobile({
       );
     case "copytext":
       return <CopyTextDisplayMobile text={block.text} title={block.title} />;
-    case "video":
+    case "video": {
       return block.videoId !== undefined ? (
-        <VideoPlayer
-          src={block.src}
-          videoId={block.videoId}
-          caption={block.caption}
-        />
+        <View
+          className={cn(
+            hasRenderedNeighborAbove && "mt-4",
+            hasRenderedNeighborBelow && "mb-4",
+          )}
+        >
+          <VideoPlayer
+            src={block.src}
+            videoId={block.videoId}
+            caption={block.caption}
+          />
+        </View>
       ) : (
         <Text className="text-sm text-red-500">Could not load video</Text>
       );
+    }
     case "previousAnswer": {
       const answers = previousAnswerData?.[block.sourceFormId];
       const schema = previousAnswerSchemas?.[block.sourceFormId];
@@ -998,47 +1011,66 @@ const FormRenderer = ({
   const isFirstPage = currentPageIndex === 0;
   const isLastPage = currentPageIndex === maxPageIndex;
 
+  const pageFields = currentPage?.fields ?? [];
+  const hasRenderedNeighborAbove = (idx: number): boolean => {
+    for (let j = idx - 1; j >= 0; j--) {
+      if (isElementCurrentlyVisible(pageFields[j])) return true;
+    }
+    return false;
+  };
+  const hasRenderedNeighborBelow = (idx: number): boolean => {
+    for (let j = idx + 1; j < pageFields.length; j++) {
+      if (isElementCurrentlyVisible(pageFields[j])) return true;
+    }
+    return false;
+  };
+
   return (
-    <View className="flex flex-col gap-y-2">
-      {currentPage?.fields.map((element, idx) => {
-        if (!("label" in element)) {
+    <View className="flex flex-col gap-y-8">
+      <View className="gap-y-4">
+        {currentPage?.fields.map((element, idx) => {
+          if (!("label" in element)) {
+            return (
+              <View key={`block-${idx}`}>
+                <RenderDisplayBlockMobile
+                  block={element as DisplayBlock}
+                  previousAnswerData={previousAnswerData}
+                  previousAnswerSchemas={previousAnswerSchemas}
+                  hasRenderedNeighborAbove={hasRenderedNeighborAbove(idx)}
+                  hasRenderedNeighborBelow={hasRenderedNeighborBelow(idx)}
+                />
+              </View>
+            );
+          }
+          const field = element as AnyField;
+          if (!isElementCurrentlyVisible(field)) {
+            return null;
+          }
           return (
-            <View key={`block-${idx}`}>
-              <RenderDisplayBlockMobile
-                block={element as DisplayBlock}
-                previousAnswerData={previousAnswerData}
-                previousAnswerSchemas={previousAnswerSchemas}
+            <View
+              key={field.id}
+              ref={(ref) => {
+                if (ref) {
+                  ref.measure((x, y, width, height, pageX, pageY) => {
+                    fieldScreenPositions.current[field.id] = pageY;
+                  });
+                }
+              }}
+            >
+              <RenderField
+                field={field}
+                value={formData[field.id]}
+                onChange={(value) => handleFieldChange(field.id, value)}
+                disabled={readOnly}
+                error={fieldErrors[field.id]}
+                randomizationKey={randomizationKey}
+                disableOptionRandomization={disableOptionRandomization}
               />
             </View>
           );
-        }
-        const field = element as AnyField;
-        if (!isElementCurrentlyVisible(field)) {
-          return null;
-        }
-        return (
-          <View
-            key={field.id}
-            ref={(ref) => {
-              if (ref) {
-                ref.measure((x, y, width, height, pageX, pageY) => {
-                  fieldScreenPositions.current[field.id] = pageY;
-                });
-              }
-            }}
-          >
-            <RenderField
-              field={field}
-              value={formData[field.id]}
-              onChange={(value) => handleFieldChange(field.id, value)}
-              disabled={readOnly}
-              error={fieldErrors[field.id]}
-              randomizationKey={randomizationKey}
-              disableOptionRandomization={disableOptionRandomization}
-            />
-          </View>
-        );
-      })}
+        })}
+      </View>
+
       {readOnly && pageCount > 1 && (
         <View>
           <View className="flex-row justify-between items-center mb-3">
@@ -1083,7 +1115,7 @@ const FormRenderer = ({
                 </Text>
               ) : null}
             </View>
-            <View className="flex-row gap-3">
+            <View className="flex-row gap-1.5">
               {!isFirstPage && (
                 <Button
                   onPress={handlePreviousPage}
@@ -1098,7 +1130,7 @@ const FormRenderer = ({
                 onPress={isLastPage ? handleSubmit : handleNextPage}
                 color={ButtonColor.Black}
                 size={ButtonSize.Medium}
-                className="flex-2 py-4! gap-x-2"
+                className="flex-2 py-4! gap-x-1"
                 disabled={submitting}
               >
                 {submitting ? (

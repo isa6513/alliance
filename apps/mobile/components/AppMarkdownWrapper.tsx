@@ -1,6 +1,10 @@
 import React, { useCallback, useMemo } from "react";
-import { Linking, Image, View } from "react-native";
-import Markdown, { RenderRules } from "react-native-markdown-display";
+import { Linking, Image, StyleSheet, View } from "react-native";
+import Markdown, {
+  ASTNode,
+  RenderRules,
+  renderRules as defaultRenderRules,
+} from "react-native-markdown-display";
 import { RelativePathString, router } from "expo-router";
 import { getApiUrl } from "../lib/config";
 import { colors } from "../lib/style/colors";
@@ -165,29 +169,180 @@ function transformImageUrl(url: string): string {
   return url;
 }
 
+/** Match sharedweb AppMarkdownWrapper Tailwind: `mt-6` / headings */
+const MD_SPACE_HEADING_TOP = 24;
+/** `mt-4` / paragraphs */
+const MD_SPACE_PARAGRAPH_TOP = 16;
+/** `mt-2` / lists & list items */
+const MD_SPACE_LIST_TOP = 8;
+/** `my-4` / blockquote */
+const MD_SPACE_BLOCKQUOTE = 16;
+
+function isFirstAmongSiblings(node: ASTNode): boolean {
+  return node.index === 0;
+}
+
+function isLastAmongSiblings(node: ASTNode, parentNodes: ASTNode[]): boolean {
+  const parent = parentNodes[0];
+  if (!parent?.children?.length) return true;
+  return node.index === parent.children.length - 1;
+}
+
 interface AppMarkdownWrapperProps {
-  children: string;
+  /** Prefer this name to match sharedweb `AppMarkdownWrapper` */
+  markdownContent?: string;
+  children?: string;
   style?: object;
   truncated?: boolean;
 }
 
 const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
+  markdownContent,
   children,
   style,
   truncated = false,
 }) => {
+  const markdownSource = markdownContent ?? children ?? "";
   const handleLinkPress = useHandleLinkPress();
 
   const rules: RenderRules = useMemo(
     () => ({
-      // Custom image rendering with URL transformation
+      heading1: (node, children, parent, styles) => (
+        <View
+          key={node.key}
+          style={[
+            styles._VIEW_SAFE_heading1,
+            {
+              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_HEADING_TOP,
+              marginBottom: 0,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      ),
+      heading2: (node, children, parent, styles) => (
+        <View
+          key={node.key}
+          style={[
+            styles._VIEW_SAFE_heading2,
+            {
+              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_HEADING_TOP,
+              marginBottom: 0,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      ),
+      heading3: (node, children, parent, styles) => (
+        <View
+          key={node.key}
+          style={[
+            styles._VIEW_SAFE_heading3,
+            {
+              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_HEADING_TOP,
+              marginBottom: 0,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      ),
+      paragraph: (node, children, parent, styles) => {
+        const inListItem = parent[0]?.type === "list_item";
+        const marginTop = inListItem
+          ? 0
+          : isFirstAmongSiblings(node)
+            ? 0
+            : MD_SPACE_PARAGRAPH_TOP;
+        return (
+          <View
+            key={node.key}
+            style={[styles._VIEW_SAFE_paragraph, { marginTop, marginBottom: 0 }]}
+          >
+            {children}
+          </View>
+        );
+      },
+      bullet_list: (node, children, parent, styles) => (
+        <View
+          key={node.key}
+          style={[
+            styles._VIEW_SAFE_bullet_list,
+            {
+              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
+              marginBottom: 0,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      ),
+      ordered_list: (node, children, parent, styles) => (
+        <View
+          key={node.key}
+          style={[
+            styles._VIEW_SAFE_ordered_list,
+            {
+              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
+              marginBottom: 0,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      ),
+      list_item: (node, children, parent, styles, inheritedStyles = {}) => {
+        const patchedStyles = {
+          ...styles,
+          list_item: StyleSheet.flatten([
+            styles.list_item,
+            {
+              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
+              marginBottom: 0,
+            },
+          ]),
+        };
+        return defaultRenderRules.list_item!(
+          node,
+          children,
+          parent,
+          patchedStyles,
+          inheritedStyles,
+        );
+      },
+      blockquote: (node, children, parent, styles) => (
+        <View
+          key={node.key}
+          style={[
+            styles._VIEW_SAFE_blockquote,
+            {
+              // Match web `my-4` top; omit bottom margin unless last (no CSS margin-collapse in RN).
+              marginTop: MD_SPACE_BLOCKQUOTE,
+              marginBottom: isLastAmongSiblings(node, parent)
+                ? MD_SPACE_BLOCKQUOTE
+                : 0,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      ),
+      // custom image rendering with URL transformation
       image: (node, children, parent, styles) => {
         const src = node.attributes?.src || "";
         const transformedSrc = transformImageUrl(src);
         const alt = node.attributes?.alt || "";
 
         return (
-          <View key={node.key} style={{ marginVertical: 8 }}>
+          <View
+            key={node.key}
+            style={{
+              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
+              marginBottom: isLastAmongSiblings(node, parent) ? 0 : MD_SPACE_LIST_TOP,
+            }}
+          >
             <Image
               source={{ uri: transformedSrc }}
               style={{
@@ -230,7 +385,11 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           return (
             <View
               key={node.key}
-              style={{ alignItems: "center", marginVertical: 12 }}
+              style={{
+                alignItems: "center",
+                marginTop: isFirstAmongSiblings(node) ? 0 : 24,
+                marginBottom: isLastAmongSiblings(node, parent) ? 0 : 24,
+              }}
             >
               <Image
                 source={{ uri: transformedSrc }}
@@ -265,7 +424,8 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
               backgroundColor: "#f4f4f5",
               padding: 12,
               borderRadius: 4,
-              marginVertical: 8,
+              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
+              marginBottom: isLastAmongSiblings(node, parent) ? 0 : MD_SPACE_LIST_TOP,
             }}
           >
             <Text style={{ fontFamily: "monospace", fontSize: 13 }}>
@@ -292,7 +452,11 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
           return (
             <View
               key={node.key}
-              style={{ alignItems: "center", marginVertical: 12 }}
+              style={{
+                alignItems: "center",
+                marginTop: isFirstAmongSiblings(node) ? 0 : 24,
+                marginBottom: isLastAmongSiblings(node, parent) ? 0 : 24,
+              }}
             >
               <Image
                 source={{ uri: transformedSrc }}
@@ -327,7 +491,8 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
               backgroundColor: "#f4f4f5",
               padding: 12,
               borderRadius: 4,
-              marginVertical: 8,
+              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
+              marginBottom: isLastAmongSiblings(node, parent) ? 0 : MD_SPACE_LIST_TOP,
             }}
           >
             <Text style={{ fontFamily: "monospace", fontSize: 13 }}>
@@ -350,28 +515,19 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
       heading1: {
         fontSize: 20,
         fontWeight: "600" as const,
-        marginTop: 16,
-        marginBottom: 8,
         color: "#18181b",
       },
       heading2: {
         fontSize: 18,
         fontWeight: "600" as const,
-        marginTop: 14,
-        marginBottom: 6,
         color: "#18181b",
       },
       heading3: {
         fontSize: 16,
         fontWeight: "600" as const,
-        marginTop: 12,
-        marginBottom: 4,
         color: "#18181b",
       },
-      paragraph: {
-        marginTop: 0,
-        marginBottom: 10,
-      },
+      paragraph: {},
       strong: {
         fontWeight: "600" as const,
       },
@@ -384,22 +540,15 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         borderLeftWidth: 2,
         borderLeftColor: "#d4d4d8",
         paddingLeft: 12,
-        marginVertical: 8,
         backgroundColor: "#fafafa",
       },
-      bullet_list: {
-        marginVertical: 8,
-      },
+      bullet_list: {},
       bullet_list_icon: {
         fontSize: 35,
         top: 7,
       },
-      ordered_list: {
-        marginVertical: 8,
-      },
-      list_item: {
-        marginVertical: 2,
-      },
+      ordered_list: {},
+      list_item: {},
       code_inline: {
         backgroundColor: "#f4f4f5",
         paddingHorizontal: 4,
@@ -421,7 +570,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
     </View>
   ) : (
     <Markdown style={markdownStyles} rules={rules} mergeStyle>
-      {children}
+      {markdownSource}
     </Markdown>
   );
 };

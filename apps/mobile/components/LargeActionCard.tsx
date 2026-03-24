@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 
 import {
   getLastAndNextEvent,
@@ -10,7 +10,7 @@ import Card from "./system/Card";
 import Text from "./system/Text";
 import TaskTimeInfo from "./TaskTimeInfo";
 import { router } from "expo-router";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight, Maximize } from "lucide-react-native";
 import ActionTaskPanel from "./ActionTaskPanel";
 import useActivities, {
   ActivityList,
@@ -71,27 +71,26 @@ export default function LargeActionCard({
             onDismiss={dismissProps.onDismiss}
           />
         )}
-        <Text className="text-2xl font-serif font-bold">{action.name}</Text>
-        <View className="flex flex-row items-center justify-between mt-2">
+        <View className="flex flex-row items-center justify-between mb-4">
           <TaskTimeInfo
             action={action}
             nextEvent={nextEvent}
             lastEvent={lastEvent}
+            className="flex-row items-center gap-x-1"
+            filled={true}
           />
-          <Button
-            color={ButtonColor.White}
-            size={ButtonSize.Small}
+          <TouchableOpacity
             onPress={() => {
               router.push(`/actions/${action.id}`);
             }}
             className="mr-2 flex flex-row items-center gap-x-1"
           >
-            <Text className="text-sm">Details</Text>
-            <ChevronRight size={15} color="black" />
-          </Button>
+            <Maximize size={20} />
+          </TouchableOpacity>
         </View>
+        <Text className="text-xl font-serif font-bold mb-2">{action.name}</Text>
       </View>
-      <Text className="text-base mt-2">{action.shortDescription}</Text>
+      <Text className="text-base mb-4">{action.shortDescription}</Text>
       <ActionCompletedBarWithInfo
         action={action}
         friendActivities={friendActivities}

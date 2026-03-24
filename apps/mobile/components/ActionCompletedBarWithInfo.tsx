@@ -17,7 +17,7 @@ export const ActionCompletedBarWithInfo = ({
   const completedFriends = useMemo(() => {
     return (
       friendActivities?.filter(
-        (activity) => activity.type === "user_completed"
+        (activity) => activity.type === "user_completed",
       ) ?? []
     ).map((activity) => activity.user);
   }, [friendActivities]);

@@ -7,6 +7,7 @@ import { View } from "react-native";
 import Text from "./system/Text";
 import { ClockIcon, Calendar } from "lucide-react-native";
 import { cn } from "@alliance/shared/styles/util";
+import { colors } from "../lib/style/colors";
 
 const TaskTimeInfo = ({
   action,
@@ -14,23 +15,40 @@ const TaskTimeInfo = ({
   lastEvent,
   absoluteDeadline,
   className,
-}: TaskTimeInfoPropsShared & { className?: string }) => {
+  filled = false,
+}: TaskTimeInfoPropsShared & { className?: string; filled?: boolean }) => {
   const color = deadlineColor(nextEvent, action);
 
   return (
     <View className={cn(className)}>
       {!!action.timeEstimate && action.status !== "gathering_commitments" ? (
-        <View className="flex-row items-center gap-x-2">
-          <ClockIcon size={19} color="rgb(98, 161, 36)" />
-          <Text className="text-green text-base">
+        <View
+          className={cn(
+            "flex-row items-center gap-x-1",
+            filled
+              ? "text-white bg-green rounded-full px-3 py-1"
+              : "text-green",
+          )}
+        >
+          <ClockIcon size={15} color={filled ? colors.white : colors.green} />
+          <Text className={cn("text-sm", filled ? "text-white" : "text-green")}>
             {action.timeEstimate} minute{action.timeEstimate === 1 ? "" : "s"}
           </Text>
         </View>
       ) : null}
       {!!nextEvent ? (
-        <View className="flex-row items-center gap-x-1">
-          <Calendar size={16} color={color} />
-          <Text style={{ color: color }}>{formatDeadline(nextEvent.date)}</Text>
+        <View
+          className={cn(
+            "flex-row items-center gap-x-1",
+            filled
+              ? `text-white rounded-full px-3 py-1 bg-zinc-100`
+              : "text-green",
+          )}
+        >
+          <Calendar size={15} color={color} />
+          <Text className="text-sm" style={{ color: color }}>
+            {formatDeadline(nextEvent.date)}
+          </Text>
         </View>
       ) : null}
     </View>

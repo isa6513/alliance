@@ -51,6 +51,10 @@ function AppContent() {
             name="invites"
             options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
           />
+          <Stack.Screen
+            name="index"
+            options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
+          />
         </Stack>
         <TabBar />
       </View>

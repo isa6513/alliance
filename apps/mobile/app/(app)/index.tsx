@@ -217,7 +217,7 @@ export default function HomeScreen() {
 
   const renderHomeFeedActivity = useCallback(
     ({ item: activity }: { item: ActionActivityDto }) => (
-      <View className="border-b-3 border-zinc-200">
+      <View className={`border-b-3`} style={{ borderColor: colors.grey[1] }}>
         <UserActivityCard
           activity={activity}
           handleLike={() => handleHomeFeedLike(activity.id)}
@@ -262,8 +262,11 @@ export default function HomeScreen() {
       return {
         title: "Alliance",
         body: (
-          <View className="border-b-3 border-zinc-200">
-            <View className="bg-white items-center justify-center py-10 px-5">
+          <View>
+            <View
+              className="items-center justify-center py-10 px-5"
+              style={{ backgroundColor: colors.grey[0] }}
+            >
               <View className="w-8 h-8 rounded-full bg-green items-center justify-center mb-4">
                 <Check size={20} color="#fff" strokeWidth={3} />
               </View>
@@ -300,15 +303,17 @@ export default function HomeScreen() {
     return {
       title: "Current task",
       body: (
-        <LargeActionCard
-          action={currentTaskOrGeneralUpdate}
-          dismissProps={dismissProps}
-          userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
-          onUpdateActionState={refetch}
-          scrollPageTo={scrollPageTo}
-          scrollToEnd={scrollToEnd}
-          onSubmitSuccess={handleSubmitSuccess}
-        />
+        <View className="bg-white py-2 px-1">
+          <LargeActionCard
+            action={currentTaskOrGeneralUpdate}
+            dismissProps={dismissProps}
+            userRelation={currentTaskOrGeneralUpdate.userRelation ?? "none"}
+            onUpdateActionState={refetch}
+            scrollPageTo={scrollPageTo}
+            scrollToEnd={scrollToEnd}
+            onSubmitSuccess={handleSubmitSuccess}
+          />
+        </View>
       ),
       fullScreen: false,
     };
@@ -363,7 +368,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1" style={{ backgroundColor: colors.grey[0] }}>
       {header}
       {showHomeFeedList ? (
         <LegendList
