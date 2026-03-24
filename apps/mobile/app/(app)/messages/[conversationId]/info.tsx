@@ -27,6 +27,7 @@ import {
   useConversations,
 } from "../../../../lib/messages";
 import { colors } from "../../../../lib/style/colors";
+import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
 
 export default function ConversationInfoScreen() {
   const { conversationId } = useLocalSearchParams<{
@@ -226,14 +227,14 @@ export default function ConversationInfoScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pt-14 pb-4 bg-white">
+      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pb-4 bg-white">
         <TouchableOpacity onPress={() => router.back()}>
           <ChevronLeft size={22} color="#111827" />
         </TouchableOpacity>
         <Text className="text-lg font-semibold text-zinc-900">Details</Text>
       </View>
 
-      <ScrollView className="flex-1">
+      <KeyboardAwareScrollView>
         <View className="items-center px-4 pt-6">
           <TouchableOpacity
             onPress={handlePickPhoto}
@@ -401,7 +402,7 @@ export default function ConversationInfoScreen() {
             </Button>
           </View>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }
