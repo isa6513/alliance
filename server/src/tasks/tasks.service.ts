@@ -1,6 +1,7 @@
 import { Temporal } from '@js-temporal/polyfill';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -645,6 +646,20 @@ export class TasksService {
       (followUpForm.endDate && followUpForm.endDate < new Date())
     ) {
       throw new BadRequestException('Follow-up form is not active');
+    }
+    if (followUpForm.cohortExpression) {
+      const userWithTags = await this.userService.findOneOrFail(userId, {
+        tags: true,
+      });
+      const inCohort = await this.actionsService.computeIsInCohortExpression({
+        user: userWithTags,
+        cohortExpression: followUpForm.cohortExpression,
+      });
+      if (!inCohort) {
+        throw new ForbiddenException(
+          'User is not in the target cohort for this follow-up form',
+        );
+      }
     }
     const form = followUpForm.form;
     const user = await this.userService.findOneOrFail(userId);

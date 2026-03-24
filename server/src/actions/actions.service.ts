@@ -575,6 +575,13 @@ export class ActionsService {
               user,
             }));
 
+        if (user && action.followUpForms) {
+          action.followUpForms = await this.filterFollowUpFormsByCohort(
+            action.followUpForms,
+            user,
+          );
+        }
+
         return new ActionDto(action, {
           canParticipate: user
             ? await this.isEligibleForAction(action, user)
@@ -700,6 +707,12 @@ export class ActionsService {
           contractEvents: true,
         })
       : null;
+    if (user && action.followUpForms) {
+      action.followUpForms = await this.filterFollowUpFormsByCohort(
+        action.followUpForms,
+        user,
+      );
+    }
     return new ActionDto(action, {
       canParticipate: user
         ? await this.isEligibleForAction(action, user)
@@ -3856,6 +3869,26 @@ export class ActionsService {
     const result =
       await this.actionEventRecipientService.resolveCohortMemberIds(expression);
     return result ? Array.from(result) : [];
+  }
+
+  /**
+   * Filter follow-up forms by cohort expression for a given user.
+   * Forms with no cohortExpression are kept (shown to all completers).
+   */
+  async filterFollowUpFormsByCohort(
+    followUpForms: FollowUpForm[],
+    user: User,
+  ): Promise<FollowUpForm[]> {
+    const results = await Promise.all(
+      followUpForms.map(async (form) => {
+        if (!form.cohortExpression) return true;
+        return this.computeIsInCohortExpression({
+          user,
+          cohortExpression: form.cohortExpression,
+        });
+      }),
+    );
+    return followUpForms.filter((_, i) => results[i]);
   }
 
   /**

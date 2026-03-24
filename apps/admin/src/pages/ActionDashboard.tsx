@@ -1603,7 +1603,14 @@ const ActionDashboard: React.FC = () => {
               />
             )}
             {activeTab === "follow-up-forms" && action && (
-              <ActionFollowUpFormsTab action={action} setAction={setAction} />
+              <ActionFollowUpFormsTab
+                action={action}
+                setAction={setAction}
+                availableTags={availableTags}
+                availableActions={allActions}
+                availableForms={availableForms}
+                availableUsers={availableUsers}
+              />
             )}
           </div>
         </div>

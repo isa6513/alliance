@@ -188,11 +188,13 @@ const FormFieldEditor: React.FC<{
         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
       >
         <option value="">Select form...</option>
-        {availableForms.map((f) => (
-          <option key={f.id} value={f.id}>
-            {f.title ?? `Form #${f.id}`}
-          </option>
-        ))}
+        {[...availableForms]
+          .sort((a, b) => b.id - a.id)
+          .map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.title ?? `Form #${f.id}`}
+            </option>
+          ))}
       </select>
       <select
         value={value.fieldId}

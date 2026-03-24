@@ -6,21 +6,32 @@ import {
   actionsUpdateFollowUpForm,
   tasksCreateForm,
 } from "@alliance/shared/client";
-import type { FollowUpFormDto } from "@alliance/shared/client/types.gen";
+import type {
+  FollowUpFormDto,
+  FormDto,
+  TagDto,
+} from "@alliance/shared/client/types.gen";
+import type { CohortExpression } from "@alliance/shared/cohort-expression.types";
 import BaseButton, {
   BaseButtonVariant,
 } from "@alliance/sharedweb/ui/BaseButton";
 import Card from "@alliance/sharedweb/ui/Card";
 import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
 import { CardStyle } from "@alliance/shared/styles/card";
+import type { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import CohortExpressionBuilder from "./CohortExpressionBuilder";
 import { FormBuilder } from "./FormBuilder";
 import { FormSchema } from "@alliance/shared/forms/formschema";
 
 export interface ActionFollowUpFormsTabProps {
   action: Action;
   setAction: (action: Action) => void;
+  availableTags: TagDto[];
+  availableActions: { id: number; name: string }[];
+  availableForms: FormDto[];
+  availableUsers: UserSelectUser[];
 }
 
 const emptyFormSchema: FormSchema = {
@@ -40,6 +51,10 @@ function followUpFormLabel(fuf: FollowUpFormDto): string {
 export default function ActionFollowUpFormsTab({
   action,
   setAction,
+  availableTags,
+  availableActions,
+  availableForms,
+  availableUsers,
 }: ActionFollowUpFormsTabProps) {
   const followUpForms = useMemo(
     () => action.followUpForms ?? [],
@@ -238,6 +253,20 @@ export default function ActionFollowUpFormsTab({
           onDelete={handleDeleteFollowUpForm}
           savingFields={savingFields === selectedForm.id}
           deleting={deletingId === selectedForm.id}
+          availableTags={availableTags}
+          availableActions={availableActions}
+          availableForms={availableForms}
+          availableUsers={availableUsers}
+          onCohortExpressionChange={async (
+            followUpFormId: number,
+            expr: CohortExpression | null,
+          ) => {
+            await actionsUpdateFollowUpForm({
+              path: { followUpFormId },
+              body: { cohortExpression: expr as Record<string, unknown> | null },
+            });
+            await refetchAction();
+          }}
         />
       )}
     </div>
@@ -258,8 +287,16 @@ interface FollowUpFormCardProps {
   ) => Promise<void>;
   onSetFormId: (followUpFormId: number, formId: number) => Promise<void>;
   onDelete: (followUpFormId: number) => Promise<void>;
+  onCohortExpressionChange: (
+    followUpFormId: number,
+    expr: CohortExpression | null,
+  ) => Promise<void>;
   savingFields: boolean;
   deleting: boolean;
+  availableTags: TagDto[];
+  availableActions: { id: number; name: string }[];
+  availableForms: FormDto[];
+  availableUsers: UserSelectUser[];
 }
 
 function FollowUpFormCard({
@@ -268,8 +305,13 @@ function FollowUpFormCard({
   onSaveFields,
   onSetFormId,
   onDelete,
+  onCohortExpressionChange,
   savingFields,
   deleting,
+  availableTags,
+  availableActions,
+  availableForms,
+  availableUsers,
 }: FollowUpFormCardProps) {
   const [startDate, setStartDate] = useState<string>(
     followUpForm.startDate ?? "",
@@ -315,6 +357,29 @@ function FollowUpFormCard({
             placeholder="Optional instructions shown to users (supports markdown)"
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-zinc-700 mb-1">
+            Target cohort
+          </label>
+          <p className="text-xs text-zinc-500 mb-2">
+            Only users matching this cohort (who also completed the action) will
+            see and be able to submit this follow-up form. Leave empty to show
+            to all completers.
+          </p>
+          <CohortExpressionBuilder
+            value={
+              (followUpForm.cohortExpression as CohortExpression | null) ?? null
+            }
+            onChange={(expr) =>
+              onCohortExpressionChange(followUpForm.id, expr)
+            }
+            availableTags={availableTags}
+            availableActions={availableActions}
+            availableForms={availableForms}
+            availableUsers={availableUsers}
           />
         </div>
 

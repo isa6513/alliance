@@ -11,6 +11,7 @@ import {
 import { Action } from './action.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 import type { Ty } from 'src/tasks/entities/type';
+import type { CohortExpression } from '../cohort-expression.types';
 
 @Entity()
 export class FollowUpForm {
@@ -58,6 +59,12 @@ export class FollowUpForm {
   @Allow()
   @IsOptional()
   instructions?: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Object)
+  cohortExpression?: CohortExpression | null;
 
   // Relations
 
