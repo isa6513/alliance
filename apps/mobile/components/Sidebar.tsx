@@ -1,19 +1,15 @@
 import { View, TouchableOpacity, ScrollView } from "react-native";
 import { usePathname, Route, useRouter } from "expo-router";
 import {
-  Bell,
   BookText,
   FileText,
   Globe,
   Layers,
-  ListTodo,
   Search,
   Settings,
   X,
   User,
   UserPlus,
-  Users,
-  MessageSquare,
   QrCode,
 } from "lucide-react-native";
 import Text from "./system/Text";
@@ -28,93 +24,49 @@ type NavItem = {
   matchPaths: string[];
 };
 
-type NavSection = {
-  title: string;
-  items: NavItem[];
-};
-
-const navSections: NavSection[] = [
+const navItems: NavItem[] = [
   {
-    title: "",
-    items: [
-      { name: "Tasks", href: "/", icon: ListTodo, matchPaths: ["/", ""] },
-      {
-        name: "Notifications",
-        href: "/notifications",
-        icon: Bell,
-        matchPaths: ["/notifications"],
-      },
-    ],
+    name: "Actions",
+    href: "/actions",
+    icon: Layers,
+    matchPaths: ["/actions", "/action"],
   },
   {
-    title: "Platform",
-    items: [
-      {
-        name: "Actions",
-        href: "/actions",
-        icon: Layers,
-        matchPaths: ["/actions", "/action"],
-      },
-      {
-        name: "Information",
-        href: "/information",
-        icon: BookText,
-        matchPaths: ["/information"],
-      },
-      {
-        name: "Search",
-        href: "/search",
-        icon: Search,
-        matchPaths: ["/search"],
-      },
-    ],
+    name: "Information",
+    href: "/information",
+    icon: BookText,
+    matchPaths: ["/information"],
   },
   {
-    title: "Social",
-    items: [
-      { name: "Activity", href: "/feed", icon: Globe, matchPaths: ["/feed"] },
-      {
-        name: "Groups",
-        href: "/groups",
-        icon: Users,
-        matchPaths: ["/groups"],
-      },
-      {
-        name: "Messages",
-        href: "/messages",
-        icon: MessageSquare,
-        matchPaths: ["/messages"],
-      },
-      {
-        name: "Invites",
-        href: "/invites",
-        icon: UserPlus,
-        matchPaths: ["/invites"],
-      },
-    ],
+    name: "Search",
+    href: "/search",
+    icon: Search,
+    matchPaths: ["/search"],
+  },
+  { name: "Activity", href: "/feed", icon: Globe, matchPaths: ["/feed"] },
+  {
+    name: "Invites",
+    href: "/invites",
+    icon: UserPlus,
+    matchPaths: ["/invites"],
   },
   {
-    title: "Profile",
-    items: [
-      {
-        name: "Profile",
-        href: "/profile",
-        icon: User,
-        matchPaths: ["/profile"],
-      },
-      {
-        name: "Contract",
-        href: "/contract",
-        icon: FileText,
-        matchPaths: ["/contract"],
-      },
-      {
-        name: "Settings",
-        href: "/settings",
-        icon: Settings,
-        matchPaths: ["/settings"],
-      },
-    ],
+    name: "Profile",
+    href: "/profile",
+    icon: User,
+    matchPaths: ["/profile"],
+  },
+  {
+    name: "Contract",
+    href: "/contract",
+    icon: FileText,
+    matchPaths: ["/contract"],
+  },
+  {
+    name: "Settings",
+    href: "/settings",
+    icon: Settings,
+    matchPaths: ["/settings"],
   },
 ];
 
@@ -171,47 +123,35 @@ export default function Sidebar() {
           </TouchableOpacity>
         </View>
 
-        {/* Navigation sections */}
         <View className="px-4">
-          {navSections.map((section, sectionIndex) => (
-            <View
-              key={section.title || `section-${sectionIndex}`}
-              className={cn(
-                "pb-4 mb-2",
-                sectionIndex < navSections.length - 1 &&
-                  "border-b border-zinc-200",
-              )}
-            >
-              {section.items.map((item) => {
-                const active = isActive(item.matchPaths);
-                const Icon = item.icon;
-                return (
-                  <TouchableOpacity
-                    key={item.name}
-                    onPress={() => handleNavigate(item.href)}
-                    className={cn(
-                      "flex-row items-center px-3 py-2.5 rounded-lg mb-0.5",
-                      active && "bg-zinc-200",
-                    )}
-                    activeOpacity={0.7}
-                  >
-                    <Icon
-                      size={18}
-                      color={active ? colors.green : colors.text.icon}
-                    />
-                    <Text
-                      className={cn(
-                        "ml-3 text-[17px]",
-                        active ? "font-medium text-black" : "text-zinc-900",
-                      )}
-                    >
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          ))}
+          {navItems.map((item) => {
+            const active = isActive(item.matchPaths);
+            const Icon = item.icon;
+            return (
+              <TouchableOpacity
+                key={item.name}
+                onPress={() => handleNavigate(item.href)}
+                className={cn(
+                  "flex-row items-center px-3 py-2.5 rounded-lg mb-0.5",
+                  active && "bg-zinc-200",
+                )}
+                activeOpacity={0.7}
+              >
+                <Icon
+                  size={18}
+                  color={active ? colors.green : colors.text.icon}
+                />
+                <Text
+                  className={cn(
+                    "ml-3 text-[17px]",
+                    active ? "font-medium text-black" : "text-zinc-900",
+                  )}
+                >
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
     </ScrollView>
