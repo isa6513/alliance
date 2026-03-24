@@ -32,6 +32,7 @@ import EditableContentRenderer from "../../../../../components/EditableContentRe
 import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
 import OutputRenderer from "../../../../../components/OutputRenderer";
 import BackButton from "../../../../../components/system/BackButton";
+import KeyboardAwareScrollView from "../../../../../components/KeyboardAwareScrollView";
 
 export default function ActivityDetailScreen() {
   const { id, activityId } = useLocalSearchParams<{
@@ -236,7 +237,7 @@ export default function ActivityDetailScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <ScrollView
+      <KeyboardAwareScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 40 }}
         refreshControl={
@@ -359,7 +360,7 @@ export default function ActivityDetailScreen() {
             />
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }
