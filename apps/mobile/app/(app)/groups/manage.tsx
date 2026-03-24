@@ -205,93 +205,93 @@ export default function GroupManageScreen() {
             }
           >
             {error ? (
-            <View className="mx-4 mb-3 p-3 bg-red-50 rounded-lg">
-              <Text className="text-sm text-red-500">{error}</Text>
-            </View>
-          ) : null}
+              <View className="mx-4 mb-3 p-3 bg-red-50 rounded-lg">
+                <Text className="text-sm text-red-500">{error}</Text>
+              </View>
+            ) : null}
 
-          {showCreateForm && (
-            <View className="px-4 pb-4">
-              <CreateGroupForm
-                newCommunity={newCommunity}
-                setNewCommunity={setNewCommunity}
-                requiresMaxCapacity={requiresMaxCapacity}
-                onCreate={handleCreateCommunity}
-                creating={creating}
-                error={error}
-                setError={setError}
-              />
-            </View>
-          )}
+            {showCreateForm && (
+              <View className="px-4 pb-4">
+                <CreateGroupForm
+                  newCommunity={newCommunity}
+                  setNewCommunity={setNewCommunity}
+                  requiresMaxCapacity={requiresMaxCapacity}
+                  onCreate={handleCreateCommunity}
+                  creating={creating}
+                  error={error}
+                  setError={setError}
+                />
+              </View>
+            )}
 
-          {/* Groups you lead */}
-          <View className="px-4 pt-2 pb-2">
-            <Text className="text-xl font-semibold text-zinc-900">
-              Groups you lead
-            </Text>
-            <Text className="text-base text-zinc-500 mt-0.5">
-              You can lead as many groups as you want.
-            </Text>
-          </View>
-          {leaderCommunities.length ? (
-            leaderCommunities.map((community) => (
-              <AdminCommunityCard key={community.id} community={community} />
-            ))
-          ) : (
-            <View className="px-4 py-4">
-              <Text className="text-sm text-zinc-500">
-                You don&apos;t lead any groups yet.
+            {/* Groups you lead */}
+            <View className="px-4 pt-2 pb-2">
+              <Text className="text-xl font-semibold text-zinc-900">
+                Groups you lead
+              </Text>
+              <Text className="text-base text-zinc-500 mt-0.5">
+                You can lead as many groups as you want.
               </Text>
             </View>
-          )}
+            {leaderCommunities.length ? (
+              leaderCommunities.map((community) => (
+                <AdminCommunityCard key={community.id} community={community} />
+              ))
+            ) : (
+              <View className="px-4 py-4">
+                <Text className="text-sm text-zinc-500">
+                  You don&apos;t lead any groups yet.
+                </Text>
+              </View>
+            )}
 
-          {/* Groups you're a member of */}
-          <View className="px-4 pt-6 pb-2">
-            <Text className="text-xl font-semibold text-zinc-900">
-              Groups you&apos;re a member of
-            </Text>
-            <Text className="text-base text-zinc-500 mt-0.5">
-              For now, you can only be a member of one group.
-            </Text>
-          </View>
-          {memberCommunities.length ? (
-            memberCommunities.map((community) => (
-              <AdminCommunityCard key={community.id} community={community} />
-            ))
-          ) : (
-            <View className="px-4 py-4">
-              <Text className="text-sm text-zinc-500">
-                You are not a member of any group.
+            {/* Groups you're a member of */}
+            <View className="px-4 pt-6 pb-2">
+              <Text className="text-xl font-semibold text-zinc-900">
+                Groups you&apos;re a member of
+              </Text>
+              <Text className="text-base text-zinc-500 mt-0.5">
+                For now, you can only be a member of one group.
               </Text>
             </View>
-          )}
+            {memberCommunities.length ? (
+              memberCommunities.map((community) => (
+                <AdminCommunityCard key={community.id} community={community} />
+              ))
+            ) : (
+              <View className="px-4 py-4">
+                <Text className="text-sm text-zinc-500">
+                  You are not a member of any group.
+                </Text>
+              </View>
+            )}
 
-          {/* Public groups */}
-          <View className="px-4 pt-6 pb-2">
-            <Text className="text-xl font-semibold text-zinc-900">
-              Public groups
-            </Text>
-            <Text className="text-base text-zinc-500 mt-0.5">
-              Groups you can join at any time.
-            </Text>
-          </View>
-          {publicCommunitiesError ? (
-            <View className="px-4 py-4">
-              <Text className="text-sm text-red-500">
-                {publicCommunitiesError}
+            {/* Public groups */}
+            <View className="px-4 pt-6 pb-2">
+              <Text className="text-xl font-semibold text-zinc-900">
+                Public groups
+              </Text>
+              <Text className="text-base text-zinc-500 mt-0.5">
+                Groups you can join at any time.
               </Text>
             </View>
-          ) : sortedPublicCommunities.length ? (
-            sortedPublicCommunities.map((community) => (
-              <AdminCommunityCard key={community.id} community={community} />
-            ))
-          ) : (
-            <View className="px-4 py-4">
-              <Text className="text-sm text-zinc-500">
-                No public groups are available right now.
-              </Text>
-            </View>
-          )}
+            {publicCommunitiesError ? (
+              <View className="px-4 py-4">
+                <Text className="text-sm text-red-500">
+                  {publicCommunitiesError}
+                </Text>
+              </View>
+            ) : sortedPublicCommunities.length ? (
+              sortedPublicCommunities.map((community) => (
+                <AdminCommunityCard key={community.id} community={community} />
+              ))
+            ) : (
+              <View className="px-4 py-4">
+                <Text className="text-sm text-zinc-500">
+                  No public groups are available right now.
+                </Text>
+              </View>
+            )}
           </ScrollView>
         </>
       )}
@@ -502,8 +502,8 @@ function ToggleRow({
         value={value}
         onValueChange={onValueChange}
         disabled={disabled}
-        trackColor={{ false: "#e4e4e7", true: colors.green }}
-        thumbColor="white"
+        trackColor={{ false: colors.switch.trackOff, true: colors.green }}
+        thumbColor={colors.white}
       />
     </View>
   );
