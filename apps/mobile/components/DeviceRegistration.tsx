@@ -63,19 +63,27 @@ export default function DeviceRegistration() {
     if (!token) {
       return;
     }
-    const deviceId = await SecureStore.getItem("deviceId");
-    console.log("registering token: ", token);
-    const resp = await userRegisterDevice({
-      body: {
-        deviceType: Device.modelId ?? Device.modelName,
-        expoPushToken: token,
-        deviceId: deviceId ?? undefined,
-      },
-    });
-    if (resp.data) {
-      const id = resp.data.id;
-      await SecureStore.setItemAsync("deviceId", id);
-      await SecureStore.setItemAsync("registeredToken", token);
+    const alreadyRegistered = SecureStore.getItem("registeredToken");
+    if (alreadyRegistered === token) {
+      return;
+    }
+    try {
+      const deviceId = await SecureStore.getItem("deviceId");
+      console.log("registering token: ", token);
+      const resp = await userRegisterDevice({
+        body: {
+          deviceType: Device.modelId ?? Device.modelName,
+          expoPushToken: token,
+          deviceId: deviceId ?? undefined,
+        },
+      });
+      if (resp.data) {
+        const id = resp.data.id;
+        await SecureStore.setItemAsync("deviceId", id);
+        await SecureStore.setItemAsync("registeredToken", token);
+      }
+    } catch (e) {
+      console.error("push device registration failed", e);
     }
   }, []);
 

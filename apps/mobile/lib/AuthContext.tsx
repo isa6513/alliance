@@ -20,6 +20,7 @@ import {
   isVisualTestMode,
 } from "./visualTest";
 import { usePostHog } from "posthog-react-native";
+import { run } from "@alliance/shared/lib/utils";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -104,14 +105,22 @@ export const AuthProvider: React.FC<
   }, [logout, getAccessToken, posthog]);
 
   useEffect(() => {
-    (async () => {
-      const resp = await appHealthCheck();
-      if (resp.response.ok) {
-        setCanConnectToServer(true);
-      } else {
-        setCanConnectToServer(false);
+    let cancelled = false;
+    run(async () => {
+      try {
+        const resp = await appHealthCheck();
+        if (!cancelled) {
+          setCanConnectToServer(resp.response.ok);
+        }
+      } catch {
+        if (!cancelled) {
+          setCanConnectToServer(false);
+        }
       }
-    })();
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const login = useCallback(
