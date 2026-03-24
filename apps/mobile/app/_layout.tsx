@@ -120,11 +120,16 @@ export default function RootLayout() {
     return (
       <QueryClientProvider client={queryClient}>
         <KeyboardProvider>
-          <AuthProvider tokenStore={tokenStore}>
-            <DeviceRegistration />
-            <PushNotificationResponseHandler queryClient={queryClient} />
-            <Slot />
-          </AuthProvider>
+          <PostHogProvider
+            apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt"
+            options={options}
+          >
+            <AuthProvider tokenStore={tokenStore}>
+              <DeviceRegistration />
+              <PushNotificationResponseHandler queryClient={queryClient} />
+              <Slot />
+            </AuthProvider>
+          </PostHogProvider>
         </KeyboardProvider>
       </QueryClientProvider>
     );
