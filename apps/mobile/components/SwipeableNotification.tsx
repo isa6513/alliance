@@ -2,12 +2,12 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  runOnJS,
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Check } from "lucide-react-native";
+import { scheduleOnRN } from "react-native-worklets";
 import { formatTime } from "@alliance/shared/lib/utils";
 import Text from "./system/Text";
 import ProfileImage from "./ProfileImage";
@@ -45,7 +45,7 @@ function SwipeableNotification({
     })
     .onEnd(() => {
       if (translateX.value < SWIPE_THRESHOLD) {
-        runOnJS(onMarkRead)();
+        scheduleOnRN(onMarkRead);
       }
       translateX.value = withSpring(0, { duration: 300, dampingRatio: 0.8 });
     });

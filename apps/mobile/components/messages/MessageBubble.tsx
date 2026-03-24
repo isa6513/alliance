@@ -6,12 +6,12 @@ import { Dimensions, Image, Modal, TouchableOpacity, View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { scheduleOnRN } from "react-native-worklets";
 import { getImageSource } from "../../lib/config";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import ProfileImage from "../ProfileImage";
@@ -73,7 +73,7 @@ export default function MessageBubble({
     })
     .onEnd(() => {
       if (translateX.value < SWIPE_THRESHOLD && onReply) {
-        runOnJS(onReply)(message.id);
+        scheduleOnRN(onReply, message.id);
       }
       translateX.value = withSpring(0);
     });

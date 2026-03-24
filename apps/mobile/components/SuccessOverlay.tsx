@@ -6,9 +6,9 @@ import Animated, {
   withSpring,
   withDelay,
   withTiming,
-  runOnJS,
 } from "react-native-reanimated";
 import { Check } from "lucide-react-native";
+import { scheduleOnRN } from "react-native-worklets";
 import Text from "./system/Text";
 
 interface SuccessOverlayProps {
@@ -40,39 +40,54 @@ const SuccessOverlay = ({
       textOpacity.value = 0;
 
       // Fade in first, then notify parent and start the rest of the animation
-      opacity.value = withTiming(1, { duration: FADE_IN_DURATION }, (finished) => {
-        if (finished && onFadeInComplete) {
-          runOnJS(onFadeInComplete)();
-        }
-      });
+      opacity.value = withTiming(
+        1,
+        { duration: FADE_IN_DURATION },
+        (finished) => {
+          if (finished && onFadeInComplete) {
+            scheduleOnRN(onFadeInComplete);
+          }
+        },
+      );
       scale.value = withDelay(
         FADE_IN_DURATION,
         withSpring(1, {
           duration: 600,
           dampingRatio: 0.7,
-        })
+        }),
       );
       checkScale.value = withDelay(
         FADE_IN_DURATION + 200,
         withSpring(1, {
           duration: 500,
           dampingRatio: 0.65,
-        })
+        }),
       );
-      textOpacity.value = withDelay(FADE_IN_DURATION + 400, withTiming(1, { duration: 250 }));
+      textOpacity.value = withDelay(
+        FADE_IN_DURATION + 400,
+        withTiming(1, { duration: 250 }),
+      );
 
       // Auto-dismiss after animation
       const timer = setTimeout(() => {
         opacity.value = withTiming(0, { duration: 300 }, (finished) => {
           if (finished) {
-            runOnJS(onComplete)();
+            scheduleOnRN(onComplete);
           }
         });
       }, FADE_IN_DURATION + 1500);
 
       return () => clearTimeout(timer);
     }
-  }, [visible, onComplete, onFadeInComplete, scale, opacity, checkScale, textOpacity]);
+  }, [
+    visible,
+    onComplete,
+    onFadeInComplete,
+    scale,
+    opacity,
+    checkScale,
+    textOpacity,
+  ]);
 
   const containerStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
