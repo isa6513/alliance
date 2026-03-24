@@ -347,15 +347,20 @@ export function RenderField({
     case "checkbox":
       return (
         <View>
-          <View className="flex-row w-full">
-            <Checkbox
-              checked={!!value}
-              onChange={(next) => onChange?.(next)}
-              disabled={disabled}
-              error={hasError}
-            />
-            <RenderLabel field={field} error={errorMessage} />
-          </View>
+          <Pressable
+            onPress={() => onChange?.(!value)}
+            className="flex flex-row items-center"
+          >
+            <View>
+              <Checkbox
+                checked={!!value}
+                disabled={disabled}
+                error={hasError}
+                onChange={(next) => onChange?.(next)}
+                label={field.label}
+              />
+            </View>
+          </Pressable>
           {renderValidationMessage(errorMessage)}
         </View>
       );
@@ -979,7 +984,7 @@ export function TimeInputField({
               <Text className="text-blue-600 font-medium">Close</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView>
+          <ScrollView className="max-h-[300px]">
             {timeOptions.map((t) => (
               <TouchableOpacity
                 key={t}

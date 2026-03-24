@@ -25,6 +25,8 @@ const markdownStyles: StyleSheet.NamedStyles<any> = {
   },
   paragraph: {
     marginTop: 0,
+    paddingBottom: 0,
+    marginBottom: 0,
   },
 };
 
@@ -40,38 +42,36 @@ export default function Checkbox({
   const borderClass = error
     ? "border-red-500"
     : checked
-    ? "border-green-600"
-    : "border-zinc-400";
+      ? "border-green-600"
+      : "border-zinc-400";
+
+  console.log("label", label);
 
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       disabled={disabled}
       onPress={() => onChange?.(!checked)}
-      className={cn("flex-row items-start", className)}
+      className={cn("flex-row items-center", className)}
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}
     >
       <View
         className={cn(
-          "w-5 h-5 rounded border items-center justify-center mr-2",
+          "w-6 h-6 rounded border items-center justify-center mr-2",
           borderClass,
           disabled && "opacity-60",
-          checked ? "bg-green" : "bg-white"
+          checked ? "bg-green" : "bg-white",
         )}
       >
-        {checked && <Check size={14} color="#fff" strokeWidth={3} />}
+        {checked && <Check size={16} color="#fff" strokeWidth={3} />}
       </View>
-      <View className="flex-1">
-        {label ? (
-          <View className="flex-row flex-wrap items-center">
-            <Markdown style={markdownStyles}>{label}</Markdown>
-            {required && (
-              <Text className="text-red-500 ml-px self-start">*</Text>
-            )}
-          </View>
-        ) : null}
-      </View>
+      {label ? (
+        <View className="flex-row flex-wrap items-center">
+          <Markdown style={markdownStyles}>{label}</Markdown>
+          {required && <Text className="text-red-500 ml-px self-start">*</Text>}
+        </View>
+      ) : null}
     </TouchableOpacity>
   );
 }
