@@ -1,5 +1,15 @@
 import * as Haptics from "expo-haptics";
+<<<<<<< HEAD
 import { View, Pressable, Animated } from "react-native";
+=======
+import {
+  View,
+  Text,
+  Pressable,
+  Animated,
+  useWindowDimensions,
+} from "react-native";
+>>>>>>> 5075acac (more groups functionality, misc ui)
 import { usePathname, useRouter } from "expo-router";
 import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
@@ -16,8 +26,13 @@ import {
   userGetAwayRanges,
 } from "@alliance/shared/client";
 import { useMessagingUnread } from "../lib/messages";
+<<<<<<< HEAD
 import { isPathActive } from "../lib/isPathActive";
 import Text, { FontWeight } from "./system/Text";
+import { cn } from "@alliance/shared/styles/util";
+=======
+import { cn } from "@alliance/shared/styles/util";
+>>>>>>> 5075acac (more groups functionality, misc ui)
 
 const tabs = [
   {
@@ -85,7 +100,7 @@ function AnimatedTabButton({
       className="flex-1 items-center"
     >
       <Animated.View
-        className="relative items-center gap-0.5 pt-3"
+        className="relative items-center gap-0.5 pt-3 pb-1"
         style={{ transform: [{ scale }] }}
       >
         {children}
@@ -95,6 +110,11 @@ function AnimatedTabButton({
 }
 
 export default function TabBar() {
+  const { width: windowWidth } = useWindowDimensions();
+  const compactTabBar = windowWidth <= 375;
+  const iconSize = compactTabBar ? 22 : 26;
+  const labelClass = compactTabBar ? "text-[9px]" : "text-[10px]";
+
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -155,9 +175,9 @@ export default function TabBar() {
 
   return (
     <View
-      className="flex-row bg-white border-t px-2"
+      className="flex-row bg-white border-t border-zinc-100 px-2"
       style={{
-        paddingBottom: insets.bottom,
+        paddingBottom: insets.bottom + (compactTabBar ? 10 : 0),
         borderTopColor: colors.borderLight,
       }}
     >
@@ -180,12 +200,12 @@ export default function TabBar() {
             }}
           >
             <Icon
-              size={26}
-              color={active ? colors.green : colors.text.icon}
+              size={iconSize}
+              color={active ? colors.green : "#000"}
               strokeWidth={active ? 2.5 : 2}
             />
             <Text
-              className="text-[10px]"
+              className={labelClass}
               style={{ color: active ? colors.green : colors.text.icon }}
               numberOfLines={1}
             >
@@ -193,11 +213,19 @@ export default function TabBar() {
             </Text>
             {badgeCount > 0 && (
               <View
-                className="absolute top-2 ml-5 rounded-full min-w-5 h-5 px-1 items-center justify-center"
+                className={cn(
+                  "absolute rounded-full px-1 items-center justify-center",
+                  compactTabBar
+                    ? "top-1.5 ml-4 min-w-[18px] h-[18px]"
+                    : "top-2 ml-5 min-w-5 h-5",
+                )}
                 style={{ backgroundColor: badgeBackgroundColor }}
               >
                 <Text
-                  className="text-[10px] text-white"
+                  className={cn(
+                    "text-white",
+                    compactTabBar ? "text-[9px]" : "text-[10px]",
+                  )}
                   weight={FontWeight.Semibold}
                 >
                   {badgeLabel}

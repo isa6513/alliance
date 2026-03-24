@@ -4,10 +4,11 @@ import {
   RefreshControl,
   ActivityIndicator,
   FlatList,
+  ScrollView,
 } from "react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { router } from "expo-router";
-import { Settings } from "lucide-react-native";
+import { ChevronDown, Settings, X } from "lucide-react-native";
 import {
   actionsGetCommunityMemberInfo,
   communityGetCommunityInvites,
@@ -39,6 +40,7 @@ import { colors } from "../../../lib/style/colors";
 import UserActivityCard from "../../../components/UserActivityCard";
 import { GroupMemberRow } from "../../../components/GroupMemberRow";
 import { useAuth } from "../../../lib/AuthContext";
+import FormModal from "../../../components/forms/FormModal";
 
 type Tab = "activity" | "members" | "invites";
 
@@ -57,6 +59,7 @@ export default function GroupsScreen() {
     null,
   );
   const [tab, setTab] = useState<Tab>("activity");
+  const [groupPickerOpen, setGroupPickerOpen] = useState(false);
 
   const loadCommunities = useCallback(async () => {
     try {
@@ -104,6 +107,12 @@ export default function GroupsScreen() {
     ? ["activity", "members", "invites"]
     : ["activity", "members"];
 
+  useEffect(() => {
+    if (tab === "invites" && !amLeader) {
+      setTab("activity");
+    }
+  }, [tab, amLeader]);
+
   if (loading) {
     return <ScreenWithLoading title="Groups" loading />;
   }
@@ -150,6 +159,70 @@ export default function GroupsScreen() {
       </SimplePageTitle>
 
       <View className="px-4 my-4 flex flex-col gap-y-1">
+        {communities.length > 1 && (
+          <>
+            <TouchableOpacity
+              onPress={() => setGroupPickerOpen(true)}
+              activeOpacity={0.85}
+              className="self-start rounded-lg border border-zinc-200 bg-white flex-row items-center justify-between px-3 py-3 mb-4"
+              accessibilityRole="button"
+              accessibilityLabel="Select group"
+              accessibilityHint="Opens a list of your groups"
+            >
+              <Text
+                className="text-base text-zinc-900 flex-1 pr-2"
+                numberOfLines={1}
+              >
+                {selectedCommunity?.name}
+              </Text>
+              <ChevronDown size={18} color={colors.text.icon} />
+            </TouchableOpacity>
+            <FormModal
+              visible={groupPickerOpen}
+              onClose={() => setGroupPickerOpen(false)}
+            >
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-lg font-semibold text-zinc-900">
+                  Your groups
+                </Text>
+                <TouchableOpacity onPress={() => setGroupPickerOpen(false)}>
+                  <X size={20} color={colors.text.icon} />
+                </TouchableOpacity>
+              </View>
+              <ScrollView className="max-h-72" bounces={false}>
+                <View className="gap-0">
+                  {communities.map((c) => {
+                    const isSelected = c.id === selectedCommunityId;
+                    const isLead = leaderCommunityIds.has(c.id);
+                    return (
+                      <TouchableOpacity
+                        key={c.id}
+                        onPress={() => {
+                          setSelectedCommunityId(c.id);
+                          setGroupPickerOpen(false);
+                        }}
+                        className="py-3 border-b border-zinc-100 flex-row items-center justify-between gap-2"
+                        activeOpacity={0.7}
+                      >
+                        <Text
+                          className={`text-base flex-1 ${isSelected ? "font-semibold text-zinc-900" : "text-zinc-900"}`}
+                          numberOfLines={2}
+                        >
+                          {c.name}
+                        </Text>
+                        {isLead ? (
+                          <Text className="text-xs text-zinc-500 shrink-0">
+                            Lead
+                          </Text>
+                        ) : null}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+            </FormModal>
+          </>
+        )}
         <Text className="text-2xl text-zinc-900" weight={FontWeight.Semibold}>
           {selectedCommunity?.name}
         </Text>

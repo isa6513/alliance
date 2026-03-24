@@ -27,6 +27,7 @@ interface AuthContextType {
   user: UserDto | undefined;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -75,6 +76,15 @@ export const AuthProvider: React.FC<
       router.replace("/auth/login");
     }
   }, [router, clearTokens]);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const profile = (await authMe()).data;
+      setUser(profile?.user);
+    } catch {
+      // Leave current user on transient failure; session refresh handles auth.
+    }
+  }, []);
 
   const posthog = usePostHog();
 
@@ -210,6 +220,7 @@ export const AuthProvider: React.FC<
     user,
     login,
     logout,
+    refreshUser,
     canConnectToServer,
     isLoading,
   };

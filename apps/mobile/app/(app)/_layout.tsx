@@ -112,6 +112,14 @@ function AppContent() {
               name="index"
               options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
             />
+            <Stack.Screen
+              name="settings"
+              options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
+            />
+            <Stack.Screen
+              name="groups/manage"
+              options={{ contentStyle: notchContentStyle(colors.grey[0]) }}
+            />
           </Stack>
           <TabBar />
         </View>

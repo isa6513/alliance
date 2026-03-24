@@ -6,6 +6,7 @@ import {
   Switch,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { router } from "expo-router";
@@ -13,18 +14,34 @@ import { ArrowLeft } from "lucide-react-native";
 import {
   communityGetMyCommunities,
   communityGetPublicCommunities,
-  communityCreateCommunityAdmin,
+  communityCreateCommunity,
+  communityJoinPublicCommunity,
+  communityLeave,
+  communityGetIncomingCommunityInvitesForUser,
+  communityAcceptCommunityInvite,
+  communityRejectCommunityInvite,
+  userJoinGroupAssignment,
+  userLeaveGroupAssignment,
 } from "@alliance/shared/client";
 import type {
   CommunityDto,
   CreateCommunityDto,
+  CommunityInviteDto,
 } from "@alliance/shared/client/types.gen";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
-import { groupSettings } from "@alliance/shared/lib/copy";
+import {
+  groupSettings,
+  requestGroupAssignmentConfirmation,
+} from "@alliance/shared/lib/copy";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
-import Text, { FontFamily, FontWeight } from "../../../components/system/Text";
+import Text, { FontWeight, FontFamily } from "../../../components/system/Text";
 import { colors } from "../../../lib/style/colors";
 import { useAuth } from "../../../lib/AuthContext";
+import Button, {
+  ButtonColor,
+  ButtonSize,
+} from "../../../components/system/Button";
+import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
 
 const sortByName = (a: CommunityDto, b: CommunityDto) =>
   a.name
@@ -41,10 +58,31 @@ const INITIAL_COMMUNITY: CreateCommunityDto = {
   maxCapacity: GROUP_MAX_CAPACITY_DEFAULT,
 };
 
+function getRemovalMessage(
+  nonLeaderCommunities: CommunityDto[],
+  targetName?: string,
+): string | null {
+  if (!nonLeaderCommunities.length) {
+    return null;
+  }
+  const names = nonLeaderCommunities.map((c) => c.name);
+  const base =
+    names.length === 1
+      ? `your current group (${names[0]})`
+      : `the following groups: (${names.join(", ")})`;
+  if (!targetName) {
+    return `You will be removed from ${base}.`;
+  }
+  return `Joining ${targetName} will remove you from ${base}.`;
+}
+
 export default function GroupManageScreen() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [communities, setCommunities] = useState<CommunityDto[]>([]);
   const [publicCommunities, setPublicCommunities] = useState<CommunityDto[]>(
+    [],
+  );
+  const [pendingInvites, setPendingInvites] = useState<CommunityInviteDto[]>(
     [],
   );
   const [publicCommunitiesError, setPublicCommunitiesError] = useState<
@@ -57,6 +95,19 @@ export default function GroupManageScreen() {
     useState<CreateCommunityDto>(INITIAL_COMMUNITY);
   const [creating, setCreating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [joiningCommunityId, setJoiningCommunityId] = useState<number | null>(
+    null,
+  );
+  const [leavingCommunityId, setLeavingCommunityId] = useState<number | null>(
+    null,
+  );
+  const [acceptingInviteId, setAcceptingInviteId] = useState<number | null>(
+    null,
+  );
+  const [decliningInviteId, setDecliningInviteId] = useState<number | null>(
+    null,
+  );
+  const [assignmentBusy, setAssignmentBusy] = useState(false);
 
   const requiresMaxCapacity =
     newCommunity.public ||
@@ -76,6 +127,11 @@ export default function GroupManageScreen() {
     };
   }, [communities, user?.id]);
 
+  const memberCommunityIds = useMemo(
+    () => new Set((communities ?? []).map((c) => c.id)),
+    [communities],
+  );
+
   const sortedPublicCommunities = useMemo(
     () => [...publicCommunities].sort(sortByName),
     [publicCommunities],
@@ -83,11 +139,19 @@ export default function GroupManageScreen() {
 
   const loadCommunities = useCallback(async () => {
     try {
-      const [myRes, publicRes] = await Promise.all([
+      const [myRes, publicRes, invitesRes] = await Promise.all([
         communityGetMyCommunities(),
         communityGetPublicCommunities(),
+        communityGetIncomingCommunityInvitesForUser(),
       ]);
       setCommunities(myRes.data ?? []);
+      if (invitesRes.data) {
+        setPendingInvites(
+          invitesRes.data.filter((i) => i.status === "invitee_pending"),
+        );
+      } else {
+        setPendingInvites([]);
+      }
       if (publicRes.data) {
         setPublicCommunities(publicRes.data);
         setPublicCommunitiesError(null);
@@ -135,7 +199,7 @@ export default function GroupManageScreen() {
     setCreating(true);
     setError(null);
     try {
-      const response = await communityCreateCommunityAdmin({
+      const response = await communityCreateCommunity({
         body: {
           name,
           description,
@@ -146,21 +210,210 @@ export default function GroupManageScreen() {
           maxCapacity: normalizedMaxCapacity,
         },
       });
-      if (response.data) {
-        setNewCommunity(INITIAL_COMMUNITY);
-        setShowCreateForm(false);
-        void loadCommunities();
+      if (response.error || !response.data) {
+        const msg =
+          (response.error as { message?: string } | undefined)?.message ??
+          response.response?.statusText;
+        setError(
+          msg?.trim() ? msg : "Unable to create community. Please try again.",
+        );
+        return;
       }
+      setNewCommunity(INITIAL_COMMUNITY);
+      setShowCreateForm(false);
+      void loadCommunities();
+      await refreshUser();
     } catch (err) {
       console.error("Failed to create community", err);
       setError("Unable to create community. Please try again.");
     } finally {
       setCreating(false);
     }
-  }, [newCommunity, requiresMaxCapacity, loadCommunities]);
+  }, [newCommunity, requiresMaxCapacity, loadCommunities, refreshUser]);
+
+  const runLeaveGroup = useCallback(
+    async (community: CommunityDto) => {
+      setLeavingCommunityId(community.id);
+      try {
+        const res = await communityLeave({
+          path: { communityId: community.id },
+        });
+        if (!res.response.ok) {
+          throw new Error("leave failed");
+        }
+        await loadCommunities();
+        await refreshUser();
+      } catch (e) {
+        console.error("Failed to leave community", e);
+        Alert.alert("Error", "Unable to leave this group right now.");
+      } finally {
+        setLeavingCommunityId(null);
+      }
+    },
+    [loadCommunities, refreshUser],
+  );
+
+  const promptLeaveGroup = useCallback(
+    (community: CommunityDto) => {
+      const extra = !user?.undergoingGroupAssignment
+        ? 'Consider using "Request reassignment" above so staff can place you in a new group (this may take a few days).\n\n'
+        : "";
+      Alert.alert(
+        "Leave this group?",
+        `${extra}Are you sure? You won't be able to rejoin without an invite.`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Leave group",
+            style: "destructive",
+            onPress: () => void runLeaveGroup(community),
+          },
+        ],
+      );
+    },
+    [user?.undergoingGroupAssignment, runLeaveGroup],
+  );
+
+  const handleJoinPublicCommunity = useCallback(
+    (community: CommunityDto) => {
+      const message = getRemovalMessage(memberCommunities, community.name);
+      const proceed = async () => {
+        setJoiningCommunityId(community.id);
+        try {
+          const res = await communityJoinPublicCommunity({
+            path: { communityId: community.id },
+          });
+          if (!res.data) {
+            throw new Error("no community returned");
+          }
+          await loadCommunities();
+          await refreshUser();
+        } catch (e) {
+          console.error("Failed to join public group", e);
+          Alert.alert("Error", "Unable to join that group right now.");
+        } finally {
+          setJoiningCommunityId(null);
+        }
+      };
+      if (message) {
+        Alert.alert("Join public group?", message, [
+          { text: "Cancel", style: "cancel" },
+          { text: "Join group", onPress: () => void proceed() },
+        ]);
+      } else {
+        void proceed();
+      }
+    },
+    [memberCommunities, loadCommunities, refreshUser],
+  );
+
+  const handleRequestAssignment = useCallback(() => {
+    const needsConfirm = memberCommunities.length > 0;
+    const run = async () => {
+      setAssignmentBusy(true);
+      try {
+        await userJoinGroupAssignment();
+        await refreshUser();
+        await loadCommunities();
+      } catch (e) {
+        console.error("Failed to join group assignment", e);
+        Alert.alert("Error", "Unable to start reassignment. Please try again.");
+      } finally {
+        setAssignmentBusy(false);
+      }
+    };
+    if (needsConfirm) {
+      Alert.alert("Group assignment", requestGroupAssignmentConfirmation, [
+        { text: "No", style: "cancel" },
+        { text: "Yes, reassign me", onPress: () => void run() },
+      ]);
+    } else {
+      void run();
+    }
+  }, [memberCommunities.length, refreshUser, loadCommunities]);
+
+  const handleCancelAssignment = useCallback(async () => {
+    setAssignmentBusy(true);
+    try {
+      await userLeaveGroupAssignment();
+      await refreshUser();
+    } catch (e) {
+      console.error("Failed to cancel assignment", e);
+      Alert.alert("Error", "Unable to cancel. Please try again.");
+    } finally {
+      setAssignmentBusy(false);
+    }
+  }, [refreshUser]);
+
+  const handleAcceptInvite = useCallback(
+    (invite: CommunityInviteDto) => {
+      const message = getRemovalMessage(
+        memberCommunities,
+        invite.community.name,
+      );
+      const run = async () => {
+        setAcceptingInviteId(invite.id);
+        try {
+          const res = await communityAcceptCommunityInvite({
+            path: { inviteId: invite.id },
+          });
+          if (!res.response.ok) {
+            throw new Error("accept failed");
+          }
+          await loadCommunities();
+          await refreshUser();
+        } catch (e) {
+          console.error("Failed to accept invite", e);
+          Alert.alert("Error", "Unable to accept this invite.");
+        } finally {
+          setAcceptingInviteId(null);
+        }
+      };
+      if (message) {
+        Alert.alert("Accept invite?", message, [
+          { text: "Cancel", style: "cancel" },
+          { text: "Accept", onPress: () => void run() },
+        ]);
+      } else {
+        void run();
+      }
+    },
+    [memberCommunities, loadCommunities, refreshUser],
+  );
+
+  const handleDeclineInvite = useCallback(
+    async (inviteId: number) => {
+      setDecliningInviteId(inviteId);
+      try {
+        const res = await communityRejectCommunityInvite({
+          path: { inviteId },
+        });
+        if (!res.response.ok) {
+          throw new Error("decline failed");
+        }
+        await loadCommunities();
+      } catch (e) {
+        console.error("Failed to decline invite", e);
+        Alert.alert("Error", "Unable to decline this invite.");
+      } finally {
+        setDecliningInviteId(null);
+      }
+    },
+    [loadCommunities],
+  );
+
+  const inviteRowBusy =
+    acceptingInviteId !== null || decliningInviteId !== null;
+
+  const memberSectionSubtitle = useMemo(() => {
+    if (!user?.undergoingGroupAssignment) {
+      return null;
+    }
+    return memberCommunities.length ? " (reassigning...)" : " (assigning...)";
+  }, [user?.undergoingGroupAssignment, memberCommunities.length]);
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1">
       {loading ? (
         <View className="flex-1">
           <View className="flex-row items-center gap-2 p-4">
@@ -181,18 +434,7 @@ export default function GroupManageScreen() {
         </View>
       ) : (
         <>
-          <View className="flex-row items-center gap-2 p-4 border-b border-zinc-200 bg-white">
-            <TouchableOpacity onPress={() => router.back()} className="p-1">
-              <ArrowLeft size={24} color="#71717a" strokeWidth={2.5} />
-            </TouchableOpacity>
-            <Text
-              className="text-xl text-zinc-900"
-              family={FontFamily.Serif}
-              weight={FontWeight.Semibold}
-            >
-              Manage groups
-            </Text>
-            <View className="flex-1" />
+          <SimplePageTitle title="Manage groups" backButton={true}>
             <TouchableOpacity
               onPress={() => {
                 setShowCreateForm((v) => !v);
@@ -204,7 +446,7 @@ export default function GroupManageScreen() {
                 {showCreateForm ? "Cancel" : "+ New group"}
               </Text>
             </TouchableOpacity>
-          </View>
+          </SimplePageTitle>
           <ScrollView
             className="flex-1"
             contentContainerStyle={{ paddingBottom: 40 }}
@@ -232,83 +474,210 @@ export default function GroupManageScreen() {
               </View>
             )}
 
-            {/* Groups you lead */}
-            <View className="px-4 pt-2 pb-2">
-              <Text
-                className="text-xl text-zinc-900"
-                weight={FontWeight.Semibold}
-              >
-                Groups you lead
-              </Text>
-              <Text className="text-base text-zinc-500 mt-0.5">
-                You can lead as many groups as you want.
-              </Text>
-            </View>
-            {leaderCommunities.length ? (
-              leaderCommunities.map((community) => (
-                <AdminCommunityCard key={community.id} community={community} />
-              ))
-            ) : (
-              <View className="px-4 py-4">
-                <Text className="text-sm text-zinc-500">
-                  You don&apos;t lead any groups yet.
+            <View className="flex flex-col gap-y-4">
+              <View className="p-4 bg-white">
+                <Text
+                  className="text-xl font-semibold text-zinc-900"
+                  weight={FontWeight.Semibold}
+                >
+                  Groups you lead
                 </Text>
+                <Text className="text-base text-zinc-500 mt-0.5">
+                  You can lead as many groups as you want.
+                </Text>
+                {leaderCommunities.length ? (
+                  <View className="flex-1 gap-y-2 mt-4">
+                    {leaderCommunities.map((community) => (
+                      <LeaderCommunityCard
+                        key={community.id}
+                        community={community}
+                      />
+                    ))}
+                  </View>
+                ) : (
+                  <View className="px-4 py-4">
+                    <Text className="text-sm text-zinc-500">
+                      You don&apos;t lead any groups yet.
+                    </Text>
+                  </View>
+                )}
               </View>
-            )}
 
-            {/* Groups you're a member of */}
-            <View className="px-4 pt-6 pb-2">
-              <Text
-                className="text-xl text-zinc-900"
-                weight={FontWeight.Semibold}
-              >
-                Groups you&apos;re a member of
-              </Text>
-              <Text className="text-base text-zinc-500 mt-0.5">
-                For now, you can only be a member of one group.
-              </Text>
-            </View>
-            {memberCommunities.length ? (
-              memberCommunities.map((community) => (
-                <AdminCommunityCard key={community.id} community={community} />
-              ))
-            ) : (
-              <View className="px-4 py-4">
-                <Text className="text-sm text-zinc-500">
-                  You are not a member of any group.
-                </Text>
+              <View className="p-4 bg-white">
+                <View className="flex-row flex-wrap items-start justify-between gap-2">
+                  <View className="flex-1 min-w-[200px]">
+                    <Text
+                      className="text-xl text-zinc-900"
+                      weight={FontWeight.Semibold}
+                    >
+                      Groups you&apos;re a member of
+                      {memberSectionSubtitle ?? ""}
+                    </Text>
+                    <Text className="text-base text-zinc-500 mt-0.5">
+                      For now, you can only be a member of one group.
+                    </Text>
+                  </View>
+                  {user?.undergoingGroupAssignment ? (
+                    <Button
+                      title={
+                        memberCommunities.length
+                          ? "Cancel reassignment"
+                          : "Cancel assignment"
+                      }
+                      onPress={() => void handleCancelAssignment()}
+                      color={ButtonColor.Black}
+                      size={ButtonSize.Small}
+                      disabled={assignmentBusy}
+                      loading={assignmentBusy}
+                    />
+                  ) : memberCommunities.length ? (
+                    <Button
+                      title="Request reassignment"
+                      onPress={handleRequestAssignment}
+                      color={ButtonColor.Light}
+                      size={ButtonSize.Small}
+                      disabled={assignmentBusy}
+                      loading={assignmentBusy}
+                    />
+                  ) : null}
+                </View>
+                {memberCommunities.length ? (
+                  <View className="flex-1 gap-y-2 mt-4">
+                    {memberCommunities.map((community) => (
+                      <MemberCommunityCard
+                        key={community.id}
+                        community={community}
+                        onLeave={() => promptLeaveGroup(community)}
+                        leaving={leavingCommunityId === community.id}
+                      />
+                    ))}
+                  </View>
+                ) : (
+                  <View className="flex flex-col gap-y-3 items-center py-4 px-2">
+                    <Text className="text-center text-sm text-zinc-500">
+                      You are not a member of any group.
+                      {user?.undergoingGroupAssignment
+                        ? " Staff will assign you to a group in a few days."
+                        : ""}
+                    </Text>
+                    {user && !user.undergoingGroupAssignment ? (
+                      <Button
+                        title="Request assignment"
+                        onPress={handleRequestAssignment}
+                        color={ButtonColor.Black}
+                        size={ButtonSize.Medium}
+                        disabled={assignmentBusy}
+                        loading={assignmentBusy}
+                      />
+                    ) : null}
+                  </View>
+                )}
               </View>
-            )}
 
-            {/* Public groups */}
-            <View className="px-4 pt-6 pb-2">
-              <Text
-                className="text-xl text-zinc-900"
-                weight={FontWeight.Semibold}
-              >
-                Public groups
-              </Text>
-              <Text className="text-base text-zinc-500 mt-0.5">
-                Groups you can join at any time.
-              </Text>
+              {pendingInvites.length > 0 ? (
+                <View className="p-4 bg-white">
+                  <Text
+                    className="text-xl text-zinc-900"
+                    weight={FontWeight.Semibold}
+                  >
+                    Pending group invites
+                  </Text>
+                  <Text className="text-base text-zinc-500 mt-0.5">
+                    Accept or decline invitations to join a group.
+                  </Text>
+                  <View className="gap-y-2 mt-4">
+                    {pendingInvites.map((invite) => (
+                      <View
+                        key={invite.id}
+                        className="rounded-lg p-3 gap-y-3"
+                        style={{ backgroundColor: colors.grey[0] }}
+                      >
+                        <Text className="font-semibold text-zinc-900">
+                          {invite.community.name}
+                        </Text>
+                        <View className="flex-row flex-wrap gap-2">
+                          <Button
+                            title="Accept"
+                            onPress={() => handleAcceptInvite(invite)}
+                            color={ButtonColor.Green}
+                            size={ButtonSize.Small}
+                            disabled={inviteRowBusy}
+                            loading={acceptingInviteId === invite.id}
+                          />
+                          <Button
+                            title="Decline"
+                            onPress={() => void handleDeclineInvite(invite.id)}
+                            color={ButtonColor.Light}
+                            size={ButtonSize.Small}
+                            disabled={inviteRowBusy}
+                            loading={decliningInviteId === invite.id}
+                          />
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              ) : null}
+
+              <View className="p-4 bg-white">
+                <Text
+                  className="text-xl text-zinc-900"
+                  weight={FontWeight.Semibold}
+                >
+                  Public groups
+                </Text>
+                <Text className="text-base text-zinc-500 mt-0.5">
+                  Groups you can join at any time.
+                </Text>
+                {publicCommunitiesError ? (
+                  <View className="px-4 py-4">
+                    <Text className="text-sm text-red-500">
+                      {publicCommunitiesError}
+                    </Text>
+                  </View>
+                ) : sortedPublicCommunities.length ? (
+                  <View className="flex-1 gap-y-2 mt-4">
+                    {sortedPublicCommunities.map((community) => {
+                      const isMember = memberCommunityIds.has(community.id);
+                      const isLeader = community.leaders.some(
+                        (l) => l.id === user?.id,
+                      );
+                      const memberCount = getMemberCount(community);
+                      const isFull =
+                        community.maxCapacity !== null &&
+                        memberCount >= community.maxCapacity;
+                      const isJoining = joiningCommunityId === community.id;
+                      const joinDisabled =
+                        isMember || isLeader || isFull || isJoining;
+                      const joinLabel = isLeader
+                        ? "Leader"
+                        : isMember
+                          ? "Member"
+                          : isFull
+                            ? "Full"
+                            : isJoining
+                              ? "Joining…"
+                              : "Join";
+                      return (
+                        <PublicCommunityCard
+                          key={community.id}
+                          community={community}
+                          joinLabel={joinLabel}
+                          joinDisabled={joinDisabled}
+                          onJoin={() => handleJoinPublicCommunity(community)}
+                        />
+                      );
+                    })}
+                  </View>
+                ) : (
+                  <View className="px-4 py-4">
+                    <Text className="text-sm text-zinc-500">
+                      No public groups are available right now.
+                    </Text>
+                  </View>
+                )}
+              </View>
             </View>
-            {publicCommunitiesError ? (
-              <View className="px-4 py-4">
-                <Text className="text-sm text-red-500">
-                  {publicCommunitiesError}
-                </Text>
-              </View>
-            ) : sortedPublicCommunities.length ? (
-              sortedPublicCommunities.map((community) => (
-                <AdminCommunityCard key={community.id} community={community} />
-              ))
-            ) : (
-              <View className="px-4 py-4">
-                <Text className="text-sm text-zinc-500">
-                  No public groups are available right now.
-                </Text>
-              </View>
-            )}
           </ScrollView>
         </>
       )}
@@ -316,7 +685,7 @@ export default function GroupManageScreen() {
   );
 }
 
-function AdminCommunityCard({ community }: { community: CommunityDto }) {
+function LeaderCommunityCard({ community }: { community: CommunityDto }) {
   const memberCount = getMemberCount(community);
   const leaderCount = community.leaders.length;
   const capacity = community.allowStaffAssignments
@@ -324,7 +693,10 @@ function AdminCommunityCard({ community }: { community: CommunityDto }) {
     : null;
 
   return (
-    <View className="border-b border-zinc-100 px-4 py-4 gap-y-1">
+    <View
+      className="rounded p-3 gap-y-1"
+      style={{ backgroundColor: colors.grey[0] }}
+    >
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1 gap-y-1">
           <Text className="text-zinc-900" weight={FontWeight.Semibold}>
@@ -359,6 +731,103 @@ function AdminCommunityCard({ community }: { community: CommunityDto }) {
   );
 }
 
+function MemberCommunityCard({
+  community,
+  onLeave,
+  leaving,
+}: {
+  community: CommunityDto;
+  onLeave: () => void;
+  leaving: boolean;
+}) {
+  const memberCount = getMemberCount(community);
+  const leaderCount = community.leaders.length;
+  const capacity = community.allowStaffAssignments
+    ? community.maxCapacity
+    : null;
+
+  return (
+    <View
+      className="rounded p-3 gap-y-2"
+      style={{ backgroundColor: colors.grey[0] }}
+    >
+      <View className="flex-row items-start justify-between gap-3">
+        <View className="flex-1 gap-y-1">
+          <Text className="text-zinc-900" weight={FontWeight.Semibold}>
+            {community.name}
+          </Text>
+          <Text className="text-sm text-zinc-500" numberOfLines={3}>
+            {community.description || "No description yet."}
+          </Text>
+          <Text className="text-sm text-zinc-600">
+            {memberCount}
+            {capacity ? ` / ${capacity}` : ""} member
+            {memberCount === 1 ? "" : "s"}
+            {leaderCount > 0
+              ? ` · ${leaderCount} leader${leaderCount === 1 ? "" : "s"}`
+              : ""}
+          </Text>
+        </View>
+        <Button
+          title={leaving ? "…" : "Leave"}
+          onPress={onLeave}
+          color={ButtonColor.Red}
+          size={ButtonSize.Small}
+          disabled={leaving}
+          loading={leaving}
+        />
+      </View>
+    </View>
+  );
+}
+
+function PublicCommunityCard({
+  community,
+  joinLabel,
+  joinDisabled,
+  onJoin,
+}: {
+  community: CommunityDto;
+  joinLabel: string;
+  joinDisabled: boolean;
+  onJoin: () => void;
+}) {
+  const memberCount = getMemberCount(community);
+  const cap =
+    community.maxCapacity !== null
+      ? ` / ${Math.max(community.maxCapacity, memberCount)}`
+      : "";
+
+  return (
+    <View
+      className="rounded p-3 gap-y-2"
+      style={{ backgroundColor: colors.grey[0] }}
+    >
+      <View className="flex-row items-start justify-between gap-3">
+        <View className="flex-1 gap-y-1 pr-2">
+          <Text className="font-semibold text-zinc-900">{community.name}</Text>
+          {community.description ? (
+            <Text className="text-sm text-zinc-500" numberOfLines={3}>
+              {community.description}
+            </Text>
+          ) : null}
+          <Text className="text-sm text-zinc-600">
+            {memberCount}
+            {cap} members
+          </Text>
+        </View>
+        <Button
+          title={joinLabel}
+          onPress={onJoin}
+          color={ButtonColor.Black}
+          size={ButtonSize.Small}
+          disabled={joinDisabled}
+        />
+      </View>
+    </View>
+  );
+}
+
 function CreateGroupForm({
   newCommunity,
   setNewCommunity,
@@ -377,7 +846,7 @@ function CreateGroupForm({
   setError: (e: string | null) => void;
 }) {
   return (
-    <View className="mx-4 mb-4 p-4 bg-zinc-50 rounded-xl border border-zinc-200 gap-y-4">
+    <View className="mb-4 p-4 rounded-xl bg-white gap-y-4">
       <Text className="text-zinc-900" weight={FontWeight.Semibold}>
         Create group
       </Text>

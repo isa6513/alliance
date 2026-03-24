@@ -16,7 +16,7 @@ import {
   messageSendMessage,
   ProfileDto,
 } from "@alliance/shared/client";
-import { ChevronLeft, Info, Users } from "lucide-react-native";
+import { Info, Users } from "lucide-react-native";
 import MessageBubble from "../../../../components/messages/MessageBubble";
 import MessageComposer from "../../../../components/messages/MessageComposer";
 import Text, { FontWeight } from "../../../../components/system/Text";
@@ -29,6 +29,7 @@ import {
 } from "../../../../lib/messages";
 import { colors } from "../../../../lib/style/colors";
 import { LegendList, LegendListRef } from "@legendapp/list";
+import BackButton from "../../../../components/system/BackButton";
 
 export default function ConversationScreen() {
   const { conversationId } = useLocalSearchParams<{
@@ -274,16 +275,14 @@ export default function ConversationScreen() {
   }
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pb-4 bg-white z-50 -mt-14 pt-17">
-        <TouchableOpacity onPress={() => router.back()}>
-          <ChevronLeft size={22} color="#111827" />
-        </TouchableOpacity>
+      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 bg-white z-50 -mt-14 pt-17">
+        <BackButton />
         <TouchableOpacity
           onPress={() => router.push(`/messages/${selectedConvo.id}/info`)}
           className="flex-1"
           activeOpacity={0.7}
         >
-          <View style={{ flex: 1 }}>
+          <View className="flex-1">
             <Text
               className="text-base text-zinc-900"
               weight={FontWeight.Semibold}
@@ -295,7 +294,8 @@ export default function ConversationScreen() {
               <View className="flex-row items-center gap-1">
                 <Users size={14} color="#71717a" />
                 <Text className="text-xs text-zinc-500">
-                  {selectedConvo.participants.length} members
+                  {selectedConvo.participants.length} member
+                  {selectedConvo.participants.length === 1 ? "" : "s"}
                 </Text>
               </View>
             )}

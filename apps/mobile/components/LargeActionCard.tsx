@@ -10,7 +10,7 @@ import Card from "./system/Card";
 import Text, { FontFamily, FontWeight } from "./system/Text";
 import TaskTimeInfo from "./TaskTimeInfo";
 import { router } from "expo-router";
-import { Maximize } from "lucide-react-native";
+import { ArrowRight } from "lucide-react-native";
 import ActionTaskPanel from "./ActionTaskPanel";
 import useActivities, {
   ActivityList,
@@ -87,7 +87,7 @@ export default function LargeActionCard({
             }}
             className="mr-2 flex flex-row items-center gap-x-1"
           >
-            <Maximize size={20} />
+            <ArrowRight size={20} />
           </TouchableOpacity>
         </View>
         <Text

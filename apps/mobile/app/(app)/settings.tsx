@@ -198,7 +198,7 @@ export default function SettingsPage() {
     "border border-zinc-200 rounded-lg bg-white px-3 py-3 text-base";
 
   return (
-    <View className="flex-1 bg-white" testID="vr-settings-ready">
+    <View className="flex-1" testID="vr-settings-ready">
       <SimplePageTitle title="Settings">
         <Text className="text-sm text-zinc-500 mr-4">
           {saving
@@ -209,7 +209,7 @@ export default function SettingsPage() {
         </Text>
       </SimplePageTitle>
       <KeyboardAwareScrollView className="flex-1">
-        <View className="bg-zinc-100 px-2 pb-8 pt-2 flex flex-col gap-2">
+        <View className=" px-2 pb-8 pt-2 flex flex-col gap-2">
           {/* Profile Section */}
           <Card cardStyle={CardStyle.White}>
             <View className="gap-4">

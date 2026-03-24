@@ -8,6 +8,7 @@ import Text from "./system/Text";
 import { ClockIcon, Calendar } from "lucide-react-native";
 import { cn } from "@alliance/shared/styles/util";
 import { colors } from "../lib/style/colors";
+import { formatTime } from "@alliance/shared/lib/utils";
 
 const TaskTimeInfo = ({
   action,
@@ -47,7 +48,9 @@ const TaskTimeInfo = ({
         >
           <Calendar size={15} color={color} />
           <Text className="text-sm" style={{ color: color }}>
-            {formatDeadline(nextEvent.date)}
+            {absoluteDeadline
+              ? formatDeadline(nextEvent.date)
+              : `${formatTime(new Date(nextEvent.date), { addSuffix: false })} left`}
           </Text>
         </View>
       ) : null}
