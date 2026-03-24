@@ -26,7 +26,7 @@ export default function ActionUpdateCard({ update }: ActionUpdateCardProps) {
             | {
                 data?: NotificationDto[];
               }
-            | undefined
+            | undefined,
         ) => {
           if (!oldData?.data) {
             return oldData;
@@ -47,14 +47,13 @@ export default function ActionUpdateCard({ update }: ActionUpdateCardProps) {
               return { ...notification, readAt };
             }),
           };
-        }
+        },
       );
     },
   });
 
   const hasContent =
-    !!update.content?.body ||
-    (update.content?.attachments?.length ?? 0) > 0;
+    !!update.content?.body || (update.content?.attachments?.length ?? 0) > 0;
 
   return (
     <View className="flex flex-col border border-zinc-200 rounded-sm overflow-hidden">

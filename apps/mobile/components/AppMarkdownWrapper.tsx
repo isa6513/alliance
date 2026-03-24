@@ -259,7 +259,10 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         return (
           <View
             key={node.key}
-            style={[styles._VIEW_SAFE_paragraph, { marginTop, marginBottom: 0 }]}
+            style={[
+              styles._VIEW_SAFE_paragraph,
+              { marginTop, marginBottom: 0 },
+            ]}
           >
             {children}
           </View>
@@ -340,19 +343,19 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
             key={node.key}
             style={{
               marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
-              marginBottom: isLastAmongSiblings(node, parent) ? 0 : MD_SPACE_LIST_TOP,
+              marginBottom: isLastAmongSiblings(node, parent)
+                ? 0
+                : MD_SPACE_LIST_TOP,
             }}
           >
             <Image
               source={{ uri: transformedSrc }}
               style={{
+                aspectRatio: 1,
                 width: "100%",
-                height: 200,
                 borderRadius: 4,
-                borderWidth: 1,
-                borderColor: "#e4e4e7",
               }}
-              resizeMode="cover"
+              resizeMode="contain"
               accessibilityLabel={alt}
             />
           </View>
@@ -425,7 +428,9 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
               padding: 12,
               borderRadius: 4,
               marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
-              marginBottom: isLastAmongSiblings(node, parent) ? 0 : MD_SPACE_LIST_TOP,
+              marginBottom: isLastAmongSiblings(node, parent)
+                ? 0
+                : MD_SPACE_LIST_TOP,
             }}
           >
             <Text style={{ fontFamily: "monospace", fontSize: 13 }}>
@@ -492,7 +497,9 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
               padding: 12,
               borderRadius: 4,
               marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
-              marginBottom: isLastAmongSiblings(node, parent) ? 0 : MD_SPACE_LIST_TOP,
+              marginBottom: isLastAmongSiblings(node, parent)
+                ? 0
+                : MD_SPACE_LIST_TOP,
             }}
           >
             <Text style={{ fontFamily: "monospace", fontSize: 13 }}>

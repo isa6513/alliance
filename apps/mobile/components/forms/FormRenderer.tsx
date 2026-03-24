@@ -212,12 +212,14 @@ export function RenderDisplayBlockMobile({
       const IconComponent = bigLinkIcons[block.icon || "messages-square"];
       return (
         <TouchableOpacity
-          className="flex-row items-center gap-3 rounded-lg border border-zinc-200 bg-white px-5 py-4"
+          className="flex-row items-center gap-3 rounded-lg border border-zinc-200 bg-white px-5 py-4 mr-3"
           onPress={() => Linking.openURL(block.url)}
         >
           <IconComponent size={20} />
           <View className="">
-            <Text className="text-lg font-medium text-black">{block.text}</Text>
+            <Text className="text-base font-medium text-black">
+              {block.text}
+            </Text>
             <Text
               className="mt-1 font-medium text-sm text-green"
               numberOfLines={1}
