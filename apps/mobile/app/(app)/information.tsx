@@ -190,9 +190,9 @@ export default function InformationScreen() {
     <View className="flex-1 bg-white">
       <SimplePageTitle title="Information" />
       <ScrollView className="flex-1">
-        <View className="px-2 pb-8 pt-2 gap-y-6">
+        <View className="px-4 pb-8 pt-2 gap-y-6">
           <View className="gap-y-3">
-            <Text className="text-lg font-semibold text-zinc-900 font-serif">
+            <Text className="text-lg font-semibold text-zinc-900">
               Contact the office
             </Text>
             <View className="gap-y-2">
@@ -207,7 +207,7 @@ export default function InformationScreen() {
           </View>
 
           <View className="gap-y-3">
-            <Text className="text-lg font-semibold text-zinc-900 font-serif">
+            <Text className="text-lg font-semibold text-zinc-900">
               Resources
             </Text>
             <View className="gap-y-2">

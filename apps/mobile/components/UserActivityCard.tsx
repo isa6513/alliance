@@ -172,6 +172,7 @@ export default function UserActivityCard({
               onSubmit={handleSave}
               onCancel={handleCancel}
               submitLabel="Save"
+              autoFocus
             />
           </View>
         ) : (

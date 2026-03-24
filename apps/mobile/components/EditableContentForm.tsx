@@ -38,6 +38,8 @@ interface EditableContentFormProps {
    * Example: setClearDraftSignal((x)=>x+1)
    */
   clearDraftSignal?: number;
+  /** Whether to auto-focus the input when the component mounts */
+  autoFocus?: boolean;
 }
 
 const STORAGE_PREFIX = "editablecontent:draft:v1";
@@ -106,6 +108,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   onDraftRestored,
   clearDraftSignal,
   isSubmitting,
+  autoFocus,
 }) => {
   const [isPicking, setIsPicking] = useState(false);
   const [pickerError, setPickerError] = useState<string | null>(null);
@@ -285,7 +288,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         placeholder={placeholder}
         placeholderTextColor="#9ca3af"
         multiline
-        autoFocus={expanded}
+        autoFocus={autoFocus ?? expanded}
         onFocus={() => setShowExtend(true)}
         onBlur={() => {
           if (isPickingRef.current) return;
