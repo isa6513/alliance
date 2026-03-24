@@ -17,12 +17,6 @@ import { authRefreshTokens } from "@alliance/shared/client";
 import PushNotificationResponseHandler from "../components/PushNotificationResponseHandler";
 import DeviceRegistration from "../components/DeviceRegistration";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { run } from "@alliance/shared/lib/utils";
-
-let refreshTokensPromise: Promise<{
-  accessToken: string;
-  refreshToken: string | null;
-} | null> | null = null;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,50 +58,6 @@ export default function RootLayout() {
     const tokenStore = Platform.OS === "web" ? WebTokenStore : SecureStorage;
     const originalFetch = fetch.bind(globalThis);
 
-    const refreshTokens = async () => {
-      if (!refreshTokensPromise) {
-        refreshTokensPromise = run(async () => {
-          const refreshToken = await tokenStore.getItem("refreshToken");
-          if (!refreshToken) {
-            return null;
-          }
-
-          const refreshRes = await authRefreshTokens({
-            query: { mode: "header" },
-            headers: { Authorization: `Bearer ${refreshToken}` },
-          });
-
-          if (!refreshRes.response.ok || !refreshRes.data?.access_token) {
-            return null;
-          }
-
-          await tokenStore.setItem("accessToken", refreshRes.data.access_token);
-          const nextRefreshToken = refreshRes.data.refresh_token ?? null;
-          if (nextRefreshToken) {
-            await tokenStore.setItem("refreshToken", nextRefreshToken);
-          }
-
-          client.setConfig({
-            baseUrl: getApiUrl(),
-            headers: {
-              Authorization: `Bearer ${refreshRes.data.access_token}`,
-            },
-            fetch: wrappedFetch,
-            throwOnError: true,
-          });
-
-          return {
-            accessToken: refreshRes.data.access_token,
-            refreshToken: nextRefreshToken,
-          };
-        }).finally(() => {
-          refreshTokensPromise = null;
-        });
-      }
-
-      return refreshTokensPromise;
-    };
-
     const wrappedFetch: typeof fetch = async (input, init) => {
       const req = new Request(input, init);
       const retryReq = req.clone();
@@ -117,12 +67,32 @@ export default function RootLayout() {
         return res;
       }
 
-      const refreshedTokens = await refreshTokens();
-      if (refreshedTokens?.accessToken) {
+      const refreshToken = await tokenStore.getItem("refreshToken");
+      if (!refreshToken) return res;
+
+      const refreshRes = await authRefreshTokens({
+        query: { mode: "header" },
+        headers: { Authorization: `Bearer ${refreshToken}` },
+      });
+
+      if (refreshRes.response.ok && refreshRes.data?.access_token) {
+        await tokenStore.setItem("accessToken", refreshRes.data.access_token);
+        if (refreshRes.data.refresh_token) {
+          await tokenStore.setItem(
+            "refreshToken",
+            refreshRes.data.refresh_token,
+          );
+        }
+        client.setConfig({
+          baseUrl: getApiUrl(),
+          headers: { Authorization: `Bearer ${refreshRes.data.access_token}` },
+          fetch: wrappedFetch,
+          throwOnError: true,
+        });
         const retryHeaders = new Headers(retryReq.headers);
         retryHeaders.set(
           "Authorization",
-          `Bearer ${refreshedTokens.accessToken}`,
+          `Bearer ${refreshRes.data.access_token}`,
         );
         return originalFetch(new Request(retryReq, { headers: retryHeaders }));
       }
