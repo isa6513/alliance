@@ -4,6 +4,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   View,
+  ScrollView,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import {
@@ -32,6 +33,7 @@ import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivit
 import OutputRenderer from "../../../../../components/OutputRenderer";
 import BackButton from "../../../../../components/system/BackButton";
 import KeyboardAwareScrollView from "../../../../../components/KeyboardAwareScrollView";
+import { KeyboardStickyView } from "react-native-keyboard-controller";
 
 export default function ActivityDetailScreen() {
   const { id, activityId } = useLocalSearchParams<{
@@ -235,8 +237,11 @@ export default function ActivityDetailScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white">
-      <KeyboardAwareScrollView
+    <KeyboardStickyView
+      className="flex-1 bg-white"
+      offset={{ closed: 0, opened: 90 }}
+    >
+      <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 40 }}
         refreshControl={
@@ -359,7 +364,7 @@ export default function ActivityDetailScreen() {
             />
           </View>
         </View>
-      </KeyboardAwareScrollView>
-    </View>
+      </ScrollView>
+    </KeyboardStickyView>
   );
 }
