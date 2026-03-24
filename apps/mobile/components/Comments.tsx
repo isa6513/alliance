@@ -103,7 +103,7 @@ const ReplyForm = ({
   onSubmit,
 }: ReplyFormProps) => {
   return (
-    <View className="p-2 bg-zinc-100 rounded-lg">
+    <View className="p-2 bg-zinc-100 rounded">
       <EditableContentForm
         value={content}
         onChange={setContent}
@@ -260,6 +260,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
               isSubmitting={shared.isSubmitting}
               value={editContent}
               onChange={setEditContent}
+              className="bg-zinc-100 rounded overflow-visible"
               placeholder="Edit your reply..."
               expanded
               draftKey={`edit-reply-${reply.id}`}
@@ -317,7 +318,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
           {shared.user &&
             reply.author.id === shared.user.id &&
             !reply.deleted && (
-              <View className="flex-row items-center gap-x-2">
+              <View className="flex-row items-center gap-x-3">
                 <TouchableOpacity
                   onPress={() => setIsEditing(true)}
                   activeOpacity={0.7}
@@ -484,7 +485,6 @@ export default function Comments({
         await fetchComments();
         setEditableContent({ body: "", attachments: [] });
         setNestedDraft({ body: "", attachments: [] });
-        setShowForm(false);
         setReplyingTo(null);
         setError(null);
       } catch (err) {

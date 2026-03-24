@@ -343,7 +343,6 @@ export default function ActivityDetailScreen() {
               liked={activity.likedByMe ?? false}
               likes={activity.likesCount}
               onPress={handleLike}
-              bordered
             />
           </View>
 

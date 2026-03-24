@@ -107,7 +107,6 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   clearDraftSignal,
   isSubmitting,
 }) => {
-  const [inputHeight, setInputHeight] = useState(0);
   const [isPicking, setIsPicking] = useState(false);
   const [pickerError, setPickerError] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -118,7 +117,6 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
 
   const draftPath = useMemo(() => getDraftPath(draftKey), [draftKey]);
   const shouldRestoreDraft = restoreDraft ?? draftKey !== undefined;
-  const minHeight = expanded ? 120 : 32;
 
   const [showExtend, setShowExtend] = useState(false);
 
@@ -298,17 +296,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
             setShowExtend(false);
           });
         }}
-        onContentSizeChange={(event) => {
-          const nextHeight = event.nativeEvent.contentSize.height;
-          setInputHeight(nextHeight);
-        }}
-        style={[
-          styles.textInput,
-          {
-            minHeight,
-            height: Math.max(minHeight, inputHeight || minHeight),
-          },
-        ]}
+        style={[styles.textInput]}
       />
       {(value.attachments ?? []).length > 0 && (
         <View className="mt-3 flex-row flex-wrap gap-2">
