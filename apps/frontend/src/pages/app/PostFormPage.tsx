@@ -35,7 +35,7 @@ const PostFormPage: React.FC = () => {
     attachments: [],
   });
   const [scheduledVisibleAt, setScheduledVisibleAt] = useState<string | null>(
-    null
+    null,
   );
   const [useSchedulePost, setUseSchedulePost] = useState<boolean>(false);
 
@@ -45,7 +45,7 @@ const PostFormPage: React.FC = () => {
   const [actionId, setActionId] = useState<number | undefined>(
     searchParams.get("actionId")
       ? Number(searchParams.get("actionId"))
-      : undefined
+      : undefined,
   );
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -118,7 +118,7 @@ const PostFormPage: React.FC = () => {
               return res.data?.key;
             }
             return fileB64;
-          })
+          }),
         );
         attachmentKeys = uploads.filter(Boolean) as string[];
       }
@@ -194,7 +194,7 @@ const PostFormPage: React.FC = () => {
 
       <Card>
         <div className="p-2">
-          <h1 className="!text-xl font-semibold mb-6">
+          <h1 className="text-xl! font-semibold mb-6">
             {mode === "create" ? "New Thread" : "Edit Thread"}
           </h1>
 
@@ -268,7 +268,7 @@ const PostFormPage: React.FC = () => {
                             setScheduledVisibleAt(utcValue);
                             if (!utcValue) {
                               setError(
-                                "Please select a valid date and time to schedule the post."
+                                "Please select a valid date and time to schedule the post.",
                               );
                               return;
                             }
@@ -300,8 +300,8 @@ const PostFormPage: React.FC = () => {
                   {isSubmitting
                     ? "Saving..."
                     : mode === "create"
-                    ? "Create Post"
-                    : "Save Changes"}
+                      ? "Create Post"
+                      : "Save Changes"}
                 </Button>
               </div>
             </div>

@@ -25,7 +25,7 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
   const attachments = useMemo(
     () =>
       (content.attachments ?? []).filter((src): src is string => Boolean(src)),
-    [content.attachments]
+    [content.attachments],
   );
   const body = content?.body ?? "";
 
@@ -43,20 +43,18 @@ const EditableContentRenderer: React.FC<EditableContentRendererProps> = ({
     if (!body) return null;
     if (collapsed) {
       return (
-        <Text className={cn("text-zinc-800", small && "text-sm")} numberOfLines={1}>
+        <Text
+          className={cn("text-zinc-800", small && "text-sm")}
+          numberOfLines={1}
+        >
           {body}
         </Text>
       );
     }
-    if (truncated) {
-      return (
-        <Text className={cn("text-zinc-800", small && "text-sm")} numberOfLines={3}>
-          {body}
-        </Text>
-      );
-    }
+
     return (
       <AppMarkdownWrapper
+        truncated={truncated}
         style={
           small
             ? {

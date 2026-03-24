@@ -168,11 +168,13 @@ function transformImageUrl(url: string): string {
 interface AppMarkdownWrapperProps {
   children: string;
   style?: object;
+  truncated?: boolean;
 }
 
 const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
   children,
   style,
+  truncated = false,
 }) => {
   const handleLinkPress = useHandleLinkPress();
 
@@ -411,7 +413,13 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
     [style],
   );
 
-  return (
+  return truncated ? (
+    <View className="max-h-20 overflow-hidden">
+      <Markdown style={markdownStyles} rules={rules} mergeStyle>
+        {children}
+      </Markdown>
+    </View>
+  ) : (
     <Markdown style={markdownStyles} rules={rules} mergeStyle>
       {children}
     </Markdown>
