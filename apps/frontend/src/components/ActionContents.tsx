@@ -62,7 +62,9 @@ const ActionContents = () => {
     }
     const list = action.followUpForms;
     return list.filter(isFollowUpFormActive);
-  }, [action.followUpForms, context.userRelation]);
+    // dont want to show follow up before cohort recomputed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [action.followUpForms]);
 
   const progressViews = useMemo(
     () => aggregateViews.filter((view) => view.kind === "progressbar"),
