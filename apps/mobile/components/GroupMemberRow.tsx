@@ -81,9 +81,12 @@ export function GroupMemberRow({
   }, [isLeader, completedAll]);
 
   const onTopBarPress = useCallback(() => {
-    if (!showDropdown) return;
-    setExpanded((e) => !e);
-  }, [showDropdown]);
+    if (!showDropdown) {
+      router.push(`/member/${profile.id}`);
+    } else {
+      setExpanded((e) => !e);
+    }
+  }, [showDropdown, profile.id]);
 
   return (
     <View className={cn(!isLastInSection && "border-b border-zinc-200")}>
@@ -91,7 +94,6 @@ export function GroupMemberRow({
         onPress={onTopBarPress}
         className="flex-row items-center gap-3 px-4 py-3"
         activeOpacity={0.7}
-        disabled={!showDropdown}
       >
         <ProfileImage pfp={profile.profilePicture ?? null} size="large" />
         <View className="flex-1 min-w-0">
