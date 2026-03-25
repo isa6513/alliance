@@ -116,7 +116,7 @@ const ActionPageTaskPanel = () => {
     case ActionPageTaskPanelState.Completed:
       return <ActionTaskPanelCompleted action={action} />;
     case ActionPageTaskPanelState.Declined:
-      return <ActionTaskPanelDeclined />;
+      return <ActionTaskPanelDeclined action={action} />;
     case ActionPageTaskPanelState.MemberActionClosed:
       return (
         <ActionPageTaskPanelCardWrapper
