@@ -107,7 +107,7 @@ export default function Sidebar() {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleNavigate("/")}>
             <Text
-              className="uppercase text-xl font-bold"
+              className="uppercase text-xl"
               style={{ fontFamily: "Berlingske" }}
             >
               The Alliance
@@ -124,9 +124,7 @@ export default function Sidebar() {
                 key={item.name}
                 onPress={() => handleNavigate(item.href)}
                 className="flex-row items-center px-3 py-2.5 rounded-lg mb-0.5"
-                style={
-                  active ? { backgroundColor: colors.grey[2] } : undefined
-                }
+                style={active ? { backgroundColor: colors.grey[2] } : undefined}
                 activeOpacity={0.7}
               >
                 <Icon

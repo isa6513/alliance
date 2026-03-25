@@ -1,4 +1,5 @@
 import { Text as RNText, TextProps as RNTextProps } from "react-native";
+import { cn } from "@alliance/shared/styles/util";
 
 export enum TextStyle {
   Header = "header",
@@ -26,12 +27,15 @@ export default function Text({
   className,
   ...props
 }: TextProps) {
-  const baseClasses = "font-sans";
-  const typeClass = type ? typeClasses[type] : "text-base";
-  const combinedClasses = `${baseClasses} ${typeClass} ${className || ""}`;
-
   return (
-    <RNText className={combinedClasses} {...props}>
+    <RNText
+      className={cn(
+        "font-sans",
+        type ? typeClasses[type] : "text-base",
+        className,
+      )}
+      {...props}
+    >
       {children}
     </RNText>
   );
