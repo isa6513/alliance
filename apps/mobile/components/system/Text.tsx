@@ -30,7 +30,7 @@ export default function Text({
   return (
     <RNText
       className={cn(
-        "font-sans",
+        "font-sans font-regular",
         type ? typeClasses[type] : "text-base",
         className,
       )}
