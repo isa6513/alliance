@@ -5,7 +5,11 @@ import {
   ActivityIndicator,
   FlatList,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { router } from "expo-router";
 import { ChevronDown, Settings, X } from "lucide-react-native";
@@ -14,18 +18,22 @@ import {
   communityGetCommunityInvites,
   communityGetMemberContactInfo,
   communityGetMyCommunities,
+  communityUpdate,
   userGetOnetimeInvitesByCommunity,
 } from "@alliance/shared/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   CommunityDto,
   CommunityMemberContactInfoDto,
+  CreateCommunityDto,
 } from "@alliance/shared/client/types.gen";
 import {
   getDeadlineTimestampByUserId,
   hasActionsToComplete,
   sortMembersByNextTaskDue,
 } from "@alliance/shared/lib/communityMemberActions";
+import { getMemberCount } from "@alliance/shared/lib/communityUtils";
+import { groupSettings } from "@alliance/shared/lib/copy";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import useActivities, {
   ActivityList,
@@ -39,15 +47,22 @@ import { SectionHeader } from "../../../components/system/SectionHeader";
 import { colors } from "../../../lib/style/colors";
 import UserActivityCard from "../../../components/UserActivityCard";
 import { GroupMemberRow } from "../../../components/GroupMemberRow";
+import ProfileImage from "../../../components/ProfileImage";
 import { useAuth } from "../../../lib/AuthContext";
 import FormModal from "../../../components/forms/FormModal";
+import Button, {
+  ButtonColor,
+  ButtonSize,
+} from "../../../components/system/Button";
+import { CreateGroupForm } from "../../../components/groups/CreateGroupForm";
 
-type Tab = "activity" | "members" | "invites";
+type Tab = "activity" | "members" | "invites" | "settings";
 
 const TAB_DISPLAY_NAMES: Record<Tab, string> = {
   activity: "Activity",
   members: "Members",
   invites: "Invites",
+  settings: "Settings",
 };
 
 export default function GroupsScreen() {
@@ -88,6 +103,12 @@ export default function GroupsScreen() {
     void loadCommunities();
   }, [loadCommunities]);
 
+  const onCommunityUpdated = useCallback((updated: CommunityDto) => {
+    setCommunities((prev) =>
+      prev.map((c) => (c.id === updated.id ? updated : c)),
+    );
+  }, []);
+
   const selectedCommunity = useMemo(
     () => communities.find((c) => c.id === selectedCommunityId) ?? null,
     [communities, selectedCommunityId],
@@ -104,11 +125,14 @@ export default function GroupsScreen() {
   );
 
   const tabs: Tab[] = amLeader
-    ? ["activity", "members", "invites"]
+    ? ["activity", "members", "invites", "settings"]
     : ["activity", "members"];
 
   useEffect(() => {
     if (tab === "invites" && !amLeader) {
+      setTab("activity");
+    }
+    if (tab === "settings" && !amLeader) {
       setTab("activity");
     }
   }, [tab, amLeader]);
@@ -261,6 +285,13 @@ export default function GroupsScreen() {
               communityId={selectedCommunity.id}
               onRefresh={onRefresh}
               refreshing={refreshing}
+            />
+          )}
+          {tab === "settings" && (
+            <GroupSettingsTab
+              community={selectedCommunity}
+              amLeader={amLeader}
+              onCommunityUpdated={onCommunityUpdated}
             />
           )}
         </View>
@@ -691,5 +722,329 @@ function GroupInvitesTab({
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }
     />
+  );
+}
+
+function communityToCreateCommunityDto(c: CommunityDto): CreateCommunityDto {
+  const mc = getMemberCount(c);
+  return {
+    name: c.name,
+    description: c.description,
+    photo: c.photo ?? "",
+    public: c.public,
+    allowMemberInvites: c.allowMemberInvites ?? true,
+    allowStaffAssignments: c.allowStaffAssignments ?? true,
+    maxCapacity:
+      c.maxCapacity === null ? null : Math.max(c.maxCapacity, mc),
+  };
+}
+
+function GroupSettingsTab({
+  community,
+  amLeader,
+  onCommunityUpdated,
+}: {
+  community: CommunityDto;
+  amLeader: boolean;
+  onCommunityUpdated: (updated: CommunityDto) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState<CreateCommunityDto>(() =>
+    communityToCreateCommunityDto(community),
+  );
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const memberCount = useMemo(() => getMemberCount(community), [community]);
+
+  const requiresMaxCapacity = useMemo(
+    () =>
+      editForm.public ||
+      editForm.allowMemberInvites ||
+      editForm.allowStaffAssignments,
+    [editForm.public, editForm.allowMemberInvites, editForm.allowStaffAssignments],
+  );
+
+  const resetFormFromCommunity = useCallback((c: CommunityDto) => {
+    setEditForm(communityToCreateCommunityDto(c));
+  }, []);
+
+  useEffect(() => {
+    setIsEditing(false);
+    setError(null);
+  }, [community.id]);
+
+  useEffect(() => {
+    if (isEditing) return;
+    resetFormFromCommunity(community);
+  }, [community, isEditing, resetFormFromCommunity]);
+
+  const handleCancel = useCallback(() => {
+    resetFormFromCommunity(community);
+    setIsEditing(false);
+    setError(null);
+  }, [community, resetFormFromCommunity]);
+
+  const handlePickPhoto = useCallback(async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+        base64: true,
+      });
+      if (result.canceled || !result.assets.length) return;
+      const asset = result.assets[0];
+      if (!asset.base64) {
+        Alert.alert("Upload failed", "Unable to read that image.");
+        return;
+      }
+      const mime = asset.mimeType ?? "image/jpeg";
+      setEditForm((prev) => ({
+        ...prev,
+        photo: `data:${mime};base64,${asset.base64}`,
+      }));
+      setError(null);
+    } catch (err) {
+      console.error("Failed to pick image", err);
+      Alert.alert("Upload failed", "Unable to select that photo.");
+    }
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    setError(null);
+    const trimmed = editForm.name.trim();
+    if (!trimmed) {
+      setError("Name is required");
+      return;
+    }
+
+    let normalizedMaxCapacity: number | null = null;
+    if (requiresMaxCapacity) {
+      if (!editForm.maxCapacity || editForm.maxCapacity <= 0) {
+        setError("Capacity is required");
+        return;
+      }
+      normalizedMaxCapacity = editForm.maxCapacity;
+    }
+    if (normalizedMaxCapacity !== null && normalizedMaxCapacity < memberCount) {
+      setError(
+        `Capacity cannot be less than the current number of members (${memberCount})`,
+      );
+      return;
+    }
+
+    const photoTrim = editForm.photo?.trim();
+
+    setIsSaving(true);
+    try {
+      const response = await communityUpdate({
+        path: { communityId: community.id },
+        body: {
+          name: trimmed,
+          description: editForm.description,
+          photo: photoTrim || undefined,
+          public: editForm.public,
+          maxCapacity: normalizedMaxCapacity,
+          allowMemberInvites: editForm.allowMemberInvites,
+          allowStaffAssignments: editForm.allowStaffAssignments,
+        },
+      });
+      if (response.data) {
+        onCommunityUpdated(response.data);
+        setIsEditing(false);
+      } else {
+        setError("Failed to update group");
+      }
+    } catch (err) {
+      console.error("Failed to update group", err);
+      setError("Failed to update group");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    community.id,
+    editForm.allowMemberInvites,
+    editForm.allowStaffAssignments,
+    editForm.description,
+    editForm.maxCapacity,
+    editForm.name,
+    editForm.photo,
+    editForm.public,
+    memberCount,
+    onCommunityUpdated,
+    requiresMaxCapacity,
+  ]);
+
+  const requiresCapacityDisplay =
+    community.public ||
+    community.allowMemberInvites ||
+    community.allowStaffAssignments;
+
+  if (!amLeader) {
+    return (
+      <View className="flex-1 px-4 py-8">
+        <Text className="text-zinc-500 text-center">
+          Only group leads can change settings.
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="px-4 gap-4">
+          <View className="flex-row flex-wrap justify-end gap-2">
+            {isEditing ? (
+              <>
+                <Button
+                  color={ButtonColor.Light}
+                  size={ButtonSize.Small}
+                  onPress={handleCancel}
+                  disabled={isSaving}
+                  title="Cancel"
+                />
+                <Button
+                  color={ButtonColor.Blue}
+                  size={ButtonSize.Small}
+                  onPress={() => void handleSave()}
+                  disabled={isSaving || !editForm.name.trim()}
+                  loading={isSaving}
+                  title="Save"
+                />
+              </>
+            ) : (
+              <Button
+                color={ButtonColor.White}
+                size={ButtonSize.Small}
+                onPress={() => setIsEditing(true)}
+                title="Edit"
+              />
+            )}
+          </View>
+
+          {isEditing ? (
+            <CreateGroupForm
+              variant="settings"
+              newCommunity={editForm}
+              setNewCommunity={setEditForm}
+              requiresMaxCapacity={requiresMaxCapacity}
+              error={error}
+              setError={setError}
+              disabled={isSaving}
+              memberCountForCapacityLabel={memberCount}
+              headerSlot={
+                <View className="flex-row items-center gap-4">
+                  <ProfileImage
+                    pfp={editForm.photo?.trim() ? editForm.photo : null}
+                    size="larger"
+                  />
+                  <TouchableOpacity
+                    onPress={() => void handlePickPhoto()}
+                    disabled={isSaving}
+                    className="py-2 px-3 rounded-lg border border-zinc-300 bg-white"
+                  >
+                    <Text
+                      className="text-sm text-zinc-800"
+                      weight={FontWeight.Medium}
+                    >
+                      Change photo
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              }
+            />
+          ) : (
+            <>
+              <View className="flex-row items-center gap-3">
+                <ProfileImage pfp={community.photo ?? null} size="larger" />
+              </View>
+              <View>
+                <Text
+                  className="text-sm text-zinc-700 mb-1"
+                  weight={FontWeight.Medium}
+                >
+                  Name
+                </Text>
+                <Text className="text-base text-zinc-900">
+                  {community.name}
+                </Text>
+              </View>
+              <View>
+                <Text
+                  className="text-sm text-zinc-700 mb-1"
+                  weight={FontWeight.Medium}
+                >
+                  Description
+                </Text>
+                <Text className="text-base text-zinc-700">
+                  {community.description || "—"}
+                </Text>
+              </View>
+
+              <View className="gap-y-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200">
+                <View>
+                  <Text
+                    className="text-sm text-zinc-700"
+                    weight={FontWeight.Medium}
+                  >
+                    {groupSettings.public.name}
+                  </Text>
+                  <Text className="text-xs text-zinc-500 mt-0.5">
+                    {community.public ? "On" : "Off"}
+                  </Text>
+                </View>
+                <View>
+                  <Text
+                    className="text-sm text-zinc-700"
+                    weight={FontWeight.Medium}
+                  >
+                    {groupSettings.allowMemberInvites.name}
+                  </Text>
+                  <Text className="text-xs text-zinc-500 mt-0.5">
+                    {community.allowMemberInvites ? "On" : "Off"}
+                  </Text>
+                </View>
+                <View>
+                  <Text
+                    className="text-sm text-zinc-700"
+                    weight={FontWeight.Medium}
+                  >
+                    {groupSettings.allowStaffAssignments.name}
+                  </Text>
+                  <Text className="text-xs text-zinc-500 mt-0.5">
+                    {community.allowStaffAssignments ? "On" : "Off"}
+                  </Text>
+                </View>
+                {requiresCapacityDisplay ? (
+                  <View className="pt-3 border-t border-zinc-200">
+                    <Text
+                      className="text-sm text-zinc-700"
+                      weight={FontWeight.Medium}
+                    >
+                      {groupSettings.maxCapacity.name}
+                    </Text>
+                    <Text className="text-xs text-zinc-500 mt-0.5">
+                      {community.maxCapacity != null
+                        ? `${community.maxCapacity} (${memberCount} members now)`
+                        : "—"}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            </>
+          )}
+
+          {error ? <Text className="text-sm text-red-600">{error}</Text> : null}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

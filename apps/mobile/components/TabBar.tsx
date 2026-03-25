@@ -1,15 +1,5 @@
 import * as Haptics from "expo-haptics";
-<<<<<<< HEAD
-import { View, Pressable, Animated } from "react-native";
-=======
-import {
-  View,
-  Text,
-  Pressable,
-  Animated,
-  useWindowDimensions,
-} from "react-native";
->>>>>>> 5075acac (more groups functionality, misc ui)
+import { View, Pressable, Animated, useWindowDimensions } from "react-native";
 import { usePathname, useRouter } from "expo-router";
 import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
@@ -26,13 +16,9 @@ import {
   userGetAwayRanges,
 } from "@alliance/shared/client";
 import { useMessagingUnread } from "../lib/messages";
-<<<<<<< HEAD
 import { isPathActive } from "../lib/isPathActive";
 import Text, { FontWeight } from "./system/Text";
 import { cn } from "@alliance/shared/styles/util";
-=======
-import { cn } from "@alliance/shared/styles/util";
->>>>>>> 5075acac (more groups functionality, misc ui)
 
 const tabs = [
   {

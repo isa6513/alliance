@@ -2,8 +2,6 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  TextInput,
-  Switch,
   ActivityIndicator,
   RefreshControl,
   Alert,
@@ -29,10 +27,7 @@ import type {
   CommunityInviteDto,
 } from "@alliance/shared/client/types.gen";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
-import {
-  groupSettings,
-  requestGroupAssignmentConfirmation,
-} from "@alliance/shared/lib/copy";
+import { requestGroupAssignmentConfirmation } from "@alliance/shared/lib/copy";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 import Text, { FontWeight, FontFamily } from "../../../components/system/Text";
 import { colors } from "../../../lib/style/colors";
@@ -42,6 +37,7 @@ import Button, {
   ButtonSize,
 } from "../../../components/system/Button";
 import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
+import { CreateGroupForm } from "../../../components/groups/CreateGroupForm";
 
 const sortByName = (a: CommunityDto, b: CommunityDto) =>
   a.name
@@ -824,185 +820,6 @@ function PublicCommunityCard({
           disabled={joinDisabled}
         />
       </View>
-    </View>
-  );
-}
-
-function CreateGroupForm({
-  newCommunity,
-  setNewCommunity,
-  requiresMaxCapacity,
-  onCreate,
-  creating,
-  error,
-  setError,
-}: {
-  newCommunity: CreateCommunityDto;
-  setNewCommunity: React.Dispatch<React.SetStateAction<CreateCommunityDto>>;
-  requiresMaxCapacity: boolean;
-  onCreate: () => void;
-  creating: boolean;
-  error: string | null;
-  setError: (e: string | null) => void;
-}) {
-  return (
-    <View className="mb-4 p-4 rounded-xl bg-white gap-y-4">
-      <Text className="text-zinc-900" weight={FontWeight.Semibold}>
-        Create group
-      </Text>
-
-      <View className="gap-y-1">
-        <Text className="text-sm text-zinc-700" weight={FontWeight.Medium}>
-          Name
-        </Text>
-        <TextInput
-          className="border border-zinc-300 rounded-lg px-3 py-2 text-sm bg-white text-zinc-900"
-          value={newCommunity.name}
-          onChangeText={(text) => {
-            setError(null);
-            setNewCommunity((prev) => ({ ...prev, name: text }));
-          }}
-          placeholder="Member-visible title"
-          placeholderTextColor="#a1a1aa"
-        />
-      </View>
-
-      <View className="gap-y-1">
-        <Text className="text-sm text-zinc-700" weight={FontWeight.Medium}>
-          Description
-        </Text>
-        <TextInput
-          className="border border-zinc-300 rounded-lg px-3 py-2 text-sm bg-white text-zinc-900 min-h-[72px]"
-          value={newCommunity.description}
-          onChangeText={(text) => {
-            setError(null);
-            setNewCommunity((prev) => ({ ...prev, description: text }));
-          }}
-          placeholder="What is this group for?"
-          placeholderTextColor="#a1a1aa"
-          multiline
-          textAlignVertical="top"
-        />
-      </View>
-
-      <View className="gap-y-3 p-3 bg-white rounded-lg border border-zinc-200">
-        <ToggleRow
-          label={groupSettings.public.name}
-          explanation={groupSettings.public.explanation}
-          value={newCommunity.public}
-          onValueChange={(checked) => {
-            setError(null);
-            setNewCommunity((prev) => ({
-              ...prev,
-              public: checked,
-              allowMemberInvites: true,
-              allowStaffAssignments: true,
-            }));
-          }}
-        />
-        <ToggleRow
-          label={groupSettings.allowMemberInvites.name}
-          explanation={groupSettings.allowMemberInvites.explanation}
-          value={newCommunity.allowMemberInvites}
-          onValueChange={(checked) => {
-            setError(null);
-            setNewCommunity((prev) => ({
-              ...prev,
-              allowMemberInvites: checked,
-            }));
-          }}
-          disabled={newCommunity.public}
-        />
-        <ToggleRow
-          label={groupSettings.allowStaffAssignments.name}
-          explanation={groupSettings.allowStaffAssignments.explanation}
-          value={newCommunity.allowStaffAssignments}
-          onValueChange={(checked) => {
-            setError(null);
-            setNewCommunity((prev) => ({
-              ...prev,
-              allowStaffAssignments: checked,
-            }));
-          }}
-          disabled={newCommunity.public}
-        />
-
-        {requiresMaxCapacity && (
-          <View className="gap-y-1 pt-1 border-t border-zinc-100">
-            <Text className="text-sm text-zinc-700" weight={FontWeight.Medium}>
-              {groupSettings.maxCapacity.name}
-            </Text>
-            <Text className="text-xs text-zinc-500">
-              {groupSettings.maxCapacity.explanation}
-            </Text>
-            <TextInput
-              className="border border-zinc-300 rounded-lg px-3 py-2 text-sm bg-white text-zinc-900 mt-1"
-              value={
-                newCommunity.maxCapacity != null
-                  ? String(newCommunity.maxCapacity)
-                  : ""
-              }
-              onChangeText={(text) => {
-                setError(null);
-                const parsed = Number(text);
-                setNewCommunity((prev) => ({
-                  ...prev,
-                  maxCapacity:
-                    text === "" || Number.isNaN(parsed) ? null : parsed,
-                }));
-              }}
-              keyboardType="number-pad"
-              placeholderTextColor="#a1a1aa"
-              placeholder="e.g. 20"
-            />
-          </View>
-        )}
-      </View>
-
-      <TouchableOpacity
-        onPress={onCreate}
-        disabled={creating}
-        className={`py-3 rounded-lg items-center ${creating ? "bg-zinc-300" : "bg-zinc-900"}`}
-      >
-        <Text className="text-sm text-white" weight={FontWeight.Semibold}>
-          {creating ? "Creating…" : "Create group"}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-function ToggleRow({
-  label,
-  explanation,
-  value,
-  onValueChange,
-  disabled = false,
-}: {
-  label: string;
-  explanation: string;
-  value: boolean;
-  onValueChange: (v: boolean) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <View className="flex-row items-start justify-between gap-3">
-      <View className="flex-1">
-        <Text
-          className={`text-sm ${disabled ? "text-zinc-400" : "text-zinc-900"}`}
-          weight={FontWeight.Medium}
-        >
-          {label}
-        </Text>
-        <Text className="text-xs text-zinc-500 mt-0.5">{explanation}</Text>
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        disabled={disabled}
-        trackColor={{ false: colors.switch.trackOff, true: colors.green }}
-        thumbColor={colors.white}
-      />
     </View>
   );
 }
