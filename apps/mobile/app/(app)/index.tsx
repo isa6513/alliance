@@ -86,7 +86,6 @@ export default function HomeScreen() {
   const {
     activities: homeFeedActivities,
     handleLikeActivity: handleLikeHomeFeedActivity,
-    updateActivity: updateHomeFeedActivity,
     loading: homeFeedLoading,
     fetchNextPage: fetchNextHomeFeedPage,
     hasNextPage: homeFeedHasNextPage,

@@ -9,7 +9,6 @@ import { ActionActivityDto } from "@alliance/shared/client";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
-import { useAuth } from "../../lib/AuthContext";
 import { colors } from "../../lib/style/colors";
 import Text from "../../components/system/Text";
 import UserActivityCard from "../../components/UserActivityCard";
@@ -23,7 +22,6 @@ type Mode = "friends" | "everyone";
 
 export default function FeedScreen() {
   const [mode, setMode] = useState<Mode>("friends");
-  const { user } = useAuth();
   const {
     isVisible: isHeaderVisible,
     onScroll: onListScroll,
@@ -33,7 +31,6 @@ export default function FeedScreen() {
   const {
     activities: globalActivities,
     handleLikeActivity: handleGlobalLikeActivity,
-    updateActivity: updateGlobalActivity,
     loading: loadingGlobal,
     setActivities: setGlobalActivities,
     fetchNextPage: fetchNextGlobal,
@@ -48,7 +45,6 @@ export default function FeedScreen() {
   const {
     activities: friendActivities,
     handleLikeActivity: handleLikeFriendActivity,
-    updateActivity: updateFriendActivity,
     loading: loadingFriend,
     setActivities: setFriendActivities,
     fetchNextPage: fetchNextFriends,
@@ -84,17 +80,6 @@ export default function FeedScreen() {
       setGlobalActivities,
       setFriendActivities,
     ],
-  );
-
-  const updateActivity = useCallback(
-    (activity: ActionActivityDto, activityMode: Mode) => {
-      if (activityMode === "friends") {
-        updateFriendActivity(activity);
-      } else {
-        updateGlobalActivity(activity);
-      }
-    },
-    [updateFriendActivity, updateGlobalActivity],
   );
 
   const activities = mode === "friends" ? friendActivities : globalActivities;
