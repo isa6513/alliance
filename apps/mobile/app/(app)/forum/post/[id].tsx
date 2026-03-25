@@ -13,7 +13,7 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import { Pin } from "lucide-react-native";
 import { useAuth } from "../../../../lib/AuthContext";
 import ProfileImage from "../../../../components/ProfileImage";
-import Text from "../../../../components/system/Text";
+import Text, { FontWeight } from "../../../../components/system/Text";
 import { colors } from "../../../../lib/style/colors";
 import EditableContentRenderer from "../../../../components/EditableContentRenderer";
 import Comments from "../../../../components/Comments";
@@ -144,7 +144,10 @@ export default function PostDetailScreen() {
           <View className="flex-row items-start justify-between">
             <View className="flex-row items-center gap-x-1 flex-1">
               {post.pinned && <Pin size={14} color={colors.text.tertiary} />}
-              <Text className="text-lg font-semibold text-zinc-900 flex-1">
+              <Text
+                className="text-lg text-zinc-900 flex-1"
+                weight={FontWeight.Semibold}
+              >
                 {post.title}
               </Text>
             </View>
@@ -153,7 +156,7 @@ export default function PostDetailScreen() {
           <View className="flex-row flex-wrap items-center gap-x-2 mt-2">
             {renderAvatar(post.author)}
             <Text className="text-sm text-zinc-500">
-              <Text className="font-medium text-zinc-700">
+              <Text className="text-zinc-700" weight={FontWeight.Medium}>
                 {post.author.displayName}
               </Text>
               {` ${formatTime(new Date(post.createdAt), {

@@ -10,7 +10,7 @@ import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import { colors } from "../../lib/style/colors";
-import Text from "../../components/system/Text";
+import Text, { FontWeight } from "../../components/system/Text";
 import UserActivityCard from "../../components/UserActivityCard";
 import { LegendList } from "@legendapp/list";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
@@ -143,9 +143,10 @@ export default function FeedScreen() {
         >
           <Text
             className={cn(
-              "text-sm font-medium",
+              "text-sm",
               mode === "friends" ? "text-green" : "text-black",
             )}
+            weight={FontWeight.Medium}
           >
             Friends
           </Text>
@@ -160,9 +161,10 @@ export default function FeedScreen() {
         >
           <Text
             className={cn(
-              "text-sm font-medium",
+              "text-sm",
               mode === "everyone" ? "text-green" : "text-black",
             )}
+            weight={FontWeight.Medium}
           >
             Everyone
           </Text>

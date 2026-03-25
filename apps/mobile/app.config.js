@@ -60,7 +60,10 @@ export default {
         "expo-font",
         {
           fonts: [
-            "./assets/fonts/SourceSans3.ttf",
+            "./assets/fonts/SourceSans3-Regular.ttf",
+            "./assets/fonts/SourceSans3-Medium.ttf",
+            "./assets/fonts/SourceSans3-Semibold.ttf",
+            "./assets/fonts/SourceSans3-Bold.ttf",
             "./assets/fonts/SourceSans3-Italic.ttf",
             "./assets/fonts/LibreBaskerville.ttf",
             "./assets/fonts/LibreBaskerville-Bold.ttf",

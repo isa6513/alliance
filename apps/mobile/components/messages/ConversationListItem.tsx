@@ -2,7 +2,7 @@ import { ConversationDto } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { View, TouchableOpacity } from "react-native";
 import ProfileImage from "../ProfileImage";
-import Text from "../system/Text";
+import Text, { FontWeight } from "../system/Text";
 import { getConversationTimestamp } from "../../lib/messages";
 import { cn } from "@alliance/shared/styles/util";
 
@@ -41,7 +41,8 @@ export default function ConversationListItem({
         <View className="flex-1">
           <View className="flex-row items-center">
             <Text
-              className="font-medium text-zinc-900 flex-1"
+              className="text-zinc-900 flex-1"
+              weight={FontWeight.Medium}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -57,7 +58,7 @@ export default function ConversationListItem({
         </View>
         {unreadCount > 0 && (
           <View className="bg-red-500 rounded-full min-w-6 h-6 px-2 items-center justify-center">
-            <Text className="text-xs text-white font-semibold">
+            <Text className="text-xs text-white" weight={FontWeight.Semibold}>
               {unreadCount}
             </Text>
           </View>

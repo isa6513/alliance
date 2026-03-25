@@ -12,7 +12,7 @@ import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import Card, { CardStyle } from "./system/Card";
 import Button, { ButtonColor } from "./system/Button";
 import Input from "./system/Input";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import FormModal from "./forms/FormModal";
 import { colors } from "../lib/style/colors";
@@ -149,7 +149,7 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
     <Card cardStyle={CardStyle.Grey} className="rounded-xl">
       <View className="gap-4">
         <View>
-          <Text className="text-lg font-semibold text-zinc-900">
+          <Text className="text-lg text-zinc-900" weight={FontWeight.Semibold}>
             {onetimeInviteCreation.title}
           </Text>
           <View className="mt-1">
@@ -184,7 +184,10 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
 
         {responsibilityChoice === "not_responsible" && (
           <View className="gap-3 pt-2 border-t border-zinc-200">
-            <Text className="text-base font-semibold text-zinc-700">
+            <Text
+              className="text-base text-zinc-700"
+              weight={FontWeight.Semibold}
+            >
               {onetimeInviteCreation.not_responsible.title}
             </Text>
             <Input
@@ -216,7 +219,10 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
         {responsibilityChoice === "responsible" && (
           <View className="gap-3 pt-2 border-t border-zinc-200">
             <View className="gap-3">
-              <Text className="text-base font-semibold text-zinc-700">
+              <Text
+                className="text-base text-zinc-700"
+                weight={FontWeight.Semibold}
+              >
                 {onetimeInviteCreation.responsible.leader.invite.title}
               </Text>
               <View>
@@ -246,7 +252,10 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
 
             {isLeader ? (
               <View className="gap-3 pt-2 border-t border-zinc-200">
-                <Text className="text-base font-semibold text-zinc-700">
+                <Text
+                  className="text-base text-zinc-700"
+                  weight={FontWeight.Semibold}
+                >
                   {onetimeInviteCreation.responsible.leader.title}
                 </Text>
                 <TouchableOpacity
@@ -268,13 +277,21 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
                   onClose={() => setGroupSelectModalOpen(false)}
                 >
                   <View className="flex-row items-center justify-between mb-3">
-                    <Text className="text-lg font-semibold text-zinc-900">
+                    <Text
+                      className="text-lg text-zinc-900"
+                      weight={FontWeight.Semibold}
+                    >
                       {onetimeInviteCreation.responsible.leader.title}
                     </Text>
                     <TouchableOpacity
                       onPress={() => setGroupSelectModalOpen(false)}
                     >
-                      <Text className="text-blue-600 font-medium">Close</Text>
+                      <Text
+                        className="text-blue-600"
+                        weight={FontWeight.Medium}
+                      >
+                        Close
+                      </Text>
                     </TouchableOpacity>
                   </View>
                   <ScrollView className="max-h-72">
@@ -314,7 +331,10 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
 
                 {showCreateGroupForm && (
                   <View className="gap-3 pt-2 border-t border-zinc-200">
-                    <Text className="text-base font-semibold text-zinc-700">
+                    <Text
+                      className="text-base text-zinc-700"
+                      weight={FontWeight.Semibold}
+                    >
                       {onetimeInviteCreation.responsible.leader.newGroup.title}
                     </Text>
                     <Input

@@ -39,7 +39,7 @@ import Button, {
   ButtonColor,
   ButtonSize,
 } from "../../../components/system/Button";
-import Text from "../../../components/system/Text";
+import Text, { FontWeight } from "../../../components/system/Text";
 import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
 import BackButton from "../../../components/system/BackButton";
 import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
@@ -296,7 +296,9 @@ export default function UserProfileScreen() {
             onPress={() => setFriendActionsOpen((prev) => !prev)}
           >
             <View className="flex-row items-center gap-1">
-              <Text className="font-medium text-zinc-800">Friends</Text>
+              <Text className="text-zinc-800" weight={FontWeight.Medium}>
+                Friends
+              </Text>
               <ChevronDown size={14} color="#27272a" />
             </View>
           </Button>
@@ -427,7 +429,7 @@ export default function UserProfileScreen() {
                 addSuffix: true,
               })}{" "}
               in{" "}
-              <Text className="text-sm text-green font-medium">
+              <Text className="text-sm text-green" weight={FontWeight.Medium}>
                 {item.comment.parentTitle}
               </Text>
             </Text>
@@ -443,7 +445,7 @@ export default function UserProfileScreen() {
       <View className="px-4 py-3 border-b border-zinc-200">
         <View className="flex-row items-center gap-3">
           <ProfileImage pfp={request.profilePicture} size="small" />
-          <Text className="text-zinc-900 font-medium flex-1">
+          <Text className="text-zinc-900 flex-1" weight={FontWeight.Medium}>
             {request.displayName}
           </Text>
           <View className="flex-row gap-2">
@@ -471,7 +473,7 @@ export default function UserProfileScreen() {
       <View className="px-4 py-3 border-b border-zinc-200">
         <View className="flex-row items-center gap-3">
           <ProfileImage pfp={request.profilePicture} size="small" />
-          <Text className="text-zinc-900 font-medium flex-1">
+          <Text className="text-zinc-900 flex-1" weight={FontWeight.Medium}>
             {request.displayName}
           </Text>
           <Button
@@ -495,7 +497,7 @@ export default function UserProfileScreen() {
           activeOpacity={0.8}
         >
           <ProfileImage pfp={friend.profilePicture} size="small" />
-          <Text className="text-zinc-900 font-medium">
+          <Text className="text-zinc-900" weight={FontWeight.Medium}>
             {friend.displayName}
           </Text>
         </TouchableOpacity>
@@ -655,7 +657,10 @@ export default function UserProfileScreen() {
               />
             ) : (
               <View className="flex-row items-center flex-wrap gap-2 justify-center">
-                <Text className="text-xl font-semibold text-zinc-900">
+                <Text
+                  className="text-xl text-zinc-900"
+                  weight={FontWeight.Semibold}
+                >
                   {profile.displayName}
                 </Text>
                 {profile.staff && (

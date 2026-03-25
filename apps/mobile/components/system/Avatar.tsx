@@ -1,11 +1,7 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  ImageSourcePropType,
-  ViewProps,
-} from "react-native";
+import { View, Image, ImageSourcePropType, ViewProps } from "react-native";
+import Text, { FontWeight } from "./Text";
+import { cn } from "@alliance/shared/styles/util";
 
 export enum AvatarSize {
   ExtraSmall = "xs",
@@ -40,9 +36,13 @@ export default function Avatar({
   ...props
 }: AvatarProps) {
   const sizeStyle = sizeClasses[size];
-  const containerClasses = `justify-center items-center rounded-full bg-zinc-200 ${sizeStyle.container} ${className || ""}`;
-  const imageClasses = `rounded-full ${sizeStyle.container}`;
-  const textClasses = `font-semibold text-zinc-700 text-center ${sizeStyle.text}`;
+  const containerClasses = cn(
+    "justify-center items-center rounded-full bg-zinc-200",
+    sizeStyle.container,
+    className,
+  );
+  const imageClasses = cn("rounded-full", sizeStyle.container);
+  const textClasses = cn("text-zinc-700 text-center", sizeStyle.text);
 
   const combinedStyle = backgroundColor
     ? [{ backgroundColor }, style].filter(Boolean)
@@ -58,7 +58,9 @@ export default function Avatar({
 
   return (
     <View className={containerClasses} style={combinedStyle} {...props}>
-      <Text className={textClasses}>{initials}</Text>
+      <Text className={textClasses} weight={FontWeight.Semibold}>
+        {initials}
+      </Text>
     </View>
   );
 }

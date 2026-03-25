@@ -1,5 +1,5 @@
 import * as Haptics from "expo-haptics";
-import { View, Text, Pressable, Animated } from "react-native";
+import { View, Pressable, Animated } from "react-native";
 import { usePathname, useRouter } from "expo-router";
 import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
@@ -17,6 +17,7 @@ import {
 } from "@alliance/shared/client";
 import { useMessagingUnread } from "../lib/messages";
 import { isPathActive } from "../lib/isPathActive";
+import Text, { FontWeight } from "./system/Text";
 
 const tabs = [
   {
@@ -195,7 +196,10 @@ export default function TabBar() {
                 className="absolute top-2 ml-5 rounded-full min-w-5 h-5 px-1 items-center justify-center"
                 style={{ backgroundColor: badgeBackgroundColor }}
               >
-                <Text className="text-[10px] text-white font-semibold">
+                <Text
+                  className="text-[10px] text-white"
+                  weight={FontWeight.Semibold}
+                >
                   {badgeLabel}
                 </Text>
               </View>

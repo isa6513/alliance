@@ -13,7 +13,7 @@ import {
 import BackButton from "../../../components/system/BackButton";
 import MessageComposer from "../../../components/messages/MessageComposer";
 import MessageRecipientSelect from "../../../components/messages/MessageRecipientSelect";
-import Text from "../../../components/system/Text";
+import Text, { FontWeight } from "../../../components/system/Text";
 import { useAuth } from "../../../lib/AuthContext";
 import {
   buildGroupConversationTitle,
@@ -172,7 +172,9 @@ export default function NewMessageScreen() {
     <View className="flex-1 bg-white">
       <View className="flex-row items-center justify-between px-4 pb-2">
         <BackButton />
-        <Text className="text-lg font-semibold text-zinc-900">New message</Text>
+        <Text className="text-lg text-zinc-900" weight={FontWeight.Semibold}>
+          New message
+        </Text>
         <View className="w-25" />
       </View>
       <ScrollView

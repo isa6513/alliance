@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   View,
@@ -19,7 +18,11 @@ import {
 } from "@alliance/shared/client";
 import { ChevronLeft, Edit, Plus, X } from "lucide-react-native";
 import ProfileImage from "../../../../components/ProfileImage";
-import Text from "../../../../components/system/Text";
+import Text, {
+  FontFamily,
+  FontWeight,
+  resolveFontFamily,
+} from "../../../../components/system/Text";
 import Button, { ButtonColor } from "../../../../components/system/Button";
 import { useAuth } from "../../../../lib/AuthContext";
 import {
@@ -218,20 +221,15 @@ export default function ConversationInfoScreen() {
     );
   }
 
-  const directParticipant =
-    selectedConvo.type === "direct"
-      ? selectedConvo.participants.find(
-          (participant) => participant.user.id !== user?.id,
-        )
-      : null;
-
   return (
     <View className="flex-1 bg-white">
       <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pb-4 bg-white">
         <TouchableOpacity onPress={() => router.back()}>
           <ChevronLeft size={22} color="#111827" />
         </TouchableOpacity>
-        <Text className="text-lg font-semibold text-zinc-900">Details</Text>
+        <Text className="text-lg text-zinc-900" weight={FontWeight.Semibold}>
+          Details
+        </Text>
       </View>
 
       <KeyboardAwareScrollView>
@@ -255,10 +253,15 @@ export default function ConversationInfoScreen() {
             <TextInput
               value={editingTitle}
               onChangeText={setEditingTitle}
-              className="text-xl font-semibold text-zinc-900 border-b border-zinc-200 px-2 py-1 text-center"
+              className="text-xl text-zinc-900 border-b border-zinc-200 px-2 py-1 text-center"
+              style={resolveFontFamily(FontFamily.Sans, FontWeight.Semibold)}
             />
           ) : (
-            <Text className="text-xl font-semibold text-zinc-900 text-center">
+            <Text
+              className="text-xl text-zinc-900 text-center"
+              weight={FontWeight.Semibold}
+              family={FontFamily.Sans}
+            >
               {selectedConvo.title}
             </Text>
           )}
@@ -281,7 +284,7 @@ export default function ConversationInfoScreen() {
                     onPress={handleSave}
                     disabled={saving}
                   >
-                    <Text className="text-white font-medium">
+                    <Text className="text-white" weight={FontWeight.Medium}>
                       {saving ? "Saving..." : "Save"}
                     </Text>
                   </Button>
@@ -289,7 +292,9 @@ export default function ConversationInfoScreen() {
                     color={ButtonColor.Light}
                     onPress={() => setIsEditing(false)}
                   >
-                    <Text className="text-zinc-800 font-medium">Cancel</Text>
+                    <Text className="text-zinc-800" weight={FontWeight.Medium}>
+                      Cancel
+                    </Text>
                   </Button>
                 </>
               ) : (
@@ -297,7 +302,9 @@ export default function ConversationInfoScreen() {
                   color={ButtonColor.Light}
                   onPress={() => setIsEditing(true)}
                 >
-                  <Text className="text-zinc-800 font-medium">Edit group</Text>
+                  <Text className="text-zinc-800" weight={FontWeight.Medium}>
+                    Edit group
+                  </Text>
                 </Button>
               )}
             </View>
@@ -328,7 +335,7 @@ export default function ConversationInfoScreen() {
                     size="medium"
                   />
                   <View>
-                    <Text className="text-zinc-900 font-medium">
+                    <Text className="text-zinc-900" weight={FontWeight.Medium}>
                       {participant.user.displayName}
                     </Text>
                     {participant.state === "invited" && (
@@ -398,7 +405,9 @@ export default function ConversationInfoScreen() {
         {isGroup && (
           <View className="px-4 mt-8 mb-12">
             <Button color={ButtonColor.Light} onPress={handleLeave}>
-              <Text className="text-zinc-800 font-medium">Leave group</Text>
+              <Text className="text-zinc-800" weight={FontWeight.Medium}>
+                Leave group
+              </Text>
             </Button>
           </View>
         )}

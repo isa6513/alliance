@@ -15,7 +15,7 @@ import {
   CONTRACT_NOTES,
 } from "@alliance/shared/lib/contract";
 import { useAuth } from "../../lib/AuthContext";
-import Text from "../../components/system/Text";
+import Text, { FontWeight } from "../../components/system/Text";
 import Button, { ButtonColor } from "../../components/system/Button";
 import Card, { CardStyle } from "../../components/system/Card";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
@@ -132,7 +132,7 @@ export default function ContractScreen() {
   const signedContractMessage = useMemo(() => {
     if (!lastContractEvent) return null;
     return (
-      <Text className="text-green font-medium mt-2">
+      <Text className="text-green mt-2" weight={FontWeight.Medium}>
         {getSignedMessage(lastContractEvent.date)}
       </Text>
     );
@@ -182,7 +182,7 @@ export default function ContractScreen() {
           {latestContract && (
             <View className="gap-y-2">
               {signedContractId && signedContractId !== latestContract.id && (
-                <Text className="font-semibold p-2">
+                <Text className="p-2" weight={FontWeight.Semibold}>
                   An updated contract is available.
                 </Text>
               )}

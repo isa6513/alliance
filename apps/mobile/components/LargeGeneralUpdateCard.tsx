@@ -4,7 +4,7 @@ import type { FormSchema } from "@alliance/shared/forms/formschema";
 import FormRenderer from "./forms/FormRenderer";
 import Card from "./system/Card";
 import Button, { ButtonColor } from "./system/Button";
-import Text from "./system/Text";
+import Text, { FontFamily, FontWeight } from "./system/Text";
 
 export interface LargeGeneralUpdateCardProps {
   generalUpdate: GeneralUpdateDto;
@@ -37,7 +37,11 @@ export default function LargeGeneralUpdateCard({
   return (
     <Card className="p-4 sm:p-6 w-full relative rounded">
       <View className="pb-2">
-        <Text className="font-semibold text-2xl font-serif text-zinc-900">
+        <Text
+          className="text-2xl text-zinc-900"
+          family={FontFamily.Serif}
+          weight={FontWeight.Semibold}
+        >
           {generalUpdate.name}
         </Text>
       </View>

@@ -3,7 +3,6 @@ import {
   Pressable,
   ScrollView,
   Image,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -36,6 +35,7 @@ import { cn } from "@alliance/shared/styles/util";
 import Card, { CardStyle } from "../system/Card";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
 import { colors } from "../../lib/style/colors";
+import Text, { FontWeight } from "../system/Text";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -106,14 +106,16 @@ export function RenderLabel({
 }) {
   if (field.label === null) return null;
   return (
-    <>
-      <Text className="block mb-1">
+    <View className="mb-1 flex-row flex-wrap items-center">
+      <View className="shrink flex-1">
         <InlineLabelMarkdownWrapper>{field.label}</InlineLabelMarkdownWrapper>
-        {field.required && (
-          <Text className="text-red-500 font-medium inline"> *</Text>
-        )}
-      </Text>
-    </>
+      </View>
+      {field.required && (
+        <Text className="text-red-500 ml-1" weight={FontWeight.Medium}>
+          *
+        </Text>
+      )}
+    </View>
   );
 }
 
@@ -321,8 +323,9 @@ export function RenderField({
                   <Text
                     className={cn(
                       "text-sm",
-                      checked ? "text-white font-semibold" : "text-zinc-700",
+                      checked ? "text-white" : "text-zinc-700",
                     )}
+                    weight={checked ? FontWeight.Semibold : undefined}
                   >
                     {optionValue}
                   </Text>
@@ -421,7 +424,10 @@ export function RenderField({
           </TouchableOpacity>
           <FormModal visible={selectOpen} onClose={() => setSelectOpen(false)}>
             <View className="flex-row justify-between items-center mb-2">
-              <Text className="text-base font-semibold text-zinc-900">
+              <Text
+                className="text-base text-zinc-900"
+                weight={FontWeight.Semibold}
+              >
                 Select
               </Text>
             </View>
@@ -782,10 +788,13 @@ export function RenderField({
                 <AppMarkdownWrapper>{contract.markdown}</AppMarkdownWrapper>
               </View>
               <Card cardStyle={CardStyle.White} className="p-4">
-                <Text className="font-medium text-zinc-900 mb-3">
+                <Text className="text-zinc-900 mb-3" weight={FontWeight.Medium}>
                   {field.signQuestion.trim()}
                   {field.required && (
-                    <Text className="text-red-500 font-medium"> *</Text>
+                    <Text className="text-red-500" weight={FontWeight.Medium}>
+                      {" "}
+                      *
+                    </Text>
                   )}
                 </Text>
                 <View className="flex-row gap-3">
@@ -801,11 +810,12 @@ export function RenderField({
                   >
                     <Text
                       className={cn(
-                        "font-medium",
+                        "",
                         signedValue === true
                           ? "text-green-700"
                           : "text-zinc-700",
                       )}
+                      weight={FontWeight.Medium}
                     >
                       {field.yesLabel.trim()}
                     </Text>
@@ -822,11 +832,12 @@ export function RenderField({
                   >
                     <Text
                       className={cn(
-                        "font-medium",
+                        "",
                         signedValue === false
                           ? "text-red-700"
                           : "text-zinc-700",
                       )}
+                      weight={FontWeight.Medium}
                     >
                       {field.noLabel.trim()}
                     </Text>
@@ -961,11 +972,16 @@ export function TimeInputField({
           onClose={() => setShowDropdown(false)}
         >
           <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-lg font-semibold text-zinc-900">
+            <Text
+              className="text-lg text-zinc-900"
+              weight={FontWeight.Semibold}
+            >
               Pick a time
             </Text>
             <TouchableOpacity onPress={() => setShowDropdown(false)}>
-              <Text className="text-blue-600 font-medium">Close</Text>
+              <Text className="text-blue-600" weight={FontWeight.Medium}>
+                Close
+              </Text>
             </TouchableOpacity>
           </View>
           <ScrollView className="max-h-[300px]">
@@ -984,10 +1000,9 @@ export function TimeInputField({
                 <Text
                   className={cn(
                     "text-base",
-                    t === inputValue
-                      ? "font-semibold text-green-700"
-                      : "text-zinc-800",
+                    t === inputValue ? "text-green-700" : "text-zinc-800",
                   )}
+                  weight={t === inputValue ? FontWeight.Semibold : undefined}
                 >
                   {t}
                 </Text>

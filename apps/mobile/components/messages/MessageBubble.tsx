@@ -15,7 +15,7 @@ import { scheduleOnRN } from "react-native-worklets";
 import { getImageSource } from "../../lib/config";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import ProfileImage from "../ProfileImage";
-import Text from "../system/Text";
+import Text, { FontWeight } from "../system/Text";
 import { cn } from "@alliance/shared/styles/util";
 
 interface MessageBubbleProps {
@@ -139,7 +139,7 @@ export default function MessageBubble({
               <View className="flex-1">
                 {isFirstInGroup && (
                   <View className="flex-row items-center gap-2">
-                    <Text className="font-medium text-zinc-900">
+                    <Text className="text-zinc-900" weight={FontWeight.Medium}>
                       {message.author.displayName}
                     </Text>
                     <Text className="text-xs text-zinc-500">{timeLabel}</Text>

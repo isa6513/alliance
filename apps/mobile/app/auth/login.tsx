@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "../../lib/AuthContext";
 import Button from "../../components/system/Button";
 import Input from "../../components/system/Input";
-import Text from "../../components/system/Text";
+import Text, { FontWeight } from "../../components/system/Text";
 import Card, { CardStyle } from "../../components/system/Card";
 
 const LoginScreen = () => {
@@ -37,7 +37,9 @@ const LoginScreen = () => {
   return (
     <View className="flex flex-col bg-zinc-100 py-16 flex-1 px-2">
       <View className="flex-1 pt-20 justify-start">
-        <Text className="text-3xl font-bold mb-6 px-3">The Alliance</Text>
+        <Text className="text-3xl mb-6 px-3" weight={FontWeight.Bold}>
+          The Alliance
+        </Text>
 
         <Card cardStyle={CardStyle.White}>
           <View className="flex flex-col gap-y-6">
@@ -73,7 +75,9 @@ const LoginScreen = () => {
               disabled={isSubmitting || !email || !password}
               className="rounded-md w-full self-center py-4!"
             >
-              <Text className="text-white text-base font-medium">Log in</Text>
+              <Text className="text-white text-base" weight={FontWeight.Medium}>
+                Log in
+              </Text>
             </Button>
           </View>
         </Card>

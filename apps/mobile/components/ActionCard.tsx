@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { ActionDto } from "@alliance/shared/client";
-import { Card } from "./system";
+import Card from "./system/Card";
+import Text, { FontFamily, FontWeight } from "./system/Text";
 
 interface ActionCardProps {
   action: ActionDto;
@@ -12,7 +13,9 @@ export default function ActionCard({ action, onPress }: ActionCardProps) {
   return (
     <Card onPress={onPress}>
       <View>
-        <Text className="font-bold font-sans">{action.name}</Text>
+        <Text weight={FontWeight.Bold} family={FontFamily.Sans}>
+          {action.name}
+        </Text>
       </View>
       <Text numberOfLines={2} className="text-sm text-gray-500">
         {action.shortDescription}

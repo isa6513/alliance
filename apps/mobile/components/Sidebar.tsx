@@ -12,9 +12,8 @@ import {
   UserPlus,
   QrCode,
 } from "lucide-react-native";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import { colors } from "../lib/style/colors";
-import { cn } from "@alliance/shared/styles/util";
 import { useAppDrawer } from "../lib/AppDrawerContext";
 import { isPathActive } from "../lib/isPathActive";
 
@@ -132,7 +131,8 @@ export default function Sidebar() {
                   color={active ? colors.green : colors.text.icon}
                 />
                 <Text
-                  className={cn("ml-3 text-[17px]", active && "font-medium")}
+                  className="ml-3 text-[17px]"
+                  weight={active ? FontWeight.Medium : undefined}
                   style={{ color: colors.text.primary }}
                 >
                   {item.name}

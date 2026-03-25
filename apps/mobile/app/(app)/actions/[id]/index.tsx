@@ -19,7 +19,10 @@ import {
   actionsUnlikeActivity,
 } from "@alliance/shared/client";
 import Card, { CardStyle } from "../../../../components/system/Card";
-import Text from "../../../../components/system/Text";
+import Text, {
+  FontFamily,
+  FontWeight,
+} from "../../../../components/system/Text";
 import { cn } from "@alliance/shared/styles/util";
 import ActionEventsPanel from "../../../../components/ActionEventsPanel";
 import TaskTimeInfo from "../../../../components/TaskTimeInfo";
@@ -67,7 +70,7 @@ function ActivityItem({ activity, onLike }: ActivityItemProps) {
     >
       <ProfileImage pfp={activity.user.profilePicture} size="medium" />
       <View className="flex-1">
-        <Text className="font-medium text-zinc-900">
+        <Text className="text-zinc-900" weight={FontWeight.Medium}>
           {activity.user.displayName}
           {verb && <Text className="text-zinc-500"> {verb}.</Text>}
         </Text>
@@ -250,7 +253,10 @@ export default function ActionDetailScreen() {
               <View>
                 <View className="mb-2 flex flex-row items-center gap-2 w-full flex-wrap">
                   <View className="flex-1">
-                    <Text className="text-xl font-semibold text-zinc-900">
+                    <Text
+                      className="text-xl text-zinc-900"
+                      weight={FontWeight.Semibold}
+                    >
                       Task
                     </Text>
                   </View>
@@ -284,7 +290,10 @@ export default function ActionDetailScreen() {
                 <Card cardStyle={CardStyle.Green} className="mt-4">
                   <View className="flex-row items-center gap-2">
                     <Check size={18} color="#166534" />
-                    <Text className="text-green-800 font-medium flex-1">
+                    <Text
+                      className="text-green-800 flex-1"
+                      weight={FontWeight.Medium}
+                    >
                       You&apos;ve committed to participate. We&apos;ll notify
                       you when it&apos;s time to act.
                     </Text>
@@ -334,7 +343,11 @@ export default function ActionDetailScreen() {
           <View className="self-start mb-4">
             <BackButton fallbackRoute="/actions" bordered />
           </View>
-          <Text className="text-2xl font-semibold text-zinc-900 mb-2 font-serif">
+          <Text
+            className="text-2xl text-zinc-900 mb-2"
+            family={FontFamily.Serif}
+            weight={FontWeight.Semibold}
+          >
             {action.name}
           </Text>
           {action.shortDescription && (
@@ -343,10 +356,10 @@ export default function ActionDetailScreen() {
             </Text>
           )}
           {action.authors && action.authors.length > 0 && (
-            <Text className="mb-4 text-zinc-500">
-              By{" "}
+            <View className="mb-4 flex-row flex-wrap items-center">
+              <Text className="text-zinc-500">By </Text>
               {action.authors.map((author, i) => (
-                <Text key={author.id}>
+                <View key={author.id} className="flex-row items-center">
                   <Pressable
                     onPress={() => router.push(`/member/${author.id}`)}
                   >
@@ -354,12 +367,18 @@ export default function ActionDetailScreen() {
                       {author.displayName}
                     </Text>
                   </Pressable>
-                  {i < action.authors!.length - 2 && ", "}
-                  {i === action.authors!.length - 2 &&
-                    `${action.authors!.length > 2 ? "," : ""} and `}
-                </Text>
+                  {i < action.authors!.length - 2 && (
+                    <Text className="text-zinc-500">{", "}</Text>
+                  )}
+                  {i === action.authors!.length - 2 && (
+                    <Text className="text-zinc-500">
+                      {action.authors!.length > 2 ? "," : ""}
+                      {" and "}
+                    </Text>
+                  )}
+                </View>
               ))}
-            </Text>
+            </View>
           )}
           {action.events && action.events.length > 0 && (
             <View className="mb-4">
@@ -384,9 +403,10 @@ export default function ActionDetailScreen() {
               >
                 <Text
                   className={cn(
-                    "text-sm font-medium",
+                    "text-sm",
                     activeTab === tab.id ? "text-green" : "text-zinc-500",
                   )}
+                  weight={FontWeight.Medium}
                 >
                   {tab.label}
                 </Text>

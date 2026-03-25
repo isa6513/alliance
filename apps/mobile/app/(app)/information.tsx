@@ -18,7 +18,7 @@ import {
 import { Features, isEnabled } from "@alliance/shared/lib/features";
 import Card from "../../components/system/Card";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
-import Text from "../../components/system/Text";
+import Text, { FontWeight } from "../../components/system/Text";
 import { getBaseUrl } from "../../lib/config";
 import { colors } from "../../lib/style/colors";
 
@@ -148,7 +148,7 @@ function ResourceCard({
     >
       <Icon size={24} color={colors.green} strokeWidth={2} />
       <View className="flex-1 gap-y-1">
-        <Text className="text-lg font-medium text-zinc-800">
+        <Text className="text-lg text-zinc-800" weight={FontWeight.Medium}>
           {resource.title}
         </Text>
         <Text className="text-sm leading-5 text-zinc-500">
@@ -192,7 +192,10 @@ export default function InformationScreen() {
       <ScrollView className="flex-1">
         <View className="px-4 pb-8 pt-2 gap-y-6">
           <View className="gap-y-3">
-            <Text className="text-lg font-semibold text-zinc-900">
+            <Text
+              className="text-lg text-zinc-900"
+              weight={FontWeight.Semibold}
+            >
               Contact the office
             </Text>
             <View className="gap-y-2">
@@ -207,7 +210,10 @@ export default function InformationScreen() {
           </View>
 
           <View className="gap-y-3">
-            <Text className="text-lg font-semibold text-zinc-900">
+            <Text
+              className="text-lg text-zinc-900"
+              weight={FontWeight.Semibold}
+            >
               Resources
             </Text>
             <View className="gap-y-2">

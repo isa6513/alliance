@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { ActionUpdateDto } from "../../../../shared/client";
-import Text from "./Text";
+import Text, { FontWeight } from "./Text";
 import ActionUpdateCard from "../ActionUpdateCard";
 
 interface TimelineItemProps {
@@ -19,14 +19,15 @@ export default function TimelineItem({
   time,
 }: TimelineItemProps) {
   const sortedUpdates = [...(updates ?? [])].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
   return (
     <View className="flex flex-col gap-y-2">
       <View className="flex flex-col">
         <Text
-          className={highlighted ? "font-medium text-green" : "text-zinc-900"}
+          className={highlighted ? "text-green" : "text-zinc-900"}
+          weight={highlighted ? FontWeight.Medium : undefined}
         >
           {title}
         </Text>

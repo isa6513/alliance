@@ -11,7 +11,7 @@ import { cn } from "@alliance/shared/styles/util";
 import { NotificationDto } from "@alliance/shared/client";
 import { CheckCheck, ChevronDown, ChevronUp, Heart } from "lucide-react-native";
 import ProfileImage from "./ProfileImage";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 
 interface LikesGroupProps {
   bucket: LikesBucket;
@@ -48,7 +48,7 @@ function LikesGroupNotification({
         )}
         <Text className="flex-1 text-base text-zinc-900" numberOfLines={2}>
           {notification.category === "action_update" && (
-            <Text className="font-semibold">Action update: </Text>
+            <Text weight={FontWeight.Semibold}>Action update: </Text>
           )}
           {notification.message}
         </Text>

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { View, TextInput, Text, TextInputProps } from "react-native";
+import { View, TextInput, TextInputProps } from "react-native";
+import Text, { FontWeight } from "./Text";
+import { cn } from "@alliance/shared/styles/util";
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -23,16 +25,19 @@ export default function Input({
   const borderColorClass = error
     ? "border-red-500"
     : isFocused
-    ? "border-blue-500"
-    : "border-zinc-200";
+      ? "border-blue-500"
+      : "border-zinc-200";
 
-  const inputContainerClasses = `border rounded-lg bg-white px-3 min-h-11 ${borderColorClass}`;
-  const inputClasses = `text-base text-zinc-700 py-3 ${className || ""}`;
+  const inputContainerClasses = cn(
+    "border rounded-lg bg-white px-3 min-h-11",
+    borderColorClass,
+  );
+  const inputClasses = cn("text-base text-zinc-700 py-3", className);
 
   return (
     <View className={containerClassName}>
       {label && (
-        <Text className="text-sm font-medium text-zinc-700 mb-2">
+        <Text className="text-sm text-zinc-700 mb-2" weight={FontWeight.Medium}>
           {label}
           {required && <Text className="text-red-500"> *</Text>}
         </Text>

@@ -5,12 +5,12 @@ import {
   LargeActionCardPropsShared,
 } from "@alliance/shared/lib/largeActionCard";
 import { ActionCompletedBarWithInfo } from "./ActionCompletedBarWithInfo";
-import Button, { ButtonColor, ButtonSize } from "./system/Button";
+import Button, { ButtonColor } from "./system/Button";
 import Card from "./system/Card";
-import Text from "./system/Text";
+import Text, { FontFamily, FontWeight } from "./system/Text";
 import TaskTimeInfo from "./TaskTimeInfo";
 import { router } from "expo-router";
-import { ChevronRight, Maximize } from "lucide-react-native";
+import { Maximize } from "lucide-react-native";
 import ActionTaskPanel from "./ActionTaskPanel";
 import useActivities, {
   ActivityList,
@@ -33,7 +33,9 @@ function DismissBanner({
 }) {
   return (
     <View className="-mx-4 -mt-4 mb-3 bg-sky-100 border-b border-sky-300 px-4 py-3">
-      <Text className="text-sky-800 font-semibold">{header}</Text>
+      <Text className="text-sky-800" weight={FontWeight.Semibold}>
+        {header}
+      </Text>
       <Text className="text-sky-700 mt-1 mb-3">{message}</Text>
       <Button
         color={ButtonColor.White}
@@ -88,7 +90,13 @@ export default function LargeActionCard({
             <Maximize size={20} />
           </TouchableOpacity>
         </View>
-        <Text className="text-xl font-serif font-bold mb-2">{action.name}</Text>
+        <Text
+          className="text-xl mb-2"
+          family={FontFamily.Serif}
+          weight={FontWeight.Bold}
+        >
+          {action.name}
+        </Text>
       </View>
       <Text className="text-base mb-4">{action.shortDescription}</Text>
       <ActionCompletedBarWithInfo

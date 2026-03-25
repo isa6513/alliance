@@ -48,7 +48,10 @@ const options: Partial<PostHogOptions> = {
 
 export default function RootLayout() {
   useFonts({
-    "Source Sans 3": require("../assets/fonts/SourceSans3.ttf"),
+    "Source Sans 3": require("../assets/fonts/SourceSans3-Regular.ttf"),
+    "Source Sans 3 Medium": require("../assets/fonts/SourceSans3-Medium.ttf"),
+    "Source Sans 3 Semibold": require("../assets/fonts/SourceSans3-Semibold.ttf"),
+    "Source Sans 3 Bold": require("../assets/fonts/SourceSans3-Bold.ttf"),
     "Libre Baskerville": require("../assets/fonts/LibreBaskerville.ttf"),
     "Libre Baskerville Bold": require("../assets/fonts/LibreBaskerville-Bold.ttf"),
     "Libre Baskerville SemiBold": require("../assets/fonts/LibreBaskerville-SemiBold.ttf"),

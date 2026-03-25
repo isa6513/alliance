@@ -30,7 +30,7 @@ import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import { LegendList } from "@legendapp/list";
-import Text from "../../../components/system/Text";
+import Text, { FontWeight } from "../../../components/system/Text";
 import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
 import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
 import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
@@ -128,7 +128,7 @@ export default function GroupsScreen() {
             onPress={() => router.push("/groups/manage")}
             className="mt-4 px-4 py-2 bg-zinc-900 rounded-lg"
           >
-            <Text className="text-sm font-medium text-white">
+            <Text className="text-sm text-white" weight={FontWeight.Medium}>
               Manage groups
             </Text>
           </TouchableOpacity>
@@ -150,7 +150,7 @@ export default function GroupsScreen() {
       </SimplePageTitle>
 
       <View className="px-4 my-4 flex flex-col gap-y-1">
-        <Text className="text-2xl font-semibold text-zinc-900">
+        <Text className="text-2xl text-zinc-900" weight={FontWeight.Semibold}>
           {selectedCommunity?.name}
         </Text>
         <Text className="text-sm text-zinc-500">
@@ -585,14 +585,18 @@ function GroupInvitesTab({
           <SectionHeader label={item.label} />
         ) : item.type === "communityInvite" ? (
           <View className="px-4 py-3 border-b border-zinc-200 flex-row items-center justify-between bg-white">
-            <Text className="text-zinc-900 font-medium">
+            <Text className="text-zinc-900" weight={FontWeight.Medium}>
               {item.displayName}
             </Text>
             <Text className="text-xs text-zinc-500">Pending</Text>
           </View>
         ) : (
           <View className="px-4 py-3 border-b border-zinc-200 flex-row items-center justify-between bg-white">
-            <Text className="text-zinc-900 font-medium" numberOfLines={1}>
+            <Text
+              className="text-zinc-900"
+              weight={FontWeight.Medium}
+              numberOfLines={1}
+            >
               {item.invitee ?? "Unnamed"}
             </Text>
             <Text className="text-xs text-zinc-500">

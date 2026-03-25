@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import { Check } from "lucide-react-native";
 import { ActionCompletedBarWithInfo } from "./ActionCompletedBarWithInfo";
 import {
@@ -22,7 +22,11 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
       <View className="flex-row items-start justify-between gap-x-2">
         <View className="flex-1">
           <View className="flex-row items-start gap-x-2 mb-1">
-            <Text className="font-medium text-black flex-1" numberOfLines={2}>
+            <Text
+              className="text-black flex-1"
+              weight={FontWeight.Medium}
+              numberOfLines={2}
+            >
               {action.name}
             </Text>
             {action.userRelation === "completed" && (

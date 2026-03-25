@@ -14,11 +14,12 @@ import {
 import type { OnetimeInviteActions } from "@alliance/shared/lib/inviteUtils";
 import { getReferralSignupUrl } from "@alliance/shared/lib/inviteUrls";
 import { getBaseUrl } from "../lib/config";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import Button, { ButtonColor, ButtonSize } from "./system/Button";
 import ProfileImage from "./ProfileImage";
 import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import { router } from "expo-router";
+import { cn } from "@alliance/shared/styles/util";
 
 /** Mobile Tailwind classes per status; labels come from shared copy. */
 const STATUS_TEXT_CLASS: Record<
@@ -88,7 +89,8 @@ export default function OnetimeInviteListItem({
               activeOpacity={0.7}
             >
               <Text
-                className="text-base font-semibold text-zinc-900"
+                className="text-base text-zinc-900"
+                weight={FontWeight.Semibold}
                 numberOfLines={1}
               >
                 {invite.invitee}
@@ -96,7 +98,8 @@ export default function OnetimeInviteListItem({
             </TouchableOpacity>
           ) : (
             <Text
-              className="text-base font-semibold text-zinc-900"
+              className="text-base text-zinc-900"
+              weight={FontWeight.Semibold}
               numberOfLines={1}
             >
               {invite.invitee}
@@ -109,7 +112,12 @@ export default function OnetimeInviteListItem({
                 {isRequest ? "Requested by" : "Invited by"}{" "}
               </Text>
               {selfInvited ? (
-                <Text className="text-sm font-medium text-zinc-700">you</Text>
+                <Text
+                  className="text-sm text-zinc-700"
+                  weight={FontWeight.Medium}
+                >
+                  you
+                </Text>
               ) : (
                 <TouchableOpacity
                   onPress={() =>
@@ -123,7 +131,8 @@ export default function OnetimeInviteListItem({
                     size="mini"
                   />
                   <Text
-                    className="text-sm font-medium text-zinc-700"
+                    className="text-sm text-zinc-700"
+                    weight={FontWeight.Medium}
                     numberOfLines={1}
                   >
                     {invite.invitingUser.displayName}
@@ -153,7 +162,10 @@ export default function OnetimeInviteListItem({
                 {communityDisplay}
               </Text>
             )}
-            <Text className={`text-xs font-semibold ${textColorClass}`}>
+            <Text
+              className={cn("text-xs", textColorClass)}
+              weight={FontWeight.Semibold}
+            >
               {label}
             </Text>
           </View>

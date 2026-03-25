@@ -13,7 +13,7 @@ import {
   filterActions,
   useActionsQuery,
 } from "@alliance/shared/lib/actionsListPage";
-import Text from "../../../components/system/Text";
+import Text, { FontFamily } from "../../../components/system/Text";
 import { ChevronDown } from "lucide-react-native";
 import ActionItemCard from "../../../components/ActionItemCard";
 import { LegendList } from "@legendapp/list";
@@ -84,7 +84,10 @@ export default function ActionsScreen() {
                             className="px-4 py-3 border-b border-zinc-100 flex-row justify-between items-center"
                           >
                             <Text className="text-sm text-black">{mode}</Text>
-                            <Text className="text-sm text-zinc-500 font-mono">
+                            <Text
+                              className="text-sm text-zinc-500"
+                              family={FontFamily.Mono}
+                            >
                               {counts[mode]}
                             </Text>
                           </TouchableOpacity>

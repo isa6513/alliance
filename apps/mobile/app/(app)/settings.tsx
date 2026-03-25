@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Alert,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Switch, TextInput, TouchableOpacity, View } from "react-native";
 import {
   authForgotPassword,
   authMe,
@@ -27,6 +20,7 @@ import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { colors } from "../../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
+import Text, { FontWeight } from "../../components/system/Text";
 
 type SettingsToggleRowProps = {
   label: string;
@@ -182,7 +176,9 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <View className="flex-1 bg-white p-4">
-        <Text className="text-2xl font-semibold mb-4">Settings</Text>
+        <Text className="text-2xl mb-4" weight={FontWeight.Semibold}>
+          Settings
+        </Text>
         <Text className="text-center text-zinc-500">
           Loading your account information...
         </Text>
@@ -273,7 +269,9 @@ export default function SettingsPage() {
 
           {/* Show name / anonymous — toggle is "show my name" (green when on) */}
           <Card cardStyle={CardStyle.White}>
-            <Text className="font-medium mb-2">Profile visibility</Text>
+            <Text className="mb-2" weight={FontWeight.Medium}>
+              Profile visibility
+            </Text>
             <Text className="text-zinc-500 text-sm mb-4">
               When off, other members will not be able to see your name
               (anonymous).
@@ -287,9 +285,11 @@ export default function SettingsPage() {
 
           {/* Notifications Section */}
           <Card cardStyle={CardStyle.White}>
-            <Text className="text-2xl font-semibold mb-4">Notifications</Text>
+            <Text className="text-2xl mb-4" weight={FontWeight.Semibold}>
+              Notifications
+            </Text>
 
-            <Text className="font-medium mb-2">
+            <Text className="mb-2" weight={FontWeight.Medium}>
               Receive action announcements / reminders via:
             </Text>
             {!(
@@ -355,7 +355,7 @@ export default function SettingsPage() {
 
             {showPushSettings ? (
               <>
-                <Text className="font-medium mb-2 mt-4">
+                <Text className="mb-2 mt-4" weight={FontWeight.Medium}>
                   Receive push notifications for:
                 </Text>
                 <View className="gap-3 mb-4">
@@ -392,7 +392,9 @@ export default function SettingsPage() {
             ) : null}
 
             <View className="mb-4">
-              <Text className="font-medium mb-2">Preferred reminder time:</Text>
+              <Text className="mb-2" weight={FontWeight.Medium}>
+                Preferred reminder time:
+              </Text>
               <TextInput
                 className={inputClasses}
                 value={editableUser.preferredReminderTime ?? ""}
@@ -405,7 +407,7 @@ export default function SettingsPage() {
             </View>
 
             <View>
-              <Text className="font-medium mb-2">
+              <Text className="mb-2" weight={FontWeight.Medium}>
                 Your time zone for reminders:
               </Text>
               <TimeZoneSelect
@@ -418,7 +420,9 @@ export default function SettingsPage() {
           {/* Groups Section */}
           {user.communities && user.communities.length > 0 && (
             <Card cardStyle={CardStyle.White}>
-              <Text className="text-2xl font-semibold mb-4">Groups</Text>
+              <Text className="text-2xl mb-4" weight={FontWeight.Semibold}>
+                Groups
+              </Text>
               <Text className="mb-2">
                 Contact info shared with your group lead:
               </Text>
@@ -454,7 +458,9 @@ export default function SettingsPage() {
 
           {/* Privacy Section */}
           <Card cardStyle={CardStyle.White}>
-            <Text className="text-2xl font-semibold mb-4">Privacy</Text>
+            <Text className="text-2xl mb-4" weight={FontWeight.Semibold}>
+              Privacy
+            </Text>
 
             <Text className="mb-2">
               Some parts of your completed tasks can be visible to other

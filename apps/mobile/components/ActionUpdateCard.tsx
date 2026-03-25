@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { formatDistance } from "date-fns";
 import { ActionUpdateDto, NotificationDto } from "@alliance/shared/client";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import EditableContentRenderer from "./EditableContentRenderer";
 import { useMarkUnreadContentRead } from "@alliance/shared/lib/useUnreadContentRead";
 import { useQueryClient } from "@tanstack/react-query";
@@ -61,8 +61,10 @@ export default function ActionUpdateCard({ update }: ActionUpdateCardProps) {
         <View className="flex flex-col">
           <View className="flex flex-row flex-wrap items-center gap-x-2">
             <Text>
-              <Text className="text-green font-medium">Update: </Text>
-              <Text className="font-medium">{update.title}</Text>
+              <Text className="text-green" weight={FontWeight.Medium}>
+                {"Update: "}
+              </Text>
+              <Text weight={FontWeight.Medium}>{update.title}</Text>
             </Text>
             <Text className="text-zinc-500">
               {formatDistance(new Date(update.date), new Date(), {

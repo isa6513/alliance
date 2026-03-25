@@ -9,7 +9,7 @@ import {
 import { router } from "expo-router";
 import { Plus, Search } from "lucide-react-native";
 import ConversationListItem from "../../../components/messages/ConversationListItem";
-import Text from "../../../components/system/Text";
+import Text, { FontWeight } from "../../../components/system/Text";
 import { useAuth } from "../../../lib/AuthContext";
 import {
   getConversationPreview,
@@ -103,7 +103,7 @@ export default function MessagesScreen() {
 
         {pendingInvites.length > 0 && (
           <View className="px-4">
-            <Text className="text-sm text-zinc-500 font-medium">
+            <Text className="text-sm text-zinc-500" weight={FontWeight.Medium}>
               New message requests
             </Text>
             <View className="border border-zinc-200 rounded mt-2 overflow-hidden">
@@ -118,7 +118,10 @@ export default function MessagesScreen() {
                 />
               ))}
             </View>
-            <Text className="text-sm text-zinc-500 font-medium mt-4">
+            <Text
+              className="text-sm text-zinc-500 mt-4"
+              weight={FontWeight.Medium}
+            >
               Conversations
             </Text>
           </View>

@@ -9,7 +9,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Check } from "lucide-react-native";
 import { scheduleOnRN } from "react-native-worklets";
 import { formatTime } from "@alliance/shared/lib/utils";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import ProfileImage from "./ProfileImage";
 import { NotificationDto } from "@alliance/shared/client";
 import { Pressable, View } from "react-native";
@@ -82,7 +82,10 @@ function SwipeableNotification({
       >
         <View className="flex-row items-center gap-x-1 px-3">
           <Check size={16} color="white" />
-          <Text className="text-white text-sm font-medium text-nowrap whitespace-nowrap">
+          <Text
+            className="text-white text-sm text-nowrap whitespace-nowrap"
+            weight={FontWeight.Medium}
+          >
             Read
           </Text>
         </View>
@@ -117,7 +120,7 @@ function SwipeableNotification({
                   numberOfLines={2}
                 >
                   {notification.category === "action_update" && (
-                    <Text className="font-semibold">Action update: </Text>
+                    <Text weight={FontWeight.Semibold}>Action update: </Text>
                   )}
                   {notification.message}
                 </Text>

@@ -4,7 +4,6 @@ import {
   Modal,
   Platform,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -21,6 +20,7 @@ import Button, { ButtonColor } from "./system/Button";
 import { awayRangesDescription } from "@alliance/shared/lib/copy";
 import { cn } from "@alliance/shared/styles/util";
 import { colors } from "../lib/style/colors";
+import Text, { FontWeight } from "./system/Text";
 
 const REASON_OPTIONS: { value: UserAwayRangeReason; label: string }[] = [
   { value: "vacation", label: "Vacation" },
@@ -170,7 +170,9 @@ export default function AwayRangesSection() {
   if (loading) {
     return (
       <View>
-        <Text className="text-2xl font-semibold mb-4">Away periods</Text>
+        <Text className="text-2xl mb-4" weight={FontWeight.Semibold}>
+          Away periods
+        </Text>
         <Text className="text-zinc-500">Loading...</Text>
       </View>
     );
@@ -181,7 +183,9 @@ export default function AwayRangesSection() {
 
   return (
     <View>
-      <Text className="text-2xl font-semibold mb-2">Away periods</Text>
+      <Text className="text-2xl mb-2" weight={FontWeight.Semibold}>
+        Away periods
+      </Text>
       <Text className="text-sm text-zinc-600 mb-4">
         {awayRangesDescription}
       </Text>
@@ -201,16 +205,22 @@ export default function AwayRangesSection() {
               <View className="flex-row justify-between items-start">
                 <View className="flex-1">
                   {isCurrentlyAway(range) && (
-                    <Text className="text-xs font-semibold text-yellow-800 mb-1">
+                    <Text
+                      className="text-xs text-yellow-800 mb-1"
+                      weight={FontWeight.Semibold}
+                    >
                       Currently away
                     </Text>
                   )}
                   {isFutureRange(range) && (
-                    <Text className="text-xs font-semibold text-green-700 mb-1">
+                    <Text
+                      className="text-xs text-green-700 mb-1"
+                      weight={FontWeight.Semibold}
+                    >
                       Scheduled
                     </Text>
                   )}
-                  <Text className="font-medium text-zinc-900">
+                  <Text className="text-zinc-900" weight={FontWeight.Medium}>
                     {formatDate(range.startDate)} → {formatDate(range.endDate)}
                   </Text>
                   <Text className="text-sm text-zinc-600 mt-1">
@@ -232,12 +242,16 @@ export default function AwayRangesSection() {
       )}
 
       <View className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-        <Text className="font-medium mb-3">Schedule time away</Text>
+        <Text className="mb-3" weight={FontWeight.Medium}>
+          Schedule time away
+        </Text>
 
         <View className="gap-3">
           <View className="flex-row gap-3">
             <View className="flex-1">
-              <Text className="text-sm font-medium mb-1">Start date</Text>
+              <Text className="text-sm mb-1" weight={FontWeight.Medium}>
+                Start date
+              </Text>
               <TextInput
                 className={inputClasses}
                 value={startDateInput}
@@ -250,7 +264,9 @@ export default function AwayRangesSection() {
               />
             </View>
             <View className="flex-1">
-              <Text className="text-sm font-medium mb-1">End date</Text>
+              <Text className="text-sm mb-1" weight={FontWeight.Medium}>
+                End date
+              </Text>
               <TextInput
                 className={inputClasses}
                 value={endDateInput}
@@ -265,7 +281,9 @@ export default function AwayRangesSection() {
           </View>
 
           <View>
-            <Text className="text-sm font-medium mb-1">Reason</Text>
+            <Text className="text-sm mb-1" weight={FontWeight.Medium}>
+              Reason
+            </Text>
             <TouchableOpacity
               className={cn(
                 inputClasses,
@@ -289,7 +307,7 @@ export default function AwayRangesSection() {
           </View>
 
           <View>
-            <Text className="text-sm font-medium mb-1">
+            <Text className="text-sm mb-1" weight={FontWeight.Medium}>
               Note{selectedReason !== "other" && " (optional)"}
             </Text>
             <TextInput
@@ -336,11 +354,16 @@ export default function AwayRangesSection() {
         <View className="flex-1 bg-black/40 justify-end">
           <View className="bg-white rounded-t-2xl p-4">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-lg font-semibold text-zinc-900">
+              <Text
+                className="text-lg text-zinc-900"
+                weight={FontWeight.Semibold}
+              >
                 Select Reason
               </Text>
               <TouchableOpacity onPress={() => setReasonModalOpen(false)}>
-                <Text className="text-blue-600 font-medium">Close</Text>
+                <Text className="text-blue-600" weight={FontWeight.Medium}>
+                  Close
+                </Text>
               </TouchableOpacity>
             </View>
             <ScrollView>

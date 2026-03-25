@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { TextInput, TouchableOpacity, View } from "react-native";
 import { X } from "lucide-react-native";
 import ProfileImage from "../ProfileImage";
-import Text from "../system/Text";
+import Text, { FontWeight } from "../system/Text";
 
 export type UserSelectUser = Pick<
   ProfileDto,
@@ -87,7 +87,9 @@ export default function MessageRecipientSelect({
             className="flex-row items-center gap-2 bg-zinc-100 rounded px-2 py-1"
           >
             <ProfileImage pfp={user.profilePicture} size="small" />
-            <Text className="text-sm font-medium">{user.displayName}</Text>
+            <Text className="text-sm" weight={FontWeight.Medium}>
+              {user.displayName}
+            </Text>
             <TouchableOpacity
               onPress={() => removeUser(user.id)}
               className="ml-1"

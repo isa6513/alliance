@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Image,
   Linking,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -55,6 +54,7 @@ import {
   File,
 } from "lucide-react-native";
 import { cn } from "@alliance/shared/styles/util";
+import Text, { FontWeight } from "../system/Text";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -112,7 +112,9 @@ function CopyTextDisplayMobile({
           {text}
         </Text>
         {copied ? (
-          <Text className="text-sm text-green ml-2 font-medium">Copied!</Text>
+          <Text className="text-sm text-green ml-2" weight={FontWeight.Medium}>
+            Copied!
+          </Text>
         ) : (
           <Copy size={16} className="shrink-0 text-gray-400" />
         )}
@@ -158,7 +160,8 @@ export function RenderDisplayBlockMobile({
       }[block.level ?? "none"];
       return (
         <Text
-          className={cn("font-semibold text-zinc-900 my-2", headerClass)}
+          className={cn("text-zinc-900 my-2", headerClass)}
+          weight={FontWeight.Semibold}
           selectable
         >
           {block.text}
@@ -168,7 +171,7 @@ export function RenderDisplayBlockMobile({
       return <AppMarkdownWrapper>{block.text}</AppMarkdownWrapper>;
     case "label":
       return (
-        <Text className="text-sm font-semibold text-zinc-500">
+        <Text className="text-sm text-zinc-500" weight={FontWeight.Semibold}>
           {block.text}
         </Text>
       );
@@ -217,11 +220,12 @@ export function RenderDisplayBlockMobile({
         >
           <IconComponent size={20} />
           <View className="">
-            <Text className="text-base font-medium text-black">
+            <Text className="text-base text-black" weight={FontWeight.Medium}>
               {block.text}
             </Text>
             <Text
-              className="mt-1 font-medium text-sm text-green"
+              className="mt-1 text-sm text-green"
+              weight={FontWeight.Medium}
               numberOfLines={1}
             >
               {block.url}
@@ -1142,7 +1146,10 @@ const FormRenderer = ({
                     {isLastPage ? (
                       <CircleCheck size={16} color="#fff" strokeWidth={2.5} />
                     ) : null}
-                    <Text className="text-white font-medium text-base">
+                    <Text
+                      className="text-white text-base"
+                      weight={FontWeight.Medium}
+                    >
                       {isLastPage ? "Complete" : "Next"}
                     </Text>
                   </>
@@ -1174,7 +1181,10 @@ const FormRenderer = ({
           visible={withdrawOpen}
           onClose={() => setWithdrawOpen(false)}
         >
-          <Text className="text-lg font-semibold text-zinc-900 mb-3">
+          <Text
+            className="text-lg text-zinc-900 mb-3"
+            weight={FontWeight.Semibold}
+          >
             Withdraw from action
           </Text>
           <View className="gap-2 mb-3">

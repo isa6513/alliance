@@ -22,7 +22,7 @@ import { formatNextTaskDue } from "@alliance/shared/lib/formatNextTaskDue";
 import { useAwayRanges } from "@alliance/shared/lib/useAwayRanges";
 import { getMemberContactActionDescriptors } from "@alliance/shared/lib/memberContactActions";
 import { cn } from "@alliance/shared/styles/util";
-import Text, { TextStyle } from "./system/Text";
+import Text, { TextStyle, FontWeight } from "./system/Text";
 import ProfileImage from "./ProfileImage";
 import { colors } from "../lib/style/colors";
 
@@ -97,7 +97,11 @@ export function GroupMemberRow({
       >
         <ProfileImage pfp={profile.profilePicture ?? null} size="large" />
         <View className="flex-1 min-w-0">
-          <Text className="font-medium text-zinc-900" numberOfLines={1}>
+          <Text
+            className="text-zinc-900"
+            weight={FontWeight.Medium}
+            numberOfLines={1}
+          >
             {profile.displayName}
           </Text>
           {isLeader && (
@@ -196,7 +200,7 @@ function MemberContactBlock({
   return (
     <View className="px-4 py-2 gap-y-3">
       <View className="flex-row items-center">
-        <Text className="text-sm font-semibold text-zinc-700">
+        <Text className="text-sm text-zinc-700" weight={FontWeight.Semibold}>
           Next task due:{" "}
         </Text>
         <Text className={cn("text-sm", hasFiniteDeadline ? "" : "text-green")}>
@@ -245,7 +249,7 @@ function MemberContactBlock({
       )}
       {upcomingOrCurrentAwayRanges.length > 0 && (
         <View className="gap-y-2">
-          <Text className="text-sm font-semibold text-zinc-700">
+          <Text className="text-sm text-zinc-700" weight={FontWeight.Semibold}>
             Away ranges
           </Text>
           <View className="gap-y-2">

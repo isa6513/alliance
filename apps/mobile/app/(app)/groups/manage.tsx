@@ -22,7 +22,7 @@ import type {
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { groupSettings } from "@alliance/shared/lib/copy";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
-import Text from "../../../components/system/Text";
+import Text, { FontFamily, FontWeight } from "../../../components/system/Text";
 import { colors } from "../../../lib/style/colors";
 import { useAuth } from "../../../lib/AuthContext";
 
@@ -167,7 +167,11 @@ export default function GroupManageScreen() {
             <TouchableOpacity onPress={() => router.back()} className="p-1">
               <ArrowLeft size={24} color="#71717a" strokeWidth={2.5} />
             </TouchableOpacity>
-            <Text className="text-xl font-semibold text-zinc-900 font-serif">
+            <Text
+              className="text-xl text-zinc-900"
+              family={FontFamily.Serif}
+              weight={FontWeight.Semibold}
+            >
               Manage groups
             </Text>
           </View>
@@ -181,7 +185,11 @@ export default function GroupManageScreen() {
             <TouchableOpacity onPress={() => router.back()} className="p-1">
               <ArrowLeft size={24} color="#71717a" strokeWidth={2.5} />
             </TouchableOpacity>
-            <Text className="text-xl font-semibold text-zinc-900 font-serif">
+            <Text
+              className="text-xl text-zinc-900"
+              family={FontFamily.Serif}
+              weight={FontWeight.Semibold}
+            >
               Manage groups
             </Text>
             <View className="flex-1" />
@@ -192,7 +200,7 @@ export default function GroupManageScreen() {
               }}
               className="px-3 py-1.5 bg-zinc-900 rounded-lg"
             >
-              <Text className="text-sm font-medium text-white">
+              <Text className="text-sm text-white" weight={FontWeight.Medium}>
                 {showCreateForm ? "Cancel" : "+ New group"}
               </Text>
             </TouchableOpacity>
@@ -226,7 +234,10 @@ export default function GroupManageScreen() {
 
             {/* Groups you lead */}
             <View className="px-4 pt-2 pb-2">
-              <Text className="text-xl font-semibold text-zinc-900">
+              <Text
+                className="text-xl text-zinc-900"
+                weight={FontWeight.Semibold}
+              >
                 Groups you lead
               </Text>
               <Text className="text-base text-zinc-500 mt-0.5">
@@ -247,7 +258,10 @@ export default function GroupManageScreen() {
 
             {/* Groups you're a member of */}
             <View className="px-4 pt-6 pb-2">
-              <Text className="text-xl font-semibold text-zinc-900">
+              <Text
+                className="text-xl text-zinc-900"
+                weight={FontWeight.Semibold}
+              >
                 Groups you&apos;re a member of
               </Text>
               <Text className="text-base text-zinc-500 mt-0.5">
@@ -268,7 +282,10 @@ export default function GroupManageScreen() {
 
             {/* Public groups */}
             <View className="px-4 pt-6 pb-2">
-              <Text className="text-xl font-semibold text-zinc-900">
+              <Text
+                className="text-xl text-zinc-900"
+                weight={FontWeight.Semibold}
+              >
                 Public groups
               </Text>
               <Text className="text-base text-zinc-500 mt-0.5">
@@ -310,14 +327,19 @@ function AdminCommunityCard({ community }: { community: CommunityDto }) {
     <View className="border-b border-zinc-100 px-4 py-4 gap-y-1">
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1 gap-y-1">
-          <Text className="font-semibold text-zinc-900">{community.name}</Text>
+          <Text className="text-zinc-900" weight={FontWeight.Semibold}>
+            {community.name}
+          </Text>
           <Text className="text-sm text-zinc-500" numberOfLines={2}>
             {community.description || "No description yet."}
           </Text>
         </View>
         <View className="items-end gap-y-1">
           <Text
-            className={`text-xs font-medium ${community.public ? "text-green-600" : "text-zinc-400"}`}
+            className={`text-xs ${
+              community.public ? "text-green-600" : "text-zinc-400"
+            }`}
+            weight={FontWeight.Medium}
           >
             {community.public ? "Public" : "Private"}
           </Text>
@@ -356,10 +378,14 @@ function CreateGroupForm({
 }) {
   return (
     <View className="mx-4 mb-4 p-4 bg-zinc-50 rounded-xl border border-zinc-200 gap-y-4">
-      <Text className="font-semibold text-zinc-900">Create group</Text>
+      <Text className="text-zinc-900" weight={FontWeight.Semibold}>
+        Create group
+      </Text>
 
       <View className="gap-y-1">
-        <Text className="text-sm font-medium text-zinc-700">Name</Text>
+        <Text className="text-sm text-zinc-700" weight={FontWeight.Medium}>
+          Name
+        </Text>
         <TextInput
           className="border border-zinc-300 rounded-lg px-3 py-2 text-sm bg-white text-zinc-900"
           value={newCommunity.name}
@@ -373,7 +399,9 @@ function CreateGroupForm({
       </View>
 
       <View className="gap-y-1">
-        <Text className="text-sm font-medium text-zinc-700">Description</Text>
+        <Text className="text-sm text-zinc-700" weight={FontWeight.Medium}>
+          Description
+        </Text>
         <TextInput
           className="border border-zinc-300 rounded-lg px-3 py-2 text-sm bg-white text-zinc-900 min-h-[72px]"
           value={newCommunity.description}
@@ -432,7 +460,7 @@ function CreateGroupForm({
 
         {requiresMaxCapacity && (
           <View className="gap-y-1 pt-1 border-t border-zinc-100">
-            <Text className="text-sm font-medium text-zinc-700">
+            <Text className="text-sm text-zinc-700" weight={FontWeight.Medium}>
               {groupSettings.maxCapacity.name}
             </Text>
             <Text className="text-xs text-zinc-500">
@@ -467,7 +495,7 @@ function CreateGroupForm({
         disabled={creating}
         className={`py-3 rounded-lg items-center ${creating ? "bg-zinc-300" : "bg-zinc-900"}`}
       >
-        <Text className="text-sm font-semibold text-white">
+        <Text className="text-sm text-white" weight={FontWeight.Semibold}>
           {creating ? "Creating…" : "Create group"}
         </Text>
       </TouchableOpacity>
@@ -492,7 +520,8 @@ function ToggleRow({
     <View className="flex-row items-start justify-between gap-3">
       <View className="flex-1">
         <Text
-          className={`text-sm font-medium ${disabled ? "text-zinc-400" : "text-zinc-900"}`}
+          className={`text-sm ${disabled ? "text-zinc-400" : "text-zinc-900"}`}
+          weight={FontWeight.Medium}
         >
           {label}
         </Text>

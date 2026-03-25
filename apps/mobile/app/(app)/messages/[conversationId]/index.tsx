@@ -19,7 +19,7 @@ import {
 import { ChevronLeft, Info, Users } from "lucide-react-native";
 import MessageBubble from "../../../../components/messages/MessageBubble";
 import MessageComposer from "../../../../components/messages/MessageComposer";
-import Text from "../../../../components/system/Text";
+import Text, { FontWeight } from "../../../../components/system/Text";
 import { useAuth } from "../../../../lib/AuthContext";
 import {
   mergeConversationUpdate,
@@ -285,7 +285,8 @@ export default function ConversationScreen() {
         >
           <View style={{ flex: 1 }}>
             <Text
-              className="text-base font-semibold text-zinc-900"
+              className="text-base text-zinc-900"
+              weight={FontWeight.Semibold}
               numberOfLines={1}
             >
               {selectedConvo.title}
@@ -389,13 +390,17 @@ export default function ConversationScreen() {
                 onPress={handleAcceptInvite}
                 className="bg-green-600 px-4 py-2 rounded"
               >
-                <Text className="text-white font-medium">Accept</Text>
+                <Text className="text-white" weight={FontWeight.Medium}>
+                  Accept
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleDeclineInvite}
                 className="bg-zinc-200 px-4 py-2 rounded"
               >
-                <Text className="text-zinc-800 font-medium">Decline</Text>
+                <Text className="text-zinc-800" weight={FontWeight.Medium}>
+                  Decline
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -17,7 +17,7 @@ import type {
 import { cn } from "@alliance/shared/styles/util";
 import { getImageSource } from "../lib/config";
 import Card, { CardStyle } from "./system/Card";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import { RenderDisplayBlockMobile } from "./forms/FormRenderer";
 import { RenderField } from "./forms/RenderField";
 import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
@@ -166,7 +166,7 @@ function OutputRenderer({
             return (
               <View key={item.key} className="flex-row flex-wrap items-center">
                 {item.showLabel && (
-                  <Text className="font-medium text-zinc-700">
+                  <Text className="text-zinc-700" weight={FontWeight.Medium}>
                     {item.label}:{" "}
                   </Text>
                 )}

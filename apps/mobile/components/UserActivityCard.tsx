@@ -9,7 +9,7 @@ import LikeButton from "./LikeButton";
 import Comments from "./Comments";
 import EditableContentRenderer from "./EditableContentRenderer";
 import OutputRenderer from "./OutputRenderer";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import {
   actionActivityCommentable,
   actionActivityTransitiveVerb,
@@ -60,12 +60,13 @@ export default function UserActivityCard({
           </TouchableOpacity>
           <View className="flex flex-col gap-y-1 flex-1 ml-2">
             <Text className="text-zinc-900">
-              <Text className="font-medium" onPress={handleUserPress}>
+              <Text weight={FontWeight.Medium} onPress={handleUserPress}>
                 {activity.user.displayName}
               </Text>
               <Text>{` ${verb} `}</Text>
               <Text
-                className="text-green font-medium"
+                className="text-green"
+                weight={FontWeight.Medium}
                 onPress={handleActionPress}
               >
                 {activity.actionName || "this action"}

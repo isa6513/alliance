@@ -1,5 +1,7 @@
 import React from "react";
-import { View, Text, ViewProps } from "react-native";
+import { View, ViewProps } from "react-native";
+import Text, { FontWeight } from "./Text";
+import { cn } from "@alliance/shared/styles/util";
 
 export enum StatusType {
   Active = "active",
@@ -44,7 +46,10 @@ const textColorClasses: Record<StatusType, string> = {
   [StatusType.Info]: "text-blue-600",
 };
 
-const sizeClasses: Record<StatusSize, { gap: string; dot: string; text: string }> = {
+const sizeClasses: Record<
+  StatusSize,
+  { gap: string; dot: string; text: string }
+> = {
   [StatusSize.Small]: { gap: "gap-1", dot: "w-1.5 h-1.5", text: "text-xs" },
   [StatusSize.Medium]: { gap: "gap-1.5", dot: "w-2 h-2", text: "text-xs" },
   [StatusSize.Large]: { gap: "gap-2", dot: "w-2.5 h-2.5", text: "text-sm" },
@@ -61,14 +66,22 @@ export default function StatusIndicator({
   const displayText = text || status.charAt(0).toUpperCase() + status.slice(1);
   const sizeStyle = sizeClasses[size];
 
-  const containerClasses = `flex-row items-center self-start ${sizeStyle.gap} ${className || ""}`;
-  const dotClasses = `rounded-full ${sizeStyle.dot} ${dotColorClasses[status]}`;
-  const textClasses = `font-medium ${sizeStyle.text} ${textColorClasses[status]}`;
+  const containerClasses = cn(
+    "flex-row items-center self-start",
+    sizeStyle.gap,
+    className,
+  );
+  const dotClasses = cn("rounded-full", sizeStyle.dot, dotColorClasses[status]);
+  const textClasses = cn(sizeStyle.text, textColorClasses[status]);
 
   return (
     <View className={containerClasses} {...props}>
       <View className={dotClasses} />
-      {showText && <Text className={textClasses}>{displayText}</Text>}
+      {showText && (
+        <Text className={textClasses} weight={FontWeight.Medium}>
+          {displayText}
+        </Text>
+      )}
     </View>
   );
 }

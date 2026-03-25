@@ -8,7 +8,7 @@ import {
 } from "@alliance/shared/lib/actionPageTaskPanel";
 import ActionTaskPanel from "./ActionTaskPanel";
 import Card, { CardStyle } from "./system/Card";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import {
   externalOnly,
   taskDeadlinePassed,
@@ -103,7 +103,7 @@ const ActionPageTaskPanel = ({
       return (
         <View>
           <Card cardStyle={CardStyle.Grey} className="bg-zinc-100 my-2">
-            <Text className="font-medium">{taskDeadlinePassed}</Text>
+            <Text weight={FontWeight.Medium}>{taskDeadlinePassed}</Text>
             <Text>{taskDeadlinePassedDescription}</Text>
           </Card>
           <ActionTaskPanel
@@ -120,12 +120,12 @@ const ActionPageTaskPanel = ({
       return (
         <View>
           <Card cardStyle={CardStyle.Grey} className="bg-zinc-100 my-2">
-            <Text className="font-medium">
+            <Text weight={FontWeight.Medium}>
               Please sign the contract before continuing with the onboarding
               process.
             </Text>
-            <Link href="/" className="text-green flex items-center gap-x-2">
-              Go back
+            <Link href="/" className="flex items-center gap-x-2">
+              <Text className="text-green">Go back</Text>
             </Link>
           </Card>
           <ActionTaskPanel

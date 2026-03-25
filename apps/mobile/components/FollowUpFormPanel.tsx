@@ -13,7 +13,7 @@ import { usePostHog } from "posthog-react-native";
 import { useQuery } from "@tanstack/react-query";
 import FormRenderer from "./forms/FormRenderer";
 import Card, { CardStyle } from "./system/Card";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import AppMarkdownWrapper from "./AppMarkdownWrapper";
 
 interface FollowUpFormPanelProps {
@@ -115,7 +115,7 @@ export default function FollowUpFormPanel({
     <Card cardStyle={CardStyle.White} className="p-4">
       {showIntroCard && (
         <Card cardStyle={CardStyle.Alert} className="mb-3 border-0 rounded-lg">
-          <Text className="font-semibold">{formTitle}</Text>
+          <Text weight={FontWeight.Semibold}>{formTitle}</Text>
           {hasInstructions && (
             <View className="mt-1">
               <AppMarkdownWrapper

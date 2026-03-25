@@ -14,9 +14,11 @@ import {
   actionsUnlikeActivity,
 } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { useAuth } from "../../../../../lib/AuthContext";
 import { colors } from "../../../../../lib/style/colors";
-import Text from "../../../../../components/system/Text";
+import Text, {
+  FontFamily,
+  FontWeight,
+} from "../../../../../components/system/Text";
 import ProfileImage from "../../../../../components/ProfileImage";
 import LikeButton from "../../../../../components/LikeButton";
 import Comments from "../../../../../components/Comments";
@@ -31,7 +33,6 @@ export default function ActivityDetailScreen() {
     id: string;
     activityId: string;
   }>();
-  const { user } = useAuth();
 
   const [activity, setActivity] = useState<ActionActivityDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,12 +54,6 @@ export default function ActivityDetailScreen() {
         });
         if (resp.data) {
           setActivity(resp.data);
-          if (!silent || !isEditingRef.current) {
-            setEditContent({
-              body: resp.data.editableContent?.body ?? "",
-              attachments: resp.data.editableContent?.attachments ?? [],
-            });
-          }
         } else {
           setError("Activity not found");
         }
@@ -175,7 +170,11 @@ export default function ActivityDetailScreen() {
             className="mb-4"
             bordered
           />
-          <Text className="text-2xl font-serif font-semibold mb-4">
+          <Text
+            className="text-2xl mb-4"
+            family={FontFamily.Serif}
+            weight={FontWeight.Semibold}
+          >
             {activity.actionName}
           </Text>
           <View className="flex-row items-center justify-between mb-4">
@@ -188,7 +187,7 @@ export default function ActivityDetailScreen() {
               </TouchableOpacity>
               <View className="flex-1">
                 <Text className="text-zinc-900">
-                  <Text className="font-medium" onPress={handleUserPress}>
+                  <Text weight={FontWeight.Medium} onPress={handleUserPress}>
                     {activity.user.displayName}
                   </Text>
                   <Text> {verb} this action</Text>
@@ -226,7 +225,9 @@ export default function ActivityDetailScreen() {
             />
           </View>
 
-          <Text className="font-medium text-zinc-900 mb-3">Comments</Text>
+          <Text className="text-zinc-900 mb-3" weight={FontWeight.Medium}>
+            Comments
+          </Text>
           <Comments objectId={activity.id} type="activity" />
         </View>
       </ScrollView>

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, Alert } from "react-native";
+import { View, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
 import { forumCreatePost } from "../../../../../shared/client";
 import Button, { ButtonColor } from "../../../components/system/Button";
 import Card, { CardStyle } from "../../../components/system/Card";
 import Input from "../../../components/system/Input";
+import Text, { FontWeight } from "../../../components/system/Text";
 
 export default function CreatePostScreen() {
   const [title, setTitle] = useState("");
@@ -90,7 +91,9 @@ export default function CreatePostScreen() {
           onPress={handleCancel}
           color={ButtonColor.Light}
         />
-        <Text className="text-2xl font-bold">New Post</Text>
+        <Text className="text-2xl" weight={FontWeight.Bold}>
+          New Post
+        </Text>
         <Button
           title={submitting ? "Posting..." : "Post"}
           onPress={handleSubmit}

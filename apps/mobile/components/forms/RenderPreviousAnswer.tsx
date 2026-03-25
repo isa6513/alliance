@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import type { PreviousAnswerBlock } from "@alliance/shared/forms/display-blocks";
 import type {
   FormSchema,
@@ -12,12 +12,16 @@ import {
   isPreviousAnswerValueEmpty,
 } from "@alliance/shared/lib/previousAnswers";
 import { RenderField } from "./RenderField";
+import Text, { FontWeight } from "../system/Text";
 
 function EmptyPlaceholder({ block }: { block: PreviousAnswerBlock }) {
   return (
     <View>
       {block.title ? (
-        <Text className="mb-2 text-base font-medium text-zinc-900">
+        <Text
+          className="mb-2 text-base text-zinc-900"
+          weight={FontWeight.Medium}
+        >
           {block.title}
         </Text>
       ) : null}
@@ -66,7 +70,10 @@ export default function RenderPreviousAnswer({
   return (
     <View>
       {block.title ? (
-        <Text className="mb-2 text-base font-medium text-zinc-900">
+        <Text
+          className="mb-2 text-base text-zinc-900"
+          weight={FontWeight.Medium}
+        >
           {block.title}
         </Text>
       ) : null}
@@ -93,7 +100,10 @@ function RenderPreviousAnswerList({
   return (
     <View>
       {block.title ? (
-        <Text className="mb-2 text-base font-medium text-zinc-900">
+        <Text
+          className="mb-2 text-base text-zinc-900"
+          weight={FontWeight.Medium}
+        >
           {block.title}
         </Text>
       ) : null}

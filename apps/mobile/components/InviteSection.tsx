@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import type { OnetimeInviteDto } from "@alliance/shared/client";
 import type { OnetimeInviteActions } from "@alliance/shared/lib/inviteUtils";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import OnetimeInviteListItem from "./OnetimeInviteListItem";
 
 export type InviteSectionProps = {
@@ -26,7 +26,9 @@ export function InviteSection({
   return (
     <View className="mb-6">
       <View className="px-4 pb-2">
-        <Text className="text-lg font-semibold text-zinc-900">{title}</Text>
+        <Text className="text-lg text-zinc-900" weight={FontWeight.Semibold}>
+          {title}
+        </Text>
         {description !== undefined && (
           <Text className="text-sm text-zinc-500 mt-0.5">{description}</Text>
         )}

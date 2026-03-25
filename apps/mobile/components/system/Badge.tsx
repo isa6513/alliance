@@ -1,5 +1,7 @@
 import React from "react";
-import { View, Text, ViewProps } from "react-native";
+import { View, ViewProps } from "react-native";
+import Text, { FontWeight } from "./Text";
+import { cn } from "@alliance/shared/styles/util";
 
 export enum BadgeColor {
   Default = "default",
@@ -74,12 +76,19 @@ export default function Badge({
   const colorStyle = colorClasses[color];
   const sizeStyle = sizeClasses[size];
 
-  const containerClasses = `self-start rounded-full items-center justify-center ${colorStyle.container} ${sizeStyle.container} ${className || ""}`;
-  const textClasses = `font-medium text-center ${colorStyle.text} ${sizeStyle.text}`;
+  const containerClasses = cn(
+    "self-start rounded-full items-center justify-center",
+    colorStyle.container,
+    sizeStyle.container,
+    className,
+  );
+  const textClasses = cn("text-center", colorStyle.text, sizeStyle.text);
 
   return (
     <View className={containerClasses} {...props}>
-      <Text className={textClasses}>{text}</Text>
+      <Text className={textClasses} weight={FontWeight.Medium}>
+        {text}
+      </Text>
     </View>
   );
 }

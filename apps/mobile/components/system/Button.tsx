@@ -1,6 +1,11 @@
 import React from "react";
-import { TouchableOpacity, ActivityIndicator, ViewProps } from "react-native";
-import Text from "./Text";
+import {
+  TouchableOpacity,
+  ActivityIndicator,
+  TouchableOpacityProps,
+} from "react-native";
+import Text, { FontWeight } from "./Text";
+import { cn } from "@alliance/shared/styles/util";
 
 export enum ButtonColor {
   Black = "black",
@@ -20,7 +25,7 @@ export enum ButtonSize {
   Custom = "custom",
 }
 
-interface ButtonProps extends ViewProps {
+interface ButtonProps extends TouchableOpacityProps {
   onPress: () => void;
   color?: ButtonColor;
   size?: ButtonSize;
@@ -70,15 +75,15 @@ export default function Button({
   title,
   ...props
 }: ButtonProps) {
-  const baseClasses = "flex-row items-center justify-center rounded-sm";
-  const variantClasses = colorClasses[color];
-  const sizeClass = sizeClasses[size];
-  const disabledClasses = disabled ? "opacity-50" : "";
-  const combinedClasses = `${baseClasses} ${variantClasses} ${sizeClass} ${disabledClasses} ${
-    className || ""
-  }`;
+  const combinedClasses = cn(
+    "flex-row items-center justify-center rounded-sm",
+    colorClasses[color],
+    sizeClasses[size],
+    disabled && "opacity-50",
+    className,
+  );
 
-  const textClass = `font-medium ${textColorClasses[color]}`;
+  const textClass = textColorClasses[color];
 
   return (
     <TouchableOpacity
@@ -102,7 +107,9 @@ export default function Button({
       ) : children ? (
         children
       ) : title ? (
-        <Text className={textClass}>{title}</Text>
+        <Text className={textClass} weight={FontWeight.Medium}>
+          {title}
+        </Text>
       ) : null}
     </TouchableOpacity>
   );

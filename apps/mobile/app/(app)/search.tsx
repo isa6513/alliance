@@ -17,13 +17,13 @@ import {
   SEARCH_CATEGORY_NAMES,
   useSearchResults,
 } from "@alliance/shared/lib/search";
-import Text from "../../components/system/Text";
+import Text, { FontWeight } from "../../components/system/Text";
 import ProfileImage from "../../components/ProfileImage";
 import { getImageSource } from "../../lib/config";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { cn } from "@alliance/shared/styles/util";
 
-const resolveItemImage = (image?: string) => {
+const resolveItemImage = (image?: string): string | null => {
   if (!image) return null;
   if (
     image.startsWith("http") ||
@@ -141,7 +141,10 @@ export default function SearchScreen() {
                       : "border-t border-zinc-200 py-3"
                   }
                 >
-                  <Text className="text-sm text-zinc-500 font-medium px-3 pb-2">
+                  <Text
+                    className="text-sm text-zinc-500 px-3 pb-2"
+                    weight={FontWeight.Medium}
+                  >
                     {SEARCH_CATEGORY_NAMES[category]}
                   </Text>
                   <View className="gap-y-1">
@@ -177,7 +180,10 @@ export default function SearchScreen() {
                             <View className="w-8 h-8 rounded bg-zinc-100 border border-zinc-200" />
                           )}
                           <View className="flex-1">
-                            <Text className="text-zinc-900 font-medium">
+                            <Text
+                              className="text-zinc-900"
+                              weight={FontWeight.Medium}
+                            >
                               {item.name}
                             </Text>
                             {secondaryText.length > 0 && (

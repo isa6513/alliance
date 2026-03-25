@@ -1,17 +1,12 @@
 import React from "react";
-import {
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, TextInput, TouchableOpacity, View } from "react-native";
 import { ChevronDown, Clock } from "lucide-react-native";
 import { useTimeZoneSelect } from "@alliance/shared/forms/timeZoneSelect";
 import { getTimeZone } from "react-native-localize";
 import FormModal from "./FormModal";
 import { cn } from "@alliance/shared/styles/util";
 import { colors } from "../../lib/style/colors";
+import Text, { FontWeight } from "../system/Text";
 
 type Props = {
   value?: string;
@@ -75,12 +70,17 @@ export default function TimeZoneSelect({
         <View className="flex-row items-center justify-between mb-3">
           <View className="flex-row items-center gap-2">
             <Clock size={18} color="#0f172a" />
-            <Text className="text-lg font-semibold text-zinc-900">
+            <Text
+              className="text-lg text-zinc-900"
+              weight={FontWeight.Semibold}
+            >
               Select time zone
             </Text>
           </View>
           <TouchableOpacity onPress={() => setOpen(false)}>
-            <Text className="text-blue-600 font-medium">Close</Text>
+            <Text className="text-blue-600" weight={FontWeight.Medium}>
+              Close
+            </Text>
           </TouchableOpacity>
         </View>
         <View className="border border-zinc-200 rounded-lg mb-3">

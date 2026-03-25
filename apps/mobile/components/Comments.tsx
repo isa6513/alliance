@@ -26,7 +26,7 @@ import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
 import LikeButton from "./LikeButton";
 import ProfileImage from "./ProfileImage";
-import Text from "./system/Text";
+import Text, { FontWeight } from "./system/Text";
 import { colors } from "../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
 import { useQueryClient } from "@tanstack/react-query";
@@ -226,7 +226,10 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
         <View className="flex-row items-center gap-x-2">
           <ProfileImage pfp={reply.author.profilePicture} size="small" />
           <Text className={cn("text-zinc-500", metaTextClass)}>
-            <Text className={cn("font-medium text-zinc-700", metaTextClass)}>
+            <Text
+              className={cn("text-zinc-700", metaTextClass)}
+              weight={FontWeight.Medium}
+            >
               {reply.author.displayName}
             </Text>
             {` ${formatTime(new Date(reply.createdAt), {

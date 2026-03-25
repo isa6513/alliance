@@ -1,6 +1,6 @@
 import { Pressable, View } from "react-native";
 import { Menu } from "lucide-react-native";
-import Text from "./Text";
+import Text, { FontWeight } from "./Text";
 import { useAppDrawer } from "../../lib/AppDrawerContext";
 import { colors } from "../../lib/style/colors";
 
@@ -23,7 +23,9 @@ export const SimplePageTitle = ({
           {!isPermanent && (
             <Menu size={25} color={colors.text.icon} strokeWidth={2.5} />
           )}
-          <Text className="text-2xl font-semibold text-zinc-900">{title}</Text>
+          <Text className="text-2xl text-zinc-900" weight={FontWeight.Semibold}>
+            {title}
+          </Text>
         </View>
       </Pressable>
       {children}

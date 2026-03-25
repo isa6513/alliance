@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
-import Text from "./Text";
+import Text, { FontWeight } from "./Text";
 import { cn } from "@alliance/shared/styles/util";
 
 export type SegmentedTabsProps<T extends string> = {
@@ -34,9 +34,10 @@ export function SegmentedTabs<T extends string>({
           >
             <Text
               className={cn(
-                "text-sm font-medium",
+                "text-sm",
                 isSelected ? "text-zinc-900" : "text-zinc-500",
               )}
+              weight={FontWeight.Medium}
             >
               {labels[tab]}
             </Text>
