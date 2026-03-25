@@ -178,7 +178,10 @@ export default function GroupsScreen() {
             />
           )}
           {tab === "members" && (
-            <GroupMembersTab community={selectedCommunity} />
+            <GroupMembersTab
+              community={selectedCommunity}
+              amLeader={amLeader}
+            />
           )}
           {tab === "invites" && amLeader && (
             <GroupInvitesTab
@@ -266,16 +269,18 @@ type MembersListItem =
       };
       isLeader: boolean;
       isLastInSection: boolean;
-      completedAll?: boolean;
+      completedAll: boolean | null;
       contactInfo?: CommunityMemberContactInfoDto | null;
       deadlineTimestamp?: number;
+      showDropdown: boolean;
     };
 
 function buildMembersListItems(params: {
   leaders: CommunityDto["leaders"];
   sortedNonLeaderMembers: CommunityDto["users"];
   deadlineTimestampByUserId: Map<number, number>;
-  memberInfoReady: boolean;
+  memberInfoLoaded: boolean;
+  memberInfoUserIds: Set<number>;
   amLeader: boolean;
   memberContactInfoByUserId?: Record<number, CommunityMemberContactInfoDto>;
 }): MembersListItem[] {
@@ -283,63 +288,78 @@ function buildMembersListItems(params: {
     leaders,
     sortedNonLeaderMembers,
     deadlineTimestampByUserId,
-    memberInfoReady,
+    memberInfoLoaded,
+    memberInfoUserIds,
     amLeader,
     memberContactInfoByUserId,
   } = params;
+
+  function memberItem(
+    profile: CommunityDto["leaders"][number],
+    index: number,
+    sectionLength: number,
+    isLeader: boolean,
+  ): MembersListItem {
+    const completedAll =
+      memberInfoLoaded && memberInfoUserIds.has(profile.id)
+        ? !hasActionsToComplete(deadlineTimestampByUserId, profile.id)
+        : null;
+    return {
+      type: "member",
+      id: profile.id,
+      profile: {
+        id: profile.id,
+        displayName: profile.displayName,
+        profilePicture: profile.profilePicture,
+      },
+      isLeader,
+      isLastInSection: index === sectionLength - 1,
+      completedAll,
+      contactInfo: amLeader
+        ? (memberContactInfoByUserId?.[profile.id] ?? null)
+        : undefined,
+      deadlineTimestamp: deadlineTimestampByUserId.get(profile.id),
+      showDropdown: amLeader,
+    };
+  }
+
   const items: MembersListItem[] = [];
   if (leaders.length > 0) {
     items.push({ type: "header", id: "leaders", label: "Leads" });
     leaders.forEach((profile, index) => {
-      items.push({
-        type: "member",
-        id: profile.id,
-        profile: {
-          id: profile.id,
-          displayName: profile.displayName,
-          profilePicture: profile.profilePicture,
-        },
-        isLeader: true,
-        isLastInSection: index === leaders.length - 1,
-      });
+      items.push(memberItem(profile, index, leaders.length, true));
     });
   }
   if (sortedNonLeaderMembers.length > 0) {
     items.push({ type: "header", id: "members", label: "Members" });
     sortedNonLeaderMembers.forEach((profile, index) => {
-      const completedAll = memberInfoReady
-        ? !hasActionsToComplete(deadlineTimestampByUserId, profile.id)
-        : undefined;
-      items.push({
-        type: "member",
-        id: profile.id,
-        profile: {
-          id: profile.id,
-          displayName: profile.displayName,
-          profilePicture: profile.profilePicture,
-        },
-        isLeader: false,
-        isLastInSection: index === sortedNonLeaderMembers.length - 1,
-        completedAll,
-        contactInfo: amLeader
-          ? (memberContactInfoByUserId?.[profile.id] ?? null)
-          : undefined,
-        deadlineTimestamp: deadlineTimestampByUserId.get(profile.id),
-      });
+      items.push(
+        memberItem(profile, index, sortedNonLeaderMembers.length, false),
+      );
     });
   }
   return items;
 }
 
-function GroupMembersTab({ community }: { community: CommunityDto }) {
-  const { user } = useAuth();
+function GroupMembersTab({
+  community,
+  amLeader,
+}: {
+  community: CommunityDto;
+  amLeader: boolean;
+}) {
   const leaders = community.leaders;
-  const nonLeaderMembers = community.users.filter(
-    (u) => !leaders.some((l) => l.id === u.id),
+  const leaderIds = useMemo(() => new Set(leaders.map((l) => l.id)), [leaders]);
+  const nonLeaderMembers = useMemo(
+    () => community.users.filter((u) => !leaderIds.has(u.id)),
+    [community.users, leaderIds],
   );
-  const amLeader = leaders.some((l) => l.id === user?.id);
 
-  const { data: memberInfo, isPending: memberInfoLoading } = useQuery({
+  const {
+    data: memberInfo,
+    isPending: memberInfoLoading,
+    isSuccess: memberInfoLoaded,
+  } = useQuery({
     queryKey: ["communityMemberInfo", community.id],
     queryFn: () =>
       actionsGetCommunityMemberInfo({
@@ -368,6 +388,11 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
     );
   }, [memberContactInfoList]);
 
+  const memberInfoUserIds = useMemo(
+    () => new Set(memberInfo?.users?.map(({ userId }) => userId) ?? []),
+    [memberInfo],
+  );
+
   const deadlineTimestampByUserId = useMemo(() => {
     if (!memberInfo?.users?.length || !memberInfo?.actions?.length) {
       return new Map<number, number>();
@@ -395,7 +420,8 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
         leaders,
         sortedNonLeaderMembers,
         deadlineTimestampByUserId,
-        memberInfoReady: !memberInfoLoading,
+        memberInfoLoaded,
+        memberInfoUserIds,
         amLeader,
         memberContactInfoByUserId,
       }),
@@ -403,7 +429,8 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
       leaders,
       sortedNonLeaderMembers,
       deadlineTimestampByUserId,
-      memberInfoLoading,
+      memberInfoLoaded,
+      memberInfoUserIds,
       amLeader,
       memberContactInfoByUserId,
     ],
@@ -432,6 +459,7 @@ function GroupMembersTab({ community }: { community: CommunityDto }) {
             completedAll={item.completedAll}
             contactInfo={item.contactInfo}
             deadlineTimestamp={item.deadlineTimestamp}
+            showDropdown={item.showDropdown}
           />
         )
       }

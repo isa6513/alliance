@@ -49,10 +49,11 @@ export type GroupMemberRowProfile = {
 export type GroupMemberRowProps = {
   profile: GroupMemberRowProfile;
   isLeader: boolean;
+  showDropdown: boolean;
   /** When true, omit bottom border (last row before next section header or list end). */
   isLastInSection?: boolean;
-  /** When true, show green checkmark (completed all). When false, show grey circle. Omitted for leaders. */
-  completedAll?: boolean;
+  /** true = completed all, false = has remaining tasks, null = data not yet loaded. */
+  completedAll: boolean | null;
   /** When amLeader and !completedAll, show contact info (expandable block). */
   contactInfo?: CommunityMemberContactInfoDto | null;
   /** Next task due timestamp (for "Next task due" in contact block). undefined or Infinity = complete. */
@@ -62,34 +63,27 @@ export type GroupMemberRowProps = {
 export function GroupMemberRow({
   profile,
   isLeader,
+  showDropdown,
   isLastInSection,
   completedAll,
   contactInfo,
   deadlineTimestamp,
 }: GroupMemberRowProps) {
-  const hasDropdown = contactInfo != null;
-  const [expanded, setExpanded] = useState(
-    hasDropdown && completedAll === false,
-  );
+  const [expanded, setExpanded] = useState(!isLeader && completedAll === false);
 
   useEffect(() => {
-    if (!hasDropdown) {
-      return;
-    }
+    if (isLeader) return;
     if (completedAll === true) {
       setExpanded(false);
     } else if (completedAll === false) {
       setExpanded(true);
     }
-  }, [hasDropdown, completedAll]);
+  }, [isLeader, completedAll]);
 
   const onTopBarPress = useCallback(() => {
-    if (hasDropdown) {
-      setExpanded((e) => !e);
-    } else {
-      router.push(`/member/${profile.id}`);
-    }
-  }, [hasDropdown, profile.id]);
+    if (!showDropdown) return;
+    setExpanded((e) => !e);
+  }, [showDropdown]);
 
   return (
     <View className={cn(!isLastInSection && "border-b border-zinc-200")}>
@@ -97,6 +91,7 @@ export function GroupMemberRow({
         onPress={onTopBarPress}
         className="flex-row items-center gap-3 px-4 py-3"
         activeOpacity={0.7}
+        disabled={!showDropdown}
       >
         <ProfileImage pfp={profile.profilePicture ?? null} size="large" />
         <View className="flex-1 min-w-0">
@@ -109,7 +104,7 @@ export function GroupMemberRow({
             </Text>
           )}
         </View>
-        {completedAll !== undefined ? (
+        {completedAll !== null && (
           <View
             className="items-center justify-center"
             style={{
@@ -119,8 +114,8 @@ export function GroupMemberRow({
           >
             <MemberCompletionIcon completedAll={completedAll} />
           </View>
-        ) : null}
-        {hasDropdown && (
+        )}
+        {showDropdown && (
           <View
             style={{
               transform: [{ rotate: expanded ? "180deg" : "0deg" }],
@@ -134,7 +129,7 @@ export function GroupMemberRow({
           </View>
         )}
       </TouchableOpacity>
-      {hasDropdown && expanded && contactInfo != null && (
+      {expanded && contactInfo != null && (
         <MemberContactBlock
           profileId={profile.id}
           contactInfo={contactInfo}
