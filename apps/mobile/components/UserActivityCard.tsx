@@ -83,14 +83,12 @@ export default function UserActivityCard({
             </View>
           )}
 
-        <>
-          {(!!activity.editableContent?.body ||
-            (activity.editableContent?.attachments?.length ?? 0) > 0) && (
-            <View className="mt-3">
-              <EditableContentRenderer content={activity.editableContent} />
-            </View>
-          )}
-        </>
+        {(!!activity.editableContent?.body ||
+          (activity.editableContent?.attachments?.length ?? 0) > 0) && (
+          <View className="mt-3">
+            <EditableContentRenderer content={activity.editableContent} />
+          </View>
+        )}
 
         {/* Footer: pressable icons */}
         <View className="flex-row justify-between items-center mt-3">
@@ -128,7 +126,6 @@ export default function UserActivityCard({
             compact
             showForm={showCommentForm}
             autofocus={showCommentForm}
-            repliesAsCards={false}
             small
           />
         </View>

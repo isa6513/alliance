@@ -17,7 +17,6 @@ import {
 interface UserActivityCardProps {
   activity: ActionActivityDto;
   handleLike: (activityId: number) => void;
-  onActivityUpdate?: (updatedActivity: ActionActivityDto) => void;
 }
 
 const UserActivityCard = ({ activity, handleLike }: UserActivityCardProps) => {

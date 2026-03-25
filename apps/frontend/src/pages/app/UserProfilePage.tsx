@@ -115,7 +115,7 @@ const UserProfilePage: React.FC = () => {
 
   const forumActivityCount = forumActivityItems.length;
 
-  const { activities, handleLikeActivity, updateActivity } = useActivities({
+  const { activities, handleLikeActivity } = useActivities({
     list: ActivityList.User,
     objectId: userId ?? 0,
     comments: true,
@@ -451,7 +451,6 @@ const UserProfilePage: React.FC = () => {
                   activity={activity}
                   key={activity.id}
                   handleLike={handleLikeActivity}
-                  onActivityUpdate={updateActivity}
                 />
               ))}
             </div>

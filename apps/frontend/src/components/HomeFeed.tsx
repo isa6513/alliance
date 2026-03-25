@@ -1,21 +1,16 @@
 import { useCallback, useRef } from "react";
-import { ActionActivityDto } from "@alliance/shared/client";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
-import { useAuth } from "../lib/AuthContext";
 import UserActivityCard from "./UserActivityCard";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 
 const LIMIT = 5;
 
 const HomeFeed = () => {
-  const { user } = useAuth();
-
   const {
     activities,
     handleLikeActivity,
-    updateActivity,
     loading,
     fetchNextPage,
     hasNextPage,
@@ -67,13 +62,6 @@ const HomeFeed = () => {
     [handleLikeActivity],
   );
 
-  const handleUpdate = useCallback(
-    (updatedActivity: ActionActivityDto) => {
-      updateActivity(updatedActivity);
-    },
-    [updateActivity],
-  );
-
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -95,8 +83,6 @@ const HomeFeed = () => {
             activity={activity}
             key={activity.id}
             handleLike={() => handleLike(activity.id)}
-            onActivityUpdate={handleUpdate}
-            canEdit={activity.user.id === user?.id}
           />
         ))}
       </div>

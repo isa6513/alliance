@@ -2,13 +2,11 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
 import UserActivityCard from "../../components/UserActivityCard";
-import { useAuth } from "../../lib/AuthContext";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import { Link, href } from "react-router";
-import { ActionActivityDto } from "@alliance/shared/client";
 
 type Mode = "friends" | "everyone";
 
@@ -16,11 +14,9 @@ const ActivityFeedPage = () => {
   const modes: Mode[] = ["friends", "everyone"];
   const [mode, setMode] = useState<Mode>("friends");
 
-  const { user } = useAuth();
   const {
     activities,
     handleLikeActivity: handleGlobalLikeActivity,
-    updateActivity: updateGlobalActivity,
     loading,
     setActivities: setGlobalActivities,
     fetchNextPage: fetchNextGlobal,
@@ -35,7 +31,6 @@ const ActivityFeedPage = () => {
   const {
     activities: friendActivities,
     handleLikeActivity: handleLikeFriendActivity,
-    updateActivity: updateFriendActivity,
     loading: loadingFriend,
     setActivities: setFriendActivities,
     fetchNextPage: fetchNextFriends,
@@ -71,17 +66,6 @@ const ActivityFeedPage = () => {
       setGlobalActivities,
       setFriendActivities,
     ],
-  );
-
-  const updateActivity = useCallback(
-    (activity: ActionActivityDto, mode: Mode) => {
-      if (mode === "friends") {
-        updateFriendActivity(activity);
-      } else {
-        updateGlobalActivity(activity);
-      }
-    },
-    [updateFriendActivity, updateGlobalActivity],
   );
 
   const friendsRef = useRef<HTMLDivElement>(null);
@@ -180,10 +164,6 @@ const ActivityFeedPage = () => {
                 activity={activity}
                 key={activity.id}
                 handleLike={() => handleLikeActivity(activity.id, mode)}
-                onActivityUpdate={(updatedActivity) =>
-                  updateActivity(updatedActivity, mode)
-                }
-                canEdit={activity.user.id === user?.id}
               />
             ))}
             {list.length === 0 && (

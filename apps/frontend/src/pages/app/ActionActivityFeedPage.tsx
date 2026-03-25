@@ -52,7 +52,6 @@ const ActionActivityFeedPage = () => {
   const {
     activities,
     handleLikeActivity,
-    updateActivity,
     loading,
     fetchNextPage,
     hasNextPage,
@@ -82,9 +81,9 @@ const ActionActivityFeedPage = () => {
     () =>
       activities.filter(
         (activity) =>
-          activity.user.id === user?.id || myFriends.includes(activity.user.id)
+          activity.user.id === user?.id || myFriends.includes(activity.user.id),
       ),
-    [activities, user, myFriends]
+    [activities, user, myFriends],
   );
 
   const friendsRef = useRef<HTMLDivElement>(null);
@@ -93,7 +92,7 @@ const ActionActivityFeedPage = () => {
   const everyoneSentinelRef = useRef<HTMLDivElement>(null);
 
   const [activeHeight, setActiveHeight] = useState<number | undefined>(
-    undefined
+    undefined,
   );
 
   const updateHeight = useCallback(() => {
@@ -136,7 +135,7 @@ const ActionActivityFeedPage = () => {
           }
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
 
     if (friendsSentinelRef.current)
@@ -161,8 +160,6 @@ const ActionActivityFeedPage = () => {
                 activity={activity}
                 key={activity.id}
                 handleLike={handleLikeActivity}
-                onActivityUpdate={updateActivity}
-                canEdit={activity.user.id === user?.id}
               />
             ))}
             {list.length === 0 && (
@@ -216,7 +213,7 @@ const ActionActivityFeedPage = () => {
                 "!border-b-[2px] rounded-none",
                 m === mode
                   ? "!border-b-green text-black"
-                  : "!border-b-transparent hover:!border-b-zinc-200 text-zinc-500"
+                  : "!border-b-transparent hover:!border-b-zinc-200 text-zinc-500",
               )}
             >
               <p className="capitalize">{m}</p>

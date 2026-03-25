@@ -8,16 +8,12 @@ export interface CommunityActivityTabProps {
   userId?: number;
 }
 
-const CommunityActivityTab = ({
-  communityId,
-  userId,
-}: CommunityActivityTabProps) => {
-  const { activities, handleLikeActivity, updateActivity, loading } =
-    useActivities({
-      list: ActivityList.Community,
-      objectId: communityId,
-      comments: true,
-    });
+const CommunityActivityTab = ({ communityId }: CommunityActivityTabProps) => {
+  const { activities, handleLikeActivity, loading } = useActivities({
+    list: ActivityList.Community,
+    objectId: communityId,
+    comments: true,
+  });
 
   return (
     <div className="mt-4 flex flex-col gap-y-2 *:p-4">
@@ -31,8 +27,6 @@ const CommunityActivityTab = ({
           activity={activity}
           key={activity.id}
           handleLike={handleLikeActivity}
-          onActivityUpdate={updateActivity}
-          canEdit={activity.user.id === userId}
         />
       ))}
     </div>

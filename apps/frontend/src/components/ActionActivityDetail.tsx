@@ -6,7 +6,7 @@ import {
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useMemo } from "react";
 import { Link, href, useOutletContext, useParams } from "react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "@alliance/shared/lib/utils";
