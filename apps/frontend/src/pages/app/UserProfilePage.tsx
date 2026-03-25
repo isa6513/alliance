@@ -452,7 +452,6 @@ const UserProfilePage: React.FC = () => {
                   key={activity.id}
                   handleLike={handleLikeActivity}
                   onActivityUpdate={updateActivity}
-                  canEdit={isMe}
                 />
               ))}
             </div>

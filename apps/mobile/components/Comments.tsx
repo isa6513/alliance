@@ -44,10 +44,6 @@ export interface CommentsProps {
   repliesAsCards?: boolean;
 }
 
-const renderAvatar = (user: CommentDto["author"]) => {
-  return <ProfileImage pfp={user.profilePicture} size="small" />;
-};
-
 const uploadAttachments = async (attachments: string[]) => {
   const uploads = await Promise.all(
     attachments.map(async (file) => {
@@ -228,7 +224,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-x-2">
-          {renderAvatar(reply.author)}
+          <ProfileImage pfp={reply.author.profilePicture} size="small" />
           <Text className={cn("text-zinc-500", metaTextClass)}>
             <Text className={cn("font-medium text-zinc-700", metaTextClass)}>
               {reply.author.displayName}

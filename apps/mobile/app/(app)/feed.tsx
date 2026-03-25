@@ -138,15 +138,11 @@ export default function FeedScreen() {
           <UserActivityCard
             activity={activity}
             handleLike={() => handleLikeActivity(activity.id, mode)}
-            onActivityUpdate={(updatedActivity) =>
-              updateActivity(updatedActivity, mode)
-            }
-            canEdit={activity.user.id === user?.id}
           />
         </View>
       );
     },
-    [handleLikeActivity, updateActivity, mode, user?.id],
+    [handleLikeActivity, mode],
   );
 
   const listHeader = (

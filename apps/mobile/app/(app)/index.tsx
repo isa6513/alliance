@@ -161,18 +161,13 @@ export default function HomeScreen() {
 
   const allItems = useMemo<HomeScreenItem[]>(() => {
     const actionAndUpdateItems: HomeScreenItem[] = [
-      ...todoActions.map(
-        (action) => ({ kind: "action", action }) as const,
-      ),
+      ...todoActions.map((action) => ({ kind: "action", action }) as const),
       ...(generalUpdates ?? []).map(
-        (generalUpdate) =>
-          ({ kind: "generalUpdate", generalUpdate }) as const,
+        (generalUpdate) => ({ kind: "generalUpdate", generalUpdate }) as const,
       ),
     ].sort((a, b) => {
-      const aVal =
-        a.kind === "action" ? a.action : a.generalUpdate;
-      const bVal =
-        b.kind === "action" ? b.action : b.generalUpdate;
+      const aVal = a.kind === "action" ? a.action : a.generalUpdate;
+      const bVal = b.kind === "action" ? b.action : b.generalUpdate;
       return homePagePriorityComparator(aVal, bVal);
     });
 
@@ -229,13 +224,6 @@ export default function HomeScreen() {
     [handleLikeHomeFeedActivity],
   );
 
-  const handleHomeFeedUpdate = useCallback(
-    (updatedActivity: ActionActivityDto) => {
-      updateHomeFeedActivity(updatedActivity);
-    },
-    [updateHomeFeedActivity],
-  );
-
   const onHomeFeedEndReached = useCallback(() => {
     if (homeFeedHasNextPage && !homeFeedFetchingNextPage) {
       void fetchNextHomeFeedPage();
@@ -248,12 +236,10 @@ export default function HomeScreen() {
         <UserActivityCard
           activity={activity}
           handleLike={() => handleHomeFeedLike(activity.id)}
-          onActivityUpdate={handleHomeFeedUpdate}
-          canEdit={activity.user.id === user?.id}
         />
       </View>
     ),
-    [handleHomeFeedLike, handleHomeFeedUpdate, user?.id],
+    [handleHomeFeedLike],
   );
 
   useEffect(() => {
@@ -377,9 +363,7 @@ export default function HomeScreen() {
   ]);
 
   const showHomeFeedList =
-    !currentItem &&
-    !homeFeedLoading &&
-    homeFeedActivities.length > 0;
+    !currentItem && !homeFeedLoading && homeFeedActivities.length > 0;
 
   const header = (
     <SimplePageTitle title={title}>

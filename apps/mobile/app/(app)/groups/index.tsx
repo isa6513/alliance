@@ -202,14 +202,12 @@ function GroupActivityTab({
   onRefresh: () => void;
   refreshing: boolean;
 }) {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { activities, handleLikeActivity, updateActivity, loading } =
-    useActivities({
-      list: ActivityList.Community,
-      objectId: communityId,
-      comments: true,
-    });
+  const { activities, handleLikeActivity, loading } = useActivities({
+    list: ActivityList.Community,
+    objectId: communityId,
+    comments: true,
+  });
 
   const handleRefresh = useCallback(() => {
     onRefresh();
@@ -241,8 +239,6 @@ function GroupActivityTab({
           <UserActivityCard
             activity={item}
             handleLike={() => handleLikeActivity(item.id)}
-            onActivityUpdate={updateActivity}
-            canEdit={item.user.id === user?.id}
           />
         </View>
       )}

@@ -2,12 +2,9 @@ import {
   ActionActivityDto,
   ActionDto,
   actionsGetActivity,
-  actionsUpdateActivity,
-  CreateEditableContentDto,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, href, useOutletContext, useParams } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
@@ -16,7 +13,6 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
 import Comments from "./Comments";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
-import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import { OutputRenderer } from "@alliance/sharedweb/forms/OutputRenderer";
 import BasicErrorMessage from "./BasicErrorMessage";
@@ -45,8 +41,7 @@ const ActionActivityDetail = () => {
   const params = useParams();
   const activityId = parseInt(params.activityId!);
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const { action, activities, handleLikeActivity, setActivities } =
+  const { action, activities, handleLikeActivity } =
     useOutletContext<ActionActivityDetailContext>();
 
   // Find the activity from the shared state (used for like sync)
@@ -83,57 +78,6 @@ const ActionActivityDetail = () => {
   };
 
   const isLiked = activity?.likedByMe ?? false;
-
-  const isOwner = activity?.user.id === user?.id;
-  const [editing, setEditing] = useState(false);
-  const [editContent, setEditContent] =
-    useState<CreateEditableContentDto | null>(
-      activity?.editableContent ?? null,
-    );
-  const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    setEditContent(activity?.editableContent ?? null);
-  }, [activity]);
-
-  const handleSave = async () => {
-    if (!user || !activity || isSaving || !editContent) {
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const resp = await actionsUpdateActivity({
-        path: {
-          id: activity.id,
-        },
-        body: {
-          editableContent: editContent,
-        },
-      });
-      if (resp.error) {
-        console.error(resp.error);
-        return;
-      }
-      const newActivity = resp.data!;
-      setActivities(
-        activities.map((a) => (a.id === activity.id ? newActivity : a)),
-      );
-      queryClient.invalidateQueries({
-        queryKey: ["actionsGetActivity", activityId],
-      });
-      setEditing(false);
-    } catch (error) {
-      console.error("Error updating activity:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setEditContent(activity?.editableContent ?? null);
-    setEditing(false);
-  };
 
   if (activity?.actionId !== action.id) {
     return <BasicErrorMessage>Activity not found</BasicErrorMessage>;
@@ -183,16 +127,6 @@ const ActionActivityDetail = () => {
                 </div>
               </div>
               <div className="flex flex-row items-center gap-x-2">
-                {isOwner && !editing && (
-                  <button
-                    onClick={() => setEditing(true)}
-                    className="text-green underline md:ml-2 text-nowrap"
-                  >
-                    {activity.editableContent?.body
-                      ? "Edit details"
-                      : "Add details"}
-                  </button>
-                )}
                 <p className="text-zinc-500 text-nowrap">
                   {formatTime(new Date(activity?.createdAt), {
                     addSuffix: true,
@@ -200,44 +134,11 @@ const ActionActivityDetail = () => {
                 </p>
               </div>
             </div>
-            {editing ? (
-              <div className="space-y-2 mt-4 mb-0">
-                <div className="rounded p-3 bg-zinc-100">
-                  <EditableContentForm
-                    value={editContent ?? { body: "", attachments: [] }}
-                    restoreDraft={false}
-                    onChange={setEditContent}
-                    placeholder="Add a description..."
-                  />
-                  <div className="mt-2 flex justify-end items-center gap-2">
-                    <Button
-                      color={ButtonColor.Blue}
-                      onClick={handleSave}
-                      disabled={isSaving}
-                    >
-                      {isSaving ? "Saving..." : "Save"}
-                    </Button>
-                    <Button
-                      color={ButtonColor.White}
-                      onClick={handleCancel}
-                      disabled={isSaving}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
+            {(!!activity.editableContent.body ||
+              activity.editableContent.attachments.length > 0) && (
+              <div className="mt-3">
+                <EditableContentRenderer content={activity.editableContent} />
               </div>
-            ) : (
-              <>
-                {(!!activity.editableContent.body ||
-                  activity.editableContent.attachments.length > 0) && (
-                  <div className="mt-3">
-                    <EditableContentRenderer
-                      content={activity.editableContent}
-                    />
-                  </div>
-                )}
-              </>
             )}
             {activity.formResponseOutput && (
               <div className="my-3">

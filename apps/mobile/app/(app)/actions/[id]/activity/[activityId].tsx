@@ -12,22 +12,14 @@ import {
   actionsGetActivity,
   actionsLikeActivity,
   actionsUnlikeActivity,
-  actionsUpdateActivity,
-  CreateEditableContentDto,
-  imagesUploadImage,
 } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { useAuth } from "../../../../../lib/AuthContext";
 import { colors } from "../../../../../lib/style/colors";
 import Text from "../../../../../components/system/Text";
-import Button, {
-  ButtonColor,
-  ButtonSize,
-} from "../../../../../components/system/Button";
 import ProfileImage from "../../../../../components/ProfileImage";
 import LikeButton from "../../../../../components/LikeButton";
 import Comments from "../../../../../components/Comments";
-import EditableContentForm from "../../../../../components/EditableContentForm";
 import EditableContentRenderer from "../../../../../components/EditableContentRenderer";
 import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
 import OutputRenderer from "../../../../../components/OutputRenderer";
@@ -45,15 +37,7 @@ export default function ActivityDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState<CreateEditableContentDto>({
-    body: "",
-    attachments: [],
-  });
-  const [isSaving, setIsSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const isEditingRef = useRef(false);
-  isEditingRef.current = isEditing;
 
   const fetchActivity = useCallback(
     async (options?: { silent?: boolean }) => {
@@ -150,69 +134,7 @@ export default function ActivityDetailScreen() {
     }
   }, [activity]);
 
-  const handleEdit = useCallback(() => {
-    if (!activity) return;
-    setEditContent({
-      body: activity.editableContent?.body ?? "",
-      attachments: activity.editableContent?.attachments ?? [],
-    });
-    setIsEditing(true);
-  }, [activity]);
-
-  const handleSave = useCallback(async () => {
-    if (!user || !activity || isSaving) return;
-
-    setIsSaving(true);
-    try {
-      const uploads = await Promise.all(
-        (editContent.attachments || []).map(async (img) => {
-          if (img.startsWith("data:")) {
-            const res = await imagesUploadImage({ body: { file: img } });
-            return res.data?.key;
-          }
-          return img;
-        }),
-      );
-      const attachmentKeys = uploads.filter((key) => key !== undefined);
-
-      const response = await actionsUpdateActivity({
-        path: { id: activity.id },
-        body: {
-          editableContent: {
-            body: editContent.body,
-            attachments: attachmentKeys,
-          },
-        },
-      });
-
-      if (response.error) {
-        console.error("Error updating activity:", response.error);
-        return;
-      }
-
-      if (response.data) {
-        setActivity(response.data);
-      }
-
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Error updating activity:", err);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [user, activity, isSaving, editContent]);
-
-  const handleCancel = useCallback(() => {
-    if (!activity) return;
-    setEditContent({
-      body: activity.editableContent?.body ?? "",
-      attachments: activity.editableContent?.attachments ?? [],
-    });
-    setIsEditing(false);
-  }, [activity]);
-
   const verb = activity ? actionActivityTransitiveVerb[activity.type] : null;
-  const isOwner = activity?.user.id === user?.id;
 
   if (loading) {
     return (
@@ -253,11 +175,9 @@ export default function ActivityDetailScreen() {
             className="mb-4"
             bordered
           />
-
           <Text className="text-2xl font-serif font-semibold mb-4">
             {activity.actionName}
           </Text>
-
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center gap-x-2 flex-1">
               <TouchableOpacity onPress={handleUserPress} activeOpacity={0.7}>
@@ -289,53 +209,13 @@ export default function ActivityDetailScreen() {
             <Text className="text-zinc-500 text-sm">
               {formatTime(new Date(activity.createdAt), { addSuffix: true })}
             </Text>
-            {isOwner && !isEditing && (
-              <TouchableOpacity onPress={handleEdit} activeOpacity={0.7}>
-                <Text className="text-green text-sm">
-                  {activity.editableContent?.body
-                    ? "Edit details"
-                    : "Add details"}
-                </Text>
-              </TouchableOpacity>
-            )}
           </View>
 
-          {/* Content */}
-          {isEditing ? (
-            <View className="border border-zinc-200 rounded p-3 bg-zinc-50 mb-4">
-              <EditableContentForm
-                value={editContent}
-                onChange={setEditContent}
-                onSubmit={handleSave}
-                placeholder="Add a description..."
-                restoreDraft={false}
-              />
-              <View className="flex-row justify-end gap-x-2 mt-3">
-                <Button
-                  color={ButtonColor.White}
-                  size={ButtonSize.Small}
-                  title="Cancel"
-                  onPress={handleCancel}
-                  disabled={isSaving}
-                />
-                <Button
-                  color={ButtonColor.Black}
-                  size={ButtonSize.Small}
-                  title={isSaving ? "Saving..." : "Save"}
-                  onPress={handleSave}
-                  disabled={isSaving}
-                />
-              </View>
+          {(!!activity.editableContent?.body ||
+            (activity.editableContent?.attachments?.length ?? 0) > 0) && (
+            <View className="mb-4">
+              <EditableContentRenderer content={activity.editableContent} />
             </View>
-          ) : (
-            <>
-              {(!!activity.editableContent?.body ||
-                (activity.editableContent?.attachments?.length ?? 0) > 0) && (
-                <View className="mb-4">
-                  <EditableContentRenderer content={activity.editableContent} />
-                </View>
-              )}
-            </>
           )}
 
           <View className="flex-row items-center mb-6">

@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   View,
   FlatList,
-  Platform,
 } from "react-native";
 import { RelativePathString, router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -116,7 +115,7 @@ export default function UserProfileScreen() {
   const removeFriend = useRemoveFriendMutation();
   const updateProfileMutation = useUpdateProfileMutation(userId);
 
-  const { activities, handleLikeActivity, updateActivity } = useActivities({
+  const { activities, handleLikeActivity } = useActivities({
     list: ActivityList.User,
     objectId: userId ?? 0,
     comments: true,
@@ -367,15 +366,10 @@ export default function UserProfileScreen() {
   const renderActionItem = useCallback(
     ({ item: activity }: { item: NonNullable<typeof activities>[number] }) => (
       <View className="border-b border-zinc-200">
-        <UserActivityCard
-          activity={activity}
-          handleLike={handleLikeActivity}
-          onActivityUpdate={updateActivity}
-          canEdit={isMe}
-        />
+        <UserActivityCard activity={activity} handleLike={handleLikeActivity} />
       </View>
     ),
-    [handleLikeActivity, updateActivity, isMe],
+    [handleLikeActivity],
   );
 
   const renderForumItem = useCallback(

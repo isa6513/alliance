@@ -1,19 +1,12 @@
 import { useCallback, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
-import {
-  ActionActivityDto,
-  actionsUpdateActivity,
-  CreateEditableContentDto,
-  imagesUploadImage,
-} from "@alliance/shared/client";
+import { ActionActivityDto } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { MessageCircleIcon, Edit } from "lucide-react-native";
-import { useAuth } from "../lib/AuthContext";
+import { MessageCircleIcon } from "lucide-react-native";
 import ProfileImage from "./ProfileImage";
 import LikeButton from "./LikeButton";
 import Comments from "./Comments";
-import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
 import OutputRenderer from "./OutputRenderer";
 import Text from "./system/Text";
@@ -25,22 +18,12 @@ import {
 interface UserActivityCardProps {
   activity: ActionActivityDto;
   handleLike: (activityId: number) => void;
-  onActivityUpdate?: (updatedActivity: ActionActivityDto) => void;
-  canEdit?: boolean;
 }
 
 export default function UserActivityCard({
   activity,
   handleLike,
-  onActivityUpdate,
-  canEdit = false,
 }: UserActivityCardProps) {
-  const { user: self } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState<CreateEditableContentDto>(
-    activity.editableContent ?? { body: "", attachments: [] },
-  );
-  const [isSaving, setIsSaving] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
 
   const verb = actionActivityTransitiveVerb[activity.type];
@@ -51,9 +34,9 @@ export default function UserActivityCard({
   }, [activity.actionId]);
 
   const handleActivityPress = useCallback(() => {
-    if (isEditing || isSaving || showCommentForm) return;
+    if (showCommentForm) return;
     router.push(`/actions/${activity.actionId}/activity/${activity.id}`);
-  }, [activity.actionId, activity.id, isEditing, isSaving, showCommentForm]);
+  }, [activity.actionId, activity.id, showCommentForm]);
 
   const handleUserPress = useCallback(() => {
     router.push(`/member/${activity.user.id}`);
@@ -63,73 +46,12 @@ export default function UserActivityCard({
     addSuffix: true,
   });
 
-  const handleEdit = useCallback(() => {
-    setEditContent({
-      body: activity.editableContent.body,
-      attachments: activity.editableContent.attachments,
-    });
-    setIsEditing(true);
-  }, [activity.editableContent]);
-
-  const handleSave = useCallback(async () => {
-    if (!self || isSaving) return;
-
-    setIsSaving(true);
-    try {
-      const uploads = await Promise.all(
-        (editContent.attachments || []).map(async (img) => {
-          if (img.startsWith("data:")) {
-            const res = await imagesUploadImage({ body: { file: img } });
-            return res.data?.key;
-          }
-          return img;
-        }),
-      );
-      const attachmentKeys = uploads.filter(
-        (key) => key !== undefined,
-      ) as string[];
-
-      const response = await actionsUpdateActivity({
-        path: { id: activity.id },
-        body: {
-          editableContent: {
-            body: editContent.body,
-            attachments: attachmentKeys,
-          },
-        },
-      });
-
-      if (response.error) {
-        console.error("Error updating activity:", response.error);
-        return;
-      }
-
-      if (response.data && onActivityUpdate) {
-        onActivityUpdate(response.data);
-      }
-
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating activity:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [self, isSaving, editContent, activity.id, onActivityUpdate]);
-
-  const handleCancel = useCallback(() => {
-    setEditContent({
-      body: activity.editableContent.body,
-      attachments: activity.editableContent.attachments,
-    });
-    setIsEditing(false);
-  }, [activity.editableContent]);
-
   return (
     <View className="bg-white p-4">
       <TouchableOpacity
-        activeOpacity={isEditing || isSaving || showCommentForm ? 1 : 0.7}
+        activeOpacity={showCommentForm ? 1 : 0.7}
         onPress={handleActivityPress}
-        disabled={isEditing || isSaving || showCommentForm}
+        disabled={showCommentForm}
       >
         {/* Header: User info and action */}
         <View className="flex-row items-start flex-wrap">
@@ -161,67 +83,40 @@ export default function UserActivityCard({
             </View>
           )}
 
-        {isEditing ? (
-          <View className="mt-3 border border-zinc-200 rounded p-3 bg-zinc-50">
-            <EditableContentForm
-              value={editContent}
-              onChange={setEditContent}
-              placeholder="Add a description..."
-              restoreDraft={false}
-              isSubmitting={isSaving}
-              onSubmit={handleSave}
-              onCancel={handleCancel}
-              submitLabel="Save"
-              autoFocus
-            />
-          </View>
-        ) : (
-          <>
-            {(!!activity.editableContent?.body ||
-              (activity.editableContent?.attachments?.length ?? 0) > 0) && (
-              <View className="mt-3">
-                <EditableContentRenderer content={activity.editableContent} />
-              </View>
-            )}
-          </>
-        )}
+        <>
+          {(!!activity.editableContent?.body ||
+            (activity.editableContent?.attachments?.length ?? 0) > 0) && (
+            <View className="mt-3">
+              <EditableContentRenderer content={activity.editableContent} />
+            </View>
+          )}
+        </>
 
         {/* Footer: pressable icons */}
-        {!isEditing && (
-          <View className="flex-row justify-between items-center mt-3">
-            <View className="flex-1 flex-row items-center justify-around gap-x-8! w-full">
-              <LikeButton
-                liked={activity.likedByMe ?? false}
-                likes={activity.likesCount}
-                iconColor="#a1a1aa"
-                size={22}
-                onPress={() => handleLike(activity.id)}
-              />
+        <View className="flex-row justify-between items-center mt-3">
+          <View className="flex-1 flex-row items-center justify-around gap-x-8! w-full">
+            <LikeButton
+              liked={activity.likedByMe ?? false}
+              likes={activity.likesCount}
+              iconColor="#a1a1aa"
+              size={22}
+              onPress={() => handleLike(activity.id)}
+            />
 
-              {commentable && (
-                <TouchableOpacity
-                  onPress={(e) => {
-                    setShowCommentForm(true);
-                    e.stopPropagation();
-                  }}
-                  activeOpacity={0.4}
-                  className="flex-row items-center gap-x-1 py-1!"
-                >
-                  <MessageCircleIcon size={22} color="#a1a1aa" />
-                </TouchableOpacity>
-              )}
-              {canEdit && (
-                <TouchableOpacity
-                  onPress={handleEdit}
-                  activeOpacity={0.7}
-                  className="flex-row items-center gap-x-1 py-1!"
-                >
-                  <Edit size={22} color="#a1a1aa" />
-                </TouchableOpacity>
-              )}
-            </View>
+            {commentable && (
+              <TouchableOpacity
+                onPress={(e) => {
+                  setShowCommentForm(true);
+                  e.stopPropagation();
+                }}
+                activeOpacity={0.4}
+                className="flex-row items-center gap-x-1 py-1!"
+              >
+                <MessageCircleIcon size={22} color="#a1a1aa" />
+              </TouchableOpacity>
+            )}
           </View>
-        )}
+        </View>
       </TouchableOpacity>
 
       {commentable && (
