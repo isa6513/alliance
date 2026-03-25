@@ -47,7 +47,8 @@ const LoginScreen = () => {
                 placeholder="Email"
                 value={email}
                 onChangeText={setEmail}
-                textContentType="emailAddress"
+                textContentType="username"
+                autoComplete="username"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}

@@ -272,7 +272,6 @@ export default function ConversationScreen() {
       </View>
     );
   }
-
   return (
     <View className="flex-1 bg-white">
       <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 pb-4 bg-white z-50 -mt-14 pt-17">
@@ -331,7 +330,7 @@ export default function ConversationScreen() {
           ) : (
             <LegendList
               ref={listRef}
-              data={convoMessages}
+              data={convoMessages.slice()}
               keyExtractor={(item) => item.id}
               style={{ flex: 1 }}
               onLayout={() => {

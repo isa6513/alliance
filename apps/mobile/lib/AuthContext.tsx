@@ -14,7 +14,6 @@ import {
 } from "../../../shared/client";
 import { useRouter } from "expo-router";
 import { client } from "@alliance/shared/client/client.gen";
-import { getApiUrl } from "./config";
 import {
   getVisualTestAutoLoginCredentials,
   isVisualTestMode,
@@ -85,7 +84,7 @@ export const AuthProvider: React.FC<
         const accessToken = await getAccessToken();
         if (accessToken) {
           client.setConfig({
-            baseUrl: getApiUrl(),
+            ...client.getConfig(),
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
@@ -136,7 +135,7 @@ export const AuthProvider: React.FC<
         }
 
         client.setConfig({
-          baseUrl: getApiUrl(),
+          ...client.getConfig(),
           headers: {
             Authorization: `Bearer ${response.data.access_token}`,
           },

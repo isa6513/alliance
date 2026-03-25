@@ -13,7 +13,7 @@ import {
   updateConversationsForLastMessage,
 } from "@alliance/shared/lib/messages";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./AuthContext";
-import { getApiUrl, getWebSocketUrl } from "./config";
+import { getWebSocketUrl } from "./config";
 import SecureStorage from "./SecureStorage";
 import WebTokenStore from "./ExpoWebTokenStore";
 import { client } from "@alliance/shared/client/client.gen";
@@ -36,7 +36,7 @@ const onRefreshToken = async (): Promise<string | null> => {
   if (token) {
     await tokenStore.setItem(ACCESS_TOKEN_KEY, token);
     client.setConfig({
-      baseUrl: getApiUrl(),
+      ...client.getConfig(),
       headers: { Authorization: `Bearer ${token}` },
     });
     return token;
