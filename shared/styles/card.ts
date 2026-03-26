@@ -18,7 +18,7 @@ export enum CardStyle {
   Orange = "orange",
 }
 
-export const cardStyleClasses: Record<CardStyle, string> = {
+export const cardStyleClasses = {
   [CardStyle.White]: "bg-white border-none box-border",
   [CardStyle.WhiteBorder]: "bg-white border-zinc-200 box-border",
   [CardStyle.WhiteSolid]: "bg-white border-none",
@@ -37,4 +37,26 @@ export const cardStyleClasses: Record<CardStyle, string> = {
     "bg-transparent border-gray-2 hover:border box-border",
   [CardStyle.LightGreen]: "bg-green/10 border-green/30",
   [CardStyle.Red]: "bg-red-100 border-red-300",
-};
+} as const satisfies Record<CardStyle, string>;
+
+export const mobileCardStyleClasses = {
+  [CardStyle.White]: "bg-white border-none",
+  [CardStyle.WhiteBorder]: "bg-white border-zinc-200",
+  [CardStyle.WhiteSolid]: "bg-white border-none",
+  [CardStyle.Outline]: "bg-transparent border-zinc-200",
+  [CardStyle.Alert]: "bg-sky-100 border-sky-300",
+  [CardStyle.Grey]: "bg-zinc-100 border-none",
+  [CardStyle.GreyBorder]: "bg-zinc-100 border-zinc-200",
+  [CardStyle.Black]: "bg-black border-zinc-300 text-white",
+  [CardStyle.Green]: "bg-green/20 border-green",
+  [CardStyle.Image]: "bg-transparent border-none",
+  [CardStyle.LightGreen]: "bg-green/10 border-green/30",
+  [CardStyle.LightGrey]: "bg-zinc-50 border-none",
+  [CardStyle.LightGreyBorder]: "bg-zinc-50 border-zinc-200",
+  [CardStyle.Red]: "bg-red-100 border-red-300",
+
+  // Untested
+  [CardStyle.Orange]: "bg-orange-100 border-0",
+  [CardStyle.Transparent]: "bg-transparent border-gray-2 hover:border",
+  [CardStyle.Navy]: "bg-navy text-white border-none rounded-none",
+} as const satisfies Record<CardStyle, string>;

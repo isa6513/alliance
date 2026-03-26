@@ -1,32 +1,51 @@
 export const noTasksToDoRightNow = "No tasks to do right now";
 export const noTasksContractSuspended =
   "You will not be assigned tasks while you do not have a signed membership contract.";
-export const taskNotAssigned =
-  "You have not been assigned this task. No action is needed.";
-export const taskWithdrew = "You withdrew from this action.";
-export const taskCompleted = "You've completed this task.";
-export const taskDeadlinePassed = "The deadline for member action has passed.";
-export const taskDeadlinePassedDescription =
-  "You do not need to complete this task, but you can still do so below if you would like.";
 
-export const TASK_DISMISS_MESSAGE_CURRENTLY_AWAY =
-  "You are currently away, so this task is optional for you. You can either complete it or dismiss it.";
-// We might show this while the task is in progress or after the deadline
-export const TASK_DISMISS_MESSAGE_WAS_AWAY =
-  "You were away during this task, so it is optional for you. You can either complete it or dismiss it.";
-export const TASK_DISMISS_MESSAGE_WILL_BE_AWAY =
-  "You will be away before this task is due, so it is optional for you. You can either complete it or dismiss it.";
-export const TASK_DISMISS_MESSAGE_AFTER_DEADLINE =
-  "You have missed this task's deadline. You can either complete it or dismiss it.";
-
-export const TASK_DISMISS_HEADER_AWAY = "Away";
-export const TASK_DISMISS_HEADER_DEADLINE = "Deadline passed";
-export const TASK_OPTIONAL_HEADER = "This action is optional.";
-export const TASK_OPTIONAL_MESSAGE =
-  "You can complete the task as usual or dismiss it.";
-
-export const externalOnly =
-  "This action is intended for external participants. Members cannot complete it.";
+export const taskHeaders = {
+  actionPage: {
+    completed: "You've completed this task.",
+    deadlinePassed: {
+      title: "The deadline for member action has passed.",
+      description:
+        "You do not need to complete this task, but you can still do so below if you would like.",
+    },
+    externalOnly:
+      "This action is intended for external participants. Members cannot complete it.",
+    memberActionClosed: "This action no longer requires member participation.",
+    notAssigned: "You have not been assigned this task. No action is needed.",
+    onboardingSignContractFirst:
+      "Please sign the contract before continuing with the onboarding process.",
+    optional: {
+      title: "This action is optional.",
+      description:
+        "You are not required to complete the task, but can if you would like.",
+    },
+    withdrew: "You withdrew from this action.",
+  },
+  homePage: {
+    away: {
+      title: "Away",
+      description: {
+        currentlyAway:
+          "You are currently away, so this task is optional for you. You can either complete it or dismiss it.",
+        wasAway:
+          "You were away during this task, so it is optional for you. You can either complete it or dismiss it.",
+        willBeAway:
+          "You will be away before this task is due, so it is optional for you. You can either complete it or dismiss it.",
+      },
+    },
+    deadline: {
+      title: "Deadline passed",
+      description:
+        "You have missed this task's deadline. You can either complete it or dismiss it.",
+    },
+    optional: {
+      title: "This action is optional.",
+      description: "You can complete the task as usual or dismiss it.",
+    },
+  },
+} as const;
 
 export const awayRangesDescription =
   "You can schedule a period of time when you won't be able to complete Alliance actions. This will let the office know not to expect you to complete tasks while you're away.";

@@ -50,7 +50,6 @@ function DismissBanner({
 export default function LargeActionCard({
   action,
   dismissProps,
-  userRelation,
   onUpdateActionState,
   scrollPageTo,
   scrollToEnd,
@@ -106,7 +105,6 @@ export default function LargeActionCard({
       <View className="mt-6 border-t border-zinc-200 pt-6">
         <ActionTaskPanel
           action={action}
-          userRelation={userRelation}
           onCompleteAction={onUpdateActionState}
           onJoinAction={onUpdateActionState}
           onDeclineAction={onUpdateActionState}

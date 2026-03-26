@@ -4,21 +4,19 @@ import {
   actionsComplete,
   actionsDecline,
   actionsJoin,
+  FormResponseDto,
   SubmitFormDto,
   tasksOptout,
-  UserActionRelation,
 } from "../client";
 
 export interface ActionTaskPanelPropsShared {
   action: ActionDto;
-  userRelation: UserActionRelation;
-  missedDeadline?: boolean;
   onCompleteAction: () => void;
   onJoinAction: () => void;
   onDeclineAction: () => void;
   onOptOutAction: () => void;
-  card?: boolean;
   disabled?: boolean;
+  formResponse?: FormResponseDto;
 }
 
 export const useTaskFormHandlers = ({
@@ -51,7 +49,7 @@ export const useTaskFormHandlers = ({
       setActionError(null);
       onCompleteAction();
     },
-    [action, onCompleteAction]
+    [action, onCompleteAction],
   );
 
   const handleJoinAction = useCallback(async () => {
@@ -79,14 +77,14 @@ export const useTaskFormHandlers = ({
       setActionError(null);
       onDeclineAction();
     },
-    [action, onDeclineAction]
+    [action, onDeclineAction],
   );
 
   const handleAbandonAction = useCallback(
     async (
       outOfTime: boolean,
       reason: string,
-      partialFormData: SubmitFormDto
+      partialFormData: SubmitFormDto,
     ) => {
       const req = await tasksOptout({
         path: { id: action.taskFormId! },
@@ -99,7 +97,7 @@ export const useTaskFormHandlers = ({
       setActionError(null);
       onOptOutAction();
     },
-    [action, onOptOutAction]
+    [action, onOptOutAction],
   );
 
   return {

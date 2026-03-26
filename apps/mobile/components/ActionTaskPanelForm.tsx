@@ -1,9 +1,11 @@
 import {
+  FormResponseDto,
   SubmitFormDto,
   tasksGetForm,
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
+import { noop } from "@alliance/shared/lib/constants";
 import { useState } from "react";
 import FormRenderer from "./forms/FormRenderer";
 import { FormSchema } from "@alliance/shared/forms/formschema";
@@ -25,8 +27,9 @@ interface ActionTaskPanelFormProps {
   publicAction?: boolean;
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
-  onSubmitSuccess: () => void;
+  onSubmitSuccess?: () => void;
   disabled?: boolean;
+  formResponse?: FormResponseDto;
 }
 
 const ActionTaskPanelForm = ({
@@ -38,8 +41,9 @@ const ActionTaskPanelForm = ({
   publicAction = false,
   scrollPageTo,
   scrollToEnd,
-  onSubmitSuccess,
+  onSubmitSuccess = noop,
   disabled,
+  formResponse,
 }: ActionTaskPanelFormProps) => {
   const posthog = usePostHog();
   const [error, setError] = useState<string | null>(null);
@@ -50,10 +54,21 @@ const ActionTaskPanelForm = ({
     isPending,
   } = useQuery({
     queryKey: ["form", taskFormId],
-    queryFn: () =>
-      tasksGetForm({ path: { id: taskFormId } }).then(
-        (response) => response.data,
-      ),
+    queryFn: async () => {
+      const response = await tasksGetForm({
+        path: { id: taskFormId },
+      });
+
+      if (!response.data) {
+        throw new Error(
+          (response.error as Error)?.message ??
+            "Unable to load form. Please try again.",
+        );
+      }
+
+      return response.data;
+    },
+    enabled: !formResponse,
   });
 
   const handleSubmitForm = onCompleteAction
@@ -76,7 +91,7 @@ const ActionTaskPanelForm = ({
           posthog.captureException(response.error, {
             event: "form_submit_error",
             properties: {
-              actionId: actionId,
+              actionId,
               $exception_fingerprint: "FormSubmitError",
             },
           });
@@ -85,14 +100,38 @@ const ActionTaskPanelForm = ({
       }
     : null;
 
+  if (formResponse) {
+    return (
+      <FormRenderer
+        form={formResponse.schemaSnapshot as unknown as FormSchema}
+        id={formResponse.formId}
+        actionId={actionId}
+        completedFormResponse={formResponse}
+        onSubmit={null}
+        userId={formResponse.user?.id}
+        user={formResponse.user ?? undefined}
+        scrollPageTo={scrollPageTo}
+        scrollToEnd={scrollToEnd}
+        renderFormAsCompleted
+      />
+    );
+  }
+
   if (isPending) {
-    return <ActivityIndicator />;
+    return (
+      <View className="items-center justify-center py-6">
+        <ActivityIndicator />
+      </View>
+    );
   }
 
   if (!form) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-red-500">{formError?.message}</Text>
+      <View className="items-center justify-center py-6">
+        <Text className="text-red-500">Error loading form</Text>
+        <Text className="text-center text-red-500">
+          {formError?.message ?? "Unable to load form. Please try again."}
+        </Text>
       </View>
     );
   }
@@ -101,7 +140,7 @@ const ActionTaskPanelForm = ({
     <View>
       <FormRenderer
         id={taskFormId}
-        form={form?.schema as unknown as FormSchema}
+        form={form.schema as unknown as FormSchema}
         onSubmit={handleSubmitForm}
         onFormStarted={onFormStarted}
         onAbandonAction={onAbandonAction}
@@ -111,10 +150,7 @@ const ActionTaskPanelForm = ({
         scrollToEnd={scrollToEnd}
         renderFormAsCompleted={disabled}
       />
-      {error ? <Text className="text-red-500">{error}</Text> : null}
-      {formError ? (
-        <Text className="text-red-500">{formError.message}</Text>
-      ) : null}
+      {error ? <Text className="mt-2 text-red-500">{error}</Text> : null}
     </View>
   );
 };

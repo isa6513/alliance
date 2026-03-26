@@ -15,11 +15,13 @@ import Card from "@alliance/sharedweb/ui/Card";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
+import { UserActionRelation } from "@alliance/shared/client";
 
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   showDetails?: boolean;
   className?: string;
   onCompleteAction: () => void;
+  userRelation: UserActionRelation;
 }
 
 enum LargeActionCardState {

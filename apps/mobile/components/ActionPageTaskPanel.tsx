@@ -4,22 +4,21 @@ import {
 } from "@alliance/shared/client/types.gen";
 import {
   ActionPageTaskPanelState,
+  cardStylesForState,
   getActionPageTaskPanelState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
-import ActionTaskPanel from "./ActionTaskPanel";
-import Card, { CardStyle } from "./system/Card";
-import Text, { FontWeight } from "./system/Text";
-import {
-  externalOnly,
-  taskDeadlinePassed,
-  taskDeadlinePassedDescription,
-  taskNotAssigned,
-} from "@alliance/shared/lib/copy";
-import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
-import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
-import { View } from "react-native";
-import { useAuth } from "../lib/AuthContext";
+import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
+import { taskHeaders } from "@alliance/shared/lib/copy";
+import { ArrowRight } from "lucide-react-native";
 import { Link } from "expo-router";
+import { ReactNode } from "react";
+import { View } from "react-native";
+import { colors } from "../lib/style/colors";
+import CheckIcon from "./system/CheckIcon";
+import StackedCard from "./system/StackedCard";
+import Text, { FontWeight } from "./system/Text";
+import ActionTaskPanel from "./ActionTaskPanel";
+import { useAuth } from "../lib/AuthContext";
 
 export interface ActionPageTaskPanelProps {
   action: ActionDto;
@@ -32,6 +31,69 @@ export interface ActionPageTaskPanelProps {
   scrollToEnd: (animated?: boolean) => void;
 }
 
+const taskPanelTopByState: Record<ActionPageTaskPanelState, ReactNode> = {
+  [ActionPageTaskPanelState.PublicOnlyAuthenticated]: (
+    <Text>{taskHeaders.actionPage.externalOnly}</Text>
+  ),
+  [ActionPageTaskPanelState.PublicOnly]: null,
+  [ActionPageTaskPanelState.NotAuthenticated]: (
+    <View className="flex-row flex-wrap items-center">
+      <Link href="/auth/login">
+        <Text className="text-green">Log in</Text>
+      </Link>
+      <Text> to complete this task.</Text>
+    </View>
+  ),
+  [ActionPageTaskPanelState.NotAssigned]: (
+    <Text>{taskHeaders.actionPage.notAssigned}</Text>
+  ),
+  [ActionPageTaskPanelState.Completed]: (
+    <View className="flex-row items-center gap-x-3">
+      <CheckIcon size="small" />
+      <Text>{taskHeaders.actionPage.completed}</Text>
+    </View>
+  ),
+  [ActionPageTaskPanelState.Declined]: (
+    <Text>{taskHeaders.actionPage.withdrew}</Text>
+  ),
+  [ActionPageTaskPanelState.MemberActionClosed]: (
+    <Text>{taskHeaders.actionPage.memberActionClosed}</Text>
+  ),
+  [ActionPageTaskPanelState.MissingDataOrNotActive]: null,
+  [ActionPageTaskPanelState.ShowTaskWithMissedDeadline]: (
+    <View className="gap-y-1">
+      <Text weight={FontWeight.Medium}>
+        {taskHeaders.actionPage.deadlinePassed.title}
+      </Text>
+      <Text className="text-zinc-500">
+        {taskHeaders.actionPage.deadlinePassed.description}
+      </Text>
+    </View>
+  ),
+  [ActionPageTaskPanelState.OnboardingSignContractFirst]: (
+    <View className="flex-row items-center justify-between gap-x-2">
+      <Text className="flex-1">
+        {taskHeaders.actionPage.onboardingSignContractFirst}
+      </Text>
+      <Link href="/actions" className="flex-row items-center gap-x-2">
+        <Text className="text-green">Go back</Text>
+        <ArrowRight size={16} color={colors.green} />
+      </Link>
+    </View>
+  ),
+  [ActionPageTaskPanelState.Optional]: (
+    <View className="gap-y-1">
+      <Text className="text-sky-500" weight={FontWeight.Medium}>
+        {taskHeaders.actionPage.optional.title}
+      </Text>
+      <Text className="text-zinc-500">
+        {taskHeaders.actionPage.optional.description}
+      </Text>
+    </View>
+  ),
+  [ActionPageTaskPanelState.ShowTask]: null,
+};
+
 const ActionPageTaskPanel = ({
   action,
   userRelation,
@@ -42,12 +104,16 @@ const ActionPageTaskPanel = ({
   scrollPageTo,
   scrollToEnd,
 }: ActionPageTaskPanelProps) => {
-  const { user } = useAuth();
-  const state = getActionPageTaskPanelState(
+  const { user, isAuthenticated } = useAuth();
+  const state = getActionPageTaskPanelState({
     action,
     userRelation,
-    user?.hasActiveContract ?? false,
-  );
+    contractSigned: user?.hasActiveContract ?? false,
+    isAuthenticated,
+  });
+  const formResponse = useCompletedTaskForm(action);
+  const taskPanelHeader = taskPanelTopByState[state];
+  const { header: headerStyle, body: bodyStyle } = cardStylesForState(state);
 
   const panelHandlers = {
     onCompleteAction,
@@ -57,99 +123,51 @@ const ActionPageTaskPanel = ({
   };
 
   switch (state) {
-    case ActionPageTaskPanelState.PublicOnly:
-      //TODO: should always be authenticated in app
-      return (
-        <Card cardStyle={CardStyle.Grey}>
-          <Text>{externalOnly}</Text>
-        </Card>
-      );
+    case ActionPageTaskPanelState.Declined:
+    case ActionPageTaskPanelState.Completed:
+    case ActionPageTaskPanelState.PublicOnlyAuthenticated:
     case ActionPageTaskPanelState.NotAuthenticated:
-      return (
-        //TODO: should always be authenticated in app
-        <Card cardStyle={CardStyle.Grey}>
-          <Text>Error authenticating user - please try again.</Text>
-        </Card>
-      );
     case ActionPageTaskPanelState.NotAssigned:
+    case ActionPageTaskPanelState.MemberActionClosed:
+    case ActionPageTaskPanelState.OnboardingSignContractFirst:
       return (
-        <View className="gap-y-2">
-          <Card cardStyle={CardStyle.Grey}>
-            <Text>{taskNotAssigned}</Text>
-          </Card>
-          <ActionTaskPanel
-            action={action}
-            userRelation={userRelation ?? "none"}
-            scrollPageTo={scrollPageTo}
-            scrollToEnd={scrollToEnd}
-            disabled
-            onSubmitSuccess={() => {}}
-            onCompleteAction={() => {}}
-            onJoinAction={() => {}}
-            onDeclineAction={() => {}}
-            onOptOutAction={() => {}}
-          />
-        </View>
+        <StackedCard
+          top={taskPanelHeader}
+          topCardStyle={headerStyle}
+          bottom={
+            <ActionTaskPanel
+              action={action}
+              scrollPageTo={scrollPageTo}
+              scrollToEnd={scrollToEnd}
+              disabled
+              formResponse={formResponse ?? undefined}
+              {...panelHandlers}
+            />
+          }
+          bottomCardStyle={bodyStyle}
+        />
+      );
+    case ActionPageTaskPanelState.PublicOnly:
+    case ActionPageTaskPanelState.ShowTaskWithMissedDeadline:
+    case ActionPageTaskPanelState.Optional:
+    case ActionPageTaskPanelState.ShowTask:
+      return (
+        <StackedCard
+          top={taskPanelHeader}
+          topCardStyle={headerStyle}
+          bottom={
+            <ActionTaskPanel
+              action={action}
+              scrollPageTo={scrollPageTo}
+              scrollToEnd={scrollToEnd}
+              {...panelHandlers}
+            />
+          }
+          bottomCardStyle={bodyStyle}
+        />
       );
     case ActionPageTaskPanelState.MissingDataOrNotActive:
       return null;
-    case ActionPageTaskPanelState.Completed:
-      return <ActionTaskPanelCompleted action={action} />;
-    case ActionPageTaskPanelState.Declined:
-      return <ActionTaskPanelDeclined action={action} />;
-    case ActionPageTaskPanelState.MemberActionClosed:
-      return null;
-    case ActionPageTaskPanelState.ShowTaskWithMissedDeadline:
-      return (
-        <View>
-          <Card cardStyle={CardStyle.Grey} className="bg-zinc-100 my-2">
-            <Text weight={FontWeight.Medium}>{taskDeadlinePassed}</Text>
-            <Text>{taskDeadlinePassedDescription}</Text>
-          </Card>
-          <ActionTaskPanel
-            action={action}
-            userRelation={userRelation ?? "none"}
-            scrollPageTo={scrollPageTo}
-            scrollToEnd={scrollToEnd}
-            onSubmitSuccess={() => {}}
-            {...panelHandlers}
-          />
-        </View>
-      );
-    case ActionPageTaskPanelState.OnboardingSignContractFirst:
-      return (
-        <View>
-          <Card cardStyle={CardStyle.Grey} className="bg-zinc-100 my-2">
-            <Text weight={FontWeight.Medium}>
-              Please sign the contract before continuing with the onboarding
-              process.
-            </Text>
-            <Link href="/" className="flex items-center gap-x-2">
-              <Text className="text-green">Go back</Text>
-            </Link>
-          </Card>
-          <ActionTaskPanel
-            action={action}
-            userRelation={userRelation ?? "none"}
-            scrollPageTo={scrollPageTo}
-            onSubmitSuccess={() => {}}
-            scrollToEnd={scrollToEnd}
-            {...panelHandlers}
-            disabled
-          />
-        </View>
-      );
-    case ActionPageTaskPanelState.ShowTask:
-      return (
-        <ActionTaskPanel
-          onSubmitSuccess={() => {}}
-          action={action}
-          scrollPageTo={scrollPageTo}
-          scrollToEnd={scrollToEnd}
-          userRelation={userRelation ?? "none"}
-          {...panelHandlers}
-        />
-      );
     default:
       throw new Error(
         `Unknown action page task panel state: ${state satisfies never}`,

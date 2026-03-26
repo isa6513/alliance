@@ -16,12 +16,9 @@ import ActionEventsPanel from "./ActionEventsPanel";
 import FollowUpFormPanel from "./FollowUpFormPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
-import Card from "@alliance/sharedweb/ui/Card";
 import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
 import { useEffect, useMemo } from "react";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
-import { CardStyle } from "@alliance/shared/styles/card";
-import { externalOnly } from "@alliance/shared/lib/copy";
 import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
 import { useLiveTaskFormAggregateViews } from "../lib/useLiveTaskFormAggregateViews";
 
@@ -165,9 +162,6 @@ const ActionContents = () => {
               <img src={chevronLeft} className="w-3 h-3 rotate-270" />
             </Link>
           </div>
-        )}
-        {isAuthenticated && action.publicOnly && (
-          <Card style={CardStyle.Grey}>{externalOnly}</Card>
         )}
         {action.status !== "planned" && (
           <div className="flex flex-col">

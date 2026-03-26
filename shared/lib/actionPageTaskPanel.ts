@@ -1,8 +1,10 @@
 import { ActionDto, UserActionRelation } from "../client/types.gen";
+import { CardStyle } from "../styles/card";
 import { getLatestEvent } from "./actionUtils";
 
 export enum ActionPageTaskPanelState {
   PublicOnly = "public_only",
+  PublicOnlyAuthenticated = "public_only_authenticated",
   NotAuthenticated = "not_authenticated",
   OnboardingSignContractFirst = "onboarding_sign_contract_first",
   NotAssigned = "not_assigned",
@@ -12,22 +14,77 @@ export enum ActionPageTaskPanelState {
   MissingDataOrNotActive = "missing_data_or_not_active",
   ShowTaskWithMissedDeadline = "show_task_with_missed_deadline",
   ShowTask = "show_task",
+  Optional = "optional",
 }
 
-export function getActionPageTaskPanelState(
-  action: ActionDto,
-  userRelation: UserActionRelation | null,
-  contractSigned: boolean
-): ActionPageTaskPanelState {
-  if (action.publicOnly) return ActionPageTaskPanelState.PublicOnly;
+enum ActionPageTaskPanelEnabled {
+  Disabled = "disabled",
+  Enabled = "enabled",
+}
+
+const stateIsDisabled = {
+  [ActionPageTaskPanelState.PublicOnlyAuthenticated]:
+    ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.PublicOnly]: ActionPageTaskPanelEnabled.Enabled,
+  [ActionPageTaskPanelState.NotAuthenticated]:
+    ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.NotAssigned]: ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.Completed]: ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.Declined]: ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.MemberActionClosed]:
+    ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.MissingDataOrNotActive]:
+    ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.ShowTaskWithMissedDeadline]:
+    ActionPageTaskPanelEnabled.Enabled,
+  [ActionPageTaskPanelState.OnboardingSignContractFirst]:
+    ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.Optional]: ActionPageTaskPanelEnabled.Enabled,
+  [ActionPageTaskPanelState.ShowTask]: ActionPageTaskPanelEnabled.Enabled,
+} as const satisfies Record<
+  ActionPageTaskPanelState,
+  ActionPageTaskPanelEnabled
+>;
+
+type HeaderBodyStyles = {
+  header: CardStyle;
+  body: CardStyle;
+};
+const cardStylesByDisabled = {
+  [ActionPageTaskPanelEnabled.Enabled]: {
+    header: CardStyle.LightGreyBorder,
+    body: CardStyle.WhiteBorder,
+  },
+  [ActionPageTaskPanelEnabled.Disabled]: {
+    header: CardStyle.WhiteBorder,
+    body: CardStyle.LightGreyBorder,
+  },
+} as const satisfies Record<ActionPageTaskPanelEnabled, HeaderBodyStyles>;
+
+export function cardStylesForState(
+  state: ActionPageTaskPanelState,
+): HeaderBodyStyles {
+  return cardStylesByDisabled[stateIsDisabled[state]];
+}
+
+export function getActionPageTaskPanelState(params: {
+  action: ActionDto;
+  userRelation: UserActionRelation | null;
+  contractSigned: boolean;
+  isAuthenticated: boolean;
+}): ActionPageTaskPanelState {
+  const { action, userRelation, contractSigned, isAuthenticated } = params;
+
+  if (action.publicOnly) {
+    return isAuthenticated
+      ? ActionPageTaskPanelState.PublicOnlyAuthenticated
+      : ActionPageTaskPanelState.PublicOnly;
+  }
 
   if (!action.reqAuthenticated)
     return ActionPageTaskPanelState.NotAuthenticated;
 
-  if (
-    !action.canParticipate &&
-    !action.preventCompletion
-  )
+  if (!action.canParticipate && !action.preventCompletion)
     return ActionPageTaskPanelState.NotAssigned;
 
   if (action.onboarding && !contractSigned && !action.isContractSigningAction) {
@@ -59,6 +116,10 @@ export function getActionPageTaskPanelState(
 
   if (didMissDeadline) {
     return ActionPageTaskPanelState.ShowTaskWithMissedDeadline;
+  }
+
+  if (action.optional) {
+    return ActionPageTaskPanelState.Optional;
   }
 
   return ActionPageTaskPanelState.ShowTask;

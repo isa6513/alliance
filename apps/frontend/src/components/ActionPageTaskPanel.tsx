@@ -1,23 +1,21 @@
 import { UserActionRelation } from "@alliance/shared/client";
+import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
 import Card from "@alliance/sharedweb/ui/Card";
-import { Link, isRouteErrorResponse, useOutletContext } from "react-router";
+import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
+import { ArrowRight } from "lucide-react";
+import { isRouteErrorResponse, useOutletContext } from "react-router";
+import { Link } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
-import ActionTaskPanel from "./ActionTaskPanel";
 import { ActionTaskPanelPropsShared } from "@alliance/shared/lib/actionTaskPanel";
-import ActionTaskPanelCompleted from "./ActionTaskPanelCompleted";
-import ActionTaskPanelDeclined from "./ActionTaskPanelDeclined";
+import ActionTaskPanel from "./ActionTaskPanel";
+import StackedCard from "./system/StackedCard";
 import { useAuth } from "../lib/AuthContext";
 import {
   ActionPageTaskPanelState,
+  cardStylesForState,
   getActionPageTaskPanelState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
-import {
-  taskDeadlinePassed,
-  taskDeadlinePassedDescription,
-  taskNotAssigned,
-} from "@alliance/shared/lib/copy";
-import { ArrowRight } from "lucide-react";
-import ActionPageTaskPanelCardWrapper from "./ActionPageTaskPanelCardWrapper";
+import { taskHeaders } from "@alliance/shared/lib/copy";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -44,187 +42,163 @@ export interface TaskPanelContext extends Omit<
   userRelation: UserActionRelation | null;
 }
 
+const taskPanelHeaderByState: Record<
+  ActionPageTaskPanelState,
+  React.ReactNode
+> = {
+  [ActionPageTaskPanelState.PublicOnlyAuthenticated]: (
+    <p>{taskHeaders.actionPage.externalOnly}</p>
+  ),
+  [ActionPageTaskPanelState.PublicOnly]: null,
+  [ActionPageTaskPanelState.NotAuthenticated]: (
+    <p>
+      <Link to="/login" className="text-green hover:underline">
+        Log in
+      </Link>{" "}
+      to complete this task.
+    </p>
+  ),
+  [ActionPageTaskPanelState.NotAssigned]: (
+    <p>{taskHeaders.actionPage.notAssigned}</p>
+  ),
+  [ActionPageTaskPanelState.Completed]: (
+    <div className="flex items-center gap-x-3">
+      <CheckIcon size="small" />
+      <p>{taskHeaders.actionPage.completed}</p>
+    </div>
+  ),
+  [ActionPageTaskPanelState.Declined]: <p>{taskHeaders.actionPage.withdrew}</p>,
+  [ActionPageTaskPanelState.MemberActionClosed]: (
+    <p>{taskHeaders.actionPage.memberActionClosed}</p>
+  ),
+  [ActionPageTaskPanelState.MissingDataOrNotActive]: null,
+  [ActionPageTaskPanelState.ShowTaskWithMissedDeadline]: (
+    <div>
+      <p className="font-medium">
+        {taskHeaders.actionPage.deadlinePassed.title}
+      </p>
+      <p className="text-zinc-500">
+        {taskHeaders.actionPage.deadlinePassed.description}
+      </p>
+    </div>
+  ),
+  [ActionPageTaskPanelState.OnboardingSignContractFirst]: (
+    <div className="flex flex-row justify-between items-center gap-x-2">
+      <p>{taskHeaders.actionPage.onboardingSignContractFirst}</p>
+      <Link to="/tasks" className="text-green flex items-center gap-x-2">
+        Go back
+        <ArrowRight className="w-4 h-4" />
+      </Link>
+    </div>
+  ),
+  [ActionPageTaskPanelState.Optional]: (
+    <div>
+      <p className="font-medium text-sky-500">
+        {taskHeaders.actionPage.optional.title}
+      </p>
+      <p className="text-zinc-500">
+        {taskHeaders.actionPage.optional.description}
+      </p>
+    </div>
+  ),
+  [ActionPageTaskPanelState.ShowTask]: null,
+};
+
+const bodyPaddingClasses = "p-4 sm:p-6";
+
 const ActionPageTaskPanel = () => {
   const { userRelation, action, ...panelHandlers } =
     useOutletContext<TaskPanelContext>();
 
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
-  const state = getActionPageTaskPanelState(
+  const state = getActionPageTaskPanelState({
     action,
     userRelation,
-    user?.hasActiveContract ?? false,
-  );
-
-  const { isAuthenticated } = useAuth();
+    contractSigned: user?.hasActiveContract ?? false,
+    isAuthenticated,
+  });
+  const resolvedUserRelation = userRelation ?? "none";
+  const formResponse = useCompletedTaskForm(action);
+  const taskPanelHeader = taskPanelHeaderByState[state];
+  const { header: headerStyle, body: bodyStyle } = cardStylesForState(state);
 
   switch (state) {
+    case ActionPageTaskPanelState.Declined:
+    case ActionPageTaskPanelState.Completed:
+    case ActionPageTaskPanelState.PublicOnlyAuthenticated:
+    case ActionPageTaskPanelState.NotAuthenticated:
+    case ActionPageTaskPanelState.NotAssigned:
+    case ActionPageTaskPanelState.MemberActionClosed:
+    case ActionPageTaskPanelState.OnboardingSignContractFirst:
+      return (
+        <StackedCard
+          top={taskPanelHeader}
+          topCardStyle={headerStyle}
+          bottom={
+            <ActionTaskPanel
+              userRelation="none"
+              action={action}
+              {...panelHandlers}
+              disabled
+              formResponse={formResponse ?? undefined}
+            />
+          }
+          bottomCardStyle={bodyStyle}
+          bottomCardClassName={bodyPaddingClasses}
+        />
+      );
     case ActionPageTaskPanelState.PublicOnly:
       return (
-        <ActionTaskPanel
-          userRelation={"none"}
-          action={action}
-          {...panelHandlers}
-          missedDeadline={false}
-          disabled={isAuthenticated}
-          card={isAuthenticated}
-        />
-      );
-    case ActionPageTaskPanelState.NotAuthenticated:
-      return (
-        <ActionPageTaskPanelCardWrapper
-          taskPanelTop={
-            <p className="text-center">
-              <Link to="/login" className="text-green">
-                Log in
-              </Link>{" "}
-              to complete this task.
-            </p>
-          }
-          taskPanel={
+        <StackedCard
+          top={taskPanelHeader}
+          topCardStyle={headerStyle}
+          bottom={
             <ActionTaskPanel
-              userRelation={"none"}
+              userRelation="none"
               action={action}
               {...panelHandlers}
-              missedDeadline={false}
-              disabled={true}
-              card={false}
             />
           }
-        />
-      );
-    case ActionPageTaskPanelState.NotAssigned:
-      return (
-        <ActionPageTaskPanelCardWrapper
-          taskPanelTop={
-            <p className="text-center text-zinc-500">{taskNotAssigned}</p>
-          }
-          taskPanel={
-            <ActionTaskPanel
-              userRelation={"none"}
-              action={action}
-              {...panelHandlers}
-              missedDeadline={false}
-              disabled={true}
-              card={false}
-            />
-          }
+          bottomCardStyle={bodyStyle}
+          bottomCardClassName={bodyPaddingClasses}
         />
       );
     case ActionPageTaskPanelState.MissingDataOrNotActive:
       return null;
-    case ActionPageTaskPanelState.Completed:
-      return <ActionTaskPanelCompleted action={action} />;
-    case ActionPageTaskPanelState.Declined:
-      return <ActionTaskPanelDeclined action={action} />;
-    case ActionPageTaskPanelState.MemberActionClosed:
-      return (
-        <ActionPageTaskPanelCardWrapper
-          taskPanelTop={
-            <p className="text-center text-zinc-500">
-              This action no longer requires member participation.
-            </p>
-          }
-          taskPanel={
-            <ActionTaskPanel
-              userRelation={"none"}
-              action={action}
-              {...panelHandlers}
-              missedDeadline={false}
-              disabled={true}
-              card={false}
-            />
-          }
-        />
-      );
     case ActionPageTaskPanelState.ShowTaskWithMissedDeadline:
       return (
-        <ActionPageTaskPanelCardWrapper
-          taskPanelTop={
-            <div>
-              <p className="font-medium">{taskDeadlinePassed}</p>
-              <p>{taskDeadlinePassedDescription}</p>
-            </div>
-          }
-          taskPanel={
+        <StackedCard
+          top={taskPanelHeader}
+          topCardStyle={headerStyle}
+          bottom={
             <ActionTaskPanel
-              userRelation={userRelation ?? "none"}
               action={action}
+              userRelation={resolvedUserRelation}
               {...panelHandlers}
-              missedDeadline={true}
-              card={false}
+              missedDeadline
             />
           }
+          bottomCardStyle={bodyStyle}
+          bottomCardClassName={bodyPaddingClasses}
         />
       );
-    case ActionPageTaskPanelState.OnboardingSignContractFirst:
-      return (
-        <ActionPageTaskPanelCardWrapper
-          taskPanelTop={
-            <div className="flex flex-row justify-between items-center gap-x-2">
-              <p className="text-center text-zinc-500">
-                Please sign the contract before continuing with the onboarding
-                process.
-              </p>
-              <Link
-                to="/tasks"
-                className="text-green flex items-center gap-x-2"
-              >
-                Go back
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          }
-          taskPanel={
-            <ActionTaskPanel
-              userRelation={"none"}
-              action={action}
-              {...panelHandlers}
-              missedDeadline={false}
-              disabled={true}
-              card={false}
-            />
-          }
-        />
-      );
+    case ActionPageTaskPanelState.Optional:
     case ActionPageTaskPanelState.ShowTask:
       return (
-        <>
-          {action.optional ? (
-            <ActionPageTaskPanelCardWrapper
-              taskPanelTop={
-                <div>
-                  <p className="font-medium text-sky-500">
-                    This action is optional.
-                  </p>
-                  <p className="text-zinc-500">
-                    You are not required to complete the task, but can if you
-                    would like.
-                  </p>
-                </div>
-              }
-              taskPanel={
-                <ActionTaskPanel
-                  action={action}
-                  userRelation={userRelation ?? "none"}
-                  card={false}
-                  {...panelHandlers}
-                />
-              }
+        <StackedCard
+          top={taskPanelHeader}
+          topCardStyle={headerStyle}
+          bottom={
+            <ActionTaskPanel
+              action={action}
+              userRelation={resolvedUserRelation}
+              {...panelHandlers}
             />
-          ) : (
-            <ActionPageTaskPanelCardWrapper
-              taskPanel={
-                <ActionTaskPanel
-                  action={action}
-                  userRelation={userRelation ?? "none"}
-                  card={false}
-                  {...panelHandlers}
-                />
-              }
-            />
-          )}
-        </>
+          }
+          bottomCardStyle={bodyStyle}
+          bottomCardClassName={bodyPaddingClasses}
+        />
       );
     default:
       throw new Error(

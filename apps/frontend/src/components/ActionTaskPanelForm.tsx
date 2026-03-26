@@ -1,5 +1,5 @@
 import {
-  FormDto,
+  FormResponseDto,
   SubmitFormDto,
   tasksGetForm,
   tasksSubmitForm,
@@ -11,11 +11,12 @@ import FormRenderer, {
 import { FormSchema } from "@alliance/shared/forms/formschema";
 import Card from "@alliance/sharedweb/ui/Card";
 import posthog from "posthog-js";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { cn } from "@alliance/shared/styles/util";
+import { useQuery } from "@tanstack/react-query";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -24,12 +25,13 @@ interface ActionTaskPanelFormProps {
   onAbandonAction: (
     outOfTime: boolean,
     reason: string,
-    partialFormData: SubmitFormDto
+    partialFormData: SubmitFormDto,
   ) => void;
   card?: boolean;
   actionId: number;
   disabled?: boolean;
   publicAction?: boolean;
+  formResponse?: FormResponseDto;
 }
 
 const ActionTaskPanelForm = ({
@@ -41,26 +43,32 @@ const ActionTaskPanelForm = ({
   actionId,
   disabled = false,
   publicAction = false,
+  formResponse,
 }: ActionTaskPanelFormProps) => {
-  const [form, setForm] = useState<FormDto | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const { user, refreshUser } = useAuth();
-
-  useEffect(() => {
-    const fetchForm = async () => {
-      const form = await tasksGetForm({
+  const {
+    data: form,
+    error: formError,
+    isPending,
+  } = useQuery({
+    queryKey: ["form", taskFormId],
+    queryFn: async () => {
+      const response = await tasksGetForm({
         path: { id: taskFormId },
       });
-      setLoading(false);
-      if (!form.data) {
-        setError("Unable to load form - please reload");
-        throw new Error((form.error as Error).message);
+
+      if (!response.data) {
+        throw new Error(
+          (response.error as Error)?.message ??
+            "Unable to load form - please reload",
+        );
       }
-      setForm(form.data);
-    };
-    fetchForm();
-  }, [taskFormId]);
+
+      return response.data;
+    },
+    enabled: !formResponse,
+  });
 
   const handleSubmitForm = onCompleteAction
     ? async (data: SubmitFormDto) => {
@@ -100,7 +108,7 @@ const ActionTaskPanelForm = ({
           posthog.captureException(response.error, {
             event: "form_submit_error",
             properties: {
-              actionId: actionId,
+              actionId,
               $exception_fingerprint: "FormSubmitError",
             },
           });
@@ -116,13 +124,28 @@ const ActionTaskPanelForm = ({
     };
   }, []);
 
+  if (formResponse) {
+    return (
+      <FormRenderer
+        form={formResponse.schemaSnapshot as unknown as FormSchema}
+        id={formResponse.formId}
+        actionId={actionId}
+        completedFormResponse={formResponse}
+        onSubmit={null}
+        userId={formResponse.user?.id}
+        user={formResponse.user}
+        renderFormAsCompleted
+      />
+    );
+  }
+
   if (!form) {
-    if (loading) {
+    if (isPending) {
       return (
         <div
           className={cn(
             "flex flex-col justify-center items-center",
-            card && "p-6 border border-zinc-200"
+            card && "p-6 border border-zinc-200",
           )}
         >
           <Spinner />
@@ -133,11 +156,11 @@ const ActionTaskPanelForm = ({
         <div
           className={cn(
             "flex flex-col justify-center items-center text-red-500",
-            card && "p-6 border border-zinc-200"
+            card && "p-6 border border-zinc-200",
           )}
         >
           <p>Error loading form</p>
-          {error && <p>{error}</p>}
+          <p>{formError?.message ?? "Unable to load form - please reload"}</p>
         </div>
       );
     }

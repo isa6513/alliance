@@ -13,8 +13,15 @@ import {
 } from "@alliance/shared/lib/actionTaskPanel";
 import posthog from "posthog-js";
 import { canCompleteAction } from "@alliance/shared/lib/actionUtils";
+import { UserActionRelation } from "@alliance/shared/client";
 
-const ActionTaskPanel: React.FC<ActionTaskPanelPropsShared> = ({
+export type ActionTaskPanelProps = ActionTaskPanelPropsShared & {
+  userRelation: UserActionRelation;
+  missedDeadline?: boolean;
+  card?: boolean;
+};
+
+const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   action,
   userRelation,
   missedDeadline = false,
@@ -24,7 +31,8 @@ const ActionTaskPanel: React.FC<ActionTaskPanelPropsShared> = ({
   onOptOutAction,
   card = false,
   disabled = false,
-}: ActionTaskPanelPropsShared) => {
+  formResponse,
+}: ActionTaskPanelProps) => {
   const { isAuthenticated } = useAuth();
 
   const handleCompleteAction = useCallback(() => {
@@ -69,7 +77,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelPropsShared> = ({
     );
   }, [actionError]);
 
-  if (disabled && action.taskFormId) {
+  if ((disabled || formResponse) && action.taskFormId !== undefined) {
     return (
       <ActionTaskPanelForm
         taskFormId={action.taskFormId}
@@ -79,6 +87,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelPropsShared> = ({
         card={card}
         actionId={action.id}
         disabled={true}
+        formResponse={formResponse}
       />
     );
   }

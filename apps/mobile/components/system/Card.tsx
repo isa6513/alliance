@@ -1,25 +1,17 @@
 import React from "react";
 import {
+  CardStyle,
+  mobileCardStyleClasses,
+} from "@alliance/shared/styles/card";
+import {
   View,
   TouchableOpacity,
   ImageBackground,
   ImageSourcePropType,
-  ViewProps,
   TouchableOpacityProps,
 } from "react-native";
-import { cardStyleClasses } from "@alliance/shared/styles/card";
-
-export enum CardStyle {
-  White = "white",
-  Outline = "outline",
-  Alert = "alert",
-  Grey = "grey",
-  Black = "black",
-  Green = "green",
-  Image = "image",
-  LightGreen = "light-green",
-  Red = "red",
-}
+import { cn } from "@alliance/shared/styles/util";
+export { CardStyle } from "@alliance/shared/styles/card";
 
 interface CardProps extends TouchableOpacityProps {
   children: React.ReactNode;
@@ -37,8 +29,8 @@ export default function Card({
   ...props
 }: CardProps) {
   const baseClasses = "flex flex-col p-4 rounded-lg";
-  const variantClasses = cardStyleClasses[cardStyle];
-  const combinedClasses = `${baseClasses} ${variantClasses} ${className || ""}`;
+  const variantClasses = mobileCardStyleClasses[cardStyle];
+  const combinedClasses = cn(baseClasses, variantClasses, className);
 
   if (backgroundImage && cardStyle === CardStyle.Image) {
     return (

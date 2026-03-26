@@ -1,23 +1,13 @@
-import { ActionDto, UserActionRelation } from "../client";
+import { ActionDto } from "../client";
 import {
   ActionWithAwayStatus,
   TaskAwayStatus,
   deadlineHasPassed,
 } from "./actionUtils";
-import {
-  TASK_DISMISS_HEADER_AWAY,
-  TASK_DISMISS_HEADER_DEADLINE,
-  TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
-  TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
-  TASK_DISMISS_MESSAGE_WAS_AWAY,
-  TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
-  TASK_OPTIONAL_HEADER,
-  TASK_OPTIONAL_MESSAGE,
-} from "./copy";
+import { taskHeaders } from "./copy";
 
 export interface LargeActionCardPropsShared {
   action: ActionWithAwayStatus;
-  userRelation: UserActionRelation;
   onUpdateActionState: () => void;
   dismissProps?: {
     header: string;
@@ -27,9 +17,11 @@ export interface LargeActionCardPropsShared {
 }
 
 const AWAY_STATUS_MESSAGES = {
-  [TaskAwayStatus.AWAY_CURRENTLY]: TASK_DISMISS_MESSAGE_CURRENTLY_AWAY,
-  [TaskAwayStatus.AWAY_LATER]: TASK_DISMISS_MESSAGE_WILL_BE_AWAY,
-  [TaskAwayStatus.AWAY_PREVIOUSLY]: TASK_DISMISS_MESSAGE_WAS_AWAY,
+  [TaskAwayStatus.AWAY_CURRENTLY]:
+    taskHeaders.homePage.away.description.currentlyAway,
+  [TaskAwayStatus.AWAY_LATER]: taskHeaders.homePage.away.description.willBeAway,
+  [TaskAwayStatus.AWAY_PREVIOUSLY]:
+    taskHeaders.homePage.away.description.wasAway,
 } as const satisfies Record<
   Exclude<TaskAwayStatus, TaskAwayStatus.NOT_AWAY>,
   string
@@ -47,22 +39,22 @@ export function getTaskDismissInfo(
 
   if (action.awayStatus !== TaskAwayStatus.NOT_AWAY) {
     return {
-      header: TASK_DISMISS_HEADER_AWAY,
+      header: taskHeaders.homePage.away.title,
       message: AWAY_STATUS_MESSAGES[action.awayStatus],
     };
   }
 
   if (deadlineHasPassed(action, new Date())) {
     return {
-      header: TASK_DISMISS_HEADER_DEADLINE,
-      message: TASK_DISMISS_MESSAGE_AFTER_DEADLINE,
+      header: taskHeaders.homePage.deadline.title,
+      message: taskHeaders.homePage.deadline.description,
     };
   }
 
   if (action.optional) {
     return {
-      header: TASK_OPTIONAL_HEADER,
-      message: TASK_OPTIONAL_MESSAGE,
+      header: taskHeaders.homePage.optional.title,
+      message: taskHeaders.homePage.optional.description,
     };
   }
 
