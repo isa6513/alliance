@@ -1,14 +1,18 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Modal,
+  Pressable,
   RefreshControl,
   TouchableOpacity,
   View,
 } from "react-native";
 import { router, RelativePathString } from "expo-router";
+import { Ellipsis } from "lucide-react-native";
 import {
   NotificationDto,
   notifsFindAll,
+  notifsSetReadAll,
   notifsSetRead,
 } from "@alliance/shared/client";
 import {
@@ -50,6 +54,8 @@ export default function NotificationsScreen() {
 
   const { user } = useAuth();
 
+  const [overflowOpen, setOverflowOpen] = useState(false);
+
   const {
     data: response,
     isPending,
@@ -74,10 +80,81 @@ export default function NotificationsScreen() {
       .filter((notif) => getNotificationTime(notif).getTime() <= Date.now());
   }, [response]);
 
+  const unreadTotal = useMemo(() => {
+    return response?.filter((n) => !n.readAt).length ?? 0;
+  }, [response]);
+
   const renderItems = useMemo(
     () => buildNotificationRenderItems(notifications),
     [notifications],
   );
+
+  const handleMarkAllAsRead = useCallback(() => {
+    if (unreadTotal === 0) return;
+
+    // Backend marks everything read; we also update cached list for snappy UX.
+    setOverflowOpen(false);
+    void notifsSetReadAll();
+
+    const readAt = new Date().toISOString();
+    queryClient.setQueryData(
+      ["notifications"],
+      (oldData: NotificationDto[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map((notification) => ({
+          ...notification,
+          readAt,
+        }));
+      },
+    );
+    queryClient.setQueryData<number>(["notifications", "unreadCount"], 0);
+
+    posthog?.capture("notifications_marked_all_as_read");
+  }, [posthog, queryClient, unreadTotal]);
+
+  const markAllOverflow = useMemo(() => {
+    if (unreadTotal === 0) return null;
+
+    return (
+      <View className="relative">
+        <TouchableOpacity
+          onPress={() => setOverflowOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Open notification actions"
+          className="p-2"
+        >
+          <Ellipsis size={18} color="#0D1B2A" strokeWidth={2} />
+        </TouchableOpacity>
+
+        <Modal
+          visible={overflowOpen}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setOverflowOpen(false)}
+        >
+          <Pressable
+            className="flex-1 bg-black/20"
+            onPress={() => setOverflowOpen(false)}
+          >
+            <View className="mx-4 mt-28 bg-white border border-zinc-200 rounded overflow-hidden">
+              <TouchableOpacity
+                onPress={() => {
+                  setOverflowOpen(false);
+                  handleMarkAllAsRead();
+                }}
+                className="px-4 py-3 flex-row justify-between items-center"
+                accessibilityRole="button"
+                accessibilityLabel="Mark all notifications as read"
+                testID="vr-notifications-mark-all-read"
+              >
+                <Text className="text-sm text-zinc-900">Mark all as read</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Modal>
+      </View>
+    );
+  }, [handleMarkAllAsRead, overflowOpen, unreadTotal]);
 
   const markNotificationsRead = useCallback(
     (notificationsToMark: Pick<NotificationDto, "id" | "sourceType">[]) => {
@@ -102,12 +179,15 @@ export default function NotificationsScreen() {
           );
         },
       );
-      queryClient.setQueryData<number>(["notifications", "unreadCount"], (prev) =>
-        Math.max(
-          (prev ?? notifications.filter((notification) => !notification.readAt).length) -
-            notificationsToMark.length,
-          0,
-        ),
+      queryClient.setQueryData<number>(
+        ["notifications", "unreadCount"],
+        (prev) =>
+          Math.max(
+            (prev ??
+              notifications.filter((notification) => !notification.readAt)
+                .length) - notificationsToMark.length,
+            0,
+          ),
       );
     },
     [notifications, queryClient],
@@ -210,13 +290,16 @@ export default function NotificationsScreen() {
   ) : error ? (
     <View className="flex-1">
       <SimplePageTitle title="Notifications">
-        <TouchableOpacity
-          onPress={() => router.push("/profile")}
-          className="px-2"
-          accessibilityLabel="View profile"
-        >
-          <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-x-2">
+          {markAllOverflow}
+          <TouchableOpacity
+            onPress={() => router.push("/profile")}
+            className="px-2"
+            accessibilityLabel="View profile"
+          >
+            <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
+          </TouchableOpacity>
+        </View>
       </SimplePageTitle>
       <View className="flex-1 items-center justify-center bg-white">
         <Text className="text-center text-red-500">{error.message}</Text>
@@ -225,13 +308,16 @@ export default function NotificationsScreen() {
   ) : renderItems.length === 0 ? (
     <View className="flex-1">
       <SimplePageTitle title="Notifications">
-        <TouchableOpacity
-          onPress={() => router.push("/profile")}
-          className="px-2"
-          accessibilityLabel="View profile"
-        >
-          <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-x-2">
+          {markAllOverflow}
+          <TouchableOpacity
+            onPress={() => router.push("/profile")}
+            className="px-2"
+            accessibilityLabel="View profile"
+          >
+            <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
+          </TouchableOpacity>
+        </View>
       </SimplePageTitle>
       <View className="flex-1 items-center justify-center bg-white">
         <Text className="text-zinc-500">You&apos;re all caught up.</Text>
@@ -240,13 +326,16 @@ export default function NotificationsScreen() {
   ) : (
     <View className="flex-1 bg-white" testID="vr-notifications-ready">
       <SimplePageTitle title="Notifications">
-        <TouchableOpacity
-          onPress={() => router.push("/profile")}
-          className="px-2"
-          accessibilityLabel="View profile"
-        >
-          <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-x-2">
+          {markAllOverflow}
+          <TouchableOpacity
+            onPress={() => router.push("/profile")}
+            className="px-2"
+            accessibilityLabel="View profile"
+          >
+            <ProfileImage pfp={user?.profilePicture ?? null} size="medium" />
+          </TouchableOpacity>
+        </View>
       </SimplePageTitle>
       <LegendList
         data={renderItems}
