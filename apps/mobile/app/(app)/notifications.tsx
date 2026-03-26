@@ -89,12 +89,22 @@ export default function NotificationsScreen() {
     [notifications],
   );
 
-  const handleMarkAllAsRead = useCallback(() => {
+  const handleMarkAllAsRead = useCallback(async () => {
     if (unreadTotal === 0) return;
 
+    await queryClient.cancelQueries({ queryKey: ["notifications"] });
+    await queryClient.cancelQueries({
+      queryKey: ["notifications", "unreadCount"],
+    });
+
     // Backend marks everything read; we also update cached list for snappy UX.
-    setOverflowOpen(false);
-    void notifsSetReadAll();
+    const prevNotifications = queryClient.getQueryData<NotificationDto[]>([
+      "notifications",
+    ]);
+    const prevUnreadCount = queryClient.getQueryData<number>([
+      "notifications",
+      "unreadCount",
+    ]);
 
     const readAt = new Date().toISOString();
     queryClient.setQueryData(
@@ -109,10 +119,34 @@ export default function NotificationsScreen() {
     );
     queryClient.setQueryData<number>(["notifications", "unreadCount"], 0);
 
+    try {
+      const res = await notifsSetReadAll();
+      if (res && typeof res === "object" && "error" in res && res.error) {
+        throw (res as { error: unknown }).error;
+      }
+    } catch {
+      if (prevNotifications !== undefined) {
+        queryClient.setQueryData(["notifications"], prevNotifications);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      }
+
+      if (prevUnreadCount !== undefined) {
+        queryClient.setQueryData(
+          ["notifications", "unreadCount"],
+          prevUnreadCount,
+        );
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["notifications", "unreadCount"],
+        });
+      }
+    }
+
     posthog?.capture("notifications_marked_all_as_read");
   }, [posthog, queryClient, unreadTotal]);
 
-  const markAllOverflow = useMemo(() => {
+  const markAllOverflow = (() => {
     if (unreadTotal === 0) return null;
 
     return (
@@ -140,7 +174,7 @@ export default function NotificationsScreen() {
               <TouchableOpacity
                 onPress={() => {
                   setOverflowOpen(false);
-                  handleMarkAllAsRead();
+                  void handleMarkAllAsRead();
                 }}
                 className="px-4 py-3 flex-row justify-between items-center"
                 accessibilityRole="button"
@@ -154,7 +188,7 @@ export default function NotificationsScreen() {
         </Modal>
       </View>
     );
-  }, [handleMarkAllAsRead, overflowOpen, unreadTotal]);
+  })();
 
   const markNotificationsRead = useCallback(
     (notificationsToMark: Pick<NotificationDto, "id" | "sourceType">[]) => {
