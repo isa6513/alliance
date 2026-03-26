@@ -1,6 +1,7 @@
 import React from "react";
 import TableOfContents from "./TableOfContents";
 import { cn } from "@alliance/shared/styles/util";
+import { useNavbarOptions } from "../lib/NavbarOptionsContext";
 
 export type InfoSubpageTocSections = {
   id: string;
@@ -14,6 +15,8 @@ interface InfoSubpageProps {
 }
 
 const InfoSubpage: React.FC<InfoSubpageProps> = ({ tocSections, children }) => {
+  useNavbarOptions({ whiteBackground: true });
+
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-6xl mx-auto px-3 pt-6 sm:py-10 md:py-16 pb-32 md:pb-64">

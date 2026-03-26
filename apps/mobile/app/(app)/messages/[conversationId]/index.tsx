@@ -31,7 +31,6 @@ import {
 import { colors } from "../../../../lib/style/colors";
 import { LegendList, LegendListRef } from "@legendapp/list";
 import BackButton from "../../../../components/system/BackButton";
-import { SimplePageTitle } from "../../../../components/system/SimplePageTitle";
 
 export default function ConversationScreen() {
   const { conversationId } = useLocalSearchParams<{
