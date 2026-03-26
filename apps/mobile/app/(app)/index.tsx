@@ -315,7 +315,7 @@ export default function HomeScreen() {
       return {
         title: "Follow-up",
         body: (
-          <View className="bg-white py-2 px-4">
+          <View className="bg-white py-2 px-1">
             <FollowUpFormPanel
               key={currentItem.followUpForm.id}
               followUpForm={currentItem.followUpForm}
