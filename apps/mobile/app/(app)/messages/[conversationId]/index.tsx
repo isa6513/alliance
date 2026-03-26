@@ -275,14 +275,14 @@ export default function ConversationScreen() {
   }
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row items-center gap-3 border-b border-zinc-200 px-4 bg-white z-50 -mt-14 pt-17">
+      <View className="flex-row items-start gap-3 border-b border-zinc-200 px-4 bg-white z-50 pb-2">
         <BackButton />
         <TouchableOpacity
           onPress={() => router.push(`/messages/${selectedConvo.id}/info`)}
           className="flex-1"
           activeOpacity={0.7}
         >
-          <View className="flex-1">
+          <View className="flex-1 flex flex-col justify-center">
             <Text
               className="text-base text-zinc-900"
               weight={FontWeight.Semibold}

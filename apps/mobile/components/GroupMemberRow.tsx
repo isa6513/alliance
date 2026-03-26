@@ -106,7 +106,7 @@ export function GroupMemberRow({
           </Text>
           {isLeader && (
             <Text type={TextStyle.Secondary} className="text-xs">
-              Leader
+              Lead
             </Text>
           )}
         </View>

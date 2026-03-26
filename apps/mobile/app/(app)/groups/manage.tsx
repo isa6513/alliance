@@ -482,7 +482,7 @@ export default function GroupManageScreen() {
                   You can lead as many groups as you want.
                 </Text>
                 {leaderCommunities.length ? (
-                  <View className="flex-1 gap-y-2 mt-4">
+                  <View className="gap-y-2 mt-4">
                     {leaderCommunities.map((community) => (
                       <LeaderCommunityCard
                         key={community.id}
@@ -538,7 +538,7 @@ export default function GroupManageScreen() {
                   ) : null}
                 </View>
                 {memberCommunities.length ? (
-                  <View className="flex-1 gap-y-2 mt-4">
+                  <View className="gap-y-2 mt-4">
                     {memberCommunities.map((community) => (
                       <MemberCommunityCard
                         key={community.id}
@@ -632,7 +632,7 @@ export default function GroupManageScreen() {
                     </Text>
                   </View>
                 ) : sortedPublicCommunities.length ? (
-                  <View className="flex-1 gap-y-2 mt-4">
+                  <View className="gap-y-2 mt-4">
                     {sortedPublicCommunities.map((community) => {
                       const isMember = memberCommunityIds.has(community.id);
                       const isLeader = community.leaders.some(
