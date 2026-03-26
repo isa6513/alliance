@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Platform,
   TextInput,
   TouchableOpacity,
   View,
+  KeyboardAvoidingView,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import {
   conversationAcceptInvite,
   ConversationDto,
@@ -30,6 +31,7 @@ import {
 import { colors } from "../../../../lib/style/colors";
 import { LegendList, LegendListRef } from "@legendapp/list";
 import BackButton from "../../../../components/system/BackButton";
+import { SimplePageTitle } from "../../../../components/system/SimplePageTitle";
 
 export default function ConversationScreen() {
   const { conversationId } = useLocalSearchParams<{
@@ -309,7 +311,7 @@ export default function ConversationScreen() {
       </View>
 
       <KeyboardAvoidingView
-        behavior="position"
+        behavior={Platform.OS === "ios" ? "padding" : "position"}
         style={{ flex: 1 }}
         contentContainerStyle={{ flex: 1 }}
         keyboardVerticalOffset={130}
