@@ -46,6 +46,21 @@ const stateIsDisabled = {
   ActionPageTaskPanelEnabled
 >;
 
+export const shouldLoadCompletedTaskFormByState = {
+  [ActionPageTaskPanelState.PublicOnlyAuthenticated]: false,
+  [ActionPageTaskPanelState.PublicOnly]: false,
+  [ActionPageTaskPanelState.NotAuthenticated]: false,
+  [ActionPageTaskPanelState.NotAssigned]: false,
+  [ActionPageTaskPanelState.Completed]: true,
+  [ActionPageTaskPanelState.Declined]: true,
+  [ActionPageTaskPanelState.MemberActionClosed]: false,
+  [ActionPageTaskPanelState.MissingDataOrNotActive]: false,
+  [ActionPageTaskPanelState.ShowTaskWithMissedDeadline]: false,
+  [ActionPageTaskPanelState.OnboardingSignContractFirst]: false,
+  [ActionPageTaskPanelState.Optional]: false,
+  [ActionPageTaskPanelState.ShowTask]: false,
+} as const satisfies Record<ActionPageTaskPanelState, boolean>;
+
 type HeaderBodyStyles = {
   header: CardStyle;
   body: CardStyle;

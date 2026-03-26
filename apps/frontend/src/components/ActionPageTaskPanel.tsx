@@ -14,6 +14,7 @@ import {
   ActionPageTaskPanelState,
   cardStylesForState,
   getActionPageTaskPanelState,
+  shouldLoadCompletedTaskFormByState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
 import { taskHeaders } from "@alliance/shared/lib/copy";
 
@@ -119,7 +120,10 @@ const ActionPageTaskPanel = () => {
     isAuthenticated,
   });
   const resolvedUserRelation = userRelation ?? "none";
-  const formResponse = useCompletedTaskForm(action);
+  const formResponse = useCompletedTaskForm(
+    action,
+    shouldLoadCompletedTaskFormByState[state],
+  );
   const taskPanelHeader = taskPanelHeaderByState[state];
   const { header: headerStyle, body: bodyStyle } = cardStylesForState(state);
 

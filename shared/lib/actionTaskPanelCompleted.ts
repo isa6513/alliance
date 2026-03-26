@@ -3,25 +3,42 @@ import { tasksGetMyFormResponse } from "../client/sdk.gen";
 import { ActionDto, FormResponseDto } from "../client/types.gen";
 
 export const useCompletedTaskForm = (
-  action: Pick<ActionDto, "taskFormId"> | null
+  action: Pick<ActionDto, "taskFormId"> | null,
+  enabled = true,
 ) => {
   const [formResponse, setFormResponse] = useState<FormResponseDto | null>(
-    null
+    null,
   );
 
   useEffect(() => {
-    if (action?.taskFormId) {
-      const fetchFormAndResponse = async (id: number) => {
-        const formResponse = await tasksGetMyFormResponse({
+    if (!enabled || !action?.taskFormId) {
+      setFormResponse(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchFormAndResponse = async (id: number) => {
+      try {
+        const response = await tasksGetMyFormResponse({
           path: { id },
         });
-        if (formResponse.data) {
-          setFormResponse(formResponse.data);
+        if (!cancelled) {
+          setFormResponse(response.data ?? null);
         }
-      };
-      fetchFormAndResponse(action.taskFormId);
-    }
-  }, [action]);
+      } catch {
+        if (!cancelled) {
+          setFormResponse(null);
+        }
+      }
+    };
+
+    void fetchFormAndResponse(action.taskFormId);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [action, enabled]);
 
   return formResponse;
 };
