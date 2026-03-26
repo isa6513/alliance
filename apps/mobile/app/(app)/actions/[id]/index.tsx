@@ -251,20 +251,21 @@ export default function ActionDetailScreen() {
           <View>
             {action.status !== "planned" ? (
               <View>
-                <View className="mb-2 flex flex-row items-center gap-2 w-full flex-wrap">
-                  <View className="flex-1">
-                    <Text
-                      className="text-xl text-zinc-900"
-                      weight={FontWeight.Semibold}
-                    >
-                      Task
-                    </Text>
-                  </View>
+                <View className="mb-4 flex flex-col gap-1 w-full">
+                  <Text
+                    className="text-xl text-zinc-900"
+                    weight={FontWeight.Semibold}
+                  >
+                    Task
+                  </Text>
+
                   <TaskTimeInfo
                     action={action}
                     nextEvent={nextEvent}
                     lastEvent={lastEvent}
-                    className="flex-col items-end"
+                    absoluteDeadline={true}
+                    className="flex-row gap-x-1 items-start"
+                    filled={true}
                   />
                 </View>
                 <ActionPageTaskPanel
@@ -339,9 +340,9 @@ export default function ActionDetailScreen() {
             resizeMode="cover"
           />
         )}
-        <View className="p-5">
+        <View className="p-4">
           <View className="self-start mb-4">
-            <BackButton fallbackRoute="/actions" bordered />
+            <BackButton fallbackRoute="/actions" />
           </View>
           <Text
             className="text-2xl text-zinc-900 mb-2"
@@ -356,22 +357,22 @@ export default function ActionDetailScreen() {
             </Text>
           )}
           {action.authors && action.authors.length > 0 && (
-            <View className="mb-4 flex-row flex-wrap items-center">
-              <Text className="text-zinc-500">By </Text>
+            <View className="mb-6 flex-row flex-wrap items-center">
+              <Text className="text-zinc-500 text-sm">By </Text>
               {action.authors.map((author, i) => (
                 <View key={author.id} className="flex-row items-center">
                   <Pressable
                     onPress={() => router.push(`/member/${author.id}`)}
                   >
-                    <Text className="text-zinc-500 underline">
+                    <Text className="text-zinc-500 underline text-sm">
                       {author.displayName}
                     </Text>
                   </Pressable>
                   {i < action.authors!.length - 2 && (
-                    <Text className="text-zinc-500">{", "}</Text>
+                    <Text className="text-zinc-500 text-sm">{", "}</Text>
                   )}
                   {i === action.authors!.length - 2 && (
-                    <Text className="text-zinc-500">
+                    <Text className="text-zinc-500 text-sm">
                       {action.authors!.length > 2 ? "," : ""}
                       {" and "}
                     </Text>
@@ -381,7 +382,7 @@ export default function ActionDetailScreen() {
             </View>
           )}
           {action.events && action.events.length > 0 && (
-            <View className="mb-4">
+            <View className="mb-6">
               <ActionEventsPanel action={action} />
             </View>
           )}
@@ -396,7 +397,7 @@ export default function ActionDetailScreen() {
                   setActiveTab(tab.id);
                 }}
                 className={cn(
-                  "px-4 py-3 items-center grow",
+                  "py-2 items-center grow",
                   activeTab === tab.id && "border-b-2 border-green",
                 )}
                 activeOpacity={0.7}
