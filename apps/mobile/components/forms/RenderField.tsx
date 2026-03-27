@@ -251,7 +251,10 @@ export function RenderField({
         </View>
       );
 
-    case "number":
+    case "number": {
+      const numberDecimalPlaces = field.allowDecimals
+        ? (field.decimalPlaces ?? undefined)
+        : undefined;
       return (
         <View>
           <RenderLabel field={field} error={errorMessage} />
@@ -263,16 +266,29 @@ export function RenderField({
                 onChange?.("");
                 return;
               }
+              if (field.allowDecimals && /^-?\d*\.?\d*$/.test(text)) {
+                const next = parseFloat(text);
+                if (Number.isNaN(next)) {
+                  onChange?.("");
+                } else if (numberDecimalPlaces !== undefined) {
+                  const factor = Math.pow(10, numberDecimalPlaces);
+                  onChange?.(Math.round(next * factor) / factor);
+                } else {
+                  onChange?.(next);
+                }
+                return;
+              }
               const next = parseFloat(text);
               onChange?.(Number.isNaN(next) ? "" : next);
             }}
             onFocus={onFocus}
-            keyboardType="numeric"
+            keyboardType={field.allowDecimals ? "decimal-pad" : "numeric"}
             editable={!disabled}
           />
           {renderValidationMessage(errorMessage)}
         </View>
       );
+    }
 
     case "range": {
       const values = getRangeValues(field);

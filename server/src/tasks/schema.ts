@@ -113,6 +113,8 @@ export type NumberField = BaseField<'number'> & {
   min?: number;
   max?: number;
   step?: number;
+  allowDecimals?: boolean;
+  decimalPlaces?: number;
 };
 export type RangeField = BaseField<'range'> & {
   optionCount?: number;

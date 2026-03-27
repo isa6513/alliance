@@ -294,7 +294,11 @@ export function RenderField({
         </div>
       );
 
-    case "number":
+    case "number": {
+      const numberStep = field.allowDecimals
+        ? "any"
+        : (field.step ?? 1);
+      const numberDecimalPlaces = field.allowDecimals ? (field.decimalPlaces ?? undefined) : undefined;
       return (
         <div className="space-y-1">
           <RenderLabel
@@ -311,23 +315,33 @@ export function RenderField({
             }
             onChange={
               onChange
-                ? (e) =>
-                    onChange(
-                      e.target.value === "" ? "" : parseFloat(e.target.value),
-                    )
+                ? (e) => {
+                    if (e.target.value === "") {
+                      onChange("");
+                      return;
+                    }
+                    const parsed = parseFloat(e.target.value);
+                    if (numberDecimalPlaces !== undefined) {
+                      const factor = Math.pow(10, numberDecimalPlaces);
+                      onChange(Math.round(parsed * factor) / factor);
+                    } else {
+                      onChange(parsed);
+                    }
+                  }
                 : undefined
             }
             required={field.required}
             disabled={disabled}
             min={field.min}
             max={field.max}
-            step={field.step}
+            step={numberStep}
             aria-invalid={hasError}
             className={composeClassName(sharedInputClasses)}
           />
           {renderValidationMessage()}
         </div>
       );
+    }
 
     case "range": {
       const values = getRangeValues(field);

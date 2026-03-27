@@ -516,6 +516,23 @@ export function validateFieldValue(
       if (typeof numberField.max === "number" && numValue > numberField.max) {
         return `Value must be at most ${numberField.max}.`;
       }
+      if (
+        Number.isFinite(numValue) &&
+        !numberField.allowDecimals &&
+        !Number.isInteger(numValue)
+      ) {
+        return "Decimals are not allowed for this field.";
+      }
+      if (
+        Number.isFinite(numValue) &&
+        numberField.allowDecimals &&
+        typeof numberField.decimalPlaces === "number"
+      ) {
+        const parts = String(numValue).split(".");
+        if (parts.length === 2 && parts[1].length > numberField.decimalPlaces) {
+          return `Value must have at most ${numberField.decimalPlaces} decimal place${numberField.decimalPlaces === 1 ? "" : "s"}.`;
+        }
+      }
       if (!required) return null;
       if (
         valueToCheck === undefined ||
