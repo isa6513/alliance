@@ -1,0 +1,2 @@
+let's approach this from the perspective of trying to figure out what's wrong instead of trying to fix the issue. potentially adding console logs, making small incremental changes and then testing (as opposed to trying to make many changes to fix the issue), etc.
+that means it's also ok to make any changes you want that are "throwaway" changes, i.e. no need to make the code look "good", we will just git reset hard at some point once we have acquired the knowledge required to solve the problem.
