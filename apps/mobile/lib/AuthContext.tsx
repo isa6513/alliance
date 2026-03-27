@@ -19,7 +19,7 @@ import {
   isVisualTestMode,
 } from "./visualTest";
 import { usePostHog } from "posthog-react-native";
-import { run } from "@alliance/shared/lib/utils";
+import { run } from "@alliance/common/run";
 
 interface AuthContextType {
   isAuthenticated: boolean;

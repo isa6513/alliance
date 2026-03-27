@@ -127,7 +127,7 @@ import {
 } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import type { Relations } from 'src/utils/Repository';
-import { run } from 'src/utils/promise';
+import { run } from '@alliance/common/run';
 import { CachedFilter } from 'src/utils/cached-filter';
 import { findLeast } from 'src/utils/filter';
 import {

@@ -20,7 +20,7 @@ import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { Community } from 'src/community/entities/community.entity';
 import { communityHasCapacity } from 'src/community/community.utils';
 import { profileUrl } from 'src/search/approutes';
-import { run } from 'src/utils/promise';
+import { run } from '@alliance/common/run';
 import {
   REFERRAL_COMMUNITY_SELECTORS,
   buildNotifForLeaderWithReferrer,

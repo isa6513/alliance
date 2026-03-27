@@ -757,7 +757,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Zip server source
-        run: zip -r nest-build.zip src package.json bun.lock tsconfig.json migrations
+        run: |
+          zip -r nest-build.zip src package.json bun.lock tsconfig.json migrations
+          (cd .. && zip -r server/nest-build.zip common/src common/package.json common/tsconfig.json)
         working-directory: ./server
 
       - name: move server to root
@@ -829,11 +831,18 @@ jobs:
 
             rm -rf nest-backend-deploy-backup || true
             mv nest-backend nest-backend-deploy-backup || true
+            rm -rf common-deploy-backup || true
+            mv common common-deploy-backup || true
 
             rollback () {
+              trap - ERR
               echo "Deployment failed - rolling back"
               cd ~/
               pm2 delete nest-app || true
+              if [ -d "common-deploy-backup" ]; then
+                rm -rf common
+                mv common-deploy-backup common
+              fi
               if [ -d "nest-backend-deploy-backup" ]; then
                 rm -rf nest-backend
                 mv nest-backend-deploy-backup nest-backend
@@ -846,6 +855,7 @@ jobs:
 
             mkdir -p ~/nest-backend
             unzip -o ~/nest-build.zip -d ~/nest-backend
+            mv ~/nest-backend/common ~/common
 
             if [ -d ~/nest-backend-deploy-backup/node_modules ]; then
               cp -a ~/nest-backend-deploy-backup/node_modules ~/nest-backend/

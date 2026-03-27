@@ -16,6 +16,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@alliance/admin@workspace:apps/admin"
   dependencies:
+    "@alliance/common": "workspace:*"
     "@alliance/shared": "workspace:*"
     "@alliance/sharedweb": "workspace:*"
     "@eslint/js": "npm:^9.22.0"
@@ -98,10 +99,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@alliance/common@workspace:*, @alliance/common@workspace:common":
+  version: 0.0.0-use.local
+  resolution: "@alliance/common@workspace:common"
+  languageName: unknown
+  linkType: soft
+
 "@alliance/frontend@workspace:apps/frontend":
   version: 0.0.0-use.local
   resolution: "@alliance/frontend@workspace:apps/frontend"
   dependencies:
+    "@alliance/common": "workspace:*"
     "@alliance/shared": "workspace:*"
     "@alliance/sharedweb": "workspace:*"
     "@base-ui/react": "npm:^1.2.0"
@@ -189,6 +197,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@alliance/mobile@workspace:apps/mobile"
   dependencies:
+    "@alliance/common": "workspace:*"
     "@alliance/shared": "workspace:*"
     "@babel/core": "npm:^7.25.2"
     "@hey-api/client-fetch": "npm:^0.10.0"

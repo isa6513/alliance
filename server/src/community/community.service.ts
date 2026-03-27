@@ -16,7 +16,7 @@ import {
   type CreateNotifParams,
   NotifsService,
 } from 'src/notifs/notifs.service';
-import { run } from 'src/utils/promise';
+import { run } from '@alliance/common/run';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { groupUrl } from 'src/search/approutes';
 import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';

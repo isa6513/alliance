@@ -40,27 +40,6 @@ export const formatTime = (time: Date, { addSuffix = true }) => {
 };
 
 /**
- * Used to immediately invoke a function expression
- *
- * e.g. to create a promise of some expression:
- * ```
- * run(async () => {
- *   // some async operation
- * })
- * ```
- *
- * Equivalent to (but more readable than):
- * ```
- * (async () => {
- *   // some async operation
- * })()
- * ```
- */
-export function run<T>(fn: () => T): T {
-  return fn();
-}
-
-/**
  * Run an async function without awaiting; use in event handlers to avoid floating promises.
  * Optionally pass an onError callback for centralised error handling.
  */

@@ -15,6 +15,7 @@
     "react-is": "^19.0.0"
   },
   "dependencies": {
+    "@alliance/common": "workspace:*",
     "@alliance/shared": "workspace:*",
     "@alliance/sharedweb": "workspace:*",
     "@hey-api/client-fetch": "^0.12.0",

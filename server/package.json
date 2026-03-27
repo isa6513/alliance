@@ -26,6 +26,7 @@
     "test:agents": "./scripts/test-in-container.sh"
   },
   "dependencies": {
+    "@alliance/common": "file:../common",
     "@aws-sdk/client-s3": "^3.842.0",
     "@aws-sdk/s3-request-presigner": "^3.842.0",
     "@js-temporal/polyfill": "^0.5.1",

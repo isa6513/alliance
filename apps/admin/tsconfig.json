@@ -3,6 +3,7 @@
   "extends": "../../tsconfig.base.json",
   "files": [],
   "references": [
+    { "path": "../../common" },
     { "path": "../../shared" },
     { "path": "../../sharedweb" },
     { "path": "./tsconfig.app.json" },

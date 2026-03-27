@@ -22,6 +22,7 @@
     "build:prod": "APP_VARIANT=production npx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace"
   },
   "dependencies": {
+    "@alliance/common": "workspace:*",
     "@alliance/shared": "workspace:*",
     "@hey-api/client-fetch": "^0.10.0",
     "@legendapp/list": "^2.0.19",

@@ -26,6 +26,7 @@
   },
   "include": [
     "src",
+    "../../common",
     "../../shared",
     "vite-env.d.ts",
     ".react-router/types/**/*",

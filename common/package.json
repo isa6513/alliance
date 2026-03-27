@@ -1,0 +1,9 @@
+{
+  "name": "@alliance/common",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "yarn@4.9.1",
+  "exports": {
+    "./*": "./src/*.ts"
+  }
+}

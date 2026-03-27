@@ -26,6 +26,7 @@
   },
   "include": [
     "src",
+    "../../common",
     "../../shared",
     "../../sharedweb",
     "vite-env.d.ts",

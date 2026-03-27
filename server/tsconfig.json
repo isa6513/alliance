@@ -13,6 +13,9 @@
     "paths": {
       "src/*": [
         "./src/*"
+      ],
+      "@alliance/common/*": [
+        "../common/src/*"
       ]
     },
     "incremental": true,

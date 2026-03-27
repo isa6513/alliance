@@ -7,7 +7,7 @@
  *   // some async operation
  * })
  * ```
- * 
+ *
  * Equivalent to (but more readable than):
  * ```
  * (async () => {
