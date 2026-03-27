@@ -749,7 +749,7 @@ export function ConditionalVisibility({
     [buildConditionForField, conditions, updateConditions],
   );
 
-  const addPreviousActionCondition = useCallback(() => {
+  const addCrossFormCondition = useCallback(() => {
     if (formList.length === 0) return;
     const firstFormId = formList[0].id;
     const cached = externalSchemaCache.get(firstFormId);
@@ -1026,7 +1026,7 @@ export function ConditionalVisibility({
         {isCrossForm && (
           <div>
             <label className="block text-xs text-gray-700 mb-1">
-              Source form (previous action)
+              Source form (cross-form)
             </label>
             <select
               className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -1398,7 +1398,7 @@ export function ConditionalVisibility({
                 {isFieldCondition(condition) &&
                   getConditionSourceFormId(condition) != null && (
                     <span className="ml-1 text-[10px] text-blue-500 font-normal">
-                      prev. action
+                      cross-form
                     </span>
                   )}
               </span>
@@ -1446,10 +1446,10 @@ export function ConditionalVisibility({
           <button
             type="button"
             className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-40"
-            onClick={addPreviousActionCondition}
+            onClick={addCrossFormCondition}
             disabled={formListLoading || formList.length === 0}
           >
-            + Previous action condition
+            + Cross-form condition
           </button>
           <button
             type="button"
