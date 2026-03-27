@@ -64,11 +64,13 @@ interface BaseField<TKind extends FieldKind> {
 }
 
 // Conditions reference other field ids; we type this late with a helper (see defineForm)
+// When `sourceFormId` is set, `when` refers to a field in that form and
+// the value is resolved from the user's previous response to it.
 export type Condition =
-  | { when: string; equals: string | number | boolean | null }
-  | { when: string; includesOption: string }
-  | { when: string; anySelected: boolean }
-  | { when: string; hasValue: boolean }
+  | { when: string; equals: string | number | boolean | null; sourceFormId?: number }
+  | { when: string; includesOption: string; sourceFormId?: number }
+  | { when: string; anySelected: boolean; sourceFormId?: number }
+  | { when: string; hasValue: boolean; sourceFormId?: number }
   | { expr: string }
   | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
   | { deviceType: DeviceVisibilityTarget[] };

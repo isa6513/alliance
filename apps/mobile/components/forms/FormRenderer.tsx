@@ -32,6 +32,7 @@ import type {
 import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
 import {
   applyDefaultValues,
+  collectConditionSourceFormIds,
   computeFormStorageKey,
   filterAnswersByFieldIds,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
@@ -347,6 +348,9 @@ const FormRenderer = ({
           }
         }
       }
+    }
+    for (const id of collectConditionSourceFormIds(schema)) {
+      ids.add(id);
     }
     return Array.from(ids);
   }, [schema]);
@@ -741,8 +745,9 @@ const FormRenderer = ({
         visibilityValidatorResults,
         fieldLookup,
         readOnly,
+        previousAnswerData,
       }),
-    [fieldLookup, formData, visibilityValidatorResults, readOnly],
+    [fieldLookup, formData, visibilityValidatorResults, readOnly, previousAnswerData],
   );
 
   const validateFieldValue = useCallback(
@@ -754,8 +759,9 @@ const FormRenderer = ({
       validateFieldValueShared(field, fieldValue, data ?? formData, {
         deviceType: DEVICE_TYPE,
         visibilityValidatorResults,
+        previousAnswerData,
       }),
-    [formData, visibilityValidatorResults],
+    [formData, visibilityValidatorResults, previousAnswerData],
   );
 
   const applyFieldErrorUpdates = useCallback(

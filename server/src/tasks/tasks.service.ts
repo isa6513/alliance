@@ -54,6 +54,7 @@ import {
   type CityFieldValue,
   type CustomComponentField,
   type FormValue,
+  collectSourceFormIds,
   FormSchema,
   isQuestionField,
   isQuestionVisible,
@@ -299,6 +300,34 @@ export class TasksService {
       }
     }
 
+    // Fetch previous form responses for cross-form visibility conditions
+    const sourceFormIds = collectSourceFormIds(schema);
+    const previousAnswerData: Record<number, Record<string, unknown>> = {};
+    if (sourceFormIds.length > 0) {
+      const entries = await Promise.all(
+        sourceFormIds.map(async (formId) => {
+          try {
+            const response = await this.formResponseRepository.findOne({
+              where: { formId, user: { id: userId } },
+              order: { createdAt: 'DESC' },
+            });
+            if (response?.answers) {
+              return [formId, response.answers] as const;
+            }
+          } catch {
+            // form response not found
+          }
+          return null;
+        }),
+      );
+      for (const entry of entries) {
+        if (entry) previousAnswerData[entry[0]] = entry[1];
+      }
+    }
+    const hasPreviousAnswerData = Object.keys(previousAnswerData).length > 0
+      ? previousAnswerData
+      : undefined;
+
     for (const page of schema.pages) {
       for (const field of page.fields) {
         if (isQuestionField(field)) {
@@ -309,6 +338,7 @@ export class TasksService {
               submitFormDto.answers,
               validatorResults,
               submitFormDto.deviceType,
+              hasPreviousAnswerData,
             )
           ) {
             if (
@@ -326,6 +356,7 @@ export class TasksService {
               submitFormDto.answers,
               validatorResults,
               submitFormDto.deviceType,
+              hasPreviousAnswerData,
             )
           ) {
             const answer = submitFormDto.answers[field.id];
@@ -343,6 +374,7 @@ export class TasksService {
                 submitFormDto.answers,
                 validatorResults,
                 submitFormDto.deviceType,
+                hasPreviousAnswerData,
               )
             ) {
               continue;
@@ -397,6 +429,7 @@ export class TasksService {
                     mergedData,
                     validatorResults,
                     submitFormDto.deviceType,
+                    hasPreviousAnswerData,
                   )
                 ) {
                   continue;

@@ -11,6 +11,8 @@ import {
   CustomValidatorTypeDto,
   tasksCustomValidators,
   tasksFindOneCustomValidator,
+  tasksGetForm,
+  tasksListForms,
   tasksTestCustomExpression,
   userGetTags,
   userList,
@@ -25,6 +27,7 @@ import {
   type Condition,
   type ContractField,
   type EmailField,
+  type FormSchema,
   type MultiSelectField,
   type NumberField,
   type PhoneField,
@@ -310,6 +313,92 @@ export function ConditionalVisibility({
   } = useCustomValidators();
   const { createDraftId, drafts, removeDraft, setDraft } =
     useCustomValidatorDrafts();
+
+  const { forms: formList, loading: formListLoading } = useFormList();
+
+  const activeExternalFormIds = useMemo(() => {
+    const ids = new Set<number>();
+    const formula = field.visibleIfFormula;
+    if (formula?.conditions) {
+      for (const cond of Object.values(formula.conditions)) {
+        if ("sourceFormId" in cond && typeof cond.sourceFormId === "number") {
+          ids.add(cond.sourceFormId);
+        }
+      }
+    }
+    const legacy = normalizeConditions(field.visibleIf);
+    for (const cond of legacy) {
+      if ("sourceFormId" in cond && typeof cond.sourceFormId === "number") {
+        ids.add(cond.sourceFormId);
+      }
+    }
+    return Array.from(ids);
+  }, [field.visibleIf, field.visibleIfFormula]);
+
+  const [externalFieldsMap, setExternalFieldsMap] = useState<
+    Record<number, AnyField[]>
+  >(() => {
+    const initial: Record<number, AnyField[]> = {};
+    for (const fid of activeExternalFormIds) {
+      const cached = externalSchemaCache.get(fid);
+      if (cached) initial[fid] = cached;
+    }
+    return initial;
+  });
+  const [externalFieldsLoading, setExternalFieldsLoading] = useState(false);
+
+  useEffect(() => {
+    const toLoad = activeExternalFormIds.filter(
+      (fid) => !externalFieldsMap[fid] && !externalSchemaCache.has(fid),
+    );
+    if (toLoad.length === 0) return;
+    let cancelled = false;
+    setExternalFieldsLoading(true);
+    Promise.all(
+      toLoad.map(async (fid) => {
+        try {
+          const response = await tasksGetForm({ path: { id: fid } });
+          const schema = (response.data as Record<string, unknown> | undefined)
+            ?.schema as FormSchema | undefined;
+          if (!schema?.pages) return [fid, []] as const;
+          const allFields: AnyField[] = [];
+          for (const page of schema.pages) {
+            for (const el of page.fields) {
+              if ("label" in el) allFields.push(el as AnyField);
+            }
+          }
+          externalSchemaCache.set(fid, allFields);
+          return [fid, allFields] as const;
+        } catch {
+          return [fid, []] as const;
+        }
+      }),
+    ).then((entries) => {
+      if (cancelled) return;
+      setExternalFieldsMap((prev) => {
+        const next = { ...prev };
+        for (const [fid, fields] of entries) {
+          next[fid] = fields as AnyField[];
+        }
+        return next;
+      });
+      setExternalFieldsLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeExternalFormIds, externalFieldsMap]);
+
+  const getExternalControllers = useCallback(
+    (formId: number): ControllerField[] => {
+      const fields = externalFieldsMap[formId] ?? externalSchemaCache.get(formId) ?? [];
+      return fields.filter((f): f is ControllerField =>
+        isConditionalController(f),
+      );
+    },
+    [externalFieldsMap],
+  );
+
   const usableValidators = useMemo(
     () => validators.filter((validator) => validator.usableForVisibility),
     [validators],
@@ -342,49 +431,43 @@ export function ConditionalVisibility({
   );
 
   const buildConditionForField = useCallback(
-    (controller: ControllerField | undefined): FieldCondition | null => {
+    (
+      controller: ControllerField | undefined,
+      sourceFormId?: number,
+    ): FieldCondition | null => {
       if (!controller) {
         return null;
       }
+      const base = sourceFormId
+        ? { when: controller.id, sourceFormId }
+        : { when: controller.id };
       if (isTextContentController(controller)) {
-        return {
-          when: controller.id,
-          hasValue: true,
-        };
+        return { ...base, hasValue: true };
       }
       if (controller.kind === "checkbox") {
-        return {
-          when: controller.id,
-          equals: true,
-        };
+        return { ...base, equals: true };
       }
       if (controller.kind === "contract") {
-        return {
-          when: controller.id,
-          equals: true,
-        };
+        return { ...base, equals: true };
       }
       if (controller.kind === "multiselect") {
         return {
-          when: controller.id,
+          ...base,
           includesOption: controller.options?.[0]?.value ?? "",
         };
       }
       if (controller.kind === "number") {
         return {
-          when: controller.id,
+          ...base,
           equals: defaultNumberEqualsForVisibility(controller),
         };
       }
       if (controller.kind === "range") {
         const values = getRangeValues(controller);
-        return {
-          when: controller.id,
-          equals: values[0] ?? 1,
-        };
+        return { ...base, equals: values[0] ?? 1 };
       }
       return {
-        when: controller.id,
+        ...base,
         equals: controller.options?.[0]?.value ?? "",
       };
     },
@@ -629,6 +712,66 @@ export function ConditionalVisibility({
     ],
   );
 
+  const handleSourceFormChange = useCallback(
+    (index: number, formId: number) => {
+      const cached = externalSchemaCache.get(formId);
+      if (cached) {
+        const extCtrls = cached.filter(
+          (f): f is ControllerField => isConditionalController(f),
+        );
+        const first = extCtrls[0];
+        const next = [...conditions];
+        const cond = buildConditionForField(first, formId);
+        if (cond) {
+          next[index] = cond;
+          updateConditions(next, true);
+        }
+        setExternalFieldsMap((prev) => ({ ...prev, [formId]: cached }));
+      } else {
+        const next = [...conditions];
+        next[index] = { when: "", hasValue: true, sourceFormId: formId } as FieldCondition;
+        updateConditions(next, true);
+        tasksGetForm({ path: { id: formId } }).then((response) => {
+          const schema = (response.data as Record<string, unknown> | undefined)
+            ?.schema as FormSchema | undefined;
+          if (!schema?.pages) return;
+          const allFields: AnyField[] = [];
+          for (const page of schema.pages) {
+            for (const el of page.fields) {
+              if ("label" in el) allFields.push(el as AnyField);
+            }
+          }
+          externalSchemaCache.set(formId, allFields);
+          setExternalFieldsMap((prev) => ({ ...prev, [formId]: allFields }));
+        });
+      }
+    },
+    [buildConditionForField, conditions, updateConditions],
+  );
+
+  const addPreviousActionCondition = useCallback(() => {
+    if (formList.length === 0) return;
+    const firstFormId = formList[0].id;
+    const cached = externalSchemaCache.get(firstFormId);
+    if (cached) {
+      const extCtrls = cached.filter(
+        (f): f is ControllerField => isConditionalController(f),
+      );
+      const first = extCtrls[0];
+      const cond = buildConditionForField(first, firstFormId);
+      if (cond) {
+        updateConditions([...conditions, cond]);
+        return;
+      }
+    }
+    const placeholder: FieldCondition = {
+      when: "",
+      hasValue: true,
+      sourceFormId: firstFormId,
+    } as FieldCondition;
+    updateConditions([...conditions, placeholder]);
+  }, [buildConditionForField, conditions, formList, updateConditions]);
+
   const addDeviceCondition = useCallback(() => {
     const defaultCondition: DeviceCondition = {
       deviceType: [...DEVICE_VISIBILITY_TARGETS],
@@ -660,13 +803,25 @@ export function ConditionalVisibility({
     [conditions, updateConditions],
   );
 
+  const getConditionSourceFormId = (cond: Condition): number | undefined => {
+    if (isFieldCondition(cond) && "sourceFormId" in cond) {
+      return (cond as FieldCondition & { sourceFormId?: number }).sourceFormId;
+    }
+    return undefined;
+  };
+
   const handleControllerChange = useCallback(
     (index: number, id: string) => {
-      const nextField = controllers.find((f) => f.id === id);
+      const existing = conditions[index];
+      const sourceFormId = getConditionSourceFormId(existing);
+      const pool = sourceFormId
+        ? getExternalControllers(sourceFormId)
+        : controllers;
+      const nextField = pool.find((f) => f.id === id);
       if (!nextField) {
         return;
       }
-      const nextCondition = buildConditionForField(nextField);
+      const nextCondition = buildConditionForField(nextField, sourceFormId);
       if (!nextCondition) {
         return;
       }
@@ -674,7 +829,7 @@ export function ConditionalVisibility({
       next[index] = nextCondition;
       updateConditions(next, true);
     },
-    [buildConditionForField, conditions, controllers, updateConditions],
+    [buildConditionForField, conditions, controllers, getExternalControllers, updateConditions],
   );
 
   const handleNumberConditionModeChange = useCallback(
@@ -684,24 +839,31 @@ export function ConditionalVisibility({
       if (!isFieldCondition(current)) {
         return;
       }
-      const controller = controllers.find((f) => f.id === current.when);
+      const sourceFormId = getConditionSourceFormId(current);
+      const pool = sourceFormId
+        ? getExternalControllers(sourceFormId)
+        : controllers;
+      const controller = pool.find((f) => f.id === current.when);
       if (!controller || controller.kind !== "number") {
         return;
       }
+      const base = sourceFormId
+        ? { when: controller.id, sourceFormId }
+        : { when: controller.id };
       if (mode === "has_value") {
-        next[index] = { when: controller.id, hasValue: true };
+        next[index] = { ...base, hasValue: true };
       } else if (mode === "empty") {
-        next[index] = { when: controller.id, hasValue: false };
+        next[index] = { ...base, hasValue: false };
       } else {
         const existingNum =
           isEqualsCondition(current) && typeof current.equals === "number"
             ? current.equals
             : defaultNumberEqualsForVisibility(controller);
-        next[index] = { when: controller.id, equals: existingNum };
+        next[index] = { ...base, equals: existingNum };
       }
       updateConditions(next, true);
     },
-    [conditions, controllers, updateConditions],
+    [conditions, controllers, getExternalControllers, updateConditions],
   );
 
   const handleNumberEqualsInputChange = useCallback(
@@ -711,20 +873,27 @@ export function ConditionalVisibility({
       if (!isFieldCondition(current)) {
         return;
       }
-      const controller = controllers.find((f) => f.id === current.when);
+      const sourceFormId = getConditionSourceFormId(current);
+      const pool = sourceFormId
+        ? getExternalControllers(sourceFormId)
+        : controllers;
+      const controller = pool.find((f) => f.id === current.when);
       if (!controller || controller.kind !== "number") {
         return;
       }
+      const base = sourceFormId
+        ? { when: controller.id, sourceFormId }
+        : { when: controller.id };
       const prev =
         isEqualsCondition(current) && typeof current.equals === "number"
           ? current.equals
           : defaultNumberEqualsForVisibility(controller);
       const n = raw.trim() === "" ? NaN : parseFloat(raw);
       const equals = Number.isFinite(n) ? n : prev;
-      next[index] = { when: controller.id, equals };
+      next[index] = { ...base, equals };
       updateConditions(next, true);
     },
-    [conditions, controllers, updateConditions],
+    [conditions, controllers, getExternalControllers, updateConditions],
   );
 
   const handleConditionValueChange = useCallback(
@@ -734,58 +903,44 @@ export function ConditionalVisibility({
       if (!isFieldCondition(current)) {
         return;
       }
-      const controller = controllers.find((f) => f.id === current.when);
+      const sourceFormId = getConditionSourceFormId(current);
+      const pool = sourceFormId
+        ? getExternalControllers(sourceFormId)
+        : controllers;
+      const controller = pool.find((f) => f.id === current.when);
       if (!controller) {
         return;
       }
+      const base = sourceFormId
+        ? { when: controller.id, sourceFormId }
+        : { when: controller.id };
       if (isTextContentController(controller)) {
-        next[index] = {
-          when: controller.id,
-          hasValue: value === "true",
-        };
+        next[index] = { ...base, hasValue: value === "true" };
       } else if (controller.kind === "checkbox") {
-        next[index] = {
-          when: controller.id,
-          equals: value === "true",
-        };
+        next[index] = { ...base, equals: value === "true" };
       } else if (controller.kind === "contract") {
-        next[index] = {
-          when: controller.id,
-          equals: value === "true",
-        };
+        next[index] = { ...base, equals: value === "true" };
       } else if (controller.kind === "multiselect") {
         next[index] =
           value === ANY_SELECTED_VALUE
-            ? {
-                when: controller.id,
-                anySelected: true,
-              }
-            : {
-                when: controller.id,
-                includesOption: value,
-              };
+            ? { ...base, anySelected: true }
+            : { ...base, includesOption: value };
       } else if (controller.kind === "range") {
-        next[index] = {
-          when: controller.id,
-          equals: Number(value),
-        };
+        next[index] = { ...base, equals: Number(value) };
       } else if (controller.kind === "number") {
         const n = parseFloat(value);
         next[index] = {
-          when: controller.id,
+          ...base,
           equals: Number.isFinite(n)
             ? n
             : defaultNumberEqualsForVisibility(controller),
         };
       } else {
-        next[index] = {
-          when: controller.id,
-          equals: value,
-        };
+        next[index] = { ...base, equals: value };
       }
       updateConditions(next, true);
     },
-    [conditions, controllers, updateConditions],
+    [conditions, controllers, getExternalControllers, updateConditions],
   );
 
   const handleValidatorSelection = useCallback(
@@ -843,7 +998,13 @@ export function ConditionalVisibility({
   );
 
   const renderFieldCondition = (condition: FieldCondition, index: number) => {
-    const controller = controllers.find((f) => f.id === condition.when);
+    const sourceFormId =
+      "sourceFormId" in condition
+        ? (condition as FieldCondition & { sourceFormId?: number }).sourceFormId
+        : undefined;
+    const isCrossForm = sourceFormId != null;
+    const pool = isCrossForm ? getExternalControllers(sourceFormId) : controllers;
+    const controller = pool.find((f) => f.id === condition.when);
     const hasContentValue = isHasValueCondition(condition)
       ? String(condition.hasValue ?? true)
       : "true";
@@ -862,22 +1023,58 @@ export function ConditionalVisibility({
       controller?.kind === "range" ? getRangeValues(controller) : [];
     return (
       <div className="space-y-2">
+        {isCrossForm && (
+          <div>
+            <label className="block text-xs text-gray-700 mb-1">
+              Source form (previous action)
+            </label>
+            <select
+              className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+              value={sourceFormId ?? ""}
+              onChange={(event) => {
+                const nextId = Number(event.target.value);
+                if (Number.isFinite(nextId)) {
+                  handleSourceFormChange(index, nextId);
+                }
+              }}
+            >
+              {formListLoading && <option value="">Loading forms…</option>}
+              {formList.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.title} (#{f.id})
+                </option>
+              ))}
+            </select>
+            {externalFieldsLoading && (
+              <p className="text-[11px] text-gray-400 mt-1">
+                Loading fields…
+              </p>
+            )}
+          </div>
+        )}
         <div>
           <label className="block text-xs text-gray-700 mb-1">
             Show when field
           </label>
           <select
             className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-            value={controller ? controller.id : (controllers[0]?.id ?? "")}
+            value={controller ? controller.id : (pool[0]?.id ?? "")}
             onChange={(event) =>
               handleControllerChange(index, event.target.value)
             }
           >
-            {controllers.map((f) => (
+            {pool.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.label}
               </option>
             ))}
+            {pool.length === 0 && (
+              <option value="">
+                {isCrossForm && externalFieldsLoading
+                  ? "Loading…"
+                  : "No fields available"}
+              </option>
+            )}
           </select>
         </div>
 
@@ -1198,6 +1395,12 @@ export function ConditionalVisibility({
                 <span className="text-gray-400 font-normal ml-1">
                   ({conditionNameForIndex(index)})
                 </span>
+                {isFieldCondition(condition) &&
+                  getConditionSourceFormId(condition) != null && (
+                    <span className="ml-1 text-[10px] text-blue-500 font-normal">
+                      prev. action
+                    </span>
+                  )}
               </span>
               <button
                 type="button"
@@ -1239,6 +1442,14 @@ export function ConditionalVisibility({
             disabled={!canUseFieldControllers}
           >
             + Field condition
+          </button>
+          <button
+            type="button"
+            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+            onClick={addPreviousActionCondition}
+            disabled={formListLoading || formList.length === 0}
+          >
+            + Previous action condition
           </button>
           <button
             type="button"
@@ -1511,6 +1722,59 @@ function useTags(enabled: boolean): {
 
   return { tags, loading, error };
 }
+
+type FormListItem = { id: number; title: string };
+
+let cachedFormList: FormListItem[] | null = null;
+let pendingFormListRequest: Promise<FormListItem[]> | null = null;
+
+function useFormList(): {
+  forms: FormListItem[];
+  loading: boolean;
+} {
+  const [forms, setForms] = useState<FormListItem[]>(
+    () => cachedFormList ?? [],
+  );
+  const [loading, setLoading] = useState(() => !cachedFormList);
+
+  useEffect(() => {
+    if (cachedFormList) {
+      setForms(cachedFormList);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    if (!pendingFormListRequest) {
+      pendingFormListRequest = tasksListForms().then((response) => {
+        const items = ((response.data ?? []) as Array<{ id: number; title: string }>)
+          .map((f) => ({ id: f.id, title: f.title }))
+          .sort((a, b) => a.id - b.id);
+        cachedFormList = items;
+        return items;
+      });
+    }
+    setLoading(true);
+    pendingFormListRequest
+      .then((data) => {
+        if (cancelled) return;
+        setForms(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      })
+      .finally(() => {
+        pendingFormListRequest = null;
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { forms, loading };
+}
+
+const externalSchemaCache = new Map<number, AnyField[]>();
 
 type CustomValidatorSelectProps = {
   type?: CustomValidatorType;

@@ -1030,6 +1030,340 @@ describe('Tasks (e2e)', () => {
     });
   });
 
+  describe('Cross-form conditional visibility', () => {
+    const createAction = async (name: string): Promise<Action> => {
+      const action = await actionRepo.save(
+        actionRepo.create({
+          name,
+          category: 'Community',
+          body: 'Body copy',
+          shortDescription: 'Short copy',
+          type: ActionTaskType.Activity,
+          commitmentless: true,
+          isForumParticipationAction: false,
+          everyoneShouldComplete: false,
+          shouldCompleteAfterDeadline: false,
+          visibilityMode: VisibilityMode.Public,
+          preventCompletion: false,
+          optional: false,
+          publicOnly: false,
+          isContractSigningAction: false,
+          latestMemberActionEvent: {
+            event: null,
+            deadline: null,
+          },
+          onboarding: false,
+          followUpForms: [],
+          cohortExpression: {
+            type: 'Tag',
+            tagId: ctx.defaultTag.id,
+          },
+        } satisfies CreateActionDto),
+      );
+
+      await eventRepo.save(
+        eventRepo.create({
+          title: `${name} Event`,
+          description: `${name} Event`,
+          newStatus: ActionStatus.MemberAction,
+          date: new Date(Date.now() - 1000),
+          action,
+        }),
+      );
+
+      return action;
+    };
+
+    it('hides required fields when sourceFormId condition is not met', async () => {
+      const sourceSchema: FormSchema = {
+        title: 'Source Form',
+        pages: [
+          {
+            id: 'page-1',
+            fields: [
+              {
+                id: 'role',
+                kind: 'radio',
+                label: 'Role',
+                required: true,
+                options: [
+                  { label: 'Volunteer', value: 'volunteer' },
+                  { label: 'Organizer', value: 'organizer' },
+                ],
+              },
+            ],
+          },
+        ],
+        outputViews: [],
+      };
+
+      const sourceAction = await createAction('Source Action');
+      const sourceFormRes = await request(ctx.app.getHttpServer())
+        .post('/tasks/createForm')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ title: sourceSchema.title, schema: sourceSchema })
+        .expect(201);
+      const sourceFormId = sourceFormRes.body.id as number;
+
+      await request(ctx.app.getHttpServer())
+        .post(`/tasks/submitForm/${sourceFormId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          answers: { role: 'volunteer' },
+          schemaSnapshot: sourceSchema,
+          actionId: sourceAction.id,
+        })
+        .expect(201);
+
+      const dependentSchema: FormSchema = {
+        title: 'Dependent Form',
+        pages: [
+          {
+            id: 'page-1',
+            fields: [
+              {
+                id: 'general-question',
+                kind: 'text',
+                label: 'General question',
+                required: true,
+              },
+              {
+                id: 'organizer-detail',
+                kind: 'text',
+                label: 'Organizer detail',
+                required: true,
+                visibleIf: [
+                  {
+                    when: 'role',
+                    equals: 'organizer',
+                    sourceFormId,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        outputViews: [],
+      };
+
+      const dependentAction = await createAction('Dependent Action');
+      const dependentFormRes = await request(ctx.app.getHttpServer())
+        .post('/tasks/createForm')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ title: dependentSchema.title, schema: dependentSchema })
+        .expect(201);
+      const dependentFormId = dependentFormRes.body.id as number;
+
+      // Submit without organizer-detail (it should be hidden because source answer = 'volunteer')
+      await request(ctx.app.getHttpServer())
+        .post(`/tasks/submitForm/${dependentFormId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          answers: { 'general-question': 'Hello' },
+          schemaSnapshot: dependentSchema,
+          actionId: dependentAction.id,
+        })
+        .expect(201);
+    });
+
+    it('shows required fields when sourceFormId condition is met', async () => {
+      const sourceSchema: FormSchema = {
+        title: 'Source Form 2',
+        pages: [
+          {
+            id: 'page-1',
+            fields: [
+              {
+                id: 'role',
+                kind: 'radio',
+                label: 'Role',
+                required: true,
+                options: [
+                  { label: 'Volunteer', value: 'volunteer' },
+                  { label: 'Organizer', value: 'organizer' },
+                ],
+              },
+            ],
+          },
+        ],
+        outputViews: [],
+      };
+
+      const sourceAction = await createAction('Source Action 2');
+      const sourceFormRes = await request(ctx.app.getHttpServer())
+        .post('/tasks/createForm')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ title: sourceSchema.title, schema: sourceSchema })
+        .expect(201);
+      const sourceFormId = sourceFormRes.body.id as number;
+
+      await request(ctx.app.getHttpServer())
+        .post(`/tasks/submitForm/${sourceFormId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          answers: { role: 'organizer' },
+          schemaSnapshot: sourceSchema,
+          actionId: sourceAction.id,
+        })
+        .expect(201);
+
+      const dependentSchema: FormSchema = {
+        title: 'Dependent Form 2',
+        pages: [
+          {
+            id: 'page-1',
+            fields: [
+              {
+                id: 'organizer-detail',
+                kind: 'text',
+                label: 'Organizer detail',
+                required: true,
+                visibleIf: [
+                  {
+                    when: 'role',
+                    equals: 'organizer',
+                    sourceFormId,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        outputViews: [],
+      };
+
+      const dependentAction = await createAction('Dependent Action 2');
+      const dependentFormRes = await request(ctx.app.getHttpServer())
+        .post('/tasks/createForm')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ title: dependentSchema.title, schema: dependentSchema })
+        .expect(201);
+      const dependentFormId = dependentFormRes.body.id as number;
+
+      // Submit without the required field — should fail because condition IS met
+      await request(ctx.app.getHttpServer())
+        .post(`/tasks/submitForm/${dependentFormId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          answers: {},
+          schemaSnapshot: dependentSchema,
+          actionId: dependentAction.id,
+        })
+        .expect(400);
+
+      // Submit with the field — should succeed
+      await request(ctx.app.getHttpServer())
+        .post(`/tasks/submitForm/${dependentFormId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          answers: { 'organizer-detail': 'My organizer info' },
+          schemaSnapshot: dependentSchema,
+          actionId: dependentAction.id,
+        })
+        .expect(201);
+    });
+
+    it('works with visibleIfFormula and sourceFormId', async () => {
+      const sourceSchema: FormSchema = {
+        title: 'Source Form 3',
+        pages: [
+          {
+            id: 'page-1',
+            fields: [
+              {
+                id: 'interest',
+                kind: 'radio',
+                label: 'Interest',
+                required: true,
+                options: [
+                  { label: 'Tech', value: 'tech' },
+                  { label: 'Art', value: 'art' },
+                ],
+              },
+            ],
+          },
+        ],
+        outputViews: [],
+      };
+
+      const sourceAction = await createAction('Source Action 3');
+      const sourceFormRes = await request(ctx.app.getHttpServer())
+        .post('/tasks/createForm')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ title: sourceSchema.title, schema: sourceSchema })
+        .expect(201);
+      const sourceFormId = sourceFormRes.body.id as number;
+
+      await request(ctx.app.getHttpServer())
+        .post(`/tasks/submitForm/${sourceFormId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          answers: { interest: 'tech' },
+          schemaSnapshot: sourceSchema,
+          actionId: sourceAction.id,
+        })
+        .expect(201);
+
+      const dependentSchema: FormSchema = {
+        title: 'Dependent Form 3',
+        pages: [
+          {
+            id: 'page-1',
+            fields: [
+              {
+                id: 'tech-question',
+                kind: 'text',
+                label: 'Tech question',
+                required: true,
+                visibleIfFormula: {
+                  conditions: {
+                    isTech: {
+                      when: 'interest',
+                      equals: 'tech',
+                      sourceFormId,
+                    },
+                  },
+                  formula: 'isTech',
+                },
+              },
+            ],
+          },
+        ],
+        outputViews: [],
+      };
+
+      const dependentAction = await createAction('Dependent Action 3');
+      const dependentFormRes = await request(ctx.app.getHttpServer())
+        .post('/tasks/createForm')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ title: dependentSchema.title, schema: dependentSchema })
+        .expect(201);
+      const dependentFormId = dependentFormRes.body.id as number;
+
+      // Field IS visible because source answer = 'tech', so omitting it should fail
+      await request(ctx.app.getHttpServer())
+        .post(`/tasks/submitForm/${dependentFormId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          answers: {},
+          schemaSnapshot: dependentSchema,
+          actionId: dependentAction.id,
+        })
+        .expect(400);
+
+      // Providing the answer should succeed
+      await request(ctx.app.getHttpServer())
+        .post(`/tasks/submitForm/${dependentFormId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          answers: { 'tech-question': 'I love TypeScript' },
+          schemaSnapshot: dependentSchema,
+          actionId: dependentAction.id,
+        })
+        .expect(201);
+    });
+  });
+
   describe('User field extraction from form submission', () => {
     const createAction = async (name: string): Promise<Action> => {
       const action = await actionRepo.save(

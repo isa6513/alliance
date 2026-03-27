@@ -3,6 +3,7 @@ import type {
   AnyField,
   CityFieldValue,
   Condition,
+  FormSchema,
   FormValue,
   ListField,
   NumberField,
@@ -212,7 +213,25 @@ export type ConditionExtras = {
   fieldLookup?: Map<string, AnyField>;
   visibilityMemo?: Map<string, boolean>;
   visibilityEvaluationStack?: Set<string>;
+  previousAnswerData?: Record<number, Record<string, unknown>>;
 };
+
+function resolveConditionValue(
+  cond: Condition & { when: string },
+  data: Record<string, FormValue>,
+  extras: ConditionExtras,
+): FormValue | undefined {
+  if (
+    "sourceFormId" in cond &&
+    cond.sourceFormId != null &&
+    extras.previousAnswerData
+  ) {
+    return extras.previousAnswerData[cond.sourceFormId]?.[
+      cond.when
+    ] as FormValue;
+  }
+  return data[cond.when];
+}
 
 export function evaluateCondition(
   cond: Condition,
@@ -238,7 +257,11 @@ export function evaluateCondition(
     }
     return actual === expected;
   }
-  const val = data[cond.when];
+  const val = resolveConditionValue(
+    cond,
+    data,
+    extras,
+  );
   return evaluateValueBasedCondition(cond, val);
 }
 
@@ -358,15 +381,30 @@ export function isElementCurrentlyVisible(
     return visible;
   };
 
+  const resolveValue = (
+    cond: Condition & { when: string },
+  ): FormValue | undefined => {
+    if (
+      "sourceFormId" in cond &&
+      cond.sourceFormId != null &&
+      extras.previousAnswerData
+    ) {
+      return extras.previousAnswerData[cond.sourceFormId]?.[
+        cond.when
+      ] as FormValue;
+    }
+    return isReferencedFieldVisible(cond.when)
+      ? data[cond.when]
+      : undefined;
+  };
+
   if (hasFormula) {
     const results: Record<string, boolean> = {};
     for (const [name, cond] of Object.entries(formula!.conditions)) {
       if ("expr" in cond || "deviceType" in cond || "validatorId" in cond) {
         results[name] = evaluateCondition(cond, data, extras);
       } else {
-        const value = isReferencedFieldVisible(cond.when)
-          ? data[cond.when]
-          : undefined;
+        const value = resolveValue(cond as Condition & { when: string });
         results[name] = evaluateValueBasedCondition(cond, value);
       }
     }
@@ -382,9 +420,7 @@ export function isElementCurrentlyVisible(
       return evaluateCondition(condition, data, extras);
     }
 
-    const value = isReferencedFieldVisible(condition.when)
-      ? data[condition.when]
-      : undefined;
+    const value = resolveValue(condition as Condition & { when: string });
     return evaluateValueBasedCondition(condition, value);
   });
 }
@@ -588,4 +624,39 @@ export function getListSubFieldErrors(
     }
   }
   return result;
+}
+
+/** Scan a form schema for all sourceFormIds referenced in visibility/required conditions. */
+export function collectConditionSourceFormIds(schema: FormSchema): number[] {
+  const ids = new Set<number>();
+  const collectFromCondition = (c: Condition) => {
+    if ("sourceFormId" in c && typeof c.sourceFormId === "number") {
+      ids.add(c.sourceFormId);
+    }
+  };
+  const collectFromElement = (el: AnyField | DisplayBlock) => {
+    if (el.visibleIf) {
+      const arr = Array.isArray(el.visibleIf) ? el.visibleIf : [el.visibleIf];
+      arr.forEach(collectFromCondition);
+    }
+    if (el.visibleIfFormula?.conditions) {
+      Object.values(el.visibleIfFormula.conditions).forEach(
+        collectFromCondition,
+      );
+    }
+    if ("requiredIf" in el && (el as AnyField).requiredIf) {
+      collectFromCondition((el as AnyField).requiredIf!);
+    }
+  };
+  for (const page of schema.pages) {
+    for (const field of page.fields) {
+      collectFromElement(field);
+      if ("label" in field && (field as AnyField).kind === "list") {
+        for (const sub of ((field as AnyField) as ListField).fields ?? []) {
+          collectFromElement(sub);
+        }
+      }
+    }
+  }
+  return Array.from(ids);
 }

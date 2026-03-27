@@ -65,11 +65,13 @@ interface BaseField<TKind extends FieldKind> {
 }
 
 // Conditions reference other field ids; we type this late with a helper (see defineForm)
+// When `sourceFormId` is set, `when` refers to a field in that form and
+// the value is resolved from the user's previous response to it.
 export type Condition =
-  | { when: string; equals: string | number | boolean | null }
-  | { when: string; includesOption: string }
-  | { when: string; anySelected: boolean }
-  | { when: string; hasValue: boolean }
+  | { when: string; equals: string | number | boolean | null; sourceFormId?: number }
+  | { when: string; includesOption: string; sourceFormId?: number }
+  | { when: string; anySelected: boolean; sourceFormId?: number }
+  | { when: string; hasValue: boolean; sourceFormId?: number }
   | { expr: string }
   | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
   | { deviceType: DeviceVisibilityTarget[] };
@@ -294,6 +296,7 @@ export function isQuestionVisible(
   formData: Record<string, FormValue>,
   validatorResults?: Record<number, boolean>,
   deviceType?: DeviceVisibilityTarget,
+  previousAnswerData?: Record<number, Record<string, unknown>>,
 ): boolean {
   const normalizedDeviceType: DeviceVisibilityTarget = deviceType ?? 'desktop';
   const hasContent = (value: FormValue | undefined): boolean => {
@@ -308,6 +311,12 @@ export function isQuestionVisible(
     }
     return true;
   };
+  const resolveValue = (c: Condition & { when: string }): FormValue => {
+    if ('sourceFormId' in c && c.sourceFormId != null && previousAnswerData) {
+      return previousAnswerData[c.sourceFormId]?.[c.when] as FormValue;
+    }
+    return formData[c.when];
+  };
   const evalCond = (c: Condition): boolean => {
     if ('expr' in c) return true;
     if ('deviceType' in c) {
@@ -321,7 +330,7 @@ export function isQuestionVisible(
       if (actual === undefined) return false;
       return actual === expected;
     }
-    const val = formData[c.when];
+    const val = resolveValue(c as Condition & { when: string });
     if ('hasValue' in c) {
       const present = hasContent(val as FormValue | undefined);
       return c.hasValue ? present : !present;
@@ -381,4 +390,39 @@ export function isQuestionVisible(
     }
   }
   return true;
+}
+
+/** Scan a form schema for all sourceFormIds referenced in visibility conditions. */
+export function collectSourceFormIds(schema: FormSchema): number[] {
+  const ids = new Set<number>();
+  const collectFromCondition = (c: Condition) => {
+    if ('sourceFormId' in c && typeof c.sourceFormId === 'number') {
+      ids.add(c.sourceFormId);
+    }
+  };
+  const collectFromElement = (el: AnyField | DisplayBlock) => {
+    if (el.visibleIf) {
+      const arr = Array.isArray(el.visibleIf) ? el.visibleIf : [el.visibleIf];
+      arr.forEach(collectFromCondition);
+    }
+    if (el.visibleIfFormula?.conditions) {
+      Object.values(el.visibleIfFormula.conditions).forEach(
+        collectFromCondition,
+      );
+    }
+    if ('requiredIf' in el && (el as AnyField).requiredIf) {
+      collectFromCondition((el as AnyField).requiredIf!);
+    }
+  };
+  for (const page of schema.pages) {
+    for (const field of page.fields) {
+      collectFromElement(field);
+      if (isQuestionField(field) && field.kind === 'list') {
+        for (const sub of (field as ListField).fields ?? []) {
+          collectFromElement(sub);
+        }
+      }
+    }
+  }
+  return Array.from(ids);
 }
