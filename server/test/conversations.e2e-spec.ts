@@ -353,6 +353,21 @@ describe('ConversationController (e2e)', () => {
   });
 
   describe('unread counts', () => {
+    const getUnreadSummary = async (
+      token: string,
+    ): Promise<{
+      messageCount: number;
+      messageRequestCount: number;
+      totalCount: number;
+    }> => {
+      const response = await request(ctx.app.getHttpServer())
+        .get('/messaging/conversations/unread-summary')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      return response.body;
+    };
+
     const getUnreadCount = async (token: string): Promise<number> => {
       const response = await request(ctx.app.getHttpServer())
         .get('/messaging/conversations/unread')
@@ -485,6 +500,48 @@ describe('ConversationController (e2e)', () => {
 
       const unreadCount = await getUnreadCount(readerToken);
       expect(unreadCount).toBe(2);
+    });
+
+    it('returns a lightweight summary for unread messages and message requests', async () => {
+      const { token: readerToken, user: reader } = await createUserAndToken();
+      const { user: joinedSender, token: joinedSenderToken } =
+        await createUserAndToken();
+      const { token: requestSenderToken } = await createUserAndToken();
+
+      await createDirectConversationWithUnread(
+        readerToken,
+        joinedSender.id,
+        joinedSenderToken,
+      );
+
+      const requestConversation = await request(ctx.app.getHttpServer())
+        .post('/messaging/conversations/direct')
+        .set('Authorization', `Bearer ${requestSenderToken}`)
+        .send({ targetUserId: reader.id })
+        .expect(201);
+
+      const unreadSummaryBeforeMessageRequest = await getUnreadSummary(readerToken);
+      expect(unreadSummaryBeforeMessageRequest).toEqual({
+        messageCount: 1,
+        messageRequestCount: 1,
+        totalCount: 2,
+      });
+
+      await request(ctx.app.getHttpServer())
+        .post('/messaging/messages')
+        .set('Authorization', `Bearer ${requestSenderToken}`)
+        .send({
+          conversationId: requestConversation.body.id,
+          body: 'Request follow-up',
+        })
+        .expect(201);
+
+      const unreadSummaryAfterMessageRequest = await getUnreadSummary(readerToken);
+      expect(unreadSummaryAfterMessageRequest).toEqual({
+        messageCount: 1,
+        messageRequestCount: 1,
+        totalCount: 2,
+      });
     });
 
     describe('overall unread totals across multiple conversations', () => {

@@ -1008,6 +1008,12 @@ export type UnreadMessagesDto = {
     count: number;
 };
 
+export type UnreadMessageSummaryDto = {
+    messageCount: number;
+    messageRequestCount: number;
+    totalCount: number;
+};
+
 export type CreateMessageDto = {
     conversationId: number;
     body: string;
@@ -4108,6 +4114,19 @@ export type ConversationGetUnreadMessagesResponses = {
 };
 
 export type ConversationGetUnreadMessagesResponse = ConversationGetUnreadMessagesResponses[keyof ConversationGetUnreadMessagesResponses];
+
+export type ConversationGetUnreadSummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/unread-summary';
+};
+
+export type ConversationGetUnreadSummaryResponses = {
+    200: UnreadMessageSummaryDto;
+};
+
+export type ConversationGetUnreadSummaryResponse = ConversationGetUnreadSummaryResponses[keyof ConversationGetUnreadSummaryResponses];
 
 export type ConversationLeaveData = {
     body?: never;

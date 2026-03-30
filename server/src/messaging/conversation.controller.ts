@@ -21,6 +21,7 @@ import {
   CreateDirectConversationDto,
   CreateGroupConversationDto,
   ConversationParticipantDto,
+  UnreadMessageSummaryDto,
   UnreadMessagesDto,
   UpdateConversationDto,
 } from './dto/messaging.dto';
@@ -171,6 +172,15 @@ export class ConversationController {
     @Request() req: JwtRequest,
   ): Promise<UnreadMessagesDto> {
     return this.conversationService.getUnreadMessages(req.user.sub);
+  }
+
+  @Get('unread-summary')
+  @ApiOkResponse({ type: UnreadMessageSummaryDto })
+  @UseGuards(AuthGuard)
+  async getUnreadSummary(
+    @Request() req: JwtRequest,
+  ): Promise<UnreadMessageSummaryDto> {
+    return this.conversationService.getUnreadSummary(req.user.sub);
   }
 
   @Post(':conversationId/leave')

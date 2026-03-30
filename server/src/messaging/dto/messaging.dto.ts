@@ -332,3 +332,17 @@ export class UnreadMessagesDto {
   @IsInt()
   count: number;
 }
+
+export class UnreadMessageSummaryDto {
+  @ApiProperty({ type: Number })
+  @IsInt()
+  messageCount: number;
+
+  @ApiProperty({ type: Number })
+  @IsInt()
+  messageRequestCount: number;
+
+  @ApiProperty({ type: Number })
+  @IsInt()
+  totalCount: number;
+}

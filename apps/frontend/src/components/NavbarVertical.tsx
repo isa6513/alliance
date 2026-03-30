@@ -93,6 +93,7 @@ const NavbarVertical: React.FC<{
   const {
     unread: unreadMessages,
     hasUpdates,
+    updateTick,
     setUnread,
     setHasUpdates,
     refreshUnreadCount,
@@ -177,7 +178,7 @@ const NavbarVertical: React.FC<{
     if (currentLocation !== NavbarPage.Messages && hasUpdates) {
       refreshUnreadCount();
     }
-  }, [hasUpdates, refreshUnreadCount, currentLocation]);
+  }, [hasUpdates, updateTick, refreshUnreadCount, currentLocation]);
 
   useEffect(() => {
     if (currentLocation === NavbarPage.Messages) {
@@ -186,16 +187,25 @@ const NavbarVertical: React.FC<{
     }
   }, [currentLocation, setUnread, setHasUpdates]);
 
-  const unreadNotifsForPage = useMemo((): Partial<
-    Record<NavbarPage, number>
-  > => {
+  const unreadNotifsForPage = useMemo((): Record<NavbarPage, number> => {
     return {
       [NavbarPage.Tasks]: todoActions,
       [NavbarPage.Groups]: pendingCommunityInvites.length,
       [NavbarPage.Messages]:
         currentLocation !== NavbarPage.Messages ? unreadMessages : 0,
+      [NavbarPage.CurrentActions]: 0,
+      [NavbarPage.Activity]: 0,
+      [NavbarPage.Information]: 0,
+      [NavbarPage.Invite]: 0,
     };
   }, [todoActions, pendingCommunityInvites, unreadMessages, currentLocation]);
+
+  const getBadgeLabel = (count: number) => {
+    if (!count) {
+      return null;
+    }
+    return Math.min(count, 99).toString();
+  };
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -273,15 +283,15 @@ const NavbarVertical: React.FC<{
                   <div
                     className={cn(
                       "font-semibold text-xs text-white",
-                      "rounded-md",
+                      "rounded-full px-1",
                       "flex justify-center items-center",
-                      "w-5 h-5",
+                      "min-w-5 h-5",
                       item.page === NavbarPage.Tasks
                         ? "bg-red-500"
                         : "bg-zinc-500",
                     )}
                   >
-                    {unreadNotifsForPage[item.page]}
+                    {getBadgeLabel(unreadNotifsForPage[item.page])}
                   </div>
                 )}
               </Link>

@@ -22,6 +22,7 @@ import {
   CreateDirectConversationDto,
   CreateGroupConversationDto,
   ConversationParticipantDto,
+  UnreadMessageSummaryDto,
   UnreadMessagesDto,
   UpdateConversationDto,
 } from './dto/messaging.dto';
@@ -881,5 +882,63 @@ export class ConversationService {
       .getRawOne<{ unreadCount?: string }>();
 
     return { count: Number(result?.unreadCount ?? 0) };
+  }
+
+  async getUnreadSummary(userId: number): Promise<UnreadMessageSummaryDto> {
+    const [messageCount, messageRequestCount] = await Promise.all([
+      this.sumUnreadCountsByParticipantState(userId, ParticipantState.Joined),
+      this.countConversationsByParticipantState(userId, ParticipantState.Invited),
+    ]);
+
+    return {
+      messageCount,
+      messageRequestCount,
+      totalCount: messageCount + messageRequestCount,
+    };
+  }
+
+  private async sumUnreadCountsByParticipantState(
+    userId: number,
+    state: ParticipantState,
+    options?: { minimumPerConversation?: number },
+  ): Promise<number> {
+    const minimumPerConversation = options?.minimumPerConversation ?? 0;
+    const unreadCountSubquery = this.messageRepository
+      .createQueryBuilder('message')
+      .select('COUNT(message.id)')
+      .where('message.conversationId = participant.conversationId')
+      .andWhere('message.authorId != :userId', { userId })
+      .andWhere(
+        'message.createdAt > COALESCE(lastReadMessage.createdAt, participant.joinedAt)',
+      )
+      .andWhere('(message.id != lastReadMessage.id OR lastReadMessage.id IS NULL)')
+      .getQuery();
+    const unreadCountExpression =
+      minimumPerConversation > 0
+        ? `GREATEST((${unreadCountSubquery}), ${minimumPerConversation})`
+        : `(${unreadCountSubquery})`;
+    const result = await this.participantRepository
+      .createQueryBuilder('participant')
+      .leftJoin('participant.lastReadMessage', 'lastReadMessage')
+      .select(`COALESCE(SUM(${unreadCountExpression}), 0)`, 'total')
+      .where('participant.userId = :userId', { userId })
+      .andWhere('participant.state = :state', { state })
+      .getRawOne<{ total?: string }>();
+
+    return Number(result?.total ?? 0);
+  }
+
+  private async countConversationsByParticipantState(
+    userId: number,
+    state: ParticipantState,
+  ): Promise<number> {
+    const result = await this.participantRepository
+      .createQueryBuilder('participant')
+      .select('COUNT(DISTINCT participant.conversationId)', 'total')
+      .where('participant.userId = :userId', { userId })
+      .andWhere('participant.state = :state', { state })
+      .getRawOne<{ total?: string }>();
+
+    return Number(result?.total ?? 0);
   }
 }

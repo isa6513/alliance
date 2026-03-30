@@ -1,7 +1,7 @@
 import {
   ConversationDto,
   conversationGetMyConversations,
-  conversationGetUnreadMessages,
+  conversationGetUnreadSummary,
   conversationMarkRead,
   MessageDto,
   messageGetMessages,
@@ -35,7 +35,7 @@ export interface UseLiveConvoMessagesResult {
 
 export const sortConversations = (
   a: ConversationDto,
-  b: ConversationDto
+  b: ConversationDto,
 ): number => {
   return (
     new Date(b.lastMessage?.createdAt ?? b.createdAt).getTime() -
@@ -44,43 +44,50 @@ export const sortConversations = (
 };
 
 export const getConversationTimestamp = (conversation: ConversationDto) => {
-  return new Date(conversation.lastMessage?.createdAt ?? conversation.createdAt);
+  return new Date(
+    conversation.lastMessage?.createdAt ?? conversation.createdAt,
+  );
 };
 
 export const getParticipantState = (
   conversation: ConversationDto,
-  userId: number | null | undefined
+  userId: number | null | undefined,
 ) => {
   if (!userId) return null;
   return (
-    conversation.participants.find((participant) => participant.user.id === userId)
-      ?.state ?? null
+    conversation.participants.find(
+      (participant) => participant.user.id === userId,
+    )?.state ?? null
   );
 };
 
 export const filterConversationsByParticipantState = (
   conversations: ConversationDto[] | null | undefined,
   userId: number | null | undefined,
-  state: "joined" | "invited"
+  state: "joined" | "invited",
 ) => {
   if (!conversations || !userId) return undefined;
   return conversations.filter(
-    (conversation) => getParticipantState(conversation, userId) === state
+    (conversation) => getParticipantState(conversation, userId) === state,
   );
 };
 
 export const getJoinedConversations = (
   conversations: ConversationDto[] | null | undefined,
-  userId: number | null | undefined
+  userId: number | null | undefined,
 ) => {
   return filterConversationsByParticipantState(conversations, userId, "joined");
 };
 
 export const getPendingInvites = (
   conversations: ConversationDto[] | null | undefined,
-  userId: number | null | undefined
+  userId: number | null | undefined,
 ) => {
-  return filterConversationsByParticipantState(conversations, userId, "invited");
+  return filterConversationsByParticipantState(
+    conversations,
+    userId,
+    "invited",
+  );
 };
 
 export const buildGroupConversationTitle = (names: string[]) => {
@@ -94,7 +101,7 @@ export const buildGroupConversationTitle = (names: string[]) => {
 export const findMatchingConversation = (
   conversations: ConversationDto[] | null | undefined,
   currentUserId: number | null | undefined,
-  participantIds: number[]
+  participantIds: number[],
 ): ConversationDto | null => {
   if (!conversations || !currentUserId || participantIds.length === 0) {
     return null;
@@ -116,8 +123,10 @@ export const findMatchingConversation = (
       continue;
     }
 
-    const isDirect = conversation.type === "direct" && usersWithoutCurrent.length === 1;
-    const isGroup = conversation.type === "multiple" && usersWithoutCurrent.length > 1;
+    const isDirect =
+      conversation.type === "direct" && usersWithoutCurrent.length === 1;
+    const isGroup =
+      conversation.type === "multiple" && usersWithoutCurrent.length > 1;
 
     if (isDirect || isGroup) {
       return conversation;
@@ -129,7 +138,7 @@ export const findMatchingConversation = (
 
 export const getConversationPreview = (
   conversation: ConversationDto,
-  currentUserId?: number | null
+  currentUserId?: number | null,
 ) => {
   const lastMessage = conversation.lastMessage;
   if (!lastMessage) {
@@ -162,47 +171,51 @@ export const getMessageRequestPreview = (conversation: ConversationDto) => {
 
 export const updateConversationsForLastMessage = (
   conversations: ConversationDto[] | null,
-  message: MessageDto
+  message: MessageDto,
 ) => {
   if (!conversations) return conversations;
   const existing = conversations.find(
-    (conversation) => conversation.id === message.conversationId
+    (conversation) => conversation.id === message.conversationId,
   );
   if (!existing) {
     return conversations;
   }
   const updated = { ...existing, lastMessage: message };
-  return [updated, ...conversations.filter((conversation) => conversation.id !== updated.id)];
+  return [
+    updated,
+    ...conversations.filter((conversation) => conversation.id !== updated.id),
+  ];
 };
 
 export const mergeConversationUpdate = (
   conversations: ConversationDto[] | null,
-  updatedConversation: ConversationDto
+  updatedConversation: ConversationDto,
 ) => {
   if (!conversations) {
     return conversations;
   }
   const existing = conversations.find(
-    (conversation) => conversation.id === updatedConversation.id
+    (conversation) => conversation.id === updatedConversation.id,
   );
   if (!existing) {
     return conversations;
   }
   const merged = { ...existing, ...updatedConversation };
-  return [merged, ...conversations.filter((conversation) => conversation.id !== merged.id)].sort(
-    sortConversations
-  );
+  return [
+    merged,
+    ...conversations.filter((conversation) => conversation.id !== merged.id),
+  ].sort(sortConversations);
 };
 
 export const mergeConversationUnreadPayload = (
   conversations: ConversationDto[] | null,
   payload: ConversationUnreadPayload,
-  activeConversationId: number | null
+  activeConversationId: number | null,
 ) => {
   const isActive = activeConversationId === payload.conversationId;
 
   const mergePayload = (
-    base: ConversationDto | undefined | null
+    base: ConversationDto | undefined | null,
   ): ConversationDto | undefined => {
     if (!base && !payload.conversation) return undefined;
     const mergedBase = base ?? payload.conversation!;
@@ -215,9 +228,9 @@ export const mergeConversationUnreadPayload = (
         mergedBase.lastMessage,
       unreadCount: isActive
         ? 0
-        : payload.unreadCount ??
+        : (payload.unreadCount ??
           payload.conversation?.unreadCount ??
-          mergedBase.unreadCount,
+          mergedBase.unreadCount),
     };
   };
 
@@ -227,7 +240,7 @@ export const mergeConversationUnreadPayload = (
   }
 
   const existingIndex = conversations.findIndex(
-    (conversation) => conversation.id === payload.conversationId
+    (conversation) => conversation.id === payload.conversationId,
   );
   if (existingIndex === -1) {
     const merged = mergePayload(payload.conversation ?? null);
@@ -242,13 +255,15 @@ export const mergeConversationUnreadPayload = (
 
   const updated = [
     merged,
-    ...conversations.filter((conversation) => conversation.id !== payload.conversationId),
+    ...conversations.filter(
+      (conversation) => conversation.id !== payload.conversationId,
+    ),
   ];
   return updated.sort(sortConversations);
 };
 
 const resolveAuthToken = async (
-  getAuthToken?: () => Promise<string | null> | string | null
+  getAuthToken?: () => Promise<string | null> | string | null,
 ) => {
   if (!getAuthToken) return null;
   try {
@@ -264,7 +279,7 @@ const resolveAuthToken = async (
 };
 
 const buildSocketOptions = (
-  getAuthToken?: () => Promise<string | null> | string | null
+  getAuthToken?: () => Promise<string | null> | string | null,
 ) => {
   if (!getAuthToken) {
     return { transports: ["websocket"], withCredentials: true };
@@ -281,13 +296,16 @@ const buildSocketOptions = (
 
 const attachAuthRefresh = (
   socket: Socket,
-  onRefreshToken?: () => Promise<string | null>
+  onRefreshToken?: () => Promise<string | null>,
 ) => {
   if (!onRefreshToken) return;
   let refreshing = false;
   socket.on("connect_error", async (err) => {
     if (refreshing) return;
-    if (!err.message?.includes("jwt expired") && !err.message?.includes("Unauthorized")) {
+    if (
+      !err.message?.includes("jwt expired") &&
+      !err.message?.includes("Unauthorized")
+    ) {
       return;
     }
     refreshing = true;
@@ -310,12 +328,12 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
   const { getWebSocketUrl, getAuthToken, onRefreshToken } = config;
 
   const useConversations = (activeConversationId?: number | null) => {
-    const [conversations, setConversations] = useState<ConversationDto[] | null>(
-      null
-    );
+    const [conversations, setConversations] = useState<
+      ConversationDto[] | null
+    >(null);
     const [loading, setLoading] = useState(true);
     const activeConversationRef = useRef<number | null>(
-      activeConversationId ?? null
+      activeConversationId ?? null,
     );
 
     useEffect(() => {
@@ -352,18 +370,24 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
 
       (async () => {
         if (cancelled) return;
-        socket = io(`${getWebSocketUrl()}/messaging/overview`, buildSocketOptions(getAuthToken));
+        socket = io(
+          `${getWebSocketUrl()}/messaging/overview`,
+          buildSocketOptions(getAuthToken),
+        );
         attachAuthRefresh(socket, onRefreshToken);
 
-        socket.on("conversation:unread", (payload: ConversationUnreadPayload) => {
-          setConversations((prev) =>
-            mergeConversationUnreadPayload(
-              prev,
-              payload,
-              activeConversationRef.current
-            )
-          );
-        });
+        socket.on(
+          "conversation:unread",
+          (payload: ConversationUnreadPayload) => {
+            setConversations((prev) =>
+              mergeConversationUnreadPayload(
+                prev,
+                payload,
+                activeConversationRef.current,
+              ),
+            );
+          },
+        );
 
         socket.on("messaging:error", (error) => {
           console.error("Messaging overview socket error", error);
@@ -381,16 +405,20 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
 
   const useLiveConvoMessages = (
     conversationId: number | null,
-    options?: UseLiveConvoMessagesOptions
+    options?: UseLiveConvoMessagesOptions,
   ): UseLiveConvoMessagesResult => {
-    const [convoMessages, setConvoMessages] = useState<MessageDto[] | null>(null);
+    const [convoMessages, setConvoMessages] = useState<MessageDto[] | null>(
+      null,
+    );
     const socketRef = useRef<Socket | null>(null);
     const joinedConversationRef = useRef<number | null>(null);
     const activeConversationRef = useRef<number | null>(conversationId);
     const pendingMessagesRef = useRef<MessageDto[]>([]);
     const messageIdsRef = useRef<Set<string>>(new Set());
     const optimisticIdsRef = useRef<Set<string>>(new Set());
-    const handlersRef = useRef<UseLiveConvoMessagesOptions | undefined>(options);
+    const handlersRef = useRef<UseLiveConvoMessagesOptions | undefined>(
+      options,
+    );
 
     useEffect(() => {
       handlersRef.current = options;
@@ -403,7 +431,10 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
       (async () => {
         if (cancelled) return;
 
-        socket = io(`${getWebSocketUrl()}/messaging`, buildSocketOptions(getAuthToken));
+        socket = io(
+          `${getWebSocketUrl()}/messaging`,
+          buildSocketOptions(getAuthToken),
+        );
         attachAuthRefresh(socket, onRefreshToken);
         socketRef.current = socket;
 
@@ -427,7 +458,8 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
             }
             const optimisticToRemove = prev.find(
               (msg) =>
-                msg.id.startsWith("temp-") && msg.author.id === incoming.author.id
+                msg.id.startsWith("temp-") &&
+                msg.author.id === incoming.author.id,
             );
             if (optimisticToRemove) {
               optimisticIdsRef.current.delete(optimisticToRemove.id);
@@ -516,7 +548,7 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
           const ids = new Set(initialMessages.map((msg) => msg.id));
           messageIdsRef.current = ids;
           const pending = pendingMessagesRef.current.filter(
-            (msg) => msg.conversationId === conversationId && !ids.has(msg.id)
+            (msg) => msg.conversationId === conversationId && !ids.has(msg.id),
           );
           pendingMessagesRef.current = [];
           setConvoMessages([...initialMessages, ...pending]);
@@ -528,7 +560,10 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
 
       return () => {
         cancelled = true;
-        if (socketRef.current && joinedConversationRef.current === conversationId) {
+        if (
+          socketRef.current &&
+          joinedConversationRef.current === conversationId
+        ) {
           socketRef.current.emit("leave-conversation", { conversationId });
           joinedConversationRef.current = null;
         }
@@ -563,13 +598,14 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
   const useMessagingUnread = () => {
     const [unread, setUnread] = useState<number>(0);
     const [hasUpdates, setHasUpdates] = useState<boolean>(false);
+    const [updateTick, setUpdateTick] = useState(0);
     const socketRef = useRef<Socket | null>(null);
 
     const refreshUnreadCount = useCallback(() => {
-      conversationGetUnreadMessages()
+      conversationGetUnreadSummary()
         .then((res) => {
           if (res.data) {
-            setUnread(res.data.count);
+            setUnread(res.data.totalCount);
             setHasUpdates(false);
           }
         })
@@ -588,12 +624,16 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
 
       (async () => {
         if (cancelled) return;
-        socket = io(`${getWebSocketUrl()}/messaging/overview`, buildSocketOptions(getAuthToken));
+        socket = io(
+          `${getWebSocketUrl()}/messaging/overview`,
+          buildSocketOptions(getAuthToken),
+        );
         attachAuthRefresh(socket, onRefreshToken);
         socketRef.current = socket;
 
         socket.on("conversation:unread", () => {
           setHasUpdates(true);
+          setUpdateTick((tick) => tick + 1);
         });
 
         socket.on("messaging:error", (error) => {
@@ -608,7 +648,14 @@ export const createMessagingHooks = (config: MessagingConnectionConfig) => {
       };
     }, [getWebSocketUrl, getAuthToken]);
 
-    return { unread, refreshUnreadCount, hasUpdates, setUnread, setHasUpdates };
+    return {
+      unread,
+      refreshUnreadCount,
+      hasUpdates,
+      updateTick,
+      setUnread,
+      setHasUpdates,
+    };
   };
 
   return { useConversations, useLiveConvoMessages, useMessagingUnread };

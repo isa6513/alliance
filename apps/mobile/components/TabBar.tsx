@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "expo-router";
 import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import {
   getAwayStatus,
@@ -15,15 +15,10 @@ import {
   notifsGetUnreadCount,
   userGetAwayRanges,
 } from "@alliance/shared/client";
-import {
-  getJoinedConversations,
-  getPendingInvites,
-  useConversations,
-} from "../lib/messages";
+import { useMessagingUnread } from "../lib/messages";
 import { isPathActive } from "../lib/isPathActive";
 import Text, { FontWeight } from "./system/Text";
 import { cn } from "@alliance/shared/styles/util";
-import { useAuth } from "../lib/AuthContext";
 
 const tabs = [
   {
@@ -109,9 +104,13 @@ export default function TabBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user } = useAuth();
   const { data: actions } = useActionsQuery();
-  const { conversations } = useConversations(null);
+  const {
+    unread: unreadMessages,
+    hasUpdates,
+    updateTick,
+    refreshUnreadCount,
+  } = useMessagingUnread();
   const { data: awayRanges = [] } = useQuery({
     queryKey: ["awayRanges"],
     queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
@@ -135,27 +134,25 @@ export default function TabBar() {
       }),
     ).length;
   }, [actions, awayRanges]);
-  const unreadMessages = useMemo(() => {
-    const joinedConversations = getJoinedConversations(conversations, user?.id) ?? [];
-    const pendingInvites = getPendingInvites(conversations, user?.id) ?? [];
 
-    const joinedUnreadCount = joinedConversations.reduce(
-      (total, conversation) => total + (conversation.unreadCount ?? 0),
-      0,
-    );
-    const pendingInviteCount = pendingInvites.reduce(
-      (total, conversation) => total + Math.max(conversation.unreadCount ?? 0, 1),
-      0,
-    );
-
-    return joinedUnreadCount + pendingInviteCount;
-  }, [conversations, user?.id]);
+  useEffect(() => {
+    if (hasUpdates) {
+      refreshUnreadCount();
+    }
+  }, [hasUpdates, updateTick, refreshUnreadCount]);
 
   const tabBadgeCounts: Record<TabPaths, number> = {
     "/": uncompletedTaskCount,
     "/notifications": unreadNotifications,
     "/messages": unreadMessages,
     "/groups": 0,
+  };
+
+  const getBadgeLabel = (count: number) => {
+    if (!count) {
+      return null;
+    }
+    return Math.min(count, 99).toString();
   };
 
   return (
@@ -172,10 +169,7 @@ export default function TabBar() {
         const badgeCount = tabBadgeCounts[tab.href];
         const badgeBackgroundColor =
           tab.href === "/" ? colors.error : colors.text.icon;
-        const badgeLabel =
-          tab.href === "/notifications" && badgeCount > 99
-            ? "99+"
-            : badgeCount.toString();
+        const badgeLabel = getBadgeLabel(badgeCount);
         return (
           <AnimatedTabButton
             key={tab.href}
@@ -196,7 +190,7 @@ export default function TabBar() {
             >
               {tab.label}
             </Text>
-            {badgeCount > 0 && (
+            {badgeLabel && (
               <View
                 className={cn(
                   "absolute rounded-full px-1 items-center justify-center",
