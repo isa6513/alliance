@@ -360,8 +360,7 @@ export default function HomeScreen() {
     handleSubmitSuccess,
   ]);
 
-  const showHomeFeedList =
-    !currentItem && !homeFeedLoading && homeFeedActivities.length > 0;
+  const showHomeFeedList = !homeFeedLoading && homeFeedActivities.length > 0;
 
   const header = (
     <SimplePageTitle title={title}>
@@ -416,7 +415,14 @@ export default function HomeScreen() {
             backgroundColor: "white",
             paddingBottom: 40,
           }}
-          ListHeaderComponent={body}
+          ListHeaderComponent={
+            <>
+              {body}
+              <View className="px-4 pt-4 pb-2 bg-white">
+                <Text className="text-xl">Activity</Text>
+              </View>
+            </>
+          }
           ListFooterComponent={
             homeFeedFetchingNextPage ? (
               <View className="py-4 items-center">
