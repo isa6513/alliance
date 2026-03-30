@@ -126,13 +126,7 @@ function OutputRenderer({
   );
 
   if (!selectedView || !effectiveSchema) {
-    return (
-      <View className={className}>
-        <Text className="text-sm text-zinc-500">
-          No output views configured for this form.
-        </Text>
-      </View>
-    );
+    return null;
   }
 
   if (!resolvedOutput || resolvedOutput.items.length === 0) {

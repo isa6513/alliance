@@ -129,13 +129,7 @@ export function OutputRenderer({
   );
 
   if (!selectedView || !effectiveSchema) {
-    return (
-      <div className={className}>
-        <p className="text-sm text-gray-500">
-          No output views configured for this form.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   if (!resolvedOutput || resolvedOutput.items.length === 0) {

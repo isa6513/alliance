@@ -13,6 +13,7 @@ import {
   actionActivityCommentable,
   actionActivityTransitiveVerb,
 } from "@alliance/shared/lib/actionActivityConstants";
+import { FormSchema } from "@alliance/shared/forms/formschema";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -92,7 +93,11 @@ const UserActivityCard = ({ activity, handleLike }: UserActivityCardProps) => {
           )}
           {activity.formResponseOutput &&
             Object.keys(activity.formResponseOutput.publicAnswers ?? {})
-              .length > 0 && (
+              .length > 0 &&
+            !!(
+              activity.formResponseOutput
+                .schemaSnapshot as unknown as FormSchema
+            ).outputViews?.length && (
               <div className="my-3">
                 <OutputRenderer submission={activity.formResponseOutput} />
               </div>
