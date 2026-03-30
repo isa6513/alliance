@@ -69,11 +69,7 @@ export function shouldTextUser(user: User) {
 }
 
 export function shouldPushUser(user: User) {
-  return (
-    !user.turnedOffAllNotifs &&
-    user.pushNotifsForActions &&
-    process.env.NODE_ENV === 'development'
-  );
+  return !user.turnedOffAllNotifs && user.pushNotifsForActions;
 }
 
 function getPreviewText(body: string) {
