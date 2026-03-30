@@ -37,6 +37,7 @@ type ReminderGroupContentFields = Pick<
   | "textMessage"
   | "pushMessage"
   | "useSuiteTaskCount"
+  | "excludeOptionalActions"
 >;
 
 type ReminderGroupScheduleFields = Pick<
@@ -106,7 +107,7 @@ const COHORT_OPTION_OBJ: Record<ReminderCohortType, string> = {
 };
 
 const COHORT_OPTIONS = Object.entries(COHORT_OPTION_OBJ).map(
-  ([value, label]) => ({ value, label })
+  ([value, label]) => ({ value, label }),
 );
 
 interface ActionReminderFormProps {
@@ -126,7 +127,7 @@ interface ActionReminderFormProps {
   onEventChange?: (eventId: number) => void;
   onSubmit: (
     payload: ActionReminderGroupFormSubmitPayload,
-    recipientCount: number
+    recipientCount: number,
   ) => Promise<void> | void;
 }
 
@@ -148,7 +149,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   onSubmit,
 }) => {
   const [selectedEventId, setSelectedEventId] = useState<number | null>(
-    initialValues.memberActionEventId ?? null
+    initialValues.memberActionEventId ?? null,
   );
   const initialGroup = initialValues.reminderGroup;
   const initialTimingMode: ReminderGroupTimingMode =
@@ -175,24 +176,28 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   const [timingMode, setTimingMode] =
     useState<ReminderGroupTimingMode>(initialTimingMode);
   const [sendAtAbsolute, setSendAtAbsolute] = useState<string>(
-    initialSendAtAbsolute
+    initialSendAtAbsolute,
   );
   const [sendAtHoursFromDeadline, setSendAtHoursFromDeadline] =
     useState<number>(initialSendAtHours);
   const [relativeRangeStartHours, setRelativeRangeStartHours] =
     useState<number>(initialRelativeRangeStartHours);
   const [relativeRangeEndHours, setRelativeRangeEndHours] = useState<number>(
-    initialRelativeRangeEndHours
+    initialRelativeRangeEndHours,
   );
   const [sendRangeStart, setSendRangeStart] =
     useState<string>(initialRangeStart);
   const [sendRangeEnd, setSendRangeEnd] = useState<string>(initialRangeEnd);
   const [name, setName] = useState<string>(
-    initialValues.reminderGroup?.name ?? ""
+    initialValues.reminderGroup?.name ?? "",
   );
 
   const [useSuiteTaskCount, setUseSuiteTaskCount] = useState<boolean>(
-    initialValues.reminderGroup?.useSuiteTaskCount ?? true
+    initialValues.reminderGroup?.useSuiteTaskCount ?? true,
+  );
+
+  const [excludeOptionalActions, setExcludeOptionalActions] = useState<boolean>(
+    initialValues.reminderGroup?.excludeOptionalActions ?? false,
   );
 
   useEffect(() => {
@@ -208,25 +213,25 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   >([]);
 
   const [emailSubject, setEmailSubject] = useState<string>(
-    initialValues.reminderGroup?.emailSubject ?? defaultEmailSubject
+    initialValues.reminderGroup?.emailSubject ?? defaultEmailSubject,
   );
   const [emailMessage, setEmailMessage] = useState<string>(
-    initialValues.reminderGroup?.emailMessage ?? defaultEmailContents
+    initialValues.reminderGroup?.emailMessage ?? defaultEmailContents,
   );
   const [textMessage, setTextMessage] = useState<string>(
-    initialValues.reminderGroup?.textMessage ?? defaultTextMessage
+    initialValues.reminderGroup?.textMessage ?? defaultTextMessage,
   );
   const [pushMessage, setPushMessage] = useState<string>(
-    initialValues.reminderGroup?.pushMessage ?? defaultPushMessage
+    initialValues.reminderGroup?.pushMessage ?? defaultPushMessage,
   );
   const [cohortType, setCohortType] = useState<ReminderCohortType>(
-    initialValues.reminderGroup?.cohortType ?? "all_uncompleted"
+    initialValues.reminderGroup?.cohortType ?? "all_uncompleted",
   );
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>(
-    initialValues.users.map((user) => user.id)
+    initialValues.users.map((user) => user.id),
   );
   const [selectedTagId, setSelectedTagId] = useState<string | null>(
-    initialValues.reminderGroup?.userTag?.id ?? null
+    initialValues.reminderGroup?.userTag?.id ?? null,
   );
   const [localError, setLocalError] = useState<string | null>(null);
   const initialSnapshotRef = useRef<string>("");
@@ -259,7 +264,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
 
   const computedInitialSnapshot = useMemo(() => {
     const userIds = [...initialValues.users.map((user) => user.id)].sort(
-      (a, b) => a - b
+      (a, b) => a - b,
     );
     const reminder = initialValues.reminderGroup;
     return JSON.stringify({
@@ -318,12 +323,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         timingMode,
         useSuiteTaskCount,
         userTagId:
-          cohortType === "tag" ? selectedTagId ?? undefined : undefined,
+          cohortType === "tag" ? (selectedTagId ?? undefined) : undefined,
         userIds: cohortType === "custom" ? selectedUserIds : undefined,
         sendAtAbsolute: timingMode === "absolute" ? sendAtAbsolute : undefined,
         sendAtSecondsFromDeadline:
           timingMode === "from_deadline"
-            ? sendAtSecondsFromDeadline ?? 0
+            ? (sendAtSecondsFromDeadline ?? 0)
             : undefined,
         send_range_start:
           timingMode === "within_range" ? sendRangeStart : undefined,
@@ -337,6 +342,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           timingMode === "within_relative_range"
             ? relativeRangeEndSeconds
             : undefined,
+        excludeOptionalActions,
       },
     }).then((response) => {
       if (response.error) {
@@ -356,6 +362,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     textMessage,
     pushMessage,
     timingMode,
+    excludeOptionalActions,
     sendAtAbsolute,
     sendAtHoursFromDeadline,
     sendRangeStart,
@@ -502,32 +509,32 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     setSendAtHoursFromDeadline(
       nextGroup?.sendAtSecondsFromDeadline != null
         ? nextGroup.sendAtSecondsFromDeadline / 3600
-        : 0
+        : 0,
     );
     setSendRangeStart(nextGroup?.send_range_start ?? new Date().toISOString());
     setSendRangeEnd(
       nextGroup?.send_range_end ??
-        new Date(Date.now() + 60 * 60 * 1000).toISOString()
+        new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     );
     setRelativeRangeStartHours(
       nextGroup?.relative_range_start_seconds_from_deadline != null
         ? nextGroup.relative_range_start_seconds_from_deadline / 3600
-        : 0
+        : 0,
     );
     setRelativeRangeEndHours(
       nextGroup?.relative_range_end_seconds_from_deadline != null
         ? nextGroup.relative_range_end_seconds_from_deadline / 3600
-        : 0
+        : 0,
     );
     setName(initialValues.reminderGroup?.name ?? "");
     setEmailSubject(
-      initialValues.reminderGroup?.emailSubject ?? defaultEmailSubject
+      initialValues.reminderGroup?.emailSubject ?? defaultEmailSubject,
     );
     setEmailMessage(
-      initialValues.reminderGroup?.emailMessage ?? defaultEmailContents
+      initialValues.reminderGroup?.emailMessage ?? defaultEmailContents,
     );
     setTextMessage(
-      initialValues.reminderGroup?.textMessage ?? defaultTextMessage
+      initialValues.reminderGroup?.textMessage ?? defaultTextMessage,
     );
     setCohortType(initialValues.reminderGroup?.cohortType ?? "all_uncompleted");
     setSelectedUserIds(initialValues.users.map((user) => user.id));
@@ -622,13 +629,13 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         Number.isNaN(relativeRangeEndHours)
       ) {
         setLocalError(
-          "Enter both the start and end hours before the deadline."
+          "Enter both the start and end hours before the deadline.",
         );
         return;
       }
       if (relativeRangeStartHours < relativeRangeEndHours) {
         setLocalError(
-          "Window start must be greater than or equal to the window end."
+          "Window start must be greater than or equal to the window end.",
         );
         return;
       }
@@ -649,12 +656,13 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       timingMode,
       memberActionEventId: selectedEventId,
       userIds,
-      userTagId: cohortType === "tag" ? selectedTagId ?? undefined : undefined,
+      userTagId:
+        cohortType === "tag" ? (selectedTagId ?? undefined) : undefined,
       sendAtAbsolute:
         timingMode === "absolute" ? normalizedSendAtAbsolute : undefined,
       sendAtSecondsFromDeadline:
         timingMode === "from_deadline"
-          ? sendAtSecondsFromDeadline ?? 0
+          ? (sendAtSecondsFromDeadline ?? 0)
           : undefined,
       send_range_start:
         timingMode === "within_range" ? normalizedRangeStart : undefined,
@@ -669,6 +677,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           ? relativeRangeEndSeconds
           : undefined,
       useSuiteTaskCount,
+      excludeOptionalActions,
     } satisfies ActionReminderGroupFormSubmitPayload;
 
     console.log(payload);
@@ -682,7 +691,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
 
   const sortedPlans = tentativePlans.sort(
     (a, b) =>
-      new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime()
+      new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime(),
   );
   const firstTentativePlan = sortedPlans[0];
 
@@ -1096,18 +1105,23 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
           />
         )}
       </div>
-      <div>
+      <div className="flex items-center gap-4">
         <LargeCheckbox
           label="Use suite task count"
           checked={useSuiteTaskCount}
           onChange={(checked) => setUseSuiteTaskCount(checked)}
+        />
+        <LargeCheckbox
+          label="Exclude optional actions"
+          checked={excludeOptionalActions}
+          onChange={(checked) => setExcludeOptionalActions(checked)}
         />
       </div>
 
       <div
         className={cn(
           "border border-gray-200 rounded-md bg-zinc-100",
-          !keywordsHelpExpanded && "hover:border-gray-300"
+          !keywordsHelpExpanded && "hover:border-gray-300",
         )}
       >
         <button
@@ -1266,7 +1280,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
               "px-4 py-2 rounded self-start",
               tentativePlans.length > 0 && isProd
                 ? "bg-yellow-600 text-white"
-                : "border border-gray-200"
+                : "border border-gray-200",
             )}
           >
             {isProd && "⚠️"} This will send <b>{tentativePlans.length}</b>{" "}

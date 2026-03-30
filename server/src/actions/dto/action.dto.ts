@@ -57,6 +57,7 @@ export class CreateReminderGroupDto extends PickType(ReminderGroup, [
   'relative_range_start_seconds_from_deadline',
   'relative_range_end_seconds_from_deadline',
   'useSuiteTaskCount',
+  'excludeOptionalActions',
 ]) {
   @ApiPropertyOptional({ type: Number, isArray: true })
   @IsOptional()

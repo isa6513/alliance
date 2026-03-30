@@ -311,6 +311,7 @@ export type ReminderGroup = {
     deadlineEvent?: ActionEvent;
     useSuiteTaskCount: boolean;
     allSent: boolean;
+    excludeOptionalActions: boolean;
 };
 
 export type ActionSuite = {
@@ -1901,6 +1902,7 @@ export type CreateReminderGroupDto = {
     relative_range_start_seconds_from_deadline?: number;
     relative_range_end_seconds_from_deadline?: number;
     useSuiteTaskCount: boolean;
+    excludeOptionalActions: boolean;
     userIds?: Array<number>;
     userTagId?: string;
     suiteId?: number;

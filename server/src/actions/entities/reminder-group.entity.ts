@@ -179,17 +179,23 @@ export class ReminderGroup {
   @IsOptional()
   deadlineEvent?: Ty<ActionEvent>;
 
-  @ApiProperty({ type: Boolean })
+  @ApiProperty()
   @Column({ type: 'boolean', default: true })
   @IsDefined()
   @Allow()
   useSuiteTaskCount: boolean;
 
-  @ApiProperty({ type: Boolean })
+  @ApiProperty()
   @Column({ type: 'boolean', default: false })
   @IsDefined()
   @Allow()
   allSent: boolean;
+
+  @ApiProperty()
+  @Column({ type: 'boolean', default: false })
+  @IsDefined()
+  @Allow()
+  excludeOptionalActions: boolean;
 }
 
 export function firstOccurrenceInRange(

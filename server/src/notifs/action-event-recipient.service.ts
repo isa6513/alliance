@@ -313,8 +313,12 @@ export class ActionEventRecipientService {
     event: Pick<ActionEvent, 'newStatus' | 'action' | 'date'>,
     deadlineEvent: Pick<ActionEvent, 'newStatus' | 'action' | 'date'> | null,
     actionSuite?: ActionSuite,
+    excludeOptionalActions?: boolean,
   ): Promise<User[]> {
-    const actions = actionSuite ? actionSuite.actions : [event.action];
+    const pre_actions = actionSuite ? actionSuite.actions : [event.action];
+    const actions = excludeOptionalActions
+      ? pre_actions.filter((action) => !action.optional)
+      : pre_actions;
 
     const [
       usersWithTags,
@@ -383,6 +387,7 @@ export class ActionEventRecipientService {
     deadlineEvent: Pick<ActionEvent, 'newStatus' | 'action' | 'date'> | null,
     type: ActionEventNotifType,
     suite?: ActionSuite,
+    excludeOptionalActions?: boolean,
   ): Promise<User[]> {
     const uncompleted = (
       await this.findFilteredUsersForEvent(
@@ -390,6 +395,7 @@ export class ActionEventRecipientService {
         deadlineEvent,
         ActionEventNotifType.PersonalReminder,
         suite,
+        excludeOptionalActions,
       )
     ).map((user) => user.id);
 
@@ -408,6 +414,7 @@ export class ActionEventRecipientService {
     deadlineEvent: Pick<ActionEvent, 'newStatus' | 'action' | 'date'> | null,
     type: ActionEventNotifType,
     suite?: ActionSuite,
+    excludeOptionalActions?: boolean,
   ): Promise<User[]> {
     const users = await this.findBaseUsersForEvent({
       action: event.action,
@@ -416,10 +423,17 @@ export class ActionEventRecipientService {
     });
     return type === ActionEventNotifType.Announcement
       ? users
-      : await this.filterForShouldRemind(users, event, deadlineEvent, suite);
+      : await this.filterForShouldRemind(
+          users,
+          event,
+          deadlineEvent,
+          suite,
+          excludeOptionalActions,
+        );
   }
 
   async findReminderGroupCohort(group: ReminderGroup): Promise<User[]> {
+    //TODO
     let users: User[];
     switch (group.cohortType) {
       case ReminderCohortType.Custom:
@@ -434,6 +448,7 @@ export class ActionEventRecipientService {
           group.deadlineEvent ?? null,
           ActionEventNotifType.PersonalReminder,
           group.actionSuite,
+          group.excludeOptionalActions,
         );
         break;
       case ReminderCohortType.GroupLeadsWithUncompleted:
@@ -442,6 +457,7 @@ export class ActionEventRecipientService {
           group.deadlineEvent ?? null,
           ActionEventNotifType.PersonalReminder,
           group.actionSuite,
+          group.excludeOptionalActions,
         );
       case ReminderCohortType.Tag:
         if (!group.userTag) {

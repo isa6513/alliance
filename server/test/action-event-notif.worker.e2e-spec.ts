@@ -1713,4 +1713,316 @@ describe('ActionEventNotifWorker (e2e)', () => {
     expect(notifiedUserIds).toContain(user.id);
     expect(notifiedUserIds).not.toContain(nonResponder.id);
   });
+
+  // --- excludeOptionalActions tests ---
+
+  it('excludeOptionalActions: suite with only optional actions sends no reminders', async () => {
+    const now = Date.now();
+    await clearUserContract(ctx.testUserId);
+
+    const suite = await actionSuiteRepo.save(
+      actionSuiteRepo.create({
+        name: uniqueName('optional-only-suite'),
+      }),
+    );
+
+    const eventDate = new Date(now - 60 * 60 * 1000);
+
+    const { action: optionalAction, memberEvent } =
+      await createActionWithMemberEvent({
+        name: uniqueName('optional-action-only'),
+        eventDate,
+        suite,
+        suiteManaged: true,
+      });
+
+    // Mark the action as optional
+    await actionRepo.update(optionalAction.id, { optional: true });
+
+    const suiteWithActions = await actionSuiteRepo.findOneOrFail({
+      where: { id: suite.id },
+      relations: { actions: true },
+    });
+
+    const user = await userRepo.save(
+      userRepo.create({
+        email: `${uniqueName('opt-only-user')}@example.com`,
+        password: 'pass',
+        name: 'Optional Only User',
+        tags: [ctx.defaultTag],
+        contractEvents: [
+          {
+            type: ContractEventType.SIGNED,
+            date: new Date(now - 72 * 60 * 60 * 1000),
+            automatic: false,
+            contractId: ctx.defaultContractId,
+          } as ContractEvent,
+        ],
+        textNotifsForActions: true,
+        phoneNumber: '+15555553001',
+        phoneNumberValidated: true,
+        emailNotifsForActions: false,
+        turnedOffAllNotifs: false,
+      }),
+    );
+
+    // User has NOT completed the optional action — but with excludeOptionalActions
+    // there are no required actions, so no reminder should be sent.
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.AllUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 5 * 60 * 1000),
+        actionSuite: suiteWithActions,
+        excludeOptionalActions: true,
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    expect(notifs).toHaveLength(0);
+
+    await userRepo.delete({ id: user.id });
+  });
+
+  it('excludeOptionalActions: user with only uncompleted optional actions gets no reminder', async () => {
+    const now = Date.now();
+    await clearUserContract(ctx.testUserId);
+
+    const suite = await actionSuiteRepo.save(
+      actionSuiteRepo.create({
+        name: uniqueName('mixed-suite'),
+      }),
+    );
+
+    const eventDate = new Date(now - 60 * 60 * 1000);
+
+    const { action: requiredAction, memberEvent } =
+      await createActionWithMemberEvent({
+        name: uniqueName('required-action'),
+        eventDate,
+        suite,
+        suiteManaged: true,
+      });
+
+    const { action: optionalAction } = await createActionWithMemberEvent({
+      name: uniqueName('optional-action'),
+      eventDate,
+      suite,
+      suiteManaged: true,
+    });
+
+    // Mark one action as optional
+    await actionRepo.update(optionalAction.id, { optional: true });
+
+    const suiteWithActions = await actionSuiteRepo.findOneOrFail({
+      where: { id: suite.id },
+      relations: { actions: true },
+    });
+
+    const createSuiteUser = async (
+      label: string,
+      phoneSuffix: string,
+    ): Promise<User> =>
+      userRepo.save(
+        userRepo.create({
+          email: `${uniqueName(`excl-opt-${label}`)}@example.com`,
+          password: 'pass',
+          name: `ExclOpt ${label}`,
+          tags: [ctx.defaultTag],
+          contractEvents: [
+            {
+              type: ContractEventType.SIGNED,
+              date: new Date(now - 72 * 60 * 60 * 1000),
+              automatic: false,
+              contractId: ctx.defaultContractId,
+            } as ContractEvent,
+          ],
+          textNotifsForActions: true,
+          phoneNumber: `+1555555${phoneSuffix}`,
+          phoneNumberValidated: true,
+          emailNotifsForActions: false,
+          turnedOffAllNotifs: false,
+        }),
+      );
+
+    // User A: completed required, NOT optional → should NOT get reminder
+    const userA = await createSuiteUser('completedReq', '3101');
+    await recordCompletion(userA, requiredAction);
+
+    // User B: completed neither → SHOULD get reminder (uncompleted required action)
+    const userB = await createSuiteUser('completedNone', '3102');
+
+    // User C: completed both → should NOT get reminder
+    const userC = await createSuiteUser('completedBoth', '3103');
+    await recordCompletion(userC, requiredAction);
+    await recordCompletion(userC, optionalAction);
+
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.AllUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 5 * 60 * 1000),
+        actionSuite: suiteWithActions,
+        excludeOptionalActions: true,
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    const notifiedUserIds = notifs.map((n) => n.user.id);
+
+    // Only userB should get a reminder (uncompleted required action)
+    expect(notifiedUserIds).toContain(userB.id);
+    expect(notifiedUserIds).not.toContain(userA.id);
+    expect(notifiedUserIds).not.toContain(userC.id);
+
+    await userRepo.delete([userA.id, userB.id, userC.id]);
+  });
+
+  it('excludeOptionalActions: GroupLeadsWithUncompleted ignores optional actions', async () => {
+    const now = Date.now();
+
+    const suite = await actionSuiteRepo.save(
+      actionSuiteRepo.create({
+        name: uniqueName('leader-opt-suite'),
+      }),
+    );
+
+    const eventDate = new Date(now - 60 * 60 * 1000);
+
+    const { action: requiredAction, memberEvent } =
+      await createActionWithMemberEvent({
+        name: uniqueName('leader-opt-required'),
+        eventDate,
+        suite,
+        suiteManaged: true,
+      });
+
+    const { action: optionalAction } = await createActionWithMemberEvent({
+      name: uniqueName('leader-opt-optional'),
+      eventDate,
+      suite,
+      suiteManaged: true,
+    });
+
+    await actionRepo.update(optionalAction.id, { optional: true });
+
+    const suiteWithActions = await actionSuiteRepo.findOneOrFail({
+      where: { id: suite.id },
+      relations: { actions: true },
+    });
+
+    const createSignedUser = async (
+      label: string,
+      phoneSuffix: string,
+      overrides: Partial<User> = {},
+    ) =>
+      userRepo.save(
+        userRepo.create({
+          email: `${uniqueName(
+            `leader-opt-${label.toLowerCase().replace(/\s+/g, '-')}`,
+          )}@example.com`,
+          password: 'pass',
+          name: label,
+          tags: [ctx.defaultTag],
+          contractEvents: [
+            {
+              type: ContractEventType.SIGNED,
+              date: new Date(now - 7 * 24 * 60 * 60 * 1000),
+              automatic: false,
+              contractId: ctx.defaultContractId,
+            } as ContractEvent,
+          ],
+          textNotifsForActions: true,
+          phoneNumber: `+1555555${phoneSuffix}`,
+          phoneNumberValidated: true,
+          emailNotifsForActions: false,
+          turnedOffAllNotifs: false,
+          ...overrides,
+        }),
+      );
+
+    // Leader of a community where members completed required but not optional
+    const leaderAllRequiredDone = await createSignedUser(
+      'Leader All Req Done',
+      '4101',
+      { remindAboutUncompletedGroupMembers: true },
+    );
+
+    // Leader of a community where members haven't completed required
+    const leaderWithGaps = await createSignedUser('Leader With Gaps', '4102', {
+      remindAboutUncompletedGroupMembers: true,
+    });
+
+    const communityAllReqDone = await communityRepo.save(
+      communityRepo.create({
+        name: uniqueName('community-all-req-done'),
+        description: 'All required actions done',
+        leaders: [leaderAllRequiredDone],
+        users: [leaderAllRequiredDone],
+      }),
+    );
+
+    const communityWithGaps = await communityRepo.save(
+      communityRepo.create({
+        name: uniqueName('community-with-gaps'),
+        description: 'Has uncompleted required actions',
+        leaders: [leaderWithGaps],
+        users: [leaderWithGaps],
+      }),
+    );
+
+    // Member who completed required but NOT optional
+    const memberReqDone = await createSignedUser('Member Req Done', '4103', {
+      communities: [communityAllReqDone],
+      textNotifsForActions: false,
+    });
+    await recordCompletion(memberReqDone, requiredAction);
+    // Deliberately not completing optionalAction
+    await recordCompletion(leaderAllRequiredDone, requiredAction);
+    await recordCompletion(leaderAllRequiredDone, optionalAction);
+
+    // Member who hasn't completed required
+    const memberNoReq = await createSignedUser('Member No Req', '4104', {
+      communities: [communityWithGaps],
+      textNotifsForActions: false,
+    });
+    await recordCompletion(leaderWithGaps, requiredAction);
+    await recordCompletion(leaderWithGaps, optionalAction);
+
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.GroupLeadsWithUncompleted,
+      {
+        sendAtAbsolute: new Date(now - 5 * 60 * 1000),
+        actionSuite: suiteWithActions,
+        excludeOptionalActions: true,
+        textMessage: 'Leader reminder: #{nmembers} members need help.',
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    const notifiedIds = notifs.map((n) => n.user.id);
+
+    // Only leaderWithGaps should get notified (memberNoReq has uncompleted required action)
+    // leaderAllRequiredDone should NOT be notified (memberReqDone completed all required actions)
+    expect(notifiedIds).toContain(leaderWithGaps.id);
+    expect(notifiedIds).not.toContain(leaderAllRequiredDone.id);
+
+    await userRepo.delete([
+      leaderAllRequiredDone.id,
+      leaderWithGaps.id,
+      memberReqDone.id,
+      memberNoReq.id,
+    ]);
+    await communityRepo.delete([communityAllReqDone.id, communityWithGaps.id]);
+  });
 });

@@ -445,6 +445,7 @@ export class ActionEventReminderService {
       group.deadlineEvent ?? null,
       ActionEventNotifType.PersonalReminder,
       group.actionSuite,
+      group.excludeOptionalActions,
     );
 
     const usersWithCommunities = await this.userService.findByIds(

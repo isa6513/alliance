@@ -26,8 +26,7 @@ export const presetNames = [
   "Group Leads 2 days",
 ] as const;
 
-export type ReminderPresetName = typeof presetNames[number];
-
+export type ReminderPresetName = (typeof presetNames)[number];
 
 export const reminderPresets: Record<
   ReminderPresetName,
@@ -42,6 +41,7 @@ export const reminderPresets: Record<
     emailSubject: defaultAnnouncementEmailSubject,
     pushMessage: defaultAnnouncementPushMessage,
     useSuiteTaskCount: true,
+    excludeOptionalActions: false,
   },
   "Two Day Range": {
     timingMode: "within_relative_range",
@@ -54,6 +54,7 @@ export const reminderPresets: Record<
     name: "24-48h reminder",
     pushMessage: defaultPushMessage,
     useSuiteTaskCount: true,
+    excludeOptionalActions: false,
   },
   "One Day Range": {
     timingMode: "within_relative_range",
@@ -66,6 +67,7 @@ export const reminderPresets: Record<
     name: "6-24h reminder",
     pushMessage: defaultPushMessage,
     useSuiteTaskCount: true,
+    excludeOptionalActions: false,
   },
   "Three Hour": {
     timingMode: "from_deadline",
@@ -77,6 +79,7 @@ export const reminderPresets: Record<
     name: "3 hour reminder",
     pushMessage: defaultPushMessage,
     useSuiteTaskCount: true,
+    excludeOptionalActions: false,
   },
   "Missed Deadline": {
     timingMode: "from_deadline",
@@ -88,6 +91,7 @@ export const reminderPresets: Record<
     name: "Missed deadline message",
     pushMessage: defaultMissedDeadlineTextMessage,
     useSuiteTaskCount: true,
+    excludeOptionalActions: true,
   },
   "Group Leads 3 days": {
     timingMode: "within_relative_range",
@@ -100,6 +104,7 @@ export const reminderPresets: Record<
     name: "Group leads 3 days reminder",
     pushMessage: defaultGroupLeadsTextMessage,
     useSuiteTaskCount: true,
+    excludeOptionalActions: true,
   },
   "Group Leads 2 days": {
     timingMode: "within_relative_range",
@@ -112,5 +117,6 @@ export const reminderPresets: Record<
     name: "Group leads 2 days reminder",
     pushMessage: defaultGroupLeadsTextMessage,
     useSuiteTaskCount: true,
+    excludeOptionalActions: true,
   },
 };

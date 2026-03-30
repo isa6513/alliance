@@ -145,24 +145,16 @@ export class MailService {
     context: ISendMailOptions['context'],
     cid?: string,
   ): Promise<Mail> {
-    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'staging') {
-      return {
-        id: Math.floor(Math.random() * 1000000),
-        sentMessageId: 'test',
-        to: recipient,
-        cid,
-        clickedLink: false,
-        status: EmailStatus.Sent,
-        emailType: emailType,
-        createdAt: new Date(),
-      };
-    }
     const mail = await this.mailRepository.create({
       to: recipient,
       emailType: emailType,
       status: EmailStatus.Pending,
       cid,
     });
+
+    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'staging') {
+      return await this.mailRepository.save(mail);
+    }
 
     const tag =
       process.env.NODE_ENV === 'production' ? 'production' : 'development';
