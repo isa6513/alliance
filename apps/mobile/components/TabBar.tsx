@@ -149,7 +149,6 @@ export default function TabBar() {
     "/messages": unreadMessages,
     "/groups": 0,
   };
-  console.log({ tabBadgeCounts }, "asdf");
 
   const getBadgeLabel = (count: number) => {
     if (!count) {
@@ -173,7 +172,6 @@ export default function TabBar() {
         const badgeBackgroundColor =
           tab.href === "/" ? colors.error : colors.text.icon;
         const badgeLabel = getBadgeLabel(badgeCount);
-        console.log({ tab: tab.href, badgeLabel, badgeCount }, "asdf");
         return (
           <AnimatedTabButton
             key={tab.href}
