@@ -33,9 +33,9 @@ export class NotificationDto {
   @ApiPropertyOptional({ nullable: true })
   mobileAppLocation?: string | null;
 
-  @ApiPropertyOptional({ type: Date })
+  @ApiProperty({ type: Date, nullable: true })
   @Type(() => Date)
-  readAt?: Date;
+  readAt: Date | null;
 
   @ApiProperty({ type: Date })
   @Type(() => Date)
@@ -114,7 +114,7 @@ export class NotificationDto {
     message: string;
     webAppLocation?: string;
     mobileAppLocation?: string;
-    readAt?: Date;
+    readAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
     sendTime: Date;

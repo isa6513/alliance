@@ -1039,7 +1039,7 @@ export type NotificationDto = {
     message: string;
     webAppLocation?: string | null;
     mobileAppLocation?: string | null;
-    readAt?: string;
+    readAt: string | null;
     createdAt: string;
     priority: NotifPriority;
     updatedAt: string;
