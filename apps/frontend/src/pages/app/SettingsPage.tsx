@@ -19,8 +19,6 @@ import { useAuth } from "../../lib/AuthContext";
 import AwayRangesSection from "../../components/AwayRangesSection";
 import TimeZoneSelect from "@alliance/sharedweb/forms/TimeZoneSelect";
 import { CardStyle } from "@alliance/shared/styles/card";
-import { isFeatureEnabled } from "../../lib/config";
-import { Features } from "@alliance/shared/lib/features";
 import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 
@@ -217,8 +215,6 @@ const SettingsPage: React.FC = () => {
     return <div>Not found</div>;
   }
 
-  const showPushSettings = isFeatureEnabled(Features.PushNotifications);
-
   return (
     <CenterLayout>
       <div className="mb-6 relative flex flex-col gap-y-6">
@@ -397,21 +393,19 @@ const SettingsPage: React.FC = () => {
                   yesColor={ButtonColor.Green}
                 />
               </div>
-              {showPushSettings && (
-                <div className="flex flex-row items-center justify-between gap-x-4 py-3">
-                  <span className="font-medium">Push</span>
-                  <YesNoToggle
-                    value={!!editableUser.pushNotifsForActions}
-                    onChange={(next) =>
-                      updateEditableUser({ pushNotifsForActions: next })
-                    }
-                    ariaLabel="Push notifications"
-                    yesLabel="On"
-                    noLabel="Off"
-                    yesColor={ButtonColor.Green}
-                  />
-                </div>
-              )}
+              <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+                <span className="font-medium">Push</span>
+                <YesNoToggle
+                  value={!!editableUser.pushNotifsForActions}
+                  onChange={(next) =>
+                    updateEditableUser({ pushNotifsForActions: next })
+                  }
+                  ariaLabel="Push notifications"
+                  yesLabel="On"
+                  noLabel="Off"
+                  yesColor={ButtonColor.Green}
+                />
+              </div>
             </div>
             <div className="flex flex-col divide-y divide-zinc-200 mt-12 ">
               {user.leaderOfIds.length > 0 ? (
@@ -456,67 +450,63 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          {showPushSettings && (
-            <>
-              <p className="!font-medium mt-6 mb-2">
-                Receive push notifications for:
-              </p>
-              <div className="flex flex-col divide-y divide-zinc-200 border-t border-zinc-200">
-                <div className="flex flex-row items-center justify-between gap-x-4 py-3">
-                  <span className="font-medium">Likes</span>
-                  <YesNoToggle
-                    value={editableUser.pushesForLikes ?? false}
-                    onChange={(next) =>
-                      updateEditableUser({ pushesForLikes: next })
-                    }
-                    ariaLabel="Push notifications for likes"
-                    yesLabel="On"
-                    noLabel="Off"
-                    yesColor={ButtonColor.Green}
-                  />
-                </div>
-                <div className="flex flex-row items-center justify-between gap-x-4 py-3">
-                  <span className="font-medium">Comments</span>
-                  <YesNoToggle
-                    value={editableUser.pushesForComments ?? false}
-                    onChange={(next) =>
-                      updateEditableUser({ pushesForComments: next })
-                    }
-                    ariaLabel="Push notifications for comments"
-                    yesLabel="On"
-                    noLabel="Off"
-                    yesColor={ButtonColor.Green}
-                  />
-                </div>
-                <div className="flex flex-row items-center justify-between gap-x-4 py-3">
-                  <span className="font-medium">Friend requests</span>
-                  <YesNoToggle
-                    value={editableUser.pushesForFriendRequests ?? false}
-                    onChange={(next) =>
-                      updateEditableUser({ pushesForFriendRequests: next })
-                    }
-                    ariaLabel="Push notifications for friend requests"
-                    yesLabel="On"
-                    noLabel="Off"
-                    yesColor={ButtonColor.Green}
-                  />
-                </div>
-                <div className="flex flex-row items-center justify-between gap-x-4 py-3">
-                  <span className="font-medium">Messages</span>
-                  <YesNoToggle
-                    value={editableUser.pushesForMessages ?? false}
-                    onChange={(next) =>
-                      updateEditableUser({ pushesForMessages: next })
-                    }
-                    ariaLabel="Push notifications for messages"
-                    yesLabel="On"
-                    noLabel="Off"
-                    yesColor={ButtonColor.Green}
-                  />
-                </div>
-              </div>
-            </>
-          )}
+          <p className="!font-medium mt-6 mb-2">
+            Receive push notifications for:
+          </p>
+          <div className="flex flex-col divide-y divide-zinc-200 border-t border-zinc-200">
+            <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+              <span className="font-medium">Likes</span>
+              <YesNoToggle
+                value={editableUser.pushesForLikes ?? false}
+                onChange={(next) =>
+                  updateEditableUser({ pushesForLikes: next })
+                }
+                ariaLabel="Push notifications for likes"
+                yesLabel="On"
+                noLabel="Off"
+                yesColor={ButtonColor.Green}
+              />
+            </div>
+            <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+              <span className="font-medium">Comments</span>
+              <YesNoToggle
+                value={editableUser.pushesForComments ?? false}
+                onChange={(next) =>
+                  updateEditableUser({ pushesForComments: next })
+                }
+                ariaLabel="Push notifications for comments"
+                yesLabel="On"
+                noLabel="Off"
+                yesColor={ButtonColor.Green}
+              />
+            </div>
+            <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+              <span className="font-medium">Friend requests</span>
+              <YesNoToggle
+                value={editableUser.pushesForFriendRequests ?? false}
+                onChange={(next) =>
+                  updateEditableUser({ pushesForFriendRequests: next })
+                }
+                ariaLabel="Push notifications for friend requests"
+                yesLabel="On"
+                noLabel="Off"
+                yesColor={ButtonColor.Green}
+              />
+            </div>
+            <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+              <span className="font-medium">Messages</span>
+              <YesNoToggle
+                value={editableUser.pushesForMessages ?? false}
+                onChange={(next) =>
+                  updateEditableUser({ pushesForMessages: next })
+                }
+                ariaLabel="Push notifications for messages"
+                yesLabel="On"
+                noLabel="Off"
+                yesColor={ButtonColor.Green}
+              />
+            </div>
+          </div>
 
           <div className="flex flex-col md:flex-row gap-y-2 gap-x-12 font-medium mt-6 pt-6 border-t border-zinc-200">
             <div>

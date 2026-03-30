@@ -8,7 +8,6 @@ import {
   userMyLocation,
   userUpdate,
 } from "@alliance/shared/client";
-import { Features, isEnabled } from "@alliance/shared/lib/features";
 import { hasSettingsChanges } from "@alliance/shared/lib/settings";
 import { useAuth } from "../../lib/AuthContext";
 import Button, { ButtonColor } from "../../components/system/Button";
@@ -102,10 +101,6 @@ export default function SettingsPage() {
   const hasChanges = useMemo(() => {
     return hasSettingsChanges(editableUser, initialUser);
   }, [editableUser, initialUser]);
-  const showPushSettings = isEnabled(
-    Features.PushNotifications,
-    __DEV__ ? "development" : "production",
-  );
 
   const forgotPassword = useMutation({
     mutationFn: (email: string) => authForgotPassword({ body: { email } }),
@@ -319,15 +314,13 @@ export default function SettingsPage() {
                   updateEditableUser({ textNotifsForActions: value })
                 }
               />
-              {showPushSettings ? (
-                <SettingsToggleRow
-                  label="Push"
-                  value={!!editableUser.pushNotifsForActions}
-                  onChange={(value) =>
-                    updateEditableUser({ pushNotifsForActions: value })
-                  }
-                />
-              ) : null}
+              <SettingsToggleRow
+                label="Push"
+                value={!!editableUser.pushNotifsForActions}
+                onChange={(value) =>
+                  updateEditableUser({ pushNotifsForActions: value })
+                }
+              />
             </View>
 
             <View className="gap-3 mb-4">
@@ -353,43 +346,39 @@ export default function SettingsPage() {
               />
             </View>
 
-            {showPushSettings ? (
-              <>
-                <Text className="mb-2 mt-4" weight={FontWeight.Medium}>
-                  Receive push notifications for:
-                </Text>
-                <View className="gap-3 mb-4">
-                  <SettingsToggleRow
-                    label="Likes"
-                    value={editableUser.pushesForLikes ?? false}
-                    onChange={(value) =>
-                      updateEditableUser({ pushesForLikes: value })
-                    }
-                  />
-                  <SettingsToggleRow
-                    label="Comments"
-                    value={editableUser.pushesForComments ?? false}
-                    onChange={(value) =>
-                      updateEditableUser({ pushesForComments: value })
-                    }
-                  />
-                  <SettingsToggleRow
-                    label="Friend requests"
-                    value={editableUser.pushesForFriendRequests ?? false}
-                    onChange={(value) =>
-                      updateEditableUser({ pushesForFriendRequests: value })
-                    }
-                  />
-                  <SettingsToggleRow
-                    label="Messages"
-                    value={editableUser.pushesForMessages ?? false}
-                    onChange={(value) =>
-                      updateEditableUser({ pushesForMessages: value })
-                    }
-                  />
-                </View>
-              </>
-            ) : null}
+            <Text className="mb-2 mt-4" weight={FontWeight.Medium}>
+              Receive push notifications for:
+            </Text>
+            <View className="gap-3 mb-4">
+              <SettingsToggleRow
+                label="Likes"
+                value={editableUser.pushesForLikes ?? false}
+                onChange={(value) =>
+                  updateEditableUser({ pushesForLikes: value })
+                }
+              />
+              <SettingsToggleRow
+                label="Comments"
+                value={editableUser.pushesForComments ?? false}
+                onChange={(value) =>
+                  updateEditableUser({ pushesForComments: value })
+                }
+              />
+              <SettingsToggleRow
+                label="Friend requests"
+                value={editableUser.pushesForFriendRequests ?? false}
+                onChange={(value) =>
+                  updateEditableUser({ pushesForFriendRequests: value })
+                }
+              />
+              <SettingsToggleRow
+                label="Messages"
+                value={editableUser.pushesForMessages ?? false}
+                onChange={(value) =>
+                  updateEditableUser({ pushesForMessages: value })
+                }
+              />
+            </View>
 
             <View className="mb-4">
               <Text className="mb-2" weight={FontWeight.Medium}>
