@@ -13,6 +13,7 @@ import {
 } from 'typeorm';
 import { PickType } from '@nestjs/swagger';
 import { UserDevice } from 'src/user/entities/user-device.entity';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 export const EXPO_CLIENT = Symbol('EXPO_CLIENT');
 
@@ -146,6 +147,7 @@ export class PushService {
         pushEntities[i].errorCode = ticket.details?.error;
         pushEntities[i].errorMessage = ticket.message;
         console.error(`expo push error: ${ticket.details?.error}`);
+        console.error(`expo push error: ${ticket.message}`);
         if (ticket.details?.error === 'DeviceNotRegistered') {
           const userDevice = await this.userDeviceRepository.findOne({
             where: { expoPushToken: pushEntities[i].expoPushToken },
@@ -160,6 +162,7 @@ export class PushService {
     return await this.pushRepository.save(pushEntities);
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
   async queryExpoStatuses() {
     const pendingPushes = await this.pushRepository.find({
       where: {
@@ -211,6 +214,9 @@ export class PushService {
       } catch (error) {
         console.error(error);
       }
+    }
+    for (const push of pendingPushes) {
+      push.lastCheckedStatusAt = new Date();
     }
     return await this.pushRepository.save(pendingPushes);
   }
