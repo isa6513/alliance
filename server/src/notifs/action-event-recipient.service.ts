@@ -433,7 +433,6 @@ export class ActionEventRecipientService {
   }
 
   async findReminderGroupCohort(group: ReminderGroup): Promise<User[]> {
-    //TODO
     let users: User[];
     switch (group.cohortType) {
       case ReminderCohortType.Custom:
@@ -476,6 +475,7 @@ export class ActionEventRecipientService {
       group.memberActionEvent,
       group.deadlineEvent ?? null,
       group.actionSuite,
+      group.excludeOptionalActions,
     );
   }
 }

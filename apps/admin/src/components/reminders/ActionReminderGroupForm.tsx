@@ -539,6 +539,9 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     setCohortType(initialValues.reminderGroup?.cohortType ?? "all_uncompleted");
     setSelectedUserIds(initialValues.users.map((user) => user.id));
     setSelectedTagId(initialValues.reminderGroup?.userTag?.id ?? null);
+    setExcludeOptionalActions(
+      initialValues.reminderGroup?.excludeOptionalActions ?? false,
+    );
     setLocalError(null);
   }, [
     computedInitialSnapshot,
