@@ -16,9 +16,7 @@ const RoadmapPage: React.FC = () => {
   return (
     <InfoSubpage tocSections={tocSections}>
       <section className="gap-y-4 flex flex-col">
-        <h1 id="experimental-phase" className="text-title-medium">
-          Roadmap
-        </h1>
+        <h1 className="text-title-medium">Roadmap</h1>
         <p className="text-zinc-500 mb-4">Last updated: March 30, 2026</p>
         <h2
           id="experimental-phase"
