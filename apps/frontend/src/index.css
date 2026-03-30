@@ -180,6 +180,10 @@ select {
   @apply font-serif font-semibold text-2xl md:text-3xl;
 }
 
+.text-title-medium {
+  @apply font-serif font-semibold text-3xl md:text-4xl;
+}
+
 .text-title-large {
   @apply font-serif font-semibold text-4xl md:text-5xl;
 }

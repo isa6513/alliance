@@ -15,11 +15,11 @@ const RoadmapPage: React.FC = () => {
 
   return (
     <InfoSubpage tocSections={tocSections}>
-      <p className="text-zinc-500">Last updated: February 25, 2026</p>
       <section className="gap-y-4 flex flex-col">
-        <h1 id="experimental-phase" className="text-title">
+        <h1 id="experimental-phase" className="text-title-medium">
           Roadmap
         </h1>
+        <p className="text-zinc-500 mb-4">Last updated: March 30, 2026</p>
         <h2
           id="experimental-phase"
           className="text-2xl font-semibold text-black"
@@ -105,16 +105,8 @@ const RoadmapPage: React.FC = () => {
         <p>Right now, the office is:</p>
         <ul className="list-disc list-inside pl-4 space-y-2">
           <li>Planning weekly actions that test specific hypotheses.</li>
-          <li>
-            Developing processes so that group leads can help and communicate
-            with other group leads.
-          </li>
+          <li>Working to improve invite flows.</li>
           <li>Developing a mobile app.</li>
-          <li>Reorganizing our information and action pages.</li>
-          <li>
-            Piloting videos and textual updates that help members better
-            understand the Alliance.
-          </li>
           <li>Hiring.</li>
         </ul>
       </section>
