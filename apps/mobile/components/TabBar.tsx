@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "expo-router";
 import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
 import { colors } from "../lib/style/colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import {
   getAwayStatus,
@@ -15,10 +15,15 @@ import {
   notifsGetUnreadCount,
   userGetAwayRanges,
 } from "@alliance/shared/client";
-import { useMessagingUnread } from "../lib/messages";
+import {
+  getJoinedConversations,
+  getPendingInvites,
+  useConversations,
+} from "../lib/messages";
 import { isPathActive } from "../lib/isPathActive";
 import Text, { FontWeight } from "./system/Text";
 import { cn } from "@alliance/shared/styles/util";
+import { useAuth } from "../lib/AuthContext";
 
 const tabs = [
   {
@@ -104,14 +109,9 @@ export default function TabBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user } = useAuth();
   const { data: actions } = useActionsQuery();
-  const {
-    unread: unreadMessages,
-    hasUpdates: messageHasUpdates,
-    setUnread: setUnreadMessages,
-    setHasUpdates: setMessageHasUpdates,
-    refreshUnreadCount: refreshUnreadMessages,
-  } = useMessagingUnread();
+  const { conversations } = useConversations(null);
   const { data: awayRanges = [] } = useQuery({
     queryKey: ["awayRanges"],
     queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
@@ -135,27 +135,26 @@ export default function TabBar() {
       }),
     ).length;
   }, [actions, awayRanges]);
-  const isOnMessagesTab = pathname.startsWith("/messages");
+  const unreadMessages = useMemo(() => {
+    const joinedConversations = getJoinedConversations(conversations, user?.id) ?? [];
+    const pendingInvites = getPendingInvites(conversations, user?.id) ?? [];
 
-  useEffect(() => {
-    if (!isOnMessagesTab && messageHasUpdates) {
-      refreshUnreadMessages();
-    }
-  }, [isOnMessagesTab, messageHasUpdates, refreshUnreadMessages]);
+    const joinedUnreadCount = joinedConversations.reduce(
+      (total, conversation) => total + (conversation.unreadCount ?? 0),
+      0,
+    );
+    const pendingInviteCount = pendingInvites.reduce(
+      (total, conversation) => total + Math.max(conversation.unreadCount ?? 0, 1),
+      0,
+    );
 
-  useEffect(() => {
-    if (!isOnMessagesTab) {
-      return;
-    }
-
-    setUnreadMessages(0);
-    setMessageHasUpdates(true);
-  }, [isOnMessagesTab, setMessageHasUpdates, setUnreadMessages]);
+    return joinedUnreadCount + pendingInviteCount;
+  }, [conversations, user?.id]);
 
   const tabBadgeCounts: Record<TabPaths, number> = {
     "/": uncompletedTaskCount,
     "/notifications": unreadNotifications,
-    "/messages": isOnMessagesTab ? 0 : unreadMessages,
+    "/messages": unreadMessages,
     "/groups": 0,
   };
 
