@@ -38,7 +38,7 @@ export default {
       googleServicesFile: IS_DEV
         ? "./google-services-dev.json"
         : "./google-services.json",
-      versionCode: 5,
+      versionCode: 7,
     },
     web: {
       bundler: "metro",
