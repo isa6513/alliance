@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import { View, TextInput, TextInputProps } from "react-native";
 import Text, { FontWeight } from "./Text";
 import { cn } from "@alliance/shared/styles/util";
@@ -9,6 +9,8 @@ interface InputProps extends TextInputProps {
   helperText?: string;
   required?: boolean;
   containerClassName?: string;
+  rightElement?: ReactNode;
+  rightElementClassName?: string;
 }
 
 export default function Input({
@@ -17,10 +19,13 @@ export default function Input({
   helperText,
   required = false,
   containerClassName,
+  rightElement,
+  rightElementClassName,
   className,
   ...textInputProps
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
+  const hasRightElement = Boolean(rightElement);
 
   const borderColorClass = error
     ? "border-red-500"
@@ -30,9 +35,14 @@ export default function Input({
 
   const inputContainerClasses = cn(
     "border rounded-lg bg-white px-3 min-h-11",
+    hasRightElement && "flex-row items-center",
     borderColorClass,
   );
-  const inputClasses = cn("text-base text-zinc-700 py-3", className);
+  const inputClasses = cn(
+    "text-base text-zinc-700 py-3",
+    hasRightElement && "flex-1",
+    className,
+  );
 
   return (
     <View className={containerClassName}>
@@ -51,6 +61,9 @@ export default function Input({
           underlineColorAndroid="transparent"
           {...textInputProps}
         />
+        {hasRightElement ? (
+          <View className={cn("ml-2", rightElementClassName)}>{rightElement}</View>
+        ) : null}
       </View>
       {error && <Text className="text-xs text-red-500 mt-1">{error}</Text>}
       {helperText && !error && (

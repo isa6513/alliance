@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "../../lib/AuthContext";
 import Button from "../../components/system/Button";
 import Input from "../../components/system/Input";
+import PasswordVisibilityToggle from "../../components/system/PasswordVisibilityToggle";
 import Text, { FontWeight } from "../../components/system/Text";
 import Card, { CardStyle } from "../../components/system/Card";
 
@@ -12,6 +13,7 @@ const LoginScreen = () => {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async () => {
@@ -63,16 +65,24 @@ const LoginScreen = () => {
                 placeholder="Password"
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 textContentType="password"
+                autoComplete="current-password"
                 keyboardType="default"
                 autoCapitalize="none"
                 autoCorrect={false}
+                rightElement={
+                  <PasswordVisibilityToggle
+                    visible={showPassword}
+                    onPress={() => setShowPassword((current) => !current)}
+                  />
+                }
               />
             </View>
             <Button
               onPress={handleLogin}
               disabled={isSubmitting || !email || !password}
+              loading={isSubmitting}
               className="rounded-md w-full self-center py-4!"
             >
               <Text className="text-white text-base" weight={FontWeight.Medium}>

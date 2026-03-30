@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   TouchableOpacity,
-  ActivityIndicator,
   ScrollView,
   Alert,
 } from "react-native";
@@ -10,6 +9,7 @@ import { Link, useRouter } from "expo-router";
 import { authRegister } from "@alliance/shared/client";
 import Button from "../../components/system/Button";
 import Input from "../../components/system/Input";
+import PasswordVisibilityToggle from "../../components/system/PasswordVisibilityToggle";
 import Text from "../../components/system/Text";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 
@@ -18,6 +18,7 @@ const SignupScreen = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({
     name: "",
@@ -143,21 +144,24 @@ const SignupScreen = () => {
                 setPassword(text);
                 if (errors.password) setErrors({ ...errors, password: "" });
               }}
-              secureTextEntry
+              secureTextEntry={!showPassword}
+              autoComplete="new-password"
               autoCapitalize="none"
               autoCorrect={false}
+              rightElement={
+                <PasswordVisibilityToggle
+                  visible={showPassword}
+                  onPress={() => setShowPassword((current) => !current)}
+                />
+              }
             />
             {errors.password ? (
               <Text className="text-sm text-zinc-500">{errors.password}</Text>
             ) : null}
           </View>
 
-          <Button onPress={handleSignup} disabled={isSubmitting}>
-            {isSubmitting ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text className="text-sm text-zinc-500">Create Account</Text>
-            )}
+          <Button onPress={handleSignup} disabled={isSubmitting} loading={isSubmitting}>
+            <Text className="text-white text-base">Create Account</Text>
           </Button>
 
           <View className="flex flex-row gap-x-2">
