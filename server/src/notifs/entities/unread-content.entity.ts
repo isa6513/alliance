@@ -3,7 +3,7 @@ import type { Ty } from 'src/tasks/entities/type';
 import { User } from '../../user/entities/user.entity';
 import { Column } from 'typeorm';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export enum UnreadContentType {
@@ -44,24 +44,24 @@ export class UnreadContent {
   sendTime: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
-  @ApiPropertyOptional({ type: Date })
+  @ApiProperty({ type: Date, nullable: true })
   @Type(() => Date)
-  readAt?: Date;
+  readAt: Date | null;
 
   @Column({ default: true })
   @ApiProperty()
   shouldPush: boolean;
 
   @Column({ type: 'timestamptz', nullable: true })
-  @ApiPropertyOptional({ type: Date })
+  @ApiProperty({ type: Date, nullable: true })
   @Type(() => Date)
-  pushDispatchedAt?: Date;
+  pushDispatchedAt: Date | null;
 
-  @Column({ nullable: true })
-  @ApiPropertyOptional()
-  pushClaimedBy?: string;
+  @Column({ type: 'text', nullable: true })
+  @ApiProperty({ nullable: true })
+  pushClaimedBy: string | null;
 
-  @Column({ nullable: true })
-  @ApiPropertyOptional()
-  pushClaimedAt?: Date;
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiProperty({ type: Date, nullable: true })
+  pushClaimedAt: Date | null;
 }

@@ -134,7 +134,7 @@ export class NotifPushDispatcherWorker {
             body: notif.message,
             screen: notif.mobileAppLocation || notif.webAppLocation,
             notification: notif,
-            idempotencyKey: notif.id.toString(),
+            idempotencyKey: `${notif.id}-${notif.updatedAt.getTime()}`,
           },
           notif.sendTime,
         )),

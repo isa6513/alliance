@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import type { Repository } from 'typeorm';
+import { IsNull, type Repository } from 'typeorm';
 import {
   Notification,
   NotificationCategory,
@@ -77,6 +77,12 @@ export class LikeNotificationService {
       const updatedUsers = [...(existingNotif.associatedUsers ?? []), liker];
       existingNotif.associatedUsers = updatedUsers;
       existingNotif.groupingCount = updatedUsers.length;
+      existingNotif.readAt = null;
+      existingNotif.sendTime = new Date();
+      existingNotif.shouldPush = true;
+      existingNotif.pushClaimedBy = null;
+      existingNotif.pushClaimedAt = null;
+      existingNotif.pushDispatchedAt = null;
       existingNotif.message = this.buildMessage({
         targetType,
         count: updatedUsers.length,
@@ -122,6 +128,7 @@ export class LikeNotificationService {
         user: { id: params.ownerId },
         groupingKey,
         category: NotificationCategory.Likes,
+        readAt: IsNull(),
       },
       relations: { associatedUsers: true },
     });

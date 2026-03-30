@@ -904,6 +904,69 @@ describe('Forum (e2e)', () => {
       expect(likeNotifs[0].groupingCount).toBe(2);
     });
 
+    it('creates a new post like notification after the previous one is read', async () => {
+      const postResponse = await request(ctx.app.getHttpServer())
+        .post('/forum/posts')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({
+          title: 'Post With Read Like Notification',
+          editableContent: {
+            body: 'Body',
+            attachments: [],
+          },
+          visibleAt: new Date(),
+        } satisfies CreatePostDto)
+        .expect(201);
+
+      const postId = postResponse.body.id;
+      const groupingKey = `forum_like:post:${postId}:user:${ctx.testUserId}`;
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/posts/${postId}/like`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(201);
+
+      let likeNotifs = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.Likes,
+          groupingKey,
+        },
+        order: { createdAt: 'ASC' },
+      });
+
+      expect(likeNotifs).toHaveLength(1);
+
+      await request(ctx.app.getHttpServer())
+        .post(`/notifs/read/${likeNotifs[0].id}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(201);
+
+      const { token: secondLikerToken, user: secondLiker } =
+        await createExtraUserAndToken();
+
+      await request(ctx.app.getHttpServer())
+        .post(`/forum/posts/${postId}/like`)
+        .set('Authorization', `Bearer ${secondLikerToken}`)
+        .expect(201);
+
+      likeNotifs = await notifRepo.find({
+        where: {
+          user: { id: ctx.testUserId },
+          category: NotificationCategory.Likes,
+          groupingKey,
+        },
+        order: { createdAt: 'ASC' },
+      });
+
+      expect(likeNotifs).toHaveLength(2);
+      expect(likeNotifs[1].groupingCount).toBe(1);
+      expect(likeNotifs[1].message).toBe(
+        `${secondLiker.name} liked your post: Post With Read Like Notification`,
+      );
+      expect(likeNotifs[1].readAt).toBeNull();
+    });
+
     // it('creates a new comment like notification after the previous one is read', async () => {
     //   const postResponse = await request(ctx.app.getHttpServer())
     //     .post('/forum/posts')

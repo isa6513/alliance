@@ -111,9 +111,9 @@ export class Notification {
   @ApiProperty({ nullable: true })
   mobileAppLocation: string;
 
-  @Column({ nullable: true })
-  @ApiPropertyOptional()
-  readAt?: Date;
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiProperty({ type: Date, nullable: true })
+  readAt: Date | null;
 
   @CreateDateColumnTz()
   @ApiProperty()
@@ -141,17 +141,17 @@ export class Notification {
   shouldPush: boolean;
 
   @Column({ type: 'timestamptz', nullable: true })
-  @ApiPropertyOptional({ type: Date })
+  @ApiProperty({ type: Date, nullable: true })
   @Type(() => Date)
-  pushDispatchedAt?: Date;
+  pushDispatchedAt: Date | null;
 
-  @Column({ nullable: true })
-  @ApiPropertyOptional()
-  pushClaimedBy?: string;
+  @Column({ type: 'text', nullable: true })
+  @ApiProperty({ nullable: true })
+  pushClaimedBy: string | null;
 
-  @Column({ nullable: true })
-  @ApiPropertyOptional()
-  pushClaimedAt?: Date;
+  @Column({ type: 'timestamptz', nullable: true })
+  @ApiProperty({ type: Date, nullable: true })
+  pushClaimedAt: Date | null;
 
   // Relations
 

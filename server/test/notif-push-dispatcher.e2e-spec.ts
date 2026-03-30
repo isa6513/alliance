@@ -241,6 +241,43 @@ describe('NotifPushDispatcher – new device filtering (e2e)', () => {
       expect(messages[0].body).toBe('Test push notification');
     });
 
+    it('can send a second push when a grouped like notification is updated', async () => {
+      const user = await createUser({ pushesForLikes: true });
+      const now = new Date();
+      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+      await createDevice(user, oneHourAgo);
+
+      const notif = await createNotification(user, oneHourAgo, {
+        category: NotificationCategory.Likes,
+        message: 'First like',
+      });
+
+      const firstMessages =
+        await dispatcher.findNotificationPushes('test-dispatch-likes-1');
+      expect(firstMessages).toHaveLength(1);
+      expect(firstMessages[0].body).toBe('First like');
+
+      const firstPushes = await pushService.sendMessages(firstMessages);
+      expect(firstPushes).toHaveLength(1);
+
+      await notifRepo.update(notif.id, {
+        message: 'Second like',
+        shouldPush: true,
+        pushClaimedBy: null,
+        pushClaimedAt: null,
+        pushDispatchedAt: null,
+      });
+
+      const secondMessages =
+        await dispatcher.findNotificationPushes('test-dispatch-likes-2');
+      expect(secondMessages).toHaveLength(1);
+      expect(secondMessages[0].body).toBe('Second like');
+
+      const secondPushes = await pushService.sendMessages(secondMessages);
+      expect(secondPushes).toHaveLength(1);
+    });
+
     it('only pushes to the pre-existing device, not the new one', async () => {
       const user = await createUser();
       const now = new Date();
