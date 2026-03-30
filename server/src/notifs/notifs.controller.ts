@@ -21,6 +21,7 @@ import {
   MarkUnreadContentReadDto,
   ReadNotificationQueryDto,
 } from './dto/unread-content.dto';
+import { UnreadCountDto } from './dto/unread-count.dto';
 
 @Controller('notifs')
 export class NotifsController {
@@ -39,8 +40,8 @@ export class NotifsController {
 
   @Get('unread-count')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ schema: { type: 'number' } })
-  getUnreadCount(@Request() req: JwtRequest): Promise<number> {
+  @ApiOkResponse({ type: UnreadCountDto })
+  getUnreadCount(@Request() req: JwtRequest): Promise<UnreadCountDto> {
     return this.notifsService.getUnreadCount(req.user.sub);
   }
 

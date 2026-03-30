@@ -1050,6 +1050,10 @@ export type NotificationDto = {
     contentId?: number;
 };
 
+export type UnreadCountDto = {
+    unreadCount: number;
+};
+
 export type MarkUnreadContentReadDto = {
     contentType: UnreadContentType;
     contentIds: Array<number>;
@@ -4230,7 +4234,7 @@ export type NotifsGetUnreadCountData = {
 };
 
 export type NotifsGetUnreadCountResponses = {
-    200: number;
+    200: UnreadCountDto;
 };
 
 export type NotifsGetUnreadCountResponse = NotifsGetUnreadCountResponses[keyof NotifsGetUnreadCountResponses];

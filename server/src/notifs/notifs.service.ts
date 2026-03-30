@@ -17,6 +17,7 @@ import {
   NotificationSourceType,
 } from './dto/notification.dto';
 import { MarkUnreadContentReadDto } from './dto/unread-content.dto';
+import { UnreadCountDto } from './dto/unread-count.dto';
 import {
   NOTIFICATION_CATEGORY_PRIORITIES,
   Notification,
@@ -131,7 +132,7 @@ export class NotifsService {
     return limit !== undefined ? filtered.slice(0, limit) : filtered;
   }
 
-  async getUnreadCount(userId: number): Promise<number> {
+  async getUnreadCount(userId: number): Promise<UnreadCountDto> {
     const [notifCount, unreadContentCount] = await Promise.all([
       this.notifsRepository.count({
         where: {
@@ -148,7 +149,7 @@ export class NotifsService {
         },
       }),
     ]);
-    return notifCount + unreadContentCount;
+    return { unreadCount: notifCount + unreadContentCount };
   }
 
   findOne(id: number) {

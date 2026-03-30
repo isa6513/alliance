@@ -65,7 +65,9 @@ export const NotificationsProvider = ({
           notifsGetUnreadCount(),
         ]);
         if (data) setNotifications(data);
-        if (unreadCountData !== undefined) setUnreadCount(unreadCountData);
+        if (unreadCountData !== undefined) {
+          setUnreadCount(unreadCountData.unreadCount);
+        }
       } else {
         const { data } = await notifsFindAll();
         if (!data) return;
