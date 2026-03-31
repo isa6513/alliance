@@ -50,7 +50,7 @@ resource "aws_security_group" "monitoring_sg" {
 
 resource "aws_instance" "monitoring" {
   ami                         = "ami-05572e392e80aee89"
-  instance_type               = "t3a.micro"
+  instance_type               = "t3a.small"
   subnet_id                   = module.vpc.public_subnets[0]
   vpc_security_group_ids      = [aws_security_group.monitoring_sg.id]
   associate_public_ip_address = true
