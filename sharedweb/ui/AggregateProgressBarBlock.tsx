@@ -8,6 +8,7 @@ export interface AggregateProgressBarBlockProps {
   titleClassName: string;
   captionClassName: string;
   className?: string;
+  dark?: boolean;
 }
 
 /**
@@ -18,6 +19,7 @@ export default function AggregateProgressBarBlock({
   titleClassName,
   captionClassName,
   className,
+  dark = false,
 }: AggregateProgressBarBlockProps) {
   const numerator = view.numerator.value ?? 0;
   const denominator = view.denominator.value ?? 0;
@@ -29,6 +31,7 @@ export default function AggregateProgressBarBlock({
       {title ? <p className={titleClassName}>{title}</p> : null}
       <CompletedBar
         percentage={completedBarPercentage(numerator, denominator)}
+        dark={dark}
       />
       <p className={captionClassName}>
         {caption ? <>{`${caption} `}</> : null}

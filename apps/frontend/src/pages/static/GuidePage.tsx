@@ -184,7 +184,7 @@ const GuidePage: React.FC = () => {
                   abide by our membership contract.
                 </GuideP>
                 <div className="mt-12 flex flex-col gap-y-4">
-                  <MemberContract id="contract" className="bg-zinc-50 p-6" />
+                  <MemberContract id="contract" className="bg-white p-6" />
                   <p className="text-center text-zinc-500">
                     Our current membership contract
                   </p>
@@ -196,9 +196,9 @@ const GuidePage: React.FC = () => {
                 <GuideP>
                   Right now, we are taking small-scale actions focused on
                   learning, not direct impact. Here are examples of actions we
-                  have taken recently:
+                  have taken:
                 </GuideP>
-                <div className="my-8">
+                <div className="my-6">
                   <ExampleActionCardList />
                 </div>
                 <GuideP>

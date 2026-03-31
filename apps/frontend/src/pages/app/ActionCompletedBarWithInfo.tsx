@@ -9,13 +9,13 @@ import { href, Link } from "react-router";
 import { cn } from "@alliance/shared/styles/util";
 import { useMemo } from "react";
 
-interface ActionCompletedBarWithInfoProps
-  extends ActionCompletedBarWithInfoPropsShared {
+interface ActionCompletedBarWithInfoProps extends ActionCompletedBarWithInfoPropsShared {
   className?: string;
   textSize?: "sm" | "base";
   textColor?: string;
   showInfoTooltip?: boolean;
   seeAllLink?: boolean;
+  dark?: boolean;
 }
 
 const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
@@ -26,13 +26,14 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
   textColor = "zinc-500",
   showInfoTooltip = false,
   seeAllLink = false,
+  dark = false,
 }: ActionCompletedBarWithInfoProps) => {
   const { labelString, percentage } = getCompletedPercentage(action);
 
   const completedFriends = useMemo(() => {
     return (
       friendActivities?.filter(
-        (activity) => activity.type === "user_completed"
+        (activity) => activity.type === "user_completed",
       ) ?? []
     ).map((activity) => activity.user);
   }, [friendActivities]);
@@ -75,7 +76,7 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
           <UserProfilePicRow users={completedFriends} />
         )}
       </div>
-      <CompletedBar percentage={percentage} />
+      <CompletedBar percentage={percentage} dark={dark} />
     </div>
   );
 };

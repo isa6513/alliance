@@ -34,7 +34,7 @@ Members of the Alliance are individuals that have signed and abide by the follow
 "
             />
 
-            <MemberContract id="contract" />
+            <MemberContract id="contract" className="bg-white p-6" />
 
             <MarkdownWrapper
               id="foundation-2"

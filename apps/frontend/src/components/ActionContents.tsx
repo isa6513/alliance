@@ -134,13 +134,14 @@ const ActionContents = () => {
             {progressViews.map((view) => (
               <div
                 key={view.id}
-                className="border border-zinc-200 rounded-md p-4 flex flex-col gap-y-2"
+                className="bg-grey-0 rounded-md p-6 flex flex-col gap-y-2"
               >
                 <AggregateProgressBarBlock
                   view={view}
                   titleClassName="font-semibold text-lg text-zinc-900"
                   captionClassName="text-sm text-zinc-600"
                   className="flex flex-col gap-y-2"
+                  dark
                 />
               </div>
             ))}

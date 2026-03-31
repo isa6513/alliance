@@ -55,7 +55,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         <p className="mt-1 text-zinc-500 text-sm">{description}</p>
       )}
       {showCompletedBar && (
-        <Card style={CardStyle.WhiteBorder} className="p-5 mt-2">
+        <Card style={CardStyle.WhiteBorder} className="p-6 mt-2">
           <ActionCompletedBarWithInfo
             friendActivities={friendActivities}
             action={action}
@@ -63,6 +63,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
             textColor="zinc-800"
             showInfoTooltip
             seeAllLink
+            dark
           />
         </Card>
       )}
