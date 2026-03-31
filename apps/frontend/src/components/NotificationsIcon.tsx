@@ -57,8 +57,7 @@ const NotificationsIcon = () => {
       window.removeEventListener("resize", clampPanel);
       window.removeEventListener("scroll", clampPanel, true);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ref from useOutsideClick is a stable useRef
-  }, [isOpen]);
+  }, [isOpen, ref]);
 
   return (
     <div
