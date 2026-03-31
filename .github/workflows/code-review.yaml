@@ -180,8 +180,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           REVIEW_TEXT: ${{ steps.combine_reviews.outputs.combined_final_message }}
-          # Adjust to your local clone path:
-          CURSOR_FILE_PREFIX: "cursor://file//Users/caseymanning/Documents/alliance/webapp"
+          CURSOR_FILE_PREFIX: "cursor://file//Users/charles/github/alliance"
         run: |
           set -euo pipefail
 
