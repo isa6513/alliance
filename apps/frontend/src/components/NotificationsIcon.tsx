@@ -1,6 +1,6 @@
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useCallback, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { href, useNavigate } from "react-router";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
 import { cn } from "@alliance/shared/styles/util";
@@ -8,8 +8,12 @@ import { Bell } from "lucide-react";
 import { NAV_BAR_ICON_HEIGHT } from "@alliance/shared/lib/constants";
 import NotificationList from "./NotificationList";
 
+const VIEWPORT_EDGE_PX = 8;
+
 const NotificationsIcon = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [panelShiftX, setPanelShiftX] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
   const ref = useOutsideClick(() => setIsOpen(false));
   const {
     notifications,
@@ -22,6 +26,33 @@ const NotificationsIcon = () => {
   const toggle = useCallback(() => {
     setIsOpen(!isOpen);
   }, [isOpen]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setPanelShiftX(0);
+      return;
+    }
+    const clampPanel = () => {
+      const trigger = ref.current;
+      const panel = panelRef.current;
+      if (!trigger || !panel) return;
+      const iw = window.innerWidth;
+      const w = panel.offsetWidth;
+      const anchorRight = trigger.getBoundingClientRect().right;
+      const naturalLeft = anchorRight - w;
+      const minLeft = VIEWPORT_EDGE_PX;
+      const maxLeft = iw - VIEWPORT_EDGE_PX - w;
+      const left = Math.max(minLeft, Math.min(naturalLeft, maxLeft));
+      setPanelShiftX(left - naturalLeft);
+    };
+    clampPanel();
+    window.addEventListener("resize", clampPanel);
+    window.addEventListener("scroll", clampPanel, true);
+    return () => {
+      window.removeEventListener("resize", clampPanel);
+      window.removeEventListener("scroll", clampPanel, true);
+    };
+  }, [isOpen, notifications.length, ref]);
 
   return (
     <div
@@ -42,11 +73,17 @@ const NotificationsIcon = () => {
       )}
       {isOpen && (
         <div
+          ref={panelRef}
           className={cn(
             "absolute right-0 top-full mt-1 z-50",
             "shadow-lg/5 bg-white rounded p-4 space-y-2 max-h-[500px] overflow-y-auto cursor-default",
             "w-[min(450px,calc(100vw-1rem))]",
           )}
+          style={
+            panelShiftX !== 0
+              ? { transform: `translateX(${panelShiftX}px)` }
+              : undefined
+          }
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex flex-col md:flex-row justify-between items-center mb-6">
