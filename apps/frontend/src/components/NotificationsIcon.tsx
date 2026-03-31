@@ -1,6 +1,6 @@
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useCallback, useLayoutEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { href, useNavigate } from "react-router";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
 import { cn } from "@alliance/shared/styles/util";
@@ -8,15 +8,8 @@ import { Bell } from "lucide-react";
 import { NAV_BAR_ICON_HEIGHT } from "@alliance/shared/lib/constants";
 import NotificationList from "./NotificationList";
 
-const DROPDOWN_PREFERRED_WIDTH = 450;
-
 const NotificationsIcon = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownStyle, setDropdownStyle] = useState<{
-    left?: number;
-    width?: number;
-    top?: number;
-  }>({});
   const ref = useOutsideClick(() => setIsOpen(false));
   const {
     notifications,
@@ -30,26 +23,11 @@ const NotificationsIcon = () => {
     setIsOpen(!isOpen);
   }, [isOpen]);
 
-  useLayoutEffect(() => {
-    if (isOpen && ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      const left = Math.max(0, rect.right - DROPDOWN_PREFERRED_WIDTH);
-      const width = Math.min(DROPDOWN_PREFERRED_WIDTH, rect.right - left);
-      setDropdownStyle({
-        left,
-        width,
-        top: rect.bottom + 4,
-      });
-    } else {
-      setDropdownStyle({});
-    }
-  }, [isOpen, ref]);
-
   return (
     <div
       className={cn(
         "bg-grey-2 hover:bg-grey-3 text-black",
-        "w-12 h-12 rounded-full flex items-center justify-center cursor-pointer relative",
+        "w-12 h-12 rounded-full flex items-center justify-center cursor-pointer relative overflow-visible",
       )}
       onClick={toggle}
       ref={ref}
@@ -64,12 +42,11 @@ const NotificationsIcon = () => {
       )}
       {isOpen && (
         <div
-          className="fixed shadow-lg/5 bg-white rounded p-4 space-y-2 max-h-[500px] overflow-y-auto cursor-default z-50"
-          style={{
-            left: dropdownStyle.left,
-            width: dropdownStyle.width,
-            top: dropdownStyle.top,
-          }}
+          className={cn(
+            "absolute right-0 top-full mt-1 z-50",
+            "shadow-lg/5 bg-white rounded p-4 space-y-2 max-h-[500px] overflow-y-auto cursor-default",
+            "w-[min(450px,calc(100vw-1rem))]",
+          )}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex flex-col md:flex-row justify-between items-center mb-6">
