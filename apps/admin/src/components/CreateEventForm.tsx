@@ -55,6 +55,44 @@ const defaultEventNames: Record<ActionStatus, string> = {
   planned: "Planned",
 };
 
+const MIN_DEADLINE_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Snap to 11:59 PM local on the picked calendar day, then move forward by
+ * whole days if needed so the deadline is at least `minDurationMs` after launch.
+ */
+function normalizeDeadlineEventDate(
+  pickedUtcIso: string,
+  launchStart: Date,
+  minDurationMs: number = MIN_DEADLINE_DURATION_MS,
+): string {
+  const picked = new Date(pickedUtcIso);
+  if (Number.isNaN(picked.getTime()) || Number.isNaN(launchStart.getTime())) {
+    return pickedUtcIso;
+  }
+  let deadline = new Date(
+    picked.getFullYear(),
+    picked.getMonth(),
+    picked.getDate(),
+    23,
+    59,
+    0,
+    0,
+  );
+  while (deadline.getTime() - launchStart.getTime() < minDurationMs) {
+    deadline = new Date(
+      deadline.getFullYear(),
+      deadline.getMonth(),
+      deadline.getDate() + 1,
+      23,
+      59,
+      0,
+      0,
+    );
+  }
+  return deadline.toISOString();
+}
+
 const CreateEventForm = (props: CreateEventFormProps) => {
   const {
     action,
@@ -67,8 +105,11 @@ const CreateEventForm = (props: CreateEventFormProps) => {
   const [useCustomName, setUseCustomName] = useState<boolean>(false);
   const [launchNow, setLaunchNow] = useState<boolean>(true);
   const [useDeadlineEvent, setUseDeadlineEvent] = useState<boolean>(false);
-  const [deadlineEventDate, setDeadlineEventDate] = useState<string>(
-    new Date(new Date().getTime() + 604800000).toISOString()
+  const [deadlineEventDate, setDeadlineEventDate] = useState<string>(() =>
+    normalizeDeadlineEventDate(
+      new Date(Date.now() + MIN_DEADLINE_DURATION_MS).toISOString(),
+      new Date(),
+    ),
   );
   const [deadlineEventStatus, setDeadlineEventStatus] = useState<
     "office_action" | "completed"
@@ -86,7 +127,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
   const handleEventInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
     setEventForm((prev) => ({
@@ -100,6 +141,20 @@ const CreateEventForm = (props: CreateEventFormProps) => {
       ...prev,
       date: change.utcValue || "",
     }));
+  };
+
+  const launchStartForDeadline = () =>
+    launchNow ? new Date() : new Date(eventForm.date);
+
+  const handleDeadlineDateChange = (change: DateTimePickerChange) => {
+    const raw = change.utcValue;
+    if (!raw) {
+      setDeadlineEventDate("");
+      return;
+    }
+    setDeadlineEventDate(
+      normalizeDeadlineEventDate(raw, launchStartForDeadline()),
+    );
   };
 
   const handleAddEvent = async (e: React.FormEvent) => {
@@ -144,9 +199,14 @@ const CreateEventForm = (props: CreateEventFormProps) => {
         (eventForm.newStatus === "member_action" ||
           eventForm.newStatus === "gathering_commitments")
       ) {
+        const launchStart = new Date(eventData.date);
+        const resolvedDeadlineDate = normalizeDeadlineEventDate(
+          deadlineEventDate,
+          launchStart,
+        );
         const officeActionEvent = {
           title: defaultEventNames[deadlineEventStatus],
-          date: deadlineEventDate,
+          date: resolvedDeadlineDate,
           newStatus: deadlineEventStatus,
           description: "",
         } satisfies CreateActionEventDto;
@@ -316,7 +376,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
       <div
         className={cn(
           !launchNow && "bg-zinc-100 mb-2",
-          "p-2 -m-1 rounded-md mt-4"
+          "p-2 -m-1 rounded-md mt-4",
         )}
       >
         <div className="flex items-center mb-4">
@@ -355,7 +415,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
         <div
           className={cn(
             useDeadlineEvent && "bg-zinc-100 mb-2",
-            "p-2 -m-1 rounded-md"
+            "p-2 -m-1 rounded-md",
           )}
         >
           <div className="flex items-center mb-2">
@@ -371,14 +431,18 @@ const CreateEventForm = (props: CreateEventFormProps) => {
             </label>
           </div>
 
+          <p className="text-sm text-gray-600 mb-1">
+            This will create a second action event after the launch of this one,
+            providing a deadline for members.
+          </p>
+
           {useDeadlineEvent && (
             <div>
-              <p className="text-sm text-gray-600 mb-1">
-                This will create a second action event timed after the launch of
-                this one, providing a deadline for members.
-              </p>
               <div>
-                <label htmlFor="eventDate" className="block text-black mb-1">
+                <label
+                  htmlFor="deadlineEventDateInput"
+                  className="block text-black mb-1"
+                >
                   Deadline event time (
                   {Intl.DateTimeFormat().resolvedOptions().timeZone}
                   ):
@@ -387,9 +451,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
                   id="eventDate"
                   name="date"
                   value={deadlineEventDate}
-                  onChange={(change) =>
-                    setDeadlineEventDate(change.utcValue || "")
-                  }
+                  onChange={handleDeadlineDateChange}
                   required
                   className="max-w-80"
                 />
@@ -406,7 +468,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
                   value={deadlineEventStatus}
                   onChange={(e) =>
                     setDeadlineEventStatus(
-                      e.target.value as "office_action" | "completed"
+                      e.target.value as "office_action" | "completed",
                     )
                   }
                   className="w-full max-w-80 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -428,8 +490,8 @@ const CreateEventForm = (props: CreateEventFormProps) => {
           creatingEvent
             ? "bg-gray-400 text-white cursor-not-allowed"
             : eventCreatedSuccess
-            ? "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
-            : "bg-[#333] text-white hover:bg-[#444] focus:ring-blue-500"
+              ? "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
+              : "bg-[#333] text-white hover:bg-[#444] focus:ring-blue-500",
         )}
       >
         {creatingEvent ? (
