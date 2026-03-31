@@ -16,7 +16,13 @@ import { useQuery } from "@tanstack/react-query";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import CompletedBar from "@alliance/sharedweb/ui/CompletedBar";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { completedBarPercentage } from "@alliance/shared/lib/utils";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import Footer from "../../components/Footer";
+
+const MEMBER_GOAL = 150;
 
 const SignupPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -26,10 +32,10 @@ const SignupPage: React.FC = () => {
 
   const referralCode = searchParams.get("ref");
 
-  const { data: memberCount } = useQuery({
+  const { data: memberCount, isPending: memberCountPending } = useQuery({
     queryKey: ["userNmembers"],
     queryFn: () => userNmembers().then((res) => res.data ?? 0),
-    enabled: !!referralCode,
+    enabled: isFeatureEnabled(Features.PublicSignup) || Boolean(referralCode),
   });
 
   const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
@@ -99,7 +105,7 @@ const SignupPage: React.FC = () => {
   if (!isFeatureEnabled(Features.PublicSignup) && !referralCode) {
     return (
       <div className="min-h-screen flex flex-col bg-page">
-        <div className="flex flex-col flex-grow items-center justify-center ">
+        <div className="flex flex-col grow items-center justify-center ">
           <div className="w-full max-w-md px-8">
             <p className="font-bold !mb-2">
               The Alliance is currently invite-only.
@@ -112,14 +118,59 @@ const SignupPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-page">
-      <div className="flex flex-col-reverse md:flex-row gap-x-16 lg:gap-x-24 xl:gap-x-32 gap-y-12 py-12 items-center my-auto mx-auto px-4">
+    <div className="min-h-screen flex flex-col bg-white">
+      <PrelaunchNavbar transparent={false} absolute={false} />
+      <div className="flex flex-col md:flex-row gap-x-16 lg:gap-x-24 xl:gap-x-32 gap-y-12 py-12 items-center my-auto mx-auto px-4">
         <div className="flex flex-col w-full md:w-lg items-center justify-center">
           <div className="w-full">
             {isInviteValid && (
-              <h2 className="text-title-small text-center mb-8">
-                Create an account
-              </h2>
+              <>
+                {inviterProfile && (
+                  <div className="mb-6  rounded-md">
+                    <div className="flex flex-row gap-x-1 items-center text-zinc-500">
+                      <span>Invited by </span>
+                      <AvatarProfile
+                        pfp={inviterProfile?.profilePicture ?? null}
+                        size="small"
+                        className="ml-1 inline-block text-green"
+                      />
+                      <span className="font-medium">
+                        {inviterProfile?.displayName}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <h2 className="text-title mb-2">Join the Alliance</h2>
+                <p className="text-lg text-zinc-900 mb-6">
+                  We&apos;re a global group of people cooperating to improve the
+                  world.
+                </p>
+
+                <div className="mb-12 w-full flex flex-col gap-y-1">
+                  <div className="flex flex-row justify-between items-end">
+                    <p className="text-base text-zinc-500 text-center">
+                      Help us reach{" "}
+                      <span className="font-semibold text-black">
+                        {MEMBER_GOAL}
+                      </span>{" "}
+                      members
+                    </p>
+                    <p className="text-base text-zinc-500 whitespace-nowrap">
+                      {memberCountPending ? "…" : (memberCount ?? 0)} /{" "}
+                      {MEMBER_GOAL}
+                    </p>
+                  </div>
+                  <div className="flex flex-row items-center justify-between w-full">
+                    <CompletedBar
+                      percentage={completedBarPercentage(
+                        memberCount ?? 0,
+                        MEMBER_GOAL,
+                      )}
+                      height="h-5"
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             {error && (
@@ -131,13 +182,15 @@ const SignupPage: React.FC = () => {
               </Card>
             )}
 
-            <Card className="p-4 md:p-8 relative" style={CardStyle.White}>
+            <div className="relative">
               {isInviteValid ? (
-                <SignupForm
-                  onSubmit={handleSubmit}
-                  loading={loading}
-                  referralCode={referralCode}
-                />
+                <>
+                  <SignupForm
+                    onSubmit={handleSubmit}
+                    loading={loading}
+                    referralCode={referralCode}
+                  />
+                </>
               ) : (
                 <div className="p-4 md:p-8 space-y-4 flex flex-col">
                   <p className="font-semibold">
@@ -156,7 +209,7 @@ const SignupPage: React.FC = () => {
                   </p>
                 </div>
               )}
-            </Card>
+            </div>
             {!referralCode && (
               <div className="mt-6 text-center">
                 <p className="text-[11pt] text-zinc-600">
@@ -172,41 +225,13 @@ const SignupPage: React.FC = () => {
             )}
           </div>
         </div>
-        {referralCode && (
+        {/* {referralCode && (
           <div className="flex flex-col gap-y-6 max-w-lg p-4 md:p-0">
-            <div className="flex flex-col gap-y-2 mb-4">
-              <div className="flex flex-row gap-x-1 items-center">
-                <span>From </span>
-                <AvatarProfile
-                  pfp={inviterProfile?.profilePicture ?? null}
-                  size="small"
-                  className="ml-1 inline-block text-green"
-                />
-                <span className="font-medium">
-                  {inviterProfile?.displayName}
-                </span>
-              </div>
-              <p className="text-sm text-zinc-500">
-                You will be added as friends automatically.
-              </p>
-            </div>
-            {inviteeName && (
-              <p className="flex flex-row flex-wrap gap-x-1 items-center">
-                Hi {inviteeName},
-              </p>
-            )}
-            <p>
-              I invite you to join me as a member of the Alliance. We are an
-              online community
-              {memberCount !== undefined && memberCount > 0
-                ? ` of ${memberCount} people `
-                : " "}
-              cooperating to improve the world.
-            </p>
+            <p>Why join the Alliance?</p>
             <ol className="list-decimal list-inside space-y-3 pl-2">
               <li>
                 <span className="font-semibold">
-                  We take action in creative, effective ways.
+                  Our actions are effective.
                 </span>{" "}
                 Members of the Alliance commit to complete tasks on time. As a
                 result of this trust, we are able to execute complex, precise
@@ -214,7 +239,7 @@ const SignupPage: React.FC = () => {
               </li>
               <li>
                 <span className="font-semibold">
-                  Participation is straightforward and rewarding.
+                  Participation is straightforward.
                 </span>{" "}
                 Tasks take 15 minutes per week and have tangible results. For
                 example, our{" "}
@@ -237,14 +262,14 @@ const SignupPage: React.FC = () => {
                 <span className="font-semibold">
                   We are growing carefully and deliberately.
                 </span>{" "}
-                Right now, we’re running small experiments. We hope to set
-                ourselves up for a future in which millions of members can take
-                large-scale action to reduce poverty, restore the environment,
-                and more.
+                Right now, we’re running small experiments in order to test our
+                structures and processes. One day, millions of members could
+                take large-scale action to reduce poverty, restore the
+                environment, and more.
               </li>
             </ol>
             <p>
-              If you want to learn more, our{" "}
+              Our{" "}
               <Link to={href("/guide")} className="text-link">
                 guide
               </Link>{" "}
@@ -252,8 +277,9 @@ const SignupPage: React.FC = () => {
               gives some examples of past actions.
             </p>
           </div>
-        )}
+        )} */}
       </div>
+      <Footer />
     </div>
   );
 };
