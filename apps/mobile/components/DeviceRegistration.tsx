@@ -63,10 +63,6 @@ export default function DeviceRegistration() {
     if (!token) {
       return;
     }
-    const alreadyRegistered = SecureStore.getItem("registeredToken");
-    if (alreadyRegistered === token) {
-      return;
-    }
     try {
       const deviceId = await SecureStore.getItem("deviceId");
       console.log("registering token: ", token);
