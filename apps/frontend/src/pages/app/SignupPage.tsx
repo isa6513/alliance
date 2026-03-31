@@ -39,7 +39,7 @@ const SignupPage: React.FC = () => {
   });
 
   const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
-  const [inviteeName, setInviteeName] = useState<string | null>(null);
+  // const [inviteeName, setInviteeName] = useState<string | null>(null);
   // const [communityId, setCommunityId] = useState<number | null>(null);
   const [isInviteValid, setIsInviteValid] = useState(true);
 
@@ -51,7 +51,7 @@ const SignupPage: React.FC = () => {
 
     userOnetimeInvite({ path: { code: referralCode } }).then((response) => {
       if (response.data) {
-        setInviteeName(response.data.invitee);
+        // setInviteeName(response.data.invitee);
         // setCommunityId(response.data.community?.id ?? null);
         setIsInviteValid(response.data.status !== "link_used");
       }
@@ -110,7 +110,7 @@ const SignupPage: React.FC = () => {
             <p className="font-bold !mb-2">
               The Alliance is currently invite-only.
             </p>
-            <p>If you recieved an invite link, please use it to sign up.</p>
+            <p>If you received an invite link, please use it to sign up.</p>
           </div>
         </div>
       </div>
@@ -184,13 +184,11 @@ const SignupPage: React.FC = () => {
 
             <div className="relative">
               {isInviteValid ? (
-                <>
-                  <SignupForm
-                    onSubmit={handleSubmit}
-                    loading={loading}
-                    referralCode={referralCode}
-                  />
-                </>
+                <SignupForm
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                  referralCode={referralCode}
+                />
               ) : (
                 <div className="p-4 md:p-8 space-y-4 flex flex-col">
                   <p className="font-semibold">
