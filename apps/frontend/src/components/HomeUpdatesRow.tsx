@@ -120,14 +120,16 @@ const HomeUpdatesRow = () => {
               >
                 <div
                   className={cn(
-                    "flex flex-col justify-between rounded px-4 py-3 h-full ",
-                    isUnread
-                      ? "bg-green/5 hover:bg-green/10"
-                      : "bg-white hover:bg-green/5",
+                    "flex flex-col justify-between rounded px-4 py-3 h-full bg-white hover:bg-green/5",
                   )}
                 >
                   <div>
-                    <p className="text-sm md:text-base font-medium text-green mb-0.5 flex items-center gap-2 min-w-0">
+                    <p
+                      className={cn(
+                        "text-sm md:text-base font-medium mb-0.5 flex items-center gap-2 min-w-0",
+                        isUnread ? "text-green" : "text-green/60",
+                      )}
+                    >
                       {isUnread && (
                         <span
                           className="size-2 shrink-0 rounded-full bg-green"
@@ -139,7 +141,12 @@ const HomeUpdatesRow = () => {
                       </span>
                     </p>
                     {update.title && (
-                      <p className="text-sm md:text-base leading-snug text-zinc-800">
+                      <p
+                        className={cn(
+                          "text-sm md:text-base leading-snug ",
+                          isUnread ? "text-zinc-800" : "text-zinc-400",
+                        )}
+                      >
                         {update.title}
                       </p>
                     )}
