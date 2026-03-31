@@ -64,5 +64,3 @@ We have a few scripts that do both of these together, as well as installing need
 generate migrations (in server/): `bun migration:generate -- migrations/[name of migration]`
 
 run migrations `bun migration:run`
-
-testing
