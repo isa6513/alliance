@@ -21,6 +21,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { ActionActivity } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
@@ -50,6 +51,7 @@ export enum VisibilityMode {
 const MS_IN_WEEK = 7 * 24 * 60 * 60 * 1000;
 
 @Entity()
+@Unique(['taskFormId'])
 export class Action {
   // Fields
 
