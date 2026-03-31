@@ -172,7 +172,7 @@ export class AuthService {
       tokenType: JWTTokenType.access,
       ...(isImpersonation && { isImpersonation: true }),
     };
-    return this.jwtService.signAsync(payload, { expiresIn: '15m' });
+    return this.jwtService.signAsync(payload, { expiresIn: '1d' });
   }
 
   async refreshTokens(
