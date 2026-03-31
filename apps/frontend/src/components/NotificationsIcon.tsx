@@ -42,7 +42,12 @@ const NotificationsIcon = () => {
       const naturalLeft = anchorRight - w;
       const minLeft = VIEWPORT_EDGE_PX;
       const maxLeft = iw - VIEWPORT_EDGE_PX - w;
-      const left = Math.max(minLeft, Math.min(naturalLeft, maxLeft));
+      let left: number;
+      if (maxLeft < minLeft) {
+        left = Math.max(0, Math.min(naturalLeft, iw - w));
+      } else {
+        left = Math.max(minLeft, Math.min(naturalLeft, maxLeft));
+      }
       setPanelShiftX(left - naturalLeft);
     };
     clampPanel();
@@ -52,7 +57,8 @@ const NotificationsIcon = () => {
       window.removeEventListener("resize", clampPanel);
       window.removeEventListener("scroll", clampPanel, true);
     };
-  }, [isOpen, notifications.length, ref]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ref from useOutsideClick is a stable useRef
+  }, [isOpen]);
 
   return (
     <div
