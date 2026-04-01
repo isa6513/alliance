@@ -118,7 +118,7 @@ const buildRoundedLeftPath = (
   y: number,
   width: number,
   height: number,
-  radius: number
+  radius: number,
 ) => {
   const r = Math.max(0, Math.min(radius, width / 2, height / 2));
   if (width <= 0 || height <= 0) return "";
@@ -139,7 +139,7 @@ const buildRoundedRightPath = (
   y: number,
   width: number,
   height: number,
-  radius: number
+  radius: number,
 ) => {
   const r = Math.max(0, Math.min(radius, width / 2, height / 2));
   if (width <= 0 || height <= 0) return "";
@@ -177,7 +177,7 @@ const parseIsoDate = (value?: string | null): Date | null => {
 
 const parseLocalDateInput = (
   value?: string | null,
-  endOfDay = false
+  endOfDay = false,
 ): Date | null => {
   if (!value) return null;
   const [yearRaw, monthRaw, dayRaw] = value.split("-");
@@ -198,7 +198,7 @@ const parseLocalDateInput = (
     endOfDay ? 23 : 0,
     endOfDay ? 59 : 0,
     endOfDay ? 59 : 0,
-    endOfDay ? 999 : 0
+    endOfDay ? 999 : 0,
   );
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
@@ -215,7 +215,7 @@ const getWeekStartDate = (value: Date): Date => {
 const runInBatches = async <T, R>(
   items: T[],
   batchSize: number,
-  worker: (item: T) => Promise<R>
+  worker: (item: T) => Promise<R>,
 ): Promise<R[]> => {
   const results: R[] = [];
   for (let i = 0; i < items.length; i += batchSize) {
@@ -233,7 +233,7 @@ const StatsPage: React.FC = () => {
   const [queryRange, setQueryRange] = useState(defaultRange);
   const [stats, setStats] = useState<DailyStatsRecord[]>([]);
   const [actionStats, setActionStats] = useState<ActionStatsWithWithdrawals[]>(
-    []
+    [],
   );
   const [reminderGroupClickRatePoints, setReminderGroupClickRatePoints] =
     useState<ReminderGroupClickRatePoint[]>([]);
@@ -287,7 +287,7 @@ const StatsPage: React.FC = () => {
     };
   });
   const [inviteFunnel, setInviteFunnel] = useState<InviteFunnelDto | null>(
-    null
+    null,
   );
   const [inviteFunnelLoading, setInviteFunnelLoading] =
     useState<boolean>(false);
@@ -391,7 +391,7 @@ const StatsPage: React.FC = () => {
             actionId: action.id,
             actionName: action.name,
             fallbackDate: event.date,
-          }))
+          })),
       );
 
       if (memberActionEvents.length === 0) {
@@ -412,7 +412,7 @@ const StatsPage: React.FC = () => {
             actionName: eventSummary.actionName,
             fallbackDate: eventSummary.fallbackDate,
           }));
-        }
+        },
       );
 
       const reminderGroups = reminderGroupResults.flat();
@@ -422,7 +422,9 @@ const StatsPage: React.FC = () => {
       }
 
       const uniqueReminderGroups = Array.from(
-        new Map(reminderGroups.map((entry) => [entry.group.id, entry])).values()
+        new Map(
+          reminderGroups.map((entry) => [entry.group.id, entry]),
+        ).values(),
       );
 
       const groupsWithSentNotifs = await runInBatches(
@@ -436,27 +438,23 @@ const StatsPage: React.FC = () => {
             ...entry,
             sentNotifs: response.data ?? [],
           };
-        }
+        },
       );
 
       const points = groupsWithSentNotifs
         .map(({ group, actionId, actionName, fallbackDate, sentNotifs }) => {
-          const emailNotifs = sentNotifs.filter(
-            (notif) => notif.channel === "email" && notif.mail
-          );
-          const textNotifs = sentNotifs.filter(
-            (notif) => notif.channel === "text" && notif.mms
-          );
+          const emailNotifs = sentNotifs.filter((notif) => !!notif.mail);
+          const textNotifs = sentNotifs.filter((notif) => !!notif.mms);
 
           if (emailNotifs.length === 0 && textNotifs.length === 0) {
             return null;
           }
 
           const emailClickedCount = emailNotifs.filter(
-            (notif) => notif.mail?.clickedLink
+            (notif) => notif.mail?.clickedLink,
           ).length;
           const textClickedCount = textNotifs.filter(
-            (notif) => notif.mms?.clickedLink
+            (notif) => notif.mms?.clickedLink,
           ).length;
 
           const sentTimestamps = [...emailNotifs, ...textNotifs]
@@ -466,8 +464,8 @@ const StatsPage: React.FC = () => {
           const pointDate =
             (sentTimestamps.length
               ? new Date(Math.min(...sentTimestamps))
-              : parseIsoDate(group.sendAtAbsolute) ??
-                parseIsoDate(fallbackDate)) ?? null;
+              : (parseIsoDate(group.sendAtAbsolute) ??
+                parseIsoDate(fallbackDate))) ?? null;
 
           if (!pointDate) {
             return null;
@@ -495,7 +493,7 @@ const StatsPage: React.FC = () => {
         .sort(
           (a, b) =>
             a.date.getTime() - b.date.getTime() ||
-            a.reminderGroupId - b.reminderGroupId
+            a.reminderGroupId - b.reminderGroupId,
         );
 
       setReminderGroupClickRatePoints(points);
@@ -629,7 +627,7 @@ const StatsPage: React.FC = () => {
 
   const chartActionStats = useMemo(
     () => actionStats.filter((a) => a.showInChart),
-    [actionStats]
+    [actionStats],
   );
 
   const actionBarsGeometry = useMemo(() => {
@@ -683,7 +681,13 @@ const StatsPage: React.FC = () => {
   const cumulativeCompletionData = useMemo(() => {
     const now = new Date();
     const completedActions = actionStats
-      .filter((a) => a.memberActionEndDate && a.showInChart && !a.onboarding && !a.optional)
+      .filter(
+        (a) =>
+          a.memberActionEndDate &&
+          a.showInChart &&
+          !a.onboarding &&
+          !a.optional,
+      )
       .map((a) => ({
         ...a,
         endDate: new Date(a.memberActionEndDate!),
@@ -788,7 +792,7 @@ const StatsPage: React.FC = () => {
         getValue: (d) => (d.avgRate as number) ?? 0,
       },
     ],
-    []
+    [],
   );
 
   // Weekly (non-cumulative) completion rate data.
@@ -904,7 +908,7 @@ const StatsPage: React.FC = () => {
         getValue: (d) => (d.weekRate as number) ?? 0,
       },
     ],
-    []
+    [],
   );
 
   const filteredReminderGroupClickRatePoints = useMemo(() => {
@@ -922,7 +926,7 @@ const StatsPage: React.FC = () => {
     rangeEnd.setHours(23, 59, 59, 999);
 
     return reminderGroupClickRatePoints.filter(
-      (point) => point.date >= rangeStart && point.date <= rangeEnd
+      (point) => point.date >= rangeStart && point.date <= rangeEnd,
     );
   }, [reminderGroupClickRatePoints, reminderClickRateRange]);
 
@@ -957,7 +961,7 @@ const StatsPage: React.FC = () => {
 
       existing.mostRecentDateMs = Math.max(
         existing.mostRecentDateMs,
-        point.date.getTime()
+        point.date.getTime(),
       );
 
       if (point.emailSentCount > 0) {
@@ -997,7 +1001,7 @@ const StatsPage: React.FC = () => {
           sentCount: aggregate.emailSentCount,
           clickedCount: aggregate.emailClickedCount,
         })),
-    [reminderActionAggregates]
+    [reminderActionAggregates],
   );
 
   const textReminderActionBars = useMemo<ReminderActionChannelBar[]>(
@@ -1015,7 +1019,7 @@ const StatsPage: React.FC = () => {
           sentCount: aggregate.textSentCount,
           clickedCount: aggregate.textClickedCount,
         })),
-    [reminderActionAggregates]
+    [reminderActionAggregates],
   );
 
   const buildReminderActionBarGeometry = useCallback(
@@ -1043,7 +1047,7 @@ const StatsPage: React.FC = () => {
       const xTickIndexes = bars
         .map((_, index) => index)
         .filter(
-          (index) => index % xTickStep === 0 || index === bars.length - 1
+          (index) => index % xTickStep === 0 || index === bars.length - 1,
         );
 
       return {
@@ -1056,17 +1060,17 @@ const StatsPage: React.FC = () => {
         xTickIndexes,
       };
     },
-    []
+    [],
   );
 
   const emailReminderBarGeometry = useMemo(
     () => buildReminderActionBarGeometry(emailReminderActionBars),
-    [buildReminderActionBarGeometry, emailReminderActionBars]
+    [buildReminderActionBarGeometry, emailReminderActionBars],
   );
 
   const textReminderBarGeometry = useMemo(
     () => buildReminderActionBarGeometry(textReminderActionBars),
-    [buildReminderActionBarGeometry, textReminderActionBars]
+    [buildReminderActionBarGeometry, textReminderActionBars],
   );
 
   const sortedRetentionCohorts = useMemo(() => {
@@ -1077,13 +1081,13 @@ const StatsPage: React.FC = () => {
       }))
       .sort(
         (a, b) =>
-          new Date(a.cohortStart).getTime() - new Date(b.cohortStart).getTime()
+          new Date(a.cohortStart).getTime() - new Date(b.cohortStart).getTime(),
       );
   }, [retentionCohorts]);
 
   const filteredRetentionCohorts = useMemo(() => {
     return sortedRetentionCohorts.filter((cohort) =>
-      cohort.points.some((point) => point.completedCount > 0)
+      cohort.points.some((point) => point.completedCount > 0),
     );
   }, [sortedRetentionCohorts]);
 
@@ -1093,7 +1097,7 @@ const StatsPage: React.FC = () => {
     }
 
     const cohortDates = filteredRetentionCohorts.map((cohort) =>
-      new Date(cohort.cohortStart).getTime()
+      new Date(cohort.cohortStart).getTime(),
     );
     const minDate = min(cohortDates) ?? Date.now();
     const maxDate = max(cohortDates) ?? Date.now();
@@ -1116,7 +1120,7 @@ const StatsPage: React.FC = () => {
         return {
           key: cohort.cohortStart,
           label: `Week of ${fullDateFormatter.format(
-            new Date(cohort.cohortStart)
+            new Date(cohort.cohortStart),
           )}`,
           color: colorScale(new Date(cohort.cohortStart).getTime()).hex(),
           data: cohort.points.map((point) => ({
@@ -1129,7 +1133,7 @@ const StatsPage: React.FC = () => {
             cohortSize: cohort.cohortSize,
           })),
         };
-      }
+      },
     );
 
     return { multiLineData, legendGradient, cohortMap };
@@ -1145,7 +1149,7 @@ const StatsPage: React.FC = () => {
     }
 
     const allWeekIndices = filteredRetentionCohorts.flatMap((cohort) =>
-      cohort.points.map((point) => point.weekIndex)
+      cohort.points.map((point) => point.weekIndex),
     );
     const maxWeek = max(allWeekIndices) ?? 0;
     const rawMin = Math.max(0, Math.floor(weekRange.min));
@@ -1157,12 +1161,12 @@ const StatsPage: React.FC = () => {
     const rows = [...filteredRetentionCohorts]
       .sort(
         (a, b) =>
-          new Date(b.cohortStart).getTime() - new Date(a.cohortStart).getTime()
+          new Date(b.cohortStart).getTime() - new Date(a.cohortStart).getTime(),
       )
       .map((cohort) => ({
         cohort,
         pointsByWeek: new Map(
-          cohort.points.map((point) => [point.weekIndex, point])
+          cohort.points.map((point) => [point.weekIndex, point]),
         ),
       }));
 
@@ -1388,12 +1392,12 @@ const StatsPage: React.FC = () => {
       // Find closest data point
       let closestPoint = parsedContractStatusHistory[0];
       let closestDistance = Math.abs(
-        hoveredDate.getTime() - closestPoint.parsedDate.getTime()
+        hoveredDate.getTime() - closestPoint.parsedDate.getTime(),
       );
 
       for (const point of parsedContractStatusHistory) {
         const distance = Math.abs(
-          hoveredDate.getTime() - point.parsedDate.getTime()
+          hoveredDate.getTime() - point.parsedDate.getTime(),
         );
         if (distance < closestDistance) {
           closestDistance = distance;
@@ -1403,7 +1407,7 @@ const StatsPage: React.FC = () => {
 
       setHoveredContractPoint(closestPoint);
     },
-    [contractStatusChartGeometry, parsedContractStatusHistory]
+    [contractStatusChartGeometry, parsedContractStatusHistory],
   );
 
   const handleRetentionCellHover = useCallback(
@@ -1411,7 +1415,7 @@ const StatsPage: React.FC = () => {
       event: React.MouseEvent<HTMLDivElement, MouseEvent>,
       row: RetentionGridRow,
       week: number,
-      point: MemberCompletionRetentionCohortDto["points"][number] | undefined
+      point: MemberCompletionRetentionCohortDto["points"][number] | undefined,
     ) => {
       if (!point || !Number.isFinite(point.weekCompletionRate)) {
         setHoveredRetentionCell(null);
@@ -1437,7 +1441,7 @@ const StatsPage: React.FC = () => {
         actions: point.actions ?? [],
       });
     },
-    []
+    [],
   );
 
   const handleRetentionCellLeave = useCallback(() => {
@@ -1463,12 +1467,19 @@ const StatsPage: React.FC = () => {
                   Completion reliability
                 </div>
                 <div className="text-3xl font-bold text-gray-900">
-                  {weeklyCompletionData.length > 0
-                    ? (
-                        weeklyCompletionData[weeklyCompletionData.length - 1]
-                          .weekRate * 100
-                      ).toFixed(2)
-                    : "[No data]"}
+                  {(() => {
+                    const totalCompleted = actionStats.reduce(
+                      (sum, a) => sum + a.usersCompleted,
+                      0,
+                    );
+                    const totalAssigned = actionStats.reduce(
+                      (sum, a) => sum + a.usersJoined,
+                      0,
+                    );
+                    return totalAssigned > 0
+                      ? ((totalCompleted / totalAssigned) * 100).toFixed(2)
+                      : "[No data]";
+                  })()}
                   %
                 </div>
               </div>
@@ -1662,7 +1673,7 @@ const StatsPage: React.FC = () => {
                           {Math.round(
                             (bar.value /
                               inviteFunnelGeometry.bars[idx - 1].value) *
-                              100
+                              100,
                           )}
                           %
                         </text>
@@ -1818,10 +1829,10 @@ const StatsPage: React.FC = () => {
                   <>
                     <line
                       x1={contractStatusChartGeometry.xScale(
-                        hoveredContractPoint.parsedDate
+                        hoveredContractPoint.parsedDate,
                       )}
                       x2={contractStatusChartGeometry.xScale(
-                        hoveredContractPoint.parsedDate
+                        hoveredContractPoint.parsedDate,
                       )}
                       y1={contractStatusChartGeometry.margin.top}
                       y2={
@@ -1837,9 +1848,9 @@ const StatsPage: React.FC = () => {
                     <rect
                       x={Math.min(
                         contractStatusChartGeometry.xScale(
-                          hoveredContractPoint.parsedDate
+                          hoveredContractPoint.parsedDate,
                         ) + 12,
-                        contractStatusChartGeometry.width - 130
+                        contractStatusChartGeometry.width - 130,
                       )}
                       y={contractStatusChartGeometry.margin.top + 12}
                       width={118}
@@ -1851,9 +1862,9 @@ const StatsPage: React.FC = () => {
                     <text
                       x={Math.min(
                         contractStatusChartGeometry.xScale(
-                          hoveredContractPoint.parsedDate
+                          hoveredContractPoint.parsedDate,
                         ) + 24,
-                        contractStatusChartGeometry.width - 118
+                        contractStatusChartGeometry.width - 118,
                       )}
                       y={contractStatusChartGeometry.margin.top + 31}
                       className="fill-black text-sm font-semibold"
@@ -1862,16 +1873,16 @@ const StatsPage: React.FC = () => {
                         ? `${Math.round(
                             (hoveredContractPoint.churnedCount /
                               hoveredContractPoint.totalEverSigned) *
-                              100
+                              100,
                           )}% churn`
                         : "0% churn"}
                     </text>
                     <text
                       x={Math.min(
                         contractStatusChartGeometry.xScale(
-                          hoveredContractPoint.parsedDate
+                          hoveredContractPoint.parsedDate,
                         ) + 24,
-                        contractStatusChartGeometry.width - 118
+                        contractStatusChartGeometry.width - 118,
                       )}
                       y={contractStatusChartGeometry.margin.top + 50}
                       className="fill-gray-500 text-xs"
@@ -2095,7 +2106,7 @@ const StatsPage: React.FC = () => {
                         "text-xs",
                         isHovered
                           ? "fill-gray-900 font-semibold"
-                          : "fill-gray-700"
+                          : "fill-gray-700",
                       )}
                     >
                       {action.actionName.length > 25
@@ -2117,8 +2128,8 @@ const StatsPage: React.FC = () => {
                             ? "url(#in-progress-stripes-hover)"
                             : "url(#in-progress-stripes)"
                           : isHovered
-                          ? "#d1d5db"
-                          : "#e5e7eb"
+                            ? "#d1d5db"
+                            : "#e5e7eb"
                       }
                     />
 
@@ -2131,7 +2142,7 @@ const StatsPage: React.FC = () => {
                             y,
                             Math.max(completedWidth, 0),
                             actionBarsGeometry.barHeight,
-                            4
+                            4,
                           )}
                           fill={isHovered ? "#15803d" : "#16a34a"}
                         />
@@ -2155,7 +2166,7 @@ const StatsPage: React.FC = () => {
                           y,
                           Math.max(withdrawnWidth, 0),
                           actionBarsGeometry.barHeight,
-                          4
+                          4,
                         )}
                         fill={isHovered ? "#ea580c" : "#f97316"}
                       />
@@ -2167,7 +2178,7 @@ const StatsPage: React.FC = () => {
                         actionBarsGeometry.margin.left +
                         Math.max(
                           expectedWidth,
-                          completedWidth + withdrawnWidth
+                          completedWidth + withdrawnWidth,
                         ) +
                         8
                       }
@@ -2222,7 +2233,7 @@ const StatsPage: React.FC = () => {
                       ? `${Math.round(
                           (hoveredActionBar.action.usersCompleted /
                             hoveredActionBar.action.usersJoined) *
-                            100
+                            100,
                         )}%`
                       : "N/A"}
                   </span>
@@ -2481,7 +2492,7 @@ const StatsPage: React.FC = () => {
                           {emailReminderBarGeometry.xTickIndexes.map(
                             (index) => {
                               const x = emailReminderBarGeometry.xScale(
-                                String(index)
+                                String(index),
                               );
                               if (x === undefined) return null;
                               const action = emailReminderActionBars[index];
@@ -2508,17 +2519,17 @@ const StatsPage: React.FC = () => {
                                   {label}
                                 </text>
                               );
-                            }
+                            },
                           )}
                         </g>
 
                         {emailReminderActionBars.map((bar, index) => {
                           const x = emailReminderBarGeometry.xScale(
-                            String(index)
+                            String(index),
                           );
                           if (x === undefined) return null;
                           const y = emailReminderBarGeometry.yScale(
-                            Math.max(0, Math.min(1, bar.averageRate))
+                            Math.max(0, Math.min(1, bar.averageRate)),
                           );
                           const barBottom =
                             emailReminderBarGeometry.height -
@@ -2594,7 +2605,7 @@ const StatsPage: React.FC = () => {
                           ))}
                           {textReminderBarGeometry.xTickIndexes.map((index) => {
                             const x = textReminderBarGeometry.xScale(
-                              String(index)
+                              String(index),
                             );
                             if (x === undefined) return null;
                             const action = textReminderActionBars[index];
@@ -2625,11 +2636,11 @@ const StatsPage: React.FC = () => {
 
                         {textReminderActionBars.map((bar, index) => {
                           const x = textReminderBarGeometry.xScale(
-                            String(index)
+                            String(index),
                           );
                           if (x === undefined) return null;
                           const y = textReminderBarGeometry.yScale(
-                            Math.max(0, Math.min(1, bar.averageRate))
+                            Math.max(0, Math.min(1, bar.averageRate)),
                           );
                           const barBottom =
                             textReminderBarGeometry.height -
@@ -2680,7 +2691,7 @@ const StatsPage: React.FC = () => {
                       "font-medium",
                       hoveredReminderActionBar.channel === "email"
                         ? "text-blue-600"
-                        : "text-orange-600"
+                        : "text-orange-600",
                     )}
                   >
                     {Math.round(hoveredReminderActionBar.bar.averageRate * 100)}
@@ -2734,7 +2745,7 @@ const StatsPage: React.FC = () => {
         legendLabels={{ left: "Older", right: "Newer" }}
         getHoverContent={(point) => ({
           title: `Week of ${fullDateFormatter.format(
-            new Date(`${point.cohortStart}T00:00:00Z`)
+            new Date(`${point.cohortStart}T00:00:00Z`),
           )}`,
           items: [
             { label: "Weeks since join", value: point.weekIndex as number },
@@ -2805,7 +2816,7 @@ const StatsPage: React.FC = () => {
                     ))}
                     {retentionGridData.rows.map((row) => {
                       const cohortDate = new Date(
-                        `${row.cohort.cohortStart}T00:00:00Z`
+                        `${row.cohort.cohortStart}T00:00:00Z`,
                       );
                       return (
                         <React.Fragment
@@ -2854,7 +2865,7 @@ const StatsPage: React.FC = () => {
                                     event,
                                     row,
                                     week,
-                                    point
+                                    point,
                                   )
                                 }
                                 onMouseMove={(event) =>
@@ -2862,7 +2873,7 @@ const StatsPage: React.FC = () => {
                                     event,
                                     row,
                                     week,
-                                    point
+                                    point,
                                   )
                                 }
                                 onMouseLeave={handleRetentionCellLeave}
@@ -2892,8 +2903,8 @@ const StatsPage: React.FC = () => {
                         <p>
                           {fullDateFormatter.format(
                             new Date(
-                              `${hoveredRetentionCell.actionStartDate}T00:00:00Z`
-                            )
+                              `${hoveredRetentionCell.actionStartDate}T00:00:00Z`,
+                            ),
                           )}
                         </p>
                       </div>
@@ -2901,8 +2912,8 @@ const StatsPage: React.FC = () => {
                         Cohort: Week of{" "}
                         {fullDateFormatter.format(
                           new Date(
-                            `${hoveredRetentionCell.cohortStart}T00:00:00Z`
-                          )
+                            `${hoveredRetentionCell.cohortStart}T00:00:00Z`,
+                          ),
                         )}
                       </div>
                       <div className="mt-1 flex items-center justify-between">
@@ -3033,7 +3044,7 @@ const StatsPage: React.FC = () => {
                   0,
                   churnHistogramGeometry.xScale(x1) -
                     churnHistogramGeometry.xScale(x0) -
-                    2
+                    2,
                 );
                 const barHeight =
                   churnHistogramGeometry.yScale(0) -
@@ -3089,7 +3100,7 @@ const StatsPage: React.FC = () => {
           <svg
             className={cn(
               "w-5 h-5 text-gray-500 transition-transform",
-              dailyStatsTableOpen && "rotate-180"
+              dailyStatsTableOpen && "rotate-180",
             )}
             fill="none"
             stroke="currentColor"
@@ -3164,7 +3175,7 @@ const StatsPage: React.FC = () => {
             <svg
               className={cn(
                 "w-5 h-5 text-gray-500 transition-transform",
-                actionStatsTableOpen && "rotate-180"
+                actionStatsTableOpen && "rotate-180",
               )}
               fill="none"
               stroke="currentColor"
@@ -3220,8 +3231,8 @@ const StatsPage: React.FC = () => {
                               action.completionRate >= 0.9
                                 ? "text-green-600 font-medium"
                                 : action.completionRate >= 0.7
-                                ? "text-yellow-600"
-                                : "text-red-600"
+                                  ? "text-yellow-600"
+                                  : "text-red-600"
                             }
                           >
                             {Math.round(action.completionRate * 100)}%
@@ -3233,7 +3244,7 @@ const StatsPage: React.FC = () => {
                       <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
                         {action.memberActionStartDate
                           ? new Date(
-                              action.memberActionStartDate
+                              action.memberActionStartDate,
                             ).toLocaleDateString()
                           : "N/A"}
                       </td>
