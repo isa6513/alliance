@@ -41,7 +41,7 @@ function getPushRoute(screen: string | undefined): RelativePathString | null {
 
 function setNotificationReadOptimistically(
   notificationToMark: Pick<NotificationDto, "id" | "sourceType">,
-  queryClient: QueryClient
+  queryClient: QueryClient,
 ) {
   const existingData = queryClient.getQueryData<NotificationDto[]>([
     "notifications",
@@ -97,8 +97,9 @@ export default function PushNotificationResponseHandler({
   queryClient: QueryClient;
 }) {
   const { isAuthenticated, isLoading } = useAuth();
-  const pendingNotificationActionRef =
-    useRef<PendingNotificationAction | null>(null);
+  const pendingNotificationActionRef = useRef<PendingNotificationAction | null>(
+    null,
+  );
   const authStateRef = useRef({ isAuthenticated, isLoading });
   const lastHandledResponseIdentifierRef = useRef<string | null>(null);
   const responseSub = useRef<Notifications.EventSubscription | null>(null);
@@ -125,11 +126,14 @@ export default function PushNotificationResponseHandler({
         void pushMarkOpened({ body: { cid: pendingAction.cid } }).catch(
           (error) => {
             console.error("failed to mark push as opened", error);
-          }
+          },
         );
       }
 
-      if (pendingAction.notificationId && pendingAction.notificationSourceType) {
+      if (
+        pendingAction.notificationId &&
+        pendingAction.notificationSourceType
+      ) {
         markNotificationReadFromTap({
           id: pendingAction.notificationId,
           sourceType: pendingAction.notificationSourceType,
@@ -141,7 +145,7 @@ export default function PushNotificationResponseHandler({
         router.push(route);
       }
     },
-    [markNotificationReadFromTap]
+    [markNotificationReadFromTap],
   );
 
   const handleNotificationResponse = useCallback(
@@ -178,7 +182,7 @@ export default function PushNotificationResponseHandler({
 
       handlePendingNotificationAction(pendingAction);
     },
-    [handlePendingNotificationAction]
+    [handlePendingNotificationAction],
   );
 
   useEffect(() => {
@@ -200,17 +204,17 @@ export default function PushNotificationResponseHandler({
   }, [handlePendingNotificationAction, isAuthenticated, isLoading]);
 
   useEffect(() => {
-    if (Platform.OS === "web" || isVisualTestMode) {
+    if (isVisualTestMode) {
       return;
     }
 
     void Notifications.getLastNotificationResponseAsync().then(
-      handleNotificationResponse
+      handleNotificationResponse,
     );
 
     // Only tapped notification responses should mark reads, not delivered pushes.
     responseSub.current = Notifications.addNotificationResponseReceivedListener(
-      handleNotificationResponse
+      handleNotificationResponse,
     );
 
     return () => {

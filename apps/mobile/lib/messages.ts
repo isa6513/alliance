@@ -1,4 +1,3 @@
-import { Platform } from "react-native";
 import {
   buildGroupConversationTitle,
   createMessagingHooks,
@@ -15,15 +14,13 @@ import {
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./AuthContext";
 import { getWebSocketUrl } from "./config";
 import SecureStorage from "./SecureStorage";
-import WebTokenStore from "./ExpoWebTokenStore";
 import { client } from "@alliance/shared/client/client.gen";
 import { authRefreshTokens } from "@alliance/shared/client";
 
-const tokenStore = Platform.OS === "web" ? WebTokenStore : SecureStorage;
-const getAuthToken = () => tokenStore.getItem(ACCESS_TOKEN_KEY);
+const getAuthToken = () => SecureStorage.getItem(ACCESS_TOKEN_KEY);
 
 const onRefreshToken = async (): Promise<string | null> => {
-  const refreshToken = await tokenStore.getItem(REFRESH_TOKEN_KEY);
+  const refreshToken = await SecureStorage.getItem(REFRESH_TOKEN_KEY);
   if (!refreshToken) return null;
 
   const response = await authRefreshTokens({
@@ -34,7 +31,7 @@ const onRefreshToken = async (): Promise<string | null> => {
 
   const token = response.data?.access_token;
   if (token) {
-    await tokenStore.setItem(ACCESS_TOKEN_KEY, token);
+    await SecureStorage.setItem(ACCESS_TOKEN_KEY, token);
     client.setConfig({
       ...client.getConfig(),
       headers: { Authorization: `Bearer ${token}` },

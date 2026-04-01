@@ -22,7 +22,7 @@ async function registerForPushNotificationsAsync() {
     });
   }
 
-  if (Device.isDevice && Platform.OS !== "web") {
+  if (Device.isDevice) {
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
