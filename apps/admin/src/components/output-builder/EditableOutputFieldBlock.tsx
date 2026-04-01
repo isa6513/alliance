@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type {
   AnyField,
-  Condition,
   OutputFieldBlock,
   VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
@@ -28,29 +27,24 @@ export function EditableOutputFieldBlock({
   availableFields,
 }: EditableOutputFieldBlockProps) {
   const selectedField = availableFields.find(
-    (field) => field.id === block.fieldId
+    (field) => field.id === block.fieldId,
   );
   const [showVisibilityControls, setShowVisibilityControls] = useState(() =>
     block.visibleIfFormula?.conditions
       ? Object.keys(block.visibleIfFormula.conditions).length > 0
-      : Array.isArray(block.visibleIf)
-      ? block.visibleIf.length > 0
-      : !!block.visibleIf
+      : false,
   );
 
   useEffect(() => {
     const hasConditions = block.visibleIfFormula?.conditions
       ? Object.keys(block.visibleIfFormula.conditions).length > 0
-      : Array.isArray(block.visibleIf)
-      ? block.visibleIf.length > 0
-      : !!block.visibleIf;
+      : false;
     if (hasConditions) {
       setShowVisibilityControls(true);
     }
-  }, [block.visibleIf, block.visibleIfFormula]);
+  }, [block.visibleIfFormula]);
 
   const handleVisibilityChange = (updates: {
-    visibleIf?: Condition[];
     visibleIfFormula?: VisibleIfFormula;
   }) => {
     onUpdate(updates);
@@ -59,7 +53,7 @@ export function EditableOutputFieldBlock({
   const handleVisibilityToggle = (enabled: boolean) => {
     setShowVisibilityControls(enabled);
     if (!enabled) {
-      onUpdate({ visibleIf: undefined, visibleIfFormula: undefined });
+      onUpdate({ visibleIfFormula: undefined });
     }
   };
 
@@ -71,7 +65,7 @@ export function EditableOutputFieldBlock({
         "group relative border rounded-lg transition-all",
         isDragging
           ? "border-blue-400 shadow-lg opacity-50"
-          : "border-gray-200 hover:border-gray-300"
+          : "border-gray-200 hover:border-gray-300",
       )}
     >
       <div

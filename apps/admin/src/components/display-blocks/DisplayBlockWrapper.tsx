@@ -12,7 +12,6 @@ import type {
 } from "@alliance/shared/forms/display-blocks";
 import type {
   AnyField,
-  Condition,
   VisibleIfFormula,
 } from "@alliance/shared/forms/formschema";
 import type { UserDto } from "@alliance/shared/client";
@@ -24,7 +23,7 @@ import { cn } from "@alliance/shared/styles/util";
 type ManualUserListEntry = Pick<UserDto, "id" | "name" | "hasActiveContract">;
 
 const stripManualFields = (
-  updates: Partial<DisplayBlock>
+  updates: Partial<DisplayBlock>,
 ): Partial<DisplayBlock> => {
   const {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -77,25 +76,23 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
     if (!block) return false;
     return block.visibleIfFormula?.conditions
       ? !!Object.keys(block.visibleIfFormula.conditions).length
-      : Array.isArray(block.visibleIf)
-      ? !!block.visibleIf.length
-      : !!block?.visibleIf;
+      : false;
   });
 
   const manualUserContent = useMemo(
     () => block?.manualUserContent ?? {},
-    [block?.manualUserContent]
+    [block?.manualUserContent],
   );
   const manualContentKeys = useMemo(
     () => Object.keys(manualUserContent),
-    [manualUserContent]
+    [manualUserContent],
   );
   const manualPerUserEnabled = Boolean(block?.manualPerUser);
   const [manualUsers, setManualUsers] = useState<UserDto[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [userLoadError, setUserLoadError] = useState<string | null>(null);
   const [activeManualUserId, setActiveManualUserId] = useState<string | null>(
-    null
+    null,
   );
   const [hasUserSelectedTarget, setHasUserSelectedTarget] = useState(false);
   const [isUserListOpen, setIsUserListOpen] = useState(false);
@@ -105,7 +102,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
       manualUsers.length > 0
         ? manualUsers.map((candidate) => String(candidate.id))
         : manualContentKeys,
-    [manualContentKeys, manualUsers]
+    [manualContentKeys, manualUsers],
   );
   const totalManualTargets = manualTargetList.length;
   const activeManualIndex = useMemo(() => {
@@ -154,7 +151,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
       }
       setActiveManualUserId(userId);
     },
-    []
+    [],
   );
 
   const loadUsers = useCallback(
@@ -169,7 +166,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
       } catch (error) {
         console.error(
           "Failed to load users for display block overrides",
-          error
+          error,
         );
         setUserLoadError("Unable to load users");
       } finally {
@@ -177,7 +174,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
         setIsLoadingUsers(false);
       }
     },
-    [isLoadingUsers, manualUsers.length]
+    [isLoadingUsers, manualUsers.length],
   );
 
   useEffect(() => {
@@ -212,9 +209,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   useEffect(() => {
     const useConditions = block?.visibleIfFormula?.conditions
       ? !!Object.keys(block.visibleIfFormula.conditions).length
-      : Array.isArray(block?.visibleIf)
-      ? !!block?.visibleIf.length
-      : !!block?.visibleIf;
+      : false;
 
     if (useConditions && !showConditionalVisibilityControl) {
       setShowConditionalVisibilityControl(true);
@@ -264,37 +259,36 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   }, [activeManualUserId, block, manualPerUserEnabled, manualUserContent]);
 
   const hasContentForActiveUser = Boolean(
-    activeManualUserId && manualUserContent[activeManualUserId]
+    activeManualUserId && manualUserContent[activeManualUserId],
   );
   const activeUser = useMemo(
     () =>
       manualPerUserEnabled && activeManualUserId
         ? manualUsers.find(
-            (candidate) => String(candidate.id) === activeManualUserId
+            (candidate) => String(candidate.id) === activeManualUserId,
           )
         : undefined,
-    [activeManualUserId, manualPerUserEnabled, manualUsers]
+    [activeManualUserId, manualPerUserEnabled, manualUsers],
   );
   const usersWithContent = useMemo(
     () =>
       manualUsers.filter((candidate) =>
         Object.prototype.hasOwnProperty.call(
           manualUserContent,
-          String(candidate.id)
-        )
+          String(candidate.id),
+        ),
       ),
-    [manualUserContent, manualUsers]
+    [manualUserContent, manualUsers],
   );
   const usersWithoutContent = useMemo(
     () =>
       manualUsers.filter(
-        (candidate) => !manualUserContent[String(candidate.id)]
+        (candidate) => !manualUserContent[String(candidate.id)],
       ),
-    [manualUserContent, manualUsers]
+    [manualUserContent, manualUsers],
   );
 
   const handleConditionalChange = (updates: {
-    visibleIf?: Condition[];
     visibleIfFormula?: VisibleIfFormula;
   }) => {
     if (!onUpdate || !block) {
@@ -308,7 +302,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
         Object.entries(block.manualUserContent).map(([userId, content]) => [
           userId,
           { ...content, ...updates },
-        ])
+        ]),
       ) as Record<string, ManualDisplayBlockContent>;
       onUpdate({
         ...(updates as Partial<T>),
@@ -324,7 +318,6 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
     setShowConditionalVisibilityControl(checked);
     if (!checked) {
       handleConditionalChange({
-        visibleIf: undefined,
         visibleIfFormula: undefined,
       });
     }
@@ -350,7 +343,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
     }
 
     const currentIndex = manualTargetList.findIndex(
-      (id) => id === activeManualUserId
+      (id) => id === activeManualUserId,
     );
     const safeIndex = currentIndex >= 0 ? currentIndex : 0;
     const nextIndex =
@@ -398,7 +391,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
       manualPerUserEnabled,
       manualUserContent,
       onUpdate,
-    ]
+    ],
   );
 
   const clearContentForActiveUser = () => {
@@ -435,7 +428,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
         "group relative border rounded-lg p-4 pl-8 transition-all",
         isDragging
           ? "border-blue-400 shadow-lg opacity-50"
-          : "border-gray-200 hover:border-gray-300"
+          : "border-gray-200 hover:border-gray-300",
       )}
     >
       <div
@@ -557,7 +550,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
                                 "rounded-full px-2 py-0.5 text-[11px]",
                                 hasContentForActiveUser
                                   ? "bg-green-100 text-green-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                                  : "bg-yellow-100 text-yellow-800",
                               )}
                             >
                               {hasContentForActiveUser
@@ -818,7 +811,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
                           "truncate",
                           activeManualUserId === userId
                             ? "font-semibold text-blue-700"
-                            : "text-gray-800"
+                            : "text-gray-800",
                         )}
                       >
                         {name}
@@ -829,7 +822,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
                         "text-xs rounded-full px-2 py-0.5",
                         hasContent
                           ? "bg-green/10 text-green-800"
-                          : "bg-gray-100 text-gray-700"
+                          : "bg-gray-100 text-gray-700",
                       )}
                     >
                       {hasContent ? "Set" : "Unset"}

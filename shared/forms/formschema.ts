@@ -51,9 +51,6 @@ interface BaseField<TKind extends FieldKind> {
   defaultValue?: FormValue | null;
   customValidatorId?: number;
 
-  // simple conditions using string IDs
-  /** @deprecated Use visibleIfFormula for new logic. Kept for backward compatibility. */
-  visibleIf?: Condition[];
   visibleIfFormula?: VisibleIfFormula;
   requiredIf?: Condition;
 
@@ -67,7 +64,11 @@ interface BaseField<TKind extends FieldKind> {
 // When `sourceFormId` is set, `when` refers to a field in that form and
 // the value is resolved from the user's previous response to it.
 export type Condition =
-  | { when: string; equals: string | number | boolean | null; sourceFormId?: number }
+  | {
+      when: string;
+      equals: string | number | boolean | null;
+      sourceFormId?: number;
+    }
   | { when: string; includesOption: string; sourceFormId?: number }
   | { when: string; anySelected: boolean; sourceFormId?: number }
   | { when: string; hasValue: boolean; sourceFormId?: number }
@@ -82,7 +83,7 @@ export type FormulaNode =
   | { op: "NOT"; operand: FormulaNode | string }
   | string;
 
-/** Named conditions (condition1, condition2, ...) plus a formula tree. Replaces visibleIf when present. */
+/** Named conditions (condition1, condition2, ...) plus a formula tree. */
 export interface VisibleIfFormula {
   conditions: Record<string, Condition>;
   formula: FormulaNode;
@@ -268,8 +269,6 @@ export interface OutputFieldBlock {
   showLabel?: boolean;
   labelOverride?: string;
   format?: "field" | "textonly" | "card";
-  /** @deprecated Use visibleIfFormula. */
-  visibleIf?: Condition[];
   visibleIfFormula?: VisibleIfFormula;
 }
 

@@ -257,11 +257,7 @@ export function evaluateCondition(
     }
     return actual === expected;
   }
-  const val = resolveConditionValue(
-    cond,
-    data,
-    extras,
-  );
+  const val = resolveConditionValue(cond, data, extras);
   return evaluateValueBasedCondition(cond, val);
 }
 
@@ -326,16 +322,11 @@ export function isElementCurrentlyVisible(
   extras: ConditionExtras & { readOnly?: boolean } = {},
 ): boolean {
   const formula = element.visibleIfFormula;
-  const conditions = Array.isArray(element.visibleIf)
-    ? element.visibleIf
-    : element.visibleIf
-      ? [element.visibleIf]
-      : [];
   const hasFormula =
     formula?.conditions &&
     Object.keys(formula.conditions).length > 0 &&
     formula.formula;
-  if (conditions.length === 0 && !hasFormula) {
+  if (!hasFormula) {
     return true;
   }
   if (extras.readOnly && element.id) {
@@ -393,36 +384,19 @@ export function isElementCurrentlyVisible(
         cond.when
       ] as FormValue;
     }
-    return isReferencedFieldVisible(cond.when)
-      ? data[cond.when]
-      : undefined;
+    return isReferencedFieldVisible(cond.when) ? data[cond.when] : undefined;
   };
 
-  if (hasFormula) {
-    const results: Record<string, boolean> = {};
-    for (const [name, cond] of Object.entries(formula!.conditions)) {
-      if ("expr" in cond || "deviceType" in cond || "validatorId" in cond) {
-        results[name] = evaluateCondition(cond, data, extras);
-      } else {
-        const value = resolveValue(cond as Condition & { when: string });
-        results[name] = evaluateValueBasedCondition(cond, value);
-      }
+  const results: Record<string, boolean> = {};
+  for (const [name, cond] of Object.entries(formula!.conditions)) {
+    if ("expr" in cond || "deviceType" in cond || "validatorId" in cond) {
+      results[name] = evaluateCondition(cond, data, extras);
+    } else {
+      const value = resolveValue(cond as Condition & { when: string });
+      results[name] = evaluateValueBasedCondition(cond, value);
     }
-    return evaluateVisibilityFormula(formula!.formula, results);
   }
-
-  return conditions.every((condition) => {
-    if (
-      "expr" in condition ||
-      "deviceType" in condition ||
-      "validatorId" in condition
-    ) {
-      return evaluateCondition(condition, data, extras);
-    }
-
-    const value = resolveValue(condition as Condition & { when: string });
-    return evaluateValueBasedCondition(condition, value);
-  });
+  return evaluateVisibilityFormula(formula!.formula, results);
 }
 
 export function isFieldConditionallyRequired(
@@ -652,10 +626,6 @@ export function collectConditionSourceFormIds(schema: FormSchema): number[] {
     }
   };
   const collectFromElement = (el: AnyField | DisplayBlock) => {
-    if (el.visibleIf) {
-      const arr = Array.isArray(el.visibleIf) ? el.visibleIf : [el.visibleIf];
-      arr.forEach(collectFromCondition);
-    }
     if (el.visibleIfFormula?.conditions) {
       Object.values(el.visibleIfFormula.conditions).forEach(
         collectFromCondition,
@@ -669,7 +639,7 @@ export function collectConditionSourceFormIds(schema: FormSchema): number[] {
     for (const field of page.fields) {
       collectFromElement(field);
       if ("label" in field && (field as AnyField).kind === "list") {
-        for (const sub of ((field as AnyField) as ListField).fields ?? []) {
+        for (const sub of (field as AnyField as ListField).fields ?? []) {
           collectFromElement(sub);
         }
       }

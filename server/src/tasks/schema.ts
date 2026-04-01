@@ -52,9 +52,6 @@ interface BaseField<TKind extends FieldKind> {
   defaultValue?: FormValue | null;
   customValidatorId?: number;
 
-  // simple conditions using string IDs
-  /** @deprecated Use visibleIfFormula. */
-  visibleIf?: Condition[];
   visibleIfFormula?: VisibleIfFormula;
   requiredIf?: Condition;
 
@@ -68,7 +65,11 @@ interface BaseField<TKind extends FieldKind> {
 // When `sourceFormId` is set, `when` refers to a field in that form and
 // the value is resolved from the user's previous response to it.
 export type Condition =
-  | { when: string; equals: string | number | boolean | null; sourceFormId?: number }
+  | {
+      when: string;
+      equals: string | number | boolean | null;
+      sourceFormId?: number;
+    }
   | { when: string; includesOption: string; sourceFormId?: number }
   | { when: string; anySelected: boolean; sourceFormId?: number }
   | { when: string; hasValue: boolean; sourceFormId?: number }
@@ -251,8 +252,6 @@ export interface OutputFieldBlock {
   showLabel?: boolean;
   labelOverride?: string;
   format?: 'field' | 'textonly' | 'card';
-  /** @deprecated Use visibleIfFormula. */
-  visibleIf?: Condition[];
   visibleIfFormula?: VisibleIfFormula;
 }
 
@@ -384,13 +383,6 @@ export function isQuestionVisible(
     return evaluateVisibilityFormulaNode(formula.formula, results);
   }
 
-  const raw = element.visibleIf;
-  if (raw && (Array.isArray(raw) ? raw.length > 0 : true)) {
-    const conditions = Array.isArray(raw) ? raw : [raw];
-    for (const condition of conditions) {
-      if (!evalCond(condition)) return false;
-    }
-  }
   return true;
 }
 
@@ -403,10 +395,6 @@ export function collectSourceFormIds(schema: FormSchema): number[] {
     }
   };
   const collectFromElement = (el: AnyField | DisplayBlock) => {
-    if (el.visibleIf) {
-      const arr = Array.isArray(el.visibleIf) ? el.visibleIf : [el.visibleIf];
-      arr.forEach(collectFromCondition);
-    }
     if (el.visibleIfFormula?.conditions) {
       Object.values(el.visibleIfFormula.conditions).forEach(
         collectFromCondition,

@@ -402,9 +402,9 @@ describe('Tasks (e2e)', () => {
     expect(aggregateViewsResponse.body.aggregateViews[0].numerator.value).toBe(
       250,
     );
-    expect(aggregateViewsResponse.body.aggregateViews[0].denominator.value).toBe(
-      1000,
-    );
+    expect(
+      aggregateViewsResponse.body.aggregateViews[0].denominator.value,
+    ).toBe(1000);
   });
 
   it('hides privateByDefault output fields in public output while keeping normal output fields visible', async () => {
@@ -960,7 +960,12 @@ describe('Tasks (e2e)', () => {
                 kind: 'text',
                 label: 'Phone proof',
                 required: true,
-                visibleIf: [{ validatorId: visibilityValidatorId }],
+                visibleIfFormula: {
+                  conditions: {
+                    condition1: { validatorId: visibilityValidatorId },
+                  },
+                  formula: 'condition1',
+                },
               },
             ],
           },
@@ -1132,13 +1137,16 @@ describe('Tasks (e2e)', () => {
                 kind: 'text',
                 label: 'Organizer detail',
                 required: true,
-                visibleIf: [
-                  {
-                    when: 'role',
-                    equals: 'organizer',
-                    sourceFormId,
+                visibleIfFormula: {
+                  conditions: {
+                    condition1: {
+                      when: 'role',
+                      equals: 'organizer',
+                      sourceFormId,
+                    },
                   },
-                ],
+                  formula: 'condition1',
+                },
               },
             ],
           },
@@ -1218,13 +1226,16 @@ describe('Tasks (e2e)', () => {
                 kind: 'text',
                 label: 'Organizer detail',
                 required: true,
-                visibleIf: [
-                  {
-                    when: 'role',
-                    equals: 'organizer',
-                    sourceFormId,
+                visibleIfFormula: {
+                  conditions: {
+                    condition1: {
+                      when: 'role',
+                      equals: 'organizer',
+                      sourceFormId,
+                    },
                   },
-                ],
+                  formula: 'condition1',
+                },
               },
             ],
           },
@@ -1263,7 +1274,7 @@ describe('Tasks (e2e)', () => {
         .expect(201);
     });
 
-    it('works with visibleIfFormula and sourceFormId', async () => {
+    it('works with visibility formula and sourceFormId', async () => {
       const sourceSchema: FormSchema = {
         title: 'Source Form 3',
         pages: [

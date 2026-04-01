@@ -124,7 +124,10 @@ describe('ForumActionCompleterWorker (e2e)', () => {
     );
   };
 
-  const createForumValidator = async (type: CustomValidatorType, postId: number) => {
+  const createForumValidator = async (
+    type: CustomValidatorType,
+    postId: number,
+  ) => {
     return customValidatorRepo.save(
       customValidatorRepo.create({
         type,
@@ -144,7 +147,12 @@ describe('ForumActionCompleterWorker (e2e)', () => {
               id: 'reply',
               kind: 'text',
               label: 'Reply',
-              visibleIf: [{ validatorId }],
+              visibleIfFormula: {
+                conditions: {
+                  condition1: { validatorId },
+                },
+                formula: 'condition1',
+              },
             },
           ],
         },

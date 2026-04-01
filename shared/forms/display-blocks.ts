@@ -1,5 +1,5 @@
 // display-blocks.ts
-import { Condition, VisibleIfFormula } from "@alliance/shared/forms/formschema";
+import { VisibleIfFormula } from "@alliance/shared/forms/formschema";
 
 export type DisplayKind =
   | "header" // H1–H6
@@ -18,8 +18,6 @@ export type DisplayKind =
 interface BaseBlock {
   kind: DisplayKind;
   id?: string;
-  /** @deprecated Use visibleIfFormula. */
-  visibleIf?: Condition[];
   visibleIfFormula?: VisibleIfFormula;
   width?: "full" | "1/2" | "1/3";
   manualPerUser?: boolean;
@@ -80,7 +78,12 @@ export type VideoBlock = BaseBlock & {
   caption?: string;
 };
 
-export type BigLinkIcon = "messages-square" | "file" | "file-text" | "file-check" | "signature";
+export type BigLinkIcon =
+  | "messages-square"
+  | "file"
+  | "file-text"
+  | "file-check"
+  | "signature";
 
 export type BigLinkBlock = BaseBlock & {
   kind: "biglink";

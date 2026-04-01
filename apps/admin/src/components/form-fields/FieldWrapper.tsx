@@ -31,7 +31,7 @@ import {
 
 function isFormField(field: unknown): field is AnyField {
   return Boolean(
-    field && typeof field === "object" && "kind" in (field as AnyField)
+    field && typeof field === "object" && "kind" in (field as AnyField),
   );
 }
 
@@ -45,7 +45,7 @@ type ExtractableField =
 
 function supportsExtraction(field: AnyField): field is ExtractableField {
   return AUTO_EXTRACT_FIELD_KINDS.includes(
-    field.kind as (typeof AUTO_EXTRACT_FIELD_KINDS)[number]
+    field.kind as (typeof AUTO_EXTRACT_FIELD_KINDS)[number],
   );
 }
 
@@ -54,12 +54,12 @@ function hasExtractionEnabled(field: AnyField): boolean {
   if (field.kind === "checkbox" || field.kind === "custom") {
     return Boolean(
       (field as CheckboxField | CustomComponentField).autoExtractUserData
-        ?.target
+        ?.target,
     );
   }
   return Boolean(
     (field as PhoneField | TimeField | TimezoneField | CityField)
-      .autoExtractUserData
+      .autoExtractUserData,
   );
 }
 
@@ -96,15 +96,11 @@ export function FieldWrapper<T extends AnyField>({
     useCustomValidatorDrafts();
   const [isExtraMenuOpen, setIsExtraMenuOpen] = useState(false);
   const [showCustomValidatorControl, setShowCustomValidatorControl] = useState(
-    () => (isCurrentFormField ? Boolean(field.customValidatorId) : false)
+    () => (isCurrentFormField ? Boolean(field.customValidatorId) : false),
   );
   const initialVisibilityCount =
     isCurrentFormField && field.visibleIfFormula?.conditions
       ? Object.keys(field.visibleIfFormula.conditions).length
-      : isCurrentFormField && Array.isArray(field.visibleIf)
-      ? field.visibleIf.length
-      : isCurrentFormField && field.visibleIf
-      ? 1
       : 0;
   const [
     showConditionalVisibilityControl,
@@ -122,7 +118,7 @@ export function FieldWrapper<T extends AnyField>({
     string | undefined
   >(undefined);
   const [loadedValidatorId, setLoadedValidatorId] = useState<number | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -172,10 +168,6 @@ export function FieldWrapper<T extends AnyField>({
     const conditionCount =
       isCurrentFormField && field.visibleIfFormula?.conditions
         ? Object.keys(field.visibleIfFormula.conditions).length
-        : isCurrentFormField && Array.isArray(field.visibleIf)
-        ? field.visibleIf.length
-        : isCurrentFormField && field.visibleIf
-        ? 1
         : 0;
 
     if (conditionCount > 0 && !showConditionalVisibilityControl) {
@@ -217,7 +209,7 @@ export function FieldWrapper<T extends AnyField>({
   const handleValidatorChange = async (
     validatorType: CustomValidatorType | undefined,
     idArgument?: string,
-    expression?: string
+    expression?: string,
   ) => {
     console.log("handlevalidatorchange", validatorType, idArgument);
     if (!validatorType) {
@@ -248,7 +240,6 @@ export function FieldWrapper<T extends AnyField>({
   };
 
   const handleVisibilityChange = (updates: {
-    visibleIf?: AnyField["visibleIf"];
     visibleIfFormula?: AnyField["visibleIfFormula"];
   }) => {
     onUpdate(updates as unknown as Partial<T>);
@@ -265,7 +256,6 @@ export function FieldWrapper<T extends AnyField>({
     setShowConditionalVisibilityControl(checked);
     if (!checked) {
       handleVisibilityChange({
-        visibleIf: undefined,
         visibleIfFormula: undefined,
       });
     }
@@ -320,7 +310,7 @@ export function FieldWrapper<T extends AnyField>({
   };
 
   const handleCheckboxExtractionTargetChange = (
-    target: CheckboxExtractionTarget | ""
+    target: CheckboxExtractionTarget | "",
   ) => {
     if (
       !isCurrentFormField ||
@@ -338,7 +328,7 @@ export function FieldWrapper<T extends AnyField>({
         "group relative border rounded-lg transition-all [&_input,&_textarea]:bg-white",
         isDragging
           ? "border-blue-400 shadow-lg opacity-50"
-          : "border-gray-200 hover:border-gray-300"
+          : "border-gray-200 hover:border-gray-300",
       )}
     >
       {/* Drag handle */}
@@ -424,7 +414,7 @@ export function FieldWrapper<T extends AnyField>({
                           }
                           onChange={(e) =>
                             handleCheckboxExtractionTargetChange(
-                              e.target.value as CheckboxExtractionTarget | ""
+                              e.target.value as CheckboxExtractionTarget | "",
                             )
                           }
                         >

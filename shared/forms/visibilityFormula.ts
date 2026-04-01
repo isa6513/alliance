@@ -3,7 +3,7 @@ import type { FormulaNode } from "./formschema";
 const CONDITION_NAME_REGEX = /^condition\d+$/;
 
 function tokenize(
-  input: string
+  input: string,
 ): { type: "id" | "AND" | "OR" | "NOT" | "(" | ")"; value: string }[] {
   const tokens: {
     type: "id" | "AND" | "OR" | "NOT" | "(" | ")";
@@ -65,7 +65,7 @@ type ParseResult = { node: FormulaNode } | { error: string };
  */
 export function parseVisibilityFormula(
   text: string,
-  allowedNames: Set<string>
+  allowedNames: Set<string>,
 ): ParseResult {
   const tokens = tokenize(text);
   if (tokens.length === 0 && text.trim().length > 0) {
@@ -151,7 +151,7 @@ export function parseVisibilityFormula(
  */
 export function evaluateVisibilityFormula(
   node: FormulaNode,
-  results: Record<string, boolean>
+  results: Record<string, boolean>,
 ): boolean {
   if (typeof node === "string") {
     return results[node] === true;
@@ -209,7 +209,7 @@ export function serializeVisibilityFormula(node: FormulaNode): string {
   return `${left} ${node.op} ${right}`;
 }
 
-/** Default formula when migrating from visibleIf: AND of all conditions. */
+/** Default AND formula for n named conditions (condition1 … conditionN). */
 export function defaultFormulaForConditionCount(n: number): string {
   if (n <= 0) return "";
   if (n === 1) return "condition1";

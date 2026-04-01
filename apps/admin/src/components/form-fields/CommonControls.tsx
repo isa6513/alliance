@@ -185,14 +185,10 @@ export function OutputPrivateByDefaultToggle({
 // ---------------- Conditional Visibility ----------------
 type ConditionalVisibilityProps = {
   field: (AnyField | DisplayBlock) & {
-    visibleIf?: Condition[] | Condition;
     visibleIfFormula?: VisibleIfFormula;
   };
   previousFields: AnyField[];
-  onChange: (updates: {
-    visibleIf?: Condition[];
-    visibleIfFormula?: VisibleIfFormula;
-  }) => void;
+  onChange: (updates: { visibleIfFormula?: VisibleIfFormula }) => void;
 };
 
 type TextContentControllerField =
@@ -292,11 +288,6 @@ function isEqualsCondition(
   return "equals" in condition;
 }
 
-function normalizeConditions(input?: Condition[] | Condition): Condition[] {
-  if (!input) return [];
-  return Array.isArray(input) ? input : [input];
-}
-
 export function ConditionalVisibility({
   field,
   previousFields,
@@ -326,14 +317,8 @@ export function ConditionalVisibility({
         }
       }
     }
-    const legacy = normalizeConditions(field.visibleIf);
-    for (const cond of legacy) {
-      if ("sourceFormId" in cond && typeof cond.sourceFormId === "number") {
-        ids.add(cond.sourceFormId);
-      }
-    }
     return Array.from(ids);
-  }, [field.visibleIf, field.visibleIfFormula]);
+  }, [field.visibleIfFormula]);
 
   const [externalFieldsMap, setExternalFieldsMap] = useState<
     Record<number, AnyField[]>
@@ -391,7 +376,8 @@ export function ConditionalVisibility({
 
   const getExternalControllers = useCallback(
     (formId: number): ControllerField[] => {
-      const fields = externalFieldsMap[formId] ?? externalSchemaCache.get(formId) ?? [];
+      const fields =
+        externalFieldsMap[formId] ?? externalSchemaCache.get(formId) ?? [];
       return fields.filter((f): f is ControllerField =>
         isConditionalController(f),
       );
@@ -414,8 +400,8 @@ export function ConditionalVisibility({
       });
       return names.map((name) => formula.conditions[name]);
     }
-    return normalizeConditions(field.visibleIf);
-  }, [field.visibleIf, field.visibleIfFormula]);
+    return [];
+  }, [field.visibleIfFormula]);
 
   const formulaText = useMemo(() => {
     const formula = field.visibleIfFormula;
@@ -520,7 +506,7 @@ export function ConditionalVisibility({
         );
       }
       if (next.length === 0) {
-        onChange({ visibleIfFormula: undefined, visibleIf: undefined });
+        onChange({ visibleIfFormula: undefined });
         return;
       }
       onChange({
@@ -716,8 +702,8 @@ export function ConditionalVisibility({
     (index: number, formId: number) => {
       const cached = externalSchemaCache.get(formId);
       if (cached) {
-        const extCtrls = cached.filter(
-          (f): f is ControllerField => isConditionalController(f),
+        const extCtrls = cached.filter((f): f is ControllerField =>
+          isConditionalController(f),
         );
         const first = extCtrls[0];
         const next = [...conditions];
@@ -729,7 +715,11 @@ export function ConditionalVisibility({
         setExternalFieldsMap((prev) => ({ ...prev, [formId]: cached }));
       } else {
         const next = [...conditions];
-        next[index] = { when: "", hasValue: true, sourceFormId: formId } as FieldCondition;
+        next[index] = {
+          when: "",
+          hasValue: true,
+          sourceFormId: formId,
+        } as FieldCondition;
         updateConditions(next, true);
         tasksGetForm({ path: { id: formId } }).then((response) => {
           const schema = (response.data as Record<string, unknown> | undefined)
@@ -754,8 +744,8 @@ export function ConditionalVisibility({
     const firstFormId = formList[0].id;
     const cached = externalSchemaCache.get(firstFormId);
     if (cached) {
-      const extCtrls = cached.filter(
-        (f): f is ControllerField => isConditionalController(f),
+      const extCtrls = cached.filter((f): f is ControllerField =>
+        isConditionalController(f),
       );
       const first = extCtrls[0];
       const cond = buildConditionForField(first, firstFormId);
@@ -829,7 +819,13 @@ export function ConditionalVisibility({
       next[index] = nextCondition;
       updateConditions(next, true);
     },
-    [buildConditionForField, conditions, controllers, getExternalControllers, updateConditions],
+    [
+      buildConditionForField,
+      conditions,
+      controllers,
+      getExternalControllers,
+      updateConditions,
+    ],
   );
 
   const handleNumberConditionModeChange = useCallback(
@@ -1003,7 +999,9 @@ export function ConditionalVisibility({
         ? (condition as FieldCondition & { sourceFormId?: number }).sourceFormId
         : undefined;
     const isCrossForm = sourceFormId != null;
-    const pool = isCrossForm ? getExternalControllers(sourceFormId) : controllers;
+    const pool = isCrossForm
+      ? getExternalControllers(sourceFormId)
+      : controllers;
     const controller = pool.find((f) => f.id === condition.when);
     const hasContentValue = isHasValueCondition(condition)
       ? String(condition.hasValue ?? true)
@@ -1046,9 +1044,7 @@ export function ConditionalVisibility({
               ))}
             </select>
             {externalFieldsLoading && (
-              <p className="text-[11px] text-gray-400 mt-1">
-                Loading fields…
-              </p>
+              <p className="text-[11px] text-gray-400 mt-1">Loading fields…</p>
             )}
           </div>
         )}
@@ -1746,7 +1742,9 @@ function useFormList(): {
     let cancelled = false;
     if (!pendingFormListRequest) {
       pendingFormListRequest = tasksListForms().then((response) => {
-        const items = ((response.data ?? []) as Array<{ id: number; title: string }>)
+        const items = (
+          (response.data ?? []) as Array<{ id: number; title: string }>
+        )
           .map((f) => ({ id: f.id, title: f.title }))
           .sort((a, b) => a.id - b.id);
         cachedFormList = items;

@@ -641,22 +641,6 @@ const FormRenderer = ({
 
   const visibilityValidatorIds = useMemo(() => {
     const ids = new Set<number>();
-    const collectFromConditions = (visibleIf: unknown) => {
-      const conditions = Array.isArray(visibleIf)
-        ? visibleIf
-        : visibleIf
-          ? [visibleIf]
-          : [];
-      for (const condition of conditions) {
-        if (
-          condition &&
-          typeof condition === "object" &&
-          "validatorId" in condition
-        ) {
-          ids.add((condition as { validatorId: number }).validatorId);
-        }
-      }
-    };
     const collectFromVisibleIfFormula = (
       visibleIfFormula: VisibleIfFormula | undefined,
     ) => {
@@ -671,13 +655,11 @@ const FormRenderer = ({
     };
     for (const page of schema.pages) {
       for (const element of page.fields) {
-        collectFromConditions(element.visibleIf);
         collectFromVisibleIfFormula(element.visibleIfFormula);
         if ("label" in element && (element as AnyField).kind === "list") {
           const listField = element as AnyField & { fields?: AnyField[] };
           if (Array.isArray(listField.fields)) {
             for (const sub of listField.fields) {
-              collectFromConditions(sub.visibleIf);
               collectFromVisibleIfFormula(sub.visibleIfFormula);
             }
           }
@@ -747,7 +729,13 @@ const FormRenderer = ({
         readOnly,
         previousAnswerData,
       }),
-    [fieldLookup, formData, visibilityValidatorResults, readOnly, previousAnswerData],
+    [
+      fieldLookup,
+      formData,
+      visibilityValidatorResults,
+      readOnly,
+      previousAnswerData,
+    ],
   );
 
   const validateFieldValue = useCallback(

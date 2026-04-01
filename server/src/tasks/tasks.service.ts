@@ -226,16 +226,6 @@ export class TasksService {
 
     for (const page of schema.pages) {
       for (const element of page.fields) {
-        const conditions = Array.isArray(element.visibleIf)
-          ? element.visibleIf
-          : element.visibleIf
-            ? [element.visibleIf]
-            : [];
-        for (const condition of conditions) {
-          if ('validatorId' in condition) {
-            validatorIds.add(condition.validatorId);
-          }
-        }
         const formula = element.visibleIfFormula;
         if (formula?.conditions) {
           for (const condition of Object.values(formula.conditions)) {
@@ -252,16 +242,6 @@ export class TasksService {
           const listField = element as ListField;
           if (Array.isArray(listField.fields)) {
             for (const sub of listField.fields) {
-              const subConditions = Array.isArray(sub.visibleIf)
-                ? sub.visibleIf
-                : sub.visibleIf
-                  ? [sub.visibleIf]
-                  : [];
-              for (const condition of subConditions) {
-                if ('validatorId' in condition) {
-                  validatorIds.add(condition.validatorId);
-                }
-              }
               const subFormula = sub.visibleIfFormula;
               if (subFormula?.conditions) {
                 for (const condition of Object.values(subFormula.conditions)) {
@@ -324,9 +304,10 @@ export class TasksService {
         if (entry) previousAnswerData[entry[0]] = entry[1];
       }
     }
-    const hasPreviousAnswerData = Object.keys(previousAnswerData).length > 0
-      ? previousAnswerData
-      : undefined;
+    const hasPreviousAnswerData =
+      Object.keys(previousAnswerData).length > 0
+        ? previousAnswerData
+        : undefined;
 
     for (const page of schema.pages) {
       for (const field of page.fields) {

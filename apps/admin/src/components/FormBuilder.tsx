@@ -155,42 +155,6 @@ const ensureSchemaViews = (schema: FormSchema): FormSchema => ({
   aggregateViews: schema.aggregateViews ?? [],
 });
 
-/** Remove deprecated visibleIf from all fields and blocks so only visibleIfFormula is persisted. */
-function stripVisibleIfFromSchema(schema: FormSchema): FormSchema {
-  const stripFromElement = (
-    el: Record<string, unknown>,
-  ): Record<string, unknown> => {
-    const out = { ...el };
-    if ("visibleIf" in out) {
-      delete out.visibleIf;
-    }
-    if (out.kind === "list" && Array.isArray(out.fields)) {
-      out.fields = out.fields.map((f: unknown) =>
-        typeof f === "object" && f !== null
-          ? stripFromElement(f as Record<string, unknown>)
-          : f,
-      );
-    }
-    return out;
-  };
-
-  return {
-    ...schema,
-    pages: (schema.pages ?? []).map((page) => ({
-      ...page,
-      fields: (page.fields ?? []).map((f) =>
-        stripFromElement(f as unknown as Record<string, unknown>),
-      ) as unknown as Page["fields"],
-    })),
-    outputViews: (schema.outputViews ?? []).map((view) => ({
-      ...view,
-      blocks: (view.blocks ?? []).map((b) =>
-        stripFromElement(b as unknown as Record<string, unknown>),
-      ) as unknown as typeof view.blocks,
-    })),
-  } as FormSchema;
-}
-
 const ensurePages = (schema: FormSchema): FormSchema => {
   const withOutputViews = ensureSchemaViews(schema);
   if (
@@ -291,39 +255,6 @@ const mapConditionForOptionValue = (
   return { condition, updated: false };
 };
 
-const getUpdatedVisibilityConditions = (
-  visibleIf: Condition[] | Condition | undefined,
-  controllerId: string,
-  previousValue: string,
-  nextValue: string,
-): { changed: boolean; visibleIf?: Condition[] } => {
-  if (!visibleIf) {
-    return { changed: false };
-  }
-
-  const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
-  let updated = false;
-  const nextConditions = conditions.map((c) => {
-    const { condition, updated: u } = mapConditionForOptionValue(
-      c,
-      controllerId,
-      previousValue,
-      nextValue,
-    );
-    if (u) updated = true;
-    return condition;
-  });
-
-  if (!updated) {
-    return { changed: false };
-  }
-
-  return {
-    changed: true,
-    visibleIf: nextConditions,
-  };
-};
-
 const getUpdatedVisibilityFormula = (
   visibleIfFormula: VisibleIfFormula | undefined,
   controllerId: string,
@@ -371,33 +302,21 @@ const applyOptionValueToConditionalVisibility = (
       return candidate;
     }
 
-    const visibleIf = candidate.visibleIf;
-    const visibleIfFormula = candidate.visibleIfFormula;
-
-    const result = getUpdatedVisibilityConditions(
-      visibleIf,
-      controllerId,
-      previousValue,
-      nextValue,
-    );
     const formulaResult = getUpdatedVisibilityFormula(
-      visibleIfFormula,
+      candidate.visibleIfFormula,
       controllerId,
       previousValue,
       nextValue,
     );
 
-    if (!result.changed && !formulaResult.changed) {
+    if (!formulaResult.changed) {
       return candidate;
     }
 
     hasChanges = true;
     return {
       ...candidate,
-      ...(result.changed && result.visibleIf != null
-        ? { visibleIf: result.visibleIf }
-        : {}),
-      ...(formulaResult.changed && formulaResult.visibleIfFormula != null
+      ...(formulaResult.visibleIfFormula != null
         ? { visibleIfFormula: formulaResult.visibleIfFormula }
         : {}),
     };
@@ -547,19 +466,6 @@ export function FormBuilder({
     }
     const activeDraftIds = new Set<number>();
 
-    const collectFromConditions = (visibleIf?: Condition[] | Condition) => {
-      if (!visibleIf) return;
-      const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
-      conditions.forEach((condition) => {
-        if (
-          "validatorId" in condition &&
-          isDraftValidatorId(condition.validatorId)
-        ) {
-          activeDraftIds.add(condition.validatorId);
-        }
-      });
-    };
-
     const collectFromVisibleIfFormula = (visibleIfFormula?: {
       conditions: Record<string, Condition>;
     }) => {
@@ -581,14 +487,12 @@ export function FormBuilder({
             activeDraftIds.add(field.customValidatorId);
           }
         }
-        collectFromConditions(field.visibleIf);
         collectFromVisibleIfFormula(field.visibleIfFormula);
       });
     });
 
     schema.outputViews.forEach((view) => {
       view.blocks.forEach((block) => {
-        collectFromConditions(block.visibleIf);
         collectFromVisibleIfFormula(block.visibleIfFormula);
       });
     });
@@ -981,19 +885,6 @@ export function FormBuilder({
     async (schemaToSave: FormSchema) => {
       const draftIds = new Set<number>();
 
-      const collectFromConditions = (visibleIf?: Condition[] | Condition) => {
-        if (!visibleIf) return;
-        const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
-        conditions.forEach((condition) => {
-          if (
-            "validatorId" in condition &&
-            isDraftValidatorId(condition.validatorId)
-          ) {
-            draftIds.add(condition.validatorId);
-          }
-        });
-      };
-
       const collectFromVisibleIfFormula = (visibleIfFormula?: {
         conditions: Record<string, Condition>;
       }) => {
@@ -1016,14 +907,12 @@ export function FormBuilder({
           ) {
             draftIds.add(field.customValidatorId);
           }
-          collectFromConditions(field.visibleIf);
           collectFromVisibleIfFormula(field.visibleIfFormula);
         });
       });
 
       schemaToSave.outputViews.forEach((view) => {
         view.blocks.forEach((block) => {
-          collectFromConditions(block.visibleIf);
           collectFromVisibleIfFormula(block.visibleIfFormula);
         });
       });
@@ -1067,14 +956,6 @@ export function FormBuilder({
         return condition;
       };
 
-      const mapVisibleIf = (
-        visibleIf?: Condition[] | Condition,
-      ): Condition[] | undefined => {
-        if (!visibleIf) return undefined;
-        const conditions = Array.isArray(visibleIf) ? visibleIf : [visibleIf];
-        return conditions.map(mapCondition);
-      };
-
       const mapVisibleIfFormula = (
         visibleIfFormula?: VisibleIfFormula,
       ): VisibleIfFormula | undefined => {
@@ -1096,7 +977,6 @@ export function FormBuilder({
         pages: schemaToSave.pages.map((page) => ({
           ...page,
           fields: page.fields.map((field) => {
-            const nextVisibleIf = mapVisibleIf(field.visibleIf);
             const nextVisibleIfFormula = mapVisibleIfFormula(
               field.visibleIfFormula,
             );
@@ -1110,13 +990,11 @@ export function FormBuilder({
               return {
                 ...field,
                 customValidatorId: nextValidatorId,
-                visibleIf: nextVisibleIf,
                 visibleIfFormula: nextVisibleIfFormula,
               };
             }
             return {
               ...field,
-              visibleIf: nextVisibleIf,
               visibleIfFormula: nextVisibleIfFormula,
             };
           }),
@@ -1125,7 +1003,6 @@ export function FormBuilder({
           ...view,
           blocks: view.blocks.map((block) => ({
             ...block,
-            visibleIf: mapVisibleIf(block.visibleIf),
             visibleIfFormula: mapVisibleIfFormula(block.visibleIfFormula),
           })),
         })),
@@ -1243,12 +1120,10 @@ export function FormBuilder({
         setSchema(schemaForSave);
       }
 
-      const schemaToPersist = stripVisibleIfFromSchema(schemaForSave);
-
       // displayBlocksOnly mode: save via onSave only (e.g. general update schema)
       if (generalUpdateName && onSave) {
-        await onSave(schemaToPersist);
-        setLastSavedSchemaJSON(JSON.stringify(schemaToPersist));
+        await onSave(schemaForSave);
+        setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
         setHasUnsavedChanges(false);
         showSuccessToast("Saved successfully");
         return;
@@ -1261,23 +1136,23 @@ export function FormBuilder({
         response = await tasksUpdateForm({
           path: { formId },
           body: {
-            title: schemaToPersist.title,
-            schema: schemaToPersist as unknown as Record<string, unknown>,
+            title: schemaForSave.title,
+            schema: schemaForSave as unknown as Record<string, unknown>,
           },
         });
       } else {
         // Create new form
         response = await tasksCreateForm({
           body: {
-            title: schemaToPersist.title,
-            schema: schemaToPersist as unknown as Record<string, unknown>,
+            title: schemaForSave.title,
+            schema: schemaForSave as unknown as Record<string, unknown>,
           },
         });
       }
 
       if (response.response.ok && response.data) {
         setFormId(response.data.id);
-        setLastSavedSchemaJSON(JSON.stringify(schemaToPersist));
+        setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
         setHasUnsavedChanges(false);
         if (resolvedDraftIds.length > 0) {
           setCustomValidatorDrafts((prev) => {
@@ -1297,7 +1172,7 @@ export function FormBuilder({
 
       // Call the optional onSave callback if provided
       if (onSave) {
-        await onSave(schemaToPersist);
+        await onSave(schemaForSave);
       }
 
       // Clear success message after 3 seconds
