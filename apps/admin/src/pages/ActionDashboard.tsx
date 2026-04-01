@@ -32,7 +32,7 @@ import type {
   ShareUrlStatsDto,
 } from "@alliance/shared/client/types.gen";
 import FormResponseStatistics from "../components/FormResponseStatistics";
-import type { FormWithSchema } from "./FormResponses";
+import type { FormResponseFilter, FormWithSchema } from "./FormResponses";
 import { getApiUrl, getBaseUrl } from "@alliance/sharedweb/lib/config";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -1486,6 +1486,19 @@ const ActionDashboard: React.FC = () => {
                       <FormResponseStatistics
                         form={taskForm}
                         responses={formResponses}
+                        onFilterSelect={(filter: FormResponseFilter) => {
+                          const params = new URLSearchParams({
+                            tab: "responses",
+                            filterField: filter.fieldId,
+                            filterOp: filter.op,
+                          });
+                          if (filter.value != null) {
+                            params.set("filterValue", filter.value);
+                          }
+                          navigate(
+                            `/forms/${action.taskFormId}/responses?${params.toString()}`
+                          );
+                        }}
                       />
                     </Card>
                   )}
