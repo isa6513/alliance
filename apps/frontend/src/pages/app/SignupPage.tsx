@@ -21,6 +21,7 @@ import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 
 import { CardStyle } from "@alliance/shared/styles/card";
 import ExampleActionCardList from "../../components/ExampleActionCardList";
+import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
 import { ChevronRight } from "lucide-react";
 
 function formatSignupSocialProofNames(
@@ -233,7 +234,7 @@ const SignupPage: React.FC = () => {
                 <h2 className="font-medium text-3xl">Create an account</h2>
                 {(signupSocialProofPending ||
                   (signupSocialProof?.profiles?.length ?? 0) > 0) && (
-                  <div className="flex flex-row items-center gap-2 mb-4 min-h-9">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4 min-h-9">
                     <div className="flex flex-row items-center shrink-0">
                       {signupSocialProofPending
                         ? null
@@ -313,11 +314,11 @@ const SignupPage: React.FC = () => {
       {/* Right: info */}
       <div className="w-full md:w-3/5 md:ml-[40%] bg-grey-0 border-l border-grey-1 flex items-center justify-center px-4 sm:px-12 lg:px-24 xl:px-32 py-12 lg:py-24">
         <div className="w-full">
-          <h2 className="text-title-medium mb-6">Join the Alliance</h2>
+          <h2 className="text-title-large mb-8">Join the Alliance</h2>
 
-          <div className="w-full flex flex-col gap-y-6">
+          <div className="w-full flex flex-col gap-y-8">
             <div>
-              <p className="text-lg text-zinc-600 mb-4">
+              <p className="text-lg md:text-xl text-zinc-900 mb-4">
                 We&apos;re a global group of people cooperating to improve the
                 world.
               </p>
@@ -346,7 +347,7 @@ const SignupPage: React.FC = () => {
             <div className="text-base">
               <Link
                 to={href("/progress")}
-                className="text-zinc-600 text-lg mb-4 hover:underline flex flex-row items-center gap-x-2"
+                className="text-zinc-900 text-lg md:text-xl mb-4 hover:underline flex flex-row items-center gap-x-2"
               >
                 Actions take 15 minutes a week.
               </Link>
@@ -354,10 +355,19 @@ const SignupPage: React.FC = () => {
               <ExampleActionCardList bgColor="white" dropdown={true} />
             </div>
 
+            <div className="text-base">
+              <p className="text-zinc-900 text-lg md:text-xl mb-4">
+                We&apos;re focused on global crises that affect billions of
+                people.
+              </p>
+
+              <ExamplePriorityCardList bgColor="white" dropdown />
+            </div>
+
             <div>
               <Link
                 to={href("/guide")}
-                className="text-zinc-600 text-lg hover:underline flex flex-row items-center gap-x-2"
+                className="text-zinc-900 text-lg md:text-xl hover:underline flex flex-row items-center gap-x-2"
               >
                 Read our guide <ChevronRight className="w-4 h-4" />
               </Link>

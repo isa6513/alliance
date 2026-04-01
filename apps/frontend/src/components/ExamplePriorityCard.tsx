@@ -1,37 +1,28 @@
 import { ChevronRight } from "lucide-react";
 import { ReactNode } from "react";
 
-import { Link } from "react-router";
 import { cn } from "@alliance/shared/styles/util";
 
 import ExampleDropdownCard from "./ExampleDropdownCard";
 
-interface ExampleActionCardProps {
-  name: string;
+interface ExamplePriorityCardProps {
+  id: string;
+  title: string;
   description: ReactNode;
-  link: string;
   bgColor?: "grey" | "white";
   dropdown?: boolean;
 }
 
-const ExampleActionCard: React.FC<ExampleActionCardProps> = ({
-  name,
+const ExamplePriorityCard: React.FC<ExamplePriorityCardProps> = ({
+  title,
   description,
-  link,
   bgColor = "grey",
   dropdown = false,
-}: ExampleActionCardProps) => {
+}: ExamplePriorityCardProps) => {
   if (dropdown) {
     return (
-      <ExampleDropdownCard title={name} bgColor={bgColor}>
+      <ExampleDropdownCard title={title} bgColor={bgColor}>
         <div className="min-w-0">{description}</div>
-        <Link
-          to={link}
-          className="flex w-fit flex-row items-center gap-x-1 font-medium text-zinc-500 underline"
-        >
-          Action details
-          <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
-        </Link>
       </ExampleDropdownCard>
     );
   }
@@ -44,8 +35,7 @@ const ExampleActionCard: React.FC<ExampleActionCardProps> = ({
   );
 
   return (
-    <Link
-      to={link}
+    <div
       className={cn(
         "flex flex-row items-center justify-between gap-x-3 md:gap-x-4",
         shell,
@@ -54,14 +44,14 @@ const ExampleActionCard: React.FC<ExampleActionCardProps> = ({
       <div className="flex flex-row items-start justify-between gap-x-3 md:gap-x-4 ">
         <div className="flex flex-1 flex-col">
           <div className="flex flex-row items-center justify-between gap-x-2">
-            <p className="font-medium text-green">{name}</p>
+            <p className="font-medium text-green">{title}</p>
           </div>
-          <p className=" text-zinc-500">{description}</p>
+          <div className="text-zinc-500">{description}</div>
         </div>
       </div>
       <ChevronRight className="h-5 w-5 shrink-0 text-green" aria-hidden />
-    </Link>
+    </div>
   );
 };
 
-export default ExampleActionCard;
+export default ExamplePriorityCard;
