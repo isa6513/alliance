@@ -75,3 +75,5 @@ Optional, clearly marked as non-blocking style/ergonomics polish.
 ```
 
 # Notes
+
+Any of the items/instructions above can be ignored if the user specifically says to ignore them. Otherwise, they must be followed.
