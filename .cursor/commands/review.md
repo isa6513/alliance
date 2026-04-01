@@ -53,11 +53,15 @@ Provide a high-signal review of the proposed change that improves long-term code
 
 # Output contract (always use these sections, in this order)
 
-```
+````
 ## Summary
 - 2–5 sentences: what changed, overall risk, and whether it’s ready (or what blocks it).
 ## Must-fix issues
 For each issue:
+1-3 words in kebab-case. how to refer to this issue (copy-pastable markdown code triple backtick block)
+```
+kebab-case-name
+```
 - Severity: BLOCKER | HIGH | MEDIUM
 - Evidence: file(s) + relevant snippet/behavioral description
 - Why it matters (risk/regression/security/maintenance)
@@ -66,13 +70,8 @@ For each issue:
 Same structure, but severity: MEDIUM | LOW. Prefer maintainability/duplication/clarity wins.
 ## Nits
 Optional, clearly marked as non-blocking style/ergonomics polish.
-## Tests & verification plan
-- What to run (commands) and what to manually validate (if applicable)
-- Specific missing tests you recommend adding
-## Open questions / assumptions
-- Any questions you need answered to be fully confident
-- Any assumptions you made while reviewing
-```
+Same structure, but without severity.
+````
 
 # Notes
 
