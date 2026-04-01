@@ -176,6 +176,10 @@ select {
   }
 }
 
+.text-invite-form-body {
+  @apply text-base text-zinc-600;
+}
+
 .text-title {
   @apply font-serif font-semibold text-2xl md:text-3xl;
 }

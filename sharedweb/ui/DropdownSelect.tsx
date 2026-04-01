@@ -21,6 +21,7 @@ type DropdownSelectProps<T extends EnumType> = {
   keyIcons?: Record<keyof T, React.ReactNode>;
   size?: "small" | "medium" | "large";
   dropdownAlignment?: "left" | "right";
+  dropdownWidth?: "small" | "medium" | "large";
 };
 
 function DropdownSelect<T extends EnumType>({
@@ -33,6 +34,7 @@ function DropdownSelect<T extends EnumType>({
   keyIcons,
   size = "medium",
   dropdownAlignment = "left",
+  dropdownWidth = "small",
 }: DropdownSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,6 +47,12 @@ function DropdownSelect<T extends EnumType>({
     medium: "text-base",
     large: "text-lg",
   }[size];
+
+  const dropdownWidthClass = {
+    small: "w-[220px]",
+    medium: "w-[280px]",
+    large: "w-[340px]",
+  }[dropdownWidth];
 
   return (
     <div className="relative">
@@ -64,7 +72,8 @@ function DropdownSelect<T extends EnumType>({
         className={cn(
           "absolute z-10 top-[calc(100% - 30px)] mt-0.5",
           dropdownAlignment === "left" ? "left-0" : "right-0",
-          "w-[220px] bg-white border border-gray-2 overflow-hidden rounded",
+          dropdownWidthClass,
+          "bg-white border border-gray-2 overflow-hidden rounded",
           isOpen ? "flex flex-col" : "hidden",
         )}
         ref={ref}

@@ -20,7 +20,14 @@ import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import OnetimeInviteForm from "./OnetimeInviteForm";
 
-type ResponsibilityChoice = "responsible" | "not_responsible" | null;
+const inviteTitleClass = "font-semibold text-xl text-zinc-900";
+const inviteSectionLabelClass = "text-lg font-semibold text-zinc-900";
+const inviteStrongClass = "text-base font-semibold text-zinc-900";
+
+type PlacementSelection =
+  | { kind: "community"; id: number }
+  | { kind: "assign" }
+  | { kind: "new" };
 
 type InviteFormProps = {
   onInviteCreated: (invite: OnetimeInviteDto) => void;
@@ -29,13 +36,11 @@ type InviteFormProps = {
 const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   const { user } = useAuth();
   const { error: errorToast, success: successToast } = useToast();
-  const [responsibilityChoice, setResponsibilityChoice] =
-    useState<ResponsibilityChoice>(null);
+  const [placement, setPlacement] = useState<PlacementSelection>({
+    kind: "new",
+  });
   const [inviteeName, setInviteeName] = useState("");
   const [info, setInfo] = useState("");
-  const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(
-    null,
-  );
   const [creatingInvite, setCreatingInvite] = useState(false);
   const [communities, setCommunities] = useState<CommunityDto[]>([]);
 
@@ -45,10 +50,11 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
       if (response.data) {
         setCommunities(response.data);
         if (resetSelectedCommunityId && user) {
-          setSelectedCommunityId(
-            response.data.find((community) =>
-              community.leaders.some((leader) => leader.id === user.id),
-            )?.id ?? null,
+          const led = response.data.find((community) =>
+            community.leaders.some((leader) => leader.id === user.id),
+          );
+          setPlacement(
+            led ? { kind: "community", id: led.id } : { kind: "new" },
           );
         }
       }
@@ -77,33 +83,56 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
 
   const isLeader = leaderCommunities.length > 0;
 
-  useEffect(() => {
-    if (isLeader) {
-      setResponsibilityChoice("responsible");
-    }
-  }, [isLeader]);
-
   const leaderCommunitiesById = useMemo(() => {
     return new Map(
       leaderCommunities.map((community) => [community.id, community]),
     );
   }, [leaderCommunities]);
   const selectedCommunity = useMemo(() => {
-    return leaderCommunitiesById.get(selectedCommunityId as number) ?? null;
-  }, [leaderCommunitiesById, selectedCommunityId]);
+    if (placement.kind !== "community") {
+      return null;
+    }
+    return leaderCommunitiesById.get(placement.id) ?? null;
+  }, [leaderCommunitiesById, placement]);
 
-  const communityOptions = useMemo<Record<`c${number}` | "new", string>>(
-    () => ({
+  const communityOptions = useMemo(() => {
+    return {
       ...Object.fromEntries(
         leaderCommunities.map((community) => [
           `c${community.id}`,
           community.name,
         ]),
       ),
-      new: "Create a new group",
-    }),
-    [leaderCommunities],
-  );
+      assign: onetimeInviteCreation.assignToOpenGroup,
+      new: onetimeInviteCreation.createNewGroupOption,
+    } as Record<string, string>;
+  }, [leaderCommunities]);
+
+  const dropdownSelectedLabel = useMemo(() => {
+    if (placement.kind === "assign") {
+      return communityOptions.assign;
+    }
+    if (placement.kind === "new") {
+      return communityOptions.new;
+    }
+    return (
+      communityOptions[`c${placement.id}`] ??
+      onetimeInviteCreation.createNewGroupOption
+    );
+  }, [placement, communityOptions]);
+
+  useEffect(() => {
+    if (
+      placement.kind === "community" &&
+      !leaderCommunitiesById.has(placement.id)
+    ) {
+      setPlacement(
+        leaderCommunities[0]
+          ? { kind: "community", id: leaderCommunities[0].id }
+          : { kind: "new" },
+      );
+    }
+  }, [placement, leaderCommunities, leaderCommunitiesById]);
 
   const handleCreateInvite = useCallback(
     async (communityId: number | null) => {
@@ -112,22 +141,12 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         return;
       }
 
-      if (responsibilityChoice === "responsible") {
-        if (communityId === null) {
-          errorToast("Please select a group");
-          return;
-        }
-      }
-
       setCreatingInvite(true);
       try {
         const body: CreateOnetimeInviteDto = {
           invitee: inviteeName.trim(),
           ...(info.trim() && { info: info.trim() }),
-          ...(responsibilityChoice === "responsible" &&
-            communityId !== null && {
-              communityId,
-            }),
+          ...(communityId !== null && { communityId }),
         };
 
         const response = await userCreateOnetimeInvite({ body });
@@ -149,14 +168,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         setCreatingInvite(false);
       }
     },
-    [
-      inviteeName,
-      info,
-      responsibilityChoice,
-      errorToast,
-      successToast,
-      onInviteCreated,
-    ],
+    [inviteeName, info, errorToast, successToast, onInviteCreated],
   );
 
   const onCreateCommunity = useCallback(
@@ -164,7 +176,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
       try {
         await handleCreateInvite(community.id);
         await refreshCommunities(false);
-        setSelectedCommunityId(community.id);
+        setPlacement({ kind: "community", id: community.id });
       } catch {
         errorToast("Failed to refresh groups");
       }
@@ -194,203 +206,161 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     <Card style={CardStyle.White} className="p-6">
       <div className="flex flex-col gap-y-6">
         <div className="flex flex-col gap-y-4">
-          <div className="flex flex-col gap-y-2">
-            <p className="font-semibold text-xl">
-              {onetimeInviteCreation.title}
-            </p>
-            <AppMarkdownWrapper
-              className="text-zinc-500"
-              markdownContent={onetimeInviteCreation.explanation.join("\n\n")}
-            />
-          </div>
-          <div className="flex flex-col md:flex-row gap-2">
-            <NewButton
-              color={ButtonColor.Green}
-              onClick={() => setResponsibilityChoice("responsible")}
-              disabled={responsibilityChoice === "responsible"}
-              className="w-full"
-            >
-              {onetimeInviteCreation.responsible.buttonText}
-            </NewButton>
-            <NewButton
-              color={ButtonColor.Grey}
-              onClick={() => setResponsibilityChoice("not_responsible")}
-              disabled={responsibilityChoice === "not_responsible"}
-              className="w-full"
-            >
-              {onetimeInviteCreation.not_responsible.buttonText}
-            </NewButton>
-          </div>
+          <p className={inviteTitleClass}>{onetimeInviteCreation.title}</p>
+          <AppMarkdownWrapper
+            className="text-invite-form-body"
+            markdownContent={onetimeInviteCreation.explanation.join("\n\n")}
+          />
+          <OnetimeInviteForm
+            inviteeName={inviteeName}
+            setInviteeName={setInviteeName}
+            info={info}
+            setInfo={setInfo}
+          />
         </div>
 
-        {responsibilityChoice === "not_responsible" && (
-          <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
-            <div className="flex flex-col gap-y-2">
-              <p className="font-semibold text-xl">
-                {onetimeInviteCreation.not_responsible.title}
-              </p>
-              {!memberCommunityAllowsMemberInvites ? (
-                <div className="text-zinc-500">
-                  <AppMarkdownWrapper
-                    markdownContent={onetimeInviteCreation.not_responsible.explanations.genericGroup.join(
-                      "\n\n",
-                    )}
-                  />
-                </div>
-              ) : memberCommunityRemainingCapacity > 0 ? (
-                <>
-                  <div className="text-zinc-500">
-                    <AppMarkdownWrapper
-                      markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroup.join(
-                        "\n\n",
-                      )}
+        <div className="flex flex-col gap-y-4">
+          <p className={inviteSectionLabelClass}>
+            {onetimeInviteCreation.responsible.leader.title}
+          </p>
+          <p className="text-invite-form-body">
+            {onetimeInviteCreation.groupContext}
+          </p>
+          <DropdownSelect
+            options={communityOptions}
+            value={dropdownSelectedLabel}
+            onChange={([key]) => {
+              const k = String(key);
+              if (k === "assign") {
+                setPlacement({ kind: "assign" });
+              } else if (k === "new") {
+                setPlacement({ kind: "new" });
+              } else if (k.startsWith("c")) {
+                setPlacement({ kind: "community", id: Number(k.slice(1)) });
+              }
+            }}
+            titleOverride={dropdownSelectedLabel}
+            dropdownWidth="medium"
+          />
+        </div>
+
+        {placement.kind === "assign" && (
+          <div className="flex flex-col gap-y-4">
+            {!memberCommunityAllowsMemberInvites ? (
+              <AppMarkdownWrapper
+                className="text-invite-form-body"
+                markdownContent={onetimeInviteCreation.not_responsible.explanations.genericGroup.join(
+                  "\n\n",
+                )}
+              />
+            ) : memberCommunityRemainingCapacity > 0 ? (
+              <>
+                <AppMarkdownWrapper
+                  className="text-invite-form-body"
+                  markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroup.join(
+                    "\n\n",
+                  )}
+                />
+                <Link
+                  to={`/groups?communityId=${memberCommunities[0].id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="border border-zinc-200 bg-white hover:bg-zinc-50 rounded px-3 py-2.5 flex flex-col gap-y-2 self-start max-w-full"
+                >
+                  <p className={inviteSectionLabelClass}>Your current group</p>
+                  <div className="flex flex-row items-center gap-x-2 min-w-0">
+                    <AvatarProfile
+                      pfp={memberCommunities[0].photo ?? null}
+                      size="small"
                     />
-                  </div>
-                  <Link
-                    to={`/groups?communityId=${memberCommunities[0].id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    key="your-current-group"
-                    className="mt-2 border border-zinc-200 bg-white hover:bg-zinc-50 rounded px-3 py-2 flex flex-col gap-y-2 self-start"
-                  >
-                    <p className="text-sm text-zinc-500">Your current group</p>
-                    <div className="flex flex-row justify-between items-center gap-x-1.5">
-                      <AvatarProfile
-                        pfp={memberCommunities[0].photo ?? null}
-                        size="small"
-                      />
-                      <div className="flex flex-row gap-2">
-                        <p className="font-semibold">
-                          {memberCommunities[0].name}
-                        </p>
-                        <p className="text-zinc-500">
-                          {`${memberCommunityRemainingCapacity} open seat${
-                            memberCommunityRemainingCapacity === 1 ? "" : "s"
-                          }`}
-                        </p>
-                      </div>
+                    <div className="flex flex-col min-w-0 sm:flex-row sm:items-baseline sm:gap-x-2">
+                      <p className={`${inviteStrongClass} truncate`}>
+                        {memberCommunities[0].name}
+                      </p>
+                      <p className="text-invite-form-body shrink-0">
+                        {`${memberCommunityRemainingCapacity} open seat${
+                          memberCommunityRemainingCapacity === 1 ? "" : "s"
+                        }`}
+                      </p>
                     </div>
-                  </Link>
-                </>
-              ) : (
-                <div className="text-zinc-500">
-                  <AppMarkdownWrapper
-                    markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.join(
-                      "\n\n",
-                    )}
-                  />
-                </div>
+                  </div>
+                </Link>
+              </>
+            ) : (
+              <AppMarkdownWrapper
+                className="text-invite-form-body"
+                markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.join(
+                  "\n\n",
+                )}
+              />
+            )}
+            <NewButton
+              color={ButtonColor.Black}
+              onClick={() => handleCreateInvite(null)}
+              disabled={creatingInvite || !inviteeName.trim()}
+              className="w-full"
+            >
+              {creatingInvite ? "Creating..." : "Create invite"}
+            </NewButton>
+          </div>
+        )}
+
+        {placement.kind === "new" && (
+          <div className="flex flex-col gap-y-4">
+            <AppMarkdownWrapper
+              className="text-invite-form-body"
+              markdownContent={onetimeInviteCreation.responsible.leader.invite.explanation.join(
+                "\n\n",
               )}
-            </div>
-            <OnetimeInviteForm
-              inviteeName={inviteeName}
-              setInviteeName={setInviteeName}
-              info={info}
-              setInfo={setInfo}
-              onSubmit={() => handleCreateInvite(null)}
-              creatingInvite={creatingInvite}
-              submittingText="Creating..."
+            />
+            <p className={inviteSectionLabelClass}>
+              {onetimeInviteCreation.responsible.leader.newGroup.title}
+            </p>
+            {!isLeader && (
+              <p className="text-invite-form-body">
+                You are not leading a group yet—create one to be responsible for
+                this member.
+              </p>
+            )}
+            <p className="text-invite-form-body">
+              Read our{" "}
+              <Link to="/groups-guide" className="text-green hover:underline">
+                groups guide
+              </Link>{" "}
+              to learn how to lead a group.
+            </p>
+            <CommunityCreateForm
+              name={user?.name}
+              createButtonTextOverride={
+                creatingInvite
+                  ? "Creating invite..."
+                  : onetimeInviteCreation.responsible.leader.newGroup
+                      .createButtonText
+              }
+              createDisabled={creatingInvite || !inviteeName.trim()}
+              onSuccess={onCreateCommunity}
+              includePhotoEditor={false}
+              fullWidthButtons={true}
             />
           </div>
         )}
 
-        {responsibilityChoice === "responsible" && (
-          <>
-            {/* Invitee name input */}
-            <div className="border-t border-zinc-200 pt-4">
-              <OnetimeInviteForm
-                title={onetimeInviteCreation.responsible.leader.invite.title}
-                explanation={
-                  onetimeInviteCreation.responsible.leader.invite.explanation
-                }
-                inviteeName={inviteeName}
-                setInviteeName={setInviteeName}
-                info={info}
-                setInfo={setInfo}
-              />
-            </div>
-
-            {isLeader && (
-              <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
-                {/* Group selection */}
-                <p className="text-xl font-semibold">
-                  {onetimeInviteCreation.responsible.leader.title}
-                </p>
-                <DropdownSelect
-                  options={communityOptions}
-                  value={selectedCommunity?.name ?? communityOptions["new"]}
-                  onChange={([key]) => {
-                    if (key === "new") {
-                      setSelectedCommunityId(null);
-                    } else {
-                      setSelectedCommunityId(Number(key.slice(1)));
-                    }
-                  }}
-                  titleOverride={
-                    selectedCommunityId &&
-                    typeof selectedCommunityId === "number"
-                      ? selectedCommunity?.name || "Select a group"
-                      : selectedCommunityId === null
-                        ? "Create a new group"
-                        : "Select a group"
-                  }
-                />
-                {!!selectedCommunity && (
-                  <NewButton
-                    color={ButtonColor.Black}
-                    onClick={() => handleCreateInvite(selectedCommunityId)}
-                    disabled={
-                      creatingInvite ||
-                      !inviteeName.trim() ||
-                      selectedCommunityId === null
-                    }
-                    className="w-full"
-                  >
-                    {creatingInvite ? "Creating invite..." : "Create invite"}
-                  </NewButton>
-                )}
-              </div>
-            )}
-
-            {!selectedCommunity && (
-              <div className="flex flex-col gap-y-4 border-t border-zinc-200 pt-4">
-                {/* Group creation */}
-                <div className="flex flex-col gap-y-2">
-                  <p className="text-xl font-semibold">
-                    {onetimeInviteCreation.responsible.leader.newGroup.title}
-                  </p>
-                  {!isLeader && (
-                    <p className="text-zinc-500">
-                      You do not lead a group yet. You must create a group to be
-                      responsible for the new member.
-                    </p>
-                  )}
-                  <p className="text-zinc-500">
-                    You can learn more about groups on our{" "}
-                    <Link
-                      to={"/groups-guide"}
-                      className="text-green hover:underline"
-                    >
-                      groups guide
-                    </Link>
-                    .
-                  </p>
-                </div>
-                <CommunityCreateForm
-                  name={user?.name}
-                  createButtonTextOverride={
-                    creatingInvite
-                      ? "Creating invite..."
-                      : onetimeInviteCreation.responsible.leader.newGroup
-                          .createButtonText
-                  }
-                  createDisabled={creatingInvite || !inviteeName.trim()}
-                  onSuccess={onCreateCommunity}
-                  includePhotoEditor={false}
-                  fullWidthButtons={true}
-                />
-              </div>
-            )}
-          </>
+        {placement.kind === "community" && selectedCommunity && (
+          <div className="flex flex-col gap-y-4">
+            <AppMarkdownWrapper
+              className="text-invite-form-body"
+              markdownContent={onetimeInviteCreation.responsible.leader.invite.explanation.join(
+                "\n\n",
+              )}
+            />
+            <NewButton
+              color={ButtonColor.Black}
+              onClick={() => handleCreateInvite(placement.id)}
+              disabled={creatingInvite || !inviteeName.trim()}
+              className="w-full"
+            >
+              {creatingInvite ? "Creating invite..." : "Create invite"}
+            </NewButton>
+          </div>
         )}
       </div>
     </Card>

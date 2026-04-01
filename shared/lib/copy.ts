@@ -58,8 +58,7 @@ export const requestGroupAssignmentConfirmation =
 export const groupSettings = {
   public: {
     name: "Let anyone join this group",
-    explanation:
-      "Anyone can join this group without the group lead's approval.",
+    explanation: "Anyone can join this group without your approval.",
   },
   allowMemberInvites: {
     name: "Let group members invite new members to this group",
@@ -80,25 +79,26 @@ export const groupSettings = {
 export const onetimeInviteCreation = {
   title: "Invite a new member",
   explanation: [
-    "New members tend to have a better experience when they know their [group lead](https://worldalliance.org/groups-guide) personally. As their initial group lead, you would be responsible for ensuring they complete tasks on time. Once they become familiar with the Alliance, they can stay in your group or transfer to a different group.",
-    "If you do not want to be their group lead, they can be assigned to a different group.",
-    "Who would you like the new member's initial group lead to be?",
+    "Once you create an invite, you will get a personal sign-up link to share.",
   ],
+  assignToOpenGroup: "Assign them to any open group",
+  createNewGroupOption: "Create a new group",
   inviteeContextExplanation:
-    "(Optional) Any context that you are willing to share about the invitation, such as your relationship with the invitee, why you think the invitee is a good fit, how you plan to send the invite, etc.",
+    "(Optional) Any context you are comfortable sharing with the office, such as how you know them, why they are a fit, how you will send the link, etc. This is not shown on the invite.",
+  groupContext:
+    "New members usually have a better experience when they know their group lead personally.",
   responsible: {
     buttonText: "Myself",
     leader: {
-      title: "Select a group",
+      title: "Which group should they join?",
       invite: {
         title: "Create an invite",
         explanation: [
-          "This will create a personalized invite link that explains the Alliance and how to sign up.",
           "When the invitee signs up, they will be added to your group automatically.",
         ],
       },
       newGroup: {
-        title: "Create a group",
+        title: "Create a new group",
         createButtonText: "Create group and invite",
       },
     },
@@ -108,16 +108,13 @@ export const onetimeInviteCreation = {
     title: "Create an invite",
     explanations: {
       genericGroup: [
-        "This will create a personalized invite link that explains the Alliance and how to sign up.",
-        "When the invitee signs up, they will be assigned to a group.",
+        "A staff member will place them in a group with open space after they sign up.",
       ],
       yourGroup: [
-        "This will create a personalized invite link that explains the Alliance and how to sign up.",
-        "When the invitee signs up, they will be added to your current group if it has capacity. Otherwise, they will be assigned to a different group.",
+        "If your current group has available space, the invitee will be added to it; otherwise staff will assign them to another open group.",
       ],
       yourGroupNoCapacity: [
-        "This will create a personalized invite link that explains the Alliance and how to sign up.",
-        "Your current group does not have capacity for new members. When the invitee signs up, they will be assigned to a different group.",
+        "Your group is full, so they will be assigned elsewhere after they sign up.",
       ],
     },
   },

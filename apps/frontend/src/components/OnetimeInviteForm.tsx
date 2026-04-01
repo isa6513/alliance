@@ -32,13 +32,14 @@ const OnetimeInviteForm = ({
     <div className="flex flex-col gap-y-4">
       {title && explanation && (
         <div className="flex flex-col gap-y-2">
-          <p className="text-xl font-semibold">{title}</p>
-          <div className="text-zinc-500">
-            <AppMarkdownWrapper markdownContent={explanation.join("\n\n")} />
-          </div>
+          <p className="text-xl font-semibold text-zinc-900">{title}</p>
+          <AppMarkdownWrapper
+            className="text-invite-form-body"
+            markdownContent={explanation.join("\n\n")}
+          />
         </div>
       )}
-      <div className="flex flex-col gap-y-2">
+      <div className="flex flex-col gap-y-4">
         <input
           type="text"
           className="border border-zinc-300 rounded px-3 py-2 flex-1"
@@ -46,12 +47,12 @@ const OnetimeInviteForm = ({
           value={inviteeName}
           onChange={(e) => setInviteeName(e.target.value)}
         />
-        <p className="my-2 text-zinc-500">
+        <p className="text-invite-form-body">
           {onetimeInviteCreation.inviteeContextExplanation}
         </p>
         <TextareaAutosize
           className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-          placeholder="Context for the office about the invitation (not included in the invite!)"
+          placeholder="Context for the office"
           value={info}
           onChange={(e) => setInfo(e.target.value)}
           minRows={2}
