@@ -7,7 +7,7 @@ import {
 } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import List from "@alliance/sharedweb/ui/List";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
@@ -59,6 +59,30 @@ const InvitesPage = () => {
     });
   }, []);
 
+  const invitesPerMember = useMemo(() => {
+    const map = new Map<
+      number,
+      { name: string; pfp: string | null; sent: number; accepted: number }
+    >();
+    for (const invite of invites) {
+      const user = invite.invitingUser;
+      if (!user) continue;
+      const id = user.id;
+      const entry = map.get(id) ?? {
+        name: user.displayName ?? "Unknown",
+        pfp: user.profilePicture ?? null,
+        sent: 0,
+        accepted: 0,
+      };
+      entry.sent++;
+      if (invite.status === "link_used" || invite.invitedUserId) {
+        entry.accepted++;
+      }
+      map.set(id, entry);
+    }
+    return [...map.values()].sort((a, b) => b.sent - a.sent);
+  }, [invites]);
+
   const copyToClipboard = (text: string) => {
     const baseUrl = getBaseUrl();
     const url = `${baseUrl}/signup?ref=${text}`;
@@ -101,6 +125,41 @@ const InvitesPage = () => {
             </div>
           </form>
         </Card>
+        {invitesPerMember.length > 0 && (
+          <details className="mt-5 rounded-lg border border-gray-200 bg-white">
+            <summary className="cursor-pointer select-none px-5 py-4 font-semibold">
+              Invites per Member
+            </summary>
+            <div className="px-5 pb-4">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-gray-500 border-b border-gray-200">
+                    <th className="pb-2 font-semibold">Member</th>
+                    <th className="pb-2 text-right font-semibold">Sent</th>
+                    <th className="pb-2 text-right font-semibold">Accepted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invitesPerMember.map((member) => (
+                    <tr
+                      key={member.name}
+                      className="border-b border-gray-100 last:border-b-0"
+                    >
+                      <td className="py-2">
+                        <div className="flex flex-row gap-2 items-center">
+                          <AvatarProfile size="small" pfp={member.pfp} />
+                          <span>{member.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-2 text-right">{member.sent}</td>
+                      <td className="py-2 text-right">{member.accepted}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        )}
         <div className="flex flex-row justify-between items-center my-5">
           <p className="font-bold">Past Invites</p>
           <Link
