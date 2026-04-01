@@ -3,10 +3,12 @@ import ExampleActionCard from "./ExampleActionCard";
 
 interface ExampleActionCardListProps {
   bgColor?: "grey" | "white";
+  dropdown?: boolean;
 }
 
 const ExampleActionCardList: React.FC<ExampleActionCardListProps> = ({
   bgColor = "grey",
+  dropdown = false,
 }: ExampleActionCardListProps) => {
   const exampleActions = [
     {
@@ -60,6 +62,7 @@ const ExampleActionCardList: React.FC<ExampleActionCardListProps> = ({
           name={action.name}
           description={action.description}
           link={action.link}
+          dropdown={dropdown}
         />
       ))}
     </div>

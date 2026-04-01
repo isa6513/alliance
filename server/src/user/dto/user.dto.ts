@@ -97,6 +97,16 @@ export class ProfileDtoWithFriends extends ProfileDto {
   }
 }
 
+/** Public signup page: overlapping avatars + name line (min 5 faces when DB allows). */
+export class SignupSocialProofDto {
+  @ApiProperty({ type: ProfileDto, isArray: true })
+  profiles: ProfileDto[];
+
+  constructor(profiles: ProfileDto[]) {
+    this.profiles = profiles;
+  }
+}
+
 export class UserDto extends PickType(User, [
   'name',
   'admin',

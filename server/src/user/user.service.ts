@@ -11,13 +11,23 @@ import { ImagesService } from 'src/images/images.service';
 import { MailService } from 'src/mail/mail.service';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
-import { DeepPartial, ILike, In, IsNull, Not, type Repository } from 'typeorm';
+import {
+  Brackets,
+  DeepPartial,
+  ILike,
+  In,
+  IsNull,
+  Not,
+  type Repository,
+} from 'typeorm';
+import { sqlUserHasActiveContractAt } from './has-active-contract-at';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
   AssignGroupsDto,
   FriendStatusDto,
   ProfileDto,
+  SignupSocialProofDto,
   UpdateProfileDto,
   UserCityCountDto,
 } from './dto/user.dto';
@@ -383,6 +393,110 @@ export class UserService {
     );
 
     return others.map((o) => new ProfileDto(o));
+  }
+
+  private async findFriendUsersWithProfilePictures(
+    inviterId: number,
+  ): Promise<User[]> {
+    const contractAt = new Date();
+    const rels = await this.friendRepository
+      .createQueryBuilder('f')
+      .innerJoinAndSelect('f.requester', 'req')
+      .innerJoinAndSelect('f.addressee', 'addr')
+      .where('f.status = :status', { status: FriendStatus.Accepted })
+      .andWhere('(f.requesterId = :inviterId OR f.addresseeId = :inviterId)', {
+        inviterId,
+      })
+      .andWhere(
+        new Brackets((sqb) => {
+          sqb
+            .where(
+              `f.requesterId = :inviterId AND addr.profilePicture IS NOT NULL AND TRIM(addr.profilePicture) <> '' AND (${sqlUserHasActiveContractAt('addr')})`,
+            )
+            .orWhere(
+              `f.addresseeId = :inviterId AND req.profilePicture IS NOT NULL AND TRIM(req.profilePicture) <> '' AND (${sqlUserHasActiveContractAt('req')})`,
+            );
+        }),
+      )
+      .setParameter('contractAt', contractAt) // used in sqlUserHasActiveContractAt
+      .getMany();
+    const others = rels.map((r) =>
+      r.requester!.id === inviterId ? r.addressee! : r.requester!,
+    );
+    return others.sort((a, b) => a.id - b.id);
+  }
+
+  private async pickRandomUsersWithProfilePictures(
+    count: number,
+    excludeIds: number[],
+    signedContract: boolean = true,
+  ): Promise<User[]> {
+    if (count <= 0) {
+      return [];
+    }
+    const contractAt = new Date();
+    const qb = this.userRepository
+      .createQueryBuilder('u')
+      .where('u.profilePicture IS NOT NULL')
+      .andWhere("TRIM(u.profilePicture) != ''")
+      .andWhere('u.isNotSignedUpPartialProfile = :partial', { partial: false });
+    if (excludeIds.length > 0) {
+      qb.andWhere('u.id NOT IN (:...ids)', { ids: excludeIds });
+    }
+    if (signedContract) {
+      qb.andWhere(sqlUserHasActiveContractAt('u'), { contractAt });
+    }
+    return qb.orderBy('RANDOM()').take(count).getMany();
+  }
+
+  /**
+   * Up to 5 member profiles with avatars for the signup page.
+   * Prefer accepted friends of the referrer (from invite or referral code), then random members with photos.
+   */
+  async getSignupSocialProof(
+    referralCode?: string,
+  ): Promise<SignupSocialProofDto> {
+    const minProfiles = 5;
+    const profiles: ProfileDto[] = [];
+    const usedIds: number[] = [];
+
+    const trimmed = referralCode?.trim();
+    let inviterId: number | null = null;
+    if (trimmed) {
+      const invite = await this.findInviteByCode(trimmed);
+      if (invite?.invitingUser) {
+        inviterId = invite.invitingUser.id;
+      } else {
+        const refUser = await this.findOneByReferralCode(trimmed);
+        inviterId = refUser?.id ?? null;
+      }
+    }
+
+    if (inviterId != null) {
+      const friends = await this.findFriendUsersWithProfilePictures(inviterId);
+      for (const u of friends) {
+        if (profiles.length >= minProfiles) {
+          break;
+        }
+        if (!usedIds.includes(u.id)) {
+          usedIds.push(u.id);
+          profiles.push(new ProfileDto(u));
+        }
+      }
+    }
+
+    const need = minProfiles - profiles.length;
+    if (need > 0) {
+      const fillers = await this.pickRandomUsersWithProfilePictures(
+        need,
+        usedIds,
+      );
+      for (const u of fillers) {
+        profiles.push(new ProfileDto(u));
+      }
+    }
+
+    return new SignupSocialProofDto(profiles);
   }
 
   async findMessageableUsers(userId: number): Promise<ProfileDto[]> {

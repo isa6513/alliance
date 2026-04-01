@@ -3636,6 +3636,25 @@ export type UserDeleteTagResponses = {
     200: unknown;
 };
 
+export type SignupSocialProofDto = {
+    profiles: Array<ProfileDto>;
+};
+
+export type UserSignupSocialProofData = {
+    body?: never;
+    path?: never;
+    query?: {
+        code?: string;
+    };
+    url: '/user/signupSocialProof';
+};
+
+export type UserSignupSocialProofResponses = {
+    200: SignupSocialProofDto;
+};
+
+export type UserSignupSocialProofResponse = UserSignupSocialProofResponses[keyof UserSignupSocialProofResponses];
+
 export type UserReferrerProfileData = {
     body?: never;
     path: {

@@ -18,6 +18,7 @@ import {
 import {
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
@@ -33,6 +34,7 @@ import {
   FriendStatusDto,
   ProfileDto,
   ProfileDtoWithFriends,
+  SignupSocialProofDto,
   UpdateProfileDto,
   UserCityCountDto,
   UserDto,
@@ -456,6 +458,15 @@ export class UserController {
   @ApiOkResponse()
   async deleteTag(@Param('tagId') tagId: string) {
     await this.userService.deleteTag(tagId);
+  }
+
+  @Get('signupSocialProof')
+  @Public()
+  @ApiOperation({ summary: 'Member avatars for signup social proof (optional referral code)' })
+  @ApiQuery({ name: 'code', required: false, description: 'Referral or invite code to prefer inviter friends' })
+  @ApiOkResponse({ type: SignupSocialProofDto })
+  async signupSocialProof(@Query('code') code?: string): Promise<SignupSocialProofDto> {
+    return this.userService.getSignupSocialProof(code);
   }
 
   @Get('referrerProfile/:code')

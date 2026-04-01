@@ -3,16 +3,18 @@ import {
   authRegister,
   ProfileDto,
   SignUpDto,
+  userFindOne,
   userNmembers,
   userOnetimeInvite,
   userReferrerProfile,
+  userSignupSocialProof,
 } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
 import Card from "@alliance/sharedweb/ui/Card";
 import posthog from "posthog-js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, href, useSearchParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
@@ -20,6 +22,55 @@ import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { CardStyle } from "@alliance/shared/styles/card";
 import ExampleActionCardList from "../../components/ExampleActionCardList";
 import { ChevronRight } from "lucide-react";
+
+function formatSignupSocialProofNames(
+  profiles: Pick<ProfileDto, "displayName">[],
+  totalMemberCount: number,
+): string {
+  const names = profiles.map((p) => p.displayName);
+  const n = names.length;
+  if (n === 0) return "";
+  if (n === 1) return names[0];
+  if (n === 2) return `${names[0]} and ${names[1]}`;
+  if (n === 3) {
+    return `${names[0]}, ${names[1]}, and ${names[2]}`;
+  }
+  const namesShown = 3;
+  const others = Math.max(0, totalMemberCount - namesShown);
+  return `${names[0]}, ${names[1]}, ${names[2]} and ${others} ${others === 1 ? "other" : "others"}`;
+}
+
+const memberQuotes = [
+  {
+    quote:
+      "On the whole, world is not going in the right direction. We need new ideas to change that, and the Alliance is just that. But it will work only if we all participate.",
+    author:
+      "Janos Pasztor, former UN Assistant Secretary-General for Climate Change",
+    userId: 33,
+  },
+  {
+    quote: (
+      <span>
+        For a few years now, I&apos;ve been thinking about contributing back to
+        society and the world and what cause I should get behind. There are so
+        many possibilities - food security, climate change, poverty, housing,
+        education, all are worthy. But one thing I kept thinking was that
+        contributing to any one of these causes has minimal individual level
+        impact. How can I amplify or have a greater impact?
+        <br />
+        <br />I am convinced that the Alliance offers that platform and my
+        opportunity for maximizing the impact of my time and energy contribution
+        to the world over time. I want to be part of it and grow with it. They
+        take your commitment seriously and will hold your feet to the fire. But
+        it&apos;s just a few minutes per week and l&apos;ve found every project
+        thus far to be self-enriching and meaningful.
+      </span>
+    ),
+
+    author: "Sameer Vaidya, Alliance member",
+    userId: 96,
+  },
+];
 
 const SignupPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -29,15 +80,48 @@ const SignupPage: React.FC = () => {
 
   const referralCode = searchParams.get("ref");
 
-  const { data: memberCount, isPending: memberCountPending } = useQuery({
+  const { data: memberCount } = useQuery({
     queryKey: ["userNmembers"],
     queryFn: () => userNmembers().then((res) => res.data ?? 0),
     enabled: isFeatureEnabled(Features.PublicSignup) || Boolean(referralCode),
   });
 
+  const { data: signupSocialProof, isPending: signupSocialProofPending } =
+    useQuery({
+      queryKey: ["user", "signupSocialProof", referralCode ?? ""],
+      queryFn: () =>
+        userSignupSocialProof({
+          query: referralCode ? { code: referralCode } : {},
+        }).then((res) => res.data ?? null),
+      enabled: isFeatureEnabled(Features.PublicSignup) || Boolean(referralCode),
+    });
+
+  const quoteUserIds = useMemo(
+    () => [...new Set(memberQuotes.map((q) => q.userId))],
+    [],
+  );
+
+  const quoteProfileQueries = useQueries({
+    queries: quoteUserIds.map((userId) => ({
+      queryKey: ["user", "slug", userId] as const,
+      queryFn: () =>
+        userFindOne({ path: { id: userId } }).then((res) => res.data ?? null),
+      staleTime: 60 * 60 * 1000,
+      enabled:
+        (isFeatureEnabled(Features.PublicSignup) || Boolean(referralCode)) &&
+        quoteUserIds.length > 0,
+    })),
+  });
+
+  const quotePfpByUserId = new Map(
+    quoteUserIds.map((id, i) => [
+      id,
+      quoteProfileQueries[i]?.data?.profilePicture ?? null,
+    ]),
+  );
+
   const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
   // const [inviteeName, setInviteeName] = useState<string | null>(null);
-  // const [communityId, setCommunityId] = useState<number | null>(null);
   const [isInviteValid, setIsInviteValid] = useState(true);
 
   useEffect(() => {
@@ -49,7 +133,6 @@ const SignupPage: React.FC = () => {
     userOnetimeInvite({ path: { code: referralCode } }).then((response) => {
       if (response.data) {
         // setInviteeName(response.data.invitee);
-        // setCommunityId(response.data.community?.id ?? null);
         setIsInviteValid(response.data.status !== "link_used");
       }
     });
@@ -116,8 +199,8 @@ const SignupPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row">
-      {/* Left: create account */}
-      <div className="w-full md:w-1/2 bg-white flex items-center justify-center px-4 md:px-8 py-12">
+      {/* Left: create account — fixed on md+ so only the right column scrolls */}
+      <div className="w-full md:w-2/5 md:fixed md:inset-y-0 md:left-0 md:z-10 bg-white flex items-center justify-center px-4 md:px-8 py-12 md:overflow-y-auto">
         <div className="w-full max-w-lg">
           {isInviteValid && inviterProfile && (
             <div className="mb-3 rounded-md">
@@ -146,14 +229,51 @@ const SignupPage: React.FC = () => {
 
           <div className="relative">
             {isInviteValid ? (
-              <>
-                <h2 className="font-medium text-3xl mb-8">Create an account</h2>
-                <SignupForm
-                  onSubmit={handleSubmit}
-                  loading={loading}
-                  referralCode={referralCode}
-                />
-              </>
+              <div>
+                <h2 className="font-medium text-3xl">Create an account</h2>
+                {(signupSocialProofPending ||
+                  (signupSocialProof?.profiles?.length ?? 0) > 0) && (
+                  <div className="flex flex-row items-center gap-2 mb-4 min-h-9">
+                    <div className="flex flex-row items-center shrink-0">
+                      {signupSocialProofPending
+                        ? null
+                        : signupSocialProof?.profiles.map((p, i) => (
+                            <div
+                              key={p.id}
+                              className={
+                                i > 0
+                                  ? "-ml-1.5 ring-2 ring-white rounded-sm z-0 relative"
+                                  : "ring-2 ring-white rounded-sm z-0 relative"
+                              }
+                              style={{ zIndex: i }}
+                            >
+                              <AvatarProfile
+                                pfp={p.profilePicture ?? null}
+                                size="small"
+                                className="inline-block text-green"
+                              />
+                            </div>
+                          ))}
+                    </div>
+                    <p className="text-sm text-zinc-500 leading-snug">
+                      {signupSocialProofPending
+                        ? "…"
+                        : "Join " +
+                          formatSignupSocialProofNames(
+                            signupSocialProof?.profiles ?? [],
+                            memberCount ?? 100,
+                          )}
+                    </p>
+                  </div>
+                )}
+                <div className="mt-6">
+                  <SignupForm
+                    onSubmit={handleSubmit}
+                    loading={loading}
+                    referralCode={referralCode}
+                  />
+                </div>
+              </div>
             ) : (
               <div className="p-4 md:p-8 space-y-4 flex flex-col">
                 <p className="font-semibold">
@@ -191,37 +311,56 @@ const SignupPage: React.FC = () => {
       </div>
 
       {/* Right: info */}
-      <div className="w-full md:w-1/2 bg-grey-0 border-l border-grey-1 flex items-center justify-center px-4 sm:px-12 lg:px-24 xl:px-32 py-12">
+      <div className="w-full md:w-3/5 md:ml-[40%] bg-grey-0 border-l border-grey-1 flex items-center justify-center px-4 sm:px-12 lg:px-24 xl:px-32 py-12 lg:py-24">
         <div className="w-full">
-          <h2 className="text-title-medium mb-4">Join the Alliance</h2>
-          <p className="text-lg text-zinc-600 mb-6">
-            We&apos;re a global group of{" "}
-            <span className="font-medium text-black">
-              {memberCountPending ? "…" : (memberCount ?? 0)} people
-            </span>{" "}
-            cooperating to improve the world. We leverage dependable time
-            commitments from members to plan effective actions.
-          </p>
+          <h2 className="text-title-medium mb-6">Join the Alliance</h2>
 
-          <div className="w-full flex flex-col gap-y-4">
+          <div className="w-full flex flex-col gap-y-6">
             <div>
-              <Link
-                to={href("/guide")}
-                className="font-medium text-lg hover:underline flex flex-row items-center gap-x-2"
-              >
-                Read our guide <ChevronRight className="w-4 h-4" />
-              </Link>
+              <p className="text-lg text-zinc-600 mb-4">
+                We&apos;re a global group of people cooperating to improve the
+                world.
+              </p>
+
+              <div className="flex flex-col gap-y-2">
+                {memberQuotes.map((memberQuote, index) => (
+                  <div
+                    className="bg-white p-6 rounded-md"
+                    key={`${memberQuote.userId}-${index}`}
+                  >
+                    <p>{memberQuote.quote}</p>
+                    <div className="flex flex-row items-center gap-x-2 mt-2">
+                      <AvatarProfile
+                        pfp={quotePfpByUserId.get(memberQuote.userId) ?? null}
+                        size="small"
+                        className="ml-1 inline-block text-green"
+                      />
+                      <span className="text-zinc-500">
+                        {memberQuote.author}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="text-base">
               <Link
                 to={href("/progress")}
-                className="font-medium text-lg mb-4 hover:underline flex flex-row items-center gap-x-2"
+                className="text-zinc-600 text-lg mb-4 hover:underline flex flex-row items-center gap-x-2"
               >
-                Examples of actions
-                <ChevronRight className="w-4 h-4" />
+                Actions take 15 minutes a week.
               </Link>
 
-              <ExampleActionCardList bgColor="white" />
+              <ExampleActionCardList bgColor="white" dropdown={true} />
+            </div>
+
+            <div>
+              <Link
+                to={href("/guide")}
+                className="text-zinc-600 text-lg hover:underline flex flex-row items-center gap-x-2"
+              >
+                Read our guide <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </div>
