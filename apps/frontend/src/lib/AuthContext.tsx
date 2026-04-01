@@ -17,6 +17,7 @@ import React, {
 } from "react";
 
 import posthog from "posthog-js";
+import type { QueryClient } from "@tanstack/react-query";
 import { testAuthUser } from "../stories/testData";
 
 interface AuthContextType {
@@ -32,8 +33,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
-  ({ children }: React.PropsWithChildren) => {
+export const AuthProvider: React.FC<
+  React.PropsWithChildren<{ queryClient: QueryClient }>
+> = memo(
+  ({ children, queryClient }: React.PropsWithChildren<{ queryClient: QueryClient }>) => {
     const [user, setUser] = useState<UserDto | undefined>();
     const [isImpersonation, setIsImpersonation] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -89,23 +92,28 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
       };
     }, []);
 
-    const login = useCallback(async (email: string, password: string) => {
-      setLoading(true);
-      const { error } = await authLogin({
-        body: { email, password, mode: "cookie" },
-      });
-      if (error) {
-        console.error("login error", error);
-        throw new Error("Login failed");
-      }
+    const login = useCallback(
+      async (email: string, password: string) => {
+        setLoading(true);
+        const { error } = await authLogin({
+          body: { email, password, mode: "cookie" },
+        });
+        if (error) {
+          console.error("login error", error);
+          throw new Error("Login failed");
+        }
 
-      const { data } = await authMe();
-      if (data) {
-        setUser(data.user);
-        setIsImpersonation(data.isImpersonation ?? false);
-      }
-      setLoading(false);
-    }, []);
+        queryClient.clear();
+
+        const { data } = await authMe();
+        if (data) {
+          setUser(data.user);
+          setIsImpersonation(data.isImpersonation ?? false);
+        }
+        setLoading(false);
+      },
+      [queryClient],
+    );
 
     const logout = useCallback(async () => {
       await authLogout();
@@ -117,11 +125,12 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = memo(
     const onLogin = useCallback(() => {
       authMe().then((res) => {
         if (res.data) {
+          queryClient.clear();
           setUser(res.data.user);
           setIsImpersonation(res.data.isImpersonation ?? false);
         }
       });
-    }, []);
+    }, [queryClient]);
 
     const refreshUser = useCallback(async () => {
       const { data } = await authMe();

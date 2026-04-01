@@ -20,6 +20,7 @@ import {
 } from "./visualTest";
 import { usePostHog } from "posthog-react-native";
 import { run } from "@alliance/common/run";
+import type { QueryClient } from "@tanstack/react-query";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -45,8 +46,9 @@ export interface AuthTokenStore {
 export const AuthProvider: React.FC<
   React.PropsWithChildren<{
     tokenStore: AuthTokenStore;
+    queryClient: QueryClient;
   }>
-> = ({ children, tokenStore }) => {
+> = ({ children, tokenStore, queryClient }) => {
   const [user, setUser] = useState<UserDto | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [canConnectToServer, setCanConnectToServer] = useState<boolean>(false);
@@ -160,6 +162,8 @@ export const AuthProvider: React.FC<
           console.error("didn't recieve tokens: something went wrong");
         }
 
+        queryClient.clear();
+
         const userProfile = await authMe();
         if (!userProfile.data) {
           throw new Error("Failed to fetch user profile");
@@ -183,7 +187,7 @@ export const AuthProvider: React.FC<
         setIsLoading(false);
       }
     },
-    [router, saveTokens, posthog],
+    [router, saveTokens, posthog, queryClient],
   );
 
   useEffect(() => {

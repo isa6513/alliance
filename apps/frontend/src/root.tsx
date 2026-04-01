@@ -98,7 +98,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 export function Layout({ children }: { children: React.ReactNode }) {
   const inner = (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <AuthProvider queryClient={queryClient}>
         <ToastProvider>
           <HtmlBackgroundManager>{children}</HtmlBackgroundManager>
         </ToastProvider>

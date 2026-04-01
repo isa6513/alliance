@@ -126,7 +126,7 @@ export default function RootLayout() {
             apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt"
             options={options}
           >
-            <AuthProvider tokenStore={tokenStore}>
+            <AuthProvider queryClient={queryClient} tokenStore={tokenStore}>
               <DeviceRegistration />
               <PushNotificationResponseHandler queryClient={queryClient} />
               <Slot />
@@ -146,7 +146,7 @@ export default function RootLayout() {
               apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt"
               options={options}
             >
-              <AuthProvider tokenStore={tokenStore}>
+              <AuthProvider queryClient={queryClient} tokenStore={tokenStore}>
                 <DeviceRegistration />
                 <PushNotificationResponseHandler queryClient={queryClient} />
                 <Slot />
