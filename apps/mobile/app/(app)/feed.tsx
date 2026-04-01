@@ -16,17 +16,11 @@ import { LegendList } from "@legendapp/list";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { cn } from "@alliance/shared/styles/util";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
-import { useHideOnScroll } from "../../lib/useHideOnScroll";
 
 type Mode = "friends" | "everyone";
 
 export default function FeedScreen() {
   const [mode, setMode] = useState<Mode>("friends");
-  const {
-    isVisible: isHeaderVisible,
-    onScroll: onListScroll,
-    scrollEventThrottle,
-  } = useHideOnScroll();
 
   const {
     activities: globalActivities,
@@ -131,7 +125,7 @@ export default function FeedScreen() {
   );
 
   const listHeader = (
-    <SimplePageTitle title="Activity" isVisible={isHeaderVisible}>
+    <SimplePageTitle title="Activity">
       <View className="flex-row bg-white/20 rounded-lg p-1">
         <TouchableOpacity
           onPress={() => setMode("friends")}
@@ -208,8 +202,6 @@ export default function FeedScreen() {
             data={activities}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderActivity}
-            onScroll={onListScroll}
-            scrollEventThrottle={scrollEventThrottle}
             onEndReached={onEndReached}
             onEndReachedThreshold={0.3}
             refreshControl={

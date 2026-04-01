@@ -8,16 +8,13 @@ import BackButton from "./BackButton";
 export const SimplePageTitle = ({
   title,
   children,
-  isVisible = true,
   backButton = false,
 }: {
   title: string;
   children?: React.ReactNode;
-  isVisible?: boolean;
   backButton?: boolean;
 }) => {
   const { openDrawer, isPermanent } = useAppDrawer();
-  if (!isVisible) return null;
 
   return (
     <View className="flex-row items-center gap-x-2 px-2 justify-between pb-2 pr-4">
