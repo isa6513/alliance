@@ -73,11 +73,12 @@ export const AuthProvider: React.FC<
   const logout = useCallback(async () => {
     authLogout();
     clearTokens();
+    queryClient.clear();
     setUser(undefined);
     if (!isVisualTestMode) {
       router.replace("/auth/login");
     }
-  }, [router, clearTokens]);
+  }, [router, clearTokens, queryClient]);
 
   const refreshUser = useCallback(async () => {
     try {

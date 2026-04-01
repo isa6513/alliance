@@ -117,10 +117,11 @@ export const AuthProvider: React.FC<
 
     const logout = useCallback(async () => {
       await authLogout();
-      window.location.href = "/login";
+      queryClient.clear();
       posthog.reset();
       setUser(undefined);
-    }, []);
+      window.location.href = "/login";
+    }, [queryClient]);
 
     const onLogin = useCallback(() => {
       authMe().then((res) => {
