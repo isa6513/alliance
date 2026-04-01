@@ -1,4 +1,4 @@
-import type { FileField } from "@alliance/shared/forms/formschema";
+import type { FileField } from "@alliance/common/forms/form-schema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";

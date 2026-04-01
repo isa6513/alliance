@@ -13,9 +13,11 @@ import { UserDto } from 'src/user/dto/user.dto';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
 import type { Ty } from './entities/type';
-import type { AggregateViewSchema } from './schema';
-import { DEVICE_VISIBILITY_TARGETS } from './form-schema/v0/device';
-import type { DeviceVisibilityTarget } from './form-schema/v0/device';
+import type { AggregateViewSchema } from '@alliance/common/forms/form-schema';
+import {
+  DEVICE_VISIBILITY_TARGETS,
+  type DeviceVisibilityTarget,
+} from '@alliance/common/forms/device';
 
 export class CreateFormDto extends PickType(Form, ['title', 'schema']) {}
 

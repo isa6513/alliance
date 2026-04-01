@@ -3,7 +3,7 @@ import type {
   AnyField,
   OutputFieldBlock,
   VisibleIfFormula,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import { ConditionalVisibility } from "../form-fields/CommonControls";
 import { cn } from "@alliance/shared/styles/util";
 

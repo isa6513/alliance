@@ -1,7 +1,7 @@
 import type {
   MultiSelectField,
   SelectField,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
@@ -33,7 +33,7 @@ export function EditableChoiceField({
 
   const updateOption = (
     index: number,
-    updates: { label?: string; value?: string }
+    updates: { label?: string; value?: string },
   ) => {
     const previousOptions = field.options || [];
     const previousValue = previousOptions[index]?.value;
@@ -54,9 +54,11 @@ export function EditableChoiceField({
       updates.value !== undefined &&
       previousValue
     ) {
-      const defaults = Array.isArray(field.defaultValue)
-        ? field.defaultValue.slice()
-        : [];
+      const defaults: string[] =
+        Array.isArray(field.defaultValue) &&
+        field.defaultValue.every((value) => typeof value === "string")
+          ? field.defaultValue.slice()
+          : [];
       if (defaults.includes(previousValue)) {
         const filtered = defaults.filter((value) => value !== previousValue);
         if (updates.value && updates.value.length > 0) {
@@ -83,10 +85,11 @@ export function EditableChoiceField({
       field.kind === "multiselect" &&
       removedValue &&
       Array.isArray(field.defaultValue) &&
-      field.defaultValue.includes(removedValue)
+      field.defaultValue.every((value) => typeof value === "string") &&
+      field.defaultValue.includes(removedValue as string)
     ) {
       const filtered = field.defaultValue.filter(
-        (value) => value !== removedValue
+        (value) => value !== removedValue,
       );
       updates.defaultValue = filtered.length > 0 ? filtered : null;
     }
@@ -114,7 +117,10 @@ export function EditableChoiceField({
       return;
     }
     const defaults = new Set(
-      Array.isArray(field.defaultValue) ? field.defaultValue : []
+      Array.isArray(field.defaultValue) &&
+        field.defaultValue.every((value) => typeof value === "string")
+        ? field.defaultValue
+        : [],
     );
     if (checked) {
       defaults.add(value);
@@ -215,6 +221,9 @@ export function EditableChoiceField({
                     type="checkbox"
                     checked={
                       Array.isArray(field.defaultValue) &&
+                      field.defaultValue.every(
+                        (value) => typeof value === "string",
+                      ) &&
                       field.defaultValue.includes(option.value)
                     }
                     onChange={(event) =>

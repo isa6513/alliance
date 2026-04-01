@@ -1,7 +1,7 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Contract } from '../entities/contract.entity';
-import { ContractField } from 'src/tasks/schema';
+import type { ContractField } from '@alliance/common/forms/form-schema';
 
 export class ContractDto extends PickType(Contract, ['id', 'markdown']) {
   constructor(contract: Contract) {

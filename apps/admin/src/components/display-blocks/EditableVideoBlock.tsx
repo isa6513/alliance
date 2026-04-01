@@ -1,5 +1,5 @@
 import React from "react";
-import type { VideoBlock } from "@alliance/shared/forms/display-blocks";
+import type { VideoBlock } from "@alliance/common/forms/display-blocks";
 import { useState, useEffect } from "react";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
@@ -67,7 +67,7 @@ export function EditableVideoBlock({
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    update: (updates: Partial<VideoBlock>) => void
+    update: (updates: Partial<VideoBlock>) => void,
   ) => {
     const files = Array.from(e.target.files ?? []);
     if (files.length === 0) return;

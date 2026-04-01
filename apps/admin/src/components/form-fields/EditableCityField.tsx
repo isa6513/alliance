@@ -1,4 +1,4 @@
-import type { CityField } from "@alliance/shared/forms/formschema";
+import type { CityField } from "@alliance/common/forms/form-schema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";

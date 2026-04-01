@@ -1,4 +1,4 @@
-import type { PhoneField } from "@alliance/shared/forms/formschema";
+import type { PhoneField } from "@alliance/common/forms/form-schema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";

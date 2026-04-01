@@ -5,7 +5,7 @@ import type {
   AggregateViewValue,
   AnyField,
   FormSchema,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { cn } from "@alliance/shared/styles/util";
 import { X } from "lucide-react";

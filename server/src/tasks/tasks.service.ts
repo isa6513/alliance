@@ -60,8 +60,8 @@ import {
   isQuestionVisible,
   type ListField,
   Page,
-} from './schema';
-import type { DeviceVisibilityTarget } from './form-schema/v0/device';
+} from '@alliance/common/forms/form-schema';
+import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 import { EventLogService } from 'src/eventlog/eventlog.service';

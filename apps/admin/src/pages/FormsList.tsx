@@ -4,7 +4,7 @@ import {
   tasksGetFormResponses,
   tasksListForms,
 } from "@alliance/shared/client";
-import { FormSchema, Page } from "@alliance/shared/forms/formschema";
+import { FormSchema, Page } from "@alliance/common/forms/form-schema";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 import React, { useCallback, useEffect, useState } from "react";
@@ -20,7 +20,7 @@ const FormsList: React.FC = () => {
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [responseCounts, setResponseCounts] = useState<Record<number, number>>(
-    {}
+    {},
   );
   const navigate = useNavigate();
 
@@ -51,7 +51,7 @@ const FormsList: React.FC = () => {
         }
       }
     },
-    [loadForms]
+    [loadForms],
   );
 
   useEffect(() => {
@@ -71,7 +71,7 @@ const FormsList: React.FC = () => {
             console.error("Failed to get responses for form", f.id, e);
             return [f.id, 0] as const;
           }
-        })
+        }),
       );
       if (!cancelled) {
         const map: Record<number, number> = {};
@@ -93,7 +93,7 @@ const FormsList: React.FC = () => {
         navigate(`/forms/${formId}`);
       }
     },
-    [navigate]
+    [navigate],
   );
 
   return (
@@ -145,13 +145,13 @@ const FormsList: React.FC = () => {
                       {form.schema.pages?.reduce(
                         (total: number, page) =>
                           total + (page.fields?.length || 0),
-                        0
+                        0,
                       ) || 0}{" "}
                       field
                       {(form.pages?.reduce(
                         (total: number, page) =>
                           total + (page.fields?.length || 0),
-                        0
+                        0,
                       ) || 0) !== 1
                         ? "s"
                         : ""}

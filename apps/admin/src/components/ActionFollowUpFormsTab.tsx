@@ -23,7 +23,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import CohortExpressionBuilder from "./CohortExpressionBuilder";
 import { FormBuilder } from "./FormBuilder";
-import { FormSchema } from "@alliance/shared/forms/formschema";
+import { FormSchema } from "@alliance/common/forms/form-schema";
 
 export interface ActionFollowUpFormsTabProps {
   action: Action;

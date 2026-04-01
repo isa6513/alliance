@@ -20,7 +20,7 @@ import {
   type UserDto,
   CustomExpressionUserDto,
 } from "@alliance/shared/client";
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
+import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
 import {
   type AnyField,
   type CheckboxField,
@@ -37,7 +37,7 @@ import {
   type TextField,
   type TextareaField,
   type VisibleIfFormula,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import {
   conditionNameForIndex,
   defaultFormulaForConditionCount,
@@ -54,7 +54,7 @@ import { cn } from "@alliance/shared/styles/util";
 import {
   DEVICE_VISIBILITY_TARGETS,
   type DeviceVisibilityTarget,
-} from "@alliance/shared/forms/schema/device";
+} from "@alliance/common/forms/device";
 
 function getFormulaConditionRefs(node: VisibleIfFormula["formula"]): string[] {
   if (typeof node === "string") return [node];

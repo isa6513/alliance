@@ -9,7 +9,7 @@ import {
 import type {
   DisplayBlock,
   DisplayKind,
-} from "@alliance/shared/forms/display-blocks";
+} from "@alliance/common/forms/display-blocks";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
 import type {
@@ -20,7 +20,7 @@ import type {
   MultiSelectField,
   Page,
   VisibleIfFormula,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import type { UserDto } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PreviewAsUserBar } from "./PreviewAsUserBar";

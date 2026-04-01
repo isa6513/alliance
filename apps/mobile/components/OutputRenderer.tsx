@@ -13,14 +13,14 @@ import type {
   AnyField,
   FormSchema,
   FormValue,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import { cn } from "@alliance/shared/styles/util";
 import { getImageSource } from "../lib/config";
 import Card, { CardStyle } from "./system/Card";
 import Text, { FontWeight } from "./system/Text";
 import { RenderDisplayBlockMobile } from "./forms/FormRenderer";
 import { RenderField } from "./forms/RenderField";
-import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
+import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
 
 type OutputRendererProps = {
   schema?: FormSchema;

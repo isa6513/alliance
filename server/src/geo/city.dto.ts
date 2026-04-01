@@ -1,5 +1,7 @@
-import { PickType, ApiProperty } from '@nestjs/swagger';
+import { PickType, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { City } from './city.entity';
+import { CityFieldValue } from '@alliance/common/forms/form-schema';
+import { Assert } from '@alliance/common/types';
 
 export class UserCity {
   @ApiProperty()
@@ -10,9 +12,9 @@ export class UserCity {
   latitude: number;
   @ApiProperty()
   longitude: number;
-  @ApiProperty()
+  @ApiPropertyOptional()
   country?: string;
-  @ApiProperty()
+  @ApiPropertyOptional()
   region?: string;
 }
 
@@ -23,3 +25,6 @@ export class CitySearchDto extends PickType(City, [
   'countryCode',
   'admin1',
 ]) {}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type _typecheck = Assert<CitySearchDto extends CityFieldValue ? true : false>;

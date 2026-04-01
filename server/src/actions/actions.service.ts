@@ -35,7 +35,7 @@ import {
 import { actionActivityUrl, actionUrl, withSid } from 'src/search/approutes';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { FormSchema } from 'src/tasks/schema';
+import type { FormSchema } from '@alliance/common/forms/form-schema';
 import {
   ActionSuiteSummaryDto,
   CommunityUserInfoDto,

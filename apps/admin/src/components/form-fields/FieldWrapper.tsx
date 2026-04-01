@@ -8,8 +8,8 @@ import type {
   PhoneField,
   TimeField,
   TimezoneField,
-} from "@alliance/shared/forms/formschema";
-import { AUTO_EXTRACT_FIELD_KINDS } from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
+import { AUTO_EXTRACT_FIELD_KINDS } from "@alliance/common/forms/form-schema";
 import {
   ConditionalVisibility,
   CustomValidatorSelect,

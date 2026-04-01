@@ -1,11 +1,11 @@
 import { View } from "react-native";
-import type { PreviousAnswerBlock } from "@alliance/shared/forms/display-blocks";
+import type { PreviousAnswerBlock } from "@alliance/common/forms/display-blocks";
 import type {
   FormSchema,
   FormValue,
   ListField,
   ListFieldValue,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import {
   findFieldInSchema,
   getVisiblePreviousAnswerSubFields,

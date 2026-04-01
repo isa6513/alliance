@@ -4,7 +4,7 @@ import type {
   FieldKind,
   FormSchema,
   ListField,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import { tasksListForms, tasksGetForm } from "@alliance/shared/client";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
@@ -120,7 +120,7 @@ function renderEditableSubField(
   index: number,
   updateSubField: (index: number, updates: Partial<AnyField>) => void,
   removeSubField: (index: number) => void,
-  previousFields: AnyField[]
+  previousFields: AnyField[],
 ) {
   const commonProps = {
     field: sub as never,
@@ -177,7 +177,7 @@ export function EditableListField({
   // --- Prefill from previous answer state ---
   const [prefillForms, setPrefillForms] = useState<FormListItem[]>([]);
   const [prefillSourceFields, setPrefillSourceFields] = useState<AnyField[]>(
-    []
+    [],
   );
 
   // Load list of forms on mount
@@ -239,10 +239,10 @@ export function EditableListField({
   }, [prefillSourceFormId]);
 
   const prefillSourceListFields = prefillSourceFields.filter(
-    (f) => f.kind === "list"
+    (f) => f.kind === "list",
   ) as ListField[];
   const selectedSourceListField = prefillSourceListFields.find(
-    (f) => f.id === field.prefillFromPreviousAnswer?.sourceFieldId
+    (f) => f.id === field.prefillFromPreviousAnswer?.sourceFieldId,
   );
   const sourceSubFields = selectedSourceListField?.fields ?? [];
 
@@ -359,7 +359,7 @@ export function EditableListField({
                 index,
                 updateSubField,
                 removeSubField,
-                previousFieldsFor(index)
+                previousFieldsFor(index),
               )}
             </div>
           ))}

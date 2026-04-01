@@ -1,5 +1,5 @@
-import type { DisplayKind } from "@alliance/shared/forms/display-blocks";
-import type { FieldKind } from "@alliance/shared/forms/formschema";
+import type { DisplayKind } from "@alliance/common/forms/display-blocks";
+import type { FieldKind } from "@alliance/common/forms/form-schema";
 
 interface ElementSelectProps {
   onAddField: (kind: FieldKind) => void;
@@ -65,8 +65,8 @@ export function ElementSelect({
                     {type === "custom"
                       ? "Custom Component Field"
                       : type === "textarea"
-                      ? "Text Field"
-                      : `${type.charAt(0).toUpperCase() + type.slice(1)} Field`}
+                        ? "Text Field"
+                        : `${type.charAt(0).toUpperCase() + type.slice(1)} Field`}
                   </button>
                 ))}
               </div>
@@ -85,8 +85,8 @@ export function ElementSelect({
                   {type === "previousAnswer"
                     ? "Previous Answer Block"
                     : type === "copytext"
-                    ? "Copy Text Block"
-                    : type.charAt(0).toUpperCase() + type.slice(1) + " Block"}
+                      ? "Copy Text Block"
+                      : type.charAt(0).toUpperCase() + type.slice(1) + " Block"}
                 </button>
               ))}
             </div>

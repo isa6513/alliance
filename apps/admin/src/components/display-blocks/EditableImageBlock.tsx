@@ -1,5 +1,5 @@
 import { imagesUploadImage } from "@alliance/shared/client";
-import type { ImageBlock } from "@alliance/shared/forms/display-blocks";
+import type { ImageBlock } from "@alliance/common/forms/display-blocks";
 import { useState } from "react";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
@@ -19,7 +19,7 @@ export function EditableImageBlock({
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    update: (updates: Partial<ImageBlock>) => void
+    update: (updates: Partial<ImageBlock>) => void,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;

@@ -7,7 +7,7 @@ import type {
   CustomComponentConfigField,
   CustomComponentDefinition,
 } from "@alliance/sharedweb/forms/components";
-import type { CustomComponentField } from "@alliance/shared/forms/formschema";
+import type { CustomComponentField } from "@alliance/common/forms/form-schema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
@@ -76,12 +76,12 @@ export function EditableCustomComponentField({
 
   const selectedComponent = useMemo(
     () => getCustomComponentById(field.componentId),
-    [field.componentId]
+    [field.componentId],
   );
 
   const componentConfig = useMemo(
     () => (field.componentConfig ?? {}) as Record<string, unknown>,
-    [field.componentConfig]
+    [field.componentConfig],
   );
 
   useEffect(() => {

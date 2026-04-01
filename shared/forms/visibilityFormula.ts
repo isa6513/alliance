@@ -1,4 +1,4 @@
-import type { FormulaNode } from "./formschema";
+import type { FormulaNode } from "@alliance/common/forms/visible-if-formula";
 
 const CONDITION_NAME_REGEX = /^condition\d+$/;
 
@@ -144,48 +144,6 @@ export function parseVisibilityFormula(
     return { error: "Unexpected token after formula." };
   }
   return result;
-}
-
-/**
- * Evaluate a formula node given a map of condition name -> result.
- */
-export function evaluateVisibilityFormula(
-  node: FormulaNode,
-  results: Record<string, boolean>,
-): boolean {
-  if (typeof node === "string") {
-    return results[node] === true;
-  }
-  if (node.op === "NOT") {
-    const operand =
-      typeof node.operand === "string"
-        ? results[node.operand] === true
-        : evaluateVisibilityFormula(node.operand, results);
-    return !operand;
-  }
-  if (node.op === "AND") {
-    const left =
-      typeof node.left === "string"
-        ? results[node.left] === true
-        : evaluateVisibilityFormula(node.left, results);
-    const right =
-      typeof node.right === "string"
-        ? results[node.right] === true
-        : evaluateVisibilityFormula(node.right, results);
-    return left && right;
-  }
-  if (node.op === "OR") {
-    const left =
-      typeof node.left === "string"
-        ? results[node.left] === true
-        : evaluateVisibilityFormula(node.left, results);
-    const right =
-      typeof node.right === "string"
-        ? results[node.right] === true
-        : evaluateVisibilityFormula(node.right, results);
-    return left || right;
-  }
-  return false;
 }
 
 /** Serialize a formula node back to display string (for editing). */

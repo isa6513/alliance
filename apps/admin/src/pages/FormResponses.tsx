@@ -12,7 +12,7 @@ import type {
   FieldKind,
   FormSchema,
   Page,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import React, {
@@ -73,7 +73,7 @@ export type FormResponseFilter = {
 };
 
 const isAnswerField = (
-  node: unknown
+  node: unknown,
 ): node is { id: string; label: string } => {
   if (!node || typeof node !== "object") return false;
   const anyNode = node as { kind: string; id: string; label: string };
@@ -92,7 +92,7 @@ const isTab = (value: string | null): value is Tab =>
   value === "responses" || value === "stats" || value === "questions";
 
 const sortResponsesByCreatedAtDesc = (
-  list: FormResponseDto[]
+  list: FormResponseDto[],
 ): FormResponseDto[] => {
   return [...list].sort((a, b) => {
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -123,7 +123,7 @@ const getSelections = (value: unknown): string[] => {
 
 const getOptionLabel = (
   field: AnyField,
-  value: string | undefined
+  value: string | undefined,
 ): string | undefined => {
   if (!value) return undefined;
   const options =
@@ -140,7 +140,7 @@ const formatAiScore = (value: number | null): string => {
 const matchesResponseFilter = (
   response: FormResponseDto,
   filter: FormResponseFilter,
-  field: AnyField
+  field: AnyField,
 ): boolean => {
   const rawValue = response.answers?.[filter.fieldId];
   if (filter.op === "no-response") {
@@ -206,7 +206,7 @@ const FormResponses: React.FC = () => {
       });
       setParams(next);
     },
-    [params, setParams]
+    [params, setParams],
   );
 
   const activeFilter = useMemo<FormResponseFilter | null>(() => {
@@ -226,7 +226,7 @@ const FormResponses: React.FC = () => {
 
   const numericFormId = useMemo(
     () => (formId ? Number(formId) : NaN),
-    [formId]
+    [formId],
   );
 
   useEffect(() => {
@@ -237,8 +237,8 @@ const FormResponses: React.FC = () => {
             res.data?.map((r) => [
               r.sid ?? (r.data as { sid?: string })?.sid,
               r.user,
-            ]) ?? []
-          )
+            ]) ?? [],
+          ),
         );
       });
     }
@@ -335,7 +335,7 @@ const FormResponses: React.FC = () => {
   const filteredResponses = useMemo(() => {
     if (!activeFilter || !activeFilterField) return responses;
     return responses.filter((response) =>
-      matchesResponseFilter(response, activeFilter, activeFilterField)
+      matchesResponseFilter(response, activeFilter, activeFilterField),
     );
   }, [responses, activeFilter, activeFilterField]);
 
@@ -348,7 +348,7 @@ const FormResponses: React.FC = () => {
 
   const selectedQuestionField = useMemo(
     () => fieldsById[selectedQuestionFieldId],
-    [fieldsById, selectedQuestionFieldId]
+    [fieldsById, selectedQuestionFieldId],
   );
 
   useEffect(() => {
@@ -420,7 +420,7 @@ const FormResponses: React.FC = () => {
       case "multiselect": {
         const optionLabel = getOptionLabel(
           activeFilterField,
-          activeFilter.value
+          activeFilter.value,
         );
         return {
           fieldLabel,
@@ -431,7 +431,7 @@ const FormResponses: React.FC = () => {
       case "select": {
         const optionLabel = getOptionLabel(
           activeFilterField,
-          activeFilter.value
+          activeFilter.value,
         );
         return { fieldLabel, description: optionLabel ?? valueLabel };
       }
@@ -456,7 +456,7 @@ const FormResponses: React.FC = () => {
       });
       setPage(1);
     },
-    [updateParams]
+    [updateParams],
   );
 
   const clearFilter = useCallback(() => {
@@ -488,7 +488,7 @@ const FormResponses: React.FC = () => {
     if (!selectedQuestionFieldId) return [];
     return responses.filter(
       (response) =>
-        !isNoResponseValue(response.answers?.[selectedQuestionFieldId])
+        !isNoResponseValue(response.answers?.[selectedQuestionFieldId]),
     );
   }, [responses, selectedQuestionFieldId]);
 
@@ -512,7 +512,7 @@ const FormResponses: React.FC = () => {
           return selections
             .map(
               (selection) =>
-                getOptionLabel(selectedQuestionField, selection) ?? selection
+                getOptionLabel(selectedQuestionField, selection) ?? selection,
             )
             .join(", ");
         }
@@ -520,7 +520,7 @@ const FormResponses: React.FC = () => {
           return formatValue(value);
       }
     },
-    [selectedQuestionField, formatValue]
+    [selectedQuestionField, formatValue],
   );
 
   const csvEscape = (s: string): string => {
@@ -571,7 +571,7 @@ const FormResponses: React.FC = () => {
     const a = document.createElement("a");
     const safeTitle = (form.title || `form-${form.id}`).replace(
       /[^a-z0-9-_]+/gi,
-      "-"
+      "-",
     );
     a.href = url;
     a.download = `${safeTitle}-responses.csv`;
@@ -599,11 +599,11 @@ const FormResponses: React.FC = () => {
   }, []);
 
   const respondentName = currentResponse
-    ? currentResponse.user?.name ??
+    ? (currentResponse.user?.name ??
       (sidsToUserMap[currentResponse.sid ?? ""]
         ? "anonymous invited by " +
           sidsToUserMap[currentResponse.sid ?? ""]?.displayName
-        : "anonymous")
+        : "anonymous"))
     : "";
 
   const getRespondentName = useCallback(
@@ -616,7 +616,7 @@ const FormResponses: React.FC = () => {
           : "anonymous")
       );
     },
-    [sidsToUserMap]
+    [sidsToUserMap],
   );
 
   const userSearchResults = useMemo(() => {
@@ -628,7 +628,7 @@ const FormResponses: React.FC = () => {
     }));
     if (!query) return items;
     const matched = items.filter(({ name }) =>
-      name.toLowerCase().includes(query)
+      name.toLowerCase().includes(query),
     );
     matched.sort((a, b) => {
       const aStarts = a.name.toLowerCase().startsWith(query) ? 0 : 1;
@@ -647,7 +647,7 @@ const FormResponses: React.FC = () => {
         setUserDropdownOpen(false);
       }
     },
-    [userSearchResults]
+    [userSearchResults],
   );
 
   return (
@@ -807,7 +807,7 @@ const FormResponses: React.FC = () => {
                           type="button"
                           className={cn(
                             "w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-b border-gray-50 last:border-b-0",
-                            idx + 1 === page && "bg-blue-50 font-medium"
+                            idx + 1 === page && "bg-blue-50 font-medium",
                           )}
                           onClick={() => {
                             setPage(idx + 1);
@@ -846,10 +846,10 @@ const FormResponses: React.FC = () => {
                           "https://us.posthog.com/project/188181/replay/home?sessionRecordingId=" +
                             currentResponse.sessionReplayUrl!.substring(
                               currentResponse.sessionReplayUrl!.lastIndexOf(
-                                "/"
-                              ) + 1
+                                "/",
+                              ) + 1,
                             ),
-                          "_blank"
+                          "_blank",
                         )
                       }
                     >
@@ -991,7 +991,7 @@ const FormResponses: React.FC = () => {
                         ? (response.aiDetectionResults ?? []).find(
                             (d) =>
                               d.fieldPath ===
-                              `answers.${selectedQuestionFieldId}`
+                              `answers.${selectedQuestionFieldId}`,
                           )
                         : null;
                     return (
@@ -1007,7 +1007,7 @@ const FormResponses: React.FC = () => {
                           selectedQuestionField &&
                             AI_SCORE_FIELD_KINDS.has(selectedQuestionField.kind)
                             ? "md:grid-cols-[260px_minmax(0,1fr)_auto]"
-                            : "md:grid-cols-[260px_minmax(0,1fr)]"
+                            : "md:grid-cols-[260px_minmax(0,1fr)]",
                         )}
                       >
                         <div className="min-w-0">
@@ -1025,7 +1025,7 @@ const FormResponses: React.FC = () => {
                         </div>
                         {selectedQuestionField &&
                           AI_SCORE_FIELD_KINDS.has(
-                            selectedQuestionField.kind
+                            selectedQuestionField.kind,
                           ) && (
                             <div className="flex items-start">
                               <span
@@ -1036,11 +1036,11 @@ const FormResponses: React.FC = () => {
                                       "number" &&
                                     aiDetection.aiProbability > 0
                                     ? "text-red-600"
-                                    : "text-gray-400"
+                                    : "text-gray-400",
                                 )}
                               >
                                 {formatAiScore(
-                                  aiDetection?.aiProbability ?? null
+                                  aiDetection?.aiProbability ?? null,
                                 )}
                               </span>
                             </div>

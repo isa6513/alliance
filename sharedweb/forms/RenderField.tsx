@@ -10,7 +10,7 @@ import type {
   ListFieldValue,
   RangeField,
   TimeField,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import { isOutputValueMissing } from "@alliance/shared/outputrenderer";
 import { shuffleWithSeed } from "./randomutils";
 import { formatTimeForDisplay, parseTimeInput } from "./timeUtils";
@@ -295,10 +295,10 @@ export function RenderField({
       );
 
     case "number": {
-      const numberStep = field.allowDecimals
-        ? "any"
-        : (field.step ?? 1);
-      const numberDecimalPlaces = field.allowDecimals ? (field.decimalPlaces ?? undefined) : undefined;
+      const numberStep = field.allowDecimals ? "any" : (field.step ?? 1);
+      const numberDecimalPlaces = field.allowDecimals
+        ? (field.decimalPlaces ?? undefined)
+        : undefined;
       return (
         <div className="space-y-1">
           <RenderLabel

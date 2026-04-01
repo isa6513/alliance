@@ -1,4 +1,4 @@
-import type { HeaderBlock } from "@alliance/shared/forms/display-blocks";
+import type { HeaderBlock } from "@alliance/common/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import { cn } from "@alliance/shared/styles/util";
@@ -34,14 +34,14 @@ export function EditableHeaderBlock({
               (activeBlock.level || 2) === 1
                 ? "text-3xl"
                 : (activeBlock.level || 2) === 2
-                ? "text-2xl"
-                : (activeBlock.level || 2) === 3
-                ? "text-xl"
-                : (activeBlock.level || 2) === 4
-                ? "text-lg"
-                : (activeBlock.level || 2) === 5
-                ? "text-base"
-                : "text-sm"
+                  ? "text-2xl"
+                  : (activeBlock.level || 2) === 3
+                    ? "text-xl"
+                    : (activeBlock.level || 2) === 4
+                      ? "text-lg"
+                      : (activeBlock.level || 2) === 5
+                        ? "text-base"
+                        : "text-sm",
             )}
             placeholder="Enter header text"
           />

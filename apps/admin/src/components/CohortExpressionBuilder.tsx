@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import type { TagDto, FormDto } from "@alliance/shared/client";
 import { tasksGetForm, actionsFindOneAdmin } from "@alliance/shared/client";
-import type { AnyField, FormSchema } from "@alliance/shared/forms/formschema";
+import type { AnyField, FormSchema } from "@alliance/common/forms/form-schema";
 import type { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import UserSelect from "@alliance/sharedweb/ui/UserSelect";
 import { cn } from "@alliance/shared/styles/util";

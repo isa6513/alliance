@@ -1,5 +1,5 @@
 import { isElementCurrentlyVisible } from "./formrenderer";
-import type { DisplayBlock } from "./forms/display-blocks";
+import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
 import type {
   AnyField,
   CityFieldValue,
@@ -9,8 +9,8 @@ import type {
   OutputBlock,
   OutputFieldBlock,
   OutputViewSchema,
-} from "./forms/formschema";
-import { DeviceVisibilityTarget } from "./forms/schema/device";
+} from "@alliance/common/forms/form-schema";
+import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
 
 export type ResolvedOutputDisplayItem = {
   type: "display";
@@ -62,7 +62,7 @@ const formatCity = (value: CityFieldValue | string): string => {
   const region = value.admin1?.trim();
   const country = value.countryName?.trim();
   const locationParts = [region, country].filter(
-    (part): part is string => !!part && part.length > 0
+    (part): part is string => !!part && part.length > 0,
   );
   const suffix = locationParts.length ? `, ${locationParts.join(", ")}` : "";
   return `${value.name}${suffix}`;
@@ -78,7 +78,9 @@ export const isOutputValueMissing = (value: FormValue | undefined): boolean => {
   return false;
 };
 
-export const collectOutputFieldMap = (schema: FormSchema): Map<string, AnyField> => {
+export const collectOutputFieldMap = (
+  schema: FormSchema,
+): Map<string, AnyField> => {
   const map = new Map<string, AnyField>();
   schema.pages.forEach((page) => {
     page.fields.forEach((field) => {
@@ -92,7 +94,7 @@ export const collectOutputFieldMap = (schema: FormSchema): Map<string, AnyField>
 
 export const resolveOutputView = (
   schema: FormSchema,
-  viewId?: string
+  viewId?: string,
 ): OutputViewSchema | null => {
   const views = schema.outputViews ?? [];
   if (!views.length) {
@@ -109,7 +111,7 @@ export const resolveOutputView = (
 
 export const formatOutputFieldValue = (
   field: AnyField,
-  value: FormValue | undefined
+  value: FormValue | undefined,
 ): string => {
   if (isOutputValueMissing(value)) {
     return "";
@@ -154,17 +156,17 @@ export const formatOutputFieldValue = (
       return Array.isArray(value)
         ? value.join(", ")
         : typeof value === "boolean"
-        ? value
-          ? "Yes"
-          : "No"
-        : String(value);
+          ? value
+            ? "Yes"
+            : "No"
+          : String(value);
   }
 };
 
 export const getOutputFileValues = (value: FormValue | undefined): string[] => {
   const rawValues = Array.isArray(value) ? value : [value];
   return rawValues.filter(
-    (entry): entry is string => typeof entry === "string" && entry.length > 0
+    (entry): entry is string => typeof entry === "string" && entry.length > 0,
   );
 };
 
@@ -173,7 +175,7 @@ export const isOutputBlockVisible = (
   answers: Record<string, FormValue>,
   validatorResults?: Record<number, boolean>,
   deviceType?: DeviceVisibilityTarget,
-  inputField?: AnyField
+  inputField?: AnyField,
 ): boolean => {
   if (inputField) {
     const isVisible = isElementCurrentlyVisible(inputField, answers, {
@@ -195,20 +197,22 @@ export const isOutputBlockVisible = (
 
 const buildOutputField = (
   field: AnyField,
-  block: OutputFieldBlock
+  block: OutputFieldBlock,
 ): AnyField => {
   const withLabel: AnyField = {
     ...field,
-    label: block.showLabel ? block.labelOverride ?? field.label : null,
+    label: block.showLabel ? (block.labelOverride ?? field.label) : null,
     required: false,
   };
 
   if (field.kind === "list") {
     const listField = field as ListField;
-    (withLabel as ListField).fields = (listField.fields ?? []).map((subField) => ({
-      ...subField,
-      required: false,
-    }));
+    (withLabel as ListField).fields = (listField.fields ?? []).map(
+      (subField) => ({
+        ...subField,
+        required: false,
+      }),
+    );
   }
 
   return withLabel;
@@ -241,13 +245,13 @@ export const resolveOutputItems = ({
           answers,
           validatorResults,
           deviceType,
-          "fieldId" in block ? fieldLookup.get(block.fieldId) : undefined
+          "fieldId" in block ? fieldLookup.get(block.fieldId) : undefined,
         ) &&
-        ("kind" in block || publicAnswers?.[block.fieldId] === true)
+        ("kind" in block || publicAnswers?.[block.fieldId] === true),
     )
     .map((block, index): ResolvedOutputItem => {
       const key =
-        "kind" in block ? block.id ?? `${block.kind}-${index}` : block.id;
+        "kind" in block ? (block.id ?? `${block.kind}-${index}`) : block.id;
 
       if ("kind" in block) {
         return {

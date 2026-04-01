@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { PreviousAnswerBlock } from "@alliance/shared/forms/display-blocks";
+import type { PreviousAnswerBlock } from "@alliance/common/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import { tasksListForms, tasksGetForm } from "@alliance/shared/client";
@@ -7,7 +7,7 @@ import type {
   AnyField,
   FormSchema,
   ListField,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 
 type FormListItem = { id: number; title: string };
 

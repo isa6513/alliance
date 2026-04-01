@@ -11,6 +11,7 @@
     "react-markdown": "*"
   },
   "dependencies": {
+    "@alliance/common": "workspace:*",
     "@alliance/shared": "workspace:*",
     "@base-ui/react": "^1.2.0",
     "@hey-api/client-fetch": "^0.13.1",

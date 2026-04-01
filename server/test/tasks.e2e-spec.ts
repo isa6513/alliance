@@ -14,7 +14,7 @@ import {
   ActionStatus,
 } from 'src/actions/entities/action-event.entity';
 import { User } from 'src/user/entities/user.entity';
-import { FormSchema } from 'src/tasks/schema';
+import type { FormSchema } from '@alliance/common/forms/form-schema';
 import {
   ActionActivity,
   ActionActivityType,

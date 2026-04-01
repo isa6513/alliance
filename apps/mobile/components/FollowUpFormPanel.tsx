@@ -6,7 +6,7 @@ import type {
   SubmitFollowUpFormDto,
   FollowUpForm,
 } from "@alliance/shared/client/types.gen";
-import { FormSchema } from "@alliance/shared/forms/formschema";
+import { FormSchema } from "@alliance/common/forms/form-schema";
 import { computeFormStorageKey } from "@alliance/shared/formrenderer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { usePostHog } from "posthog-react-native";

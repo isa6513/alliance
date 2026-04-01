@@ -1,8 +1,26 @@
-import type { CitySearchDto } from "../client";
 import type { DisplayBlock, ManualDisplayBlockContent } from "./display-blocks";
-import { DeviceVisibilityTarget } from "./schema/device";
+import type { DeviceVisibilityTarget } from "./device";
+import {
+  evaluateVisibilityFormula,
+  type Condition,
+  type VisibleIfFormula,
+} from "./visible-if-formula";
 
-// field-kinds.ts
+export type {
+  Condition,
+  FormulaNode,
+  VisibleIfFormula,
+} from "./visible-if-formula";
+
+/** City answer shape; matches API `CitySearchDto` / server `CitySearchDto` structurally. */
+export interface CityFieldValue {
+  id: number;
+  name: string;
+  admin1: string;
+  countryCode: string;
+  countryName: string;
+}
+
 export type FieldKind =
   | "text"
   | "textarea"
@@ -25,8 +43,6 @@ export type FieldKind =
 
 type Option<V extends string = string> = { label: string; value: V };
 
-// Unified value type for answers (persisted)
-export type CityFieldValue = CitySearchDto;
 export type ListFieldValue = Record<string, FormValue>[];
 export type FormValue =
   | string
@@ -41,7 +57,6 @@ export interface FieldOutputConfig {
   privateByDefault?: boolean;
 }
 
-// Base field for dynamic forms (no generics, runtime-first)
 interface BaseField<TKind extends FieldKind> {
   id: string;
   kind: TKind;
@@ -54,48 +69,16 @@ interface BaseField<TKind extends FieldKind> {
   visibleIfFormula?: VisibleIfFormula;
   requiredIf?: Condition;
 
-  // UI hints
   width?: "full" | "1/2" | "1/3";
 
   output?: FieldOutputConfig;
 }
 
-// Conditions reference other field ids; we type this late with a helper (see defineForm)
-// When `sourceFormId` is set, `when` refers to a field in that form and
-// the value is resolved from the user's previous response to it.
-export type Condition =
-  | {
-      when: string;
-      equals: string | number | boolean | null;
-      sourceFormId?: number;
-    }
-  | { when: string; includesOption: string; sourceFormId?: number }
-  | { when: string; anySelected: boolean; sourceFormId?: number }
-  | { when: string; hasValue: boolean; sourceFormId?: number }
-  | { expr: string }
-  | { validatorId: number; resultEquals?: boolean } // validators default to expecting true
-  | { deviceType: DeviceVisibilityTarget[] };
-
-/** Formula tree for visibility: AND/OR of two operands, NOT of one. Leaves are condition names (e.g. condition1, condition2). */
-export type FormulaNode =
-  | { op: "AND"; left: FormulaNode | string; right: FormulaNode | string }
-  | { op: "OR"; left: FormulaNode | string; right: FormulaNode | string }
-  | { op: "NOT"; operand: FormulaNode | string }
-  | string;
-
-/** Named conditions (condition1, condition2, ...) plus a formula tree. */
-export interface VisibleIfFormula {
-  conditions: Record<string, Condition>;
-  formula: FormulaNode;
-}
-
-// Specialized fields:
-
 export type TextField = BaseField<"text"> & {
   placeholder?: string;
   minLength?: number;
   maxLength?: number;
-  pattern?: string; // regex string (runtime checked)
+  pattern?: string;
 };
 
 export type TextareaField = BaseField<"textarea"> & {
@@ -131,7 +114,6 @@ export type CheckboxField = BaseField<"checkbox"> & {
   checkboxPosition?: CheckboxPosition;
 };
 
-// Field kinds that support auto-extraction into user data
 export const AUTO_EXTRACT_FIELD_KINDS = [
   "phone",
   "time",
@@ -141,6 +123,7 @@ export const AUTO_EXTRACT_FIELD_KINDS = [
   "custom",
 ] as const;
 export type AutoExtractFieldKind = (typeof AUTO_EXTRACT_FIELD_KINDS)[number];
+
 export type RadioField = BaseField<"radio"> & {
   options: Option<string>[];
   randomizeOptions?: boolean;
@@ -157,10 +140,10 @@ export type MultiSelectField = BaseField<"multiselect"> & {
   maxSelections?: number;
 };
 
-export type DateField = BaseField<"date">; // ISO date string (YYYY-MM-DD)
+export type DateField = BaseField<"date">;
 export type TimeField = BaseField<"time"> & {
   autoExtractUserData?: boolean;
-}; // Stored as HH:mm (24h) string
+};
 export type TimezoneField = BaseField<"timezone"> & {
   autoExtractUserData?: boolean;
 };
@@ -193,7 +176,6 @@ export type ListField = BaseField<"list"> & {
     targetSubFieldId: string;
   };
 };
-// Persist file answers as string URL/key
 export type FileField = BaseField<"file">;
 export type CustomComponentField = BaseField<"custom"> & {
   componentId: string;
@@ -278,4 +260,135 @@ export interface OutputViewSchema {
   title?: string;
   description?: string;
   blocks: OutputBlock[];
+}
+
+export function isQuestionField(
+  field: AnyField | DisplayBlock,
+): field is AnyField {
+  return "label" in field;
+}
+
+export function isQuestionVisible(
+  element: AnyField | DisplayBlock,
+  formData: Record<string, FormValue>,
+  validatorResults?: Record<number, boolean>,
+  deviceType?: DeviceVisibilityTarget,
+  previousAnswerData?: Record<number, Record<string, unknown>>,
+): boolean {
+  const normalizedDeviceType: DeviceVisibilityTarget = deviceType ?? "desktop";
+  const hasContent = (value: FormValue | undefined): boolean => {
+    if (value === undefined || value === null) {
+      return false;
+    }
+    if (typeof value === "string") {
+      return value.trim().length > 0;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return true;
+  };
+  const resolveValue = (c: Condition & { when: string }): FormValue => {
+    if ("sourceFormId" in c && c.sourceFormId != null && previousAnswerData) {
+      return previousAnswerData[c.sourceFormId]?.[c.when] as FormValue;
+    }
+    return formData[c.when];
+  };
+  const evalCond = (c: Condition): boolean => {
+    if ("expr" in c) return true;
+    if ("deviceType" in c) {
+      if (!Array.isArray(c.deviceType) || c.deviceType.length === 0)
+        return false;
+      return c.deviceType.includes(normalizedDeviceType);
+    }
+    if ("validatorId" in c) {
+      const expected = c.resultEquals ?? true;
+      const actual = validatorResults?.[c.validatorId];
+      if (actual === undefined) return false;
+      return actual === expected;
+    }
+    const val = resolveValue(c as Condition & { when: string });
+    if ("hasValue" in c) {
+      const present = hasContent(val as FormValue | undefined);
+      return c.hasValue ? present : !present;
+    }
+    if ("anySelected" in c) {
+      const selections = Array.isArray(val) ? val : [];
+      return c.anySelected ? selections.length > 0 : selections.length === 0;
+    }
+    if ("includesOption" in c) {
+      if (!c.includesOption) return false;
+      return (
+        Array.isArray(val) &&
+        val.length > 0 &&
+        typeof val[0] === "string" &&
+        (val as string[]).includes(c.includesOption)
+      );
+    }
+    if (!("equals" in c)) return true;
+    if (typeof c.equals === "boolean") return Boolean(val) === c.equals;
+    if (typeof c.equals === "number" && Number.isFinite(c.equals)) {
+      if (val === "" || val === undefined || val === null) return false;
+      if (typeof val === "number" && Number.isFinite(val))
+        return val === c.equals;
+      if (typeof val === "string" && val.trim() !== "") {
+        const n = Number(val);
+        return Number.isFinite(n) && n === c.equals;
+      }
+      return false;
+    }
+    if (Array.isArray(val) && c.equals !== null && c.equals !== undefined) {
+      if (val.length > 0 && typeof val[0] === "string") {
+        return (val as string[]).includes(c.equals as string);
+      }
+      return false;
+    }
+    return val === c.equals;
+  };
+
+  const formula = element.visibleIfFormula;
+  if (
+    formula?.conditions &&
+    Object.keys(formula.conditions).length > 0 &&
+    formula.formula
+  ) {
+    const results: Record<string, boolean> = {};
+    for (const [name, cond] of Object.entries(formula.conditions)) {
+      results[name] = evalCond(cond);
+    }
+    return evaluateVisibilityFormula(formula.formula, results);
+  }
+
+  return true;
+}
+
+/** Scan a form schema for all sourceFormIds referenced in visibility conditions. */
+export function collectSourceFormIds(schema: FormSchema): number[] {
+  const ids = new Set<number>();
+  const collectFromCondition = (c: Condition) => {
+    if ("sourceFormId" in c && typeof c.sourceFormId === "number") {
+      ids.add(c.sourceFormId);
+    }
+  };
+  const collectFromElement = (el: AnyField | DisplayBlock) => {
+    if (el.visibleIfFormula?.conditions) {
+      Object.values(el.visibleIfFormula.conditions).forEach(
+        collectFromCondition,
+      );
+    }
+    if ("requiredIf" in el && (el as AnyField).requiredIf) {
+      collectFromCondition((el as AnyField).requiredIf!);
+    }
+  };
+  for (const page of schema.pages) {
+    for (const field of page.fields) {
+      collectFromElement(field);
+      if (isQuestionField(field) && field.kind === "list") {
+        for (const sub of (field as ListField).fields ?? []) {
+          collectFromElement(sub);
+        }
+      }
+    }
+  }
+  return Array.from(ids);
 }

@@ -3,7 +3,7 @@ import type {
   AnyField,
   FieldKind,
   RangeField,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import Card from "@alliance/sharedweb/ui/Card";
 import FormMarkdownWrapper from "@alliance/sharedweb/ui/FormMarkdownWrapper";
 import React, { useMemo } from "react";
@@ -93,7 +93,7 @@ const getRangeValues = (field: RangeField): number[] => {
     : DEFAULT_RANGE_OPTION_COUNT;
   const optionCount = Math.min(
     MAX_RANGE_OPTION_COUNT,
-    Math.max(MIN_RANGE_OPTION_COUNT, normalized)
+    Math.max(MIN_RANGE_OPTION_COUNT, normalized),
   );
   return Array.from({ length: optionCount }, (_, index) => index + 1);
 };
@@ -114,7 +114,7 @@ const getFieldLabel = (field: AnyField): string =>
 
 const buildNumberStats = (
   values: number[],
-  totalResponses: number
+  totalResponses: number,
 ): Pick<FieldStats, "rows" | "answeredCount" | "summary"> => {
   if (values.length === 0) {
     const rows =
@@ -163,7 +163,7 @@ const buildNumberStats = (
   }
 
   const shouldUseIntegerBuckets = sorted.every((value) =>
-    Number.isInteger(value)
+    Number.isInteger(value),
   );
 
   if (shouldUseIntegerBuckets) {
@@ -234,7 +234,7 @@ const buildNumberStats = (
 const buildFieldStats = (
   field: AnyField,
   responses: FormResponseDto[],
-  totalResponses: number
+  totalResponses: number,
 ): FieldStats => {
   switch (field.kind) {
     case "checkbox": {
@@ -350,8 +350,8 @@ const buildFieldStats = (
         const selections = Array.isArray(rawValue)
           ? rawValue.map(String)
           : rawValue
-          ? [String(rawValue)]
-          : [];
+            ? [String(rawValue)]
+            : [];
         if (selections.length === 0) {
           noResponseCount += 1;
           return;
@@ -568,9 +568,9 @@ const FormResponseStatistics: React.FC<FormResponseStatisticsProps> = ({
   const statsData = useMemo(
     () =>
       statsFields.map((field) =>
-        buildFieldStats(field, responses, totalResponses)
+        buildFieldStats(field, responses, totalResponses),
       ),
-    [responses, statsFields, totalResponses]
+    [responses, statsFields, totalResponses],
   );
 
   if (!form) {

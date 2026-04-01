@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
+import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
 import { getApiUrl } from "../lib/config";
 import { Link } from "react-router";
 import Card from "../ui/Card";
@@ -14,10 +14,10 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import type { BigLinkIcon } from "@alliance/shared/forms/display-blocks";
+import type { BigLinkIcon } from "@alliance/common/forms/display-blocks";
 import { CardStyle } from "@alliance/shared/styles/card";
 import VideoPlayer from "./VideoPlayer";
-import type { FormSchema } from "@alliance/shared/forms/formschema";
+import type { FormSchema } from "@alliance/common/forms/form-schema";
 import RenderPreviousAnswer from "./RenderPreviousAnswer";
 
 const bigLinkIcons: Record<BigLinkIcon, React.FC<{ size?: number }>> = {

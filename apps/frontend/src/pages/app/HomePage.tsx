@@ -34,7 +34,7 @@ import { useTaskActionsData } from "../../lib/useTaskActionsData";
 import HomeUpdatesRow from "../../components/HomeUpdatesRow";
 import SeeAll from "../../components/SeeAll";
 import HomeFeed from "../../components/HomeFeed";
-import type { AggregateViewSchema } from "@alliance/shared/forms/formschema";
+import type { AggregateViewSchema } from "@alliance/common/forms/form-schema";
 import { runAsync } from "@alliance/shared/lib/utils";
 import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
 import {

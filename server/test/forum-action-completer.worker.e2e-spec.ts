@@ -20,7 +20,7 @@ import {
   CustomValidator,
   CustomValidatorType,
 } from 'src/tasks/entities/customvalidator.entity';
-import { FormSchema } from 'src/tasks/schema';
+import type { FormSchema } from '@alliance/common/forms/form-schema';
 import { Post } from 'src/forum/entities/post.entity';
 import {
   Comment,

@@ -1,5 +1,4 @@
-// display-blocks.ts
-import { VisibleIfFormula } from "@alliance/shared/forms/formschema";
+import type { VisibleIfFormula } from "./visible-if-formula";
 
 export type DisplayKind =
   | "header" // H1–H6
@@ -23,8 +22,6 @@ interface BaseBlock {
   manualPerUser?: boolean;
   manualUserContent?: Record<string, ManualDisplayBlockContent>;
 }
-
-// Specific blocks
 
 export type HeaderBlock = BaseBlock & {
   kind: "header";
@@ -67,7 +64,7 @@ export type ImageBlock = BaseBlock & {
   kind: "image";
   alt: string;
   src: string; // or { key: string } if you want S3 keys
-  aspectRatio?: number; // e.g., 16/9
+  aspectRatio?: number; // e.g. 16/9
   caption?: string;
 };
 

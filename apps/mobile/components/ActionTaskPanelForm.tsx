@@ -8,7 +8,7 @@ import {
 import { noop } from "@alliance/shared/lib/constants";
 import { useState } from "react";
 import FormRenderer from "./forms/FormRenderer";
-import { FormSchema } from "@alliance/shared/forms/formschema";
+import { FormSchema } from "@alliance/common/forms/form-schema";
 import { ActivityIndicator, View } from "react-native";
 import { usePostHog } from "posthog-react-native";
 import Text from "./system/Text";

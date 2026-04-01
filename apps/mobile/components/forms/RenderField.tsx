@@ -23,7 +23,7 @@ import type {
   ListFieldValue,
   RangeField,
   TimeField,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
 import {
   formatTimeForDisplay,

@@ -1,4 +1,4 @@
-import type { CopyTextBlock } from "@alliance/shared/forms/display-blocks";
+import type { CopyTextBlock } from "@alliance/common/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 
@@ -26,7 +26,9 @@ export function EditableCopyTextBlock({
           <input
             type="text"
             value={activeBlock.title ?? ""}
-            onChange={(e) => handleUpdate({ title: e.target.value || undefined })}
+            onChange={(e) =>
+              handleUpdate({ title: e.target.value || undefined })
+            }
             className="w-full text-xs text-gray-500 border-none outline-none bg-transparent"
             placeholder="Title (optional)"
           />

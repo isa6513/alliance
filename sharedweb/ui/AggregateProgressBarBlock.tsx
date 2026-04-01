@@ -1,4 +1,4 @@
-import type { AggregateViewSchema } from "@alliance/shared/forms/formschema";
+import type { AggregateViewSchema } from "@alliance/common/forms/form-schema";
 import { formatAggregateValue } from "@alliance/shared/lib/actionAggregates";
 import CompletedBar from "./CompletedBar";
 import { completedBarPercentage } from "@alliance/shared/lib/utils";

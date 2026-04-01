@@ -13,7 +13,7 @@ import {
   actionActivityCommentable,
   actionActivityTransitiveVerb,
 } from "@alliance/shared/lib/actionActivityConstants";
-import { FormSchema } from "@alliance/shared/forms/formschema";
+import { FormSchema } from "@alliance/common/forms/form-schema";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;

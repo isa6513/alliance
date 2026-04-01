@@ -1,4 +1,4 @@
-import type { NumberField } from "@alliance/shared/forms/formschema";
+import type { NumberField } from "@alliance/common/forms/form-schema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
@@ -87,7 +87,9 @@ export function EditableNumberField({
           onChange={(e) =>
             onUpdate({
               allowDecimals: e.target.checked,
-              decimalPlaces: e.target.checked ? (field.decimalPlaces ?? 2) : undefined,
+              decimalPlaces: e.target.checked
+                ? (field.decimalPlaces ?? 2)
+                : undefined,
               step: e.target.checked ? undefined : field.step,
             })
           }
@@ -114,7 +116,9 @@ export function EditableNumberField({
             onChange={(e) => {
               const val = parseInt(e.target.value, 10);
               onUpdate({
-                decimalPlaces: Number.isNaN(val) ? 2 : Math.max(1, Math.min(10, val)),
+                decimalPlaces: Number.isNaN(val)
+                  ? 2
+                  : Math.max(1, Math.min(10, val)),
               });
             }}
             className="w-24 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"

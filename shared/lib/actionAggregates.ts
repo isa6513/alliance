@@ -1,4 +1,4 @@
-import type { AggregateViewSchema } from "../forms/formschema";
+import type { AggregateViewSchema } from "@alliance/common/forms/form-schema";
 
 export const isAggregateViewSchema = (
   value: unknown,

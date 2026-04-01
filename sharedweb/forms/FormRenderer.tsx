@@ -23,18 +23,18 @@ import RenderField from "./RenderField";
 import type {
   DisplayBlock,
   PreviousAnswerBlock,
-} from "@alliance/shared/forms/display-blocks";
-import type {
-  AnyField,
-  FormSchema,
-  FormValue,
-  ListField,
-  VisibleIfFormula,
-} from "@alliance/shared/forms/formschema";
-import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
+} from "@alliance/common/forms/display-blocks";
+import {
+  collectSourceFormIds,
+  type AnyField,
+  type FormSchema,
+  type FormValue,
+  type ListField,
+  type VisibleIfFormula,
+} from "@alliance/common/forms/form-schema";
+import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import {
   applyDefaultValues,
-  collectConditionSourceFormIds,
   computeFormStorageKey,
   filterAnswersByFieldIds,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
@@ -526,7 +526,7 @@ const FormRenderer = ({
         }
       }
     }
-    for (const id of collectConditionSourceFormIds(schema)) {
+    for (const id of collectSourceFormIds(schema)) {
       ids.add(id);
     }
     return Array.from(ids);

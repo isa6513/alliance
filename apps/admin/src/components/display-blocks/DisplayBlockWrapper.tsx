@@ -9,11 +9,11 @@ import {
 import type {
   DisplayBlock,
   ManualDisplayBlockContent,
-} from "@alliance/shared/forms/display-blocks";
+} from "@alliance/common/forms/display-blocks";
 import type {
   AnyField,
   VisibleIfFormula,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import type { UserDto } from "@alliance/shared/client";
 import { userList } from "@alliance/shared/client";
 import { ConditionalVisibility } from "../form-fields/CommonControls";

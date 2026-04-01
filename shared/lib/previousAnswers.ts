@@ -1,10 +1,10 @@
-import type { PreviousAnswerBlock } from "../forms/display-blocks";
+import type { PreviousAnswerBlock } from "@alliance/common/forms/display-blocks";
 import type {
   AnyField,
   FormSchema,
   FormValue,
   ListField,
-} from "../forms/formschema";
+} from "@alliance/common/forms/form-schema";
 
 export function findFieldInSchema(
   schema: FormSchema,

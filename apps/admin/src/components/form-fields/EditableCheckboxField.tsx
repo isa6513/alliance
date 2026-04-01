@@ -1,4 +1,4 @@
-import type { CheckboxField } from "@alliance/shared/forms/formschema";
+import type { CheckboxField } from "@alliance/common/forms/form-schema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
@@ -42,8 +42,7 @@ export function EditableCheckboxField({
         <select
           value={field.checkboxPosition ?? "left"}
           onChange={(event) => {
-            const position =
-              event.target.value === "right" ? "right" : "left";
+            const position = event.target.value === "right" ? "right" : "left";
             onUpdate({
               checkboxPosition: position === "left" ? undefined : position,
             });

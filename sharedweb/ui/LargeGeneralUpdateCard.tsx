@@ -1,4 +1,4 @@
-import type { FormSchema } from "@alliance/shared/forms/formschema";
+import type { FormSchema } from "@alliance/common/forms/form-schema";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import Card from "@alliance/sharedweb/ui/Card";
 import { UserDto } from "@alliance/shared/client";

@@ -9,12 +9,7 @@ import {
   FindOneOptions,
   ObjectId,
 } from 'typeorm';
-
-type Equal<A, B> =
-  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
-    ? true
-    : false;
-type Assert<T extends true> = T;
+import type { Assert, Equal } from '@alliance/common/types';
 
 type NonRelationType =
   | string

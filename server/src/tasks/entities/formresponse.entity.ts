@@ -11,7 +11,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
-import type { DeviceVisibilityTarget } from '../form-schema/v0/device';
+import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
 import { Form } from './form.entity';
 import type { Ty } from './type';
 

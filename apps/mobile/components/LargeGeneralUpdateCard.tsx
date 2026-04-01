@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import type { GeneralUpdateDto, UserDto } from "@alliance/shared/client";
-import type { FormSchema } from "@alliance/shared/forms/formschema";
+import type { FormSchema } from "@alliance/common/forms/form-schema";
 import FormRenderer from "./forms/FormRenderer";
 import Card from "./system/Card";
 import Button, { ButtonColor } from "./system/Button";

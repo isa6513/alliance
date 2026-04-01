@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type {
   DisplayBlock,
   DisplayKind,
-} from "@alliance/shared/forms/display-blocks";
+} from "@alliance/common/forms/display-blocks";
 import type {
   AnyField,
   FormSchema,
@@ -10,7 +10,7 @@ import type {
   OutputBlock,
   OutputFieldBlock,
   OutputViewSchema,
-} from "@alliance/shared/forms/formschema";
+} from "@alliance/common/forms/form-schema";
 import OutputRenderer from "@alliance/sharedweb/forms/OutputRenderer";
 import {
   EditableDividerBlock,
@@ -153,17 +153,17 @@ interface OutputBuilderProps {
 
 export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
   const [selectedViewId, setSelectedViewId] = useState<string | null>(
-    () => schema.outputViews?.[0]?.id ?? null
+    () => schema.outputViews?.[0]?.id ?? null,
   );
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dropPosition, setDropPosition] = useState<"before" | "after" | null>(
-    null
+    null,
   );
   const outputFields = useMemo(() => collectOutputFields(schema), [schema]);
   const previewAnswers = useMemo(
     () => buildPreviewAnswers(outputFields),
-    [outputFields]
+    [outputFields],
   );
 
   useEffect(() => {
@@ -199,7 +199,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
   const updateSelectedView = (updates: Partial<OutputViewSchema>) => {
     if (!selectedView) return;
     const nextViews = (schema.outputViews ?? []).map((view) =>
-      view.id === selectedView.id ? { ...view, ...updates } : view
+      view.id === selectedView.id ? { ...view, ...updates } : view,
     );
     updateViews(nextViews);
   };
@@ -207,7 +207,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
   const updateBlockAtIndex = (index: number, updates: Partial<OutputBlock>) => {
     if (!selectedView) return;
     const nextBlocks = selectedView.blocks.map((block, idx) =>
-      idx === index ? ({ ...block, ...updates } as OutputBlock) : block
+      idx === index ? ({ ...block, ...updates } as OutputBlock) : block,
     );
     updateSelectedView({ blocks: nextBlocks });
   };
@@ -237,7 +237,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
     const nextViews = (schema.outputViews ?? []).map((view) =>
       view.id === selectedView.id
         ? { ...view, blocks: [...view.blocks, block] }
-        : view
+        : view,
     );
     updateViews(nextViews);
   };
@@ -271,7 +271,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
     const nextViews = (schema.outputViews ?? []).map((view) =>
       view.id === selectedView.id
         ? { ...view, blocks: [...view.blocks, newBlock] }
-        : view
+        : view,
     );
     updateViews(nextViews);
   };
@@ -285,7 +285,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
 
   const removeView = (viewId: string) => {
     const nextViews = (schema.outputViews ?? []).filter(
-      (view) => view.id !== viewId
+      (view) => view.id !== viewId,
     );
     updateViews(nextViews);
     if (selectedViewId === viewId) {
@@ -356,7 +356,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
     const isDisplayBlock = (block as DisplayBlock).kind !== undefined;
     const key =
       "kind" in block
-        ? block.id ?? `${block.kind}-${index}`
+        ? (block.id ?? `${block.kind}-${index}`)
         : (block as OutputFieldBlock).id;
     const dragProps = {
       onDragStart: handleDragStart(index),
@@ -531,7 +531,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                         "px-3 py-1.5 rounded-l-md border text-sm",
                         isActive
                           ? "bg-blue-100 text-blue-700 border-blue-300"
-                          : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200"
+                          : "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200",
                       )}
                     >
                       {view.title || "Untitled view"}
@@ -544,7 +544,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                         "px-2 py-1.5 rounded-r-md border border-l-0 text-sm",
                         (schema.outputViews ?? []).length <= 1
                           ? "bg-gray-50 text-gray-300 cursor-not-allowed"
-                          : "bg-gray-100 text-gray-500 hover:text-red-500 hover:bg-red-50 border-gray-200"
+                          : "bg-gray-100 text-gray-500 hover:text-red-500 hover:bg-red-50 border-gray-200",
                       )}
                     >
                       <X size={20} />
@@ -621,7 +621,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                       "px-3 py-2 rounded-md text-sm border",
                       outputFields.length
                         ? "bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
-                        : "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+                        : "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed",
                     )}
                   >
                     Add output field block
@@ -641,7 +641,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                     </div>
                   )}
                   {selectedView.blocks.map((block, index) =>
-                    renderBlock(block, index)
+                    renderBlock(block, index),
                   )}
                   {draggedIndex !== null &&
                     selectedView &&
@@ -664,7 +664,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                           const nextBlocks = [...selectedView.blocks];
                           const [movingBlock] = nextBlocks.splice(
                             draggedIndex,
-                            1
+                            1,
                           );
                           nextBlocks.push(movingBlock);
                           updateSelectedView({ blocks: nextBlocks });
@@ -688,7 +688,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                           answers: previewAnswers,
                           visibilityValidatorResults: {},
                           publicAnswers: Object.fromEntries(
-                            outputFields.map((field) => [field.id, true])
+                            outputFields.map((field) => [field.id, true]),
                           ),
                           schemaSnapshot: schema as unknown as Record<
                             string,

@@ -11,7 +11,7 @@ import type {
 import FormRenderer, {
   computeFormStorageKey,
 } from "@alliance/sharedweb/forms/FormRenderer";
-import { FormSchema } from "@alliance/shared/forms/formschema";
+import { FormSchema } from "@alliance/common/forms/form-schema";
 import Card from "@alliance/sharedweb/ui/Card";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import posthog from "posthog-js";

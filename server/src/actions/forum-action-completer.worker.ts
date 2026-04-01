@@ -10,7 +10,7 @@ import {
 } from 'src/tasks/entities/customvalidator.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { FormSchema } from 'src/tasks/schema';
+import type { FormSchema } from '@alliance/common/forms/form-schema';
 import {
   DataSource,
   In,

@@ -1,5 +1,5 @@
 import { tasksGetFormAggregateViews } from "@alliance/shared/client";
-import type { AggregateViewSchema } from "@alliance/shared/forms/formschema";
+import type { AggregateViewSchema } from "@alliance/common/forms/form-schema";
 import { parseAggregateViewsPayload } from "@alliance/shared/lib/actionAggregates";
 import { runAsync } from "@alliance/shared/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,7 +33,9 @@ export function useLiveTaskFormAggregateViews(
       if (signal?.aborted) {
         return;
       }
-      setAggregateViews(parseAggregateViewsPayload(response.data?.aggregateViews));
+      setAggregateViews(
+        parseAggregateViewsPayload(response.data?.aggregateViews),
+      );
     },
     [taskFormId],
   );

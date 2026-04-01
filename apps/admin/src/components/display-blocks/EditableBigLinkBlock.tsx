@@ -1,7 +1,7 @@
 import type {
   BigLinkBlock,
   BigLinkIcon,
-} from "@alliance/shared/forms/display-blocks";
+} from "@alliance/common/forms/display-blocks";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
@@ -77,7 +77,7 @@ export function EditableBigLinkBlock({
                   "p-1.5 rounded border",
                   (activeBlock.icon || "messages-square") === value
                     ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-zinc-200 text-zinc-500 hover:border-zinc-400"
+                    : "border-zinc-200 text-zinc-500 hover:border-zinc-400",
                 )}
               >
                 <Icon size={16} />

@@ -1,4 +1,4 @@
-import type { ContractField } from "@alliance/shared/forms/formschema";
+import type { ContractField } from "@alliance/common/forms/form-schema";
 import { useQuery } from "@tanstack/react-query";
 import { contractAllAdmin, contractGetCurrent } from "@alliance/shared/client";
 import { RequiredToggle } from "./CommonControls";
@@ -48,12 +48,12 @@ export function EditableContractField({
         id: c.id,
         name: c.name?.trim() || `Contract #${c.id}`,
       })),
-    [contracts]
+    [contracts],
   );
 
   const selectedContract = useMemo(
     () => contracts.find((c) => c.id === field.contractId) ?? null,
-    [contracts, field.contractId]
+    [contracts, field.contractId],
   );
 
   // Sync contract markdown into parent state so Preview mode has access to it
@@ -75,7 +75,7 @@ export function EditableContractField({
   // Merge selected contract onto field so RenderField (existing preview) can show markdown + sign toggle
   const fieldWithContract = useMemo(
     () => (selectedContract ? { ...field, contract: selectedContract } : field),
-    [field, selectedContract]
+    [field, selectedContract],
   );
 
   return (

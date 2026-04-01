@@ -836,6 +836,10 @@ export type AddUserToTagDto = {
     userId: number;
 };
 
+export type SignupSocialProofDto = {
+    profiles: Array<ProfileDto>;
+};
+
 export type OnetimeInviteDto = {
     id: number;
     invitee: string;
@@ -3636,14 +3640,13 @@ export type UserDeleteTagResponses = {
     200: unknown;
 };
 
-export type SignupSocialProofDto = {
-    profiles: Array<ProfileDto>;
-};
-
 export type UserSignupSocialProofData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Referral or invite code to prefer inviter friends
+         */
         code?: string;
     };
     url: '/user/signupSocialProof';

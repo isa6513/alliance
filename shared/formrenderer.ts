@@ -1,18 +1,17 @@
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
-import type {
-  AnyField,
-  CityFieldValue,
-  Condition,
-  FormSchema,
-  FormValue,
-  ListField,
-  NumberField,
-  OutputFieldBlock,
-  RangeField,
-} from "@alliance/shared/forms/formschema";
-import type { DeviceVisibilityTarget } from "@alliance/shared/forms/schema/device";
+import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
+import {
+  type AnyField,
+  type CityFieldValue,
+  type Condition,
+  type FormValue,
+  type ListField,
+  type NumberField,
+  type OutputFieldBlock,
+  type RangeField,
+} from "@alliance/common/forms/form-schema";
+import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import { parseTimeToMinutes } from "@alliance/shared/forms/timeUtils";
-import { evaluateVisibilityFormula } from "@alliance/shared/forms/visibilityFormula";
+import { evaluateVisibilityFormula } from "@alliance/common/forms/visible-if-formula";
 
 export const FALLBACK_TIMEZONE = "America/Los_Angeles";
 const DEFAULT_RANGE_OPTION_COUNT = 10;
@@ -615,35 +614,4 @@ export function getListSubFieldErrors(
     }
   }
   return result;
-}
-
-/** Scan a form schema for all sourceFormIds referenced in visibility/required conditions. */
-export function collectConditionSourceFormIds(schema: FormSchema): number[] {
-  const ids = new Set<number>();
-  const collectFromCondition = (c: Condition) => {
-    if ("sourceFormId" in c && typeof c.sourceFormId === "number") {
-      ids.add(c.sourceFormId);
-    }
-  };
-  const collectFromElement = (el: AnyField | DisplayBlock) => {
-    if (el.visibleIfFormula?.conditions) {
-      Object.values(el.visibleIfFormula.conditions).forEach(
-        collectFromCondition,
-      );
-    }
-    if ("requiredIf" in el && (el as AnyField).requiredIf) {
-      collectFromCondition((el as AnyField).requiredIf!);
-    }
-  };
-  for (const page of schema.pages) {
-    for (const field of page.fields) {
-      collectFromElement(field);
-      if ("label" in field && (field as AnyField).kind === "list") {
-        for (const sub of (field as AnyField as ListField).fields ?? []) {
-          collectFromElement(sub);
-        }
-      }
-    }
-  }
-  return Array.from(ids);
 }

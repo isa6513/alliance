@@ -1,4 +1,4 @@
-import type { RadioField } from "@alliance/shared/forms/formschema";
+import type { RadioField } from "@alliance/common/forms/form-schema";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
@@ -25,7 +25,7 @@ export function EditableRadioField({
 
   const updateOption = (
     index: number,
-    updates: { label?: string; value?: string }
+    updates: { label?: string; value?: string },
   ) => {
     const previousOptions = field.options || [];
     const previousValue = previousOptions[index]?.value;

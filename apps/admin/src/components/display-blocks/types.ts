@@ -1,5 +1,5 @@
-import type { DisplayBlock } from "@alliance/shared/forms/display-blocks";
-import type { AnyField } from "@alliance/shared/forms/formschema";
+import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
+import type { AnyField } from "@alliance/common/forms/form-schema";
 
 export interface BaseDisplayBlockProps<T extends DisplayBlock> {
   block: T;
