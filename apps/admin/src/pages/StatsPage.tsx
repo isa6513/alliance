@@ -1468,11 +1468,14 @@ const StatsPage: React.FC = () => {
                 </div>
                 <div className="text-3xl font-bold text-gray-900">
                   {(() => {
-                    const totalCompleted = actionStats.reduce(
+                    const filtered = actionStats.filter(
+                      (a) => !a.onboarding && !a.optional,
+                    );
+                    const totalCompleted = filtered.reduce(
                       (sum, a) => sum + a.usersCompleted,
                       0,
                     );
-                    const totalAssigned = actionStats.reduce(
+                    const totalAssigned = filtered.reduce(
                       (sum, a) => sum + a.usersJoined,
                       0,
                     );
