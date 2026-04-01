@@ -21,6 +21,7 @@ import {
 import { usePostHog } from "posthog-react-native";
 import { run } from "@alliance/common/run";
 import type { QueryClient } from "@tanstack/react-query";
+import SecureStorage, { SecureStorageKey } from "./SecureStorage";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -32,44 +33,33 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
-export const ACCESS_TOKEN_KEY = "accessToken";
-export const REFRESH_TOKEN_KEY = "refreshToken";
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export interface AuthTokenStore {
-  setItem: (key: string, value: string) => Promise<void>;
-  getItem: (key: string) => Promise<string | null>;
-  deleteItem: (key: string) => Promise<void>;
-}
 
 export const AuthProvider: React.FC<
   React.PropsWithChildren<{
-    tokenStore: AuthTokenStore;
     queryClient: QueryClient;
   }>
-> = ({ children, tokenStore, queryClient }) => {
+> = ({ children, queryClient }) => {
   const [user, setUser] = useState<UserDto | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [canConnectToServer, setCanConnectToServer] = useState<boolean>(false);
   const router = useRouter();
 
-  const saveTokens = useCallback(
-    async (access: string, refresh: string) => {
-      await tokenStore.setItem(ACCESS_TOKEN_KEY, access);
-      await tokenStore.setItem(REFRESH_TOKEN_KEY, refresh);
-    },
-    [tokenStore],
-  );
+  const saveTokens = useCallback(async (access: string, refresh: string) => {
+    await SecureStorage.setItem(SecureStorageKey.ACCESS_TOKEN, access);
+    await SecureStorage.setItem(SecureStorageKey.REFRESH_TOKEN, refresh);
+  }, []);
 
   const clearTokens = useCallback(async () => {
-    await tokenStore.deleteItem(ACCESS_TOKEN_KEY);
-    await tokenStore.deleteItem(REFRESH_TOKEN_KEY);
-  }, [tokenStore]);
+    await Promise.all([
+      SecureStorage.deleteItem(SecureStorageKey.ACCESS_TOKEN),
+      SecureStorage.deleteItem(SecureStorageKey.REFRESH_TOKEN),
+    ]);
+  }, []);
 
   const getAccessToken = useCallback(async () => {
-    return await tokenStore.getItem(ACCESS_TOKEN_KEY);
-  }, [tokenStore]);
+    return await SecureStorage.getItem(SecureStorageKey.ACCESS_TOKEN);
+  }, []);
   const logout = useCallback(async () => {
     authLogout();
     clearTokens();

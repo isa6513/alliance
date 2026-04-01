@@ -1,9 +1,8 @@
 import { Slot } from "expo-router";
 import { AuthProvider } from "../lib/AuthContext";
-import { Platform } from "react-native";
 import { useEffect } from "react";
 import { client } from "@alliance/shared/client/client.gen";
-import SecureStorage from "../lib/SecureStorage";
+import SecureStorage, { SecureStorageKey } from "../lib/SecureStorage";
 import { getApiUrl } from "../lib/config";
 import { useFonts } from "expo-font";
 import "../global.css";
@@ -58,8 +57,6 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    console.log({ os: Platform.OS }, "asdf");
-    const tokenStore = SecureStorage;
     const originalFetch = fetch.bind(globalThis);
 
     const wrappedFetch: typeof fetch = async (input, init) => {
@@ -71,7 +68,9 @@ export default function RootLayout() {
         return res;
       }
 
-      const refreshToken = await tokenStore.getItem("refreshToken");
+      const refreshToken = await SecureStorage.getItem(
+        SecureStorageKey.REFRESH_TOKEN,
+      );
       if (!refreshToken) return res;
 
       const refreshRes = await authRefreshTokens({
@@ -80,10 +79,13 @@ export default function RootLayout() {
       });
 
       if (refreshRes.response.ok && refreshRes.data?.access_token) {
-        await tokenStore.setItem("accessToken", refreshRes.data.access_token);
+        await SecureStorage.setItem(
+          SecureStorageKey.ACCESS_TOKEN,
+          refreshRes.data.access_token,
+        );
         if (refreshRes.data.refresh_token) {
-          await tokenStore.setItem(
-            "refreshToken",
+          await SecureStorage.setItem(
+            SecureStorageKey.REFRESH_TOKEN,
             refreshRes.data.refresh_token,
           );
         }
@@ -120,10 +122,7 @@ export default function RootLayout() {
               apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt"
               options={options}
             >
-              <AuthProvider
-                queryClient={queryClient}
-                tokenStore={SecureStorage}
-              >
+              <AuthProvider queryClient={queryClient}>
                 <DeviceRegistration />
                 <PushNotificationResponseHandler queryClient={queryClient} />
                 <Slot />

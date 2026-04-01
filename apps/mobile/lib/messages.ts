@@ -11,16 +11,17 @@ import {
   sortConversations,
   updateConversationsForLastMessage,
 } from "@alliance/shared/lib/messages";
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./AuthContext";
 import { getWebSocketUrl } from "./config";
-import SecureStorage from "./SecureStorage";
+import SecureStorage, { SecureStorageKey } from "./SecureStorage";
 import { client } from "@alliance/shared/client/client.gen";
 import { authRefreshTokens } from "@alliance/shared/client";
 
-const getAuthToken = () => SecureStorage.getItem(ACCESS_TOKEN_KEY);
+const getAuthToken = () => SecureStorage.getItem(SecureStorageKey.ACCESS_TOKEN);
 
 const onRefreshToken = async (): Promise<string | null> => {
-  const refreshToken = await SecureStorage.getItem(REFRESH_TOKEN_KEY);
+  const refreshToken = await SecureStorage.getItem(
+    SecureStorageKey.REFRESH_TOKEN,
+  );
   if (!refreshToken) return null;
 
   const response = await authRefreshTokens({
@@ -31,7 +32,7 @@ const onRefreshToken = async (): Promise<string | null> => {
 
   const token = response.data?.access_token;
   if (token) {
-    await SecureStorage.setItem(ACCESS_TOKEN_KEY, token);
+    await SecureStorage.setItem(SecureStorageKey.ACCESS_TOKEN, token);
     client.setConfig({
       ...client.getConfig(),
       headers: { Authorization: `Bearer ${token}` },

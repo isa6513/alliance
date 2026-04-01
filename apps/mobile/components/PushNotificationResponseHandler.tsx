@@ -8,7 +8,6 @@ import { QueryClient } from "@tanstack/react-query";
 import * as Notifications from "expo-notifications";
 import { RelativePathString, router } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
-import { Platform } from "react-native";
 import { useAuth } from "../lib/AuthContext";
 import { isVisualTestMode } from "../lib/visualTest";
 import {
