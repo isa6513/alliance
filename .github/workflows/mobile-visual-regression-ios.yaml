@@ -39,18 +39,6 @@ jobs:
         with:
           ref: ${{ env.visual_regression_ref }}
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Activate Yarn 4.x
-        run: corepack prepare yarn@4.9.1 --activate
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "yarn"
-
       - name: Capture Xcode Version
         id: xcode-version
         run: |
@@ -60,10 +48,10 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.3.6
 
-      - name: Install Yarn Dependencies
-        run: corepack yarn install --immutable
+      - name: Install monorepo dependencies
+        run: bun install --frozen-lockfile
 
       - name: Install Backend Dependencies
         run: bun install --frozen-lockfile
@@ -81,7 +69,7 @@ jobs:
             ~/.cocoapods/repos
             ~/Library/Caches/CocoaPods
             ~/Library/Caches/org.cocoapods.CocoaPods
-          key: mobile-ios-cocoapods-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-${{ hashFiles('yarn.lock', 'apps/mobile/package.json', 'apps/mobile/app.json', 'apps/mobile/babel.config.js', 'apps/mobile/metro.config.js') }}
+          key: mobile-ios-cocoapods-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-${{ hashFiles('bun.lock', 'apps/mobile/package.json', 'apps/mobile/app.json', 'apps/mobile/babel.config.js', 'apps/mobile/metro.config.js') }}
           restore-keys: |
             mobile-ios-cocoapods-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-
 
@@ -102,7 +90,8 @@ jobs:
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
       - name: Prebuild iOS Project
-        run: corepack yarn workspace @alliance/mobile exec expo prebuild --platform ios
+        run: bunx expo prebuild --platform ios
+        working-directory: ./apps/mobile
         env:
           CI: "true"
 
@@ -111,13 +100,13 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: citesting/ios-derived-data
-          key: mobile-ios-derived-data-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-${{ hashFiles('yarn.lock', 'apps/mobile/package.json', 'apps/mobile/app.json', 'apps/mobile/**/*.ts', 'apps/mobile/**/*.tsx', 'apps/mobile/**/*.js', 'apps/mobile/**/*.jsx', 'apps/mobile/**/*.json', 'citesting/src/take-mobile-screenshots.ts', 'citesting/src/mobile-screenshot-targets.ts') }}
+          key: mobile-ios-derived-data-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-${{ hashFiles('bun.lock', 'apps/mobile/package.json', 'apps/mobile/app.json', 'apps/mobile/**/*.ts', 'apps/mobile/**/*.tsx', 'apps/mobile/**/*.js', 'apps/mobile/**/*.jsx', 'apps/mobile/**/*.json', 'citesting/src/take-mobile-screenshots.ts', 'citesting/src/mobile-screenshot-targets.ts') }}
           restore-keys: |
-            mobile-ios-derived-data-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-${{ hashFiles('yarn.lock', 'apps/mobile/package.json', 'apps/mobile/app.json') }}-
+            mobile-ios-derived-data-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-${{ hashFiles('bun.lock', 'apps/mobile/package.json', 'apps/mobile/app.json') }}-
             mobile-ios-derived-data-${{ runner.os }}-${{ runner.arch }}-${{ steps.xcode-version.outputs.version }}-
 
       - name: Take iOS Screenshots
-        run: corepack yarn workspace @alliance/citesting take:mobile:ios
+        run: bun run --cwd citesting take:mobile:ios
         env:
           DB_HOST: localhost
           DB_PORT: 5432
@@ -162,7 +151,7 @@ jobs:
         run: |
           BASELINE=${{ github.workspace }}/screenshots-mobile/baseline
           if [ "$(ls -A "$BASELINE" 2>/dev/null)" ]; then
-            corepack yarn workspace @alliance/citesting compare \
+            bun run --cwd citesting compare \
               "$BASELINE" \
               ${{ github.workspace }}/screenshots-mobile/current \
               ${{ github.workspace }}/screenshots-mobile/diffs
@@ -176,7 +165,7 @@ jobs:
         run: |
           BASELINE=${{ github.workspace }}/screenshots-mobile/baseline
           if [ "$(ls -A "$BASELINE" 2>/dev/null)" ]; then
-            corepack yarn workspace @alliance/citesting ai-review \
+            bun run --cwd citesting ai-review \
               "$BASELINE" \
               ${{ github.workspace }}/screenshots-mobile/current \
               ${{ github.workspace }}/screenshots-mobile/diffs

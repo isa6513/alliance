@@ -659,19 +659,10 @@ const ensureIosWorkspace = async () => {
     `${logPrefix} Native iOS workspace missing. Running Expo prebuild...`
   );
   await runCommand(
-    "corepack",
-    [
-      "yarn",
-      "workspace",
-      "@alliance/mobile",
-      "exec",
-      "expo",
-      "prebuild",
-      "--platform",
-      "ios",
-    ],
+    "bun",
+    ["x", "expo", "prebuild", "--platform", "ios"],
     {
-      cwd: repoRoot,
+      cwd: path.join(repoRoot, "apps", "mobile"),
       env: {
         ...process.env,
         CI: "true",

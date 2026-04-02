@@ -1,0 +1,4 @@
+# Classic hoisted node_modules (not isolated) so tsc/eslint resolve shared types
+# (e.g. @types/react) across workspace packages reliably.
+[install]
+linker = "hoisted"

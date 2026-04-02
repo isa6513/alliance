@@ -1,8 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(yarn build)",
-      "Bash(yarn gen-api)",
+      "Bash(bun run build)",
+      "Bash(bun run gen-api)",
       "Bash(npm run test:*)"
     ],
     "deny": []

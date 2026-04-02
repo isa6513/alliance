@@ -396,8 +396,8 @@ const ensureFrontendBuild = async () => {
 
   console.log(`${logPrefix} Building frontend (mode: ${frontendBuildMode})...`);
   await runCommand(
-    "yarn",
-    ["workspace", "@alliance/frontend", "build", "--mode", frontendBuildMode],
+    "bun",
+    ["run", "--cwd", "apps/frontend", "build", "--", "--mode", frontendBuildMode],
     { cwd: repoRoot, env }
   );
 };
@@ -424,8 +424,8 @@ const startFrontend = async () => {
   };
 
   return spawnProcess(
-    "yarn",
-    ["workspace", "@alliance/frontend", "dev", "--port", String(frontendPort)],
+    "bun",
+    ["run", "--cwd", "apps/frontend", "dev", "--", "--port", String(frontendPort)],
     {
       cwd: repoRoot,
       env,

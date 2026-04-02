@@ -2,11 +2,11 @@
 
 ## Setup
 
-Currently, frontend/, admin/, and shared/, are part of a yarn monorepo, while server/ is a separate npm-managed project.
+The repo root is a **Bun** workspace (hoisted `node_modules`, see `bunfig.toml`); `server/` is a separate Bun package with its own `bun.lock`.
 
 **to install frontend deps**
 
-In root dir: `yarn install` (install yarn version `4.9.1` via corepack if missing)
+In root dir: `bun install` (install [Bun](https://bun.sh) 1.3.x+ if missing; `packageManager` in root `package.json` pins `bun@1.3.6`)
 
 **server install:**
 
@@ -22,11 +22,11 @@ Set up postgres database running locally with username/password/db name matching
 
 ### frontend
 
-Start the frontend: `cd apps/frontend && yarn dev` (or `yarn frontend:dev` from root dir)
+Start the frontend: `cd apps/frontend && bun dev` (or `bun run frontend:dev` from root)
 
 ### admin
 
-Start the admin panel: `cd apps/admin && yarn dev` (or `yarn admin:dev` from root dir)
+Start the admin panel: `cd apps/admin && bun dev` (or `bun run admin:dev` from root)
 
 ### server
 
@@ -51,8 +51,8 @@ Running the app with expo is a two step process:
 
 We have a few scripts that do both of these together, as well as installing needed pods deps:
 
-- To build and run on a local simulator: `yarn build:simulator`
-- To build into xcode for app store upload: `yarn buildprod`
+- To build and run on a local simulator: `bun run --cwd apps/mobile build:simulator`
+- To build into xcode for app store upload: use the `build:ios` / EAS scripts in `apps/mobile` (see `apps/mobile/package.json`)
 - To build and run on a physical device: `npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios --device [your device id]`
 
 (you can find your device id via `xcrun xctrace list devices`)
@@ -61,7 +61,7 @@ We have a few scripts that do both of these together, as well as installing need
 
 ### Openapi client gen:
 
-`yarn gen-api` (in root dir, dev server must be running)
+`bun run gen-api` (in root dir, dev server must be running)
 
 ### Server migrations
 

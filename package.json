@@ -2,6 +2,7 @@
   "private": true,
   "name": "alliance",
   "version": "0.0.0",
+  "packageManager": "bun@1.3.6",
   "workspaces": [
     "apps/admin",
     "apps/frontend",
@@ -15,11 +16,11 @@
     "node": ">=22"
   },
   "scripts": {
-    "frontend:dev": "yarn workspace @alliance/frontend dev",
-    "admin:dev": "yarn workspace @alliance/admin dev",
+    "frontend:dev": "bun run --cwd apps/frontend dev",
+    "admin:dev": "bun run --cwd apps/admin dev",
     "server:dev": "cd server && bun dev",
-    "gen-api": "yarn workspace @alliance/shared gen-api",
-    "eas-build-pre-install": "corepack enable && corepack prepare yarn@4.9.1 --activate"
+    "gen-api": "bun run --cwd shared gen-api",
+    "eas-build-pre-install": "bun install --frozen-lockfile"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
@@ -27,7 +28,6 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.0"
   },
-  "packageManager": "yarn@4.9.1",
   "dependencies": {
     "@tanstack/react-query": "^5.90.20",
     "lucide-react": "^0.563.0",
@@ -36,7 +36,7 @@
     "react-markdown": "^10.1.0",
     "socket.io-client": "^4.8.1"
   },
-  "resolutions": {
+  "overrides": {
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-test-renderer": "19.0.0",
