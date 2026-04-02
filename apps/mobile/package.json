@@ -14,11 +14,11 @@
     "lint": "expo lint",
     "gen-api": "bunx openapi-ts",
     "eas-build-pre-install": "cd ../.. && bun install --frozen-lockfile",
-    "build:simulator": "npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios",
-    "build:simulator:clean": "npx expo prebuild --clean && cd ios && pod install && cd .. && npx expo run:ios",
-    "build:device": "npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios --device 00008150-001528163445401C",
+    "build:simulator": "bunx expo prebuild && cd ios && pod install && cd .. && bunx expo run:ios",
+    "build:simulator:clean": "bunx expo prebuild --clean && cd ios && pod install && cd .. && bunx expo run:ios",
+    "build:device": "bunx expo prebuild && cd ios && pod install && cd .. && bunx expo run:ios --device 00008150-001528163445401C",
     "build:android": "eas build -p android --profile production --local",
-    "build:ios": "APP_VARIANT=production npx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace"
+    "build:ios": "APP_VARIANT=production bunx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace"
   },
   "dependencies": {
     "@alliance/common": "workspace:*",
@@ -64,7 +64,7 @@
     "react-native-keyboard-controller": "1.20.7",
     "react-native-localize": "^3.6.1",
     "react-native-markdown-display": "^7.0.2",
-    "react-native-qrcode-svg": "^6.3.4",
+    "react-native-qrcode-svg": "6.2.0",
     "react-native-reanimated": "^4.2.2",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0",
