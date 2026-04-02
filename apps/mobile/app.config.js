@@ -9,6 +9,7 @@ export default {
     icon: "./assets/images/globe-icon.png",
     scheme: "alliance",
     userInterfaceStyle: "automatic",
+    owner: "caseym",
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
