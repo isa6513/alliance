@@ -839,16 +839,13 @@ jobs:
 
             mkdir -p ~/nest-backend
             unzip -o ~/nest-build.zip -d ~/nest-backend
-            mv ~/nest-backend/common ~/common
 
             if [ -d ~/nest-backend-deploy-backup/node_modules ]; then
               cp -a ~/nest-backend-deploy-backup/node_modules ~/nest-backend/
             fi
 
             cd ~/nest-backend
-            bun install
-            cd ~/common && bun install --frozen-lockfile
-            cd ~/nest-backend
+            bun install --frozen-lockfile
 
             # Run migrations
             bunx typeorm-ts-node-commonjs --dataSource src/datasources/dataSource.ts migration:run
