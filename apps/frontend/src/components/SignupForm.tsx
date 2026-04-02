@@ -10,12 +10,15 @@ export interface SignupFormProps {
   loading: boolean;
   submitButtonText?: string;
   referralCode?: string | null;
+  /** When true, inputs and submit are non-interactive (e.g. invite link preview). */
+  disabled?: boolean;
 }
 const SignupForm = ({
   onSubmit,
   loading,
   submitButtonText = "Sign up",
   referralCode,
+  disabled = false,
 }: SignupFormProps) => {
   const [formData, setFormData] = useState<
     SignUpDto & { confirmPassword: string }
@@ -32,6 +35,9 @@ const SignupForm = ({
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      if (disabled) {
+        return;
+      }
 
       if (formData.password !== formData.confirmPassword) {
         setFieldErrors({
@@ -46,10 +52,13 @@ const SignupForm = ({
         referralCode: referralCode || undefined,
       });
     },
-    [onSubmit, formData, referralCode]
+    [onSubmit, formData, referralCode, disabled]
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) {
+      return;
+    }
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -74,6 +83,7 @@ const SignupForm = ({
         error={fieldErrors.name}
         className="text-[16px]"
         inputClassName="text-[16px]"
+        disabled={disabled}
       />
 
       <FormInput
@@ -87,6 +97,7 @@ const SignupForm = ({
         error={fieldErrors.email}
         className="text-[16px]"
         inputClassName="text-[16px]"
+        disabled={disabled}
       />
 
       <FormInput
@@ -99,6 +110,7 @@ const SignupForm = ({
         error={fieldErrors.password}
         className="text-[16px]"
         inputClassName="text-[16px]"
+        disabled={disabled}
       />
 
       <FormInput
@@ -111,6 +123,7 @@ const SignupForm = ({
         error={fieldErrors.confirmPassword}
         className="text-[16px]"
         inputClassName="text-[16px]"
+        disabled={disabled}
       />
 
       <div className="pt-2">
@@ -118,7 +131,7 @@ const SignupForm = ({
           color={ButtonColor.Black}
           className="w-full flex justify-center text-center  justify-self-center pb-2 text-[16px]"
           type="submit"
-          disabled={loading}
+          disabled={loading || disabled}
         >
           {loading ? "Creating account..." : submitButtonText}
         </Button>

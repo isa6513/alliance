@@ -80,6 +80,10 @@ const SignupPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const referralCode = searchParams.get("ref");
+  const isPreviewMode = useMemo(() => {
+    const p = searchParams.get("preview");
+    return p === "1" || p === "true";
+  }, [searchParams]);
 
   const { data: memberCount } = useQuery({
     queryKey: ["userNmembers"],
@@ -138,15 +142,21 @@ const SignupPage: React.FC = () => {
       }
     });
 
+    if (isPreviewMode) {
+      return;
+    }
     posthog.register_once({
       referral_code: referralCode,
     });
     posthog.capture("invite_page_opened", {
       referral_code: referralCode,
     });
-  }, [referralCode]);
+  }, [referralCode, isPreviewMode]);
 
   const handleSubmit = async (formData: SignUpDto) => {
+    if (isPreviewMode) {
+      return;
+    }
     setError(null);
     setLoading(true);
 
@@ -203,6 +213,12 @@ const SignupPage: React.FC = () => {
       {/* Left: create account — fixed on md+ so only the right column scrolls */}
       <div className="w-full md:w-2/5 md:fixed md:inset-y-0 md:left-0 md:z-10 bg-white flex items-center justify-center px-4 md:px-8 py-12 md:overflow-y-auto">
         <div className="w-full max-w-lg">
+          {isPreviewMode && (
+            <p className="mb-4 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
+              Preview: this is what people will see when they sign up with your
+              invite link.
+            </p>
+          )}
           {isInviteValid && inviterProfile && (
             <div className="mb-3 rounded-md">
               <div className="flex flex-row gap-x-1 items-center text-zinc-500">
@@ -272,6 +288,7 @@ const SignupPage: React.FC = () => {
                     onSubmit={handleSubmit}
                     loading={loading}
                     referralCode={referralCode}
+                    disabled={isPreviewMode}
                   />
                 </div>
               </div>

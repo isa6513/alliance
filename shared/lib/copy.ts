@@ -79,7 +79,7 @@ export const groupSettings = {
 export const onetimeInviteCreation = {
   title: "Invite a new member",
   explanation: [
-    "Once you create an invite, you will get a personal sign-up link to share.",
+    "Once you create an invite, you will get a personal invite link to share.",
   ],
   assignToOpenGroup: "Assign them to any open group",
   createNewGroupOption: "Create a new group",

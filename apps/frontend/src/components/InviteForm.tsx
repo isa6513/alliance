@@ -14,11 +14,14 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import CommunityCreateForm from "./CommunityCreateForm";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
+import { getOnetimeInviteSignupUrl } from "@alliance/shared/lib/inviteUrls";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import { Link } from "react-router";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import OnetimeInviteForm from "./OnetimeInviteForm";
+import { ChevronRight } from "lucide-react";
 
 const inviteTitleClass = "font-semibold text-xl text-zinc-900";
 const inviteSectionLabelClass = "text-lg font-semibold text-zinc-900";
@@ -211,6 +214,18 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
             className="text-invite-form-body"
             markdownContent={onetimeInviteCreation.explanation.join("\n\n")}
           />
+          {user?.referralCode && (
+            <Link
+              to={
+                getOnetimeInviteSignupUrl(getBaseUrl(), user.referralCode) +
+                "&preview=1"
+              }
+              target="_blank"
+              className="text-green hover:underline flex flex-row items-center gap-x-1"
+            >
+              Preview invite link <ChevronRight className="w-4 h-4" />
+            </Link>
+          )}
           <OnetimeInviteForm
             inviteeName={inviteeName}
             setInviteeName={setInviteeName}
