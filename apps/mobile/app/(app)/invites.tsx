@@ -11,18 +11,22 @@ import {
   userApproveOnetimeInvite,
   userDeleteOnetimeInvite,
   userGetOnetimeInvitesOverview,
+  userNmembers,
   userRejectOnetimeInvite,
 } from "@alliance/shared/client";
 import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
+import { MEMBER_GOAL } from "@alliance/shared/lib/constants";
 import { inviteBuckets } from "@alliance/shared/lib/copy";
 import { runAsync } from "@alliance/shared/lib/utils";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
+import { useQuery } from "@tanstack/react-query";
+import { UserCheck } from "lucide-react-native";
 import { useAuth } from "../../lib/AuthContext";
 import { useReferralLink } from "../../lib/useReferralLink";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { SegmentedTabs } from "../../components/system/SegmentedTabs";
 import { ScreenWithLoading } from "../../components/system/ScreenWithLoading";
-import Text from "../../components/system/Text";
+import Text, { FontWeight } from "../../components/system/Text";
 import InviteForm from "../../components/InviteForm";
 import { InviteSection } from "../../components/InviteSection";
 import ReferralQrSection from "../../components/ReferralQrSection";
@@ -170,6 +174,21 @@ export default function InvitesScreen() {
     waitingForResponse.length === 0 &&
     settled.length === 0;
 
+  const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
+    useQuery({
+      queryKey: ["userNmembers"],
+      queryFn: async () => {
+        const res = await userNmembers();
+        return res.data ?? 0;
+      },
+      enabled: Boolean(user),
+    });
+
+  const allianceProgressPercent = useMemo(() => {
+    const n = allianceMemberCount ?? 0;
+    return Math.min(100, (n / MEMBER_GOAL) * 100);
+  }, [allianceMemberCount]);
+
   if (!user || loadingInvites) {
     return <ScreenWithLoading title="Invites" loading />;
   }
@@ -252,14 +271,47 @@ export default function InvitesScreen() {
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.grey[0] }}>
-      <SimplePageTitle title="Invites">
-        {acceptedInvites.length > 0 && (
-          <Text className="text-sm text-zinc-500 py-2 bg-white px-3 rounded-md">
-            Accepted: {acceptedInvites.length}
-          </Text>
-        )}
-      </SimplePageTitle>
-      <View className="px-4 pt-3 pb-2">
+      <SimplePageTitle title="Invites" />
+      <View className="px-4 pb-3">
+        <Text className="text-sm text-zinc-500 leading-snug">
+          Help the Alliance reach its current growth goal
+        </Text>
+        <View className="mt-1">
+          <View
+            className="w-full h-4 rounded-full overflow-hidden"
+            style={{ backgroundColor: colors.grey[2] }}
+          >
+            <View
+              className="h-full rounded-full"
+              style={{
+                width: `${allianceProgressPercent}%`,
+                backgroundColor: colors.green,
+              }}
+            />
+          </View>
+          <View className="flex-row items-center justify-between mt-1">
+            <Text className="text-sm">
+              <Text
+                className="text-sm"
+                weight={FontWeight.Semibold}
+                style={{ color: colors.green }}
+              >
+                {allianceMemberCountPending
+                  ? "…"
+                  : (allianceMemberCount ?? 0).toLocaleString()}
+              </Text>
+              <Text className="text-sm text-zinc-500">
+                {" "}
+                / {MEMBER_GOAL.toLocaleString()} members
+              </Text>
+            </Text>
+            <Text className="text-sm text-zinc-500">
+              {acceptedInvites.length} accepted
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View className="px-4 pt-1 pb-2">
         <SegmentedTabs
           tabs={INVITES_TABS_ORDER}
           selectedTab={selectedTab}
