@@ -9,6 +9,7 @@
     "apps/mobile",
     "citesting",
     "common",
+    "server",
     "shared",
     "sharedweb"
   ],
