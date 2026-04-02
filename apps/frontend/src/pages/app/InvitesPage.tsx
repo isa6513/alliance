@@ -3,10 +3,13 @@ import {
   userApproveOnetimeInvite,
   userDeleteOnetimeInvite,
   userGetOnetimeInvitesOverview,
+  userNmembers,
   userRejectOnetimeInvite,
 } from "@alliance/shared/client";
+import { MEMBER_GOAL } from "@alliance/shared/lib/constants";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../lib/AuthContext";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
@@ -14,9 +17,14 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import OnetimeInviteListItem from "../../components/OnetimeInviteListItem";
 import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
-import { inviteBuckets, deleteInviteConfirmation } from "@alliance/shared/lib/copy";
+import {
+  inviteBuckets,
+  deleteInviteConfirmation,
+} from "@alliance/shared/lib/copy";
 import InviteForm from "../../components/InviteForm";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import { UserCheck } from "lucide-react";
+import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 
 const InvitesPage = () => {
   const { user } = useAuth();
@@ -92,19 +100,19 @@ const InvitesPage = () => {
         });
         if (!response.data) {
           errorToast(
-            `Failed to approve invite: ${response.response.statusText}`
+            `Failed to approve invite: ${response.response.statusText}`,
           );
           return;
         }
 
         setInvites((prev) =>
           prev.map((invite) =>
-            invite.id === inviteId ? response.data : invite
-          )
+            invite.id === inviteId ? response.data : invite,
+          ),
         );
       })();
     },
-    [errorToast]
+    [errorToast],
   );
 
   const handleRejectInvite = useCallback(
@@ -116,7 +124,7 @@ const InvitesPage = () => {
 
         if (response.error) {
           errorToast(
-            `Failed to reject invite: ${response.response.statusText}`
+            `Failed to reject invite: ${response.response.statusText}`,
           );
           return;
         }
@@ -124,7 +132,7 @@ const InvitesPage = () => {
         setInvites((prev) => prev.filter((request) => request.id !== inviteId));
       })();
     },
-    [errorToast]
+    [errorToast],
   );
 
   const handleDeleteInvite = useCallback(
@@ -147,7 +155,7 @@ const InvitesPage = () => {
         }
       })();
     },
-    [confirm]
+    [confirm],
   );
 
   const handleDeleteRequest = useCallback((inviteId: number) => {
@@ -163,6 +171,18 @@ const InvitesPage = () => {
     setInvites((prev) => [invite, ...prev]);
   }, []);
 
+  const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
+    useQuery({
+      queryKey: ["userNmembers"],
+      queryFn: () => userNmembers().then((res) => res.data ?? 0),
+      enabled: Boolean(user),
+    });
+
+  const allianceProgressPercent = useMemo(() => {
+    const n = allianceMemberCount ?? 0;
+    return Math.min(100, (n / MEMBER_GOAL) * 100);
+  }, [allianceMemberCount]);
+
   if (!user || loadingInvites) {
     return <Spinner />;
   }
@@ -171,19 +191,57 @@ const InvitesPage = () => {
     <CenterLayout>
       <div className="flex flex-col gap-y-12">
         <div className="flex flex-col gap-y-4">
-          <div className="flex flex-row justify-between items-center gap-x-2">
+          <div className="flex flex-col gap-y-4">
             <h1 className="text-title">Invites</h1>
-            {acceptedInvites.length > 0 && (
-              <p className="text-zinc-500 text-base sm:text-lg">
-                Accepted invites:{" "}
-                <span className="font-semibold text-black">
-                  {acceptedInvites.length}
-                </span>
-              </p>
-            )}
+            <div className="w-full flex flex-row items-center gap-x-6">
+              <div className="flex-1 rounded flex flex-col gap-y-1 min-w-0">
+                <p className="leading-snug text-zinc-500 text-sm flex flex-row items-center gap-x-1">
+                  Help the Alliance reach its current growth goal
+                  <InfoTooltip
+                    content="The office sets regular growth goals so that the Alliance can test processes and actions at progressively larger scales."
+                    size={12}
+                  />
+                </p>
+                <div className="flex flex-col gap-y-1">
+                  <div className="w-full h-4 bg-grey-2 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-green rounded-full transition-[width] duration-300 ease-out"
+                      style={{ width: `${allianceProgressPercent}%` }}
+                      role="progressbar"
+                      aria-valuenow={allianceMemberCount ?? 0}
+                      aria-valuemin={0}
+                      aria-valuemax={MEMBER_GOAL}
+                      aria-label="Alliance members toward growth goal"
+                    />
+                  </div>
+                  <p className="text-sm sm:text-base tabular-nums">
+                    <span className="font-semibold text-green">
+                      {allianceMemberCountPending
+                        ? "…"
+                        : (allianceMemberCount ?? 0).toLocaleString()}
+                    </span>
+                    <span className="text-zinc-500">
+                      {" "}
+                      / {MEMBER_GOAL.toLocaleString()} members
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-row items-center gap-x-2 bg-white rounded p-4">
+                <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
+                <div>
+                  <p className="font-semibold text-black text-lg sm:text-xl">
+                    {acceptedInvites.length}
+                  </p>
+                  <p className="leading-none text-zinc-500 text-sm sm:text-base">
+                    Accepted invites
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {<InviteForm onInviteCreated={handleInviteCreated} />}
+          <InviteForm onInviteCreated={handleInviteCreated} />
           {error && <p className="text-red-500 text-sm">{error}</p>}
         </div>
 
@@ -197,7 +255,7 @@ const InvitesPage = () => {
           )}
 
         {actionable.length > 0 && (
-          <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-4">
             <p className="font-semibold text-2xl">
               {inviteBuckets.actionable.title}
             </p>
@@ -218,7 +276,7 @@ const InvitesPage = () => {
         )}
 
         {unverifiableActionable.length > 0 && (
-          <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-4">
             <div className="flex flex-col gap-y-1">
               <p className="font-semibold text-2xl">
                 {inviteBuckets.unverifiableActionable.title}
@@ -246,7 +304,7 @@ const InvitesPage = () => {
         )}
 
         {waitingForResponse.length > 0 && (
-          <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-4">
             <div className="flex flex-col gap-y-1">
               <p className="font-semibold text-2xl">
                 {inviteBuckets.waitingForResponse.title}
@@ -271,7 +329,7 @@ const InvitesPage = () => {
         )}
 
         {settled.length > 0 && (
-          <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-4">
             <div className="flex flex-col gap-y-1">
               <p className="font-semibold text-2xl">
                 {inviteBuckets.settled.title}

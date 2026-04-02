@@ -6,6 +6,7 @@ import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { Copy as CopyIcon } from "lucide-react";
 import { href, Link } from "react-router";
+import { formatTime } from "@alliance/shared/lib/utils";
 
 type OnetimeInviteListItemProps = {
   invite: OnetimeInviteDto;
@@ -26,8 +27,8 @@ const STATUS_TEXT_CLASS: Record<
 > = {
   request_pending: "text-amber-500",
   request_rejected: "text-orange-600",
-  link_used: "text-zinc-600",
-  link_unused: "text-green",
+  link_used: "text-green",
+  link_unused: "text-amber-500",
 };
 
 const OnetimeInviteListItem = ({
@@ -71,7 +72,7 @@ const OnetimeInviteListItem = ({
         )}
 
         {invite.invitingUser && (
-          <div className="text-sm flex flex-row items-center gap-x-2">
+          <div className="text-sm flex flex-row items-center gap-x-1.5">
             {isRequest ? "Requested by" : "Invited by"}
             {selfInvited ? (
               " you"
@@ -91,6 +92,11 @@ const OnetimeInviteListItem = ({
                 </span>
               </Link>
             )}
+            <div className="text-zinc-400 text-sm">
+              {formatTime(new Date(invite.createdAt), {
+                addSuffix: true,
+              })}
+            </div>
           </div>
         )}
         {invite.inviteeDescription && (
