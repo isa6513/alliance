@@ -742,8 +742,8 @@ jobs:
 
       - name: Zip server source
         run: |
-          zip -r nest-build.zip src package.json bun.lock tsconfig.json migrations
-          (cd .. && zip -r server/nest-build.zip common/src common/package.json common/bun.lock common/tsconfig.json)
+          zip -r nest-build.zip src package.json tsconfig.json migrations
+          (cd .. && zip -r server/nest-build.zip bun.lock common/src common/package.json common/tsconfig.json)
         working-directory: ./server
 
       - name: move server to root
