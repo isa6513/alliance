@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Alert, TouchableOpacity, ScrollView } from "react-native";
-import { ChevronDown } from "lucide-react-native";
+import {
+  View,
+  Alert,
+  TouchableOpacity,
+  ScrollView,
+  Linking,
+} from "react-native";
+import { ChevronDown, ChevronRight } from "lucide-react-native";
 import type { CommunityDto, OnetimeInviteDto } from "@alliance/shared/client";
 import {
   communityCreateCommunity,
@@ -8,6 +14,7 @@ import {
 } from "@alliance/shared/client";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
+import { getOnetimeInviteSignupUrl } from "@alliance/shared/lib/inviteUrls";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import Card, { CardStyle } from "./system/Card";
 import Button, { ButtonColor } from "./system/Button";
@@ -16,6 +23,7 @@ import Text, { FontWeight } from "./system/Text";
 import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import FormModal from "./forms/FormModal";
 import { colors } from "../lib/style/colors";
+import { getBaseUrl } from "../lib/config";
 import { useAuth } from "../lib/AuthContext";
 import { useCreateOnetimeInvite } from "../lib/useCreateOnetimeInvite";
 
@@ -157,6 +165,21 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
               {onetimeInviteCreation.explanation.join("\n\n")}
             </AppMarkdownWrapper>
           </View>
+          {user?.referralCode && (
+            <TouchableOpacity
+              onPress={() => {
+                const url =
+                  getOnetimeInviteSignupUrl(getBaseUrl(), user.referralCode!) +
+                  "&preview=1";
+                Linking.openURL(url);
+              }}
+              className="flex-row items-center gap-x-1 mt-1"
+              activeOpacity={0.7}
+            >
+              <Text className="text-green">Preview invite link</Text>
+              <ChevronRight size={16} color={colors.green} />
+            </TouchableOpacity>
+          )}
         </View>
 
         <View className="flex-row gap-2">
