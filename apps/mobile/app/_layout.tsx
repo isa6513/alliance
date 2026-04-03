@@ -15,6 +15,7 @@ import { authRefreshTokens } from "@alliance/shared/client";
 import PushNotificationResponseHandler from "../components/PushNotificationResponseHandler";
 import DeviceRegistration from "../components/DeviceRegistration";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { KeyboardExtenderPortalProvider } from "../components/KeyboardExtenderPortal";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -123,9 +124,11 @@ export default function RootLayout() {
               options={options}
             >
               <AuthProvider queryClient={queryClient}>
-                <DeviceRegistration />
-                <PushNotificationResponseHandler queryClient={queryClient} />
-                <Slot />
+                <KeyboardExtenderPortalProvider>
+                  <DeviceRegistration />
+                  <PushNotificationResponseHandler queryClient={queryClient} />
+                  <Slot />
+                </KeyboardExtenderPortalProvider>
               </AuthProvider>
             </PostHogProvider>
           </KeyboardProvider>

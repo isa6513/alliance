@@ -13,6 +13,7 @@ import { CreateEditableContentDto } from "@alliance/shared/client";
 import Text from "./system/Text";
 import { KeyboardExtender } from "react-native-keyboard-controller";
 import Reanimated from "react-native-reanimated";
+import { useKeyboardExtenderPortal } from "./KeyboardExtenderPortal";
 
 interface EditableContentFormProps {
   value: CreateEditableContentDto;
@@ -93,6 +94,31 @@ function ToolbarButton({
   );
 }
 
+/**
+ * Syncs toolbar content to the portal's KeyboardExtender (rendered outside the
+ * scrollable list subtree). Cleans up on unmount so the extender hides.
+ */
+function PortalToolbar({
+  portal,
+  enabled,
+  toolbar,
+}: {
+  portal: { setToolbar: (node: React.ReactNode | null) => void };
+  enabled: boolean;
+  toolbar: React.ReactNode;
+}) {
+  useEffect(() => {
+    portal.setToolbar(enabled ? toolbar : null);
+  }, [enabled, portal, toolbar]);
+
+  useEffect(() => {
+    return () => portal.setToolbar(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return null;
+}
+
 const EditableContentForm: React.FC<EditableContentFormProps> = ({
   value,
   onChange,
@@ -110,6 +136,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
   isSubmitting,
   autoFocus,
 }) => {
+  const portal = useKeyboardExtenderPortal();
   const [isPicking, setIsPicking] = useState(false);
   const [pickerError, setPickerError] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -321,49 +348,59 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
           ))}
         </View>
       )}
-      <KeyboardExtender enabled={showExtend}>
-        <Reanimated.View className="p-2 flex-row items-center gap-3 justify-between mx-5">
-          <ToolbarButton
-            onTap={() =>
-              toolbarTap(() => {
-                if (!isPicking) handlePickImages();
-              })
-            }
-            className="px-3 py-1.5"
-          >
-            {isPicking ? (
-              <ActivityIndicator size="small" color="#444" />
-            ) : (
-              <Text className="text-zinc-800">Add photos</Text>
-            )}
-          </ToolbarButton>
-          {pickerError ? (
-            <Text className="text-xs text-red-500">{pickerError}</Text>
-          ) : null}
-          <View className="flex-row justify-center items-center">
-            {onCancel && (
-              <ToolbarButton
-                onTap={() => toolbarTap(onCancel)}
-                className="px-3 py-1.5"
-              >
-                <Text className="text-zinc-500">Cancel</Text>
-              </ToolbarButton>
-            )}
+      {(() => {
+        const toolbar = (
+          <Reanimated.View className="p-2 flex-row items-center gap-3 justify-between mx-5">
             <ToolbarButton
               onTap={() =>
                 toolbarTap(() => {
-                  if (canSubmit && !isSubmitting) onSubmit();
+                  if (!isPicking) handlePickImages();
                 })
               }
-              className="px-3 py-1.5 bg-green rounded-full"
+              className="px-3 py-1.5"
             >
-              <Text className="text-white">
-                {isSubmitting ? "Posting..." : submitLabel}
-              </Text>
+              {isPicking ? (
+                <ActivityIndicator size="small" color="#444" />
+              ) : (
+                <Text className="text-zinc-800">Add photos</Text>
+              )}
             </ToolbarButton>
-          </View>
-        </Reanimated.View>
-      </KeyboardExtender>
+            {pickerError ? (
+              <Text className="text-xs text-red-500">{pickerError}</Text>
+            ) : null}
+            <View className="flex-row justify-center items-center">
+              {onCancel && (
+                <ToolbarButton
+                  onTap={() => toolbarTap(onCancel)}
+                  className="px-3 py-1.5"
+                >
+                  <Text className="text-zinc-500">Cancel</Text>
+                </ToolbarButton>
+              )}
+              <ToolbarButton
+                onTap={() =>
+                  toolbarTap(() => {
+                    if (canSubmit && !isSubmitting) onSubmit();
+                  })
+                }
+                className="px-3 py-1.5 bg-green rounded-full"
+              >
+                <Text className="text-white">
+                  {isSubmitting ? "Posting..." : submitLabel}
+                </Text>
+              </ToolbarButton>
+            </View>
+          </Reanimated.View>
+        );
+
+        if (portal) {
+          return <PortalToolbar portal={portal} enabled={showExtend} toolbar={toolbar} />;
+        }
+
+        return (
+          <KeyboardExtender enabled={showExtend}>{toolbar}</KeyboardExtender>
+        );
+      })()}
     </View>
   );
 };
