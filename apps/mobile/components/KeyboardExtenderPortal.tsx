@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
+import { View } from "react-native";
 import { KeyboardExtender } from "react-native-keyboard-controller";
 
 type PortalContextValue = {
@@ -21,21 +22,16 @@ export function KeyboardExtenderPortalProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [toolbar, setToolbar] = useState<React.ReactNode | null>(null);
+  const [toolbar, setToolbar] = useState<React.ReactNode>(null);
 
-  const contextValue = useMemo<PortalContextValue>(
-    () => ({
-      setToolbar,
-    }),
-    [],
-  );
+  const contextValue = useMemo<PortalContextValue>(() => ({ setToolbar }), []);
 
   return (
     <PortalContext.Provider value={contextValue}>
       {children}
-      <KeyboardExtender enabled={toolbar != null}>
-        {toolbar ?? <></>}
-      </KeyboardExtender>
+      {toolbar !== null && (
+        <KeyboardExtender enabled>{toolbar}</KeyboardExtender>
+      )}
     </PortalContext.Provider>
   );
 }

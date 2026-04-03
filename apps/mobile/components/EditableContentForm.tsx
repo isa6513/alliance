@@ -94,27 +94,20 @@ function ToolbarButton({
   );
 }
 
-/**
- * Syncs toolbar content to the portal's KeyboardExtender (rendered outside the
- * scrollable list subtree). Cleans up on unmount so the extender hides.
- */
 function PortalToolbar({
   portal,
-  enabled,
   toolbar,
 }: {
   portal: { setToolbar: (node: React.ReactNode | null) => void };
-  enabled: boolean;
   toolbar: React.ReactNode;
 }) {
   useEffect(() => {
-    portal.setToolbar(enabled ? toolbar : null);
-  }, [enabled, portal, toolbar]);
+    return () => portal.setToolbar(null);
+  }, [portal]);
 
   useEffect(() => {
-    return () => portal.setToolbar(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    portal.setToolbar(toolbar);
+  }, [portal, toolbar]);
 
   return null;
 }
@@ -394,7 +387,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
         );
 
         if (portal) {
-          return <PortalToolbar portal={portal} enabled={showExtend} toolbar={toolbar} />;
+          return <PortalToolbar portal={portal} toolbar={toolbar} />;
         }
 
         return (
