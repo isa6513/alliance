@@ -33,9 +33,9 @@ export function KeyboardExtenderPortalProvider({
   return (
     <PortalContext.Provider value={contextValue}>
       {children}
-      {toolbar != null && (
-        <KeyboardExtender enabled>{toolbar}</KeyboardExtender>
-      )}
+      <KeyboardExtender enabled={toolbar != null}>
+        {toolbar ?? <></>}
+      </KeyboardExtender>
     </PortalContext.Provider>
   );
 }
