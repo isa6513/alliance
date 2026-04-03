@@ -26,6 +26,8 @@ import { generateCIDForNotif } from './notif-utils';
 import { PushService } from 'src/push/push.service';
 import { ReminderCohortType } from 'src/actions/entities/reminder-group.entity';
 
+export type UncompletedTaskSummary = { name: string; timeEstimate?: number };
+
 const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
 const PROCESS_ONE_LOCK_KEY2 = 0xce01;
 
@@ -80,16 +82,25 @@ export class ActionEventNotifWorker {
     }
   }
 
+  async findUncompletedTasksForPlan(
+    plan: NotificationPlan,
+  ): Promise<UncompletedTaskSummary[]> {
+    const tasks = await this.actionsService.findUncompletedTasks(
+      plan.user.id,
+      plan.group.useSuiteTaskCount ? plan.group.actionSuite?.id : undefined,
+    );
+    if (plan.group.excludeOptionalActions) {
+      return tasks.filter((task) => !task.optional);
+    }
+    return tasks;
+  }
+
   async processCustomReminderText(
     text: string,
     plan: NotificationPlan,
     cid: string,
+    uncompletedTasks: UncompletedTaskSummary[],
   ): Promise<string> {
-    const uncompletedTasks = await this.actionsService.findUncompletedTasks(
-      plan.user.id,
-      plan.group.useSuiteTaskCount ? plan.group.actionSuite?.id : undefined,
-    );
-
     let uncompletedMembersInGroupCount: number | undefined = undefined;
     if (
       plan.group.cohortType === ReminderCohortType.GroupLeadsWithUncompleted
@@ -121,6 +132,15 @@ export class ActionEventNotifWorker {
   private async processOne(plan: NotificationPlan) {
     const cid = generateCIDForNotif();
 
+    const uncompletedTasks = await this.findUncompletedTasksForPlan(plan);
+
+    if (
+      uncompletedTasks.length === 0 &&
+      plan.group.cohortType !== ReminderCohortType.GroupLeadsWithUncompleted
+    ) {
+      return;
+    }
+
     const idempotency_key = `reminder:${plan.group.id}:${plan.user.id}`;
 
     const plannedNotif = this.actionEventNotifsRepository.create({
@@ -149,6 +169,7 @@ export class ActionEventNotifWorker {
         plan.group.pushMessage,
         plan,
         cid,
+        uncompletedTasks,
       );
 
       const pushes = await this.pushService.getPushForAllUserDevices(
@@ -173,6 +194,7 @@ export class ActionEventNotifWorker {
         plan.group.textMessage,
         plan,
         cid,
+        uncompletedTasks,
       );
       const result = await this.mmsService.sendMms(
         plan.user.phoneNumber!,
@@ -193,11 +215,13 @@ export class ActionEventNotifWorker {
         plan.group.emailMessage,
         plan,
         cid,
+        uncompletedTasks,
       );
       const emailSubject = await this.processCustomReminderText(
         plan.group.emailSubject,
         plan,
         cid,
+        uncompletedTasks,
       );
 
       const result = await this.mailService.sendActionEventNotificationEmail(

@@ -1186,14 +1186,17 @@ describe('ActionEventNotifWorker (e2e)', () => {
       leaderWithGapsForText.leaderOfIds = [communityWithGaps.id];
     }
 
+    const leaderPlan = {
+      user: leaderWithGapsForText,
+      group: reminderGroup,
+      scheduledFor: new Date(),
+    };
+    const leaderTasks = await worker.findUncompletedTasksForPlan(leaderPlan);
     const leaderText = await worker.processCustomReminderText(
       reminderGroup.textMessage,
-      {
-        user: leaderWithGapsForText,
-        group: reminderGroup,
-        scheduledFor: new Date(),
-      },
+      leaderPlan,
       'cid-group-leads',
+      leaderTasks,
     );
 
     expect(leaderText).toBe('Leader reminder: 2 members need help.');
@@ -1309,14 +1312,17 @@ describe('ActionEventNotifWorker (e2e)', () => {
       leaderForText.leaderOfIds = [community.id];
     }
 
+    const leaderPlan2 = {
+      user: leaderForText,
+      group: reminderGroup,
+      scheduledFor: new Date(),
+    };
+    const leaderTasks2 = await worker.findUncompletedTasksForPlan(leaderPlan2);
     const leaderText = await worker.processCustomReminderText(
       reminderGroup.textMessage,
-      {
-        user: leaderForText,
-        group: reminderGroup,
-        scheduledFor: new Date(),
-      },
+      leaderPlan2,
       'cid-leader-count',
+      leaderTasks2,
     );
 
     expect(leaderText).toBe('Leaders need to help 1 members.');
@@ -1408,14 +1414,17 @@ describe('ActionEventNotifWorker (e2e)', () => {
       },
     );
 
+    const suitePlan = {
+      user,
+      group: suiteReminderGroup,
+      scheduledFor: new Date(),
+    };
+    const suiteTasks = await worker.findUncompletedTasksForPlan(suitePlan);
     const suiteText = await worker.processCustomReminderText(
       suiteReminderGroup.textMessage,
-      {
-        user,
-        group: suiteReminderGroup,
-        scheduledFor: new Date(),
-      },
+      suitePlan,
       'cid-suite-count',
+      suiteTasks,
     );
 
     expect(suiteText).toBe('Suite reminder 2 with 22 minutes');
@@ -1434,14 +1443,17 @@ describe('ActionEventNotifWorker (e2e)', () => {
       },
     );
 
+    const totalPlan = {
+      user,
+      group: totalReminderGroup,
+      scheduledFor: new Date(),
+    };
+    const totalTasks = await worker.findUncompletedTasksForPlan(totalPlan);
     const totalText = await worker.processCustomReminderText(
       totalReminderGroup.textMessage,
-      {
-        user,
-        group: totalReminderGroup,
-        scheduledFor: new Date(),
-      },
+      totalPlan,
       'cid-total-count',
+      totalTasks,
     );
 
     expect(totalText).toBe('Total reminder 3');
@@ -1469,14 +1481,18 @@ describe('ActionEventNotifWorker (e2e)', () => {
       },
     );
 
+    const templatePlan = {
+      user,
+      group: reminderGroup,
+      scheduledFor: new Date(),
+    };
+    const templateTasks =
+      await worker.findUncompletedTasksForPlan(templatePlan);
     const text = await worker.processCustomReminderText(
       'Hi #{firstname}, #{action} is waiting.',
-      {
-        user,
-        group: reminderGroup,
-        scheduledFor: new Date(),
-      },
+      templatePlan,
       'cid-123',
+      templateTasks,
     );
 
     expect(text).toContain('Hi Reminder');

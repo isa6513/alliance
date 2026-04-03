@@ -53,11 +53,11 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
   });
 
   it('replaces all reminder keywords when a deadline event is present', async () => {
-    actionsService.findUncompletedTasks.mockResolvedValue([
-      { id: 1, name: 'Task 1', timeEstimate: 15 } as unknown as ActionDto,
-      { id: 2, name: 'Task 2', timeEstimate: 30 } as unknown as ActionDto,
-      { id: 3, name: 'Task 3', timeEstimate: 45 } as unknown as ActionDto,
-    ]);
+    const uncompletedTasks = [
+      { name: 'Task 1', timeEstimate: 15 },
+      { name: 'Task 2', timeEstimate: 30 },
+      { name: 'Task 3', timeEstimate: 45 },
+    ];
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2024-01-01T00:00:00Z'));
 
@@ -102,14 +102,11 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
         template,
         plan,
         'cid-123',
+        uncompletedTasks,
       );
 
       expect(result).toBe(
         'Hi Alex Example (Alex Example), action Test Action has 3 tasks due in 2 days and 6 hours. Link: https://app.example.org/tasks?cid=cid-123',
-      );
-      expect(actionsService.findUncompletedTasks).toHaveBeenCalledWith(
-        7,
-        undefined,
       );
     } finally {
       jest.useRealTimers();
@@ -117,9 +114,7 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
   });
 
   it('falls back gracefully when user has a single name and no deadline event', async () => {
-    actionsService.findUncompletedTasks.mockResolvedValue([
-      { id: 1, name: 'Task 1', timeEstimate: 15 } as unknown as ActionDto,
-    ]);
+    const uncompletedTasks = [{ name: 'Task 1', timeEstimate: 15 }];
     const consoleErrorSpy = jest
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
@@ -158,14 +153,11 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
         template,
         plan,
         'cid-456',
+        uncompletedTasks,
       );
 
       expect(result).toBe(
         'Hello Cher! Deadline in [err] / [err]. Tasks left: 1. Visit https://app.example.org/tasks?cid=cid-456',
-      );
-      expect(actionsService.findUncompletedTasks).toHaveBeenCalledWith(
-        9,
-        undefined,
       );
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'User name has less than 2 parts: Cher',
@@ -173,6 +165,73 @@ describe('ActionEventNotifWorker.processCustomReminderText', () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+});
+
+describe('ActionEventNotifWorker.findUncompletedTasksForPlan', () => {
+  let worker: ActionEventNotifWorker;
+  let actionsService: jest.Mocked<ActionsService>;
+
+  beforeEach(() => {
+    actionsService = {
+      findUncompletedTasks: jest.fn(),
+    } as unknown as jest.Mocked<ActionsService>;
+
+    worker = new ActionEventNotifWorker(
+      {} as DataSource,
+      {} as MailService,
+      {} as MmsService,
+      actionsService,
+      {} as Repository<ActionEventNotif>,
+      {} as ActionEventReminderService,
+      {} as PushService,
+    );
+  });
+
+  it('filters out optional tasks when excludeOptionalActions is set', async () => {
+    actionsService.findUncompletedTasks.mockResolvedValue([
+      { id: 1, name: 'Required', timeEstimate: 10, optional: false } as unknown as ActionDto,
+      { id: 2, name: 'Optional', timeEstimate: 5, optional: true } as unknown as ActionDto,
+      { id: 3, name: 'Also Required', timeEstimate: 20 } as unknown as ActionDto,
+    ]);
+
+    const plan: NotificationPlan = {
+      scheduledFor: new Date(),
+      user: { id: 1 } as User,
+      group: {
+        id: 1,
+        excludeOptionalActions: true,
+        memberActionEvent: { action: {} },
+      } as unknown as ReminderGroup,
+    };
+
+    const result = await worker.findUncompletedTasksForPlan(plan);
+
+    expect(result).toEqual([
+      expect.objectContaining({ name: 'Required' }),
+      expect.objectContaining({ name: 'Also Required' }),
+    ]);
+  });
+
+  it('returns all tasks when excludeOptionalActions is not set', async () => {
+    actionsService.findUncompletedTasks.mockResolvedValue([
+      { id: 1, name: 'Required', optional: false } as unknown as ActionDto,
+      { id: 2, name: 'Optional', optional: true } as unknown as ActionDto,
+    ]);
+
+    const plan: NotificationPlan = {
+      scheduledFor: new Date(),
+      user: { id: 1 } as User,
+      group: {
+        id: 1,
+        excludeOptionalActions: false,
+        memberActionEvent: { action: {} },
+      } as unknown as ReminderGroup,
+    };
+
+    const result = await worker.findUncompletedTasksForPlan(plan);
+
+    expect(result).toHaveLength(2);
   });
 });
 
