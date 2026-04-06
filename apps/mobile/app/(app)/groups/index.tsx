@@ -893,11 +893,7 @@ function GroupSettingsTab({
   }
 
   return (
-    <KeyboardAwareScrollView
-      className="flex-1"
-      contentContainerStyle={{ paddingBottom: 40 }}
-      keyboardShouldPersistTaps="handled"
-    >
+    <KeyboardAwareScrollView>
       <View className="px-4 gap-4">
         <View className="flex-row flex-wrap justify-end gap-2">
           {isEditing ? (
