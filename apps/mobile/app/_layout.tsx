@@ -1,3 +1,4 @@
+import { StatusBar } from "expo-status-bar";
 import { Slot } from "expo-router";
 import { AuthProvider } from "../lib/AuthContext";
 import { useEffect } from "react";
@@ -127,6 +128,7 @@ export default function RootLayout() {
                 <KeyboardExtenderPortalProvider>
                   <DeviceRegistration />
                   <PushNotificationResponseHandler queryClient={queryClient} />
+                  <StatusBar style="dark" />
                   <Slot />
                 </KeyboardExtenderPortalProvider>
               </AuthProvider>
