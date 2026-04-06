@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Platform,
   TextInput,
   TouchableOpacity,
   View,
-  KeyboardAvoidingView,
 } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   conversationAcceptInvite,
@@ -310,10 +309,10 @@ export default function ConversationScreen() {
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "position"}
+        behavior="padding"
         style={{ flex: 1 }}
-        contentContainerStyle={{ flex: 1 }}
         keyboardVerticalOffset={130}
+        enabled
       >
         {otherParticipantInvited && selectedConvo.type === "direct" && (
           <View className="px-4 py-3 bg-zinc-50 border-b border-zinc-200">
