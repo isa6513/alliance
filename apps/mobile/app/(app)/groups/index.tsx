@@ -5,8 +5,6 @@ import {
   ActivityIndicator,
   FlatList,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -55,6 +53,7 @@ import Button, {
   ButtonSize,
 } from "../../../components/system/Button";
 import { CreateGroupForm } from "../../../components/groups/CreateGroupForm";
+import KeyboardAwareScrollView from "../../../components/KeyboardAwareScrollView";
 
 type Tab = "activity" | "members" | "invites" | "settings";
 
@@ -734,8 +733,7 @@ function communityToCreateCommunityDto(c: CommunityDto): CreateCommunityDto {
     public: c.public,
     allowMemberInvites: c.allowMemberInvites ?? true,
     allowStaffAssignments: c.allowStaffAssignments ?? true,
-    maxCapacity:
-      c.maxCapacity === null ? null : Math.max(c.maxCapacity, mc),
+    maxCapacity: c.maxCapacity === null ? null : Math.max(c.maxCapacity, mc),
   };
 }
 
@@ -762,7 +760,11 @@ function GroupSettingsTab({
       editForm.public ||
       editForm.allowMemberInvites ||
       editForm.allowStaffAssignments,
-    [editForm.public, editForm.allowMemberInvites, editForm.allowStaffAssignments],
+    [
+      editForm.public,
+      editForm.allowMemberInvites,
+      editForm.allowStaffAssignments,
+    ],
   );
 
   const resetFormFromCommunity = useCallback((c: CommunityDto) => {
@@ -891,160 +893,153 @@ function GroupSettingsTab({
   }
 
   return (
-    <KeyboardAvoidingView
+    <KeyboardAwareScrollView
       className="flex-1"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      keyboardShouldPersistTaps="handled"
     >
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 40 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="px-4 gap-4">
-          <View className="flex-row flex-wrap justify-end gap-2">
-            {isEditing ? (
-              <>
-                <Button
-                  color={ButtonColor.Light}
-                  size={ButtonSize.Small}
-                  onPress={handleCancel}
-                  disabled={isSaving}
-                  title="Cancel"
-                />
-                <Button
-                  color={ButtonColor.Blue}
-                  size={ButtonSize.Small}
-                  onPress={() => void handleSave()}
-                  disabled={isSaving || !editForm.name.trim()}
-                  loading={isSaving}
-                  title="Save"
-                />
-              </>
-            ) : (
-              <Button
-                color={ButtonColor.White}
-                size={ButtonSize.Small}
-                onPress={() => setIsEditing(true)}
-                title="Edit"
-              />
-            )}
-          </View>
-
+      <View className="px-4 gap-4">
+        <View className="flex-row flex-wrap justify-end gap-2">
           {isEditing ? (
-            <CreateGroupForm
-              variant="settings"
-              newCommunity={editForm}
-              setNewCommunity={setEditForm}
-              requiresMaxCapacity={requiresMaxCapacity}
-              error={error}
-              setError={setError}
-              disabled={isSaving}
-              memberCountForCapacityLabel={memberCount}
-              headerSlot={
-                <View className="flex-row items-center gap-4">
-                  <ProfileImage
-                    pfp={editForm.photo?.trim() ? editForm.photo : null}
-                    size="larger"
-                  />
-                  <TouchableOpacity
-                    onPress={() => void handlePickPhoto()}
-                    disabled={isSaving}
-                    className="py-2 px-3 rounded-lg border border-zinc-300 bg-white"
-                  >
-                    <Text
-                      className="text-sm text-zinc-800"
-                      weight={FontWeight.Medium}
-                    >
-                      Change photo
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              }
-            />
-          ) : (
             <>
-              <View className="flex-row items-center gap-3">
-                <ProfileImage pfp={community.photo ?? null} size="larger" />
-              </View>
-              <View>
-                <Text
-                  className="text-sm text-zinc-700 mb-1"
-                  weight={FontWeight.Medium}
-                >
-                  Name
-                </Text>
-                <Text className="text-base text-zinc-900">
-                  {community.name}
-                </Text>
-              </View>
-              <View>
-                <Text
-                  className="text-sm text-zinc-700 mb-1"
-                  weight={FontWeight.Medium}
-                >
-                  Description
-                </Text>
-                <Text className="text-base text-zinc-700">
-                  {community.description || "—"}
-                </Text>
-              </View>
-
-              <View className="gap-y-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200">
-                <View>
-                  <Text
-                    className="text-sm text-zinc-700"
-                    weight={FontWeight.Medium}
-                  >
-                    {groupSettings.public.name}
-                  </Text>
-                  <Text className="text-xs text-zinc-500 mt-0.5">
-                    {community.public ? "On" : "Off"}
-                  </Text>
-                </View>
-                <View>
-                  <Text
-                    className="text-sm text-zinc-700"
-                    weight={FontWeight.Medium}
-                  >
-                    {groupSettings.allowMemberInvites.name}
-                  </Text>
-                  <Text className="text-xs text-zinc-500 mt-0.5">
-                    {community.allowMemberInvites ? "On" : "Off"}
-                  </Text>
-                </View>
-                <View>
-                  <Text
-                    className="text-sm text-zinc-700"
-                    weight={FontWeight.Medium}
-                  >
-                    {groupSettings.allowStaffAssignments.name}
-                  </Text>
-                  <Text className="text-xs text-zinc-500 mt-0.5">
-                    {community.allowStaffAssignments ? "On" : "Off"}
-                  </Text>
-                </View>
-                {requiresCapacityDisplay ? (
-                  <View className="pt-3 border-t border-zinc-200">
-                    <Text
-                      className="text-sm text-zinc-700"
-                      weight={FontWeight.Medium}
-                    >
-                      {groupSettings.maxCapacity.name}
-                    </Text>
-                    <Text className="text-xs text-zinc-500 mt-0.5">
-                      {community.maxCapacity != null
-                        ? `${community.maxCapacity} (${memberCount} members now)`
-                        : "—"}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
+              <Button
+                color={ButtonColor.Light}
+                size={ButtonSize.Small}
+                onPress={handleCancel}
+                disabled={isSaving}
+                title="Cancel"
+              />
+              <Button
+                color={ButtonColor.Blue}
+                size={ButtonSize.Small}
+                onPress={() => void handleSave()}
+                disabled={isSaving || !editForm.name.trim()}
+                loading={isSaving}
+                title="Save"
+              />
             </>
+          ) : (
+            <Button
+              color={ButtonColor.White}
+              size={ButtonSize.Small}
+              onPress={() => setIsEditing(true)}
+              title="Edit"
+            />
           )}
-
-          {error ? <Text className="text-sm text-red-600">{error}</Text> : null}
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+        {isEditing ? (
+          <CreateGroupForm
+            variant="settings"
+            newCommunity={editForm}
+            setNewCommunity={setEditForm}
+            requiresMaxCapacity={requiresMaxCapacity}
+            error={error}
+            setError={setError}
+            disabled={isSaving}
+            memberCountForCapacityLabel={memberCount}
+            headerSlot={
+              <View className="flex-row items-center gap-4">
+                <ProfileImage
+                  pfp={editForm.photo?.trim() ? editForm.photo : null}
+                  size="larger"
+                />
+                <TouchableOpacity
+                  onPress={() => void handlePickPhoto()}
+                  disabled={isSaving}
+                  className="py-2 px-3 rounded-lg border border-zinc-300 bg-white"
+                >
+                  <Text
+                    className="text-sm text-zinc-800"
+                    weight={FontWeight.Medium}
+                  >
+                    Change photo
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            }
+          />
+        ) : (
+          <>
+            <View className="flex-row items-center gap-3">
+              <ProfileImage pfp={community.photo ?? null} size="larger" />
+            </View>
+            <View>
+              <Text
+                className="text-sm text-zinc-700 mb-1"
+                weight={FontWeight.Medium}
+              >
+                Name
+              </Text>
+              <Text className="text-base text-zinc-900">{community.name}</Text>
+            </View>
+            <View>
+              <Text
+                className="text-sm text-zinc-700 mb-1"
+                weight={FontWeight.Medium}
+              >
+                Description
+              </Text>
+              <Text className="text-base text-zinc-700">
+                {community.description || "—"}
+              </Text>
+            </View>
+
+            <View className="gap-y-3 p-3 bg-zinc-50 rounded-lg border border-zinc-200">
+              <View>
+                <Text
+                  className="text-sm text-zinc-700"
+                  weight={FontWeight.Medium}
+                >
+                  {groupSettings.public.name}
+                </Text>
+                <Text className="text-xs text-zinc-500 mt-0.5">
+                  {community.public ? "On" : "Off"}
+                </Text>
+              </View>
+              <View>
+                <Text
+                  className="text-sm text-zinc-700"
+                  weight={FontWeight.Medium}
+                >
+                  {groupSettings.allowMemberInvites.name}
+                </Text>
+                <Text className="text-xs text-zinc-500 mt-0.5">
+                  {community.allowMemberInvites ? "On" : "Off"}
+                </Text>
+              </View>
+              <View>
+                <Text
+                  className="text-sm text-zinc-700"
+                  weight={FontWeight.Medium}
+                >
+                  {groupSettings.allowStaffAssignments.name}
+                </Text>
+                <Text className="text-xs text-zinc-500 mt-0.5">
+                  {community.allowStaffAssignments ? "On" : "Off"}
+                </Text>
+              </View>
+              {requiresCapacityDisplay ? (
+                <View className="pt-3 border-t border-zinc-200">
+                  <Text
+                    className="text-sm text-zinc-700"
+                    weight={FontWeight.Medium}
+                  >
+                    {groupSettings.maxCapacity.name}
+                  </Text>
+                  <Text className="text-xs text-zinc-500 mt-0.5">
+                    {community.maxCapacity != null
+                      ? `${community.maxCapacity} (${memberCount} members now)`
+                      : "—"}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </>
+        )}
+
+        {error ? <Text className="text-sm text-red-600">{error}</Text> : null}
+      </View>
+    </KeyboardAwareScrollView>
   );
 }
