@@ -312,7 +312,6 @@ export default function ConversationScreen() {
         behavior="padding"
         style={{ flex: 1 }}
         keyboardVerticalOffset={130}
-        enabled
       >
         {otherParticipantInvited && selectedConvo.type === "direct" && (
           <View className="px-4 py-3 bg-zinc-50 border-b border-zinc-200">
