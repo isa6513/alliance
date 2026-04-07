@@ -34,18 +34,19 @@ Right now I run:
 
 ```
 ffmpeg \
-  -i alliance_graded.mov \
-  -i alliance_graded.srt \
+  -i alliance_video.mp4 \
+  -i alliance_video.srt \
   -map 0:v:0 -map 0:a:0 -map 1:0 \
   -c:v libx264 -preset fast -crf 28 -maxrate 2M -bufsize 4M \
   -vf scale=-2:720 \
   -c:a aac -b:a 128k \
   -c:s webvtt \
+  -metadata:s:s:0 language=eng \
   -f hls \
   -hls_time 6 \
   -hls_list_size 0 \
   -hls_flags independent_segments \
-  -var_stream_map "v:0,a:0,s:0,sgroup:subtitle" \
+  -var_stream_map "v:0,a:0,s:0,sgroup:subtitle,sname:English" \
   -master_pl_name playlist.m3u8 \
   output.m3u8
 ```
