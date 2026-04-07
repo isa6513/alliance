@@ -77,14 +77,11 @@ function TaskNavigatorFollowUpRows({
         aria-pressed={isActive}
         className={cn(
           "flex flex-row items-center gap-x-2 pl-6 rounded-md py-1 -mr-1 pr-1 w-full text-left border-0 bg-transparent cursor-pointer font-inherit",
-          isActive ? "bg-green/10" : "hover:bg-grey-2",
+          isActive ? "bg-sky-100" : "hover:bg-grey-2",
         )}
       >
         <CircleChevronRight
-          className={cn(
-            "h-4 w-4 shrink-0",
-            isActive ? "text-green" : "text-blue-400",
-          )}
+          className="h-4 w-4 shrink-0 text-blue-400"
           aria-hidden
         />
         <span
@@ -135,7 +132,7 @@ function TaskNavigatorTodoActionRow({
             "w-4! h-4! shrink-0 border-2 rounded-full mt-[4px]",
             isActive
               ? action.optional
-                ? "border-blue bg-sky-100"
+                ? "border-blue-400 bg-sky-100"
                 : "border-green bg-green/20"
               : "border-zinc-200",
           )}
