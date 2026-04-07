@@ -154,27 +154,24 @@ function TaskNavigatorCompletedRow({
   action,
   followUpForms,
   activeFollowUpFormId,
-  onSelectCompletedTitle,
   onSelectFollowUp,
 }: {
   action: ActionDto;
   followUpForms: FollowUpForm[];
   activeFollowUpFormId: number | null;
-  onSelectCompletedTitle: () => void;
   onSelectFollowUp: (formId: number) => void;
 }) {
   return (
     <div className="text-zinc-600 flex flex-col gap-y-1">
       <div className="flex gap-x-2 items-start">
         <CheckIcon size="line" />
-        <button
-          type="button"
-          onClick={onSelectCompletedTitle}
+        <Link
+          to={href("/actions/:id", { id: action.id.toString() })}
           className="text-zinc-400 line-through text-left border-0 bg-transparent p-0 cursor-pointer font-inherit hover:text-zinc-500"
         >
           {action.optional && "(Optional) "}
           {action.name}
-        </button>
+        </Link>
       </div>
       <TaskNavigatorFollowUpRows
         forms={followUpForms}
@@ -383,22 +380,6 @@ const HomePage = () => {
                     action={action}
                     followUpForms={followUpFormsByActionId[action.id] ?? []}
                     activeFollowUpFormId={activeFollowUpFormId}
-                    onSelectCompletedTitle={() => {
-                      const actionIdx = taskNavigatorItems.findIndex(
-                        (c) => c.kind === "action" && c.action.id === action.id,
-                      );
-                      if (actionIdx >= 0) {
-                        setTaskNavigatorIndex(actionIdx);
-                        return;
-                      }
-                      const fuIdx = taskNavigatorItems.findIndex(
-                        (c) =>
-                          c.kind === "followUpForm" && c.actionId === action.id,
-                      );
-                      if (fuIdx >= 0) {
-                        setTaskNavigatorIndex(fuIdx);
-                      }
-                    }}
                     onSelectFollowUp={(formId) => {
                       const idx = taskNavigatorItems.findIndex(
                         (c) =>
