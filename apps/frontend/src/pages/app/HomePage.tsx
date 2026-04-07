@@ -114,7 +114,11 @@ function TaskNavigatorTodoActionRow({
     <li
       className={cn(
         "rounded-lg px-2 py-1.5 -mx-0.5",
-        isActive ? "bg-green/10" : "hover:bg-grey-2",
+        isActive
+          ? action.optional
+            ? "bg-sky-100"
+            : "bg-green/10"
+          : "hover:bg-grey-2",
       )}
       aria-current={isActive ? "true" : undefined}
     >
@@ -129,7 +133,11 @@ function TaskNavigatorTodoActionRow({
         <div
           className={cn(
             "w-4! h-4! shrink-0 border-2 rounded-full mt-[4px]",
-            isActive ? "border-green bg-green/20" : "border-zinc-200",
+            isActive
+              ? action.optional
+                ? "border-blue bg-sky-100"
+                : "border-green bg-green/20"
+              : "border-zinc-200",
           )}
         />
         <span
