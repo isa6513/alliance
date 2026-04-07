@@ -167,7 +167,7 @@ function TaskNavigatorCompletedRow({
         <CheckIcon size="line" />
         <Link
           to={href("/actions/:id", { id: action.id.toString() })}
-          className="text-zinc-400 line-through text-left border-0 bg-transparent p-0 cursor-pointer font-inherit hover:text-zinc-500"
+          className="text-zinc-400 line-through text-left font-inherit hover:text-zinc-500"
         >
           {action.optional && "(Optional) "}
           {action.name}
