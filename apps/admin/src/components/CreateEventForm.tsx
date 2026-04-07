@@ -55,44 +55,6 @@ const defaultEventNames: Record<ActionStatus, string> = {
   planned: "Planned",
 };
 
-const MIN_DEADLINE_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
-
-/**
- * Snap to 11:59 PM local on the picked calendar day, then move forward by
- * whole days if needed so the deadline is at least `minDurationMs` after launch.
- */
-function normalizeDeadlineEventDate(
-  pickedUtcIso: string,
-  launchStart: Date,
-  minDurationMs: number = MIN_DEADLINE_DURATION_MS,
-): string {
-  const picked = new Date(pickedUtcIso);
-  if (Number.isNaN(picked.getTime()) || Number.isNaN(launchStart.getTime())) {
-    return pickedUtcIso;
-  }
-  let deadline = new Date(
-    picked.getFullYear(),
-    picked.getMonth(),
-    picked.getDate(),
-    23,
-    59,
-    0,
-    0,
-  );
-  while (deadline.getTime() - launchStart.getTime() < minDurationMs) {
-    deadline = new Date(
-      deadline.getFullYear(),
-      deadline.getMonth(),
-      deadline.getDate() + 1,
-      23,
-      59,
-      0,
-      0,
-    );
-  }
-  return deadline.toISOString();
-}
-
 const CreateEventForm = (props: CreateEventFormProps) => {
   const {
     action,
@@ -105,12 +67,19 @@ const CreateEventForm = (props: CreateEventFormProps) => {
   const [useCustomName, setUseCustomName] = useState<boolean>(false);
   const [launchNow, setLaunchNow] = useState<boolean>(true);
   const [useDeadlineEvent, setUseDeadlineEvent] = useState<boolean>(false);
-  const [deadlineEventDate, setDeadlineEventDate] = useState<string>(() =>
-    normalizeDeadlineEventDate(
-      new Date(Date.now() + MIN_DEADLINE_DURATION_MS).toISOString(),
-      new Date(),
-    ),
-  );
+  const [deadlineEventDate, setDeadlineEventDate] = useState<string>(() => {
+    const now = new Date();
+    const defaultDate = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 7,
+      23,
+      59,
+      0,
+      0,
+    );
+    return defaultDate.toISOString();
+  });
   const [deadlineEventStatus, setDeadlineEventStatus] = useState<
     "office_action" | "completed"
   >("office_action");
@@ -143,18 +112,12 @@ const CreateEventForm = (props: CreateEventFormProps) => {
     }));
   };
 
-  const launchStartForDeadline = () =>
-    launchNow ? new Date() : new Date(eventForm.date);
-
   const handleDeadlineDateChange = (change: DateTimePickerChange) => {
-    const raw = change.utcValue;
-    if (!raw) {
+    if (!change.utcValue) {
       setDeadlineEventDate("");
       return;
     }
-    setDeadlineEventDate(
-      normalizeDeadlineEventDate(raw, launchStartForDeadline()),
-    );
+    setDeadlineEventDate(change.utcValue);
   };
 
   const handleAddEvent = async (e: React.FormEvent) => {
@@ -199,14 +162,9 @@ const CreateEventForm = (props: CreateEventFormProps) => {
         (eventForm.newStatus === "member_action" ||
           eventForm.newStatus === "gathering_commitments")
       ) {
-        const launchStart = new Date(eventData.date);
-        const resolvedDeadlineDate = normalizeDeadlineEventDate(
-          deadlineEventDate,
-          launchStart,
-        );
         const officeActionEvent = {
           title: defaultEventNames[deadlineEventStatus],
-          date: resolvedDeadlineDate,
+          date: deadlineEventDate,
           newStatus: deadlineEventStatus,
           description: "",
         } satisfies CreateActionEventDto;
