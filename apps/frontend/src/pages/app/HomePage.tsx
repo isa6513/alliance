@@ -42,8 +42,10 @@ import {
   mapFormViewsToActionIds,
   sidebarProgressActionCandidates,
 } from "../../lib/fetchTaskFormProgressViews";
-import { CircleChevronRight } from "lucide-react";
-import { cn } from "@alliance/shared/styles/util";
+import {
+  TaskNavigatorCompletedRow,
+  TaskNavigatorTodoActionRow,
+} from "./TaskNavigatorRow";
 
 /** Ordered queue of main-column cards (action or follow-up) driven by the task navigator list. */
 type TaskNavigatorItem =
@@ -58,129 +60,6 @@ function TaskNavigatorListShell({ children }: { children: ReactNode }) {
   );
 }
 
-function TaskNavigatorFollowUpRows({
-  forms,
-  activeFollowUpFormId,
-  onSelectFollowUp,
-}: {
-  forms: FollowUpForm[];
-  activeFollowUpFormId: number | null;
-  onSelectFollowUp: (formId: number) => void;
-}) {
-  return forms.map((followUpForm) => {
-    const isActive = activeFollowUpFormId === followUpForm.id;
-    return (
-      <button
-        key={followUpForm.id}
-        type="button"
-        onClick={() => onSelectFollowUp(followUpForm.id)}
-        aria-pressed={isActive}
-        className={cn(
-          "flex flex-row items-center gap-x-2 pl-6 rounded-md py-1 -mr-1 pr-1 w-full text-left border-0 bg-transparent cursor-pointer font-inherit",
-          isActive ? "bg-sky-100" : "hover:bg-grey-2",
-        )}
-      >
-        <CircleChevronRight
-          className="h-4 w-4 shrink-0 text-blue-400"
-          aria-hidden
-        />
-        <span
-          className={cn(
-            isActive ? "text-zinc-900 font-semibold" : "text-zinc-600",
-          )}
-        >
-          {followUpForm.name?.trim() ? followUpForm.name : "Follow-up form"}
-        </span>
-      </button>
-    );
-  });
-}
-
-function TaskNavigatorTodoActionRow({
-  action,
-  isActive,
-  onSelect,
-  showOptionalPrefix,
-}: {
-  action: ActionWithAwayStatus;
-  isActive: boolean;
-  onSelect: () => void;
-  showOptionalPrefix: boolean;
-}) {
-  return (
-    <li
-      className={cn(
-        "rounded-lg px-2 py-1.5 -mx-0.5",
-        isActive
-          ? action.optional
-            ? "bg-sky-100"
-            : "bg-green/10"
-          : "hover:bg-grey-2",
-      )}
-      aria-current={isActive ? "true" : undefined}
-    >
-      <button
-        type="button"
-        onClick={onSelect}
-        aria-pressed={isActive}
-        className={
-          "text-zinc-600 flex gap-x-2 items-start w-full text-left border-0 bg-transparent p-0 cursor-pointer font-inherit"
-        }
-      >
-        <div
-          className={cn(
-            "w-4! h-4! shrink-0 border-2 rounded-full mt-[4px]",
-            isActive
-              ? action.optional
-                ? "border-blue-400 bg-sky-100"
-                : "border-green bg-green/20"
-              : "border-zinc-200",
-          )}
-        />
-        <span
-          className={cn(
-            isActive ? "text-zinc-900 font-semibold" : "text-zinc-600",
-          )}
-        >
-          {showOptionalPrefix && action.optional && "(Optional) "}
-          {action.name}
-        </span>
-      </button>
-    </li>
-  );
-}
-
-function TaskNavigatorCompletedRow({
-  action,
-  followUpForms,
-  activeFollowUpFormId,
-  onSelectFollowUp,
-}: {
-  action: ActionDto;
-  followUpForms: FollowUpForm[];
-  activeFollowUpFormId: number | null;
-  onSelectFollowUp: (formId: number) => void;
-}) {
-  return (
-    <div className="text-zinc-600 flex flex-col gap-y-1">
-      <div className="flex gap-x-2 items-start">
-        <CheckIcon size="line" />
-        <Link
-          to={href("/actions/:id", { id: action.id.toString() })}
-          className="text-zinc-400 line-through text-left font-inherit hover:text-zinc-500"
-        >
-          {action.optional && "(Optional) "}
-          {action.name}
-        </Link>
-      </div>
-      <TaskNavigatorFollowUpRows
-        forms={followUpForms}
-        activeFollowUpFormId={activeFollowUpFormId}
-        onSelectFollowUp={onSelectFollowUp}
-      />
-    </div>
-  );
-}
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -370,29 +249,28 @@ const HomePage = () => {
             )}
 
             {/* Completed actions */}
-            <ul className="list-none space-y-1 m-0 p-0">
+            <div className="flex flex-col gap-y-1">
               {[
                 ...completedActions,
                 ...followUpParentActionsNotInCompletedList,
               ].map((action) => (
-                <li key={action.id}>
-                  <TaskNavigatorCompletedRow
-                    action={action}
-                    followUpForms={followUpFormsByActionId[action.id] ?? []}
-                    activeFollowUpFormId={activeFollowUpFormId}
-                    onSelectFollowUp={(formId) => {
-                      const idx = taskNavigatorItems.findIndex(
-                        (c) =>
-                          c.kind === "followUpForm" &&
-                          c.actionId === action.id &&
-                          c.followUpForm.id === formId,
-                      );
-                      if (idx >= 0) {
-                        setTaskNavigatorIndex(idx);
-                      }
-                    }}
-                  />
-                </li>
+                <TaskNavigatorCompletedRow
+                  key={action.id}
+                  action={action}
+                  followUpForms={followUpFormsByActionId[action.id] ?? []}
+                  activeFollowUpFormId={activeFollowUpFormId}
+                  onSelectFollowUp={(formId) => {
+                    const idx = taskNavigatorItems.findIndex(
+                      (c) =>
+                        c.kind === "followUpForm" &&
+                        c.actionId === action.id &&
+                        c.followUpForm.id === formId,
+                    );
+                    if (idx >= 0) {
+                      setTaskNavigatorIndex(idx);
+                    }
+                  }}
+                />
               ))}
 
               {/* Actions in the current week */}
@@ -417,9 +295,9 @@ const HomePage = () => {
               })}
               {nextWeekTodoActions.length > 0 && (
                 <>
-                  <li className="list-none pt-2">
+                  <div className="pt-2">
                     <p className="text-zinc-500 font-medium">Upcoming</p>
-                  </li>
+                  </div>
                   {nextWeekTodoActions.map((action) => {
                     const isActive = action.id === activeActionId;
                     return (
@@ -442,7 +320,7 @@ const HomePage = () => {
                   })}
                 </>
               )}
-            </ul>
+            </div>
           </TaskNavigatorListShell>
         )}
       </>
