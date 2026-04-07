@@ -8,7 +8,7 @@ Right now i use `whisper v2` for this.
 
 - Install: `pip3 install openai-whisper`
 
-- Run: `whisper alliance_video.mov --model large-v2 --output_format srt --language en`
+- Run: `whisper alliance_video.mp4 --model large-v2 --output_format srt --language en`
 
 Move on to step 2 while this runs.
 
