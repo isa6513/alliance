@@ -24,12 +24,15 @@ import { Comment, CommentParentObject } from './entities/comment.entity';
 import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
 import { Action } from 'src/actions/entities/action.entity';
-import { GroupingKey, LikeNotificationService } from 'src/notifs/like-notification.service';
+import {
+  GroupingKey,
+  LikeNotificationService,
+} from 'src/notifs/like-notification.service';
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import {
   NotifsService,
-  shouldEmailUser,
-  shouldTextUser,
+  userActionNotifsEnabled_email,
+  userActionNotifsEnabled_text,
 } from 'src/notifs/notifs.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 import { MailService } from 'src/mail/mail.service';
@@ -583,14 +586,14 @@ export class ForumService {
         });
         if (post.notifyForReplies && parentAuthor.receiveReplyNotifications) {
           const url = withCid(commentUrl(comment, undefined, true), cid);
-          if (shouldTextUser(parentAuthor)) {
+          if (userActionNotifsEnabled_text(parentAuthor)) {
             await this.mmsService.sendMms(
               parentAuthor.phoneNumber!,
               `${authorDto.displayName} replied to your comment on ${post.title}: ${url}`,
               [],
               cid,
             );
-          } else if (shouldEmailUser(parentAuthor)) {
+          } else if (userActionNotifsEnabled_email(parentAuthor)) {
             await this.mailService.sendMail(
               parentAuthor.email!,
               EmailType.ForumReply,

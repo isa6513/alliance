@@ -324,6 +324,7 @@ export class ActionEventRecipientService {
       usersWithTags,
       usersDismissed,
       cohortMemberIds,
+      perActionCohortMemberIds,
       completionActivities,
     ] = await Promise.all([
       this.userService.findByIds(
@@ -339,6 +340,12 @@ export class ActionEventRecipientService {
         })
         .then((acts) => new Set(acts.map((a) => a.userId))),
       this.resolveCohortMemberIds(event.action.cohortExpression),
+      Promise.all(
+        actions.map(async (action) => ({
+          actionId: action.id,
+          memberIds: await this.resolveCohortMemberIds(action.cohortExpression),
+        })),
+      ),
       this.actionActivityRepository.find({
         where: {
           userId: In(users.map((user) => user.id)),
@@ -352,13 +359,29 @@ export class ActionEventRecipientService {
       }),
     ]);
 
+    const cohortByActionId = new Map(
+      perActionCohortMemberIds.map((r) => [r.actionId, r.memberIds]),
+    );
+
+    const participationCohortMemberIds = actionSuite
+      ? perActionCohortMemberIds.some((r) => r.memberIds === null)
+        ? null // at least one action targets everyone
+        : new Set(
+            perActionCohortMemberIds.flatMap((r) => [...(r.memberIds ?? [])]),
+          )
+      : cohortMemberIds;
+
     const idToUser = new Map(usersWithTags.map((user) => [user.id, user]));
 
     const userToHasCompletedAllActions = new Map<number, boolean>();
     for (const user of users) {
+      const relevantActions = actions.filter((action) => {
+        const memberIds = cohortByActionId.get(action.id);
+        return !memberIds || memberIds.has(user.id);
+      });
       userToHasCompletedAllActions.set(
         user.id,
-        actions.every((action) =>
+        relevantActions.every((action) =>
           completionActivities.some(
             (activity) =>
               activity.userId === user.id && activity.actionId === action.id,
@@ -373,7 +396,7 @@ export class ActionEventRecipientService {
           eventDate: event.date,
           deadlineDate: deadlineEvent?.date ?? null,
           everyoneShouldComplete: event.action.everyoneShouldComplete,
-          cohortMemberIds,
+          cohortMemberIds: participationCohortMemberIds,
           user: idToUser.get(user.id)!,
           userDismissed: usersDismissed.has(user.id),
           onboarding: event.action.onboarding,
@@ -416,11 +439,13 @@ export class ActionEventRecipientService {
     suite?: ActionSuite,
     excludeOptionalActions?: boolean,
   ): Promise<User[]> {
-    const users = await this.findBaseUsersForEvent({
-      action: event.action,
-      eventId: event.id,
-      eventStatus: event.newStatus,
-    });
+    const users = suite
+      ? await this.userService.findActiveUsersWithTags()
+      : await this.findBaseUsersForEvent({
+          action: event.action,
+          eventId: event.id,
+          eventStatus: event.newStatus,
+        });
     return type === ActionEventNotifType.Announcement
       ? users
       : await this.filterForShouldRemind(

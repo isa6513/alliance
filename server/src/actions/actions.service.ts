@@ -28,9 +28,9 @@ import {
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
 import {
   NotifsService,
-  shouldPushUser,
-  shouldEmailUser,
-  shouldTextUser,
+  userActionNotifsEnabled_email,
+  userActionNotifsEnabled_text,
+  userActionNotifsEnabled_push,
 } from 'src/notifs/notifs.service';
 import { actionActivityUrl, actionUrl, withSid } from 'src/search/approutes';
 import { Form } from 'src/tasks/entities/form.entity';
@@ -2491,9 +2491,9 @@ export class ActionsService {
     return plans.map((plan) => ({
       ...plan,
       channels: [
-        shouldTextUser(plan.user) ? ('text' as const) : null,
-        shouldEmailUser(plan.user) ? ('email' as const) : null,
-        shouldPushUser(plan.user) ? ('push' as const) : null,
+        userActionNotifsEnabled_text(plan.user) ? ('text' as const) : null,
+        userActionNotifsEnabled_email(plan.user) ? ('email' as const) : null,
+        userActionNotifsEnabled_push(plan.user) ? ('push' as const) : null,
       ].filter((channel) => channel !== null),
     }));
   }

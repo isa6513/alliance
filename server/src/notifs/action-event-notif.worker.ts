@@ -8,9 +8,9 @@ import { MailService, processKeywordReplacements } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
 import { DataSource, QueryFailedError, type Repository } from 'typeorm';
 import {
-  shouldEmailUser,
-  shouldPushUser,
-  shouldTextUser,
+  userActionNotifsEnabled_email,
+  userActionNotifsEnabled_push,
+  userActionNotifsEnabled_text,
 } from '../notifs/notifs.service';
 import {
   ActionEventReminderService,
@@ -163,7 +163,7 @@ export class ActionEventNotifWorker {
     }
 
     let sendingAnyNotif = false;
-    if (shouldPushUser(plan.user)) {
+    if (userActionNotifsEnabled_push(plan.user)) {
       sendingAnyNotif = true;
       const pushMessage = await this.processCustomReminderText(
         plan.group.pushMessage,
@@ -188,7 +188,7 @@ export class ActionEventNotifWorker {
         notif.sent = true;
       }
     }
-    if (shouldTextUser(plan.user)) {
+    if (userActionNotifsEnabled_text(plan.user)) {
       sendingAnyNotif = true;
       const textMessage = await this.processCustomReminderText(
         plan.group.textMessage,
@@ -208,7 +208,7 @@ export class ActionEventNotifWorker {
       }
       notif.mms = result;
     }
-    if (shouldEmailUser(plan.user)) {
+    if (userActionNotifsEnabled_email(plan.user)) {
       sendingAnyNotif = true;
 
       const emailMessage = await this.processCustomReminderText(

@@ -34,9 +34,9 @@ import {
 } from './entities/action-event-notif.entity';
 import { generateCIDForNotif } from './notif-utils';
 import {
-  shouldEmailUser,
-  shouldPushUser,
-  shouldTextUser,
+  userActionNotifsEnabled_email,
+  userActionNotifsEnabled_push,
+  userActionNotifsEnabled_text,
 } from './notifs.service';
 import { testUser } from './test-users';
 
@@ -328,13 +328,13 @@ export class ActionEventReminderService {
     );
     const channels = plans.map((plan) => {
       const channels: ('email' | 'text' | 'push')[] = [];
-      if (shouldPushUser(plan.user)) {
+      if (userActionNotifsEnabled_push(plan.user)) {
         channels.push('push');
       }
-      if (shouldTextUser(plan.user)) {
+      if (userActionNotifsEnabled_text(plan.user)) {
         channels.push('text');
       }
-      if (shouldEmailUser(plan.user)) {
+      if (userActionNotifsEnabled_email(plan.user)) {
         channels.push('email');
       }
       return channels;

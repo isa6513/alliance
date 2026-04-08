@@ -3,7 +3,10 @@ import { ActionsService } from 'src/actions/actions.service';
 import { MailService } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
 import { generateCIDForNotif } from 'src/notifs/notif-utils';
-import { shouldEmailUser, shouldTextUser } from 'src/notifs/notifs.service';
+import {
+  userActionNotifsEnabled_email,
+  userActionNotifsEnabled_text,
+} from 'src/notifs/notifs.service';
 import { suspensionMessage } from 'src/notifs/textnotifcontents';
 import { ContractService } from 'src/contract/contract.service';
 import { DataSource } from 'typeorm';
@@ -71,7 +74,7 @@ export class ContractSuspenderWorker {
           });
           if (res) {
             const cid = generateCIDForNotif();
-            if (shouldTextUser(user)) {
+            if (userActionNotifsEnabled_text(user)) {
               await this.mmsService.sendMms(
                 user.phoneNumber!,
                 suspensionMessage,
@@ -79,7 +82,7 @@ export class ContractSuspenderWorker {
                 cid,
               );
             }
-            if (shouldEmailUser(user)) {
+            if (userActionNotifsEnabled_email(user)) {
               await this.mailService.sendContractSuspendedEmail(
                 user.email,
                 user.name,

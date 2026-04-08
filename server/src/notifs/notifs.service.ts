@@ -49,7 +49,7 @@ export type CreateUnreadContentParams = Required<
 > &
   DeepPartial<UnreadContent>;
 
-export function shouldEmailUser(user: User) {
+export function userActionNotifsEnabled_email(user: User) {
   return (
     user.emailNotifsForActions &&
     !user.turnedOffAllNotifs &&
@@ -57,7 +57,7 @@ export function shouldEmailUser(user: User) {
   );
 }
 
-export function shouldTextUser(user: User) {
+export function userActionNotifsEnabled_text(user: User) {
   return (
     user.textNotifsForActions &&
     !user.turnedOffAllNotifs &&
@@ -68,7 +68,7 @@ export function shouldTextUser(user: User) {
   );
 }
 
-export function shouldPushUser(user: User) {
+export function userActionNotifsEnabled_push(user: User) {
   return !user.turnedOffAllNotifs && user.pushNotifsForActions;
 }
 
