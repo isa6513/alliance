@@ -115,7 +115,7 @@ jobs:
         working-directory: ./apps/frontend
 
       - name: Typecheck
-        run: bun run tsc
+        run: bun typecheck
         working-directory: ./apps/frontend
 
       - name: Build React App

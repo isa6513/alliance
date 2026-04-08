@@ -143,7 +143,7 @@ export default function ActionFollowUpFormsTab({
             instructions: fields.instructions?.trim() || null,
             cohortExpression:
               (fields.cohortExpression as Record<string, unknown> | null) ??
-              null,
+              undefined,
           },
         });
         if (res.data) {

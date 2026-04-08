@@ -1,4 +1,4 @@
-- NEVER run `bun run tsc` / root frontend typecheck after routine edits unless you are changing types.
+- To typecheck, run `bun typecheck` in `./server`, `./apps/frontend`, or `./apps/admin`. For mobile, run `bunx tsc --noEmit` in `./apps/mobile`. `tsc` produces **no output on success** — empty output means it compiled cleanly. Do not re-run it if the output is empty. **Never run `tsc` without `--noEmit`** (or `tsc -b` without `--noEmit`) — it emits `.d.ts` and `.js` files throughout the repo.
 
 ### Server
 

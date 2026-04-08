@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+const DATE_WIDTH = 1000 * 60 * 60 * 24 * 14;
+
 const NewActionTimeline = () => {
-  const [dateWidth, setDateWidth] = useState(1000 * 60 * 60 * 24 * 14);
   const [viewWidth, setViewWidth] = useState(1000 * 60 * 60 * 24 * 7);
   const [viewCenter, setViewCenter] = useState(new Date().getTime());
 
   const startDate = useMemo(
-    () => new Date(new Date().getTime() - dateWidth / 2),
-    [dateWidth]
+    () => new Date(new Date().getTime() - DATE_WIDTH / 2),
+    [],
   );
   const endDate = useMemo(
-    () => new Date(startDate.getTime() + dateWidth),
-    [startDate, dateWidth]
+    () => new Date(startDate.getTime() + DATE_WIDTH),
+    [startDate],
   );
 
   const outerRef = useRef<HTMLDivElement>(null);
@@ -60,7 +61,7 @@ const NewActionTimeline = () => {
           className="absolute top-4 bottom-0 bg-zinc-100 text-sm text-zinc-600 font-mono pt-1"
           style={{
             left: `${timeToPixel(
-              startDate.getTime() + index * 1000 * 60 * 60 * 24
+              startDate.getTime() + index * 1000 * 60 * 60 * 24,
             )}px`,
             fontWeight: 450,
           }}

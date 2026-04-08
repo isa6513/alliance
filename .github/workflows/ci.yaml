@@ -143,5 +143,45 @@ jobs:
         working-directory: ./apps/frontend
 
       - name: Typecheck
-        run: bun run tsc
+        run: bun typecheck
         working-directory: ./apps/frontend
+
+  typecheck-admin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.6
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate React Router Types
+        run: bunx react-router typegen
+        working-directory: ./apps/admin
+
+      - name: Typecheck
+        run: bun typecheck
+        working-directory: ./apps/admin
+
+  typecheck-mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.6
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
+        working-directory: ./apps/mobile

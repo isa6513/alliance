@@ -1,9 +1,10 @@
-import { ActionDto, actionsFindAllWithDrafts } from "@alliance/shared/client";
+import { actionsFindAllWithDrafts } from "@alliance/shared/client";
 import React, { useCallback, useEffect, useState } from "react";
 import ActionTimeline from "../components/ActionTimeline";
+import { Action } from "@alliance/shared/client/types.gen";
 
 const Timeline: React.FC = () => {
-  const [actions, setActions] = useState<ActionDto[]>([]);
+  const [actions, setActions] = useState<Action[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

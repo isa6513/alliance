@@ -14,8 +14,10 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "emitDeclarationOnly": true,
+    "noEmit": true,
     "jsx": "react-jsx",
+    "rootDirs": [".", "./.react-router/types", "../.."],
+    "rootDir": "../..",
 
     /* Linting */
     "strict": true,
@@ -28,9 +30,8 @@
     "src",
     "../../common",
     "../../shared",
+    "../../sharedweb",
     "vite-env.d.ts",
-    ".react-router/types/**/*",
-    "../../shared/client/hey-api.ts",
-    "../../shared/client/client.gen.ts"
+    ".react-router/types"
   ]
 }
