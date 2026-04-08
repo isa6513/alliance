@@ -18,12 +18,10 @@ export interface ActionActivityFeedItemProps {
 }
 
 const ACTIVITY_TYPE_CLICKABLE = {
-  user_joined: false,
   user_completed: true,
   user_submitted_follow_up_form: true,
 
   // no rendered activity
-  user_declined: null,
   user_wont_complete: null,
   user_dismissed: null,
 } as const satisfies {

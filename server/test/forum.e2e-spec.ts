@@ -64,7 +64,7 @@ describe('Forum (e2e)', () => {
       name: 'Test Action',
       category: 'Test',
       body: 'Test action for forum tests',
-      status: ActionStatus.GatheringCommitments,
+      status: ActionStatus.MemberAction,
       cohortExpression: {
         type: 'Tag',
         tagId: ctx.defaultTag.id,
@@ -74,8 +74,8 @@ describe('Forum (e2e)', () => {
 
     const event = eventRepo.create({
       title: 'Action Started',
-      description: 'Action is now in gathering commitments phase',
-      newStatus: ActionStatus.GatheringCommitments,
+      description: 'Action is now in member action phase',
+      newStatus: ActionStatus.MemberAction,
       date: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
       action: testAction,
     });

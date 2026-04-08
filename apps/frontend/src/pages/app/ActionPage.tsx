@@ -59,14 +59,8 @@ export default function ActionPage() {
     navigate(href("/actions/:id", { id: actionId.toString() }));
   }, [actionId, navigate]);
 
-  const {
-    action,
-    loading,
-    onCompleteAction,
-    onJoinAction,
-    onDeclineAction,
-    onOptOutAction,
-  } = useActionHandlers(actionId, isAuthenticated, reloadTasks);
+  const { action, loading, onCompleteAction, onOptOutAction } =
+    useActionHandlers(actionId, isAuthenticated, reloadTasks);
 
   const publicMode = !isAuthenticated;
 
@@ -118,9 +112,7 @@ export default function ActionPage() {
                 action,
                 userRelation: action.userRelation ?? null,
                 onCompleteAction,
-                onJoinAction,
                 publicMode,
-                onDeclineAction,
                 onOptOutAction,
                 activities,
                 handleLikeActivity,

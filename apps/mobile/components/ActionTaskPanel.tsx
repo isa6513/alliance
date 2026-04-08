@@ -7,16 +7,7 @@ import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import { useCallback } from "react";
 import { usePostHog } from "posthog-react-native";
 
-export type ActionTaskPanelProps = Pick<
-  ActionTaskPanelPropsShared,
-  | "action"
-  | "onCompleteAction"
-  | "onJoinAction"
-  | "onDeclineAction"
-  | "onOptOutAction"
-  | "disabled"
-  | "formResponse"
-> & {
+export type ActionTaskPanelProps = ActionTaskPanelPropsShared & {
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
   onSubmitSuccess?: () => void;
@@ -25,8 +16,6 @@ export type ActionTaskPanelProps = Pick<
 const ActionTaskPanel = ({
   action,
   onCompleteAction,
-  onJoinAction,
-  onDeclineAction,
   onOptOutAction,
   scrollPageTo,
   scrollToEnd,
@@ -38,8 +27,6 @@ const ActionTaskPanel = ({
     useTaskFormHandlers({
       action,
       onCompleteAction,
-      onJoinAction,
-      onDeclineAction,
       onOptOutAction,
     });
 

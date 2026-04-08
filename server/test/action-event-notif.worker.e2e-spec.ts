@@ -155,7 +155,6 @@ describe('ActionEventNotifWorker (e2e)', () => {
         body: 'Body copy',
         shortDescription: 'Short description',
         type: ActionTaskType.Activity,
-        commitmentless: true,
         everyoneShouldComplete: false,
         suite,
         timeEstimate,
@@ -399,7 +398,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         actionId: action.id,
         user,
         userId: user.id,
-        type: ActionActivityType.USER_JOINED,
+        type: ActionActivityType.USER_COMPLETED,
       }),
     );
 
@@ -1518,7 +1517,6 @@ describe('ActionEventNotifWorker (e2e)', () => {
         body: 'Body copy',
         shortDescription: 'Short description',
         type: ActionTaskType.Activity,
-        commitmentless: true,
         everyoneShouldComplete: true,
         cohortExpression,
       }),
@@ -1550,7 +1548,6 @@ describe('ActionEventNotifWorker (e2e)', () => {
         body: 'Body',
         shortDescription: 'Short',
         type: ActionTaskType.Activity,
-        commitmentless: true,
         everyoneShouldComplete: true,
       }),
     );

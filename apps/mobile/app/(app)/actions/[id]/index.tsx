@@ -187,8 +187,6 @@ export default function ActionDetailScreen() {
     loading,
     refetchAction,
     onCompleteAction,
-    onJoinAction,
-    onDeclineAction,
     onOptOutAction,
   } = useActionHandlers(parseInt(id), true, reloadTasks);
 
@@ -274,8 +272,6 @@ export default function ActionDetailScreen() {
                   action={action}
                   userRelation={userRelation ?? null}
                   onCompleteAction={onCompleteAction}
-                  onJoinAction={onJoinAction}
-                  onDeclineAction={onDeclineAction}
                   onOptOutAction={onOptOutAction}
                 />
               </View>
@@ -286,21 +282,6 @@ export default function ActionDetailScreen() {
                 </Text>
               </View>
             )}
-            {userRelation === "joined" &&
-              action.status === "gathering_commitments" && (
-                <Card cardStyle={CardStyle.Green} className="mt-4">
-                  <View className="flex-row items-center gap-2">
-                    <Check size={18} color="#166534" />
-                    <Text
-                      className="text-green-800 flex-1"
-                      weight={FontWeight.Medium}
-                    >
-                      You&apos;ve committed to participate. We&apos;ll notify
-                      you when it&apos;s time to act.
-                    </Text>
-                  </View>
-                </Card>
-              )}
           </View>
         );
 

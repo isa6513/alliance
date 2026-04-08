@@ -24,7 +24,6 @@ interface ActionTimelineBarProps {
 const STATUS_LABELS: Record<ActionStatus, string> = {
   draft: "Draft",
   planned: "Planned",
-  gathering_commitments: "Gathering Commitments",
   office_action: "Office Action",
   member_action: "Member Action",
   resolution: "Resolution",

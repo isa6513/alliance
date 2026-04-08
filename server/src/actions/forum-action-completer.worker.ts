@@ -211,7 +211,6 @@ export class ForumActionCompleterWorker {
         type: In([
           ActionActivityType.USER_COMPLETED,
           ActionActivityType.USER_WONT_COMPLETE,
-          ActionActivityType.USER_DECLINED,
         ]),
       },
     });

@@ -89,26 +89,12 @@ export class Action {
   @IsOptional()
   squareThumbnailImageAlt?: string;
 
-  @Column({ nullable: true })
-  @ApiPropertyOptional({
-    description: 'Number of commitments needed to start the action',
-  })
-  @IsOptional()
-  commitmentThreshold?: number;
-
   @Column({ default: 500, nullable: true })
   @ApiPropertyOptional({
     description: 'Suggested donation amount (cents)',
   })
   @IsOptional()
   donationAmount?: number;
-
-  @Column({ default: false })
-  @ApiProperty({
-    description: 'e.g. onboarding',
-  })
-  @IsNotEmpty()
-  commitmentless: boolean;
 
   @Column()
   @ApiProperty({ description: 'markdown page body' })

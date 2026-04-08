@@ -2,8 +2,6 @@ import { useCallback, useState } from "react";
 import {
   ActionDto,
   actionsComplete,
-  actionsDecline,
-  actionsJoin,
   FormResponseDto,
   SubmitFormDto,
   tasksOptout,
@@ -12,8 +10,6 @@ import {
 export interface ActionTaskPanelPropsShared {
   action: ActionDto;
   onCompleteAction: () => void;
-  onJoinAction: () => void;
-  onDeclineAction: () => void;
   onOptOutAction: () => void;
   disabled?: boolean;
   formResponse?: FormResponseDto;
@@ -22,16 +18,10 @@ export interface ActionTaskPanelPropsShared {
 export const useTaskFormHandlers = ({
   action,
   onCompleteAction,
-  onJoinAction,
-  onDeclineAction,
   onOptOutAction,
 }: Pick<
   ActionTaskPanelPropsShared,
-  | "action"
-  | "onCompleteAction"
-  | "onJoinAction"
-  | "onDeclineAction"
-  | "onOptOutAction"
+  "action" | "onCompleteAction" | "onOptOutAction"
 >) => {
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -50,34 +40,6 @@ export const useTaskFormHandlers = ({
       onCompleteAction();
     },
     [action, onCompleteAction],
-  );
-
-  const handleJoinAction = useCallback(async () => {
-    const req = await actionsJoin({
-      path: { id: action.id },
-    });
-    if (req.error) {
-      setActionError("Something went wrong. Please try again.");
-      return;
-    }
-    setActionError(null);
-    onJoinAction();
-  }, [action, onJoinAction]);
-
-  const handleDeclineAction = useCallback(
-    async (moral: boolean, reason: string) => {
-      const req = await actionsDecline({
-        path: { id: action.id },
-        body: { reason, moral },
-      });
-      if (req.error) {
-        setActionError("Something went wrong. Please try again.");
-        return;
-      }
-      setActionError(null);
-      onDeclineAction();
-    },
-    [action, onDeclineAction],
   );
 
   const handleAbandonAction = useCallback(
@@ -102,8 +64,6 @@ export const useTaskFormHandlers = ({
 
   return {
     handleCompleteWithTracking: handleComplete,
-    handleJoinAction,
-    handleDeclineAction,
     handleAbandonAction,
     actionError,
   };

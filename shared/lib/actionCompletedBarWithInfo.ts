@@ -3,7 +3,6 @@ import { ActionActivityDto, ActionDto } from "../client/types.gen";
 export interface ActionCompletedBarWithInfoPropsShared {
   action: Pick<
     ActionDto,
-    | "commitmentThreshold"
     | "status"
     | "everyoneShouldComplete"
     | "usersCompleted"
@@ -19,17 +18,10 @@ export interface ActionCompletedBarWithInfoPropsShared {
 }
 
 export function getCompletedPercentage(
-  action: ActionCompletedBarWithInfoPropsShared["action"]
+  action: ActionCompletedBarWithInfoPropsShared["action"],
 ) {
-  const value =
-    action.status === "gathering_commitments"
-      ? action.usersJoined
-      : action.usersCompleted;
-
-  const threshold =
-    action.status === "gathering_commitments"
-      ? action.commitmentThreshold
-      : action.usersJoined;
+  const value = action.usersCompleted;
+  const threshold = action.usersJoined;
 
   if (!threshold) {
     return { labelString: "", percentage: null };
@@ -39,7 +31,9 @@ export function getCompletedPercentage(
 
   const noDenominator = action.optional || action.everyoneShouldComplete;
 
-  const labelString = noDenominator ? value : `${value} / ${safeThreshold}`;
+  const labelString = noDenominator
+    ? `${value} member${value === 1 ? "" : "s"} completed`
+    : `${value} / ${safeThreshold} member${safeThreshold === 1 ? "" : "s"} completed`;
 
   const percentage = noDenominator ? 100 : (value / safeThreshold) * 100;
 

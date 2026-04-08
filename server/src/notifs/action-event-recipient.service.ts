@@ -280,27 +280,7 @@ export class ActionEventRecipientService {
         })?.date,
       });
 
-    if (eventStatus === ActionStatus.MemberAction && !action.commitmentless) {
-      const activities = await this.actionActivityRepository.find({
-        where: {
-          actionId: action.id,
-          type: ActionActivityType.USER_JOINED,
-        },
-        relations: {
-          user: {
-            tags: true,
-            awayRanges: true,
-            contractEvents: true,
-          },
-        },
-      });
-      return activities.map((a) => a.user).filter(filterToEligible);
-    }
-
-    if (
-      eventStatus === ActionStatus.GatheringCommitments ||
-      eventStatus === ActionStatus.MemberAction
-    ) {
+    if (eventStatus === ActionStatus.MemberAction) {
       const users = await this.userService.findActiveUsersWithTags();
       return users.filter(filterToEligible);
     }
@@ -352,7 +332,6 @@ export class ActionEventRecipientService {
           actionId: In(actions.map((action) => action.id)),
           type: In([
             ActionActivityType.USER_COMPLETED,
-            ActionActivityType.USER_DECLINED,
             ActionActivityType.USER_WONT_COMPLETE,
           ]),
         },

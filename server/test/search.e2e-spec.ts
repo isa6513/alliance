@@ -55,7 +55,7 @@ describe('Search (e2e)', () => {
       eventRepo.create({
         title: 'Launch',
         description: 'Action is live',
-        newStatus: ActionStatus.GatheringCommitments,
+        newStatus: ActionStatus.MemberAction,
         date: new Date(Date.now() - 1000),
         action: targetAction,
       }),

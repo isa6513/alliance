@@ -2,7 +2,6 @@ import { useCallback, useMemo } from "react";
 import { ActionDto, FollowUpForm } from "../client";
 import {
   ActionWithAwayStatus,
-  canJoinAction,
   isCurrentlyCompletedAction,
   isFollowUpFormActive,
   homePagePriorityComparator,
@@ -22,13 +21,6 @@ export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
       []
     );
   }, [actions]);
-
-  const newActions =
-    actions
-      ?.filter((action) => canJoinAction(action))
-      .sort((a, b) => {
-        return b.priority - a.priority;
-      }) || [];
 
   const isActionDeadlineWithinDays = useCallback(
     (action: ActionDto, days: number) => {
@@ -66,9 +58,7 @@ export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
   );
 
   const currentTask: ActionWithAwayStatus | null =
-    (newActions.length > 0 && newActions[0]) ||
-    (todoActions.length > 0 && todoActions[0]) ||
-    null;
+    (todoActions.length > 0 && todoActions[0]) || null;
 
   const currentWeekTodoActions = todoActions.filter((action) => {
     return showActionInSidebarList(action) && isActionInCurrentWeek(action);
@@ -119,7 +109,6 @@ export function useHomePageActions(actions: ActionWithAwayStatus[] | null) {
 
   return {
     todoActions,
-    newActions,
     currentTask,
     currentWeekTodoActions,
     nextWeekTodoActions,

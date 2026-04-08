@@ -89,7 +89,7 @@ const InvitePage: React.FC = () => {
     updatedAt: new Date().toISOString(),
     publicOnly: false,
     updates: [],
-    userRelation: "joined" as const,
+    userRelation: "none" as const,
     canParticipate: true,
     awayStatus: TaskAwayStatus.NOT_AWAY,
     events: [
@@ -110,7 +110,6 @@ const InvitePage: React.FC = () => {
         suiteManaged: false,
       },
     ],
-    commitmentless: false,
     followUpForms: [],
   };
 
@@ -196,7 +195,7 @@ const InvitePage: React.FC = () => {
               <div className="p-1 md:p-4 md:py-6 bg-zinc-50 mb-2">
                 <LargeActionCard
                   action={exampleTask}
-                  userRelation={"joined"}
+                  userRelation={"none"}
                   onUpdateActionState={() => {}}
                   onCompleteAction={() => {}}
                   showDetails={false}

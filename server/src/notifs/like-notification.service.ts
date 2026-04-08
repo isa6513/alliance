@@ -180,11 +180,6 @@ export class LikeNotificationService {
           ? `completion of: ${targetContent}`
           : 'action activity';
         break;
-      case 'activity:user_joined':
-        label = targetContent
-          ? `commitment to: ${targetContent}`
-          : 'action commitment';
-        break;
       case 'activity:user_submitted_follow_up_form':
         label = targetContent
           ? `follow-up to: ${targetContent}`

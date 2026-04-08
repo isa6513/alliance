@@ -16,9 +16,6 @@ export interface ActionListCardProps {
     | "shortDescription"
     | "usersJoined"
     | "usersCompleted"
-    | "commitmentThreshold"
-    | "type"
-    | "donationAmount"
     | "optional"
   >;
 }
@@ -29,7 +26,7 @@ const ActionListCard = ({ action }: ActionListCardProps) => {
     (id: number) => {
       navigate(`/actions/${id}`);
     },
-    [navigate]
+    [navigate],
   );
 
   const lastEventDate = getLastPastEventDate(action);
@@ -57,7 +54,9 @@ const ActionListCard = ({ action }: ActionListCardProps) => {
             <span
               className={cn(
                 "p-2 right-0 top-0 text-zinc-800 font-medium text-xs rounded-sm text-nowrap border-zinc-200 border",
-                action.status === "member_action" ? "bg-green/20" : "bg-zinc-50"
+                action.status === "member_action"
+                  ? "bg-green/20"
+                  : "bg-zinc-50",
               )}
             >
               {action.status}
@@ -75,9 +74,6 @@ const ActionListCard = ({ action }: ActionListCardProps) => {
           status={action.status}
           usersJoined={action.usersJoined}
           usersCompleted={action.usersCompleted}
-          commitmentThreshold={action.commitmentThreshold}
-          actionType={action.type}
-          donationAmount={action.donationAmount}
           className="mt-2"
         />
       </div>

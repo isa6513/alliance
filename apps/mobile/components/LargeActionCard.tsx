@@ -106,8 +106,6 @@ export default function LargeActionCard({
         <ActionTaskPanel
           action={action}
           onCompleteAction={onUpdateActionState}
-          onJoinAction={onUpdateActionState}
-          onDeclineAction={onUpdateActionState}
           onOptOutAction={onUpdateActionState}
           scrollPageTo={scrollPageTo}
           scrollToEnd={scrollToEnd}

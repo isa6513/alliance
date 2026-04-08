@@ -44,9 +44,7 @@ function generalUpdatePriority(
 
 function actionPriority(action: ActionPriorityFields): TaskPriority {
   const startDateString = action.events.find(
-    (event) =>
-      event.newStatus === "member_action" ||
-      event.newStatus === "gathering_commitments",
+    (event) => event.newStatus === "member_action",
   )?.date;
   return {
     priority: action.priority,
@@ -198,20 +196,18 @@ export function getDeadlineTimestamp(
   action: Pick<ActionDto, "events">,
 ): number {
   let i = 0;
-  // Find first 'member_action' or 'gathering_commitments' event
+  // Find first 'member_action' event
   while (
     action.events[i] &&
-    action.events[i].newStatus !== "member_action" &&
-    action.events[i].newStatus !== "gathering_commitments"
+    action.events[i].newStatus !== "member_action"
   ) {
     i++;
   }
 
-  // Find next non-'member_action' or 'gathering_commitments' event
+  // Find next non-'member_action' event
   while (
     action.events[i] &&
-    (action.events[i].newStatus === "member_action" ||
-      action.events[i].newStatus === "gathering_commitments")
+    action.events[i].newStatus === "member_action"
   ) {
     i++;
   }
@@ -229,8 +225,7 @@ export function canCompleteAction(action: ActionDto) {
     getPastEvents(action).some(
       (event) => event.newStatus === "member_action",
     ) &&
-    (action.userRelation === "joined" ||
-      (action.commitmentless && action.userRelation !== "completed")) &&
+    action.userRelation !== "completed" &&
     action.userRelation !== "declined" &&
     (action.canParticipate || action.publicOnly)
   );
@@ -241,7 +236,6 @@ export function shouldCompleteAction(action: ActionDto) {
     canCompleteAction(action) &&
     action.shouldParticipate &&
     (action.status === "member_action" ||
-      action.status === "gathering_commitments" ||
       (action.shouldCompleteAfterDeadline &&
         deadlineHasPassed(action, new Date()))) &&
     !action.publicOnly
@@ -251,24 +245,15 @@ export function shouldCompleteAction(action: ActionDto) {
 export function isCurrentlyCompletedAction(action: ActionDto) {
   return (
     action.shouldParticipate &&
-    (action.status === "member_action" ||
-      action.status === "gathering_commitments") &&
+    action.status === "member_action" &&
     !action.everyoneShouldComplete &&
     action.userRelation === "completed"
   );
 }
 
-export function canJoinAction(action: ActionDto) {
-  return (
-    action.status === "gathering_commitments" &&
-    action.userRelation === "none" &&
-    action.canParticipate
-  );
-}
-
 export function showActionInSidebarList(action: ActionWithAwayStatus) {
   return (
-    (shouldCompleteAction(action) || canJoinAction(action)) &&
+    shouldCompleteAction(action) &&
     action.awayStatus === TaskAwayStatus.NOT_AWAY &&
     !deadlineHasPassed(action, new Date()) &&
     action.userRelation !== "dismissed"
@@ -278,12 +263,9 @@ export function showActionInSidebarList(action: ActionWithAwayStatus) {
 export function deadlineHasPassed(action: ActionDto, date: Date): boolean {
   return (
     action.status !== "member_action" &&
-    action.status !== "gathering_commitments" &&
     action.events.some(
       (event) =>
-        new Date(event.date) < date &&
-        (event.newStatus === "member_action" ||
-          event.newStatus === "gathering_commitments"),
+        new Date(event.date) < date && event.newStatus === "member_action",
     )
   );
 }

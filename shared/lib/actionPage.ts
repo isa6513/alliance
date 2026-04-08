@@ -43,24 +43,6 @@ export function useActionHandlers(
     reloadTasks();
   }, [action, reloadTasks]);
 
-  const onJoinAction = useCallback(async () => {
-    if (!action) return;
-    setAction((action) => ({
-      ...action!,
-      userRelation: "joined",
-    }));
-    reloadTasks();
-  }, [action, reloadTasks]);
-
-  const onDeclineAction = useCallback(async () => {
-    if (!action) return;
-    setAction((action) => ({
-      ...action!,
-      userRelation: "declined",
-    }));
-    reloadTasks();
-  }, [action, reloadTasks]);
-
   const onOptOutAction = useCallback(async () => {
     if (!action) return;
     setAction((action) => ({
@@ -75,8 +57,6 @@ export function useActionHandlers(
     loading,
     refetchAction: fetchAction,
     onCompleteAction,
-    onJoinAction,
-    onDeclineAction,
     onOptOutAction,
   };
 }

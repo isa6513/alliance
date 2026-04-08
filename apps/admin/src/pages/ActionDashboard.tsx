@@ -74,8 +74,6 @@ export const getStatusColor = (status: ActionDto["status"]) => {
       return "bg-gray-100 text-gray-800";
     case "planned":
       return "bg-blue-100 text-blue-800";
-    case "gathering_commitments":
-      return "bg-yellow-100 text-yellow-800";
     case "office_action":
       return "bg-orange-100 text-orange-800";
     case "member_action":
@@ -309,7 +307,6 @@ const ActionDashboard: React.FC = () => {
     timeEstimate: 0,
     shortDescription: "",
     visibilityMode: "public",
-    commitmentless: true,
     isContractSigningAction: false,
     type: "Activity",
     preventCompletion: false,
@@ -336,7 +333,6 @@ const ActionDashboard: React.FC = () => {
         timeEstimate: 0,
         shortDescription: "",
         visibilityMode: "public",
-        commitmentless: true,
         type: "Activity",
         preventCompletion: false,
         taskFormId: undefined,
@@ -611,7 +607,6 @@ const ActionDashboard: React.FC = () => {
 
     // Handle numeric fields
     if (
-      name === "commitmentThreshold" ||
       name === "donationThreshold" ||
       name === "donationAmount"
     ) {

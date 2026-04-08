@@ -47,10 +47,7 @@ const ActionCompletedBarWithInfo: React.FC<ActionCompletedBarWithInfoProps> = ({
       <div className="flex flex-row items-center justify-between w-full gap-x-2">
         <div className="flex flex-row items-center gap-x-2 mb-1">
           <p className={cn(`text-${textSize}`, `text-${textColor}`)}>
-            {labelString}{" "}
-            {action.status === "gathering_commitments"
-              ? "members committed"
-              : "members completed"}
+            {labelString}
           </p>
           {showInfoTooltip && (
             <InfoTooltip

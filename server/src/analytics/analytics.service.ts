@@ -301,7 +301,6 @@ ORDER BY pp.total_session_duration_seconds DESC
         .andWhere('activity.type IN (:...types)', {
           types: [
             ActionActivityType.USER_WONT_COMPLETE,
-            ActionActivityType.USER_DECLINED,
           ],
         })
         .groupBy('activity.actionId')

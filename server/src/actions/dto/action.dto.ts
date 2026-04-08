@@ -152,7 +152,6 @@ export class CreateActionEventDto extends OmitType(ActionEventDto, [
 export class UpdateActionEventDto extends PartialType(CreateActionEventDto) {}
 
 export enum UserActionRelation {
-  Joined = 'joined',
   Completed = 'completed',
   None = 'none',
   Declined = 'declined',
@@ -575,7 +574,6 @@ export enum GlobalFeedItemType {
 }
 
 export const GlobalFeedActivityTypes = [
-  ActionActivityType.USER_JOINED,
   ActionActivityType.USER_COMPLETED,
   ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM,
 ] as const satisfies ActionActivityType[];

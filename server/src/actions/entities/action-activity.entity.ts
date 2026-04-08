@@ -20,19 +20,15 @@ import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import type { Ty } from 'src/tasks/entities/type';
 
 export enum ActionActivityType {
-  USER_JOINED = 'user_joined',
   USER_COMPLETED = 'user_completed',
-  USER_DECLINED = 'user_declined', // declining to commit
-  USER_WONT_COMPLETE = 'user_wont_complete', //declining after commitment
+  USER_WONT_COMPLETE = 'user_wont_complete',
   USER_DISMISSED = 'user_dismissed',
 
   USER_SUBMITTED_FOLLOW_UP_FORM = 'user_submitted_follow_up_form',
 }
 
 export const ALLOW_DUPLICATE = {
-  [ActionActivityType.USER_JOINED]: false,
   [ActionActivityType.USER_COMPLETED]: false,
-  [ActionActivityType.USER_DECLINED]: false,
   [ActionActivityType.USER_WONT_COMPLETE]: false,
   [ActionActivityType.USER_DISMISSED]: false,
   [ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM]: true,

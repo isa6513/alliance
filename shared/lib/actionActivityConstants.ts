@@ -1,10 +1,8 @@
 import { ActionActivityType } from "../client";
 
 export const actionActivityViewable = {
-  user_joined: true,
   user_completed: true,
   user_submitted_follow_up_form: true,
-  user_declined: false,
   user_wont_complete: false,
   user_dismissed: false,
 } as const satisfies Record<ActionActivityType, boolean>;
@@ -22,28 +20,22 @@ type ActionActivityVerbMapping = {
 };
 
 export const actionActivityTransitiveVerb = {
-  user_joined: "committed to",
   user_completed: "completed",
   user_submitted_follow_up_form: "followed up on",
-  user_declined: null,
   user_wont_complete: null,
   user_dismissed: null,
 } as const satisfies ActionActivityVerbMapping;
 
 export const actionActivityIntransitiveVerb = {
-  user_joined: "",
   user_completed: "completed",
   user_submitted_follow_up_form: "followed-up",
-  user_declined: null,
   user_wont_complete: null,
   user_dismissed: null,
 } as const satisfies ActionActivityVerbMapping;
 
 export const actionActivityCommentable = {
-  user_joined: false,
   user_completed: true,
   user_submitted_follow_up_form: true,
-  user_declined: false,
   user_wont_complete: false,
   user_dismissed: false,
 } as const satisfies {

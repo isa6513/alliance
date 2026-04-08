@@ -75,7 +75,7 @@ export type CustomActionStat = 'none' | 'users_invited';
 /**
  * New status of the action after the event
  */
-export type ActionStatus = 'draft' | 'planned' | 'gathering_commitments' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
+export type ActionStatus = 'draft' | 'planned' | 'office_action' | 'member_action' | 'resolution' | 'completed' | 'failed' | 'abandoned';
 
 export type ActionEvent = {
     /**
@@ -113,7 +113,7 @@ export type ActionEvent = {
 /**
  * Type of action activity
  */
-export type ActionActivityType = 'user_joined' | 'user_completed' | 'user_declined' | 'user_wont_complete' | 'user_dismissed' | 'user_submitted_follow_up_form';
+export type ActionActivityType = 'user_completed' | 'user_wont_complete' | 'user_dismissed' | 'user_submitted_follow_up_form';
 
 export type EditableContent = {
     /**
@@ -351,17 +351,9 @@ export type Action = {
      */
     squareThumbnailImageAlt?: string;
     /**
-     * Number of commitments needed to start the action
-     */
-    commitmentThreshold?: number;
-    /**
      * Suggested donation amount (cents)
      */
     donationAmount?: number;
-    /**
-     * e.g. onboarding
-     */
-    commitmentless: boolean;
     /**
      * markdown page body
      */
@@ -1199,6 +1191,15 @@ export type UpdateContractDto = {
     endDate: string | null;
 };
 
+export type OptOutActionDto = {
+    actionId: number;
+    reason: string;
+    outOfTime: boolean;
+    partialFormData?: {
+        [key: string]: unknown;
+    };
+};
+
 export type EditableContentDto = {
     /**
      * Markdown or plain text body
@@ -1261,21 +1262,7 @@ export type ActionActivityDto = {
     editableContent: EditableContentDto;
 };
 
-export type DeclineActionDto = {
-    reason: string;
-    moral: boolean;
-};
-
-export type OptOutActionDto = {
-    actionId: number;
-    reason: string;
-    outOfTime: boolean;
-    partialFormData?: {
-        [key: string]: unknown;
-    };
-};
-
-export type UserActionRelation = 'joined' | 'completed' | 'none' | 'declined' | 'dismissed';
+export type UserActionRelation = 'completed' | 'none' | 'declined' | 'dismissed';
 
 export type UserActionRelationDto = {
     relation: UserActionRelation;
@@ -1346,17 +1333,9 @@ export type ActionDto = {
      */
     squareThumbnailImageAlt?: string;
     /**
-     * Number of commitments needed to start the action
-     */
-    commitmentThreshold?: number;
-    /**
      * Suggested donation amount (cents)
      */
     donationAmount?: number;
-    /**
-     * e.g. onboarding
-     */
-    commitmentless: boolean;
     /**
      * markdown page body
      */
@@ -1516,14 +1495,9 @@ export type UpdateGeneralUpdateDto = {
     suiteIds?: Array<number>;
 };
 
-export type LatLonDto = {
-    latitude: number;
-    longitude: number;
-};
-
 export type GlobalFeedItemType = 'activity_group' | 'action_update' | 'new_members' | 'forum_comments';
 
-export type GlobalFeedActivityTypes = 'user_joined' | 'user_completed' | 'user_submitted_follow_up_form';
+export type GlobalFeedActivityTypes = 'user_completed' | 'user_submitted_follow_up_form';
 
 export type GlobalFeedActivityGroupDto = {
     users: Array<ProfileDto>;
@@ -1686,17 +1660,9 @@ export type CreateActionDto = {
      */
     squareThumbnailImageAlt?: string;
     /**
-     * Number of commitments needed to start the action
-     */
-    commitmentThreshold?: number;
-    /**
      * Suggested donation amount (cents)
      */
     donationAmount?: number;
-    /**
-     * e.g. onboarding
-     */
-    commitmentless: boolean;
     /**
      * markdown page body
      */
@@ -1792,17 +1758,9 @@ export type UpdateActionDto = {
      */
     squareThumbnailImageAlt?: string;
     /**
-     * Number of commitments needed to start the action
-     */
-    commitmentThreshold?: number;
-    /**
      * Suggested donation amount (cents)
      */
     donationAmount?: number;
-    /**
-     * e.g. onboarding
-     */
-    commitmentless?: boolean;
     /**
      * markdown page body
      */
@@ -2050,17 +2008,9 @@ export type ExportActionDto = {
      */
     squareThumbnailImageAlt?: string;
     /**
-     * Number of commitments needed to start the action
-     */
-    commitmentThreshold?: number;
-    /**
      * Suggested donation amount (cents)
      */
     donationAmount?: number;
-    /**
-     * e.g. onboarding
-     */
-    commitmentless: boolean;
     /**
      * markdown page body
      */
@@ -4854,36 +4804,6 @@ export type ContractUpdateResponses = {
 
 export type ContractUpdateResponse = ContractUpdateResponses[keyof ContractUpdateResponses];
 
-export type ActionsJoinData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/actions/join/{id}';
-};
-
-export type ActionsJoinResponses = {
-    200: ActionActivityDto;
-};
-
-export type ActionsJoinResponse = ActionsJoinResponses[keyof ActionsJoinResponses];
-
-export type ActionsDeclineData = {
-    body: DeclineActionDto;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/actions/decline/{id}';
-};
-
-export type ActionsDeclineResponses = {
-    200: ActionActivityDto;
-};
-
-export type ActionsDeclineResponse = ActionsDeclineResponses[keyof ActionsDeclineResponses];
-
 export type ActionsOptoutData = {
     body: OptOutActionDto;
     path: {
@@ -5091,21 +5011,6 @@ export type ActionsUpdateGeneralUpdateResponses = {
 
 export type ActionsUpdateGeneralUpdateResponse = ActionsUpdateGeneralUpdateResponses[keyof ActionsUpdateGeneralUpdateResponses];
 
-export type ActionsUserLocationsData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/actions/userlocations/{id}';
-};
-
-export type ActionsUserLocationsResponses = {
-    200: Array<LatLonDto>;
-};
-
-export type ActionsUserLocationsResponse = ActionsUserLocationsResponses[keyof ActionsUserLocationsResponses];
-
 export type ActionsGetActivityFeedData = {
     body?: never;
     path?: never;
@@ -5232,32 +5137,6 @@ export type ActionsFindAllWithDraftsResponses = {
 };
 
 export type ActionsFindAllWithDraftsResponse = ActionsFindAllWithDraftsResponses[keyof ActionsFindAllWithDraftsResponses];
-
-export type ActionsSseActionCountData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/actions/live/{id}';
-};
-
-export type ActionsSseActionCountResponses = {
-    200: unknown;
-};
-
-export type ActionsLiveListData = {
-    body?: never;
-    path?: never;
-    query: {
-        ids: string;
-    };
-    url: '/actions/live-list';
-};
-
-export type ActionsLiveListResponses = {
-    200: unknown;
-};
 
 export type ActionsFriendActivityForActionData = {
     body?: never;
@@ -5622,17 +5501,6 @@ export type ActionsClearDbData = {
 };
 
 export type ActionsClearDbResponses = {
-    200: unknown;
-};
-
-export type ActionsSetTestRelationsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/actions/setTestRelations';
-};
-
-export type ActionsSetTestRelationsResponses = {
     200: unknown;
 };
 

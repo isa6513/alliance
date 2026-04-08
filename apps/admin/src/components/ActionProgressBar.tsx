@@ -6,9 +6,6 @@ export interface ActionProgressBarProps {
   status: ActionDto["status"];
   usersJoined: number;
   usersCompleted: number;
-  commitmentThreshold?: number;
-  actionType?: string;
-  donationAmount?: number;
   className?: string;
 }
 
@@ -54,51 +51,11 @@ const ActionProgressBar: React.FC<ActionProgressBarProps> = ({
   status,
   usersJoined,
   usersCompleted,
-  commitmentThreshold,
-  actionType,
-  donationAmount,
   className,
 }) => {
   // Don't show progress bars for draft actions
   if (status === "draft") {
     return null;
-  }
-
-  // Gathering Commitments: Show progress towards commitment threshold
-  if (status === "gathering_commitments") {
-    if (actionType === "Funding") {
-      const suggestedAmount = donationAmount || 50;
-      const donationGoal = (usersJoined || 1000) * suggestedAmount;
-      const currentAmount = (usersJoined * suggestedAmount) / 100;
-      const percentage = (currentAmount / donationGoal) * 100;
-      const isComplete = currentAmount >= donationGoal;
-      const barColor = isComplete ? "bg-green-500" : "bg-yellow-500";
-
-      return (
-        <ProgressBarWrapper className={className}>
-          <ProgressBar
-            percentage={percentage}
-            barColor={barColor}
-            label={`$${currentAmount} / $${donationGoal} committed`}
-          />
-        </ProgressBarWrapper>
-      );
-    } else {
-      const threshold = commitmentThreshold || 10;
-      const percentage = (usersJoined / threshold) * 100;
-      const isComplete = usersJoined >= threshold;
-      const barColor = isComplete ? "bg-green-500" : "bg-yellow-500";
-
-      return (
-        <ProgressBarWrapper className={className}>
-          <ProgressBar
-            percentage={percentage}
-            barColor={barColor}
-            label={`${usersJoined} / ${threshold} commitments`}
-          />
-        </ProgressBarWrapper>
-      );
-    }
   }
 
   // Completion progress for various statuses

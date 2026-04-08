@@ -35,7 +35,6 @@ export type CreateEventFormProps = {
 const statusOptions: Record<ActionStatus, string> = {
   draft: "Draft",
   planned: "Planned",
-  gathering_commitments: "Gathering Commitments",
   office_action: "Office Action",
   member_action: "Member Action",
   resolution: "Resolution",
@@ -46,7 +45,6 @@ const statusOptions: Record<ActionStatus, string> = {
 
 const defaultEventNames: Record<ActionStatus, string> = {
   draft: "Draft",
-  gathering_commitments: "Gathering commitments",
   office_action: "Office taking action",
   member_action: "Members taking action",
   resolution: "Pending office resolution",
@@ -88,9 +86,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
   const [eventForm, setEventForm] = useState<CreateActionEventDto>({
     title: "",
     description: "",
-    newStatus: action.commitmentless
-      ? "member_action"
-      : "gathering_commitments",
+    newStatus: "member_action",
     date: new Date().toISOString(),
   });
 
@@ -160,8 +156,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
       if (
         useDeadlineEvent &&
         !response.error &&
-        (eventForm.newStatus === "member_action" ||
-          eventForm.newStatus === "gathering_commitments")
+        eventForm.newStatus === "member_action"
       ) {
         const officeActionEvent = {
           title: defaultEventNames[deadlineEventStatus],
@@ -221,9 +216,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
         setEventForm({
           title: "",
           description: "",
-          newStatus: action.commitmentless
-            ? "member_action"
-            : "gathering_commitments",
+          newStatus: "member_action",
           date: new Date().toISOString(),
         });
         setUseCustomName(false);
@@ -255,10 +248,6 @@ const CreateEventForm = (props: CreateEventFormProps) => {
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {Object.entries(statusOptions).map(([key, label]) => {
-            // Don't allow selecting gathering_commitments if action is commitmentless
-            if (key === "gathering_commitments" && action.commitmentless) {
-              return null;
-            }
             return (
               <option key={key} value={key}>
                 {label}
@@ -369,8 +358,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
         )}
       </div>
 
-      {(eventForm.newStatus === "member_action" ||
-        eventForm.newStatus === "gathering_commitments") && (
+      {eventForm.newStatus === "member_action" && (
         <div
           className={cn(
             useDeadlineEvent && "bg-zinc-100 mb-2",

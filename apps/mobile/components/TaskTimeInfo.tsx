@@ -22,7 +22,7 @@ const TaskTimeInfo = ({
 
   return (
     <View className={cn(className)}>
-      {!!action.timeEstimate && action.status !== "gathering_commitments" ? (
+      {!!action.timeEstimate ? (
         <View
           className={cn(
             "flex-row items-center gap-x-1",

@@ -255,24 +255,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
         gridCol: true,
       },
       {
-        name: "commitmentThreshold",
-        label: "Commitment Threshold",
-        type: "number",
-        section: "settings",
-        helpText: "Commitments needed to proceed",
-        show: (f) => !f.commitmentless,
-        gridCol: true,
-      },
-      {
-        name: "commitmentless",
-        label: "Use Commitment Mode",
-        type: "checkbox",
-        section: "settings",
-        helpText: "Require users to commit before member action",
-        inverted: true, // UI shows "Use Commitment Mode" but field is "commitmentless"
-      },
-
-      {
         name: "onboarding",
         label: "Onboarding",
         helpText:
@@ -545,7 +527,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
           value={(form as any)[f.name] ?? ""}
           onChange={onInputChange}
           required={f.required}
-          min={f.name === "commitmentThreshold" ? 1 : undefined}
+          min={undefined}
           step={f.name === "donationAmount" ? 0.01 : undefined}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
         />

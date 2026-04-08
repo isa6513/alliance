@@ -1,9 +1,4 @@
-import Card from "@alliance/sharedweb/ui/Card";
-import { CardStyle } from "@alliance/shared/styles/card";
 import { useCallback, useMemo } from "react";
-import { useAuth } from "../lib/AuthContext";
-import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
-import ActionTaskPanelCommit from "./ActionTaskPanelCommit";
 import ActionTaskPanelForm from "./ActionTaskPanelForm";
 // import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
 // import { StripeWrapper } from "./StripeWrapper";
@@ -14,6 +9,7 @@ import {
 import posthog from "posthog-js";
 import { canCompleteAction } from "@alliance/shared/lib/actionUtils";
 import { UserActionRelation } from "@alliance/shared/client";
+import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
 
 export type ActionTaskPanelProps = ActionTaskPanelPropsShared & {
   userRelation: UserActionRelation;
@@ -23,18 +19,12 @@ export type ActionTaskPanelProps = ActionTaskPanelPropsShared & {
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   action,
-  userRelation,
-  missedDeadline = false,
   onCompleteAction,
-  onJoinAction,
-  onDeclineAction,
   onOptOutAction,
   card = false,
   disabled = false,
   formResponse,
 }: ActionTaskPanelProps) => {
-  const { isAuthenticated } = useAuth();
-
   const handleCompleteAction = useCallback(() => {
     onCompleteAction();
     posthog.capture("action_completed", {
@@ -52,19 +42,12 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     });
   }, [action]);
 
-  const {
-    handleCompleteWithTracking,
-    actionError,
-    handleAbandonAction,
-    handleJoinAction,
-    handleDeclineAction,
-  } = useTaskFormHandlers({
-    action,
-    onCompleteAction: handleCompleteAction,
-    onJoinAction,
-    onDeclineAction,
-    onOptOutAction,
-  });
+  const { handleCompleteWithTracking, actionError, handleAbandonAction } =
+    useTaskFormHandlers({
+      action,
+      onCompleteAction: handleCompleteAction,
+      onOptOutAction,
+    });
 
   const errorMessageNode = useMemo(() => {
     if (!actionError) {
@@ -92,38 +75,6 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     );
   }
 
-  if (
-    !action.commitmentless &&
-    (action.status === "gathering_commitments" ||
-      action.status === "office_action") &&
-    !missedDeadline
-  ) {
-    if (userRelation === "joined") {
-      return (
-        <Card style={CardStyle.Green}>
-          <p>
-            <span className="font-medium">
-              You&apos;ve committed to participate.
-            </span>{" "}
-            We&apos;ll notify you when it&apos;s time to act.
-          </p>
-        </Card>
-      );
-    } else {
-      if (!isAuthenticated) {
-        return null;
-      }
-      return (
-        <>
-          <ActionTaskPanelCommit
-            onCommit={handleJoinAction}
-            onDecline={handleDeclineAction}
-          />
-          {errorMessageNode}
-        </>
-      );
-    }
-  }
   let completionElement = null;
   if (canCompleteAction(action)) {
     if (action.type === "Funding") {

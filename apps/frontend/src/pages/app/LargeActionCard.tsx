@@ -140,8 +140,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               action={action}
               userRelation={userRelation}
               onCompleteAction={handleCompleteAction}
-              onJoinAction={handleUpdateActionState}
-              onDeclineAction={handleUpdateActionState}
               onOptOutAction={handleUpdateActionState}
             />
           </div>

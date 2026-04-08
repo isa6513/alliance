@@ -15,13 +15,11 @@ export interface SmallActionCardProps {
     ActionDto,
     | "name"
     | "shortDescription"
-    | "commitmentless"
     | "category"
     | "id"
     | "status"
     | "everyoneShouldComplete"
     | "userRelation"
-    | "commitmentThreshold"
     | "usersCompleted"
     | "usersJoined"
     | "optional"
@@ -50,19 +48,9 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
     [navigate, action.id]
   );
 
-  const waitingOnCompletion =
-    action.status === "member_action" &&
-    (action.userRelation === "joined" || action.commitmentless);
+  const waitingOnCompletion = action.status === "member_action";
 
-  const waitingOnCommitment =
-    action.status === "gathering_commitments" && action.userRelation === "none";
-
-  const waitingForOffice =
-    action.status === "office_action" && action.userRelation === "joined";
-
-  const waitingOnOthers =
-    action.status === "gathering_commitments" &&
-    action.userRelation === "joined";
+  const waitingForOffice = action.status === "office_action";
 
   return (
     <div className={cn("relative", className)}>
@@ -77,16 +65,8 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
               {waitingOnCompletion && (
                 <Tag style={TagStyle.GreyOutline}>Needs your completion</Tag>
               )}
-              {waitingOnCommitment && (
-                <Tag style={TagStyle.GreyOutline}>Gathering commitments</Tag>
-              )}
               {waitingForOffice && (
                 <Tag style={TagStyle.GreyOutline}>Office taking action</Tag>
-              )}
-              {waitingOnOthers && (
-                <Tag style={TagStyle.GreyOutline}>
-                  Waiting for commitments from others
-                </Tag>
               )}
             </div>
 

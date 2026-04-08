@@ -16,7 +16,7 @@ const TaskTimeInfo = ({
 
   return (
     <div className="flex flex-row flex-wrap gap-x-4">
-      {!!action.timeEstimate && action.status !== "gathering_commitments" && (
+      {!!action.timeEstimate && (
         <div className="flex flex-row items-center gap-x-1.5 text-base text-zinc-500">
           <ClockIcon />
           <p className="text-green">{`${action.timeEstimate} minute${

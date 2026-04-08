@@ -5,9 +5,7 @@ import {
 import { useCallback, useState } from "react";
 
 const ACTIVITY_TYPE_OPTIONS = Object.entries({
-  user_joined: "Joined",
   user_completed: "Completed",
-  user_declined: "Declined",
   user_wont_complete: "Won't complete",
   user_dismissed: null,
   user_submitted_follow_up_form: null,

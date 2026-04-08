@@ -1,5 +1,4 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, IsNull, Not, Repository } from 'typeorm';
 import { LiveActivityRegistration } from './entities/live-activity-registration.entity';
@@ -72,7 +71,7 @@ export class LiveActivityWorker {
 
       // Find users who joined but haven't completed
       const joinedUserIds =
-        await this.actionsService.findUsersJoinedForAction(action);
+        await this.actionsService.findEligibleUsersForAction(action);
       const completedActivities = await this.actionActivityRepository.find({
         where: { actionId: action.id, type: ActionActivityType.USER_COMPLETED },
       });

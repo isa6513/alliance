@@ -78,7 +78,7 @@ describe('AdminViewer (e2e)', () => {
         name: 'Test Action',
         category: 'Test',
         body: 'Test action for forum tests',
-        status: ActionStatus.GatheringCommitments,
+        status: ActionStatus.MemberAction,
       });
 
       await actionRepository.save(testAction);

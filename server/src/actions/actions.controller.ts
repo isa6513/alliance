@@ -4,7 +4,6 @@ import {
   Controller,
   Delete,
   Get,
-  MessageEvent,
   NotFoundException,
   Param,
   ParseBoolPipe,
@@ -13,7 +12,6 @@ import {
   Post,
   Query,
   Request,
-  Sse,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -25,8 +23,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { instanceToPlain } from 'class-transformer';
-import { Observable, from, fromEvent, merge } from 'rxjs';
-import { bufferTime, filter, map, scan, share } from 'rxjs/operators';
 import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 import {
@@ -56,10 +52,8 @@ import {
   CreateActionSuiteDto,
   CreateActionUpdateDto,
   CreateReminderGroupDto,
-  DeclineActionDto,
   ExportActionDto,
   GlobalFeedItemDto,
-  LatLonDto,
   OptOutActionDto,
   PasteJsonDto,
   PreviewEmailHtmlDto,
@@ -101,44 +95,12 @@ import {
 
 @Controller('actions')
 export class ActionsController {
-  private readonly delta$: Observable<{ actionId: number; delta: number }>;
   constructor(
     private readonly actionsService: ActionsService,
     private readonly eventEmitter: EventEmitter2,
     private readonly actionEventReminderService: ActionEventReminderService,
     private readonly forumActionCompleterWorker: ForumActionCompleterWorker,
-  ) {
-    this.delta$ = fromEvent<{ actionId: number; delta: number }>(
-      this.eventEmitter,
-      'action.delta',
-    ).pipe(share());
-  }
-
-  @Post('join/:id')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: ActionActivityDto })
-  join(@Request() req: JwtRequest, @Param('id', ParseIntPipe) id: number) {
-    if (!req.user) {
-      throw new UnauthorizedException('User not found');
-    }
-    return this.actionsService.joinAction(+id, req.user.sub);
-  }
-
-  @Post('decline/:id')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: ActionActivityDto })
-  decline(
-    @Request() req: JwtRequest,
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: DeclineActionDto,
-  ) {
-    return this.actionsService.declineAction(
-      id,
-      req.user.sub,
-      body.reason,
-      body.moral,
-    );
-  }
+  ) {}
 
   @Post('optout/:id')
   @UseGuards(AuthGuard)
@@ -306,14 +268,6 @@ export class ActionsController {
     return this.actionsService.deleteGeneralUpdate(id);
   }
 
-  @Get('userlocations/:id')
-  @ApiOkResponse({ type: [LatLonDto] })
-  async userLocations(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<LatLonDto[]> {
-    return this.actionsService.userCoordinatesForAction(id);
-  }
-
   @Get('activities/feed')
   @UseGuards(AuthOptionalGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })
@@ -429,72 +383,6 @@ export class ActionsController {
         suite: true,
       })
       .then((actions) => instanceToPlain(actions));
-  }
-
-  @Sse('live/:id')
-  @Public()
-  @ApiOperation({ summary: 'SSE endpoint for join counts on a single action' })
-  sseActionCount(
-    @Param('id', ParseIntPipe) id: number,
-  ): Observable<MessageEvent> {
-    const snapshot$ = from(this.actionsService.countCommitted(id));
-
-    const counter$ = merge(
-      snapshot$,
-      this.delta$.pipe(
-        filter((e) => e.actionId === id),
-        map((e) => e.delta),
-      ),
-    ).pipe(
-      scan((total, delta) => total + delta),
-      map((t) => ({ data: t.toString() }) as MessageEvent),
-    );
-
-    return counter$;
-  }
-
-  @Sse('live-list')
-  @Public()
-  @ApiOperation({ summary: 'SSE endpoint for join counts on multiple actions' })
-  liveList(@Query('ids') idsQuery?: string): Observable<MessageEvent> {
-    if (!idsQuery) throw new BadRequestException('ids query param required');
-    const ids = idsQuery.split(',').map(Number).filter(Boolean);
-    const idSet = new Set(ids);
-
-    /* 1️⃣ initial snapshot */
-    const snapshot$ = from(this.actionsService.countCommittedBulk(ids));
-
-    /* 2️⃣ batch all deltas for these ids every 100 ms */
-    const batched$ = this.delta$.pipe(
-      filter((e) => idSet.has(e.actionId)), // only the ids this client cares about
-      bufferTime(100), // 100 ms window (tweak as needed)
-      filter((buf) => buf.length > 0), // skip empty windows
-      map((buf) => {
-        // collapse many deltas into cumulative {id: Δ}
-        const byId: Record<number, number> = {};
-        for (const { actionId, delta } of buf) {
-          byId[actionId] = (byId[actionId] ?? 0) + delta;
-        }
-        return byId;
-      }),
-    );
-
-    /* 3️⃣ running totals */
-    const counters$ = merge(snapshot$, batched$).pipe(
-      scan(
-        (state, change) => {
-          // change is snapshot (full map) *or* batched delta map
-          for (const id of Object.keys(change).map(Number)) {
-            state[id] = (state[id] ?? 0) + change[id];
-          }
-          return { ...state }; // emit copy for distinct reference
-        },
-        {} as Record<number, number>,
-      ),
-      map((s) => ({ data: JSON.stringify(s) }) as MessageEvent),
-    );
-
-    return counters$;
   }
 
   @Get('friendActivity/:actionId')
@@ -803,16 +691,6 @@ export class ActionsController {
   @ApiOkResponse()
   clearDb() {
     return this.actionsService.clearDb();
-  }
-
-  @Post('setTestRelations')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse()
-  setTestRelations(@Request() req: JwtRequest) {
-    if (!req.user) {
-      throw new UnauthorizedException('User not found');
-    }
-    return this.actionsService.setTestRelations(req.user.sub);
   }
 
   @Post('likeActivity/:id')

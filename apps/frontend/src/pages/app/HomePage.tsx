@@ -94,7 +94,6 @@ const HomePage = () => {
 
   const {
     todoActions,
-    newActions,
     currentWeekTodoActions,
     nextWeekTodoActions,
     remainingTasksEstimatedTimeCurrentWeek,
@@ -105,10 +104,8 @@ const HomePage = () => {
   const numTodo = todoActions.filter(showActionInSidebarList).length;
 
   const hasOnboardingTasks = useMemo(
-    () =>
-      todoActions.some((a) => a.onboarding) ||
-      newActions.some((a) => a.onboarding),
-    [todoActions, newActions],
+    () => todoActions.some((a) => a.onboarding),
+    [todoActions],
   );
 
   const isLargeScreen = useMediaQuery("(min-width: 1150px)");
@@ -236,7 +233,7 @@ const HomePage = () => {
       <>
         {hasTaskSectionContent && (
           <TaskNavigatorListShell>
-            {taskNavigatorCurrentWeekSidebarActions.length + newActions.length >
+            {taskNavigatorCurrentWeekSidebarActions.length >
               0 && (
               <p className="text-zinc-600 mb-1">
                 <span className="text-green font-medium mr-0.5">
@@ -330,7 +327,6 @@ const HomePage = () => {
     currentWeekTodoActions,
     followUpFormsByActionId,
     followUpParentActionsNotInCompletedList,
-    newActions,
     nextWeekTodoActions,
     numTodo,
     selectedTaskNavigatorItem,

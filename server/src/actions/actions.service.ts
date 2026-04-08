@@ -9,7 +9,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { instanceToPlain } from 'class-transformer';
 import { randomBytes } from 'crypto';
-import { from, Observable } from 'rxjs';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
 import {
@@ -90,7 +89,6 @@ import {
   GlobalFeedItemDto,
   GlobalFeedItemType,
   GlobalFeedNewMembersDto,
-  LatLonDto,
   ReminderGroupPlanDto,
   SetPriorityDto,
   SuspensionPlanDto,
@@ -376,44 +374,10 @@ export class ActionsService {
       },
     });
 
-    return this.findUsersJoinedForAction(action);
+    return this.findEligibleUsersForAction(action);
   }
 
-  async findUsersJoinedForAction(action: Action): Promise<number[]> {
-    return action.commitmentless
-      ? this.findUsersJoinedForCommitmentlessAction(action)
-      : this.findUsersJoinedForCommitmentfulAction(action);
-  }
-
-  async findUsersJoinedForCommitmentfulAction(
-    action: Action,
-  ): Promise<number[]> {
-    const activities = await this.actionActivityRepository.find({
-      where: {
-        actionId: action.id,
-        type: In([
-          ActionActivityType.USER_JOINED,
-          ActionActivityType.USER_WONT_COMPLETE,
-        ]),
-      },
-    });
-
-    const userIds: Set<number> = new Set(
-      activities
-        .filter((activity) => activity.type === ActionActivityType.USER_JOINED)
-        .map((activity) => activity.userId),
-    );
-    for (const activity of activities.filter(
-      (activity) => activity.type === ActionActivityType.USER_WONT_COMPLETE,
-    )) {
-      userIds.delete(activity.userId);
-    }
-    return Array.from(userIds);
-  }
-
-  async findUsersJoinedForCommitmentlessAction(
-    action: Action,
-  ): Promise<number[]> {
+  async findEligibleUsersForAction(action: Action): Promise<number[]> {
     const event = action.events.find(
       (event) => event.newStatus === ActionStatus.MemberAction,
     );
@@ -476,7 +440,7 @@ export class ActionsService {
       },
     });
 
-    const joinedUserIds = await this.findUsersJoinedForAction(action);
+    const joinedUserIds = await this.findEligibleUsersForAction(action);
 
     const completedActivities = await this.actionActivityRepository.find({
       where: {
@@ -957,13 +921,6 @@ export class ActionsService {
   ): Promise<UserActionRelation> {
     if (
       activities.some(
-        (activity) => activity.type === ActionActivityType.USER_DECLINED,
-      )
-    ) {
-      return UserActionRelation.Declined;
-    }
-    if (
-      activities.some(
         (activity) => activity.type === ActionActivityType.USER_WONT_COMPLETE,
       )
     ) {
@@ -982,13 +939,6 @@ export class ActionsService {
       )
     ) {
       return UserActionRelation.Completed;
-    }
-    if (
-      activities.some(
-        (activity) => activity.type === ActionActivityType.USER_JOINED,
-      )
-    ) {
-      return UserActionRelation.Joined;
     }
     return UserActionRelation.None;
   }
@@ -1034,16 +984,8 @@ export class ActionsService {
     } = options;
     const action = await this.findOne({ id: actionId, userId });
 
-    if (
-      (type === ActionActivityType.USER_JOINED ||
-        type === ActionActivityType.USER_COMPLETED) &&
-      !adminCreated
-    ) {
+    if (type === ActionActivityType.USER_COMPLETED && !adminCreated) {
       await this.ensureUserEligibleForAction(action, userId);
-    }
-
-    if (type === ActionActivityType.USER_JOINED) {
-      this.eventEmitter.emit('action.delta', { actionId, delta: +1 });
     }
 
     const user = await this.userService.findOneOrFail(userId);
@@ -1095,51 +1037,7 @@ export class ActionsService {
       await this.liveActivityService.updateCompletionCount(actionId);
     }
 
-    await this.checkAndProcessAutomaticTransitions(actionId);
-
     return activityDto;
-  }
-
-  async joinAction(
-    actionId: number,
-    userId: number,
-  ): Promise<ActionActivityDto> {
-    const action = await this.findOne({ id: actionId, userId });
-
-    if (action.status !== ActionStatus.GatheringCommitments) {
-      throw new BadRequestException(
-        'You can only join an action during the gathering commitments phase',
-      );
-    }
-
-    return this.createActionActivity({
-      actionId,
-      userId,
-      type: ActionActivityType.USER_JOINED,
-    });
-  }
-
-  async declineAction(
-    actionId: number,
-    userId: number,
-    reason: string,
-    isMoral: boolean,
-  ): Promise<ActionActivityDto> {
-    const action = await this.findOne({ id: actionId, userId });
-    await this.ensureUserEligibleForAction(action, userId);
-    const user = await this.userService.findOneOrFail(userId);
-
-    const activity = this.actionActivityRepository.create({
-      type: ActionActivityType.USER_DECLINED,
-      actionId: actionId,
-      userId: userId,
-      action: action,
-      user: user,
-      declineReason: reason,
-      isMoral,
-    });
-    const savedActivity = await this.actionActivityRepository.save(activity);
-    return new ActionActivityDto(savedActivity);
   }
 
   async optoutAction(
@@ -1281,37 +1179,6 @@ export class ActionsService {
     }
   }
 
-  countCommitted(actionId: number): Observable<number> {
-    return from(
-      this.actionActivityRepository.count({
-        where: {
-          action: { id: actionId },
-          type: ActionActivityType.USER_JOINED,
-        },
-      }),
-    );
-  }
-
-  async countCommittedBulk(ids: number[]): Promise<Record<number, number>> {
-    if (!ids.length) return {};
-
-    const rows = await this.actionActivityRepository
-      .createQueryBuilder('ua')
-      .select('ua.actionId', 'id')
-      .addSelect('COUNT(*)', 'count')
-      .where('ua.actionId IN (:...ids)', { ids })
-      .andWhere('ua.type IN (:...types)', {
-        types: [ActionActivityType.USER_JOINED],
-      })
-      .groupBy('ua.actionId')
-      .getRawMany<{ id: string; count: string }>();
-
-    const map: Record<number, number> = {};
-    rows.forEach((r) => (map[+r.id] = +r.count));
-    ids.forEach((id) => (map[id] ??= 0));
-    return map;
-  }
-
   async getLikedActivityIds(
     activityIds: number[],
     userId: number,
@@ -1366,27 +1233,6 @@ export class ActionsService {
           likedByMe: likedIds.has(activity.id),
         }),
     );
-  }
-
-  async userCoordinatesForAction(actionId: number): Promise<LatLonDto[]> {
-    const joinActivities = await this.actionActivityRepository.find({
-      where: {
-        action: { id: actionId },
-        type: ActionActivityType.USER_JOINED,
-      },
-      relations: {
-        user: { city: true },
-      },
-    });
-    return joinActivities
-      .filter(
-        (activity) =>
-          activity.user.city !== null && activity.user.city !== undefined,
-      )
-      .map((activity) => ({
-        latitude: activity.user.city!.latitude,
-        longitude: activity.user.city!.longitude,
-      }));
   }
 
   buildOutputFormResponse(
@@ -1551,7 +1397,6 @@ export class ActionsService {
     if (options.filterFeedTypes !== false) {
       qb.where('activity.type IN (:...types)', {
         types: [
-          ActionActivityType.USER_JOINED,
           ActionActivityType.USER_COMPLETED,
           ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM,
         ],
@@ -1680,64 +1525,6 @@ export class ActionsService {
     }
   }
 
-  async checkAndProcessAutomaticTransitions(actionId: number) {
-    const action = await this.findOne({ id: actionId, serverSide: true });
-
-    // Check if we should transition from GatheringCommitments to CommitmentsReached
-    if (action.status === ActionStatus.GatheringCommitments) {
-      if (
-        action.commitmentThreshold &&
-        action.usersJoined >= action.commitmentThreshold
-      ) {
-        await this.createAutomaticTransitionEvent(
-          actionId,
-          ActionStatus.OfficeAction,
-          'Commitment threshold reached',
-          `${action.usersJoined} people have committed to this action, meeting the threshold of ${action.commitmentThreshold}.`,
-        );
-      }
-    }
-
-    // Check if we should transition from MemberAction to Resolution
-    if (
-      action.status === ActionStatus.MemberAction &&
-      action.usersJoined > 0 &&
-      action.usersCompleted >= action.usersJoined &&
-      !action.commitmentless
-    ) {
-      await this.createAutomaticTransitionEvent(
-        actionId,
-        ActionStatus.Resolution,
-        'All members completed action',
-        `All ${action.usersJoined} committed members have completed the action.`,
-      );
-    }
-  }
-
-  private async createAutomaticTransitionEvent(
-    actionId: number,
-    newStatus: ActionStatus,
-    title: string,
-    description: string,
-  ): Promise<void> {
-    const action = await this.findOne({ id: actionId, serverSide: true });
-
-    const eventData: CreateActionEventDto = {
-      title,
-      description,
-      newStatus,
-      date: new Date(), // Set to current time for immediate transition
-    };
-
-    const newEvent = this.actionEventRepository.create({
-      ...eventData,
-      action,
-    });
-
-    await this.actionEventRepository.save(newEvent);
-    await this.syncGeneralUpdateDatesForSuites([action.suite?.id]);
-  }
-
   async clearDb() {
     if (process.env.NODE_ENV !== 'development') {
       return;
@@ -1745,21 +1532,6 @@ export class ActionsService {
     await this.actionActivityRepository.delete({});
     await this.actionEventRepository.delete({});
     await this.actionRepository.delete({});
-  }
-
-  async setTestRelations(id: number) {
-    const actions = await this.actionRepository.find({
-      relations: { events: true },
-    });
-    for (const action of actions) {
-      if (action.status === ActionStatus.MemberAction) {
-        await this.createActionActivity({
-          actionId: action.id,
-          userId: id,
-          type: ActionActivityType.USER_JOINED,
-        });
-      }
-    }
   }
 
   async getActivityForUser(userId: number): Promise<ActionActivityDto[]> {
@@ -2716,7 +2488,7 @@ export class ActionsService {
       const joinedUsersPromises = await Promise.all(
         actions.map(async (action) => ({
           actionId: action.id,
-          usersJoined: await this.findUsersJoinedForAction(action),
+          usersJoined: await this.findEligibleUsersForAction(action),
         })),
       );
 
@@ -2839,10 +2611,7 @@ export class ActionsService {
           return UserActionRelationPillStatus.Completed;
         case ActionActivityType.USER_WONT_COMPLETE:
           return UserActionRelationPillStatus.WontComplete;
-        case ActionActivityType.USER_DECLINED:
-          return UserActionRelationPillStatus.WontComplete;
         case ActionActivityType.USER_DISMISSED:
-        case ActionActivityType.USER_JOINED:
         case ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM:
           return null;
         default:
@@ -2867,10 +2636,7 @@ export class ActionsService {
           detail.status = status;
         }
         // Capture withdrawal reason details for wont_complete and declined activities
-        if (
-          activity.type === ActionActivityType.USER_WONT_COMPLETE ||
-          activity.type === ActionActivityType.USER_DECLINED
-        ) {
+        if (activity.type === ActionActivityType.USER_WONT_COMPLETE) {
           detail.declineReason = activity.declineReason;
           detail.isMoral = activity.isMoral;
           detail.outOfTime = activity.outOfTime;
@@ -2985,7 +2751,6 @@ export class ActionsService {
         type: In([
           ActionActivityType.USER_COMPLETED,
           ActionActivityType.USER_WONT_COMPLETE,
-          ActionActivityType.USER_DECLINED,
         ]),
       },
     });
@@ -3123,48 +2888,31 @@ export class ActionsService {
     }
 
     const actionIds: number[] = [];
-    let needsActiveUsers = false;
     for (const suite of suitesToProcess) {
       for (const action of suite.actions) {
         actionIds.push(action.id);
-        if (action.commitmentless) {
-          needsActiveUsers = true;
-        }
       }
     }
 
-    const [dismissedActivities, joinedActivities, completionActivities] =
-      await Promise.all([
-        this.actionActivityRepository.find({
-          where: {
-            actionId: In(actionIds),
-            type: ActionActivityType.USER_DISMISSED,
-          },
-        }),
-        this.actionActivityRepository.find({
-          where: {
-            actionId: In(actionIds),
-            type: ActionActivityType.USER_JOINED,
-          },
-          relations: {
-            user: { tags: true, awayRanges: true, contractEvents: true },
-          },
-        }),
-        this.actionActivityRepository.find({
-          where: {
-            actionId: In(actionIds),
-            type: In([
-              ActionActivityType.USER_COMPLETED,
-              ActionActivityType.USER_WONT_COMPLETE,
-              ActionActivityType.USER_DECLINED,
-            ]),
-          },
-        }),
-      ]);
+    const [dismissedActivities, completionActivities] = await Promise.all([
+      this.actionActivityRepository.find({
+        where: {
+          actionId: In(actionIds),
+          type: ActionActivityType.USER_DISMISSED,
+        },
+      }),
+      this.actionActivityRepository.find({
+        where: {
+          actionId: In(actionIds),
+          type: In([
+            ActionActivityType.USER_COMPLETED,
+            ActionActivityType.USER_WONT_COMPLETE,
+          ]),
+        },
+      }),
+    ]);
 
-    const activeUsers = needsActiveUsers
-      ? await this.userService.findActiveUsersWithTags()
-      : [];
+    const activeUsers = await this.userService.findActiveUsersWithTags();
 
     const dismissedByAction = new Map<number, Set<number>>();
     for (const activity of dismissedActivities) {
@@ -3172,14 +2920,6 @@ export class ActionsService {
         dismissedByAction.set(activity.actionId, new Set());
       }
       dismissedByAction.get(activity.actionId)!.add(activity.userId);
-    }
-
-    const joinedUsersByAction = new Map<number, User[]>();
-    for (const activity of joinedActivities) {
-      if (!joinedUsersByAction.has(activity.actionId)) {
-        joinedUsersByAction.set(activity.actionId, []);
-      }
-      joinedUsersByAction.get(activity.actionId)!.push(activity.user);
     }
 
     const completedByAction = new Map<number, Set<number>>();
@@ -3202,9 +2942,7 @@ export class ActionsService {
           currentEventId: event.id,
         });
 
-        const baseCandidates = action.commitmentless
-          ? activeUsers
-          : (joinedUsersByAction.get(action.id) ?? []);
+        const baseCandidates = activeUsers;
 
         const cohortMemberIds =
           await this.actionEventRecipientService.resolveCohortMemberIds(

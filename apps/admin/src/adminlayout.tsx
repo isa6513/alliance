@@ -31,7 +31,6 @@ export interface LoaderData {
 }
 
 export interface ActivitiesForAction {
-  join: ActionActivityDto | null;
   completion: ActionActivityDto | null;
 }
 
@@ -58,13 +57,6 @@ export async function clientLoader() {
   const completionActivities = activityList.filter(
     (activity) => activity.type === "user_completed"
   );
-  const joinActivities = activityList.filter(
-    (activity) => activity.type === "user_joined"
-  );
-
-  joinActivities.forEach((activity) => {
-    actionToRelationMap.set(activity.actionId, "joined");
-  });
 
   completionActivities.forEach((activity) => {
     actionToRelationMap.set(activity.actionId, "completed");
@@ -74,13 +66,10 @@ export async function clientLoader() {
   activityList.forEach((activity) => {
     if (!activitiesForAction.has(activity.actionId)) {
       activitiesForAction.set(activity.actionId, {
-        join: null,
         completion: null,
       });
     }
-    if (activity.type === "user_joined") {
-      activitiesForAction.get(activity.actionId)!.join = activity;
-    } else if (activity.type === "user_completed") {
+    if (activity.type === "user_completed") {
       activitiesForAction.get(activity.actionId)!.completion = activity;
     }
   });
