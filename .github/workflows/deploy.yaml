@@ -683,6 +683,7 @@ jobs:
       - test-backend-unit
       - build-react-app
       - migrations-drift-check
+      - typecheck-mobile
       - visual-regression
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:

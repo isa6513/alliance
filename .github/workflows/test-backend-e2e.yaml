@@ -9,7 +9,7 @@ on:
 
 jobs:
   test-backend-e2e:
-    environment: ${{ inputs.environment || '' }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     services:
       postgres:
