@@ -3,7 +3,7 @@ import {
   Circle,
   CircleCheck,
   CircleChevronRight,
-  SquareArrowOutUpRight,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@alliance/shared/styles/util";
 import type { ReactNode } from "react";
@@ -43,7 +43,7 @@ function TaskNavigatorRow({
       <Link to={linkTo} className={rowClass}>
         {icon}
         <span>{label}</span>
-        <SquareArrowOutUpRight size={12} className="shrink-0 text-zinc-400" />
+        <ArrowRight size={12} className="shrink-0 text-zinc-400" />
       </Link>
     );
   }
