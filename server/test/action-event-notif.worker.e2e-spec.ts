@@ -379,7 +379,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     expect(notifs).toHaveLength(0);
   });
 
-  it('sends reminders to joined users who have not completed the action', async () => {
+  it('sends reminders to eligible users who have not completed the action', async () => {
     const now = Date.now();
     const user = await getPrimaryUser();
     await setUserContractSigned(
@@ -387,20 +387,10 @@ describe('ActionEventNotifWorker (e2e)', () => {
       new Date(now - 5 * 24 * 60 * 60 * 1000),
     );
 
-    const { action, memberEvent } = await createActionWithMemberEvent({
-      name: uniqueName('joined-action'),
+    const { memberEvent } = await createActionWithMemberEvent({
+      name: uniqueName('uncompleted-action'),
       eventDate: new Date(now - 50 * 60 * 1000),
     });
-
-    await activityRepo.save(
-      activityRepo.create({
-        action,
-        actionId: action.id,
-        user,
-        userId: user.id,
-        type: ActionActivityType.USER_COMPLETED,
-      }),
-    );
 
     const reminderGroup = await createReminderGroup(
       memberEvent,

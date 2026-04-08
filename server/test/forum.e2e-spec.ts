@@ -757,12 +757,12 @@ describe('Forum (e2e)', () => {
     });
 
     it('provides activity and action level comment listings', async () => {
-      const actionJoin = await request(ctx.app.getHttpServer())
-        .post(`/actions/join/${testAction.id}`)
+      const actionComplete = await request(ctx.app.getHttpServer())
+        .post(`/actions/complete/${testAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(201);
 
-      const activityId = actionJoin.body.id;
+      const activityId = actionComplete.body.id;
 
       await request(ctx.app.getHttpServer())
         .post(`/actions/addActivityComment/${activityId}`)
@@ -1307,12 +1307,12 @@ describe('Forum (e2e)', () => {
         actionId: testAction.id,
       });
 
-      const joinResponse = await request(ctx.app.getHttpServer())
-        .post(`/actions/join/${testAction.id}`)
+      const completeResponse = await request(ctx.app.getHttpServer())
+        .post(`/actions/complete/${testAction.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .expect(201);
 
-      const activityId = joinResponse.body.id;
+      const activityId = completeResponse.body.id;
 
       const commentResponse = await request(ctx.app.getHttpServer())
         .post(`/actions/addActivityComment/${activityId}`)

@@ -13,7 +13,7 @@ export const testActions: ActionDto[] = [
     category: "Climate Change",
     id: 1,
     image: "",
-    status: "gathering_commitments",
+    status: "member_action",
     timeEstimate: 5,
     usersJoined: 234,
     activities: [],
@@ -39,7 +39,7 @@ export const testActions: ActionDto[] = [
         suiteManaged: false,
       },
     ],
-    commitmentless: false,
+
     everyoneShouldComplete: false,
     archived: false,
     updates: [],
@@ -62,7 +62,7 @@ export const testActions: ActionDto[] = [
     category: "Climate Change",
     id: 2,
     image: "",
-    status: "gathering_commitments",
+    status: "member_action",
     timeEstimate: 5,
     usersJoined: 234,
     activities: [],
@@ -71,7 +71,7 @@ export const testActions: ActionDto[] = [
     type: "Activity",
     usersCompleted: 57,
     events: [],
-    commitmentless: false,
+
     everyoneShouldComplete: false,
     archived: false,
     priority: 0,
@@ -267,7 +267,7 @@ export const chartdata = [
 export const testActivities: ActionActivityDto[] = [
   {
     id: 1,
-    type: "user_joined",
+    type: "user_completed",
     createdAt: new Date().toISOString(),
     user: {
       id: 0,
@@ -292,7 +292,7 @@ export const testActivities: ActionActivityDto[] = [
   },
   {
     id: 2,
-    type: "user_joined",
+    type: "user_completed",
     createdAt: new Date().toISOString(),
     user: {
       id: 1,
