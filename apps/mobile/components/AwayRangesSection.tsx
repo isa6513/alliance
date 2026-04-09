@@ -58,11 +58,6 @@ function isFutureRange(range: UserAwayRangeDto): boolean {
   return new Date(range.startDate) > new Date();
 }
 
-function getTodayDateString(): string {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
-}
-
 export default function AwayRangesSection() {
   const [awayRanges, setAwayRanges] = useState<UserAwayRangeDto[]>([]);
   const [loading, setLoading] = useState(true);

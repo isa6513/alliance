@@ -1,4 +1,3 @@
-import { Check } from "lucide-react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -18,7 +17,6 @@ import {
   actionsLikeActivity,
   actionsUnlikeActivity,
 } from "@alliance/shared/client";
-import Card, { CardStyle } from "../../../../components/system/Card";
 import Text, {
   FontFamily,
   FontWeight,
@@ -182,13 +180,8 @@ export default function ActionDetailScreen() {
     router.reload();
   }, []);
 
-  const {
-    action,
-    loading,
-    refetchAction,
-    onCompleteAction,
-    onOptOutAction,
-  } = useActionHandlers(parseInt(id), true, reloadTasks);
+  const { action, loading, refetchAction, onCompleteAction, onOptOutAction } =
+    useActionHandlers(parseInt(id), true, reloadTasks);
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
 

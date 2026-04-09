@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { View } from "react-native";
 import { KeyboardExtender } from "react-native-keyboard-controller";
 
 type PortalContextValue = {

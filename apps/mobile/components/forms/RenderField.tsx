@@ -616,7 +616,6 @@ export function RenderField({
             disabled={disabled}
             allowCustomValue
             onSelect={(city) => onChange?.(city)}
-            onFocus={onFocus}
           />
           {renderValidationMessage(errorMessage)}
         </View>

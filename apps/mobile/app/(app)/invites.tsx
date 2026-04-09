@@ -20,7 +20,6 @@ import { inviteBuckets } from "@alliance/shared/lib/copy";
 import { runAsync } from "@alliance/shared/lib/utils";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import { useQuery } from "@tanstack/react-query";
-import { UserCheck } from "lucide-react-native";
 import { useAuth } from "../../lib/AuthContext";
 import { useReferralLink } from "../../lib/useReferralLink";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";

@@ -22,7 +22,6 @@ type Props = {
   debounceMs?: number;
   disabled?: boolean;
   allowCustomValue?: boolean;
-  onFocus?: () => void;
 };
 
 export default function CityAutosuggestMobile({
@@ -33,7 +32,6 @@ export default function CityAutosuggestMobile({
   debounceMs = 150,
   disabled = false,
   allowCustomValue = true,
-  onFocus,
 }: Props) {
   const {
     query,
@@ -44,7 +42,6 @@ export default function CityAutosuggestMobile({
     highlighted,
     setHighlighted,
     selectCity,
-    commitCustomValue,
     fetchGeolocation,
   } = useCityAutosuggest({
     value,
