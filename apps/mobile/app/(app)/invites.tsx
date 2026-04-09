@@ -5,7 +5,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { View, ScrollView, RefreshControl } from "react-native";
+import { View, RefreshControl } from "react-native";
+import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import type { OnetimeInviteDto } from "@alliance/shared/client";
 import {
   userApproveOnetimeInvite,
@@ -318,15 +319,14 @@ export default function InvitesScreen() {
           labels={INVITES_TAB_LABELS}
         />
       </View>
-      <ScrollView
-        className="flex-1"
+      <KeyboardAwareScrollView
         contentContainerStyle={{ paddingBottom: 24, flexGrow: 1 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         <View className="px-4 pt-4 gap-4">{tabContent[selectedTab]}</View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }
