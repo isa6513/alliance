@@ -245,6 +245,20 @@ const FAQPage: React.FC = () => {
               </p>
             </FAQExpandable>
             <FAQExpandable
+              title="What if I do not live in the United States?"
+              expanded={question === "cannot-complete-a-task"}
+            >
+              <p>
+                Alliance membership is open to anyone.
+              </p>
+              <p>
+                However, some actions require members to live in the United States. In these cases, we provide non-US members with a modified action, or we do not assign them the action .
+              </p>
+              <p>
+                At our current state, we do not have the capacity to design different actions for non-US members. As the Alliance grows, we hope to develop the capacity to design actions for all locations members live.
+              </p>
+            </FAQExpandable>
+            <FAQExpandable
               title="Who runs the Alliance?"
               expanded={question === "who-runs-the-alliance"}
             >
