@@ -45,6 +45,7 @@ import RenderPreviousAnswer from "./RenderPreviousAnswer";
 import VideoPlayer from "./VideoPlayer";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
 import {
+  Check,
   CircleCheck,
   Copy,
   Ellipsis,
@@ -105,20 +106,23 @@ function CopyTextDisplayMobile({
         <Text className="text-sm text-zinc-500 mb-1">{title}</Text>
       ) : null}
       <TouchableOpacity
-        className="flex-row items-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3"
+        className="relative rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3"
         onPress={handleCopy}
         activeOpacity={0.7}
       >
-        <Text className="flex-1" numberOfLines={1}>
-          {text}
-        </Text>
-        {copied ? (
-          <Text className="text-sm text-green ml-2" weight={FontWeight.Medium}>
-            Copied!
-          </Text>
-        ) : (
-          <Copy size={16} className="shrink-0 text-gray-400" />
-        )}
+        <Text>{text}</Text>
+        <View className="absolute top-1.5 right-1.5 flex-row items-center gap-1 bg-zinc-50 border border-zinc-200 px-1.5 py-0.5 rounded">
+          {copied ? (
+            <>
+              <Text className="text-sm text-green" weight={FontWeight.Medium}>
+                Copied!
+              </Text>
+              <Check size={14} className="text-green" />
+            </>
+          ) : (
+            <Copy size={14} className="text-gray-400" />
+          )}
+        </View>
       </TouchableOpacity>
     </View>
   );

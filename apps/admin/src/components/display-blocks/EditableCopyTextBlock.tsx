@@ -32,12 +32,22 @@ export function EditableCopyTextBlock({
             className="w-full text-xs text-gray-500 border-none outline-none bg-transparent"
             placeholder="Title (optional)"
           />
-          <input
-            type="text"
+          <textarea
             value={activeBlock.text}
-            onChange={(e) => handleUpdate({ text: e.target.value })}
-            className="w-full text-sm text-gray-900 border-none outline-none bg-transparent"
-            placeholder="Text to copy (e.g. email, URL)"
+            onChange={(e) => {
+              handleUpdate({ text: e.target.value });
+              e.target.style.height = "auto";
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            ref={(el) => {
+              if (el) {
+                el.style.height = "auto";
+                el.style.height = `${el.scrollHeight}px`;
+              }
+            }}
+            className="w-full text-sm text-gray-900 border-none outline-none bg-transparent resize-none overflow-hidden"
+            placeholder="Text to copy"
+            rows={1}
           />
         </div>
       )}
