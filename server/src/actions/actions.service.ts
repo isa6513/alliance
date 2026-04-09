@@ -132,6 +132,7 @@ import {
   computeIsAwayDuringAnyOfLastMemberAction,
   computeIsContractActiveDuringEntireLatestMemberAction,
   computeIsTaggedOrInManualCohort,
+  computeShouldParticipate,
 } from 'src/utils/action-user';
 import { computeIsAwayInRange } from 'src/utils/user';
 import { CommunityService } from 'src/community/community.service';
@@ -2951,7 +2952,7 @@ export class ActionsService {
 
         const baseUsers = baseCandidates.filter(
           (user) =>
-            this.actionEventRecipientService.computeShouldParticipate({
+            computeShouldParticipate({
               eventDate: event.date,
               deadlineDate: deadlineEvent?.date ?? null,
               everyoneShouldComplete: action.everyoneShouldComplete,

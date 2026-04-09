@@ -5,6 +5,7 @@ import type { Repository } from 'typeorm';
 import type { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import type { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import type { Community } from 'src/community/entities/community.entity';
+import { findLeast } from 'src/utils/filter';
 
 export function computeIsContractActiveDuringEntireLatestMemberAction(params: {
   action: Pick<Action, 'events' | 'latestMemberActionEvent'>;
@@ -110,4 +111,67 @@ export function computeIsTaggedOrInManualCohort(params: {
         endDate: latestMemberActionEventDeadline,
       }))
   );
+}
+
+/**
+ * Determines whether a user should participate in a given action event based on
+ * cohort membership, dismissal status, onboarding rules, contract dates, and the
+ * `everyoneShouldComplete` flag.
+ */
+export function computeShouldParticipate(params: {
+  eventDate: Date;
+  deadlineDate: Date | null;
+  everyoneShouldComplete: boolean;
+  cohortMemberIds: Set<number> | null;
+  user: User;
+  userDismissed: boolean;
+  onboarding: boolean;
+  includeSuspended?: boolean;
+  includeDismissed?: boolean;
+}): boolean {
+  const {
+    eventDate,
+    deadlineDate,
+    everyoneShouldComplete,
+    cohortMemberIds,
+    user,
+    userDismissed,
+    onboarding,
+    includeSuspended = false,
+    includeDismissed = false,
+  } = params;
+
+  if (!includeDismissed && userDismissed) {
+    return false;
+  }
+
+  if (cohortMemberIds && !cohortMemberIds.has(user.id)) {
+    return false;
+  }
+
+  if (
+    !everyoneShouldComplete &&
+    deadlineDate &&
+    !user.hasActiveContractInFullRange({
+      startDate: eventDate,
+      endDate: deadlineDate,
+    })
+  ) {
+    return false;
+  }
+
+  if (onboarding) {
+    const earliestContractEvent = findLeast(
+      user.contractEvents ?? [],
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    );
+    if (earliestContractEvent && earliestContractEvent.date < eventDate) {
+      return false;
+    }
+  }
+
+  if (includeSuspended) {
+    return true;
+  }
+  return user.hasActiveContractAt(eventDate) || everyoneShouldComplete;
 }

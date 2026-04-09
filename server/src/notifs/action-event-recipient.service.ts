@@ -19,7 +19,7 @@ import {
 } from 'src/actions/entities/reminder-group.entity';
 import { ActionSuite } from 'src/actions/entities/action-suite.entity';
 import { computeIsAwayInRange } from 'src/utils/user';
-import { findLeast } from 'src/utils/filter';
+import { computeShouldParticipate } from 'src/utils/action-user';
 import { CommunityService } from 'src/community/community.service';
 import type { CohortExpression } from 'src/actions/cohort-expression.types';
 import {
@@ -143,64 +143,6 @@ export class ActionEventRecipientService {
     return evaluateCohortExpression(expression, ctx);
   }
 
-  computeShouldParticipate(params: {
-    eventDate: Date;
-    deadlineDate: Date | null;
-    everyoneShouldComplete: boolean;
-    cohortMemberIds: Set<number> | null;
-    user: User;
-    userDismissed: boolean;
-    onboarding: boolean;
-    includeSuspended?: boolean;
-    includeDismissed?: boolean;
-  }): boolean {
-    const {
-      eventDate,
-      deadlineDate,
-      everyoneShouldComplete,
-      cohortMemberIds,
-      user,
-      userDismissed,
-      onboarding,
-      includeSuspended = false,
-      includeDismissed = false,
-    } = params;
-
-    if (!includeDismissed && userDismissed) {
-      return false;
-    }
-
-    if (cohortMemberIds && !cohortMemberIds.has(user.id)) {
-      return false;
-    }
-
-    if (
-      !everyoneShouldComplete &&
-      deadlineDate &&
-      !user.hasActiveContractInFullRange({
-        startDate: eventDate,
-        endDate: deadlineDate,
-      })
-    ) {
-      return false;
-    }
-
-    if (onboarding) {
-      const earliestContractEvent = findLeast(
-        user.contractEvents ?? [],
-        (a, b) => a.date.getTime() - b.date.getTime(),
-      );
-      if (earliestContractEvent && earliestContractEvent.date < eventDate) {
-        return false;
-      }
-    }
-
-    if (includeSuspended) {
-      return true;
-    }
-    return user.hasActiveContractAt(eventDate) || everyoneShouldComplete;
-  }
-
   getNextEvent(params: {
     events: ActionEvent[];
     currentEventId: number;
@@ -260,7 +202,7 @@ export class ActionEventRecipientService {
     ]);
 
     const filterToEligible = (user: User) =>
-      this.computeShouldParticipate({
+      computeShouldParticipate({
         eventDate: event.date,
         deadlineDate: deadlineEvent?.date ?? null,
         everyoneShouldComplete: action.everyoneShouldComplete,
@@ -371,7 +313,7 @@ export class ActionEventRecipientService {
 
     return users
       .filter((user) =>
-        this.computeShouldParticipate({
+        computeShouldParticipate({
           eventDate: event.date,
           deadlineDate: deadlineEvent?.date ?? null,
           everyoneShouldComplete: event.action.everyoneShouldComplete,
