@@ -39,13 +39,16 @@ export function NavbarOptionsProvider({ children }: { children: ReactNode }) {
 }
 
 export function useNavbarOptions(opts: NavbarOptions) {
-  const context = useContext(NavbarOptionsContext);
+  const setOptions = useContext(NavbarOptionsContext)?.setOptions;
 
   useEffect(() => {
-    if (!context) return;
-    const { setOptions } = context;
-    setOptions(opts);
+    if (!setOptions) {
+      return;
+    }
+    setOptions({
+      whiteBackground: opts.whiteBackground,
+      noBorder: opts.noBorder,
+    });
     return () => setOptions({ whiteBackground: false, noBorder: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opts.whiteBackground, opts.noBorder, context]);
+  }, [opts.whiteBackground, opts.noBorder, setOptions]);
 }
