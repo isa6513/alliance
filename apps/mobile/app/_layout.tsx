@@ -38,11 +38,17 @@ Notifications.setNotificationHandler({
   }),
 });
 
+const posthogHost =
+  process.env.EXPO_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
+
 const options: Partial<PostHogOptions> = {
+  host: posthogHost,
   enableSessionReplay: true,
   captureAppLifecycleEvents: true,
   sessionReplayConfig: {
     maskAllTextInputs: false,
+    captureLog: true,
+    captureNetworkTelemetry: true,
   },
 };
 
