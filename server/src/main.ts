@@ -70,9 +70,10 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidUnknownValues: true,
       disableErrorMessages: false,
+      forbidUnknownValues: true,
+      transform: true,
+      whitelist: true,
     }),
   );
   app.useGlobalInterceptors(new MetricsInterceptor());
