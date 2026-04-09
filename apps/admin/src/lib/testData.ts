@@ -39,6 +39,7 @@ export const FORM_BUILDER_PREVIEW_USER: UserDto = {
   remindAboutUncompletedGroupMembers: false,
   leaderOfIds: [],
   receiveReplyNotifications: false,
+  pushesForActionUpdates: false,
 };
 
 export const testActions: CreateActionDto[] = [

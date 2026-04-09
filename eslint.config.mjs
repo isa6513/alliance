@@ -5,7 +5,7 @@ export default tseslint.config([
 	...tseslint.configs.recommended,
 	{
         plugins: {'local-rules': eslintPluginExample},
-		files: ["**/*.ts"],
+		files: ["**/*.ts", "**/*.tsx"],
 		languageOptions: {
 			parserOptions: {
 				tsconfigRootDir: import.meta.dirname,

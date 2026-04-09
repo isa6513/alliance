@@ -132,8 +132,26 @@ jobs:
           name: admin-build
           path: apps/admin/admin-build.zip
 
+  typecheck-frontend:
+    uses: ./.github/workflows/typecheck-frontend.yaml
+
+  typecheck-admin:
+    uses: ./.github/workflows/typecheck-admin.yaml
+
   typecheck-mobile:
     uses: ./.github/workflows/typecheck-mobile.yaml
+
+  typecheck-server:
+    uses: ./.github/workflows/typecheck-server.yaml
+
+  typecheck-common:
+    uses: ./.github/workflows/typecheck-common.yaml
+
+  typecheck-shared:
+    uses: ./.github/workflows/typecheck-shared.yaml
+
+  typecheck-sharedweb:
+    uses: ./.github/workflows/typecheck-sharedweb.yaml
 
   deploy-react-app:
     runs-on: ubuntu-latest
@@ -143,7 +161,13 @@ jobs:
       - test-backend-e2e
       - test-backend-unit
       - migrations-drift-check
+      - typecheck-frontend
+      - typecheck-admin
       - typecheck-mobile
+      - typecheck-server
+      - typecheck-common
+      - typecheck-shared
+      - typecheck-sharedweb
       - visual-regression
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
@@ -683,7 +707,13 @@ jobs:
       - test-backend-unit
       - build-react-app
       - migrations-drift-check
+      - typecheck-frontend
+      - typecheck-admin
       - typecheck-mobile
+      - typecheck-server
+      - typecheck-common
+      - typecheck-shared
+      - typecheck-sharedweb
       - visual-regression
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
