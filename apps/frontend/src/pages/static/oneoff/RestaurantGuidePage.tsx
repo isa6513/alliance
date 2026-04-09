@@ -31,15 +31,16 @@ const RestaurantGuidePage: React.FC = () => {
                   <strong>Modifier Groups</strong>.
                 </li>
                 <li>
-                  Create a new group named <strong>"Include Utensils?"</strong>.
+                  Create a new group named{" "}
+                  <strong>&quot;Include Utensils?&quot;</strong>.
                 </li>
                 <li>
-                  Add options: <strong>"Yes"</strong> ($0.00) and{" "}
-                  <strong>"No"</strong> ($0.00).
+                  Add options: <strong>&quot;Yes&quot;</strong> ($0.00) and{" "}
+                  <strong>&quot;No&quot;</strong> ($0.00).
                 </li>
                 <li>
-                  Set <strong>Required</strong> to "Yes" and set both Min and
-                  Max selection to 1.
+                  Set <strong>Required</strong> to &quot;Yes&quot; and set both
+                  Min and Max selection to 1.
                 </li>
                 <li>
                   <strong>Apply to Items:</strong> Bulk-assign this modifier
@@ -66,11 +67,11 @@ const RestaurantGuidePage: React.FC = () => {
                   <strong>New Group</strong>.
                 </li>
                 <li>
-                  Name it <strong>"Utensils Included?"</strong> and add "Yes"
-                  and "No" choices.
+                  Name it <strong>&quot;Utensils Included?&quot;</strong> and
+                  add &quot;Yes&quot; and &quot;No&quot; choices.
                 </li>
                 <li>
-                  Toggle <strong>Required selection</strong> to "On".
+                  Toggle <strong>Required selection</strong> to &quot;On&quot;.
                 </li>
                 <li>
                   In the <strong>Items</strong> tab, link this group to all
@@ -117,7 +118,7 @@ const RestaurantGuidePage: React.FC = () => {
                 </li>
                 <li>
                   Click <strong>+ Add Modifier Group</strong> and name it
-                  "Include Utensils?".
+                  &quot;Include Utensils?&quot;.
                 </li>
                 <li>
                   Under <strong>Properties</strong>, set{" "}
@@ -128,7 +129,8 @@ const RestaurantGuidePage: React.FC = () => {
                   <strong>Max Selections</strong> to 1.
                 </li>
                 <li>
-                  Add two Modifier Options: "Yes" ($0.00) and "No" ($0.00).
+                  Add two Modifier Options: &quot;Yes&quot; ($0.00) and
+                  &quot;No&quot; ($0.00).
                 </li>
                 <li>
                   <strong>Crucial:</strong> Verify channel visibility is enabled
@@ -148,10 +150,13 @@ const RestaurantGuidePage: React.FC = () => {
                   <strong>Modifiers</strong>.
                 </li>
                 <li>
-                  Click <strong>Create a modifier</strong> and name it "Include
-                  Utensils?".
+                  Click <strong>Create a modifier</strong> and name it
+                  &quot;Include Utensils?&quot;.
                 </li>
-                <li>Add two options: "Yes" and "No" (both priced at $0.00).</li>
+                <li>
+                  Add two options: &quot;Yes&quot; and &quot;No&quot; (both
+                  priced at $0.00).
+                </li>
                 <li>
                   Under Selection Rules, toggle <strong>Required</strong> to On.
                 </li>
@@ -191,7 +196,7 @@ const RestaurantGuidePage: React.FC = () => {
               </h4>
               <p className="text-zinc-700 text-sm">
                 Ensure your digital kitchen displays or printed tickets clearly
-                highlight the "Yes/No" utensil modifier.
+                highlight the &quot;Yes/No&quot; utensil modifier.
               </p>
             </div>
             <div className="bg-white border border-green rounded p-6">
@@ -200,7 +205,7 @@ const RestaurantGuidePage: React.FC = () => {
               </h4>
               <p className="text-zinc-700 text-sm">
                 Instruct your team to only include utensils when explicitly
-                marked "Yes" on the order ticket.
+                marked &quot;Yes&quot; on the order ticket.
               </p>
             </div>
           </div>

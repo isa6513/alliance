@@ -7,7 +7,7 @@
     "dev": "react-router dev",
     "build": "react-router build",
     "serve": "react-router-serve build/server/index.js",
-    "typecheck": "tsc -p tsconfig.app.json",
+    "typecheck": "tsc -p tsconfig.app.json && eslint .",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",

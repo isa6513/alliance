@@ -29,10 +29,7 @@ export function NavbarOptionsProvider({ children }: { children: ReactNode }) {
     setOptionsState((prev) => ({ ...prev, ...opts }));
   }, []);
 
-  const value = useMemo(
-    () => ({ options, setOptions }),
-    [options, setOptions],
-  );
+  const value = useMemo(() => ({ options, setOptions }), [options, setOptions]);
 
   return (
     <NavbarOptionsContext.Provider value={value}>
@@ -43,12 +40,12 @@ export function NavbarOptionsProvider({ children }: { children: ReactNode }) {
 
 export function useNavbarOptions(opts: NavbarOptions) {
   const context = useContext(NavbarOptionsContext);
-  if (!context) return;
-
-  const { setOptions } = context;
 
   useEffect(() => {
+    if (!context) return;
+    const { setOptions } = context;
     setOptions(opts);
     return () => setOptions({ whiteBackground: false, noBorder: false });
-  }, [opts.whiteBackground, opts.noBorder, setOptions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opts.whiteBackground, opts.noBorder, context]);
 }

@@ -1,12 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import {
-  geoOrthographic,
-  geoPath,
-  select,
-  drag,
-  zoom,
-  timer,
-} from "d3";
+import { geoOrthographic, geoPath, select, drag, zoom, timer } from "d3";
 import type {
   Selection,
   GeoProjection,
@@ -43,7 +36,7 @@ const Globe: React.FC<GlobeProps> = ({
   const svgRef =
     useRef<Selection<SVGSVGElement, unknown, null, undefined>>(null);
   const projectionRef = useRef<GeoProjection>(null);
-  const pathRef = useRef<GeoPath<any, GeoPermissibleObjects>>(null);
+  const pathRef = useRef<GeoPath<unknown, GeoPermissibleObjects>>(null);
   const peopleGroupRef =
     useRef<Selection<SVGGElement, unknown, null, undefined>>(null);
   const rotateTimerRef = useRef<Timer>(null);
@@ -127,6 +120,7 @@ const Globe: React.FC<GlobeProps> = ({
       .data(world.features)
       .enter()
       .append("path")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .attr("d", pathRef.current as any)
       .attr("fill", colored ? "#c0e3aa" : "#fff")
       .attr("stroke", "#000")
@@ -135,22 +129,22 @@ const Globe: React.FC<GlobeProps> = ({
     /* --- drag behaviour ----------------------------------------------- */
     const k = sensitivity / projection.scale();
     svg.call(
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore typing mismatch
+      // @ts-expect-error typing mismatch
       drag().on("drag", (event: D3DragEvent) => {
         const r = projection.rotate();
         projection.rotate([r[0] + event.dx * k, 0]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mapG.selectAll("path").attr("d", pathRef.current as any);
         updateDotPositions(); // keeps dots glued to the surface
-      })
+      }),
     );
 
     /* --- zoom filter (optional – disabled wheel) ---------------------- */
     svg.call(
-      // @ts-ignore
+      // @ts-expect-error typing mismatch
       zoom()
         .filter((e) => !e.ctrlKey && !e.button && !e.type.includes("wheel"))
-        .on("zoom", null)
+        .on("zoom", null),
     );
 
     /* --- group that will hold the dynamic dots ------------------------ */
@@ -164,6 +158,7 @@ const Globe: React.FC<GlobeProps> = ({
       rotateTimerRef.current = timer(() => {
         const r = projection.rotate();
         projection.rotate([r[0] - sensitivity / projection.scale() / 6, r[1]]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mapG.selectAll("path").attr("d", pathRef.current as any);
         updateDotPositions();
       }, 200);
@@ -174,6 +169,7 @@ const Globe: React.FC<GlobeProps> = ({
       rotateTimerRef.current?.stop();
       svg.remove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colored, spin, strokeWidth]);
 
   /* ---------- 2) update people when prop changes ---------------------- */
@@ -206,7 +202,7 @@ const Globe: React.FC<GlobeProps> = ({
 
     // EXIT
     dots.exit().remove();
-  }, [people]);
+  }, [people, locations]);
 
   return (
     <div ref={mapRef} className="w-full aspect-square select-none touch-none" />

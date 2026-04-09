@@ -8,27 +8,27 @@ type Restaurant = {
   img: string;
 };
 
-const UtensilWastePage: React.FC = () => {
-  const restaurants: Restaurant[] = [
-    {
-      name: "Katsuo + Kombu",
-      url: "https://www.instagram.com/katsuo_and_kombu/",
-      img: "https://d2s742iet3d3t1.cloudfront.net/restaurants/restaurant-151140000000000000/restaurant_1684962456.png",
-    },
-    {
-      name: "Fambrini's Cafe",
-      url: "http://www.fambriniscafe.com/",
-      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUXSyeu0IvWJonDnejDguhgYf0hKgeTkpATQ&s",
-    },
-  ];
+const restaurants: Restaurant[] = [
+  {
+    name: "Katsuo + Kombu",
+    url: "https://www.instagram.com/katsuo_and_kombu/",
+    img: "https://d2s742iet3d3t1.cloudfront.net/restaurants/restaurant-151140000000000000/restaurant_1684962456.png",
+  },
+  {
+    name: "Fambrini's Cafe",
+    url: "http://www.fambriniscafe.com/",
+    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUXSyeu0IvWJonDnejDguhgYf0hKgeTkpATQ&s",
+  },
+];
 
+const UtensilWastePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredRestaurants = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return restaurants;
     return restaurants.filter((r) => r.name.toLowerCase().includes(query));
-  }, [restaurants, searchQuery]);
+  }, [searchQuery]);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -142,7 +142,7 @@ const UtensilWastePage: React.FC = () => {
             </div>
           ) : searchQuery.trim() !== "" ? (
             <p className="text-zinc-500 text-center py-12 border-2 border-dashed border-zinc-200 rounded">
-              No restaurants found matching "{searchQuery}"
+              No restaurants found matching &quot;{searchQuery}&quot;
             </p>
           ) : null}
         </div>
