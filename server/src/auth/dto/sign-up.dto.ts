@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsDefined,
   IsNotEmpty,
@@ -16,6 +17,7 @@ export class SignUpDto {
   readonly name: string;
 
   @IsDefined()
+  @Transform(({ value }) => value?.trim())
   @IsEmail()
   //   @Validate(IsUserAlreadyExist)
   @ApiProperty()

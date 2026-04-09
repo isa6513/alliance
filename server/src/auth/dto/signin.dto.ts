@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsDefined, IsEmail, IsEnum, IsNotEmpty } from 'class-validator';
 export type TokenMode = 'cookie' | 'header';
 
@@ -10,6 +11,7 @@ export class SignInDto {
 
   @ApiProperty()
   @IsDefined()
+  @Transform(({ value }) => value?.trim())
   @IsEmail()
   email: string;
 
