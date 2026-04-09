@@ -44,7 +44,7 @@ function formatSignupSocialProofNames(
 const memberQuotes = [
   {
     quote:
-      "On the whole, world is not going in the right direction. We need new ideas to change that, and the Alliance is just that. But it will work only if we all participate.",
+      "On the whole, the world is not going in the right direction. We need new ideas to change that, and the Alliance is just that. But it will work only if we all participate.",
     author:
       "Janos Pasztor, former UN Assistant Secretary-General for Climate Change",
     userId: 33,
@@ -337,9 +337,22 @@ const SignupPage: React.FC = () => {
             <div>
               <p className="text-lg md:text-xl text-zinc-900 mb-4">
                 We&apos;re a global group of people cooperating to improve the
-                world.
+                world.{" "}
+                <Link to={href("/progress")}>
+                  Every week, we assign you effective actions that take 15
+                  minutes a week.
+                </Link>
               </p>
+              <div className="text-base">
+                <ExampleActionCardList bgColor="white" dropdown={true} />
+              </div>
+            </div>
 
+            <div className="flex flex-col gap-y-4">
+              <p className="text-zinc-900 text-lg md:text-xl">
+                Every action is completed by other reliable members, multiplying
+                your impact.
+              </p>
               <div className="flex flex-col gap-y-2">
                 {memberQuotes.map((memberQuote, index) => (
                   <div
@@ -360,16 +373,6 @@ const SignupPage: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="text-base">
-              <Link
-                to={href("/progress")}
-                className="text-zinc-900 text-lg md:text-xl mb-4 hover:underline flex flex-row items-center gap-x-2"
-              >
-                Actions take 15 minutes a week.
-              </Link>
-
-              <ExampleActionCardList bgColor="white" dropdown={true} />
             </div>
 
             <div className="text-base">
