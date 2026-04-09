@@ -248,11 +248,12 @@ export const useTimedSet = (ttlMs: number) => {
   }, []);
 
   useEffect(() => {
+    const timeouts = timeoutsRef.current;
     return () => {
-      timeoutsRef.current.forEach((timeout) => {
+      timeouts.forEach((timeout) => {
         clearTimeout(timeout);
       });
-      timeoutsRef.current.clear();
+      timeouts.clear();
     };
   }, []);
 

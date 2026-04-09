@@ -209,7 +209,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
       areaPath,
       bisectDate,
     };
-  }, [props, height, yDomain, showArea, areaSeriesKey]);
+  }, [props, height, yDomain, showArea, areaSeriesKey, yAxisFormat]);
 
   // Numeric x-axis chart geometry
   const numericGeometry = useMemo(() => {
@@ -276,7 +276,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = (props) => {
       yTicks,
       lines,
     };
-  }, [props, height, yDomain]);
+  }, [props, height, yDomain, yAxisFormat]);
 
   const handleNumericHover = useCallback(
     (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
