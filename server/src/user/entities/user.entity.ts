@@ -281,6 +281,11 @@ export class User {
   @Allow()
   pushesForMessages: boolean;
 
+  @Column({ default: true })
+  @ApiProperty()
+  @Allow()
+  pushesForActionUpdates: boolean;
+
   @Column({ default: false })
   @ApiProperty()
   @Allow()

@@ -378,6 +378,13 @@ export default function SettingsPage() {
                   updateEditableUser({ pushesForMessages: value })
                 }
               />
+              <SettingsToggleRow
+                label="Action updates"
+                value={editableUser.pushesForActionUpdates ?? false}
+                onChange={(value) =>
+                  updateEditableUser({ pushesForActionUpdates: value })
+                }
+              />
             </View>
 
             <View className="mb-4">

@@ -506,6 +506,19 @@ const SettingsPage: React.FC = () => {
                 yesColor={ButtonColor.Green}
               />
             </div>
+            <div className="flex flex-row items-center justify-between gap-x-4 py-3">
+              <span className="font-medium">Action updates</span>
+              <YesNoToggle
+                value={editableUser.pushesForActionUpdates ?? false}
+                onChange={(next) =>
+                  updateEditableUser({ pushesForActionUpdates: next })
+                }
+                ariaLabel="Push notifications for action updates"
+                yesLabel="On"
+                noLabel="Off"
+                yesColor={ButtonColor.Green}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col md:flex-row gap-y-2 gap-x-12 font-medium mt-6 pt-6 border-t border-zinc-200">

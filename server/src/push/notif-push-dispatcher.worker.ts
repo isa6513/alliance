@@ -97,7 +97,7 @@ export class NotifPushDispatcherWorker {
     for (const notif of toSend) {
       const notifTypeToSendable: Record<NotificationCategory, boolean> = {
         [NotificationCategory.ActionEvent]: true,
-        [NotificationCategory.ActionUpdate]: true,
+        [NotificationCategory.ActionUpdate]: notif.user.pushesForActionUpdates,
         [NotificationCategory.ForumReply]: notif.user.pushesForComments,
         [NotificationCategory.FriendRequest]:
           notif.user.pushesForFriendRequests,
@@ -187,7 +187,8 @@ export class NotifPushDispatcherWorker {
     for (const { unreadContent, dto } of hydrated) {
       const contentTypeToSendable: Record<UnreadContentType, boolean> = {
         [UnreadContentType.ActionEvent]: true,
-        [UnreadContentType.ActionUpdate]: true,
+        [UnreadContentType.ActionUpdate]:
+          unreadContent.user.pushesForActionUpdates,
         [UnreadContentType.ForumReply]: unreadContent.user.pushesForComments,
       };
       if (!contentTypeToSendable[unreadContent.contentType]) {
