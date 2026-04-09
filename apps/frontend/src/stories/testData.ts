@@ -148,6 +148,7 @@ export const testAuthUser: UserDto = {
   receiveReplyNotifications: true,
   leaderOfIds: [],
   pushesForMessages: true,
+  pushesForActionUpdates: true,
 };
 
 export const testFriends: ProfileDto[] = [testUser, testUser, testUser];

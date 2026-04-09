@@ -81,6 +81,7 @@ export const testUser = new User({
   remindAboutUncompletedGroupMembers: true,
   receiveReplyNotifications: true,
   pushesForMessages: true,
+  pushesForActionUpdates: true,
 } satisfies Omit<
   User,
   | 'friends'
