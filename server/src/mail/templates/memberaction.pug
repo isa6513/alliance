@@ -7,11 +7,7 @@ html(lang="en")
 
   body
       p Hi #{name},
-      case commitmentless
-        when true
-          p A new action is ready for you to complete: "#{actionName}."
-        when false
-          p You previously committed to "#{actionName}."
+      p A new action is ready for you to complete: "#{actionName}."
 
       case hasDeadline
         when true
