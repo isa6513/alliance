@@ -7,7 +7,7 @@ import SecureStorage, { SecureStorageKey } from "../lib/SecureStorage";
 import { getApiUrl } from "../lib/config";
 import { useFonts } from "expo-font";
 import "../global.css";
-import { PostHogOptions, PostHogProvider } from "posthog-react-native";
+import PostHogProvider from "../lib/PostHogProvider";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import * as Notifications from "expo-notifications";
@@ -38,19 +38,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const posthogHost =
-  process.env.EXPO_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
-
-const options: Partial<PostHogOptions> = {
-  host: posthogHost,
-  enableSessionReplay: true,
-  captureAppLifecycleEvents: true,
-  sessionReplayConfig: {
-    maskAllTextInputs: false,
-    captureLog: true,
-    captureNetworkTelemetry: true,
-  },
-};
 
 export default function RootLayout() {
   useFonts({
@@ -126,10 +113,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <KeyboardProvider>
-            <PostHogProvider
-              apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt"
-              options={options}
-            >
+            <PostHogProvider>
               <AuthProvider queryClient={queryClient}>
                 <KeyboardExtenderPortalProvider>
                   <DeviceRegistration />
