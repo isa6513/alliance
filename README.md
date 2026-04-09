@@ -42,20 +42,56 @@ When opening the app locally for the first time, you can log in with the account
 
 Developers often want to test local code with a cleaned version of the production database. To allow for this, we have a script, `./misc/load_staging_data.sh` that will copy the data from the staging server into the local postgres. For this to work, you first need to set up your `.ssh/config` with a `staging` destination with the appropriate ssh key (ask an existing developer for the keys / ip)
 
-### mobile
+### Mobile
 
-Running the app with expo is a two step process:
+#### iOS
 
-- prebuilding / creating the development build (`npx expo prebuild`)
-- running the expo dev server which the build connects to. (`npx expo start --dev-client`)
+##### One time only:
 
-We have a few scripts that do both of these together, as well as installing needed pods deps:
+1. Download [Xcode](https://apps.apple.com/us/app/xcode/id497799835) (for iOS)
 
-- To build and run on a local simulator: `bun run --cwd apps/mobile build:simulator`
-- To build into xcode for app store upload: use the `build:ios` / EAS scripts in `apps/mobile` (see `apps/mobile/package.json`)
-- To build and run on a physical device: `npx expo prebuild && cd ios && pod install && cd .. && npx expo run:ios --device [your device id]`
+2. If running on a physical device, enable Developer Mode: go to **Settings > Privacy & Security > Developer Mode** and toggle it on. (This option only appears after connecting your device to Xcode once.)
+
+3. Set up the environment file (one time only):
+
+From the root level:
+
+```bash
+([ ! -f apps/mobile/.env ] && cp apps/mobile/.env.example apps/mobile/.env || echo ".env already exists, skipping copy")
+```
+
+##### Build
+
+1. Run on your iOS device (prebuild runs automatically):
+
+```bash
+(cd apps/mobile && bun run ios --device)
+```
+
+##### Other build scripts
+
+- Build and run on a local simulator: `bun run --cwd apps/mobile build:simulator`
+- Build into Xcode for App Store upload: use the `build:ios` / EAS scripts in `apps/mobile` (see `apps/mobile/package.json`)
 
 (you can find your device id via `xcrun xctrace list devices`)
+
+#### Android
+
+Enable Developer Options on your device: go to **Settings > About phone** and tap **Build number** 7 times. Then go to **Settings > Developer options** and enable **USB debugging**.
+
+Add the expo build onto your device:
+
+```bash
+(cd apps/mobile && bun run android)
+```
+
+#### Start the expo server
+
+(For both Android and iOS)
+
+```bash
+(cd apps/mobile && bun run start)
+```
 
 ## Miscellaneous commands
 
