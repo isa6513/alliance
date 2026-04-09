@@ -10,6 +10,8 @@ For new endpoints, use either @AuthGuard, @AdminGuard, or @CommunityLeaderGuard 
 
 Test server code with `npm run test:agents` which runs the end to end tests with a custom postgres instance.
 
+Generate migrations with `cd server && bun migration:generate -- migrations/{migration-name}`. Do not write migration files from scratch. The generated migration may not always be correct (e.g. a renamed column will generate a DROP + ADD, which deletes all existing data). Review the output and edit the generated file if needed.
+
 ### Frontend
 
 For frontend types, if types depend on server api data, always pick the types form the generated api in `types.gen.ts` where possible to avoid redefinitions. This file can be regenerated with `bun run gen-api` at the top level directory.
