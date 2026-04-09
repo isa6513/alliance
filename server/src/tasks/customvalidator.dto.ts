@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional } from 'class-validator';
 import { User } from 'src/user/entities/user.entity';
 import {
@@ -93,10 +94,12 @@ export class TestCustomExpressionResponseDto {
   totalCount: number;
 
   @ApiProperty({ type: CustomExpressionUserDto, isArray: true })
+  @Type(() => CustomExpressionUserDto)
   @IsNotEmpty()
   passUsers: CustomExpressionUserDto[];
 
   @ApiProperty({ type: CustomExpressionUserDto, isArray: true })
+  @Type(() => CustomExpressionUserDto)
   @IsNotEmpty()
   failUsers: CustomExpressionUserDto[];
 

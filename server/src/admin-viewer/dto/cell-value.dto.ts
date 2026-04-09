@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ColumnDataType } from './column-type.enum';
 
 export class CellValueDto {
@@ -16,19 +16,18 @@ export class CellValueDto {
 
   @ApiProperty({
     enum: ColumnDataType,
+    enumName: 'ColumnDataType',
     description: 'The semantic type of this value',
   })
   type: ColumnDataType;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Formatted display value for the frontend',
-    required: false,
   })
   displayValue?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Target table for relation columns',
-    required: false,
   })
   relationTarget?: string;
 }

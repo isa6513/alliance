@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsOptional,
   IsNumber,
@@ -11,8 +11,7 @@ import { Type } from 'class-transformer';
 import { ColumnMetadataDto } from './column-metadata.dto';
 
 export class TableDataQueryDto {
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     default: 1,
     description: 'Page number for pagination',
     minimum: 1,
@@ -23,8 +22,7 @@ export class TableDataQueryDto {
   @Min(1)
   page?: number = 1;
 
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     default: 50,
     description: 'Number of records per page',
     minimum: 1,
@@ -37,16 +35,14 @@ export class TableDataQueryDto {
   @Max(1000)
   limit?: number = 50;
 
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     description: 'Column name to sort by',
   })
   @IsOptional()
   @IsString()
   sortBy?: string;
 
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     enum: ['ASC', 'DESC'],
     default: 'ASC',
     description: 'Sort order',
@@ -55,8 +51,7 @@ export class TableDataQueryDto {
   @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC' = 'ASC';
 
-  @ApiProperty({
-    required: false,
+  @ApiPropertyOptional({
     description: 'Search term to filter results',
   })
   @IsOptional()
@@ -66,13 +61,15 @@ export class TableDataQueryDto {
 
 export class TableDataDto {
   @ApiProperty({
-    type: [ColumnMetadataDto],
+    type: ColumnMetadataDto,
+    isArray: true,
     description: 'Column metadata for the table',
   })
   columns: ColumnMetadataDto[];
 
   @ApiProperty({
     type: 'array',
+    isArray: true,
     items: {
       type: 'array',
       items: {

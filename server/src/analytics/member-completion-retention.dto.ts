@@ -39,7 +39,7 @@ export class MemberCompletionRetentionPointDto {
   @ApiProperty()
   weekCompletedCount: number;
 
-  @ApiProperty({ type: () => [MemberCompletionRetentionActionSummaryDto] })
+  @ApiProperty({ type: () => MemberCompletionRetentionActionSummaryDto, isArray: true })
   actions: MemberCompletionRetentionActionSummaryDto[];
 }
 
@@ -50,6 +50,6 @@ export class MemberCompletionRetentionCohortDto {
   @ApiProperty()
   cohortSize: number;
 
-  @ApiProperty({ type: () => [MemberCompletionRetentionPointDto] })
+  @ApiProperty({ type: () => MemberCompletionRetentionPointDto, isArray: true })
   points: MemberCompletionRetentionPointDto[];
 }

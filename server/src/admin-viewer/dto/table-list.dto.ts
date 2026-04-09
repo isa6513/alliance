@@ -15,6 +15,6 @@ export class TableMetadataDto {
 }
 
 export class TableListDto {
-  @ApiProperty({ type: [TableMetadataDto] })
+  @ApiProperty({ type: TableMetadataDto, isArray: true })
   tables: TableMetadataDto[];
 }

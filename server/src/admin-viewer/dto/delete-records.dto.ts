@@ -1,14 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class DeleteRecordsDto {
   @ApiProperty({
     description: 'Array of primary key values for records to delete',
     example: [1, 2, 3],
-    type: [String],
+    type: String,
+    isArray: true,
   })
   @IsArray()
   @IsNotEmpty()
+  @Type(() => String)
   primaryKeyValues: (string | number)[];
 }
 
@@ -34,15 +37,16 @@ export class DeleteRecordsResponseDto {
   @ApiProperty({
     description: 'Array of primary key values that were successfully deleted',
     example: [1, 2, 3],
-    type: [String],
+    type: String,
+    isArray: true,
   })
   deletedIds: (string | number)[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Array of primary key values that failed to delete',
     example: [],
-    type: [String],
-    required: false,
+    type: String,
+    isArray: true,
   })
   failedIds?: (string | number)[];
 }

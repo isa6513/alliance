@@ -1,11 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 
-import {
-  UserAwayRange,
-  UserAwayRangeReason,
-} from '../entities/user-away-range.entity';
+import { UserAwayRange } from '../entities/user-away-range.entity';
 import { IsDefined, IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
 
 export class CreateAwayRangeDto extends PickType(UserAwayRange, [
   'note',

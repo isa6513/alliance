@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsObject, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsDefined, IsNotEmpty, IsObject, IsOptional } from 'class-validator';
 
 export class CreateRecordDto {
   @ApiProperty({
@@ -8,7 +8,7 @@ export class CreateRecordDto {
   })
   @IsNotEmpty()
   @IsObject()
-  record: Record<string, any>;
+  record: Record<string, unknown>;
 }
 
 export class CreateRecordResponseDto {
@@ -16,18 +16,20 @@ export class CreateRecordResponseDto {
     description: 'Whether the insert was successful',
     example: true,
   })
+  @IsDefined()
   success: boolean;
 
   @ApiProperty({
     description: 'Success or error message',
     example: 'Record created successfully',
   })
+  @IsDefined()
   message: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The created record data',
-    required: false,
   })
   @IsOptional()
-  createdRecord?: any;
+  @IsObject()
+  createdRecord?: Record<string, unknown>;
 }

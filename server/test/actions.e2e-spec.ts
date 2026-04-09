@@ -47,7 +47,6 @@ describe('Actions (e2e)', () => {
   let communityRepo: Repository<Community>;
   let formRepo: Repository<Form>;
   let formResponseRepo: Repository<FormResponse>;
-  let groupRestrictedAction: Action;
   let outsiderToken: string;
 
   const createPublishedAction = async (
@@ -166,7 +165,7 @@ describe('Actions (e2e)', () => {
       { secret: process.env.JWT_SECRET },
     );
 
-    const { action: restricted } = await createPublishedAction(
+    await createPublishedAction(
       'Group Restricted Action',
       {
         status: ActionStatus.MemberAction,
@@ -189,10 +188,6 @@ describe('Actions (e2e)', () => {
           tagId: ctx.defaultTag.id,
         },
       },
-    });
-
-    groupRestrictedAction = await actionRepo.findOneOrFail({
-      where: { id: restricted.id },
     });
   }, 50000);
 
