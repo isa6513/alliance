@@ -6,13 +6,13 @@ import Animated, {
   Extrapolation,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { Check } from "lucide-react-native";
+import { Check, CheckCheck } from "lucide-react-native";
 import { scheduleOnRN } from "react-native-worklets";
 import { formatTime } from "@alliance/shared/lib/utils";
 import Text, { FontWeight } from "./system/Text";
 import ProfileImage from "./ProfileImage";
 import { NotificationDto } from "@alliance/shared/client";
-import { Pressable, View } from "react-native";
+import { Pressable, TouchableOpacity, View } from "react-native";
 import { cn } from "@alliance/shared/styles/util";
 import { getNotificationTime } from "@alliance/shared/lib/notificationBucketing";
 
@@ -125,11 +125,23 @@ function SwipeableNotification({
                   {notification.message}
                 </Text>
               </View>
-              <Text className="text-xs text-zinc-500 mt-1">
-                {formatTime(getNotificationTime(notification), {
-                  addSuffix: true,
-                })}
-              </Text>
+              <View className="flex-row items-center justify-between mt-1">
+                <Text className="text-xs text-zinc-500">
+                  {formatTime(getNotificationTime(notification), {
+                    addSuffix: true,
+                  })}
+                </Text>
+                {isUnread && onMarkRead && (
+                  <TouchableOpacity
+                    activeOpacity={0.75}
+                    onPress={onMarkRead}
+                    className="flex-row items-center gap-x-1"
+                  >
+                    <CheckCheck size={12} color="#71717a" />
+                    <Text className="text-xs text-zinc-500">Mark as read</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           </Pressable>
         </Animated.View>

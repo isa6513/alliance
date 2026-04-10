@@ -19,6 +19,7 @@ const NotificationsIcon = () => {
     notifications,
     unreadCount,
     handleMarkAllAsRead,
+    handleMarkAsRead,
     handleNotifClick,
     refreshNotifications,
   } = useNotifications();
@@ -119,6 +120,7 @@ const NotificationsIcon = () => {
             <NotificationList
               notifications={notifications}
               handleNotifClick={handleNotifClick}
+              handleMarkAsRead={handleMarkAsRead}
               refreshNotifications={() => refreshNotifications({ limit: 20 })}
               listClassName="flex flex-col gap-y-8 divide-y divide-grey-2"
               inset={false}

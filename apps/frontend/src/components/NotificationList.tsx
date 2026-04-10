@@ -17,12 +17,14 @@ import NotificationText from "../pages/app/NotificationText";
 const LikesGroup = ({
   bucket,
   handleNotifClick,
+  handleMarkAsRead,
   onMarkAllRead,
   itemClassName,
   inset = true,
 }: {
   bucket: LikesBucket;
   handleNotifClick: (notification: NotificationDto) => () => void;
+  handleMarkAsRead?: (notification: NotificationDto) => () => void;
   onMarkAllRead: () => void;
   itemClassName?: string;
   inset?: boolean;
@@ -80,8 +82,10 @@ const LikesGroup = ({
               key={getNotificationIdentityKey(notification)}
               notification={notification}
               handleNotifClick={handleNotifClick}
+              handleMarkAsRead={handleMarkAsRead}
               className={cn(
-                "hover:bg-zinc-100  py-3 pl-4 flex cursor-pointer flex-col gap-y-1",
+                // Don't highlight row when hovering the mark-as-read button
+                "[&:not(:has(button:hover))]:hover:bg-zinc-100 py-3 pl-4 flex cursor-pointer flex-col gap-y-1",
                 notification.readAt ? "bg-white" : "bg-red-50",
                 itemClassName,
               )}
@@ -96,6 +100,7 @@ const LikesGroup = ({
 export interface NotificationListProps {
   notifications: NotificationDto[];
   handleNotifClick: (notification: NotificationDto) => () => void;
+  handleMarkAsRead?: (notification: NotificationDto) => () => void;
   refreshNotifications: () => void;
   itemClassName?: string;
   listClassName?: string;
@@ -105,6 +110,7 @@ export interface NotificationListProps {
 const NotificationList = ({
   notifications,
   handleNotifClick,
+  handleMarkAsRead,
   refreshNotifications,
   itemClassName,
   listClassName,
@@ -131,6 +137,7 @@ const NotificationList = ({
             key={item.key}
             bucket={item.bucket}
             handleNotifClick={handleNotifClick}
+            handleMarkAsRead={handleMarkAsRead}
             onMarkAllRead={handleMarkBucketAsRead(item.bucket)}
             itemClassName={itemClassName}
             inset={inset}
@@ -140,8 +147,10 @@ const NotificationList = ({
             key={item.key}
             notification={item.notification}
             handleNotifClick={handleNotifClick}
+            handleMarkAsRead={handleMarkAsRead}
             className={cn(
-              "hover:bg-zinc-100 p-4 flex cursor-pointer flex-col gap-y-2",
+              // Don't highlight row when hovering the mark-as-read button
+              "[&:not(:has(button:hover))]:hover:bg-zinc-100 p-4 flex cursor-pointer flex-col gap-y-2",
               item.notification.readAt ? "bg-white" : "bg-red-50",
               !inset && "-m-4",
               itemClassName,

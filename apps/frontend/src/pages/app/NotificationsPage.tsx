@@ -9,6 +9,7 @@ const NotificationsPage = () => {
   const {
     notifications,
     handleMarkAllAsRead,
+    handleMarkAsRead,
     handleNotifClick,
     refreshNotifications,
   } = useNotifications();
@@ -37,6 +38,7 @@ const NotificationsPage = () => {
           <NotificationList
             notifications={notifications}
             handleNotifClick={handleNotifClick}
+            handleMarkAsRead={handleMarkAsRead}
             refreshNotifications={() => refreshNotifications()}
             listClassName="divide-y divide-grey-2"
           />

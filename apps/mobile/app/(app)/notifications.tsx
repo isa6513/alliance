@@ -231,7 +231,7 @@ export default function NotificationsScreen() {
     (notification: NotificationDto) => {
       notifsSetRead(getNotificationReadRequest(notification));
       markNotificationsRead([notification]);
-      posthog?.capture("notification_swiped_read", {
+      posthog?.capture("notification_marked_read", {
         notificationId: notification.id,
         notificationSourceType: notification.sourceType,
       });
@@ -289,6 +289,7 @@ export default function NotificationsScreen() {
             key={item.key}
             bucket={item.bucket}
             onMarkBucketRead={handleMarkBucketAsRead}
+            onMarkRead={handleMarkAsRead}
             onPressNotification={handleNotificationPress}
           />
         );

@@ -16,15 +16,18 @@ import Text, { FontWeight } from "./system/Text";
 interface LikesGroupProps {
   bucket: LikesBucket;
   onMarkBucketRead: (bucket: LikesBucket) => void;
+  onMarkRead?: (notification: NotificationDto) => void;
   onPressNotification: (notification: NotificationDto) => void;
 }
 
 function LikesGroupNotification({
   notification,
   onPress,
+  onMarkRead,
 }: {
   notification: NotificationDto;
   onPress: () => void;
+  onMarkRead?: () => void;
 }) {
   const displayUsers = notification.associatedUsers.slice(0, 3);
   const remainingUsers =
@@ -53,11 +56,23 @@ function LikesGroupNotification({
           {notification.message}
         </Text>
       </View>
-      <Text className="mt-1 text-xs text-zinc-500">
-        {formatTime(getNotificationTime(notification), {
-          addSuffix: true,
-        })}
-      </Text>
+      <View className="flex-row items-center justify-between mt-1">
+        <Text className="text-xs text-zinc-500">
+          {formatTime(getNotificationTime(notification), {
+            addSuffix: true,
+          })}
+        </Text>
+        {!notification.readAt && onMarkRead && (
+          <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={onMarkRead}
+            className="flex-row items-center gap-x-1"
+          >
+            <CheckCheck size={12} color="#71717a" />
+            <Text className="text-xs text-zinc-500">Mark as read</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -65,6 +80,7 @@ function LikesGroupNotification({
 export default function LikesGroup({
   bucket,
   onMarkBucketRead,
+  onMarkRead,
   onPressNotification,
 }: LikesGroupProps) {
   const [expanded, setExpanded] = useState(false);
@@ -115,6 +131,9 @@ export default function LikesGroup({
               key={getNotificationIdentityKey(notification)}
               notification={notification}
               onPress={() => onPressNotification(notification)}
+              onMarkRead={
+                onMarkRead ? () => onMarkRead(notification) : undefined
+              }
             />
           ))}
         </View>

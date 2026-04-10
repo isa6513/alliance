@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef,
   ReactNode,
 } from "react";
 import {
@@ -33,6 +34,9 @@ interface NotificationsContextType {
       NotificationDto,
       "id" | "sourceType" | "webAppLocation" | "category"
     >,
+  ) => () => void;
+  handleMarkAsRead: (
+    notification: Pick<NotificationDto, "id" | "sourceType">,
   ) => () => void;
   handleMarkAllAsRead: (e: React.MouseEvent) => void;
   refreshNotifications: (options?: { limit?: number }) => Promise<void>;
@@ -82,6 +86,32 @@ export const NotificationsProvider = ({
     refreshNotifications({ limit: 20 });
   }, [refreshNotifications]);
 
+  const notificationsRef = useRef(notifications);
+  notificationsRef.current = notifications;
+
+  const markNotificationRead = useCallback(
+    (notification: Pick<NotificationDto, "id" | "sourceType">) => {
+      notifsSetRead(getNotificationReadRequest(notification));
+      setNotifications((prev) => {
+        const key = getNotificationIdentityKey(notification);
+        const readAt = new Date().toISOString();
+        let wasUnread = false;
+        const next = prev.map((n) => {
+          if (getNotificationIdentityKey(n) === key) {
+            if (!n.readAt) wasUnread = true;
+            return { ...n, readAt } satisfies NotificationDto;
+          }
+          return n;
+        });
+        if (wasUnread) {
+          setUnreadCount((c) => Math.max(c - 1, 0));
+        }
+        return next;
+      });
+    },
+    [],
+  );
+
   const handleNotifClick = useCallback(
     (
       notification: Pick<
@@ -90,9 +120,7 @@ export const NotificationsProvider = ({
       >,
     ) =>
       () => {
-        notifsSetRead(getNotificationReadRequest(notification));
-
-        const clickedNotif = notifications.find(
+        const clickedNotif = notificationsRef.current.find(
           (n) =>
             getNotificationIdentityKey(n) ===
             getNotificationIdentityKey(notification),
@@ -117,18 +145,26 @@ export const NotificationsProvider = ({
           navigate(path);
         }
 
-        setNotifications((prev) => {
-          const readAt = new Date().toISOString();
-          return prev.map((n) =>
-            getNotificationIdentityKey(n) ===
-            getNotificationIdentityKey(notification)
-              ? ({ ...n, readAt } satisfies NotificationDto)
-              : n,
-          );
+        markNotificationRead(notification);
+
+        posthog.capture("notification_read_via_click", {
+          notificationId: notification.id,
+          notificationSourceType:
+            clickedNotif?.sourceType ?? notification.sourceType,
         });
-        setUnreadCount((prev) => Math.max(prev - 1, 0));
       },
-    [navigate, notifications],
+    [navigate, markNotificationRead],
+  );
+
+  const handleMarkAsRead = useCallback(
+    (notification: Pick<NotificationDto, "id" | "sourceType">) => () => {
+      posthog.capture("notification_marked_read", {
+        notificationId: notification.id,
+        notificationSourceType: notification.sourceType,
+      });
+      markNotificationRead(notification);
+    },
+    [markNotificationRead],
   );
 
   const handleMarkAllAsRead = useCallback((e: React.MouseEvent) => {
@@ -150,22 +186,11 @@ export const NotificationsProvider = ({
       }
 
       const ids = new Set(contentIds);
-      const markedCount = notifications.filter(
-        (notification) =>
-          !notification.readAt &&
-          notification.contentType === contentType &&
-          notification.contentId !== undefined &&
-          ids.has(notification.contentId),
-      ).length;
-
-      if (markedCount === 0) {
-        return;
-      }
-
       const readAt = new Date().toISOString();
 
-      setNotifications((prev) =>
-        prev.map((notification) => {
+      setNotifications((prev) => {
+        let markedCount = 0;
+        const next = prev.map((notification) => {
           if (
             notification.readAt ||
             notification.contentType !== contentType ||
@@ -175,12 +200,18 @@ export const NotificationsProvider = ({
             return notification;
           }
 
+          markedCount++;
           return { ...notification, readAt } satisfies NotificationDto;
-        }),
-      );
-      setUnreadCount((prev) => Math.max(prev - markedCount, 0));
+        });
+
+        if (markedCount > 0) {
+          setUnreadCount((c) => Math.max(c - markedCount, 0));
+        }
+
+        return markedCount > 0 ? next : prev;
+      });
     },
-    [notifications],
+    [],
   );
 
   return (
@@ -189,6 +220,7 @@ export const NotificationsProvider = ({
         notifications,
         unreadCount,
         handleNotifClick,
+        handleMarkAsRead,
         handleMarkAllAsRead,
         refreshNotifications,
         applyNotificationsReadByContent,
