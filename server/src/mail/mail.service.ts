@@ -265,6 +265,7 @@ export class MailService {
       'Reminder to sign your Alliance membership contract',
       {
         name,
+        link: `${process.env.APP_URL}/tasks`,
       },
     );
   }
