@@ -252,10 +252,10 @@ const FAQPage: React.FC = () => {
                 Alliance membership is open to anyone.
               </p>
               <p>
-                However, some actions require members to live in the United States. In these cases, we provide non-US members with a modified action, or we do not assign them the action .
+                However, some actions require members to live in the United States. If an action is restricted to US members, we provide non-US members with a modified action, or we do not assign them that action.
               </p>
               <p>
-                At our current state, we do not have the capacity to design different actions for non-US members. As the Alliance grows, we hope to develop the capacity to design actions for all locations members live.
+                As the Alliance grows, actions will have greater global coverage.
               </p>
             </FAQExpandable>
             <FAQExpandable
