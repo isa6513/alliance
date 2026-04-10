@@ -11,12 +11,13 @@ import { suspensionMessage } from 'src/notifs/textnotifcontents';
 import { ContractService } from 'src/contract/contract.service';
 import { DataSource } from 'typeorm';
 import { withPgAdvisoryLock } from '../notifs/lock-utils';
+import { LOCK_KEYS } from '../notifs/lock-keys';
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 import { Cron } from '@nestjs/schedule';
 
-const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
-const PROCESS_ONE_LOCK_KEY2 = 0xce01;
+const [PROCESS_ONE_LOCK_KEY1, PROCESS_ONE_LOCK_KEY2] =
+  LOCK_KEYS.contractSuspender;
 
 @Injectable()
 export class ContractSuspenderWorker {

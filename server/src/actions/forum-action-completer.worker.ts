@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ForumService } from 'src/forum/forum.service';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import { withPgAdvisoryLock } from 'src/notifs/lock-utils';
+import { LOCK_KEYS } from 'src/notifs/lock-keys';
 import {
   CustomValidator,
   CustomValidatorType,
@@ -30,8 +31,8 @@ import { ProfileDto } from 'src/user/dto/user.dto';
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 
-const PROCESS_ONE_LOCK_KEY1 = 0xf0a1;
-const PROCESS_ONE_LOCK_KEY2 = 0xace1;
+const [PROCESS_ONE_LOCK_KEY1, PROCESS_ONE_LOCK_KEY2] =
+  LOCK_KEYS.forumActionCompleter;
 const AUTOCOMPLETE_TARGET_OFFSET_MS = 60 * 60 * 1000;
 const AUTOCOMPLETE_WINDOW_MS = 5 * 60 * 1000;
 

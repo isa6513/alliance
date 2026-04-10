@@ -22,14 +22,15 @@ import {
   ActionEventNotifType,
 } from './entities/action-event-notif.entity';
 import { withPgAdvisoryLock } from './lock-utils';
+import { LOCK_KEYS } from './lock-keys';
 import { generateCIDForNotif } from './notif-utils';
 import { PushService } from 'src/push/push.service';
 import { ReminderCohortType } from 'src/actions/entities/reminder-group.entity';
 
 export type UncompletedTaskSummary = { name: string; timeEstimate?: number };
 
-const PROCESS_ONE_LOCK_KEY1 = 0xa11a;
-const PROCESS_ONE_LOCK_KEY2 = 0xce01;
+const [PROCESS_ONE_LOCK_KEY1, PROCESS_ONE_LOCK_KEY2] =
+  LOCK_KEYS.actionEventNotif;
 
 @Injectable()
 export class ActionEventNotifWorker {

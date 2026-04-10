@@ -127,6 +127,7 @@ export class MailService {
     [EmailType.MissedSecondDeadline]: 'missedseconddeadline',
     [EmailType.CustomActionReminder]: 'customactionreminder',
     [EmailType.ContractSuspended]: 'contractsuspended',
+    [EmailType.ContractReminder]: 'contractreminder',
   };
 
   async renderHtml(emailType: EmailType, context: ISendMailOptions['context']) {
@@ -248,6 +249,20 @@ export class MailService {
       email,
       EmailType.ContractSuspended,
       'Alliance contract suspended',
+      {
+        name,
+      },
+    );
+  }
+
+  public async sendContractReminderEmail(
+    email: string,
+    name: string,
+  ): Promise<Mail> {
+    return this.sendMail(
+      email,
+      EmailType.ContractReminder,
+      'Reminder to sign your Alliance membership contract',
       {
         name,
       },

@@ -11,10 +11,10 @@ import {
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import { UserDevice } from 'src/user/entities/user-device.entity';
 import { withPgAdvisoryLock } from 'src/notifs/lock-utils';
+import { LOCK_KEYS } from 'src/notifs/lock-keys';
 import { ActionsService } from 'src/actions/actions.service';
 
-const LOCK_KEY_1 = 900;
-const LOCK_KEY_2 = 1;
+const [LOCK_KEY_1, LOCK_KEY_2] = LOCK_KEYS.liveActivity;
 const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000;
 
 @Injectable()
