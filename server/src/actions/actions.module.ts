@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { Post } from 'src/forum/entities/post.entity';
-import { Mail } from 'src/mail/mail.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { MmsModule } from 'src/mms/mms.module';
 import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
@@ -71,7 +70,6 @@ import { ApnsModule } from 'src/apns/apns.module';
       ReminderGroup,
       Tag,
       Community,
-      Mail,
     ]),
     ContractModule,
     UserModule,

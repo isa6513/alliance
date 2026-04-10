@@ -3,7 +3,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
-import { Mail } from 'src/mail/mail.entity';
 import { EmailType } from 'src/mail/mail.entity';
 import { MailService } from 'src/mail/mail.service';
 import { withPgAdvisoryLock } from '../notifs/lock-utils';
@@ -21,8 +20,6 @@ export class ContractReminderWorker {
     private readonly mailService: MailService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Mail)
-    private readonly mailRepository: Repository<Mail>,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -50,6 +47,7 @@ export class ContractReminderWorker {
           .createQueryBuilder('user')
           .leftJoin('user.contractEvents', 'ce')
           .where('user.createdAt <= :cutoff', { cutoff })
+          .andWhere('user.isNotSignedUpPartialProfile = false')
           .andWhere('ce.id IS NULL')
           .andWhere(
             `NOT EXISTS (
