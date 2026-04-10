@@ -70,6 +70,13 @@ export default function NotificationsScreen() {
       }),
   });
 
+  const refreshNotifications = useCallback(() => {
+    refetch();
+    queryClient.invalidateQueries({
+      queryKey: ["notifications", "unreadCount"],
+    });
+  }, [refetch, queryClient]);
+
   const notifications = useMemo(() => {
     if (!response) return [];
     return response
@@ -376,7 +383,7 @@ export default function NotificationsScreen() {
         data={renderItems}
         keyExtractor={(item) => item.key}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refreshNotifications} />
         }
         recycleItems
         renderItem={({ item }) => (
