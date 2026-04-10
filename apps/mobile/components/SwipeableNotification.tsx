@@ -131,7 +131,7 @@ function SwipeableNotification({
                     addSuffix: true,
                   })}
                 </Text>
-                {isUnread && onMarkRead && (
+                {isUnread && (
                   <TouchableOpacity
                     activeOpacity={0.75}
                     onPress={onMarkRead}
