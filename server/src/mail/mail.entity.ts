@@ -45,9 +45,9 @@ export class Mail {
   @Column()
   to: string;
 
-  @ApiProperty()
-  @Column()
-  status: string;
+  @ApiProperty({ enum: EmailStatus, enumName: 'EmailStatus' })
+  @Column({ type: 'enum', enum: EmailStatus, enumName: 'EmailStatus' })
+  status: EmailStatus;
 
   @Column({ type: 'enum', enum: EmailType, enumName: 'EmailType' })
   @ApiProperty({ enum: EmailType, enumName: 'EmailType' })

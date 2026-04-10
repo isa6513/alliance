@@ -227,14 +227,16 @@ export type ReminderCohortType = 'all_uncompleted' | 'group_leads_with_uncomplet
 
 export type ActionEventNotifType = 'announcement' | 'misseddeadline' | 'reminder' | 'personalreminder';
 
-export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'forum_reply' | 'missed_deadline' | 'missed_second_deadline' | 'custom_action_reminder' | 'contract_suspended';
+export type EmailStatus = 'pending' | 'sent' | 'failed';
+
+export type EmailType = 'verification' | 'password_reset' | 'partial_signup' | 'welcome' | 'other' | 'commitment' | 'memberaction' | 'commitmentreminder' | 'memberactionreminder' | 'forum_digest' | 'forum_reply' | 'missed_deadline' | 'missed_second_deadline' | 'custom_action_reminder' | 'contract_suspended' | 'contract_reminder';
 
 export type Mail = {
     id: number;
     sentMessageId?: string;
     renderedHtml?: string;
     to: string;
-    status: string;
+    status: EmailStatus;
     emailType: EmailType;
     createdAt: string;
     cid?: string;
