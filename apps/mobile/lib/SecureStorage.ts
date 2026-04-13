@@ -1,4 +1,9 @@
-import { setItemAsync, getItemAsync, deleteItemAsync } from "expo-secure-store";
+import {
+  deleteItemAsync,
+  getItemAsync,
+  setItemAsync,
+  type SecureStoreOptions,
+} from "expo-secure-store";
 
 export enum SecureStorageKey {
   ACCESS_TOKEN = "accessToken",
@@ -8,8 +13,13 @@ export enum SecureStorageKey {
 }
 
 export const SecureStorage = {
-  setItem: async (key: SecureStorageKey, value: string) =>
-    await setItemAsync(key, value),
-  getItem: async (key: SecureStorageKey) => await getItemAsync(key),
-  deleteItem: async (key: SecureStorageKey) => await deleteItemAsync(key),
+  setItem: (
+    key: SecureStorageKey,
+    value: string,
+    options?: SecureStoreOptions,
+  ) => setItemAsync(key, value, options),
+  getItem: (key: SecureStorageKey, options?: SecureStoreOptions) =>
+    getItemAsync(key, options),
+  deleteItem: (key: SecureStorageKey, options?: SecureStoreOptions) =>
+    deleteItemAsync(key, options),
 };
