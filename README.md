@@ -16,9 +16,14 @@ In root dir: `bun install` (install [Bun](https://bun.sh) 1.3.x+ if missing; `pa
 
 `cp .env.example .env` (and make necessary edits)
 
-Install PostgreSQL 18:
-- **macOS (Homebrew):** `brew install postgresql@18 && brew services start postgresql@18`
-- **Ubuntu/Debian:** `sudo apt install postgresql-18`
+Install PostgreSQL 17:
+- **macOS (Homebrew):** `brew install postgresql@17 && brew services start postgresql@17`
+- **Ubuntu/Debian:** Add the [PGDG apt repository](https://www.postgresql.org/download/linux/debian/), then install:
+  ```bash
+  sudo apt install -y postgresql-common
+  sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+  sudo apt install -y postgresql-17
+  ```
 - **Windows:** Download the installer from https://www.postgresql.org/download/windows/
 
 Set up a local database with username/password/db name matching .env file

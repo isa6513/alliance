@@ -331,7 +331,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: postgres
         options: >-
@@ -391,7 +391,7 @@ jobs:
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     services:
       postgres:
-        image: postgres
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: postgres
         options: >-
