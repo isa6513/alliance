@@ -3,14 +3,14 @@ import { Slot } from "expo-router";
 import { AuthProvider } from "../lib/AuthContext";
 import { useEffect } from "react";
 import { client } from "@alliance/shared/client/client.gen";
-import SecureStorage, { SecureStorageKey } from "../lib/SecureStorage";
+import { SecureStorage, SecureStorageKey } from "../lib/SecureStorage";
 import { getApiUrl } from "../lib/config";
 import { useFonts } from "expo-font";
 import "../global.css";
 import PostHogProvider from "../lib/PostHogProvider";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
-import * as Notifications from "expo-notifications";
+import Notifications from "expo-notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { authRefreshTokens } from "@alliance/shared/client";
 import PushNotificationResponseHandler from "../components/PushNotificationResponseHandler";
@@ -37,7 +37,6 @@ Notifications.setNotificationHandler({
     shouldShowList: true,
   }),
 });
-
 
 export default function RootLayout() {
   useFonts({

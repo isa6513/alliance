@@ -7,7 +7,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import { launchImageLibraryAsync } from "expo-image-picker";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { router } from "expo-router";
 import { ChevronDown, Settings, X } from "lucide-react-native";
@@ -789,7 +789,7 @@ function GroupSettingsTab({
 
   const handlePickPhoto = useCallback(async () => {
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryAsync({
         mediaTypes: ["images"],
         quality: 0.8,
         base64: true,

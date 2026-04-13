@@ -1,7 +1,7 @@
 /* eslint-disable @darraghor/nestjs-typed/all-properties-have-explicit-defined */
 /* eslint-disable @darraghor/nestjs-typed/all-properties-are-whitelisted */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { Exclude, Expose, Type } from 'class-transformer';
 import {
   Allow,

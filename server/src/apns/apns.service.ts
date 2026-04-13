@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import * as http2 from 'http2';
-import * as crypto from 'crypto';
+import http2 from 'http2';
+import crypto from 'crypto';
 
 interface ApnsPayload {
   aps: Record<string, unknown>;
@@ -116,9 +116,7 @@ export class ApnsService implements OnModuleDestroy {
         });
         req.on('end', () => {
           if (statusCode !== 200) {
-            this.logger.warn(
-              `APNs response ${statusCode}: ${responseBody}`,
-            );
+            this.logger.warn(`APNs response ${statusCode}: ${responseBody}`);
           }
           resolve({ statusCode, body: responseBody });
         });

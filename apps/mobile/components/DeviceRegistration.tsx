@@ -1,9 +1,9 @@
 import { useEffect, useCallback } from "react";
 import { Platform } from "react-native";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
+import Notifications from "expo-notifications";
+import { isDevice, modelId, modelName } from "expo-device";
 import Constants from "expo-constants";
-import * as SecureStore from "expo-secure-store";
+import { SecureStorage, SecureStorageKey } from "../lib/SecureStorage";
 import { userRegisterDevice } from "@alliance/shared/client";
 import { useAuth } from "../lib/AuthContext";
 import { isVisualTestMode } from "../lib/visualTest";
@@ -22,7 +22,7 @@ async function registerForPushNotificationsAsync() {
     });
   }
 
-  if (Device.isDevice) {
+  if (isDevice) {
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -64,18 +64,18 @@ export default function DeviceRegistration() {
       return;
     }
     try {
-      const deviceId = await SecureStore.getItem("deviceId");
+      const deviceId = await SecureStorage.getItem(SecureStorageKey.DEVICE_ID);
       const resp = await userRegisterDevice({
         body: {
-          deviceType: Device.modelId ?? Device.modelName,
+          deviceType: modelId ?? modelName,
           expoPushToken: token,
           deviceId: deviceId ?? undefined,
         },
       });
       if (resp.data) {
         const id = resp.data.id;
-        await SecureStore.setItemAsync("deviceId", id);
-        await SecureStore.setItemAsync("registeredToken", token);
+        await SecureStorage.setItem(SecureStorageKey.DEVICE_ID, id);
+        await SecureStorage.setItem(SecureStorageKey.REGISTERED_TOKEN, token);
       }
     } catch (e) {
       console.error("push device registration failed", e);

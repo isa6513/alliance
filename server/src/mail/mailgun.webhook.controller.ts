@@ -1,6 +1,6 @@
 import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 import { PostHog } from 'posthog-node';
 import type { MailgunWebhookBody } from './mailgun';
 import { User } from 'src/user/entities/user.entity';

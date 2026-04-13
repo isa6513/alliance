@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Check, ChevronDown } from "lucide-react-native";
 import Checkbox from "../system/Checkbox";
-import * as ImagePicker from "expo-image-picker";
+import { launchImageLibraryAsync } from "expo-image-picker";
 import TimeZoneSelect from "./TimeZoneSelect";
 import CityAutosuggest from "./CityAutosuggest";
 import FormModal from "./FormModal";
@@ -629,7 +629,7 @@ export function RenderField({
       const pickImage = async () => {
         if (disabled || uploading) return;
         setPickerError(null);
-        const result = await ImagePicker.launchImageLibraryAsync({
+        const result = await launchImageLibraryAsync({
           mediaTypes: ["images"],
           allowsEditing: true,
           quality: 0.8,

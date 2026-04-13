@@ -1,4 +1,4 @@
-import * as React from "react";
+import type React from "react";
 import { PreviewCard } from "@base-ui/react/preview-card";
 import { cn } from "@alliance/shared/styles/util";
 
@@ -51,7 +51,7 @@ function HoverCardContent({
           data-slot="hover-card-content"
           className={cn(
             "rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-sm font-medium text-zinc-700 shadow-sm outline-none transition-opacity duration-100",
-            className
+            className,
           )}
           {...props}
         />

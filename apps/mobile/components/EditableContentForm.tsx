@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import { launchImageLibraryAsync } from "expo-image-picker";
 import { File, Paths } from "expo-file-system";
 import { CreateEditableContentDto } from "@alliance/shared/client";
 import Text from "./system/Text";
@@ -251,7 +251,7 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
     setPickerError(null);
     setIsPicking(true);
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsMultipleSelection: true,
         quality: 0.8,

@@ -5,7 +5,7 @@ import {
   pushMarkOpened,
 } from "@alliance/shared/client";
 import { QueryClient } from "@tanstack/react-query";
-import * as Notifications from "expo-notifications";
+import Notifications from "expo-notifications";
 import { RelativePathString, router } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import { useAuth } from "../lib/AuthContext";
@@ -207,9 +207,7 @@ export default function PushNotificationResponseHandler({
       return;
     }
 
-    void Notifications.getLastNotificationResponseAsync().then(
-      handleNotificationResponse,
-    );
+    handleNotificationResponse(Notifications.getLastNotificationResponse());
 
     // Only tapped notification responses should mark reads, not delivered pushes.
     responseSub.current = Notifications.addNotificationResponseReceivedListener(

@@ -21,7 +21,7 @@ import {
 import { usePostHog } from "posthog-react-native";
 import { run } from "@alliance/common/run";
 import type { QueryClient } from "@tanstack/react-query";
-import SecureStorage, { SecureStorageKey } from "./SecureStorage";
+import { SecureStorage, SecureStorageKey } from "./SecureStorage";
 
 interface AuthContextType {
   isAuthenticated: boolean;

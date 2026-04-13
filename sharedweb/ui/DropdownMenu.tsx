@@ -1,4 +1,4 @@
-import * as React from "react";
+import type React from "react";
 import { Menu } from "@base-ui/react/menu";
 import { ChevronRight, Check } from "lucide-react";
 import { cn } from "@alliance/shared/styles/util";
@@ -45,7 +45,7 @@ function DropdownMenuContent({
           data-slot="dropdown-menu-content"
           className={cn(
             "min-w-32 rounded-md border border-zinc-200 bg-white p-1 shadow-lg text-zinc-900 outline-none overflow-x-hidden overflow-y-auto z-50",
-            className
+            className,
           )}
           {...props}
         />
@@ -69,7 +69,7 @@ function DropdownMenuLabel({
       data-inset={inset}
       className={cn(
         "px-3 py-2 text-xs font-medium text-zinc-500 data-[inset]:pl-4",
-        className
+        className,
       )}
       {...props}
     />
@@ -96,7 +96,7 @@ function DropdownMenuItem({
         "data-[variant=destructive]:text-red-600 data-[variant=destructive]:data-[highlighted]:bg-red-50",
         "data-[inset]:pl-4",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0",
-        className
+        className,
       )}
       {...props}
     />
@@ -122,7 +122,7 @@ function DropdownMenuSubTrigger({
         "data-[highlighted]:bg-zinc-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         "data-[inset]:pl-4",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0",
-        className
+        className,
       )}
       {...props}
     >
@@ -153,7 +153,7 @@ function DropdownMenuSubContent({
           data-slot="dropdown-menu-sub-content"
           className={cn(
             "min-w-[140px] rounded-md border border-zinc-200 bg-white p-1 shadow-lg text-zinc-900 outline-none overflow-x-hidden overflow-y-auto z-50",
-            className
+            className,
           )}
           {...props}
         />
@@ -179,7 +179,7 @@ function DropdownMenuCheckboxItem({
         "data-[highlighted]:bg-zinc-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         "data-[inset]:pl-4",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0",
-        className
+        className,
       )}
       {...props}
     >
@@ -215,7 +215,7 @@ function DropdownMenuRadioItem({
         "data-[highlighted]:bg-zinc-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         "data-[inset]:pl-4",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0",
-        className
+        className,
       )}
       {...props}
     >

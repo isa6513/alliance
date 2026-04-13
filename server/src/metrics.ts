@@ -5,7 +5,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import * as client from 'prom-client';
+import client from 'prom-client';
 import { Observable, tap } from 'rxjs';
 
 export const register = new client.Registry();

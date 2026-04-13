@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import { launchImageLibraryAsync } from "expo-image-picker";
 import { ImagePlus, Send, X } from "lucide-react-native";
 import Text from "../system/Text";
 import { colors } from "../../lib/style/colors";
@@ -51,7 +51,7 @@ export default function MessageComposer({
     if (picking) return;
     setPicking(true);
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsMultipleSelection: true,
         base64: true,

@@ -1,5 +1,5 @@
+import type React from "react";
 import { Check } from "lucide-react";
-import * as React from "react";
 import {
   useTimeZoneSelect,
   formatNowTimeInTz,

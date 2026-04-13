@@ -1,9 +1,9 @@
 // Tremor useOnWindowResize [v0.0.2]
 
-import * as React from "react";
+import { useEffect } from "react";
 
 export const useOnWindowResize = (handler: () => void) => {
-  React.useEffect(() => {
+  useEffect(() => {
     const handleResize = () => {
       handler();
     };

@@ -6,7 +6,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MulterModule } from '@nestjs/platform-express';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as multer from 'multer';
+import multer from 'multer';
 import { ActionsModule } from './actions/actions.module';
 import { AdminViewerModule } from './admin-viewer/admin-viewer.module';
 import { AnalyticsModule } from './analytics/analytics.module';

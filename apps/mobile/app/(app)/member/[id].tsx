@@ -8,7 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { RelativePathString, router, useLocalSearchParams } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
+import { launchImageLibraryAsync } from "expo-image-picker";
 import { UpdateProfileDto } from "@alliance/shared/client";
 import {
   buildForumActivityItems,
@@ -162,7 +162,7 @@ export default function UserProfileScreen() {
     if (isPickingAvatar) return;
     setIsPickingAvatar(true);
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryAsync({
         mediaTypes: ["images"],
         quality: 0.8,
         base64: true,

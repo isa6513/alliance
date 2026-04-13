@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
+import { launchImageLibraryAsync } from "expo-image-picker";
 import {
   conversationAddParticipant,
   conversationLeave,
@@ -112,7 +112,7 @@ export default function ConversationInfoScreen() {
   const handlePickPhoto = useCallback(async () => {
     if (!isAdmin || !isGroup) return;
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
+      const result = await launchImageLibraryAsync({
         mediaTypes: ["images"],
         quality: 0.8,
         base64: true,

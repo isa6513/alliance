@@ -1,4 +1,4 @@
-import * as Haptics from "expo-haptics";
+import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
 import { View, Pressable, Animated, useWindowDimensions } from "react-native";
 import { usePathname, useRouter } from "expo-router";
 import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
@@ -177,7 +177,7 @@ export default function TabBar() {
             key={tab.href}
             onPress={() => router.dismissTo(tab.href)}
             onPressIn={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              impactAsync(ImpactFeedbackStyle.Light);
             }}
           >
             <Icon

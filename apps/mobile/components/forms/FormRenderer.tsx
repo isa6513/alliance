@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Clipboard from "expo-clipboard";
+import { setStringAsync as setClipboardStringAsync } from "expo-clipboard";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
 import type { UserDto } from "@alliance/shared/client";
 import {
@@ -95,7 +95,7 @@ function CopyTextDisplayMobile({
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    await Clipboard.setStringAsync(text);
+    await setClipboardStringAsync(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
