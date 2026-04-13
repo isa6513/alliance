@@ -10,7 +10,7 @@ import "../global.css";
 import PostHogProvider from "../lib/PostHogProvider";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
-import Notifications from "expo-notifications";
+import { setNotificationHandler } from "expo-notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { authRefreshTokens } from "@alliance/shared/client";
 import PushNotificationResponseHandler from "../components/PushNotificationResponseHandler";
@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
   },
 });
 
-Notifications.setNotificationHandler({
+setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: true,
     shouldSetBadge: true,

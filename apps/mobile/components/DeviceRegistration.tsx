@@ -1,6 +1,12 @@
 import { useEffect, useCallback } from "react";
 import { Platform } from "react-native";
-import Notifications from "expo-notifications";
+import {
+  AndroidImportance,
+  getExpoPushTokenAsync,
+  getPermissionsAsync,
+  requestPermissionsAsync,
+  setNotificationChannelAsync,
+} from "expo-notifications";
 import { isDevice, modelId, modelName } from "expo-device";
 import Constants from "expo-constants";
 import { SecureStorage, SecureStorageKey } from "../lib/SecureStorage";
@@ -14,20 +20,19 @@ function handleRegistrationError(errorMessage: string) {
 
 async function registerForPushNotificationsAsync() {
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
+    await setNotificationChannelAsync("default", {
       name: "default",
-      importance: Notifications.AndroidImportance.MAX,
+      importance: AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: "#FF231F7C",
     });
   }
 
   if (isDevice) {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
+    const { status: existingStatus } = await getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
+      const { status } = await requestPermissionsAsync();
       finalStatus = status;
     }
     if (finalStatus !== "granted") {
@@ -45,7 +50,7 @@ async function registerForPushNotificationsAsync() {
     }
     try {
       const pushTokenString = (
-        await Notifications.getExpoPushTokenAsync({
+        await getExpoPushTokenAsync({
           projectId,
         })
       ).data;

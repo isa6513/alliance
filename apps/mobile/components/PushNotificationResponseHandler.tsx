@@ -5,7 +5,12 @@ import {
   pushMarkOpened,
 } from "@alliance/shared/client";
 import { QueryClient } from "@tanstack/react-query";
-import Notifications from "expo-notifications";
+import {
+  addNotificationResponseReceivedListener,
+  getLastNotificationResponse,
+  type EventSubscription,
+  type NotificationResponse,
+} from "expo-notifications";
 import { RelativePathString, router } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
 import { useAuth } from "../lib/AuthContext";
@@ -101,7 +106,7 @@ export default function PushNotificationResponseHandler({
   );
   const authStateRef = useRef({ isAuthenticated, isLoading });
   const lastHandledResponseIdentifierRef = useRef<string | null>(null);
-  const responseSub = useRef<Notifications.EventSubscription | null>(null);
+  const responseSub = useRef<EventSubscription | null>(null);
 
   const markNotificationReadFromTap = useCallback(
     (notification: Pick<NotificationDto, "id" | "sourceType">) => {
@@ -148,7 +153,7 @@ export default function PushNotificationResponseHandler({
   );
 
   const handleNotificationResponse = useCallback(
-    (response: Notifications.NotificationResponse | null) => {
+    (response: NotificationResponse | null) => {
       if (!response) {
         return;
       }
@@ -207,10 +212,10 @@ export default function PushNotificationResponseHandler({
       return;
     }
 
-    handleNotificationResponse(Notifications.getLastNotificationResponse());
+    handleNotificationResponse(getLastNotificationResponse());
 
     // Only tapped notification responses should mark reads, not delivered pushes.
-    responseSub.current = Notifications.addNotificationResponseReceivedListener(
+    responseSub.current = addNotificationResponseReceivedListener(
       handleNotificationResponse,
     );
 
