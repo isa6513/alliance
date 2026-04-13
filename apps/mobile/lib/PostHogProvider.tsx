@@ -1,43 +1,36 @@
 import {
-  PostHogOptions,
   PostHogProvider as RNPostHogProvider,
+  PostHogProviderProps,
 } from "posthog-react-native";
 import { type ReactNode } from "react";
 
-const { posthogHost, posthogEnabled } = __DEV__
+const postHogProviderProps: Omit<PostHogProviderProps, "children"> = __DEV__
   ? {
-      posthogHost: "",
-      posthogEnabled: false,
+      apiKey: "phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt",
+      options: {
+        host: "https://us.i.posthog.com",
+        defaultOptIn: false,
+      },
+      autocapture: false,
     }
   : {
-      posthogHost:
-        process.env.EXPO_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
-      posthogEnabled: true,
+      apiKey: "phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt",
+      options: {
+        host:
+          process.env.EXPO_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+        enableSessionReplay: true,
+        captureAppLifecycleEvents: true,
+        sessionReplayConfig: {
+          maskAllTextInputs: false,
+          captureLog: true,
+          captureNetworkTelemetry: true,
+          throttleDelayMs: 250,
+        },
+      },
     };
 
-const options: Partial<PostHogOptions> = {
-  host: posthogHost,
-  enableSessionReplay: true,
-  captureAppLifecycleEvents: true,
-  sessionReplayConfig: {
-    maskAllTextInputs: false,
-    captureLog: true,
-    captureNetworkTelemetry: true,
-    throttleDelayMs: 250,
-  },
-};
-
 export default function PostHogProvider({ children }: { children: ReactNode }) {
-  if (!posthogEnabled) {
-    return children;
-  }
-
   return (
-    <RNPostHogProvider
-      apiKey="phc_4Bkir1Px9qIRnMQfMWQPcGIq6wjodf9jtme8fty3ZLt"
-      options={options}
-    >
-      {children}
-    </RNPostHogProvider>
+    <RNPostHogProvider {...postHogProviderProps}>{children}</RNPostHogProvider>
   );
 }
