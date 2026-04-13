@@ -1,10 +1,12 @@
 import {
+  actionsActionRelations,
   actionsShareLinksForForm,
   FormResponseDto,
   ProfileDto,
   tasksGetForm,
   tasksGetFormResponses,
   type FormDto,
+  type UserActionRelationDetailDto,
 } from "@alliance/shared/client";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import type {
@@ -27,8 +29,13 @@ import { useParams, useSearchParams } from "react-router";
 import { CirclePlay } from "lucide-react";
 import { CardStyle } from "@alliance/shared/styles/card";
 import FormResponseStatistics from "../components/FormResponseStatistics";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@alliance/sharedweb/ui/HoverCard";
 
-export type FormWithSchema = Pick<FormDto, "id" | "title"> & {
+export type FormWithSchema = Pick<FormDto, "id" | "title" | "usedInAction"> & {
   schema: FormSchema;
   pages?: Page[];
 };
@@ -186,6 +193,10 @@ const FormResponses: React.FC = () => {
     Record<string, ProfileDto>
   >({});
 
+  const [withdrawnUserMap, setWithdrawnUserMap] = useState<
+    Record<number, UserActionRelationDetailDto>
+  >({});
+
   const [params, setParams] = useSearchParams();
   const tabParam = params.get("tab");
   const tab = isTab(tabParam) ? tabParam : "responses";
@@ -242,6 +253,23 @@ const FormResponses: React.FC = () => {
         );
       });
     }
+  }, [form]);
+
+  useEffect(() => {
+    const actionId = form?.usedInAction?.id;
+    if (!actionId) return;
+    actionsActionRelations().then((res) => {
+      const map: Record<number, UserActionRelationDetailDto> = {};
+      for (const userEntry of res.data?.users ?? []) {
+        const relation = userEntry.relations.find(
+          (r) => r.actionId === actionId && r.status === "wont_complete"
+        );
+        if (relation) {
+          map[userEntry.userId] = relation;
+        }
+      }
+      setWithdrawnUserMap(map);
+    });
   }, [form]);
 
   const loadData = useCallback(async () => {
@@ -606,6 +634,11 @@ const FormResponses: React.FC = () => {
         : "anonymous"))
     : "";
 
+  const currentWithdrawal = currentResponse?.user?.id != null
+    ? (withdrawnUserMap[currentResponse.user.id] ?? null)
+    : null;
+
+
   const getRespondentName = useCallback(
     (response: FormResponseDto): string => {
       return (
@@ -830,9 +863,35 @@ const FormResponses: React.FC = () => {
               {currentResponse && (
                 <div className="flex items-center gap-4">
                   <div className="text-right min-w-[200px]">
-                    <p className="font-medium text-gray-900 truncate max-w-[700px]">
-                      {respondentName}
-                    </p>
+                    <div className="flex items-center justify-end gap-2">
+                      <p className="font-medium text-gray-900 truncate max-w-[700px]">
+                        {respondentName}
+                      </p>
+                      {currentWithdrawal && (
+                        <HoverCard>
+                          <HoverCardTrigger
+                            render={
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 whitespace-nowrap cursor-default">
+                                Withdrew
+                              </span>
+                            }
+                          />
+                          <HoverCardContent>
+                            <div className="flex flex-col items-center gap-0.5">
+                              {currentWithdrawal.outOfTime && (
+                                <span className="text-orange-600">Out of time</span>
+                              )}
+                              {currentWithdrawal.isMoral && (
+                                <span className="text-amber-600">Moral objection</span>
+                              )}
+                              {currentWithdrawal.declineReason && (
+                                <span className="text-zinc-500">{currentWithdrawal.declineReason}</span>
+                              )}
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-500">
                       {new Date(currentResponse.createdAt).toLocaleString()}
                     </p>
@@ -1011,9 +1070,17 @@ const FormResponses: React.FC = () => {
                         )}
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-gray-900">
-                            {getRespondentName(response)}
-                          </p>
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <p className="truncate text-sm font-semibold text-gray-900">
+                              {getRespondentName(response)}
+                            </p>
+                            {response.user?.id != null &&
+                              withdrawnUserMap[response.user.id] && (
+                                <span className="inline-flex shrink-0 items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
+                                  Withdrew
+                                </span>
+                              )}
+                          </div>
                           <p className="text-xs text-gray-500">
                             {new Date(response.createdAt).toLocaleString()}
                           </p>
