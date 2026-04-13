@@ -70,6 +70,7 @@ import {
   UpdateActionEventDto,
   EvaluateCohortExpressionDto,
   EvaluateCohortExpressionResponseDto,
+  ActionWithdrawalDto,
 } from './dto/action.dto';
 import {
   NotificationScheduleEntryDto,
@@ -316,6 +317,15 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.actionsService.getActivity(id, req.user?.sub);
+  }
+
+  @Get('withdrawals/byForm/:formId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionWithdrawalDto, isArray: true })
+  async getWithdrawals(
+    @Param('formId', ParseIntPipe) formId: number,
+  ): Promise<ActionWithdrawalDto[]> {
+    return this.actionsService.getWithdrawalsForForm(formId);
   }
 
   @Get('events/:id')

@@ -133,17 +133,6 @@ export class TasksService {
     return this.transformImageUrls(await this.transformContractFields(form));
   }
 
-  async getFormWithAction(formId: number): Promise<FormDto> {
-    const form = await this.getForm(formId);
-    const action = await this.actionRepository.findOne({
-      where: { taskFormId: formId },
-    });
-    return {
-      ...form,
-      usedInAction: action ? new ActionDto(action) : undefined,
-    };
-  }
-
   private resolveAggregateValue(
     value: AggregateViewValue,
     totalsByFieldId: Map<string, number>,

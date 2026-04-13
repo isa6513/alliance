@@ -1543,6 +1543,13 @@ export type GlobalFeedItemDto = {
     forumComments?: GlobalFeedForumCommentsDto;
 };
 
+export type ActionWithdrawalDto = {
+    userId: number;
+    declineReason?: string;
+    isMoral?: boolean;
+    outOfTime?: boolean;
+};
+
 export type NotificationScheduleMetadataDto = {
     currentEventId?: number;
     nextEventId?: number;
@@ -5062,6 +5069,21 @@ export type ActionsGetActivityResponses = {
 };
 
 export type ActionsGetActivityResponse = ActionsGetActivityResponses[keyof ActionsGetActivityResponses];
+
+export type ActionsGetWithdrawalsData = {
+    body?: never;
+    path: {
+        formId: number;
+    };
+    query?: never;
+    url: '/actions/withdrawals/byForm/{formId}';
+};
+
+export type ActionsGetWithdrawalsResponses = {
+    200: Array<ActionWithdrawalDto>;
+};
+
+export type ActionsGetWithdrawalsResponse = ActionsGetWithdrawalsResponses[keyof ActionsGetWithdrawalsResponses];
 
 export type ActionsGetEventData = {
     body?: never;

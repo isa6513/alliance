@@ -1,12 +1,12 @@
 import {
-  actionsActionRelations,
+  actionsGetWithdrawals,
   actionsShareLinksForForm,
-  FormResponseDto,
-  ProfileDto,
   tasksGetForm,
   tasksGetFormResponses,
   type FormDto,
-  type UserActionRelationDetailDto,
+  type FormResponseDto,
+  type ActionWithdrawalDto,
+  type ProfileDto,
 } from "@alliance/shared/client";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import type {
@@ -28,6 +28,7 @@ import { cn } from "@alliance/shared/styles/util";
 import { useParams, useSearchParams } from "react-router";
 import { CirclePlay } from "lucide-react";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { useQuery } from "@tanstack/react-query";
 import FormResponseStatistics from "../components/FormResponseStatistics";
 import {
   HoverCard,
@@ -35,7 +36,52 @@ import {
   HoverCardTrigger,
 } from "@alliance/sharedweb/ui/HoverCard";
 
-export type FormWithSchema = Pick<FormDto, "id" | "title" | "usedInAction"> & {
+const WithdrawalBadge: React.FC<{ className?: string }> = ({ className }) => (
+  <span
+    className={cn(
+      "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800",
+      className,
+    )}
+  >
+    Withdrew
+  </span>
+);
+
+const WithdrawalInfo: React.FC<{ withdrawal: ActionWithdrawalDto }> = ({
+  withdrawal,
+}) => {
+  const hasDetails =
+    withdrawal.outOfTime || withdrawal.isMoral || withdrawal.declineReason;
+
+  if (!hasDetails) {
+    return <WithdrawalBadge className="whitespace-nowrap" />;
+  }
+
+  return (
+    <HoverCard>
+      <HoverCardTrigger
+        render={
+          <WithdrawalBadge className="whitespace-nowrap cursor-default" />
+        }
+      />
+      <HoverCardContent>
+        <div className="flex flex-col items-center gap-0.5">
+          {withdrawal.outOfTime && (
+            <span className="text-orange-600">Out of time</span>
+          )}
+          {withdrawal.isMoral && (
+            <span className="text-amber-600">Moral objection</span>
+          )}
+          {withdrawal.declineReason && (
+            <span className="text-zinc-500">{withdrawal.declineReason}</span>
+          )}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  );
+};
+
+export type FormWithSchema = Pick<FormDto, "id" | "title"> & {
   schema: FormSchema;
   pages?: Page[];
 };
@@ -193,9 +239,27 @@ const FormResponses: React.FC = () => {
     Record<string, ProfileDto>
   >({});
 
-  const [withdrawnUserMap, setWithdrawnUserMap] = useState<
-    Record<number, UserActionRelationDetailDto>
-  >({});
+  const { numericFormId, isFormIdValid } = useMemo(() => {
+    const numericFormId = Number(formId);
+    const isFormIdValid = !Number.isNaN(numericFormId);
+    return { numericFormId, isFormIdValid };
+  }, [formId]);
+
+  const { data: withdrawnUserMap = new Map<number, ActionWithdrawalDto>() } =
+    useQuery({
+      queryKey: ["actionsGetWithdrawals", numericFormId],
+      queryFn: async () => {
+        const res = await actionsGetWithdrawals({
+          path: { formId: numericFormId },
+        });
+        const map = new Map<number, ActionWithdrawalDto>();
+        for (const withdrawal of res.data ?? []) {
+          map.set(withdrawal.userId, withdrawal);
+        }
+        return map;
+      },
+      enabled: isFormIdValid,
+    });
 
   const [params, setParams] = useSearchParams();
   const tabParam = params.get("tab");
@@ -235,11 +299,6 @@ const FormResponses: React.FC = () => {
     };
   }, [filterFieldId, filterOpParam, filterValueParam]);
 
-  const numericFormId = useMemo(
-    () => (formId ? Number(formId) : NaN),
-    [formId],
-  );
-
   useEffect(() => {
     if (form) {
       actionsShareLinksForForm({ path: { formId: form.id } }).then((res) => {
@@ -255,25 +314,8 @@ const FormResponses: React.FC = () => {
     }
   }, [form]);
 
-  useEffect(() => {
-    const actionId = form?.usedInAction?.id;
-    if (!actionId) return;
-    actionsActionRelations().then((res) => {
-      const map: Record<number, UserActionRelationDetailDto> = {};
-      for (const userEntry of res.data?.users ?? []) {
-        const relation = userEntry.relations.find(
-          (r) => r.actionId === actionId && r.status === "wont_complete"
-        );
-        if (relation) {
-          map[userEntry.userId] = relation;
-        }
-      }
-      setWithdrawnUserMap(map);
-    });
-  }, [form]);
-
   const loadData = useCallback(async () => {
-    if (!numericFormId || Number.isNaN(numericFormId)) return;
+    if (!isFormIdValid) return;
     setLoading(true);
     setError(null);
     try {
@@ -293,7 +335,7 @@ const FormResponses: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [numericFormId]);
+  }, [numericFormId, isFormIdValid]);
 
   useEffect(() => {
     loadData();
@@ -634,10 +676,10 @@ const FormResponses: React.FC = () => {
         : "anonymous"))
     : "";
 
-  const currentWithdrawal = currentResponse?.user?.id != null
-    ? (withdrawnUserMap[currentResponse.user.id] ?? null)
-    : null;
-
+  const currentWithdrawal =
+    currentResponse?.user?.id != null
+      ? (withdrawnUserMap.get(currentResponse.user.id) ?? null)
+      : null;
 
   const getRespondentName = useCallback(
     (response: FormResponseDto): string => {
@@ -868,28 +910,7 @@ const FormResponses: React.FC = () => {
                         {respondentName}
                       </p>
                       {currentWithdrawal && (
-                        <HoverCard>
-                          <HoverCardTrigger
-                            render={
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 whitespace-nowrap cursor-default">
-                                Withdrew
-                              </span>
-                            }
-                          />
-                          <HoverCardContent>
-                            <div className="flex flex-col items-center gap-0.5">
-                              {currentWithdrawal.outOfTime && (
-                                <span className="text-orange-600">Out of time</span>
-                              )}
-                              {currentWithdrawal.isMoral && (
-                                <span className="text-amber-600">Moral objection</span>
-                              )}
-                              {currentWithdrawal.declineReason && (
-                                <span className="text-zinc-500">{currentWithdrawal.declineReason}</span>
-                              )}
-                            </div>
-                          </HoverCardContent>
-                        </HoverCard>
+                        <WithdrawalInfo withdrawal={currentWithdrawal} />
                       )}
                     </div>
                     <p className="text-sm text-gray-500">
@@ -1075,10 +1096,8 @@ const FormResponses: React.FC = () => {
                               {getRespondentName(response)}
                             </p>
                             {response.user?.id != null &&
-                              withdrawnUserMap[response.user.id] && (
-                                <span className="inline-flex shrink-0 items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
-                                  Withdrew
-                                </span>
+                              withdrawnUserMap.has(response.user.id) && (
+                                <WithdrawalBadge className="shrink-0" />
                               )}
                           </div>
                           <p className="text-xs text-gray-500">

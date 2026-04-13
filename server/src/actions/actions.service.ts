@@ -98,6 +98,7 @@ import {
   UpdateActionDto,
   UpdateActionEventDto,
   UserActionRelation,
+  ActionWithdrawalDto,
 } from './dto/action.dto';
 import { Post } from 'src/forum/entities/post.entity';
 import {
@@ -2682,6 +2683,44 @@ export class ActionsService {
       suites,
       users: userRelations,
     };
+  }
+
+  async getWithdrawalsForForm(
+    formId: number,
+  ): Promise<ActionWithdrawalDto[]> {
+    const action = await this.actionRepository.findOne({
+      where: { taskFormId: formId },
+    });
+    if (!action) {
+      return [];
+    }
+    const activities = await this.actionActivityRepository.find({
+      where: {
+        actionId: action.id,
+        type: ActionActivityType.USER_WONT_COMPLETE,
+      },
+      order: { createdAt: 'DESC' },
+    });
+    const seen = new Set<number>();
+    const results: {
+      userId: number;
+      declineReason?: string;
+      isMoral?: boolean;
+      outOfTime?: boolean;
+    }[] = [];
+    for (const a of activities) {
+      if (seen.has(a.userId)) {
+        continue;
+      }
+      seen.add(a.userId);
+      results.push({
+        userId: a.userId,
+        declineReason: a.declineReason,
+        isMoral: a.isMoral,
+        outOfTime: a.outOfTime,
+      });
+    }
+    return results;
   }
 
   async findUserActionRelations(): Promise<UserActionRelationsResponseDto> {

@@ -725,3 +725,10 @@ export class EvaluateCohortExpressionResponseDto {
   @IsArray()
   userIds: number[];
 }
+
+export class ActionWithdrawalDto extends PickType(ActionActivity, [
+  'userId',
+  'declineReason',
+  'isMoral',
+  'outOfTime',
+]) {}

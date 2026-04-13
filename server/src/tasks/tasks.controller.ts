@@ -112,8 +112,8 @@ export class TasksController {
 
   @Get('slug/:id')
   @ApiOkResponse({ type: FormDto })
-  async getForm(@Param('id', ParseIntPipe) id: number) {
-    return this.tasksService.getFormWithAction(id);
+  async getForm(@Param('id', ParseIntPipe) id: number): Promise<FormDto> {
+    return new FormDto(await this.tasksService.getForm(id));
   }
 
   @Get('aggregateViews/:id')
