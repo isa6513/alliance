@@ -65,7 +65,6 @@ export default function DeviceRegistration() {
     }
     try {
       const deviceId = await SecureStore.getItem("deviceId");
-      console.log("registering token: ", token);
       const resp = await userRegisterDevice({
         body: {
           deviceType: Device.modelId ?? Device.modelName,
