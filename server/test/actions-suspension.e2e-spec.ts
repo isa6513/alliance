@@ -262,10 +262,9 @@ describe('findUsersToSuspend (e2e)', () => {
   });
 
   it('does not count optional actions toward the suspension streak', async () => {
-    // Add a 4th suite with an optional action. failingUser has already failed
-    // the 2 required suites (Suite One & Two). If optional actions were counted
-    // this would hit the 3-strike threshold — but they shouldn't be.
-    // First, remove Suite Three so failingUser only has 2 required failures.
+    // Remove Suite Three so failingUser only has 2 required failures, then add
+    // an optional suite. If optional actions were counted this would hit the
+    // 3-strike threshold — but they shouldn't be.
     const suiteThree = await suiteRepo.findOneOrFail({
       where: { name: 'Suite Three' },
     });
@@ -277,7 +276,6 @@ describe('findUsersToSuspend (e2e)', () => {
     await actionRepo.delete(actionThree.id);
     await suiteRepo.delete(suiteThree.id);
 
-    // Create an optional suite in its place
     const optionalSuite = await suiteRepo.save(
       suiteRepo.create({ name: 'Suite Optional' }),
     );
@@ -320,30 +318,31 @@ describe('findUsersToSuspend (e2e)', () => {
       }),
     ]);
 
-    // 2 required failures + 1 optional failure should NOT trigger suspension
-    const result = await actionsService.findUsersToSuspend(now);
-    expect(result.usersToSuspend.map((u) => u.id)).not.toContain(
-      failingUser.id,
-    );
+    try {
+      // 2 required failures + 1 optional failure should NOT trigger suspension
+      const result = await actionsService.findUsersToSuspend(now);
+      expect(result.usersToSuspend.map((u) => u.id)).not.toContain(
+        failingUser.id,
+      );
+    } finally {
+      // Restore Suite Three so subsequent tests have the original 3 required suites
+      await eventRepo.delete({ action: { id: optionalAction.id } });
+      await actionRepo.delete(optionalAction.id);
+      await suiteRepo.delete(optionalSuite.id);
 
-    // Clean up: restore Suite Three so subsequent tests have the original 3 required suites
-    await eventRepo.delete({ action: { id: optionalAction.id } });
-    await actionRepo.delete(optionalAction.id);
-    await suiteRepo.delete(optionalSuite.id);
-
-    const restoredAction = await createCompletedSuiteAction(
-      'Suite Three',
-      'Action Three',
-      new Date('2023-03-10T00:00:00Z'),
-    );
-    // Re-add completingUser's completion activity for the restored action
-    await activityRepo.save(
-      activityRepo.create({
-        actionId: restoredAction.id,
-        userId: completingUser.id,
-        type: ActionActivityType.USER_COMPLETED,
-      }),
-    );
+      const restoredAction = await createCompletedSuiteAction(
+        'Suite Three',
+        'Action Three',
+        new Date('2023-03-10T00:00:00Z'),
+      );
+      await activityRepo.save(
+        activityRepo.create({
+          actionId: restoredAction.id,
+          userId: completingUser.id,
+          type: ActionActivityType.USER_COMPLETED,
+        }),
+      );
+    }
   });
 
   it('suspends users who fail three suites and does not re-suspend once inactive or re-signed', async () => {
