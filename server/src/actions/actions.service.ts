@@ -2685,9 +2685,7 @@ export class ActionsService {
     };
   }
 
-  async getWithdrawalsForForm(
-    formId: number,
-  ): Promise<ActionWithdrawalDto[]> {
+  async getWithdrawalsForForm(formId: number): Promise<ActionWithdrawalDto[]> {
     const action = await this.actionRepository.findOne({
       where: { taskFormId: formId },
     });
@@ -2826,6 +2824,7 @@ export class ActionsService {
       const action = actions[i];
       if (!action.suite) continue;
       if (action.onboarding) continue;
+      if (action.optional) continue;
 
       const suiteId = action.suite.id;
       if (!suiteMap.has(suiteId)) {

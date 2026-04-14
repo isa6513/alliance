@@ -261,6 +261,93 @@ describe('findUsersToSuspend (e2e)', () => {
     await suiteRepo.delete(inProgressSuite.id);
   });
 
+  it('does not count optional actions toward the suspension streak', async () => {
+    // Remove the 3 existing suites' actions so we start fresh for this test
+    await activityRepo.delete({});
+    await eventRepo.query('DELETE FROM action_event');
+    await actionRepo.query('DELETE FROM action');
+    await suiteRepo.query('DELETE FROM action_suite');
+
+    // Create 3 suites: first two have required actions, third has an optional action
+    const suiteA = await suiteRepo.save(suiteRepo.create({ name: 'Suite A' }));
+    const suiteB = await suiteRepo.save(suiteRepo.create({ name: 'Suite B' }));
+    const suiteC = await suiteRepo.save(
+      suiteRepo.create({ name: 'Suite C (optional)' }),
+    );
+
+    const createAction = async (
+      suite: ActionSuite,
+      name: string,
+      baseDate: Date,
+      optional: boolean,
+    ) => {
+      const action = await actionRepo.save(
+        actionRepo.create({
+          name,
+          category: 'Suspension Test',
+          body: 'Body',
+          taskContents: 'Tasks',
+          shortDescription: 'Short description',
+          suite,
+          everyoneShouldComplete: false,
+          visibilityMode: VisibilityMode.Public,
+          preventCompletion: false,
+          type: ActionTaskType.Activity,
+          optional,
+        }),
+      );
+      await eventRepo.save([
+        eventRepo.create({
+          title: `${name} office`,
+          description: 'Office phase',
+          newStatus: ActionStatus.OfficeAction,
+          date: baseDate,
+          action,
+        }),
+        eventRepo.create({
+          title: `${name} member`,
+          description: 'Member phase',
+          newStatus: ActionStatus.MemberAction,
+          date: addDays(baseDate, 1),
+          action,
+        }),
+        eventRepo.create({
+          title: `${name} done`,
+          description: 'Completed',
+          newStatus: ActionStatus.Completed,
+          date: addDays(baseDate, 2),
+          action,
+        }),
+      ]);
+      return action;
+    };
+
+    await createAction(
+      suiteA,
+      'Required A',
+      new Date('2023-01-10T00:00:00Z'),
+      false,
+    );
+    await createAction(
+      suiteB,
+      'Required B',
+      new Date('2023-02-10T00:00:00Z'),
+      false,
+    );
+    await createAction(
+      suiteC,
+      'Optional C',
+      new Date('2023-03-10T00:00:00Z'),
+      true,
+    );
+
+    // failingUser has not completed any of the 3, but only 2 are required
+    const result = await actionsService.findUsersToSuspend(now);
+    expect(result.usersToSuspend.map((u) => u.id)).not.toContain(
+      failingUser.id,
+    );
+  });
+
   it('suspends users who fail three suites and does not re-suspend once inactive or re-signed', async () => {
     const initialRun = await actionsService.findUsersToSuspend(now);
 
@@ -272,7 +359,11 @@ describe('findUsersToSuspend (e2e)', () => {
       initialRun.usersToSuspend.some((user) => user.id === completingUser.id),
     ).toBe(false);
 
-    await contractService.suspendContract(failingUser.id, true, 'test-auto-key');
+    await contractService.suspendContract(
+      failingUser.id,
+      true,
+      'test-auto-key',
+    );
 
     const afterSuspension = await actionsService.findUsersToSuspend(now);
     expect(afterSuspension.usersToSuspend).toHaveLength(0);
