@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   Share,
   Alert,
+  Platform,
   type GestureResponderEvent,
 } from "react-native";
 import type { OnetimeInviteDto } from "@alliance/shared/client";
@@ -56,10 +57,11 @@ export default function OnetimeInviteListItem({
 
   const handleShare = () => {
     const url = getReferralSignupUrl(getBaseUrl(), invite.code);
-    Share.share({
-      url,
-      title: "Alliance invite",
-    }).then(() => {
+    Share.share(
+      Platform.OS === "android"
+        ? { message: url, title: "Alliance invite" }
+        : { url, title: "Alliance invite" },
+    ).then(() => {
       actions.onShared?.(invite.id);
     });
   };
