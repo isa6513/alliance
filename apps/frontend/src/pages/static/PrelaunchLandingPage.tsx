@@ -6,10 +6,13 @@ import alliancePeople from "../../assets/alliance_people.webp";
 import { actionsFindOne } from "@alliance/shared/client";
 import type { ActionDto } from "@alliance/shared/client";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { ChevronRight } from "lucide-react";
 import Footer from "../../components/Footer";
+import { formatTime } from "@alliance/shared/lib/utils";
 
-const FEATURED_ACTION_IDS: number[] = [84, 81, 76, 75];
+const FEATURED_ACTION_IDS: number[] = [91, 84, 76, 75];
+
+/** Shared width + horizontal padding for hero copy and sections below. */
+const LANDING_MAIN_COL = "mx-auto w-full max-w-4xl px-6 sm:px-10 lg:px-16";
 
 function usePrelaunchActions() {
   const results = useQueries({
@@ -32,9 +35,12 @@ function PreviewActionCard({ action }: { action: ActionDto }) {
   return (
     <Link
       to={href("/actions/:id", { id: action.id.toString() })}
-      className="group relative flex flex-row items-start justify-between gap-4 rounded-lg bg-white  p-4 lg:p-6 hover:bg-zinc-50"
+      className="rounded-md group relative flex flex-row items-start justify-between gap-4 p-4 lg:p-6 bg-zinc-50 hover:bg-zinc-100"
     >
       <div className="flex flex-col gap-1 min-w-0 flex-1">
+        <p className="text-zinc-500 text-sm">
+          {formatTime(new Date(action.createdAt), { addSuffix: true })}
+        </p>
         <p className="text-lg lg:text-xl font-medium text-black">
           {action.name}
         </p>
@@ -42,7 +48,6 @@ function PreviewActionCard({ action }: { action: ActionDto }) {
           {action.shortDescription}
         </p>
       </div>
-      <ChevronRight className="h-5 w-5 shrink-0 text-green" aria-hidden />
     </Link>
   );
 }
@@ -52,45 +57,46 @@ const PrelaunchLandingPage: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      <PrelaunchNavbar transparent={false} absolute={false} showLogo={false} />
+      <section className="relative min-h-dvh w-full overflow-hidden">
+        <img
+          src={alliancePeople}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div
+          className="absolute inset-0 bg-linear-to-t from-black/75 via-black/40 to-black/15"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-linear-to-b from-black/80 via-black/45 to-transparent sm:h-44 md:h-52"
+          aria-hidden
+        />
+        <PrelaunchNavbar transparent absolute showLogo />
 
-      <div className="flex-1 flex flex-col mx-auto w-full bg-white">
-        <section className="bg-white w-full px-8 py-12 lg:py-24">
-          <div className="flex items-start justify-center mb-12">
-            <div className="flex flex-col gap-y-3 lg:gap-y-8 max-w-[700px]">
-              <p className="font-berlingske uppercase font-medium font-serif text-3xl lg:text-4xl text-black text-center">
-                The Alliance
+        <div className="relative z-1 flex min-h-dvh w-full flex-col justify-end pb-10 pt-28 sm:pb-14 lg:pb-20 lg:pt-32">
+          <div className={LANDING_MAIN_COL}>
+            <p className="font-serif font-semibold text-4xl text-white drop-shadow-sm sm:text-5xl lg:text-7xl">
+              The Alliance
+            </p>
+            <div className="mt-4 flex flex-col gap-y-4 text-lg text-white/95 drop-shadow-sm sm:mt-6 sm:gap-y-5 sm:text-xl lg:text-3xl">
+              <p>
+                We&apos;re a global group of people cooperating to address
+                global crises. Each member contributes a consistent amount of
+                their time each week, providing the reliability needed to
+                coordinate precise, effective actions.
               </p>
-              <div className="flex flex-col gap-y-3 lg:gap-y-6 text-zinc-900 text-lg sm:text-xl lg:text-2xl text-center">
-                <p>
-                  The Alliance is a global group of people cooperating to
-                  improve the world. We require dependable time commitments from
-                  members, which allows us to plan and execute precise,
-                  effective actions.
-                </p>
-                <p>
-                  We are in an experimental, invite-only phase. We aim to give
-                  members, and ultimately a significant proportion of humanity,
-                  the ability to make deliberate, large-scale change.
-                </p>
-              </div>
             </div>
           </div>
-          <div className="flex flex-col items-center mx-auto gap-y-4 lg:max-w-[1000px]">
-            <img
-              src={alliancePeople}
-              alt="Alliance members"
-              className="w-full lg:max-h-screen object-contain rounded-md"
-            />
-            <p className="text-center text-zinc-500 text-base lg:text-lg">
-              A few members gathered in San Francisco, California
-            </p>
-          </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="bg-page w-full mx-auto px-8 py-12 lg:py-24">
-          <div className="max-w-[1000px] flex flex-col items-center justify-start gap-y-4 lg:gap-y-6 mx-auto">
-            <p className="text-heading-public text-black  w-full">
+      <div className="flex flex-1 flex-col bg-white">
+        <section className="w-full py-12 lg:py-36">
+          <div
+            className={`${LANDING_MAIN_COL} flex flex-col gap-y-4 lg:gap-y-6`}
+          >
+            <p className="text-heading-public w-full text-black">
               Recent actions
             </p>
             {isPending ? (
@@ -98,7 +104,7 @@ const PrelaunchLandingPage: React.FC = () => {
                 <Spinner size="large" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:gap-4 w-full">
+              <div className="flex w-full flex-col gap-2">
                 {actions.map((action) => (
                   <PreviewActionCard key={action.id} action={action} />
                 ))}
@@ -107,7 +113,7 @@ const PrelaunchLandingPage: React.FC = () => {
           </div>
         </section>
       </div>
-      <Footer />
+      <Footer className="bg-white" />
     </div>
   );
 };

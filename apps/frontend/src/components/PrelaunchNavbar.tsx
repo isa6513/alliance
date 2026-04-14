@@ -50,13 +50,16 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
         showLogo ? "justify-between" : "justify-end",
         transparent
           ? "bg-transparent text-white"
-          : "text-black bg-white border-b md:border-none border-zinc-200"
+          : "text-black bg-white border-b md:border-none border-zinc-200",
       )}
       ref={ref}
     >
       {showLogo && (
         <h1
-          className="font-bold font-berlingske text-lg md:text-2xl cursor-pointer text-nowrap"
+          className={cn(
+            "font-bold font-berlingske text-lg md:text-2xl cursor-pointer text-nowrap",
+            transparent ? "text-white" : undefined,
+          )}
           onClick={() => {
             navigate(href("/"));
           }}
@@ -70,7 +73,12 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
             <Link
               to={destinations[link]}
               key={link}
-              className="border border-zinc-200 bg-white hover:bg-zinc-50 py-1 md:py-1.5 px-3 md:px-5 rounded-full whitespace-nowrap"
+              className={cn(
+                "py-1 md:py-1.5 px-3 md:px-5 rounded-full whitespace-nowrap font-medium",
+                transparent
+                  ? "bg-white text-black hover:bg-zinc-100"
+                  : "bg-black text-white hover:bg-zinc-800",
+              )}
             >
               {link}
             </Link>
@@ -78,11 +86,16 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
             <Link
               to={destinations[link]}
               key={link}
-              className="hover:underline whitespace-nowrap"
+              className={cn(
+                "hover:underline whitespace-nowrap",
+                transparent
+                  ? "text-white/90 hover:text-white"
+                  : "text-zinc-900",
+              )}
             >
               {link}
             </Link>
-          )
+          ),
         )}
       </div>
     </div>
