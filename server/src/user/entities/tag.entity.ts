@@ -6,6 +6,7 @@ import {
   JoinTable,
   ManyToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Type } from 'class-transformer';
@@ -17,6 +18,7 @@ import type { Ty } from 'src/tasks/entities/type';
 import { GeneralUpdate } from 'src/actions/entities/general-update.entity';
 
 @Entity()
+@Unique(['name'])
 export class Tag {
   // Fields
 
