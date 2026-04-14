@@ -238,27 +238,29 @@ describe('findUsersToSuspend (e2e)', () => {
       }),
     );
 
-    // Query at `now` — the in-progress suite deadline hasn't passed,
-    // so only the first 3 (fully past) suites should count.
-    // failingUser has failed all 3 past suites => still suspended.
-    const result = await actionsService.findUsersToSuspend(now);
-    expect(result.usersToSuspend.map((u) => u.id)).toEqual([failingUser.id]);
+    try {
+      // Query at `now` — the in-progress suite deadline hasn't passed,
+      // so only the first 3 (fully past) suites should count.
+      // failingUser has failed all 3 past suites => still suspended.
+      const result = await actionsService.findUsersToSuspend(now);
+      expect(result.usersToSuspend.map((u) => u.id)).toEqual([failingUser.id]);
 
-    // Now query at a time where only 2 suites are past and the 3rd suite's
-    // deadline hasn't passed yet. Remove suite three's completed event deadline
-    // by pushing it into the future so only 2 suites are fully past.
-    // Instead, simulate by checking at a date before suite three's deadline:
-    // Suite Three: MemberAction at 2023-03-11, Completed at 2023-03-12
-    // Check at 2023-03-11T12:00:00Z — between member start and deadline
-    const midSuiteThree = new Date('2023-03-11T12:00:00Z');
-    const midResult = await actionsService.findUsersToSuspend(midSuiteThree);
-    // Only 2 suites are fully past at this point, not enough for suspension
-    expect(midResult.usersToSuspend).toHaveLength(0);
-
-    // Clean up the in-progress suite
-    await eventRepo.delete({ action: { id: inProgressAction.id } });
-    await actionRepo.delete(inProgressAction.id);
-    await suiteRepo.delete(inProgressSuite.id);
+      // Now query at a time where only 2 suites are past and the 3rd suite's
+      // deadline hasn't passed yet. Remove suite three's completed event deadline
+      // by pushing it into the future so only 2 suites are fully past.
+      // Instead, simulate by checking at a date before suite three's deadline:
+      // Suite Three: MemberAction at 2023-03-11, Completed at 2023-03-12
+      // Check at 2023-03-11T12:00:00Z — between member start and deadline
+      const midSuiteThree = new Date('2023-03-11T12:00:00Z');
+      const midResult = await actionsService.findUsersToSuspend(midSuiteThree);
+      // Only 2 suites are fully past at this point, not enough for suspension
+      expect(midResult.usersToSuspend).toHaveLength(0);
+    } finally {
+      // Clean up the in-progress suite
+      await eventRepo.delete({ action: { id: inProgressAction.id } });
+      await actionRepo.delete(inProgressAction.id);
+      await suiteRepo.delete(inProgressSuite.id);
+    }
   });
 
   it('does not count optional actions toward the suspension streak', async () => {
