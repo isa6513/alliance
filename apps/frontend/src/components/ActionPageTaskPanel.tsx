@@ -18,6 +18,7 @@ import {
   shouldLoadCompletedTaskFormByState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
 import { taskHeaders } from "@alliance/shared/lib/copy";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -123,7 +124,7 @@ const ActionPageTaskPanel = () => {
   );
 
   const handleShareCopy = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/actions/${action.id}`);
+    navigator.clipboard.writeText(`${getBaseUrl()}/actions/${action.id}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -139,7 +140,9 @@ const ActionPageTaskPanel = () => {
         className="flex items-center gap-x-1 text-zinc-500 hover:text-zinc-700"
       >
         <Link2 className="w-3.5 h-3.5" />
-        <span className="text-sm">{copied ? "Copied to Clipboard!" : "Share"}</span>
+        <span className="text-sm">
+          {copied ? "Copied to Clipboard!" : "Share"}
+        </span>
       </button>
     </div>
   );

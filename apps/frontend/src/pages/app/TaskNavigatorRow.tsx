@@ -10,6 +10,7 @@ import { cn } from "@alliance/shared/styles/util";
 import { type ReactNode, useState } from "react";
 import type { ActionDto, FollowUpForm } from "@alliance/shared/client";
 import type { ActionWithAwayStatus } from "@alliance/shared/lib/actionUtils";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 
 const ICON_SIZE = 16;
 
@@ -156,9 +157,7 @@ export function TaskNavigatorCompletedRow({
   const [copied, setCopied] = useState(false);
 
   const handleShare = () => {
-    navigator.clipboard.writeText(
-      `${window.location.origin}/actions/${action.id}`,
-    );
+    navigator.clipboard.writeText(`${getBaseUrl()}/actions/${action.id}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -179,7 +178,9 @@ export function TaskNavigatorCompletedRow({
           className="shrink-0 flex items-center gap-x-1 text-zinc-400 hover:text-zinc-600"
         >
           <Link2 size={12} />
-          <span className="text-xs">{copied ? "Copied to Clipboard!" : "Share"}</span>
+          <span className="text-xs">
+            {copied ? "Copied to Clipboard!" : "Share"}
+          </span>
         </button>
       </div>
       <TaskNavigatorFollowUpRows
