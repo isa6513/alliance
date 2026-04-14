@@ -1286,7 +1286,7 @@ describe('Actions (e2e)', () => {
       const newEvent: CreateActionEventDto = {
         title: 'Test Event',
         description: 'Test Event',
-        newStatus: ActionStatus.MemberAction,
+        newStatus: ActionStatus.Resolution,
         date: new Date(),
       };
 
@@ -1391,7 +1391,7 @@ describe('Actions (e2e)', () => {
         const firstEvent: CreateActionEventDto = {
           title: 'Launch',
           description: 'Action launched',
-          newStatus: ActionStatus.MemberAction,
+          newStatus: ActionStatus.OfficeAction,
           date: new Date(Date.now() - 3600000), // 1 hour ago
         };
 
@@ -1542,13 +1542,13 @@ describe('Actions (e2e)', () => {
             date: new Date(now - 14400000), // 4 hours ago
           },
           {
-            title: 'Member Action Start',
-            newStatus: ActionStatus.MemberAction,
+            title: 'Office Action Start',
+            newStatus: ActionStatus.OfficeAction,
             date: new Date(now - 3600000), // 1 hour ago (most recent past)
           },
           {
-            title: 'Commitments Reached',
-            newStatus: ActionStatus.OfficeAction,
+            title: 'Planned Phase',
+            newStatus: ActionStatus.Planned,
             date: new Date(now - 7200000), // 2 hours ago
           },
         ];
@@ -1573,7 +1573,7 @@ describe('Actions (e2e)', () => {
           .set('Authorization', `Bearer ${ctx.accessToken}`);
 
         expect(res.status).toBe(200);
-        expect(res.body.status).toBe(ActionStatus.MemberAction); // Most recent past event
+        expect(res.body.status).toBe(ActionStatus.OfficeAction); // Most recent past event
         expect(res.body.events.length).toBe(4);
 
         // Cleanup
@@ -2232,10 +2232,6 @@ describe('Actions (e2e)', () => {
               status: ActionStatus.MemberAction,
               date: new Date(now - 10800000),
             }, // 3h ago
-            {
-              status: ActionStatus.MemberAction,
-              date: new Date(now - 7200000),
-            }, // 2h ago
             { status: ActionStatus.Resolution, date: new Date(now - 1800000) }, // 30min ago (past, not a deadline)
           ],
         },
