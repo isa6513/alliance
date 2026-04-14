@@ -2143,15 +2143,19 @@ export class ActionsService {
       relations: { actions: true },
     });
 
-    for (const action of suite.actions) {
-      console.log('adding event to action', action.id);
-      const newEvent = this.actionEventRepository.create({
-        ...actionEventDto,
-        action,
-        suiteManaged: true,
-      });
-      await this.actionEventRepository.save(newEvent);
+    await this.actionEventRepository.manager.transaction(async (manager) => {
+      for (const action of suite.actions) {
+        console.log('adding event to action', action.id);
+        const newEvent = manager.create(ActionEvent, {
+          ...actionEventDto,
+          action,
+          suiteManaged: true,
+        });
+        await manager.save(newEvent);
+      }
+    });
 
+    for (const action of suite.actions) {
       await this.reloadUsersJoinedForAction(action.id);
     }
     await this.syncGeneralUpdateDatesForSuites([suiteId]);
