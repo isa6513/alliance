@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ALL_MEMBERS_TAG_NAME } from 'src/constants';
 import { City } from 'src/geo/city.entity';
 import { ImagesService } from 'src/images/images.service';
 import { MailService } from 'src/mail/mail.service';
@@ -980,6 +981,10 @@ export class UserService {
 
   async findTagByName(name: string): Promise<Tag | null> {
     return this.tagRepository.findOne({ where: { name } });
+  }
+
+  async findAllMembersTag(): Promise<Tag | null> {
+    return this.findTagByName(ALL_MEMBERS_TAG_NAME);
   }
 
   async findTagOrFail(id: string): Promise<Tag> {

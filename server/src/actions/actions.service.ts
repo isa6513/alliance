@@ -2521,7 +2521,7 @@ export class ActionsService {
     });
 
     const allMembersTagIdP: Promise<string | null> = run(async () => {
-      const tag = await this.userService.findTagByName('All Members');
+      const tag = await this.userService.findAllMembersTag();
       return tag?.id ?? null;
     });
 

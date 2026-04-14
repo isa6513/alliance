@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module, OnModuleInit, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ImagesModule } from 'src/images/images.module';
@@ -26,6 +26,7 @@ import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { CommunityModule } from 'src/community/community.module';
 import { LiveActivityRegistration } from 'src/apns/entities/live-activity-registration.entity';
+import { ALL_MEMBERS_TAG_NAME } from 'src/constants';
 
 @Module({
   imports: [
@@ -59,6 +60,16 @@ import { LiveActivityRegistration } from 'src/apns/entities/live-activity-regist
   providers: [UserService, IsUserAlreadyExist],
   exports: [UserService],
 })
-export class UserModule {
+export class UserModule implements OnModuleInit {
   constructor(private readonly userService: UserService) {}
+
+  async onModuleInit() {
+    const existing = await this.userService.findAllMembersTag();
+    if (!existing) {
+      await this.userService.createTag({
+        name: ALL_MEMBERS_TAG_NAME,
+        description: 'Every Alliance member',
+      });
+    }
+  }
 }

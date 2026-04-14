@@ -100,7 +100,7 @@ export class AuthService {
     const { invite, referringUser, referralSource } =
       await this.resolveReferralCode(signUp.referralCode);
 
-    const defaultTag = await this.usersService.findTagByName('All Members');
+    const defaultTag = await this.usersService.findAllMembersTag();
 
     const user = await this.usersService.create({
       ...signUp,
