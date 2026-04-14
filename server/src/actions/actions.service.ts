@@ -158,8 +158,6 @@ import {
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 
-const MS_IN_WEEK = 7 * 24 * 60 * 60 * 1000;
-
 type SuspendPlanContext = {
   orderedSuites: Array<{ suiteId: number; pastDate: Date | null }>;
   expectedBySuite: Map<number, Set<number>>;
@@ -2417,53 +2415,6 @@ export class ActionsService {
   }
 
   // TODO move ==================================
-
-  latestMemberActionPhaseDeadline(events: ActionEvent[]): Date | null {
-    let latestMemberActionDate: Date | null = null;
-    for (const event of events) {
-      if (
-        event.newStatus === ActionStatus.MemberAction &&
-        (latestMemberActionDate === null || event.date > latestMemberActionDate)
-      ) {
-        latestMemberActionDate = event.date;
-      }
-    }
-    if (!latestMemberActionDate) {
-      return null;
-    }
-
-    let earliestDeadline: Date | null = null;
-    for (const event of events) {
-      if (
-        event.newStatus !== ActionStatus.MemberAction &&
-        event.date > latestMemberActionDate &&
-        (earliestDeadline === null || event.date < earliestDeadline)
-      ) {
-        earliestDeadline = event.date;
-      }
-    }
-    return earliestDeadline;
-  }
-
-  someMemberActionPhaseIsOver(params: {
-    events: ActionEvent[];
-    date: Date;
-  }): boolean {
-    const { events, date } = params;
-    const deadline = this.latestMemberActionPhaseDeadline(events);
-    if (!deadline) {
-      return false;
-    }
-    return deadline <= date;
-  }
-
-  calculateDeadlineWeekNumber(events: ActionEvent[]): number | null {
-    const deadline = this.latestMemberActionPhaseDeadline(events);
-    if (!deadline) {
-      return null;
-    }
-    return Math.floor(deadline.getTime() / MS_IN_WEEK);
-  }
 
   async findActionRelationsForUsers(
     usersP: Promise<User[]>,
