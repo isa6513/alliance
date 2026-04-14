@@ -1165,7 +1165,11 @@ export class ActionsService {
     }
 
     await this.syncGeneralUpdateDatesForSuites(
-      suiteIds ?? [...new Set(actions.map((a) => a.suite?.id))],
+      suiteIds ?? [
+        ...new Set(
+          actions.map((a) => a.suite?.id).filter((id) => id !== undefined),
+        ),
+      ],
     );
 
     return saved;
