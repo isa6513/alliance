@@ -22,6 +22,7 @@
     "@alliance/shared": "workspace:*",
     "@hey-api/client-fetch": "^0.10.0",
     "@legendapp/list": "^2.0.19",
+    "@likashefqet/react-native-image-zoom": "^4.3.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/drawer": "^7.3.9",

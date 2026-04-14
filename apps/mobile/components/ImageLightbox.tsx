@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Dimensions, Image, Modal, TouchableOpacity, View } from "react-native";
-import { X } from "lucide-react-native";
+import { Image, Modal, Pressable, TouchableOpacity } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { ImageZoom } from "@likashefqet/react-native-image-zoom";
 
 interface ImageLightboxModalProps {
   uri: string | null;
@@ -8,9 +9,6 @@ interface ImageLightboxModalProps {
 }
 
 export function ImageLightboxModal({ uri, onClose }: ImageLightboxModalProps) {
-  const { width, height } = Dimensions.get("window");
-  const lightboxSize = Math.min(width * 0.9, height * 0.7);
-
   return (
     <Modal
       visible={!!uri}
@@ -18,27 +16,22 @@ export function ImageLightboxModal({ uri, onClose }: ImageLightboxModalProps) {
       animationType="fade"
       onRequestClose={onClose}
     >
-      <TouchableOpacity
-        className="flex-1 bg-black/80 items-center justify-center"
-        onPress={onClose}
-        activeOpacity={1}
-      >
-        <View className="max-w-[90%] max-h-[80%]">
-          {uri && (
-            <Image
-              source={{ uri }}
-              style={{ width: lightboxSize, height: lightboxSize }}
-              resizeMode="contain"
-            />
-          )}
-          <TouchableOpacity
-            onPress={onClose}
-            className="absolute -top-10 right-0"
-          >
-            <X size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
+      <GestureHandlerRootView className="flex-1 bg-black/80">
+        {uri ? (
+          <ImageZoom
+            uri={uri}
+            minScale={1}
+            maxScale={5}
+            isDoubleTapEnabled
+            isSingleTapEnabled
+            onSingleTap={onClose}
+            style={{ flex: 1 }}
+            resizeMode="contain"
+          />
+        ) : (
+          <Pressable onPress={onClose} className="flex-1" />
+        )}
+      </GestureHandlerRootView>
     </Modal>
   );
 }
