@@ -834,14 +834,14 @@ export class ActionsController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuite, isArray: true })
   suites(): Promise<ActionSuite[]> {
-    return this.actionsService.getSuites();
+    return this.actionsService.findSuites();
   }
 
   @Get('suite/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto })
   suite(@Param('id', ParseIntPipe) id: number): Promise<ActionSuiteDto> {
-    return this.actionsService.getSuite(id);
+    return this.actionsService.findSuite(id);
   }
 
   @Post('createSuite')

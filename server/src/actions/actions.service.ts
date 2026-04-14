@@ -1118,18 +1118,57 @@ export class ActionsService {
     userId?: number,
   ): Promise<ActionEvent> {
     const action = await this.findOne({ id: actionId, userId });
-
-    const newEvent = this.actionEventRepository.create({
-      ...actionEventDto,
-      action,
+    const [savedEvent] = await this.addEventToActions({
+      actions: [action],
+      event: actionEventDto,
     });
-
-    const savedEvent = await this.actionEventRepository.save(newEvent);
-
-    await this.reloadUsersJoinedForAction(action.id);
-
-    await this.syncGeneralUpdateDatesForSuites([action.suite?.id]);
     return savedEvent;
+  }
+
+  private async addEventToActions(params: {
+    actions: Action[];
+    event: CreateActionEventDto;
+    overrides?: Partial<ActionEvent>;
+    suiteIds?: number[];
+  }): Promise<ActionEvent[]> {
+    const { actions, event, overrides, suiteIds } = params;
+    let saved: ActionEvent[];
+    try {
+      saved = await this.actionEventRepository.manager.transaction(
+        async (manager) => {
+          const events: ActionEvent[] = [];
+          for (const action of actions) {
+            const newEvent = manager.create(ActionEvent, {
+              ...event,
+              ...overrides,
+              action,
+            });
+            events.push(await manager.save(newEvent));
+          }
+          return events;
+        },
+      );
+    } catch (err) {
+      if (
+        err?.code === '23505' &&
+        err?.constraint === 'UQ_action_event_one_member_action'
+      ) {
+        throw new BadRequestException(
+          'An action can only have one member_action event',
+        );
+      }
+      throw err;
+    }
+
+    for (const action of actions) {
+      await this.reloadUsersJoinedForAction(action.id);
+    }
+
+    await this.syncGeneralUpdateDatesForSuites(
+      suiteIds ?? [...new Set(actions.map((a) => a.suite?.id))],
+    );
+
+    return saved;
   }
 
   async remove(id: number) {
@@ -2066,11 +2105,11 @@ export class ActionsService {
     }
   }
 
-  async getSuites(): Promise<ActionSuite[]> {
+  async findSuites(): Promise<ActionSuite[]> {
     return this.actionSuiteRepository.find();
   }
 
-  async getSuite(id: number): Promise<ActionSuiteDto> {
+  async findSuite(id: number): Promise<ActionSuiteDto> {
     const suite = await this.actionSuiteRepository.findOneOrFail({
       where: { id },
       relations: {
@@ -2134,7 +2173,7 @@ export class ActionsService {
       await this.actionEventRepository.update(id, body);
     }
     await this.syncGeneralUpdateDatesForSuites([suiteId]);
-    return this.getSuite(suiteId);
+    return this.findSuite(suiteId);
   }
 
   async addSuiteEvent(suiteId: number, actionEventDto: CreateActionEventDto) {
@@ -2143,23 +2182,13 @@ export class ActionsService {
       relations: { actions: true },
     });
 
-    await this.actionEventRepository.manager.transaction(async (manager) => {
-      for (const action of suite.actions) {
-        console.log('adding event to action', action.id);
-        const newEvent = manager.create(ActionEvent, {
-          ...actionEventDto,
-          action,
-          suiteManaged: true,
-        });
-        await manager.save(newEvent);
-      }
+    await this.addEventToActions({
+      actions: suite.actions,
+      event: actionEventDto,
+      overrides: { suiteManaged: true },
+      suiteIds: [suiteId],
     });
-
-    for (const action of suite.actions) {
-      await this.reloadUsersJoinedForAction(action.id);
-    }
-    await this.syncGeneralUpdateDatesForSuites([suiteId]);
-    return this.getSuite(suiteId);
+    return this.findSuite(suiteId);
   }
 
   async deleteSuiteEvent(suiteId: number, eventId: number) {
@@ -2193,7 +2222,7 @@ export class ActionsService {
       }
     }
     await this.syncGeneralUpdateDatesForSuites([suiteId]);
-    return this.getSuite(suiteId);
+    return this.findSuite(suiteId);
   }
 
   async tentativePlansForGroup(
