@@ -33,7 +33,10 @@ import { formatTime } from "@alliance/shared/lib/utils";
 import { ChevronDown, Edit, Menu } from "lucide-react-native";
 import AppMarkdownWrapper from "../../../components/AppMarkdownWrapper";
 import EditableContentRenderer from "../../../components/EditableContentRenderer";
-import ProfileImage from "../../../components/ProfileImage";
+import { ImageLightboxModal } from "../../../components/ImageLightbox";
+import ProfileImage, {
+  resolveProfileImageUri,
+} from "../../../components/ProfileImage";
 import UserActivityCard from "../../../components/UserActivityCard";
 import Button, {
   ButtonColor,
@@ -131,6 +134,7 @@ export default function UserProfileScreen() {
   const [editBio, setEditBio] = useState("");
   const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(null);
   const [isPickingAvatar, setIsPickingAvatar] = useState(false);
+  const [pfpLightboxOpen, setPfpLightboxOpen] = useState(false);
 
   const completedActionCount = useMemo(() => {
     return (
@@ -644,7 +648,22 @@ export default function UserProfileScreen() {
               </View>
             </TouchableOpacity>
           ) : (
-            <ProfileImage pfp={profile.profilePicture} size="larger" />
+            <>
+              <TouchableOpacity
+                onPress={() => profile.profilePicture && setPfpLightboxOpen(true)}
+                activeOpacity={profile.profilePicture ? 0.9 : 1}
+              >
+                <ProfileImage pfp={profile.profilePicture} size="larger" />
+              </TouchableOpacity>
+              <ImageLightboxModal
+                uri={
+                  pfpLightboxOpen && profile.profilePicture
+                    ? resolveProfileImageUri(profile.profilePicture)
+                    : null
+                }
+                onClose={() => setPfpLightboxOpen(false)}
+              />
+            </>
           )}
           <View className="gap-1">
             {isEditing ? (

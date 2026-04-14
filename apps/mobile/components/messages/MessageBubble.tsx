@@ -1,8 +1,8 @@
 import { MessageDto } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { Reply, X } from "lucide-react-native";
-import { useMemo, useState } from "react";
-import { Dimensions, Image, Modal, TouchableOpacity, View } from "react-native";
+import { Reply } from "lucide-react-native";
+import { useMemo } from "react";
+import { TouchableOpacity, View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -14,6 +14,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { scheduleOnRN } from "react-native-worklets";
 import { getImageSource } from "../../lib/config";
 import AppMarkdownWrapper from "../AppMarkdownWrapper";
+import ImageLightbox from "../ImageLightbox";
 import ProfileImage from "../ProfileImage";
 import Text, { FontWeight } from "../system/Text";
 import { cn } from "@alliance/shared/styles/util";
@@ -48,14 +49,10 @@ export default function MessageBubble({
   onReply,
   onFocusReply,
 }: MessageBubbleProps) {
-  const attachments = message.attachments ?? [];
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const lightboxSrc =
-    lightboxIndex !== null
-      ? resolveAttachmentUri(attachments[lightboxIndex])
-      : null;
-  const { width, height } = Dimensions.get("window");
-  const lightboxSize = Math.min(width * 0.9, height * 0.7);
+  const resolvedUris = useMemo(
+    () => message.attachments.map(resolveAttachmentUri),
+    [message.attachments],
+  );
   const translateX = useSharedValue(0);
 
   const timeLabel = useMemo(() => {
@@ -148,23 +145,12 @@ export default function MessageBubble({
                 {message.body ? (
                   <AppMarkdownWrapper>{message.body}</AppMarkdownWrapper>
                 ) : null}
-                {attachments.length > 0 && (
+                {resolvedUris.length > 0 && (
                   <View className="flex-row flex-wrap gap-2 mb-2">
-                    {attachments.map((attachment, idx) => {
-                      const uri = resolveAttachmentUri(attachment);
-                      return (
-                        <TouchableOpacity
-                          key={`${message.id}-attachment-${idx}`}
-                          onPress={() => setLightboxIndex(idx)}
-                          activeOpacity={0.9}
-                        >
-                          <Image
-                            source={{ uri }}
-                            className="w-24 h-24 rounded border border-zinc-200"
-                          />
-                        </TouchableOpacity>
-                      );
-                    })}
+                    <ImageLightbox
+                      uris={resolvedUris}
+                      thumbnailClassName="w-24 h-24 rounded border border-zinc-200"
+                    />
                   </View>
                 )}
               </View>
@@ -172,34 +158,6 @@ export default function MessageBubble({
           </Animated.View>
         </GestureDetector>
       </View>
-      <Modal
-        visible={!!lightboxSrc}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setLightboxIndex(null)}
-      >
-        <TouchableOpacity
-          className="flex-1 bg-black/80 items-center justify-center"
-          onPress={() => setLightboxIndex(null)}
-          activeOpacity={1}
-        >
-          <View className="max-w-[90%] max-h-[80%]">
-            {lightboxSrc && (
-              <Image
-                source={{ uri: lightboxSrc }}
-                style={{ width: lightboxSize, height: lightboxSize }}
-                resizeMode="contain"
-              />
-            )}
-            <TouchableOpacity
-              onPress={() => setLightboxIndex(null)}
-              className="absolute -top-10 right-0"
-            >
-              <X size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
     </View>
   );
 }

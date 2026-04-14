@@ -52,7 +52,7 @@ const isLocalhostHost = (hostname: string) =>
   hostname === "0.0.0.0" ||
   hostname === "::1";
 
-const resolveProfileImageUri = (pfp: string) => {
+export const resolveProfileImageUri = (pfp: string) => {
   if (pfp.startsWith("data:") || pfp.startsWith("file:")) {
     return pfp;
   }
