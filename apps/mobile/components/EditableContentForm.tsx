@@ -275,7 +275,10 @@ const EditableContentForm: React.FC<EditableContentFormProps> = ({
       inputRef.current?.focus();
     } catch (err) {
       console.error("Failed to pick image(s)", err);
-      setPickerError("Unable to add that photo.");
+      const message =
+        (err instanceof Error ? err.message : String(err || "")) ||
+        "Unable to add that photo.";
+      setPickerError(message);
     } finally {
       isPickingRef.current = false;
       setIsPicking(false);
