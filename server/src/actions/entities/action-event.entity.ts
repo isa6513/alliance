@@ -46,6 +46,10 @@ export const readableActionStatus: Record<ActionStatus, string> = {
 @Entity()
 @Index(['action', 'date'])
 @Index(['action', 'newStatus', 'date'])
+@Index('UQ_action_event_one_member_action', ['action'], {
+  unique: true,
+  where: `"newStatus" = 'member_action'`,
+})
 export class ActionEvent {
   @PrimaryGeneratedColumn()
   @ApiProperty({ description: 'Unique identifier for the action event' })
