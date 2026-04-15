@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useState, useRef, type ReactNode } from "react";
 import type { UserDto } from "@alliance/shared/client";
 import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import type {
@@ -140,6 +140,8 @@ export function RenderField({
   responseHiddenFromOthers,
   isOutputView,
 }: RenderFieldProps) {
+  const instanceId = useId();
+  const fieldName = `${field.id}-${instanceId}`;
   const errorMessage =
     typeof error === "string" && error.trim().length > 0 ? error : null;
   const hasError = Boolean(errorMessage);
@@ -382,7 +384,7 @@ export function RenderField({
                 >
                   <input
                     type="radio"
-                    name={field.id}
+                    name={fieldName}
                     value={optionValue}
                     className="sr-only"
                     checked={checked}
@@ -493,7 +495,7 @@ export function RenderField({
               <label key={optIndex} className="flex items-start">
                 <input
                   type="radio"
-                  name={field.id}
+                  name={fieldName}
                   value={option.value}
                   checked={value === option.value}
                   onChange={
@@ -590,7 +592,7 @@ export function RenderField({
               <label key={optIndex} className="flex">
                 <input
                   type="checkbox"
-                  name={field.id}
+                  name={fieldName}
                   checked={selections.includes(option.value)}
                   onChange={
                     onChange
