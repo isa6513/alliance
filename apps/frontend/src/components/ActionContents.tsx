@@ -17,7 +17,9 @@ import FollowUpFormPanel from "./FollowUpFormPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
 import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ExternalLinkIcon } from "lucide-react";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
 import { useLiveTaskFormAggregateViews } from "../lib/useLiveTaskFormAggregateViews";
@@ -34,7 +36,8 @@ const ActionContents = () => {
     context.userRelation,
   );
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const [shareCopied, setShareCopied] = useState(false);
   const loggedInMode = !action.publicOnly;
 
   useEffect(() => {
@@ -74,6 +77,13 @@ const ActionContents = () => {
 
   const { lastEvent, nextEvent } = getLastAndNextEvent(action);
 
+  const handleShareAction = () => {
+    const ref = user?.referralCode ? `?ref=${user.referralCode}` : "";
+    navigator.clipboard.writeText(`${getBaseUrl()}/actions/${action.id}${ref}`);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2000);
+  };
+
   return (
     <div className="flex flex-col gap-y-3 flex-2 w-full">
       {action?.image && (
@@ -86,6 +96,16 @@ const ActionContents = () => {
       <div className="flex flex-row justify-between items-start mb-6">
         {action !== undefined && (
           <div className="flex flex-col gap-y-3">
+            <button
+              type="button"
+              onClick={handleShareAction}
+              className="self-start flex items-center gap-x-1 text-zinc-500 hover:text-zinc-700"
+            >
+              <span className="text-sm">
+                {shareCopied ? "Copied to clipboard" : "Share"}
+              </span>
+              <ExternalLinkIcon className="w-3.5 h-3.5 shrink-0" />
+            </button>
             <p className="text-title">{action.name}</p>
             {loggedInMode ? (
               <div>

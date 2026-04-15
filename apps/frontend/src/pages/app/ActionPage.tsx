@@ -41,7 +41,10 @@ export async function loader({
       : Promise.resolve(null),
   ]);
 
-  return { action: action.data, referrerName: referrer?.data?.displayName ?? null };
+  return {
+    action: action.data,
+    referrerName: referrer?.data?.displayName ?? null,
+  };
 }
 
 export function meta({ data }: { data: Awaited<ReturnType<typeof loader>> }) {

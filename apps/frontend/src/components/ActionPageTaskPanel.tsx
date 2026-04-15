@@ -2,10 +2,9 @@ import { UserActionRelation } from "@alliance/shared/client";
 import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
 import Card from "@alliance/sharedweb/ui/Card";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import { ArrowRight, Link2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Link } from "react-router";
-import { useState } from "react";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
 import { ActionTaskPanelPropsShared } from "@alliance/shared/lib/actionTaskPanel";
 import ActionTaskPanel from "./ActionTaskPanel";
@@ -18,7 +17,6 @@ import {
   shouldLoadCompletedTaskFormByState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
 import { taskHeaders } from "@alliance/shared/lib/copy";
-import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -109,7 +107,6 @@ const ActionPageTaskPanel = () => {
     useOutletContext<TaskPanelContext>();
 
   const { user, isAuthenticated } = useAuth();
-  const [copied, setCopied] = useState(false);
 
   const state = getActionPageTaskPanelState({
     action,
@@ -123,30 +120,10 @@ const ActionPageTaskPanel = () => {
     shouldLoadCompletedTaskFormByState[state],
   );
 
-  const handleShareCopy = () => {
-    const ref = user?.referralCode ? `?ref=${user.referralCode}` : "";
-    navigator.clipboard.writeText(
-      `${getBaseUrl()}/actions/${action.id}${ref}`,
-    );
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const completedHeader = (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-x-3">
-        <CheckIcon size="small" />
-        <p>{taskHeaders.actionPage.completed}</p>
-      </div>
-      <button
-        onClick={handleShareCopy}
-        className="flex items-center gap-x-1 text-zinc-500 hover:text-zinc-700"
-      >
-        <Link2 className="w-3.5 h-3.5" />
-        <span className="text-sm">
-          {copied ? "Copied to Clipboard!" : "Share"}
-        </span>
-      </button>
+    <div className="flex items-center gap-x-3">
+      <CheckIcon size="small" />
+      <p>{taskHeaders.actionPage.completed}</p>
     </div>
   );
 
