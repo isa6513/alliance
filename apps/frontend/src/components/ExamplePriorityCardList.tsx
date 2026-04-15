@@ -5,11 +5,13 @@ import ExamplePriorityCard from "./ExamplePriorityCard";
 interface ExamplePriorityCardListProps {
   bgColor?: "grey" | "white";
   dropdown?: boolean;
+  titleClass?: string;
 }
 
 const ExamplePriorityCardList: React.FC<ExamplePriorityCardListProps> = ({
   bgColor = "grey",
   dropdown = false,
+  titleClass = "",
 }: ExamplePriorityCardListProps) => {
   return (
     <div className="flex flex-col rounded gap-y-2">
@@ -21,6 +23,7 @@ const ExamplePriorityCardList: React.FC<ExamplePriorityCardListProps> = ({
           title={priority.title}
           description={priority.description}
           dropdown={dropdown}
+          titleClass={titleClass}
         />
       ))}
     </div>

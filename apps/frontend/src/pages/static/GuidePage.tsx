@@ -106,28 +106,26 @@ const GuidePage: React.FC = () => {
       <PrelaunchNavbar transparent={false} absolute={false} />
 
       <div className="mx-6 md:mx-12 pt-8 md:pt-32 pb-56">
-        <div className="mb-16 flex flex-col items-center">
-          <h1 className="text-title-large text-center mb-6">
-            Guide to the Alliance
-          </h1>
-          <div className="max-w-2xl flex flex-col gap-y-6 text-center text-lg">
-            <p>
-              The Alliance is a global group of individuals cooperating to
-              improve the world. Each member spends a small fraction of their
-              time completing tasks that advance our shared goals.
-            </p>
-            <p>
-              Our long-term goal is to unite humanity behind a democratic,
-              expert-developed plan to end global crises. Right now, we are
-              running experiments to test our organizational structures and
-              processes.
-            </p>
-          </div>
-        </div>
         <div className="flex flex-row md:gap-8 lg:gap-12 justify-center">
           <TableOfContents tocSections={tocSections} />
 
           <div className="flex flex-col gap-y-4 max-w-184">
+            <div className="mb-8 md:mb-16 flex flex-col">
+              <h1 className="text-title-large mb-6">Guide to the Alliance</h1>
+              <div className="flex flex-col gap-y-6 text-lg md:text-xl text-zinc-500">
+                <p>
+                  The Alliance is a global group of individuals cooperating to
+                  improve the world. Each member spends a small fraction of
+                  their time completing tasks that advance our shared goals.
+                </p>
+                <p>
+                  Our long-term goal is to unite humanity behind a democratic,
+                  expert-developed plan to end global crises. Right now, we are
+                  running experiments to test our organizational structures and
+                  processes.
+                </p>
+              </div>
+            </div>
             <div className="flex flex-col gap-y-12">
               <GuideSection id="priorities">
                 <GuideH1>Priorities</GuideH1>

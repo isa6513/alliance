@@ -8,6 +8,7 @@ import ExampleDropdownCard from "./ExampleDropdownCard";
 interface ExamplePriorityCardProps {
   id: string;
   title: string;
+  titleClass?: string;
   description: ReactNode;
   bgColor?: "grey" | "white";
   dropdown?: boolean;
@@ -15,13 +16,18 @@ interface ExamplePriorityCardProps {
 
 const ExamplePriorityCard: React.FC<ExamplePriorityCardProps> = ({
   title,
+  titleClass = "",
   description,
   bgColor = "grey",
   dropdown = false,
 }: ExamplePriorityCardProps) => {
   if (dropdown) {
     return (
-      <ExampleDropdownCard title={title} bgColor={bgColor}>
+      <ExampleDropdownCard
+        title={title}
+        titleClass={titleClass}
+        bgColor={bgColor}
+      >
         <div className="min-w-0">{description}</div>
       </ExampleDropdownCard>
     );
@@ -44,7 +50,7 @@ const ExamplePriorityCard: React.FC<ExamplePriorityCardProps> = ({
       <div className="flex flex-row items-start justify-between gap-x-3 md:gap-x-4 ">
         <div className="flex flex-1 flex-col">
           <div className="flex flex-row items-center justify-between gap-x-2">
-            <p className="font-medium text-green">{title}</p>
+            <p className={cn("font-medium text-green", titleClass)}>{title}</p>
           </div>
           <div className="text-zinc-500">{description}</div>
         </div>

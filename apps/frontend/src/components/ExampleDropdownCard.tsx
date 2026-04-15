@@ -5,6 +5,7 @@ import { cn } from "@alliance/shared/styles/util";
 
 type ExampleDropdownCardProps = {
   title: ReactNode;
+  titleClass?: string;
   /** Shown when expanded. */
   children: ReactNode;
   bgColor?: "grey" | "white";
@@ -12,6 +13,7 @@ type ExampleDropdownCardProps = {
 
 const ExampleDropdownCard: React.FC<ExampleDropdownCardProps> = ({
   title,
+  titleClass = "",
   children,
   bgColor = "grey",
 }) => {
@@ -34,7 +36,9 @@ const ExampleDropdownCard: React.FC<ExampleDropdownCardProps> = ({
         aria-expanded={expanded}
         aria-controls={contentId}
       >
-        <span className="min-w-0 font-medium text-green">{title}</span>
+        <span className={cn("min-w-0 font-medium text-green", titleClass)}>
+          {title}
+        </span>
         <ChevronDown
           className={cn(
             "h-5 w-5 shrink-0 text-green transition-transform duration-200",

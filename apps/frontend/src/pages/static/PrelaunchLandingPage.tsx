@@ -8,11 +8,16 @@ import type { ActionDto } from "@alliance/shared/client";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import Footer from "../../components/Footer";
 import { formatTime } from "@alliance/shared/lib/utils";
+import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
 
 const FEATURED_ACTION_IDS: number[] = [91, 84, 76, 75];
 
 /** Shared width + horizontal padding for hero copy and sections below. */
 const LANDING_MAIN_COL = "mx-auto w-full max-w-4xl px-6 sm:px-10 lg:px-16";
+
+/** Gap between sections + outer vertical padding (avoids stacked py on each section). */
+const LANDING_BODY = "gap-10 lg:gap-18 py-10 lg:py-24";
+const LANDING_SECTION_INNER = "flex flex-col gap-y-6 lg:gap-y-8";
 
 function usePrelaunchActions() {
   const results = useQueries({
@@ -29,6 +34,21 @@ function usePrelaunchActions() {
     .filter((a): a is ActionDto => a != null);
   const isPending = results.some((r) => r.isPending);
   return { actions, isPending };
+}
+
+function HowItWorksCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1 rounded-md bg-zinc-50 p-4 lg:p-6">
+      <p className="text-lg font-medium text-black lg:text-xl">{title}</p>
+      <p className="text-base text-zinc-500 lg:text-lg">{children}</p>
+    </div>
+  );
 }
 
 function PreviewActionCard({ action }: { action: ActionDto }) {
@@ -81,22 +101,54 @@ const PrelaunchLandingPage: React.FC = () => {
             </p>
             <div className="mt-4 flex flex-col gap-y-4 text-lg text-white/95 drop-shadow-sm sm:mt-6 sm:gap-y-5 sm:text-xl lg:text-3xl">
               <p>
-                We&apos;re a global group of people cooperating to address
-                global crises. Each member contributes a consistent amount of
-                their time each week, providing the reliability needed to
-                coordinate precise, effective actions.
+                We&apos;re a global group of people cooperating to improve the
+                world. Each member contributes a consistent amount of their time
+                each week, providing the reliability needed to plan precise,
+                effective actions.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="flex flex-1 flex-col bg-white">
-        <section className="w-full py-12 lg:py-36">
-          <div
-            className={`${LANDING_MAIN_COL} flex flex-col gap-y-4 lg:gap-y-6`}
-          >
-            <p className="text-heading-public w-full text-black">
+      <div className={`flex flex-1 flex-col bg-white ${LANDING_BODY}`}>
+        <section className="w-full">
+          <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
+            <p className="text-title-medium w-full text-black">How we work</p>
+            <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
+              <HowItWorksCard title="Members">
+                Alliance members complete 15 minutes of actions each week over
+                our online platform.
+              </HowItWorksCard>
+              <HowItWorksCard title="Office">
+                Our full-time office designs actions in order to achieve a
+                measurable impact.
+              </HowItWorksCard>
+            </div>
+          </div>
+        </section>
+        <section className="w-full">
+          <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
+            <div className="flex flex-col gap-4">
+              <p className="text-title-medium w-full text-black">
+                Our priorities
+              </p>
+              <p className="text-base text-zinc-500 lg:text-lg">
+                We are focused on global crises that are interconnected, affect
+                billions of people, and are possible to solve with coordinated
+                action.
+              </p>
+            </div>
+            <ExamplePriorityCardList
+              bgColor="grey"
+              dropdown
+              titleClass="text-base lg:text-lg"
+            />
+          </div>
+        </section>
+        <section className="w-full">
+          <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
+            <p className="text-title-medium w-full text-black">
               Recent actions
             </p>
             {isPending ? (
@@ -110,6 +162,24 @@ const PrelaunchLandingPage: React.FC = () => {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+        <section className="w-full">
+          <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
+            <div className="flex flex-col gap-4">
+              <p className="text-title-medium w-full text-black">Join us</p>
+              <p className="text-base text-zinc-500 lg:text-lg">
+                Membership is currently by invitation only. If you are
+                interested in becoming a member,{" "}
+                <a
+                  href="mailto:contact@worldalliance.org"
+                  className="text-link"
+                >
+                  email us
+                </a>
+                .
+              </p>
+            </div>
           </div>
         </section>
       </div>
