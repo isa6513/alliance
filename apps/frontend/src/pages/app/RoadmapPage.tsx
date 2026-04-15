@@ -8,9 +8,9 @@ const RoadmapPage: React.FC = () => {
   useWhiteBackground();
 
   const tocSections = [
-    { id: "experimental-phase", label: "Experimental phase", level: 2 },
-    { id: "public-launch", label: "Public launch", level: 2 },
-    { id: "current-activities", label: "Current activities", level: 2 },
+    { id: "experimental-phase", label: "Experimental phase", level: 3 },
+    { id: "public-launch", label: "Public launch", level: 3 },
+    { id: "current-activities", label: "Current activities", level: 3 },
   ];
 
   return (

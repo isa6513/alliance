@@ -16,7 +16,7 @@ const FEATURED_ACTION_IDS: number[] = [91, 84, 76, 75];
 const LANDING_MAIN_COL = "mx-auto w-full max-w-4xl px-6 sm:px-10 lg:px-16";
 
 /** Gap between sections + outer vertical padding (avoids stacked py on each section). */
-const LANDING_BODY = "gap-10 lg:gap-18 py-10 lg:py-24";
+const LANDING_BODY = "gap-10 lg:gap-20 py-10 lg:py-28";
 const LANDING_SECTION_INNER = "flex flex-col gap-y-6 lg:gap-y-8";
 
 function usePrelaunchActions() {
@@ -114,7 +114,13 @@ const PrelaunchLandingPage: React.FC = () => {
       <div className={`flex flex-1 flex-col bg-white ${LANDING_BODY}`}>
         <section className="w-full">
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
-            <p className="text-title-medium w-full text-black">How we work</p>
+            <div className="flex flex-col gap-4">
+              <p className="text-title-medium w-full text-black">How we work</p>
+              <p className="text-lg text-zinc-500 lg:text-xl">
+                We design actions based on the number of reliable members we can
+                count on.
+              </p>
+            </div>
             <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
               <HowItWorksCard title="Members">
                 Alliance members complete 15 minutes of actions each week over
@@ -133,7 +139,7 @@ const PrelaunchLandingPage: React.FC = () => {
               <p className="text-title-medium w-full text-black">
                 Our priorities
               </p>
-              <p className="text-base text-zinc-500 lg:text-lg">
+              <p className="text-lg text-zinc-500 lg:text-xl">
                 We are focused on global crises that are interconnected, affect
                 billions of people, and are possible to solve with coordinated
                 action.
@@ -148,9 +154,15 @@ const PrelaunchLandingPage: React.FC = () => {
         </section>
         <section className="w-full">
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
-            <p className="text-title-medium w-full text-black">
-              Recent actions
-            </p>
+            <div className="flex flex-col gap-4">
+              <p className="text-title-medium w-full text-black">
+                Recent actions
+              </p>
+              <p className="text-lg text-zinc-500 lg:text-xl">
+                At this stage, we are taking small-scale actions focused on
+                learning.
+              </p>
+            </div>
             {isPending ? (
               <div className="flex justify-center py-8">
                 <Spinner size="large" />
@@ -168,9 +180,9 @@ const PrelaunchLandingPage: React.FC = () => {
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
             <div className="flex flex-col gap-4">
               <p className="text-title-medium w-full text-black">Join us</p>
-              <p className="text-base text-zinc-500 lg:text-lg">
+              <p className="text-zinc-500 text-lg lg:text-xl">
                 Membership is currently by invitation only. If you are
-                interested in becoming a member,{" "}
+                interested in becoming a member, please{" "}
                 <a
                   href="mailto:contact@worldalliance.org"
                   className="text-link"

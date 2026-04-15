@@ -21,7 +21,7 @@ const ResourceButton = ({
       id={id}
       className={cn(
         "rounded border border-zinc-200 hover:bg-zinc-50 p-4 text-lg w-full",
-        className
+        className,
       )}
     >
       <div className="flex flex-row items-center justify-between w-full">
