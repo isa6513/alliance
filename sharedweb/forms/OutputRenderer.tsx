@@ -139,9 +139,18 @@ export function OutputRenderer({
   return (
     <Card style={CardStyle.LightGrey}>
       <div className={cn("space-y-2", className)}>
-        {resolvedOutput.items.map((item) => {
+        {resolvedOutput.items.map((item, index) => {
           if (item.type === "display") {
-            return <RenderDisplayBlock block={item.block} key={item.key} />;
+            return (
+              <div
+                key={item.key}
+                className={cn(
+                  item.block.kind === "header" && index > 0 && "pt-4",
+                )}
+              >
+                <RenderDisplayBlock block={item.block} />
+              </div>
+            );
           }
 
           const content = renderOutputFieldValue(item);

@@ -136,10 +136,17 @@ function OutputRenderer({
   return (
     <Card cardStyle={CardStyle.Grey}>
       <View className={cn("gap-2", className)}>
-        {resolvedOutput.items.map((item) => {
+        {resolvedOutput.items.map((item, index) => {
           if (item.type === "display") {
             return (
-              <RenderDisplayBlockMobile block={item.block} key={item.key} />
+              <View
+                key={item.key}
+                className={cn(
+                  item.block.kind === "header" && index > 0 && "pt-4",
+                )}
+              >
+                <RenderDisplayBlockMobile block={item.block} />
+              </View>
             );
           }
 
