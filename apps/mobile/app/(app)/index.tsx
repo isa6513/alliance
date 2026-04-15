@@ -8,10 +8,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   actionsDismissAction,
   actionsDismissGeneralUpdate,
-  actionsFindAllLoggedIn,
   actionsUnreadGeneralUpdates,
   userGetAwayRanges,
 } from "@alliance/shared/client";
+import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import type {
   ActionActivityDto,
   FollowUpForm,
@@ -62,6 +62,7 @@ export default function HomeScreen() {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const hasNoTasks = useRef(true);
 
   const handleSubmitSuccess = useCallback(() => {
     setShowSuccess(true);
@@ -74,12 +75,8 @@ export default function HomeScreen() {
     data: actions,
     isPending,
     refetch,
-  } = useQuery({
-    queryKey: ["actions"],
-    queryFn: () =>
-      actionsFindAllLoggedIn({ query: { sorted: true } }).then(
-        (response) => response.data ?? [],
-      ),
+  } = useActionsQuery({
+    refetchInterval: hasNoTasks.current ? 60_000 : false,
   });
 
   const { user } = useAuth();
@@ -177,6 +174,8 @@ export default function HomeScreen() {
 
     return [...actionAndUpdateItems, ...followUpItems];
   }, [todoActions, generalUpdates, activeCompletableFollowUpForms]);
+
+  hasNoTasks.current = allItems.length === 0;
 
   const {
     index: safeIndex,

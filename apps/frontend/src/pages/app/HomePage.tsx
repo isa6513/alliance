@@ -60,16 +60,18 @@ function TaskNavigatorListShell({ children }: { children: ReactNode }) {
   );
 }
 
-
 const HomePage = () => {
   const queryClient = useQueryClient();
+  const hasNoTasks = useRef(true);
   const {
     actions,
     generalUpdates,
     loading,
     handleDismissAction,
     handleDismissGeneralUpdate,
-  } = useTaskActionsData();
+  } = useTaskActionsData({
+    refetchInterval: hasNoTasks.current ? 60_000 : false,
+  });
 
   const { user, refreshUser } = useAuth();
   const hasRefreshedForNoContract = useRef(false);
@@ -201,6 +203,8 @@ const HomePage = () => {
     return [...actionCards, ...followUpCards];
   }, [todoActions, activeCompletableFollowUpForms]);
 
+  hasNoTasks.current = taskNavigatorItems.length === 0;
+
   const { index: taskNavigatorIndex, setIndex: setTaskNavigatorIndex } =
     useBoundedIndex(taskNavigatorItems.length);
 
@@ -209,10 +213,9 @@ const HomePage = () => {
     [generalUpdates],
   );
 
-  const selectedTaskNavigatorItem =
-    taskNavigatorItems.length > 0
-      ? taskNavigatorItems[taskNavigatorIndex]
-      : undefined;
+  const selectedTaskNavigatorItem = hasNoTasks.current
+    ? undefined
+    : taskNavigatorItems[taskNavigatorIndex];
 
   const taskNavigatorListContent = useMemo(() => {
     const taskNavigatorCurrentWeekSidebarActions =
@@ -233,8 +236,7 @@ const HomePage = () => {
       <>
         {hasTaskSectionContent && (
           <TaskNavigatorListShell>
-            {taskNavigatorCurrentWeekSidebarActions.length >
-              0 && (
+            {taskNavigatorCurrentWeekSidebarActions.length > 0 && (
               <p className="text-zinc-600 mb-1">
                 <span className="text-green font-medium mr-0.5">
                   {taskNavigatorCurrentWeekSidebarActions.length} left

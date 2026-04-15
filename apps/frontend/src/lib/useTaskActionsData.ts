@@ -20,7 +20,9 @@ const GENERAL_UPDATES_QUERY_KEY = [
   "unread",
 ] as const;
 
-export function useTaskActionsData(): {
+export function useTaskActionsData(options?: {
+  refetchInterval?: number | false;
+}): {
   actions: ActionWithAwayStatus[] | null;
   generalUpdates: GeneralUpdateDto[] | null;
   loading: boolean;
@@ -32,7 +34,7 @@ export function useTaskActionsData(): {
     data: actionsData,
     isLoading: actionsLoading,
     isError: actionsError,
-  } = useActionsQuery();
+  } = useActionsQuery({ refetchInterval: options?.refetchInterval });
   const {
     data: awayRanges = [],
     isLoading: awayRangesLoading,
@@ -82,11 +84,11 @@ export function useTaskActionsData(): {
         prev?.map((action) =>
           action.id === actionId
             ? { ...action, shouldParticipate: false }
-            : action
-        )
+            : action,
+        ),
       );
     },
-    [queryClient]
+    [queryClient],
   );
 
   const handleDismissGeneralUpdate = useCallback(
@@ -97,10 +99,10 @@ export function useTaskActionsData(): {
 
       queryClient.setQueryData<GeneralUpdateDto[] | undefined>(
         GENERAL_UPDATES_QUERY_KEY,
-        (prev) => prev?.filter((u) => u.id !== generalUpdateId) ?? []
+        (prev) => prev?.filter((u) => u.id !== generalUpdateId) ?? [],
       );
     },
-    [queryClient]
+    [queryClient],
   );
 
   return {

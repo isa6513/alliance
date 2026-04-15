@@ -2,7 +2,9 @@ import { ActionDto, actionsFindAllLoggedIn } from "../client";
 import { FilterMode } from "./actionUtils";
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 
-export const useActionsQuery = (): UseQueryResult<ActionDto[], Error> =>
+export const useActionsQuery = (options?: {
+  refetchInterval?: number | false;
+}): UseQueryResult<ActionDto[], Error> =>
   useQuery({
     queryKey: ["actions"],
     queryFn: () =>
@@ -10,6 +12,7 @@ export const useActionsQuery = (): UseQueryResult<ActionDto[], Error> =>
         (response) =>
           response.data?.filter((action) => action.status !== "draft") ?? [],
       ),
+    refetchInterval: options?.refetchInterval,
   });
 
 export const filterActions = (
