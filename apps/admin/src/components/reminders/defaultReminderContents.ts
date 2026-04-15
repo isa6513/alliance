@@ -11,7 +11,7 @@ Please complete within #{days} at this link: #{link}`;
 
 export const defaultAnnouncementTextMessage = `New Alliance task#{s}: #{tasknames}. Complete within #{days} (#{link})`;
 
-export const defaultAnnouncementPushMessage = `#{n} new Alliance task#{s} need#{s|} completion within #{days}`;
+export const defaultAnnouncementPushMessage = `New task#{s}: #{tasknames}`;
 
 // generic reminder
 
