@@ -56,8 +56,8 @@ const HomeFeed = () => {
   }, []);
 
   const handleLike = useCallback(
-    async (activityId: number) => {
-      await handleLikeActivity(activityId);
+    (activityId: number) => {
+      return handleLikeActivity(activityId);
     },
     [handleLikeActivity],
   );

@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   forumFindOnePost,
-  forumLikePost,
   forumRemovePost,
-  forumUnlikePost,
   PostDto,
 } from "@alliance/shared/client";
+import { usePostLikeMutation } from "@alliance/shared/lib/usePostLikeMutation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { Pin } from "lucide-react-native";
 import { useAuth } from "../../../../lib/AuthContext";
@@ -40,42 +40,37 @@ export default function PostDetailScreen() {
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
   const { user } = useAuth();
-  const [post, setPost] = useState<PostDto | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const fetchPost = useCallback(async () => {
-    if (!postId) return;
-    try {
-      const response = await forumFindOnePost({
-        path: { id: postId },
-      });
-      if (!response.data) {
-        throw new Error("Post not found");
-      }
-      setPost(response.data);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching post details:", err);
-      setError("Failed to load post details");
-    } finally {
-      setLoading(false);
-    }
-  }, [postId]);
+  const queryKey = ["forumFindOnePost", postId];
 
-  useEffect(() => {
-    fetchPost();
-  }, [fetchPost]);
+  const {
+    data: post = null,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey,
+    queryFn: () =>
+      forumFindOnePost({ path: { id: postId! } }).then(
+        (res) => res.data ?? null,
+      ),
+    enabled: !!postId,
+  });
 
-  const handleLike = useCallback(async () => {
-    if (!post || !user) return;
-    if (post.likes?.some((like) => like.id === user.id)) {
-      await forumUnlikePost({ path: { id: post.id } });
-    } else {
-      await forumLikePost({ path: { id: post.id } });
-    }
-    fetchPost();
-  }, [fetchPost, post, user]);
+  const handleLike = usePostLikeMutation({
+    postId: Number(postId),
+    userId: user?.id,
+    getPost: () => post,
+    setPost: (updater) => {
+      queryClient.setQueryData(queryKey, (old: typeof post) =>
+        old ? updater(old) : old,
+      );
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
 
   const confirmDeletePost = useCallback(() => {
     if (!post || post.author.id !== user?.id) return;
@@ -90,7 +85,7 @@ export default function PostDetailScreen() {
             router.push("/forum");
           } catch (err) {
             console.error("Error deleting post:", err);
-            setError("Failed to delete post");
+            setDeleteError("Failed to delete post");
           }
         },
       },
@@ -105,11 +100,12 @@ export default function PostDetailScreen() {
     );
   }
 
-  if (error || !post) {
+  if (deleteError || queryError || !post) {
     return (
       <View className="flex-1 items-center justify-center bg-white px-6">
         <Text className="text-zinc-500 text-center">
-          {error ?? "Post not found"}
+          {deleteError ??
+            (queryError ? "Failed to load post details" : "Post not found")}
         </Text>
       </View>
     );

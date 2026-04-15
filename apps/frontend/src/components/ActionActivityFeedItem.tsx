@@ -14,7 +14,7 @@ export interface ActionActivityFeedItemProps {
   showTime?: boolean;
   card?: boolean;
   showAction: boolean;
-  handleLike: (activity: ActionActivityDto) => void;
+  handleLike: (activity: ActionActivityDto) => Promise<unknown>;
 }
 
 const ACTIVITY_TYPE_CLICKABLE = {
@@ -69,7 +69,7 @@ const ActionActivityFeedItem = ({
         key={activity.id}
         className={cn(
           "rounded-md border-zinc-200",
-          clickable ? "cursor-pointer" : "cursor-default"
+          clickable ? "cursor-pointer" : "cursor-default",
         )}
         onClick={() => {
           if (!clickable) {
@@ -80,7 +80,7 @@ const ActionActivityFeedItem = ({
             href("/actions/:id/activity/:activityId", {
               id: activity.actionId.toString(),
               activityId: activity.id.toString(),
-            })
+            }),
           );
         }}
       >

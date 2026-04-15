@@ -8,9 +8,7 @@ import {
   forumFindCommentsForAction,
   forumFindCommentsForActivity,
   forumFindCommentsForPost,
-  forumLikeComment,
   forumPinComment,
-  forumUnlikeComment,
   forumUpdateComment,
   UserDto,
 } from "@alliance/shared/client";
@@ -23,7 +21,9 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "react-router";
+import { useAuth } from "../../lib/AuthContext";
 import { uploadAttachments } from "../../lib/uploadAttachments";
+import { useCommentLikeMutation } from "@alliance/shared/lib/useCommentLikeMutation";
 
 interface CommentsContextValue {
   user?: UserDto;
@@ -31,14 +31,14 @@ interface CommentsContextValue {
   setReplyingTo: (id: number | null) => void;
   handleSubmitReply: (
     content: CreateEditableContentDto,
-    onSuccess?: () => void
+    onSuccess?: () => void,
   ) => Promise<void>;
   handleDeleteReply: (id: number) => Promise<void>;
   onUpdateReply: (
     id: number,
-    content: CreateEditableContentDto
+    content: CreateEditableContentDto,
   ) => Promise<void>;
-  onLikeReply: (id: number, unlike?: boolean) => Promise<void>;
+  onLikeReply: (id: number, unlike?: boolean) => Promise<unknown>;
   onPinReply: (id: number) => Promise<void>;
   isSubmitting: boolean;
   newlyAddedReplies: Set<number>;
@@ -55,7 +55,7 @@ export function useCommentsContext(): CommentsContextValue {
   const ctx = useContext(CommentsContext);
   if (!ctx) {
     throw new Error(
-      "useCommentsContext must be used within a CommentsProvider"
+      "useCommentsContext must be used within a CommentsProvider",
     );
   }
   return ctx;
@@ -67,14 +67,14 @@ export interface UseCommentTreeResult {
   fetchComments: () => Promise<void>;
   handleSubmitReply: (
     content: CreateEditableContentDto,
-    onSuccess?: () => void
+    onSuccess?: () => void,
   ) => Promise<void>;
   handleDeleteReply: (id: number) => Promise<void>;
   handleUpdateReply: (
     id: number,
-    content: CreateEditableContentDto
+    content: CreateEditableContentDto,
   ) => Promise<void>;
-  handleLikeReply: (id: number, unlike?: boolean) => Promise<void>;
+  handleLikeReply: (id: number, unlike?: boolean) => Promise<unknown>;
   handlePinReply: (id: number) => Promise<void>;
   replyingTo: number | null;
   setReplyingTo: (id: number | null) => void;
@@ -88,10 +88,10 @@ export interface UseCommentTreeResult {
 export function useCommentTree(
   objectId: number,
   type: CommentParentObject,
-  initialComments?: CommentDto[]
+  initialComments?: CommentDto[],
 ): UseCommentTreeResult {
   const [comments, setComments] = useState<CommentDto[] | null>(
-    initialComments ?? null
+    initialComments ?? null,
   );
   const [error, setError] = useState<string | null>(null);
   const [editableContent, setEditableContent] =
@@ -99,11 +99,11 @@ export function useCommentTree(
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newlyAddedReplies, setNewlyAddedReplies] = useState<Set<number>>(
-    new Set()
+    new Set(),
   );
   const [lastAddedReplyId, setLastAddedReplyId] = useState<number | null>(null);
   const [highlightedReplyId, setHighlightedReplyId] = useState<number | null>(
-    null
+    null,
   );
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -147,7 +147,7 @@ export function useCommentTree(
 
         setTimeout(() => {
           const replyElement = document.getElementById(
-            `reply-${replyIdNumber}`
+            `reply-${replyIdNumber}`,
           );
           if (replyElement) {
             replyElement.scrollIntoView({
@@ -179,7 +179,7 @@ export function useCommentTree(
 
   const handleSubmitReply = async (
     contentDto: CreateEditableContentDto,
-    onSuccess?: () => void
+    onSuccess?: () => void,
   ) => {
     try {
       setIsSubmitting(true);
@@ -240,7 +240,7 @@ export function useCommentTree(
 
   const handleUpdateReply = async (
     replyId: number,
-    content: CreateEditableContentDto
+    content: CreateEditableContentDto,
   ) => {
     try {
       await forumUpdateComment({
@@ -274,14 +274,13 @@ export function useCommentTree(
     }
   };
 
-  const handleLikeReply = async (replyId: number, unlike = false) => {
-    if (unlike) {
-      await forumUnlikeComment({ path: { id: replyId } });
-    } else {
-      await forumLikeComment({ path: { id: replyId } });
-    }
-    fetchComments();
-  };
+  const { user } = useAuth();
+
+  const handleLikeReply = useCommentLikeMutation({
+    userId: user?.id,
+    setComments,
+    fetchComments,
+  });
 
   const handlePinReply = async (replyId: number) => {
     await forumPinComment({ path: { id: replyId } });

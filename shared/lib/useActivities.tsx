@@ -13,6 +13,7 @@ import {
 import { useCallback, useMemo } from "react";
 import {
   useInfiniteQuery,
+  useMutation,
   useQueryClient,
   InfiniteData,
 } from "@tanstack/react-query";
@@ -131,11 +132,11 @@ const callActivityApi = async (props: UseActivitiesProps, before?: string) => {
 };
 
 const processActivities = (
-  data: ActionActivityDto[] | undefined
+  data: ActionActivityDto[] | undefined,
 ): ActionActivityDto[] => {
   const filtered = data?.filter((a) => actionActivityViewable[a.type]) ?? [];
   return filtered.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 };
 
@@ -147,7 +148,7 @@ type ActivityPage = {
 
 const fetchActivityPage = async (
   props: UseActivitiesProps,
-  before?: string
+  before?: string,
 ): Promise<ActivityPage> => {
   const resp = await callActivityApi(props, before);
   const raw = resp.data ?? [];
@@ -157,12 +158,12 @@ const fetchActivityPage = async (
   };
 };
 
-type InfiniteActivityData = InfiniteData<ActivityPage>;
+export type InfiniteActivityData = InfiniteData<ActivityPage>;
 
 /** Map over all activities across pages in an infinite query cache entry */
-const mapInfiniteActivities = (
+export const mapInfiniteActivities = (
   old: InfiniteActivityData | undefined,
-  mapper: (activity: ActionActivityDto) => ActionActivityDto
+  mapper: (activity: ActionActivityDto) => ActionActivityDto,
 ): InfiniteActivityData | undefined => {
   if (!old) return old;
   return {
@@ -202,81 +203,90 @@ const useActivities = (props: UseActivitiesProps) => {
 
   const activities = useMemo(
     () => data?.pages.flatMap((p) => p.activities) ?? [],
-    [data]
+    [data],
   );
 
-  const setActivities = useCallback(
-    (updater: React.SetStateAction<ActionActivityDto[]>) => {
-      queryClient.setQueryData<InfiniteActivityData>(queryKey, (old) => {
-        if (!old) return old;
-        if (typeof updater === "function") {
-          // Apply per-page to preserve page structure and pageParams alignment
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              activities: updater(page.activities),
-            })),
-          };
-        }
-        // Direct replacement: single page, matching single pageParam
-        return {
-          pages: [{ activities: updater, serverCount: updater.length }],
-          pageParams: [old.pageParams[0]],
-        };
+  const likeMutation = useMutation({
+    mutationFn: async ({
+      activityId,
+      isLiked,
+    }: {
+      activityId: number;
+      isLiked: boolean;
+      activityType: string;
+    }) => {
+      const response = isLiked
+        ? await actionsUnlikeActivity({ path: { id: activityId } })
+        : await actionsLikeActivity({ path: { id: activityId } });
+      if (response.response.ok && response.data) return response.data;
+      throw new Error("Like request failed");
+    },
+    onMutate: async ({ activityId, isLiked }) => {
+      await queryClient.cancelQueries({ queryKey: ["useActivities"] });
+
+      const previousQueries = queryClient.getQueriesData<InfiniteActivityData>({
+        queryKey: ["useActivities"],
+      });
+
+      queryClient.setQueriesData<InfiniteActivityData>(
+        { queryKey: ["useActivities"] },
+        (old) =>
+          mapInfiniteActivities(old, (a) =>
+            a.id === activityId
+              ? {
+                  ...a,
+                  likedByMe: !isLiked,
+                  likesCount: isLiked ? a.likesCount - 1 : a.likesCount + 1,
+                }
+              : a,
+          ),
+      );
+
+      return { previousQueries };
+    },
+    onError: (_err, _vars, context) => {
+      context?.previousQueries?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
       });
     },
-    [queryClient, queryKey]
-  );
+    onSuccess: (data, { activityId, isLiked, activityType }) => {
+      queryClient.setQueriesData<InfiniteActivityData>(
+        { queryKey: ["useActivities"] },
+        (old) =>
+          mapInfiniteActivities(old, (a) =>
+            a.id === activityId
+              ? {
+                  ...a,
+                  likes: data.likes,
+                  likesCount: data.likesCount,
+                  likedByMe: data.likedByMe,
+                }
+              : a,
+          ),
+      );
+
+      if (!isLiked) {
+        posthog.capture("activity_liked", { activityId, activityType });
+      }
+    },
+  });
 
   const handleLikeActivity = useCallback(
-    async (activityId: number) => {
+    async (
+      activityId: number,
+      overrides?: { isLiked: boolean; activityType: string },
+    ) => {
       const activity = activities.find((a) => a.id === activityId);
-      if (!activity) return;
-
-      const isLiked = activity.likedByMe ?? false;
-
-      const updateLikeInCache = (responseData: ActionActivityDto) => {
-        const mapper = (a: ActionActivityDto) =>
-          a.id === activityId
-            ? {
-                ...a,
-                likes: responseData.likes,
-                likesCount: responseData.likesCount,
-                likedByMe: responseData.likedByMe,
-              }
-            : a;
-
-        queryClient.setQueryData<InfiniteActivityData>(queryKey, (old) =>
-          mapInfiniteActivities(old, mapper)
-        );
-      };
-
-      if (isLiked) {
-        const response = await actionsUnlikeActivity({
-          path: { id: activityId },
-        });
-        if (response.response.ok && response.data) {
-          updateLikeInCache(response.data);
-          return response.data;
-        }
-        return null;
-      } else {
-        const response = await actionsLikeActivity({
-          path: { id: activityId },
-        });
-        if (response.response.ok && response.data) {
-          updateLikeInCache(response.data);
-          posthog.capture("activity_liked", {
-            activityId: activity.id,
-            activityType: activity.type,
-          });
-          return response.data;
-        }
-      }
-      return null;
+      const isLiked = overrides?.isLiked ?? activity?.likedByMe ?? false;
+      const activityType = overrides?.activityType ?? activity?.type;
+      if (!activityType) return;
+      await likeMutation.mutateAsync({
+        activityId,
+        isLiked,
+        activityType,
+      });
     },
-    [activities, queryClient, queryKey]
+    [activities, likeMutation],
   );
 
   const updateActivity = useCallback(
@@ -285,10 +295,10 @@ const useActivities = (props: UseActivitiesProps) => {
         a.id === updatedActivity.id ? { ...a, ...updatedActivity } : a;
 
       queryClient.setQueryData<InfiniteActivityData>(queryKey, (old) =>
-        mapInfiniteActivities(old, mapper)
+        mapInfiniteActivities(old, mapper),
       );
     },
-    [queryClient, queryKey]
+    [queryClient, queryKey],
   );
 
   const noop = useCallback(() => {}, []);
@@ -297,10 +307,9 @@ const useActivities = (props: UseActivitiesProps) => {
     loading,
     activities,
     handleLikeActivity,
-    setActivities,
     updateActivity,
     fetchNextPage: infinite ? fetchNextPage : noop,
-    hasNextPage: infinite ? hasNextPage ?? false : false,
+    hasNextPage: infinite ? (hasNextPage ?? false) : false,
     isFetchingNextPage: infinite ? isFetchingNextPage : false,
   };
 };

@@ -26,7 +26,6 @@ export default function FeedScreen() {
     activities: globalActivities,
     handleLikeActivity: handleGlobalLikeActivity,
     loading: loadingGlobal,
-    setActivities: setGlobalActivities,
     fetchNextPage: fetchNextGlobal,
     hasNextPage: hasNextGlobal,
     isFetchingNextPage: isFetchingNextGlobal,
@@ -40,7 +39,6 @@ export default function FeedScreen() {
     activities: friendActivities,
     handleLikeActivity: handleLikeFriendActivity,
     loading: loadingFriend,
-    setActivities: setFriendActivities,
     fetchNextPage: fetchNextFriends,
     hasNextPage: hasNextFriends,
     isFetchingNextPage: isFetchingNextFriends,
@@ -51,29 +49,14 @@ export default function FeedScreen() {
   });
 
   const handleLikeActivity = useCallback(
-    async (activityId: number, activityMode: Mode) => {
+    (activityId: number, activityMode: Mode) => {
       if (activityMode === "friends") {
-        const liked = await handleLikeFriendActivity(activityId);
-        if (liked) {
-          setGlobalActivities((prev) =>
-            prev.map((a) => (a.id === activityId ? liked : a)),
-          );
-        }
+        return handleLikeFriendActivity(activityId);
       } else {
-        const liked = await handleGlobalLikeActivity(activityId);
-        if (liked) {
-          setFriendActivities((prev) =>
-            prev.map((a) => (a.id === activityId ? liked : a)),
-          );
-        }
+        return handleGlobalLikeActivity(activityId);
       }
     },
-    [
-      handleLikeFriendActivity,
-      handleGlobalLikeActivity,
-      setGlobalActivities,
-      setFriendActivities,
-    ],
+    [handleLikeFriendActivity, handleGlobalLikeActivity],
   );
 
   const activities = mode === "friends" ? friendActivities : globalActivities;

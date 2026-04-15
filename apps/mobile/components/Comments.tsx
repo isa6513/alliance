@@ -13,8 +13,6 @@ import {
   forumFindCommentsForAction,
   forumFindCommentsForActivity,
   forumFindCommentsForPost,
-  forumLikeComment,
-  forumUnlikeComment,
   forumUpdateComment,
   imagesUploadImage,
 } from "@alliance/shared/client";
@@ -30,6 +28,7 @@ import Text, { FontWeight } from "./system/Text";
 import { colors } from "../lib/style/colors";
 import { cn } from "@alliance/shared/styles/util";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCommentLikeMutation } from "@alliance/shared/lib/useCommentLikeMutation";
 
 export interface CommentsProps {
   objectId: number;
@@ -139,7 +138,7 @@ type ReplyItemSharedProps = {
     content: CreateEditableContentDto,
   ) => Promise<void>;
   onDeleteReply: (replyId: number) => void;
-  onLikeReply: (replyId: number, unlike?: boolean) => void;
+  onLikeReply: (replyId: number, unlike?: boolean) => Promise<unknown>;
 };
 
 type ReplyItemProps = ReplyItemSharedProps & {
@@ -565,17 +564,11 @@ export default function Comments({
     [],
   );
 
-  const handleLikeReply = useCallback(
-    async (replyId: number, unlike = false) => {
-      if (unlike) {
-        await forumUnlikeComment({ path: { id: replyId } });
-      } else {
-        await forumLikeComment({ path: { id: replyId } });
-      }
-      fetchComments();
-    },
-    [fetchComments],
-  );
+  const handleLikeReply = useCommentLikeMutation({
+    userId: user?.id,
+    setComments,
+    fetchComments,
+  });
 
   const sortedComments = useMemo(() => {
     if (!comments) return null;

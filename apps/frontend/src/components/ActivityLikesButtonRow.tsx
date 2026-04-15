@@ -4,7 +4,7 @@ import UserProfilePicRow from "./UserProfilePicRow";
 
 interface ActivityLikesButtonRowProps {
   isLiked: boolean;
-  handleLike: (() => void) | null;
+  handleLike: (() => Promise<unknown>) | null;
   labelText?: boolean;
   likes?: ProfileDto[];
   likesCount?: number;

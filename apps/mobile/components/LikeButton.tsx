@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Heart } from "lucide-react-native";
 import Text from "./system/Text";
@@ -6,7 +7,7 @@ import { cn } from "@alliance/shared/styles/util";
 interface LikeButtonProps {
   liked: boolean;
   likes: number;
-  onPress?: () => void;
+  onPress?: () => Promise<unknown>;
   bordered?: boolean;
   size?: number;
   iconColor?: string;
@@ -20,18 +21,31 @@ export default function LikeButton({
   bordered = false,
   size = 20,
 }: LikeButtonProps) {
+  const [isPending, setIsPending] = useState(false);
   const baseClasses = "flex-row items-center gap-x-1";
   const borderClasses = bordered
     ? "border border-zinc-200 rounded px-2 py-1"
     : "";
-  const color = liked ? "#ef4444" :  iconColor ?? "#888";
+  const isDisabled = isPending || !onPress;
+  const color = liked ? "#ef4444" : (iconColor ?? "#888");
 
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={async () => {
+        if (onPress && !isPending) {
+          setIsPending(true);
+          try {
+            await onPress();
+          } catch {
+            // errors should already be handled by mutation's onError
+          } finally {
+            setIsPending(false);
+          }
+        }
+      }}
       activeOpacity={0.7}
       className={cn(baseClasses, borderClasses)}
-      disabled={!onPress}
+      disabled={isDisabled}
     >
       <Heart size={size} color={color} fill={liked ? color : "none"} />
       {likes > 0 && <Text>{likes}</Text>}

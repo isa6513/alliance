@@ -6,7 +6,7 @@ import {
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useMemo } from "react";
 import { Link, href, useOutletContext, useParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
 import { formatTime } from "@alliance/shared/lib/utils";
@@ -33,8 +33,10 @@ export function ErrorBoundary(error: unknown) {
 export interface ActionActivityDetailContext {
   action: ActionDto;
   activities: ActionActivityDto[];
-  handleLikeActivity: (activityId: number) => Promise<unknown>;
-  setActivities: (activities: ActionActivityDto[]) => void;
+  handleLikeActivity: (
+    activityId: number,
+    overrides?: { isLiked: boolean; activityType: string },
+  ) => Promise<unknown>;
 }
 
 const ActionActivityDetail = () => {
@@ -70,11 +72,46 @@ const ActionActivityDetail = () => {
 
   const verb = activity ? actionActivityTransitiveVerb[activity.type] : null;
 
+  const queryClient = useQueryClient();
+  const detailQueryKey = ["actionsGetActivity", activityId];
+
+  const likeMutation = useMutation({
+    mutationFn: (isLiked: boolean) =>
+      handleLikeActivity(activityId, {
+        isLiked,
+        activityType: activity?.type ?? "",
+      }),
+    onMutate: async (isLiked: boolean) => {
+      await queryClient.cancelQueries({ queryKey: detailQueryKey });
+      const previous = queryClient.getQueryData<ActionActivityDto | null>(
+        detailQueryKey,
+      );
+      queryClient.setQueryData(
+        detailQueryKey,
+        (old: ActionActivityDto | null) =>
+          old
+            ? {
+                ...old,
+                likedByMe: !isLiked,
+                likesCount: isLiked ? old.likesCount - 1 : old.likesCount + 1,
+              }
+            : old,
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(detailQueryKey, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: detailQueryKey });
+    },
+  });
+
   const handleLike = async () => {
-    if (!user || !activity) {
-      return;
-    }
-    await handleLikeActivity(activity.id);
+    if (!user || !activity) return;
+    await likeMutation.mutateAsync(activity.likedByMe ?? false);
   };
 
   const isLiked = activity?.likedByMe ?? false;

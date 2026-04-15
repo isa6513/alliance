@@ -17,7 +17,7 @@ import { FormSchema } from "@alliance/common/forms/form-schema";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
-  handleLike: (activityId: number) => void;
+  handleLike: (activityId: number) => Promise<unknown>;
 }
 
 const UserActivityCard = ({ activity, handleLike }: UserActivityCardProps) => {

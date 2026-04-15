@@ -1,14 +1,12 @@
 import {
   forumFindOnePost,
-  forumLikePost,
   forumRemovePost,
-  forumUnlikePost,
 } from "@alliance/shared/client";
 import { formatFullDateTime } from "@alliance/shared/lib/dateFormatters";
 import Card from "@alliance/sharedweb/ui/Card";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { Link, href, useNavigate, useParams } from "react-router";
 import Comments from "../../components/Comments";
 import PostLikeButton from "../../components/PostLikeButton";
@@ -20,6 +18,7 @@ import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePostLikeMutation } from "@alliance/shared/lib/usePostLikeMutation";
 import { ArrowLeft } from "lucide-react";
 
 const PostDetailPage: React.FC = () => {
@@ -40,7 +39,7 @@ const PostDetailPage: React.FC = () => {
     queryKey: ["forumFindOnePost", postId],
     queryFn: () =>
       forumFindOnePost({ path: { id: postId! } }).then(
-        (res) => res.data ?? null
+        (res) => res.data ?? null,
       ),
     enabled: !!postId,
   });
@@ -63,21 +62,22 @@ const PostDetailPage: React.FC = () => {
     }
   };
 
-  const handleLike = useCallback(async () => {
-    if (!post) return;
-
-    if (post.likes?.some((like) => like.id === user?.id)) {
-      await forumUnlikePost({
-        path: { id: post.id },
+  const handleLike = usePostLikeMutation({
+    postId: Number(postId),
+    userId: user?.id,
+    getPost: () => post,
+    setPost: (updater) => {
+      queryClient.setQueryData(
+        ["forumFindOnePost", postId],
+        (old: typeof post) => (old ? updater(old) : old),
+      );
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["forumFindOnePost", postId],
       });
-    } else {
-      await forumLikePost({
-        path: { id: post.id },
-      });
-    }
-
-    queryClient.invalidateQueries({ queryKey: ["forumFindOnePost", postId] });
-  }, [post, queryClient, postId, user]);
+    },
+  });
 
   const displayError =
     error || (queryError ? "Failed to load post details" : null);
@@ -170,7 +170,7 @@ const PostDetailPage: React.FC = () => {
                       </UserDisplayName>
                     </Link>
                   </React.Fragment>
-                )
+                ),
               )}
               <span className="text-zinc-500">
                 {formatTime(new Date(post.createdAt), {
@@ -220,7 +220,7 @@ const PostDetailPage: React.FC = () => {
           objectId={post.id}
           type={"post"}
           qaMode={post.qaMode}
-          expertIds={post.qaMode ? post.expertIds ?? [] : []}
+          expertIds={post.qaMode ? (post.expertIds ?? []) : []}
           expertLabel={post.qaMode ? post.expertLabel : undefined}
           className="px-2 md:px-4"
         />

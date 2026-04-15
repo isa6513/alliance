@@ -33,7 +33,7 @@ import Comments from "../../../../components/Comments";
 import ProfileImage from "../../../../components/ProfileImage";
 import { formatTime } from "@alliance/shared/lib/utils";
 import LikeButton from "../../../../components/LikeButton";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { colors } from "../../../../lib/style/colors";
 import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
@@ -50,7 +50,7 @@ const tabs: { id: TabId; label: string }[] = [
 
 interface ActivityItemProps {
   activity: ActionActivityDto;
-  onLike: (activityId: number) => void;
+  onLike: (activityId: number) => Promise<unknown>;
 }
 
 function ActivityItem({ activity, onLike }: ActivityItemProps) {
@@ -105,40 +105,87 @@ function ActivityTabContent({ actionId }: ActivityTabContentProps) {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
+  const likeMutation = useMutation({
+    mutationFn: async ({
+      activityId,
+      isLiked,
+    }: {
+      activityId: number;
+      isLiked: boolean;
+    }) => {
+      const response = isLiked
+        ? await actionsUnlikeActivity({ path: { id: activityId } })
+        : await actionsLikeActivity({ path: { id: activityId } });
+      if (response.response.ok && response.data) return response.data;
+      throw new Error("Like request failed");
+    },
+    onMutate: async ({ activityId, isLiked }) => {
+      const queryKey = ["actionActivities", actionId];
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData(queryKey);
+
+      queryClient.setQueryData(
+        queryKey,
+        (oldData: typeof activitiesResponse) => {
+          if (!oldData?.data) return oldData;
+          return {
+            ...oldData,
+            data: oldData.data.map((a: ActionActivityDto) =>
+              a.id === activityId
+                ? {
+                    ...a,
+                    likedByMe: !isLiked,
+                    likesCount: isLiked ? a.likesCount - 1 : a.likesCount + 1,
+                  }
+                : a,
+            ),
+          };
+        },
+      );
+
+      return { previousData };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          ["actionActivities", actionId],
+          context.previousData,
+        );
+      }
+    },
+    onSuccess: (data, { activityId }) => {
+      queryClient.setQueryData(
+        ["actionActivities", actionId],
+        (oldData: typeof activitiesResponse) => {
+          if (!oldData?.data) return oldData;
+          return {
+            ...oldData,
+            data: oldData.data.map((a) =>
+              a.id === activityId
+                ? {
+                    ...a,
+                    likes: data.likes,
+                    likesCount: data.likesCount,
+                    likedByMe: data.likedByMe,
+                  }
+                : a,
+            ),
+          };
+        },
+      );
+    },
+  });
+
   const handleLike = useCallback(
     async (activityId: number) => {
       const activity = activities.find((a) => a.id === activityId);
       if (!activity) return;
-
-      const isLiked = activity.likedByMe ?? false;
-
-      const response = isLiked
-        ? await actionsUnlikeActivity({ path: { id: activityId } })
-        : await actionsLikeActivity({ path: { id: activityId } });
-
-      if (response.response.ok && response.data) {
-        queryClient.setQueryData(
-          ["actionActivities", actionId],
-          (oldData: typeof activitiesResponse) => {
-            if (!oldData?.data) return oldData;
-            return {
-              ...oldData,
-              data: oldData.data.map((a) =>
-                a.id === activityId
-                  ? {
-                      ...a,
-                      likes: response.data!.likes,
-                      likesCount: response.data!.likesCount,
-                      likedByMe: response.data!.likedByMe,
-                    }
-                  : a,
-              ),
-            };
-          },
-        );
-      }
+      await likeMutation.mutateAsync({
+        activityId,
+        isLiked: activity.likedByMe ?? false,
+      });
     },
-    [activities, actionId, queryClient],
+    [activities, likeMutation],
   );
 
   if (isPending) {

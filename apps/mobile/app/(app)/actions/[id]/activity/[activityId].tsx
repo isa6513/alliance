@@ -13,6 +13,11 @@ import {
   actionsLikeActivity,
   actionsUnlikeActivity,
 } from "@alliance/shared/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  InfiniteActivityData,
+  mapInfiniteActivities,
+} from "@alliance/shared/lib/useActivities";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { colors } from "../../../../../lib/style/colors";
 import Text, {
@@ -38,6 +43,7 @@ export default function ActivityDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchActivity = useCallback(
@@ -89,45 +95,121 @@ export default function ActivityDetailScreen() {
     }
   }, [activity?.user.id]);
 
+  const actionId = Number(id);
+
+  const likeMutation = useMutation({
+    mutationFn: async (isLiked: boolean) => {
+      if (!activity) throw new Error("No activity");
+      const response = isLiked
+        ? await actionsUnlikeActivity({ path: { id: activity.id } })
+        : await actionsLikeActivity({ path: { id: activity.id } });
+      if (response.response.ok && response.data) return response.data;
+      throw new Error("Like request failed");
+    },
+    onMutate: async (isLiked: boolean) => {
+      const previousActivity = activity;
+
+      // Optimistically update local state
+      setActivity((prev: ActionActivityDto | null) =>
+        prev
+          ? {
+              ...prev,
+              likedByMe: !isLiked,
+              likesCount: isLiked ? prev.likesCount - 1 : prev.likesCount + 1,
+            }
+          : prev,
+      );
+
+      // Optimistically update the action page's activity list cache
+      await queryClient.cancelQueries({
+        queryKey: ["actionActivities", actionId],
+      });
+      const previousActionActivities = queryClient.getQueryData([
+        "actionActivities",
+        actionId,
+      ]);
+      queryClient.setQueryData(
+        ["actionActivities", actionId],
+        (oldData: { data?: ActionActivityDto[] } | undefined) => {
+          if (!oldData?.data) return oldData;
+          return {
+            ...oldData,
+            data: oldData.data.map((a) =>
+              a.id === activity?.id
+                ? {
+                    ...a,
+                    likedByMe: !isLiked,
+                    likesCount: isLiked
+                      ? a.likesCount - 1
+                      : a.likesCount + 1,
+                  }
+                : a,
+            ),
+          };
+        },
+      );
+
+      // Optimistically update all feed caches (home, activity feed, etc.)
+      await queryClient.cancelQueries({ queryKey: ["useActivities"] });
+      const previousFeedQueries =
+        queryClient.getQueriesData<InfiniteActivityData>({
+          queryKey: ["useActivities"],
+        });
+      queryClient.setQueriesData<InfiniteActivityData>(
+        { queryKey: ["useActivities"] },
+        (old) =>
+          mapInfiniteActivities(old, (a) =>
+            a.id === activity?.id
+              ? {
+                  ...a,
+                  likedByMe: !isLiked,
+                  likesCount: isLiked ? a.likesCount - 1 : a.likesCount + 1,
+                }
+              : a,
+          ),
+      );
+
+      return { previousActivity, previousActionActivities, previousFeedQueries };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousActivity) {
+        setActivity(context.previousActivity);
+      }
+      if (context?.previousActionActivities) {
+        queryClient.setQueryData(
+          ["actionActivities", actionId],
+          context.previousActionActivities,
+        );
+      }
+      context?.previousFeedQueries?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
+    },
+    onSuccess: (data) => {
+      // Reconcile with server data
+      setActivity((prev: ActionActivityDto | null) =>
+        prev
+          ? {
+              ...prev,
+              likes: data.likes,
+              likesCount: data.likesCount,
+              likedByMe: data.likedByMe,
+            }
+          : prev,
+      );
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["actionActivities", actionId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["useActivities"] });
+    },
+  });
+
   const handleLike = useCallback(async () => {
     if (!activity) return;
-
-    const isLiked = activity.likedByMe ?? false;
-
-    if (isLiked) {
-      const response = await actionsUnlikeActivity({
-        path: { id: activity.id },
-      });
-      if (response.data) {
-        setActivity((prev) =>
-          prev
-            ? {
-                ...prev,
-                likes: response.data!.likes,
-                likesCount: response.data!.likesCount,
-                likedByMe: response.data!.likedByMe,
-              }
-            : prev,
-        );
-      }
-    } else {
-      const response = await actionsLikeActivity({
-        path: { id: activity.id },
-      });
-      if (response.data) {
-        setActivity((prev) =>
-          prev
-            ? {
-                ...prev,
-                likes: response.data!.likes,
-                likesCount: response.data!.likesCount,
-                likedByMe: response.data!.likedByMe,
-              }
-            : prev,
-        );
-      }
-    }
-  }, [activity]);
+    await likeMutation.mutateAsync(activity.likedByMe ?? false);
+  }, [activity, likeMutation]);
 
   const verb = activity ? actionActivityTransitiveVerb[activity.type] : null;
 

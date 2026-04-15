@@ -22,7 +22,7 @@ const ActionActivityList = ({
   const { user } = useAuth();
 
   const allActivities = activities.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
   if (loading) {
@@ -40,9 +40,7 @@ const ActionActivityList = ({
   }
 
   const handleLike = async (activity: ActionActivityDto) => {
-    if (!user) {
-      return;
-    }
+    if (!user) return;
     await onLikeActivity(activity.id);
   };
 

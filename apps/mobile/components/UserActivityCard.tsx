@@ -17,7 +17,7 @@ import {
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
-  handleLike: (activityId: number) => void;
+  handleLike: (activityId: number) => Promise<unknown>;
 }
 
 export default function UserActivityCard({

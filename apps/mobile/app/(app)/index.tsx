@@ -216,8 +216,8 @@ export default function HomeScreen() {
   }, []);
 
   const handleHomeFeedLike = useCallback(
-    async (activityId: number) => {
-      await handleLikeHomeFeedActivity(activityId);
+    (activityId: number) => {
+      return handleLikeHomeFeedActivity(activityId);
     },
     [handleLikeHomeFeedActivity],
   );

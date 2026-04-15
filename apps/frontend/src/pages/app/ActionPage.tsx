@@ -81,7 +81,7 @@ export default function ActionPage() {
 
   useCIDFromParams(actionId);
 
-  const { activities, handleLikeActivity, setActivities } = useActivities({
+  const { activities, handleLikeActivity } = useActivities({
     list: ActivityList.Action,
     objectId: actionId,
     limit: 10,
@@ -155,7 +155,6 @@ export default function ActionPage() {
                 onOptOutAction,
                 activities,
                 handleLikeActivity,
-                setActivities,
               } satisfies TaskPanelContext & ActionActivityDetailContext
             }
           />

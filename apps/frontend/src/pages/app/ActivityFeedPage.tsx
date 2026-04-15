@@ -18,7 +18,6 @@ const ActivityFeedPage = () => {
     activities,
     handleLikeActivity: handleGlobalLikeActivity,
     loading,
-    setActivities: setGlobalActivities,
     fetchNextPage: fetchNextGlobal,
     hasNextPage: hasNextGlobal,
     isFetchingNextPage: isFetchingNextGlobal,
@@ -32,7 +31,6 @@ const ActivityFeedPage = () => {
     activities: friendActivities,
     handleLikeActivity: handleLikeFriendActivity,
     loading: loadingFriend,
-    setActivities: setFriendActivities,
     fetchNextPage: fetchNextFriends,
     hasNextPage: hasNextFriends,
     isFetchingNextPage: isFetchingNextFriends,
@@ -43,29 +41,14 @@ const ActivityFeedPage = () => {
   });
 
   const handleLikeActivity = useCallback(
-    async (activityId: number, mode: Mode) => {
+    (activityId: number, mode: Mode) => {
       if (mode === "friends") {
-        const liked = await handleLikeFriendActivity(activityId);
-        if (liked) {
-          setGlobalActivities((prev) =>
-            prev.map((a) => (a.id === activityId ? liked : a)),
-          );
-        }
+        return handleLikeFriendActivity(activityId);
       } else {
-        const liked = await handleGlobalLikeActivity(activityId);
-        if (liked) {
-          setFriendActivities((prev) =>
-            prev.map((a) => (a.id === activityId ? liked : a)),
-          );
-        }
+        return handleGlobalLikeActivity(activityId);
       }
     },
-    [
-      handleLikeFriendActivity,
-      handleGlobalLikeActivity,
-      setGlobalActivities,
-      setFriendActivities,
-    ],
+    [handleLikeFriendActivity, handleGlobalLikeActivity],
   );
 
   const friendsRef = useRef<HTMLDivElement>(null);
@@ -151,7 +134,6 @@ const ActivityFeedPage = () => {
       mode === "friends" ? isFetchingNextFriends : isFetchingNextGlobal;
     const sentinelRef =
       mode === "friends" ? friendsSentinelRef : everyoneSentinelRef;
-
     return (
       <div className="w-1/2">
         <div
