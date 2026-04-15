@@ -198,9 +198,9 @@ const GuidePage: React.FC = () => {
                   </GuideLi>
                 </GuideUl>
                 <GuideP>
-                  To create a culture of reliability, we ask new members to sign
-                  a <GuideStrong>membership contract</GuideStrong> that asks
-                  them to complete tasks dependably. Once they sign a contract,
+                  New members to sign a{" "}
+                  <GuideStrong>membership contract</GuideStrong> that sets a
+                  clear expectation of reliability. Once they sign a contract,
                   we start to assign them tasks.
                 </GuideP>
                 <div className="my-8 flex flex-col gap-y-4">
@@ -271,9 +271,13 @@ const GuidePage: React.FC = () => {
                 </GuideP>
                 <GuideP>
                   These crises represent egregious violations of our
-                  foundational moral principle: that we should not treat others
-                  in ways that we do not want to be treated. They cause, or have
-                  the potential to cause, enormous harm to billions of people.
+                  foundational{" "}
+                  <Link to={href("/foundation")} className="text-link">
+                    moral principle
+                  </Link>
+                  : that we should not treat others in ways that we do not want
+                  to be treated. They cause, or have the potential to cause,
+                  enormous harm to billions of people.
                 </GuideP>
                 <GuideP>
                   In addition, these crises are amenable to coordinated action
