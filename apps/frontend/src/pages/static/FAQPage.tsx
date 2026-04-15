@@ -15,8 +15,8 @@ const FAQPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
       <div className="flex flex-col md:flex-row mx-2 sm:mx-4 md:mx-12 pt-8 md:pt-32 pb-56 justify-center">
-        <div className="flex flex-col w-full md:w-3xl gap-y-8">
-          <h1 className="text-title-medium">Frequently asked questions</h1>
+        <div className="flex flex-col w-full md:w-3xl gap-y-12">
+          <h1 className="text-title-large">Frequently asked questions</h1>
           <div className="flex flex-col gap-y-6 text-lg">
             <FAQExpandable
               title="What is the Alliance?"
@@ -248,14 +248,16 @@ const FAQPage: React.FC = () => {
               title="What if I do not live in the United States?"
               expanded={question === "cannot-complete-a-task"}
             >
+              <p>Alliance membership is open to anyone.</p>
               <p>
-                Alliance membership is open to anyone.
+                However, some actions require members to live in the United
+                States. If an action is restricted to US members, we provide
+                non-US members with a modified action, or we do not assign them
+                that action.
               </p>
               <p>
-                However, some actions require members to live in the United States. If an action is restricted to US members, we provide non-US members with a modified action, or we do not assign them that action.
-              </p>
-              <p>
-                As the Alliance grows, actions will have greater global coverage.
+                As the Alliance grows, actions will have greater global
+                coverage.
               </p>
             </FAQExpandable>
             <FAQExpandable

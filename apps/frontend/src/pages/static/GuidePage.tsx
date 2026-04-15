@@ -153,8 +153,8 @@ const GuidePage: React.FC = () => {
                   <GuideStrong>
                     expert-guided, democratically approved plan
                   </GuideStrong>{" "}
-                  to end these crises by strategically directing our collective
-                  economic, political, and social resources.
+                  that strategically mobilizes our collective economic,
+                  political, and social resources.
                 </GuideP>
               </GuideSection>
 
