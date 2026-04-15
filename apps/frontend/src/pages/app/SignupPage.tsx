@@ -329,18 +329,18 @@ const SignupPage: React.FC = () => {
       </div>
 
       {/* Right: info */}
-      <div className="w-full md:w-3/5 md:ml-[40%] bg-grey-0 border-l border-grey-1 flex items-center justify-center px-4 sm:px-12 lg:px-24 xl:px-32 py-12 lg:py-24">
+      <div className="w-full md:w-3/5 md:ml-[40%] bg-grey-0 border-l border-grey-1 flex items-center justify-center px-4 sm:px-12 lg:px-24 xl:px-36 py-12 lg:py-24">
         <div className="w-full">
-          <h2 className="text-title-large mb-8">Join the Alliance</h2>
+          <h2 className="text-title-medium mb-8">Join the Alliance</h2>
 
-          <div className="w-full flex flex-col gap-y-8">
+          <div className="w-full flex flex-col gap-y-8 lg:gap-y-12">
             <div>
               <p className="text-lg md:text-xl text-zinc-900 mb-4">
                 We&apos;re a global group of people cooperating to improve the
                 world.{" "}
                 <Link to={href("/progress")}>
-                  Every week, we assign you effective actions that take 15
-                  minutes a week.
+                  We develop and assign effective actions that take 15 minutes a
+                  week.
                 </Link>
               </p>
               <div className="text-base">
