@@ -16,5 +16,6 @@
     "../../shared",
     "../../common",
     "../../sharedweb"
-  ]
+  ],
+  "exclude": ["../../common/**/*.test.ts"]
 }
