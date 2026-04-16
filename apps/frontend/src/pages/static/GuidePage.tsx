@@ -8,94 +8,22 @@ import ExampleActionCardList from "../../components/ExampleActionCardList";
 import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
 import ExampleActionCategoryList from "../../components/ExampleActionCategoryList";
 import TableOfContents from "../../components/TableOfContents";
-import { alliancePriorities } from "../../lib/alliancePriorities";
-import { cn } from "@alliance/shared/styles/util";
-import { AlliancePriority } from "../../lib/alliancePriorities";
+import {
+  alliancePriorities,
+  type AlliancePriority,
+} from "../../lib/alliancePriorities";
 import { ArrowRight } from "lucide-react";
+import {
+  GuideH1,
+  GuideH2,
+  GuideLi,
+  GuideOl,
+  GuideP,
+  GuideSection,
+  GuideStrong,
+  GuideUl,
+} from "./StaticDocShared";
 
-// Guide page typography (no MarkdownWrapper)
-const GuideSection = ({
-  id,
-  className,
-  children,
-}: {
-  id?: string;
-  className?: string;
-  children: React.ReactNode;
-}) => (
-  <div className={cn("w-full mx-auto", className)} id={id}>
-    {children}
-  </div>
-);
-const GuideH1 = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLHeadingElement>) => (
-  <h1
-    className={cn(
-      "font-semibold text-2xl md:text-3xl first:mt-0 mt-4 md:mt-8",
-      className,
-    )}
-    {...props}
-  />
-);
-const GuideH2 = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLHeadingElement>) => (
-  <h2
-    className={cn(
-      "font-semibold text-xl md:text-2xl first:mt-0 mt-4 md:mt-8",
-      className,
-    )}
-    {...props}
-  />
-);
-const GuideP = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLParagraphElement>) => (
-  <p
-    className={cn("text-zinc-800 text-lg first:mt-0 mt-2 md:mt-5", className)}
-    {...props}
-  />
-);
-const GuideStrong = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLSpanElement>) => (
-  <span className={cn("font-semibold text-black", className)} {...props} />
-);
-const GuideOl = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLOListElement>) => (
-  <ol
-    className={cn(
-      "text-lg text-zinc-800 list-decimal list-inside first:mt-0 mt-2 md:mt-5 pl-4",
-      className,
-    )}
-    {...props}
-  />
-);
-const GuideUl = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLUListElement>) => (
-  <ul
-    className={cn(
-      "text-lg text-zinc-800 list-disc list-inside first:mt-0 mt-2 md:mt-5 pl-4",
-      className,
-    )}
-    {...props}
-  />
-);
-const GuideLi = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLLIElement>) => (
-  <li className={cn("first:mt-0 mt-2", className)} {...props} />
-);
 const GuidePage: React.FC = () => {
   const tocSections = [
     { id: "guide-to-the-alliance", label: "About", level: 2 },
@@ -119,10 +47,10 @@ const GuidePage: React.FC = () => {
         <div className="flex flex-row md:gap-8 lg:gap-12 justify-center">
           <TableOfContents tocSections={tocSections} />
 
-          <div className="flex flex-col gap-y-4 max-w-184">
+          <div className="flex flex-col gap-y-4 max-w-184 w-full min-w-0">
             <div className="mb-8 md:mb-16 flex flex-col">
               <h1 className="text-title-large mb-4">Guide to the Alliance</h1>
-              <div className="flex flex-col gap-y-6 text-xl md:text-2xl text-zinc-900">
+              <div className="flex flex-col gap-y-6 text-xl md:text-2xl text-zinc-500">
                 <p>
                   The Alliance is a global group of people cooperating to
                   improve the world.
