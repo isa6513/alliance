@@ -5,27 +5,11 @@ import type { BaseDisplayBlockProps } from "./types";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import FormTextarea from "../FormTextarea";
 
-export function EditableTextBlock({
-  block,
-  onUpdate,
-  onRemove,
-  onDragStart,
-  onDragEnd,
-  isDragging,
-  previousFields,
-}: BaseDisplayBlockProps<TextBlock>) {
+export function EditableTextBlock(props: BaseDisplayBlockProps<TextBlock>) {
   const [showPreview, setShowPreview] = useState(false);
 
   return (
-    <DisplayBlockWrapper
-      onRemove={onRemove}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      isDragging={isDragging}
-      block={block}
-      onUpdate={onUpdate}
-      previousFields={previousFields}
-    >
+    <DisplayBlockWrapper {...props}>
       {({ block: activeBlock, onUpdate: handleUpdate }) => (
         <div className="space-y-2">
           <FormTextarea

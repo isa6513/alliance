@@ -16,7 +16,10 @@ import type {
 } from "@alliance/common/forms/form-schema";
 import type { UserDto } from "@alliance/shared/client";
 import { userList } from "@alliance/shared/client";
-import { ConditionalVisibility } from "../form-fields/CommonControls";
+import {
+  ConditionalVisibility,
+  type OutputBlockOption,
+} from "../form-fields/CommonControls";
 import { CheckCircle2, Circle } from "lucide-react";
 import { cn } from "@alliance/shared/styles/util";
 
@@ -53,6 +56,7 @@ interface DisplayBlockWrapperProps<T extends DisplayBlock = DisplayBlock> {
   block?: T;
   onUpdate?: (updates: Partial<T>) => void;
   previousFields?: AnyField[];
+  outputBlocks?: OutputBlockOption[];
 }
 
 export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
@@ -64,6 +68,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   block,
   onUpdate,
   previousFields,
+  outputBlocks,
 }: DisplayBlockWrapperProps<T>) {
   const showConditional = Boolean(block && onUpdate);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -425,7 +430,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   return (
     <div
       className={cn(
-        "group relative border rounded-lg p-4 pl-8 transition-all",
+        "group relative border rounded-lg p-4 pl-8 pt-8 transition-all",
         isDragging
           ? "border-blue-400 shadow-lg opacity-50"
           : "border-gray-200 hover:border-gray-300",
@@ -458,6 +463,14 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
           </svg>
         </div>
       </div>
+      {block?.id && (
+        <span
+          className="absolute top-2 left-8 font-mono text-[10px] text-gray-400 px-1.5 py-0.5 bg-gray-50 border border-gray-200 rounded select-all"
+          title="Block id"
+        >
+          {block.id}
+        </span>
+      )}
       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         {showConditional && (
           <div className="relative" ref={optionsMenuRef}>
@@ -843,6 +856,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
             <ConditionalVisibility
               field={effectiveBlock ?? block!}
               previousFields={previousFields || []}
+              outputBlocks={outputBlocks}
               onChange={handleConditionalChange}
             />
           </div>

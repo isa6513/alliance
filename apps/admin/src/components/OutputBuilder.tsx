@@ -189,6 +189,30 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
     );
   }, [schema.outputViews, selectedViewId]);
 
+  const outputBlocks = useMemo(() => {
+    if (!selectedView) return [];
+    const fieldLookup = new Map(outputFields.map((f) => [f.id, f]));
+    const truncate = (s: string, n = 30) =>
+      s.length > n ? `${s.slice(0, n)}…` : s;
+    return selectedView.blocks
+      .filter((b): b is OutputBlock & { id: string } => Boolean(b.id))
+      .map((b) => {
+        if ("kind" in b) {
+          const kindLabel = b.kind.charAt(0).toUpperCase() + b.kind.slice(1);
+          const text = "text" in b && b.text ? truncate(b.text) : undefined;
+          return {
+            id: b.id,
+            label: text ? `${kindLabel}: ${text}` : kindLabel,
+          };
+        }
+        return {
+          id: b.id,
+          label:
+            b.labelOverride ?? fieldLookup.get(b.fieldId)?.label ?? b.fieldId,
+        };
+      });
+  }, [selectedView, outputFields]);
+
   const updateViews = (views: OutputViewSchema[]) => {
     onSchemaChange({
       ...schema,
@@ -381,86 +405,54 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
           {isDisplayBlock ? (
             (() => {
               const displayBlock = block as DisplayBlock;
+              const sharedProps = {
+                onUpdate: handleDisplayUpdate,
+                onRemove: () => removeBlockAtIndex(index),
+                previousFields: outputFields,
+                outputBlocks,
+                ...dragProps,
+              };
               switch (displayBlock.kind) {
                 case "header":
                   return (
                     <EditableHeaderBlock
                       block={displayBlock}
-                      onUpdate={handleDisplayUpdate}
-                      onRemove={() => removeBlockAtIndex(index)}
-                      previousFields={outputFields}
-                      {...dragProps}
+                      {...sharedProps}
                     />
                   );
                 case "text":
                   return (
-                    <EditableTextBlock
-                      block={displayBlock}
-                      onUpdate={handleDisplayUpdate}
-                      onRemove={() => removeBlockAtIndex(index)}
-                      previousFields={outputFields}
-                      {...dragProps}
-                    />
+                    <EditableTextBlock block={displayBlock} {...sharedProps} />
                   );
                 case "label":
                   return (
-                    <EditableLabelBlock
-                      block={displayBlock}
-                      onUpdate={handleDisplayUpdate}
-                      onRemove={() => removeBlockAtIndex(index)}
-                      previousFields={outputFields}
-                      {...dragProps}
-                    />
+                    <EditableLabelBlock block={displayBlock} {...sharedProps} />
                   );
                 case "divider":
                   return (
                     <EditableDividerBlock
                       block={displayBlock}
-                      onUpdate={handleDisplayUpdate}
-                      onRemove={() => removeBlockAtIndex(index)}
-                      previousFields={outputFields}
-                      {...dragProps}
+                      {...sharedProps}
                     />
                   );
                 case "spacer":
                   return (
                     <EditableSpacerBlock
                       block={displayBlock}
-                      onUpdate={handleDisplayUpdate}
-                      onRemove={() => removeBlockAtIndex(index)}
-                      previousFields={outputFields}
-                      {...dragProps}
+                      {...sharedProps}
                     />
                   );
                 case "html":
                   return (
-                    <EditableHtmlBlock
-                      block={displayBlock}
-                      onUpdate={handleDisplayUpdate}
-                      onRemove={() => removeBlockAtIndex(index)}
-                      previousFields={outputFields}
-                      {...dragProps}
-                    />
+                    <EditableHtmlBlock block={displayBlock} {...sharedProps} />
                   );
                 case "image":
                   return (
-                    <EditableImageBlock
-                      block={displayBlock}
-                      onUpdate={handleDisplayUpdate}
-                      onRemove={() => removeBlockAtIndex(index)}
-                      previousFields={outputFields}
-                      {...dragProps}
-                    />
+                    <EditableImageBlock block={displayBlock} {...sharedProps} />
                   );
                 case "quote":
                   return (
-                    <EditableQuoteBlock
-                      block={displayBlock}
-                      onUpdate={handleDisplayUpdate}
-                      onRemove={() => removeBlockAtIndex(index)}
-                      previousFields={outputFields}
-                      {...dragProps}
-                    />
+                    <EditableQuoteBlock block={displayBlock} {...sharedProps} />
                   );
                 default:
                   return null;
@@ -470,6 +462,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
             <EditableOutputFieldBlock
               block={block as OutputFieldBlock}
               availableFields={outputFields}
+              outputBlocks={outputBlocks}
               onUpdate={(updates) => updateBlockAtIndex(index, updates)}
               onRemove={() => removeBlockAtIndex(index)}
               {...dragProps}

@@ -21,6 +21,7 @@ import type {
   Page,
   VisibleIfFormula,
 } from "@alliance/common/forms/form-schema";
+import { validateFormSchema } from "@alliance/common/forms/form-schema-validate";
 import type { UserDto } from "@alliance/shared/client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PreviewAsUserBar } from "./PreviewAsUserBar";
@@ -1115,6 +1116,16 @@ export function FormBuilder({
     setSaveError(null);
 
     try {
+      const validationErrors = validateFormSchema(schema);
+      if (validationErrors.length > 0) {
+        const summary = validationErrors
+          .map((e) => `• Block ${e.blockId}: ${e.message}`)
+          .join("\n");
+        setSaveError(summary);
+        showErrorToast("Fix invalid references before saving");
+        return;
+      }
+
       const { schema: schemaForSave, resolvedDraftIds } =
         await resolveCustomValidatorDrafts(schema);
       if (resolvedDraftIds.length > 0) {

@@ -176,6 +176,7 @@ export const isOutputBlockVisible = (
   validatorResults?: Record<number, boolean>,
   deviceType?: DeviceVisibilityTarget,
   inputField?: AnyField,
+  outputBlockVisibility?: Map<string, boolean>,
 ): boolean => {
   if (inputField) {
     const isVisible = isElementCurrentlyVisible(inputField, answers, {
@@ -192,6 +193,7 @@ export const isOutputBlockVisible = (
   return isElementCurrentlyVisible(block, answers, {
     deviceType: deviceType ?? "desktop",
     visibilityValidatorResults: validatorResults ?? {},
+    outputBlockVisibility,
   });
 };
 
@@ -237,17 +239,71 @@ export const resolveOutputItems = ({
     return { selectedView, items: [], fieldLookup };
   }
 
-  const items = (selectedView.blocks ?? [])
-    .filter(
-      (block) =>
-        isOutputBlockVisible(
-          block,
-          answers,
-          validatorResults,
-          deviceType,
-          "fieldId" in block ? fieldLookup.get(block.fieldId) : undefined,
-        ) &&
-        ("kind" in block || publicAnswers?.[block.fieldId] === true),
+  // Resolve visibility for every block, walking outputBlockVisible dependencies
+  // first so a condition always sees a populated map. Any block (field or
+  // display) can reference any other block by id. Cycles should be rejected by
+  // validateFormSchema; the inProgress guard returns false if one slips past.
+  const allBlocks = selectedView.blocks ?? [];
+  const blockById = new Map<string, OutputBlock>();
+  for (const b of allBlocks) {
+    if (b.id) blockById.set(b.id, b);
+  }
+  const outputBlockVisibility = new Map<string, boolean>();
+  const inProgress = new Set<string>();
+
+  const evaluateBlockVisibility = (block: OutputBlock): boolean => {
+    if ("kind" in block) {
+      return isOutputBlockVisible(
+        block,
+        answers,
+        validatorResults,
+        deviceType,
+        undefined,
+        outputBlockVisibility,
+      );
+    }
+    return (
+      isOutputBlockVisible(
+        block,
+        answers,
+        validatorResults,
+        deviceType,
+        fieldLookup.get(block.fieldId),
+        outputBlockVisibility,
+      ) && publicAnswers?.[block.fieldId] === true
+    );
+  };
+
+  const computeVisibility = (block: OutputBlock): boolean => {
+    if (block.id) {
+      const cached = outputBlockVisibility.get(block.id);
+      if (cached !== undefined) return cached;
+      if (inProgress.has(block.id)) return false;
+      inProgress.add(block.id);
+    }
+    for (const cond of Object.values(
+      block.visibleIfFormula?.conditions ?? {},
+    )) {
+      if ("outputBlockVisible" in cond) {
+        const dep = blockById.get(cond.outputBlockVisible);
+        if (dep && dep.id && !outputBlockVisibility.has(dep.id)) {
+          computeVisibility(dep);
+        }
+      }
+    }
+    if (block.id) inProgress.delete(block.id);
+    const visible = evaluateBlockVisibility(block);
+    if (block.id) outputBlockVisibility.set(block.id, visible);
+    return visible;
+  };
+
+  for (const block of allBlocks) computeVisibility(block);
+
+  const items = allBlocks
+    .filter((block) =>
+      block.id
+        ? (outputBlockVisibility.get(block.id) ?? false)
+        : evaluateBlockVisibility(block),
     )
     .map((block, index): ResolvedOutputItem => {
       const key =

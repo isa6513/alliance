@@ -11,6 +11,9 @@ jobs:
   test-backend-unit:
     uses: ./.github/workflows/test-backend-unit.yaml
 
+  test-common-unit:
+    uses: ./.github/workflows/test-common-unit.yaml
+
   migrations-drift-check:
     runs-on: ubuntu-latest
     services:

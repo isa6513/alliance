@@ -3,25 +3,9 @@ import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 
-export function EditableSpacerBlock({
-  block,
-  onUpdate,
-  onRemove,
-  onDragStart,
-  onDragEnd,
-  isDragging,
-  previousFields,
-}: BaseDisplayBlockProps<SpacerBlock>) {
+export function EditableSpacerBlock(props: BaseDisplayBlockProps<SpacerBlock>) {
   return (
-    <DisplayBlockWrapper
-      onRemove={onRemove}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      isDragging={isDragging}
-      block={block}
-      onUpdate={onUpdate}
-      previousFields={previousFields}
-    >
+    <DisplayBlockWrapper {...props}>
       {({ block: activeBlock, onUpdate: handleUpdate }) => (
         <div className="space-y-2">
           {/* Compact size selector */}

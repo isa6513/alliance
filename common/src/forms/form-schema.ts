@@ -309,6 +309,11 @@ export function isQuestionVisible(
       if (actual === undefined) return false;
       return actual === expected;
     }
+    if ("outputBlockVisible" in c) {
+      // Output-view visibility is evaluated by resolveOutputItems, not here.
+      // Fall back to "visible" so form-level checks don't accidentally hide things.
+      return c.isVisible ?? true;
+    }
     const val = resolveValue(c as Condition & { when: string });
     if ("hasValue" in c) {
       const present = hasContent(val as FormValue | undefined);

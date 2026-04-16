@@ -3,25 +3,9 @@ import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import { cn } from "@alliance/shared/styles/util";
 
-export function EditableHeaderBlock({
-  block,
-  onUpdate,
-  onRemove,
-  onDragStart,
-  onDragEnd,
-  isDragging,
-  previousFields,
-}: BaseDisplayBlockProps<HeaderBlock>) {
+export function EditableHeaderBlock(props: BaseDisplayBlockProps<HeaderBlock>) {
   return (
-    <DisplayBlockWrapper
-      onRemove={onRemove}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      isDragging={isDragging}
-      block={block}
-      onUpdate={onUpdate}
-      previousFields={previousFields}
-    >
+    <DisplayBlockWrapper {...props}>
       {({ block: activeBlock, onUpdate: handleUpdate }) => (
         <div className="space-y-2">
           {/* Inline editable header */}

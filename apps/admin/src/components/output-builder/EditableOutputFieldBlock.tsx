@@ -4,7 +4,10 @@ import type {
   OutputFieldBlock,
   VisibleIfFormula,
 } from "@alliance/common/forms/form-schema";
-import { ConditionalVisibility } from "../form-fields/CommonControls";
+import {
+  ConditionalVisibility,
+  type OutputBlockOption,
+} from "../form-fields/CommonControls";
 import { cn } from "@alliance/shared/styles/util";
 
 interface EditableOutputFieldBlockProps {
@@ -15,6 +18,7 @@ interface EditableOutputFieldBlockProps {
   onDragEnd?: (e: React.DragEvent) => void;
   isDragging?: boolean;
   availableFields: AnyField[];
+  outputBlocks?: OutputBlockOption[];
 }
 
 export function EditableOutputFieldBlock({
@@ -25,6 +29,7 @@ export function EditableOutputFieldBlock({
   onDragEnd,
   isDragging,
   availableFields,
+  outputBlocks,
 }: EditableOutputFieldBlockProps) {
   const selectedField = availableFields.find(
     (field) => field.id === block.fieldId,
@@ -87,6 +92,12 @@ export function EditableOutputFieldBlock({
         </div>
       </div>
 
+      <span
+        className="absolute top-2 left-2 font-mono text-[10px] text-gray-400 px-1.5 py-0.5 bg-gray-50 border border-gray-200 rounded select-all"
+        title="Block id"
+      >
+        {block.id}
+      </span>
       <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <label className="flex cursor-pointer items-center px-2 py-1.5 text-gray-700 text-xs rounded-md hover:bg-gray-100">
           <input
@@ -107,7 +118,7 @@ export function EditableOutputFieldBlock({
         </button>
       </div>
 
-      <div className="space-y-3 p-4">
+      <div className="space-y-3 p-4 pt-8">
         <div>
           <p className="text-sm font-medium text-gray-900">
             {selectedField?.label || "Select a field"}
@@ -133,7 +144,7 @@ export function EditableOutputFieldBlock({
             )}
             {availableFields.map((field) => (
               <option key={field.id} value={field.id}>
-                {field.label}
+                ({field.id}) {field.label}
               </option>
             ))}
           </select>
@@ -193,6 +204,7 @@ export function EditableOutputFieldBlock({
           <ConditionalVisibility
             field={block as unknown as AnyField}
             previousFields={availableFields}
+            outputBlocks={outputBlocks}
             onChange={handleVisibilityChange}
           />
         </div>

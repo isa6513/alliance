@@ -5,15 +5,7 @@ import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 
-export function EditableImageBlock({
-  block,
-  onUpdate,
-  onRemove,
-  onDragStart,
-  onDragEnd,
-  isDragging,
-  previousFields,
-}: BaseDisplayBlockProps<ImageBlock>) {
+export function EditableImageBlock(props: BaseDisplayBlockProps<ImageBlock>) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -54,15 +46,7 @@ export function EditableImageBlock({
   };
 
   return (
-    <DisplayBlockWrapper
-      onRemove={onRemove}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      isDragging={isDragging}
-      block={block}
-      onUpdate={onUpdate}
-      previousFields={previousFields}
-    >
+    <DisplayBlockWrapper {...props}>
       {({ block: activeBlock, onUpdate: handleUpdate }) => (
         <div className="space-y-2">
           {/* File upload */}

@@ -1,5 +1,6 @@
 import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
 import type { AnyField } from "@alliance/common/forms/form-schema";
+import type { OutputBlockOption } from "../form-fields/CommonControls";
 
 export interface BaseDisplayBlockProps<T extends DisplayBlock> {
   block: T;
@@ -9,4 +10,5 @@ export interface BaseDisplayBlockProps<T extends DisplayBlock> {
   onDragEnd?: (e: React.DragEvent) => void;
   isDragging?: boolean;
   previousFields?: AnyField[];
+  outputBlocks?: OutputBlockOption[];
 }

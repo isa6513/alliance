@@ -213,6 +213,7 @@ export type ConditionExtras = {
   visibilityMemo?: Map<string, boolean>;
   visibilityEvaluationStack?: Set<string>;
   previousAnswerData?: Record<number, Record<string, unknown>>;
+  outputBlockVisibility?: Map<string, boolean>;
 };
 
 function resolveConditionValue(
@@ -254,6 +255,12 @@ export function evaluateCondition(
     if (actual === undefined) {
       return false;
     }
+    return actual === expected;
+  }
+  if ("outputBlockVisible" in cond) {
+    const expected = cond.isVisible ?? true;
+    const actual =
+      extras.outputBlockVisibility?.get(cond.outputBlockVisible) ?? true;
     return actual === expected;
   }
   const val = resolveConditionValue(cond, data, extras);
@@ -388,7 +395,12 @@ export function isElementCurrentlyVisible(
 
   const results: Record<string, boolean> = {};
   for (const [name, cond] of Object.entries(formula!.conditions)) {
-    if ("expr" in cond || "deviceType" in cond || "validatorId" in cond) {
+    if (
+      "expr" in cond ||
+      "deviceType" in cond ||
+      "validatorId" in cond ||
+      "outputBlockVisible" in cond
+    ) {
       results[name] = evaluateCondition(cond, data, extras);
     } else {
       const value = resolveValue(cond as Condition & { when: string });

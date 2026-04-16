@@ -183,12 +183,20 @@ export function OutputPrivateByDefaultToggle({
 }
 
 // ---------------- Conditional Visibility ----------------
+export type OutputBlockOption = { id: string; label: string };
+
 type ConditionalVisibilityProps = {
   field: (AnyField | DisplayBlock) & {
     visibleIfFormula?: VisibleIfFormula;
   };
   previousFields: AnyField[];
   onChange: (updates: { visibleIfFormula?: VisibleIfFormula }) => void;
+  /**
+   * When provided, enables an "output block visible" condition type referencing
+   * any other block (field or display) in the current output view by id. Only
+   * meaningful inside the output view builder.
+   */
+  outputBlocks?: OutputBlockOption[];
 };
 
 type TextContentControllerField =
@@ -248,6 +256,10 @@ type DeviceCondition = Extract<
   Condition,
   { deviceType: DeviceVisibilityTarget[] }
 >;
+type OutputBlockVisibleCondition = Extract<
+  Condition,
+  { outputBlockVisible: string }
+>;
 
 function isFieldCondition(cond: Condition): cond is FieldCondition {
   return "when" in cond;
@@ -259,6 +271,12 @@ function isValidatorCondition(cond: Condition): cond is ValidatorCondition {
 
 function isDeviceCondition(cond: Condition): cond is DeviceCondition {
   return "deviceType" in cond;
+}
+
+function isOutputBlockVisibleCondition(
+  cond: Condition,
+): cond is OutputBlockVisibleCondition {
+  return "outputBlockVisible" in cond;
 }
 
 function isHasValueCondition(
@@ -292,6 +310,7 @@ export function ConditionalVisibility({
   field,
   previousFields,
   onChange,
+  outputBlocks,
 }: ConditionalVisibilityProps) {
   const ANY_SELECTED_VALUE = "__ANY_SELECTED__";
   const controllers = (previousFields || []).filter((f): f is ControllerField =>
@@ -769,6 +788,33 @@ export function ConditionalVisibility({
     const next = [...conditions, defaultCondition];
     updateConditions(next);
   }, [conditions, updateConditions]);
+
+  const addOutputBlockVisibleCondition = useCallback(() => {
+    if (!outputBlocks || outputBlocks.length === 0) return;
+    const firstId = outputBlocks.find((b) => b.id !== field.id)?.id;
+    if (!firstId) return;
+    const defaultCondition: OutputBlockVisibleCondition = {
+      outputBlockVisible: firstId,
+      isVisible: true,
+    };
+    updateConditions([...conditions, defaultCondition]);
+  }, [conditions, outputBlocks, field.id, updateConditions]);
+
+  const handleOutputBlockVisibleChange = useCallback(
+    (
+      index: number,
+      updates: Partial<
+        Pick<OutputBlockVisibleCondition, "outputBlockVisible" | "isVisible">
+      >,
+    ) => {
+      const next = [...conditions];
+      const current = next[index];
+      if (!isOutputBlockVisibleCondition(current)) return;
+      next[index] = { ...current, ...updates };
+      updateConditions(next, true);
+    },
+    [conditions, updateConditions],
+  );
 
   const handleDeviceConditionChange = useCallback(
     (index: number, target: DeviceVisibilityTarget, enabled: boolean) => {
@@ -1288,6 +1334,75 @@ export function ConditionalVisibility({
     );
   };
 
+  const renderOutputBlockVisibleCondition = (
+    condition: OutputBlockVisibleCondition,
+    index: number,
+  ) => {
+    const candidates = (outputBlocks ?? []).filter(
+      (b) => b.id !== field.id,
+    );
+    const isVisible = condition.isVisible ?? true;
+    const referencedId = condition.outputBlockVisible;
+    const isMissing =
+      referencedId.length > 0 &&
+      !candidates.some((b) => b.id === referencedId);
+    return (
+      <div className="space-y-2">
+        <div>
+          <label className="block text-xs text-gray-700 mb-1">
+            Show when output block
+          </label>
+          <select
+            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            value={referencedId}
+            onChange={(event) =>
+              handleOutputBlockVisibleChange(index, {
+                outputBlockVisible: event.target.value,
+              })
+            }
+          >
+            {candidates.length === 0 && !isMissing && (
+              <option value={referencedId}>
+                No other output blocks available
+              </option>
+            )}
+            {isMissing && (
+              <option value={referencedId}>
+                Missing block ({referencedId})
+              </option>
+            )}
+            {candidates.map((b) => (
+              <option key={b.id} value={b.id}>
+                ({b.id}) {b.label}
+              </option>
+            ))}
+          </select>
+          {isMissing && (
+            <p className="mt-1 text-[11px] text-red-500">
+              Referenced block was deleted. Pick another block or remove this
+              rule.
+            </p>
+          )}
+        </div>
+        <div>
+          <label className="block text-xs text-gray-700 mb-1">is</label>
+          <select
+            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+            value={String(isVisible)}
+            onChange={(event) =>
+              handleOutputBlockVisibleChange(index, {
+                isVisible: event.target.value === "true",
+              })
+            }
+          >
+            <option value="true">Visible in this output view</option>
+            <option value="false">Hidden in this output view</option>
+          </select>
+        </div>
+      </div>
+    );
+  };
+
   const renderDeviceCondition = (condition: DeviceCondition, index: number) => {
     const selected = new Set(condition.deviceType ?? []);
     return (
@@ -1412,6 +1527,8 @@ export function ConditionalVisibility({
               renderValidatorCondition(condition, index)
             ) : isDeviceCondition(condition) ? (
               renderDeviceCondition(condition, index)
+            ) : isOutputBlockVisibleCondition(condition) ? (
+              renderOutputBlockVisibleCondition(condition, index)
             ) : (
               <p className="text-[11px] text-red-500">
                 Unsupported condition type. Remove and re-create this rule.
@@ -1462,6 +1579,18 @@ export function ConditionalVisibility({
           >
             + Device condition
           </button>
+          {outputBlocks !== undefined && (
+            <button
+              type="button"
+              className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+              onClick={addOutputBlockVisibleCondition}
+              disabled={
+                outputBlocks.filter((b) => b.id !== field.id).length === 0
+              }
+            >
+              + Output block visible condition
+            </button>
+          )}
         </div>
         {!canUseFieldControllers && (
           <p className="text-[11px] text-gray-400">

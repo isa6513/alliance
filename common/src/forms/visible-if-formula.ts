@@ -11,7 +11,8 @@ export type Condition =
   | { when: string; hasValue: boolean; sourceFormId?: number }
   | { expr: string }
   | { validatorId: number; resultEquals?: boolean }
-  | { deviceType: DeviceVisibilityTarget[] };
+  | { deviceType: DeviceVisibilityTarget[] }
+  | { outputBlockVisible: string; isVisible?: boolean };
 
 /** Formula tree for visibility: AND/OR of two operands, NOT of one. Leaves are condition names (e.g. condition1, condition2). */
 export type FormulaNode =

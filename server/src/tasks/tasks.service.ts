@@ -61,6 +61,7 @@ import {
   type ListField,
   Page,
 } from '@alliance/common/forms/form-schema';
+import { validateFormSchema } from '@alliance/common/forms/form-schema-validate';
 import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
@@ -121,7 +122,18 @@ export class TasksService {
   }
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
+    this.assertSchemaValid(createFormDto.schema as unknown as FormSchema);
     return this.formRepository.save(createFormDto);
+  }
+
+  private assertSchemaValid(schema: FormSchema): void {
+    const errors = validateFormSchema(schema);
+    if (errors.length > 0) {
+      throw new BadRequestException({
+        message: 'Invalid form schema',
+        errors,
+      });
+    }
   }
 
   async getForm(formId: number): Promise<Form> {
@@ -437,6 +449,7 @@ export class TasksService {
   ): Promise<Form> {
     const form = await this.getForm(formId);
     if (updateFormDto.schema) {
+      this.assertSchemaValid(updateFormDto.schema as unknown as FormSchema);
       this.stripContractFromSchema(
         updateFormDto.schema as unknown as FormSchema,
       );

@@ -3,25 +3,9 @@ import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
 import FormTextarea from "../FormTextarea";
 
-export function EditableQuoteBlock({
-  block,
-  onUpdate,
-  onRemove,
-  onDragStart,
-  onDragEnd,
-  isDragging,
-  previousFields,
-}: BaseDisplayBlockProps<QuoteBlock>) {
+export function EditableQuoteBlock(props: BaseDisplayBlockProps<QuoteBlock>) {
   return (
-    <DisplayBlockWrapper
-      onRemove={onRemove}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      isDragging={isDragging}
-      block={block}
-      onUpdate={onUpdate}
-      previousFields={previousFields}
-    >
+    <DisplayBlockWrapper {...props}>
       {({ block: activeBlock, onUpdate: handleUpdate }) => (
         <div className="space-y-2 bg-zinc-100 px-5 py-4">
           <FormTextarea
