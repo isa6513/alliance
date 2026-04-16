@@ -1,4 +1,5 @@
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { tasksGetForm } from "@alliance/shared/client";
 import type { ProfileDto } from "@alliance/shared/client/types.gen";
 import {
   Link,
@@ -17,12 +18,21 @@ import FollowUpFormPanel from "./FollowUpFormPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
 import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ExternalLinkIcon } from "lucide-react";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
 import { useLiveTaskFormAggregateViews } from "../lib/useLiveTaskFormAggregateViews";
+import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
+import {
+  buildShareText,
+  getCompletedShareableTextTemplate,
+  getDefaultShareableTextTemplate,
+} from "@alliance/shared/lib/shareText";
+import { clipboardCopy } from "@alliance/shared/lib/copy";
+import ShareConfettiButton from "./ShareConfettiButton";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
@@ -37,8 +47,37 @@ const ActionContents = () => {
   );
 
   const { isAuthenticated, user } = useAuth();
-  const [shareCopied, setShareCopied] = useState(false);
   const loggedInMode = !action.publicOnly;
+  const isCompleted = context.userRelation === "completed";
+  const formResponse = useCompletedTaskForm(action, isCompleted);
+  const { data: taskForm } = useQuery({
+    queryKey: ["form", action.taskFormId],
+    queryFn: async () => {
+      const response = await tasksGetForm({
+        path: { id: action.taskFormId! },
+      });
+
+      if (!response.data) {
+        throw new Error(
+          (response.error as Error)?.message ??
+            "Unable to load form - please reload",
+        );
+      }
+
+      return response.data;
+    },
+    enabled: !isCompleted && action.taskFormId != null,
+  });
+  const shareTemplate = isCompleted
+    ? getCompletedShareableTextTemplate({
+        schemaSnapshot: formResponse?.schemaSnapshot as
+          | Record<string, unknown>
+          | undefined,
+        currentSchema: taskForm?.schema as Record<string, unknown> | undefined,
+      })
+    : getDefaultShareableTextTemplate(
+        taskForm?.schema as Record<string, unknown> | undefined,
+      );
 
   useEffect(() => {
     if (location.hash === "#description") {
@@ -79,9 +118,13 @@ const ActionContents = () => {
 
   const handleShareAction = () => {
     const ref = user?.referralCode ? `?ref=${user.referralCode}` : "";
-    navigator.clipboard.writeText(`${getBaseUrl()}/actions/${action.id}${ref}`);
-    setShareCopied(true);
-    setTimeout(() => setShareCopied(false), 2000);
+    const url = `${getBaseUrl()}/actions/${action.id}${ref}`;
+    const text = buildShareText({
+      template: shareTemplate,
+      formResponse,
+      url,
+    });
+    return navigator.clipboard.writeText(text);
   };
 
   return (
@@ -96,16 +139,15 @@ const ActionContents = () => {
       <div className="flex flex-row justify-between items-start mb-6">
         {action !== undefined && (
           <div className="flex flex-col gap-y-3">
-            <button
-              type="button"
+            <ShareConfettiButton
               onClick={handleShareAction}
-              className="self-start flex items-center gap-x-1 text-zinc-500 hover:text-zinc-700"
-            >
-              <span className="text-sm">
-                {shareCopied ? "Copied to clipboard" : "Share"}
-              </span>
-              <ExternalLinkIcon className="w-3.5 h-3.5 shrink-0" />
-            </button>
+              icon={ExternalLinkIcon}
+              label={clipboardCopy.share}
+              copiedLabel={clipboardCopy.copiedToClipboard}
+              className="self-start text-zinc-500 hover:text-zinc-700"
+              iconClassName="w-3.5 h-3.5 shrink-0"
+              labelClassName="text-sm order-first"
+            />
             <p className="text-title">{action.name}</p>
             {loggedInMode ? (
               <div>

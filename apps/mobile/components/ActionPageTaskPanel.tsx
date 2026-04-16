@@ -8,8 +8,11 @@ import {
   getActionPageTaskPanelState,
   shouldLoadCompletedTaskFormByState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
-import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
-import { taskHeaders } from "@alliance/shared/lib/copy";
+import {
+  useCompletedTaskForm,
+  useTaskForm,
+} from "@alliance/shared/lib/actionTaskPanelCompleted";
+import { clipboardCopy, taskHeaders } from "@alliance/shared/lib/copy";
 import { ArrowRight, Link2 } from "lucide-react-native";
 import { Link } from "expo-router";
 import { ReactNode, useState } from "react";
@@ -22,6 +25,10 @@ import Text, { FontWeight } from "./system/Text";
 import ActionTaskPanel from "./ActionTaskPanel";
 import { useAuth } from "../lib/AuthContext";
 import * as Clipboard from "expo-clipboard";
+import {
+  buildShareText,
+  getCompletedShareableTextTemplate,
+} from "@alliance/shared/lib/shareText";
 
 export interface ActionPageTaskPanelProps {
   action: ActionDto;
@@ -111,12 +118,23 @@ const ActionPageTaskPanel = ({
     action,
     shouldLoadCompletedTaskFormByState[state],
   );
+  const taskForm = useTaskForm(action, state === ActionPageTaskPanelState.Completed);
+  const shareTemplate = getCompletedShareableTextTemplate({
+    schemaSnapshot: formResponse?.schemaSnapshot as
+      | Record<string, unknown>
+      | undefined,
+    currentSchema: taskForm?.schema as Record<string, unknown> | undefined,
+  });
 
   const handleShareCopy = async () => {
     const ref = user?.referralCode ? `?ref=${user.referralCode}` : "";
-    await Clipboard.setStringAsync(
-      `${getBaseUrl()}/actions/${action.id}${ref}`,
-    );
+    const url = `${getBaseUrl()}/actions/${action.id}${ref}`;
+    const text = buildShareText({
+      template: shareTemplate,
+      formResponse,
+      url,
+    });
+    await Clipboard.setStringAsync(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -134,7 +152,9 @@ const ActionPageTaskPanel = ({
       >
         <Link2 size={14} color={copied ? colors.green : "#71717a"} />
         <Text className={copied ? "text-green text-sm" : "text-zinc-500 text-sm"}>
-          {copied ? "Copied to Clipboard!" : "Share"}
+          {copied
+            ? clipboardCopy.copiedToClipboard
+            : clipboardCopy.share}
         </Text>
       </TouchableOpacity>
     </View>
