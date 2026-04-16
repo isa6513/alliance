@@ -1,83 +1,43 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { tasksGetForm, tasksGetMyFormResponse } from "../client/sdk.gen";
 import { ActionDto, FormDto, FormResponseDto } from "../client/types.gen";
 
 export const useCompletedTaskForm = (
   action: Pick<ActionDto, "taskFormId"> | null,
   enabled = true,
-) => {
-  const [formResponse, setFormResponse] = useState<FormResponseDto | null>(
-    null,
-  );
+): FormResponseDto | null => {
+  const taskFormId = action?.taskFormId ?? null;
+  const { data } = useQuery({
+    queryKey: ["taskFormResponse", taskFormId],
+    queryFn: async () => {
+      const response = await tasksGetMyFormResponse({
+        path: { id: taskFormId! },
+      });
+      return response.data ?? null;
+    },
+    enabled: enabled && taskFormId != null,
+    retry: false,
+  });
 
-  useEffect(() => {
-    if (!enabled || !action?.taskFormId) {
-      setFormResponse(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    const fetchFormAndResponse = async (id: number) => {
-      try {
-        const response = await tasksGetMyFormResponse({
-          path: { id },
-        });
-        if (!cancelled) {
-          setFormResponse(response.data ?? null);
-        }
-      } catch {
-        if (!cancelled) {
-          setFormResponse(null);
-        }
-      }
-    };
-
-    void fetchFormAndResponse(action.taskFormId);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [action, enabled]);
-
-  return formResponse;
+  return data ?? null;
 };
 
 export const useTaskForm = (
   action: Pick<ActionDto, "taskFormId"> | null,
   enabled = true,
-) => {
-  const [taskForm, setTaskForm] = useState<FormDto | null>(null);
+): FormDto | null => {
+  const taskFormId = action?.taskFormId ?? null;
+  const { data } = useQuery({
+    queryKey: ["taskForm", taskFormId],
+    queryFn: async () => {
+      const response = await tasksGetForm({
+        path: { id: taskFormId! },
+      });
+      return response.data ?? null;
+    },
+    enabled: enabled && taskFormId != null,
+    retry: false,
+  });
 
-  useEffect(() => {
-    if (!enabled || !action?.taskFormId) {
-      setTaskForm(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    const fetchTaskForm = async (id: number) => {
-      try {
-        const response = await tasksGetForm({
-          path: { id },
-        });
-        if (!cancelled) {
-          setTaskForm(response.data ?? null);
-        }
-      } catch {
-        if (!cancelled) {
-          setTaskForm(null);
-        }
-      }
-    };
-
-    void fetchTaskForm(action.taskFormId);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [action, enabled]);
-
-  return taskForm;
+  return data ?? null;
 };
