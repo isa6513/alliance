@@ -3,7 +3,9 @@ import Footer from "../../components/Footer";
 import MemberContract from "../../components/MemberContract";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { href, Link } from "react-router";
+import LargeActionCard from "../app/LargeActionCard";
 import ExampleActionCardList from "../../components/ExampleActionCardList";
+import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
 import ExampleActionCategoryList from "../../components/ExampleActionCategoryList";
 import TableOfContents from "../../components/TableOfContents";
 import { alliancePriorities } from "../../lib/alliancePriorities";
@@ -54,7 +56,7 @@ const GuideP = ({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) => (
   <p
-    className={cn("text-zinc-600 text-lg first:mt-0 mt-2 md:mt-5", className)}
+    className={cn("text-zinc-800 text-lg first:mt-0 mt-2 md:mt-5", className)}
     {...props}
   />
 );
@@ -70,7 +72,7 @@ const GuideOl = ({
 }: React.HTMLAttributes<HTMLOListElement>) => (
   <ol
     className={cn(
-      "text-lg text-zinc-600 list-decimal list-inside first:mt-0 mt-2 md:mt-5 pl-4",
+      "text-lg text-zinc-800 list-decimal list-inside first:mt-0 mt-2 md:mt-5 pl-4",
       className,
     )}
     {...props}
@@ -82,7 +84,7 @@ const GuideUl = ({
 }: React.HTMLAttributes<HTMLUListElement>) => (
   <ul
     className={cn(
-      "text-lg text-zinc-600 list-disc list-inside first:mt-0 mt-2 md:mt-5 pl-4",
+      "text-lg text-zinc-800 list-disc list-inside first:mt-0 mt-2 md:mt-5 pl-4",
       className,
     )}
     {...props}
@@ -120,7 +122,7 @@ const GuidePage: React.FC = () => {
           <div className="flex flex-col gap-y-4 max-w-184">
             <div className="mb-8 md:mb-16 flex flex-col">
               <h1 className="text-title-large mb-4">Guide to the Alliance</h1>
-              <div className="flex flex-col gap-y-6 text-xl md:text-2xl text-zinc-500">
+              <div className="flex flex-col gap-y-6 text-xl md:text-2xl text-zinc-900">
                 <p>
                   The Alliance is a global group of people cooperating to
                   improve the world.
@@ -139,12 +141,11 @@ const GuidePage: React.FC = () => {
                   technological development.
                 </GuideP>
                 <GuideP>
-                  <GuideStrong>Reliability</GuideStrong> is critical to our
-                  strategy. Every week, committed members participate in
-                  collective actions that advance our shared goals. Since we can
-                  count on members, we are able to plan each action with
-                  precision and predict in advance whether it will be
-                  successful.
+                  <GuideStrong>Reliability</GuideStrong> is key to our strategy.
+                  Every week, committed members participate in collective
+                  actions that advance our shared goals. Since we can count on
+                  members, we can plan each action with precision and predict
+                  whether it will succeed.
                 </GuideP>
                 <GuideP>
                   We are in an experimental, invite-only stage. Eventually, we
@@ -176,6 +177,21 @@ const GuidePage: React.FC = () => {
                   We built an online platform (web and mobile apps) that members
                   use to complete tasks.
                 </GuideP>
+                <div className="my-8 flex flex-col gap-y-4">
+                  <div className="p-1 md:p-4 md:py-6 bg-zinc-50 rounded-md">
+                    <LargeActionCard
+                      action={exampleMemberTaskAction}
+                      userRelation="none"
+                      onUpdateActionState={() => {}}
+                      onCompleteAction={() => {}}
+                      showDetails={false}
+                      className="pointer-events-none transform-[scale(0.9)] bg-white drop-shadow-xl drop-shadow-zinc-100"
+                    />
+                  </div>
+                  <p className="text-center text-zinc-500 text-base">
+                    Example task a member might see on the platform
+                  </p>
+                </div>
                 <GuideP>
                   We depend on members reliably completing the tasks they are
                   assigned. Since we know exactly how many people will
@@ -301,13 +317,14 @@ const GuidePage: React.FC = () => {
                   Right now, we are taking small-scale actions focused on
                   learning, not direct impact. We are focused on building
                   internal processes and structures that we can trust to scale
-                  smoothly, such the way we develop and distribute actions.
+                  smoothly, such as the way we develop and distribute actions.
+                  We expect this phase to last for at least another 6 months.
                 </GuideP>
 
                 <GuideP>
-                  Once we are satisfied with our processes and structures, we
-                  will launch publicly. After this point, we will shift our
-                  focus to growth and impact.
+                  Once we are confident in our processes and structures, we will
+                  launch publicly. After this point, we will shift our focus to
+                  growth and impact.
                 </GuideP>
 
                 <GuideP>

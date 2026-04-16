@@ -10,10 +10,7 @@ import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import posthog from "posthog-js";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import {
-  ActionWithAwayStatus,
-  TaskAwayStatus,
-} from "@alliance/shared/lib/actionUtils";
+import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -59,59 +56,6 @@ const InvitePage: React.FC = () => {
       </div>
     );
   }
-
-  const exampleTask: ActionWithAwayStatus = {
-    name: "Ask your local cafe to switch to compostable cups",
-    body: "The Alliance is a global group of people that abide by a process which governs the use of our collective power. We seek to unite millions to billions of people into one cooperative force that represents humanity's collective interests. \n \n Our mission is to build a civilization that serves all individuals in their pursuit of life, liberty, and happiness – a world in which we can take pride. Most pressingly, we seek to resolve ongoing global crises, which include environmental destruction, extreme poverty, democratic dysfunction, and unsafe technological development. It is our aim to end these crises in their entirety in the coming years, not to make incremental improvements \n\n\n The Alliance is a global group of people that abide by a process which governs the use of our collective power. We seek to unite millions to billions of people into one cooperative force that represents humanity's collective interests. \n \n Our mission is to build a civilization that serves all individuals in their pursuit of life, liberty, and happiness – a world in which we can take pride. Most pressingly, we seek to resolve ongoing global crises, which include environmental destruction, extreme poverty, democratic dysfunction, and unsafe technological development. It is our aim to end these crises in their entirety in the coming years, not to make incremental improvements",
-    category: "Climate Change",
-    id: 1,
-    taskFormId: 23,
-    image: "",
-    status: "member_action",
-    isContractSigningAction: false,
-    onboarding: false,
-    isForumParticipationAction: false,
-    timeEstimate: 5,
-    visibilityMode: "public",
-    optional: false,
-    usersJoined: 100,
-    activities: [],
-    shortDescription:
-      "We've negotiated a discount with a compostable cup supplier for all cafes that members can convince to use their cups.",
-    type: "Activity" as const,
-    usersCompleted: 68,
-    priority: 0,
-    preventCompletion: false,
-    everyoneShouldComplete: false,
-    shouldCompleteAfterDeadline: false,
-    archived: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    publicOnly: false,
-    updates: [],
-    userRelation: "none" as const,
-    canParticipate: true,
-    awayStatus: TaskAwayStatus.NOT_AWAY,
-    events: [
-      {
-        id: 1,
-        title: "Event 1",
-        description: "Event 1 description",
-        date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-        newStatus: "member_action",
-        suiteManaged: false,
-      },
-      {
-        id: 2,
-        title: "Event 2",
-        description: "Event 2 description",
-        date: new Date(Date.now() - 1000 * 60 * 60 * 49).toISOString(),
-        newStatus: "member_action",
-        suiteManaged: false,
-      },
-    ],
-    followUpForms: [],
-  };
 
   const memberQuotes = [
     {
@@ -194,7 +138,7 @@ const InvitePage: React.FC = () => {
             <div className="my-4">
               <div className="p-1 md:p-4 md:py-6 bg-zinc-50 mb-2">
                 <LargeActionCard
-                  action={exampleTask}
+                  action={exampleMemberTaskAction}
                   userRelation={"none"}
                   onUpdateActionState={() => {}}
                   onCompleteAction={() => {}}
