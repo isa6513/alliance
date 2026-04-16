@@ -53,16 +53,21 @@ const BaseLikeButton = ({
           "border border-zinc-300 rounded hover:bg-zinc-100 px-2 py-1.5",
       )}
       onClick={async (e) => {
-        if (handleLike && !isPending) {
-          e.stopPropagation();
-          setIsPending(true);
-          try {
-            await handleLike();
-          } catch {
-            // errors should already be handled by mutation's onError
-          } finally {
-            setIsPending(false);
-          }
+        if (!handleLike) {
+          return;
+        }
+        e.stopPropagation();
+
+        if (isPending) {
+          return;
+        }
+        setIsPending(true);
+        try {
+          await handleLike();
+        } catch {
+          // errors should already be handled by mutation's onError
+        } finally {
+          setIsPending(false);
         }
       }}
     >
