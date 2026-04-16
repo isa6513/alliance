@@ -15,6 +15,7 @@ import FormRenderer from "./forms/FormRenderer";
 import Card, { CardStyle } from "./system/Card";
 import Text, { FontWeight } from "./system/Text";
 import AppMarkdownWrapper from "./AppMarkdownWrapper";
+import { useAuth } from "../lib/AuthContext";
 
 interface FollowUpFormPanelProps {
   followUpForm: FollowUpForm;
@@ -32,6 +33,7 @@ export default function FollowUpFormPanel({
   onSubmitted,
 }: FollowUpFormPanelProps) {
   const posthog = usePostHog();
+  const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [formInstanceKey, setFormInstanceKey] = useState(0);
 
@@ -133,6 +135,8 @@ export default function FollowUpFormPanel({
           actionId={actionId}
           onSubmit={handleSubmit}
           persistKey={`follow-up-${followUpForm.id}`}
+          userId={user?.id}
+          user={user}
           onFormStarted={() => {}}
           renderFormAsCompleted={false}
           scrollPageTo={scrollPageTo}

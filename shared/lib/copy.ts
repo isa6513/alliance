@@ -179,3 +179,8 @@ export const referralQrCopy = {
 
 export const suspendContractConfirmation =
   "Are you sure you want to suspend your contract? You will be removed from your groups.";
+
+export const outputFieldPublicToggle = {
+  showPublicly: "Show my response to other members",
+  hidePublicly: "Hide my response from others",
+} as const;

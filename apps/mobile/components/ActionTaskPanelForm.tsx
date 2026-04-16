@@ -13,6 +13,7 @@ import { ActivityIndicator, View } from "react-native";
 import { usePostHog } from "posthog-react-native";
 import Text from "./system/Text";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../lib/AuthContext";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -46,6 +47,7 @@ const ActionTaskPanelForm = ({
   formResponse,
 }: ActionTaskPanelFormProps) => {
   const posthog = usePostHog();
+  const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -146,6 +148,8 @@ const ActionTaskPanelForm = ({
         onAbandonAction={onAbandonAction}
         actionId={actionId}
         persistKey={String(taskFormId)}
+        userId={user?.id}
+        user={user}
         scrollPageTo={scrollPageTo}
         scrollToEnd={scrollToEnd}
         renderFormAsCompleted={disabled}

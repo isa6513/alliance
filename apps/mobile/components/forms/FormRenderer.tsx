@@ -44,6 +44,7 @@ import FormModal from "./FormModal";
 import RenderPreviousAnswer from "./RenderPreviousAnswer";
 import VideoPlayer from "./VideoPlayer";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
+import Checkbox from "../system/Checkbox";
 import {
   Check,
   CircleCheck,
@@ -56,6 +57,7 @@ import {
   File,
 } from "lucide-react-native";
 import { cn } from "@alliance/shared/styles/util";
+import { outputFieldPublicToggle } from "@alliance/shared/lib/copy";
 import Text, { FontWeight } from "../system/Text";
 
 type FormRendererProps = {
@@ -923,6 +925,36 @@ const FormRenderer = ({
     }
   };
 
+  const handlePublicToggleChange = (fieldId: string, nextPublic: boolean) => {
+    if (readOnly) return;
+    setPublicAnswers((prev) => ({ ...prev, [fieldId]: nextPublic }));
+  };
+
+  const renderPublicToggle = (field: AnyField) => {
+    if (!field.output?.output) return null;
+    const useMakePublicToggle = !!field.output.privateByDefault;
+    const defaultSharePublic =
+      outputFieldDefaultPublic.get(field.id) ?? userDefaultPublic;
+    const sharePublicly = publicAnswers[field.id] ?? defaultSharePublic;
+    const toggleChecked = useMakePublicToggle ? sharePublicly : !sharePublicly;
+    const toggleLabel = useMakePublicToggle
+      ? outputFieldPublicToggle.showPublicly
+      : outputFieldPublicToggle.hidePublicly;
+    return (
+      <View className="mt-2">
+        <Checkbox
+          checked={toggleChecked}
+          disabled={readOnly}
+          onChange={(next) => {
+            const nextPublic = useMakePublicToggle ? next : !next;
+            handlePublicToggleChange(field.id, nextPublic);
+          }}
+          label={toggleLabel}
+        />
+      </View>
+    );
+  };
+
   const handleNextPage = async () => {
     const result = await validatePage(currentPageIndex, true);
     if (result.isValid) {
@@ -1070,6 +1102,7 @@ const FormRenderer = ({
                 randomizationKey={randomizationKey}
                 disableOptionRandomization={disableOptionRandomization}
               />
+              {renderPublicToggle(field)}
             </View>
           );
         })}

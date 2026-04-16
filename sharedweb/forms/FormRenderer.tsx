@@ -18,6 +18,7 @@ import {
 import { useOutsideClick } from "../../sharedweb/lib/useOutsideClick";
 import Dropdown from "../ui/Dropdown";
 import { cn } from "@alliance/shared/styles/util";
+import { outputFieldPublicToggle } from "@alliance/shared/lib/copy";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type {
@@ -1393,8 +1394,8 @@ const FormRenderer = ({
     const sharePublicly = resolvedPublicAnswers[field.id] ?? defaultSharePublic;
     const useMakePublicToggle = Boolean(field.output?.privateByDefault);
     const toggleLabel = useMakePublicToggle
-      ? "Show my response to other members"
-      : "Hide my response from others";
+      ? outputFieldPublicToggle.showPublicly
+      : outputFieldPublicToggle.hidePublicly;
     const toggleChecked = useMakePublicToggle ? sharePublicly : !sharePublicly;
     return (
       <div key={field.id || index}>
