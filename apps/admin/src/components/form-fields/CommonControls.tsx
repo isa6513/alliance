@@ -1338,14 +1338,14 @@ export function ConditionalVisibility({
     condition: OutputBlockVisibleCondition,
     index: number,
   ) => {
-    const candidates = (outputBlocks ?? []).filter(
-      (b) => b.id !== field.id,
-    );
+    const allBlocks = outputBlocks ?? [];
+    const candidates = allBlocks.filter((b) => b.id !== field.id);
     const isVisible = condition.isVisible ?? true;
     const referencedId = condition.outputBlockVisible;
     const isMissing =
       referencedId.length > 0 &&
-      !candidates.some((b) => b.id === referencedId);
+      !candidates.some((b) => b.id === referencedId) &&
+      referencedId !== field.id;
     return (
       <div className="space-y-2">
         <div>
@@ -1371,11 +1371,14 @@ export function ConditionalVisibility({
                 Missing block ({referencedId})
               </option>
             )}
-            {candidates.map((b) => (
-              <option key={b.id} value={b.id}>
-                ({b.id}) {b.label}
-              </option>
-            ))}
+            {allBlocks.map((b) => {
+              const isSelf = b.id === field.id;
+              return (
+                <option key={b.id} value={b.id} disabled={isSelf}>
+                  ({b.id}) {b.label}{isSelf ? " (current block)" : ""}
+                </option>
+              );
+            })}
           </select>
           {isMissing && (
             <p className="mt-1 text-[11px] text-red-500">
