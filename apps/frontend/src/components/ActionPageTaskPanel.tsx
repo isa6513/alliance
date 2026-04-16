@@ -1,11 +1,8 @@
 import { UserActionRelation } from "@alliance/shared/client";
-import {
-  useCompletedTaskForm,
-  useTaskForm,
-} from "@alliance/shared/lib/actionTaskPanelCompleted";
+import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
 import Card from "@alliance/sharedweb/ui/Card";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import { ArrowRight, Link2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Link } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
@@ -19,13 +16,7 @@ import {
   getActionPageTaskPanelState,
   shouldLoadCompletedTaskFormByState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
-import { clipboardCopy, taskHeaders } from "@alliance/shared/lib/copy";
-import { getBaseUrl } from "@alliance/sharedweb/lib/config";
-import {
-  buildShareText,
-  getCompletedShareableTextTemplate,
-} from "@alliance/shared/lib/shareText";
-import ShareConfettiButton from "./ShareConfettiButton";
+import { taskHeaders } from "@alliance/shared/lib/copy";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -128,39 +119,13 @@ const ActionPageTaskPanel = () => {
     action,
     shouldLoadCompletedTaskFormByState[state],
   );
-  const taskForm = useTaskForm(action, state === ActionPageTaskPanelState.Completed);
-  const shareTemplate = getCompletedShareableTextTemplate({
-    schemaSnapshot: formResponse?.schemaSnapshot as
-      | Record<string, unknown>
-      | undefined,
-    currentSchema: taskForm?.schema as Record<string, unknown> | undefined,
-  });
 
-  const handleShareCopy = () => {
-    const ref = user?.referralCode ? `?ref=${user.referralCode}` : "";
-    const url = `${getBaseUrl()}/actions/${action.id}${ref}`;
-    const text = buildShareText({
-      template: shareTemplate,
-      formResponse,
-      url,
-    });
-    return navigator.clipboard.writeText(text);
-  };
   const completedHeader = (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-x-3">
         <CheckIcon size="small" />
         <p>{taskHeaders.actionPage.completed}</p>
       </div>
-      <ShareConfettiButton
-        onClick={handleShareCopy}
-        icon={Link2}
-        label={clipboardCopy.share}
-        copiedLabel={clipboardCopy.copiedToClipboard}
-        className="text-zinc-500 hover:text-zinc-700"
-        iconClassName="w-3.5 h-3.5"
-        labelClassName="text-sm"
-      />
     </div>
   );
 
