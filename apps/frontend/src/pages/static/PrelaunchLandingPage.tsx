@@ -3,12 +3,13 @@ import { useQueries } from "@tanstack/react-query";
 import { Link, href } from "react-router";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import alliancePeople from "../../assets/alliance_people.webp";
-import { actionsFindOne } from "@alliance/shared/client";
-import type { ActionDto } from "@alliance/shared/client";
+import { actionsFindOne, userFindOne } from "@alliance/shared/client";
+import type { ActionDto, ProfileDto } from "@alliance/shared/client";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import Footer from "../../components/Footer";
 import { formatTime } from "@alliance/shared/lib/utils";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 
 const FEATURED_ACTION_IDS: number[] = [91, 84, 76, 75];
 
@@ -18,6 +19,86 @@ const LANDING_MAIN_COL = "mx-auto w-full max-w-4xl px-6 sm:px-10 lg:px-16";
 /** Gap between sections + outer vertical padding (avoids stacked py on each section). */
 const LANDING_BODY = "gap-10 lg:gap-20 py-10 lg:py-28";
 const LANDING_SECTION_INNER = "flex flex-col gap-y-6 lg:gap-y-8";
+
+const MEMBER_QUOTES = [
+  {
+    quote:
+      "I am convinced that the Alliance offers the platform for maximizing the impact of my time and energy contribution to the world over time. I want to be part of it and grow with it. They take your commitment seriously and will hold your feet to the fire. But it's just a few minutes per week and I've found every project thus far to be self-enriching and meaningful.",
+    memberId: 96,
+  },
+  {
+    quote:
+      "On the whole, the world is not going in the right direction. We need new ideas to change that, and the Alliance is just that. But it will work only if we all participate.",
+    memberId: 33,
+  },
+
+  {
+    quote:
+      "It seems to me that there is an inability to leverage collective will towards problems that almost everybody agrees exist (severe wealth inequality; climate change; political polarization to name a few). I think this is mostly a function of not individuals not having clear actions that can affect the relevant issue. The Alliance is the natural solution to this.",
+    memberId: 55,
+  },
+];
+
+function useMemberQuoteProfiles(memberIds: number[]) {
+  return useQueries({
+    queries: memberIds.map((memberId) => ({
+      queryKey: ["user", "slug", memberId],
+      queryFn: () =>
+        userFindOne({ path: { id: memberId } }).then(
+          (r) => (r.data ?? null) as ProfileDto | null,
+        ),
+      staleTime: 60 * 60 * 1000,
+    })),
+  });
+}
+
+function MemberQuoteCard({
+  quote,
+  profile,
+  isPending,
+}: {
+  memberId: number;
+  quote: string;
+  profile: ProfileDto | null;
+  isPending: boolean;
+}) {
+  const avatar = (
+    <AvatarProfile
+      pfp={profile?.profilePicture ?? null}
+      size="large"
+      alt={
+        profile?.displayName
+          ? `${profile.displayName} profile photo`
+          : "Member profile photo"
+      }
+    />
+  );
+
+  return (
+    <div className="flex h-full min-h-0 w-full flex-row items-start gap-3 rounded-md border border-zinc-200 p-4">
+      <div className="shrink-0">
+        {isPending ? (
+          <div
+            className="size-16 animate-pulse rounded-full bg-zinc-200 sm:size-20"
+            aria-hidden
+          />
+        ) : (
+          avatar
+        )}
+      </div>
+      <figure className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
+        <blockquote className="text-base text-zinc-900 leading-snug">
+          {quote}
+        </blockquote>
+        {profile?.displayName ? (
+          <figcaption className="text-sm text-zinc-500">
+            {profile.displayName}
+          </figcaption>
+        ) : null}
+      </figure>
+    </div>
+  );
+}
 
 function usePrelaunchActions() {
   const results = useQueries({
@@ -74,6 +155,9 @@ function PreviewActionCard({ action }: { action: ActionDto }) {
 
 const PrelaunchLandingPage: React.FC = () => {
   const { actions, isPending } = usePrelaunchActions();
+  const memberQuoteQueries = useMemberQuoteProfiles(
+    MEMBER_QUOTES.map((q) => q.memberId),
+  );
 
   return (
     <div className="flex flex-col">
@@ -112,7 +196,7 @@ const PrelaunchLandingPage: React.FC = () => {
       </section>
 
       <div className={`flex flex-1 flex-col bg-white ${LANDING_BODY}`}>
-        <section className="w-full">
+        <section className="w-full flex flex-col gap-8">
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
             <div className="flex flex-col gap-4">
               <p className="text-title-medium w-full text-black">How we work</p>
@@ -133,6 +217,21 @@ const PrelaunchLandingPage: React.FC = () => {
             </div>
           </div>
         </section>
+
+        <section className="w-full">
+          <div className="px-4 lg:px-36 grid w-full grid-cols-1 gap-2 md:grid-cols-3">
+            {MEMBER_QUOTES.map((item, index) => (
+              <MemberQuoteCard
+                key={`${item.memberId}-${index}`}
+                memberId={item.memberId}
+                quote={item.quote}
+                profile={memberQuoteQueries[index]?.data ?? null}
+                isPending={memberQuoteQueries[index]?.isPending ?? true}
+              />
+            ))}
+          </div>
+        </section>
+
         <section className="w-full">
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
             <div className="flex flex-col gap-4">
