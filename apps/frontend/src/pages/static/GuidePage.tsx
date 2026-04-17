@@ -63,7 +63,7 @@ const GuidePage: React.FC = () => {
                 <GuideP>
                   The Alliance aims to facilitate{" "}
                   <GuideStrong>large-scale coordination</GuideStrong> over the
-                  Internet. We are focused on four interconnected{" "}
+                  Internet. We are focused on four{" "}
                   <GuideStrong>global crises</GuideStrong>: extreme poverty,
                   environmental destruction, democratic decline, and dangerous
                   technological development.
@@ -142,7 +142,7 @@ const GuidePage: React.FC = () => {
                   </GuideLi>
                 </GuideUl>
                 <GuideP>
-                  New members to sign a{" "}
+                  New members sign a{" "}
                   <GuideStrong>membership contract</GuideStrong> that sets a
                   clear expectation of reliability. Once they sign a contract,
                   we start to assign them tasks.
@@ -242,11 +242,12 @@ const GuidePage: React.FC = () => {
               <GuideSection id="roadmap">
                 <GuideH1>Roadmap</GuideH1>
                 <GuideP>
-                  Right now, we are taking small-scale actions focused on
-                  learning, not direct impact. We are focused on building
-                  internal processes and structures that we can trust to scale
-                  smoothly, such as the way we develop and distribute actions.
-                  We expect this phase to last for at least another 6 months.
+                  Right now, we are running small-scale actions with the primary
+                  goal of learning, not direct impact. We are focused on
+                  building internal processes and structures that we can trust
+                  to scale smoothly, including the way we develop and evaluate
+                  actions. We expect this phase to last for at least another 6
+                  months.
                 </GuideP>
 
                 <GuideP>
