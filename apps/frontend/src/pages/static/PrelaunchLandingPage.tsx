@@ -17,7 +17,7 @@ const FEATURED_ACTION_IDS: number[] = [91, 84, 76, 75];
 const LANDING_MAIN_COL = "mx-auto w-full max-w-4xl px-6 sm:px-10 lg:px-16";
 
 /** Gap between sections + outer vertical padding (avoids stacked py on each section). */
-const LANDING_BODY = "gap-10 lg:gap-20 py-10 lg:py-28";
+const LANDING_BODY = "gap-10 lg:gap-20 py-18 lg:py-28";
 const LANDING_SECTION_INNER = "flex flex-col gap-y-6 lg:gap-y-8";
 
 const MEMBER_QUOTES = [
@@ -75,7 +75,7 @@ function MemberQuoteCard({
   );
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-row items-start gap-3 rounded-md border border-zinc-200 p-4">
+    <div className="flex h-full min-h-0 w-full flex-row items-start gap-3">
       <div className="shrink-0">
         {isPending ? (
           <div
@@ -87,11 +87,11 @@ function MemberQuoteCard({
         )}
       </div>
       <figure className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
-        <blockquote className="text-base text-zinc-900 leading-snug">
+        <blockquote className="text-base lg:text-lg text-zinc-900 leading-snug">
           {quote}
         </blockquote>
         {profile?.displayName ? (
-          <figcaption className="text-sm text-zinc-500">
+          <figcaption className="text-sm lg:text-base text-zinc-500">
             {profile.displayName}
           </figcaption>
         ) : null}
@@ -219,7 +219,7 @@ const PrelaunchLandingPage: React.FC = () => {
         </section>
 
         <section className="w-full">
-          <div className="px-4 lg:px-36 grid w-full grid-cols-1 gap-2 md:grid-cols-3">
+          <div className="px-4 lg:px-32 grid w-full grid-cols-1 gap-8 lg:gap-20 md:grid-cols-3">
             {MEMBER_QUOTES.map((item, index) => (
               <MemberQuoteCard
                 key={`${item.memberId}-${index}`}
