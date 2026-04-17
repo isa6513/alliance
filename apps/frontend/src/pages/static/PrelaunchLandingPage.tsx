@@ -79,7 +79,7 @@ function MemberQuoteCard({
       <div className="shrink-0">
         {isPending ? (
           <div
-            className="size-16 animate-pulse rounded-full bg-zinc-200 sm:size-20"
+            className="size-9 animate-pulse rounded bg-zinc-200"
             aria-hidden
           />
         ) : (
