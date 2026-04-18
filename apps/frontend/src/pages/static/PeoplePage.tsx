@@ -22,7 +22,6 @@ const PeoplePage: React.FC = () => {
     return {
       10: "Mark Xu",
       7: "Sidney Hough",
-      15: "Casey Manning",
       64: "Charles Lien",
       11: "Grant Hough",
       127: "Alex Hockett",
