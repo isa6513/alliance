@@ -34,7 +34,7 @@ const MEMBER_QUOTES = [
 
   {
     quote:
-      "It seems to me that there is an inability to leverage collective will towards problems that almost everybody agrees exist (severe wealth inequality; climate change; political polarization to name a few). I think this is mostly a function of not individuals not having clear actions that can affect the relevant issue. The Alliance is the natural solution to this.",
+      "There is an inability to leverage collective will towards problems that almost everybody agrees exist (severe wealth inequality; climate change; political polarization to name a few). I think this is mostly the result of individuals not having clear actions that can affect the relevant issues. The Alliance is the natural solution to this.",
     memberId: 55,
   },
 ];
