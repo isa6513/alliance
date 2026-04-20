@@ -30,11 +30,9 @@ import { useMemo } from "react";
 
 export const userQueryKeys = {
   profile: (userId: number) => ["user", userId, "profile"] as const,
-  friendStatus: (userId: number) =>
-    ["user", userId, "friendStatus"] as const,
+  friendStatus: (userId: number) => ["user", userId, "friendStatus"] as const,
   forumPosts: (userId: number) => ["user", userId, "forumPosts"] as const,
-  forumComments: (userId: number) =>
-    ["user", userId, "forumComments"] as const,
+  forumComments: (userId: number) => ["user", userId, "forumComments"] as const,
   friends: (userId: number) => ["user", userId, "friends"] as const,
   receivedRequests: () => ["user", "friendRequests", "received"] as const,
   sentRequests: () => ["user", "friendRequests", "sent"] as const,
@@ -55,7 +53,7 @@ export type ForumActivityItem =
 
 export const buildForumActivityItems = (
   posts: PostDto[] = [],
-  comments: UserCommentDto[] = []
+  comments: UserCommentDto[] = [],
 ): ForumActivityItem[] => {
   const postItems: ForumActivityItem[] = posts.map((post) => ({
     type: "post",
@@ -70,13 +68,13 @@ export const buildForumActivityItems = (
   }));
 
   return [...postItems, ...commentItems].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 };
 
 const defaultQueryEnabled = (
   userId: number | undefined,
-  enabled: boolean | undefined
+  enabled: boolean | undefined,
 ) => Boolean(userId) && (enabled ?? true);
 
 type UserProfileQueryOptions = Omit<
@@ -111,9 +109,10 @@ type FriendRequestsQueryOptions = Omit<
 
 export const useUserProfileQuery = (
   userId: number,
-  options?: UserProfileQueryOptions
+  options?: UserProfileQueryOptions,
 ) =>
   useQuery({
+    ...options,
     queryKey: userQueryKeys.profile(userId),
     queryFn: async () => {
       if (!userId) return null;
@@ -127,15 +126,15 @@ export const useUserProfileQuery = (
       }
       return response.data ?? null;
     },
-    ...options,
     enabled: defaultQueryEnabled(userId, options?.enabled),
   });
 
 export const useUserFriendStatusQuery = (
   userId: number,
-  options?: FriendStatusQueryOptions
+  options?: FriendStatusQueryOptions,
 ) =>
   useQuery({
+    ...options,
     queryKey: userQueryKeys.friendStatus(userId),
     queryFn: async () => {
       if (!userId) return null;
@@ -144,30 +143,30 @@ export const useUserFriendStatusQuery = (
       });
       return response.data ?? null;
     },
-    ...options,
     enabled: defaultQueryEnabled(userId, options?.enabled),
   });
 
 export const useUserForumPostsQuery = (
   userId: number,
-  options?: UserPostsQueryOptions
+  options?: UserPostsQueryOptions,
 ) =>
   useQuery({
+    ...options,
     queryKey: userQueryKeys.forumPosts(userId),
     queryFn: async () => {
       if (!userId) return [];
       const response = await forumFindPostsByUser({ path: { id: userId } });
       return response.data ?? [];
     },
-    ...options,
     enabled: defaultQueryEnabled(userId, options?.enabled),
   });
 
 export const useUserForumCommentsQuery = (
   userId: number,
-  options?: UserCommentsQueryOptions
+  options?: UserCommentsQueryOptions,
 ) =>
   useQuery({
+    ...options,
     queryKey: userQueryKeys.forumComments(userId),
     queryFn: async () => {
       if (!userId) return [];
@@ -176,47 +175,46 @@ export const useUserForumCommentsQuery = (
       });
       return response.data ?? [];
     },
-    ...options,
     enabled: defaultQueryEnabled(userId, options?.enabled),
   });
 
 export const useUserFriendsQuery = (
   userId: number,
-  options?: FriendsQueryOptions
+  options?: FriendsQueryOptions,
 ) =>
   useQuery({
+    ...options,
     queryKey: userQueryKeys.friends(userId),
     queryFn: async () => {
       if (!userId) return [];
       const response = await userListFriends({ path: { id: userId } });
       return response.data ?? [];
     },
-    ...options,
     enabled: defaultQueryEnabled(userId, options?.enabled),
   });
 
 export const useUserReceivedFriendRequestsQuery = (
-  options?: FriendRequestsQueryOptions
+  options?: FriendRequestsQueryOptions,
 ) =>
   useQuery({
+    ...options,
     queryKey: userQueryKeys.receivedRequests(),
     queryFn: async () => {
       const response = await userListReceivedRequests({});
       return response.data ?? [];
     },
-    ...options,
   });
 
 export const useUserSentFriendRequestsQuery = (
-  options?: FriendRequestsQueryOptions
+  options?: FriendRequestsQueryOptions,
 ) =>
   useQuery({
+    ...options,
     queryKey: userQueryKeys.sentRequests(),
     queryFn: async () => {
       const response = await userListSentRequests({});
       return response.data ?? [];
     },
-    ...options,
   });
 
 type MessageableUsersQueryOptions = Omit<
@@ -227,7 +225,7 @@ type MessageableUsersQueryOptions = Omit<
 const EMPTY_MESSAGEABLE_IDS: ReadonlySet<number> = new Set();
 
 export const useMessageableUsersQuery = (
-  options?: MessageableUsersQueryOptions
+  options?: MessageableUsersQueryOptions,
 ) => {
   const query = useQuery({
     ...options,
@@ -245,11 +243,7 @@ export const useMessageableUsersQuery = (
   return { ...query, ids };
 };
 
-type FriendRequestMutationOptions = UseMutationOptions<
-  unknown,
-  Error,
-  number
->;
+type FriendRequestMutationOptions = UseMutationOptions<unknown, Error, number>;
 
 type UpdateProfileMutationOptions = UseMutationOptions<
   ProfileDto | null,
@@ -267,7 +261,7 @@ const invalidateFriendLists = (queryClient: QueryClient) => {
 };
 
 export const useSendFriendRequestMutation = (
-  options?: FriendRequestMutationOptions
+  options?: FriendRequestMutationOptions,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -291,7 +285,7 @@ export const useSendFriendRequestMutation = (
 };
 
 export const useAcceptFriendRequestMutation = (
-  options?: FriendRequestMutationOptions
+  options?: FriendRequestMutationOptions,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -318,7 +312,7 @@ export const useAcceptFriendRequestMutation = (
 };
 
 export const useDeclineFriendRequestMutation = (
-  options?: FriendRequestMutationOptions
+  options?: FriendRequestMutationOptions,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -339,7 +333,7 @@ export const useDeclineFriendRequestMutation = (
 };
 
 export const useRemoveFriendMutation = (
-  options?: FriendRequestMutationOptions
+  options?: FriendRequestMutationOptions,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -367,13 +361,13 @@ export const useRemoveFriendMutation = (
 
 export const useUpdateProfileMutation = (
   userId: number | undefined,
-  options?: UpdateProfileMutationOptions
+  options?: UpdateProfileMutationOptions,
 ) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: UpdateProfileDto) => {
       const response = await userUpdate({ body: payload });
-      console.log(response)
+      console.log(response);
       if (response.error) {
         throw response.error;
       }
@@ -381,11 +375,11 @@ export const useUpdateProfileMutation = (
     },
     onSuccess: (data, variables, onMutateResult, context) => {
       const targetId = data?.id ?? userId;
-      console.log(targetId)
-      console.log(data)
+      console.log(targetId);
+      console.log(data);
       if (targetId) {
-        console.log(userQueryKeys.profile(targetId))
-          queryClient.setQueryData(userQueryKeys.profile(targetId), data);
+        console.log(userQueryKeys.profile(targetId));
+        queryClient.setQueryData(userQueryKeys.profile(targetId), data);
       }
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
