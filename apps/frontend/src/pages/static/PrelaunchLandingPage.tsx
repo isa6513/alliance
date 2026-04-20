@@ -13,7 +13,7 @@ import { ArrowRight } from "lucide-react";
 
 /** Shared width + horizontal padding for hero copy and sections below. */
 const LANDING_MAIN_COL = "mx-auto w-full max-w-4xl px-6 sm:px-10 lg:px-16";
-const LANDING_BIG_COL = "px-4 lg:px-32 grid w-full";
+const LANDING_BIG_COL = "px-4 lg:px-32 w-full";
 
 /** Gap between sections + outer vertical padding (avoids stacked py on each section). */
 const LANDING_BODY = "gap-16 sm:gap-24 lg:gap-36 py-18 lg:py-28";
@@ -201,7 +201,7 @@ const PrelaunchLandingPage: React.FC = () => {
             </div>
           </div>
           <div
-            className={`${LANDING_BIG_COL} grid-cols-1 gap-2 md:grid-cols-3`}
+            className={`${LANDING_BIG_COL} grid grid-cols-1 gap-2 md:grid-cols-3`}
           >
             {MEMBER_QUOTES.map((item, index) => (
               <MemberQuoteCard
