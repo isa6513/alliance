@@ -745,7 +745,6 @@ const StatsPage: React.FC = () => {
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     return dataPoints.map(({ dayKey: _dayKey, ...point }) => point);
   }, [actionStats, completionRateRange]);
 

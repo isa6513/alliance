@@ -1,4 +1,4 @@
-import { ActionDto } from "../client";
+import { ActionDto, ActionEventDto } from "../client";
 import {
   ActionWithAwayStatus,
   TaskAwayStatus,
@@ -61,19 +61,10 @@ export function getTaskDismissInfo(
   return undefined;
 }
 
-export function getLastAndNextEvent(action: ActionDto) {
+export function getNextEvent(action: ActionDto): ActionEventDto | null {
   const now = new Date();
-  const pastEvents = action.events.filter(
-    (event) => new Date(event.date) <= now,
-  );
-
   const futureEvents = action.events.filter(
     (event) => new Date(event.date) > now,
   );
-
-  const lastEvent =
-    pastEvents.length > 0 ? pastEvents[pastEvents.length - 1] : null;
-  const nextEvent = futureEvents.length > 0 ? futureEvents[0] : null;
-
-  return { lastEvent, nextEvent };
+  return futureEvents.length > 0 ? futureEvents[0] : null;
 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { CitySearchDto } from './city.dto';
 import { City } from './city.entity';
@@ -37,7 +36,7 @@ export class GeoService {
     const data = fs.readFileSync(filePath, { encoding: 'utf-8' });
     const lines = data.split('\n').filter((line) => !line.startsWith('#'));
     for (const line of lines) {
-      const [ISO, ISO3, ISO_NUMERIC, fips, country] = line.split('\t', 5);
+      const [ISO, _ISO3, _ISO_NUMERIC, _fips, country] = line.split('\t', 5);
       countries[ISO] = country;
     }
     return countries;

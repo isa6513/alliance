@@ -10,7 +10,7 @@ import {
 } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
-import { getLastAndNextEvent } from "@alliance/shared/lib/largeActionCard";
+import { getNextEvent } from "@alliance/shared/lib/largeActionCard";
 import { isFollowUpFormActive } from "@alliance/shared/lib/actionUtils";
 import TaskTimeInfo from "../pages/app/TaskTimeInfo";
 import ActionEventsPanel from "./ActionEventsPanel";
@@ -114,7 +114,7 @@ const ActionContents = () => {
     return null;
   }
 
-  const { lastEvent, nextEvent } = getLastAndNextEvent(action);
+  const nextEvent = getNextEvent(action);
 
   const handleShareAction = () => {
     const ref = user?.referralCode ? `?ref=${user.referralCode}` : "";
@@ -182,7 +182,6 @@ const ActionContents = () => {
               <TaskTimeInfo
                 action={action}
                 nextEvent={nextEvent}
-                lastEvent={lastEvent}
                 absoluteDeadline={true}
               />
             )}
@@ -247,7 +246,6 @@ const ActionContents = () => {
                 <TaskTimeInfo
                   action={action}
                   nextEvent={nextEvent}
-                  lastEvent={lastEvent}
                   absoluteDeadline={true}
                 />
               </div>

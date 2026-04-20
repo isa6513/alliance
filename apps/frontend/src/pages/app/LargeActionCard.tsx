@@ -7,7 +7,7 @@ import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 import TaskTimeInfo from "./TaskTimeInfo";
 import { ChevronRight } from "lucide-react";
 import {
-  getLastAndNextEvent,
+  getNextEvent,
   LargeActionCardPropsShared,
 } from "@alliance/shared/lib/largeActionCard";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -82,7 +82,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
     [navigate, action],
   );
 
-  const { lastEvent, nextEvent } = getLastAndNextEvent(action);
+  const nextEvent = getNextEvent(action);
 
   return (
     <>
@@ -112,11 +112,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
           <div className="flex sm:flex-row gap-4 items-start flex-col-reverse">
             <div className="flex flex-col flex-1 gap-y-2">
               <p className="text-title text-2xl!">{action.name}</p>
-              <TaskTimeInfo
-                action={action}
-                nextEvent={nextEvent}
-                lastEvent={lastEvent}
-              />
+              <TaskTimeInfo action={action} nextEvent={nextEvent} />
             </div>
             {showDetails && (
               <Button

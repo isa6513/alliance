@@ -13,7 +13,6 @@ import { formatTime } from "@alliance/shared/lib/utils";
 const TaskTimeInfo = ({
   action,
   nextEvent,
-  lastEvent,
   absoluteDeadline,
   className,
   filled = false,

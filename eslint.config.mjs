@@ -1,8 +1,10 @@
 import eslintPluginExample from "./eslint/eslint-local-rules.mjs";
+import sharedRules from "./eslint/shared-rules.mjs";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config([
   ...tseslint.configs.recommended,
+  sharedRules,
   {
     plugins: { "local-rules": eslintPluginExample },
     files: ["**/*.ts", "**/*.tsx"],
@@ -12,22 +14,11 @@ export default tseslint.config([
       },
     },
     rules: {
-      "prefer-const": "warn",
-      "no-constant-binary-expression": "error",
       "local-rules/enforce-foo-bar": "error",
       "@typescript-eslint/no-restricted-imports": [
         "error",
         {
           paths: ["@alliance/shared/*"],
-        },
-      ],
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          caughtErrorsIgnorePattern: "^_",
-          destructuredArrayIgnorePattern: "^_",
         },
       ],
     },

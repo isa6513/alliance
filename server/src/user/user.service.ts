@@ -141,8 +141,7 @@ export class UserService {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { cityId, profilePicture, ...updateData } = data;
+    const { cityId: _cityId, profilePicture, ...updateData } = data;
 
     if (!updateData.preferredReminderTime) {
       updateData.preferredReminderTime = undefined;

@@ -1,7 +1,7 @@
 import { TouchableOpacity, View } from "react-native";
 
 import {
-  getLastAndNextEvent,
+  getNextEvent,
   LargeActionCardPropsShared,
 } from "@alliance/shared/lib/largeActionCard";
 import { ActionCompletedBarWithInfo } from "./ActionCompletedBarWithInfo";
@@ -55,7 +55,7 @@ export default function LargeActionCard({
   scrollToEnd,
   onSubmitSuccess,
 }: LargeActionCardProps) {
-  const { nextEvent, lastEvent } = getLastAndNextEvent(action);
+  const nextEvent = getNextEvent(action);
   const { activities: friendActivities } = useActivities({
     list: ActivityList.FriendsForAction,
     objectId: action.id,
@@ -76,7 +76,6 @@ export default function LargeActionCard({
           <TaskTimeInfo
             action={action}
             nextEvent={nextEvent}
-            lastEvent={lastEvent}
             className="flex-row items-center gap-x-1"
             filled={true}
           />

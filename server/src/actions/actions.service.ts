@@ -2380,17 +2380,13 @@ export class ActionsService {
 
     const {
       taskForm,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reminderGroups,
+      reminderGroups: _reminderGroups,
       suite,
       events,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      activities,
+      activities: _activities,
       authors,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      updates,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      followUpForms,
+      updates: _updates,
+      followUpForms: _followUpForms,
       ...actionCols
     } = importaction;
 

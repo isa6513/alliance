@@ -164,7 +164,7 @@ const ActionDashboard: React.FC = () => {
         return next;
       });
     },
-    [setSearchParams]
+    [setSearchParams],
   );
 
   // Load available forms on component mount
@@ -249,8 +249,8 @@ const ActionDashboard: React.FC = () => {
           setAvailableUsers(mappedUsers);
           setActiveContractUserIds(
             new Set(
-              response.data.filter((u) => u.hasActiveContract).map((u) => u.id)
-            )
+              response.data.filter((u) => u.hasActiveContract).map((u) => u.id),
+            ),
           );
         }
       } catch (err) {
@@ -281,7 +281,7 @@ const ActionDashboard: React.FC = () => {
               id: a.id,
               name: a.name,
               usersCompleted: a.usersCompleted ?? 0,
-            }))
+            })),
           );
         }
       } catch (err) {
@@ -388,16 +388,11 @@ const ActionDashboard: React.FC = () => {
         }
         setAction(actionData);
         const {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          activities,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          usersCompleted,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          usersJoined,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          events,
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          updates,
+          activities: _activities,
+          usersCompleted: _usersCompleted,
+          usersJoined: _usersJoined,
+          events: _events,
+          updates: _updates,
           suite,
           ...formData
         } = actionData;
@@ -413,7 +408,7 @@ const ActionDashboard: React.FC = () => {
         });
 
         setCohortExpression(
-          actionData.cohortExpression as unknown as CohortExpression | null
+          actionData.cohortExpression as unknown as CohortExpression | null,
         );
 
         setImageKey(actionData.image ?? null);
@@ -538,7 +533,7 @@ const ActionDashboard: React.FC = () => {
     (action: ActionDto) => {
       navigate(`/actions/${action.id}`);
     },
-    [navigate]
+    [navigate],
   );
 
   const handleDuplicate = useCallback(async () => {
@@ -585,7 +580,7 @@ const ActionDashboard: React.FC = () => {
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const target = e.target as HTMLInputElement;
     const { name, value, type } = target;
@@ -607,10 +602,7 @@ const ActionDashboard: React.FC = () => {
     }
 
     // Handle numeric fields
-    if (
-      name === "donationThreshold" ||
-      name === "donationAmount"
-    ) {
+    if (name === "donationThreshold" || name === "donationAmount") {
       const numValue = value === "" ? null : parseFloat(value);
       setForm((prev) => ({
         ...prev,
@@ -659,7 +651,7 @@ const ActionDashboard: React.FC = () => {
     (expr: CohortExpression | null) => {
       setCohortExpression(expr);
     },
-    []
+    [],
   );
 
   const handleAuthorsChange = useCallback((ids: number[]) => {
@@ -777,7 +769,7 @@ const ActionDashboard: React.FC = () => {
 
     if (
       window.confirm(
-        "Are you sure you want to delete this action? This cannot be undone."
+        "Are you sure you want to delete this action? This cannot be undone.",
       )
     ) {
       try {
@@ -818,7 +810,7 @@ const ActionDashboard: React.FC = () => {
   const currentEventId = action?.events
     ?.filter((event) => new Date(event.date).getTime() < new Date().getTime())
     .sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
     )[0]?.id;
 
   const hasMemberActionStarted = useMemo(() => {
@@ -826,7 +818,7 @@ const ActionDashboard: React.FC = () => {
     return action.events.some(
       (event) =>
         event.newStatus === "member_action" &&
-        new Date(event.date).getTime() < new Date().getTime()
+        new Date(event.date).getTime() < new Date().getTime(),
     );
   }, [action?.events]);
 
@@ -936,7 +928,7 @@ const ActionDashboard: React.FC = () => {
   }, [action, taskForm]);
 
   const readinessReadyCount = readinessChecklist.filter(
-    (item) => item.isReady
+    (item) => item.isReady,
   ).length;
   const readinessTotalCount = readinessChecklist.length;
   const readinessComplete =
@@ -1032,7 +1024,7 @@ const ActionDashboard: React.FC = () => {
                     "py-2 px-1 border-b-2 text-sm text-nowrap",
                     activeTab === tab.key
                       ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
                   )}
                 >
                   {tab.label}
@@ -1079,7 +1071,7 @@ const ActionDashboard: React.FC = () => {
                     onClick={() =>
                       window.open(
                         `/database?table=action&id=${action.id}`,
-                        "_blank"
+                        "_blank",
                       )
                     }
                     color={ButtonColor.White}
@@ -1161,7 +1153,7 @@ const ActionDashboard: React.FC = () => {
                       <span
                         className={cn(
                           "inline-flex items-center px-3 py-1 rounded-full cursor-pointer text-sm font-medium",
-                          getStatusColor(action.status)
+                          getStatusColor(action.status),
                         )}
                         onClick={() => onTabChange("events")}
                       >
@@ -1180,7 +1172,7 @@ const ActionDashboard: React.FC = () => {
                           {Math.round(
                             (action.usersCompleted /
                               (action.usersJoined || 1)) *
-                              100
+                              100,
                           )}
                           %)
                         </span>
@@ -1193,7 +1185,7 @@ const ActionDashboard: React.FC = () => {
                               (action.usersCompleted /
                                 (action.usersJoined || 1)) *
                                 100,
-                              100
+                              100,
                             )}%`,
                           }}
                         />
@@ -1215,7 +1207,7 @@ const ActionDashboard: React.FC = () => {
                             {action.usersJoined > 0
                               ? Math.round(
                                   (action.usersCompleted / action.usersJoined) *
-                                    100
+                                    100,
                                 )
                               : 0}
                             %
@@ -1358,7 +1350,7 @@ const ActionDashboard: React.FC = () => {
                         .sort(
                           (a, b) =>
                             new Date(b.date).getTime() -
-                            new Date(a.date).getTime()
+                            new Date(a.date).getTime(),
                         )
                         .map((event) => (
                           <div
@@ -1370,7 +1362,7 @@ const ActionDashboard: React.FC = () => {
                                 "w-2 h-2 rounded-full flex-shrink-0",
                                 event.id === currentEventId
                                   ? "bg-blue-500"
-                                  : "bg-gray-300"
+                                  : "bg-gray-300",
                               )}
                             />
                             <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
@@ -1384,7 +1376,7 @@ const ActionDashboard: React.FC = () => {
                                     month: "short",
                                     day: "numeric",
                                     year: "numeric",
-                                  }
+                                  },
                                 )}
                               </span>
                             </div>
@@ -1494,7 +1486,7 @@ const ActionDashboard: React.FC = () => {
                             params.set("filterValue", filter.value);
                           }
                           navigate(
-                            `/forms/${action.taskFormId}/responses?${params.toString()}`
+                            `/forms/${action.taskFormId}/responses?${params.toString()}`,
                           );
                         }}
                       />
@@ -1529,7 +1521,7 @@ const ActionDashboard: React.FC = () => {
                           "rounded-full px-3 py-1 text-sm font-medium",
                           readinessComplete
                             ? "bg-green/20 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
+                            : "bg-yellow-100 text-yellow-800",
                         )}
                       >
                         {readinessReadyCount}/{readinessTotalCount} ready

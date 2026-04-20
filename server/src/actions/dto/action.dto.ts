@@ -386,8 +386,7 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   ) {
     super();
     this.actionName = actionActivity.action?.name;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { action, ...rest } = actionActivity;
+    const { action: _action, ...rest } = actionActivity;
     Object.assign(this, rest);
     this.user = new ProfileDto(actionActivity.user);
     // Only include likes array when explicitly requested (detail views, like/unlike)

@@ -24,7 +24,7 @@ import Text, {
 import { cn } from "@alliance/shared/styles/util";
 import ActionEventsPanel from "../../../../components/ActionEventsPanel";
 import TaskTimeInfo from "../../../../components/TaskTimeInfo";
-import { getLastAndNextEvent } from "@alliance/shared/lib/largeActionCard";
+import { getNextEvent } from "@alliance/shared/lib/largeActionCard";
 import ActionPageTaskPanel from "../../../../components/ActionPageTaskPanel";
 import { useActionHandlers } from "@alliance/shared/lib/actionPage";
 import { actionActivityIntransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
@@ -280,7 +280,7 @@ export default function ActionDetailScreen() {
   };
 
   const userRelation = action.userRelation as UserActionRelation | undefined;
-  const { nextEvent, lastEvent } = getLastAndNextEvent(action);
+  const nextEvent = getNextEvent(action);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -300,7 +300,6 @@ export default function ActionDetailScreen() {
                   <TaskTimeInfo
                     action={action}
                     nextEvent={nextEvent}
-                    lastEvent={lastEvent}
                     absoluteDeadline={true}
                     className="flex-row gap-x-1 items-start"
                     filled={true}

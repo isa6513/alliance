@@ -26,5 +26,4 @@ export class CitySearchDto extends PickType(City, [
   'admin1',
 ]) {}
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type _typecheck = Assert<CitySearchDto extends CityFieldValue ? true : false>;

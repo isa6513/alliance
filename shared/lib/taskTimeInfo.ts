@@ -4,7 +4,6 @@ import { format } from "date-fns";
 export interface TaskTimeInfoPropsShared {
   action: ActionDto;
   nextEvent: ActionEventDto | null;
-  lastEvent: ActionEventDto | null;
   absoluteDeadline?: boolean;
 }
 

@@ -76,7 +76,6 @@ type ReplyFormProps = {
   content: CreateEditableContentDto;
   setContent: (next: CreateEditableContentDto) => void;
   onCancel?: () => void;
-  compact?: boolean;
   autofocus?: boolean;
   objectId: number;
   isSubmitting: boolean;
@@ -91,7 +90,6 @@ const ReplyForm = ({
   content,
   setContent,
   onCancel,
-  compact,
   autofocus,
   objectId,
   isSubmitting,
@@ -351,7 +349,6 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
             content={shared.nestedDraft}
             setContent={shared.setNestedDraft}
             onCancel={() => shared.setReplyingTo(null)}
-            compact={shared.compact}
             autofocus={shared.autofocus}
             objectId={shared.objectId}
             isSubmitting={shared.isSubmitting}
@@ -632,7 +629,6 @@ export default function Comments({
           parentId={null}
           content={editableContent}
           setContent={setEditableContent}
-          compact={compact}
           autofocus={autofocus}
           objectId={objectId}
           isSubmitting={isSubmitting}

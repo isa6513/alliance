@@ -333,7 +333,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         </View>
       ),
       // custom image rendering with URL transformation
-      image: (node, children, parent, styles) => {
+      image: (node, children, parent) => {
         const src = node.attributes?.src || "";
         const transformedSrc = transformImageUrl(src);
         const alt = node.attributes?.alt || "";
@@ -362,7 +362,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         );
       },
       // Custom link rendering
-      link: (node, children, parent, styles) => {
+      link: (node, children) => {
         const href = node.attributes?.href || "";
         return (
           <Text
@@ -375,7 +375,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         );
       },
       // Handle imgcap code blocks (custom image with caption syntax)
-      code_block: (node, children, parent, styles) => {
+      code_block: (node, children, parent) => {
         const content = node.content || "";
         const language = node.attributes?.class?.replace("language-", "") || "";
 
@@ -440,7 +440,7 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         );
       },
       body: (node, children) => <>{children}</>,
-      fence: (node, children, parent, styles) => {
+      fence: (node, children, parent) => {
         const content = node.content || "";
         // The info string (language) for fenced code blocks can be in different properties
         const info =

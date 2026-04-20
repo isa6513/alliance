@@ -29,9 +29,7 @@ const stripManualFields = (
   updates: Partial<DisplayBlock>,
 ): Partial<DisplayBlock> => {
   const {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     manualPerUser: _manualPerUser,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     manualUserContent: _manualUserContent,
     ...rest
   } = updates as Partial<DisplayBlock>;
@@ -406,7 +404,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
     if (!manualUserContent[activeManualUserId]) {
       return;
     }
-    const { [activeManualUserId]: _removed, ...rest } = manualUserContent; // eslint-disable-line @typescript-eslint/no-unused-vars
+    const { [activeManualUserId]: _removed, ...rest } = manualUserContent;
     onUpdate({
       manualUserContent: rest,
     } as Partial<T>);

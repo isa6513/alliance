@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Temporal } from '@js-temporal/polyfill';
 import {
   ObjectLiteral,
