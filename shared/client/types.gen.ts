@@ -2749,6 +2749,10 @@ export type ActionStatsWithOnboardingDto = {
      */
     usersWithdrawn: number;
     /**
+     * Number of users who dismissed this optional action
+     */
+    usersDismissed: number;
+    /**
      * Completion rate as a fraction (usersCompleted / usersJoined)
      */
     completionRate: number;
