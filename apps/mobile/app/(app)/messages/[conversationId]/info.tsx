@@ -13,9 +13,8 @@ import {
   conversationLeave,
   conversationRemoveParticipant,
   conversationUpdateInfo,
-  ProfileDto,
-  userListMessageableUsers,
 } from "@alliance/shared/client";
+import { useMessageableUsersQuery } from "@alliance/shared/lib/user";
 import { ChevronLeft, Edit, Plus, X } from "lucide-react-native";
 import ProfileImage from "../../../../components/ProfileImage";
 import Text, {
@@ -72,27 +71,14 @@ export default function ConversationInfoScreen() {
   const [editingPhoto, setEditingPhoto] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
-  const [messageableUsers, setMessageableUsers] = useState<ProfileDto[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const { data: messageableUsers = [], isLoading: loadingUsers } =
+    useMessageableUsersQuery({ enabled: isGroup && isAdmin });
 
   useEffect(() => {
     if (!selectedConvo || isEditing) return;
     setEditingTitle(selectedConvo.title);
     setEditingPhoto(selectedConvo.photo ?? null);
   }, [selectedConvo, isEditing]);
-
-  useEffect(() => {
-    if (!isGroup || !isAdmin) return;
-    setLoadingUsers(true);
-    userListMessageableUsers()
-      .then((response) => {
-        setMessageableUsers(response.data ?? []);
-      })
-      .catch((error) => {
-        console.error("Failed to load messageable users", error);
-      })
-      .finally(() => setLoadingUsers(false));
-  }, [isAdmin, isGroup]);
 
   const filteredUsers = useMemo(() => {
     if (!search.trim()) return [];

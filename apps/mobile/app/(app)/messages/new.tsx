@@ -8,8 +8,8 @@ import {
   conversationCreateGroupConversation,
   messageSendMessage,
   ProfileDto,
-  userListMessageableUsers,
 } from "@alliance/shared/client";
+import { useMessageableUsersQuery } from "@alliance/shared/lib/user";
 import BackButton from "../../../components/system/BackButton";
 import MessageComposer from "../../../components/messages/MessageComposer";
 import MessageRecipientSelect from "../../../components/messages/MessageRecipientSelect";
@@ -28,30 +28,12 @@ export default function NewMessageScreen() {
   const { to } = useLocalSearchParams<{ to?: string }>();
   const { conversations, setConversations } = useConversations(null);
 
-  const [messageableUsers, setMessageableUsers] = useState<ProfileDto[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(true);
+  const { data: messageableUsers = [], isLoading: loadingUsers } =
+    useMessageableUsersQuery();
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    userListMessageableUsers()
-      .then((response) => {
-        if (cancelled) return;
-        setMessageableUsers(response.data ?? []);
-      })
-      .catch((error) => {
-        console.error("Failed to load messageable users", error);
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingUsers(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     const target = Array.isArray(to) ? to[0] : to;

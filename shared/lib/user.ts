@@ -10,6 +10,7 @@ import {
   userDeclineFriendRequest,
   userFindOne,
   userListFriends,
+  userListMessageableUsers,
   userListReceivedRequests,
   userListSentRequests,
   userMyFriendRelationship,
@@ -25,6 +26,7 @@ import {
   type UseMutationOptions,
   type UseQueryOptions,
 } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 export const userQueryKeys = {
   profile: (userId: number) => ["user", userId, "profile"] as const,
@@ -36,6 +38,7 @@ export const userQueryKeys = {
   friends: (userId: number) => ["user", userId, "friends"] as const,
   receivedRequests: () => ["user", "friendRequests", "received"] as const,
   sentRequests: () => ["user", "friendRequests", "sent"] as const,
+  messageableUsers: () => ["user", "messageableUsers"] as const,
 };
 
 export type ForumActivityItem =
@@ -216,6 +219,32 @@ export const useUserSentFriendRequestsQuery = (
     ...options,
   });
 
+type MessageableUsersQueryOptions = Omit<
+  UseQueryOptions<ProfileDto[]>,
+  "queryKey" | "queryFn"
+>;
+
+const EMPTY_MESSAGEABLE_IDS: ReadonlySet<number> = new Set();
+
+export const useMessageableUsersQuery = (
+  options?: MessageableUsersQueryOptions
+) => {
+  const query = useQuery({
+    ...options,
+    queryKey: userQueryKeys.messageableUsers(),
+    queryFn: async () => {
+      const response = await userListMessageableUsers();
+      return response.data ?? [];
+    },
+  });
+  const ids = useMemo<ReadonlySet<number>>(
+    () =>
+      query.data ? new Set(query.data.map((u) => u.id)) : EMPTY_MESSAGEABLE_IDS,
+    [query.data],
+  );
+  return { ...query, ids };
+};
+
 type FriendRequestMutationOptions = UseMutationOptions<
   unknown,
   Error,
@@ -276,6 +305,9 @@ export const useAcceptFriendRequestMutation = (
       void queryClient.invalidateQueries({
         queryKey: userQueryKeys.friends(requesterId),
       });
+      void queryClient.invalidateQueries({
+        queryKey: userQueryKeys.messageableUsers(),
+      });
       invalidateFriendLists(queryClient);
       options?.onSuccess?.(data, requesterId, onMutateResult, context);
     },
@@ -320,6 +352,9 @@ export const useRemoveFriendMutation = (
       });
       void queryClient.invalidateQueries({
         queryKey: userQueryKeys.friends(targetUserId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: userQueryKeys.messageableUsers(),
       });
       invalidateFriendLists(queryClient);
       options?.onSuccess?.(data, targetUserId, onMutateResult, context);

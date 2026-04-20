@@ -15,6 +15,7 @@ import {
   type ForumActivityItem,
   useAcceptFriendRequestMutation,
   useDeclineFriendRequestMutation,
+  useMessageableUsersQuery,
   useRemoveFriendMutation,
   useSendFriendRequestMutation,
   useUpdateProfileMutation,
@@ -30,7 +31,7 @@ import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { ChevronDown, Edit, Menu } from "lucide-react-native";
+import { ChevronDown, Edit, Menu, MessageSquare } from "lucide-react-native";
 import AppMarkdownWrapper from "../../../components/AppMarkdownWrapper";
 import EditableContentRenderer from "../../../components/EditableContentRenderer";
 import { ImageLightboxModal } from "../../../components/ImageLightbox";
@@ -110,6 +111,9 @@ export default function UserProfileScreen() {
   });
   const { data: sentRequests = [] } = useUserSentFriendRequestsQuery({
     enabled: isMe,
+  });
+  const { ids: messageableIds } = useMessageableUsersQuery({
+    enabled: isAuthenticated,
   });
 
   const sendFriendRequest = useSendFriendRequestMutation();
@@ -505,9 +509,19 @@ export default function UserProfileScreen() {
             {friend.displayName}
           </Text>
         </TouchableOpacity>
+        {isMe && messageableIds.has(friend.id) && (
+          <TouchableOpacity
+            onPress={() => router.push(`/messages/new?to=${friend.id}`)}
+            activeOpacity={0.7}
+            className="p-2"
+            accessibilityLabel={`Message ${friend.displayName}`}
+          >
+            <MessageSquare size={22} color={colors.text.icon} />
+          </TouchableOpacity>
+        )}
       </View>
     ),
-    [],
+    [isMe, messageableIds],
   );
 
   const listData = useMemo((): any[] => {
@@ -713,6 +727,18 @@ export default function UserProfileScreen() {
               actions
             </Text>
           </View>
+          {!isMe && isAuthenticated && messageableIds.has(profile.id) && (
+            <View className="ml-auto">
+              <TouchableOpacity
+                onPress={() => router.push(`/messages/new?to=${profile.id}`)}
+                activeOpacity={0.7}
+                className="p-2"
+                accessibilityLabel={`Message ${profile.displayName}`}
+              >
+                <MessageSquare size={24} color={colors.text.icon} />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
         {(!isMe || isEditing) && (
           <View className="flex-row items-center gap-3">
