@@ -2768,33 +2768,6 @@ export class ActionsService {
     return this.findActionRelationsForUsers(usersPromise);
   }
 
-  async getFailedUsersForEvent(
-    action: Action,
-    event: ActionEvent,
-  ): Promise<User[]> {
-    const baseUsers =
-      await this.actionEventRecipientService.findBaseUsersForEvent({
-        action,
-        eventId: event.id,
-      });
-
-    const completionActivities = await this.actionActivityRepository.find({
-      where: {
-        actionId: action.id,
-        type: In([
-          ActionActivityType.USER_COMPLETED,
-          ActionActivityType.USER_WONT_COMPLETE,
-        ]),
-      },
-    });
-
-    const didntComplete = baseUsers.filter(
-      (user) =>
-        !completionActivities.some((activity) => activity.userId === user.id),
-    );
-    return didntComplete;
-  }
-
   isActionPast(action: Action, now: Date): boolean {
     return action.events.some(
       (event) =>

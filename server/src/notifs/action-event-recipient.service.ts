@@ -166,14 +166,7 @@ export class ActionEventRecipientService {
     includeDismissed?: boolean;
   }): Promise<User[]> {
     const { action, eventId, includeSuspended, includeDismissed } = params;
-    const events =
-      action.events ??
-      (
-        await this.actionRepository.findOneOrFail({
-          where: { id: action.id },
-          relations: { events: true },
-        })
-      ).events;
+    const events = action.events;
 
     const event = events.find((event) => event.id === eventId);
 
