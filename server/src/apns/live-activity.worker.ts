@@ -71,7 +71,7 @@ export class LiveActivityWorker {
 
       // Find users who joined but haven't completed
       const joinedUserIds =
-        await this.actionsService.findEligibleUsersForAction(action);
+        await this.actionsService.findJoinedUsersForAction(action);
       const completedActivities = await this.actionActivityRepository.find({
         where: { actionId: action.id, type: ActionActivityType.USER_COMPLETED },
       });

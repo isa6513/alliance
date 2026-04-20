@@ -374,10 +374,10 @@ export class ActionsService {
       },
     });
 
-    return this.findEligibleUsersForAction(action);
+    return this.findJoinedUsersForAction(action);
   }
 
-  async findEligibleUsersForAction(action: Action): Promise<number[]> {
+  async findJoinedUsersForAction(action: Action): Promise<number[]> {
     const event = action.events.find(
       (event) => event.newStatus === ActionStatus.MemberAction,
     );
@@ -440,7 +440,7 @@ export class ActionsService {
       },
     });
 
-    const joinedUserIds = await this.findEligibleUsersForAction(action);
+    const joinedUserIds = await this.findJoinedUsersForAction(action);
 
     const completedActivities = await this.actionActivityRepository.find({
       where: {
@@ -2488,7 +2488,7 @@ export class ActionsService {
       const joinedUsersPromises = await Promise.all(
         actions.map(async (action) => ({
           actionId: action.id,
-          usersJoined: await this.findEligibleUsersForAction(action),
+          usersJoined: await this.findJoinedUsersForAction(action),
         })),
       );
 
