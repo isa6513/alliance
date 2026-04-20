@@ -358,7 +358,7 @@ export class Action {
   }
 
   @IsOptional()
-  private _memberActionEvent:
+  private _memberActionPhase:
     | {
         event: ActionEvent;
         deadline: Date | null;
@@ -368,10 +368,10 @@ export class Action {
         deadline: null;
       }
     | null = null;
-  get memberActionEvent(): NonNullable<typeof this._memberActionEvent> {
-    populateCache: if (!this._memberActionEvent) {
+  get memberActionPhase(): NonNullable<typeof this._memberActionPhase> {
+    populateCache: if (!this._memberActionPhase) {
       if (!this.events) {
-        this._memberActionEvent = {
+        this._memberActionPhase = {
           event: null,
           deadline: null,
         };
@@ -385,7 +385,7 @@ export class Action {
       );
 
       if (!memberActionEvent) {
-        this._memberActionEvent = {
+        this._memberActionPhase = {
           event: null,
           deadline: null,
         };
@@ -399,20 +399,20 @@ export class Action {
           event.date > memberActionEvent.date &&
           event.newStatus !== ActionStatus.MemberAction,
       );
-      this._memberActionEvent = {
+      this._memberActionPhase = {
         event: memberActionEvent,
         deadline: deadlineEvent?.date ?? null,
       };
     }
-    return this._memberActionEvent;
+    return this._memberActionPhase;
   }
 
   @IsOptional()
   get deadlineWeekNumber(): number | null {
-    if (!this.memberActionEvent?.deadline) {
+    if (!this.memberActionPhase?.deadline) {
       return null;
     } else {
-      return Math.floor(this.memberActionEvent.deadline.getTime() / MS_IN_WEEK);
+      return Math.floor(this.memberActionPhase.deadline.getTime() / MS_IN_WEEK);
     }
   }
 }

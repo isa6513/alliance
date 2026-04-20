@@ -161,7 +161,7 @@ describe('Tasks (e2e)', () => {
           type: 'Tag',
           tagId: ctx.defaultTag.id,
         },
-        memberActionEvent: {
+        memberActionPhase: {
           event: null,
           deadline: null,
         },
@@ -352,7 +352,7 @@ describe('Tasks (e2e)', () => {
           type: 'Tag',
           tagId: ctx.defaultTag.id,
         },
-        memberActionEvent: {
+        memberActionPhase: {
           event: null,
           deadline: null,
         },
@@ -463,7 +463,7 @@ describe('Tasks (e2e)', () => {
           type: 'Tag',
           tagId: ctx.defaultTag.id,
         },
-        memberActionEvent: {
+        memberActionPhase: {
           event: null,
           deadline: null,
         },
@@ -594,7 +594,7 @@ describe('Tasks (e2e)', () => {
           publicOnly: false,
           isContractSigningAction: false,
           isForumParticipationAction: false,
-          memberActionEvent: {
+          memberActionPhase: {
             event: null,
             deadline: null,
           },
@@ -1048,7 +1048,7 @@ describe('Tasks (e2e)', () => {
           optional: false,
           publicOnly: false,
           isContractSigningAction: false,
-          memberActionEvent: {
+          memberActionPhase: {
             event: null,
             deadline: null,
           },
@@ -1387,7 +1387,7 @@ describe('Tasks (e2e)', () => {
           optional: false,
           publicOnly: false,
           isContractSigningAction: false,
-          memberActionEvent: {
+          memberActionPhase: {
             event: null,
             deadline: null,
           },

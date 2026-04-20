@@ -207,7 +207,7 @@ describe('Actions (e2e)', () => {
         preventCompletion: false,
         publicOnly: false,
         onboarding: false,
-        memberActionEvent: {
+        memberActionPhase: {
           event: null,
           deadline: null,
         },

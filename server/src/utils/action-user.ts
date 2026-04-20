@@ -8,11 +8,11 @@ import type { Community } from 'src/community/entities/community.entity';
 import { findLeast } from 'src/utils/filter';
 
 export function computeIsContractActiveDuringEntireMemberAction(params: {
-  action: Pick<Action, 'events' | 'memberActionEvent'>;
+  action: Pick<Action, 'events' | 'memberActionPhase'>;
   user: Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'>;
 }): boolean {
   const { action, user } = params;
-  const { event: memberActionEvent, deadline } = action.memberActionEvent;
+  const { event: memberActionEvent, deadline } = action.memberActionPhase;
 
   if (!memberActionEvent) {
     return false;
@@ -25,12 +25,12 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
 }
 
 export function computeIsAwayDuringAnyOfMemberAction(params: {
-  action: Pick<Action, 'events' | 'memberActionEvent'>;
+  action: Pick<Action, 'events' | 'memberActionPhase'>;
   user: Pick<User, 'awayRanges' | 'isAwayAtAnyPointInRange'>;
 }): boolean {
   const { action, user } = params;
 
-  const { event: memberActionEvent, deadline } = action.memberActionEvent;
+  const { event: memberActionEvent, deadline } = action.memberActionPhase;
 
   if (!memberActionEvent) {
     return false;
@@ -69,8 +69,8 @@ export function computeIsTaggedOrInManualCohortAction(params: {
     manualCohortUserIdSet: null,
     participatingTagIdSet: new Set<string>(),
     everyoneShouldComplete: action.everyoneShouldComplete,
-    memberActionEventDate: action.memberActionEvent?.event?.date,
-    memberActionEventDeadline: action.memberActionEvent?.deadline,
+    memberActionEventDate: action.memberActionPhase?.event?.date,
+    memberActionEventDeadline: action.memberActionPhase?.deadline,
     includeSuspended,
   });
 }

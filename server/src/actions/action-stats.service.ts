@@ -59,8 +59,8 @@ export class ActionStatsService {
   }
 
   private async computeUsersInvited(action: Action) {
-    const rangeStart = action.memberActionEvent.event?.date;
-    const rangeEnd = action.memberActionEvent.deadline;
+    const rangeStart = action.memberActionPhase.event?.date;
+    const rangeEnd = action.memberActionPhase.deadline;
     if (!rangeStart || !rangeEnd) {
       return undefined;
     }

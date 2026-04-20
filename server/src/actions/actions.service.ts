@@ -832,8 +832,8 @@ export class ActionsService {
         continue;
       }
 
-      generalUpdate.startDate = action.memberActionEvent.event?.date;
-      generalUpdate.endDate = action.memberActionEvent.deadline ?? undefined;
+      generalUpdate.startDate = action.memberActionPhase.event?.date;
+      generalUpdate.endDate = action.memberActionPhase.deadline ?? undefined;
     }
     await this.generalUpdateRepository.save(generalUpdates);
   }
@@ -2539,7 +2539,7 @@ export class ActionsService {
           expressionReferencesTag(action.cohortExpression, allMembersTagId),
         suiteId: action.suite?.id,
         memberActionDeadline:
-          action.memberActionEvent?.deadline?.getTime() ?? null,
+          action.memberActionPhase?.deadline?.getTime() ?? null,
       } satisfies UserActionSummaryDto;
     });
 
@@ -2578,8 +2578,8 @@ export class ActionsService {
         const detail = getDetail({ userId, actionId: action.id });
         detail.status = action.optional
           ? UserActionRelationPillStatus.OptionalTask
-          : action.memberActionEvent?.deadline &&
-              action.memberActionEvent.deadline < now
+          : action.memberActionPhase?.deadline &&
+              action.memberActionPhase.deadline < now
             ? UserActionRelationPillStatus.MissedDeadline
             : UserActionRelationPillStatus.Todo;
       }
