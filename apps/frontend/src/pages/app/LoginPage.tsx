@@ -34,6 +34,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState<string | null>(
     location.state?.message || null,
@@ -84,20 +85,26 @@ const LoginPage: React.FC = () => {
   };
 
   const handleForgotPasswordClick = async () => {
+    if (isSendingReset) return;
     if (!formData.email) {
       setMessage(forgotPasswordCopy.emailRequired.message);
       return;
     }
 
     setError(null);
-    const resp = await authForgotPassword({
-      body: { email: formData.email },
-    });
-    if (resp.error) {
-      setError(forgotPasswordCopy.sendError);
-      console.error(resp.error);
-    } else {
-      setMessage(forgotPasswordCopy.sendSuccess.message);
+    setIsSendingReset(true);
+    try {
+      const resp = await authForgotPassword({
+        body: { email: formData.email },
+      });
+      if (resp.error) {
+        setError(forgotPasswordCopy.sendError);
+        console.error(resp.error);
+      } else {
+        setMessage(forgotPasswordCopy.sendSuccess.message);
+      }
+    } finally {
+      setIsSendingReset(false);
     }
   };
 
@@ -184,7 +191,11 @@ const LoginPage: React.FC = () => {
             </div>
           )}
           <p
-            className="mt-4 text-green text-center hover:underline cursor-pointer"
+            className={`mt-4 text-green text-center ${
+              isSendingReset
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:underline cursor-pointer"
+            }`}
             onClick={handleForgotPasswordClick}
           >
             {forgotPasswordCopy.prompt}

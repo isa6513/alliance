@@ -123,7 +123,7 @@ const LoginScreen = () => {
         <Pressable
           onPress={handleForgotPassword}
           disabled={isSendingReset}
-          className="mt-4 self-center"
+          className={`mt-4 self-center ${isSendingReset ? "opacity-50" : ""}`}
         >
           <Text className="text-green">{forgotPasswordCopy.prompt}</Text>
         </Pressable>
