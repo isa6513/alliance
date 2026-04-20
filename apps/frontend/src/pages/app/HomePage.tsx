@@ -513,7 +513,7 @@ const HomePage = () => {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-y-4 rounded border border-grey-2 w-full py-8 lg:py-12 px-8">
-                        <CheckIcon size="large" />
+                        <CheckIcon size={32} />
                         <p className="text-center text-zinc-500 text-lg lg:text-xl">
                           {noTasksToDoRightNow}
                         </p>

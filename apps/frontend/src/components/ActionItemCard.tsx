@@ -33,9 +33,7 @@ const ActionItemCard: React.FC<ActionItemCardProps> = ({
             <div className="flex-1 flex flex-col">
               <div className="flex flex-row items-center justify-between gap-x-2">
                 <p className="font-medium text-black">{action.name}</p>
-                {action.userRelation === "completed" && (
-                  <CheckIcon size="mini" />
-                )}
+                {action.userRelation === "completed" && <CheckIcon size={20} />}
               </div>
               <p className="text-zinc-500">{action.shortDescription}</p>
             </div>

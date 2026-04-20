@@ -123,7 +123,7 @@ const ActionPageTaskPanel = () => {
   const completedHeader = (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-x-3">
-        <CheckIcon size="small" />
+        <CheckIcon size={24} />
         <p>{taskHeaders.actionPage.completed}</p>
       </div>
     </div>

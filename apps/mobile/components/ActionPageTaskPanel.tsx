@@ -118,7 +118,10 @@ const ActionPageTaskPanel = ({
     action,
     shouldLoadCompletedTaskFormByState[state],
   );
-  const taskForm = useTaskForm(action, state === ActionPageTaskPanelState.Completed);
+  const taskForm = useTaskForm(
+    action,
+    state === ActionPageTaskPanelState.Completed,
+  );
   const shareTemplate = getCompletedShareableTextTemplate({
     schemaSnapshot: formResponse?.schemaSnapshot as
       | Record<string, unknown>
@@ -142,7 +145,7 @@ const ActionPageTaskPanel = ({
   const completedHeader = (
     <View className="flex-row items-center justify-between">
       <View className="flex-row items-center gap-x-3">
-        <CheckIcon size="small" />
+        <CheckIcon size={24} />
         <Text>{taskHeaders.actionPage.completed}</Text>
       </View>
       <TouchableOpacity
@@ -151,10 +154,10 @@ const ActionPageTaskPanel = ({
         activeOpacity={0.7}
       >
         <Link2 size={14} color={copied ? colors.green : "#71717a"} />
-        <Text className={copied ? "text-green text-sm" : "text-zinc-500 text-sm"}>
-          {copied
-            ? clipboardCopy.copiedToClipboard
-            : clipboardCopy.share}
+        <Text
+          className={copied ? "text-green text-sm" : "text-zinc-500 text-sm"}
+        >
+          {copied ? clipboardCopy.copiedToClipboard : clipboardCopy.share}
         </Text>
       </TouchableOpacity>
     </View>

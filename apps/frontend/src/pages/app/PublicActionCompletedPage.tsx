@@ -5,7 +5,7 @@ const PublicActionCompletedPage = () => {
   return (
     <CenterLayout className="h-screen">
       <div className="flex flex-row items-center justify-center flex-1 gap-4">
-        <CheckIcon size="xl" />
+        <CheckIcon size={40} />
         <div>
           <p className="text-xl font-bold">Action completed</p>
           <p>Thanks for participating!</p>

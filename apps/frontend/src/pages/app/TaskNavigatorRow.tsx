@@ -1,11 +1,5 @@
 import { Link, href } from "react-router";
-import {
-  Circle,
-  CircleCheck,
-  CircleChevronRight,
-  ArrowRight,
-  Link2,
-} from "lucide-react";
+import { Circle, CircleChevronRight, ArrowRight, Link2 } from "lucide-react";
 import { cn } from "@alliance/shared/styles/util";
 import { type ReactNode } from "react";
 import type { ActionDto, FollowUpForm } from "@alliance/shared/client";
@@ -21,6 +15,7 @@ import {
   getCompletedShareableTextTemplate,
 } from "@alliance/shared/lib/shareText";
 import { clipboardCopy } from "@alliance/shared/lib/copy";
+import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import ShareConfettiButton from "../../components/ShareConfettiButton";
 
 const ICON_SIZE = 16;
@@ -188,7 +183,7 @@ export function TaskNavigatorCompletedRow({
   return (
     <div className="flex flex-col gap-y-1">
       <div className="flex items-center gap-x-2 rounded-lg py-1 px-2 w-full hover:bg-grey-2">
-        <CircleCheck size={ICON_SIZE} className="shrink-0 text-green" />
+        <CheckIcon size={ICON_SIZE} />
         <Link
           to={href("/actions/:id", { id: action.id.toString() })}
           className="text-zinc-400 line-through grow hover:text-zinc-500"

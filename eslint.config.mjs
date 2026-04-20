@@ -21,6 +21,15 @@ export default tseslint.config([
                   "paths": ["@alliance/shared/*"],
             },
         ],
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {
+                    argsIgnorePattern: "^_",
+                    varsIgnorePattern: "^_",
+                    caughtErrorsIgnorePattern: "^_",
+                    destructuredArrayIgnorePattern: "^_",
+                },
+            ],
 		},
         settings: {
             'import/resolver': {
