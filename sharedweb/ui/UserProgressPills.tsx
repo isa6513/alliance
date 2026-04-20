@@ -87,27 +87,30 @@ export function useMaxActionsPerWeek(params: {
       return null;
     }
     const weekNumberByActionId = new Map(
-      actionSummaries.map((action) => [action.id, action.weekNumber])
+      actionSummaries.map((action) => [action.id, action.weekNumber]),
     );
 
     const maxActionsPerWeek: Record<number, number> = {};
     for (const relations of Object.values(userActionRelations)) {
-      const counts = relations.reduce((acc, relation) => {
-        if (PILL_STATUS_DATA[relation.status].pillStyle) {
-          const weekNumber = weekNumberByActionId.get(relation.actionId);
-          if (weekNumber === null || weekNumber === undefined) {
-            return acc;
+      const counts = relations.reduce(
+        (acc, relation) => {
+          if (PILL_STATUS_DATA[relation.status].pillStyle) {
+            const weekNumber = weekNumberByActionId.get(relation.actionId);
+            if (weekNumber === null || weekNumber === undefined) {
+              return acc;
+            }
+            acc[weekNumber] = (acc[weekNumber] ?? 0) + 1;
           }
-          acc[weekNumber] = (acc[weekNumber] ?? 0) + 1;
-        }
-        return acc;
-      }, {} as Record<number, number>);
+          return acc;
+        },
+        {} as Record<number, number>,
+      );
 
       for (const [weekNumberKey, count] of Object.entries(counts)) {
         const weekNumber = Number(weekNumberKey);
         maxActionsPerWeek[weekNumber] = Math.max(
           maxActionsPerWeek[weekNumber] ?? 0,
-          count
+          count,
         );
       }
     }
@@ -151,7 +154,7 @@ function Pill({
                 "rounded flex items-center justify-center text-xs font-semibold",
                 MIN_MAX_WIDTH,
                 pillStyle,
-                pillHeight
+                pillHeight,
               )}
             />
           </div>
@@ -161,11 +164,9 @@ function Pill({
         <div className="flex flex-col items-center justify-center text-center">
           <p>{action.name}</p>
           <p className="text-zinc-500">
-            {action.latestMemberActionDeadline === null
+            {action.memberActionDeadline === null
               ? "No deadline"
-              : `Due ${formatDateTime(
-                  new Date(action.latestMemberActionDeadline)
-                )}`}
+              : `Due ${formatDateTime(new Date(action.memberActionDeadline))}`}
           </p>
           <p className={pillTextStyle}>
             {pillSubtitleText}
@@ -199,9 +200,9 @@ const UserProgressPills = ({
         Math.max(
           1,
           Math.floor(
-            (element.clientWidth + pillGapPx) / (minPillWidthPx + pillGapPx)
-          )
-        )
+            (element.clientWidth + pillGapPx) / (minPillWidthPx + pillGapPx),
+          ),
+        ),
       );
     };
 
@@ -230,8 +231,8 @@ const UserProgressPills = ({
                 ? relation.outOfTime
                   ? ": Out of time"
                   : relation.isMoral
-                  ? ": Moral objection"
-                  : ": Other reason"
+                    ? ": Moral objection"
+                    : ": Other reason"
                 : null
             }
             pillStatusData={pillStatusData}
@@ -276,7 +277,7 @@ const UserProgressPills = ({
               action={action}
               pillStatusData={pillStatusData}
               pillHeight={pillHeight}
-            />
+            />,
           );
         }
       }
@@ -285,8 +286,8 @@ const UserProgressPills = ({
       pills.push(
         ...pillsForWeek,
         ...Array(maxActionsPerWeek[weekNumber] - pillsForWeek.length).fill(
-          <EmptyPill />
-        )
+          <EmptyPill />,
+        ),
       );
     }
 

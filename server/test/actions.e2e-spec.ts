@@ -165,19 +165,16 @@ describe('Actions (e2e)', () => {
       { secret: process.env.JWT_SECRET },
     );
 
-    await createPublishedAction(
-      'Group Restricted Action',
-      {
-        status: ActionStatus.MemberAction,
-        actionOverrides: {
-          visibilityMode: VisibilityMode.Public,
-          cohortExpression: {
-            type: 'Tag',
-            tagId: ctx.defaultTag.id,
-          },
+    await createPublishedAction('Group Restricted Action', {
+      status: ActionStatus.MemberAction,
+      actionOverrides: {
+        visibilityMode: VisibilityMode.Public,
+        cohortExpression: {
+          type: 'Tag',
+          tagId: ctx.defaultTag.id,
         },
       },
-    );
+    });
 
     await createPublishedAction('Group Restricted Hidden Action', {
       status: ActionStatus.MemberAction,
@@ -210,7 +207,7 @@ describe('Actions (e2e)', () => {
         preventCompletion: false,
         publicOnly: false,
         onboarding: false,
-        latestMemberActionEvent: {
+        memberActionEvent: {
           event: null,
           deadline: null,
         },

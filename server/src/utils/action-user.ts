@@ -7,39 +7,37 @@ import type { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import type { Community } from 'src/community/entities/community.entity';
 import { findLeast } from 'src/utils/filter';
 
-export function computeIsContractActiveDuringEntireLatestMemberAction(params: {
-  action: Pick<Action, 'events' | 'latestMemberActionEvent'>;
+export function computeIsContractActiveDuringEntireMemberAction(params: {
+  action: Pick<Action, 'events' | 'memberActionEvent'>;
   user: Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'>;
 }): boolean {
   const { action, user } = params;
-  const { event: latestMemberActionEvent, deadline } =
-    action.latestMemberActionEvent;
+  const { event: memberActionEvent, deadline } = action.memberActionEvent;
 
-  if (!latestMemberActionEvent) {
+  if (!memberActionEvent) {
     return false;
   }
 
   return user.hasActiveContractInFullRange({
-    startDate: latestMemberActionEvent.date,
+    startDate: memberActionEvent.date,
     endDate: deadline,
   });
 }
 
-export function computeIsAwayDuringAnyOfLastMemberAction(params: {
-  action: Pick<Action, 'events' | 'latestMemberActionEvent'>;
+export function computeIsAwayDuringAnyOfMemberAction(params: {
+  action: Pick<Action, 'events' | 'memberActionEvent'>;
   user: Pick<User, 'awayRanges' | 'isAwayAtAnyPointInRange'>;
 }): boolean {
   const { action, user } = params;
 
-  const { event: lastMemberActionEvent, deadline } =
-    action.latestMemberActionEvent;
+  const { event: memberActionEvent, deadline } = action.memberActionEvent;
 
-  if (!lastMemberActionEvent) {
+  if (!memberActionEvent) {
     return false;
   }
 
   return user.isAwayAtAnyPointInRange({
-    startDate: lastMemberActionEvent.date,
+    startDate: memberActionEvent.date,
     endDate: deadline,
   });
 }
@@ -71,8 +69,8 @@ export function computeIsTaggedOrInManualCohortAction(params: {
     manualCohortUserIdSet: null,
     participatingTagIdSet: new Set<string>(),
     everyoneShouldComplete: action.everyoneShouldComplete,
-    latestMemberActionEventDate: action.latestMemberActionEvent?.event?.date,
-    latestMemberActionEventDeadline: action.latestMemberActionEvent?.deadline,
+    memberActionEventDate: action.memberActionEvent?.event?.date,
+    memberActionEventDeadline: action.memberActionEvent?.deadline,
     includeSuspended,
   });
 }
@@ -83,8 +81,8 @@ export function computeIsTaggedOrInManualCohort(params: {
   manualCohortUserIdSet: Set<number> | null;
   participatingTagIdSet: Set<string>;
   everyoneShouldComplete: boolean;
-  latestMemberActionEventDate: Date | undefined | null;
-  latestMemberActionEventDeadline: Date | undefined | null;
+  memberActionEventDate: Date | undefined | null;
+  memberActionEventDeadline: Date | undefined | null;
   includeSuspended: boolean;
 }): boolean {
   const {
@@ -93,8 +91,8 @@ export function computeIsTaggedOrInManualCohort(params: {
     manualCohortUserIdSet,
     participatingTagIdSet,
     everyoneShouldComplete,
-    latestMemberActionEventDate,
-    latestMemberActionEventDeadline,
+    memberActionEventDate,
+    memberActionEventDeadline,
     includeSuspended,
   } = params;
 
@@ -107,8 +105,8 @@ export function computeIsTaggedOrInManualCohort(params: {
     (includeSuspended ||
       everyoneShouldComplete ||
       user.hasActiveContractInFullRange({
-        startDate: latestMemberActionEventDate,
-        endDate: latestMemberActionEventDeadline,
+        startDate: memberActionEventDate,
+        endDate: memberActionEventDeadline,
       }))
   );
 }

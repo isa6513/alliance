@@ -154,17 +154,17 @@ export function getAwayStatus(
   awayRanges: UserAwayRangeDto[],
   date: Date,
 ): TaskAwayStatus {
-  const lastMemberActionEvent = action.events.find(
+  const memberActionEvent = action.events.find(
     (event) =>
       new Date(event.date) <= date && event.newStatus === "member_action",
   );
-  if (!lastMemberActionEvent) {
+  if (!memberActionEvent) {
     return TaskAwayStatus.NOT_AWAY;
   }
 
   const { event, endDate } = getActionEventAt(
     action,
-    new Date(lastMemberActionEvent.date),
+    new Date(memberActionEvent.date),
   );
 
   if (!event) {
@@ -197,18 +197,12 @@ export function getDeadlineTimestamp(
 ): number {
   let i = 0;
   // Find first 'member_action' event
-  while (
-    action.events[i] &&
-    action.events[i].newStatus !== "member_action"
-  ) {
+  while (action.events[i] && action.events[i].newStatus !== "member_action") {
     i++;
   }
 
   // Find next non-'member_action' event
-  while (
-    action.events[i] &&
-    action.events[i].newStatus === "member_action"
-  ) {
+  while (action.events[i] && action.events[i].newStatus === "member_action") {
     i++;
   }
 
@@ -418,9 +412,9 @@ export function calculateAllCompletionData(params: {
     (
       action,
     ): action is typeof action & {
-      latestMemberActionDeadline: number;
+      memberActionDeadline: number;
     } =>
-      action.latestMemberActionDeadline !== null &&
+      action.memberActionDeadline !== null &&
       calculateCompletionData([action]).nTotal > 0,
   );
   if (actionsWithUserRelations.length === 0) {
@@ -435,7 +429,7 @@ export function calculateAllCompletionData(params: {
   );
   if (activeActions.length === 0) {
     const previousActions = actionsWithUserRelations.filter(
-      (action) => action.latestMemberActionDeadline < Date.now(),
+      (action) => action.memberActionDeadline < Date.now(),
     );
     if (previousActions.length === 0) {
       return {
@@ -445,11 +439,11 @@ export function calculateAllCompletionData(params: {
     }
 
     const latestPreviousDeadline = Math.max(
-      ...previousActions.map((action) => action.latestMemberActionDeadline),
+      ...previousActions.map((action) => action.memberActionDeadline),
     );
     const selectedPreviousActions = previousActions.filter(
       (action) =>
-        action.latestMemberActionDeadline >=
+        action.memberActionDeadline >=
         latestPreviousDeadline - actionDeadlineWindowMs,
     );
     return {
@@ -459,12 +453,11 @@ export function calculateAllCompletionData(params: {
   }
 
   const earliestDeadline = Math.min(
-    ...activeActions.map((action) => action.latestMemberActionDeadline),
+    ...activeActions.map((action) => action.memberActionDeadline),
   );
   const currentActions = activeActions.filter(
     (action) =>
-      action.latestMemberActionDeadline <
-      earliestDeadline + actionDeadlineWindowMs,
+      action.memberActionDeadline < earliestDeadline + actionDeadlineWindowMs,
   );
 
   return {

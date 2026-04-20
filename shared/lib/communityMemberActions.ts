@@ -37,11 +37,11 @@ export function getDeadlineTimestampByUserId(params: {
         if (
           !action ||
           !DEADLINE_IN_CONSIDERATION[relation.status] ||
-          action.latestMemberActionDeadline === null
+          action.memberActionDeadline === null
         ) {
           continue;
         }
-        deadline = Math.min(deadline, action.latestMemberActionDeadline);
+        deadline = Math.min(deadline, action.memberActionDeadline);
       }
       return [+userIdKey, deadline];
     }),

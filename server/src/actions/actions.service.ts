@@ -130,8 +130,8 @@ import { run } from '@alliance/common/run';
 import { CachedFilter } from 'src/utils/cached-filter';
 import { findLeast } from 'src/utils/filter';
 import {
-  computeIsAwayDuringAnyOfLastMemberAction,
-  computeIsContractActiveDuringEntireLatestMemberAction,
+  computeIsAwayDuringAnyOfMemberAction,
+  computeIsContractActiveDuringEntireMemberAction,
   computeIsTaggedOrInManualCohort,
   computeShouldParticipate,
 } from 'src/utils/action-user';
@@ -533,7 +533,7 @@ export class ActionsService {
             cohortExpression: action.cohortExpression,
           })) &&
           (action.everyoneShouldComplete ||
-            computeIsContractActiveDuringEntireLatestMemberAction({
+            computeIsContractActiveDuringEntireMemberAction({
               action,
               user,
             }));
@@ -832,9 +832,8 @@ export class ActionsService {
         continue;
       }
 
-      generalUpdate.startDate = action.latestMemberActionEvent.event?.date;
-      generalUpdate.endDate =
-        action.latestMemberActionEvent.deadline ?? undefined;
+      generalUpdate.startDate = action.memberActionEvent.event?.date;
+      generalUpdate.endDate = action.memberActionEvent.deadline ?? undefined;
     }
     await this.generalUpdateRepository.save(generalUpdates);
   }
@@ -878,8 +877,8 @@ export class ActionsService {
           manualCohortUserIdSet: new Set(update.manualCohortUserIds),
           participatingTagIdSet: new Set(update.tags.map((tag) => tag.id)),
           everyoneShouldComplete: false,
-          latestMemberActionEventDate: update.startDate,
-          latestMemberActionEventDeadline: update.endDate,
+          memberActionEventDate: update.startDate,
+          memberActionEventDeadline: update.endDate,
           includeSuspended: false,
         });
       })
@@ -2539,8 +2538,8 @@ export class ActionsService {
           allMembersTagId !== null &&
           expressionReferencesTag(action.cohortExpression, allMembersTagId),
         suiteId: action.suite?.id,
-        latestMemberActionDeadline:
-          action.latestMemberActionEvent?.deadline?.getTime() ?? null,
+        memberActionDeadline:
+          action.memberActionEvent?.deadline?.getTime() ?? null,
       } satisfies UserActionSummaryDto;
     });
 
@@ -2579,8 +2578,8 @@ export class ActionsService {
         const detail = getDetail({ userId, actionId: action.id });
         detail.status = action.optional
           ? UserActionRelationPillStatus.OptionalTask
-          : action.latestMemberActionEvent?.deadline &&
-              action.latestMemberActionEvent.deadline < now
+          : action.memberActionEvent?.deadline &&
+              action.memberActionEvent.deadline < now
             ? UserActionRelationPillStatus.MissedDeadline
             : UserActionRelationPillStatus.Todo;
       }
@@ -2588,7 +2587,7 @@ export class ActionsService {
         const detail = getDetail({ userId, actionId: action.id });
         const theUser = userCachedFilter.filtered({ id: userId })[0]!;
         if (
-          computeIsAwayDuringAnyOfLastMemberAction({
+          computeIsAwayDuringAnyOfMemberAction({
             user: theUser,
             action,
           }) &&

@@ -358,7 +358,7 @@ export class Action {
   }
 
   @IsOptional()
-  private _latestMemberActionEvent:
+  private _memberActionEvent:
     | {
         event: ActionEvent;
         deadline: Date | null;
@@ -368,26 +368,24 @@ export class Action {
         deadline: null;
       }
     | null = null;
-  get latestMemberActionEvent(): NonNullable<
-    typeof this._latestMemberActionEvent
-  > {
-    populateCache: if (!this._latestMemberActionEvent) {
+  get memberActionEvent(): NonNullable<typeof this._memberActionEvent> {
+    populateCache: if (!this._memberActionEvent) {
       if (!this.events) {
-        this._latestMemberActionEvent = {
+        this._memberActionEvent = {
           event: null,
           deadline: null,
         };
         break populateCache;
       }
 
-      const latestMemberActionEvent = findLeast(
+      const memberActionEvent = findLeast(
         this.events,
         (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
         (event) => event.newStatus === ActionStatus.MemberAction,
       );
 
-      if (!latestMemberActionEvent) {
-        this._latestMemberActionEvent = {
+      if (!memberActionEvent) {
+        this._memberActionEvent = {
           event: null,
           deadline: null,
         };
@@ -398,25 +396,23 @@ export class Action {
         this.events,
         (a, b) => a.date.getTime() - b.date.getTime(),
         (event) =>
-          event.date > latestMemberActionEvent.date &&
+          event.date > memberActionEvent.date &&
           event.newStatus !== ActionStatus.MemberAction,
       );
-      this._latestMemberActionEvent = {
-        event: latestMemberActionEvent,
+      this._memberActionEvent = {
+        event: memberActionEvent,
         deadline: deadlineEvent?.date ?? null,
       };
     }
-    return this._latestMemberActionEvent;
+    return this._memberActionEvent;
   }
 
   @IsOptional()
   get deadlineWeekNumber(): number | null {
-    if (!this.latestMemberActionEvent?.deadline) {
+    if (!this.memberActionEvent?.deadline) {
       return null;
     } else {
-      return Math.floor(
-        this.latestMemberActionEvent.deadline.getTime() / MS_IN_WEEK,
-      );
+      return Math.floor(this.memberActionEvent.deadline.getTime() / MS_IN_WEEK);
     }
   }
 }

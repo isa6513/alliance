@@ -186,7 +186,7 @@ const CommunityPage = () => {
 
     const now = Date.now();
     const futureDeadlines = communityMemberInfo.actions
-      .map((a) => a.latestMemberActionDeadline)
+      .map((a) => a.memberActionDeadline)
       .filter((d): d is number => d != null && d > now);
 
     if (futureDeadlines.length === 0) return;

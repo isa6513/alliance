@@ -35,7 +35,7 @@ export class UserActionSummaryDto {
   suiteId?: number;
 
   @ApiProperty({ type: Number, nullable: true })
-  latestMemberActionDeadline: number | null;
+  memberActionDeadline: number | null;
 }
 
 export class ActionSuiteSummaryDto {

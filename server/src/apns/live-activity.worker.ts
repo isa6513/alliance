@@ -62,7 +62,7 @@ export class LiveActivityWorker {
 
     for (const action of actions) {
       if (action.status !== ActionStatus.MemberAction) continue;
-      const deadline = action.latestMemberActionEvent?.deadline;
+      const deadline = action.memberActionEvent?.deadline;
       if (!deadline) continue;
 
       // Only start if deadline is within 8 hours and hasn't passed
@@ -155,7 +155,7 @@ export class LiveActivityWorker {
     });
 
     for (const reg of registrations) {
-      const deadline = reg.action?.latestMemberActionEvent?.deadline;
+      const deadline = reg.action?.memberActionEvent?.deadline;
       if (!deadline || deadline.getTime() > now.getTime()) continue;
 
       try {
