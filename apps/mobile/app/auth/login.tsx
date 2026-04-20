@@ -17,8 +17,10 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   const handleForgotPassword = async () => {
+    if (isSendingReset) return;
     if (!email) {
       Alert.alert(
         forgotPasswordCopy.emailRequired.title,
@@ -27,15 +29,20 @@ const LoginScreen = () => {
       return;
     }
 
-    const resp = await authForgotPassword({ body: { email } });
-    if (resp.error) {
-      Alert.alert("Error", forgotPasswordCopy.sendError);
-      return;
+    setIsSendingReset(true);
+    try {
+      const resp = await authForgotPassword({ body: { email } });
+      if (resp.error) {
+        Alert.alert("Error", forgotPasswordCopy.sendError);
+        return;
+      }
+      Alert.alert(
+        forgotPasswordCopy.sendSuccess.title,
+        forgotPasswordCopy.sendSuccess.message,
+      );
+    } finally {
+      setIsSendingReset(false);
     }
-    Alert.alert(
-      forgotPasswordCopy.sendSuccess.title,
-      forgotPasswordCopy.sendSuccess.message,
-    );
   };
 
   const handleLogin = async () => {
@@ -113,7 +120,11 @@ const LoginScreen = () => {
             </Button>
           </View>
         </Card>
-        <Pressable onPress={handleForgotPassword} className="mt-4 self-center">
+        <Pressable
+          onPress={handleForgotPassword}
+          disabled={isSendingReset}
+          className="mt-4 self-center"
+        >
           <Text className="text-green">{forgotPasswordCopy.prompt}</Text>
         </Pressable>
       </View>
