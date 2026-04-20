@@ -3,21 +3,20 @@ import { useQueries } from "@tanstack/react-query";
 import { Link, href } from "react-router";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import alliancePeople from "../../assets/alliance_people.webp";
-import { actionsFindOne, userFindOne } from "@alliance/shared/client";
-import type { ActionDto, ProfileDto } from "@alliance/shared/client";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
+import ewaste from "../../assets/ewaste.webp";
+import { userFindOne } from "@alliance/shared/client";
+import type { ProfileDto } from "@alliance/shared/client";
 import Footer from "../../components/Footer";
-import { formatTime } from "@alliance/shared/lib/utils";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-
-const FEATURED_ACTION_IDS: number[] = [91, 84, 76, 75];
+import { ArrowRight } from "lucide-react";
 
 /** Shared width + horizontal padding for hero copy and sections below. */
 const LANDING_MAIN_COL = "mx-auto w-full max-w-4xl px-6 sm:px-10 lg:px-16";
+const LANDING_BIG_COL = "px-4 lg:px-32 grid w-full";
 
 /** Gap between sections + outer vertical padding (avoids stacked py on each section). */
-const LANDING_BODY = "gap-10 lg:gap-20 py-18 lg:py-28";
+const LANDING_BODY = "gap-16 sm:gap-24 lg:gap-36 py-18 lg:py-28";
 const LANDING_SECTION_INNER = "flex flex-col gap-y-6 lg:gap-y-8";
 
 const MEMBER_QUOTES = [
@@ -75,7 +74,7 @@ function MemberQuoteCard({
   );
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-row items-start gap-3">
+    <div className="flex h-full min-h-0 w-full flex-row items-start gap-3 border border-grey-1 p-4 sm:p-6 rounded-md">
       <div className="shrink-0">
         {isPending ? (
           <div
@@ -100,23 +99,6 @@ function MemberQuoteCard({
   );
 }
 
-function usePrelaunchActions() {
-  const results = useQueries({
-    queries: FEATURED_ACTION_IDS.map((id) => ({
-      queryKey: ["actions", "featured", id],
-      queryFn: () =>
-        actionsFindOne({ path: { id } }).then(
-          (r) => r.data as ActionDto | undefined,
-        ),
-    })),
-  });
-  const actions = results
-    .map((r) => r.data)
-    .filter((a): a is ActionDto => a != null);
-  const isPending = results.some((r) => r.isPending);
-  return { actions, isPending };
-}
-
 function HowItWorksCard({
   title,
   children,
@@ -126,35 +108,37 @@ function HowItWorksCard({
 }) {
   return (
     <div className="flex flex-col gap-1 rounded-md bg-zinc-50 p-4 lg:p-6">
-      <p className="text-lg font-medium text-black lg:text-xl">{title}</p>
+      <p className="text-lg font-semibold text-black lg:text-xl">{title}</p>
       <p className="text-base text-zinc-500 lg:text-lg">{children}</p>
     </div>
   );
 }
 
-function PreviewActionCard({ action }: { action: ActionDto }) {
+function ImpactCard({
+  id,
+  emphasis,
+  rest,
+}: {
+  id: number;
+  emphasis: string;
+  rest: string;
+}) {
   return (
     <Link
-      to={href("/actions/:id", { id: action.id.toString() })}
-      className="rounded-md group relative flex flex-row items-start justify-between gap-4 p-4 lg:p-6 bg-zinc-50 hover:bg-zinc-100"
+      to={href("/actions/:id", { id: id.toString() })}
+      className="flex flex-col gap-4 border border-grey-1 group hover:border-grey-3 rounded-md p-4 sm:p-6"
     >
-      <div className="flex flex-col gap-1 min-w-0 flex-1">
-        <p className="text-zinc-500 text-sm">
-          {formatTime(new Date(action.createdAt), { addSuffix: true })}
-        </p>
-        <p className="text-lg lg:text-xl font-medium text-black">
-          {action.name}
-        </p>
-        <p className="text-zinc-500 text-base lg:text-lg">
-          {action.shortDescription}
-        </p>
-      </div>
+      <p className="text-lg text-zinc-500 lg:text-xl">
+        <span className="font-semibold text-black group-hover:underline">
+          {emphasis}
+        </span>{" "}
+        {rest}
+      </p>
     </Link>
   );
 }
 
 const PrelaunchLandingPage: React.FC = () => {
-  const { actions, isPending } = usePrelaunchActions();
   const memberQuoteQueries = useMemberQuoteProfiles(
     MEMBER_QUOTES.map((q) => q.memberId),
   );
@@ -199,10 +183,10 @@ const PrelaunchLandingPage: React.FC = () => {
         <section className="w-full flex flex-col gap-8">
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
             <div className="flex flex-col gap-4">
-              <p className="text-title-medium w-full text-black">How we work</p>
+              <p className="text-title-large w-full text-black">How we work</p>
               <p className="text-lg text-zinc-500 lg:text-xl">
-                We design actions based on the number of reliable members we can
-                count on.
+                We design actions based on the number of members we can count
+                on.
               </p>
             </div>
             <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
@@ -216,10 +200,9 @@ const PrelaunchLandingPage: React.FC = () => {
               </HowItWorksCard>
             </div>
           </div>
-        </section>
-
-        <section className="w-full">
-          <div className="px-4 lg:px-32 grid w-full grid-cols-1 gap-8 lg:gap-20 md:grid-cols-3">
+          <div
+            className={`${LANDING_BIG_COL} grid-cols-1 gap-2 md:grid-cols-3`}
+          >
             {MEMBER_QUOTES.map((item, index) => (
               <MemberQuoteCard
                 key={`${item.memberId}-${index}`}
@@ -235,7 +218,7 @@ const PrelaunchLandingPage: React.FC = () => {
         <section className="w-full">
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
             <div className="flex flex-col gap-4">
-              <p className="text-title-medium w-full text-black">
+              <p className="text-title-large w-full text-black">
                 Our priorities
               </p>
               <p className="text-lg text-zinc-500 lg:text-xl">
@@ -254,31 +237,72 @@ const PrelaunchLandingPage: React.FC = () => {
         <section className="w-full">
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
             <div className="flex flex-col gap-4">
-              <p className="text-title-medium w-full text-black">
-                Recent actions
-              </p>
+              <p className="text-title-large w-full text-black">Our impact</p>
               <p className="text-lg text-zinc-500 lg:text-xl">
                 At this stage, we are taking small-scale actions focused on
                 learning.
               </p>
             </div>
-            {isPending ? (
-              <div className="flex justify-center py-8">
-                <Spinner size="large" />
+          </div>
+          <div className={`${LANDING_BIG_COL} flex flex-col mt-8 md:mt-12`}>
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <ImpactCard
+                  id={84}
+                  emphasis="We donated $2,552"
+                  rest="to Helen Keller International by making small adjustments to our personal habits."
+                />
+
+                <ImpactCard
+                  id={75}
+                  emphasis="We submitted 3 formal comments"
+                  rest="on U.S. federal AI policy dockets, informed by member and expert opinions."
+                />
+
+                <ImpactCard
+                  id={56}
+                  emphasis="We showed that AI companies violate privacy expectations"
+                  rest="by running a survey with friends and family."
+                />
+
+                <ImpactCard
+                  id={14}
+                  emphasis="We caused 11 cafe locations"
+                  rest="to adopt bring-your-own-cup policies by helping them attain media recognition."
+                />
               </div>
-            ) : (
-              <div className="flex w-full flex-col gap-2">
-                {actions.map((action) => (
-                  <PreviewActionCard key={action.id} action={action} />
-                ))}
+              <div className="flex flex-row sm:flex-col items-center sm:items-start text-link">
+                <Link
+                  to="/progress"
+                  className="whitespace-nowrap text-link text-lg flex flex-row items-center gap-x-1"
+                >
+                  See more
+                </Link>
+                <ArrowRight className="w-4 h-4 " />
               </div>
-            )}
+            </div>
+          </div>
+          <div className={`${LANDING_BIG_COL} mt-8 md:mt-12`}>
+            <div className="max-w-5xl mx-auto flex flex-col gap-4">
+              <img
+                src={ewaste}
+                alt="E-waste"
+                className="w-full h-full object-cover"
+              />
+              <p className="text-lg text-zinc-500 text-left sm:text-center flex flex-row items-center justify-center gap-1">
+                We collected and recycled 57 kg (126 lbs) of e-waste.{" "}
+                <Link to="/actions/60" className="text-link">
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </p>
+            </div>
           </div>
         </section>
+
         <section className="w-full">
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
             <div className="flex flex-col gap-4">
-              <p className="text-title-medium w-full text-black">Join us</p>
+              <p className="text-title-large w-full text-black">Join us</p>
               <p className="text-zinc-500 text-lg lg:text-xl">
                 Membership is currently by invitation only. If you are
                 interested in becoming a member, please{" "}
