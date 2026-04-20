@@ -18,7 +18,10 @@ import { User } from 'src/user/entities/user.entity';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { Action } from 'src/actions/entities/action.entity';
-import { ActionEvent, ActionStatus } from 'src/actions/entities/action-event.entity';
+import {
+  ActionEvent,
+  ActionStatus,
+} from 'src/actions/entities/action-event.entity';
 import { ContractEvent } from 'src/user/entities/contract-event.entity';
 import {
   MemberCompletionRetentionCohortDto,
@@ -300,9 +303,7 @@ ORDER BY pp.total_session_duration_seconds DESC
         .addSelect('COUNT(DISTINCT activity.userId)', 'withdrawnCount')
         .where('activity.actionId IN (:...actionIds)', { actionIds })
         .andWhere('activity.type IN (:...types)', {
-          types: [
-            ActionActivityType.USER_WONT_COMPLETE,
-          ],
+          types: [ActionActivityType.USER_WONT_COMPLETE],
         })
         .groupBy('activity.actionId')
         .getRawMany<{ actionId: string; withdrawnCount: string }>();
@@ -509,10 +510,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     const maxDurationDays = 21;
 
     const eligibleActions = actionStats.filter((record) => {
-      if (
-        !record.memberActionStartDate ||
-        record.usersJoined <= 0
-      ) {
+      if (!record.memberActionStartDate || record.usersJoined <= 0) {
         return false;
       }
       if (record.memberActionStartDate > now) {
@@ -765,7 +763,6 @@ ORDER BY pp.total_session_duration_seconds DESC
           await this.actionEventRecipientService.findBaseUsersForEvent({
             action,
             eventId: memberActionEvent.id,
-            eventStatus: ActionStatus.MemberAction,
             includeSuspended: true,
           });
 
@@ -809,9 +806,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     }
 
     return Array.from(cohortWeekTotals.entries())
-      .sort(
-        ([cohortA], [cohortB]) => cohortA - cohortB,
-      )
+      .sort(([cohortA], [cohortB]) => cohortA - cohortB)
       .map(([cohortIndex, weekMap]) => {
         const cohortStartDate = actionStartDates[cohortIndex];
         const cohortStart = this.formatDateKey(cohortStartDate);
@@ -970,7 +965,12 @@ ORDER BY pp.total_session_duration_seconds DESC
     startDate: string,
     endDate: string,
   ): Promise<
-    { date: string; activeCount: number; churnedCount: number; totalEverSigned: number }[]
+    {
+      date: string;
+      activeCount: number;
+      churnedCount: number;
+      totalEverSigned: number;
+    }[]
   > {
     // Get all contract events ordered by date
     const allEvents = await this.contractEventRepository.find({

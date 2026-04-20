@@ -191,7 +191,6 @@ export class ForumActionCompleterWorker {
       await this.actionEventRecipientService.findBaseUsersForEvent({
         action,
         eventId: memberActionEvent.id,
-        eventStatus: ActionStatus.MemberAction,
       });
     const baseUserIds = new Set(baseUsers.map((user) => user.id));
     const eligibleResponderIds = Array.from(replyAuthorIds).filter((id) =>
