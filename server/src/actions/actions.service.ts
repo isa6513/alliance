@@ -386,7 +386,6 @@ export class ActionsService {
     const baseUsers =
       await this.actionEventRecipientService.findBaseUsersForEvent({
         eventId: event.id,
-        eventStatus: ActionStatus.MemberAction,
         action,
         includeDismissed: true,
       });
@@ -2778,7 +2777,6 @@ export class ActionsService {
       await this.actionEventRecipientService.findBaseUsersForEvent({
         action,
         eventId: event.id,
-        eventStatus: ActionStatus.MemberAction,
       });
 
     const completionActivities = await this.actionActivityRepository.find({

@@ -82,7 +82,6 @@ export class ActionEventRecipientService {
         );
         if (!event) return new Set();
         const baseUsers = await this.findBaseUsersForEvent({
-          eventStatus: ActionStatus.MemberAction,
           action,
           eventId: event.id,
         });
@@ -161,14 +160,12 @@ export class ActionEventRecipientService {
   }
 
   public async findBaseUsersForEvent(params: {
-    eventStatus: ActionStatus;
     action: Action;
     eventId: number;
     includeSuspended?: boolean;
     includeDismissed?: boolean;
   }): Promise<User[]> {
-    const { eventStatus, action, eventId, includeSuspended, includeDismissed } =
-      params;
+    const { action, eventId, includeSuspended, includeDismissed } = params;
     const events =
       action.events ??
       (
@@ -222,12 +219,8 @@ export class ActionEventRecipientService {
         })?.date,
       });
 
-    if (eventStatus === ActionStatus.MemberAction) {
-      const users = await this.userService.findActiveUsersWithTags();
-      return users.filter(filterToEligible);
-    }
-
-    return [];
+    const users = await this.userService.findActiveUsersWithTags();
+    return users.filter(filterToEligible);
   }
 
   async filterForShouldRemind(
@@ -365,7 +358,6 @@ export class ActionEventRecipientService {
       : await this.findBaseUsersForEvent({
           action: event.action,
           eventId: event.id,
-          eventStatus: event.newStatus,
         });
     return type === ActionEventNotifType.Announcement
       ? users
