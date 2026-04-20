@@ -1,42 +1,42 @@
 import eslintPluginExample from "./eslint/eslint-local-rules.mjs";
-import tseslint from 'typescript-eslint';
+import tseslint from "typescript-eslint";
 
 export default tseslint.config([
-	...tseslint.configs.recommended,
-	{
-        plugins: {'local-rules': eslintPluginExample},
-		files: ["**/*.ts", "**/*.tsx"],
-		languageOptions: {
-			parserOptions: {
-				tsconfigRootDir: import.meta.dirname,
-			},
-		},
-		rules: {
-			"prefer-const": "warn",
-			"no-constant-binary-expression": "error",
-			"local-rules/enforce-foo-bar": "error",
-            "@typescript-eslint/no-restricted-imports": [
-                "error",
-                {
-                  "paths": ["@alliance/shared/*"],
-            },
-        ],
-            "@typescript-eslint/no-unused-vars": [
-                "error",
-                {
-                    argsIgnorePattern: "^_",
-                    varsIgnorePattern: "^_",
-                    caughtErrorsIgnorePattern: "^_",
-                    destructuredArrayIgnorePattern: "^_",
-                },
-            ],
-		},
-        settings: {
-            'import/resolver': {
-                typescript: {
-                    project: ['apps/frontend/tsconfig.json'],
-                },
-            },
-        },
+  ...tseslint.configs.recommended,
+  {
+    plugins: { "local-rules": eslintPluginExample },
+    files: ["**/*.ts", "**/*.tsx"],
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
+    rules: {
+      "prefer-const": "warn",
+      "no-constant-binary-expression": "error",
+      "local-rules/enforce-foo-bar": "error",
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          paths: ["@alliance/shared/*"],
+        },
+      ],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+        },
+      ],
+    },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          project: ["apps/frontend/tsconfig.json"],
+        },
+      },
+    },
+  },
 ]);
