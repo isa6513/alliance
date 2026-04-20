@@ -195,51 +195,6 @@ export class LikeNotificationService {
     );
   }
 
-  async getActiveLikeNotification(params: {
-    ownerId: number;
-    targetType: LikeNotificationTarget;
-    targetId: number;
-    groupingKey?: GroupingKey;
-  }): Promise<Notification | null> {
-    const groupingKey =
-      params.groupingKey ?? `like:${params.targetType}:${params.targetId}`;
-
-    const notification = await this.notifRepository.findOne({
-      where: {
-        user: { id: params.ownerId },
-        groupingKey,
-        category: NotificationCategory.Likes,
-        readAt: IsNull(),
-      },
-      relations: { associatedUsers: true },
-    });
-
-    if (!notification) {
-      return null;
-    }
-
-    const dedupedUsers = this.dedupeAssociatedUsers(
-      notification.associatedUsers ?? [],
-    );
-
-    if (dedupedUsers.length !== (notification.associatedUsers?.length ?? 0)) {
-      notification.associatedUsers = dedupedUsers;
-      notification.groupingCount = dedupedUsers.length;
-      notification.message = this.buildMessage({
-        targetType: params.targetType,
-        count: dedupedUsers.length,
-        targetContent: notification.targetContent,
-        likerName:
-          dedupedUsers.length === 1
-            ? new ProfileDto(dedupedUsers[0]).displayName
-            : undefined,
-      });
-      await this.notifRepository.save(notification);
-    }
-
-    return notification;
-  }
-
   private buildMessage(params: {
     targetType: LikeNotificationTarget;
     count: number;
@@ -275,18 +230,5 @@ export class LikeNotificationService {
     }
 
     return `${count} people liked your ${label}`;
-  }
-
-  private dedupeAssociatedUsers(users: User[]): User[] {
-    const seen = new Set<number>();
-    const unique: User[] = [];
-    for (const user of users) {
-      if (!user || user.id === undefined || seen.has(user.id)) {
-        continue;
-      }
-      seen.add(user.id);
-      unique.push(user);
-    }
-    return unique;
   }
 }
