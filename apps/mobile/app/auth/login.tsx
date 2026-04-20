@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { View, Alert } from "react-native";
+import { View, Alert, Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import { authForgotPassword } from "@alliance/shared/client";
+import { forgotPassword as forgotPasswordCopy } from "@alliance/shared/lib/copy";
 import { useAuth } from "../../lib/AuthContext";
 import Button from "../../components/system/Button";
 import Input from "../../components/system/Input";
@@ -15,6 +17,26 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      Alert.alert(
+        forgotPasswordCopy.emailRequired.title,
+        forgotPasswordCopy.emailRequired.message,
+      );
+      return;
+    }
+
+    const resp = await authForgotPassword({ body: { email } });
+    if (resp.error) {
+      Alert.alert("Error", forgotPasswordCopy.sendError);
+      return;
+    }
+    Alert.alert(
+      forgotPasswordCopy.sendSuccess.title,
+      forgotPasswordCopy.sendSuccess.message,
+    );
+  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -91,6 +113,9 @@ const LoginScreen = () => {
             </Button>
           </View>
         </Card>
+        <Pressable onPress={handleForgotPassword} className="mt-4 self-center">
+          <Text className="text-green">{forgotPasswordCopy.prompt}</Text>
+        </Pressable>
       </View>
     </View>
   );

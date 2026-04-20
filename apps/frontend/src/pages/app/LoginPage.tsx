@@ -5,6 +5,7 @@ import {
   SignInDto,
 } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
+import { forgotPassword as forgotPasswordCopy } from "@alliance/shared/lib/copy";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import React, { useEffect, useMemo, useState } from "react";
@@ -35,7 +36,7 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState<string | null>(
-    location.state?.message || null
+    location.state?.message || null,
   );
   const navigate = useNavigate();
 
@@ -84,7 +85,7 @@ const LoginPage: React.FC = () => {
 
   const handleForgotPasswordClick = async () => {
     if (!formData.email) {
-      setMessage('Enter an email address, then click "Forgot password" again.');
+      setMessage(forgotPasswordCopy.emailRequired.message);
       return;
     }
 
@@ -93,12 +94,10 @@ const LoginPage: React.FC = () => {
       body: { email: formData.email },
     });
     if (resp.error) {
-      setError("Error sending password reset email.");
+      setError(forgotPasswordCopy.sendError);
       console.error(resp.error);
     } else {
-      setMessage(
-        "A link to reset your password has been sent to your email address."
-      );
+      setMessage(forgotPasswordCopy.sendSuccess.message);
     }
   };
 
@@ -188,7 +187,7 @@ const LoginPage: React.FC = () => {
             className="mt-4 text-green text-center hover:underline cursor-pointer"
             onClick={handleForgotPasswordClick}
           >
-            Forgot password?
+            {forgotPasswordCopy.prompt}
           </p>
         </div>
       </div>

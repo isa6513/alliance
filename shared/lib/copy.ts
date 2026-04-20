@@ -191,3 +191,17 @@ export const outputFieldPublicToggle = {
   showPublicly: "Show my response to other members",
   hidePublicly: "Hide my response from others",
 } as const;
+
+export const forgotPassword = {
+  prompt: "Forgot password?",
+  emailRequired: {
+    title: "Enter your email",
+    message: 'Enter an email address above, then try "Forgot password?" again.',
+  },
+  sendError: "Error sending password reset email.",
+  sendSuccess: {
+    title: "Check your email",
+    message:
+      "A link to reset your password has been sent to your email address.",
+  },
+} as const;
