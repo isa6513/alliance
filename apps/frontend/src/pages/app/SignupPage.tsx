@@ -387,7 +387,7 @@ const SignupPage: React.FC = () => {
               </h2>
               <p className="text-zinc-500 text-lg md:text-xl mb-6">
                 We ask members to show up consistently so that we can develop
-                precise, effective actions plans in advance.
+                precise, effective action plans in advance.
               </p>
               <div className="flex flex-col gap-y-2">
                 {memberQuotes.map((memberQuote, index) => (
