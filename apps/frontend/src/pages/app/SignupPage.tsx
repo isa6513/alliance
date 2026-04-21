@@ -20,9 +20,12 @@ import { isFeatureEnabled } from "../../lib/config";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 
 import { CardStyle } from "@alliance/shared/styles/card";
-import ExampleActionCardList from "../../components/ExampleActionCardList";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
+import FeaturedImpactCard from "../../components/FeaturedImpactCard";
+import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
 import { ChevronRight } from "lucide-react";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import Footer from "../../components/Footer";
 
 function formatSignupSocialProofNames(
   profiles: Pick<ProfileDto, "displayName">[],
@@ -209,18 +212,18 @@ const SignupPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row">
-      {/* Left: create account — fixed on md+ so only the right column scrolls */}
-      <div className="w-full md:w-2/5 md:fixed md:inset-y-0 md:left-0 md:z-10 bg-white flex items-center justify-center px-4 md:px-8 py-12 md:overflow-y-auto">
-        <div className="w-full max-w-lg">
+    <div className="min-h-screen w-full bg-white">
+      <PrelaunchNavbar transparent={false} absolute={false} />
+      <div className="mx-auto w-full max-w-3xl px-4 sm:px-8 py-12 lg:py-16 flex flex-col gap-y-12 lg:gap-y-16">
+        <section className="flex flex-col gap-y-6">
           {isPreviewMode && (
-            <p className="mb-4 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
+            <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
               Preview: this is what people will see when they sign up with your
               invite link.
             </p>
           )}
           {isInviteValid && inviterProfile && (
-            <div className="mb-3 rounded-md">
+            <div className="rounded-md">
               <div className="flex flex-row gap-x-1 items-center text-zinc-500">
                 <span>Invited by </span>
                 <AvatarProfile
@@ -236,10 +239,7 @@ const SignupPage: React.FC = () => {
           )}
 
           {error && (
-            <Card
-              style={CardStyle.Alert}
-              className="border-red-400 bg-red-50 mb-6"
-            >
+            <Card style={CardStyle.Alert} className="border-red-400 bg-red-50">
               <span className="text-red-700">{error}</span>
             </Card>
           )}
@@ -247,10 +247,20 @@ const SignupPage: React.FC = () => {
           <div className="relative">
             {isInviteValid ? (
               <div>
-                <h2 className="font-medium text-3xl">Create an account</h2>
+                <h2
+                  className="font-semibold text-3xl md:text-4xl font-serif mb-2"
+                  id="create-account"
+                >
+                  Create an account
+                </h2>
+                <p className="text-lg md:text-xl text-zinc-500">
+                  The Alliance is a global community of people cooperating to
+                  improve the world. We&apos;re in an early, experimental
+                  phase—membership is invite-only.
+                </p>
                 {(signupSocialProofPending ||
                   (signupSocialProof?.profiles?.length ?? 0) > 0) && (
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4 min-h-9">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4 mt-3 min-h-9">
                     <div className="flex flex-row items-center shrink-0">
                       {signupSocialProofPending
                         ? null
@@ -293,7 +303,7 @@ const SignupPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="p-4 md:p-8 space-y-4 flex flex-col">
+              <div className="space-y-4 flex flex-col">
                 <p className="font-semibold">
                   You were sent an invite that has already been used.
                 </p>
@@ -313,7 +323,7 @@ const SignupPage: React.FC = () => {
           </div>
 
           {!referralCode && (
-            <div className="mt-6 text-center">
+            <div className="text-center sm:text-left">
               <p className="text-[11pt] text-zinc-600">
                 Already have an account?{" "}
                 <Link
@@ -325,38 +335,64 @@ const SignupPage: React.FC = () => {
               </p>
             </div>
           )}
-        </div>
-      </div>
+        </section>
 
-      {/* Right: info */}
-      <div className="w-full md:w-3/5 md:ml-[40%] bg-grey-0 border-l border-grey-1 flex items-center justify-center px-4 sm:px-12 lg:px-24 xl:px-36 py-12 lg:py-24">
-        <div className="w-full">
-          <h2 className="text-title-medium mb-8">Join the Alliance</h2>
-
-          <div className="w-full flex flex-col gap-y-8 lg:gap-y-12">
-            <div>
-              <p className="text-lg md:text-xl text-zinc-900 mb-4">
-                We&apos;re a global group of people cooperating to improve the
-                world.{" "}
-                <Link to={href("/progress")}>
-                  We develop and assign effective actions that take 15 minutes a
-                  week.
-                </Link>
-              </p>
-              <div className="text-base">
-                <ExampleActionCardList bgColor="white" dropdown={true} />
+        <section className="flex flex-col">
+          <div className="flex flex-col gap-y-8 md:gap-y-14">
+            <div className="flex flex-col">
+              <h2 className="font-semibold text-2xl md:text-3xl font-serif mb-2">
+                Easy, tangible impact
+              </h2>
+              <div className="flex flex-col mb-6">
+                <p className="text-lg md:text-xl text-zinc-500">
+                  <Link to={href("/progress")}>
+                    Members participate in actions that take 15 minutes a week.
+                    Our full-time team strives to plan actions that have a
+                    clear, measurable impact.
+                  </Link>
+                </p>
               </div>
+              <div className="flex flex-col gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {FEATURED_IMPACT_ACTIONS.map((action) => (
+                    <FeaturedImpactCard key={action.actionId} {...action} />
+                  ))}
+                </div>
+              </div>
+              <Link
+                to={href("/progress")}
+                className="whitespace-nowrap text-link text-base md:text-lg flex flex-row items-center gap-x-1 w-fit"
+              >
+                See more
+                <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
-
-            <div className="flex flex-col gap-y-4">
-              <p className="text-zinc-900 text-lg md:text-xl">
-                Every action is completed by other reliable members, multiplying
-                your impact.
+            <div className="flex flex-col">
+              <h2 className="font-semibold text-2xl md:text-3xl font-serif mb-2">
+                Focus on global crises
+              </h2>
+              <div className="flex flex-row gap-3 mb-6">
+                <p className="text-lg md:text-xl text-zinc-500">
+                  <Link to={href("/progress")}>
+                    We prioritize problems that cause enormous, irreversible
+                    harm.
+                  </Link>
+                </p>
+              </div>
+              <ExamplePriorityCardList dropdown />
+            </div>
+            <div className="flex flex-col">
+              <h2 className="font-semibold text-2xl md:text-3xl font-serif mb-2">
+                Commited community
+              </h2>
+              <p className="text-zinc-500 text-lg md:text-xl mb-6">
+                We ask members to show up consistently so that we can develop
+                precise, effective actions plans in advance.
               </p>
               <div className="flex flex-col gap-y-2">
                 {memberQuotes.map((memberQuote, index) => (
                   <div
-                    className="bg-white p-6 rounded-md"
+                    className="text-base lg:text-lg bg-white p-4 sm:p-6 rounded-md border border-grey-1"
                     key={`${memberQuote.userId}-${index}`}
                   >
                     <p>{memberQuote.quote}</p>
@@ -374,27 +410,35 @@ const SignupPage: React.FC = () => {
                 ))}
               </div>
             </div>
-
-            <div className="text-base">
-              <p className="text-zinc-900 text-lg md:text-xl mb-4">
-                We&apos;re focused on global crises that affect billions of
-                people.
+            <div className="flex flex-col">
+              <h2 className="font-semibold text-2xl md:text-3xl font-serif mb-2">
+                Help us grow
+              </h2>
+              <p className="text-zinc-500 text-lg md:text-xl mb-6">
+                You were invited because a current member of the Alliance
+                believes you are a good fit for our community. The more people
+                who join us, the more impact we will be able to achieve, and the
+                better we can test our processes and strategies.
               </p>
-
-              <ExamplePriorityCardList bgColor="white" dropdown />
-            </div>
-
-            <div>
-              <Link
-                to={href("/guide")}
-                className="text-zinc-900 text-lg md:text-xl hover:underline flex flex-row items-center gap-x-2"
+              <p className="text-zinc-500 text-lg md:text-xl mb-6">
+                Once we reach around 10,000 members, we will launch publicly.
+                You can read more about our roadmap on our{" "}
+                <Link to={href("/guide")} className="text-link">
+                  guide
+                </Link>
+                .
+              </p>
+              <a
+                href="#create-account"
+                className="bg-zinc-800 hover:bg-zinc-700 font-semibold text-center text-white px-6 py-4 rounded-md text-lg"
               >
-                Read our guide <ChevronRight className="w-4 h-4" />
-              </Link>
+                Join
+              </a>
             </div>
           </div>
-        </div>
+        </section>
       </div>
+      <Footer />
     </div>
   );
 };

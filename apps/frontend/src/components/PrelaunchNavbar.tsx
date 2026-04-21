@@ -48,9 +48,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
         absolute ? "absolute" : "relative",
         "w-screen",
         showLogo ? "justify-between" : "justify-end",
-        transparent
-          ? "bg-transparent text-white"
-          : "text-black bg-white border-b md:border-none border-zinc-200",
+        transparent ? "bg-transparent text-white" : "text-black bg-white",
       )}
       ref={ref}
     >

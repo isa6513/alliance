@@ -1,6 +1,6 @@
 import React from "react";
 import { useQueries } from "@tanstack/react-query";
-import { Link, href } from "react-router";
+import { Link } from "react-router";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import alliancePeople from "../../assets/alliance_people.webp";
 import ewaste from "../../assets/ewaste.webp";
@@ -8,6 +8,8 @@ import { userFindOne } from "@alliance/shared/client";
 import type { ProfileDto } from "@alliance/shared/client";
 import Footer from "../../components/Footer";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
+import FeaturedImpactCard from "../../components/FeaturedImpactCard";
+import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { ArrowRight } from "lucide-react";
 
@@ -111,30 +113,6 @@ function HowItWorksCard({
       <p className="text-lg font-semibold text-black lg:text-xl">{title}</p>
       <p className="text-base text-zinc-500 lg:text-lg">{children}</p>
     </div>
-  );
-}
-
-function ImpactCard({
-  id,
-  emphasis,
-  rest,
-}: {
-  id: number;
-  emphasis: string;
-  rest: string;
-}) {
-  return (
-    <Link
-      to={href("/actions/:id", { id: id.toString() })}
-      className="flex flex-col gap-4 border border-grey-1 group hover:border-grey-3 rounded-md p-4 sm:p-6"
-    >
-      <p className="text-lg text-zinc-500 lg:text-xl">
-        <span className="font-semibold text-black group-hover:underline">
-          {emphasis}
-        </span>{" "}
-        {rest}
-      </p>
-    </Link>
   );
 }
 
@@ -247,29 +225,9 @@ const PrelaunchLandingPage: React.FC = () => {
           <div className={`${LANDING_BIG_COL} flex flex-col mt-8 md:mt-12`}>
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <ImpactCard
-                  id={84}
-                  emphasis="We donated $2,552"
-                  rest="to Helen Keller International by making small adjustments to our personal habits."
-                />
-
-                <ImpactCard
-                  id={75}
-                  emphasis="We submitted 3 formal comments"
-                  rest="on U.S. federal AI policy dockets, informed by member and expert opinions."
-                />
-
-                <ImpactCard
-                  id={56}
-                  emphasis="We showed that AI companies violate privacy expectations"
-                  rest="by running a survey with friends and family."
-                />
-
-                <ImpactCard
-                  id={14}
-                  emphasis="We caused 11 cafe locations"
-                  rest="to adopt bring-your-own-cup policies by helping them attain media recognition."
-                />
+                {FEATURED_IMPACT_ACTIONS.map((action) => (
+                  <FeaturedImpactCard key={action.actionId} {...action} />
+                ))}
               </div>
               <div className="flex flex-row sm:flex-col items-center sm:items-start text-link">
                 <Link
