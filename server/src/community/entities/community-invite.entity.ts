@@ -15,7 +15,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { Community } from './community.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { Notification } from 'src/notifs/entities/notification.entity';
 
 export enum CommunityInviteStatus {
@@ -72,7 +72,7 @@ export class CommunityInvite {
   @Type(() => User)
   @JoinColumn({ name: 'invitingUserId' })
   @IsOptional()
-  invitingUser?: Ty<User>;
+  invitingUser?: Relation<User>;
 
   @ManyToOne(() => User, (user) => user.invitedCommunities, {
     onDelete: 'CASCADE',
@@ -81,7 +81,7 @@ export class CommunityInvite {
   @Type(() => User)
   @JoinColumn({ name: 'invitedUserId' })
   @Allow()
-  invitedUser: Ty<User>;
+  invitedUser: Relation<User>;
 
   @ManyToOne(() => Community, (community) => community.internalInvites, {
     onDelete: 'CASCADE',
@@ -90,12 +90,12 @@ export class CommunityInvite {
   @Type(() => Community)
   @JoinColumn({ name: 'communityId' })
   @IsDefined()
-  community: Ty<Community>;
+  community: Relation<Community>;
 
   @OneToMany(() => Notification, (notif) => notif.communityInvite)
   @Type(() => Notification)
   @ApiPropertyOptional({ type: () => Notification, isArray: true })
   @Allow()
   @IsOptional()
-  notifs?: Ty<Notification>[];
+  notifs?: Relation<Notification>[];
 }

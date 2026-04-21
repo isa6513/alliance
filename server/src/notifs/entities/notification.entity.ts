@@ -17,7 +17,7 @@ import {
 import { ActionUpdate } from 'src/actions/entities/action-update.entity';
 import { Comment } from 'src/forum/entities/comment.entity';
 import { Type } from 'class-transformer';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import type { Push } from 'src/push/push.entity';
 import { CommunityInvite } from 'src/community/entities/community-invite.entity';
@@ -164,45 +164,45 @@ export class Notification {
   @ManyToOne(() => User, (user) => user.notifications, {
     onDelete: 'CASCADE',
   })
-  user: Ty<User>;
+  user: Relation<User>;
 
   @ManyToMany(() => User)
   @JoinTable({ name: 'notification_associated_users' })
-  associatedUsers?: Ty<User>[];
+  associatedUsers?: Relation<User>[];
 
   @OneToMany('Push', 'notification', {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  pushes: Ty<Push>[];
+  pushes: Relation<Push>[];
 
   @ApiPropertyOptional({ type: () => ActionUpdate })
   @ManyToOne(() => ActionUpdate, (actionUpdate) => actionUpdate.notifs, {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  actionUpdate?: Ty<ActionUpdate>;
+  actionUpdate?: Relation<ActionUpdate>;
 
   @ApiPropertyOptional({ type: () => Comment })
   @ManyToOne(() => Comment, (comment) => comment.notifications, {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  comment?: Ty<Comment>;
+  comment?: Relation<Comment>;
 
   @ApiPropertyOptional({ type: () => OnetimeInvite })
   @ManyToOne(() => OnetimeInvite, (invite) => invite.notifs, {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  onetimeInvite?: Ty<OnetimeInvite>;
+  onetimeInvite?: Relation<OnetimeInvite>;
 
   @ApiPropertyOptional({ type: () => CommunityInvite })
   @ManyToOne(() => CommunityInvite, (invite) => invite.notifs, {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  communityInvite?: Ty<CommunityInvite>;
+  communityInvite?: Relation<CommunityInvite>;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()

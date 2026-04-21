@@ -16,6 +16,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
+import type { Relation } from 'src/utils/Repository';
 import { CommunityInvite } from './community-invite.entity';
 
 @Entity()
@@ -91,30 +92,30 @@ export class Community {
   @JoinTable()
   @Type(() => User)
   @Allow()
-  users: User[];
+  users: Relation<User>[];
 
   @ManyToMany(() => User, (user) => user.leaderOf)
   @ApiPropertyOptional({ type: () => User, isArray: true })
   @JoinTable()
   @Type(() => User)
   @IsOptional()
-  leaders?: User[];
+  leaders?: Relation<User>[];
 
   @OneToMany(() => User, (user) => user.pendingCommunity)
   @ApiPropertyOptional({ type: () => User, isArray: true })
   @Type(() => User)
   @IsOptional()
-  pendingUsers?: User[];
+  pendingUsers?: Relation<User>[];
 
   @OneToMany(() => OnetimeInvite, (invite) => invite.community)
   @ApiPropertyOptional({ type: () => OnetimeInvite, isArray: true })
   @Type(() => OnetimeInvite)
   @IsOptional()
-  invites?: OnetimeInvite[];
+  invites?: Relation<OnetimeInvite>[];
 
   @OneToMany(() => CommunityInvite, (invite) => invite.community)
   @ApiProperty({ type: () => CommunityInvite, isArray: true })
   @Type(() => CommunityInvite)
   @IsDefined()
-  internalInvites: CommunityInvite[];
+  internalInvites: Relation<CommunityInvite>[];
 }

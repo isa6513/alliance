@@ -14,7 +14,7 @@ import { Type } from 'class-transformer';
 import { Allow, IsOptional } from 'class-validator';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
 import { Community } from 'src/community/entities/community.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { Notification } from 'src/notifs/entities/notification.entity';
 
 export enum OnetimeInviteStatus {
@@ -91,13 +91,13 @@ export class OnetimeInvite {
   @Type(() => User)
   @JoinColumn({ name: 'invitingUserId' })
   @Allow()
-  invitingUser: Ty<User>;
+  invitingUser: Relation<User>;
 
   @OneToOne(() => User, (user) => user.referredByInvite)
   @ApiProperty({ type: () => User, nullable: true })
   @Type(() => User)
   @IsOptional()
-  invitedUser: Ty<User> | null;
+  invitedUser: Relation<User> | null;
 
   @RelationId((invite: OnetimeInvite) => invite.invitedUser)
   @Type(() => Number)
@@ -113,7 +113,7 @@ export class OnetimeInvite {
   @Type(() => Community)
   @JoinColumn({ name: 'communityId' })
   @IsOptional()
-  community?: Ty<Community> | null;
+  community?: Relation<Community> | null;
 
   @RelationId((invite: OnetimeInvite) => invite.community)
   @Type(() => Number)
@@ -125,5 +125,5 @@ export class OnetimeInvite {
   @Type(() => Notification)
   @ApiProperty({ type: () => Notification, isArray: true })
   @Allow()
-  notifs: Ty<Notification>[];
+  notifs: Relation<Notification>[];
 }

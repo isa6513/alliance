@@ -13,7 +13,7 @@ import {
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
 import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
 import { Form } from './form.entity';
-import type { Ty } from './type';
+import type { Relation } from 'src/utils/Repository';
 
 @Entity()
 @Index(['user', 'formId'])
@@ -31,7 +31,7 @@ export class FormResponse {
   @ManyToOne(() => Form, (f) => f.responses, { onDelete: 'CASCADE' })
   @IsDefined()
   @Type(() => Form)
-  form: Ty<Form>;
+  form: Relation<Form>;
 
   @Column({ type: 'jsonb' })
   @ApiProperty()
@@ -62,7 +62,7 @@ export class FormResponse {
   @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: true })
   @IsOptional()
   @Type(() => User)
-  user?: Ty<User>;
+  user?: Relation<User>;
 
   @Column({ type: 'text', nullable: true })
   @ApiPropertyOptional()

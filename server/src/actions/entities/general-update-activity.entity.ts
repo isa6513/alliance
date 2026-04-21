@@ -11,7 +11,7 @@ import {
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
 import { User } from '../../user/entities/user.entity';
 import { GeneralUpdate } from './general-update.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 
 export enum GeneralUpdateActivityType {
   DISMISSED = 'dismissed',
@@ -47,7 +47,7 @@ export class GeneralUpdateActivity {
   @JoinColumn({ name: 'generalUpdateId' })
   @Allow()
   @Type(() => GeneralUpdate)
-  generalUpdate: Ty<GeneralUpdate>;
+  generalUpdate: Relation<GeneralUpdate>;
 
   @Column()
   @ApiProperty()
@@ -58,7 +58,7 @@ export class GeneralUpdateActivity {
   @JoinColumn({ name: 'userId' })
   @Allow()
   @Type(() => User)
-  user: Ty<User>;
+  user: Relation<User>;
 
   @Column()
   @Allow()

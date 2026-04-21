@@ -14,7 +14,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { GeneralUpdateActivity } from './general-update-activity.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { Tag } from 'src/user/entities/tag.entity';
 import { ActionSuite } from './action-suite.entity';
 
@@ -89,7 +89,7 @@ export class GeneralUpdate {
   @OneToMany(() => GeneralUpdateActivity, (activity) => activity.generalUpdate)
   @Type(() => GeneralUpdateActivity)
   @IsOptional()
-  activities?: Ty<GeneralUpdateActivity>[];
+  activities?: Relation<GeneralUpdateActivity>[];
 
   @ManyToMany(() => Tag, (tag) => tag.generalUpdates, {
     onDelete: 'CASCADE',
@@ -98,7 +98,7 @@ export class GeneralUpdate {
   @Allow()
   @JoinTable()
   @Type(() => Tag)
-  tags: Tag[];
+  tags: Relation<Tag>[];
 
   @ManyToMany(() => ActionSuite, (suite) => suite.generalUpdates, {
     nullable: true,
@@ -107,5 +107,5 @@ export class GeneralUpdate {
   @Type(() => ActionSuite)
   @JoinTable()
   @IsOptional()
-  suites?: Ty<ActionSuite>[];
+  suites?: Relation<ActionSuite>[];
 }

@@ -41,7 +41,7 @@ import { Temporal } from '@js-temporal/polyfill';
 import { Community } from 'src/community/entities/community.entity';
 import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 import { Participant } from 'src/messaging/entities/participant.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { ContractEvent, ContractEventType } from './contract-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { UserDevice } from './user-device.entity';
@@ -105,7 +105,7 @@ export class User {
 
   @OneToOne(() => Mms, { nullable: true })
   @JoinColumn({ name: 'optInMmsId' })
-  optInMms?: Mms;
+  optInMms?: Relation<Mms>;
 
   @Column({ default: false })
   @ApiProperty()
@@ -306,28 +306,28 @@ export class User {
   @OneToMany(() => ContractEvent, (event) => event.user, { cascade: true })
   @Type(() => ContractEvent)
   @ApiPropertyOptional({ type: () => ContractEvent, isArray: true })
-  contractEvents?: Ty<ContractEvent>[];
+  contractEvents?: Relation<ContractEvent>[];
 
   @OneToMany(() => ActionActivity, (activity) => activity.user)
-  activities?: ActionActivity[];
+  activities?: Relation<ActionActivity>[];
 
   @OneToMany(() => GeneralUpdateActivity, (activity) => activity.user)
-  generalUpdateActivities?: GeneralUpdateActivity[];
+  generalUpdateActivities?: Relation<GeneralUpdateActivity>[];
 
   @OneToMany(() => Friend, (friend) => friend.requester)
-  sentFriendRequests?: Friend[];
+  sentFriendRequests?: Relation<Friend>[];
 
   @OneToMany(() => Friend, (friend) => friend.addressee)
-  receivedFriendRequests?: Friend[];
+  receivedFriendRequests?: Relation<Friend>[];
 
   @OneToMany(() => Notification, (notification) => notification.user)
-  notifications: Notification[];
+  notifications: Relation<Notification>[];
 
   @ManyToOne(() => User, (user) => user.referredUsers, {
     nullable: true,
     onDelete: 'SET NULL',
   })
-  referredBy?: User | null;
+  referredBy?: Relation<User> | null;
 
   @OneToOne(() => OnetimeInvite, (invite) => invite.invitedUser)
   @ApiProperty({
@@ -336,7 +336,7 @@ export class User {
   })
   @JoinColumn()
   @Type(() => OnetimeInvite)
-  referredByInvite: OnetimeInvite | null;
+  referredByInvite: Relation<OnetimeInvite> | null;
 
   @Column({
     type: 'enum',
@@ -347,27 +347,27 @@ export class User {
   referralSource: ReferralSource;
 
   @OneToMany(() => User, (user) => user.referredBy)
-  referredUsers?: User[];
+  referredUsers?: Relation<User>[];
 
   @ManyToOne(() => City, { nullable: true, onDelete: 'SET NULL' })
   @IsOptional()
   @Type(() => City)
-  city?: City | null;
+  city?: Relation<City> | null;
 
   @OneToMany(() => ActionEventNotif, (notif) => notif.user)
-  actionEventNotifs: ActionEventNotif[];
+  actionEventNotifs: Relation<ActionEventNotif>[];
 
   @OneToMany(() => UserAwayRange, (awayRange) => awayRange.user)
-  awayRanges: UserAwayRange[];
+  awayRanges: Relation<UserAwayRange>[];
 
   @OneToOne(() => Mail, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'welcomeMailId' })
-  welcomeMail: Mail | null;
+  welcomeMail: Relation<Mail> | null;
 
   @ManyToMany(() => Tag, (tag) => tag.users, { onDelete: 'CASCADE' })
   @ApiProperty({ type: () => Tag, isArray: true })
   @Type(() => Tag)
-  tags: Ty<Tag>[];
+  tags: Relation<Tag>[];
 
   @ManyToOne(() => Community, (community) => community.pendingUsers)
   @ApiPropertyOptional({
@@ -378,20 +378,20 @@ export class User {
   })
   @Type(() => Community)
   @IsOptional()
-  pendingCommunity?: Ty<Community> | null;
+  pendingCommunity?: Relation<Community> | null;
 
   @ManyToMany(() => Community, (community) => community.users, {
     onDelete: 'CASCADE',
   })
   @ApiProperty({ type: () => Community, isArray: true })
   @Type(() => Community)
-  communities: Community[];
+  communities: Relation<Community>[];
 
   @ManyToMany(() => Community, (community) => community.leaders, {
     onDelete: 'CASCADE',
   })
   @Type(() => Community)
-  leaderOf: Community[];
+  leaderOf: Relation<Community>[];
 
   @RelationId((user: User) => user.leaderOf)
   @ApiProperty({ type: Number, isArray: true })
@@ -401,20 +401,20 @@ export class User {
   @ApiProperty({ type: () => CommunityInvite, isArray: true })
   @Type(() => CommunityInvite)
   @IsDefined()
-  invitedCommunities: CommunityInvite[];
+  invitedCommunities: Relation<CommunityInvite>[];
 
   @OneToMany(() => Participant, (participant) => participant.user)
   @ApiProperty({ type: () => Participant, isArray: true })
   @Type(() => Participant)
-  participants: Ty<Participant>[];
+  participants: Relation<Participant>[];
 
   @ManyToMany(() => Action, (action) => action.authors)
   @ApiPropertyOptional({ type: () => Action, isArray: true })
   @Type(() => Action)
-  authoredActions?: Ty<Action>[];
+  authoredActions?: Relation<Action>[];
 
   @OneToMany(() => UserDevice, (device) => device.user)
-  devices: Ty<UserDevice>[];
+  devices: Relation<UserDevice>[];
 
   // Methods
 

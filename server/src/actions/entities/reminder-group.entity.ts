@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsDefined, IsOptional } from 'class-validator';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { Tag } from 'src/user/entities/tag.entity';
 import { DEFAULT_TIME_ZONE, User } from 'src/user/entities/user.entity';
 import {
@@ -78,13 +78,13 @@ export class ReminderGroup {
   @ApiPropertyOptional({ type: () => ActionSuite })
   @Type(() => ActionSuite)
   @IsOptional()
-  actionSuite?: Ty<ActionSuite>;
+  actionSuite?: Relation<ActionSuite>;
 
   @ManyToOne(() => ActionEvent, { onDelete: 'CASCADE' })
   @ApiProperty({ type: () => ActionEvent })
   @Type(() => ActionEvent)
   @IsDefined()
-  memberActionEvent: Ty<ActionEvent>;
+  memberActionEvent: Relation<ActionEvent>;
 
   @ApiProperty({
     enum: ReminderCohortType,
@@ -98,7 +98,7 @@ export class ReminderGroup {
   @ApiPropertyOptional({ type: () => Tag })
   @Type(() => Tag)
   @IsOptional()
-  userTag?: Ty<Tag>;
+  userTag?: Relation<Tag>;
 
   // for custom cohort
   @ManyToMany(() => User)
@@ -106,7 +106,7 @@ export class ReminderGroup {
   @ApiPropertyOptional({ type: () => User, isArray: true })
   @Type(() => User)
   @IsOptional()
-  users?: User[];
+  users?: Relation<User>[];
 
   @ApiProperty({ type: String })
   @Column({ type: 'text' })
@@ -135,7 +135,7 @@ export class ReminderGroup {
   )
   @Allow()
   @Type(() => ActionEventNotif)
-  notifications: Ty<ActionEventNotif>[];
+  notifications: Relation<ActionEventNotif>[];
 
   @ApiPropertyOptional({ type: Date })
   @Column({ type: 'timestamptz', nullable: true })
@@ -177,7 +177,7 @@ export class ReminderGroup {
   @ApiPropertyOptional({ type: () => ActionEvent })
   @Type(() => ActionEvent)
   @IsOptional()
-  deadlineEvent?: Ty<ActionEvent>;
+  deadlineEvent?: Relation<ActionEvent>;
 
   @ApiProperty()
   @Column({ type: 'boolean', default: true })

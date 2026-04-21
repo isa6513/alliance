@@ -15,7 +15,7 @@ import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Notification } from 'src/notifs/entities/notification.entity';
 import { Tag } from 'src/user/entities/tag.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 
 export enum ActionUpdateNotifyType {
   None = 'none',
@@ -36,7 +36,7 @@ export class ActionUpdate {
   @Type(() => Action)
   @Allow()
   @ApiProperty({ type: () => Action })
-  action: Ty<Action>;
+  action: Relation<Action>;
 
   @RelationId((update: ActionUpdate) => update.action)
   @Type(() => Number)
@@ -54,8 +54,8 @@ export class ActionUpdate {
   @JoinColumn({ name: 'contentId' })
   @Type(() => EditableContent)
   @Allow()
-  @ApiProperty()
-  content: EditableContent;
+  @ApiProperty({ type: () => EditableContent })
+  content: Relation<EditableContent>;
 
   @Column({ type: 'timestamptz' })
   @IsNotEmpty()
@@ -79,7 +79,7 @@ export class ActionUpdate {
   @Type(() => ActionEvent)
   @ApiPropertyOptional({ type: () => ActionEvent })
   @IsOptional()
-  associatedEvent?: Ty<ActionEvent>;
+  associatedEvent?: Relation<ActionEvent>;
 
   @RelationId((update: ActionUpdate) => update.associatedEvent)
   @Type(() => Number)
@@ -104,12 +104,12 @@ export class ActionUpdate {
   @Type(() => Notification)
   @ApiProperty({ type: () => Notification, isArray: true })
   @Allow()
-  notifs: Ty<Notification>[];
+  notifs: Relation<Notification>[];
 
   @ManyToOne(() => Tag, { nullable: true })
   @JoinColumn({ name: 'tagId' })
   @Type(() => Tag)
   @ApiPropertyOptional({ type: () => Tag })
   @IsOptional()
-  tag?: Ty<Tag>;
+  tag?: Relation<Tag>;
 }

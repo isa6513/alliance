@@ -14,7 +14,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 export enum FriendStatus {
   Pending = 'pending',
   Accepted = 'accepted',
@@ -48,12 +48,12 @@ export class Friend {
   @ManyToOne(() => User, (user) => user.sentFriendRequests, {
     onDelete: 'CASCADE',
   })
-  requester?: Ty<User>;
+  requester?: Relation<User>;
 
   @ManyToOne(() => User, (user) => user.receivedFriendRequests, {
     onDelete: 'CASCADE',
   })
-  addressee?: Ty<User>;
+  addressee?: Relation<User>;
 
   @OneToOne(() => Notification, {
     cascade: true,
@@ -61,7 +61,7 @@ export class Friend {
     onDelete: 'SET NULL',
   })
   @JoinColumn()
-  sentNotif: Ty<Notification> | null;
+  sentNotif: Relation<Notification> | null;
 
   @OneToOne(() => Notification, {
     cascade: true,
@@ -69,5 +69,5 @@ export class Friend {
     onDelete: 'SET NULL',
   })
   @JoinColumn()
-  acceptedNotif: Ty<Notification> | null;
+  acceptedNotif: Relation<Notification> | null;
 }

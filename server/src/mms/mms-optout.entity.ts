@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CreateDateColumnTz, UpdateDateColumnTz } from "src/datasources/basecolumns";
-import type { Ty } from "src/tasks/entities/type";
+import type { Relation } from "src/utils/Repository";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
@@ -33,5 +33,5 @@ export class MmsOptout {
     @ManyToOne(() => User, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'userId' })
     @ApiProperty({ type: () => User })
-    user: Ty<User>;
+    user: Relation<User>;
 }

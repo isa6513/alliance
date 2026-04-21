@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Action } from 'src/actions/entities/action.entity';
+import type { Relation } from 'src/utils/Repository';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
@@ -26,14 +27,14 @@ export class LiveActivityRegistration {
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: Relation<User>;
 
   @Column()
   actionId: number;
 
   @ManyToOne(() => Action, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'actionId' })
-  action: Action;
+  action: Relation<Action>;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()

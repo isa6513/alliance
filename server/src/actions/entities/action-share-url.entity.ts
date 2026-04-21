@@ -3,7 +3,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -26,12 +26,12 @@ export class ActionShareUrl {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   @Type(() => User)
-  user: Ty<User>;
+  user: Relation<User>;
 
   @ManyToOne(() => Action, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'actionId' })
   @Type(() => Action)
-  action: Ty<Action>;
+  action: Relation<Action>;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()

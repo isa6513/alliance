@@ -7,6 +7,7 @@ import {
   Unique,
 } from 'typeorm';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
+import type { Relation } from 'src/utils/Repository';
 import { User } from 'src/user/entities/user.entity';
 import { ForumDigestPreference } from 'src/user/entities/user.entity';
 
@@ -26,7 +27,7 @@ export class ForumDigestLog {
 
   @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: false })
   @ApiProperty({ type: () => User })
-  user: User;
+  user: Relation<User>;
 
   @Column({ type: 'date' })
   @ApiProperty({ type: String, format: 'date' })

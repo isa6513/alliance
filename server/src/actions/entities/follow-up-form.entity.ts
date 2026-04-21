@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { Action } from './action.entity';
 import { Form } from 'src/tasks/entities/form.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import type { CohortExpression } from '../cohort-expression.types';
 
 @Entity()
@@ -79,7 +79,7 @@ export class FollowUpForm {
   @JoinColumn({ name: 'actionId' })
   @Type(() => Action)
   @Allow()
-  action: Ty<Action>;
+  action: Relation<Action>;
 
   @Column()
   @ApiProperty()
@@ -90,5 +90,5 @@ export class FollowUpForm {
   @JoinColumn({ name: 'formId' })
   @Type(() => Form)
   @Allow()
-  form: Ty<Form>;
+  form: Relation<Form>;
 }

@@ -17,7 +17,7 @@ import { CreateDateColumnTz } from 'src/datasources/basecolumns';
 import { User } from '../../user/entities/user.entity';
 import { Action } from './action.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 
 export enum ActionActivityType {
   USER_COMPLETED = 'user_completed',
@@ -60,7 +60,7 @@ export class ActionActivity {
   @JoinColumn({ name: 'actionId' })
   @Allow()
   @Type(() => Action)
-  action: Ty<Action>;
+  action: Relation<Action>;
 
   @Column()
   @ApiProperty()
@@ -71,7 +71,7 @@ export class ActionActivity {
   @JoinColumn({ name: 'userId' })
   @Allow()
   @Type(() => User)
-  user: Ty<User>;
+  user: Relation<User>;
 
   @Column()
   @Allow()
@@ -104,14 +104,14 @@ export class ActionActivity {
   @IsOptional()
   @Type(() => EditableContent)
   @ApiPropertyOptional({ type: () => EditableContent })
-  editableContent?: EditableContent;
+  editableContent?: Relation<EditableContent>;
 
   @ManyToMany(() => User, { onDelete: 'CASCADE' })
   @JoinTable()
   @Allow()
   @ApiProperty({ type: () => User, isArray: true })
   @Type(() => User)
-  likes: Ty<User>[];
+  likes: Relation<User>[];
 
   @Column({ default: 0 })
   @ApiProperty()
@@ -126,7 +126,7 @@ export class ActionActivity {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  taskFormResponse?: Ty<FormResponse>;
+  taskFormResponse?: Relation<FormResponse>;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()

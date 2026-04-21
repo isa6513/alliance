@@ -11,7 +11,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { ActionUpdate } from './action-update.entity';
 import { Action } from './action.entity';
 
@@ -99,13 +99,13 @@ export class ActionEvent {
   @IsDefined()
   @Allow()
   @Type(() => Action)
-  action: Ty<Action>;
+  action: Relation<Action>;
 
   @OneToMany(() => ActionUpdate, (update) => update.associatedEvent)
   @ApiProperty({ type: () => ActionUpdate, isArray: true })
   @Type(() => ActionUpdate)
   @Allow()
-  updates: Ty<ActionUpdate>[];
+  updates: Relation<ActionUpdate>[];
 
   @ApiProperty()
   @Column({ default: false })

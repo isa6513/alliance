@@ -14,7 +14,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { Participant } from './participant.entity';
 import { Community } from 'src/community/entities/community.entity';
 
@@ -36,7 +36,7 @@ export class Conversation {
 
   @OneToMany(() => Message, (message) => message.conversation)
   @ApiProperty({ type: () => Message, isArray: true })
-  messages: Ty<Message>[];
+  messages: Relation<Message>[];
 
   @CreateDateColumnTz()
   @ApiProperty({ type: Date })
@@ -48,7 +48,7 @@ export class Conversation {
 
   @OneToMany(() => Participant, (participant) => participant.conversation)
   @ApiProperty({ type: () => Participant, isArray: true })
-  participants: Ty<Participant>[];
+  participants: Relation<Participant>[];
 
   @Column({
     type: 'enum',
@@ -69,5 +69,5 @@ export class Conversation {
   @ManyToOne(() => Community, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'communityId' })
   @ApiPropertyOptional({ type: () => Community })
-  community?: Ty<Community>;
+  community?: Relation<Community>;
 }

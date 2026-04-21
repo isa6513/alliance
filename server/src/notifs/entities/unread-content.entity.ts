@@ -1,5 +1,5 @@
 import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { User } from '../../user/entities/user.entity';
 import { Column } from 'typeorm';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
@@ -20,7 +20,7 @@ export class UnreadContent {
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
-  user: Ty<User>;
+  user: Relation<User>;
 
   @Column({ type: 'enum', enum: UnreadContentType })
   @ApiProperty({ enum: UnreadContentType, enumName: 'UnreadContentType' })

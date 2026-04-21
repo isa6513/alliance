@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsArray, IsOptional, IsString } from 'class-validator';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { ContractEvent } from 'src/user/entities/contract-event.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -53,5 +53,5 @@ export class Contract {
   @Allow()
   @IsArray()
   @Type(() => ContractEvent)
-  events: Ty<ContractEvent>[];
+  events: Relation<ContractEvent>[];
 }

@@ -13,7 +13,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { User } from 'src/user/entities/user.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 
 @Entity()
 export class Message {
@@ -36,13 +36,13 @@ export class Message {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   @ApiProperty({ type: () => User })
-  author: Ty<User>;
+  author: Relation<User>;
 
   @ManyToOne(() => Conversation, (conversation) => conversation.messages, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'conversationId' })
-  conversation: Ty<Conversation>;
+  conversation: Relation<Conversation>;
 
   @CreateDateColumnTz()
   @ApiProperty({ type: Date })
@@ -58,8 +58,8 @@ export class Message {
   @ManyToOne(() => Message, (message) => message.replies)
   @JoinColumn({ name: 'replyToId' })
   @ApiProperty({ type: () => Message, required: false })
-  replyTo: Message;
+  replyTo: Relation<Message>;
 
   @OneToMany(() => Message, (message) => message.replyTo)
-  replies: Message[];
+  replies: Relation<Message>[];
 }

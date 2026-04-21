@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Type } from 'class-transformer';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
@@ -32,7 +32,7 @@ export class UserAwayRange {
   @JoinColumn({ name: 'userId' })
   @Allow()
   @Type(() => User)
-  user: Ty<User>;
+  user: Relation<User>;
 
   @Column()
   @ApiProperty()

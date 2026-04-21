@@ -6,7 +6,7 @@ import {
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { Notification } from 'src/notifs/entities/notification.entity';
 import { UnreadContent } from 'src/notifs/entities/unread-content.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -29,7 +29,7 @@ export class Push {
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
-  user: Ty<User>;
+  user: Relation<User>;
 
   @Column()
   @ApiProperty()
@@ -84,14 +84,14 @@ export class Push {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'notificationId' })
-  notification?: Ty<Notification>;
+  notification?: Relation<Notification>;
 
   @ManyToOne(() => UnreadContent, {
     nullable: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'unreadContentId' })
-  unreadContent?: Ty<UnreadContent>;
+  unreadContent?: Relation<UnreadContent>;
 
   @ManyToOne(
     () => ActionEventNotif,
@@ -102,7 +102,7 @@ export class Push {
     },
   )
   @JoinColumn({ name: 'actionEventNotifId' })
-  actionEventNotif?: Ty<ActionEventNotif>;
+  actionEventNotif?: Relation<ActionEventNotif>;
 
   @Column({ nullable: true })
   @ApiPropertyOptional()

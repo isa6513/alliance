@@ -13,7 +13,7 @@ import { User } from './user.entity';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Contract } from 'src/contract/entities/contract.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { Allow, IsOptional } from 'class-validator';
 
 export enum ContractEventType {
@@ -73,7 +73,7 @@ export class ContractEvent {
   @ManyToOne(() => User, (user) => user.contractEvents, { onDelete: 'CASCADE' })
   @Allow()
   @Type(() => User)
-  user: Ty<User>;
+  user: Relation<User>;
 
   @ManyToOne(() => Contract, (contract) => contract.events, {
     onDelete: 'CASCADE',
@@ -85,5 +85,5 @@ export class ContractEvent {
   })
   @Type(() => Contract)
   @IsOptional()
-  contract?: Ty<Contract>;
+  contract?: Relation<Contract>;
 }

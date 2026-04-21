@@ -15,7 +15,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
 import { ActionEvent } from './action-event.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { GeneralUpdate } from './general-update.entity';
 
 @Entity()
@@ -50,19 +50,19 @@ export class ActionSuite {
   @ApiProperty({ type: () => Action, isArray: true })
   @Allow()
   @Type(() => Action)
-  actions: Ty<Action>[];
+  actions: Relation<Action>[];
 
   @ManyToMany(() => GeneralUpdate, (generalUpdate) => generalUpdate.suites)
   @ApiProperty({ type: () => GeneralUpdate, isArray: true })
   @Allow()
   @Type(() => GeneralUpdate)
-  generalUpdates: Ty<GeneralUpdate>[];
+  generalUpdates: Relation<GeneralUpdate>[];
 
   @OneToMany(() => ReminderGroup, (reminderGroup) => reminderGroup.actionSuite)
   @ApiProperty({ type: () => ReminderGroup, isArray: true })
   @Allow()
   @Type(() => ReminderGroup)
-  reminderGroups: Ty<ReminderGroup>[];
+  reminderGroups: Relation<ReminderGroup>[];
 
   // Methods
 

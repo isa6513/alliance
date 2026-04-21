@@ -19,6 +19,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
+import type { Relation } from 'src/utils/Repository';
 
 @Entity()
 export class Post {
@@ -41,14 +42,14 @@ export class Post {
   @ApiProperty({ type: () => EditableContent })
   @Allow()
   @Type(() => EditableContent)
-  editableContent: EditableContent;
+  editableContent: Relation<EditableContent>;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   @ApiProperty()
   @Allow()
   @Type(() => User)
-  author: User;
+  author: Relation<User>;
 
   @Column()
   @ApiProperty()
@@ -60,7 +61,7 @@ export class Post {
   @ApiProperty({ required: false, type: () => Action })
   @Allow()
   @Type(() => Action)
-  action: Action;
+  action: Relation<Action>;
 
   @Column({ nullable: true })
   @ApiPropertyOptional({ required: false })
@@ -102,7 +103,7 @@ export class Post {
   @JoinTable()
   @Allow()
   @Type(() => User)
-  likes: User[];
+  likes: Relation<User>[];
 
   @RelationId((post: Post) => post.likes)
   @ApiProperty({ type: () => Number, isArray: true })
@@ -125,7 +126,7 @@ export class Post {
   @JoinTable()
   @Allow()
   @Type(() => User)
-  experts: User[];
+  experts: Relation<User>[];
 
   @RelationId((post: Post) => post.experts)
   @ApiProperty({ type: () => Number, isArray: true })
@@ -137,7 +138,7 @@ export class Post {
   @JoinTable()
   @Allow()
   @Type(() => User)
-  authors: User[];
+  authors: Relation<User>[];
 
   @RelationId((post: Post) => post.authors)
   @ApiProperty({ type: () => Number, isArray: true })

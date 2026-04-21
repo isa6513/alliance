@@ -7,7 +7,7 @@ import {
   Unique,
 } from 'typeorm';
 import { Conversation } from './conversation.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { User } from 'src/user/entities/user.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Message } from './message.entity';
@@ -36,11 +36,11 @@ export class Participant {
   @ManyToOne(() => Conversation, (conversation) => conversation.participants, {
     onDelete: 'CASCADE',
   })
-  conversation: Ty<Conversation>;
+  conversation: Relation<Conversation>;
 
   @ManyToOne(() => User, (user) => user.participants, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
-  user: Ty<User>;
+  user: Relation<User>;
 
   @Column({ type: 'enum', enum: ParticipantRole, enumName: 'ParticipantRole' })
   @ApiProperty({ enum: ParticipantRole, enumName: 'ParticipantRole' })
@@ -49,7 +49,7 @@ export class Participant {
   @ManyToOne(() => Message, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'lastReadMessageId' })
   @ApiPropertyOptional({ type: () => Message })
-  lastReadMessage?: Ty<Message>;
+  lastReadMessage?: Relation<Message>;
 
   @Column({
     type: 'enum',

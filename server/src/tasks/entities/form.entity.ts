@@ -8,7 +8,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import type { Ty } from './type';
+import type { Relation } from 'src/utils/Repository';
 
 @Entity()
 export class Form {
@@ -43,5 +43,5 @@ export class Form {
   @OneToMany(() => FormResponse, (r: FormResponse) => r.form)
   @Type(() => FormResponse)
   @IsArray()
-  responses: Ty<FormResponse>[];
+  responses: Relation<FormResponse>[];
 }

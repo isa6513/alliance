@@ -14,7 +14,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { GeneralUpdate } from 'src/actions/entities/general-update.entity';
 
 @Entity()
@@ -63,11 +63,11 @@ export class Tag {
   @Allow()
   @JoinTable()
   @Type(() => User)
-  users: Ty<User>[];
+  users: Relation<User>[];
 
   @ManyToMany(() => GeneralUpdate, (generalUpdate) => generalUpdate.tags)
   @ApiProperty({ type: () => GeneralUpdate, isArray: true })
   @Allow()
   @Type(() => GeneralUpdate)
-  generalUpdates: GeneralUpdate[];
+  generalUpdates: Relation<GeneralUpdate>[];
 }

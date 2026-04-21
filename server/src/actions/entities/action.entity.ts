@@ -11,7 +11,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -290,7 +290,7 @@ export class Action {
   @Allow()
   @IsArray()
   @Type(() => ActionEvent)
-  events: Ty<ActionEvent>[];
+  events: Relation<ActionEvent>[];
 
   @OneToMany(() => ActionActivity, (activity) => activity.action)
   @ApiProperty({
@@ -301,7 +301,7 @@ export class Action {
   @Allow()
   @IsArray()
   @Type(() => ActionActivity)
-  activities: ActionActivity[];
+  activities: Relation<ActionActivity>[];
 
   @OneToMany(() => ActionUpdate, (update) => update.action)
   @ApiProperty({
@@ -310,7 +310,7 @@ export class Action {
   })
   @Allow()
   @Type(() => ActionUpdate)
-  updates: ActionUpdate[];
+  updates: Relation<ActionUpdate>[];
 
   @OneToMany(() => FollowUpForm, (followUpForm) => followUpForm.action)
   @ApiProperty({
@@ -319,20 +319,20 @@ export class Action {
   })
   @Allow()
   @Type(() => FollowUpForm)
-  followUpForms: FollowUpForm[];
+  followUpForms: Relation<FollowUpForm>[];
 
   @ManyToOne(() => ActionSuite, (suite) => suite.actions, { nullable: true })
   @ApiPropertyOptional({ type: () => ActionSuite })
   @Type(() => ActionSuite)
   @IsOptional()
-  suite?: Ty<ActionSuite> | null;
+  suite?: Relation<ActionSuite> | null;
 
   @ManyToMany(() => User, (user) => user.authoredActions, { cascade: true })
   @JoinTable()
   @ApiPropertyOptional({ type: () => User, isArray: true })
   @Type(() => User)
   @IsOptional()
-  authors?: Ty<User>[];
+  authors?: Relation<User>[];
 
   // Methods
 

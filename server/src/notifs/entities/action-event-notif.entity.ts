@@ -15,7 +15,7 @@ import {
 import { ReminderGroup } from 'src/actions/entities/reminder-group.entity';
 import { Type } from 'class-transformer';
 import { CreateDateColumnTz } from 'src/datasources/basecolumns';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import { Push } from 'src/push/push.entity';
 
 export enum ActionEventNotifType {
@@ -47,16 +47,16 @@ export class ActionEventNotif {
   @ApiProperty({ type: Mail, nullable: true })
   @OneToOne(() => Mail, { nullable: true })
   @JoinColumn({ name: 'mailId' })
-  mail: Mail | null;
+  mail: Relation<Mail> | null;
 
   @ApiProperty({ type: Mms, nullable: true })
   @OneToOne(() => Mms, { nullable: true })
   @JoinColumn({ name: 'mmsId' })
-  mms: Mms | null;
+  mms: Relation<Mms> | null;
 
   @ApiPropertyOptional({ type: () => Push, isArray: true })
   @OneToMany(() => Push, (push) => push.actionEventNotif)
-  pushes?: Ty<Push>[];
+  pushes?: Relation<Push>[];
 
   @ManyToOne(
     () => ReminderGroup,
@@ -69,13 +69,13 @@ export class ActionEventNotif {
   @JoinColumn({ name: 'reminderGroupId' })
   @ApiPropertyOptional({ type: () => ReminderGroup })
   @Type(() => ReminderGroup)
-  reminderGroup?: Ty<ReminderGroup>;
+  reminderGroup?: Relation<ReminderGroup>;
 
   @ManyToOne(() => User, (user) => user.actionEventNotifs, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
-  user: Ty<User>;
+  user: Relation<User>;
 
   @Column({ default: false })
   @ApiProperty({

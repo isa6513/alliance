@@ -7,7 +7,7 @@ import {
   Unique,
 } from 'typeorm';
 import { User } from './user.entity';
-import type { Ty } from 'src/tasks/entities/type';
+import type { Relation } from 'src/utils/Repository';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
@@ -23,7 +23,7 @@ export class UserDevice {
 
   @ManyToOne(() => User, (user) => user.devices, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
-  user: Ty<User>;
+  user: Relation<User>;
 
   @Column({ nullable: true })
   deviceType?: string;
