@@ -7,7 +7,7 @@ export type FeaturedImpactAction = {
 export const FEATURED_IMPACT_ACTIONS: readonly FeaturedImpactAction[] = [
   {
     actionId: 84,
-    emphasis: "We raised $2,552",
+    emphasis: "We raised $2,702",
     rest: "for Helen Keller International by making small adjustments to our personal spending habits.",
   },
   {
