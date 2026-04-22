@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../public.decorator';
+import { requestContext } from 'src/utils/request-context';
 import type { JwtPayload } from './jwtreq';
 
 @Injectable()
@@ -43,6 +44,10 @@ export class AuthGuard implements CanActivate {
         secret: process.env.JWT_SECRET,
       });
       request['user'] = payload;
+      const ctx = requestContext.getStore();
+      if (ctx) {
+        ctx.userId = payload.sub;
+      }
     } catch {
       throw new UnauthorizedException();
     }
