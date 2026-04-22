@@ -1718,24 +1718,38 @@ export class ActionsService {
     userId: number,
     communityId: number,
   ): Promise<{ completedCount: number }> {
-    const community = await this.communityService.findOneOrFail(communityId, {
-      users: true,
-    });
-    if (!community.users.some((user) => user.id === userId)) {
+    const memberRow = await this.communityRepository
+      .createQueryBuilder('c')
+      .select('c.id', 'id')
+      .innerJoin(
+        'community_users_user',
+        'cuu',
+        'cuu."communityId" = c.id AND cuu."userId" = :userId',
+        { userId },
+      )
+      .where('c.id = :communityId', { communityId })
+      .getRawOne<{ id: number }>();
+
+    if (!memberRow) {
+      await this.communityRepository.findOneOrFail({
+        where: { id: communityId },
+        select: { id: true },
+      });
       throw new NotFoundException('User is not a member of this community');
     }
 
-    const memberIds = (community.users ?? []).map((m) => m.id);
-    if (memberIds.length === 0) {
-      return { completedCount: 0 };
-    }
-
-    const completedCount = await this.actionActivityRepository.count({
-      where: {
+    const completedCount = await this.actionActivityRepository
+      .createQueryBuilder('activity')
+      .innerJoin(
+        'community_users_user',
+        'cuu',
+        'cuu."userId" = activity.userId AND cuu."communityId" = :communityId',
+        { communityId },
+      )
+      .where('activity.type = :type', {
         type: ActionActivityType.USER_COMPLETED,
-        userId: In(memberIds),
-      },
-    });
+      })
+      .getCount();
 
     return { completedCount };
   }
