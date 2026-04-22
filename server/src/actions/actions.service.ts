@@ -1714,6 +1714,32 @@ export class ActionsService {
     );
   }
 
+  async countCommunityCompletedActions(
+    userId: number,
+    communityId: number,
+  ): Promise<{ completedCount: number }> {
+    const community = await this.communityService.findOneOrFail(communityId, {
+      users: true,
+    });
+    if (!community.users.some((user) => user.id === userId)) {
+      throw new NotFoundException('User is not a member of this community');
+    }
+
+    const memberIds = (community.users ?? []).map((m) => m.id);
+    if (memberIds.length === 0) {
+      return { completedCount: 0 };
+    }
+
+    const completedCount = await this.actionActivityRepository.count({
+      where: {
+        type: ActionActivityType.USER_COMPLETED,
+        userId: In(memberIds),
+      },
+    });
+
+    return { completedCount };
+  }
+
   async homeFeed(
     userId: number,
     limit: number = 20,

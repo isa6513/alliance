@@ -5254,6 +5254,25 @@ export type ActionsCommunityActivityResponses = {
 
 export type ActionsCommunityActivityResponse = ActionsCommunityActivityResponses[keyof ActionsCommunityActivityResponses];
 
+export type CommunityCompletedActionsCountDto = {
+    completedCount: number;
+};
+
+export type ActionsCommunityCompletedActionsCountData = {
+    body?: never;
+    path?: never;
+    query: {
+        communityId: number;
+    };
+    url: '/actions/communityCompletedActionsCount';
+};
+
+export type ActionsCommunityCompletedActionsCountResponses = {
+    200: CommunityCompletedActionsCountDto;
+};
+
+export type ActionsCommunityCompletedActionsCountResponse = ActionsCommunityCompletedActionsCountResponses[keyof ActionsCommunityCompletedActionsCountResponses];
+
 export type ActionsFindOneData = {
     body?: never;
     path: {
