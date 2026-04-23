@@ -69,8 +69,8 @@ const ProgressListPage: React.FC = () => {
             <div className="flex flex-col gap-2">
               <h2 className="text-heading-public">Impact</h2>
               <p className="text-zinc-500 text-lg md:text-xl">
-                At this stage, we are taking small-scale actions with the goal
-                of learning and building our processes.
+                At this stage, we are taking small-scale actions in order to
+                learn and build our processes.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
