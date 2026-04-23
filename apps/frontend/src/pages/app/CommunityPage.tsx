@@ -747,7 +747,7 @@ const CommunityPage = () => {
                         }
                         shortLabel={
                           m === "activity"
-                            ? " actions"
+                            ? "actions"
                             : m === "members"
                               ? "members"
                               : TAB_DISPLAY_NAMES[m]
