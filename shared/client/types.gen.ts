@@ -4,6 +4,7 @@ export type SignInDto = {
     mode: 'cookie' | 'header';
     email: string;
     password: string;
+    guestToken?: string;
 };
 
 export type SignInResponseDto = {
@@ -20,6 +21,7 @@ export type SignUpDto = {
     password: string;
     mode: TokenMode;
     referralCode?: string;
+    guestToken?: string;
 };
 
 export type AuthTokens = {
@@ -55,7 +57,7 @@ export type ContractEvent = {
     contract?: Contract | null;
 };
 
-export type ReferralSource = 'referral_link' | 'onetime_invite';
+export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link';
 
 export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
 
@@ -128,6 +130,12 @@ export type EditableContent = {
     attachments: Array<string>;
 };
 
+export type Guest = {
+    id: string;
+    createdAt: string;
+    linkedUser?: User;
+};
+
 export type FormResponse = {
     id: number;
     formId: number;
@@ -142,6 +150,7 @@ export type FormResponse = {
     };
     deviceType?: string;
     user?: User;
+    guest?: Guest;
     sessionReplayUrl?: string;
     createdAt: string;
     phDistinctId?: string;
@@ -1592,6 +1601,23 @@ export type SetPriorityDto = {
     generalUpdatePriorities: Array<SetGeneralUpdatePriorityDto>;
 };
 
+export type CommunityCompletedActionsCountDto = {
+    /**
+     * Number of member action completions (user_completed activities) recorded for current members of this community
+     */
+    completedCount: number;
+};
+
+export type ActionSharePreviewDto = {
+    firstName?: string;
+    completedByReferrer: boolean;
+    validReferral: boolean;
+};
+
+export type ActionReferralCodeDto = {
+    referralCode: string;
+};
+
 export type Form = {
     id: number;
     title: string;
@@ -2647,6 +2673,14 @@ export type FormDto = {
         [key: string]: unknown;
     };
     usedInAction?: ActionDto;
+};
+
+export type GuestFormResponseDto = {
+    response?: FormResponseDto;
+};
+
+export type LinkedGuestDraftDto = {
+    draft?: FormResponseDto;
 };
 
 export type FormAggregateViewsDto = {
@@ -5254,10 +5288,6 @@ export type ActionsCommunityActivityResponses = {
 
 export type ActionsCommunityActivityResponse = ActionsCommunityActivityResponses[keyof ActionsCommunityActivityResponses];
 
-export type CommunityCompletedActionsCountDto = {
-    completedCount: number;
-};
-
 export type ActionsCommunityCompletedActionsCountData = {
     body?: never;
     path?: never;
@@ -5291,6 +5321,38 @@ export type ActionsFindOneResponses = {
 };
 
 export type ActionsFindOneResponse = ActionsFindOneResponses[keyof ActionsFindOneResponses];
+
+export type ActionsGetSharePreviewData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: {
+        ref?: string;
+    };
+    url: '/actions/{id}/sharePreview';
+};
+
+export type ActionsGetSharePreviewResponses = {
+    200: ActionSharePreviewDto;
+};
+
+export type ActionsGetSharePreviewResponse = ActionsGetSharePreviewResponses[keyof ActionsGetSharePreviewResponses];
+
+export type ActionsGetActionReferralCodeData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/{id}/referralCode';
+};
+
+export type ActionsGetActionReferralCodeResponses = {
+    200: ActionReferralCodeDto;
+};
+
+export type ActionsGetActionReferralCodeResponse = ActionsGetActionReferralCodeResponses[keyof ActionsGetActionReferralCodeResponses];
 
 export type ActionsFindOneAdminData = {
     body?: never;
@@ -6876,6 +6938,36 @@ export type TasksGetMyFormResponseResponses = {
 };
 
 export type TasksGetMyFormResponseResponse = TasksGetMyFormResponseResponses[keyof TasksGetMyFormResponseResponses];
+
+export type TasksGetGuestFormResponseData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/guestResponse/{id}';
+};
+
+export type TasksGetGuestFormResponseResponses = {
+    200: GuestFormResponseDto;
+};
+
+export type TasksGetGuestFormResponseResponse = TasksGetGuestFormResponseResponses[keyof TasksGetGuestFormResponseResponses];
+
+export type TasksGetLinkedGuestDraftData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/tasks/draft/{id}';
+};
+
+export type TasksGetLinkedGuestDraftResponses = {
+    200: LinkedGuestDraftDto;
+};
+
+export type TasksGetLinkedGuestDraftResponse = TasksGetLinkedGuestDraftResponses[keyof TasksGetLinkedGuestDraftResponses];
 
 export type TasksGetFormData = {
     body?: never;

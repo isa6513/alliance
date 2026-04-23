@@ -9,7 +9,7 @@ import type { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../public.decorator';
 import { requestContext } from 'src/utils/request-context';
-import type { JwtPayload } from './jwtreq';
+import { JWTTokenType, type JwtPayload } from './jwtreq';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -43,6 +43,9 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
         secret: process.env.JWT_SECRET,
       });
+      if (payload.tokenType === JWTTokenType.guest) {
+        throw new UnauthorizedException();
+      }
       request['user'] = payload;
       const ctx = requestContext.getStore();
       if (ctx) {
@@ -64,6 +67,22 @@ export function extractRefreshTokenFromCookie(
   request: Request,
 ): string | undefined {
   return request.cookies?.refresh_token;
+}
+
+export function extractGuestTokenFromCookie(
+  request: Request,
+): string | undefined {
+  return request.cookies?.guest_token;
+}
+
+export function extractGuestTokenFromHeader(
+  request: Request,
+): string | undefined {
+  const header = request.headers['x-guest-token'];
+  if (typeof header !== 'string' || header.length === 0) {
+    return undefined;
+  }
+  return header;
 }
 
 export function extractTokenFromHeader(request: Request): string | undefined {

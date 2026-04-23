@@ -2,6 +2,7 @@ import {
   FormResponseDto,
   SubmitFormDto,
   tasksGetForm,
+  tasksGetLinkedGuestDraft,
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
@@ -32,6 +33,8 @@ interface ActionTaskPanelFormProps {
   disabled?: boolean;
   publicAction?: boolean;
   formResponse?: FormResponseDto;
+  redirectOnComplete?: boolean;
+  onSubmitted?: (formResponse: FormResponseDto) => void;
   scrollContainerRef?: RefObject<HTMLElement | null>;
 }
 
@@ -45,10 +48,12 @@ const ActionTaskPanelForm = ({
   disabled = false,
   publicAction = false,
   formResponse,
+  redirectOnComplete = publicAction,
+  onSubmitted,
   scrollContainerRef,
 }: ActionTaskPanelFormProps) => {
   const [error, setError] = useState<string | null>(null);
-  const { user, refreshUser } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
   const {
     data: form,
     error: formError,
@@ -72,21 +77,38 @@ const ActionTaskPanelForm = ({
     enabled: !formResponse,
   });
 
+  const draftEnabled =
+    !formResponse && !disabled && !publicAction && isAuthenticated;
+  const { data: draftFormResponse } = useQuery({
+    queryKey: ["linkedGuestDraft", taskFormId],
+    queryFn: async () => {
+      const response = await tasksGetLinkedGuestDraft({
+        path: { id: taskFormId },
+      });
+      return response.data?.draft ?? null;
+    },
+    enabled: draftEnabled,
+    retry: false,
+  });
+
   const handleSubmitForm = onCompleteAction
-    ? async (data: SubmitFormDto) => {
+    ? async (data: SubmitFormDto): Promise<boolean> => {
         setError(null);
 
-        const response = publicAction
-          ? await tasksSubmitPublicForm({
+        const response = isAuthenticated
+          ? await tasksSubmitForm({
               path: { id: taskFormId },
               body: data,
             })
-          : await tasksSubmitForm({
+          : await tasksSubmitPublicForm({
               path: { id: taskFormId },
               body: data,
             });
         if (response.response.ok) {
-          if (publicAction) {
+          if (response.data) {
+            onSubmitted?.(response.data);
+          }
+          if (!isAuthenticated && redirectOnComplete) {
             window.location.href = "/actions/completed";
           }
           if (typeof window !== "undefined" && form) {
@@ -101,21 +123,22 @@ const ActionTaskPanelForm = ({
             refreshUser();
           }
           onCompleteAction(false); //tasksSubmitForm handles completion here
-        } else {
-          if ((response.error as Error).message === "Form already submitted") {
-            window.location.reload();
-            return;
-          }
-          console.error(response.error);
-          posthog.captureException(response.error, {
-            event: "form_submit_error",
-            properties: {
-              actionId,
-              $exception_fingerprint: "FormSubmitError",
-            },
-          });
-          setError("Failed to submit action.");
+          return true;
         }
+        if ((response.error as Error).message === "Form already submitted") {
+          window.location.reload();
+          return false;
+        }
+        console.error(response.error);
+        posthog.captureException(response.error, {
+          event: "form_submit_error",
+          properties: {
+            actionId,
+            $exception_fingerprint: "FormSubmitError",
+          },
+        });
+        setError("Failed to submit action.");
+        return false;
       }
     : null;
 
@@ -185,6 +208,7 @@ const ActionTaskPanelForm = ({
           onAbandonAction={onAbandonAction}
           renderFormAsCompleted={disabled}
           publicAction={publicAction}
+          draftFormResponse={draftFormResponse}
           phDistinctId={distinctId}
           sessionReplayUrl={sessionReplayUrl}
           scrollContainerRef={scrollContainerRef}

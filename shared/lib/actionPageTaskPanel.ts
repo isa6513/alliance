@@ -6,6 +6,8 @@ export enum ActionPageTaskPanelState {
   PublicOnly = "public_only",
   PublicOnlyAuthenticated = "public_only_authenticated",
   NotAuthenticated = "not_authenticated",
+  GuestRef = "guest_ref",
+  GuestCompleted = "guest_completed",
   OnboardingSignContractFirst = "onboarding_sign_contract_first",
   NotAssigned = "not_assigned",
   Completed = "completed",
@@ -28,6 +30,8 @@ const stateIsDisabled = {
   [ActionPageTaskPanelState.PublicOnly]: ActionPageTaskPanelEnabled.Enabled,
   [ActionPageTaskPanelState.NotAuthenticated]:
     ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.GuestRef]: ActionPageTaskPanelEnabled.Enabled,
+  [ActionPageTaskPanelState.GuestCompleted]: ActionPageTaskPanelEnabled.Disabled,
   [ActionPageTaskPanelState.NotAssigned]: ActionPageTaskPanelEnabled.Disabled,
   [ActionPageTaskPanelState.Completed]: ActionPageTaskPanelEnabled.Disabled,
   [ActionPageTaskPanelState.Declined]: ActionPageTaskPanelEnabled.Disabled,
@@ -46,10 +50,18 @@ const stateIsDisabled = {
   ActionPageTaskPanelEnabled
 >;
 
+export function isFormDisabledByState(
+  state: ActionPageTaskPanelState,
+): boolean {
+  return stateIsDisabled[state] === ActionPageTaskPanelEnabled.Disabled;
+}
+
 export const shouldLoadCompletedTaskFormByState = {
   [ActionPageTaskPanelState.PublicOnlyAuthenticated]: false,
   [ActionPageTaskPanelState.PublicOnly]: false,
   [ActionPageTaskPanelState.NotAuthenticated]: false,
+  [ActionPageTaskPanelState.GuestRef]: false,
+  [ActionPageTaskPanelState.GuestCompleted]: false,
   [ActionPageTaskPanelState.NotAssigned]: false,
   [ActionPageTaskPanelState.Completed]: true,
   [ActionPageTaskPanelState.Declined]: true,
@@ -87,8 +99,21 @@ export function getActionPageTaskPanelState(params: {
   userRelation: UserActionRelation | null;
   contractSigned: boolean;
   isAuthenticated: boolean;
+  hasRefCode: boolean;
+  hasGuestResponse: boolean;
 }): ActionPageTaskPanelState {
-  const { action, userRelation, contractSigned, isAuthenticated } = params;
+  const {
+    action,
+    userRelation,
+    contractSigned,
+    isAuthenticated,
+    hasRefCode,
+    hasGuestResponse,
+  } = params;
+
+  if (!isAuthenticated && hasGuestResponse) {
+    return ActionPageTaskPanelState.GuestCompleted;
+  }
 
   if (action.publicOnly) {
     return isAuthenticated
@@ -96,8 +121,11 @@ export function getActionPageTaskPanelState(params: {
       : ActionPageTaskPanelState.PublicOnly;
   }
 
-  if (!action.reqAuthenticated)
-    return ActionPageTaskPanelState.NotAuthenticated;
+  if (!action.reqAuthenticated && !isAuthenticated) {
+    return hasRefCode
+      ? ActionPageTaskPanelState.GuestRef
+      : ActionPageTaskPanelState.NotAuthenticated;
+  }
 
   if (!action.canParticipate && !action.preventCompletion)
     return ActionPageTaskPanelState.NotAssigned;

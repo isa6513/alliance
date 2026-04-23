@@ -89,3 +89,17 @@ export class FormResponseDto extends PickType(FormResponse, [
   @Type(() => AiDetectionResultDto)
   aiDetectionResults?: AiDetectionResultDto[];
 }
+
+export class LinkedGuestDraftDto {
+  @ApiPropertyOptional({ type: () => FormResponseDto })
+  @IsOptional()
+  @Type(() => FormResponseDto)
+  draft?: FormResponseDto;
+}
+
+export class GuestFormResponseDto {
+  @ApiPropertyOptional({ type: () => FormResponseDto })
+  @IsOptional()
+  @Type(() => FormResponseDto)
+  response?: FormResponseDto;
+}

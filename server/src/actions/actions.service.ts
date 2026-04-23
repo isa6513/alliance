@@ -64,6 +64,7 @@ import {
   MoreThan,
   Not,
   Or,
+  QueryFailedError,
   type Repository,
 } from 'typeorm';
 import { UserService } from '../user/user.service';
@@ -71,6 +72,8 @@ import {
   ActionActivityDto,
   ActionDto,
   ActionEventDto,
+  ActionReferralCodeDto,
+  ActionSharePreviewDto,
   ActionSuiteDto,
   ActionUpdateDto,
   CreateActionActivityDto,
@@ -685,6 +688,64 @@ export class ActionsService {
         : undefined,
       reqAuthenticated: !!user,
     });
+  }
+
+  async getSharePreview(
+    actionId: number,
+    shareCode?: string,
+  ): Promise<ActionSharePreviewDto> {
+    // Match public action visibility before exposing referrer completion state.
+    await this.findOne({ id: actionId });
+
+    const response = new ActionSharePreviewDto();
+    response.completedByReferrer = false;
+    response.validReferral = false;
+
+    const trimmedCode = shareCode?.trim();
+    if (!trimmedCode) {
+      return response;
+    }
+
+    const shareUrl = await this.actionShareUrlRepository.findOne({
+      where: {
+        action: { id: actionId },
+        sid: trimmedCode,
+      },
+      relations: { user: true },
+    });
+
+    if (!shareUrl?.user) {
+      return response;
+    }
+
+    response.validReferral = true;
+    response.firstName = this.getFirstNameForSharePreview(shareUrl.user);
+    response.completedByReferrer =
+      (await this.getActionRelation(actionId, shareUrl.user.id)) ===
+      UserActionRelation.Completed;
+
+    return response;
+  }
+
+  async getOrCreateActionReferralCode(
+    actionId: number,
+    userId: number,
+  ): Promise<ActionReferralCodeDto> {
+    const shareUrl = await this.getOrCreateActionShareUrl(actionId, userId);
+    if (!shareUrl.sid) {
+      throw new BadRequestException('Unable to create share code');
+    }
+    return { referralCode: shareUrl.sid };
+  }
+
+  private getFirstNameForSharePreview(
+    user: Pick<User, 'anonymous' | 'name'>,
+  ): string {
+    if (user.anonymous) {
+      return 'Someone';
+    }
+
+    return user.name.trim().split(/\s+/)[0] || 'Someone';
   }
 
   async findAllGeneralUpdates(): Promise<GeneralUpdate[]> {
@@ -3194,6 +3255,14 @@ export class ActionsService {
   }
 
   async getShareLink(actionId: number, userId: number): Promise<string> {
+    const shareUrl = await this.getOrCreateActionShareUrl(actionId, userId);
+    return shareUrl.url;
+  }
+
+  private async getOrCreateActionShareUrl(
+    actionId: number,
+    userId: number,
+  ): Promise<ActionShareUrl> {
     const existing = await this.actionShareUrlRepository.findOne({
       where: {
         action: { id: actionId },
@@ -3201,7 +3270,7 @@ export class ActionsService {
       },
     });
     if (existing) {
-      return existing.url;
+      return existing;
     }
 
     const sid = this.generateCIDForShareUrl();
@@ -3214,7 +3283,7 @@ export class ActionsService {
       throw new BadRequestException('specified action not found');
     }
 
-    const shareUrl = await this.actionShareUrlRepository.create({
+    const shareUrl = this.actionShareUrlRepository.create({
       url,
       user: { id: userId },
       action,
@@ -3224,8 +3293,24 @@ export class ActionsService {
       },
     });
 
-    await this.actionShareUrlRepository.save(shareUrl);
-    return shareUrl.url;
+    try {
+      return await this.actionShareUrlRepository.save(shareUrl);
+    } catch (err) {
+      // Lost a race with a concurrent creator; the unique (actionId, userId)
+      // constraint guarantees exactly one row exists now — return it.
+      if (err instanceof QueryFailedError && (err as { code?: string }).code === '23505') {
+        const winner = await this.actionShareUrlRepository.findOne({
+          where: {
+            action: { id: actionId },
+            user: { id: userId },
+          },
+        });
+        if (winner) {
+          return winner;
+        }
+      }
+      throw err;
+    }
   }
 
   async getShareLinksForForm(formId: number): Promise<ShareUrlDto[]> {

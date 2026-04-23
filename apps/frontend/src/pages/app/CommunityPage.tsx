@@ -1,5 +1,5 @@
 import {
-  actionsGetCommunityCompletedActionsCount,
+  actionsCommunityCompletedActionsCount,
   actionsGetCommunityMemberInfo,
   communityDelete,
   communityGetMemberContactInfo,
@@ -183,7 +183,7 @@ const CommunityPage = () => {
     queryKey: ["communityCompletedActionsCount", community?.id ?? null],
     queryFn: () =>
       community
-        ? actionsGetCommunityCompletedActionsCount({
+        ? actionsCommunityCompletedActionsCount({
             query: { communityId: community.id },
           }).then((resp) => resp.data?.completedCount ?? 0)
         : 0,

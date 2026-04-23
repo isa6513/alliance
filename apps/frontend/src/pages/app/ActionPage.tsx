@@ -1,8 +1,12 @@
-import { actionsFindOne, userReferrerProfile } from "@alliance/shared/client";
+import {
+  actionsFindOne,
+  actionsGetSharePreview,
+} from "@alliance/shared/client";
 import {
   href,
   Link,
   Outlet,
+  useLoaderData,
   useLocation,
   useNavigate,
   useParams,
@@ -19,9 +23,12 @@ import useActivities, {
 } from "@alliance/shared/lib/useActivities";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { useActionHandlers } from "@alliance/shared/lib/actionPage";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { ActionActivityDetailContext } from "../../components/ActionActivityDetail";
 import { useNavbarOptions } from "../../lib/NavbarOptionsContext";
+import { isNonmemberOnPublicActionReferral } from "../../lib/publicActionReferral";
+import { guestReferral, taskHeaders } from "@alliance/shared/lib/copy";
+import { X } from "lucide-react";
 
 export async function loader({
   params,
@@ -34,27 +41,34 @@ export async function loader({
   const url = new URL(request.url);
   const refCode = url.searchParams.get("ref");
 
-  const [action, referrer] = await Promise.all([
+  const [action, sharePreview] = await Promise.all([
     actionsFindOne({ path: { id: parseInt(id) } }),
     refCode
-      ? userReferrerProfile({ path: { code: refCode } }).catch(() => null)
+      ? actionsGetSharePreview({
+          path: { id: parseInt(id) },
+          query: { ref: refCode },
+        })
+          .then((res) => res.data ?? null)
+          .catch(() => null)
       : Promise.resolve(null),
   ]);
 
   return {
     action: action.data,
-    referrerName: referrer?.data?.displayName ?? null,
+    sharePreview,
   };
 }
 
 export function meta({ data }: { data: Awaited<ReturnType<typeof loader>> }) {
   const action = data?.action;
-  const referrerName = data?.referrerName;
+  const sharePreview = data?.sharePreview;
 
   const title = action
-    ? referrerName
-      ? `${referrerName} completed "${action.name}"`
-      : action.name + " - Alliance"
+    ? sharePreview?.firstName
+      ? sharePreview.completedByReferrer
+        ? `${sharePreview.firstName} completed ${action.name}`
+        : `${sharePreview.firstName} invites you to try ${action.name}`
+      : `${action.name} - Alliance`
     : "Alliance";
 
   return [
@@ -72,12 +86,25 @@ export default function ActionPage() {
   const { id: idParam } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { sharePreview } = useLoaderData() as Awaited<
+    ReturnType<typeof loader>
+  >;
   useNavbarOptions({ whiteBackground: true });
   const actionId = parseInt(idParam!);
 
   const { isAuthenticated, user, loading: userLoading } = useAuth();
   const [searchParams] = useSearchParams();
-  const refCode = searchParams.get("ref");
+  const rawRefCode = searchParams.get("ref");
+  const refCode = sharePreview?.validReferral ? rawRefCode : null;
+  const signupHref = refCode
+    ? `/signup?ref=${encodeURIComponent(refCode)}`
+    : href("/signup");
+  const [invitePopupDismissed, setInvitePopupDismissed] = useState(false);
+  const [completedPopupDismissed, setCompletedPopupDismissed] = useState(false);
+  const [referralPanelAnimationNonce, setReferralPanelAnimationNonce] =
+    useState(0);
+  const [showReferralTaskPanel, setShowReferralTaskPanel] = useState(false);
+  const [guestCompleted, setGuestCompleted] = useState(false);
 
   useCIDFromParams(actionId);
 
@@ -90,6 +117,17 @@ export default function ActionPage() {
   const reloadTasks = useCallback(() => {
     navigate(href("/actions/:id", { id: actionId.toString() }));
   }, [actionId, navigate]);
+  const handleTryOutTask = useCallback(() => {
+    setInvitePopupDismissed(true);
+    setShowReferralTaskPanel(true);
+    setReferralPanelAnimationNonce((prev) => prev + 1);
+  }, []);
+  const handleGuestCompletionChange = useCallback((completed: boolean) => {
+    setGuestCompleted(completed);
+    if (completed) {
+      setCompletedPopupDismissed(false);
+    }
+  }, []);
 
   const { action, loading, onCompleteAction, onOptOutAction } =
     useActionHandlers(actionId, isAuthenticated, reloadTasks);
@@ -110,14 +148,12 @@ export default function ActionPage() {
               Log in
             </Link>
           </p>
-          {refCode && (
-            <p>
-              Would you like to join the Alliance?{" "}
-              <Link to={`/invite?ref=${refCode}`} className="text-link">
-                Invite link
-              </Link>
-            </p>
-          )}
+          <p>
+            Would you like to join the Alliance?{" "}
+            <Link to={signupHref} className="text-link">
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
     );
@@ -139,10 +175,93 @@ export default function ActionPage() {
 
   const showSidebar =
     !publicMode && !action.publicOnly && action.status === "member_action";
+  const isNonmemberPublicReferralAction = isNonmemberOnPublicActionReferral({
+    referralCode: refCode,
+    isAuthenticated,
+    userLoading,
+  });
+  const showHeaderSignupButton = publicMode && isNonmemberPublicReferralAction;
+  const showInvitePopup =
+    isNonmemberPublicReferralAction &&
+    !!sharePreview?.firstName &&
+    (guestCompleted ? !completedPopupDismissed : !invitePopupDismissed);
 
   return (
     <>
-      {publicMode && <PrelaunchNavbar transparent={false} absolute={false} />}
+      {publicMode && (
+        <PrelaunchNavbar
+          transparent={false}
+          absolute={false}
+          showSignupButton={showHeaderSignupButton}
+          signupHref={signupHref}
+        />
+      )}
+      {showInvitePopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="referral-invite-popup-title"
+            className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl"
+          >
+            <button
+              type="button"
+              aria-label={
+                guestCompleted
+                  ? "Dismiss completion popup"
+                  : "Dismiss invitation popup"
+              }
+              className="absolute right-4 top-4 text-2xl leading-none text-zinc-400 transition hover:text-zinc-600"
+              onClick={() => {
+                if (guestCompleted) {
+                  setCompletedPopupDismissed(true);
+                  setShowReferralTaskPanel(true);
+                  return;
+                }
+                setInvitePopupDismissed(true);
+              }}
+            >
+              <X />
+            </button>
+            <h2
+              id="referral-invite-popup-title"
+              className="pr-8 text-2xl font-semibold text-zinc-900"
+            >
+              {guestCompleted
+                ? taskHeaders.actionPage.completed
+                : guestReferral.inviteToTryTask(
+                    sharePreview.firstName ?? guestReferral.defaultReferrerName,
+                  )}
+            </h2>
+            <p className="mt-4 text-base leading-7 text-zinc-700">
+              {guestCompleted
+                ? guestReferral.completionIntegrityExplanation
+                : guestReferral.allianceIntro}
+            </p>
+            {guestCompleted ? (
+              <>
+                <p className="mt-4 text-base leading-7 text-zinc-700">
+                  {guestReferral.joinToCountContributions}
+                </p>
+                <Link
+                  to={signupHref}
+                  className="mt-6 inline-flex w-full justify-center rounded-full bg-green px-6 py-3 text-base font-medium text-white transition hover:opacity-90"
+                >
+                  Sign up
+                </Link>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="mt-6 inline-flex w-full justify-center rounded-full bg-zinc-900 px-6 py-3 text-base font-medium text-white transition hover:bg-zinc-800"
+                onClick={handleTryOutTask}
+              >
+                {guestReferral.tryOutTaskButton}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       <div className="w-full flex flex-row justify-between py-10 px-4 md:px-8 xl:px-16 bg-white min-h-[calc(100vh-var(--navbar-top-bar-height))]">
         <div className="flex flex-col md:pr-4 xl:pr-12 max-w-2xl lg:max-w-3xl mx-auto w-full">
           <Outlet
@@ -150,6 +269,11 @@ export default function ActionPage() {
               {
                 action,
                 userRelation: action.userRelation ?? null,
+                referralCode: refCode,
+                sharePreviewFirstName: sharePreview?.firstName ?? null,
+                showReferralTaskPanel,
+                referralPanelAnimationNonce,
+                onGuestCompletionChange: handleGuestCompletionChange,
                 onCompleteAction,
                 publicMode,
                 onOptOutAction,

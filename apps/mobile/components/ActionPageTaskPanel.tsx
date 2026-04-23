@@ -26,6 +26,7 @@ import ActionTaskPanel from "./ActionTaskPanel";
 import { useAuth } from "../lib/AuthContext";
 import * as Clipboard from "expo-clipboard";
 import {
+  buildActionShareUrl,
   buildShareText,
   getCompletedShareableTextTemplate,
 } from "@alliance/shared/lib/shareText";
@@ -39,7 +40,11 @@ export interface ActionPageTaskPanelProps {
   scrollToEnd: (animated?: boolean) => void;
 }
 
-const taskPanelTopByState: Record<ActionPageTaskPanelState, ReactNode> = {
+// Guest-completion states (GuestRef, GuestCompleted) are web-only; mobile
+// pins hasRefCode/hasGuestResponse to false below so they're never reached.
+const taskPanelTopByState: Partial<
+  Record<ActionPageTaskPanelState, ReactNode>
+> = {
   [ActionPageTaskPanelState.PublicOnlyAuthenticated]: (
     <Text>{taskHeaders.actionPage.externalOnly}</Text>
   ),
@@ -113,6 +118,8 @@ const ActionPageTaskPanel = ({
     userRelation,
     contractSigned: user?.hasActiveContract ?? false,
     isAuthenticated,
+    hasRefCode: false,
+    hasGuestResponse: false,
   });
   const formResponse = useCompletedTaskForm(
     action,
@@ -130,14 +137,22 @@ const ActionPageTaskPanel = ({
   });
 
   const handleShareCopy = async () => {
-    const ref = user?.referralCode ? `?ref=${user.referralCode}` : "";
-    const url = `${getBaseUrl()}/actions/${action.id}${ref}`;
+    const url = await buildActionShareUrl({
+      actionId: action.id,
+      baseUrl: getBaseUrl(),
+      isAuthenticated,
+    });
     const text = buildShareText({
       template: shareTemplate,
       formResponse,
+      userName: user?.name,
       url,
     });
-    await Clipboard.setStringAsync(text);
+    try {
+      await Clipboard.setStringAsync(text);
+    } catch {
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -182,6 +197,10 @@ const ActionPageTaskPanel = ({
     case ActionPageTaskPanelState.NotAssigned:
     case ActionPageTaskPanelState.MemberActionClosed:
     case ActionPageTaskPanelState.OnboardingSignContractFirst:
+    // Guest-completion states never occur on mobile (hasRefCode/hasGuestResponse
+    // pinned false); fall through to the disabled rendering just in case.
+    case ActionPageTaskPanelState.GuestRef:
+    case ActionPageTaskPanelState.GuestCompleted:
       return (
         <StackedCard
           top={taskPanelHeader}

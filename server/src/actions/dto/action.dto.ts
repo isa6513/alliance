@@ -118,6 +118,24 @@ export class PreviewTextMessageResponse {
   text: string;
 }
 
+export class ActionSharePreviewDto {
+  @ApiPropertyOptional()
+  firstName?: string;
+
+  @ApiProperty({ type: Boolean })
+  completedByReferrer: boolean;
+
+  @ApiProperty({ type: Boolean })
+  validReferral: boolean;
+}
+
+export class ActionReferralCodeDto {
+  @ApiProperty({ type: String })
+  @IsDefined()
+  @IsString()
+  referralCode: string;
+}
+
 export class PreviewEmailHtmlResponse {
   @ApiProperty({ type: String })
   @IsDefined()

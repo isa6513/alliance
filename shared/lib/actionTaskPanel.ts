@@ -9,37 +9,39 @@ import {
 
 export interface ActionTaskPanelPropsShared {
   action: ActionDto;
-  onCompleteAction: () => void;
+  onCompleteAction: () => boolean | void | Promise<boolean | void>;
   onOptOutAction: () => void;
   disabled?: boolean;
   formResponse?: FormResponseDto;
+  guestMode?: boolean;
 }
 
 export const useTaskFormHandlers = ({
   action,
   onCompleteAction,
   onOptOutAction,
+  guestMode = false,
 }: Pick<
   ActionTaskPanelPropsShared,
-  "action" | "onCompleteAction" | "onOptOutAction"
+  "action" | "onCompleteAction" | "onOptOutAction" | "guestMode"
 >) => {
   const [actionError, setActionError] = useState<string | null>(null);
 
   const handleComplete = useCallback(
     async (sendComplete: boolean = true) => {
-      if (sendComplete) {
+      if (sendComplete && !guestMode) {
         const req = await actionsComplete({
           path: { id: action.id },
         });
         if (req.error) {
           setActionError("Something went wrong. Please try again.");
-          return;
+          return false;
         }
       }
       setActionError(null);
-      onCompleteAction();
+      return onCompleteAction();
     },
-    [action, onCompleteAction],
+    [action, guestMode, onCompleteAction],
   );
 
   const handleAbandonAction = useCallback(

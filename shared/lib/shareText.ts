@@ -1,5 +1,83 @@
+import { actionsGetActionReferralCode } from "../client/sdk.gen";
 import type { FormResponseDto } from "../client/types.gen";
 import type { FormSchema } from "@alliance/common/forms/form-schema";
+
+export const FIRST_NAME_TOKEN = "#{first-name}";
+export const FULL_NAME_TOKEN = "#{full-name}";
+
+/**
+ * Canonical action share URL. Authenticated callers get a personal
+ * `?ref=<code>` suffix via the server's share-url lookup; unauthenticated
+ * callers get the plain URL.
+ */
+export async function buildActionShareUrl({
+  actionId,
+  baseUrl,
+  isAuthenticated,
+}: {
+  actionId: number;
+  baseUrl: string;
+  isAuthenticated: boolean;
+}): Promise<string> {
+  const url = `${baseUrl}/actions/${actionId}`;
+  if (!isAuthenticated) return url;
+  const { data } = await actionsGetActionReferralCode({
+    path: { id: actionId },
+  });
+  return data?.referralCode
+    ? `${url}?ref=${encodeURIComponent(data.referralCode)}`
+    : url;
+}
+
+const getUserNameParts = (name?: string | null) => {
+  const trimmedName = name?.trim() ?? "";
+  if (!trimmedName) {
+    return {
+      firstName: null,
+      fullName: null,
+    };
+  }
+
+  const [firstName] = trimmedName.split(/\s+/, 1);
+  return {
+    firstName: firstName || null,
+    fullName: trimmedName,
+  };
+};
+
+const replaceLiteralToken = (
+  value: string,
+  token: string,
+  replacement: string,
+) => value.split(token).join(replacement);
+
+const interpolateMemberNameTokens = ({
+  template,
+  userName,
+}: {
+  template: string;
+  userName?: string | null;
+}) => {
+  const { firstName, fullName } = getUserNameParts(userName);
+
+  let interpolatedTemplate = template;
+  if (firstName) {
+    interpolatedTemplate = replaceLiteralToken(
+      interpolatedTemplate,
+      FIRST_NAME_TOKEN,
+      firstName,
+    );
+  }
+  if (fullName) {
+    interpolatedTemplate = replaceLiteralToken(
+      interpolatedTemplate,
+      FULL_NAME_TOKEN,
+      fullName,
+    );
+  }
+
+  return interpolatedTemplate;
+};
 
 const resolveAnswerValue = (value: unknown): string | null => {
   if (value === undefined || value === null) {
@@ -67,10 +145,20 @@ export function getCompletedShareableTextTemplate({
   schemaSnapshot?: FormSchema | Record<string, unknown> | null;
   currentSchema?: FormSchema | Record<string, unknown> | null;
 }): string | undefined {
-  return (
-    getShareableTextTemplate(schemaSnapshot) ??
-    getShareableTextTemplate(currentSchema)
-  );
+  const snapshotTemplate = getShareableTextTemplate(schemaSnapshot);
+  if (typeof snapshotTemplate === "string" && snapshotTemplate.trim()) {
+    return snapshotTemplate;
+  }
+
+  const currentCompletedTemplate = getShareableTextTemplate(currentSchema);
+  if (
+    typeof currentCompletedTemplate === "string" &&
+    currentCompletedTemplate.trim()
+  ) {
+    return currentCompletedTemplate;
+  }
+
+  return getDefaultShareableTextTemplate(currentSchema);
 }
 
 /**
@@ -84,9 +172,20 @@ export function getCompletedShareableTextTemplate({
 export function interpolateShareText(
   template: string,
   formResponse: FormResponseDto,
+  userName?: string | null,
 ): string {
   const schema = formResponse.schemaSnapshot as unknown as FormSchema;
-  if (!schema?.pages) return template;
+  // Form-response fetches don't always eager-load user, so fall back to the
+  // explicitly passed userName. A blank user.name string is treated as absent.
+  const responseName = formResponse.user?.name;
+  const resolvedUserName =
+    responseName && responseName.trim() ? responseName : userName;
+  const interpolatedTemplate = interpolateMemberNameTokens({
+    template,
+    userName: resolvedUserName,
+  });
+
+  if (!schema?.pages) return interpolatedTemplate;
 
   const replaceToken = (match: string, token: string) => {
     const field = findSchemaField(schema, token);
@@ -97,23 +196,25 @@ export function interpolateShareText(
     return resolved ?? match;
   };
 
-  return template.replace(/#\{([^}]+)\}/g, replaceToken);
+  return interpolatedTemplate.replace(/#\{([^}]+)\}/g, replaceToken);
 }
 
 export function buildShareText({
   template,
   formResponse,
+  userName,
   url,
 }: {
   template?: string | null;
   formResponse?: FormResponseDto | null;
+  userName?: string | null;
   url: string;
 }): string {
   if (!template) return url;
 
   const interpolated = formResponse
-    ? interpolateShareText(template, formResponse)
-    : template;
+    ? interpolateShareText(template, formResponse, userName)
+    : interpolateMemberNameTokens({ template, userName });
   const trimmed = interpolated.trim();
 
   return trimmed ? `${trimmed}\n\n${url}` : url;

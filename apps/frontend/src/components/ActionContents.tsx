@@ -22,17 +22,19 @@ import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLinkIcon } from "lucide-react";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import { copyToClipboard } from "@alliance/sharedweb/lib/clipboard";
 import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
 import { useLiveTaskFormAggregateViews } from "../lib/useLiveTaskFormAggregateViews";
 import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
 import {
+  buildActionShareUrl,
   buildShareText,
   getCompletedShareableTextTemplate,
   getDefaultShareableTextTemplate,
 } from "@alliance/shared/lib/shareText";
 import { clipboardCopy } from "@alliance/shared/lib/copy";
-import ShareConfettiButton from "./ShareConfettiButton";
+import ShareButton from "./ShareButton";
 
 const ActionContents = () => {
   const context = useOutletContext<TaskPanelContext>();
@@ -46,7 +48,7 @@ const ActionContents = () => {
     context.userRelation,
   );
 
-  const { isAuthenticated, user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const loggedInMode = !action.publicOnly;
   const isCompleted = context.userRelation === "completed";
   const formResponse = useCompletedTaskForm(action, isCompleted);
@@ -116,15 +118,19 @@ const ActionContents = () => {
 
   const nextEvent = getNextEvent(action);
 
-  const handleShareAction = () => {
-    const ref = user?.referralCode ? `?ref=${user.referralCode}` : "";
-    const url = `${getBaseUrl()}/actions/${action.id}${ref}`;
+  const handleShareAction = async () => {
+    const url = await buildActionShareUrl({
+      actionId: action.id,
+      baseUrl: getBaseUrl(),
+      isAuthenticated,
+    });
     const text = buildShareText({
       template: shareTemplate,
       formResponse,
+      userName: user?.name,
       url,
     });
-    return navigator.clipboard.writeText(text);
+    return copyToClipboard(text);
   };
 
   return (
@@ -139,7 +145,7 @@ const ActionContents = () => {
       <div className="flex flex-row justify-between items-start mb-6">
         {action !== undefined && (
           <div className="flex flex-col gap-y-3">
-            <ShareConfettiButton
+            <ShareButton
               onClick={handleShareAction}
               icon={ExternalLinkIcon}
               label={clipboardCopy.share}

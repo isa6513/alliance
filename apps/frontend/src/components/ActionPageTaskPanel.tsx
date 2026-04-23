@@ -1,8 +1,13 @@
-import { UserActionRelation } from "@alliance/shared/client";
-import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
+import { FormResponseDto, UserActionRelation } from "@alliance/shared/client";
+import {
+  useCompletedTaskForm,
+  useGuestTaskForm,
+  useTaskForm,
+} from "@alliance/shared/lib/actionTaskPanelCompleted";
 import Card from "@alliance/sharedweb/ui/Card";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Link2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { isRouteErrorResponse, useOutletContext } from "react-router";
 import { Link } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
@@ -14,9 +19,23 @@ import {
   ActionPageTaskPanelState,
   cardStylesForState,
   getActionPageTaskPanelState,
+  isFormDisabledByState,
   shouldLoadCompletedTaskFormByState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
-import { taskHeaders } from "@alliance/shared/lib/copy";
+import {
+  clipboardCopy,
+  guestReferral,
+  taskHeaders,
+} from "@alliance/shared/lib/copy";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import { copyToClipboard } from "@alliance/sharedweb/lib/clipboard";
+import {
+  buildActionShareUrl,
+  buildShareText,
+  getCompletedShareableTextTemplate,
+} from "@alliance/shared/lib/shareText";
+import ShareButton from "./ShareButton";
+import { isNonmemberOnPublicActionReferral } from "../lib/publicActionReferral";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -41,6 +60,11 @@ export interface TaskPanelContext extends Omit<
 > {
   publicMode: boolean;
   userRelation: UserActionRelation | null;
+  referralCode?: string | null;
+  sharePreviewFirstName?: string | null;
+  showReferralTaskPanel?: boolean;
+  referralPanelAnimationNonce?: number;
+  onGuestCompletionChange?: (completed: boolean) => void;
 }
 
 const taskPanelHeaderByState: Record<
@@ -59,6 +83,8 @@ const taskPanelHeaderByState: Record<
       to complete this task.
     </p>
   ),
+  [ActionPageTaskPanelState.GuestRef]: null,
+  [ActionPageTaskPanelState.GuestCompleted]: null,
   [ActionPageTaskPanelState.NotAssigned]: (
     <p>{taskHeaders.actionPage.notAssigned}</p>
   ),
@@ -103,114 +129,252 @@ const taskPanelHeaderByState: Record<
 const bodyPaddingClasses = "p-4 sm:p-6";
 
 const ActionPageTaskPanel = () => {
-  const { userRelation, action, ...panelHandlers } =
-    useOutletContext<TaskPanelContext>();
+  const {
+    userRelation,
+    action,
+    referralCode,
+    sharePreviewFirstName,
+    showReferralTaskPanel = false,
+    referralPanelAnimationNonce = 0,
+    onGuestCompletionChange,
+    ...panelHandlers
+  } = useOutletContext<TaskPanelContext>();
 
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: userLoading } = useAuth();
+  const [localGuestFormResponse, setLocalGuestFormResponse] =
+    useState<FormResponseDto | null>(null);
+  const [animateReferralPanel, setAnimateReferralPanel] = useState(false);
+  const refCode = referralCode ?? null;
+  const signupHref = refCode
+    ? `/signup?ref=${encodeURIComponent(refCode)}`
+    : null;
+
+  const fetchedGuestFormResponse = useGuestTaskForm(action, !isAuthenticated);
+  const guestFormResponse =
+    localGuestFormResponse ?? fetchedGuestFormResponse ?? null;
+  const hasGuestResponse = !isAuthenticated && !!guestFormResponse;
 
   const state = getActionPageTaskPanelState({
     action,
     userRelation,
     contractSigned: user?.hasActiveContract ?? false,
     isAuthenticated,
+    hasRefCode: !!refCode,
+    hasGuestResponse,
   });
   const resolvedUserRelation = userRelation ?? "none";
+  const guestCompleted = state === ActionPageTaskPanelState.GuestCompleted;
+  const guestMode =
+    !isAuthenticated &&
+    !!refCode &&
+    (state === ActionPageTaskPanelState.PublicOnly ||
+      state === ActionPageTaskPanelState.GuestRef);
+  const isNonmemberPublicReferralAction = isNonmemberOnPublicActionReferral({
+    referralCode: refCode,
+    isAuthenticated,
+    userLoading,
+  });
+  const formDisabledByState = isFormDisabledByState(state);
   const formResponse = useCompletedTaskForm(
     action,
     shouldLoadCompletedTaskFormByState[state],
   );
+  const effectiveFormResponse = guestFormResponse ?? formResponse ?? undefined;
+  const isCompletedPanel =
+    state === ActionPageTaskPanelState.Completed || guestCompleted;
+  const taskForm = useTaskForm(action, isCompletedPanel);
+  const shareTemplate = getCompletedShareableTextTemplate({
+    schemaSnapshot: effectiveFormResponse?.schemaSnapshot as
+      | Record<string, unknown>
+      | undefined,
+    currentSchema: taskForm?.schema as Record<string, unknown> | undefined,
+  });
 
+  const handleShareCopy = async () => {
+    const url = await buildActionShareUrl({
+      actionId: action.id,
+      baseUrl: getBaseUrl(),
+      isAuthenticated,
+    });
+    const text = buildShareText({
+      template: shareTemplate,
+      formResponse: effectiveFormResponse,
+      userName: user?.name,
+      url,
+    });
+    return copyToClipboard(text);
+  };
   const completedHeader = (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-x-3">
         <CheckIcon size={24} />
         <p>{taskHeaders.actionPage.completed}</p>
       </div>
+      {isAuthenticated && (
+        <ShareButton
+          onClick={handleShareCopy}
+          icon={Link2}
+          label={clipboardCopy.share}
+          copiedLabel={clipboardCopy.copiedToClipboard}
+          className="text-zinc-500 hover:text-zinc-700"
+          iconClassName="w-3.5 h-3.5 shrink-0"
+          labelClassName="text-sm order-first"
+        />
+      )}
     </div>
   );
 
-  const taskPanelHeader =
-    state === ActionPageTaskPanelState.Completed
-      ? completedHeader
-      : taskPanelHeaderByState[state];
+  let taskPanelHeader = taskPanelHeaderByState[state];
+  if (isCompletedPanel) {
+    taskPanelHeader = completedHeader;
+  } else if (isNonmemberPublicReferralAction) {
+    taskPanelHeader = null;
+  }
   const { header: headerStyle, body: bodyStyle } = cardStylesForState(state);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setLocalGuestFormResponse(null);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    onGuestCompletionChange?.(guestCompleted);
+  }, [guestCompleted, onGuestCompletionChange]);
+
+  useEffect(() => {
+    if (!isNonmemberPublicReferralAction || referralPanelAnimationNonce === 0) {
+      return;
+    }
+
+    setAnimateReferralPanel(true);
+    const timeoutId = window.setTimeout(() => {
+      setAnimateReferralPanel(false);
+    }, 550);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isNonmemberPublicReferralAction, referralPanelAnimationNonce]);
+
+  const renderStackedCard = (bottom: React.ReactNode) => (
+    <div className="relative">
+      <StackedCard
+        top={taskPanelHeader}
+        topCardStyle={headerStyle}
+        bottom={
+          <>
+            {isNonmemberPublicReferralAction &&
+              showReferralTaskPanel &&
+              signupHref && (
+                <div className="-mx-4 -mt-4 mb-4 overflow-hidden sm:-mx-6 sm:-mt-6">
+                  <div
+                    className={`rounded-b-2xl rounded-t-none border-b border-zinc-200 bg-zinc-50 px-4 py-4 sm:px-6 sm:py-5 ${
+                      !guestCompleted && animateReferralPanel
+                        ? "referral-panel-slide-in"
+                        : ""
+                    }`}
+                  >
+                    {guestCompleted ? (
+                      <>
+                        <p className="text-base leading-7 text-zinc-700">
+                          {guestReferral.completionIntegrityExplanation}
+                        </p>
+                        <p className="mt-3 text-base leading-7 text-zinc-700">
+                          {guestReferral.joinToCountContributions}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-lg font-semibold leading-8 text-zinc-900">
+                          {guestReferral.inviteToTryTask(
+                            sharePreviewFirstName ??
+                              guestReferral.defaultReferrerName,
+                          )}
+                        </p>
+                        <p className="mt-3 text-base leading-7 text-zinc-700">
+                          {guestReferral.allianceIntro}
+                        </p>
+                      </>
+                    )}
+                    <Link
+                      to={signupHref}
+                      className="mt-5 block w-full rounded-full bg-green px-6 py-3 text-center text-base font-medium text-white"
+                    >
+                      Sign up
+                    </Link>
+                  </div>
+                </div>
+              )}
+            {bottom}
+          </>
+        }
+        bottomCardStyle={bodyStyle}
+        bottomCardClassName={bodyPaddingClasses}
+      />
+    </div>
+  );
 
   switch (state) {
     case ActionPageTaskPanelState.Declined:
     case ActionPageTaskPanelState.Completed:
+    case ActionPageTaskPanelState.GuestCompleted:
     case ActionPageTaskPanelState.PublicOnlyAuthenticated:
-    case ActionPageTaskPanelState.NotAuthenticated:
     case ActionPageTaskPanelState.NotAssigned:
     case ActionPageTaskPanelState.MemberActionClosed:
     case ActionPageTaskPanelState.OnboardingSignContractFirst:
-      return (
-        <StackedCard
-          top={taskPanelHeader}
-          topCardStyle={headerStyle}
-          bottom={
-            <ActionTaskPanel
-              userRelation="none"
-              action={action}
-              {...panelHandlers}
-              disabled
-              formResponse={formResponse ?? undefined}
-            />
-          }
-          bottomCardStyle={bodyStyle}
-          bottomCardClassName={bodyPaddingClasses}
-        />
+      return renderStackedCard(
+        <ActionTaskPanel
+          userRelation="none"
+          action={action}
+          {...panelHandlers}
+          disabled
+          formResponse={effectiveFormResponse}
+        />,
       );
+    case ActionPageTaskPanelState.NotAuthenticated:
+    case ActionPageTaskPanelState.GuestRef:
     case ActionPageTaskPanelState.PublicOnly:
-      return (
-        <StackedCard
-          top={taskPanelHeader}
-          topCardStyle={headerStyle}
-          bottom={
-            <ActionTaskPanel
-              userRelation="none"
-              action={action}
-              {...panelHandlers}
-            />
+      return renderStackedCard(
+        <ActionTaskPanel
+          userRelation="none"
+          action={action}
+          {...panelHandlers}
+          onCompleteAction={
+            guestMode ? () => {} : panelHandlers.onCompleteAction
           }
-          bottomCardStyle={bodyStyle}
-          bottomCardClassName={bodyPaddingClasses}
-        />
+          disabled={formDisabledByState}
+          formResponse={effectiveFormResponse}
+          guestMode={guestMode}
+          createAccountHref={guestMode ? (signupHref ?? undefined) : undefined}
+          forceRenderTask={guestMode || formDisabledByState}
+          redirectOnComplete={!guestMode}
+          onFormSubmitted={
+            guestMode
+              ? (response) => setLocalGuestFormResponse(response)
+              : undefined
+          }
+        />,
       );
     case ActionPageTaskPanelState.MissingDataOrNotActive:
       return null;
     case ActionPageTaskPanelState.ShowTaskWithMissedDeadline:
-      return (
-        <StackedCard
-          top={taskPanelHeader}
-          topCardStyle={headerStyle}
-          bottom={
-            <ActionTaskPanel
-              action={action}
-              userRelation={resolvedUserRelation}
-              {...panelHandlers}
-              missedDeadline
-            />
-          }
-          bottomCardStyle={bodyStyle}
-          bottomCardClassName={bodyPaddingClasses}
-        />
+      return renderStackedCard(
+        <ActionTaskPanel
+          action={action}
+          userRelation={resolvedUserRelation}
+          {...panelHandlers}
+          missedDeadline
+        />,
       );
     case ActionPageTaskPanelState.Optional:
     case ActionPageTaskPanelState.ShowTask:
-      return (
-        <StackedCard
-          top={taskPanelHeader}
-          topCardStyle={headerStyle}
-          bottom={
-            <ActionTaskPanel
-              action={action}
-              userRelation={resolvedUserRelation}
-              {...panelHandlers}
-            />
-          }
-          bottomCardStyle={bodyStyle}
-          bottomCardClassName={bodyPaddingClasses}
-        />
+      return renderStackedCard(
+        <ActionTaskPanel
+          action={action}
+          userRelation={resolvedUserRelation}
+          {...panelHandlers}
+        />,
       );
     default:
       throw new Error(

@@ -9,14 +9,21 @@ import {
   Post,
   Put,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { ActionActivityDto, OptOutActionDto } from 'src/actions/dto/action.dto';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
+import {
+  AuthGuard,
+  extractGuestTokenFromCookie,
+  extractGuestTokenFromHeader,
+} from 'src/auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from 'src/auth/public.decorator';
+import { AuthService } from 'src/auth/auth.service';
+import type { Request as ExpressRequest, Response } from 'express';
 import {
   CreateCustomValidatorDto,
   CreateCustomValidatorResponseDto,
@@ -32,14 +39,21 @@ import {
   FormAggregateViewsDto,
   FormDto,
   FormResponseDto,
+  GuestFormResponseDto,
+  LinkedGuestDraftDto,
   SubmitFollowUpFormDto,
   SubmitFormDto,
 } from './form.dto';
 import { TasksService } from './tasks.service';
 
+const GUEST_TOKEN_RESPONSE_HEADER = 'X-Guest-Token';
+
 @Controller('tasks')
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post('submitForm/:id')
   @UseGuards(AuthGuard)
@@ -56,10 +70,29 @@ export class TasksController {
   @Public()
   @ApiOkResponse({ type: FormResponseDto })
   async submitPublicForm(
+    @Request() req: ExpressRequest,
+    @Res({ passthrough: true }) res: Response,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: SubmitFormDto,
   ): Promise<FormResponseDto> {
-    return this.tasksService.submitFormPublic(+id, body);
+    const authenticatedUserId =
+      await this.authService.getAuthenticatedUserId(req);
+    if (authenticatedUserId !== null) {
+      throw new BadRequestException(
+        'Authenticated users must use /tasks/submitForm/:id',
+      );
+    }
+    const incomingToken =
+      extractGuestTokenFromHeader(req) ?? extractGuestTokenFromCookie(req);
+    const { guestId, guestToken } =
+      await this.authService.createGuestSession(incomingToken);
+    this.authService.setGuestCookie(res, guestToken);
+    res.setHeader(GUEST_TOKEN_RESPONSE_HEADER, guestToken);
+    return this.tasksService.submitFormPublic({
+      formId: +id,
+      submitFormDto: body,
+      guestId,
+    });
   }
 
   @Post('submitFollowUpForm/:followUpFormId')
@@ -108,6 +141,34 @@ export class TasksController {
     @Request() req: JwtRequest,
   ) {
     return this.tasksService.getMyFormResponse(req.user.sub, id);
+  }
+
+  @Get('guestResponse/:id')
+  @Public()
+  @ApiOkResponse({ type: GuestFormResponseDto })
+  async getGuestFormResponse(
+    @Request() req: ExpressRequest,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GuestFormResponseDto> {
+    const token =
+      extractGuestTokenFromHeader(req) ?? extractGuestTokenFromCookie(req);
+    const guestPayload = token
+      ? await this.authService.verifyGuestToken(token)
+      : null;
+    if (!guestPayload) {
+      return {};
+    }
+    return this.tasksService.getGuestFormResponse(guestPayload.sub, id);
+  }
+
+  @Get('draft/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: LinkedGuestDraftDto })
+  async getLinkedGuestDraft(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
+  ): Promise<LinkedGuestDraftDto> {
+    return this.tasksService.getLinkedGuestDraftFormResponse(req.user.sub, id);
   }
 
   @Get('slug/:id')

@@ -2,8 +2,8 @@ import { cn } from "@alliance/shared/styles/util";
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-export interface ShareConfettiButtonProps {
-  onClick: () => void | Promise<void>;
+export interface ShareButtonProps {
+  onClick: () => boolean | void | Promise<boolean | void>;
   label: string;
   copiedLabel: string;
   icon: LucideIcon;
@@ -14,7 +14,7 @@ export interface ShareConfettiButtonProps {
 
 const COPIED_LIFETIME_MS = 2000;
 
-export default function ShareConfettiButton({
+export default function ShareButton({
   onClick,
   label,
   copiedLabel,
@@ -22,7 +22,7 @@ export default function ShareConfettiButton({
   className,
   iconClassName,
   labelClassName,
-}: ShareConfettiButtonProps) {
+}: ShareButtonProps) {
   const copiedResetTimeoutRef = useRef<number | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -35,7 +35,10 @@ export default function ShareConfettiButton({
   }, []);
 
   const handleClick = async () => {
-    await onClick();
+    const didSucceed = await onClick();
+    if (didSucceed === false) {
+      return false;
+    }
     setIsCopied(true);
 
     if (copiedResetTimeoutRef.current !== null) {
@@ -46,13 +49,18 @@ export default function ShareConfettiButton({
       setIsCopied(false);
       copiedResetTimeoutRef.current = null;
     }, COPIED_LIFETIME_MS);
+
+    return true;
   };
 
   return (
     <button
       type="button"
-      onClick={() => void handleClick()}
-      className={cn("flex items-center gap-x-1 transition-colors", className)}
+      onClick={handleClick}
+      className={cn(
+        "flex items-center gap-x-1 transition-colors disabled:cursor-default",
+        className,
+      )}
     >
       <Icon className={iconClassName} />
       <span className={labelClassName}>{isCopied ? copiedLabel : label}</span>

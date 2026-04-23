@@ -16,6 +16,8 @@ import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
 import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { User } from 'src/user/entities/user.entity';
 import { ContractModule } from 'src/contract/contract.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { Guest } from 'src/auth/entities/guest.entity';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { ContractModule } from 'src/contract/contract.module';
       ActionShareUrl,
       User,
       FollowUpForm,
+      Guest,
     ]),
     UserModule,
     ForumModule,
@@ -35,6 +38,7 @@ import { ContractModule } from 'src/contract/contract.module';
     EventLogModule,
     AiDetectionModule,
     ContractModule,
+    AuthModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],

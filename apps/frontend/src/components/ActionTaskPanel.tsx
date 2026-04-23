@@ -10,11 +10,16 @@ import posthog from "posthog-js";
 import { canCompleteAction } from "@alliance/shared/lib/actionUtils";
 import { UserActionRelation } from "@alliance/shared/client";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
+import { FormResponseDto } from "@alliance/shared/client";
 
 export type ActionTaskPanelProps = ActionTaskPanelPropsShared & {
   userRelation: UserActionRelation;
   missedDeadline?: boolean;
   card?: boolean;
+  redirectOnComplete?: boolean;
+  onFormSubmitted?: (formResponse: FormResponseDto) => void;
+  createAccountHref?: string;
+  forceRenderTask?: boolean;
   scrollContainerRef?: RefObject<HTMLElement | null>;
 };
 
@@ -25,15 +30,24 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   card = false,
   disabled = false,
   formResponse,
+  guestMode = false,
+  redirectOnComplete,
+  onFormSubmitted,
+  createAccountHref,
+  forceRenderTask = false,
   scrollContainerRef,
 }: ActionTaskPanelProps) => {
-  const handleCompleteAction = useCallback(() => {
-    onCompleteAction();
+  const handleCompleteAction = useCallback(async () => {
+    const didSucceed = await onCompleteAction();
+    if (didSucceed === false) {
+      return false;
+    }
     posthog.capture("action_completed", {
       actionId: action.id,
       actionType: action.type,
       actionName: action.name,
     });
+    return true;
   }, [onCompleteAction, action.id, action.type, action.name]);
 
   const handleFormStarted = useCallback(() => {
@@ -49,6 +63,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       action,
       onCompleteAction: handleCompleteAction,
       onOptOutAction,
+      guestMode,
     });
 
   const errorMessageNode = useMemo(() => {
@@ -73,31 +88,25 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         actionId={action.id}
         disabled={true}
         formResponse={formResponse}
+        onSubmitted={onFormSubmitted}
       />
     );
   }
 
   let completionElement = null;
-  if (canCompleteAction(action)) {
-    if (action.type === "Funding") {
-      //   completionElement = (
-      //     <StripeWrapper actionId={action.id}>
-      //       <ActionTaskPanelFunding
-      //         onPaymentSuccess={handleCompleteWithTracking}
-      //       />
-      //     </StripeWrapper>
-      //   );
-    }
+  if (canCompleteAction(action) || forceRenderTask) {
     if (action.type === "Activity" && action.taskFormId) {
       completionElement = (
         <ActionTaskPanelForm
-          publicAction={action.publicOnly}
+          publicAction={action.publicOnly || guestMode}
           taskFormId={action.taskFormId}
           onCompleteAction={handleCompleteWithTracking}
           onFormStarted={handleFormStarted}
           onAbandonAction={handleAbandonAction}
           card={card}
           actionId={action.id}
+          redirectOnComplete={redirectOnComplete}
+          onSubmitted={onFormSubmitted}
           scrollContainerRef={scrollContainerRef}
         />
       );
@@ -111,6 +120,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
           action={action}
           onCompleteAction={handleCompleteWithTracking}
           disabled={disabled}
+          createAccountHref={guestMode ? createAccountHref : undefined}
         />
       );
     }

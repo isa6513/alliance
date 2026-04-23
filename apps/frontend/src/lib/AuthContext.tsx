@@ -26,7 +26,7 @@ interface AuthContextType {
   isImpersonation: boolean;
   refreshUser: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  onLogin: () => void;
+  onLogin: () => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
 }
@@ -40,6 +40,20 @@ export const AuthProvider: React.FC<
     const [user, setUser] = useState<UserDto | undefined>();
     const [isImpersonation, setIsImpersonation] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    const loadAuthenticatedUser = useCallback(
+      async (isCancelled?: () => boolean) => {
+        const { data } = await authMe();
+        if (!data) {
+          throw new Error("No user data");
+        }
+        if (isCancelled?.()) return;
+
+        setUser(data.user);
+        setIsImpersonation(data.isImpersonation ?? false);
+      },
+      [],
+    );
 
     useEffect(() => {
       if (import.meta.env.PROD) {
@@ -57,26 +71,21 @@ export const AuthProvider: React.FC<
 
     useEffect(() => {
       let cancelled = false;
+      const isCancelled = () => cancelled;
 
       const bootstrap = async () => {
         try {
-          const { data } = await authMe();
-          if (data) {
-            if (!cancelled) {
-              setUser(data.user);
-              setIsImpersonation(data.isImpersonation ?? false);
-            }
-          } else {
-            throw new Error("No user data");
+          await loadAuthenticatedUser(isCancelled);
+          if (cancelled) {
+            return;
           }
         } catch {
           try {
             await authRefreshTokens();
-
-            const { data } = await authMe();
-            if (!cancelled && data) {
-              setUser(data.user);
-              setIsImpersonation(data.isImpersonation ?? false);
+            if (cancelled) return;
+            await loadAuthenticatedUser(isCancelled);
+            if (cancelled) {
+              return;
             }
           } catch {
             console.log("AuthContext", "refresh failed");
@@ -90,6 +99,7 @@ export const AuthProvider: React.FC<
       return () => {
         cancelled = true;
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const login = useCallback(
@@ -104,15 +114,10 @@ export const AuthProvider: React.FC<
         }
 
         queryClient.clear();
-
-        const { data } = await authMe();
-        if (data) {
-          setUser(data.user);
-          setIsImpersonation(data.isImpersonation ?? false);
-        }
+        await loadAuthenticatedUser();
         setLoading(false);
       },
-      [queryClient],
+      [loadAuthenticatedUser, queryClient],
     );
 
     const logout = useCallback(async () => {
@@ -123,15 +128,10 @@ export const AuthProvider: React.FC<
       window.location.href = "/login";
     }, [queryClient]);
 
-    const onLogin = useCallback(() => {
-      authMe().then((res) => {
-        if (res.data) {
-          queryClient.clear();
-          setUser(res.data.user);
-          setIsImpersonation(res.data.isImpersonation ?? false);
-        }
-      });
-    }, [queryClient]);
+    const onLogin = useCallback(async () => {
+      queryClient.clear();
+      await loadAuthenticatedUser();
+    }, [loadAuthenticatedUser, queryClient]);
 
     const refreshUser = useCallback(async () => {
       const { data } = await authMe();
@@ -172,7 +172,7 @@ export const useAuth = (): AuthContextType => {
       user: testAuthUser,
       isImpersonation: false,
       login: () => Promise.resolve(),
-      onLogin: () => {},
+      onLogin: () => Promise.resolve(),
       logout: () => Promise.resolve(),
       refreshUser: () => Promise.resolve(),
       loading: false,
@@ -187,7 +187,7 @@ export const useAuth = (): AuthContextType => {
       user: undefined,
       isImpersonation: false,
       login: () => Promise.resolve(),
-      onLogin: () => {},
+      onLogin: () => Promise.resolve(),
       logout: () => Promise.resolve(),
       refreshUser: () => Promise.resolve(),
       loading: false,

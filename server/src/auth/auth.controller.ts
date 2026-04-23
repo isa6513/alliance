@@ -20,7 +20,7 @@ import {
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import type { Response } from 'express';
+import type { Request as ExpressRequest, Response } from 'express';
 import { UserDto } from '../user/dto/user.dto';
 import { AuthService } from './auth.service';
 import { AuthTokens, AuthMeResponseDto } from './dto/authtokens.dto';
@@ -28,7 +28,11 @@ import ForgotPasswordDto, { ResetPasswordDto } from './dto/forgotpassword.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto, SignInResponseDto, type TokenMode } from './dto/signin.dto';
 import { AdminGuard } from './guards/admin.guard';
-import { AuthGuard, extractRefreshTokenFromCookie } from './guards/auth.guard';
+import {
+  AuthGuard,
+  extractGuestTokenFromCookie,
+  extractRefreshTokenFromCookie,
+} from './guards/auth.guard';
 import type { JwtRequest } from './guards/jwtreq';
 import { RefreshTokenGuard } from './guards/refresh.guard';
 import { Public } from './public.decorator';
@@ -53,13 +57,15 @@ export class AuthController {
   @ApiUnauthorizedResponse()
   @Post('login')
   async login(
+    @Request() req: ExpressRequest,
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { access_token, refresh_token, isAdmin } =
+    const { access_token, refresh_token, isAdmin, userId } =
       await this.authService.login(signInDto.email, signInDto.password);
 
     this.authService.setAuthCookies(res, access_token, refresh_token);
+    await this.mergeGuestSession(signInDto.guestToken, req, res, userId);
     if (signInDto.mode === 'header') {
       return { access_token, refresh_token, isAdmin };
     }
@@ -72,17 +78,33 @@ export class AuthController {
   @ApiUnauthorizedResponse()
   @Post('admin/login')
   async adminLogin(
+    @Request() req: ExpressRequest,
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { access_token, refresh_token, isAdmin } =
+    const { access_token, refresh_token, isAdmin, userId } =
       await this.authService.login(signInDto.email, signInDto.password, true);
 
     this.authService.setAuthCookies(res, access_token, refresh_token);
+    await this.mergeGuestSession(signInDto.guestToken, req, res, userId);
     if (signInDto.mode === 'header') {
       return { access_token, refresh_token, isAdmin };
     }
     return { isAdmin: true };
+  }
+
+  private async mergeGuestSession(
+    bodyToken: string | undefined,
+    req: ExpressRequest,
+    res: Response,
+    userId: number,
+  ): Promise<void> {
+    const guestToken = bodyToken ?? extractGuestTokenFromCookie(req);
+    if (!guestToken) {
+      return;
+    }
+    await this.authService.mergeGuestFromToken(guestToken, userId);
+    this.authService.clearGuestCookie(res);
   }
 
   @Public()
@@ -95,6 +117,7 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse()
   async register(
+    @Request() req: ExpressRequest,
     @Body() signUp: SignUpDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{
@@ -104,10 +127,11 @@ export class AuthController {
   }> {
     await this.authService.register(signUp);
 
-    const { access_token, refresh_token, isAdmin } =
+    const { access_token, refresh_token, isAdmin, userId } =
       await this.authService.login(signUp.email, signUp.password);
 
     this.authService.setAuthCookies(res, access_token, refresh_token);
+    await this.mergeGuestSession(signUp.guestToken, req, res, userId);
     if (signUp.mode === 'header') {
       return { access_token, refresh_token, isAdmin };
     }

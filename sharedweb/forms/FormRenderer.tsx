@@ -18,7 +18,10 @@ import {
 import { useOutsideClick } from "../../sharedweb/lib/useOutsideClick";
 import Dropdown from "../ui/Dropdown";
 import { cn } from "@alliance/shared/styles/util";
-import { outputFieldPublicToggle } from "@alliance/shared/lib/copy";
+import {
+  guestReferral,
+  outputFieldPublicToggle,
+} from "@alliance/shared/lib/copy";
 import RenderDisplayBlock from "./RenderDisplayBlock";
 import RenderField from "./RenderField";
 import type {
@@ -52,12 +55,14 @@ import BaseButton, {
   BaseButtonSize,
   BaseButtonVariant,
 } from "../ui/BaseButton";
+import ConfettiWrapper from "../ui/ConfettiWrapper";
 import { Ellipsis } from "lucide-react";
 
 type FormRendererProps = {
   form: FormSchema;
   id: number;
   publicAction?: boolean;
+  createAccountHref?: string;
   actionId: number;
   persistKey?: string | null;
   initialPageIndex?: number;
@@ -75,10 +80,12 @@ type FormRendererProps = {
   followUp?: boolean;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
+  /** Prefill form with these answers when there is no locally-persisted draft. Used to restore a guest's answers after signup. */
+  draftFormResponse?: FormResponseDto | null;
   fieldLabelRightContent?: Record<string, React.ReactNode>;
   /** When set, previousAnswer blocks fetch this user's responses via the admin all-responses endpoint. */
   adminPreviewUserId?: string | number;
-  onSubmit: ((data: SubmitFormDto) => Promise<void>) | null; // null for admin preview
+  onSubmit: ((data: SubmitFormDto) => Promise<boolean>) | null; // null for admin preview
   scrollContainerRef?: React.RefObject<HTMLElement | null>;
 } & (
   | {
@@ -149,6 +156,7 @@ const FormRenderer = ({
   form,
   id,
   publicAction,
+  createAccountHref,
   onSubmit,
   persistKey,
   userId,
@@ -160,6 +168,7 @@ const FormRenderer = ({
   renderFormAsCompleted,
   followUp,
   completedFormResponse,
+  draftFormResponse,
   fieldLabelRightContent,
   adminPreviewUserId,
   actionId,
@@ -299,6 +308,13 @@ const FormRenderer = ({
     }
   });
   const formTopRef = useRef<HTMLDivElement>(null);
+  // Precedence: localStorage (active local edits) > draft (guest prefill, may
+  // arrive after mount) > empty. Once either localStorage or a draft is applied,
+  // we lock out later draft applies so we never stomp user edits.
+  const draftLockedRef = useRef(false);
+  // Guard against double-submit when the submit button's click handler
+  // (ConfettiWrapper) and the form's submit event both call submitCurrentPage.
+  const submittingRef = useRef(false);
   const [formData, setFormData] = useState<Record<string, FormValue>>(() => {
     if (readOnly) {
       const answers =
@@ -306,31 +322,42 @@ const FormRenderer = ({
       return filterAnswersByFieldIds(answers, fieldLookup);
     }
 
-    if (typeof window === "undefined") {
-      return applyDefaultValues(undefined, defaultValueMap);
-    }
-
-    if (!persistKey) {
-      return applyDefaultValues({}, defaultValueMap);
-    }
-
-    try {
-      const raw = window.localStorage.getItem(storageKey);
-      if (!raw) {
-        return applyDefaultValues({}, defaultValueMap);
+    const readLocalStorageAnswers = (): Record<string, FormValue> | null => {
+      if (typeof window === "undefined" || !persistKey) return null;
+      try {
+        const raw = window.localStorage.getItem(storageKey);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        const storedFormData =
+          parsed?.formData && typeof parsed.formData === "object"
+            ? (parsed.formData as Record<string, FormValue>)
+            : null;
+        if (!storedFormData) return null;
+        const filtered = filterAnswersByFieldIds(storedFormData, fieldLookup);
+        return Object.keys(filtered).length > 0 ? filtered : null;
+      } catch {
+        return null;
       }
-      const parsed = JSON.parse(raw);
-      const storedFormData =
-        parsed?.formData && typeof parsed.formData === "object"
-          ? (parsed.formData as Record<string, FormValue>)
-          : undefined;
-      const filtered = storedFormData
-        ? filterAnswersByFieldIds(storedFormData, fieldLookup)
-        : {};
-      return applyDefaultValues(filtered, defaultValueMap);
-    } catch {
-      return applyDefaultValues({}, defaultValueMap);
+    };
+
+    const localAnswers = readLocalStorageAnswers();
+    if (localAnswers) {
+      draftLockedRef.current = true;
+      return applyDefaultValues(localAnswers, defaultValueMap);
     }
+
+    const draftAnswers = draftFormResponse?.answers
+      ? filterAnswersByFieldIds(
+          draftFormResponse.answers as Record<string, FormValue>,
+          fieldLookup,
+        )
+      : null;
+    if (draftAnswers && Object.keys(draftAnswers).length > 0) {
+      draftLockedRef.current = true;
+      return applyDefaultValues(draftAnswers, defaultValueMap);
+    }
+
+    return applyDefaultValues({}, defaultValueMap);
   });
 
   const [publicAnswerOverrides, setPublicAnswerOverrides] = useState<
@@ -623,6 +650,23 @@ const FormRenderer = ({
       cancelled = true;
     };
   }, [previousAnswerSourceFormIds, adminPreviewUserId]);
+
+  // --- Apply guest draft answers when they arrive after mount ---
+  // The draft query is fired in parallel with the form render so we don't
+  // block paint on it; apply it here if the user hasn't started editing and
+  // localStorage didn't already win the initial-state race.
+  useEffect(() => {
+    if (readOnly) return;
+    if (draftLockedRef.current) return;
+    if (!draftFormResponse?.answers) return;
+    const draftAnswers = filterAnswersByFieldIds(
+      draftFormResponse.answers as Record<string, FormValue>,
+      fieldLookup,
+    );
+    if (Object.keys(draftAnswers).length === 0) return;
+    draftLockedRef.current = true;
+    setFormData(applyDefaultValues(draftAnswers, defaultValueMap));
+  }, [draftFormResponse, readOnly, fieldLookup, defaultValueMap]);
 
   // --- Prefill list fields from previous answer data ---
   useEffect(() => {
@@ -956,6 +1000,7 @@ const FormRenderer = ({
 
   const ensureStarted = () => {
     if (readOnly) return;
+    draftLockedRef.current = true;
     if (!hasEmittedStart) {
       try {
         onFormStarted?.();
@@ -1091,19 +1136,33 @@ const FormRenderer = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const formTrackingParams = {
+    formId: id,
+    actionId,
+    currentPageIndex,
+    pageCount: schema.pages.length,
+    enabled: !!onSubmit && !readOnly,
+  };
 
-    if (submitting) {
-      return;
+  useFormPageDurationTracking(formTrackingParams);
+  const trackValidationError =
+    useFormValidationErrorTracking(formTrackingParams);
+
+  const submitCurrentPage = useCallback(async (): Promise<boolean> => {
+    if (submittingRef.current) {
+      return false;
     }
-
+    submittingRef.current = true;
     setSubmitting(true);
 
-    if (readOnly || !onSubmit) {
+    const finishSubmit = (result: boolean) => {
+      submittingRef.current = false;
       setSubmitting(false);
-      return;
+      return result;
+    };
+
+    if (readOnly || !onSubmit) {
+      return finishSubmit(false);
     }
 
     if (!isLastPage) {
@@ -1113,8 +1172,7 @@ const FormRenderer = ({
       } else {
         trackValidationError(result.firstInvalidFieldId);
       }
-      setSubmitting(false);
-      return;
+      return finishSubmit(false);
     }
 
     const { isValid, firstInvalidPageIndex, firstInvalidFieldId } =
@@ -1127,8 +1185,7 @@ const FormRenderer = ({
       ) {
         setCurrentPageIndex(firstInvalidPageIndex);
       }
-      setSubmitting(false);
-      return;
+      return finishSubmit(false);
     }
 
     const sanitizedAnswers = filterAnswersByFieldIds(formData, fieldLookup);
@@ -1147,9 +1204,39 @@ const FormRenderer = ({
       sid: sid ?? undefined,
     };
 
-    onSubmit(submissionPayload).finally(() => {
+    try {
+      return await onSubmit(submissionPayload);
+    } catch {
+      return false;
+    } finally {
+      submittingRef.current = false;
       setSubmitting(false);
-    });
+    }
+  }, [
+    actionId,
+    currentPageIndex,
+    deviceType,
+    fieldLookup,
+    form,
+    formData,
+    isLastPage,
+    onSubmit,
+    phDistinctId,
+    readOnly,
+    resolvedPublicAnswers,
+    searchParams,
+    sessionReplayUrl,
+    trackValidationError,
+    validateAllPages,
+    validatePage,
+    visibilityValidatorResults,
+  ]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    await submitCurrentPage();
   };
 
   const validateForPreview = useCallback(async () => {
@@ -1365,18 +1452,6 @@ const FormRenderer = ({
     }
   }, [currentPageIndex]);
 
-  const formTrackingParams = {
-    formId: id,
-    actionId,
-    currentPageIndex,
-    pageCount: schema.pages.length,
-    enabled: !!onSubmit && !readOnly,
-  };
-
-  useFormPageDurationTracking(formTrackingParams);
-  const trackValidationError =
-    useFormValidationErrorTracking(formTrackingParams);
-
   useEffect(() => {
     setFieldErrors({});
   }, [schema]);
@@ -1561,19 +1636,46 @@ const FormRenderer = ({
                     </BaseButton>
                   )
                 ) : readOnly ? null : onSubmit ? (
-                  <div className="flex flex-1 space-x-2 items-center">
-                    <BaseButton
-                      variant={BaseButtonVariant.Black}
-                      className="w-full"
-                      disabled={submitting}
-                      type="submit"
-                    >
-                      {schema.submit?.label ||
-                        (followUp ? "Submit" : "Complete")}
-                    </BaseButton>
+                  <div className="w-full">
+                    {createAccountHref ? (
+                      <a
+                        href={createAccountHref}
+                        className="flex w-full items-center justify-center rounded bg-green px-4 py-2 text-base font-medium text-white hover:bg-[#4d8c1d]"
+                        style={{ fontWeight: 450 }}
+                      >
+                        {guestReferral.createAccountToSubmit}
+                      </a>
+                    ) : (
+                      <div className="w-full">
+                        <ConfettiWrapper
+                          burstPlacement="local"
+                          onTrigger={submitCurrentPage}
+                        >
+                          {({
+                            disabled: confettiDisabled,
+                            onClick,
+                            onKeyDown,
+                            onPointerDown,
+                          }) => (
+                            <BaseButton
+                              variant={BaseButtonVariant.Black}
+                              className="w-full"
+                              disabled={submitting || confettiDisabled}
+                              type="submit"
+                              onClick={onClick}
+                              onKeyDown={onKeyDown}
+                              onPointerDown={onPointerDown}
+                            >
+                              {schema.submit?.label ||
+                                (followUp ? "Submit" : "Complete")}
+                            </BaseButton>
+                          )}
+                        </ConfettiWrapper>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <div className="flex flex-1 space-x-2 items-center">
+                  <div className="w-full">
                     <BaseButton
                       variant={BaseButtonVariant.Black}
                       className="!cursor-not-allowed w-full"

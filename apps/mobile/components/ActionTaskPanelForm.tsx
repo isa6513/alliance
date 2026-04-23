@@ -14,6 +14,7 @@ import { usePostHog } from "posthog-react-native";
 import Text from "./system/Text";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../lib/AuthContext";
+import { getStoredGuestToken, setStoredGuestToken } from "../lib/guestSession";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -25,7 +26,6 @@ interface ActionTaskPanelFormProps {
     partialFormData: SubmitFormDto,
   ) => void;
   actionId: number;
-  publicAction?: boolean;
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
   onSubmitSuccess?: () => void;
@@ -39,7 +39,6 @@ const ActionTaskPanelForm = ({
   onFormStarted,
   onAbandonAction,
   actionId,
-  publicAction = false,
   scrollPageTo,
   scrollToEnd,
   onSubmitSuccess = noop,
@@ -47,7 +46,7 @@ const ActionTaskPanelForm = ({
   formResponse,
 }: ActionTaskPanelFormProps) => {
   const posthog = usePostHog();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -77,16 +76,29 @@ const ActionTaskPanelForm = ({
     ? async (data: SubmitFormDto) => {
         setError(null);
 
-        const response = publicAction
-          ? await tasksSubmitPublicForm({
+        const storedGuestToken = isAuthenticated
+          ? null
+          : await getStoredGuestToken();
+        const response = isAuthenticated
+          ? await tasksSubmitForm({
               path: { id: taskFormId },
               body: data,
             })
-          : await tasksSubmitForm({
+          : await tasksSubmitPublicForm({
               path: { id: taskFormId },
               body: data,
+              headers: storedGuestToken
+                ? { "X-Guest-Token": storedGuestToken }
+                : undefined,
             });
         if (response.response.ok) {
+          if (!isAuthenticated) {
+            const issuedGuestToken =
+              response.response.headers.get("x-guest-token");
+            if (issuedGuestToken && issuedGuestToken !== storedGuestToken) {
+              await setStoredGuestToken(issuedGuestToken);
+            }
+          }
           onSubmitSuccess();
         } else {
           console.error(response.error);
