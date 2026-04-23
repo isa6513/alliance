@@ -476,8 +476,8 @@ const CommunityPage = () => {
   return (
     <TwoColumnLayout
       main={
-        <div className="relative xl:p-10 xl:pr-5 max-w-[900px] mx-auto p-3 md:p-5">
-          <div className="relative z-50 flex flex-col md:flex-row items-end md:items-center md:justify-end gap-x-4">
+        <div className="relative xl:p-10 xl:pr-5 max-w-[900px] mx-auto p-0 md:p-5">
+          <div className="p-3 relative z-10 flex flex-col md:flex-row items-end md:items-center md:justify-end gap-x-4">
             <Link
               to={"/groups-guide"}
               className="shrink-0 text-sm md:text-base text-zinc-500 hover:text-black py-1"
@@ -747,7 +747,7 @@ const CommunityPage = () => {
                         }
                         shortLabel={
                           m === "activity"
-                            ? "completed"
+                            ? " actions"
                             : m === "members"
                               ? "members"
                               : TAB_DISPLAY_NAMES[m]
@@ -798,7 +798,7 @@ const CommunityPage = () => {
               <BottomSpacer />
             </div>
             {!chatOpen && messagingEnabled && isLargeScreen && (
-              <div className="absolute bottom-5 right-7 bg-white hover:bg-zinc-100">
+              <div className="fixed bottom-5 right-7 z-10 bg-white hover:bg-zinc-100">
                 <Button
                   color={ButtonColor.Outline}
                   onClick={() => setChatOpen(true)}

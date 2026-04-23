@@ -72,7 +72,7 @@ export const FEATURED_IMPACT_ACTIONS: readonly FeaturedImpactAction[] = [
     actionId: 81,
     emphasis:
       "We obtained agreements from 2 restaurants to only offer utensils on request",
-    rest: " by emailing  local restaurants who previously offered utensils by default.",
+    rest: " by emailing local restaurants who previously offered utensils by default.",
   },
   {
     actionId: 54,
