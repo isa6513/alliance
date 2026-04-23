@@ -225,7 +225,7 @@ const PrelaunchLandingPage: React.FC = () => {
           <div className={`${LANDING_BIG_COL} flex flex-col mt-8 md:mt-12`}>
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {FEATURED_IMPACT_ACTIONS.map((action) => (
+                {FEATURED_IMPACT_ACTIONS.slice(0, 4).map((action) => (
                   <FeaturedImpactCard key={action.actionId} {...action} />
                 ))}
               </div>
