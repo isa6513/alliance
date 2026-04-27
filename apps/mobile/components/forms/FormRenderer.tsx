@@ -63,6 +63,7 @@ import Text, { FontWeight } from "../system/Text";
 type FormRendererProps = {
   form: FormSchema;
   id: number;
+  formSnapshotId: number | null;
   publicAction?: boolean;
   actionId: number;
   persistKey?: string | null;
@@ -275,6 +276,7 @@ export function RenderDisplayBlockMobile({
 const FormRenderer = ({
   form,
   id,
+  formSnapshotId,
   onSubmit,
   persistKey,
   userId,
@@ -974,6 +976,11 @@ const FormRenderer = ({
     if (submitting || readOnly || !onSubmit) {
       return;
     }
+    if (formSnapshotId === null) {
+      throw new Error(
+        "FormRenderer: formSnapshotId is required when onSubmit is set",
+      );
+    }
     setSubmitting(true);
 
     if (pageCount > 1 && currentPageIndex < maxPageIndex) {
@@ -1009,7 +1016,7 @@ const FormRenderer = ({
     const sanitizedAnswers = filterAnswersByFieldIds(formData, fieldLookup);
     const submissionPayload: SubmitFormDto = {
       answers: sanitizedAnswers,
-      schemaSnapshot: form as unknown as Record<string, unknown>,
+      formSnapshotId,
       actionId,
       visibilityValidatorResults,
       deviceType: DEVICE_TYPE,
@@ -1030,9 +1037,14 @@ const FormRenderer = ({
   };
 
   const handleAbandon = () => {
+    if (formSnapshotId === null) {
+      throw new Error(
+        "FormRenderer: formSnapshotId is required to abandon a form",
+      );
+    }
     const submissionPayload: SubmitFormDto = {
       answers: formData,
-      schemaSnapshot: form as unknown as Record<string, unknown>,
+      formSnapshotId,
       actionId,
       visibilityValidatorResults,
       deviceType: DEVICE_TYPE,

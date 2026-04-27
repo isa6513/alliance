@@ -81,7 +81,10 @@ const WithdrawalInfo: React.FC<{ withdrawal: ActionWithdrawalDto }> = ({
   );
 };
 
-export type FormWithSchema = Pick<FormDto, "id" | "title"> & {
+export type FormWithSchema = Pick<
+  FormDto,
+  "id" | "title" | "formSnapshotId"
+> & {
   schema: FormSchema;
   pages?: Page[];
 };
@@ -980,6 +983,10 @@ const FormResponses: React.FC = () => {
                       <div className="bg-white p-6 border border-gray-200 rounded-lg">
                         <FormRenderer
                           id={form.id}
+                          formSnapshotId={
+                            currentResponse?.formSnapshotId ??
+                            form.formSnapshotId
+                          }
                           actionId={0}
                           form={responseSchema}
                           completedFormResponse={currentResponse}

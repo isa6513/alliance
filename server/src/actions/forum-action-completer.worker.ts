@@ -132,6 +132,7 @@ export class ForumActionCompleterWorker {
 
     const form = await this.formRepository.findOne({
       where: { id: action.taskFormId },
+      relations: { formSnapshot: true },
     });
     if (!form) {
       if (shouldWrite) {
@@ -441,7 +442,7 @@ export class ForumActionCompleterWorker {
   private async findForumValidator(
     form: Form,
   ): Promise<CustomValidator | null> {
-    const schema = form.schema as unknown as FormSchema;
+    const schema = form.formSnapshot.schema as unknown as FormSchema;
     const validatorIds = this.collectValidatorIds(schema);
     if (validatorIds.length === 0) {
       return null;

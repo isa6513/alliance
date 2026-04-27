@@ -19,7 +19,11 @@ import {
   ActionActivity,
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
-import { createTestApp, TestContext } from './e2e-test-utils';
+import {
+  createFormWithSnapshot,
+  createTestApp,
+  TestContext,
+} from './e2e-test-utils';
 import { ActionSuite } from 'src/actions/entities/action-suite.entity';
 import {
   ContractEvent,
@@ -1646,8 +1650,9 @@ describe('ActionEventNotifWorker (e2e)', () => {
     const user = await getPrimaryUser();
     await setUserContractSigned(user.id, new Date(now - 48 * 60 * 60 * 1000));
 
-    const form = await formRepo.save(
-      formRepo.create({
+    const { form, snapshot: cohortSnapshot } = await createFormWithSnapshot(
+      ctx.dataSource,
+      {
         title: 'Cohort Form',
         schema: {
           title: 'Cohort Form',
@@ -1658,8 +1663,8 @@ describe('ActionEventNotifWorker (e2e)', () => {
             },
           ],
           outputViews: [],
-        } as unknown as Record<string, unknown>,
-      }),
+        },
+      },
     );
 
     // User submitted a form response
@@ -1668,7 +1673,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
         formId: form.id,
         form,
         answers: { 'field-1': 'yes' },
-        schemaSnapshot: form.schema as Record<string, unknown>,
+        formSnapshotId: cohortSnapshot.id,
         user,
       }),
     );

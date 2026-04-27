@@ -154,6 +154,7 @@ const ActionTaskPanelForm = ({
       <FormRenderer
         form={formResponse.schemaSnapshot as unknown as FormSchema}
         id={formResponse.formId}
+        formSnapshotId={formResponse.formSnapshotId}
         actionId={actionId}
         completedFormResponse={formResponse}
         onSubmit={null}
@@ -199,6 +200,7 @@ const ActionTaskPanelForm = ({
         <FormRenderer
           form={form.schema as unknown as FormSchema}
           id={form.id}
+          formSnapshotId={form.formSnapshotId}
           actionId={actionId}
           onSubmit={handleSubmitForm}
           persistKey={String(taskFormId)}

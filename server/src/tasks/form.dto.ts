@@ -6,7 +6,13 @@ import {
   PickType,
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDefined, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsDefined,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { AiDetectionResultDto } from 'src/ai-detection/dto/ai-detection-result.dto';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { UserDto } from 'src/user/dto/user.dto';
@@ -19,14 +25,37 @@ import {
   type DeviceVisibilityTarget,
 } from '@alliance/common/forms/device';
 
-export class CreateFormDto extends PickType(Form, ['title', 'schema']) {}
+export class CreateFormDto extends PickType(Form, ['title']) {
+  @ApiProperty()
+  @IsDefined()
+  @Type(() => Object)
+  schema: Record<string, unknown>;
+}
 
 export class SubmitFormDto extends PickType(FormResponse, [
   'answers',
-  'schemaSnapshot',
   'phDistinctId',
   'sessionReplayUrl',
 ]) {
+  // BACKCOMPAT(form-snapshot): formSnapshotId is the canonical field for
+  // newer clients. Old mobile builds (pre-snapshot-cutover) still post
+  // `schemaSnapshot` instead. Once the minimum supported mobile version is
+  // past the cutover, make this @IsDefined and delete schemaSnapshot below.
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  formSnapshotId?: number;
+
+  // BACKCOMPAT(form-snapshot): accepted only from old clients that don't
+  // yet know about formSnapshotId. Server hashes this and resolves it to a
+  // pre-existing historical snapshot for the form — submissions whose
+  // schema doesn't match any historical snapshot are rejected. Remove once
+  // the minimum supported mobile version is past the snapshot cutover.
+  @ApiPropertyOptional({ type: Object })
+  @IsOptional()
+  @Type(() => Object)
+  schemaSnapshot?: Record<string, unknown>;
+
   @ApiProperty()
   @IsDefined()
   actionId: number;
@@ -56,9 +85,25 @@ export class SubmitFollowUpFormDto extends OmitType(SubmitFormDto, [
   'actionId',
 ]) {}
 
-export class FormDto extends PickType(Form, ['id', 'title', 'schema']) {
+export class FormDto extends PickType(Form, ['id', 'title', 'formSnapshotId']) {
+  @ApiProperty()
+  @IsDefined()
+  @Type(() => Object)
+  schema: Record<string, unknown>;
+
   @ApiPropertyOptional({ type: () => ActionDto })
+  @IsOptional()
+  @Type(() => ActionDto)
   usedInAction?: Ty<ActionDto>;
+
+  constructor(form: Form, usedInAction?: Ty<ActionDto>) {
+    super();
+    this.id = form.id;
+    this.title = form.title;
+    this.formSnapshotId = form.formSnapshotId;
+    this.schema = form.formSnapshot.schema;
+    this.usedInAction = usedInAction;
+  }
 }
 
 export class FormAggregateViewsDto {
@@ -70,8 +115,8 @@ export class FormResponseDto extends PickType(FormResponse, [
   'id',
   'answers',
   'formId',
+  'formSnapshotId',
   'createdAt',
-  'schemaSnapshot',
   'visibilityValidatorResults',
   'phDistinctId',
   'sessionReplayUrl',
@@ -79,6 +124,11 @@ export class FormResponseDto extends PickType(FormResponse, [
   'sid',
   'publicAnswers',
 ]) {
+  @ApiProperty()
+  @IsDefined()
+  @Type(() => Object)
+  schemaSnapshot: Record<string, unknown>;
+
   @ApiPropertyOptional({ type: () => UserDto })
   @IsOptional()
   @Type(() => UserDto)
@@ -88,6 +138,27 @@ export class FormResponseDto extends PickType(FormResponse, [
   @IsOptional()
   @Type(() => AiDetectionResultDto)
   aiDetectionResults?: AiDetectionResultDto[];
+
+  constructor(
+    response: FormResponse,
+    extras: { aiDetectionResults?: AiDetectionResultDto[] } = {},
+  ) {
+    super();
+    this.id = response.id;
+    this.formId = response.formId;
+    this.formSnapshotId = response.formSnapshotId;
+    this.answers = response.answers;
+    this.schemaSnapshot = response.formSnapshot.schema;
+    this.visibilityValidatorResults = response.visibilityValidatorResults;
+    this.publicAnswers = response.publicAnswers;
+    this.deviceType = response.deviceType;
+    this.sessionReplayUrl = response.sessionReplayUrl;
+    this.sid = response.sid;
+    this.phDistinctId = response.phDistinctId;
+    this.createdAt = response.createdAt;
+    this.user = response.user;
+    this.aiDetectionResults = extras.aiDetectionResults;
+  }
 }
 
 export class LinkedGuestDraftDto {
@@ -95,6 +166,10 @@ export class LinkedGuestDraftDto {
   @IsOptional()
   @Type(() => FormResponseDto)
   draft?: FormResponseDto;
+
+  constructor(draft?: FormResponse | null) {
+    this.draft = draft ? new FormResponseDto(draft) : undefined;
+  }
 }
 
 export class GuestFormResponseDto {
@@ -102,4 +177,8 @@ export class GuestFormResponseDto {
   @IsOptional()
   @Type(() => FormResponseDto)
   response?: FormResponseDto;
+
+  constructor(response?: FormResponse | null) {
+    this.response = response ? new FormResponseDto(response) : undefined;
+  }
 }

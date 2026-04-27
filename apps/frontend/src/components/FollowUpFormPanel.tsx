@@ -61,7 +61,7 @@ export default function FollowUpFormPanel({
       setError(null);
       const body: SubmitFollowUpFormDto = {
         answers: data.answers,
-        schemaSnapshot: data.schemaSnapshot,
+        formSnapshotId: data.formSnapshotId,
         visibilityValidatorResults: data.visibilityValidatorResults,
         deviceType: data.deviceType,
         publicAnswers: data.publicAnswers,
@@ -145,6 +145,7 @@ export default function FollowUpFormPanel({
           key={formInstanceKey}
           form={form.schema as unknown as FormSchema}
           id={form.id}
+          formSnapshotId={form.formSnapshotId}
           actionId={actionId}
           onSubmit={handleSubmit}
           persistKey={`follow-up-${followUpForm.id}`}

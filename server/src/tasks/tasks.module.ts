@@ -6,6 +6,8 @@ import { FollowUpForm } from 'src/actions/entities/follow-up-form.entity';
 import { UserModule } from 'src/user/user.module';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
+import { FormSnapshot } from './entities/formsnapshot.entity';
+import { FormSnapshotService } from './formsnapshot.service';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 import { ForumModule } from 'src/forum/forum.module';
@@ -24,6 +26,7 @@ import { Guest } from 'src/auth/entities/guest.entity';
     TypeOrmModule.forFeature([
       Form,
       FormResponse,
+      FormSnapshot,
       Action,
       CustomValidator,
       ActionShareUrl,
@@ -41,6 +44,6 @@ import { Guest } from 'src/auth/entities/guest.entity';
     AuthModule,
   ],
   controllers: [TasksController],
-  providers: [TasksService],
+  providers: [TasksService, FormSnapshotService],
 })
 export class TasksModule {}

@@ -1344,8 +1344,8 @@ export class ActionsService {
       return undefined;
     }
 
-    const schema = activity.taskFormResponse
-      .schemaSnapshot as unknown as FormSchema;
+    const schema = activity.taskFormResponse.formSnapshot
+      .schema as unknown as FormSchema;
 
     const answerToIsPublic = (
       answer: string,
@@ -1465,6 +1465,7 @@ export class ActionsService {
       .leftJoinAndSelect('activity.action', 'action')
       .leftJoinAndSelect('activity.editableContent', 'editableContent')
       .leftJoinAndSelect('activity.taskFormResponse', 'taskFormResponse')
+      .leftJoinAndSelect('taskFormResponse.formSnapshot', 'taskFormSnapshot')
       .select([
         'activity.id',
         'activity.type',
@@ -1488,9 +1489,11 @@ export class ActionsService {
         'taskFormResponse.formId',
         'taskFormResponse.answers',
         'taskFormResponse.publicAnswers',
-        'taskFormResponse.schemaSnapshot',
+        'taskFormResponse.formSnapshotId',
         'taskFormResponse.visibilityValidatorResults',
         'taskFormResponse.deviceType',
+        'taskFormSnapshot.id',
+        'taskFormSnapshot.schema',
       ])
       .loadRelationIdAndMap('user.leaderOfIds', 'user.leaderOf')
       .orderBy('activity.createdAt', 'DESC')
@@ -2464,6 +2467,7 @@ export class ActionsService {
       taskForm: taskForm
         ? await this.formRepository.findOneOrFail({
             where: { id: action.taskFormId },
+            relations: { formSnapshot: true },
           })
         : undefined,
       reminderGroups: reminders
@@ -3298,7 +3302,10 @@ export class ActionsService {
     } catch (err) {
       // Lost a race with a concurrent creator; the unique (actionId, userId)
       // constraint guarantees exactly one row exists now — return it.
-      if (err instanceof QueryFailedError && (err as { code?: string }).code === '23505') {
+      if (
+        err instanceof QueryFailedError &&
+        (err as { code?: string }).code === '23505'
+      ) {
         const winner = await this.actionShareUrlRepository.findOne({
           where: {
             action: { id: actionId },

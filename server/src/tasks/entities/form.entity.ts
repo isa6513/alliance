@@ -2,8 +2,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsArray, IsDefined } from 'class-validator';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { FormResponse } from './formresponse.entity';
+import {
+  FORM_SNAPSHOT_HISTORY_TABLE,
+  FormSnapshot,
+} from './formsnapshot.entity';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
@@ -22,11 +35,26 @@ export class Form {
   @IsDefined()
   title: string;
 
-  @Column({ type: 'jsonb' })
+  @Column()
   @ApiProperty()
-  @IsDefined()
-  @Type(() => Object)
-  schema!: Record<string, unknown>;
+  @Allow()
+  formSnapshotId: number;
+
+  @ManyToOne(() => FormSnapshot, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'formSnapshotId' })
+  @Type(() => FormSnapshot)
+  @Allow()
+  formSnapshot: Relation<FormSnapshot>;
+
+  @ManyToMany(() => FormSnapshot)
+  @JoinTable({
+    name: FORM_SNAPSHOT_HISTORY_TABLE,
+    joinColumn: { name: 'formId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'formSnapshotId', referencedColumnName: 'id' },
+  })
+  @Type(() => FormSnapshot)
+  @Allow()
+  historicalFormSnapshots: Relation<FormSnapshot>[];
 
   @CreateDateColumnTz()
   @ApiProperty()

@@ -38,13 +38,13 @@ import {
 } from './entities/customvalidator.entity';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
+import { FormSnapshot } from './entities/formsnapshot.entity';
+import { FormSnapshotService } from './formsnapshot.service';
 import {
   CreateFormDto,
   FormAggregateViewsDto,
   FormDto,
   FormResponseDto,
-  GuestFormResponseDto,
-  LinkedGuestDraftDto,
   SubmitFollowUpFormDto,
   SubmitFormDto,
 } from './form.dto';
@@ -98,6 +98,7 @@ export class TasksService {
     private eventLogService: EventLogService,
     private aiDetectionQueueService: AiDetectionQueueService,
     private aiDetectionQueryService: AiDetectionQueryService,
+    private formSnapshotService: FormSnapshotService,
   ) {}
 
   /** Returns true if value satisfies required validation for the field. Used for both top-level and list sub-field validation. */
@@ -125,7 +126,16 @@ export class TasksService {
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
     this.assertSchemaValid(createFormDto.schema as unknown as FormSchema);
-    return this.formRepository.save(createFormDto);
+    const snapshot = await this.formSnapshotService.findOrCreate(
+      createFormDto.schema,
+    );
+    const form = await this.formRepository.save({
+      title: createFormDto.title,
+      formSnapshotId: snapshot.id,
+      formSnapshot: snapshot,
+    });
+    await this.formSnapshotService.recordHistorical(form.id, snapshot.id);
+    return form;
   }
 
   private assertSchemaValid(schema: FormSchema): void {
@@ -139,7 +149,10 @@ export class TasksService {
   }
 
   async getForm(formId: number): Promise<Form> {
-    const form = await this.formRepository.findOne({ where: { id: formId } });
+    const form = await this.formRepository.findOne({
+      where: { id: formId },
+      relations: { formSnapshot: true },
+    });
     if (!form) {
       throw new NotFoundException('Form not found');
     }
@@ -160,10 +173,11 @@ export class TasksService {
   async findFormAggregateViews(formId: number): Promise<FormAggregateViewsDto> {
     const form = await this.formRepository.findOneOrFail({
       where: { id: formId },
+      relations: { formSnapshot: true },
     });
 
     const aggregateViews =
-      (form.schema as unknown as FormSchema).aggregateViews ?? [];
+      (form.formSnapshot.schema as unknown as FormSchema).aggregateViews ?? [];
     if (aggregateViews.length === 0) {
       return { aggregateViews: [] };
     }
@@ -201,8 +215,16 @@ export class TasksService {
     };
   }
 
+  private cloneFormSnapshotWithSchema(
+    snapshot: FormSnapshot,
+    schema: Record<string, unknown>,
+  ): FormSnapshot {
+    return Object.assign(new FormSnapshot(), snapshot, { schema });
+  }
+
   async transformImageUrls(form: Form): Promise<Form> {
-    const pages = form.schema.pages as Page[];
+    const schema = structuredClone(form.formSnapshot.schema);
+    const pages = schema.pages as Page[];
     for (const page of pages) {
       for (const field of page.fields) {
         if (field.kind === 'image') {
@@ -213,11 +235,16 @@ export class TasksService {
         }
       }
     }
+    form.formSnapshot = this.cloneFormSnapshotWithSchema(
+      form.formSnapshot,
+      schema,
+    );
     return form;
   }
 
   async transformContractFields(form: Form): Promise<Form> {
-    const pages = form.schema.pages as Page[];
+    const schema = structuredClone(form.formSnapshot.schema);
+    const pages = schema.pages as Page[];
     for (const page of pages) {
       for (const field of page.fields) {
         if (field.kind === 'contract' && field.contractId) {
@@ -227,19 +254,23 @@ export class TasksService {
         }
       }
     }
+    form.formSnapshot = this.cloneFormSnapshotWithSchema(
+      form.formSnapshot,
+      schema,
+    );
     return form;
   }
 
   async validateFormSubmission({
-    form,
+    schema,
     submitFormDto,
     userId,
   }: {
-    form: Form;
+    // The schema the user submitted against
+    schema: FormSchema;
     submitFormDto: SubmitFormDto;
     userId: number;
   }): Promise<Record<number, boolean>> {
-    const schema = form.schema as unknown as FormSchema;
     const validatorIds = new Set<number>();
 
     for (const page of schema.pages) {
@@ -454,14 +485,31 @@ export class TasksService {
     updateFormDto: CreateFormDto,
   ): Promise<Form> {
     const form = await this.getForm(formId);
+    if (updateFormDto.title !== undefined) {
+      form.title = updateFormDto.title;
+    }
+    let snapshotChanged = false;
     if (updateFormDto.schema) {
       this.assertSchemaValid(updateFormDto.schema as unknown as FormSchema);
       this.stripContractFromSchema(
         updateFormDto.schema as unknown as FormSchema,
       );
+      const snapshot = await this.formSnapshotService.findOrCreate(
+        updateFormDto.schema,
+      );
+      if (snapshot.id !== form.formSnapshotId) {
+        form.formSnapshotId = snapshot.id;
+        form.formSnapshot = snapshot;
+        snapshotChanged = true;
+      }
     }
-    Object.assign(form, updateFormDto);
     const saved = await this.formRepository.save(form);
+    if (snapshotChanged) {
+      await this.formSnapshotService.recordHistorical(
+        saved.id,
+        saved.formSnapshotId,
+      );
+    }
     return this.transformImageUrls(await this.transformContractFields(saved));
   }
 
@@ -501,30 +549,36 @@ export class TasksService {
       throw new BadRequestException('Form already submitted');
     }
 
-    const validatorResults = await this.validateFormSubmission({
+    const submittedSnapshot = await this.resolveSubmissionSnapshot(
       form,
+      submitFormDto,
+    );
+    const submittedSchema = submittedSnapshot.schema as unknown as FormSchema;
+
+    const validatorResults = await this.validateFormSubmission({
+      schema: submittedSchema,
       submitFormDto,
       userId,
     });
 
     const phoneNumber = this.getFirstAutoExtractAnswer(
-      form,
+      submittedSchema,
       submitFormDto.answers,
       'phone',
     );
     const preferredReminderTime = this.getFirstAutoExtractAnswer(
-      form,
+      submittedSchema,
       submitFormDto.answers,
       'time',
     );
     const timeZone = this.getFirstAutoExtractAnswer(
-      form,
+      submittedSchema,
       submitFormDto.answers,
       'timezone',
     );
 
     const city = this.getFirstAutoExtractAnswer(
-      form,
+      submittedSchema,
       submitFormDto.answers,
       'city',
     );
@@ -612,7 +666,7 @@ export class TasksService {
     }
 
     const shareInfoPublicly = this.getCheckboxExtractionValue(
-      form,
+      submittedSchema,
       submitFormDto.answers,
       'shareInfoPublicly',
     );
@@ -625,7 +679,7 @@ export class TasksService {
     }
 
     const contractIdsSigned = this.getContractIdsSigned(
-      form,
+      submittedSchema,
       submitFormDto.answers,
     );
     for (const contractId of contractIdsSigned) {
@@ -640,6 +694,7 @@ export class TasksService {
       form,
       formId,
       dto: submitFormDto,
+      snapshot: submittedSnapshot,
       validatorResults,
       user,
     });
@@ -668,7 +723,7 @@ export class TasksService {
         },
       },
       relations: {
-        form: true,
+        form: { formSnapshot: true },
       },
     });
     if (!followUpForm?.form) {
@@ -697,8 +752,12 @@ export class TasksService {
     const form = followUpForm.form;
     const user = await this.userService.findOneOrFail(userId);
 
-    const validatorResults = await this.validateFormSubmission({
+    const submittedSnapshot = await this.resolveSubmissionSnapshot(
       form,
+      submitFollowUpFormDto,
+    );
+    const validatorResults = await this.validateFormSubmission({
+      schema: submittedSnapshot.schema as unknown as FormSchema,
       submitFormDto: submitFollowUpFormDto as SubmitFormDto,
       userId,
     });
@@ -707,6 +766,7 @@ export class TasksService {
       form,
       formId: form.id,
       dto: submitFollowUpFormDto,
+      snapshot: submittedSnapshot,
       validatorResults,
       user,
     });
@@ -783,6 +843,7 @@ export class TasksService {
     form,
     formId,
     dto,
+    snapshot: preResolvedSnapshot,
     validatorResults,
     user,
     guestId,
@@ -791,7 +852,12 @@ export class TasksService {
     formId: number;
     dto: {
       answers: Record<string, unknown>;
-      schemaSnapshot: Record<string, unknown>;
+      // BACKCOMPAT(form-snapshot): change this from optional to required.
+      formSnapshotId?: number;
+      // BACKCOMPAT(form-snapshot): legacy payload from pre-cutover mobile
+      // clients. Resolved to a snapshot row below. Remove once the floor
+      // mobile version sends formSnapshotId.
+      schemaSnapshot?: Record<string, unknown>;
       visibilityValidatorResults?: Record<string, boolean>;
       deviceType?: DeviceVisibilityTarget;
       publicAnswers?: Record<string, boolean>;
@@ -799,13 +865,17 @@ export class TasksService {
       sessionReplayUrl?: string;
       sid?: string;
     };
+    snapshot?: FormSnapshot;
     validatorResults: Record<string, boolean>;
     user?: User;
     guestId?: string;
   }): Promise<FormResponse> {
+    const snapshot =
+      preResolvedSnapshot ?? (await this.resolveSubmissionSnapshot(form, dto));
     const formResponse = this.formResponseRepository.create({
       answers: dto.answers,
-      schemaSnapshot: dto.schemaSnapshot,
+      formSnapshotId: snapshot.id,
+      formSnapshot: snapshot,
       visibilityValidatorResults:
         dto.visibilityValidatorResults ?? validatorResults,
       deviceType: dto.deviceType,
@@ -826,13 +896,41 @@ export class TasksService {
     return savedForm;
   }
 
-  private getFirstAutoExtractAnswer(
+  // BACKCOMPAT(form-snapshot): pre-cutover mobile clients post
+  // `schemaSnapshot` (the full schema) instead of `formSnapshotId`. Resolve
+  // it to a historical snapshot for this form by hash — never accept the
+  // bytes as authoritative, since the resolved schema feeds validation,
+  // contract-signing extraction, and auto-extract. Once the minimum mobile
+  // version is past the cutover, delete this helper and inline the
+  // formSnapshotId branch back into createAndSaveFormResponse.
+  private async resolveSubmissionSnapshot(
     form: Form,
+    dto: { formSnapshotId?: number; schemaSnapshot?: Record<string, unknown> },
+  ) {
+    if (dto.formSnapshotId !== undefined) {
+      return dto.formSnapshotId === form.formSnapshotId && form.formSnapshot
+        ? form.formSnapshot
+        : this.formSnapshotService.findHistoricalOrThrow(
+            form.id,
+            dto.formSnapshotId,
+          );
+    }
+    if (!dto.schemaSnapshot) {
+      throw new BadRequestException(
+        'Form submission missing both formSnapshotId and schemaSnapshot',
+      );
+    }
+    return this.formSnapshotService.findHistoricalBySchemaOrThrow(
+      form.id,
+      dto.schemaSnapshot,
+    );
+  }
+
+  private getFirstAutoExtractAnswer(
+    schema: FormSchema,
     answers: Record<string, unknown>,
     kind: 'phone' | 'time' | 'timezone' | 'city',
   ): string | null {
-    const schema = form.schema as unknown as FormSchema;
-
     for (const page of schema.pages ?? []) {
       if (!page.fields) {
         continue;
@@ -868,10 +966,9 @@ export class TasksService {
   }
 
   private getContractIdsSigned(
-    form: Form,
+    schema: FormSchema,
     answers: Record<string, unknown>,
   ): number[] {
-    const schema = form.schema as unknown as FormSchema;
     const ids: number[] = [];
 
     for (const page of schema.pages ?? []) {
@@ -893,12 +990,10 @@ export class TasksService {
   }
 
   private getCheckboxExtractionValue(
-    form: Form,
+    schema: FormSchema,
     answers: Record<string, unknown>,
     target: CheckboxExtractionTarget,
   ): boolean | null {
-    const schema = form.schema as unknown as FormSchema;
-
     for (const page of schema.pages ?? []) {
       if (!page.fields) {
         continue;
@@ -933,18 +1028,15 @@ export class TasksService {
   }
 
   async listForms(): Promise<FormDto[]> {
-    const forms = await this.formRepository.find();
+    const forms = await this.formRepository.find({
+      relations: { formSnapshot: true },
+    });
     return Promise.all(
       forms.map(async (form) => {
         const action = await this.actionRepository.findOne({
           where: { taskFormId: form.id },
         });
-        return {
-          id: form.id,
-          title: form.title,
-          schema: form.schema,
-          usedInAction: action ? new ActionDto(action) : undefined,
-        } satisfies FormDto;
+        return new FormDto(form, action ? new ActionDto(action) : undefined);
       }),
     );
   }
@@ -957,10 +1049,10 @@ export class TasksService {
   async getFormResponses(formId: number): Promise<FormResponseDto[]> {
     const responses = await this.formResponseRepository.find({
       where: { formId },
-      relations: { user: true },
+      relations: { user: true, formSnapshot: true },
     });
     if (!responses.length) {
-      return responses;
+      return [];
     }
 
     const aiDetectionByResponseId =
@@ -969,18 +1061,21 @@ export class TasksService {
         responses.map((response) => response.id),
       );
 
-    return responses.map((response) => ({
-      ...response,
-      aiDetectionResults: aiDetectionByResponseId.get(response.id) ?? [],
-    }));
+    return responses.map(
+      (response) =>
+        new FormResponseDto(response, {
+          aiDetectionResults: aiDetectionByResponseId.get(response.id) ?? [],
+        }),
+    );
   }
 
   async getMyFormResponse(
     userId: number,
     formId: number,
-  ): Promise<FormResponseDto> {
+  ): Promise<FormResponse> {
     const response = await this.formResponseRepository.findOne({
       where: { formId, user: { id: userId } },
+      relations: { formSnapshot: true },
       order: { createdAt: 'DESC', id: 'DESC' },
     });
     if (!response) {
@@ -992,31 +1087,33 @@ export class TasksService {
   async getGuestFormResponse(
     guestId: string,
     formId: number,
-  ): Promise<GuestFormResponseDto> {
+  ): Promise<FormResponse | null> {
     const response = await this.formResponseRepository.findOne({
       where: { formId, guest: { id: guestId, linkedUser: IsNull() } },
+      relations: { formSnapshot: true },
       order: { createdAt: 'DESC', id: 'DESC' },
     });
-    return response ? { response } : {};
+    return response;
   }
 
   async getLinkedGuestDraftFormResponse(
     userId: number,
     formId: number,
-  ): Promise<LinkedGuestDraftDto> {
+  ): Promise<FormResponse | null> {
     // If the user has already submitted this form as an authenticated user,
     // any linked-guest draft is stale and shouldn't be surfaced as a prefill.
     const userResponse = await this.formResponseRepository.findOne({
       where: { formId, user: { id: userId } },
     });
     if (userResponse) {
-      return {};
+      return null;
     }
     const draft = await this.formResponseRepository.findOne({
       where: { formId, guest: { linkedUser: { id: userId } } },
+      relations: { formSnapshot: true },
       order: { createdAt: 'DESC', id: 'DESC' },
     });
-    return draft ? { draft } : {};
+    return draft;
   }
 
   async customValidators(): Promise<CustomValidatorTypeDto[]> {
@@ -1303,7 +1400,7 @@ export class TasksService {
     return { isValid: true };
   }
 
-  async getFormsForUserSID(userId: number): Promise<FormResponseDto[]> {
+  async getFormsForUserSID(userId: number): Promise<FormResponse[]> {
     const shareUrl = await this.actionShareUrlRepository.findOne({
       where: {
         user: { id: userId },
@@ -1320,11 +1417,11 @@ export class TasksService {
       return [];
     }
 
-    const formResponses = await this.formResponseRepository.find({
+    return this.formResponseRepository.find({
       where: {
         sid,
       },
+      relations: { formSnapshot: true },
     });
-    return formResponses;
   }
 }

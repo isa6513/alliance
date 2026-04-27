@@ -154,9 +154,7 @@ export type FormResponse = {
     sessionReplayUrl?: string;
     createdAt: string;
     phDistinctId?: string;
-    schemaSnapshot: {
-        [key: string]: unknown;
-    };
+    formSnapshotId: number;
     sid?: string;
 };
 
@@ -1621,9 +1619,7 @@ export type ActionReferralCodeDto = {
 export type Form = {
     id: number;
     title: string;
-    schema: {
-        [key: string]: unknown;
-    };
+    formSnapshotId: number;
     createdAt: string;
     updatedAt: string;
 };
@@ -2590,7 +2586,8 @@ export type SubmitFormDto = {
     };
     sessionReplayUrl?: string;
     phDistinctId?: string;
-    schemaSnapshot: {
+    formSnapshotId?: number;
+    schemaSnapshot?: {
         [key: string]: unknown;
     };
     actionId: number;
@@ -2632,10 +2629,11 @@ export type FormResponseDto = {
     sessionReplayUrl?: string;
     createdAt: string;
     phDistinctId?: string;
+    formSnapshotId: number;
+    sid?: string;
     schemaSnapshot: {
         [key: string]: unknown;
     };
-    sid?: string;
     user?: UserDto;
     aiDetectionResults?: Array<AiDetectionResultDto>;
 };
@@ -2646,7 +2644,8 @@ export type SubmitFollowUpFormDto = {
     };
     sessionReplayUrl?: string;
     phDistinctId?: string;
-    schemaSnapshot: {
+    formSnapshotId?: number;
+    schemaSnapshot?: {
         [key: string]: unknown;
     };
     visibilityValidatorResults?: {
@@ -2669,6 +2668,7 @@ export type CreateFormDto = {
 export type FormDto = {
     id: number;
     title: string;
+    formSnapshotId: number;
     schema: {
         [key: string]: unknown;
     };

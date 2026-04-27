@@ -342,14 +342,18 @@ export class FormResponseOutputDto extends PickType(FormResponse, [
   'id',
   'answers',
   'formId',
-  'schemaSnapshot',
   'visibilityValidatorResults',
   'deviceType',
   'publicAnswers',
 ]) {
+  @ApiProperty()
+  @Type(() => Object)
+  schemaSnapshot: Record<string, unknown>;
+
   constructor(formResponse: FormResponse) {
     super();
     Object.assign(this, formResponse);
+    this.schemaSnapshot = formResponse.formSnapshot.schema;
   }
 }
 

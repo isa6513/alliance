@@ -61,6 +61,7 @@ import { Ellipsis } from "lucide-react";
 type FormRendererProps = {
   form: FormSchema;
   id: number;
+  formSnapshotId: number | null;
   publicAction?: boolean;
   createAccountHref?: string;
   actionId: number;
@@ -155,6 +156,7 @@ const detectDeviceType = (): DeviceVisibilityTarget => {
 const FormRenderer = ({
   form,
   id,
+  formSnapshotId,
   publicAction,
   createAccountHref,
   onSubmit,
@@ -1165,6 +1167,12 @@ const FormRenderer = ({
       return finishSubmit(false);
     }
 
+    if (formSnapshotId === null) {
+      throw new Error(
+        "FormRenderer: formSnapshotId is required when onSubmit is set",
+      );
+    }
+
     if (!isLastPage) {
       const result = await validatePage(currentPageIndex, true);
       if (result.isValid) {
@@ -1194,7 +1202,7 @@ const FormRenderer = ({
 
     const submissionPayload: SubmitFormDto = {
       answers: sanitizedAnswers,
-      schemaSnapshot: form as unknown as Record<string, unknown>,
+      formSnapshotId,
       actionId,
       visibilityValidatorResults,
       deviceType,
@@ -1219,6 +1227,7 @@ const FormRenderer = ({
     fieldLookup,
     form,
     formData,
+    formSnapshotId,
     isLastPage,
     onSubmit,
     phDistinctId,
@@ -1258,9 +1267,14 @@ const FormRenderer = ({
   };
 
   const handleAbandon = () => {
+    if (formSnapshotId === null) {
+      throw new Error(
+        "FormRenderer: formSnapshotId is required to abandon a form",
+      );
+    }
     const submissionPayload: SubmitFormDto = {
       answers: formData,
-      schemaSnapshot: form as unknown as Record<string, unknown>,
+      formSnapshotId,
       actionId,
       visibilityValidatorResults,
       deviceType,

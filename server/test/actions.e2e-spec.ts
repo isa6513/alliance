@@ -22,7 +22,11 @@ import {
   ActionTaskType,
   VisibilityMode,
 } from '../src/actions/entities/action.entity';
-import { createTestApp, TestContext } from './e2e-test-utils';
+import {
+  createTestApp,
+  createFormWithSnapshot,
+  TestContext,
+} from './e2e-test-utils';
 import { User } from '../src/user/entities/user.entity';
 import {
   Notification,
@@ -799,28 +803,26 @@ describe('Actions (e2e)', () => {
       });
 
       // Create a form
-      const form = await formRepo.save(
-        formRepo.create({
+      const { form, snapshot } = await createFormWithSnapshot(ctx.dataSource, {
+        title: 'Cohort Test Form',
+        schema: {
           title: 'Cohort Test Form',
-          schema: {
-            title: 'Cohort Test Form',
-            pages: [
-              {
-                id: 'page-1',
-                fields: [
-                  {
-                    id: 'favorite-color',
-                    kind: 'text',
-                    label: 'Favorite Color',
-                    required: true,
-                  },
-                ],
-              },
-            ],
-            outputViews: [],
-          },
-        }),
-      );
+          pages: [
+            {
+              id: 'page-1',
+              fields: [
+                {
+                  id: 'favorite-color',
+                  kind: 'text',
+                  label: 'Favorite Color',
+                  required: true,
+                },
+              ],
+            },
+          ],
+          outputViews: [],
+        },
+      });
 
       // respondedUser answered "blue"
       await formResponseRepo.save(
@@ -828,7 +830,7 @@ describe('Actions (e2e)', () => {
           formId: form.id,
           user: respondedUser,
           answers: { 'favorite-color': 'blue' },
-          schemaSnapshot: form.schema,
+          formSnapshotId: snapshot.id,
         }),
       );
 
@@ -838,7 +840,7 @@ describe('Actions (e2e)', () => {
           formId: form.id,
           user: wrongAnswerUser,
           answers: { 'favorite-color': 'red' },
-          schemaSnapshot: form.schema,
+          formSnapshotId: snapshot.id,
         }),
       );
 
@@ -927,8 +929,9 @@ describe('Actions (e2e)', () => {
         name: 'No Response User 2',
       });
 
-      const form = await formRepo.save(
-        formRepo.create({
+      const { form, snapshot: anySnapshot } = await createFormWithSnapshot(
+        ctx.dataSource,
+        {
           title: 'Any Response Test',
           schema: {
             title: 'Any Response Test',
@@ -947,7 +950,7 @@ describe('Actions (e2e)', () => {
             ],
             outputViews: [],
           },
-        }),
+        },
       );
 
       await formResponseRepo.save(
@@ -955,7 +958,7 @@ describe('Actions (e2e)', () => {
           formId: form.id,
           user: respondedUser,
           answers: { 'field-1': 'anything' },
-          schemaSnapshot: form.schema,
+          formSnapshotId: anySnapshot.id,
         }),
       );
 

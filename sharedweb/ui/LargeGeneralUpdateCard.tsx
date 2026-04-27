@@ -47,6 +47,7 @@ const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
             <FormRenderer
               form={formSchema}
               id={propsId ?? 0}
+              formSnapshotId={null}
               actionId={0}
               onSubmit={null}
               userId={userId}

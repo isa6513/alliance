@@ -218,7 +218,7 @@ describe('Tasks (e2e)', () => {
         'full-name': 'Member Example',
         'phone-number': '+14155552671',
       },
-      schemaSnapshot: sampleSchema,
+      formSnapshotId: updateResponse.body.formSnapshotId as number,
       actionId: testAction.id,
     };
 
@@ -386,7 +386,7 @@ describe('Tasks (e2e)', () => {
       .set('Authorization', `Bearer ${ctx.accessToken}`)
       .send({
         answers: { amount: 250 },
-        schemaSnapshot: aggregateSchema,
+        formSnapshotId: createResponse.body.formSnapshotId as number,
         actionId: testAction.id,
       })
       .expect(201);
@@ -501,7 +501,7 @@ describe('Tasks (e2e)', () => {
           'public-output': 'should-be-visible-by-default',
           'non-output': 'not-an-output-field',
         },
-        schemaSnapshot: outputSchema,
+        formSnapshotId: createFormResponse.body.formSnapshotId as number,
         actionId: action.id,
         publicAnswers: {
           'private-output': false,
@@ -982,7 +982,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: {},
-          schemaSnapshot: visibilitySchema,
+          formSnapshotId: formOne.body.formSnapshotId as number,
           actionId: actionOne.id,
         })
         .expect(201);
@@ -1010,7 +1010,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: {},
-          schemaSnapshot: visibilitySchema,
+          formSnapshotId: formTwo.body.formSnapshotId as number,
           actionId: actionTwo.id,
         })
         .expect(400);
@@ -1020,7 +1020,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: { proof: 'Confirmed' },
-          schemaSnapshot: visibilitySchema,
+          formSnapshotId: formTwo.body.formSnapshotId as number,
           actionId: actionTwo.id,
         })
         .expect(201);
@@ -1110,7 +1110,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: { role: 'volunteer' },
-          schemaSnapshot: sourceSchema,
+          formSnapshotId: sourceFormRes.body.formSnapshotId as number,
           actionId: sourceAction.id,
         })
         .expect(201);
@@ -1163,7 +1163,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: { 'general-question': 'Hello' },
-          schemaSnapshot: dependentSchema,
+          formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
         })
         .expect(201);
@@ -1205,7 +1205,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: { role: 'organizer' },
-          schemaSnapshot: sourceSchema,
+          formSnapshotId: sourceFormRes.body.formSnapshotId as number,
           actionId: sourceAction.id,
         })
         .expect(201);
@@ -1252,7 +1252,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: {},
-          schemaSnapshot: dependentSchema,
+          formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
         })
         .expect(400);
@@ -1263,7 +1263,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: { 'organizer-detail': 'My organizer info' },
-          schemaSnapshot: dependentSchema,
+          formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
         })
         .expect(201);
@@ -1305,7 +1305,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: { interest: 'tech' },
-          schemaSnapshot: sourceSchema,
+          formSnapshotId: sourceFormRes.body.formSnapshotId as number,
           actionId: sourceAction.id,
         })
         .expect(201);
@@ -1352,7 +1352,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: {},
-          schemaSnapshot: dependentSchema,
+          formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
         })
         .expect(400);
@@ -1363,7 +1363,7 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.accessToken}`)
         .send({
           answers: { 'tech-question': 'I love TypeScript' },
-          schemaSnapshot: dependentSchema,
+          formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
         })
         .expect(201);
@@ -1483,7 +1483,7 @@ describe('Tasks (e2e)', () => {
             'city-field': 'Custom City Name',
             'share-publicly-field': true,
           },
-          schemaSnapshot: extractionSchema,
+          formSnapshotId: formResponse.body.formSnapshotId as number,
           actionId: action.id,
         })
         .expect(201);
@@ -1542,7 +1542,7 @@ describe('Tasks (e2e)', () => {
           answers: {
             'time-field': '09:30',
           },
-          schemaSnapshot: timeSchema,
+          formSnapshotId: formResponse.body.formSnapshotId as number,
           actionId: action.id,
         })
         .expect(201);
@@ -1603,7 +1603,7 @@ describe('Tasks (e2e)', () => {
             'regular-text': 'Some text',
             'regular-checkbox': false,
           },
-          schemaSnapshot: noExtractSchema,
+          formSnapshotId: formResponse.body.formSnapshotId as number,
           actionId: action.id,
         })
         .expect(201);
@@ -1658,7 +1658,7 @@ describe('Tasks (e2e)', () => {
           answers: {
             'phone-field': 'not-a-valid-phone',
           },
-          schemaSnapshot: phoneSchema,
+          formSnapshotId: formResponse.body.formSnapshotId as number,
           actionId: action.id,
         })
         .expect(201);

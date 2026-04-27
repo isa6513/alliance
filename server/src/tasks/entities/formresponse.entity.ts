@@ -8,6 +8,7 @@ import {
   Column,
   Entity,
   Index,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -15,6 +16,7 @@ import { CreateDateColumnTz } from 'src/datasources/basecolumns';
 import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
 import { Guest } from 'src/auth/entities/guest.entity';
 import { Form } from './form.entity';
+import { FormSnapshot } from './formsnapshot.entity';
 import type { Relation } from 'src/utils/Repository';
 
 @Entity()
@@ -90,11 +92,16 @@ export class FormResponse {
   @IsOptional()
   phDistinctId?: string;
 
-  @Column({ type: 'jsonb' })
+  @Column()
   @ApiProperty()
-  @IsDefined()
-  @Type(() => Object)
-  schemaSnapshot: Record<string, unknown>;
+  @Allow()
+  formSnapshotId: number;
+
+  @ManyToOne(() => FormSnapshot, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'formSnapshotId' })
+  @Type(() => FormSnapshot)
+  @Allow()
+  formSnapshot: Relation<FormSnapshot>;
 
   @Column({ type: 'text', nullable: true })
   @ApiPropertyOptional({ type: 'string' })

@@ -19,6 +19,10 @@ import { testConnectionOptions } from 'src/datasources/dataSourceTest';
 import { Tag } from 'src/user/entities/tag.entity';
 import { ForumModule } from 'src/forum/forum.module';
 import { Contract } from 'src/contract/entities/contract.entity';
+import { Form } from 'src/tasks/entities/form.entity';
+import { FormSnapshot } from 'src/tasks/entities/formsnapshot.entity';
+import { FormSnapshotService } from 'src/tasks/formsnapshot.service';
+import { FormSchema } from '@alliance/common/forms/form-schema';
 
 export interface TestContext {
   app: INestApplication;
@@ -139,4 +143,41 @@ export async function createTestApp(
     defaultTag,
     defaultContractId: defaultContract.id,
   };
+}
+
+function snapshotService(dataSource: DataSource): FormSnapshotService {
+  return new FormSnapshotService(dataSource.getRepository(FormSnapshot));
+}
+
+export async function createFormSnapshot(
+  dataSource: DataSource,
+  schema: Record<string, unknown> | FormSchema,
+): Promise<FormSnapshot> {
+  return snapshotService(dataSource).findOrCreate(
+    schema as Record<string, unknown>,
+  );
+}
+
+export async function attachFormSnapshot(
+  dataSource: DataSource,
+  formId: number,
+  formSnapshotId: number,
+): Promise<void> {
+  await snapshotService(dataSource).recordHistorical(formId, formSnapshotId);
+}
+
+export async function createFormWithSnapshot(
+  dataSource: DataSource,
+  data: {
+    title: string;
+    schema: Record<string, unknown> | FormSchema;
+  },
+): Promise<{ form: Form; snapshot: FormSnapshot }> {
+  const snapshot = await createFormSnapshot(dataSource, data.schema);
+  const formRepo = dataSource.getRepository(Form);
+  const form = await formRepo.save(
+    formRepo.create({ title: data.title, formSnapshotId: snapshot.id }),
+  );
+  await attachFormSnapshot(dataSource, form.id, snapshot.id);
+  return { form, snapshot };
 }

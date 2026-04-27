@@ -1,5 +1,9 @@
 import type { Repository } from 'typeorm';
-import { createTestApp, TestContext } from './e2e-test-utils';
+import {
+  createFormWithSnapshot,
+  createTestApp,
+  TestContext,
+} from './e2e-test-utils';
 import { ForumActionCompleterWorker } from 'src/actions/forum-action-completer.worker';
 import {
   Action,
@@ -161,12 +165,11 @@ describe('ForumActionCompleterWorker (e2e)', () => {
       aggregateViews: [],
     };
 
-    return formRepo.save(
-      formRepo.create({
-        title: 'Forum Action Form',
-        schema: schema as unknown as Record<string, unknown>,
-      }),
-    );
+    const { form } = await createFormWithSnapshot(ctx.dataSource, {
+      title: 'Forum Action Form',
+      schema,
+    });
+    return form;
   };
 
   const createActionWithEvents = async (params: {
@@ -270,7 +273,7 @@ describe('ForumActionCompleterWorker (e2e)', () => {
         formId: form.id,
         form,
         answers: {},
-        schemaSnapshot: form.schema as Record<string, unknown>,
+        formSnapshotId: form.formSnapshotId,
         user: completedViaForm,
       }),
     );

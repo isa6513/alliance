@@ -63,7 +63,9 @@ export class TasksController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: SubmitFormDto,
   ): Promise<FormResponseDto> {
-    return this.tasksService.submitForm(+id, req.user.sub, body);
+    return new FormResponseDto(
+      await this.tasksService.submitForm(+id, req.user.sub, body),
+    );
   }
 
   @Post('submitPublicForm/:id')
@@ -88,11 +90,13 @@ export class TasksController {
       await this.authService.createGuestSession(incomingToken);
     this.authService.setGuestCookie(res, guestToken);
     res.setHeader(GUEST_TOKEN_RESPONSE_HEADER, guestToken);
-    return this.tasksService.submitFormPublic({
-      formId: +id,
-      submitFormDto: body,
-      guestId,
-    });
+    return new FormResponseDto(
+      await this.tasksService.submitFormPublic({
+        formId: +id,
+        submitFormDto: body,
+        guestId,
+      }),
+    );
   }
 
   @Post('submitFollowUpForm/:followUpFormId')
@@ -103,10 +107,12 @@ export class TasksController {
     @Param('followUpFormId', ParseIntPipe) followUpFormId: number,
     @Body() body: SubmitFollowUpFormDto,
   ): Promise<FormResponseDto> {
-    return this.tasksService.submitFollowUpForm(
-      followUpFormId,
-      req.user.sub,
-      body,
+    return new FormResponseDto(
+      await this.tasksService.submitFollowUpForm(
+        followUpFormId,
+        req.user.sub,
+        body,
+      ),
     );
   }
 
@@ -114,7 +120,7 @@ export class TasksController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: FormDto })
   async createForm(@Body() body: CreateFormDto) {
-    return this.tasksService.createForm(body);
+    return new FormDto(await this.tasksService.createForm(body));
   }
 
   @Get('listForms')
@@ -139,8 +145,10 @@ export class TasksController {
   async getMyFormResponse(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
-  ) {
-    return this.tasksService.getMyFormResponse(req.user.sub, id);
+  ): Promise<FormResponseDto> {
+    return new FormResponseDto(
+      await this.tasksService.getMyFormResponse(req.user.sub, id),
+    );
   }
 
   @Get('guestResponse/:id')
@@ -156,9 +164,11 @@ export class TasksController {
       ? await this.authService.verifyGuestToken(token)
       : null;
     if (!guestPayload) {
-      return {};
+      return new GuestFormResponseDto();
     }
-    return this.tasksService.getGuestFormResponse(guestPayload.sub, id);
+    return new GuestFormResponseDto(
+      await this.tasksService.getGuestFormResponse(guestPayload.sub, id),
+    );
   }
 
   @Get('draft/:id')
@@ -168,13 +178,15 @@ export class TasksController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<LinkedGuestDraftDto> {
-    return this.tasksService.getLinkedGuestDraftFormResponse(req.user.sub, id);
+    return new LinkedGuestDraftDto(
+      await this.tasksService.getLinkedGuestDraftFormResponse(req.user.sub, id),
+    );
   }
 
   @Get('slug/:id')
   @ApiOkResponse({ type: FormDto })
   async getForm(@Param('id', ParseIntPipe) id: number): Promise<FormDto> {
-    return await this.tasksService.getForm(id);
+    return new FormDto(await this.tasksService.getForm(id));
   }
 
   @Get('aggregateViews/:id')
@@ -192,8 +204,8 @@ export class TasksController {
   async updateForm(
     @Param('formId', ParseIntPipe) formId: number,
     @Body() body: CreateFormDto,
-  ) {
-    return this.tasksService.updateForm(+formId, body);
+  ): Promise<FormDto> {
+    return new FormDto(await this.tasksService.updateForm(+formId, body));
   }
 
   @Delete(':id')
@@ -254,7 +266,7 @@ export class TasksController {
   @Post('optout/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  optout(
+  async optout(
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: OptOutActionDto,
@@ -262,7 +274,7 @@ export class TasksController {
     if (!body.partialFormData) {
       throw new BadRequestException('Partial form data is required');
     }
-    return this.tasksService.optoutForm(
+    return await this.tasksService.optoutForm(
       id,
       body.actionId,
       req.user.sub,
@@ -275,7 +287,11 @@ export class TasksController {
   @Post('formsForUserSID/:userId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [FormResponseDto] })
-  async getFormsForUserSID(@Param('userId', ParseIntPipe) userId: number) {
-    return this.tasksService.getFormsForUserSID(userId);
+  async getFormsForUserSID(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<FormResponseDto[]> {
+    return (await this.tasksService.getFormsForUserSID(userId)).map(
+      (response) => new FormResponseDto(response),
+    );
   }
 }
