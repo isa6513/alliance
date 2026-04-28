@@ -25,7 +25,7 @@ import React, {
   useState,
 } from "react";
 import { cn } from "@alliance/shared/styles/util";
-import { useParams, useSearchParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { CirclePlay } from "lucide-react";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useQuery } from "@tanstack/react-query";
@@ -231,6 +231,7 @@ const matchesResponseFilter = (
 };
 const FormResponses: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState<FormWithSchema | null>(null);
   const [responses, setResponses] = useState<FormResponseDto[]>([]);
@@ -782,6 +783,14 @@ const FormResponses: React.FC = () => {
             <div className="flex items-center gap-2">
               <Button onClick={loadData} color={ButtonColor.White} size="small">
                 Refresh
+              </Button>
+              <Button
+                onClick={() => navigate(`/forms/${numericFormId}/snapshots`)}
+                color={ButtonColor.White}
+                size="small"
+                disabled={!isFormIdValid}
+              >
+                Reassign snapshots
               </Button>
               <Button
                 onClick={handleExportCsv}

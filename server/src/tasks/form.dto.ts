@@ -7,6 +7,9 @@ import {
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  IsArray,
   IsDefined,
   IsEnum,
   IsInt,
@@ -18,12 +21,14 @@ import { ActionDto } from 'src/actions/dto/action.dto';
 import { UserDto } from 'src/user/dto/user.dto';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
+import { FormSnapshot } from './entities/formsnapshot.entity';
 import type { Ty } from './entities/type';
 import type { AggregateViewSchema } from '@alliance/common/forms/form-schema';
 import {
   DEVICE_VISIBILITY_TARGETS,
   type DeviceVisibilityTarget,
 } from '@alliance/common/forms/device';
+import { MIGRATE_RESPONSE_SNAPSHOTS_MAX_BATCH } from '@alliance/common/forms/snapshot-migration';
 
 export class CreateFormDto extends PickType(Form, ['title']) {
   @ApiProperty()
@@ -170,6 +175,90 @@ export class LinkedGuestDraftDto {
   constructor(draft?: FormResponse | null) {
     this.draft = draft ? new FormResponseDto(draft) : undefined;
   }
+}
+
+export class FormSnapshotDto extends PickType(FormSnapshot, [
+  'id',
+  'hash',
+  'createdAt',
+]) {
+  @ApiProperty()
+  @IsDefined()
+  @Type(() => Object)
+  schema: Record<string, unknown>;
+
+  constructor(snapshot: FormSnapshot) {
+    super();
+    this.id = snapshot.id;
+    this.hash = snapshot.hash;
+    this.createdAt = snapshot.createdAt;
+    this.schema = snapshot.schema;
+  }
+}
+
+export class SnapshotResponseSummaryDto {
+  @ApiProperty()
+  @IsDefined()
+  id: number;
+
+  @ApiProperty()
+  @IsDefined()
+  @Type(() => Date)
+  createdAt: Date;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  userName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  userId?: number;
+}
+
+export class SnapshotResponseGroupDto {
+  @ApiProperty({ type: () => FormSnapshotDto })
+  @IsDefined()
+  @Type(() => FormSnapshotDto)
+  snapshot: FormSnapshotDto;
+
+  @ApiProperty({ type: () => SnapshotResponseSummaryDto, isArray: true })
+  @IsArray()
+  @Type(() => SnapshotResponseSummaryDto)
+  responses: SnapshotResponseSummaryDto[];
+}
+
+export class FormSnapshotMigrationDto {
+  @ApiProperty()
+  @IsString()
+  formTitle: string;
+
+  @ApiProperty({ type: () => FormSnapshotDto })
+  @IsDefined()
+  @Type(() => FormSnapshotDto)
+  latestSnapshot: FormSnapshotDto;
+
+  @ApiProperty({ type: () => SnapshotResponseGroupDto, isArray: true })
+  @IsArray()
+  @Type(() => SnapshotResponseGroupDto)
+  groups: SnapshotResponseGroupDto[];
+}
+
+export class MigrateResponseSnapshotsDto {
+  @ApiProperty({ type: Number, isArray: true })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(MIGRATE_RESPONSE_SNAPSHOTS_MAX_BATCH)
+  @IsInt({ each: true })
+  responseIds: number[];
+
+  @ApiProperty()
+  @IsInt()
+  targetSnapshotId: number;
+}
+
+export class MigrateResponseSnapshotsResultDto {
+  @ApiProperty()
+  updatedCount: number;
 }
 
 export class GuestFormResponseDto {

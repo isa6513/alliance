@@ -2675,6 +2675,42 @@ export type FormDto = {
     usedInAction?: ActionDto;
 };
 
+export type FormSnapshotDto = {
+    id: number;
+    hash: string;
+    createdAt: string;
+    schema: {
+        [key: string]: unknown;
+    };
+};
+
+export type SnapshotResponseSummaryDto = {
+    id: number;
+    createdAt: string;
+    userName?: string;
+    userId?: number;
+};
+
+export type SnapshotResponseGroupDto = {
+    snapshot: FormSnapshotDto;
+    responses: Array<SnapshotResponseSummaryDto>;
+};
+
+export type FormSnapshotMigrationDto = {
+    formTitle: string;
+    latestSnapshot: FormSnapshotDto;
+    groups: Array<SnapshotResponseGroupDto>;
+};
+
+export type MigrateResponseSnapshotsDto = {
+    responseIds: Array<number>;
+    targetSnapshotId: number;
+};
+
+export type MigrateResponseSnapshotsResultDto = {
+    updatedCount: number;
+};
+
 export type GuestFormResponseDto = {
     response?: FormResponseDto;
 };
@@ -6923,6 +6959,36 @@ export type TasksGetFormResponsesResponses = {
 };
 
 export type TasksGetFormResponsesResponse = TasksGetFormResponsesResponses[keyof TasksGetFormResponsesResponses];
+
+export type TasksGetResponseSnapshotMigrationData = {
+    body?: never;
+    path: {
+        formId: number;
+    };
+    query?: never;
+    url: '/tasks/forms/{formId}/snapshotMigration';
+};
+
+export type TasksGetResponseSnapshotMigrationResponses = {
+    200: FormSnapshotMigrationDto;
+};
+
+export type TasksGetResponseSnapshotMigrationResponse = TasksGetResponseSnapshotMigrationResponses[keyof TasksGetResponseSnapshotMigrationResponses];
+
+export type TasksMigrateResponseSnapshotsData = {
+    body: MigrateResponseSnapshotsDto;
+    path: {
+        formId: number;
+    };
+    query?: never;
+    url: '/tasks/forms/{formId}/responseSnapshots';
+};
+
+export type TasksMigrateResponseSnapshotsResponses = {
+    200: MigrateResponseSnapshotsResultDto;
+};
+
+export type TasksMigrateResponseSnapshotsResponse = TasksMigrateResponseSnapshotsResponses[keyof TasksMigrateResponseSnapshotsResponses];
 
 export type TasksGetMyFormResponseData = {
     body?: never;

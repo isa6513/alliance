@@ -16,6 +16,7 @@ export default [
       route("/", "pages/StatsPage.tsx"),
       route("/forms", "pages/FormsList.tsx"),
       route("/forms/:formId/responses", "pages/FormResponses.tsx"),
+      route("/forms/:formId/snapshots", "pages/FormSnapshotMigration.tsx"),
       route("/forms/:formId", "pages/FormBuilder.tsx"),
       route("/members/tags", "pages/TagManagement.tsx"),
       route("/member/:userId", "pages/UserDetailView.tsx"),
@@ -28,7 +29,7 @@ export default [
       route("/messaging", "pages/MessagingOverview.tsx"),
       route(
         "/messaging/:conversationId",
-        "pages/MessagingConversationDetail.tsx"
+        "pages/MessagingConversationDetail.tsx",
       ),
       route("/posts/:postId?", "pages/PostsManagement.tsx"),
       route("/event-log", "pages/EventLogPage.tsx"),

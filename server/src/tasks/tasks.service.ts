@@ -1,6 +1,7 @@
 import { Temporal } from '@js-temporal/polyfill';
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   Logger,
@@ -22,7 +23,7 @@ import { getVideoSource } from 'src/videos/videos.service';
 import { MmsService } from 'src/mms/mms.service';
 import { welcomeMessage } from 'src/notifs/textnotifcontents';
 import { UserService } from 'src/user/user.service';
-import { IsNull, type Repository } from 'typeorm';
+import { In, IsNull, type Repository } from 'typeorm';
 import {
   CustomValidatorDto,
   CustomValidatorResponseDto,
@@ -45,6 +46,11 @@ import {
   FormAggregateViewsDto,
   FormDto,
   FormResponseDto,
+  FormSnapshotDto,
+  FormSnapshotMigrationDto,
+  MigrateResponseSnapshotsResultDto,
+  SnapshotResponseGroupDto,
+  SnapshotResponseSummaryDto,
   SubmitFollowUpFormDto,
   SubmitFormDto,
 } from './form.dto';
@@ -1067,6 +1073,97 @@ export class TasksService {
           aiDetectionResults: aiDetectionByResponseId.get(response.id) ?? [],
         }),
     );
+  }
+
+  async getResponseSnapshotMigration(
+    formId: number,
+  ): Promise<FormSnapshotMigrationDto> {
+    const form = await this.getForm(formId);
+    const responses = await this.formResponseRepository.find({
+      where: { formId },
+      relations: { formSnapshot: true, user: true },
+      order: { createdAt: 'ASC' },
+    });
+
+    const groupsBySnapshotId = new Map<
+      number,
+      { snapshot: FormSnapshot; responses: FormResponse[] }
+    >();
+    for (const response of responses) {
+      if (response.formSnapshotId === form.formSnapshotId) {
+        continue;
+      }
+      const existing = groupsBySnapshotId.get(response.formSnapshotId);
+      if (existing) {
+        existing.responses.push(response);
+      } else {
+        groupsBySnapshotId.set(response.formSnapshotId, {
+          snapshot: response.formSnapshot,
+          responses: [response],
+        });
+      }
+    }
+
+    const groups: SnapshotResponseGroupDto[] = Array.from(
+      groupsBySnapshotId.values(),
+    )
+      .sort(
+        (a, b) =>
+          a.snapshot.createdAt.getTime() - b.snapshot.createdAt.getTime(),
+      )
+      .map((g) => {
+        const dto = new SnapshotResponseGroupDto();
+        dto.snapshot = new FormSnapshotDto(g.snapshot);
+        dto.responses = g.responses.map((response) => {
+          const summary = new SnapshotResponseSummaryDto();
+          summary.id = response.id;
+          summary.createdAt = response.createdAt;
+          summary.userId = response.user?.id;
+          summary.userName = response.user?.name;
+          return summary;
+        });
+        return dto;
+      });
+
+    const result = new FormSnapshotMigrationDto();
+    result.formTitle = form.title;
+    result.latestSnapshot = new FormSnapshotDto(form.formSnapshot);
+    result.groups = groups;
+    return result;
+  }
+
+  async migrateResponseSnapshots(
+    formId: number,
+    responseIds: number[],
+    targetSnapshotId: number,
+  ): Promise<MigrateResponseSnapshotsResultDto> {
+    const form = await this.getForm(formId);
+    if (form.formSnapshotId !== targetSnapshotId) {
+      throw new ConflictException(
+        'Form snapshot has changed since you loaded this page; refresh and re-review.',
+      );
+    }
+    const matching = await this.formResponseRepository.find({
+      select: { id: true },
+      where: { formId, id: In(responseIds) },
+    });
+    if (matching.length !== responseIds.length) {
+      const matchingIds = new Set(matching.map((r) => r.id));
+      const unknownIds = responseIds.filter((id) => !matchingIds.has(id));
+      throw new BadRequestException(
+        `Response ids do not belong to form ${formId}: ${unknownIds.join(', ')}`,
+      );
+    }
+    const result = await this.formResponseRepository
+      .createQueryBuilder()
+      .update(FormResponse)
+      .set({ formSnapshotId: targetSnapshotId })
+      .where('formId = :formId', { formId })
+      .andWhere('id IN (:...responseIds)', { responseIds })
+      .execute();
+    const dto = new MigrateResponseSnapshotsResultDto();
+    dto.updatedCount = result.affected ?? 0;
+    return dto;
   }
 
   async getMyFormResponse(

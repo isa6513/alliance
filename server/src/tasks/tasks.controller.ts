@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Request,
@@ -39,8 +40,11 @@ import {
   FormAggregateViewsDto,
   FormDto,
   FormResponseDto,
+  FormSnapshotMigrationDto,
   GuestFormResponseDto,
   LinkedGuestDraftDto,
+  MigrateResponseSnapshotsDto,
+  MigrateResponseSnapshotsResultDto,
   SubmitFollowUpFormDto,
   SubmitFormDto,
 } from './form.dto';
@@ -137,6 +141,29 @@ export class TasksController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<FormResponseDto[]> {
     return this.tasksService.getFormResponses(id);
+  }
+
+  @Get('forms/:formId/snapshotMigration')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: FormSnapshotMigrationDto })
+  async getResponseSnapshotMigration(
+    @Param('formId', ParseIntPipe) formId: number,
+  ): Promise<FormSnapshotMigrationDto> {
+    return this.tasksService.getResponseSnapshotMigration(formId);
+  }
+
+  @Patch('forms/:formId/responseSnapshots')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: MigrateResponseSnapshotsResultDto })
+  async migrateResponseSnapshots(
+    @Param('formId', ParseIntPipe) formId: number,
+    @Body() body: MigrateResponseSnapshotsDto,
+  ): Promise<MigrateResponseSnapshotsResultDto> {
+    return this.tasksService.migrateResponseSnapshots(
+      formId,
+      body.responseIds,
+      body.targetSnapshotId,
+    );
   }
 
   @Get('myResponse/:id')
