@@ -402,6 +402,7 @@
         "tailwind-merge": "^3.4.0",
       },
       "peerDependencies": {
+        "@tanstack/react-query": "*",
         "react": "*",
         "react-dom": "*",
         "react-markdown": "*",

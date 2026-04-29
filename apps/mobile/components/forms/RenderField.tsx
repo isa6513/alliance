@@ -23,6 +23,8 @@ import type {
   RangeField,
   TimeField,
 } from "@alliance/common/forms/form-schema";
+import type { UserDto } from "@alliance/shared/client";
+import { getCustomComponentById } from "./customComponentRegistry";
 import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
 import {
   formatTimeForDisplay,
@@ -49,6 +51,7 @@ export type RenderFieldProps = {
   randomizationKey?: string;
   disableOptionRandomization?: boolean;
   isOutputView?: boolean;
+  user?: Omit<UserDto, "email">;
 };
 
 const sharedInputClasses =
@@ -124,6 +127,7 @@ export function RenderField({
   randomizationKey,
   disableOptionRandomization,
   isOutputView,
+  user,
 }: RenderFieldProps) {
   const [selectOpen, setSelectOpen] = useState(false);
   const errorMessage =
@@ -757,6 +761,7 @@ export function RenderField({
                     randomizationKey={randomizationKey}
                     disableOptionRandomization={disableOptionRandomization}
                     isOutputView={isOutputView}
+                    user={user}
                   />
                 ))}
                 {!disabled && (
@@ -864,18 +869,36 @@ export function RenderField({
       );
     }
 
-    case "custom":
+    case "custom": {
+      const definition = getCustomComponentById(field.componentId);
+      if (!definition) {
+        return (
+          <View>
+            <View className="rounded-lg border border-red-200 bg-red-50 p-3">
+              <RenderLabel field={field} />
+              <Text className="text-sm text-red-700">
+                Unable to render this field because the selected custom
+                component is not registered.
+              </Text>
+            </View>
+            {renderValidationMessage(errorMessage)}
+          </View>
+        );
+      }
+      const CustomComponent = definition.component;
       return (
         <View>
-          <RenderLabel field={field} />
-          <View className="border border-zinc-200 bg-zinc-50 rounded-lg p-3">
-            <Text className="text-sm text-zinc-700">
-              Custom components are not available on mobile yet.
-            </Text>
-          </View>
+          <CustomComponent
+            field={field}
+            value={typeof value === "string" ? value : null}
+            onChange={(next) => onChange?.(next)}
+            user={user}
+            disabled={disabled}
+          />
           {renderValidationMessage(errorMessage)}
         </View>
       );
+    }
 
     default:
       return null;

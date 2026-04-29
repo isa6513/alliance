@@ -1,4 +1,4 @@
-export * from "./types";
+export * from "@alliance/shared/forms/customComponents";
 export {
   customComponentRegistry,
   getCustomComponentById,

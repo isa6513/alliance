@@ -1,17 +1,15 @@
 import { useEffect, useRef } from "react";
-import type { CustomComponentProps } from "@alliance/shared/forms/customComponents";
-import Card from "../../ui/Card";
+import { Switch, View } from "react-native";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { shareInfoPubliclyToggle } from "@alliance/shared/lib/copy";
-import YesNoToggle from "../../ui/YesNoToggle";
+import Card from "../system/Card";
+import Text, { FontWeight } from "../system/Text";
+import { colors } from "../../lib/style/colors";
+import type { CustomComponentProps } from "@alliance/shared/forms/customComponents";
 
 const parseBooleanValue = (value: string | null): boolean | null => {
-  if (value === "true") {
-    return true;
-  }
-  if (value === "false") {
-    return false;
-  }
+  if (value === "true") return true;
+  if (value === "false") return false;
   return null;
 };
 
@@ -28,29 +26,28 @@ const ShareInfoPubliclyToggleComponent = ({
       ? user.shareInfoPublicly
       : null;
   const lastSetByDefaultRef = useRef(false);
-
-  const setValueFromDefault = (next: boolean) => {
-    if (parsedValue === next) {
-      return;
-    }
-    lastSetByDefaultRef.current = true;
-    onChange(next ? "true" : "false");
-  };
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   useEffect(() => {
     if (disabled) return;
+    const setFromDefault = (next: boolean) => {
+      if (parsedValue === next) return;
+      lastSetByDefaultRef.current = true;
+      onChangeRef.current(next ? "true" : "false");
+    };
     if (userDefault !== null) {
       if (parsedValue === null) {
-        setValueFromDefault(userDefault);
+        setFromDefault(userDefault);
         return;
       }
       if (lastSetByDefaultRef.current && parsedValue !== userDefault) {
-        setValueFromDefault(userDefault);
+        setFromDefault(userDefault);
       }
       return;
     }
     if (parsedValue === null) {
-      setValueFromDefault(shareInfoPubliclyToggle.fallbackDefault);
+      setFromDefault(shareInfoPubliclyToggle.fallbackDefault);
     }
   }, [parsedValue, userDefault, disabled]);
 
@@ -67,26 +64,29 @@ const ShareInfoPubliclyToggleComponent = ({
 
   return (
     <Card
-      style={CardStyle.White}
-      className="flex flex-row gap-x-4 items-center justify-between"
+      cardStyle={CardStyle.White}
+      className="flex-row items-center justify-between gap-x-4"
     >
-      <div>
-        <label className="block font-medium mb-1">
-          {label}
+      <View className="flex-1">
+        <View className="flex-row items-center mb-1">
+          <Text weight={FontWeight.Medium}>{label}</Text>
           {field.required && (
-            <span className="text-red-500 text-sm ml-1">*</span>
+            <Text className="text-red-500 text-sm ml-1">*</Text>
           )}
-        </label>
-        <p className="text-zinc-500">{description}</p>
-      </div>
-      <YesNoToggle
+        </View>
+        <Text className="text-zinc-500">{description}</Text>
+      </View>
+      <Switch
         value={resolvedValue}
-        onChange={(next) => {
+        onValueChange={(next) => {
           lastSetByDefaultRef.current = false;
           onChange(next ? "true" : "false");
         }}
         disabled={isDisabled}
-        ariaLabel={label}
+        trackColor={{ true: colors.green, false: colors.switch.trackOff }}
+        ios_backgroundColor={colors.switch.trackOff}
+        thumbColor={colors.white}
+        accessibilityLabel={label}
       />
     </Card>
   );

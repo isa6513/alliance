@@ -1,5 +1,5 @@
 import { formatShortDate } from "@alliance/shared/lib/dateFormatters";
-import type { CustomComponentProps } from "./types";
+import type { CustomComponentProps } from "@alliance/shared/forms/customComponents";
 import Card from "../../ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
 
@@ -8,16 +8,20 @@ const ExampleContractComponent = ({
   onChange,
   value,
 }: CustomComponentProps) => {
+  const signedAt = user?.contractEvents?.[0]?.date;
+  const signedDate = signedAt ? formatShortDate(new Date(signedAt)) : null;
+
   return (
     <Card style={CardStyle.Grey}>
       <div className="flex flex-row justify-between items-center">
         <p>
-          Your contract was signed on:{" "}
-          <b>
-            {formatShortDate(new Date(
-              user?.contractEvents?.[0]?.date ?? new Date()
-            ))}
-          </b>
+          {signedDate ? (
+            <>
+              Your contract was signed on: <b>{signedDate}</b>
+            </>
+          ) : (
+            "No contract on file"
+          )}
         </p>
         <input
           type="checkbox"

@@ -146,6 +146,7 @@ type RenderDisplayBlockMobileProps = {
   /** Used for video spacing: margin only when another visible block/field is above on the page */
   hasRenderedNeighborAbove?: boolean;
   hasRenderedNeighborBelow?: boolean;
+  user?: Omit<UserDto, "email">;
 };
 
 export function RenderDisplayBlockMobile({
@@ -154,6 +155,7 @@ export function RenderDisplayBlockMobile({
   previousAnswerSchemas,
   hasRenderedNeighborAbove = false,
   hasRenderedNeighborBelow = false,
+  user,
 }: RenderDisplayBlockMobileProps) {
   switch (block.kind) {
     case "header":
@@ -265,7 +267,12 @@ export function RenderDisplayBlockMobile({
       const answers = previousAnswerData?.[block.sourceFormId];
       const schema = previousAnswerSchemas?.[block.sourceFormId];
       return (
-        <RenderPreviousAnswer block={block} schema={schema} answers={answers} />
+        <RenderPreviousAnswer
+          block={block}
+          schema={schema}
+          answers={answers}
+          user={user}
+        />
       );
     }
     default:
@@ -1086,6 +1093,7 @@ const FormRenderer = ({
                   previousAnswerSchemas={previousAnswerSchemas}
                   hasRenderedNeighborAbove={hasRenderedNeighborAbove(idx)}
                   hasRenderedNeighborBelow={hasRenderedNeighborBelow(idx)}
+                  user={user}
                 />
               </View>
             );
@@ -1113,6 +1121,7 @@ const FormRenderer = ({
                 error={fieldErrors[field.id]}
                 randomizationKey={randomizationKey}
                 disableOptionRandomization={disableOptionRandomization}
+                user={user}
               />
               {renderPublicToggle(field)}
             </View>

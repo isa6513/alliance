@@ -206,6 +206,13 @@ export const outputFieldPublicToggle = {
   hidePublicly: "Hide my response from others",
 } as const;
 
+export const shareInfoPubliclyToggle = {
+  defaultLabel: "Share information publicly",
+  defaultDescription:
+    "Allow your name, profile photo, and bio to be listed in a public member directory.",
+  fallbackDefault: false,
+} as const;
+
 export const forgotPassword = {
   prompt: "Forgot password?",
   emailRequired: {

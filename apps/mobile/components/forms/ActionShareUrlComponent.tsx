@@ -1,10 +1,12 @@
-import type { CustomComponentProps } from "@alliance/shared/forms/customComponents";
-import Card from "../../ui/Card";
 import { useEffect, useState } from "react";
+import { setStringAsync as setClipboardStringAsync } from "expo-clipboard";
 import { useQuery } from "@tanstack/react-query";
 import { actionsGetShareLink } from "@alliance/shared/client";
-import Button, { ButtonColor } from "../../ui/Button";
 import { CardStyle } from "@alliance/shared/styles/card";
+import Card from "../system/Card";
+import Button, { ButtonColor, ButtonSize } from "../system/Button";
+import Text from "../system/Text";
+import type { CustomComponentProps } from "@alliance/shared/forms/customComponents";
 
 const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
   const [copied, setCopied] = useState(false);
@@ -36,10 +38,18 @@ const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
     return () => clearTimeout(timer);
   }, [copied]);
 
+  const handleCopy = async () => {
+    if (!shareUrl) return;
+    await setClipboardStringAsync(shareUrl);
+    setCopied(true);
+  };
+
   if (actionId === null) {
     return (
-      <Card style={CardStyle.Grey} className="flex-row items-center !p-0">
-        <p className="flex-1 p-2 pl-3 text-zinc-500">No action configured</p>
+      <Card cardStyle={CardStyle.Grey} className="flex-row items-center !p-0">
+        <Text className="flex-1 p-2 pl-3 text-zinc-500">
+          No action configured
+        </Text>
       </Card>
     );
   }
@@ -52,22 +62,18 @@ const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
       : shareUrl;
   const showMuted = isLoading || isError || !shareUrl;
   return (
-    <Card style={CardStyle.Grey} className="flex-row items-center !p-0">
-      <p className={`flex-1 p-2 pl-3 ${showMuted ? "text-zinc-500" : ""}`}>
+    <Card cardStyle={CardStyle.Grey} className="flex-row items-center !p-0">
+      <Text className={`flex-1 p-2 pl-3 ${showMuted ? "text-zinc-500" : ""}`}>
         {message}
-      </p>
+      </Text>
       <Button
         color={ButtonColor.Transparent}
-        onClick={() => {
-          if (showMuted || !shareUrl) return;
-          navigator.clipboard.writeText(shareUrl);
-          setCopied(true);
-        }}
+        size={ButtonSize.Custom}
+        onPress={handleCopy}
         disabled={showMuted}
-        className="text-sm !p-3 !px-3 text-green"
-      >
-        {copied ? "Copied!" : "Copy"}
-      </Button>
+        className="px-3 py-3"
+        title={copied ? "Copied!" : "Copy"}
+      />
     </Card>
   );
 };

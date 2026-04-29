@@ -6,6 +6,7 @@ import type {
   ListField,
   ListFieldValue,
 } from "@alliance/common/forms/form-schema";
+import type { UserDto } from "@alliance/shared/client";
 import {
   findFieldInSchema,
   getVisiblePreviousAnswerSubFields,
@@ -36,12 +37,14 @@ type RenderPreviousAnswerProps = {
   block: PreviousAnswerBlock;
   schema?: FormSchema;
   answers?: Record<string, unknown>;
+  user?: Omit<UserDto, "email">;
 };
 
 export default function RenderPreviousAnswer({
   block,
   schema,
   answers,
+  user,
 }: RenderPreviousAnswerProps) {
   if (!schema || !answers) {
     return <EmptyPlaceholder block={block} />;
@@ -63,6 +66,7 @@ export default function RenderPreviousAnswer({
         block={block}
         field={field as ListField}
         value={value as ListFieldValue}
+        user={user}
       />
     );
   }
@@ -77,7 +81,7 @@ export default function RenderPreviousAnswer({
           {block.title}
         </Text>
       ) : null}
-      <RenderField field={field} value={value} disabled />
+      <RenderField field={field} value={value} disabled user={user} />
     </View>
   );
 }
@@ -86,10 +90,12 @@ function RenderPreviousAnswerList({
   block,
   field,
   value,
+  user,
 }: {
   block: PreviousAnswerBlock;
   field: ListField;
   value: ListFieldValue;
+  user?: Omit<UserDto, "email">;
 }) {
   const visibleSubFields = getVisiblePreviousAnswerSubFields(field, block);
 
@@ -119,6 +125,7 @@ function RenderPreviousAnswerList({
                 field={subField}
                 value={item[subField.id]}
                 disabled
+                user={user}
               />
             ))}
           </View>

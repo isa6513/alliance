@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { UserDto } from "../../../shared/client";
+import type { UserDto } from "../client";
 import type { CustomComponentField } from "@alliance/common/forms/form-schema";
 
 export type CustomComponentConfigFieldType = "string" | "number" | "boolean";
