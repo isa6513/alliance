@@ -1380,7 +1380,7 @@ export class ActionsService {
       relations: {
         action: true,
         user: true,
-        taskFormResponse: true,
+        taskFormResponse: { formSnapshot: true },
       },
     });
 
@@ -1993,7 +1993,7 @@ export class ActionsService {
         user: true,
         action: true,
         likes: true,
-        taskFormResponse: true,
+        taskFormResponse: { formSnapshot: true },
       },
     });
     if (!activity) {
@@ -2127,7 +2127,12 @@ export class ActionsService {
   ): Promise<ActionActivityDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
-      relations: { editableContent: true, taskFormResponse: true },
+      relations: {
+        editableContent: true,
+        taskFormResponse: {
+          formSnapshot: true,
+        },
+      },
     });
     if (!activity) {
       throw new NotFoundException('Activity not found');
