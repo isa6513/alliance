@@ -1,14 +1,8 @@
 # Local Database Access
 
-The local Postgres DB runs on `localhost:5432`. Credentials live in `server/.env`:
+Local Postgres on `localhost:5432`. Credentials in `server/.env`: user `postgres`, password `alliance`, database `alliance`.
 
-- host: `localhost`
-- port: `5432`
-- user: `postgres`
-- password: `alliance`
-- database: `alliance`
-
-## Running ad-hoc queries
+## Ad-hoc queries
 
 ```bash
 PGPASSWORD=alliance psql -h localhost -p 5432 -U postgres -d alliance -c "SELECT ..."
@@ -16,6 +10,6 @@ PGPASSWORD=alliance psql -h localhost -p 5432 -U postgres -d alliance -c "SELECT
 
 ## Notes
 
-- Table names are snake_case from TypeORM entity class names (`ReminderGroup` → `reminder_group`, `ActionEvent` → `action_event`).
-- Column names preserve the entity's camelCase and must be double-quoted in SQL (e.g. `"newStatus"`, `"memberActionEventId"`).
-- The test DB (`server/.env.test`) uses password `postgres` and database `postgres` — don't confuse it with the dev DB.
+- Table names: snake_case from TypeORM entity classes (`ReminderGroup` → `reminder_group`).
+- Column names: keep entity camelCase, must be double-quoted in SQL (`"newStatus"`).
+- Test DB (`server/.env.test`): password `postgres`, database `postgres` — don't mix up with dev DB.
