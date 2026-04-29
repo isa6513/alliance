@@ -1664,6 +1664,7 @@ const FormRenderer = ({
                         <ConfettiWrapper
                           burstPlacement="local"
                           onTrigger={submitCurrentPage}
+                          className="w-full"
                         >
                           {({
                             disabled: confettiDisabled,
