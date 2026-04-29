@@ -180,6 +180,7 @@ export class ActionDto extends OmitType(Action, [
   'authors',
   'events',
   'updates',
+  'formVariants',
 ]) {
   @ApiProperty()
   usersCompleted: number;
@@ -518,6 +519,7 @@ export class ExportActionDto extends OmitType(Action, [
   'status',
   'usersJoined',
   'usersCompleted',
+  'formVariants',
 ]) {
   @ApiPropertyOptional({ type: () => Form })
   @Type(() => Form)

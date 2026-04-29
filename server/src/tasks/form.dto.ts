@@ -62,7 +62,7 @@ export class SubmitFormDto extends PickType(FormResponse, [
   schemaSnapshot?: Record<string, unknown>;
 
   @ApiProperty()
-  @IsDefined()
+  @IsInt()
   actionId: number;
 
   @ApiPropertyOptional()

@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import jsonStableStringify from 'json-stable-stringify';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import {
   FORM_SNAPSHOT_HISTORY_TABLE,
   FormSnapshot,
@@ -38,8 +38,10 @@ export class FormSnapshotService {
   async recordHistorical(
     formId: number,
     formSnapshotId: number,
+    em?: EntityManager,
   ): Promise<void> {
-    await this.snapshotRepository.query(
+    const runner = em ?? this.snapshotRepository.manager;
+    await runner.query(
       `INSERT INTO "${FORM_SNAPSHOT_HISTORY_TABLE}" ("formId", "formSnapshotId")
        VALUES ($1, $2)
        ON CONFLICT DO NOTHING`,

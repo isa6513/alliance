@@ -13,6 +13,7 @@ import { parsePhoneNumber } from 'libphonenumber-js/max';
 import { AiDetectionQueryService } from 'src/ai-detection/ai-detection-query.service';
 import { AiDetectionQueueService } from 'src/ai-detection/ai-detection-queue.service';
 import { DetectableEntity } from 'src/ai-detection/entities/ai-detection-result.entity';
+import { ActionFormVariantService } from 'src/actions/action-form-variant.service';
 import { ActionsService } from 'src/actions/actions.service';
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import { Action } from 'src/actions/entities/action.entity';
@@ -105,6 +106,7 @@ export class TasksService {
     private aiDetectionQueueService: AiDetectionQueueService,
     private aiDetectionQueryService: AiDetectionQueryService,
     private formSnapshotService: FormSnapshotService,
+    private actionFormVariantService: ActionFormVariantService,
   ) {}
 
   /** Returns true if value satisfies required validation for the field. Used for both top-level and list sub-field validation. */
@@ -545,9 +547,30 @@ export class TasksService {
       optInMms: true,
     });
 
+    const valid = await this.actionFormVariantService.validateFormIdForUser({
+      actionId: submitFormDto.actionId,
+      userId,
+      formId,
+    });
+    if (!valid) {
+      throw new ForbiddenException(
+        'This form is not the variant assigned to you for this action',
+      );
+    }
+
+    const action = await this.actionRepository.findOne({
+      where: { id: submitFormDto.actionId },
+    });
+    const variants = await this.actionFormVariantService.listForAction(
+      submitFormDto.actionId,
+    );
+    const actionFormIds = new Set<number>([formId]);
+    if (action?.taskFormId != null) actionFormIds.add(action.taskFormId);
+    for (const v of variants) actionFormIds.add(v.formId);
+
     const existingFormResponse = await this.formResponseRepository.findOne({
       where: {
-        formId,
+        formId: In([...actionFormIds]),
         user: { id: userId },
       },
     });
@@ -1039,9 +1062,7 @@ export class TasksService {
     });
     return Promise.all(
       forms.map(async (form) => {
-        const action = await this.actionRepository.findOne({
-          where: { taskFormId: form.id },
-        });
+        const action = await this.actionsService.findActionByFormId(form.id);
         return new FormDto(form, action ? new ActionDto(action) : undefined);
       }),
     );

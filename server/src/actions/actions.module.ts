@@ -13,6 +13,7 @@ import { NotifsModule } from 'src/notifs/notifs.module';
 import { CustomValidator } from 'src/tasks/entities/customvalidator.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { FormSnapshotModule } from 'src/tasks/formsnapshot.module';
 import { ContractEvent } from '../user/entities/contract-event.entity';
 import { Tag } from '../user/entities/tag.entity';
 import { User } from '../user/entities/user.entity';
@@ -21,10 +22,13 @@ import { UserModule } from '../user/user.module';
 import { ActionsController } from './actions.controller';
 import { ActionsGateway } from './actions.gateway';
 import { ActionsService } from './actions.service';
+import { ActionFormVariantService } from './action-form-variant.service';
 import { ContractReminderWorker } from './contract-reminder.worker';
 import { ContractSuspenderWorker } from './contract-suspender.worker';
 import { ActionActivity } from './entities/action-activity.entity';
 import { ActionEvent } from './entities/action-event.entity';
+import { ActionFormAssignment } from './entities/action-form-assignment.entity';
+import { ActionFormVariant } from './entities/action-form-variant.entity';
 import { ActionShareUrl } from './entities/action-share-url.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import { ActionUpdate } from './entities/action-update.entity';
@@ -53,6 +57,8 @@ import { ApnsModule } from 'src/apns/apns.module';
       ActionActivity,
       ActionEvent,
       ActionEventNotif,
+      ActionFormAssignment,
+      ActionFormVariant,
       ActionShareUrl,
       ActionSuite,
       ActionUpdate,
@@ -80,11 +86,13 @@ import { ApnsModule } from 'src/apns/apns.module';
     PushModule,
     ForumModule,
     EventLogModule,
+    FormSnapshotModule,
     forwardRef(() => ApnsModule),
   ],
   controllers: [ActionsController],
   providers: [
     ActionsService,
+    ActionFormVariantService,
     ActionsGateway,
     ActionEventNotifWorker,
     ActionEventRecipientService,
@@ -95,6 +103,10 @@ import { ApnsModule } from 'src/apns/apns.module';
     ForumActionCompleterWorker,
     ActionStatsService,
   ],
-  exports: [ActionsService, ActionEventRecipientService],
+  exports: [
+    ActionsService,
+    ActionFormVariantService,
+    ActionEventRecipientService,
+  ],
 })
-export class ActionsModule { }
+export class ActionsModule {}

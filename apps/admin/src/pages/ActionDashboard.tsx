@@ -62,6 +62,7 @@ import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import EventManagementTab from "../components/EventManagementTab";
 import { FormBuilder } from "../components/FormBuilder";
 import ActionFollowUpFormsTab from "../components/ActionFollowUpFormsTab";
+import ActionFormVariantsTab from "../components/ActionFormVariantsTab";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
@@ -105,6 +106,7 @@ type Tab =
   | "details"
   | "events"
   | "form"
+  | "form-variants"
   | "updates"
   | "follow-up-forms";
 
@@ -797,7 +799,10 @@ const ActionDashboard: React.FC = () => {
     { key: "events", label: "Event Management" },
     { key: "updates", label: "Updates" },
     ...(action?.type === "Activity"
-      ? [{ key: "form" as Tab, label: "Task Form" }]
+      ? [
+          { key: "form" as Tab, label: "Task Form" },
+          { key: "form-variants" as Tab, label: "Form Variants" },
+        ]
       : []),
     { key: "follow-up-forms", label: "Follow-up Forms" },
   ];
@@ -1587,6 +1592,10 @@ const ActionDashboard: React.FC = () => {
                 setFormId={setTaskFormId}
                 actionName={action.name}
               />
+            )}
+
+            {activeTab === "form-variants" && action && (
+              <ActionFormVariantsTab action={action} />
             )}
 
             {activeTab === "events" && action && (

@@ -199,6 +199,16 @@ export type FollowUpForm = {
     formId: number;
 };
 
+export type ActionFormVariant = {
+    id: number;
+    actionId: number;
+    formId: number;
+    name: string;
+    splitValue: number;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type GeneralUpdate = {
     id: number;
     name: string;
@@ -447,6 +457,7 @@ export type Action = {
     activities: Array<Array<ActionActivity>>;
     updates: Array<ActionUpdate>;
     followUpForms: Array<FollowUpForm>;
+    formVariants: Array<ActionFormVariant>;
     suite?: ActionSuite;
     authors?: Array<User>;
     status: ActionStatus;
@@ -1672,6 +1683,53 @@ export type EvaluateCohortExpressionDto = {
 
 export type EvaluateCohortExpressionResponseDto = {
     userIds: Array<number>;
+};
+
+export type ActionFormVariantDto = {
+    id: number;
+    actionId: number;
+    formId: number;
+    name: string;
+    splitValue: number;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type ActionFormVariantStatsDto = {
+    /**
+     * null = the action's default form (taskFormId)
+     */
+    variantId: number | null;
+    name: string;
+    formId: number | null;
+    splitValue: number | null;
+    assigned: number;
+    submitted: number;
+};
+
+export type ActionFormVariantsListDto = {
+    variants: Array<ActionFormVariantDto>;
+    stats: Array<ActionFormVariantStatsDto>;
+};
+
+export type CreateActionFormVariantDto = {
+    name: string;
+    /**
+     * Percentage of new joiners (0–100).
+     */
+    splitValue: number;
+    /**
+     * Form to clone for this variant. Defaults to the action's current taskFormId.
+     */
+    sourceFormId?: number | null;
+};
+
+export type UpdateActionFormVariantDto = {
+    name?: string;
+    /**
+     * Percentage of new joiners (0–100).
+     */
+    splitValue?: number;
 };
 
 export type CreateActionDto = {
@@ -5509,6 +5567,64 @@ export type ActionsEvaluateCohortResponses = {
 };
 
 export type ActionsEvaluateCohortResponse = ActionsEvaluateCohortResponses[keyof ActionsEvaluateCohortResponses];
+
+export type ActionsListFormVariantsData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/{id}/form-variants';
+};
+
+export type ActionsListFormVariantsResponses = {
+    200: ActionFormVariantsListDto;
+};
+
+export type ActionsListFormVariantsResponse = ActionsListFormVariantsResponses[keyof ActionsListFormVariantsResponses];
+
+export type ActionsCreateFormVariantData = {
+    body: CreateActionFormVariantDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/{id}/form-variants';
+};
+
+export type ActionsCreateFormVariantResponses = {
+    200: ActionFormVariantDto;
+};
+
+export type ActionsCreateFormVariantResponse = ActionsCreateFormVariantResponses[keyof ActionsCreateFormVariantResponses];
+
+export type ActionsDeleteFormVariantData = {
+    body?: never;
+    path: {
+        variantId: number;
+    };
+    query?: never;
+    url: '/actions/form-variants/{variantId}';
+};
+
+export type ActionsDeleteFormVariantResponses = {
+    200: unknown;
+};
+
+export type ActionsUpdateFormVariantData = {
+    body: UpdateActionFormVariantDto;
+    path: {
+        variantId: number;
+    };
+    query?: never;
+    url: '/actions/form-variants/{variantId}';
+};
+
+export type ActionsUpdateFormVariantResponses = {
+    200: ActionFormVariantDto;
+};
+
+export type ActionsUpdateFormVariantResponse = ActionsUpdateFormVariantResponses[keyof ActionsUpdateFormVariantResponses];
 
 export type ActionsCreateData = {
     body: CreateActionDto;

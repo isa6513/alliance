@@ -39,7 +39,14 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from '../auth/public.decorator';
+import { ActionFormVariantService } from './action-form-variant.service';
 import { ActionsService, UserActionRelationDto } from './actions.service';
+import {
+  ActionFormVariantDto,
+  ActionFormVariantsListDto,
+  CreateActionFormVariantDto,
+  UpdateActionFormVariantDto,
+} from './dto/action-form-variant.dto';
 import {
   ActionActivityDto,
   ActionDto,
@@ -104,6 +111,7 @@ export class ActionsController {
     private readonly eventEmitter: EventEmitter2,
     private readonly actionEventReminderService: ActionEventReminderService,
     private readonly forumActionCompleterWorker: ForumActionCompleterWorker,
+    private readonly actionFormVariantService: ActionFormVariantService,
   ) {}
 
   @Post('optout/:id')
@@ -637,6 +645,56 @@ export class ActionsController {
       dto.expression,
     );
     return { userIds };
+  }
+
+  @Get(':id/form-variants')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionFormVariantsListDto })
+  async listFormVariants(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ActionFormVariantsListDto> {
+    const [variants, stats] = await Promise.all([
+      this.actionFormVariantService.listForAction(id),
+      this.actionFormVariantService.getStatsForAction(id),
+    ]);
+    return {
+      variants: variants.map((v) => new ActionFormVariantDto(v)),
+      stats,
+    };
+  }
+
+  @Post(':id/form-variants')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionFormVariantDto })
+  async createFormVariant(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: CreateActionFormVariantDto,
+  ): Promise<ActionFormVariantDto> {
+    const variant = await this.actionFormVariantService.createVariant(id, body);
+    return new ActionFormVariantDto(variant);
+  }
+
+  @Patch('form-variants/:variantId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ActionFormVariantDto })
+  async updateFormVariant(
+    @Param('variantId', ParseIntPipe) variantId: number,
+    @Body() body: UpdateActionFormVariantDto,
+  ): Promise<ActionFormVariantDto> {
+    const variant = await this.actionFormVariantService.updateVariant(
+      variantId,
+      body,
+    );
+    return new ActionFormVariantDto(variant);
+  }
+
+  @Delete('form-variants/:variantId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async deleteFormVariant(
+    @Param('variantId', ParseIntPipe) variantId: number,
+  ): Promise<void> {
+    await this.actionFormVariantService.deleteVariant(variantId);
   }
 
   @Post('create')

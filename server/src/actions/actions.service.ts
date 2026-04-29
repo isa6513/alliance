@@ -1,8 +1,10 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiProperty } from '@nestjs/swagger';
@@ -122,7 +124,9 @@ import {
   ActionTaskType,
   VisibilityMode,
 } from './entities/action.entity';
+import { ActionFormVariant } from './entities/action-form-variant.entity';
 import { FollowUpForm } from './entities/follow-up-form.entity';
+import { ActionFormVariantService } from './action-form-variant.service';
 import {
   ReminderGroup,
   ReminderGroupTimingMode,
@@ -211,6 +215,8 @@ export class ActionsService {
     private readonly followUpFormRepository: Repository<FollowUpForm>,
     @InjectRepository(Community)
     private readonly communityRepository: Repository<Community>,
+    @InjectRepository(ActionFormVariant)
+    private readonly actionFormVariantRepository: Repository<ActionFormVariant>,
     private userService: UserService,
     public eventEmitter: EventEmitter2,
     private readonly communityService: CommunityService,
@@ -221,7 +227,51 @@ export class ActionsService {
     private readonly forumService: ForumService,
     private readonly liveActivityService: LiveActivityService,
     private readonly eventLogService: EventLogService,
+    @Inject(forwardRef(() => ActionFormVariantService))
+    private readonly actionFormVariantService: ActionFormVariantService,
   ) {}
+
+  async applyAssignedFormIds(
+    actions: Action[],
+    userId: number | undefined,
+  ): Promise<void> {
+    if (!userId || actions.length === 0) return;
+    const overrides =
+      await this.actionFormVariantService.getOrCreateAssignedFormIdsForActions(
+        actions.map((a) => a.id),
+        userId,
+      );
+    if (overrides.size === 0) return;
+    for (const action of actions) {
+      const formId = overrides.get(action.id);
+      if (formId !== undefined) {
+        action.taskFormId = formId;
+      }
+    }
+  }
+
+  async findActionByFormId(formId: number): Promise<Action | null> {
+    const direct = await this.actionRepository.findOne({
+      where: { taskFormId: formId },
+    });
+    if (direct) return direct;
+    const variant = await this.actionFormVariantRepository.findOne({
+      where: { formId },
+    });
+    if (!variant) return null;
+    return this.actionRepository.findOne({ where: { id: variant.actionId } });
+  }
+
+  async assertFormIdNotUsedAsVariant(formId: number): Promise<void> {
+    const variant = await this.actionFormVariantRepository.findOne({
+      where: { formId },
+    });
+    if (variant) {
+      throw new BadRequestException(
+        `Form ${formId} is already used as a variant form for action ${variant.actionId}`,
+      );
+    }
+  }
 
   async shiftPrioritiesAfterInsertion(): Promise<void> {
     await this.actionRepository.manager.transaction(async (manager) => {
@@ -242,6 +292,9 @@ export class ActionsService {
 
   async create(createActionDto: CreateActionDto): Promise<Action> {
     const { suiteId, authorIds, ...rest } = createActionDto;
+    if (rest.taskFormId !== undefined) {
+      await this.assertFormIdNotUsedAsVariant(rest.taskFormId);
+    }
     const action = this.actionRepository.create(rest);
 
     if (suiteId) {
@@ -511,6 +564,8 @@ export class ActionsService {
       }
     }
 
+    await this.applyAssignedFormIds(filtered, userId);
+
     const actionsDismissed = new Set(
       (
         await this.actionActivityRepository.find({
@@ -678,6 +733,9 @@ export class ActionsService {
         action.followUpForms,
         user,
       );
+    }
+    if (userId) {
+      await this.applyAssignedFormIds([action], userId);
     }
     return new ActionDto(action, {
       canParticipate: user
@@ -1151,6 +1209,13 @@ export class ActionsService {
     const oldSuiteId = action.suite?.id;
 
     const { suiteId, authorIds, ...rest } = updateActionDto;
+
+    if (
+      rest.taskFormId !== undefined &&
+      rest.taskFormId !== action.taskFormId
+    ) {
+      await this.assertFormIdNotUsedAsVariant(rest.taskFormId);
+    }
 
     action.suite = {
       id: suiteId ?? undefined,
@@ -2783,9 +2848,7 @@ export class ActionsService {
   }
 
   async getWithdrawalsForForm(formId: number): Promise<ActionWithdrawalDto[]> {
-    const action = await this.actionRepository.findOne({
-      where: { taskFormId: formId },
-    });
+    const action = await this.findActionByFormId(formId);
     if (!action) {
       return [];
     }
@@ -3321,9 +3384,10 @@ export class ActionsService {
   }
 
   async getShareLinksForForm(formId: number): Promise<ShareUrlDto[]> {
-    const action = await this.actionRepository.findOneOrFail({
-      where: { taskFormId: formId },
-    });
+    const action = await this.findActionByFormId(formId);
+    if (!action) {
+      throw new NotFoundException('No action found for this form');
+    }
     return this.actionShareUrlRepository
       .find({
         where: { action: { id: action.id } },

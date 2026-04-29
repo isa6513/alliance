@@ -25,6 +25,7 @@ import {
 } from 'typeorm';
 import { ActionActivity } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
+import { ActionFormVariant } from './action-form-variant.entity';
 import { ActionSuite } from './action-suite.entity';
 import { ActionUpdate } from './action-update.entity';
 import { FollowUpForm } from './follow-up-form.entity';
@@ -320,6 +321,15 @@ export class Action {
   @Allow()
   @Type(() => FollowUpForm)
   followUpForms: Relation<FollowUpForm>[];
+
+  @OneToMany(() => ActionFormVariant, (variant) => variant.action)
+  @ApiProperty({
+    type: () => ActionFormVariant,
+    isArray: true,
+  })
+  @Allow()
+  @Type(() => ActionFormVariant)
+  formVariants: Relation<ActionFormVariant>[];
 
   @ManyToOne(() => ActionSuite, (suite) => suite.actions, { nullable: true })
   @ApiPropertyOptional({ type: () => ActionSuite })
