@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 3eUm66lO3PYZFGRVuQD7CUQEAEg6AjdKaQAJYrf3Kjvf9Q80fQMWXlFCaw3atoC
+\restrict 6wbUhdIHexSSg2JERKWq28r4faa7zXU44TFASFrqmIXQv5B76r0eBMjUykYFEWm
 
 -- Dumped from database version 18.3 (Homebrew)
 -- Dumped by pg_dump version 18.3 (Homebrew)
@@ -1250,15 +1250,6 @@ COPY public.community_users_user ("communityId", "userId") FROM stdin;
 4	15
 7	7
 7	10
-\.
-
-
---
--- Data for Name: contract; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.contract (id, "createdAt", markdown, "startDate", "endDate", name) FROM stdin;
-1	2026-04-28 17:55:12.873701-07	1. I commit to complete up to 15 minutes of Alliance tasks per week.\n\n2. I commit to complete every task I am assigned by its deadline, unless:\n\n   a. I have spent more than 15 minutes completing Alliance tasks in the past week.\n\n   b. I cannot complete the task due to a serious external circumstance, such as a medical issue or family emergency. In this case, I will inform the strategic office as soon as I can.\n\n   c. I believe the task is immoral. In this case, I will inform the strategic office of my reasoning by the deadline for the task.\n\n3. I understand that I am considered an active member, and am therefore able to participate in Alliance governance, if I have completed at least 8 of the last 10 tasks I was assigned.	2026-04-28 17:55:12.873701-07	\N	\N
 \.
 
 
@@ -2597,13 +2588,6 @@ SELECT pg_catalog.setval('public.contract_event_id_seq', 123, true);
 
 
 --
--- Name: contract_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
---
-
-SELECT pg_catalog.setval('public.contract_id_seq', 1, true);
-
-
---
 -- Name: conversation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2831,5 +2815,5 @@ SELECT pg_catalog.setval('public.video_id_seq', 1, false);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 3eUm66lO3PYZFGRVuQD7CUQEAEg6AjdKaQAJYrf3Kjvf9Q80fQMWXlFCaw3atoC
+\unrestrict 6wbUhdIHexSSg2JERKWq28r4faa7zXU44TFASFrqmIXQv5B76r0eBMjUykYFEWm
 
