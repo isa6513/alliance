@@ -141,12 +141,25 @@ describe('Tasks (e2e)', () => {
   });
 
   it('supports the full admin and member lifecycle for forms', async () => {
+    const createResponse = await request(ctx.app.getHttpServer())
+      .post('/tasks/createForm')
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .send({
+        title: sampleSchema.title,
+        schema: sampleSchema,
+      })
+      .expect(201);
+
+    formId = createResponse.body.id;
+    expect(createResponse.body.title).toBe('Volunteer Signup');
+
     const testAction = await actionRepo.save(
       actionRepo.create({
-        name: 'Test Action',
+        name: 'Form Linked Action',
         category: 'Community',
         body: 'Body copy',
         shortDescription: 'Short copy',
+        taskFormId: formId,
         type: ActionTaskType.Activity,
         isForumParticipationAction: false,
         everyoneShouldComplete: false,
@@ -171,25 +184,13 @@ describe('Tasks (e2e)', () => {
 
     await eventRepo.save(
       eventRepo.create({
-        title: 'Test Action',
-        description: 'Test Action',
+        title: 'Form Linked Action',
+        description: 'Make non-draft',
         newStatus: ActionStatus.MemberAction,
         date: new Date(Date.now() - 1000),
         action: testAction,
       }),
     );
-
-    const createResponse = await request(ctx.app.getHttpServer())
-      .post('/tasks/createForm')
-      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
-      .send({
-        title: sampleSchema.title,
-        schema: sampleSchema,
-      })
-      .expect(201);
-
-    formId = createResponse.body.id;
-    expect(createResponse.body.title).toBe('Volunteer Signup');
 
     const getResponse = await request(ctx.app.getHttpServer())
       .get(`/tasks/slug/${formId}`)
@@ -250,31 +251,6 @@ describe('Tasks (e2e)', () => {
     const user = await userRepo.findOne({ where: { id: ctx.testUserId } });
     expect(user?.phoneNumberValidated).toBe(true);
     expect(user?.phoneNumber).toContain('+1');
-
-    const action = await actionRepo.save(
-      actionRepo.create({
-        name: 'Form Linked Action',
-        category: 'Community',
-        body: 'Body copy',
-        shortDescription: 'Short copy',
-        taskContents: 'Tasks',
-        taskFormId: formId,
-        cohortExpression: {
-          type: 'Tag',
-          tagId: ctx.defaultTag.id,
-        },
-      }),
-    );
-
-    await eventRepo.save(
-      eventRepo.create({
-        title: 'Status Event',
-        description: 'Make non-draft',
-        newStatus: ActionStatus.MemberAction,
-        date: new Date(Date.now() - 1000),
-        action,
-      }),
-    );
 
     const listResponse = await request(ctx.app.getHttpServer())
       .get('/tasks/listForms')
@@ -380,6 +356,7 @@ describe('Tasks (e2e)', () => {
       .expect(201);
 
     const aggregateFormId = createResponse.body.id as number;
+    await actionRepo.update(testAction.id, { taskFormId: aggregateFormId });
 
     await request(ctx.app.getHttpServer())
       .post(`/tasks/submitForm/${aggregateFormId}`)
@@ -491,6 +468,7 @@ describe('Tasks (e2e)', () => {
       .expect(201);
 
     const createdFormId = createFormResponse.body.id as number;
+    await actionRepo.update(action.id, { taskFormId: createdFormId });
 
     await request(ctx.app.getHttpServer())
       .post(`/tasks/submitForm/${createdFormId}`)
@@ -976,6 +954,9 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .send({ title: visibilitySchema.title, schema: visibilitySchema })
         .expect(201);
+      await actionRepo.update(actionOne.id, {
+        taskFormId: formOne.body.id as number,
+      });
 
       const submitOne = await request(ctx.app.getHttpServer())
         .post(`/tasks/submitForm/${formOne.body.id}`)
@@ -1004,6 +985,9 @@ describe('Tasks (e2e)', () => {
           schema: visibilitySchema,
         })
         .expect(201);
+      await actionRepo.update(actionTwo.id, {
+        taskFormId: formTwo.body.id as number,
+      });
 
       await request(ctx.app.getHttpServer())
         .post(`/tasks/submitForm/${formTwo.body.id}`)
@@ -1104,6 +1088,7 @@ describe('Tasks (e2e)', () => {
         .send({ title: sourceSchema.title, schema: sourceSchema })
         .expect(201);
       const sourceFormId = sourceFormRes.body.id as number;
+      await actionRepo.update(sourceAction.id, { taskFormId: sourceFormId });
 
       await request(ctx.app.getHttpServer())
         .post(`/tasks/submitForm/${sourceFormId}`)
@@ -1156,6 +1141,9 @@ describe('Tasks (e2e)', () => {
         .send({ title: dependentSchema.title, schema: dependentSchema })
         .expect(201);
       const dependentFormId = dependentFormRes.body.id as number;
+      await actionRepo.update(dependentAction.id, {
+        taskFormId: dependentFormId,
+      });
 
       // Submit without organizer-detail (it should be hidden because source answer = 'volunteer')
       await request(ctx.app.getHttpServer())
@@ -1199,6 +1187,7 @@ describe('Tasks (e2e)', () => {
         .send({ title: sourceSchema.title, schema: sourceSchema })
         .expect(201);
       const sourceFormId = sourceFormRes.body.id as number;
+      await actionRepo.update(sourceAction.id, { taskFormId: sourceFormId });
 
       await request(ctx.app.getHttpServer())
         .post(`/tasks/submitForm/${sourceFormId}`)
@@ -1245,6 +1234,9 @@ describe('Tasks (e2e)', () => {
         .send({ title: dependentSchema.title, schema: dependentSchema })
         .expect(201);
       const dependentFormId = dependentFormRes.body.id as number;
+      await actionRepo.update(dependentAction.id, {
+        taskFormId: dependentFormId,
+      });
 
       // Submit without the required field — should fail because condition IS met
       await request(ctx.app.getHttpServer())
@@ -1299,6 +1291,7 @@ describe('Tasks (e2e)', () => {
         .send({ title: sourceSchema.title, schema: sourceSchema })
         .expect(201);
       const sourceFormId = sourceFormRes.body.id as number;
+      await actionRepo.update(sourceAction.id, { taskFormId: sourceFormId });
 
       await request(ctx.app.getHttpServer())
         .post(`/tasks/submitForm/${sourceFormId}`)
@@ -1345,6 +1338,9 @@ describe('Tasks (e2e)', () => {
         .send({ title: dependentSchema.title, schema: dependentSchema })
         .expect(201);
       const dependentFormId = dependentFormRes.body.id as number;
+      await actionRepo.update(dependentAction.id, {
+        taskFormId: dependentFormId,
+      });
 
       // Field IS visible because source answer = 'tech', so omitting it should fail
       await request(ctx.app.getHttpServer())
@@ -1471,6 +1467,7 @@ describe('Tasks (e2e)', () => {
         .expect(201);
 
       const testFormId = formResponse.body.id;
+      await actionRepo.update(action.id, { taskFormId: testFormId as number });
 
       // Submit form with auto-extract data
       await request(ctx.app.getHttpServer())
@@ -1534,6 +1531,9 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .send({ title: timeSchema.title, schema: timeSchema })
         .expect(201);
+      await actionRepo.update(action.id, {
+        taskFormId: formResponse.body.id as number,
+      });
 
       await request(ctx.app.getHttpServer())
         .post(`/tasks/submitForm/${formResponse.body.id}`)
@@ -1594,6 +1594,9 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .send({ title: noExtractSchema.title, schema: noExtractSchema })
         .expect(201);
+      await actionRepo.update(action.id, {
+        taskFormId: formResponse.body.id as number,
+      });
 
       await request(ctx.app.getHttpServer())
         .post(`/tasks/submitForm/${formResponse.body.id}`)
@@ -1650,6 +1653,9 @@ describe('Tasks (e2e)', () => {
         .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
         .send({ title: phoneSchema.title, schema: phoneSchema })
         .expect(201);
+      await actionRepo.update(action.id, {
+        taskFormId: formResponse.body.id as number,
+      });
 
       await request(ctx.app.getHttpServer())
         .post(`/tasks/submitForm/${formResponse.body.id}`)
