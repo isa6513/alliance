@@ -788,7 +788,7 @@ export class ActionsController {
   async deleteReminderGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<void> {
-    this.actionEventReminderService.deleteReminderGroup(groupId);
+    await this.actionEventReminderService.deleteReminderGroup(groupId);
   }
 
   @Get('plansForGroup/:groupId')
