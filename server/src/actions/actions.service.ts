@@ -23,7 +23,6 @@ import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.s
 import {
   ActionEventReminderService,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
-  POST_MEMBER_ACTION_STATUSES,
   PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
@@ -446,21 +445,9 @@ export class ActionsService {
         includeDismissed: true,
       });
 
-    const deadlineEvents = await this.actionEventRepository.find({
-      where: {
-        action: { id: action.id },
-        date: MoreThan(event.date),
-        newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
-      },
-      order: {
-        date: 'ASC',
-      },
-      take: 1,
-    });
-    const notAwayForDeadline =
-      deadlineEvents.length > 0
-        ? baseUsers.filter((user) => !user.isAwayAt(deadlineEvents[0].date))
-        : baseUsers;
+    const notAwayDuringMemberActionPhase = baseUsers.filter(
+      (user) => !computeIsAwayDuringAnyOfMemberAction({ action, user }),
+    );
 
     const completionActivities = await this.actionActivityRepository.find({
       where: {
@@ -474,7 +461,7 @@ export class ActionsService {
         type: ActionActivityType.USER_WONT_COMPLETE,
       },
     });
-    const notAwayUsersMinusWithdrawals = notAwayForDeadline.filter(
+    const notAwayUsersMinusWithdrawals = notAwayDuringMemberActionPhase.filter(
       (user) =>
         !withdrawalActivities.some((activity) => activity.userId === user.id),
     );
