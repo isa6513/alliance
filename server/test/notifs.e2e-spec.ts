@@ -1,5 +1,8 @@
 import { NotifsModule } from 'src/notifs/notifs.module';
-import { Comment, CommentParentObject } from 'src/forum/entities/comment.entity';
+import {
+  Comment,
+  CommentParentObject,
+} from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
 import { User } from 'src/user/entities/user.entity';
 import type { Repository } from 'typeorm';
@@ -153,9 +156,9 @@ describe('Notifications (e2e)', () => {
     await ctx.agent.post('/notifs/read-all').expect(201);
 
     const notifs = await ctx.agent.get('/notifs').expect(200);
-    expect(notifs.body.every((notif: { readAt?: string }) => notif.readAt)).toBe(
-      true,
-    );
+    expect(
+      notifs.body.every((notif: { readAt?: string }) => notif.readAt),
+    ).toBe(true);
   });
 
   it('user can mark unread content read by content id', async () => {
@@ -213,7 +216,7 @@ describe('Notifications (e2e)', () => {
         user: testUser,
         contentType: UnreadContentType.ForumReply,
         contentId: comment.id,
-        sendTime: new Date(),
+        sendTime: new Date(Date.now() - 1000),
         shouldPush: false,
       }),
     );
@@ -277,7 +280,7 @@ describe('Notifications (e2e)', () => {
         user: testUser,
         contentType: UnreadContentType.ActionUpdate,
         contentId: actionUpdate.id,
-        sendTime: new Date(),
+        sendTime: new Date(Date.now() - 1000),
         shouldPush: false,
       }),
     );
