@@ -7,7 +7,6 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ApiProperty } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { instanceToPlain } from 'class-transformer';
 import { randomBytes } from 'crypto';
@@ -171,11 +170,6 @@ type SuspendPlanContext = {
   idToUser: Map<number, User>;
   allExpectedUsers: number[];
 };
-
-export class UserActionRelationDto {
-  @ApiProperty({ enum: UserActionRelation, enumName: 'UserActionRelation' })
-  relation: UserActionRelation;
-}
 
 @Injectable()
 export class ActionsService {

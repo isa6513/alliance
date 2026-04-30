@@ -40,7 +40,7 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from '../auth/public.decorator';
 import { ActionFormVariantService } from './action-form-variant.service';
-import { ActionsService, UserActionRelationDto } from './actions.service';
+import { ActionsService } from './actions.service';
 import {
   ActionFormVariantDto,
   ActionFormVariantsListDto,
@@ -80,6 +80,7 @@ import {
   EvaluateCohortExpressionDto,
   EvaluateCohortExpressionResponseDto,
   ActionWithdrawalDto,
+  UserActionRelationDto,
 } from './dto/action.dto';
 import { CommunityCompletedActionsCountDto } from './dto/community-completed-actions-count.dto';
 import {

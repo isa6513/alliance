@@ -1715,7 +1715,7 @@ export type ActionFormVariantsListDto = {
 export type CreateActionFormVariantDto = {
     name: string;
     /**
-     * Percentage of new joiners (0–100).
+     * Fraction of new joiners (0-1).
      */
     splitValue: number;
     /**
@@ -1727,7 +1727,7 @@ export type CreateActionFormVariantDto = {
 export type UpdateActionFormVariantDto = {
     name?: string;
     /**
-     * Percentage of new joiners (0–100).
+     * Fraction of new joiners (0-1).
      */
     splitValue?: number;
 };
