@@ -685,7 +685,7 @@ export class ActionsService {
     });
 
     if (action?.publicOnly) {
-      return instanceToPlain(action) as Action;
+      return action;
     }
 
     if (
@@ -694,7 +694,7 @@ export class ActionsService {
     ) {
       throw new NotFoundException('Action not found');
     }
-    return instanceToPlain(action) as Action;
+    return action;
   }
 
   async findOneDto(
