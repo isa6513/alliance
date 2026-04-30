@@ -170,8 +170,8 @@ const SettingsPage: React.FC = () => {
     // loadPaymentMethod();
 
     userMyLocation().then((locationResponse) => {
-      if (locationResponse.data) {
-        const city = locationResponse.data;
+      const city = locationResponse.data?.city;
+      if (city) {
         setLocation(city);
         const cityId = city.id;
         setEditableUser((prev) =>

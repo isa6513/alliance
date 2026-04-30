@@ -67,7 +67,7 @@ const ContractPage: React.FC = () => {
       if (res.data) {
         setLastContractEvent({
           type: "signed",
-          date: res.data,
+          date: res.data.date,
           automatic: false,
           contractId: latestContract.id,
         });
@@ -89,7 +89,7 @@ const ContractPage: React.FC = () => {
       if (res.data) {
         setLastContractEvent({
           type: "suspended",
-          date: res.data,
+          date: res.data.date,
           automatic: false,
         });
         await refreshUser();
@@ -197,7 +197,7 @@ const ContractPage: React.FC = () => {
                 <p>
                   {getSuspensionMessage(
                     lastContractEvent.date,
-                    lastContractEvent.automatic
+                    lastContractEvent.automatic,
                   )}
                 </p>
               </Card>

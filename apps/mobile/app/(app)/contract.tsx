@@ -80,7 +80,7 @@ export default function ContractScreen() {
       if (res.data) {
         setLastContractEvent({
           type: "signed",
-          date: res.data,
+          date: res.data.date,
           automatic: false,
           contractId: latestContract.id,
         });
@@ -110,7 +110,7 @@ export default function ContractScreen() {
             if (res.data) {
               setLastContractEvent({
                 type: "suspended",
-                date: res.data,
+                date: res.data.date,
                 automatic: false,
               });
               await refreshContractState();

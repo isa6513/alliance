@@ -1,4 +1,4 @@
-import { Controller, Get, Ip, Query, Req } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { GeoService } from './geo.service';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { ApiResponse } from '@nestjs/swagger';
@@ -23,23 +23,7 @@ export class GeoController {
 
   @Get('load-country-data')
   @ApiOkResponse()
-  async loadCountryData() {
+  async loadCountryData(): Promise<void> {
     return this.geoService.loadCityDataFromTxt();
-  }
-
-  @Get('ip')
-  @ApiOkResponse()
-  async loadCityData(@Ip() ip: string, @Req() req: Request) {
-    const data = await fetch(`https://ip-api.com/json/${ip}`).then((res) =>
-      res.json(),
-    );
-
-    const headers = req.headers;
-
-    return {
-      ip,
-      data,
-      headers,
-    };
   }
 }

@@ -19,6 +19,11 @@ export class ShareUrlDto extends PickType(ActionShareUrl, [
   }
 }
 
+export class ShareLinkDto {
+  @ApiProperty()
+  url: string;
+}
+
 export class ShareUrlStatsDto {
   @ApiProperty({ type: ProfileDto })
   @Type(() => ProfileDto)

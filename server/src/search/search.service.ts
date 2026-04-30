@@ -58,7 +58,7 @@ export class SearchService {
             }
             return this.userToSearchItem(user, false, false);
           } else if (search.objectType === SearchItemType.Action) {
-            const action = await this.actionsService.findOne({
+            const action = await this.actionsService.findOneOrFail({
               id: search.objectId,
               userId,
             });

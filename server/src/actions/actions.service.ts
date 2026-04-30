@@ -659,7 +659,7 @@ export class ActionsService {
     });
   }
 
-  async findOne(params: {
+  async findOneOrFail(params: {
     id: number;
     userId?: number;
     serverSide?: boolean;
@@ -702,7 +702,7 @@ export class ActionsService {
     userId?: number,
     serverSide = false,
   ): Promise<ActionDto> {
-    const action = await this.findOne({ id, userId, serverSide });
+    const action = await this.findOneOrFail({ id, userId, serverSide });
     const user = userId
       ? await this.userService.findOne(userId, {
           tags: true,
@@ -734,7 +734,7 @@ export class ActionsService {
     shareCode?: string,
   ): Promise<ActionSharePreviewDto> {
     // Match public action visibility before exposing referrer completion state.
-    await this.findOne({ id: actionId });
+    await this.findOneOrFail({ id: actionId });
 
     const response = new ActionSharePreviewDto();
     response.completedByReferrer = false;
@@ -1080,7 +1080,7 @@ export class ActionsService {
       isOutOfTime,
       adminCreated,
     } = options;
-    const action = await this.findOne({ id: actionId, userId });
+    const action = await this.findOneOrFail({ id: actionId, userId });
 
     if (type === ActionActivityType.USER_COMPLETED && !adminCreated) {
       await this.ensureUserEligibleForAction(action, userId);
@@ -1174,7 +1174,7 @@ export class ActionsService {
     id: number,
     updateActionDto: UpdateActionDto,
     userId: number,
-  ): Promise<Action | null> {
+  ): Promise<Action> {
     const action: DeepPartial<Action> | null =
       await this.actionRepository.findOne({
         where: { id },
@@ -1214,7 +1214,7 @@ export class ActionsService {
     const newSuiteId = action.suite?.id;
     await this.syncGeneralUpdateDatesForSuites([oldSuiteId, newSuiteId]);
 
-    return this.findOne({ id, userId });
+    return this.findOneOrFail({ id, userId });
   }
 
   async addEvent(
@@ -1222,7 +1222,7 @@ export class ActionsService {
     actionEventDto: CreateActionEventDto,
     userId?: number,
   ): Promise<ActionEvent> {
-    const action = await this.findOne({ id: actionId, userId });
+    const action = await this.findOneOrFail({ id: actionId, userId });
     const [savedEvent] = await this.addEventToActions({
       actions: [action],
       event: actionEventDto,
@@ -1293,7 +1293,7 @@ export class ActionsService {
     actionId: number,
     dto: CreateFollowUpFormDto,
   ): Promise<FollowUpForm> {
-    const action = await this.findOne({ id: actionId, serverSide: true });
+    const action = await this.findOneOrFail({ id: actionId, serverSide: true });
     const form = await this.formRepository.findOneOrFail({
       where: { id: dto.formId },
     });
@@ -1618,7 +1618,7 @@ export class ActionsService {
     actionId: number,
     userId: number,
   ): Promise<boolean> {
-    const action = await this.findOne({ id: actionId, userId });
+    const action = await this.findOneOrFail({ id: actionId, userId });
     const user = await this.userService.findOne(userId, {
       tags: true,
       contractEvents: true,
@@ -2140,7 +2140,7 @@ export class ActionsService {
   }
 
   async getPaymentAmountForAction(id: number): Promise<number> {
-    const action = await this.findOne({ id, serverSide: true });
+    const action = await this.findOneOrFail({ id, serverSide: true });
     if (action.type !== ActionTaskType.Funding) {
       throw new BadRequestException('Action is not a funding action');
     }

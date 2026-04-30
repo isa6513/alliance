@@ -142,9 +142,9 @@ export default function SettingsPage() {
         setLoading(false);
       });
 
-    userMyLocation().then((locationResponse: { data?: City }) => {
-      if (locationResponse.data) {
-        const city = locationResponse.data;
+    userMyLocation().then((locationResponse) => {
+      const city = locationResponse.data?.city;
+      if (city) {
         setLocation(city);
         const cityId = city.id;
         setEditableUser((prev: UpdateProfileDto | null) =>

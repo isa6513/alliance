@@ -160,7 +160,7 @@ export class ForumController {
   removePost(
     @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
-  ) {
+  ): Promise<void> {
     return this.forumService.removePost(id, user.sub);
   }
 
@@ -254,7 +254,7 @@ export class ForumController {
   deleteComment(
     @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
-  ) {
+  ): Promise<void> {
     return this.forumService.deleteReply(+id, user.sub);
   }
 
@@ -304,9 +304,7 @@ export class ForumController {
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Toggle pin status of a comment' })
   @ApiOkResponse({ type: CommentDto })
-  async pinComment(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<CommentDto> {
+  async pinComment(@Param('id', ParseIntPipe) id: number): Promise<CommentDto> {
     return new CommentDto(await this.forumService.togglePinComment(id));
   }
 }

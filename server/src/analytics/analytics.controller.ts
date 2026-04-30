@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 import { TimeSpentForUserDto } from './timespent.dto';
@@ -19,14 +27,14 @@ export class AnalyticsController {
   @Get('time-spent-per-user')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [TimeSpentForUserDto] })
-  getTimeSpentPerUser() {
+  getTimeSpentPerUser(): Promise<TimeSpentForUserDto[]> {
     return this.analyticsService.getTimeSpentPerUser();
   }
 
   @Get('time-spent-per-user-total')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [TimeSpentForUserDto] })
-  getTimeSpentPerUserTotal() {
+  getTimeSpentPerUserTotal(): Promise<TimeSpentForUserDto[]> {
     return this.analyticsService.getTimeSpentPerUserTotal();
   }
 
@@ -36,7 +44,7 @@ export class AnalyticsController {
   getDailyStats(
     @Query('date') startDate: string,
     @Query('endDate') endDate: string,
-  ) {
+  ): Promise<DailyStatsRecord[]> {
     return this.analyticsService.getDailyStats(startDate, endDate);
   }
 
@@ -50,10 +58,16 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('action-stats/:actionId')
   @ApiOkResponse({ type: ActionStatsWithOnboardingDto })
-  getActionStatsById(
+  async getActionStatsById(
     @Param('actionId') actionId: string,
-  ): Promise<ActionStatsWithOnboardingDto | null> {
-    return this.analyticsService.getActionStatsById(Number(actionId));
+  ): Promise<ActionStatsWithOnboardingDto> {
+    const stats = await this.analyticsService.getActionStatsById(
+      Number(actionId),
+    );
+    if (!stats) {
+      throw new NotFoundException('Action stats not found');
+    }
+    return stats;
   }
 
   @UseGuards(AdminGuard)
@@ -83,8 +97,7 @@ export class AnalyticsController {
     @Query('granularity') granularity?: string,
   ): Promise<ActionCompletionCurveDto[]> {
     const parsedActionId = actionId ? Number(actionId) : undefined;
-    const parsedGranularity =
-      granularity === 'hourly' ? 'hourly' : 'daily';
+    const parsedGranularity = granularity === 'hourly' ? 'hourly' : 'daily';
     return this.analyticsService.getActionCompletionCurves(
       parsedActionId,
       parsedGranularity,

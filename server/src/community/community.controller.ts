@@ -33,7 +33,7 @@ import {
 @ApiTags('community')
 @Controller('community')
 export class CommunityController {
-  constructor(private readonly communityService: CommunityService) { }
+  constructor(private readonly communityService: CommunityService) {}
 
   @Post('create/admin')
   @UseGuards(AdminGuard)
@@ -356,7 +356,7 @@ export class CommunityController {
   async rejectCommunityInvite(
     @Param('inviteId', ParseIntPipe) inviteId: number,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<void> {
     await this.communityService.rejectCommunityInvite(inviteId, req.user.sub);
   }
 }

@@ -25,7 +25,7 @@ const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
       if (res.error || !res.data) {
         throw res.error ?? new Error("Failed to load share link");
       }
-      return res.data;
+      return res.data.url;
     },
     enabled: actionId !== null,
   });

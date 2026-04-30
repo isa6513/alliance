@@ -23,7 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { City } from 'src/geo/city.entity';
+import { MaybeUserLocationDto } from 'src/geo/city.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from '../auth/public.decorator';
@@ -90,28 +90,31 @@ export class UserController {
   async createAwayRange(
     @Request() req: JwtRequest,
     @Body() body: CreateAwayRangeDto,
-  ) {
-    return this.userService.createAwayRange(req.user.sub, body);
+  ): Promise<UserAwayRangeDto> {
+    return new UserAwayRangeDto(
+      await this.userService.createAwayRange(req.user.sub, body),
+    );
   }
 
   @Get('awayranges')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [UserAwayRangeDto] })
   @ApiUnauthorizedResponse()
-  async getAwayRanges(@Request() req: JwtRequest) {
-    return this.userService.getAwayRanges(req.user.sub);
+  async getAwayRanges(@Request() req: JwtRequest): Promise<UserAwayRangeDto[]> {
+    return (await this.userService.getAwayRanges(req.user.sub)).map(
+      (range) => new UserAwayRangeDto(range),
+    );
   }
 
   @Delete('awayranges/:id')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: String })
+  @ApiOkResponse()
   @ApiUnauthorizedResponse()
   async deleteAwayRange(
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
-  ) {
+  ): Promise<void> {
     await this.userService.deleteAwayRange(req.user.sub, id);
-    return { success: true };
   }
 
   @Patch('awayranges/:id')
@@ -122,16 +125,22 @@ export class UserController {
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateAwayRangeDto,
-  ) {
-    return this.userService.updateAwayRange(req.user.sub, id, body);
+  ): Promise<UserAwayRangeDto> {
+    return new UserAwayRangeDto(
+      await this.userService.updateAwayRange(req.user.sub, id, body),
+    );
   }
 
   @Get('awayranges/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [UserAwayRangeDto] })
   @ApiUnauthorizedResponse()
-  async getAwayRangeForUser(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.getAwayRanges(id);
+  async getAwayRangeForUser(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserAwayRangeDto[]> {
+    return (await this.userService.getAwayRanges(id)).map(
+      (range) => new UserAwayRangeDto(range),
+    );
   }
 
   @Post('update')
@@ -148,9 +157,10 @@ export class UserController {
 
   @Get('mylocation')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: City })
-  async myLocation(@Request() req: JwtRequest): Promise<City | undefined> {
-    return this.userService.getUserLocation(req.user.sub);
+  @ApiOkResponse({ type: MaybeUserLocationDto })
+  async myLocation(@Request() req: JwtRequest): Promise<MaybeUserLocationDto> {
+    const city = await this.userService.getUserLocation(req.user.sub);
+    return { city };
   }
 
   @Post('friends/:targetUserId')
@@ -160,8 +170,8 @@ export class UserController {
   async requestFriend(
     @Param('targetUserId', ParseIntPipe) targetUserId: number,
     @Request() req: JwtRequest,
-  ) {
-    return this.userService.createFriendRequest(req.user.sub, targetUserId);
+  ): Promise<void> {
+    await this.userService.createFriendRequest(req.user.sub, targetUserId);
   }
 
   @Patch('friends/:requesterId/accept')
@@ -171,8 +181,8 @@ export class UserController {
   async acceptFriendRequest(
     @Param('requesterId', ParseIntPipe) requesterId: number,
     @Request() req: JwtRequest,
-  ) {
-    return this.userService.updateFriendRequestStatus(
+  ): Promise<void> {
+    await this.userService.updateFriendRequestStatus(
       requesterId,
       req.user.sub,
       FriendStatus.Accepted,
@@ -186,8 +196,8 @@ export class UserController {
   async declineFriendRequest(
     @Param('requesterId', ParseIntPipe) requesterId: number,
     @Request() req: JwtRequest,
-  ) {
-    return this.userService.updateFriendRequestStatus(
+  ): Promise<void> {
+    await this.userService.updateFriendRequestStatus(
       requesterId,
       req.user.sub,
       FriendStatus.Declined,
@@ -201,7 +211,7 @@ export class UserController {
   async removeFriend(
     @Param('targetUserId', ParseIntPipe) targetUserId: number,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<void> {
     return this.userService.removeFriend(req.user.sub, targetUserId);
   }
 
@@ -305,7 +315,12 @@ export class UserController {
   @ApiOkResponse({ type: UserDto, isArray: true })
   async listForGraph(): Promise<UserDto[]> {
     return (
-      await this.userService.findAll({ contractEvents: true, referredBy: true, communities: true, tags: true })
+      await this.userService.findAll({
+        contractEvents: true,
+        referredBy: true,
+        communities: true,
+        tags: true,
+      })
     ).map((user) => new UserDto(user));
   }
 
@@ -378,7 +393,7 @@ export class UserController {
   @Get('myprofile')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ProfileDto })
-  async myProfile(@Request() req: JwtRequest): Promise<ProfileDto | null> {
+  async myProfile(@Request() req: JwtRequest): Promise<ProfileDto> {
     const user = await this.userService.findOne(req.user.sub, {
       contractEvents: true,
     });
@@ -398,38 +413,39 @@ export class UserController {
   @Public()
   @ApiOkResponse({ type: ProfileDto })
   @ApiUnauthorizedResponse()
-  async findOne(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<ProfileDto | null> {
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ProfileDto> {
     const user = await this.userService.findOne(id, { contractEvents: true });
-    return user ? new ProfileDto(user) : null;
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return new ProfileDto(user);
   }
 
   @Post('verifyEmail')
   @Public()
   @ApiOkResponse()
-  async verifyEmail(@Body() body: VerifyEmailBody) {
+  async verifyEmail(@Body() body: VerifyEmailBody): Promise<void> {
     return this.userService.verifyEmail(body.token);
   }
 
   @Post('nmembers')
   @Public()
   @ApiOkResponse({ type: Number })
-  async nmembers() {
+  async nmembers(): Promise<number> {
     return this.userService.signedMembersCount();
   }
 
   @Post('createTag')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: TagDto })
-  async createTag(@Body() body: CreateTagDto) {
+  async createTag(@Body() body: CreateTagDto): Promise<TagDto> {
     return new TagDto(await this.userService.createTag(body));
   }
 
   @Get('tags')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [TagDto] })
-  async getTags() {
+  async getTags(): Promise<TagDto[]> {
     return (await this.userService.findAllTags()).map((tag) => new TagDto(tag));
   }
 
@@ -439,7 +455,7 @@ export class UserController {
   async addUserToTag(
     @Param('tagId') tagId: string,
     @Body() body: AddUserToTagDto,
-  ) {
+  ): Promise<TagDto> {
     return new TagDto(await this.userService.addUserToTag(tagId, body.userId));
   }
 
@@ -449,7 +465,7 @@ export class UserController {
   async removeUserFromTag(
     @Param('tagId') tagId: string,
     @Body() body: AddUserToTagDto,
-  ) {
+  ): Promise<TagDto> {
     return new TagDto(
       await this.userService.removeUserFromTag(tagId, body.userId),
     );
@@ -458,32 +474,41 @@ export class UserController {
   @Post('tags/:tagId/update')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: TagDto })
-  async updateTag(@Param('tagId') tagId: string, @Body() body: CreateTagDto) {
+  async updateTag(
+    @Param('tagId') tagId: string,
+    @Body() body: CreateTagDto,
+  ): Promise<TagDto> {
     return new TagDto(await this.userService.updateTag(tagId, body));
   }
 
   @Delete('tags/:tagId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteTag(@Param('tagId') tagId: string) {
+  async deleteTag(@Param('tagId') tagId: string): Promise<void> {
     await this.userService.deleteTag(tagId);
   }
 
   @Get('signupSocialProof')
   @Public()
-  @ApiOperation({ summary: 'Member avatars for signup social proof (optional referral code)' })
-  @ApiQuery({ name: 'code', required: false, description: 'Referral or invite code to prefer inviter friends' })
+  @ApiOperation({
+    summary: 'Member avatars for signup social proof (optional referral code)',
+  })
+  @ApiQuery({
+    name: 'code',
+    required: false,
+    description: 'Referral or invite code to prefer inviter friends',
+  })
   @ApiOkResponse({ type: SignupSocialProofDto })
-  async signupSocialProof(@Query('code') code?: string): Promise<SignupSocialProofDto> {
+  async signupSocialProof(
+    @Query('code') code?: string,
+  ): Promise<SignupSocialProofDto> {
     return this.userService.getSignupSocialProof(code);
   }
 
   @Get('referrerProfile/:code')
   @Public()
   @ApiOkResponse({ type: ProfileDto })
-  async referrerProfile(
-    @Param('code') code: string,
-  ): Promise<ProfileDto | null> {
+  async referrerProfile(@Param('code') code: string): Promise<ProfileDto> {
     const invite = await this.userService.findInviteByCode(code);
     if (invite) {
       return new ProfileDto(invite.invitingUser);
@@ -502,8 +527,12 @@ export class UserController {
   @Get('onetimeInvite/:code')
   @Public()
   @ApiOkResponse({ type: OnetimeInviteDto })
-  async onetimeInvite(@Param('code') code: string) {
-    return this.userService.findInviteByCode(code);
+  async onetimeInvite(@Param('code') code: string): Promise<OnetimeInviteDto> {
+    const invite = await this.userService.findInviteByCode(code);
+    if (!invite) {
+      throw new NotFoundException('Invite not found');
+    }
+    return new OnetimeInviteDto(invite);
   }
 
   @Post('onetimeInvite/request')
@@ -512,7 +541,7 @@ export class UserController {
   async requestOnetimeInvite(
     @Body() body: RequestOnetimeInviteDto,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<OnetimeInviteDto> {
     return new OnetimeInviteDto(
       await this.userService.requestOnetimeInvite(body, req.user.sub),
     );
@@ -524,7 +553,7 @@ export class UserController {
   async approveOnetimeInvite(
     @Param('inviteId', ParseIntPipe) inviteId: number,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<OnetimeInviteDto> {
     return new OnetimeInviteDto(
       await this.userService.approveOnetimeInviteRequest(
         inviteId,
@@ -539,7 +568,7 @@ export class UserController {
   async rejectOnetimeInvite(
     @Param('inviteId', ParseIntPipe) inviteId: number,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<void> {
     return this.userService.rejectOnetimeInviteRequest(inviteId, req.user.sub);
   }
 
@@ -549,7 +578,7 @@ export class UserController {
   async createOnetimeInvite(
     @Body() body: CreateOnetimeInviteDto,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<OnetimeInviteDto> {
     return new OnetimeInviteDto(
       await this.userService.createOnetimeInvite(body, req.user.sub),
     );
@@ -561,14 +590,14 @@ export class UserController {
   async deleteOnetimeInvite(
     @Param('inviteId', ParseIntPipe) inviteId: number,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<void> {
     await this.userService.deleteOnetimeInvite(inviteId, req.user.sub);
   }
 
   @Get('onetimeInvites')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [OnetimeInviteDto] })
-  async getOnetimeInvites() {
+  async getOnetimeInvites(): Promise<OnetimeInviteDto[]> {
     return (await this.userService.findAllOnetimeInvites()).map(
       (invite) => new OnetimeInviteDto(invite),
     );
@@ -590,7 +619,7 @@ export class UserController {
   @ApiOkResponse({ type: [OnetimeInviteDto] })
   async getOnetimeInvitesByCommunity(
     @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
+  ): Promise<OnetimeInviteDto[]> {
     return (await this.userService.findOnetimeInvites(communityId)).map(
       (invite) => new OnetimeInviteDto(invite),
     );
@@ -602,24 +631,26 @@ export class UserController {
   async getOnetimeInvitesByRequester(
     @Request() req: JwtRequest,
     @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
-    return this.userService.findOnetimeInvitesByRequester(
-      req.user.sub,
-      communityId,
-    );
+  ): Promise<OnetimeInviteDto[]> {
+    return (
+      await this.userService.findOnetimeInvitesByRequester(
+        req.user.sub,
+        communityId,
+      )
+    ).map((invite) => new OnetimeInviteDto(invite));
   }
 
   @Post('groupAssignment/join')
   @UseGuards(AuthGuard)
   @ApiOkResponse()
-  async joinGroupAssignment(@Request() req: JwtRequest) {
+  async joinGroupAssignment(@Request() req: JwtRequest): Promise<void> {
     await this.userService.joinGroupAssignment(req.user.sub);
   }
 
   @Post('groupAssignment/leave')
   @UseGuards(AuthGuard)
   @ApiOkResponse()
-  async leaveGroupAssignment(@Request() req: JwtRequest) {
+  async leaveGroupAssignment(@Request() req: JwtRequest): Promise<void> {
     await this.userService.leaveGroupAssignment(req.user.sub);
   }
 
@@ -635,7 +666,7 @@ export class UserController {
   @Post('groupAssignment/assign')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async assignGroupsAdmin(@Body() body: AssignGroupsDto) {
+  async assignGroupsAdmin(@Body() body: AssignGroupsDto): Promise<void> {
     await this.userService.assignGroupsAdmin(body);
   }
 
@@ -645,7 +676,7 @@ export class UserController {
   async registerDevice(
     @Request() req: JwtRequest,
     @Body() body: RegisterDeviceDto,
-  ) {
+  ): Promise<UserDeviceDto> {
     const device = await this.userService.registerDevice(req.user.sub, body);
     return { id: device.id };
   }
@@ -653,7 +684,9 @@ export class UserController {
   @Post('sendPushNotification')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: Push })
-  async sendPushNotification(@Body() body: TestPushNotificationDto) {
+  async sendPushNotification(
+    @Body() body: TestPushNotificationDto,
+  ): Promise<Push> {
     return this.userService.testPushNotification(body.userId, body.message);
   }
 
@@ -683,7 +716,7 @@ export class UserController {
   @Post('requestAccountDeletion')
   @UseGuards(AuthGuard)
   @ApiOkResponse()
-  async requestAccountDeletion(@Request() req: JwtRequest) {
+  async requestAccountDeletion(@Request() req: JwtRequest): Promise<void> {
     await this.userService.requestAccountDeletion(req.user.sub);
   }
 }

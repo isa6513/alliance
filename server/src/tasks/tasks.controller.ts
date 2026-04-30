@@ -123,7 +123,7 @@ export class TasksController {
   @Post('createForm')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: FormDto })
-  async createForm(@Body() body: CreateFormDto) {
+  async createForm(@Body() body: CreateFormDto): Promise<FormDto> {
     return new FormDto(await this.tasksService.createForm(body));
   }
 
@@ -245,7 +245,7 @@ export class TasksController {
   @Get('customValidators')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CustomValidatorTypeDto, isArray: true })
-  async customValidators() {
+  async customValidators(): Promise<CustomValidatorTypeDto[]> {
     return this.tasksService.customValidators();
   }
 
@@ -256,14 +256,16 @@ export class TasksController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
     @Body() body: RunValidatorDto,
-  ) {
+  ): Promise<CustomValidatorResponseDto> {
     return this.tasksService.runValidator(id, req.user.sub, body.fieldValue);
   }
 
   @Get('findOneCustomValidator/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CustomValidatorDto })
-  async findOneCustomValidator(@Param('id', ParseIntPipe) id: number) {
+  async findOneCustomValidator(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CustomValidatorDto> {
     return this.tasksService.findOneCustomValidator(id);
   }
 
@@ -297,7 +299,7 @@ export class TasksController {
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: OptOutActionDto,
-  ) {
+  ): Promise<ActionActivityDto> {
     if (!body.partialFormData) {
       throw new BadRequestException('Partial form data is required');
     }

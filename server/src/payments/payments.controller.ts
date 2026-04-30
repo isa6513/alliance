@@ -137,14 +137,19 @@ export class PaymentsController {
 
   @Post('set-partial-profile')
   @ApiOkResponse()
-  async setPartialProfile(@Body() body: CreatePartialProfileDto) {
+  async setPartialProfile(
+    @Body() body: CreatePartialProfileDto,
+  ): Promise<void> {
     console.log('setting partial profile', body);
     return this.paymentsService.updatePaymentUserDataToken(body.id, body);
   }
 
   @Post('webhook')
   @ApiOkResponse()
-  async webhook(@RawBody() event: string, @Req() request: Request) {
+  async webhook(
+    @RawBody() event: string,
+    @Req() request: Request,
+  ): Promise<void> {
     let parsedEvent: Stripe.Event;
     if (process.env.STRIPE_ENDPOINT_SECRET) {
       const signature = request.headers['stripe-signature'];
@@ -200,7 +205,7 @@ export class PaymentsController {
   @Post('clear-payment-method')
   @UseGuards(AuthGuard)
   @ApiOkResponse()
-  async clearPaymentMethods(@Request() req: JwtRequest) {
+  async clearPaymentMethods(@Request() req: JwtRequest): Promise<void> {
     const customer = await this.paymentsService.getOrCreateCustomer(
       req.user.sub,
       req.user.email,

@@ -14,7 +14,7 @@ const AIPrivacyFlyer: React.FC = () => {
         path: { id: publicActionId },
       });
       if (shareUrlRes.data) {
-        setQrCodeUrl(generateBarcodeUrl(shareUrlRes.data, 200));
+        setQrCodeUrl(generateBarcodeUrl(shareUrlRes.data.url, 200));
       }
     };
     fetchShareUrl();

@@ -15,18 +15,16 @@ import {
   Res,
   StreamableFile,
 } from '@nestjs/common';
-import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { ApiOkResponse } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { basename } from 'path';
 import { Readable } from 'stream';
 import { getImageSource, ImagesService } from './images.service';
-import { UploadImageResponseDto } from './dto/image-response.dto';
-
-export class BodyDto {
-  @IsNotEmpty()
-  file: string;
-}
+import {
+  DeleteImageResponseDto,
+  UploadImageDto,
+  UploadImageResponseDto,
+} from './dto/image.dto';
 
 @Controller('images')
 export class ImagesController {
@@ -89,8 +87,8 @@ export class ImagesController {
   }
 
   @Delete(':id')
-  @ApiOkResponse()
-  async deleteImage(@Param('id') id: number) {
+  @ApiOkResponse({ type: DeleteImageResponseDto })
+  async deleteImage(@Param('id') id: number): Promise<DeleteImageResponseDto> {
     const img = await this.imagesService.getImage(id);
     if (!img) throw new NotFoundException();
 
@@ -102,16 +100,10 @@ export class ImagesController {
   }
 
   @Post('/uploadImage')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: { type: 'string' },
-      },
-    },
-  })
   @ApiOkResponse({ type: UploadImageResponseDto })
-  async uploadImage(@Body() body) {
+  async uploadImage(
+    @Body() body: UploadImageDto,
+  ): Promise<UploadImageResponseDto> {
     const key = await this.imagesService.uploadImage(body.file);
     return { url: getImageSource(key), key };
   }

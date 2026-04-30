@@ -91,7 +91,11 @@ import { ActionEvent } from './entities/action-event.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import { Action } from './entities/action.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
-import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
+import {
+  ShareLinkDto,
+  ShareUrlDto,
+  ShareUrlStatsDto,
+} from './dto/share-url.dto';
 import { ForumActionCompleterWorker } from './forum-action-completer.worker';
 import {
   CreateGeneralUpdateDto,
@@ -122,7 +126,7 @@ export class ActionsController {
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: OptOutActionDto,
-  ) {
+  ): Promise<ActionActivityDto> {
     return this.actionsService.optoutAction(
       id,
       req.user.sub,
@@ -134,7 +138,10 @@ export class ActionsController {
   @Post('complete/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  complete(@Request() req: JwtRequest, @Param('id', ParseIntPipe) id: number) {
+  complete(
+    @Request() req: JwtRequest,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ActionActivityDto> {
     return this.actionsService.completeAction(id, req.user.sub);
   }
 
@@ -188,7 +195,7 @@ export class ActionsController {
   @Get('myActivity')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })
-  async myActivity(@Request() req: JwtRequest) {
+  async myActivity(@Request() req: JwtRequest): Promise<ActionActivityDto[]> {
     return this.actionsService.getActivityForUser(req.user?.sub);
   }
 
@@ -327,7 +334,7 @@ export class ActionsController {
   async getActivity(
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
-  ) {
+  ): Promise<ActionActivityDto> {
     return this.actionsService.getActivity(id, req.user?.sub);
   }
 
@@ -343,7 +350,9 @@ export class ActionsController {
   @Get('events/:id')
   @Public()
   @ApiOkResponse({ type: ActionEventDto })
-  async getEvent(@Param('id', ParseIntPipe) id: number) {
+  async getEvent(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ActionEventDto> {
     return this.actionsService.getEvent(id);
   }
 
@@ -397,14 +406,14 @@ export class ActionsController {
   @Get('all')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [Action] })
-  async findAllWithDrafts() {
+  async findAllWithDrafts(): Promise<Action[]> {
     return this.actionsService
       .findAllSorted({
         events: true,
         activities: true,
         suite: true,
       })
-      .then((actions) => instanceToPlain(actions));
+      .then((actions) => instanceToPlain(actions) as Action[]);
   }
 
   @Get('friendActivity/:actionId')
@@ -417,7 +426,7 @@ export class ActionsController {
     comments?: boolean,
     @Query('limit', new ParseIntPipe({ optional: true }))
     limit?: string,
-  ) {
+  ): Promise<ActionActivityDto[]> {
     const limitNum = limit ? parseInt(limit) : 20;
     return this.actionsService.friendActivityForAction(
       req.user.sub,
@@ -437,7 +446,7 @@ export class ActionsController {
     @Query('limit', new ParseIntPipe({ optional: true }))
     limit?: string,
     @Query('before') before?: string,
-  ) {
+  ): Promise<ActionActivityDto[]> {
     const limitNum = limit ? parseInt(limit) : 20;
     const beforeDate = before ? new Date(before) : undefined;
     return this.actionsService.friendActivity(
@@ -486,7 +495,7 @@ export class ActionsController {
     @Query('before') before?: string,
     @Query('comments', new ParseBoolPipe({ optional: true }))
     comments?: boolean,
-  ) {
+  ): Promise<ActionActivityDto[]> {
     const limitNum = limit ? parseInt(limit) : 20;
     const beforeDate = before ? new Date(before) : undefined;
     if (before && isNaN(beforeDate!.getTime())) {
@@ -527,7 +536,7 @@ export class ActionsController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
-  ): Promise<ActionDto | null> {
+  ): Promise<ActionDto> {
     return this.actionsService.findOneDto(id, req.user?.sub);
   }
 
@@ -560,7 +569,7 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<Action> {
-    return this.actionsService.findOne({ id, userId: req.user.sub });
+    return this.actionsService.findOneOrFail({ id, userId: req.user.sub });
   }
 
   @Get(':id/follow-up-forms')
@@ -569,7 +578,10 @@ export class ActionsController {
   async getFollowUpForms(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<FollowUpFormDto[]> {
-    const action = await this.actionsService.findOne({ id, serverSide: true });
+    const action = await this.actionsService.findOneOrFail({
+      id,
+      serverSide: true,
+    });
     const list = action.followUpForms ?? [];
     return list.map((f) => ({
       ...f,
@@ -585,7 +597,7 @@ export class ActionsController {
     @Body() dto: CreateFollowUpFormDto,
   ): Promise<FollowUpFormDto> {
     const created = await this.actionsService.createFollowUpForm(id, dto);
-    const withForm = await this.actionsService.findOne({
+    const withForm = await this.actionsService.findOneOrFail({
       id,
       serverSide: true,
     });
@@ -701,8 +713,8 @@ export class ActionsController {
   @Post('create')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
-  create(@Body() createActionDto: CreateActionDto) {
-    return this.actionsService.create(createActionDto);
+  async create(@Body() createActionDto: CreateActionDto): Promise<ActionDto> {
+    return new ActionDto(await this.actionsService.create(createActionDto));
   }
 
   @Patch(':id')
@@ -712,14 +724,14 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateActionDto: UpdateActionDto,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<Action> {
     return this.actionsService.update(id, updateActionDto, req.user.sub);
   }
 
   @Delete(':id')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.actionsService.remove(id);
   }
 
@@ -773,7 +785,9 @@ export class ActionsController {
   @Delete('reminders/:groupId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteReminderGroup(@Param('groupId', ParseIntPipe) groupId: number) {
+  async deleteReminderGroup(
+    @Param('groupId', ParseIntPipe) groupId: number,
+  ): Promise<void> {
     this.actionEventReminderService.deleteReminderGroup(groupId);
   }
 
@@ -800,7 +814,7 @@ export class ActionsController {
   @Post('clearDb')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  clearDb() {
+  clearDb(): Promise<void> {
     return this.actionsService.clearDb();
   }
 
@@ -911,8 +925,8 @@ export class ActionsController {
   @Delete('deleteUpdate/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  deleteUpdate(@Param('id', ParseIntPipe) id: number) {
-    return this.actionsService.deleteActionUpdate(id);
+  async deleteUpdate(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.actionsService.deleteActionUpdate(id);
   }
 
   @Get('allUpdates')
@@ -948,20 +962,21 @@ export class ActionsController {
   @Post('createSuite')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto })
-  createSuite(
+  async createSuite(
     @Body() createActionSuiteDto: CreateActionSuiteDto,
-  ): Promise<ActionSuite> {
-    return this.actionsService.createSuite(createActionSuiteDto);
+  ): Promise<ActionSuiteDto> {
+    const suite = await this.actionsService.createSuite(createActionSuiteDto);
+    return new ActionSuiteDto(suite, []);
   }
 
   @Patch('suite/:suiteId/batchUpdateSuiteEvents/:eventId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse()
+  @ApiOkResponse({ type: ActionSuiteDto })
   batchUpdateSuiteEvents(
     @Param('suiteId', ParseIntPipe) suiteId: number,
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: UpdateActionEventDto,
-  ) {
+  ): Promise<ActionSuiteDto> {
     return this.actionsService.batchUpdateSuiteEvents(suiteId, eventId, body);
   }
 
@@ -1023,14 +1038,14 @@ export class ActionsController {
   @Get('reloadAllActionUsersJoined')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async reloadAllActionUsersJoined() {
+  async reloadAllActionUsersJoined(): Promise<void> {
     return this.actionsService.reloadAllActionUsersJoined();
   }
 
   @Get('reloadAllActionUsersCompleted')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async reloadAllActionUsersCompleted() {
+  async reloadAllActionUsersCompleted(): Promise<void> {
     return this.actionsService.reloadAllActionUsersCompleted();
   }
 
@@ -1103,12 +1118,13 @@ export class ActionsController {
 
   @Post('getShareLink/:id')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: String })
-  getShareLink(
+  @ApiOkResponse({ type: ShareLinkDto })
+  async getShareLink(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
-  ): Promise<string> {
-    return this.actionsService.getShareLink(id, req.user.sub);
+  ): Promise<ShareLinkDto> {
+    const url = await this.actionsService.getShareLink(id, req.user.sub);
+    return { url };
   }
 
   @Get('shareLinksForForm/:formId')
@@ -1153,7 +1169,7 @@ export class ActionsController {
   @ApiOkResponse({ type: CommunityUserInfoDto })
   async getCommunityMemberInfoAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
+  ): Promise<CommunityUserInfoDto> {
     return this.actionsService.findMemberInfoByCommunityId(communityId);
   }
 
@@ -1163,7 +1179,7 @@ export class ActionsController {
   async getCommunityMemberInfo(
     @Request() req: JwtRequest,
     @Param('communityId', ParseIntPipe) communityId: number,
-  ) {
+  ): Promise<CommunityUserInfoDto> {
     return this.actionsService.findMemberInfo(req.user.sub, communityId);
   }
 

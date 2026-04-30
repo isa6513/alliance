@@ -10,9 +10,7 @@ import { Repository } from 'typeorm';
 import { MailService } from '../mail/mail.service';
 import { ReferralSource, User } from '../user/entities/user.entity';
 import { type PWResetJwtPayload, UserService } from '../user/user.service';
-import { AuthTokens } from './dto/authtokens.dto';
 import { SignUpDto } from './dto/sign-up.dto';
-import { SignInResponseDto } from './dto/signin.dto';
 import {
   extractAccessTokenFromCookie,
   extractTokenFromHeader,
@@ -257,7 +255,12 @@ export class AuthService {
     email: string,
     password: string,
     adminOnly: boolean = false,
-  ): Promise<SignInResponseDto & AuthTokens & { userId: number }> {
+  ): Promise<{
+    access_token: string;
+    refresh_token: string;
+    isAdmin: boolean;
+    userId: number;
+  }> {
     const user = await this.usersService.findOneByEmail(email);
 
     if (!user) {

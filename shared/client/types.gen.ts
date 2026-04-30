@@ -24,9 +24,9 @@ export type SignUpDto = {
     guestToken?: string;
 };
 
-export type AuthTokens = {
-    access_token: string;
-    refresh_token: string;
+export type RefreshTokensResponseDto = {
+    access_token?: string;
+    refresh_token?: string;
 };
 
 export type NotificationPreference = 'all' | 'digest' | 'none';
@@ -798,6 +798,10 @@ export type City = {
     longitude: number;
 };
 
+export type MaybeUserLocationDto = {
+    city?: City;
+};
+
 export type FriendStatus = 'pending' | 'accepted' | 'declined' | 'none';
 
 export type FriendStatusDto = {
@@ -922,6 +926,14 @@ export type RegisterLiveActivityUpdateTokenDto = {
 
 export type StreamableFile = {
     [key: string]: unknown;
+};
+
+export type DeleteImageResponseDto = {
+    deleted: boolean;
+};
+
+export type UploadImageDto = {
+    file: string;
 };
 
 export type UploadImageResponseDto = {
@@ -1201,6 +1213,10 @@ export type ContractAdminDto = {
 
 export type SignContractDto = {
     signedName: string;
+};
+
+export type ContractEventDateDto = {
+    date: string;
 };
 
 export type CreateContractDto = {
@@ -2235,6 +2251,10 @@ export type ScheduledPlansOverviewDto = {
     forumAutocompletePlans: Array<ForumAutocompletePlanDto>;
 };
 
+export type ShareLinkDto = {
+    url: string;
+};
+
 export type ShareUrlDto = {
     sid?: string;
     data?: {
@@ -3127,7 +3147,7 @@ export type AuthRefreshTokensData = {
 };
 
 export type AuthRefreshTokensResponses = {
-    200: AuthTokens;
+    200: RefreshTokensResponseDto;
 };
 
 export type AuthRefreshTokensResponse = AuthRefreshTokensResponses[keyof AuthRefreshTokensResponses];
@@ -3252,10 +3272,8 @@ export type UserDeleteAwayRangeErrors = {
 };
 
 export type UserDeleteAwayRangeResponses = {
-    200: string;
+    200: unknown;
 };
-
-export type UserDeleteAwayRangeResponse = UserDeleteAwayRangeResponses[keyof UserDeleteAwayRangeResponses];
 
 export type UserGetAwayRangeForUserData = {
     body?: never;
@@ -3316,7 +3334,7 @@ export type UserMyLocationData = {
 };
 
 export type UserMyLocationResponses = {
-    200: City;
+    200: MaybeUserLocationDto;
 };
 
 export type UserMyLocationResponse = UserMyLocationResponses[keyof UserMyLocationResponses];
@@ -4052,13 +4070,13 @@ export type ImagesDeleteImageData = {
 };
 
 export type ImagesDeleteImageResponses = {
-    200: unknown;
+    200: DeleteImageResponseDto;
 };
 
+export type ImagesDeleteImageResponse = ImagesDeleteImageResponses[keyof ImagesDeleteImageResponses];
+
 export type ImagesUploadImageData = {
-    body: {
-        file?: string;
-    };
+    body: UploadImageDto;
     path?: never;
     query?: never;
     url: '/images/uploadImage';
@@ -4917,7 +4935,7 @@ export type ContractSignContractData = {
 };
 
 export type ContractSignContractResponses = {
-    200: string;
+    200: ContractEventDateDto;
 };
 
 export type ContractSignContractResponse = ContractSignContractResponses[keyof ContractSignContractResponses];
@@ -4930,7 +4948,7 @@ export type ContractSuspendContractData = {
 };
 
 export type ContractSuspendContractResponses = {
-    200: string;
+    200: ContractEventDateDto;
 };
 
 export type ContractSuspendContractResponse = ContractSuspendContractResponses[keyof ContractSuspendContractResponses];
@@ -6039,8 +6057,10 @@ export type ActionsBatchUpdateSuiteEventsData = {
 };
 
 export type ActionsBatchUpdateSuiteEventsResponses = {
-    200: unknown;
+    200: ActionSuiteDto;
 };
+
+export type ActionsBatchUpdateSuiteEventsResponse = ActionsBatchUpdateSuiteEventsResponses[keyof ActionsBatchUpdateSuiteEventsResponses];
 
 export type ActionsAddSuiteEventData = {
     body: CreateActionEventDto;
@@ -6228,7 +6248,7 @@ export type ActionsGetShareLinkData = {
 };
 
 export type ActionsGetShareLinkResponses = {
-    200: string;
+    200: ShareLinkDto;
 };
 
 export type ActionsGetShareLinkResponse = ActionsGetShareLinkResponses[keyof ActionsGetShareLinkResponses];
@@ -6800,17 +6820,6 @@ export type GeoLoadCountryDataData = {
 };
 
 export type GeoLoadCountryDataResponses = {
-    200: unknown;
-};
-
-export type GeoLoadCityDataData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/geo/ip';
-};
-
-export type GeoLoadCityDataResponses = {
     200: unknown;
 };
 

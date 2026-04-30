@@ -1,5 +1,12 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 import { Image } from '../entities/image.entity';
+
+export class UploadImageDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  file: string;
+}
 
 export class ImageResponseDto extends PickType(Image, ['key', 'id']) {}
 

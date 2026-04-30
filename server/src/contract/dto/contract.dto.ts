@@ -20,6 +20,11 @@ export class SignContractDto {
   signedName: string;
 }
 
+export class ContractEventDateDto {
+  @ApiProperty()
+  date: Date;
+}
+
 export class ContractAdminDto extends PickType(Contract, [
   'id',
   'name',

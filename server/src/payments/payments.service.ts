@@ -155,7 +155,7 @@ export class PaymentsService {
       console.log('actionId: ', actionId);
 
       if (
-        (await this.actionService.findOne({ id: actionId })).type !==
+        (await this.actionService.findOneOrFail({ id: actionId })).type !==
         ActionTaskType.Funding
       ) {
         throw new InternalServerErrorException(

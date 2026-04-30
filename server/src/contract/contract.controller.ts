@@ -16,6 +16,7 @@ import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import {
   ContractAdminDto,
   ContractDto,
+  ContractEventDateDto,
   CreateContractDto,
   SignContractDto,
   UpdateContractDto,
@@ -29,7 +30,7 @@ export class ContractController {
   @Get('current')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ContractDto })
-  async getCurrent() {
+  async getCurrent(): Promise<ContractDto> {
     return new ContractDto(
       await this.contractService.findNewestActiveContract(),
     );
@@ -56,30 +57,34 @@ export class ContractController {
   @Get('detail/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ContractDto })
-  async getById(@Param('id', ParseIntPipe) id: number) {
+  async getById(@Param('id', ParseIntPipe) id: number): Promise<ContractDto> {
     return new ContractDto(await this.contractService.findOne(id));
   }
 
   @Post('sign/:id')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: String })
+  @ApiOkResponse({ type: ContractEventDateDto })
   async signContract(
     @Request() req: JwtRequest,
     @Body() body: SignContractDto,
     @Param('id', ParseIntPipe) contractId: number,
-  ) {
-    return this.contractService.signContract({
+  ): Promise<ContractEventDateDto> {
+    const date = await this.contractService.signContract({
       userId: req.user.sub,
       signedName: body.signedName,
       contractId,
     });
+    return { date };
   }
 
   @Post('suspend')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: String })
-  async suspendContract(@Request() req: JwtRequest) {
-    return this.contractService.suspendContract(req.user.sub);
+  @ApiOkResponse({ type: ContractEventDateDto })
+  async suspendContract(
+    @Request() req: JwtRequest,
+  ): Promise<ContractEventDateDto> {
+    const date = await this.contractService.suspendContract(req.user.sub);
+    return { date };
   }
 
   @Post('create')

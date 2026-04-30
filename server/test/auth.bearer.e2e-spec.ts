@@ -1,8 +1,9 @@
 import request from 'supertest';
 import { User } from '../src/user/entities/user.entity';
 import type { Repository } from 'typeorm';
-import { AuthTokens } from '../src/auth/dto/authtokens.dto';
 import { createTestApp, TestContext } from './e2e-test-utils';
+import { RefreshTokensResponseDto } from '../src/auth/dto/authtokens.dto';
+import { SignInResponseDto } from '../src/auth/dto/signin.dto';
 import { SignUpDto } from 'src/auth/dto/sign-up.dto';
 import {
   OnetimeInvite,
@@ -58,7 +59,7 @@ describe('Auth (e2e)', () => {
       })
       .expect(200);
 
-    const body = response.body as AuthTokens;
+    const body = response.body as SignInResponseDto;
 
     expect(body.access_token).toBeDefined();
     expect(body.refresh_token).toBeDefined();
@@ -89,17 +90,14 @@ describe('Auth (e2e)', () => {
         })
         .expect(200);
 
-      const loginBody = loginResponse.body as AuthTokens;
+      const loginBody = loginResponse.body as SignInResponseDto;
 
       const refreshResponse = await request(ctx.app.getHttpServer())
         .post('/auth/refresh')
         .set('Authorization', `Bearer ${loginBody.refresh_token}`)
         .expect(200);
 
-      const refreshBody = refreshResponse.body as Pick<
-        AuthTokens,
-        'access_token'
-      >;
+      const refreshBody = refreshResponse.body as RefreshTokensResponseDto;
 
       expect(refreshBody.access_token).toBeDefined();
     });

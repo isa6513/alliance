@@ -23,7 +23,10 @@ import {
 import type { Request as ExpressRequest, Response } from 'express';
 import { UserDto } from '../user/dto/user.dto';
 import { AuthService } from './auth.service';
-import { AuthTokens, AuthMeResponseDto } from './dto/authtokens.dto';
+import {
+  AuthMeResponseDto,
+  RefreshTokensResponseDto,
+} from './dto/authtokens.dto';
 import ForgotPasswordDto, { ResetPasswordDto } from './dto/forgotpassword.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto, SignInResponseDto, type TokenMode } from './dto/signin.dto';
@@ -60,7 +63,7 @@ export class AuthController {
     @Request() req: ExpressRequest,
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<SignInResponseDto> {
     const { access_token, refresh_token, isAdmin, userId } =
       await this.authService.login(signInDto.email, signInDto.password);
 
@@ -81,7 +84,7 @@ export class AuthController {
     @Request() req: ExpressRequest,
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<SignInResponseDto> {
     const { access_token, refresh_token, isAdmin, userId } =
       await this.authService.login(signInDto.email, signInDto.password, true);
 
@@ -140,13 +143,13 @@ export class AuthController {
 
   @Post('refresh')
   @UseGuards(RefreshTokenGuard)
-  @ApiOkResponse({ type: AuthTokens })
+  @ApiOkResponse({ type: RefreshTokensResponseDto })
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
     @Request() req: JwtRequest,
     @Query() query: TokenModeQuery,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<RefreshTokensResponseDto> {
     const userId: number = req.user.sub;
     const isImpersonation = req.user.isImpersonation ?? false;
     const { access_token, refresh_token } =
@@ -159,7 +162,7 @@ export class AuthController {
           : 'header';
     if (mode === 'cookie') {
       this.authService.setAuthCookies(res, access_token, refresh_token);
-      return;
+      return {};
     }
     return { access_token, refresh_token };
   }
@@ -179,7 +182,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
-  async logout(@Res({ passthrough: true }) res: Response) {
+  async logout(@Res({ passthrough: true }) res: Response): Promise<void> {
     this.authService.clearAuthCookies(res);
   }
 
@@ -187,7 +190,7 @@ export class AuthController {
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
-  async forgotPassword(@Body() body: ForgotPasswordDto) {
+  async forgotPassword(@Body() body: ForgotPasswordDto): Promise<void> {
     await this.authService.forgotPassword(body.email);
   }
 
@@ -195,7 +198,7 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
-  async resetPassword(@Body() body: ResetPasswordDto) {
+  async resetPassword(@Body() body: ResetPasswordDto): Promise<void> {
     await this.authService.resetPassword(body.token, body.password);
   }
 
@@ -208,7 +211,7 @@ export class AuthController {
   async impersonate(
     @Param('userId', ParseIntPipe) userId: number,
     @Res() res: Response,
-  ) {
+  ): Promise<void> {
     const { access_token, refresh_token } =
       await this.authService.generateImpersonationTokens(userId);
 

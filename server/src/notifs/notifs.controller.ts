@@ -31,7 +31,7 @@ export class NotifsController {
   @UseGuards(AuthGuard)
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({ type: [NotificationDto] })
-  findAll(
+  async findAll(
     @Request() req: JwtRequest,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ): Promise<NotificationDto[]> {
@@ -41,42 +41,44 @@ export class NotifsController {
   @Get('unread-count')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: UnreadCountDto })
-  getUnreadCount(@Request() req: JwtRequest): Promise<UnreadCountDto> {
+  async getUnreadCount(@Request() req: JwtRequest): Promise<UnreadCountDto> {
     return this.notifsService.getUnreadCount(req.user.sub);
   }
 
   @Post('read/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse()
-  setRead(
+  async setRead(
     @Param('id', ParseIntPipe) id: number,
     @Query() query: ReadNotificationQueryDto,
     @Request() req: JwtRequest,
-  ) {
-    return this.notifsService.setRead(id, req.user.sub, query.sourceType);
+  ): Promise<void> {
+    await this.notifsService.setRead(id, req.user.sub, query.sourceType);
   }
 
   @Post('read-all')
   @UseGuards(AuthGuard)
   @ApiOkResponse()
-  setReadAll(@Request() req: JwtRequest) {
+  async setReadAll(@Request() req: JwtRequest): Promise<void> {
     return this.notifsService.setReadAll(req.user.sub);
   }
 
   @Post('read-content')
   @UseGuards(AuthGuard)
   @ApiOkResponse()
-  setReadContent(
+  async setReadContent(
     @Body() body: MarkUnreadContentReadDto,
     @Request() req: JwtRequest,
-  ) {
+  ): Promise<void> {
     return this.notifsService.setUnreadContentReadByContent(req.user.sub, body);
   }
 
   @UseGuards(AdminGuard)
   @Get('for-user/:id')
   @ApiOkResponse({ type: [ActionEventNotifDto] })
-  notifsForUser(@Param('id', ParseIntPipe) id: number) {
+  async notifsForUser(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ActionEventNotifDto[]> {
     return this.notifsService
       .notifsForUser(id)
       .then((notifs) => notifs.map((notif) => new ActionEventNotifDto(notif)));
@@ -84,7 +86,7 @@ export class NotifsController {
 
   @Post('linkClick')
   @ApiOkResponse({ type: NotifClickResponseDto })
-  linkClick(@Body() body: NotifClickDto) {
+  async linkClick(@Body() body: NotifClickDto): Promise<NotifClickResponseDto> {
     return this.notifsService.notifLinkClick(body);
   }
 }

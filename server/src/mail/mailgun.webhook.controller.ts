@@ -59,7 +59,7 @@ export class MailgunWebhookController {
 
   @Post('/handle-event')
   @ApiOkResponse()
-  async handle(@Body() body: MailgunWebhookBody) {
+  async handle(@Body() body: MailgunWebhookBody): Promise<void> {
     if (process.env.NODE_ENV === 'test') return;
 
     if (!body?.signature || !verifyMailgunSignature(body.signature)) {
