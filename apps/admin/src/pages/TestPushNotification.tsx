@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { userList, userSendPushNotification } from "@alliance/shared/client";
 import type {
-  Push,
+  PushDto,
   TestPushNotificationDto,
   UserDto,
 } from "@alliance/shared/client/types.gen";
@@ -18,7 +18,7 @@ const TestPushNotification: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [respData, setRespData] = useState<Push | null>(null);
+  const [respData, setRespData] = useState<PushDto | null>(null);
 
   const selectableUsers = useMemo<UserSelectUser[]>(
     () =>
@@ -27,7 +27,7 @@ const TestPushNotification: React.FC = () => {
         name: user.name || `User #${user.id}`,
         profilePicture: user.profilePicture ?? null,
       })),
-    [users]
+    [users],
   );
 
   const loadUsers = useCallback(() => {
@@ -38,7 +38,7 @@ const TestPushNotification: React.FC = () => {
           throw new Error(
             typeof response.error === "string"
               ? response.error
-              : "Failed to load users."
+              : "Failed to load users.",
           );
         }
         setUsers(response.data ?? []);
@@ -77,7 +77,7 @@ const TestPushNotification: React.FC = () => {
         setError(
           typeof response.error === "string"
             ? response.error
-            : "Failed to send push notification."
+            : "Failed to send push notification.",
         );
         return;
       }

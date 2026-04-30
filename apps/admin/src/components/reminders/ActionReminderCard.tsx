@@ -1,8 +1,8 @@
 import {
   actionsPreviewEmailHtml,
   actionsPreviewTextMessage,
-  PreviewNotificationPlan,
-  ReminderGroup,
+  PreviewNotificationPlanDto,
+  ReminderGroupDto,
 } from "@alliance/shared/client";
 import Card from "@alliance/sharedweb/ui/Card";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
@@ -23,7 +23,7 @@ import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import { GroupScheduleLabels } from "./ActionRemindersTab";
 
 interface ActionReminderCardProps {
-  group: ReminderGroup;
+  group: ReminderGroupDto;
   sendStartDate: Date | null;
   highlightedReminder: number | undefined;
   ref: React.RefObject<HTMLDivElement | null>;
@@ -48,7 +48,7 @@ interface ActionReminderCardProps {
   handleEditGroupSubmit: (
     groupId: number,
   ) => (payload: ActionReminderGroupFormSubmitPayload) => Promise<void>;
-  reminderPlans?: PreviewNotificationPlan[];
+  reminderPlans?: PreviewNotificationPlanDto[];
   sentReminders?: ActionEventNotifDto[];
   suiteTaskCount: number;
 }

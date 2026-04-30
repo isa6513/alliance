@@ -10,7 +10,7 @@ import {
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
 import { TimeSpentForUserDto } from './timespent.dto';
-import { DailyStatsRecord } from './dailystats.entity';
+import { DailyStatsDto } from './dailystats.dto';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { MemberCompletionRetentionCohortDto } from './member-completion-retention.dto';
 import { AggregateStatsDto } from './aggregatestats.dto';
@@ -40,11 +40,11 @@ export class AnalyticsController {
 
   @UseGuards(AdminGuard)
   @Get('daily-stats')
-  @ApiOkResponse({ type: [DailyStatsRecord] })
+  @ApiOkResponse({ type: [DailyStatsDto] })
   getDailyStats(
     @Query('date') startDate: string,
     @Query('endDate') endDate: string,
-  ): Promise<DailyStatsRecord[]> {
+  ): Promise<DailyStatsDto[]> {
     return this.analyticsService.getDailyStats(startDate, endDate);
   }
 

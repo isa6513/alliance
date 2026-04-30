@@ -258,3 +258,13 @@ export class AssignGroupsDto {
   @Type(() => SingleGroupAssignmentDto)
   assignments: Array<SingleGroupAssignmentDto>;
 }
+
+export class NMembersResponseDto {
+  @ApiProperty()
+  @Allow()
+  count: number;
+
+  constructor(count: number) {
+    this.count = count;
+  }
+}

@@ -1,7 +1,7 @@
 import { Temporal } from '@js-temporal/polyfill';
 import { DataSource, type Repository } from 'typeorm';
 import { ActionEventNotifWorker } from './action-event-notif.worker';
-import { NotificationPlan } from './action-event-reminder.service';
+import { NotificationPlan } from './dto/notification-plan.dto';
 import { MailService } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
 import { ActionsService } from 'src/actions/actions.service';
@@ -190,9 +190,23 @@ describe('ActionEventNotifWorker.findUncompletedTasksForPlan', () => {
 
   it('filters out optional tasks when excludeOptionalActions is set', async () => {
     actionsService.findUncompletedTasks.mockResolvedValue([
-      { id: 1, name: 'Required', timeEstimate: 10, optional: false } as unknown as ActionDto,
-      { id: 2, name: 'Optional', timeEstimate: 5, optional: true } as unknown as ActionDto,
-      { id: 3, name: 'Also Required', timeEstimate: 20 } as unknown as ActionDto,
+      {
+        id: 1,
+        name: 'Required',
+        timeEstimate: 10,
+        optional: false,
+      } as unknown as ActionDto,
+      {
+        id: 2,
+        name: 'Optional',
+        timeEstimate: 5,
+        optional: true,
+      } as unknown as ActionDto,
+      {
+        id: 3,
+        name: 'Also Required',
+        timeEstimate: 20,
+      } as unknown as ActionDto,
     ]);
 
     const plan: NotificationPlan = {

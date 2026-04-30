@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { UserService } from 'src/user/user.service';
 import { TimeSpentForUserDto } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
+import { DailyStatsDto } from './dailystats.dto';
 import { ActionStatsRecord } from './actionstats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, In, IsNull, type Repository } from 'typeorm';
@@ -256,7 +257,7 @@ ORDER BY pp.total_session_duration_seconds DESC
   async getDailyStats(
     startDate: string,
     endDate: string,
-  ): Promise<DailyStatsRecord[]> {
+  ): Promise<DailyStatsDto[]> {
     return this.dailyStatsRepository.find({
       where: {
         date: Between(new Date(startDate), new Date(endDate)),

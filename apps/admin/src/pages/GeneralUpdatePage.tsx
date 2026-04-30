@@ -1,5 +1,5 @@
 import {
-  ActionSuite,
+  ActionSuiteDto,
   actionsCreateGeneralUpdate,
   actionsFindOneGeneralUpdate,
   actionsSuites,
@@ -75,7 +75,7 @@ const GeneralUpdatePage: React.FC = () => {
 
   const [availableTags, setAvailableTags] = useState<TagDto[]>([]);
   const [tagsLoading, setTagsLoading] = useState<boolean>(true);
-  const [availableSuites, setAvailableSuites] = useState<ActionSuite[]>([]);
+  const [availableSuites, setAvailableSuites] = useState<ActionSuiteDto[]>([]);
   const [suitesLoading, setSuitesLoading] = useState<boolean>(true);
   const [availableUsers, setAvailableUsers] = useState<UserSelectUser[]>([]);
   const [usersLoading, setUsersLoading] = useState<boolean>(true);

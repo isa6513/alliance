@@ -20,7 +20,7 @@ import {
   type MultiLineSeries,
 } from "../components/TimeSeriesChart";
 import {
-  DailyStatsRecord,
+  DailyStatsDto,
   ActionStatsWithOnboardingDto,
   MemberCompletionRetentionCohortDto,
   AggregateStatsDto,
@@ -51,7 +51,7 @@ import React, {
 } from "react";
 import ActionCompletionCurveChart from "../components/ActionCompletionCurveChart";
 
-type ParsedDailyStats = DailyStatsRecord & { parsedDate: Date };
+type ParsedDailyStats = DailyStatsDto & { parsedDate: Date };
 type ActionStatsWithWithdrawals = ActionStatsWithOnboardingDto & {
   usersWithdrawn?: number;
 };
@@ -231,7 +231,7 @@ const StatsPage: React.FC = () => {
   const [startInput, setStartInput] = useState<string>(defaultRange.start);
   const [endInput, setEndInput] = useState<string>(defaultRange.end);
   const [queryRange, setQueryRange] = useState(defaultRange);
-  const [stats, setStats] = useState<DailyStatsRecord[]>([]);
+  const [stats, setStats] = useState<DailyStatsDto[]>([]);
   const [actionStats, setActionStats] = useState<ActionStatsWithWithdrawals[]>(
     [],
   );

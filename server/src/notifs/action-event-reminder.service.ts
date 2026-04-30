@@ -1,11 +1,10 @@
 import { Temporal } from '@js-temporal/polyfill';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateReminderGroupDto,
   PreviewEmailHtmlDto,
-  PreviewEmailHtmlResponse,
+  PreviewEmailHtmlResponseDto,
   PreviewTextDto,
 } from 'src/actions/dto/action.dto';
 import { NotificationScheduleEntryDto } from 'src/actions/dto/notification-schedule.dto';
@@ -27,6 +26,10 @@ import {
 } from '../actions/entities/action-event.entity';
 import { DEFAULT_TIME_ZONE, User } from '../user/entities/user.entity';
 import { ActionEventRecipientService } from './action-event-recipient.service';
+import {
+  NotificationPlan,
+  PreviewNotificationPlanDto,
+} from './dto/notification-plan.dto';
 import { ActionEventNotifDto } from './entities/action-event-notif.dto';
 import {
   ActionEventNotif,
@@ -58,23 +61,6 @@ export const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
   ActionStatus.Failed,
   ActionStatus.Abandoned,
 ]);
-
-export class NotificationPlan {
-  @ApiProperty()
-  scheduledFor: Date;
-  @ApiProperty()
-  user: User;
-  group: ReminderGroup;
-}
-
-export class PreviewNotificationPlan extends NotificationPlan {
-  @ApiProperty({
-    enum: ['email', 'text', 'push'],
-    enumName: 'NotificationChannel',
-    isArray: true,
-  })
-  channels: ('email' | 'text' | 'push')[];
-}
 
 @Injectable()
 export class ActionEventReminderService {
@@ -308,7 +294,7 @@ export class ActionEventReminderService {
 
   async findNotificationPlansForGroup(
     groupId: number,
-  ): Promise<PreviewNotificationPlan[]> {
+  ): Promise<PreviewNotificationPlanDto[]> {
     const group = await this.reminderGroupRepository.findOneOrFail({
       where: { id: groupId },
       relations: {
@@ -517,7 +503,7 @@ export class ActionEventReminderService {
     eventId: number,
     dto: PreviewEmailHtmlDto,
     sendTime?: Date,
-  ): Promise<PreviewEmailHtmlResponse> {
+  ): Promise<PreviewEmailHtmlResponseDto> {
     const context = await this.getKeywordContextForPreview(
       eventId,
       dto,

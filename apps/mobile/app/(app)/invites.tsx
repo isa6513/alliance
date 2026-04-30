@@ -179,7 +179,7 @@ export default function InvitesScreen() {
       queryKey: ["userNmembers"],
       queryFn: async () => {
         const res = await userNmembers();
-        return res.data ?? 0;
+        return res.data?.count ?? 0;
       },
       enabled: Boolean(user),
     });

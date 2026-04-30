@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  ActionSuite,
+  ActionSuiteDto,
   CreateActionDto,
   FormDto,
   TagDto,
@@ -19,7 +19,7 @@ interface ActionFormProps {
   onInputChange: (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => void;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -33,7 +33,7 @@ interface ActionFormProps {
   formsLoading: boolean;
   availableTags?: TagDto[];
   tagsLoading: boolean;
-  availableSuites?: ActionSuite[];
+  availableSuites?: ActionSuiteDto[];
   suitesLoading: boolean;
   availableUsers?: UserSelectUser[];
   usersLoading?: boolean;
@@ -123,7 +123,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       { value: "Funding", label: "Funding" },
       { value: "Ongoing", label: "Ongoing" },
     ],
-    []
+    [],
   );
 
   const customStatTypeOptions = useMemo(
@@ -131,7 +131,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       { value: "none", label: "None" },
       { value: "users_invited", label: "Users Invited" },
     ],
-    []
+    [],
   );
 
   const visibilityModeOptions = useMemo(
@@ -140,7 +140,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       { value: "participating_groups", label: "Participating Groups" },
       { value: "public", label: "Public" },
     ],
-    []
+    [],
   );
 
   const suiteSelectOptions = useMemo(
@@ -154,7 +154,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
         label: suite.name,
       })),
     ],
-    [availableSuites, suitesLoading]
+    [availableSuites, suitesLoading],
   );
 
   const fieldDefs = useMemo(
@@ -338,7 +338,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
       suitesLoading,
       visibilityModeOptions,
       customStatTypeOptions,
-    ]
+    ],
   );
 
   const getFieldsBySection = (section: FieldSection) =>
@@ -490,7 +490,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
             "flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors",
             isChecked
               ? "border-blue-400 bg-blue-50"
-              : "border-gray-200 hover:border-gray-300 bg-white"
+              : "border-gray-200 hover:border-gray-300 bg-white",
           )}
         >
           <input
@@ -541,7 +541,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
   const renderFieldsWithGrid = (fields: FieldDef[]) => {
     const gridFields = fields.filter((f) => f.gridCol && f.type !== "checkbox");
     const nonGridFields = fields.filter(
-      (f) => !f.gridCol && f.type !== "checkbox"
+      (f) => !f.gridCol && f.type !== "checkbox",
     );
     const checkboxFields = fields.filter((f) => f.type === "checkbox");
 
@@ -648,8 +648,8 @@ const ActionForm: React.FC<ActionFormProps> = ({
               ? "Creating..."
               : "Saving..."
             : isNew
-            ? "Create Action"
-            : "Save Changes"}
+              ? "Create Action"
+              : "Save Changes"}
         </button>
       </div>
     </form>

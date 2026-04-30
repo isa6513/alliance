@@ -32,6 +32,7 @@ import { PrefillUserDto } from './prefill-user.dto';
 import {
   AssignGroupsDto,
   FriendStatusDto,
+  NMembersResponseDto,
   ProfileDto,
   ProfileDtoWithFriends,
   SignupSocialProofDto,
@@ -59,7 +60,7 @@ import {
   TestPushNotificationDto,
   UserDeviceDto,
 } from './dto/device.dto';
-import { Push } from 'src/push/push.entity';
+import { PushDto } from 'src/push/dto/push.dto';
 
 class VerifyEmailBody {
   @IsString()
@@ -293,14 +294,6 @@ export class UserController {
     return this.userService.findMessageableUsers(req.user.sub);
   }
 
-  @Get('countreferred/:id')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: Number })
-  @ApiOperation({ summary: 'Count the number of friends a user has referred' })
-  async countReferred(@Param('id', ParseIntPipe) id: number): Promise<number> {
-    return this.userService.countReferred(id);
-  }
-
   @Get('list')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserDto, isArray: true })
@@ -403,12 +396,6 @@ export class UserController {
     return new ProfileDto(user);
   }
 
-  @Get('count')
-  @ApiOkResponse({ type: Number })
-  async count(): Promise<number> {
-    return this.userService.count();
-  }
-
   @Get('slug/:id')
   @Public()
   @ApiOkResponse({ type: ProfileDto })
@@ -430,9 +417,9 @@ export class UserController {
 
   @Post('nmembers')
   @Public()
-  @ApiOkResponse({ type: Number })
-  async nmembers(): Promise<number> {
-    return this.userService.signedMembersCount();
+  @ApiOkResponse({ type: NMembersResponseDto })
+  async nmembers(): Promise<NMembersResponseDto> {
+    return new NMembersResponseDto(await this.userService.signedMembersCount());
   }
 
   @Post('createTag')
@@ -683,11 +670,13 @@ export class UserController {
 
   @Post('sendPushNotification')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: Push })
+  @ApiOkResponse({ type: PushDto })
   async sendPushNotification(
     @Body() body: TestPushNotificationDto,
-  ): Promise<Push> {
-    return this.userService.testPushNotification(body.userId, body.message);
+  ): Promise<PushDto> {
+    return new PushDto(
+      await this.userService.testPushNotification(body.userId, body.message),
+    );
   }
 
   @Post('registerLiveActivityPushToStartToken')

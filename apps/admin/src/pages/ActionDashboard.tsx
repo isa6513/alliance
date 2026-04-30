@@ -1,4 +1,4 @@
-import type { ActionSuite, TagDto } from "@alliance/shared/client";
+import type { ActionSuiteDto, TagDto } from "@alliance/shared/client";
 import {
   ActionDto,
   actionsArchive,
@@ -131,7 +131,7 @@ const ActionDashboard: React.FC = () => {
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
   const [availableTags, setAvailableTags] = useState<TagDto[]>([]);
   const [tagsLoading, setTagsLoading] = useState<boolean>(true);
-  const [availableSuites, setAvailableSuites] = useState<ActionSuite[]>([]);
+  const [availableSuites, setAvailableSuites] = useState<ActionSuiteDto[]>([]);
   const [suitesLoading, setSuitesLoading] = useState<boolean>(true);
   const [cohortExpression, setCohortExpression] =
     useState<CohortExpression | null>(null);

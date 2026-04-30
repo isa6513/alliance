@@ -1,6 +1,6 @@
 ## Endpoints
 
-Every controller endpoint needs `@ApiOkResponse({ type: })` matching its return type (omit `type` for void).
+Every controller endpoint needs `@ApiOkResponse({ type: })` (or `@ApiResponse`) matching its return type (omit `type` for void).
 
 **Before adding or editing an endpoint's return type or existing DTO, read `.claude/skills/DTO_RETURN_TYPES.md`.** Controller return types must be a DTO class — never a primitive, never `DtoType | null`. Wrap primitives in a DTO; for "not found" use `NotFoundException` or a wrapper DTO.
 

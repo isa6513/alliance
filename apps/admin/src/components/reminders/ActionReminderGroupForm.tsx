@@ -6,9 +6,9 @@ import {
   TagDto,
   type ActionEventDto,
   type CreateReminderGroupDto,
-  type PreviewNotificationPlan,
+  type PreviewNotificationPlanDto,
   type ReminderCohortType,
-  type ReminderGroup,
+  type ReminderGroupDto,
   type ReminderGroupTimingMode,
   type User,
 } from "@alliance/shared/client";
@@ -28,7 +28,7 @@ import Card from "@alliance/sharedweb/ui/Card";
 import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
 
 type ReminderGroupContentFields = Pick<
-  ReminderGroup,
+  ReminderGroupDto,
   | "name"
   | "cohortType"
   | "timingMode"
@@ -41,7 +41,7 @@ type ReminderGroupContentFields = Pick<
 >;
 
 type ReminderGroupScheduleFields = Pick<
-  ReminderGroup,
+  ReminderGroupDto,
   | "sendAtAbsolute"
   | "sendAtSecondsFromDeadline"
   | "send_range_start"
@@ -209,7 +209,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
   }, [timingMode, relativeRangeStartHours, relativeRangeEndHours]);
 
   const [tentativePlans, setTentativePlans] = useState<
-    PreviewNotificationPlan[]
+    PreviewNotificationPlanDto[]
   >([]);
 
   const [emailSubject, setEmailSubject] = useState<string>(

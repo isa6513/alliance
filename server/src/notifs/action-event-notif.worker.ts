@@ -15,8 +15,8 @@ import {
 import {
   ActionEventReminderService,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
-  NotificationPlan,
 } from './action-event-reminder.service';
+import { NotificationPlan } from './dto/notification-plan.dto';
 import {
   ActionEventNotif,
   ActionEventNotifType,

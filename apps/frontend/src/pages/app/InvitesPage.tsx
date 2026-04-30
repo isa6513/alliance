@@ -174,7 +174,7 @@ const InvitesPage = () => {
   const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
     useQuery({
       queryKey: ["userNmembers"],
-      queryFn: () => userNmembers().then((res) => res.data ?? 0),
+      queryFn: () => userNmembers().then((res) => res.data?.count ?? 0),
       enabled: Boolean(user),
     });
 

@@ -836,6 +836,10 @@ export type VerifyEmailBody = {
     [key: string]: unknown;
 };
 
+export type NMembersResponseDto = {
+    count: number;
+};
+
 export type CreateTagDto = {
     name: string;
     description: string;
@@ -911,6 +915,23 @@ export type UserDeviceDto = {
 export type TestPushNotificationDto = {
     userId: number;
     message: string;
+};
+
+export type PushDto = {
+    id: number;
+    expoPushToken: string;
+    createdAt: string;
+    body: string;
+    screen?: string;
+    updatedAt: string;
+    receiptId?: string;
+    ticketStatus?: string;
+    receiptStatus?: string;
+    errorCode?: string;
+    errorMessage?: string;
+    lastCheckedStatusAt?: string;
+    idempotencyKey?: string;
+    openedAt?: string;
 };
 
 export type RegisterLiveActivityPushToStartTokenDto = {
@@ -1984,9 +2005,34 @@ export type CreateReminderGroupDto = {
     suiteId?: number;
 };
 
+export type ReminderGroupDto = {
+    id: number;
+    name: string;
+    timingMode: ReminderGroupTimingMode;
+    actionSuite?: ActionSuite;
+    memberActionEvent: ActionEvent;
+    cohortType: ReminderCohortType;
+    userTag?: Tag;
+    users?: Array<User>;
+    emailMessage: string;
+    emailSubject: string;
+    textMessage: string;
+    pushMessage: string;
+    send_range_start?: string;
+    send_range_end?: string;
+    sendAtAbsolute?: string;
+    sendAtSecondsFromDeadline?: number;
+    relative_range_start_seconds_from_deadline?: number;
+    relative_range_end_seconds_from_deadline?: number;
+    deadlineEvent?: ActionEvent;
+    useSuiteTaskCount: boolean;
+    allSent: boolean;
+    excludeOptionalActions: boolean;
+};
+
 export type NotificationChannel = 'email' | 'text' | 'push';
 
-export type PreviewNotificationPlan = {
+export type PreviewNotificationPlanDto = {
     scheduledFor: string;
     user: User;
     channels: Array<NotificationChannel>;
@@ -2076,7 +2122,7 @@ export type PreviewEmailHtmlDto = {
     uncompletedMembersInGroupCount?: number;
 };
 
-export type PreviewEmailHtmlResponse = {
+export type PreviewEmailHtmlResponseDto = {
     subject: string;
     html: string;
 };
@@ -2088,7 +2134,7 @@ export type PreviewTextDto = {
     uncompletedMembersInGroupCount?: number;
 };
 
-export type PreviewTextMessageResponse = {
+export type PreviewTextMessageResponseDto = {
     text: string;
 };
 
@@ -2221,7 +2267,7 @@ export type PasteJsonDto = {
 
 export type ReminderGroupPlanDto = {
     reminderGroup: ReminderGroup;
-    willNotify: Array<PreviewNotificationPlan>;
+    willNotify: Array<PreviewNotificationPlanDto>;
 };
 
 export type SuspensionPlanDto = {
@@ -2864,7 +2910,7 @@ export type TimeSpentForUserDto = {
     timeSpent: number;
 };
 
-export type DailyStatsRecord = {
+export type DailyStatsDto = {
     id: number;
     dayId: string;
     date: string;
@@ -3491,21 +3537,6 @@ export type UserListMessageableUsersResponses = {
 
 export type UserListMessageableUsersResponse = UserListMessageableUsersResponses[keyof UserListMessageableUsersResponses];
 
-export type UserCountReferredData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/user/countreferred/{id}';
-};
-
-export type UserCountReferredResponses = {
-    200: number;
-};
-
-export type UserCountReferredResponse = UserCountReferredResponses[keyof UserCountReferredResponses];
-
 export type UserListData = {
     body?: never;
     path?: never;
@@ -3627,19 +3658,6 @@ export type UserMyProfileResponses = {
 
 export type UserMyProfileResponse = UserMyProfileResponses[keyof UserMyProfileResponses];
 
-export type UserCountData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/user/count';
-};
-
-export type UserCountResponses = {
-    200: number;
-};
-
-export type UserCountResponse = UserCountResponses[keyof UserCountResponses];
-
 export type UserFindOneData = {
     body?: never;
     path: {
@@ -3678,7 +3696,7 @@ export type UserNmembersData = {
 };
 
 export type UserNmembersResponses = {
-    200: number;
+    200: NMembersResponseDto;
 };
 
 export type UserNmembersResponse = UserNmembersResponses[keyof UserNmembersResponses];
@@ -4005,7 +4023,7 @@ export type UserSendPushNotificationData = {
 };
 
 export type UserSendPushNotificationResponses = {
-    200: Push;
+    200: PushDto;
 };
 
 export type UserSendPushNotificationResponse = UserSendPushNotificationResponses[keyof UserSendPushNotificationResponses];
@@ -4355,10 +4373,8 @@ export type PushMarkOpenedData = {
 };
 
 export type PushMarkOpenedResponses = {
-    200: Push;
+    200: unknown;
 };
-
-export type PushMarkOpenedResponse = PushMarkOpenedResponses[keyof PushMarkOpenedResponses];
 
 export type NotifsFindAllData = {
     body?: never;
@@ -5712,7 +5728,7 @@ export type ActionsAddEventData = {
 };
 
 export type ActionsAddEventResponses = {
-    200: ActionEvent;
+    200: ActionEventDto;
 };
 
 export type ActionsAddEventResponse = ActionsAddEventResponses[keyof ActionsAddEventResponses];
@@ -5727,7 +5743,7 @@ export type ActionsUpdateReminderGroupData = {
 };
 
 export type ActionsUpdateReminderGroupResponses = {
-    200: ReminderGroup;
+    200: ReminderGroupDto;
 };
 
 export type ActionsUpdateReminderGroupResponse = ActionsUpdateReminderGroupResponses[keyof ActionsUpdateReminderGroupResponses];
@@ -5742,7 +5758,7 @@ export type ActionsCreateReminderGroupData = {
 };
 
 export type ActionsCreateReminderGroupResponses = {
-    200: ReminderGroup;
+    200: ReminderGroupDto;
 };
 
 export type ActionsCreateReminderGroupResponse = ActionsCreateReminderGroupResponses[keyof ActionsCreateReminderGroupResponses];
@@ -5770,7 +5786,7 @@ export type ActionsPlansForGroupData = {
 };
 
 export type ActionsPlansForGroupResponses = {
-    200: Array<PreviewNotificationPlan>;
+    200: Array<PreviewNotificationPlanDto>;
 };
 
 export type ActionsPlansForGroupResponse = ActionsPlansForGroupResponses[keyof ActionsPlansForGroupResponses];
@@ -5929,7 +5945,7 @@ export type ActionsReminderGroupsForEventData = {
 };
 
 export type ActionsReminderGroupsForEventResponses = {
-    200: Array<ReminderGroup>;
+    200: Array<ReminderGroupDto>;
 };
 
 export type ActionsReminderGroupsForEventResponse = ActionsReminderGroupsForEventResponses[keyof ActionsReminderGroupsForEventResponses];
@@ -6013,7 +6029,7 @@ export type ActionsSuitesData = {
 };
 
 export type ActionsSuitesResponses = {
-    200: Array<ActionSuite>;
+    200: Array<ActionSuiteDto>;
 };
 
 export type ActionsSuitesResponse = ActionsSuitesResponses[keyof ActionsSuitesResponses];
@@ -6103,7 +6119,7 @@ export type ActionsTentativePlansForGroupData = {
 };
 
 export type ActionsTentativePlansForGroupResponses = {
-    200: Array<PreviewNotificationPlan>;
+    200: Array<PreviewNotificationPlanDto>;
 };
 
 export type ActionsTentativePlansForGroupResponse = ActionsTentativePlansForGroupResponses[keyof ActionsTentativePlansForGroupResponses];
@@ -6118,7 +6134,7 @@ export type ActionsPreviewEmailHtmlData = {
 };
 
 export type ActionsPreviewEmailHtmlResponses = {
-    200: PreviewEmailHtmlResponse;
+    200: PreviewEmailHtmlResponseDto;
 };
 
 export type ActionsPreviewEmailHtmlResponse = ActionsPreviewEmailHtmlResponses[keyof ActionsPreviewEmailHtmlResponses];
@@ -6133,7 +6149,7 @@ export type ActionsPreviewTextMessageData = {
 };
 
 export type ActionsPreviewTextMessageResponses = {
-    200: PreviewTextMessageResponse;
+    200: PreviewTextMessageResponseDto;
 };
 
 export type ActionsPreviewTextMessageResponse = ActionsPreviewTextMessageResponses[keyof ActionsPreviewTextMessageResponses];
@@ -7354,7 +7370,7 @@ export type AnalyticsGetDailyStatsData = {
 };
 
 export type AnalyticsGetDailyStatsResponses = {
-    200: Array<DailyStatsRecord>;
+    200: Array<DailyStatsDto>;
 };
 
 export type AnalyticsGetDailyStatsResponse = AnalyticsGetDailyStatsResponses[keyof AnalyticsGetDailyStatsResponses];

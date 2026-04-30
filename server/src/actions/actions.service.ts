@@ -22,8 +22,8 @@ import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.s
 import {
   ActionEventReminderService,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
-  PreviewNotificationPlan,
 } from 'src/notifs/action-event-reminder.service';
+import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
 import {
   NotifsService,
@@ -2395,7 +2395,7 @@ export class ActionsService {
   async tentativePlansForGroup(
     eventId: number,
     body: CreateReminderGroupDto,
-  ): Promise<PreviewNotificationPlan[]> {
+  ): Promise<PreviewNotificationPlanDto[]> {
     const event = await this.actionEventRepository.findOneOrFail({
       where: { id: eventId },
       relations: {

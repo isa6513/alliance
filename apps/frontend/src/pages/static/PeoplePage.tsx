@@ -13,7 +13,7 @@ import { useLoaderData } from "react-router";
 
 export async function loader() {
   const res = await userNmembers();
-  return res.data;
+  return res.data?.count;
 }
 
 const PeoplePage: React.FC = () => {
@@ -203,8 +203,9 @@ const PeoplePage: React.FC = () => {
           <h2 className="text-heading-public mb-4">Members</h2>
           {nmembers !== undefined && (
             <p className="text-zinc-900 text-lg">
-              The Alliance has {nmembers} members. Membership is currently by
-              invitation only.
+              The Alliance has {nmembers}{" "}
+              {nmembers === 1 ? "member" : "members"}. Membership is currently
+              by invitation only.
             </p>
           )}
           <p className="text-zinc-500 text-lg">

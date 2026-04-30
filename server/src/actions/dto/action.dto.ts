@@ -38,7 +38,7 @@ import { ActionSuite } from '../entities/action-suite.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 import { SubmitFormDto } from 'src/tasks/form.dto';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { PreviewNotificationPlan } from 'src/notifs/action-event-reminder.service';
+import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
 import { GeneralUpdate } from '../entities/general-update.entity';
 import type { CohortExpression } from '../cohort-expression.types';
 
@@ -111,7 +111,7 @@ export class PreviewTextDto extends PickType(CreateReminderGroupDto, [
   uncompletedMembersInGroupCount?: number;
 }
 
-export class PreviewTextMessageResponse {
+export class PreviewTextMessageResponseDto {
   @ApiProperty({ type: String })
   @IsDefined()
   @IsString()
@@ -136,7 +136,7 @@ export class ActionReferralCodeDto {
   referralCode: string;
 }
 
-export class PreviewEmailHtmlResponse {
+export class PreviewEmailHtmlResponseDto {
   @ApiProperty({ type: String })
   @IsDefined()
   @IsString()
@@ -514,7 +514,16 @@ export class ActionSuiteDto extends OmitType(ActionSuite, ['actions']) {
     super();
     Object.assign(this, suite);
     this.actions =
-      actions || suite.actions.map((action) => new ActionDto(action));
+      actions ?? suite.actions?.map((action) => new ActionDto(action)) ?? [];
+  }
+}
+
+export class ReminderGroupDto extends OmitType(ReminderGroup, [
+  'notifications',
+]) {
+  constructor(group: ReminderGroup) {
+    super();
+    Object.assign(this, group);
   }
 }
 
@@ -588,10 +597,10 @@ export class ReminderGroupPlanDto {
   @IsDefined()
   reminderGroup: ReminderGroup;
 
-  @ApiProperty({ type: () => PreviewNotificationPlan, isArray: true })
-  @Type(() => PreviewNotificationPlan)
+  @ApiProperty({ type: () => PreviewNotificationPlanDto, isArray: true })
+  @Type(() => PreviewNotificationPlanDto)
   @IsDefined()
-  willNotify: PreviewNotificationPlan[];
+  willNotify: PreviewNotificationPlanDto[];
 }
 
 export enum GlobalFeedItemType {

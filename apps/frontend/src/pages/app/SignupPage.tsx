@@ -90,7 +90,7 @@ const SignupPage: React.FC = () => {
 
   const { data: memberCount } = useQuery({
     queryKey: ["userNmembers"],
-    queryFn: () => userNmembers().then((res) => res.data ?? 0),
+    queryFn: () => userNmembers().then((res) => res.data?.count ?? 0),
     enabled: isFeatureEnabled(Features.PublicSignup) || Boolean(referralCode),
   });
 

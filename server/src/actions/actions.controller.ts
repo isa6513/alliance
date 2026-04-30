@@ -24,10 +24,8 @@ import {
 } from '@nestjs/swagger';
 import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
-import {
-  ActionEventReminderService,
-  PreviewNotificationPlan,
-} from 'src/notifs/action-event-reminder.service';
+import { ActionEventReminderService } from 'src/notifs/action-event-reminder.service';
+import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
 import { ActionEventNotifDto } from 'src/notifs/entities/action-event-notif.dto';
 import {
   CommunityUserInfoDto,
@@ -65,9 +63,10 @@ import {
   OptOutActionDto,
   PasteJsonDto,
   PreviewEmailHtmlDto,
-  PreviewEmailHtmlResponse,
+  PreviewEmailHtmlResponseDto,
   PreviewTextDto,
-  PreviewTextMessageResponse,
+  PreviewTextMessageResponseDto,
+  ReminderGroupDto,
   ReminderGroupPlanDto,
   ScheduledPlansOverviewDto,
   SetPriorityDto,
@@ -86,9 +85,6 @@ import {
   NotificationScheduleEntryDto,
   NotificationScheduleQueryDto,
 } from './dto/notification-schedule.dto';
-import { ActionEvent } from './entities/action-event.entity';
-import { ActionSuite } from './entities/action-suite.entity';
-import { ReminderGroup } from './entities/reminder-group.entity';
 import {
   ShareLinkDto,
   ShareUrlDto,
@@ -754,33 +750,39 @@ export class ActionsController {
 
   @Post(':id/events')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ActionEvent })
+  @ApiOkResponse({ type: ActionEventDto })
   async addEvent(
     @Param('id', ParseIntPipe) id: number,
     @Body() actionEventDto: CreateActionEventDto,
     @Request() req: JwtRequest,
-  ): Promise<ActionEvent> {
-    return this.actionsService.addEvent(id, actionEventDto, req.user?.sub);
+  ): Promise<ActionEventDto> {
+    return new ActionEventDto(
+      await this.actionsService.addEvent(id, actionEventDto, req.user?.sub),
+    );
   }
 
   @Patch('remindergroups/:groupId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ReminderGroup })
+  @ApiOkResponse({ type: ReminderGroupDto })
   async updateReminderGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Body() body: CreateReminderGroupDto,
-  ): Promise<ReminderGroup> {
-    return this.actionEventReminderService.updateReminderGroup(groupId, body);
+  ): Promise<ReminderGroupDto> {
+    return new ReminderGroupDto(
+      await this.actionEventReminderService.updateReminderGroup(groupId, body),
+    );
   }
 
   @Post('events/:eventId/createremindergroup')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ReminderGroup })
+  @ApiOkResponse({ type: ReminderGroupDto })
   async createReminderGroup(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: CreateReminderGroupDto,
-  ): Promise<ReminderGroup> {
-    return this.actionEventReminderService.createReminderGroup(eventId, body);
+  ): Promise<ReminderGroupDto> {
+    return new ReminderGroupDto(
+      await this.actionEventReminderService.createReminderGroup(eventId, body),
+    );
   }
 
   @Delete('reminders/:groupId')
@@ -794,10 +796,10 @@ export class ActionsController {
 
   @Get('plansForGroup/:groupId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: PreviewNotificationPlan, isArray: true })
+  @ApiOkResponse({ type: PreviewNotificationPlanDto, isArray: true })
   async plansForGroup(
     @Param('groupId', ParseIntPipe) groupId: number,
-  ): Promise<PreviewNotificationPlan[]> {
+  ): Promise<PreviewNotificationPlanDto[]> {
     return this.actionEventReminderService.findNotificationPlansForGroup(
       groupId,
     );
@@ -896,11 +898,13 @@ export class ActionsController {
 
   @Get('reminderGroupsForEvent/:id')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ReminderGroup, isArray: true })
-  reminderGroupsForEvent(
+  @ApiOkResponse({ type: ReminderGroupDto, isArray: true })
+  async reminderGroupsForEvent(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ReminderGroup[]> {
-    return this.actionEventReminderService.getReminderGroupsForEvent(id);
+  ): Promise<ReminderGroupDto[]> {
+    const groups =
+      await this.actionEventReminderService.getReminderGroupsForEvent(id);
+    return groups.map((group) => new ReminderGroupDto(group));
   }
 
   @Post('createUpdate/:id')
@@ -948,9 +952,10 @@ export class ActionsController {
 
   @Get('suites')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ActionSuite, isArray: true })
-  suites(): Promise<ActionSuite[]> {
-    return this.actionsService.findSuites();
+  @ApiOkResponse({ type: ActionSuiteDto, isArray: true })
+  async suites(): Promise<ActionSuiteDto[]> {
+    const suites = await this.actionsService.findSuites();
+    return suites.map((suite) => new ActionSuiteDto(suite, []));
   }
 
   @Get('suite/:id')
@@ -1003,31 +1008,31 @@ export class ActionsController {
 
   @Post('events/:eventId/checkTentativePlans')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: PreviewNotificationPlan, isArray: true })
+  @ApiOkResponse({ type: PreviewNotificationPlanDto, isArray: true })
   async tentativePlansForGroup(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: CreateReminderGroupDto,
-  ): Promise<PreviewNotificationPlan[]> {
+  ): Promise<PreviewNotificationPlanDto[]> {
     return this.actionsService.tentativePlansForGroup(eventId, body);
   }
 
   @Post('previewEmailHtml/:eventId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: PreviewEmailHtmlResponse })
+  @ApiOkResponse({ type: PreviewEmailHtmlResponseDto })
   async previewEmailHtml(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: PreviewEmailHtmlDto,
-  ): Promise<PreviewEmailHtmlResponse> {
+  ): Promise<PreviewEmailHtmlResponseDto> {
     return this.actionEventReminderService.previewEmailHtml(eventId, body);
   }
 
   @Post('previewTextMessage/:eventId')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: PreviewTextMessageResponse })
+  @ApiOkResponse({ type: PreviewTextMessageResponseDto })
   async previewTextMessage(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: PreviewTextDto,
-  ): Promise<PreviewTextMessageResponse> {
+  ): Promise<PreviewTextMessageResponseDto> {
     return {
       text: await this.actionEventReminderService.previewTextMessage(
         eventId,

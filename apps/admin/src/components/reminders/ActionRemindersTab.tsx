@@ -1,8 +1,8 @@
 import {
   ActionSuiteDto,
   TagDto,
-  PreviewNotificationPlan,
-  ReminderGroup,
+  PreviewNotificationPlanDto,
+  ReminderGroupDto,
   actionsCreateReminderGroup,
   actionsDeleteReminderGroup,
   actionsPlansForGroup,
@@ -99,10 +99,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   const [editSuccess, setEditSuccess] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const [reminderGroups, setReminderGroups] = useState<ReminderGroup[]>([]);
+  const [reminderGroups, setReminderGroups] = useState<ReminderGroupDto[]>([]);
 
   const [reminderPlansByGroup, setReminderPlansByGroup] = useState<
-    Partial<Record<number, PreviewNotificationPlan[]>>
+    Partial<Record<number, PreviewNotificationPlanDto[]>>
   >({});
   const [sentRemindersByGroup, setSentRemindersByGroup] = useState<
     Partial<Record<number, ActionEventNotifDto[]>>
@@ -224,11 +224,11 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     return date ? format(date, DISPLAY_DATETIME_FORMAT) : null;
   };
 
-  const getGroupMemberEventId = (group: ReminderGroup) =>
+  const getGroupMemberEventId = (group: ReminderGroupDto) =>
     group.memberActionEvent?.id ?? null;
 
   const findGroupDeadlineEvent = useCallback(
-    (group: ReminderGroup) => {
+    (group: ReminderGroupDto) => {
       const memberEventId = getGroupMemberEventId(group);
 
       if (!memberEventId) {
@@ -249,7 +249,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     const groupIds = new Set(reminderGroups.map((group) => group.id));
 
     setReminderPlansByGroup((prev) => {
-      const next: Partial<Record<number, PreviewNotificationPlan[]>> = {};
+      const next: Partial<Record<number, PreviewNotificationPlanDto[]>> = {};
       groupIds.forEach((id) => {
         if (prev[id] !== undefined) {
           next[id] = prev[id];
@@ -344,12 +344,14 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     };
   }, [reminderGroups, reminderPlansByGroup, sentRemindersByGroup]);
 
-  const getGroupRange = (group: ReminderGroup) => {
+  const getGroupRange = (group: ReminderGroupDto) => {
     const start = group.send_range_start ?? null;
     const end = group.send_range_end ?? null;
     return { start: parseDate(start), end: parseDate(end) };
   };
-  const describeGroupSchedule = (group: ReminderGroup): GroupScheduleLabels => {
+  const describeGroupSchedule = (
+    group: ReminderGroupDto,
+  ): GroupScheduleLabels => {
     if (group.timingMode === "absolute") {
       const sendAtLabel = formatDisplayDate(group.sendAtAbsolute);
       return {

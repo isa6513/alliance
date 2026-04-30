@@ -23,16 +23,16 @@ export class PushController {
 
   @Post('opened')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: Push })
+  @ApiOkResponse()
   async markOpened(
     @Body() body: PushOpenedDto,
     @Request() req: JwtRequest,
-  ): Promise<Push> {
+  ): Promise<void> {
     const push = await this.pushRepository.findOneByOrFail({
       id: body.cid,
       user: { id: req.user.sub },
     });
     push.openedAt = new Date();
-    return this.pushRepository.save(push);
+    await this.pushRepository.save(push);
   }
 }

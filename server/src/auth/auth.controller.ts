@@ -123,11 +123,7 @@ export class AuthController {
     @Request() req: ExpressRequest,
     @Body() signUp: SignUpDto,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<{
-    access_token?: string;
-    refresh_token?: string;
-    isAdmin: boolean;
-  }> {
+  ): Promise<SignInResponseDto> {
     await this.authService.register(signUp);
 
     const { access_token, refresh_token, isAdmin, userId } =
