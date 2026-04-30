@@ -1,5 +1,5 @@
 import {
-  Action,
+  ActionDto,
   actionsAllGeneralUpdatesAdmin,
   actionsFindAllWithDrafts,
   actionsSetPriority,
@@ -50,13 +50,13 @@ type PriorityItem =
     };
 
 function buildInitialList(
-  actions: Action[],
+  actions: ActionDto[],
   generalUpdates: GeneralUpdateAdminDto[],
-  filterForIncomplete: boolean
+  filterForIncomplete: boolean,
 ): PriorityItem[] {
   const withRaw: {
     item: PriorityItem;
-    raw: Action | GeneralUpdateAdminDto;
+    raw: ActionDto | GeneralUpdateAdminDto;
   }[] = [
     ...actions
       .filter((a) =>
@@ -64,7 +64,7 @@ function buildInitialList(
           ? a.status !== "completed" &&
             a.status !== "office_action" &&
             !a.archived
-          : true
+          : true,
       )
       .map((a) => ({
         item: {
@@ -80,7 +80,7 @@ function buildInitialList(
       .filter((gu) =>
         filterForIncomplete
           ? !gu.endDate || new Date(gu.endDate).getTime() > new Date().getTime()
-          : true
+          : true,
       )
       .map((gu) => ({
         item: {
@@ -120,10 +120,10 @@ const PriorityPage: React.FC = () => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dropPosition, setDropPosition] = useState<"before" | "after" | null>(
-    null
+    null,
   );
   const [filterForIncomplete, setFilterForIncomplete] = useState(true);
-  const [rawActions, setRawActions] = useState<Action[] | null>(null);
+  const [rawActions, setRawActions] = useState<ActionDto[] | null>(null);
   const [rawGeneralUpdates, setRawGeneralUpdates] = useState<
     GeneralUpdateAdminDto[] | null
   >(null);
@@ -133,7 +133,7 @@ const PriorityPage: React.FC = () => {
   /** Compute drop index and position from clientY when dropping on list (e.g. in gap between items). */
   const getDropTargetFromClientY = useCallback(
     (
-      clientY: number
+      clientY: number,
     ): { index: number; position: "before" | "after" } | null => {
       const ul = listRef.current;
       if (!ul) return null;
@@ -164,7 +164,7 @@ const PriorityPage: React.FC = () => {
       }
       return null;
     },
-    []
+    [],
   );
 
   const load = useCallback(async () => {
@@ -194,7 +194,7 @@ const PriorityPage: React.FC = () => {
     const startingItems = buildInitialList(
       rawActions,
       rawGeneralUpdates,
-      filterForIncomplete
+      filterForIncomplete,
     );
     setItems(startingItems);
     const actionIndices: [number, number][] = [];
@@ -250,7 +250,7 @@ const PriorityPage: React.FC = () => {
       setItems(next);
       handleDragEnd();
     },
-    [draggedIndex, items]
+    [draggedIndex, items],
   );
 
   const handleDrop = (index: number) => (e: React.DragEvent) => {
@@ -267,7 +267,7 @@ const PriorityPage: React.FC = () => {
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
     },
-    []
+    [],
   );
 
   const handleListDrop = useCallback(
@@ -281,7 +281,7 @@ const PriorityPage: React.FC = () => {
       if (target) performDrop(target.index, target.position);
       else handleDragEnd();
     },
-    [draggedIndex, getDropTargetFromClientY, performDrop]
+    [draggedIndex, getDropTargetFromClientY, performDrop],
   );
 
   const { newPriorities, anyChanged } = useMemo(() => {
@@ -297,8 +297,8 @@ const PriorityPage: React.FC = () => {
         item.type === "action"
           ? originalActionIndices.get(item.id)
           : item.type === "generalUpdate"
-          ? originalGeneralUpdateIndices.get(item.id)
-          : undefined;
+            ? originalGeneralUpdateIndices.get(item.id)
+            : undefined;
       if (originalIndex !== undefined && index !== originalIndex) {
         anyChanged = true;
       }
@@ -426,7 +426,7 @@ const PriorityPage: React.FC = () => {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 cursor-grab active:cursor-grabbing transition-opacity",
                   isDragging ? "opacity-50" : "hover:bg-zinc-50",
-                  isDivider && "bg-zinc-100/80"
+                  isDivider && "bg-zinc-100/80",
                 )}
               >
                 <GripVertical
@@ -453,7 +453,7 @@ const PriorityPage: React.FC = () => {
                         "text-xs px-2 py-0.5 rounded shrink-0",
                         item.type === "action"
                           ? "bg-blue-100 text-blue-800"
-                          : "bg-amber-100 text-amber-800"
+                          : "bg-amber-100 text-amber-800",
                       )}
                     >
                       {item.type === "action" ? "Action" : "General update"}

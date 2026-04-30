@@ -5325,7 +5325,7 @@ export type ActionsFindAllWithDraftsData = {
 };
 
 export type ActionsFindAllWithDraftsResponses = {
-    200: Array<Action>;
+    200: Array<ActionDto>;
 };
 
 export type ActionsFindAllWithDraftsResponse = ActionsFindAllWithDraftsResponses[keyof ActionsFindAllWithDraftsResponses];
@@ -5480,7 +5480,7 @@ export type ActionsFindOneAdminErrors = {
 };
 
 export type ActionsFindOneAdminResponses = {
-    200: Action;
+    200: ActionDto;
 };
 
 export type ActionsFindOneAdminResponse = ActionsFindOneAdminResponses[keyof ActionsFindOneAdminResponses];
@@ -5680,7 +5680,7 @@ export type ActionsUpdateData = {
 };
 
 export type ActionsUpdateResponses = {
-    200: Action;
+    200: ActionDto;
 };
 
 export type ActionsUpdateResponse = ActionsUpdateResponses[keyof ActionsUpdateResponses];

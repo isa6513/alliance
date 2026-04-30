@@ -1,8 +1,4 @@
-import {
-  Action,
-  ActionDto,
-  actionsFindAllWithDrafts,
-} from "@alliance/shared/client";
+import { ActionDto, actionsFindAllWithDrafts } from "@alliance/shared/client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import ActionTimeline from "../components/ActionTimeline";
@@ -10,7 +6,7 @@ import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ActionListCard from "../components/ActionListCard";
 
 export const getLastPastEventDate = (
-  action: Pick<ActionDto, "events">
+  action: Pick<ActionDto, "events">,
 ): Date | null => {
   const now = Date.now();
   let latest: Date | null = null;
@@ -38,13 +34,13 @@ export const getLastPastEventDate = (
 type ActionSuiteGroup = {
   id: number | null;
   name: string;
-  actions: Action[];
+  actions: ActionDto[];
   sortVal: number;
   isArchivedOnly: boolean;
 };
 
 const ActionsList: React.FC = () => {
-  const [actions, setActions] = useState<Action[]>([]);
+  const [actions, setActions] = useState<ActionDto[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -77,7 +73,7 @@ const ActionsList: React.FC = () => {
       {
         id: number | null;
         name: string;
-        actions: Action[];
+        actions: ActionDto[];
       }
     >();
 
@@ -104,13 +100,13 @@ const ActionsList: React.FC = () => {
       .map((suite) => {
         const suiteActions = suite.actions.slice();
         const nonArchivedActions = suiteActions.filter(
-          (action) => !action.archived
+          (action) => !action.archived,
         );
         const relevantActions =
           nonArchivedActions.length > 0 ? nonArchivedActions : suiteActions;
 
         const sortVal = Math.min(
-          ...relevantActions.map((action) => actions.indexOf(action))
+          ...relevantActions.map((action) => actions.indexOf(action)),
         );
 
         return {
@@ -161,7 +157,9 @@ const ActionsList: React.FC = () => {
       <ActionTimeline
         actions={actions.filter(
           (a) =>
-            !a.archived && !a.everyoneShouldComplete && a.status !== "completed"
+            !a.archived &&
+            !a.everyoneShouldComplete &&
+            a.status !== "completed",
         )}
         className="h-full"
       />

@@ -1,4 +1,4 @@
-import type { Action, ActionSuite, TagDto } from "@alliance/shared/client";
+import type { ActionSuite, TagDto } from "@alliance/shared/client";
 import {
   ActionDto,
   actionsArchive,
@@ -121,7 +121,7 @@ const ActionDashboard: React.FC = () => {
   const navigate = useNavigate();
   const isNew = actionIdParam === "new";
   const actionId = isNew ? null : parseInt(actionIdParam!);
-  const [action, setAction] = useState<Action | null>(null);
+  const [action, setAction] = useState<ActionDto | null>(null);
   const [loading, setLoading] = useState<boolean>(!isNew);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

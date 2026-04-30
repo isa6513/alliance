@@ -22,7 +22,6 @@ import {
   ApiQuery,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { instanceToPlain } from 'class-transformer';
 import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 import {
@@ -89,7 +88,6 @@ import {
 } from './dto/notification-schedule.dto';
 import { ActionEvent } from './entities/action-event.entity';
 import { ActionSuite } from './entities/action-suite.entity';
-import { Action } from './entities/action.entity';
 import { ReminderGroup } from './entities/reminder-group.entity';
 import {
   ShareLinkDto,
@@ -405,15 +403,14 @@ export class ActionsController {
 
   @Get('all')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: [Action] })
-  async findAllWithDrafts(): Promise<Action[]> {
-    return this.actionsService
-      .findAllSorted({
-        events: true,
-        activities: true,
-        suite: true,
-      })
-      .then((actions) => instanceToPlain(actions) as Action[]);
+  @ApiOkResponse({ type: [ActionDto] })
+  async findAllWithDrafts(): Promise<ActionDto[]> {
+    const actions = await this.actionsService.findAllSorted({
+      events: true,
+      activities: true,
+      suite: true,
+    });
+    return actions.map((action) => new ActionDto(action));
   }
 
   @Get('friendActivity/:actionId')
@@ -563,13 +560,15 @@ export class ActionsController {
 
   @Get('adminslug/:id')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: Action })
+  @ApiOkResponse({ type: ActionDto })
   @ApiUnauthorizedResponse()
   async findOneAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
-  ): Promise<Action> {
-    return this.actionsService.findOneOrFail({ id, userId: req.user.sub });
+  ): Promise<ActionDto> {
+    return new ActionDto(
+      await this.actionsService.findOneOrFail({ id, userId: req.user.sub }),
+    );
   }
 
   @Get(':id/follow-up-forms')
@@ -719,13 +718,15 @@ export class ActionsController {
 
   @Patch(':id')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: Action })
-  update(
+  @ApiOkResponse({ type: ActionDto })
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateActionDto: UpdateActionDto,
     @Request() req: JwtRequest,
-  ): Promise<Action> {
-    return this.actionsService.update(id, updateActionDto, req.user.sub);
+  ): Promise<ActionDto> {
+    return new ActionDto(
+      await this.actionsService.update(id, updateActionDto, req.user.sub),
+    );
   }
 
   @Delete(':id')

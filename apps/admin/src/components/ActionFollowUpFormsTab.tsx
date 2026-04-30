@@ -1,5 +1,5 @@
 import {
-  Action,
+  ActionDto,
   actionsCreateFollowUpForm,
   actionsDeleteFollowUpForm,
   actionsFindOneAdmin,
@@ -26,8 +26,8 @@ import { FormBuilder } from "./FormBuilder";
 import { FormSchema } from "@alliance/common/forms/form-schema";
 
 export interface ActionFollowUpFormsTabProps {
-  action: Action;
-  setAction: (action: Action) => void;
+  action: ActionDto;
+  setAction: (action: ActionDto) => void;
   availableTags: TagDto[];
   availableActions: { id: number; name: string }[];
   availableForms: FormDto[];

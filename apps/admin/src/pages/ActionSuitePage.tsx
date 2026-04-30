@@ -1,5 +1,4 @@
 import {
-  Action,
   actionsBatchUpdateSuiteEvents,
   actionsDeleteSuiteEvent,
   actionsSuite,
@@ -25,7 +24,7 @@ const ActionSuitePage = () => {
   const navigate = useNavigate();
 
   const [highlightedReminder, setHighlightedReminder] = useState<number | null>(
-    null
+    null,
   );
   useEffect(() => {
     if (highlightedReminder) {
@@ -63,7 +62,7 @@ const ActionSuitePage = () => {
         } else {
           setError((resp.error as Error).message as string);
         }
-      }
+      },
     );
   };
 
@@ -74,7 +73,7 @@ const ActionSuitePage = () => {
       } else {
         setError(
           ((resp.error as Error).message as string) +
-            " (events will fail to delete if reminders depend on their existence)"
+            " (events will fail to delete if reminders depend on their existence)",
         );
       }
     });
@@ -99,7 +98,7 @@ const ActionSuitePage = () => {
   return (
     <div className="p-6 flex flex-col gap-6">
       <ActionTimeline
-        actions={(suite?.actions as Action[]) ?? []}
+        actions={suite?.actions ?? []}
         title={suite.name}
         reminders={suite.reminderGroups}
         className="-m-6 mb-0"

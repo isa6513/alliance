@@ -1,5 +1,5 @@
 import {
-  Action,
+  ActionDto,
   actionsFindAllWithDrafts,
   actionsPasteJson,
 } from "@alliance/shared/client";
@@ -41,7 +41,7 @@ import { useGroupAssignment } from "./lib/GroupAssignmentContext";
 import { cn } from "@alliance/shared/styles/util";
 
 const Sidebar: React.FC = () => {
-  const [actions, setActions] = useState<Action[]>([]);
+  const [actions, setActions] = useState<ActionDto[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
@@ -131,14 +131,12 @@ const Sidebar: React.FC = () => {
 
   const groups: {
     name: string;
-    actions: Action[];
+    actions: ActionDto[];
   }[] = [
     {
       name: "Active",
       actions: filteredActions.filter(
-        (action) =>
-          action.status === "member_action" &&
-          !action.onboarding,
+        (action) => action.status === "member_action" && !action.onboarding,
       ),
     },
     {

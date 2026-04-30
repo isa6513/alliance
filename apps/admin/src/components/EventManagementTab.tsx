@@ -1,4 +1,4 @@
-import { Action } from "@alliance/shared/client";
+import { ActionDto } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -12,8 +12,8 @@ import { cn } from "@alliance/shared/styles/util";
 // Status options for event creation
 
 export interface EventManagementTabProps {
-  action: Action;
-  setAction: (action: Action) => unknown;
+  action: ActionDto;
+  setAction: (action: ActionDto) => unknown;
 }
 
 const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
@@ -54,7 +54,7 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
         {action.events && action.events.length > 0 ? (
           action.events
             .sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
             )
             .map((event) => (
               <div
@@ -68,7 +68,7 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                   <span
                     className={cn(
                       "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                      getStatusColor(event.newStatus)
+                      getStatusColor(event.newStatus),
                     )}
                   >
                     {formatStatus(event.newStatus)}
@@ -100,7 +100,7 @@ const EventManagementTab = ({ action, setAction }: EventManagementTabProps) => {
                     onClick={() =>
                       window.open(
                         `/database?table=action_event&id=${event.id}`,
-                        "_blank"
+                        "_blank",
                       )
                     }
                     color={ButtonColor.White}

@@ -1,7 +1,6 @@
 import {
-  Action,
   ActionDto,
-  ActionEvent,
+  ActionEventDto,
   actionsAddEvent,
   actionsAddSuiteEvent,
   ActionStatus,
@@ -15,7 +14,7 @@ import DateTimePicker, {
 import { useState } from "react";
 
 export type CreateEventFormProps = {
-  action: Action | ActionDto;
+  action: ActionDto;
   creatingEvent: boolean;
   setCreatingEvent: (creatingEvent: boolean) => void;
   setEventCreatedSuccess: (eventCreatedSuccess: boolean) => void;
@@ -23,7 +22,7 @@ export type CreateEventFormProps = {
 } & (
   | {
       suiteMode: false;
-      setAction: (action: Action) => void;
+      setAction: (action: ActionDto) => void;
     }
   | {
       suiteMode: true;
@@ -194,14 +193,14 @@ const CreateEventForm = (props: CreateEventFormProps) => {
       if (addedEvent) {
         if (!suiteMode) {
           props.setAction({
-            ...(action as Action),
+            ...action,
             events: !!addedOfficeActionEvent
               ? [
-                  ...(action as Action).events,
-                  addedOfficeActionEvent,
-                  addedEvent as ActionEvent,
+                  ...action.events,
+                  addedOfficeActionEvent as ActionEventDto,
+                  addedEvent as ActionEventDto,
                 ]
-              : [...(action as Action).events, addedEvent as ActionEvent],
+              : [...action.events, addedEvent as ActionEventDto],
           });
         }
         if (suiteMode && updatedSuite) {

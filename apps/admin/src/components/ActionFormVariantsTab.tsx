@@ -4,7 +4,7 @@ import {
   actionsListFormVariants,
   actionsUpdateFormVariant,
 } from "@alliance/shared/client";
-import type { Action } from "@alliance/shared/client";
+import type { ActionDto } from "@alliance/shared/client";
 import type {
   ActionFormVariantDto,
   ActionFormVariantStatsDto,
@@ -20,7 +20,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
 export interface ActionFormVariantsTabProps {
-  action: Action;
+  action: ActionDto;
 }
 
 interface EditState {

@@ -1,9 +1,9 @@
 import {
-  Action,
+  ActionEventDto,
   actionsCreateUpdate,
   actionsDeleteUpdate,
   actionsUpdateUpdate,
-  ActionUpdate,
+  ActionUpdateDto,
   ActionUpdateNotifyType,
   CreateActionUpdateDto,
   CreateEditableContentDto,
@@ -18,9 +18,9 @@ import { useState } from "react";
 
 interface ActionUpdatesTabProps {
   actionId: number;
-  updates: Action["updates"];
-  setUpdates: (updates: Action["updates"]) => unknown;
-  events: Action["events"];
+  updates: ActionUpdateDto[];
+  setUpdates: (updates: ActionUpdateDto[]) => unknown;
+  events: ActionEventDto[];
   availableTags: TagDto[];
 }
 
@@ -76,7 +76,7 @@ const ActionUpdatesTab = ({
     });
 
     if (response.response.ok && response.data) {
-      setUpdates([...updates, response.data as ActionUpdate]);
+      setUpdates([...updates, response.data as ActionUpdateDto]);
       setNewUpdate(defaultNewUpdate);
       setPreview(false);
       setClearDraftSignal((x) => x + 1);
@@ -95,7 +95,7 @@ const ActionUpdatesTab = ({
   const handleEdit = async (
     id: number,
     title: string,
-    content: CreateEditableContentDto
+    content: CreateEditableContentDto,
   ) => {
     const existingUpdate = updates.find((u) => u.id === id);
     if (!existingUpdate) return;
@@ -114,7 +114,9 @@ const ActionUpdatesTab = ({
 
     if (response.response.ok && response.data) {
       setUpdates(
-        updates.map((u) => (u.id === id ? (response.data as ActionUpdate) : u))
+        updates.map((u) =>
+          u.id === id ? (response.data as ActionUpdateDto) : u,
+        ),
       );
     }
   };
