@@ -156,7 +156,12 @@ describe('Users (e2e)', () => {
       .set('Authorization', `Bearer ${userAToken}`);
 
     expect([200, 201]).toContain(res.status);
-    expect(res.body.status).toBe(FriendStatus.Pending);
+
+    const status = await request(ctx.app.getHttpServer())
+      .get(`/user/myfriendrelationship/${userBId}`)
+      .set('Authorization', `Bearer ${userAToken}`);
+    expect(status.status).toBe(200);
+    expect(status.body.status).toBe(FriendStatus.Pending);
   });
 
   it('Request appears in the correct sent/received queues', async () => {
@@ -195,7 +200,12 @@ describe('Users (e2e)', () => {
       .set('Authorization', `Bearer ${userBToken}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe(FriendStatus.Accepted);
+
+    const status = await request(ctx.app.getHttpServer())
+      .get(`/user/myfriendrelationship/${userAId}`)
+      .set('Authorization', `Bearer ${userBToken}`);
+    expect(status.status).toBe(200);
+    expect(status.body.status).toBe(FriendStatus.Accepted);
   });
 
   it('user A has a notification for the friend request being accepted', async () => {
@@ -262,7 +272,12 @@ describe('Users (e2e)', () => {
       .set('Authorization', `Bearer ${userBToken}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe(FriendStatus.Declined);
+
+    const status = await request(ctx.app.getHttpServer())
+      .get(`/user/myfriendrelationship/${userBId}`)
+      .set('Authorization', `Bearer ${userAToken}`);
+    expect(status.status).toBe(200);
+    expect(status.body.status).toBe(FriendStatus.Declined);
   });
 
   /* ────────────────────────────────────────────────────────────
