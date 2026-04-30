@@ -197,7 +197,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
             events: !!addedOfficeActionEvent
               ? [
                   ...action.events,
-                  addedOfficeActionEvent as ActionEventDto,
+                  addedOfficeActionEvent,
                   addedEvent as ActionEventDto,
                 ]
               : [...action.events, addedEvent as ActionEventDto],

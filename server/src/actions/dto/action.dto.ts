@@ -158,7 +158,12 @@ export class ActionEventDto extends PickType(ActionEvent, [
 ]) {
   constructor(event: ActionEvent) {
     super();
-    Object.assign(this, event);
+    this.id = event.id;
+    this.title = event.title;
+    this.description = event.description;
+    this.newStatus = event.newStatus;
+    this.suiteManaged = event.suiteManaged;
+    this.date = event.date;
   }
 }
 
@@ -504,7 +509,7 @@ export class CreateActionUpdateDto extends PickType(ActionUpdate, [
 
 export class CreateActionSuiteDto extends PickType(ActionSuite, ['name']) {}
 
-export class ActionSuiteDto extends OmitType(ActionSuite, ['actions']) {
+export class ActionSuiteDto extends PickType(ActionSuite, ['id', 'name']) {
   @ApiProperty({ type: () => ActionDto, isArray: true })
   @Type(() => ActionDto)
   @Allow()
@@ -512,7 +517,8 @@ export class ActionSuiteDto extends OmitType(ActionSuite, ['actions']) {
 
   constructor(suite: ActionSuite, actions?: ActionDto[]) {
     super();
-    Object.assign(this, suite);
+    this.id = suite.id;
+    this.name = suite.name;
     this.actions =
       actions ?? suite.actions?.map((action) => new ActionDto(action)) ?? [];
   }
