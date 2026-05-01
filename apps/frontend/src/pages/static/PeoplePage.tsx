@@ -142,7 +142,7 @@ const PeoplePage: React.FC = () => {
         <h1 className="text-title-large text-left">People</h1>
         <div>
           <h2 className="text-heading-public mb-4 ">Office</h2>
-          <p className="mb-6 md:mb-8 text-zinc-900 text-lg">
+          <p className="mb-6 md:mb-8 text-zinc-900 text-lg lg:text-xl">
             Members of the office plan actions and develop our online platform.
           </p>
           <div className="space-y-8">

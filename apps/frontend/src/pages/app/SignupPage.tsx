@@ -379,7 +379,7 @@ const SignupPage: React.FC = () => {
                   </Link>
                 </p>
               </div>
-              <ExamplePriorityCardList dropdown />
+              <ExamplePriorityCardList />
             </div>
             <div className="flex flex-col">
               <h2 className="font-semibold text-2xl md:text-3xl font-serif mb-2">

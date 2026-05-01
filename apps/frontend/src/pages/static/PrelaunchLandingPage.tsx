@@ -12,14 +12,17 @@ import FeaturedImpactCard from "../../components/FeaturedImpactCard";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { ArrowRight } from "lucide-react";
+import { cn } from "@alliance/shared/styles/util";
 
 /** Shared width + horizontal padding for hero copy and sections below. */
-const LANDING_MAIN_COL = "mx-auto w-full max-w-4xl px-6 sm:px-10 lg:px-16";
-const LANDING_BIG_COL = "px-4 lg:px-32 w-full";
+const LANDING_MAIN_COL = "mx-auto w-full max-w-5xl px-6 sm:px-10 lg:px-16";
+const LANDING_BIG_COL = "px-4 sm:px-12 xl:px-32 w-full";
 
 /** Gap between sections + outer vertical padding (avoids stacked py on each section). */
 const LANDING_BODY = "gap-16 sm:gap-24 lg:gap-36 py-18 lg:py-28";
 const LANDING_SECTION_INNER = "flex flex-col gap-y-6 lg:gap-y-8";
+
+const SUBTITLE_CLASS = "text-xl text-zinc-900 lg:text-2xl";
 
 const MEMBER_QUOTES = [
   {
@@ -66,7 +69,8 @@ function MemberQuoteCard({
   const avatar = (
     <AvatarProfile
       pfp={profile?.profilePicture ?? null}
-      size="large"
+      size="override"
+      className="w-16 h-16 rounded-lg"
       alt={
         profile?.displayName
           ? `${profile.displayName} profile photo`
@@ -76,7 +80,7 @@ function MemberQuoteCard({
   );
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-row items-start gap-3 border border-grey-1 p-4 sm:p-6 rounded-md">
+    <div className="flex h-full min-h-0 w-full flex-row items-start gap-4 p-4 sm:p-6 rounded-md">
       <div className="shrink-0">
         {isPending ? (
           <div
@@ -88,11 +92,11 @@ function MemberQuoteCard({
         )}
       </div>
       <figure className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
-        <blockquote className="text-base lg:text-lg text-zinc-900 leading-snug">
+        <blockquote className="text-xl lg:text-2xl text-zinc-900 leading-snug">
           {quote}
         </blockquote>
         {profile?.displayName ? (
-          <figcaption className="text-sm lg:text-base text-zinc-500">
+          <figcaption className="text-lg lg:text-xl text-zinc-500">
             {profile.displayName}
           </figcaption>
         ) : null}
@@ -104,14 +108,18 @@ function MemberQuoteCard({
 function HowItWorksCard({
   title,
   children,
+  className,
 }: {
   title: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-md bg-zinc-50 p-4 lg:p-6">
-      <p className="text-lg font-semibold text-black lg:text-xl">{title}</p>
-      <p className="text-base text-zinc-500 lg:text-lg">{children}</p>
+    <div className={cn("flex flex-col gap-2 rounded-md", className)}>
+      <p className="text-xl font-semibold font-serif text-black lg:text-2xl">
+        {title}
+      </p>
+      <p className="text-base text-zinc-900 lg:text-xl">{children}</p>
     </div>
   );
 }
@@ -160,27 +168,31 @@ const PrelaunchLandingPage: React.FC = () => {
       <div className={`flex flex-1 flex-col bg-white ${LANDING_BODY}`}>
         <section className="w-full flex flex-col gap-8">
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 mb-8 lg:mb-12">
               <p className="text-title-large w-full text-black">How we work</p>
-              <p className="text-lg text-zinc-500 lg:text-xl">
+              <p className={SUBTITLE_CLASS}>
                 We design actions based on the number of members we can count
                 on.
               </p>
             </div>
-            <div className="grid w-full grid-cols-1 gap-2 md:grid-cols-2">
-              <HowItWorksCard title="Members">
-                Alliance members complete 15 minutes of actions each week over
-                our online platform.
+            <div className="flex flex-row divide-x divide-zinc-200">
+              <HowItWorksCard title="Members" className="w-1/2 pr-12">
+                Alliance members complete weekly tasks on our online platform.
+                Tasks take no more than 15 minutes per week, so members can
+                easily fit them into their weekly routines.
               </HowItWorksCard>
-              <HowItWorksCard title="Office">
-                Our full-time office designs actions in order to achieve a
-                measurable impact.
+              <HowItWorksCard title="Office" className="w-1/2 pl-12">
+                Alliance staff design tasks in order to achieve a measurable
+                impact. Since the office knows how many members will
+                participate, it can predict how likely each action is to
+                succeed.
               </HowItWorksCard>
             </div>
           </div>
-          <div
-            className={`${LANDING_BIG_COL} grid grid-cols-1 gap-2 md:grid-cols-3`}
-          >
+        </section>
+
+        <section className="bg-grey-0 py-16 lg:py-24">
+          <div className={`${LANDING_BIG_COL} grid grid-cols-1 gap-2`}>
             {MEMBER_QUOTES.map((item, index) => (
               <MemberQuoteCard
                 key={`${item.memberId}-${index}`}
@@ -199,60 +211,57 @@ const PrelaunchLandingPage: React.FC = () => {
               <p className="text-title-large w-full text-black">
                 Our priorities
               </p>
-              <p className="text-lg text-zinc-500 lg:text-xl">
+              <p className={SUBTITLE_CLASS}>
                 We are focused on global crises that are interconnected, affect
                 billions of people, and are possible to solve with coordinated
                 action.
               </p>
             </div>
-            <ExamplePriorityCardList
-              bgColor="grey"
-              dropdown
-              titleClass="text-base lg:text-lg"
-            />
+            <ExamplePriorityCardList titleClass="text-lg lg:text-xl" />
           </div>
         </section>
-        <section className="w-full">
-          <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
+        <section className="w-full bg-green/10 py-16 lg:py-28">
+          <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER} mb-12`}>
             <div className="flex flex-col gap-4">
               <p className="text-title-large w-full text-black">Our impact</p>
-              <p className="text-lg text-zinc-500 lg:text-xl">
+              <p className={SUBTITLE_CLASS}>
                 At this stage, we are taking small-scale actions in order to
                 learn and build our processes.
               </p>
-            </div>
-          </div>
-          <div className={`${LANDING_BIG_COL} flex flex-col mt-8 md:mt-12`}>
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {FEATURED_IMPACT_ACTIONS.slice(0, 4).map((action) => (
-                  <FeaturedImpactCard key={action.actionId} {...action} />
-                ))}
-              </div>
-              <div className="flex flex-row sm:flex-col items-center sm:items-start text-link">
+              <div className="mt-2 self-start flex flex-row items-center gap-2 bg-black hover:bg-zinc-800 text-white  px-4 py-3 rounded hover:cursor-pointer">
                 <Link
                   to="/progress"
-                  className="whitespace-nowrap text-link text-lg flex flex-row items-center gap-x-1"
+                  className="whitespace-nowrap flex flex-row items-center gap-x-1 text-lg lg:text-xl"
                 >
-                  See more
+                  More examples
                 </Link>
                 <ArrowRight className="w-4 h-4 " />
               </div>
             </div>
           </div>
-          <div className={`${LANDING_BIG_COL} mt-8 md:mt-12`}>
-            <div className="max-w-5xl mx-auto flex flex-col gap-4">
-              <img
-                src={ewaste}
-                alt="E-waste"
-                className="w-full h-full object-cover"
-              />
-              <p className="text-lg text-zinc-500 text-left sm:text-center flex flex-row items-center justify-center gap-1">
-                We collected and recycled 57 kg (126 lbs) of e-waste.{" "}
-                <Link to="/actions/60" className="text-link">
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </p>
+          <div
+            className={`${LANDING_BIG_COL} flex flex-col items-center gap-12`}
+          >
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1  sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                {FEATURED_IMPACT_ACTIONS.slice(0, 4).map((action) => (
+                  <FeaturedImpactCard
+                    key={action.actionId}
+                    {...action}
+                    bgColor="white"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="mx-auto flex flex-col gap-4">
+                <img
+                  src={ewaste}
+                  alt="E-waste"
+                  className="h-full object-cover"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -261,7 +270,7 @@ const PrelaunchLandingPage: React.FC = () => {
           <div className={`${LANDING_MAIN_COL} ${LANDING_SECTION_INNER}`}>
             <div className="flex flex-col gap-4">
               <p className="text-title-large w-full text-black">Join us</p>
-              <p className="text-zinc-500 text-lg lg:text-xl">
+              <p className={SUBTITLE_CLASS}>
                 Membership is currently by invitation only. If you are
                 interested in becoming a member, please{" "}
                 <a

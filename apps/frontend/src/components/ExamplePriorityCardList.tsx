@@ -4,27 +4,26 @@ import ExamplePriorityCard from "./ExamplePriorityCard";
 
 interface ExamplePriorityCardListProps {
   bgColor?: "grey" | "white";
-  dropdown?: boolean;
   titleClass?: string;
 }
 
 const ExamplePriorityCardList: React.FC<ExamplePriorityCardListProps> = ({
-  bgColor = "grey",
-  dropdown = false,
   titleClass = "",
 }: ExamplePriorityCardListProps) => {
   return (
-    <div className="flex flex-col gap-y-2">
-      {alliancePriorities.map((priority) => (
-        <ExamplePriorityCard
-          bgColor={bgColor}
-          key={priority.id}
-          id={priority.id}
-          title={priority.title}
-          description={priority.description}
-          dropdown={dropdown}
-          titleClass={titleClass}
-        />
+    <div className="flex flex-col">
+      {alliancePriorities.map((priority, idx) => (
+        <React.Fragment key={priority.id}>
+          <ExamplePriorityCard
+            id={priority.id}
+            title={priority.title}
+            description={priority.description}
+            titleClass={titleClass}
+          />
+          {idx < alliancePriorities.length - 1 && (
+            <div className="h-px bg-zinc-200" aria-hidden />
+          )}
+        </React.Fragment>
       ))}
     </div>
   );
