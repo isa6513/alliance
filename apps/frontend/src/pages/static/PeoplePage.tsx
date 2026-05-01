@@ -50,6 +50,11 @@ const PeoplePage: React.FC = () => {
       description: "Former UN Assistant Secretary-General for Climate Change",
     },
     {
+      name: "Denis Hayes",
+      description:
+        "Founding coordinator of Earth Day, Chair and CEO of the Bullitt Foundation",
+    },
+    {
       name: "Tara Chklovski",
       description: "Founder, CEO, Technovation",
     },
