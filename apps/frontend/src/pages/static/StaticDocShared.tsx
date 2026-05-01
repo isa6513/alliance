@@ -21,7 +21,7 @@ export const GuideH1 = ({
 }: HTMLAttributes<HTMLHeadingElement>) => (
   <h1
     className={cn(
-      "font-semibold text-2xl md:text-3xl first:mt-0 mt-4 md:mt-8",
+      "font-semibold text-3xl md:text-4xl first:mt-0 mt-4 md:mt-8",
       className,
     )}
     {...props}
