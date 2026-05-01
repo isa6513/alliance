@@ -4,7 +4,7 @@ import type { FeaturedImpactAction } from "../content/featuredImpactActions";
 import { cn } from "@alliance/shared/styles/util";
 
 const FeaturedImpactCard: React.FC<
-  FeaturedImpactAction & { bgColor: "grey" | "white" }
+  FeaturedImpactAction & { bgColor?: "grey" | "white" }
 > = ({ actionId, emphasis, rest, bgColor = "grey" }) => {
   const cardStyle = bgColor === "grey" ? "bg-grey-0" : "bg-white";
   return (

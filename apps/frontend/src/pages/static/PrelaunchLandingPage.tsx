@@ -176,12 +176,12 @@ const PrelaunchLandingPage: React.FC = () => {
               </p>
             </div>
             <div className="flex flex-row divide-x divide-zinc-200">
-              <HowItWorksCard title="Members" className="w-1/2 pr-12">
+              <HowItWorksCard title="Members" className="w-1/2 pr-6 lg:pr-12">
                 Alliance members complete weekly tasks on our online platform.
                 Tasks take no more than 15 minutes per week, so members can
                 easily fit them into their weekly routines.
               </HowItWorksCard>
-              <HowItWorksCard title="Office" className="w-1/2 pl-12">
+              <HowItWorksCard title="Office" className="w-1/2 pl-6 lg:pl-12">
                 Alliance staff design tasks in order to achieve a measurable
                 impact. Since the office knows how many members will
                 participate, it can predict how likely each action is to
@@ -228,15 +228,15 @@ const PrelaunchLandingPage: React.FC = () => {
                 At this stage, we are taking small-scale actions in order to
                 learn and build our processes.
               </p>
-              <div className="mt-2 self-start flex flex-row items-center gap-2 bg-black hover:bg-zinc-800 text-white  px-4 py-3 rounded hover:cursor-pointer">
-                <Link
-                  to="/progress"
-                  className="whitespace-nowrap flex flex-row items-center gap-x-1 text-lg lg:text-xl"
-                >
+              <Link
+                to="/progress"
+                className="mt-2 self-start flex flex-row items-center gap-2 bg-black hover:bg-zinc-800 text-white  px-4 py-3 rounded hover:cursor-pointer"
+              >
+                <p className="whitespace-nowrap flex flex-row items-center gap-x-1 text-lg lg:text-xl">
                   More examples
-                </Link>
+                </p>
                 <ArrowRight className="w-4 h-4 " />
-              </div>
+              </Link>
             </div>
           </div>
           <div
