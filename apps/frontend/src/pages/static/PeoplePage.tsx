@@ -99,6 +99,10 @@ const PeoplePage: React.FC = () => {
       name: "Paul Gambill",
       description: "Climate entrepreneur, previous co-founder of Nori",
     },
+    {
+      name: "Oran Young",
+      description: "Professor Emeritus, UC Santa Barbara ",
+    },
   ];
 
   useEffect(() => {
