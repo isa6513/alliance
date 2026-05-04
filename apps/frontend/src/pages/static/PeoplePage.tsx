@@ -101,7 +101,7 @@ const PeoplePage: React.FC = () => {
     },
     {
       name: "Oran Young",
-      description: "Professor Emeritus, UC Santa Barbara ",
+      description: "Professor Emeritus, UC Santa Barbara",
     },
   ];
 
