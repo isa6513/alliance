@@ -96,6 +96,10 @@ const PeoplePage: React.FC = () => {
       description: "Filmmaker and professor",
     },
     {
+      name: "Nathan Calvin",
+      description: "General Counsel at Encode AI",
+    },
+    {
       name: "Paul Gambill",
       description: "Climate entrepreneur, previous co-founder of Nori",
     },
