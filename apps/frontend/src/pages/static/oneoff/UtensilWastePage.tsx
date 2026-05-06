@@ -6,7 +6,7 @@ type Restaurant = {
   name: string;
   url: string;
   img: string;
-  imgFit: "cover" | "contain";
+  imgFit: "object-cover" | "object-contain";
 };
 
 const restaurants: Restaurant[] = [
@@ -14,19 +14,19 @@ const restaurants: Restaurant[] = [
     name: "Fambrini's Cafe",
     url: "http://www.fambriniscafe.com/",
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUXSyeu0IvWJonDnejDguhgYf0hKgeTkpATQ&s",
-    imgFit: "cover",
+    imgFit: "object-cover",
   },
   {
     name: "hed verythai",
     url: "https://www.hedverythaisf.com/",
     img: "https://static.spotapps.co/website_images/ab_websites/187929_website_v1/logo_scroll.png",
-    imgFit: "contain",
+    imgFit: "object-contain",
   },
   {
     name: "Katsuo + Kombu",
     url: "https://www.instagram.com/katsuo_and_kombu/",
     img: "https://d2s742iet3d3t1.cloudfront.net/restaurants/restaurant-151140000000000000/restaurant_1684962456.png",
-    imgFit: "cover",
+    imgFit: "object-cover",
   },
 ];
 
@@ -140,9 +140,7 @@ const UtensilWastePage: React.FC = () => {
                       src={restaurant.img}
                       alt={restaurant.name}
                       className={`w-16 h-16 rounded-md shrink-0 ${
-                        restaurant.imgFit === "contain"
-                          ? "object-contain"
-                          : "object-cover"
+                        restaurant.imgFit
                       }`}
                     />
 
