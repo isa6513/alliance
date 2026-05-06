@@ -64,8 +64,10 @@ export class MmsService {
     cid?: string,
   ): Promise<Mms | null> {
     if (
-      process.env.NODE_ENV === 'test' ||
-      process.env.NODE_ENV === 'staging' ||
+      !(
+        process.env.NODE_ENV === 'production' ||
+        process.env.SEND_DEV_NOTIFS === '1'
+      ) ||
       to === '15550100'
     ) {
       const mms = this.mmsRepository.create({

@@ -58,6 +58,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   beforeAll(async () => {
+    process.env.SEND_DEV_NOTIFS = '1';
     ctx = await createTestApp([]);
     worker = ctx.app.get(ActionEventNotifWorker);
     actionRepo = ctx.dataSource.getRepository(Action);

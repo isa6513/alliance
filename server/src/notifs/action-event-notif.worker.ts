@@ -49,12 +49,11 @@ export class ActionEventNotifWorker {
   @Cron('*/3 * * * *')
   async dispatchDueNotifs() {
     if (
-      process.env.NODE_ENV === 'development' &&
-      process.env.SEND_DEV_NOTIFS !== '1'
+      !(
+        process.env.NODE_ENV === 'production' ||
+        process.env.SEND_DEV_NOTIFS === '1'
+      )
     ) {
-      return;
-    }
-    if (process.env.NODE_ENV === 'staging') {
       return;
     }
 

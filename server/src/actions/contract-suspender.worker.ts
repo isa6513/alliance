@@ -34,9 +34,10 @@ export class ContractSuspenderWorker {
   @Cron('*/10 * * * *')
   async processSuspensions() {
     if (
-      (process.env.NODE_ENV === 'development' &&
-        process.env.SEND_DEV_NOTIFS !== '1') ||
-      process.env.NODE_ENV === 'test'
+      !(
+        process.env.NODE_ENV === 'production' ||
+        process.env.SEND_DEV_NOTIFS === '1'
+      )
     ) {
       return;
     }

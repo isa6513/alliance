@@ -25,9 +25,10 @@ export class ContractReminderWorker {
   @Cron(CronExpression.EVERY_HOUR)
   async sendContractReminders() {
     if (
-      (process.env.NODE_ENV === 'development' &&
-        process.env.SEND_DEV_NOTIFS !== '1') ||
-      process.env.NODE_ENV === 'test'
+      !(
+        process.env.NODE_ENV === 'production' ||
+        process.env.SEND_DEV_NOTIFS === '1'
+      )
     ) {
       return;
     }
@@ -47,7 +48,9 @@ export class ContractReminderWorker {
           .createQueryBuilder('user')
           .leftJoin('user.contractEvents', 'ce')
           .where('user.createdAt <= :cutoff', { cutoff })
-          .andWhere('user.isNotSignedUpPartialProfile = :partial', { partial: false })
+          .andWhere('user.isNotSignedUpPartialProfile = :partial', {
+            partial: false,
+          })
           .andWhere('ce.id IS NULL')
           .andWhere(
             `NOT EXISTS (

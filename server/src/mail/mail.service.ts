@@ -153,7 +153,12 @@ export class MailService {
       cid,
     });
 
-    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'staging') {
+    if (
+      !(
+        process.env.NODE_ENV === 'production' ||
+        process.env.SEND_DEV_NOTIFS === '1'
+      )
+    ) {
       return await this.mailRepository.save(mail);
     }
 
