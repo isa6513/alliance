@@ -62,6 +62,7 @@ UPDATE "user_device"
 SET "expoPushToken" = NULL,
     "liveActivityPushToStartToken" = NULL;
 UPDATE "live_activity_registration" SET "updateToken" = NULL;
+UPDATE "push" SET "expoPushToken" = 'pruned';
 
 SQL
 
