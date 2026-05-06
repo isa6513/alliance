@@ -6,18 +6,27 @@ type Restaurant = {
   name: string;
   url: string;
   img: string;
+  imgFit: "cover" | "contain";
 };
 
 const restaurants: Restaurant[] = [
   {
-    name: "Katsuo + Kombu",
-    url: "https://www.instagram.com/katsuo_and_kombu/",
-    img: "https://d2s742iet3d3t1.cloudfront.net/restaurants/restaurant-151140000000000000/restaurant_1684962456.png",
-  },
-  {
     name: "Fambrini's Cafe",
     url: "http://www.fambriniscafe.com/",
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUXSyeu0IvWJonDnejDguhgYf0hKgeTkpATQ&s",
+    imgFit: "cover",
+  },
+  {
+    name: "hed verythai",
+    url: "https://www.hedverythaisf.com/",
+    img: "https://static.spotapps.co/website_images/ab_websites/187929_website_v1/logo_scroll.png",
+    imgFit: "contain",
+  },
+  {
+    name: "Katsuo + Kombu",
+    url: "https://www.instagram.com/katsuo_and_kombu/",
+    img: "https://d2s742iet3d3t1.cloudfront.net/restaurants/restaurant-151140000000000000/restaurant_1684962456.png",
+    imgFit: "cover",
   },
 ];
 
@@ -130,7 +139,11 @@ const UtensilWastePage: React.FC = () => {
                     <img
                       src={restaurant.img}
                       alt={restaurant.name}
-                      className="w-16 h-16 rounded-md object-cover shrink-0"
+                      className={`w-16 h-16 rounded-md shrink-0 ${
+                        restaurant.imgFit === "contain"
+                          ? "object-contain"
+                          : "object-cover"
+                      }`}
                     />
 
                     <h3 className="flex-1 text-lg font-medium text-zinc-900">
