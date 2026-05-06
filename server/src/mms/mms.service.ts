@@ -64,6 +64,7 @@ export class MmsService {
     cid?: string,
   ): Promise<Mms | null> {
     if (
+      process.env.NODE_ENV === 'test' ||
       !(
         process.env.NODE_ENV === 'production' ||
         process.env.SEND_DEV_NOTIFS === '1'

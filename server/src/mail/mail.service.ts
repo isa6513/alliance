@@ -154,6 +154,7 @@ export class MailService {
     });
 
     if (
+      process.env.NODE_ENV === 'test' ||
       !(
         process.env.NODE_ENV === 'production' ||
         process.env.SEND_DEV_NOTIFS === '1'
