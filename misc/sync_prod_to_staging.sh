@@ -57,6 +57,12 @@ UPDATE "mail" SET "to" = 'user'||id||'@example.com';
 UPDATE "mms" SET "from" = 'pruned';
 UPDATE "mms" SET "to" = 'pruned';
 
+-- Clear push tokens so staging can never reach real devices
+UPDATE "user_device"
+SET "expoPushToken" = NULL,
+    "liveActivityPushToStartToken" = NULL;
+UPDATE "live_activity_registration" SET "updateToken" = NULL;
+
 SQL
 
 echo "[$(date)] ==> S3 sync s3://$PROD_ASSETS_BUCKET -> s3://$STAGING_ASSETS_BUCKET"
