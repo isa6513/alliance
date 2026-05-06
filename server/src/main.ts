@@ -32,6 +32,27 @@ function validateEnv() {
     );
     process.exit(1);
   }
+
+  validateNodeEnv();
+}
+
+function validateNodeEnv() {
+  const expected = ['production', 'staging', 'development', 'test'];
+  const env = process.env.NODE_ENV;
+  if (env && expected.includes(env)) return;
+
+  const msg = `:warning: Server starting with NODE_ENV=${env ?? '<unset>'} (expected one of ${expected.join(', ')}). Outbound notifs may misfire.`;
+  console.error(msg);
+
+  const webhook = process.env.SLACK_WEBHOOK_URL;
+  if (!webhook) return;
+  void fetch(webhook, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: msg }),
+  }).catch((err) => {
+    console.error('Failed to post NODE_ENV warning to Slack:', err);
+  });
 }
 
 class SocketIoAdapter extends IoAdapter {
