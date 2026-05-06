@@ -35,7 +35,8 @@ const SuiteEventList = ({
   return (
     <div>
       <div className={cn("flex flex-row gap-4 items-center", className)}>
-        {events
+        {(events ?? [])
+          .slice()
           .sort((a, b) => a.date.localeCompare(b.date))
           .map((event) => (
             <SuiteEventCard
