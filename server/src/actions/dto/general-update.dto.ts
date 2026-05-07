@@ -52,20 +52,18 @@ export class GeneralUpdateAdminDto extends PickType(GeneralUpdate, [
 
   constructor(generalUpdate: GeneralUpdate) {
     super();
-    Object.assign(this, {
-      id: generalUpdate.id,
-      name: generalUpdate.name,
-      schema: generalUpdate.schema,
-      startDate: generalUpdate.startDate,
-      endDate: generalUpdate.endDate,
-      createdAt: generalUpdate.createdAt,
-      updatedAt: generalUpdate.updatedAt,
-      useManualCohort: generalUpdate.useManualCohort,
-      manualCohortUserIds: generalUpdate.manualCohortUserIds,
-      priority: generalUpdate.priority,
-      tags: generalUpdate.tags ?? [],
-      suites: generalUpdate.suites ?? [],
-    });
+    this.id = generalUpdate.id;
+    this.name = generalUpdate.name;
+    this.schema = generalUpdate.schema;
+    this.startDate = generalUpdate.startDate;
+    this.endDate = generalUpdate.endDate;
+    this.createdAt = generalUpdate.createdAt;
+    this.updatedAt = generalUpdate.updatedAt;
+    this.useManualCohort = generalUpdate.useManualCohort;
+    this.manualCohortUserIds = generalUpdate.manualCohortUserIds;
+    this.priority = generalUpdate.priority;
+    this.tags = generalUpdate.tags ?? [];
+    this.suites = generalUpdate.suites ?? [];
   }
 }
 
