@@ -874,6 +874,10 @@ export class EvaluateCohortExpressionResponseDto {
   })
   @IsArray()
   userIds: number[];
+
+  constructor(userIds: number[]) {
+    this.userIds = userIds;
+  }
 }
 
 export class ActionWithdrawalDto extends PickType(ActionActivity, [

@@ -656,7 +656,7 @@ export class ActionsController {
     const userIds = await this.actionsService.evaluateCohortExpressionBatch(
       dto.expression,
     );
-    return { userIds };
+    return new EvaluateCohortExpressionResponseDto(userIds);
   }
 
   @Get(':id/form-variants')
