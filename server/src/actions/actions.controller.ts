@@ -369,10 +369,7 @@ export class ActionsController {
     const schedule =
       await this.actionEventReminderService.getNotificationSchedule(start, end);
 
-    return schedule.map((entry) => ({
-      ...entry,
-      scheduledFor: new Date(entry.scheduledFor),
-    }));
+    return schedule.map((entry) => new NotificationScheduleEntryDto(entry));
   }
 
   @Get(':id/activities')

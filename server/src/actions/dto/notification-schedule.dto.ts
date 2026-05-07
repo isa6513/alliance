@@ -63,4 +63,24 @@ export class NotificationScheduleEntryDto {
     type: NotificationScheduleMetadataDto,
   })
   metadata?: NotificationScheduleMetadataDto;
+
+  constructor(args: {
+    type: ActionEventNotifType;
+    scheduledFor: Date;
+    actionId: number;
+    actionName: string;
+    actionStatus: ActionStatus;
+    eventId: number;
+    recipients: ProfileDto[];
+    metadata?: NotificationScheduleMetadataDto;
+  }) {
+    this.type = args.type;
+    this.scheduledFor = args.scheduledFor;
+    this.actionId = args.actionId;
+    this.actionName = args.actionName;
+    this.actionStatus = args.actionStatus;
+    this.eventId = args.eventId;
+    this.recipients = args.recipients;
+    this.metadata = args.metadata;
+  }
 }
