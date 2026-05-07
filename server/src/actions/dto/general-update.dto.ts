@@ -21,14 +21,12 @@ export class GeneralUpdateDto extends PickType(GeneralUpdate, [
 ]) {
   constructor(generalUpdate: GeneralUpdate) {
     super();
-    Object.assign(this, {
-      id: generalUpdate.id,
-      name: generalUpdate.name,
-      schema: generalUpdate.schema,
-      startDate: generalUpdate.startDate,
-      endDate: generalUpdate.endDate,
-      priority: generalUpdate.priority,
-    });
+    this.id = generalUpdate.id;
+    this.name = generalUpdate.name;
+    this.schema = generalUpdate.schema;
+    this.startDate = generalUpdate.startDate;
+    this.endDate = generalUpdate.endDate;
+    this.priority = generalUpdate.priority;
   }
 }
 
