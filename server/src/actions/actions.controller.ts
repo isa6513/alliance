@@ -345,7 +345,8 @@ export class ActionsController {
   async getWithdrawals(
     @Param('formId', ParseIntPipe) formId: number,
   ): Promise<ActionWithdrawalDto[]> {
-    return this.actionsService.getWithdrawalsForForm(formId);
+    const activities = await this.actionsService.getWithdrawalsForForm(formId);
+    return activities.map((a) => new ActionWithdrawalDto(a));
   }
 
   @Get('events/:id')

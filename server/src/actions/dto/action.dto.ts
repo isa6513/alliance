@@ -885,4 +885,12 @@ export class ActionWithdrawalDto extends PickType(ActionActivity, [
   'declineReason',
   'isMoral',
   'outOfTime',
-]) {}
+]) {
+  constructor(activity: ActionActivity) {
+    super();
+    this.userId = activity.userId;
+    this.declineReason = activity.declineReason;
+    this.isMoral = activity.isMoral;
+    this.outOfTime = activity.outOfTime;
+  }
+}

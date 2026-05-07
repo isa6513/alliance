@@ -99,7 +99,6 @@ import {
   UpdateActionDto,
   UpdateActionEventDto,
   UserActionRelation,
-  ActionWithdrawalDto,
 } from './dto/action.dto';
 import { Post } from 'src/forum/entities/post.entity';
 import {
@@ -2824,7 +2823,7 @@ export class ActionsService {
     };
   }
 
-  async getWithdrawalsForForm(formId: number): Promise<ActionWithdrawalDto[]> {
+  async getWithdrawalsForForm(formId: number): Promise<ActionActivity[]> {
     const action = await this.findActionByFormId(formId);
     if (!action) {
       return [];
@@ -2837,23 +2836,13 @@ export class ActionsService {
       order: { createdAt: 'DESC' },
     });
     const seen = new Set<number>();
-    const results: {
-      userId: number;
-      declineReason?: string;
-      isMoral?: boolean;
-      outOfTime?: boolean;
-    }[] = [];
+    const results: ActionActivity[] = [];
     for (const a of activities) {
       if (seen.has(a.userId)) {
         continue;
       }
       seen.add(a.userId);
-      results.push({
-        userId: a.userId,
-        declineReason: a.declineReason,
-        isMoral: a.isMoral,
-        outOfTime: a.outOfTime,
-      });
+      results.push(a);
     }
     return results;
   }
