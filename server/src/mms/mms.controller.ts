@@ -19,6 +19,11 @@ const START_KEYWORDS = new Set(['START', 'YES', 'UNSTOP']);
 export class MmsController {
     constructor(private readonly mmsUnsubService: MmsUnsubService) { }
 
+    /**
+     * Twilio inbound webhook: the response body is returned to Twilio as TwiML,
+     * so it must stay a primitive string rather than a DTO — JSON-wrapping it
+     * would break Twilio's response handling.
+     */
     @Post('inbound')
     @ApiOkResponse()
     async handleInboundMms(
