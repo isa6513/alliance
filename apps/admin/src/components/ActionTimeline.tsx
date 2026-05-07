@@ -2,7 +2,7 @@ import {
   ActionDto,
   ActionEventDto,
   ActionStatus,
-  ReminderGroup,
+  ReminderGroupDto,
   ReminderGroupTimingMode,
 } from "@alliance/shared/client";
 import React, {
@@ -20,7 +20,7 @@ interface ActionTimelineProps {
   actions: ActionDto[];
   title?: string;
   className?: string;
-  reminders?: ReminderGroup[];
+  reminders?: ReminderGroupDto[];
   onReminderClick?: (reminderId: number) => void;
   focusOnDate?: Date | string | number | null;
 }
@@ -49,10 +49,10 @@ interface NormalizedReminder {
   endDate: Date;
   isRange: boolean;
   timingMode: ReminderGroupTimingMode;
-  original: ReminderGroup;
+  original: ReminderGroupDto;
 }
 
-const EMPTY_REMINDERS: ReminderGroup[] = [];
+const EMPTY_REMINDERS: ReminderGroupDto[] = [];
 
 const ActionTimeline: React.FC<ActionTimelineProps> = ({
   actions,

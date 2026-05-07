@@ -40,6 +40,7 @@ import { SubmitFormDto } from 'src/tasks/form.dto';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
 import { GeneralUpdate } from '../entities/general-update.entity';
+import { GeneralUpdateDto } from './general-update.dto';
 import type { CohortExpression } from '../cohort-expression.types';
 
 export class CreateReminderGroupDto extends PickType(ReminderGroup, [
@@ -509,11 +510,35 @@ export class CreateActionUpdateDto extends PickType(ActionUpdate, [
 
 export class CreateActionSuiteDto extends PickType(ActionSuite, ['name']) {}
 
+export class ReminderGroupDto extends OmitType(ReminderGroup, [
+  'notifications',
+]) {
+  constructor(group: ReminderGroup) {
+    super();
+    Object.assign(this, group);
+  }
+}
+
 export class ActionSuiteDto extends PickType(ActionSuite, ['id', 'name']) {
   @ApiProperty({ type: () => ActionDto, isArray: true })
   @Type(() => ActionDto)
   @Allow()
   actions: ActionDto[];
+
+  @ApiProperty({ type: () => ActionEventDto, isArray: true })
+  @Type(() => ActionEventDto)
+  @Allow()
+  events: ActionEventDto[];
+
+  @ApiProperty({ type: () => ReminderGroupDto, isArray: true })
+  @Type(() => ReminderGroupDto)
+  @Allow()
+  reminderGroups: ReminderGroupDto[];
+
+  @ApiProperty({ type: () => GeneralUpdateDto, isArray: true })
+  @Type(() => GeneralUpdateDto)
+  @Allow()
+  generalUpdates: GeneralUpdateDto[];
 
   constructor(suite: ActionSuite, actions?: Action[]) {
     super();
@@ -523,15 +548,19 @@ export class ActionSuiteDto extends PickType(ActionSuite, ['id', 'name']) {
       actions?.map((action) => new ActionDto(action)) ??
       suite.actions?.map((action) => new ActionDto(action)) ??
       [];
-  }
-}
-
-export class ReminderGroupDto extends OmitType(ReminderGroup, [
-  'notifications',
-]) {
-  constructor(group: ReminderGroup) {
-    super();
-    Object.assign(this, group);
+    // Suite events are stored as per-action duplicate rows tagged suiteManaged;
+    // we surface actions[0]'s copies as canonical. Brittle if actions drift —
+    // any divergence (extra/missing rows, reordering) is invisible here.
+    this.events =
+      suite.actions?.length
+        ? suite.actions[0].events
+            ?.filter((event) => event.suiteManaged)
+            .map((event) => new ActionEventDto(event)) ?? []
+        : [];
+    this.reminderGroups =
+      suite.reminderGroups?.map((group) => new ReminderGroupDto(group)) ?? [];
+    this.generalUpdates =
+      suite.generalUpdates?.map((update) => new GeneralUpdateDto(update)) ?? [];
   }
 }
 

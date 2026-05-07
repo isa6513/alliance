@@ -2081,6 +2081,9 @@ export type ActionSuiteDto = {
     id: number;
     name: string;
     actions: Array<ActionDto>;
+    events: Array<ActionEventDto>;
+    reminderGroups: Array<ReminderGroupDto>;
+    generalUpdates: Array<GeneralUpdateDto>;
 };
 
 export type CreateActionSuiteDto = {
