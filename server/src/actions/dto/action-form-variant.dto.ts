@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsInt,
@@ -11,9 +11,14 @@ import {
 import { VariantStats } from '../action-form-variant.service';
 import { ActionFormVariant } from '../entities/action-form-variant.entity';
 
-export class ActionFormVariantDto extends OmitType(ActionFormVariant, [
-  'action',
-  'form',
+export class ActionFormVariantDto extends PickType(ActionFormVariant, [
+  'id',
+  'actionId',
+  'formId',
+  'name',
+  'splitValue',
+  'createdAt',
+  'updatedAt',
 ]) {
   constructor(variant: ActionFormVariant) {
     super();
