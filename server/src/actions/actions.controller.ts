@@ -669,10 +669,7 @@ export class ActionsController {
       this.actionFormVariantService.listForAction(id),
       this.actionFormVariantService.getStatsForAction(id),
     ]);
-    return {
-      variants: variants.map((v) => new ActionFormVariantDto(v)),
-      stats,
-    };
+    return new ActionFormVariantsListDto(variants, stats);
   }
 
   @Post(':id/form-variants')

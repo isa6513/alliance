@@ -8,6 +8,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { VariantStats } from '../action-form-variant.service';
 import { ActionFormVariant } from '../entities/action-form-variant.entity';
 
 export class ActionFormVariantDto extends OmitType(ActionFormVariant, [
@@ -83,6 +84,15 @@ export class ActionFormVariantStatsDto {
 
   @ApiProperty()
   submitted: number;
+
+  constructor(stats: VariantStats) {
+    this.variantId = stats.variantId;
+    this.name = stats.name;
+    this.formId = stats.formId;
+    this.splitValue = stats.splitValue;
+    this.assigned = stats.assigned;
+    this.submitted = stats.submitted;
+  }
 }
 
 export class ActionFormVariantsListDto {
@@ -93,4 +103,9 @@ export class ActionFormVariantsListDto {
   @ApiProperty({ type: () => ActionFormVariantStatsDto, isArray: true })
   @Type(() => ActionFormVariantStatsDto)
   stats: ActionFormVariantStatsDto[];
+
+  constructor(variants: ActionFormVariant[], stats: VariantStats[]) {
+    this.variants = variants.map((v) => new ActionFormVariantDto(v));
+    this.stats = stats.map((s) => new ActionFormVariantStatsDto(s));
+  }
 }
