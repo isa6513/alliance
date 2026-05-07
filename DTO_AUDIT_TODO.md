@@ -88,8 +88,8 @@ Only DTOs with at least one violation are listed.
 
 ### `ActionReferralCodeDto` — `server/src/actions/dto/action.dto.ts:133`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:554` — `getActionReferralCode`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:554` — `getActionReferralCode`
 
 ### `ReminderGroupDto` — `server/src/actions/dto/action.dto.ts:513`
 

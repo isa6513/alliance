@@ -559,7 +559,9 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<ActionReferralCodeDto> {
-    return this.actionsService.getOrCreateActionReferralCode(id, req.user.sub);
+    return new ActionReferralCodeDto(
+      await this.actionsService.getOrCreateActionReferralCode(id, req.user.sub),
+    );
   }
 
   @Get('adminslug/:id')

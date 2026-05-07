@@ -148,6 +148,10 @@ export class ActionReferralCodeDto {
   @IsDefined()
   @IsString()
   referralCode: string;
+
+  constructor(referralCode: string) {
+    this.referralCode = referralCode;
+  }
 }
 
 export class PreviewEmailHtmlResponseDto {
