@@ -520,9 +520,11 @@ export class ActionsController {
     @Request() req: JwtRequest,
     @Query('communityId', ParseIntPipe) communityId: number,
   ): Promise<CommunityCompletedActionsCountDto> {
-    return this.actionsService.countCommunityCompletedActions(
-      req.user.sub,
-      communityId,
+    return new CommunityCompletedActionsCountDto(
+      await this.actionsService.countCommunityCompletedActions(
+        req.user.sub,
+        communityId,
+      ),
     );
   }
 

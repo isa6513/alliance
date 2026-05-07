@@ -1818,7 +1818,7 @@ export class ActionsService {
   async countCommunityCompletedActions(
     userId: number,
     communityId: number,
-  ): Promise<{ completedCount: number }> {
+  ): Promise<number> {
     const memberRow = await this.communityRepository
       .createQueryBuilder('c')
       .select('c.id', 'id')
@@ -1839,7 +1839,7 @@ export class ActionsService {
       throw new NotFoundException('User is not a member of this community');
     }
 
-    const completedCount = await this.actionActivityRepository
+    return this.actionActivityRepository
       .createQueryBuilder('activity')
       .innerJoin(
         'community_users_user',
@@ -1851,8 +1851,6 @@ export class ActionsService {
         type: ActionActivityType.USER_COMPLETED,
       })
       .getCount();
-
-    return { completedCount };
   }
 
   async homeFeed(

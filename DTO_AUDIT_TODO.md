@@ -78,8 +78,8 @@ Only DTOs with at least one violation are listed.
 
 ### `CommunityCompletedActionsCountDto` — `server/src/actions/dto/community-completed-actions-count.dto.ts:3`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:519` — `communityCompletedActionsCount`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:519` — `communityCompletedActionsCount`
 
 ### `ActionSharePreviewDto` — `server/src/actions/dto/action.dto.ts:122`
 

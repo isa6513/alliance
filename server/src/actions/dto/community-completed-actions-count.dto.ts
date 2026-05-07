@@ -6,4 +6,8 @@ export class CommunityCompletedActionsCountDto {
       'Number of member action completions (user_completed activities) recorded for current members of this community',
   })
   completedCount!: number;
+
+  constructor(completedCount: number) {
+    this.completedCount = completedCount;
+  }
 }
