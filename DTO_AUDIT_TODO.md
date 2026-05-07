@@ -93,8 +93,8 @@ Only DTOs with at least one violation are listed.
 
 ### `ReminderGroupDto` — `server/src/actions/dto/action.dto.ts:513`
 
-- [ ] Rule 2: `extends OmitType(ReminderGroup, [...])` at `action.dto.ts:513`
-- [ ] Rule 3: `Object.assign(this, group)` at `action.dto.ts:518`
+- [x] Rule 2: `extends OmitType(ReminderGroup, [...])` at `action.dto.ts:513`
+- [x] Rule 3: `Object.assign(this, group)` at `action.dto.ts:518`
 
 ### `PreviewNotificationPlanDto` — `server/src/notifs/dto/notification-plan.dto.ts:13`
 

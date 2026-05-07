@@ -603,12 +603,56 @@ export class CreateActionUpdateDto extends PickType(ActionUpdate, [
 
 export class CreateActionSuiteDto extends PickType(ActionSuite, ['name']) {}
 
-export class ReminderGroupDto extends OmitType(ReminderGroup, [
-  'notifications',
+export class ReminderGroupDto extends PickType(ReminderGroup, [
+  'id',
+  'name',
+  'timingMode',
+  'actionSuite',
+  'memberActionEvent',
+  'cohortType',
+  'userTag',
+  'users',
+  'emailMessage',
+  'emailSubject',
+  'textMessage',
+  'pushMessage',
+  'send_range_start',
+  'send_range_end',
+  'sendAtAbsolute',
+  'sendAtSecondsFromDeadline',
+  'relative_range_start_seconds_from_deadline',
+  'relative_range_end_seconds_from_deadline',
+  'deadlineEvent',
+  'useSuiteTaskCount',
+  'allSent',
+  'excludeOptionalActions',
 ]) {
   constructor(group: ReminderGroup) {
     super();
-    Object.assign(this, group);
+    this.id = group.id;
+    this.name = group.name;
+    this.timingMode = group.timingMode;
+    this.actionSuite = group.actionSuite;
+    this.memberActionEvent = group.memberActionEvent;
+    this.cohortType = group.cohortType;
+    this.userTag = group.userTag;
+    this.users = group.users;
+    this.emailMessage = group.emailMessage;
+    this.emailSubject = group.emailSubject;
+    this.textMessage = group.textMessage;
+    this.pushMessage = group.pushMessage;
+    this.send_range_start = group.send_range_start;
+    this.send_range_end = group.send_range_end;
+    this.sendAtAbsolute = group.sendAtAbsolute;
+    this.sendAtSecondsFromDeadline = group.sendAtSecondsFromDeadline;
+    this.relative_range_start_seconds_from_deadline =
+      group.relative_range_start_seconds_from_deadline;
+    this.relative_range_end_seconds_from_deadline =
+      group.relative_range_end_seconds_from_deadline;
+    this.deadlineEvent = group.deadlineEvent;
+    this.useSuiteTaskCount = group.useSuiteTaskCount;
+    this.allSent = group.allSent;
+    this.excludeOptionalActions = group.excludeOptionalActions;
   }
 }
 
