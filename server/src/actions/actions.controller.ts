@@ -408,7 +408,6 @@ export class ActionsController {
   async findAllWithDrafts(): Promise<ActionDto[]> {
     const actions = await this.actionsService.findAllSorted({
       events: true,
-      activities: true,
       suite: true,
     });
     return actions.map((action) => new ActionDto(action));
