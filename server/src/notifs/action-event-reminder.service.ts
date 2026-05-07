@@ -27,6 +27,7 @@ import {
 import { DEFAULT_TIME_ZONE, User } from '../user/entities/user.entity';
 import { ActionEventRecipientService } from './action-event-recipient.service';
 import {
+  NotificationChannel,
   NotificationPlan,
   PreviewNotificationPlanDto,
 } from './dto/notification-plan.dto';
@@ -313,23 +314,16 @@ export class ActionEventReminderService {
       new Date(Date.now() - NOTIFICATION_LOOKBACK_WINDOW_MS),
       new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
     );
-    const channels = plans.map((plan) => {
-      const channels: ('email' | 'text' | 'push')[] = [];
-      if (userActionNotifsEnabled_push(plan.user)) {
-        channels.push('push');
-      }
-      if (userActionNotifsEnabled_text(plan.user)) {
-        channels.push('text');
-      }
-      if (userActionNotifsEnabled_email(plan.user)) {
-        channels.push('email');
-      }
-      return channels;
+    return plans.map((plan) => {
+      const channels: NotificationChannel[] = [];
+      if (userActionNotifsEnabled_push(plan.user))
+        channels.push(NotificationChannel.Push);
+      if (userActionNotifsEnabled_text(plan.user))
+        channels.push(NotificationChannel.Text);
+      if (userActionNotifsEnabled_email(plan.user))
+        channels.push(NotificationChannel.Email);
+      return new PreviewNotificationPlanDto(plan, channels);
     });
-    return plans.map((plan, index) => ({
-      ...plan,
-      channels: channels[index],
-    }));
   }
 
   async getSentNotifsForGroup(groupId: number): Promise<ActionEventNotifDto[]> {

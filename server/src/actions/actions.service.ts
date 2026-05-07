@@ -22,7 +22,10 @@ import {
   ActionEventReminderService,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
 } from 'src/notifs/action-event-reminder.service';
-import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
+import {
+  NotificationChannel,
+  PreviewNotificationPlanDto,
+} from 'src/notifs/dto/notification-plan.dto';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
 import {
   NotifsService,
@@ -2445,14 +2448,16 @@ export class ActionsService {
       new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
     );
 
-    return plans.map((plan) => ({
-      ...plan,
-      channels: [
-        userActionNotifsEnabled_text(plan.user) ? ('text' as const) : null,
-        userActionNotifsEnabled_email(plan.user) ? ('email' as const) : null,
-        userActionNotifsEnabled_push(plan.user) ? ('push' as const) : null,
-      ].filter((channel) => channel !== null),
-    }));
+    return plans.map((plan) => {
+      const channels: NotificationChannel[] = [];
+      if (userActionNotifsEnabled_push(plan.user))
+        channels.push(NotificationChannel.Push);
+      if (userActionNotifsEnabled_text(plan.user))
+        channels.push(NotificationChannel.Text);
+      if (userActionNotifsEnabled_email(plan.user))
+        channels.push(NotificationChannel.Email);
+      return new PreviewNotificationPlanDto(plan, channels);
+    });
   }
 
   async findUncompletedTasks(

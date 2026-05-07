@@ -98,10 +98,10 @@ Only DTOs with at least one violation are listed.
 
 ### `PreviewNotificationPlanDto` — `server/src/notifs/dto/notification-plan.dto.ts:13`
 
-- [ ] Rule 1: no constructor (extends `NotificationPlan` which also has none)
-- [ ] Rule 4:
-  - [ ] `actions.controller.ts:803` — `plansForGroup`
-  - [ ] `actions.controller.ts:1015` — `tentativePlansForGroup`
+- [x] Rule 1: no constructor (extends `NotificationPlan` which also has none)
+- [x] Rule 4:
+  - [x] `actions.controller.ts:803` — `plansForGroup`
+  - [x] `actions.controller.ts:1015` — `tentativePlansForGroup`
 
 ### `ActionEventNotifDto` — `server/src/notifs/entities/action-event-notif.dto.ts:5`
 
