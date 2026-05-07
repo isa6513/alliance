@@ -21,6 +21,6 @@ describe('App Controller (e2e)', () => {
 
   it('exposes a health check endpoint', async () => {
     const res = await request(app.getHttpServer()).get('/').expect(200);
-    expect(res.text).toBe('OK');
+    expect(res.body.status).toBe('OK');
   });
 });
