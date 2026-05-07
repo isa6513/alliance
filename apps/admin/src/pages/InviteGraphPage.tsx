@@ -16,11 +16,7 @@ import {
   forceCollide,
   drag,
 } from "d3";
-import type {
-  Selection,
-  SimulationNodeDatum,
-  SimulationLinkDatum,
-} from "d3";
+import type { Selection, SimulationNodeDatum, SimulationLinkDatum } from "d3";
 
 interface GraphNode extends SimulationNodeDatum {
   id: string;
@@ -58,7 +54,8 @@ const InviteGraphPage = () => {
   const [loading, setLoading] = useState(true);
 
   // Filters
-  const [contractFilter, setContractFilter] = useState<ContractFilter>("active");
+  const [contractFilter, setContractFilter] =
+    useState<ContractFilter>("active");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [communityFilter, setCommunityFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
@@ -70,7 +67,7 @@ const InviteGraphPage = () => {
         setUsers(usersRes.data ?? []);
         setInvites(invitesRes.data ?? []);
         setLoading(false);
-      }
+      },
     );
   }, []);
 
@@ -110,7 +107,7 @@ const InviteGraphPage = () => {
       if (roleFilter === "regular" && (u.admin || u.staff)) continue;
       if (communityFilter !== "all") {
         const inCommunity = (u.communities ?? []).some(
-          (c) => String(c.id) === communityFilter
+          (c) => String(c.id) === communityFilter,
         );
         if (!inCommunity) continue;
       }
@@ -148,7 +145,7 @@ const InviteGraphPage = () => {
 
     // Build the graph data
     const usedInvites = invites.filter(
-      (inv) => inv.status === "link_used" && inv.invitedUserId
+      (inv) => inv.status === "link_used" && inv.invitedUserId,
     );
 
     // Users 7 and 10 are treated as the root node
@@ -168,9 +165,9 @@ const InviteGraphPage = () => {
 
     // Add center node (represents root users + uninvited)
     const rootUsers = users.filter((u) => ROOT_USER_IDS.has(u.id));
-    const centerLabel = rootUsers
-      .map((u) => (u.anonymous ? "Someone" : u.name))
-      .join(" & ") || "Root";
+    const centerLabel =
+      rootUsers.map((u) => (u.anonymous ? "Someone" : u.name)).join(" & ") ||
+      "Root";
     const centerNode: GraphNode = {
       id: "center",
       displayName: centerLabel,
@@ -202,7 +199,7 @@ const InviteGraphPage = () => {
     // Links from referredBy relation
     for (const u of users) {
       if (ROOT_USER_IDS.has(u.id)) continue;
-      const referredById = (u as UserDto & { referredById?: number | null }).referredById;
+      const referredById = u.referredById;
       if (referredById != null) {
         const src = resolveNodeId(referredById);
         const tgt = resolveNodeId(u.id);
@@ -314,7 +311,7 @@ const InviteGraphPage = () => {
         "link",
         forceLink<GraphNode, GraphLink>(links)
           .id((d) => d.id)
-          .distance(60)
+          .distance(60),
       )
       .force("charge", forceManyBody().strength(-120))
       .force("center", forceCenter(width / 2, height / 2))
@@ -464,20 +461,16 @@ const InviteGraphPage = () => {
     node.on("click", (event, d) => {
       event.stopPropagation();
       graphRef.current!.setSelectedNodeId(
-        selectedNodeId === d.id ? null : d.id
+        selectedNodeId === d.id ? null : d.id,
       );
       // Dispatch a custom event so the filter effect can re-apply
-      svgRef.current?.dispatchEvent(
-        new CustomEvent("graph-selection-change")
-      );
+      svgRef.current?.dispatchEvent(new CustomEvent("graph-selection-change"));
     });
 
     // Click empty space to clear
     svg.on("click", () => {
       graphRef.current!.setSelectedNodeId(null);
-      svgRef.current?.dispatchEvent(
-        new CustomEvent("graph-selection-change")
-      );
+      svgRef.current?.dispatchEvent(new CustomEvent("graph-selection-change"));
     });
 
     // Tooltip on hover
@@ -506,7 +499,7 @@ const InviteGraphPage = () => {
       zoomIdentity
         .translate(width / 2, height / 2)
         .scale(0.8)
-        .translate(-width / 2, -height / 2)
+        .translate(-width / 2, -height / 2),
     );
 
     return () => {
@@ -545,8 +538,7 @@ const InviteGraphPage = () => {
           return allHighlighted.has(d.id) ? 1 : 0.15;
         })
         .attr("stroke", (d: GraphNode) => {
-          if (!allHighlighted)
-            return d.isCenter ? "#9ca3af" : "#d1d5db";
+          if (!allHighlighted) return d.isCenter ? "#9ca3af" : "#d1d5db";
           if (d.id === sid) return "#3b82f6";
           if (ancestors.has(d.id)) return "#f59e0b";
           if (descendants.has(d.id)) return "#60a5fa";
@@ -589,7 +581,7 @@ const InviteGraphPage = () => {
       link
         .attr("stroke", (d: GraphLink) => linkHighlightColor(d) ?? "#ccc")
         .attr("stroke-width", (d: GraphLink) =>
-          linkHighlightColor(d) ? 2.5 : 1.5
+          linkHighlightColor(d) ? 2.5 : 1.5,
         )
         .attr("stroke-opacity", (d: GraphLink) => {
           const srcNode = d.source as GraphNode;

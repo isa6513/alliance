@@ -4,7 +4,7 @@ import {
   PartialType,
   PickType,
 } from '@nestjs/swagger';
-import { instanceToPlain, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   Allow,
   IsArray,
@@ -115,11 +115,9 @@ export class UserDto extends PickType(User, [
   'emailNotifsForActions',
   'pushNotifsForActions',
   'textNotifsForActions',
-  'socialNotifsPreference',
   'profileDescription',
   'forumDigestPreference',
   'turnedOffAllNotifs',
-  'invitedCommunities',
   'referralCode',
   'referralSource',
   'anonymous',
@@ -146,10 +144,6 @@ export class UserDto extends PickType(User, [
   'receiveReplyNotifications',
   'tags',
 ]) {
-  @ApiPropertyOptional()
-  @IsOptional()
-  cityId?: number;
-
   @ApiProperty()
   @Allow()
   email: string;
@@ -168,7 +162,44 @@ export class UserDto extends PickType(User, [
 
   constructor(user: User) {
     super();
-    Object.assign(this, instanceToPlain(user));
+    this.id = user.id;
+    this.name = user.name;
+    this.email = user.email;
+    this.phoneNumber = user.phoneNumber;
+    this.preferredReminderTime = user.preferredReminderTime;
+    this.timeZone = user.timeZone;
+    this.emailNotifsForActions = user.emailNotifsForActions;
+    this.textNotifsForActions = user.textNotifsForActions;
+    this.pushNotifsForActions = user.pushNotifsForActions;
+    this.shareEmailWithCommunityLead = user.shareEmailWithCommunityLead;
+    this.sharePhoneNumberWithCommunityLead =
+      user.sharePhoneNumberWithCommunityLead;
+    this.turnedOffAllNotifs = user.turnedOffAllNotifs;
+    this.forumDigestPreference = user.forumDigestPreference;
+    this.admin = user.admin;
+    this.staff = user.staff;
+    this.profileDescription = user.profileDescription;
+    this.referralCode = user.referralCode;
+    this.referralSource = user.referralSource;
+    this.customCityString = user.customCityString;
+    this.anonymous = user.anonymous;
+    this.shareInfoPublicly = user.shareInfoPublicly;
+    this.formDataPreference = user.formDataPreference;
+    this.pushesForLikes = user.pushesForLikes;
+    this.pushesForComments = user.pushesForComments;
+    this.pushesForFriendRequests = user.pushesForFriendRequests;
+    this.pushesForMessages = user.pushesForMessages;
+    this.pushesForActionUpdates = user.pushesForActionUpdates;
+    this.undergoingGroupAssignment = user.undergoingGroupAssignment;
+    this.remindAboutUncompletedGroupMembers =
+      user.remindAboutUncompletedGroupMembers;
+    this.receiveReplyNotifications = user.receiveReplyNotifications;
+    this.contractEvents = user.contractEvents;
+    this.activities = user.activities;
+    this.tags = user.tags;
+    this.communities = user.communities;
+    this.leaderOfIds = user.leaderOfIds;
+    this.hasActiveContract = user.hasActiveContract;
     this.profilePicture = getImageSource(user.profilePicture);
     this.referredById = user.referredBy?.id ?? null;
   }

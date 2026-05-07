@@ -29,8 +29,6 @@ export type RefreshTokensResponseDto = {
     refresh_token?: string;
 };
 
-export type NotificationPreference = 'all' | 'digest' | 'none';
-
 export type ForumDigestPreference = 'off' | 'daily' | 'weekly';
 
 export type PublicFormResponseDefault = 'public' | 'private';
@@ -58,6 +56,8 @@ export type ContractEvent = {
 };
 
 export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link';
+
+export type NotificationPreference = 'all' | 'digest' | 'none';
 
 export type OnetimeInviteStatus = 'request_pending' | 'request_rejected' | 'link_unused' | 'link_used';
 
@@ -672,7 +672,6 @@ export type UserDto = {
     pushNotifsForActions: boolean;
     shareEmailWithCommunityLead: boolean;
     sharePhoneNumberWithCommunityLead: boolean;
-    socialNotifsPreference: NotificationPreference;
     turnedOffAllNotifs: boolean;
     forumDigestPreference: ForumDigestPreference;
     admin: boolean;
@@ -697,8 +696,6 @@ export type UserDto = {
     tags: Array<Tag>;
     communities: Array<Community>;
     leaderOfIds: Array<number>;
-    invitedCommunities: Array<CommunityInvite>;
-    cityId?: number;
     email: string;
     hasActiveContract: boolean;
     referredById?: number;
@@ -2083,11 +2080,6 @@ export type CreateActionUpdateDto = {
 export type ActionSuiteDto = {
     id: number;
     name: string;
-    createdAt: string;
-    updatedAt: string;
-    generalUpdates: Array<GeneralUpdate>;
-    reminderGroups: Array<ReminderGroup>;
-    events: Array<ActionEvent>;
     actions: Array<ActionDto>;
 };
 
