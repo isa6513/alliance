@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ReminderGroup } from 'src/actions/entities/reminder-group.entity';
 import { User } from 'src/user/entities/user.entity';
-
-export enum NotificationChannel {
-  Email = 'email',
-  Text = 'text',
-  Push = 'push',
-}
+import { NotificationChannel } from '../notif-utils';
 
 export class NotificationPlan {
   @ApiProperty()

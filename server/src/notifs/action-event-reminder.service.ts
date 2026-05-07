@@ -27,7 +27,6 @@ import {
 import { DEFAULT_TIME_ZONE, User } from '../user/entities/user.entity';
 import { ActionEventRecipientService } from './action-event-recipient.service';
 import {
-  NotificationChannel,
   NotificationPlan,
   PreviewNotificationPlanDto,
 } from './dto/notification-plan.dto';
@@ -36,7 +35,7 @@ import {
   ActionEventNotif,
   ActionEventNotifType,
 } from './entities/action-event-notif.entity';
-import { generateCIDForNotif } from './notif-utils';
+import { generateCIDForNotif, NotificationChannel } from './notif-utils';
 import {
   userActionNotifsEnabled_email,
   userActionNotifsEnabled_push,

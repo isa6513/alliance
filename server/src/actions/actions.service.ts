@@ -22,10 +22,7 @@ import {
   ActionEventReminderService,
   NOTIFICATION_LOOKBACK_WINDOW_MS,
 } from 'src/notifs/action-event-reminder.service';
-import {
-  NotificationChannel,
-  PreviewNotificationPlanDto,
-} from 'src/notifs/dto/notification-plan.dto';
+import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
 import {
   NotifsService,
@@ -161,6 +158,7 @@ import {
 } from './cohort-expression.evaluator';
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import { EventType } from 'src/eventlog/event-log.entity';
+import { NotificationChannel } from 'src/notifs/notif-utils';
 
 type SuspendPlanContext = {
   orderedSuites: Array<{ suiteId: number; pastDate: Date | null }>;
