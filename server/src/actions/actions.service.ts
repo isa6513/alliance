@@ -72,7 +72,7 @@ import {
   ActionDto,
   ActionEventDto,
   ActionReferralCodeDto,
-  ActionSharePreviewDto,
+  ActionSharePreview,
   ActionSuiteDto,
   ActionUpdateDto,
   CreateActionActivityDto,
@@ -729,17 +729,13 @@ export class ActionsService {
   async getSharePreview(
     actionId: number,
     shareCode?: string,
-  ): Promise<ActionSharePreviewDto> {
+  ): Promise<ActionSharePreview> {
     // Match public action visibility before exposing referrer completion state.
     await this.findOneOrFail({ id: actionId });
 
-    const response = new ActionSharePreviewDto();
-    response.completedByReferrer = false;
-    response.validReferral = false;
-
     const trimmedCode = shareCode?.trim();
     if (!trimmedCode) {
-      return response;
+      return { completedByReferrer: false, validReferral: false };
     }
 
     const shareUrl = await this.actionShareUrlRepository.findOne({
@@ -751,16 +747,16 @@ export class ActionsService {
     });
 
     if (!shareUrl?.user) {
-      return response;
+      return { completedByReferrer: false, validReferral: false };
     }
 
-    response.validReferral = true;
-    response.firstName = this.getFirstNameForSharePreview(shareUrl.user);
-    response.completedByReferrer =
-      (await this.getActionRelation(actionId, shareUrl.user.id)) ===
-      UserActionRelation.Completed;
-
-    return response;
+    return {
+      firstName: this.getFirstNameForSharePreview(shareUrl.user),
+      completedByReferrer:
+        (await this.getActionRelation(actionId, shareUrl.user.id)) ===
+        UserActionRelation.Completed,
+      validReferral: true,
+    };
   }
 
   async getOrCreateActionReferralCode(

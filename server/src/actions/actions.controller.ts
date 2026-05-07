@@ -547,7 +547,9 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Query('ref') shareCode?: string,
   ): Promise<ActionSharePreviewDto> {
-    return this.actionsService.getSharePreview(id, shareCode);
+    return new ActionSharePreviewDto(
+      await this.actionsService.getSharePreview(id, shareCode),
+    );
   }
 
   @Post(':id/referralCode')

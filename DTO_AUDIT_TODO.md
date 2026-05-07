@@ -83,8 +83,8 @@ Only DTOs with at least one violation are listed.
 
 ### `ActionSharePreviewDto` — `server/src/actions/dto/action.dto.ts:122`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:544` — `getSharePreview`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:544` — `getSharePreview`
 
 ### `ActionReferralCodeDto` — `server/src/actions/dto/action.dto.ts:133`
 

@@ -120,7 +120,13 @@ export class PreviewTextMessageResponseDto {
   text: string;
 }
 
-export class ActionSharePreviewDto {
+export interface ActionSharePreview {
+  firstName?: string;
+  completedByReferrer: boolean;
+  validReferral: boolean;
+}
+
+export class ActionSharePreviewDto implements ActionSharePreview {
   @ApiPropertyOptional()
   firstName?: string;
 
@@ -129,6 +135,12 @@ export class ActionSharePreviewDto {
 
   @ApiProperty({ type: Boolean })
   validReferral: boolean;
+
+  constructor(data: ActionSharePreview) {
+    this.firstName = data.firstName;
+    this.completedByReferrer = data.completedByReferrer;
+    this.validReferral = data.validReferral;
+  }
 }
 
 export class ActionReferralCodeDto {
