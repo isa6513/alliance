@@ -390,7 +390,6 @@ const ActionDashboard: React.FC = () => {
         }
         setAction(actionData);
         const {
-          activities: _activities,
           usersCompleted: _usersCompleted,
           usersJoined: _usersJoined,
           events: _events,

@@ -174,10 +174,6 @@ describe('Tasks (e2e)', () => {
           type: 'Tag',
           tagId: ctx.defaultTag.id,
         },
-        memberActionPhase: {
-          event: null,
-          deadline: null,
-        },
         followUpForms: [],
       } satisfies CreateActionDto),
     );
@@ -328,10 +324,6 @@ describe('Tasks (e2e)', () => {
           type: 'Tag',
           tagId: ctx.defaultTag.id,
         },
-        memberActionPhase: {
-          event: null,
-          deadline: null,
-        },
         followUpForms: [],
       } satisfies CreateActionDto),
     );
@@ -439,10 +431,6 @@ describe('Tasks (e2e)', () => {
         cohortExpression: {
           type: 'Tag',
           tagId: ctx.defaultTag.id,
-        },
-        memberActionPhase: {
-          event: null,
-          deadline: null,
         },
         followUpForms: [],
       } satisfies CreateActionDto),
@@ -572,10 +560,6 @@ describe('Tasks (e2e)', () => {
           publicOnly: false,
           isContractSigningAction: false,
           isForumParticipationAction: false,
-          memberActionPhase: {
-            event: null,
-            deadline: null,
-          },
           onboarding: false,
           followUpForms: [],
           cohortExpression: {
@@ -1032,10 +1016,6 @@ describe('Tasks (e2e)', () => {
           optional: false,
           publicOnly: false,
           isContractSigningAction: false,
-          memberActionPhase: {
-            event: null,
-            deadline: null,
-          },
           onboarding: false,
           followUpForms: [],
           cohortExpression: {
@@ -1383,10 +1363,6 @@ describe('Tasks (e2e)', () => {
           optional: false,
           publicOnly: false,
           isContractSigningAction: false,
-          memberActionPhase: {
-            event: null,
-            deadline: null,
-          },
           onboarding: false,
           followUpForms: [],
           cohortExpression: {

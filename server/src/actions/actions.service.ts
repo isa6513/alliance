@@ -587,7 +587,7 @@ export class ActionsService {
           canParticipate: user
             ? await this.isEligibleForAction(action, user)
             : false,
-          shouldParticipate: shouldParticipate,
+          shouldParticipate,
           userRelation: user
             ? await this.getActionRelationFromActivities(
                 user.activities!.filter(
@@ -2162,16 +2162,16 @@ export class ActionsService {
     });
   }
 
-  async archive(id: number): Promise<ActionDto> {
+  async archive(id: number): Promise<Action> {
     const action = await this.actionRepository.findOneOrFail({ where: { id } });
     action.archived = true;
-    return new ActionDto(await this.actionRepository.save(action));
+    return this.actionRepository.save(action);
   }
 
-  async unarchive(id: number): Promise<ActionDto> {
+  async unarchive(id: number): Promise<Action> {
     const action = await this.actionRepository.findOneOrFail({ where: { id } });
     action.archived = false;
-    return new ActionDto(await this.actionRepository.save(action));
+    return this.actionRepository.save(action);
   }
 
   async createActionUpdate(
@@ -2529,7 +2529,7 @@ export class ActionsService {
     return actionWithExtras;
   }
 
-  async importAction(json: string): Promise<ActionDto> {
+  async importAction(json: string): Promise<Action> {
     const importaction = JSON.parse(json) as ExportActionDto;
 
     const {
@@ -2598,11 +2598,9 @@ export class ActionsService {
           );
         }
 
-        const saved = await actionRepo.findOneOrFail({
+        return actionRepo.findOneOrFail({
           where: { id: actionId },
         });
-
-        return new ActionDto(saved);
       },
     );
     await this.syncGeneralUpdateDatesForSuites([suiteIdToSync]);

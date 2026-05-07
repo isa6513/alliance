@@ -1444,10 +1444,6 @@ export type ActionDto = {
     visibilityMode: VisibilityMode;
     usersJoined: number;
     /**
-     * Number of users who have completed the action
-     */
-    usersCompleted: number;
-    /**
      * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
      */
     everyoneShouldComplete: boolean;
@@ -1485,11 +1481,11 @@ export type ActionDto = {
     customStatLabel?: string;
     customStatValue?: number;
     customStatGoal?: number;
-    activities: Array<Array<ActionActivity>>;
     followUpForms: Array<FollowUpForm>;
     suite?: ActionSuite;
-    status: ActionStatus;
+    usersCompleted: number;
     events: Array<ActionEventDto>;
+    status: ActionStatus;
     updates: Array<ActionUpdateDto>;
     canParticipate?: boolean;
     shouldParticipate?: boolean;

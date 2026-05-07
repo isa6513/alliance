@@ -896,15 +896,15 @@ export class ActionsController {
   @Post('archive/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
-  archive(@Param('id', ParseIntPipe) id: number): Promise<ActionDto> {
-    return this.actionsService.archive(id);
+  async archive(@Param('id', ParseIntPipe) id: number): Promise<ActionDto> {
+    return new ActionDto(await this.actionsService.archive(id));
   }
 
   @Post('unarchive/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
-  unarchive(@Param('id', ParseIntPipe) id: number): Promise<ActionDto> {
-    return this.actionsService.unarchive(id);
+  async unarchive(@Param('id', ParseIntPipe) id: number): Promise<ActionDto> {
+    return new ActionDto(await this.actionsService.unarchive(id));
   }
 
   @Get('reminderGroupsForEvent/:id')
@@ -1090,8 +1090,8 @@ export class ActionsController {
   @Post('pasteJson')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
-  pasteJson(@Body() body: PasteJsonDto): Promise<ActionDto> {
-    return this.actionsService.importAction(body.body);
+  async pasteJson(@Body() body: PasteJsonDto): Promise<ActionDto> {
+    return new ActionDto(await this.actionsService.importAction(body.body));
   }
 
   @Get('reminderPlansOverview')

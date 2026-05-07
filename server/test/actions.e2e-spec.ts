@@ -211,10 +211,6 @@ describe('Actions (e2e)', () => {
         preventCompletion: false,
         publicOnly: false,
         onboarding: false,
-        memberActionPhase: {
-          event: null,
-          deadline: null,
-        },
         followUpForms: [],
       };
 

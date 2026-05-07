@@ -182,11 +182,42 @@ export enum UserActionRelation {
   Dismissed = 'dismissed',
 }
 
-export class ActionDto extends OmitType(Action, [
-  'authors',
-  'events',
-  'updates',
-  'formVariants',
+export class ActionDto extends PickType(Action, [
+  'id',
+  'name',
+  'category',
+  'image',
+  'squareThumbnailImage',
+  'squareThumbnailImageAlt',
+  'donationAmount',
+  'body',
+  'taskContents',
+  'shortDescription',
+  'timeEstimate',
+  'type',
+  'taskFormId',
+  'createdAt',
+  'updatedAt',
+  'cohortExpression',
+  'isContractSigningAction',
+  'visibilityMode',
+  'usersJoined',
+  'everyoneShouldComplete',
+  'onboarding',
+  'archived',
+  'priority',
+  'optional',
+  'preventCompletion',
+  'publicOnly',
+  'shouldCompleteAfterDeadline',
+  'isForumParticipationAction',
+  'computedAutocompleteAt',
+  'customStatType',
+  'customStatLabel',
+  'customStatValue',
+  'customStatGoal',
+  'followUpForms',
+  'suite',
 ]) {
   @ApiProperty()
   usersCompleted: number;
@@ -221,7 +252,7 @@ export class ActionDto extends OmitType(Action, [
   authors?: ProfileDto[];
 
   constructor(
-    action: Partial<Action>,
+    action: Action,
     extra?: {
       canParticipate?: boolean;
       shouldParticipate?: boolean;
@@ -230,17 +261,50 @@ export class ActionDto extends OmitType(Action, [
     },
   ) {
     super();
-    Object.assign(this, action);
+    this.id = action.id;
+    this.name = action.name;
+    this.category = action.category;
     this.image = action.image ? getImageSource(action.image) : undefined;
     this.squareThumbnailImage = action.squareThumbnailImage
       ? getImageSource(action.squareThumbnailImage)
       : undefined;
     this.squareThumbnailImageAlt =
       action.squareThumbnailImageAlt ?? action.name;
+    this.donationAmount = action.donationAmount;
+    this.body = action.body;
+    this.taskContents = action.taskContents;
+    this.shortDescription = action.shortDescription;
+    this.timeEstimate = action.timeEstimate;
+    this.type = action.type;
+    this.taskFormId = action.taskFormId;
+    this.createdAt = action.createdAt;
+    this.updatedAt = action.updatedAt;
+    this.cohortExpression = action.cohortExpression;
+    this.isContractSigningAction = action.isContractSigningAction;
+    this.visibilityMode = action.visibilityMode;
+    this.usersJoined = action.usersJoined;
     this.usersCompleted = action.usersCompleted || 0;
+    this.everyoneShouldComplete = action.everyoneShouldComplete;
+    this.onboarding = action.onboarding;
+    this.archived = action.archived;
+    this.priority = action.priority;
+    this.optional = action.optional;
+    this.preventCompletion = action.preventCompletion;
+    this.publicOnly = action.publicOnly;
+    this.shouldCompleteAfterDeadline = action.shouldCompleteAfterDeadline;
+    this.isForumParticipationAction = action.isForumParticipationAction;
+    this.computedAutocompleteAt = action.computedAutocompleteAt;
+    this.customStatType = action.customStatType;
+    this.customStatLabel = action.customStatLabel;
+    this.customStatValue = action.customStatValue;
+    this.customStatGoal = action.customStatGoal;
+    this.followUpForms = action.followUpForms;
+    this.suite = action.suite;
     this.status = (action.events && action.status) ?? ActionStatus.Draft;
     this.events =
       action.events?.map((event) => new ActionEventDto(event)) || [];
+    this.updates =
+      action.updates?.map((update) => new ActionUpdateDto(update)) || [];
     this.canParticipate = extra?.canParticipate;
     this.shouldParticipate = extra?.shouldParticipate;
     this.userRelation = extra?.userRelation;
@@ -254,18 +318,15 @@ export class CreateActionDto extends OmitType(ActionDto, [
   'id',
   'usersJoined',
   'events',
-  'activities',
   'usersCompleted',
   'status',
   'taskContents',
-  'events',
   'suite',
   'archived',
   'updates',
   'authors',
   'createdAt',
   'updatedAt',
-  'deadlineWeekNumber',
   'priority',
 ]) {
   @ApiPropertyOptional({
