@@ -42,6 +42,7 @@ import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto
 import { GeneralUpdate } from '../entities/general-update.entity';
 import { GeneralUpdateDto } from './general-update.dto';
 import type { CohortExpression } from '../cohort-expression.types';
+import type { Comment } from 'src/forum/entities/comment.entity';
 
 export class CreateReminderGroupDto extends PickType(ReminderGroup, [
   'name',
@@ -468,7 +469,7 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   constructor(
     actionActivity: ActionActivity,
     extra?: {
-      comments?: CommentDto[];
+      comments?: Comment[];
       formResponseOutput?: FormResponseOutputDto;
       includeLikes?: boolean;
       likedByMe?: boolean;
@@ -488,7 +489,8 @@ export class ActionActivityDto extends PickType(ActionActivity, [
       this.likes = actionActivity.likes.map((like) => new ProfileDto(like));
     }
     this.likedByMe = extra?.likedByMe;
-    this.comments = extra?.comments ?? [];
+    this.comments =
+      extra?.comments?.map((comment) => new CommentDto(comment)) ?? [];
     this.formResponseOutput = extra?.formResponseOutput;
     this.editableContent = actionActivity.editableContent
       ? new EditableContentDto(actionActivity.editableContent)

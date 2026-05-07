@@ -1482,7 +1482,7 @@ export class ActionsService {
     return activities.map((activity) => {
       const comments = commentsByActivity.get(activity.id) ?? [];
       return new ActionActivityDto(activity, {
-        comments: comments.map((comment) => new CommentDto(comment)),
+        comments,
         formResponseOutput: activity.taskFormResponse
           ? this.buildOutputFormResponse(activity)
           : undefined,
