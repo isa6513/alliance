@@ -414,12 +414,15 @@ export class ActionActivityDto extends PickType(ActionActivity, [
     },
   ) {
     super();
+    this.id = actionActivity.id;
+    this.type = actionActivity.type;
+    this.createdAt = actionActivity.createdAt;
+    this.actionId = actionActivity.actionId;
+    this.likesCount = actionActivity.likesCount;
     this.actionName = actionActivity.action?.name;
-    const { action: _action, ...rest } = actionActivity;
-    Object.assign(this, rest);
     this.user = new ProfileDto(actionActivity.user);
     // Only include likes array when explicitly requested (detail views, like/unlike)
-    // For feed views, we rely on likesCount which is already set via Object.assign
+    // For feed views, we rely on likesCount
     if (extra?.includeLikes && actionActivity.likes !== undefined) {
       this.likes = actionActivity.likes.map((like) => new ProfileDto(like));
     }
@@ -551,12 +554,11 @@ export class ActionSuiteDto extends PickType(ActionSuite, ['id', 'name']) {
     // Suite events are stored as per-action duplicate rows tagged suiteManaged;
     // we surface actions[0]'s copies as canonical. Brittle if actions drift —
     // any divergence (extra/missing rows, reordering) is invisible here.
-    this.events =
-      suite.actions?.length
-        ? suite.actions[0].events
-            ?.filter((event) => event.suiteManaged)
-            .map((event) => new ActionEventDto(event)) ?? []
-        : [];
+    this.events = suite.actions?.length
+      ? (suite.actions[0].events
+          ?.filter((event) => event.suiteManaged)
+          .map((event) => new ActionEventDto(event)) ?? [])
+      : [];
     this.reminderGroups =
       suite.reminderGroups?.map((group) => new ReminderGroupDto(group)) ?? [];
     this.generalUpdates =

@@ -1053,7 +1053,7 @@ export class ActionsService {
   async dismissAction(
     userId: number,
     actionId: number,
-  ): Promise<ActionActivityDto> {
+  ): Promise<ActionActivity> {
     return await this.createActionActivity({
       actionId,
       userId,
@@ -1069,7 +1069,7 @@ export class ActionsService {
     declineReason?: string;
     isOutOfTime?: boolean;
     adminCreated?: boolean;
-  }): Promise<ActionActivityDto> {
+  }): Promise<ActionActivity> {
     const {
       actionId,
       userId,
@@ -1122,10 +1122,9 @@ export class ActionsService {
     });
     const savedActivity = await this.actionActivityRepository.save(activity);
 
-    const activityDto = new ActionActivityDto(savedActivity);
     this.eventEmitter.emit('action.activity', {
       actionId,
-      activity: activityDto,
+      activity: new ActionActivityDto(savedActivity),
     });
 
     await this.reloadUsersJoinedForAction(actionId);
@@ -1134,7 +1133,7 @@ export class ActionsService {
       await this.liveActivityService.updateCompletionCount(actionId);
     }
 
-    return activityDto;
+    return savedActivity;
   }
 
   async optoutAction(
@@ -1142,7 +1141,7 @@ export class ActionsService {
     userId: number,
     reason: string,
     outOfTime: boolean,
-  ): Promise<ActionActivityDto> {
+  ): Promise<ActionActivity> {
     return this.createActionActivity({
       actionId,
       userId,
@@ -1159,7 +1158,7 @@ export class ActionsService {
       taskFormResponse?: FormResponse;
       adminCreated?: boolean;
     } = {},
-  ): Promise<ActionActivityDto> {
+  ): Promise<ActionActivity> {
     return this.createActionActivity({
       actionId,
       userId,
@@ -1372,7 +1371,7 @@ export class ActionsService {
       : new Set<number>();
 
     if (comments) {
-      return this.attachComments(activities, requestingUserId);
+      return await this.attachComments(activities, requestingUserId);
     }
     return activities.map(
       (activity) =>
@@ -1684,14 +1683,13 @@ export class ActionsService {
     await this.actionRepository.delete({});
   }
 
-  async getActivityForUser(userId: number): Promise<ActionActivityDto[]> {
-    const activities = await this.actionActivityRepository.find({
+  async getActivityForUser(userId: number): Promise<ActionActivity[]> {
+    return this.actionActivityRepository.find({
       where: {
         user: { id: userId },
       },
       relations: { action: true, user: true },
     });
-    return activities.map((activity) => new ActionActivityDto(activity));
   }
 
   async friendActivity(
@@ -1785,7 +1783,7 @@ export class ActionsService {
     communityId: number,
     comments?: boolean,
     requestingUserId?: number,
-  ) {
+  ): Promise<ActionActivityDto[]> {
     const community = await this.communityService.findOneOrFail(communityId);
 
     const members = community.users ?? [];
@@ -1999,7 +1997,11 @@ export class ActionsService {
     return new ActionEventDto(event);
   }
 
-  async likeActivity(id: number, userId: number, unlike = false) {
+  async likeActivity(
+    id: number,
+    userId: number,
+    unlike = false,
+  ): Promise<ActionActivityDto> {
     const activity = await this.actionActivityRepository.findOne({
       where: { id },
       relations: { user: true, action: true, likes: true },
@@ -2151,7 +2153,7 @@ export class ActionsService {
 
   async adminCreateActivity(
     activityDto: CreateActionActivityDto,
-  ): Promise<ActionActivityDto> {
+  ): Promise<ActionActivity> {
     return this.createActionActivity({
       actionId: activityDto.actionId,
       userId: activityDto.userId,

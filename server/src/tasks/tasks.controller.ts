@@ -303,13 +303,15 @@ export class TasksController {
     if (!body.partialFormData) {
       throw new BadRequestException('Partial form data is required');
     }
-    return await this.tasksService.optoutForm(
-      id,
-      body.actionId,
-      req.user.sub,
-      body.reason,
-      body.outOfTime,
-      body.partialFormData,
+    return new ActionActivityDto(
+      await this.tasksService.optoutForm(
+        id,
+        body.actionId,
+        req.user.sub,
+        body.reason,
+        body.outOfTime,
+        body.partialFormData,
+      ),
     );
   }
 

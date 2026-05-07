@@ -121,11 +121,13 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: OptOutActionDto,
   ): Promise<ActionActivityDto> {
-    return this.actionsService.optoutAction(
-      id,
-      req.user.sub,
-      body.reason,
-      body.outOfTime,
+    return new ActionActivityDto(
+      await this.actionsService.optoutAction(
+        id,
+        req.user.sub,
+        body.reason,
+        body.outOfTime,
+      ),
     );
   }
 
@@ -136,7 +138,9 @@ export class ActionsController {
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ActionActivityDto> {
-    return this.actionsService.completeAction(id, req.user.sub);
+    return new ActionActivityDto(
+      await this.actionsService.completeAction(id, req.user.sub),
+    );
   }
 
   @Get('myStatus/:id')
@@ -190,7 +194,10 @@ export class ActionsController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: [ActionActivityDto] })
   async myActivity(@Request() req: JwtRequest): Promise<ActionActivityDto[]> {
-    return this.actionsService.getActivityForUser(req.user?.sub);
+    const activities = await this.actionsService.getActivityForUser(
+      req.user?.sub,
+    );
+    return activities.map((activity) => new ActionActivityDto(activity));
   }
 
   @Get('generalUpdates')
@@ -301,7 +308,7 @@ export class ActionsController {
       throw new BadRequestException('Invalid "before" cursor');
     }
 
-    return this.actionsService.getActivityFeed(
+    const results = await this.actionsService.getActivityFeed(
       limitNum,
       beforeDate,
       comments,
@@ -834,7 +841,7 @@ export class ActionsController {
   @Post('unlikeActivity/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  unlikeActivity(
+  async unlikeActivity(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<ActionActivityDto> {
@@ -855,7 +862,7 @@ export class ActionsController {
   @Post('updateActivity/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  updateActivity(
+  async updateActivity(
     @Param('id', ParseIntPipe) id: number,
     @Body() activityDto: UpdateActionActivityDto,
     @Request() req: JwtRequest,
@@ -866,20 +873,24 @@ export class ActionsController {
   @Post('dismiss/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  dismissAction(
+  async dismissAction(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<ActionActivityDto> {
-    return this.actionsService.dismissAction(req.user.sub, id);
+    return new ActionActivityDto(
+      await this.actionsService.dismissAction(req.user.sub, id),
+    );
   }
 
   @Post('createActivity')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  createActivity(
+  async createActivity(
     @Body() activityDto: CreateActionActivityDto,
   ): Promise<ActionActivityDto> {
-    return this.actionsService.adminCreateActivity(activityDto);
+    return new ActionActivityDto(
+      await this.actionsService.adminCreateActivity(activityDto),
+    );
   }
 
   @Post('archive/:id')
