@@ -1,22 +1,36 @@
-import {
-  ApiPropertyOptional,
-  OmitType,
-  PartialType,
-  PickType,
-} from '@nestjs/swagger';
+import { ApiPropertyOptional, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 import { FollowUpForm } from '../entities/follow-up-form.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 
-export class FollowUpFormDto extends OmitType(FollowUpForm, [
-  'action',
-  'form',
+export class FollowUpFormDto extends PickType(FollowUpForm, [
+  'id',
+  'name',
+  'startDate',
+  'endDate',
+  'instructions',
+  'cohortExpression',
+  'actionId',
+  'formId',
 ]) {
   @ApiPropertyOptional({ type: () => Form })
   @IsOptional()
   @Type(() => Form)
   form?: Form;
+
+  constructor(followUpForm: FollowUpForm) {
+    super();
+    this.id = followUpForm.id;
+    this.name = followUpForm.name;
+    this.startDate = followUpForm.startDate;
+    this.endDate = followUpForm.endDate;
+    this.instructions = followUpForm.instructions;
+    this.cohortExpression = followUpForm.cohortExpression;
+    this.actionId = followUpForm.actionId;
+    this.formId = followUpForm.formId;
+    this.form = followUpForm.form;
+  }
 }
 
 export class CreateFollowUpFormDto extends PickType(FollowUpForm, [

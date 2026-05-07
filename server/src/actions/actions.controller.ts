@@ -585,10 +585,7 @@ export class ActionsController {
       serverSide: true,
     });
     const list = action.followUpForms ?? [];
-    return list.map((f) => ({
-      ...f,
-      form: f.form,
-    })) as FollowUpFormDto[];
+    return list.map((f) => new FollowUpFormDto(f));
   }
 
   @Post(':id/follow-up-forms')
@@ -604,7 +601,7 @@ export class ActionsController {
       serverSide: true,
     });
     const found = withForm.followUpForms?.find((f) => f.id === created.id);
-    return (found ?? created) as unknown as FollowUpFormDto;
+    return new FollowUpFormDto(found ?? created);
   }
 
   @Patch('follow-up-forms/:followUpFormId')
@@ -618,7 +615,7 @@ export class ActionsController {
       followUpFormId,
       dto,
     );
-    return updated as FollowUpFormDto;
+    return new FollowUpFormDto(updated);
   }
 
   @Delete('follow-up-forms/:followUpFormId')
