@@ -421,7 +421,12 @@ export class FormResponseOutputDto extends PickType(FormResponse, [
 
   constructor(formResponse: FormResponse) {
     super();
-    Object.assign(this, formResponse);
+    this.id = formResponse.id;
+    this.answers = formResponse.answers;
+    this.formId = formResponse.formId;
+    this.visibilityValidatorResults = formResponse.visibilityValidatorResults;
+    this.deviceType = formResponse.deviceType;
+    this.publicAnswers = formResponse.publicAnswers;
     this.schemaSnapshot = formResponse.formSnapshot.schema;
   }
 }
@@ -470,7 +475,7 @@ export class ActionActivityDto extends PickType(ActionActivity, [
     actionActivity: ActionActivity,
     extra?: {
       comments?: Comment[];
-      formResponseOutput?: FormResponseOutputDto;
+      formResponseOutput?: FormResponse;
       includeLikes?: boolean;
       likedByMe?: boolean;
     },
@@ -491,7 +496,9 @@ export class ActionActivityDto extends PickType(ActionActivity, [
     this.likedByMe = extra?.likedByMe;
     this.comments =
       extra?.comments?.map((comment) => new CommentDto(comment)) ?? [];
-    this.formResponseOutput = extra?.formResponseOutput;
+    this.formResponseOutput = extra?.formResponseOutput
+      ? new FormResponseOutputDto(extra.formResponseOutput)
+      : undefined;
     this.editableContent = actionActivity.editableContent
       ? new EditableContentDto(actionActivity.editableContent)
       : { body: '', attachments: [], id: -1 };

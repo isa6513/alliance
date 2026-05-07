@@ -82,7 +82,6 @@ import {
   CreateActionUpdateDto,
   CreateReminderGroupDto,
   ExportActionDto,
-  FormResponseOutputDto,
   GlobalFeedActionUpdateDto,
   GlobalFeedActivityGroupDto,
   GlobalFeedActivityType,
@@ -1381,9 +1380,7 @@ export class ActionsService {
     );
   }
 
-  buildOutputFormResponse(
-    activity: ActionActivity,
-  ): FormResponseOutputDto | undefined {
+  buildOutputFormResponse(activity: ActionActivity): FormResponse | undefined {
     if (!activity.taskFormResponse) {
       return undefined;
     }
@@ -1423,12 +1420,10 @@ export class ActionsService {
       return undefined;
     }
 
-    const responseWithPruned = {
+    return Object.assign(new FormResponse(), {
       ...activity.taskFormResponse,
       answers,
-    } as FormResponse;
-
-    return new FormResponseOutputDto(responseWithPruned);
+    });
   }
 
   async getActionActivities(
