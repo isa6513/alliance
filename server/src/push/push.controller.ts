@@ -1,18 +1,11 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { ApiOkResponse, ApiProperty } from '@nestjs/swagger';
+import { ApiOkResponse } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsDefined, IsNumber } from 'class-validator';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Repository } from 'typeorm';
 import { Push } from './push.entity';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
-
-class PushOpenedDto {
-  @ApiProperty()
-  @IsDefined()
-  @IsNumber()
-  cid: number;
-}
+import { PushOpenedDto } from './dto/push-opened.dto';
 
 @Controller('push')
 export class PushController {

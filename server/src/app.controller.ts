@@ -1,15 +1,8 @@
 import { Controller, Get, Header, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiOkResponse, ApiProperty } from '@nestjs/swagger';
-import { IsDefined } from 'class-validator';
+import { ApiOkResponse } from '@nestjs/swagger';
 import { HealthCheckDto } from './app.dto';
 import { Public } from './auth/public.decorator';
 import { register } from './metrics';
-
-export class BugReportDto {
-  @ApiProperty({ description: 'The description of the bug' })
-  @IsDefined()
-  description: string;
-}
 
 @Controller()
 export class AppController {

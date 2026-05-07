@@ -16,40 +16,13 @@ import Stripe from 'stripe';
 import { PaymentsService } from './payments.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
-import {
-  ApiBody,
-  ApiOkResponse,
-  ApiProperty,
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
 import { CreatePartialProfileDto } from './dto/partial-profile.dto';
-import { IsNotEmpty } from 'class-validator';
 import { PaymentMethodDto } from './dto/payment-method.dto';
+import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
+import { ClientSecretDto } from './dto/client-secret.dto';
 import { ActionsService } from 'src/actions/actions.service';
-
-class CreatePaymentIntentDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  actionId: number;
-}
-
-class ClientSecretDto {
-  @ApiProperty()
-  clientSecret: string;
-
-  @ApiPropertyOptional()
-  userToken?: string;
-
-  @ApiPropertyOptional()
-  savedPaymentMethodId?: string;
-
-  @ApiPropertyOptional()
-  savedPaymentMethodLast4?: string;
-
-  @ApiPropertyOptional()
-  amount?: number;
-}
 
 @Controller('payments')
 export class PaymentsController {
