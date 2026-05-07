@@ -354,7 +354,7 @@ export class ActionsController {
   async getEvent(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ActionEventDto> {
-    return this.actionsService.getEvent(id);
+    return new ActionEventDto(await this.actionsService.getEvent(id));
   }
 
   @Get('notification-schedule')

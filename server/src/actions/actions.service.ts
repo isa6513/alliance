@@ -1981,7 +1981,7 @@ export class ActionsService {
     });
   }
 
-  async getEvent(id: number): Promise<ActionEventDto> {
+  async getEvent(id: number): Promise<ActionEvent> {
     const event = await this.actionEventRepository.findOne({
       where: { id },
       relations: { action: true },
@@ -1989,7 +1989,7 @@ export class ActionsService {
     if (!event) {
       throw new NotFoundException('Event not found');
     }
-    return new ActionEventDto(event);
+    return event;
   }
 
   async likeActivity(
