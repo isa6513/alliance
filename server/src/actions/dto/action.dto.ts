@@ -515,12 +515,14 @@ export class ActionSuiteDto extends PickType(ActionSuite, ['id', 'name']) {
   @Allow()
   actions: ActionDto[];
 
-  constructor(suite: ActionSuite, actions?: ActionDto[]) {
+  constructor(suite: ActionSuite, actions?: Action[]) {
     super();
     this.id = suite.id;
     this.name = suite.name;
     this.actions =
-      actions ?? suite.actions?.map((action) => new ActionDto(action)) ?? [];
+      actions?.map((action) => new ActionDto(action)) ??
+      suite.actions?.map((action) => new ActionDto(action)) ??
+      [];
   }
 }
 

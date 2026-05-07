@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { instanceToPlain } from 'class-transformer';
 import { randomBytes } from 'crypto';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
@@ -2286,10 +2285,7 @@ export class ActionsService {
       },
     });
 
-    return new ActionSuiteDto(
-      instanceToPlain(suite) as ActionSuite,
-      suite.actions.map((action) => new ActionDto(action)),
-    );
+    return new ActionSuiteDto(suite);
   }
 
   async createSuite(
