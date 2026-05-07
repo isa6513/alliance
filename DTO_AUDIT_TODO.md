@@ -105,9 +105,9 @@ Only DTOs with at least one violation are listed.
 
 ### `ActionEventNotifDto` — `server/src/notifs/entities/action-event-notif.dto.ts:5`
 
-- [ ] Rule 2: `extends OmitType(ActionEventNotif, ['user'])` at `action-event-notif.dto.ts:5`
-- [ ] Rule 3: `Object.assign(this, actionEventNotif)` at `action-event-notif.dto.ts:11`
-- [ ] Rule 4: `actions.controller.ts:814` — `sentNotifsForGroup`
+- [x] Rule 2: `extends OmitType(ActionEventNotif, ['user'])` at `action-event-notif.dto.ts:5`
+- [x] Rule 3: `Object.assign(this, actionEventNotif)` at `action-event-notif.dto.ts:11`
+- [x] Rule 4: `actions.controller.ts:814` — `sentNotifsForGroup`
 
 ### `ActionUpdateDto` — `server/src/actions/dto/action.dto.ts:458`
 
