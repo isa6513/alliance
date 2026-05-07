@@ -116,7 +116,7 @@ export class ActionsController {
   @Post('optout/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  optout(
+  async optout(
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: OptOutActionDto,
@@ -132,7 +132,7 @@ export class ActionsController {
   @Post('complete/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  complete(
+  async complete(
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ActionActivityDto> {

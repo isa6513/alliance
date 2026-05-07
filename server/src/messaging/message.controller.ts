@@ -28,12 +28,12 @@ export class MessageController {
   constructor(
     private readonly messageService: MessageService,
     private readonly conversationService: ConversationService,
-  ) { }
+  ) {}
 
   @Get('admin/:conversationId')
   @ApiOkResponse({ type: MessageDto, isArray: true })
   @UseGuards(AdminGuard)
-  getConversationMessagesForAdmin(
+  async getConversationMessagesForAdmin(
     @Param('conversationId', ParseIntPipe) conversationId: number,
     @Query() query: ConversationMessagesQueryDto,
   ): Promise<MessageDto[]> {

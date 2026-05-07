@@ -29,26 +29,28 @@ import {
 @ApiTags('messaging')
 @Controller('messaging/conversations')
 export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) { }
+  constructor(private readonly conversationService: ConversationService) {}
 
   @Get('admin')
   @ApiOkResponse({ type: ConversationAdminSummaryDto, isArray: true })
   @UseGuards(AdminGuard)
-  getAllConversationsForAdmin(): Promise<ConversationAdminSummaryDto[]> {
+  async getAllConversationsForAdmin(): Promise<ConversationAdminSummaryDto[]> {
     return this.conversationService.getAllConversationsForAdmin();
   }
 
   @Get()
   @ApiOkResponse({ type: ConversationDto, isArray: true })
   @UseGuards(AuthGuard)
-  getMyConversations(@Request() req: JwtRequest): Promise<ConversationDto[]> {
+  async getMyConversations(
+    @Request() req: JwtRequest,
+  ): Promise<ConversationDto[]> {
     return this.conversationService.getUserConversations(req.user.sub);
   }
 
   @Get('community/:communityId')
   @ApiOkResponse({ type: ConversationDto })
   @UseGuards(AuthGuard)
-  getCommunityConversations(
+  async getCommunityConversations(
     @Param('communityId', ParseIntPipe) communityId: number,
     @Request() req: JwtRequest,
   ): Promise<ConversationDto> {

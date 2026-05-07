@@ -6598,10 +6598,8 @@ export type ForumLikeCommentData = {
 };
 
 export type ForumLikeCommentResponses = {
-    200: CommentDto;
+    200: unknown;
 };
-
-export type ForumLikeCommentResponse = ForumLikeCommentResponses[keyof ForumLikeCommentResponses];
 
 export type ForumUnlikeCommentData = {
     body?: never;
@@ -6613,10 +6611,8 @@ export type ForumUnlikeCommentData = {
 };
 
 export type ForumUnlikeCommentResponses = {
-    200: CommentDto;
+    200: unknown;
 };
-
-export type ForumUnlikeCommentResponse = ForumUnlikeCommentResponses[keyof ForumUnlikeCommentResponses];
 
 export type ForumLikePostData = {
     body?: never;
@@ -6628,10 +6624,8 @@ export type ForumLikePostData = {
 };
 
 export type ForumLikePostResponses = {
-    200: PostDto;
+    200: unknown;
 };
-
-export type ForumLikePostResponse = ForumLikePostResponses[keyof ForumLikePostResponses];
 
 export type ForumUnlikePostData = {
     body?: never;
@@ -6643,10 +6637,8 @@ export type ForumUnlikePostData = {
 };
 
 export type ForumUnlikePostResponses = {
-    200: PostDto;
+    200: unknown;
 };
-
-export type ForumUnlikePostResponse = ForumUnlikePostResponses[keyof ForumUnlikePostResponses];
 
 export type ForumGetPostsForAdminData = {
     body?: never;

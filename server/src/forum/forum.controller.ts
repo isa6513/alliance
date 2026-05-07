@@ -29,7 +29,6 @@ import {
   UpdatePostAuthorsDto,
   UpdatePostExpertsDto,
 } from './dto/post.dto';
-import { Post as PostEntity } from './entities/post.entity';
 import { ForumService } from './forum.service';
 
 @ApiTags('forum')
@@ -54,7 +53,7 @@ export class ForumController {
   @ApiOperation({ summary: 'Get all forum posts' })
   @ApiOkResponse({ type: [PostDto] })
   @UseGuards(AuthGuard)
-  findAllPosts(@Request() req: JwtRequest): Promise<PostDto[]> {
+  async findAllPosts(@Request() req: JwtRequest): Promise<PostDto[]> {
     return this.forumService.findAllPosts(req.user.sub);
   }
 
@@ -113,7 +112,9 @@ export class ForumController {
   @Get('posts/user/:id')
   @ApiOperation({ summary: 'Get all posts by a specific user' })
   @ApiOkResponse({ type: [PostDto] })
-  findPostsByUser(@Param('id', ParseIntPipe) id: number): Promise<PostDto[]> {
+  async findPostsByUser(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PostDto[]> {
     return this.forumService
       .findPostsByUser(id)
       .then((posts) => posts.map((post) => new PostDto(post)));
@@ -124,7 +125,7 @@ export class ForumController {
     summary: 'Get all comments by a specific user, excluding activity comments',
   })
   @ApiOkResponse({ type: [UserCommentDto] })
-  findCommentsByUser(
+  async findCommentsByUser(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserCommentDto[]> {
     return this.forumService.findCommentsByUser(id);
@@ -133,7 +134,7 @@ export class ForumController {
   @Get('posts/user/:id/forumComments')
   @ApiOperation({ summary: 'Get all forum comments by a specific user' })
   @ApiOkResponse({ type: [CommentDto] })
-  findForumCommentsByUser(
+  async findForumCommentsByUser(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CommentDto[]> {
     return this.forumService
@@ -192,7 +193,7 @@ export class ForumController {
   @Post('comments/:id/like')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Like a comment' })
-  @ApiOkResponse({ type: CommentDto })
+  @ApiOkResponse()
   async likeComment(
     @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
@@ -203,7 +204,7 @@ export class ForumController {
   @Post('comments/:id/unlike')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Unlike a comment' })
-  @ApiOkResponse({ type: CommentDto })
+  @ApiOkResponse()
   async unlikeComment(
     @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
@@ -213,38 +214,24 @@ export class ForumController {
 
   @Post('posts/:id/like')
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: 'Like a comment' })
-  @ApiOkResponse({ type: PostDto })
+  @ApiOperation({ summary: 'Like a post' })
+  @ApiOkResponse()
   async likePost(
     @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
-    new PostDto(
-      (await this.forumService.likePostOrComment(
-        id,
-        user.sub,
-        false,
-        'post',
-      )) as PostEntity,
-    );
+    await this.forumService.likePostOrComment(id, user.sub, false, 'post');
   }
 
   @Post('posts/:id/unlike')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Unlike a post' })
-  @ApiOkResponse({ type: PostDto })
+  @ApiOkResponse()
   async unlikePost(
     @Param('id', ParseIntPipe) id: number,
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
-    new PostDto(
-      (await this.forumService.likePostOrComment(
-        id,
-        user.sub,
-        true,
-        'post',
-      )) as PostEntity,
-    );
+    await this.forumService.likePostOrComment(id, user.sub, true, 'post');
   }
 
   @Delete('comments/:id')

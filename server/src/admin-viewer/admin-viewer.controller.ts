@@ -45,7 +45,7 @@ export class AdminViewerController {
 
   @Get('tables')
   @ApiOkResponse({ type: TableListDto })
-  getTables(): Promise<TableListDto> {
+  async getTables(): Promise<TableListDto> {
     return this.adminViewerService.getTables();
   }
 
