@@ -163,7 +163,7 @@ export class ActionsController {
     if (!relation) {
       throw new NotFoundException('User action not found');
     }
-    return { relation: relation };
+    return new UserActionRelationDto(relation);
   }
 
   @Get()
@@ -308,7 +308,7 @@ export class ActionsController {
       throw new BadRequestException('Invalid "before" cursor');
     }
 
-    const results = await this.actionsService.getActivityFeed(
+    return await this.actionsService.getActivityFeed(
       limitNum,
       beforeDate,
       comments,

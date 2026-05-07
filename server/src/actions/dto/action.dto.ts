@@ -438,6 +438,10 @@ export class ActionActivityDto extends PickType(ActionActivity, [
 export class UserActionRelationDto {
   @ApiProperty({ enum: UserActionRelation, enumName: 'UserActionRelation' })
   relation: UserActionRelation;
+
+  constructor(relation: UserActionRelation) {
+    this.relation = relation;
+  }
 }
 
 export class CreateActionActivityDto extends PickType(ActionActivityDto, [
