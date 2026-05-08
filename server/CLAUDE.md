@@ -2,7 +2,7 @@
 
 Every controller endpoint needs `@ApiOkResponse({ type: })` (or `@ApiResponse`) matching its return type (omit `type` for void).
 
-**Before adding or editing an endpoint's return type or existing DTO, read `.claude/skills/DTO_RETURN_TYPES.md`.** Controller return types must be a DTO class — never a primitive, never `DtoType | null`. Wrap primitives in a DTO; for "not found" use `NotFoundException` or a wrapper DTO.
+**Before adding or editing an endpoint's return type or existing DTO, read `../.claude/skills/DTO_RETURN_TYPES.md`.** Controller return types must be a DTO class — never a primitive, never `DtoType | null`. Wrap primitives in a DTO; for "not found" use `NotFoundException` or a wrapper DTO.
 
 DTOs: use mapped types over entities, e.g. `SampleDto extends OmitType(SampleEntity, ['sample']) {}`. Mark optional (`?`) fields with `@ApiPropertyOptional`, not `nullable`.
 
