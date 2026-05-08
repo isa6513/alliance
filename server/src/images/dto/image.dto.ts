@@ -18,7 +18,16 @@ export class ImageDataDto {
 export class DeleteImageResponseDto {
   @ApiProperty({ type: Boolean })
   deleted: boolean;
+
+  constructor(deleted: boolean) {
+    this.deleted = deleted;
+  }
 }
+
+export type UploadImageResponse = {
+  url: string;
+  key: string;
+};
 
 export class UploadImageResponseDto {
   @ApiProperty()
@@ -26,4 +35,9 @@ export class UploadImageResponseDto {
 
   @ApiProperty()
   key: string;
+
+  constructor(input: UploadImageResponse) {
+    this.url = input.url;
+    this.key = input.key;
+  }
 }

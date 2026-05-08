@@ -67,7 +67,7 @@ NestJS serializes a `null` return as a **200 with empty body** (not JSON `null`)
 
 ## Constructors
 
-Response DTOs take a single `input` parameter. Assign each field manually to prevent leakage — no `Object.assign`. If the input type requires a new type, name it after the DTO without the `Dto` suffix; for entity-backed DTOs the entity itself is the input type.
+Response DTOs take a single `input` parameter. Assign each field manually to prevent leakage — no `Object.assign`.
 
 ```ts
 // ✅
@@ -86,6 +86,38 @@ export type SuspensionPlan = { date: Date; users: User[] };
 constructor(input: SuspensionPlan) {
   Object.assign(this, input);
 }
+```
+
+### Naming the input type
+
+Pick the input type by this order:
+
+1. **Entity-backed DTO** — input type is the entity itself (`constructor(input: SuspensionPlan)` above is the entity case; the named-type case below is for non-entity DTOs).
+2. **Single primitive field** — take the value positionally.
+3. **Otherwise** — define a named type alongside the DTO, named after the DTO without the `Dto` suffix. Never use an inline anonymous type.
+
+```ts
+// ✅ single primitive — positional
+export class DeleteImageResponseDto {
+  @ApiProperty() deleted: boolean;
+  constructor(deleted: boolean) {
+    this.deleted = deleted;
+  }
+}
+
+// ✅ multi-field — named type
+export type UploadImageResponse = { url: string; key: string };
+export class UploadImageResponseDto {
+  @ApiProperty() url: string;
+  @ApiProperty() key: string;
+  constructor(input: UploadImageResponse) {
+    this.url = input.url;
+    this.key = input.key;
+  }
+}
+
+// ❌ inline anonymous type — name it instead
+constructor(input: { url: string; key: string }) { ... }
 ```
 
 **Inputs are raw data, never other DTOs.** The DTO is responsible for converting entities/raw values into its inner DTOs. Services return raw input shapes (`SuspensionPlan[]`, not `SuspensionPlanDto[]`); the controller calls `new XxxDto(...)`.

@@ -184,13 +184,13 @@ Only DTOs with at least one violation are listed.
 
 ### `DeleteImageResponseDto` — `server/src/images/dto/image.dto.ts:18`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `images.controller.ts:99` — `deleteImage` returns object literal `{ deleted: true }`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `images.controller.ts:99` — `deleteImage` returns object literal `{ deleted: true }`
 
 ### `UploadImageResponseDto` — `server/src/images/dto/image.dto.ts:23`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `images.controller.ts:108` — `uploadImage` returns object literal `{ url, key }`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `images.controller.ts:108` — `uploadImage` returns object literal `{ url, key }`
 
 ---
 

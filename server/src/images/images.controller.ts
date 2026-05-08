@@ -96,7 +96,7 @@ export class ImagesController {
       new DeleteObjectCommand({ Bucket: this.bucket, Key: img.key }),
     );
     await this.imagesService.deleteImage(id);
-    return { deleted: true };
+    return new DeleteImageResponseDto(true);
   }
 
   @Post('/uploadImage')
@@ -105,6 +105,6 @@ export class ImagesController {
     @Body() body: UploadImageDto,
   ): Promise<UploadImageResponseDto> {
     const key = await this.imagesService.uploadImage(body.file);
-    return { url: getImageSource(key), key };
+    return new UploadImageResponseDto({ url: getImageSource(key), key });
   }
 }
