@@ -47,11 +47,9 @@ import {
   FormAggregateViewsDto,
   FormDto,
   FormResponseDto,
-  FormSnapshotDto,
-  FormSnapshotMigrationDto,
+  type FormSnapshotMigration,
   MigrateResponseSnapshotsResultDto,
-  SnapshotResponseGroupDto,
-  SnapshotResponseSummaryDto,
+  type SnapshotResponseGroup,
   SubmitFollowUpFormDto,
   SubmitFormDto,
 } from './form.dto';
@@ -1099,7 +1097,7 @@ export class TasksService {
 
   async getResponseSnapshotMigration(
     formId: number,
-  ): Promise<FormSnapshotMigrationDto> {
+  ): Promise<FormSnapshotMigration> {
     const form = await this.getForm(formId);
     const responses = await this.formResponseRepository.find({
       where: { formId },
@@ -1107,10 +1105,7 @@ export class TasksService {
       order: { createdAt: 'ASC' },
     });
 
-    const groupsBySnapshotId = new Map<
-      number,
-      { snapshot: FormSnapshot; responses: FormResponse[] }
-    >();
+    const groupsBySnapshotId = new Map<number, SnapshotResponseGroup>();
     for (const response of responses) {
       if (response.formSnapshotId === form.formSnapshotId) {
         continue;
@@ -1126,32 +1121,11 @@ export class TasksService {
       }
     }
 
-    const groups: SnapshotResponseGroupDto[] = Array.from(
-      groupsBySnapshotId.values(),
-    )
-      .sort(
-        (a, b) =>
-          a.snapshot.createdAt.getTime() - b.snapshot.createdAt.getTime(),
-      )
-      .map((g) => {
-        const dto = new SnapshotResponseGroupDto();
-        dto.snapshot = new FormSnapshotDto(g.snapshot);
-        dto.responses = g.responses.map((response) => {
-          const summary = new SnapshotResponseSummaryDto();
-          summary.id = response.id;
-          summary.createdAt = response.createdAt;
-          summary.userId = response.user?.id;
-          summary.userName = response.user?.name;
-          return summary;
-        });
-        return dto;
-      });
+    const groups = Array.from(groupsBySnapshotId.values()).sort(
+      (a, b) => a.snapshot.createdAt.getTime() - b.snapshot.createdAt.getTime(),
+    );
 
-    const result = new FormSnapshotMigrationDto();
-    result.formTitle = form.title;
-    result.latestSnapshot = new FormSnapshotDto(form.formSnapshot);
-    result.groups = groups;
-    return result;
+    return { form, groups };
   }
 
   async migrateResponseSnapshots(

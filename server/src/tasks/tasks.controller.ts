@@ -149,7 +149,9 @@ export class TasksController {
   async getResponseSnapshotMigration(
     @Param('formId', ParseIntPipe) formId: number,
   ): Promise<FormSnapshotMigrationDto> {
-    return this.tasksService.getResponseSnapshotMigration(formId);
+    return new FormSnapshotMigrationDto(
+      await this.tasksService.getResponseSnapshotMigration(formId),
+    );
   }
 
   @Patch('forms/:formId/responseSnapshots')

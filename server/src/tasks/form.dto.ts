@@ -202,16 +202,10 @@ export class FormSnapshotDto extends PickType(FormSnapshot, [
   }
 }
 
-export class SnapshotResponseSummaryDto {
-  @ApiProperty()
-  @IsDefined()
-  id: number;
-
-  @ApiProperty()
-  @IsDefined()
-  @Type(() => Date)
-  createdAt: Date;
-
+export class SnapshotResponseSummaryDto extends PickType(FormResponse, [
+  'id',
+  'createdAt',
+]) {
   @ApiPropertyOptional()
   @IsOptional()
   userName?: string;
@@ -219,7 +213,20 @@ export class SnapshotResponseSummaryDto {
   @ApiPropertyOptional()
   @IsOptional()
   userId?: number;
+
+  constructor(response: FormResponse) {
+    super();
+    this.id = response.id;
+    this.createdAt = response.createdAt;
+    this.userName = response.user?.name;
+    this.userId = response.user?.id;
+  }
 }
+
+export type SnapshotResponseGroup = {
+  snapshot: FormSnapshot;
+  responses: FormResponse[];
+};
 
 export class SnapshotResponseGroupDto {
   @ApiProperty({ type: () => FormSnapshotDto })
@@ -231,7 +238,19 @@ export class SnapshotResponseGroupDto {
   @IsArray()
   @Type(() => SnapshotResponseSummaryDto)
   responses: SnapshotResponseSummaryDto[];
+
+  constructor(input: SnapshotResponseGroup) {
+    this.snapshot = new FormSnapshotDto(input.snapshot);
+    this.responses = input.responses.map(
+      (r) => new SnapshotResponseSummaryDto(r),
+    );
+  }
 }
+
+export type FormSnapshotMigration = {
+  form: Form;
+  groups: SnapshotResponseGroup[];
+};
 
 export class FormSnapshotMigrationDto {
   @ApiProperty()
@@ -247,6 +266,12 @@ export class FormSnapshotMigrationDto {
   @IsArray()
   @Type(() => SnapshotResponseGroupDto)
   groups: SnapshotResponseGroupDto[];
+
+  constructor(input: FormSnapshotMigration) {
+    this.formTitle = input.form.title;
+    this.latestSnapshot = new FormSnapshotDto(input.form.formSnapshot);
+    this.groups = input.groups.map((g) => new SnapshotResponseGroupDto(g));
+  }
 }
 
 export class MigrateResponseSnapshotsDto {
