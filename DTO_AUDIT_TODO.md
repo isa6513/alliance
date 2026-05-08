@@ -120,11 +120,11 @@ Only DTOs with at least one violation are listed.
 
 ### `ActionSuiteDto` — `server/src/actions/dto/action.dto.ts:522`
 
-- [ ] Rule 4:
-  - [ ] `actions.controller.ts:965` — `suite`
-  - [ ] `actions.controller.ts:986` — `batchUpdateSuiteEvents`
-  - [ ] `actions.controller.ts:996` — `addSuiteEvent`
-  - [ ] `actions.controller.ts:1006` — `deleteSuiteEvent`
+- [x] Rule 4:
+  - [x] `actions.controller.ts:965` — `suite`
+  - [x] `actions.controller.ts:986` — `batchUpdateSuiteEvents`
+  - [x] `actions.controller.ts:996` — `addSuiteEvent`
+  - [x] `actions.controller.ts:1006` — `deleteSuiteEvent`
 
 ### `ExportActionDto` — `server/src/actions/dto/action.dto.ts:567`
 

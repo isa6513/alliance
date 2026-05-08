@@ -72,7 +72,6 @@ import {
   ActionDto,
   ActionEventDto,
   ActionSharePreview,
-  ActionSuiteDto,
   ActionUpdateDto,
   CreateActionActivityDto,
   CreateActionDto,
@@ -2260,8 +2259,8 @@ export class ActionsService {
     return this.actionSuiteRepository.find();
   }
 
-  async findSuite(id: number): Promise<ActionSuiteDto> {
-    const suite = await this.actionSuiteRepository.findOneOrFail({
+  async findSuite(id: number): Promise<ActionSuite> {
+    return this.actionSuiteRepository.findOneOrFail({
       where: { id },
       relations: {
         actions: { events: true, activities: true },
@@ -2269,8 +2268,6 @@ export class ActionsService {
         generalUpdates: true,
       },
     });
-
-    return new ActionSuiteDto(suite);
   }
 
   async createSuite(

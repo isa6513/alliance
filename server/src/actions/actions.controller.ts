@@ -975,8 +975,9 @@ export class ActionsController {
   @Get('suite/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto })
-  suite(@Param('id', ParseIntPipe) id: number): Promise<ActionSuiteDto> {
-    return this.actionsService.findSuite(id);
+  async suite(@Param('id', ParseIntPipe) id: number): Promise<ActionSuiteDto> {
+    const suite = await this.actionsService.findSuite(id);
+    return new ActionSuiteDto(suite);
   }
 
   @Post('createSuite')
@@ -992,12 +993,17 @@ export class ActionsController {
   @Patch('suite/:suiteId/batchUpdateSuiteEvents/:eventId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto })
-  batchUpdateSuiteEvents(
+  async batchUpdateSuiteEvents(
     @Param('suiteId', ParseIntPipe) suiteId: number,
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: UpdateActionEventDto,
   ): Promise<ActionSuiteDto> {
-    return this.actionsService.batchUpdateSuiteEvents(suiteId, eventId, body);
+    const suite = await this.actionsService.batchUpdateSuiteEvents(
+      suiteId,
+      eventId,
+      body,
+    );
+    return new ActionSuiteDto(suite);
   }
 
   @Post('suite/:suiteId/events')
@@ -1007,7 +1013,11 @@ export class ActionsController {
     @Param('suiteId', ParseIntPipe) suiteId: number,
     @Body() actionEventDto: CreateActionEventDto,
   ): Promise<ActionSuiteDto> {
-    return this.actionsService.addSuiteEvent(suiteId, actionEventDto);
+    const suite = await this.actionsService.addSuiteEvent(
+      suiteId,
+      actionEventDto,
+    );
+    return new ActionSuiteDto(suite);
   }
 
   @Delete('suite/:suiteId/events/:eventId')
@@ -1017,7 +1027,8 @@ export class ActionsController {
     @Param('suiteId', ParseIntPipe) suiteId: number,
     @Param('eventId', ParseIntPipe) eventId: number,
   ): Promise<ActionSuiteDto> {
-    return this.actionsService.deleteSuiteEvent(suiteId, eventId);
+    const suite = await this.actionsService.deleteSuiteEvent(suiteId, eventId);
+    return new ActionSuiteDto(suite);
   }
 
   @Post('events/:eventId/checkTentativePlans')
