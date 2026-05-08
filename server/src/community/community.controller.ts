@@ -226,10 +226,11 @@ export class CommunityController {
     @Request() req: JwtRequest,
     @Param('communityId', ParseIntPipe) communityId: number,
   ): Promise<CommunityMemberContactInfoDto[]> {
-    return this.communityService.getMemberContactInfo({
+    const items = await this.communityService.getMemberContactInfo({
       leaderId: req.user.sub,
       communityId,
     });
+    return items.map((item) => new CommunityMemberContactInfoDto(item));
   }
 
   @Get('memberContactInfo/:communityId/admin')
@@ -238,7 +239,10 @@ export class CommunityController {
   async getMemberContactInfoAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
   ): Promise<CommunityMemberContactInfoDto[]> {
-    return this.communityService.getMemberContactInfo({ communityId });
+    const items = await this.communityService.getMemberContactInfo({
+      communityId,
+    });
+    return items.map((item) => new CommunityMemberContactInfoDto(item));
   }
 
   @Get('memberContactInfo')
@@ -247,7 +251,8 @@ export class CommunityController {
   async getAllMemberContactInfoAdmin(): Promise<
     CommunityMemberContactInfoDto[]
   > {
-    return this.communityService.getAllMemberContactInfoAdmin();
+    const items = await this.communityService.getAllMemberContactInfoAdmin();
+    return items.map((item) => new CommunityMemberContactInfoDto(item));
   }
 
   @Post('communityInvites/create')

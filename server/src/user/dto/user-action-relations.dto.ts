@@ -170,6 +170,11 @@ export class UserActionRelationsResponseDto {
 
 export class CommunityUserInfoDto extends UserActionRelationsResponseDto {}
 
+export type CommunityMemberContactInfo = {
+  user: User;
+  timeZone?: Temporal.TimeZoneLike;
+};
+
 export class CommunityMemberContactInfoDto extends PickType(User, [
   'id',
   'timeZone',
@@ -189,11 +194,8 @@ export class CommunityMemberContactInfoDto extends PickType(User, [
   @ApiProperty({ type: () => UserAwayRangeDto, isArray: true })
   awayRanges: UserAwayRangeDto[];
 
-  constructor(
-    user: User,
-    viewerTz?: Temporal.TimeZoneLike,
-    awayRanges: UserAwayRangeDto[] = [],
-  ) {
+  constructor(input: CommunityMemberContactInfo) {
+    const { user, timeZone: viewerTz } = input;
     super(user);
     this.id = user.id;
     this.email = user.shareEmailWithCommunityLead ? user.email : undefined;
@@ -201,7 +203,10 @@ export class CommunityMemberContactInfoDto extends PickType(User, [
       ? user.phoneNumber
       : undefined;
     this.timeZone = user.timeZone?.toString();
-    this.awayRanges = awayRanges;
+    this.awayRanges = (user.awayRanges ?? [])
+      .slice()
+      .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+      .map((awayRange) => new UserAwayRangeDto(awayRange));
 
     if (!user.preferredReminderTime) {
       return;

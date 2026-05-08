@@ -100,19 +100,19 @@ Only DTOs with at least one violation are listed.
 
 ### `CommunityDto` — `server/src/community/dto/community.dto.ts:8`
 
-- [ ] Rule 2: `extends OmitType(Community, [...])` at `community.dto.ts:8`
-- [ ] Rule 3: `Object.assign(this, community)` at `community.dto.ts:25`
+- [x] Rule 2: `extends OmitType(Community, [...])` at `community.dto.ts:8`
+- [x] Rule 3: `Object.assign(this, community)` at `community.dto.ts:25`
 
 ### `CommunityInviteDto` — `server/src/user/dto/invite.dto.ts:42`
 
-- [ ] Rule 3: `Object.assign(this, communityInvite)` at `invite.dto.ts:57`
+- [x] Rule 3: `Object.assign(this, communityInvite)` at `invite.dto.ts:57`
 
 ### `CommunityMemberContactInfoDto` — `server/src/user/dto/user-action-relations.dto.ts:99`
 
-- [ ] Rule 4:
-  - [ ] `community.controller.ts:229` — `getMemberContactInfo`
-  - [ ] `community.controller.ts:241` — `getMemberContactInfoAdmin`
-  - [ ] `community.controller.ts:250` — `getAllMemberContactInfoAdmin`
+- [x] Rule 4:
+  - [x] `community.controller.ts:229` — `getMemberContactInfo`
+  - [x] `community.controller.ts:241` — `getMemberContactInfoAdmin`
+  - [x] `community.controller.ts:250` — `getAllMemberContactInfoAdmin`
 
 ---
 

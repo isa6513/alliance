@@ -19,8 +19,7 @@ import {
 import { run } from '@alliance/common/run';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { groupUrl } from 'src/search/approutes';
-import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
-import { getContactInfo } from 'src/utils/user';
+import { CommunityMemberContactInfo } from 'src/user/dto/user-action-relations.dto';
 import {
   CommunityInvite,
   CommunityInviteStatus,
@@ -637,23 +636,18 @@ export class CommunityService {
     return user.communities.sort((a, b) => leaderKey(a) - leaderKey(b));
   }
 
-  async getAllMemberContactInfoAdmin(): Promise<
-    CommunityMemberContactInfoDto[]
-  > {
+  async getAllMemberContactInfoAdmin(): Promise<CommunityMemberContactInfo[]> {
     const users = await this.userRepository.find({
       relations: { awayRanges: true },
     });
 
-    return getContactInfo({
-      users,
-      timeZone: DEFAULT_TIME_ZONE,
-    });
+    return users.map((user) => ({ user, timeZone: DEFAULT_TIME_ZONE }));
   }
 
   async getMemberContactInfo(params: {
     leaderId?: number;
     communityId: number;
-  }): Promise<CommunityMemberContactInfoDto[]> {
+  }): Promise<CommunityMemberContactInfo[]> {
     const { leaderId, communityId } = params;
 
     const leaderP =
@@ -677,10 +671,8 @@ export class CommunityService {
     }
 
     const leader = await leaderP;
-    return getContactInfo({
-      users: community.users,
-      timeZone: leader?.timeZone ?? DEFAULT_TIME_ZONE,
-    });
+    const timeZone = leader?.timeZone ?? DEFAULT_TIME_ZONE;
+    return community.users.map((user) => ({ user, timeZone }));
   }
 
   async createCommunityInvite(

@@ -54,7 +54,11 @@ export class CommunityInviteDto extends PickType(CommunityInvite, [
 
   constructor(communityInvite: CommunityInvite) {
     super();
-    Object.assign(this, communityInvite);
+    this.id = communityInvite.id;
+    this.status = communityInvite.status;
+    this.createdAt = communityInvite.createdAt;
+    this.updatedAt = communityInvite.updatedAt;
+    this.community = communityInvite.community;
     this.invitedUser = communityInvite.invitedUser
       ? new ProfileDto(communityInvite.invitedUser)
       : undefined;

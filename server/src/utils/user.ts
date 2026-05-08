@@ -2,9 +2,6 @@
 import { User } from 'src/user/entities/user.entity';
 import { findLeast } from './filter';
 import { ContractEventType } from 'src/user/entities/contract-event.entity';
-import { UserAwayRangeDto } from 'src/user/dto/away-range.dto';
-import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
-import { Temporal } from '@js-temporal/polyfill';
 
 export function computeIsContractActiveInFullRange(params: {
   user: Pick<User, 'contractEvents'>;
@@ -51,20 +48,4 @@ export function computeIsAwayInRange(params: {
         (startDate && startDate >= awayRange.endDate)
       ),
   );
-}
-
-export function getContactInfo(params: {
-  users: User[];
-  timeZone: Temporal.TimeZoneLike;
-}): CommunityMemberContactInfoDto[] {
-  const { users, timeZone } = params;
-
-  return users.map((user) => {
-    const awayRanges: UserAwayRangeDto[] = (user.awayRanges ?? [])
-      .slice()
-      .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
-      .map((awayRange) => new UserAwayRangeDto(awayRange));
-
-    return new CommunityMemberContactInfoDto(user, timeZone, awayRanges);
-  });
 }

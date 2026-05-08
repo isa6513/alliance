@@ -1003,8 +1003,6 @@ export type CommunityDto = {
     allowMemberInvites: boolean;
     allowStaffAssignments: boolean;
     maxCapacity: number | null;
-    pendingUsers?: Array<User>;
-    internalInvites: Array<CommunityInvite>;
     users: Array<ProfileDto>;
     leaders: Array<ProfileDto>;
 };
