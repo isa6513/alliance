@@ -42,7 +42,9 @@ export class NotifsController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: UnreadCountDto })
   async getUnreadCount(@Request() req: JwtRequest): Promise<UnreadCountDto> {
-    return this.notifsService.getUnreadCount(req.user.sub);
+    return new UnreadCountDto(
+      await this.notifsService.getUnreadCount(req.user.sub),
+    );
   }
 
   @Post('read/:id')

@@ -252,8 +252,8 @@ Only DTOs with at least one violation are listed.
 
 ### `UnreadCountDto` — `server/src/notifs/dto/unread-count.dto.ts:3`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `notifs.controller.ts:45` — `getUnreadCount`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `notifs.controller.ts:45` — `getUnreadCount`
 
 ### `NotifClickResponseDto` — `server/src/notifs/dto/notifclick.dto.ts:9`
 
