@@ -1276,7 +1276,7 @@ describe('Forum (e2e)', () => {
       expect(notifs[0].associatedUsers?.[0].id).toBe(ctx.adminUserId);
     });
 
-    it('decrements each author\'s like notification on a multi-author post when one of two likers unlikes', async () => {
+    it("decrements each author's like notification on a multi-author post when one of two likers unlikes", async () => {
       const { user: coAuthor } = await createExtraUserAndToken();
 
       const postResponse = await request(ctx.app.getHttpServer())

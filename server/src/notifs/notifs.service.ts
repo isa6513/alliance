@@ -413,7 +413,7 @@ export class NotifsService {
             createdAt: unreadContent.createdAt,
             updatedAt: unreadContent.readAt ?? unreadContent.createdAt,
             sendTime: unreadContent.sendTime,
-            associatedUsers: [new ProfileDto(comment.author)],
+            associatedUsers: [comment.author],
             contentType: unreadContent.contentType,
             contentId: unreadContent.contentId,
           }),

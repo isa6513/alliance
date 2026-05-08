@@ -247,8 +247,8 @@ Only DTOs with at least one violation are listed.
 
 ### `NotificationDto` — `server/src/notifs/dto/notification.dto.ts:17`
 
-- [ ] Rule 3: `Object.assign(this, notification)` at `notification.dto.ts:77`
-- [ ] Rule 4: `notifs.controller.ts:38` — `findAll`
+- [x] Rule 3: `Object.assign(this, notification)` at `notification.dto.ts:77`
+- [x] Rule 4: `notifs.controller.ts:38` — `findAll`
 
 ### `UnreadCountDto` — `server/src/notifs/dto/unread-count.dto.ts:3`
 

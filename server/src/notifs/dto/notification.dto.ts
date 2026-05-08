@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { ProfileDto } from 'src/user/dto/user.dto';
+import { User } from 'src/user/entities/user.entity';
 import {
   NOTIFICATION_CATEGORY_PRIORITIES,
   Notification,
@@ -14,47 +14,35 @@ export enum NotificationSourceType {
   UnreadContent = 'unread_content',
 }
 
-export class NotificationDto {
-  @ApiProperty()
+export type NotificationDtoArgs = {
   id: number;
-
-  @ApiProperty({
-    enum: NotificationCategory,
-    enumName: 'NotificationCategory',
-  })
   category: NotificationCategory;
-
-  @ApiProperty()
   message: string;
-
-  @ApiPropertyOptional({ nullable: true })
-  webAppLocation?: string | null;
-
-  @ApiPropertyOptional({ nullable: true })
+  webAppLocation: string;
   mobileAppLocation?: string | null;
-
-  @ApiProperty({ type: Date, nullable: true })
-  @Type(() => Date)
   readAt: Date | null;
-
-  @ApiProperty({ type: Date })
-  @Type(() => Date)
   createdAt: Date;
-
-  @ApiProperty({
-    enum: NotifPriority,
-    enumName: 'NotifPriority',
-  })
   priority: NotifPriority;
-
-  @ApiProperty({ type: Date })
-  @Type(() => Date)
   updatedAt: Date;
-
-  @ApiProperty({ type: Date })
-  @Type(() => Date)
   sendTime: Date;
+  associatedUsers: User[];
+  sourceType: NotificationSourceType;
+  contentType?: UnreadContentType;
+  contentId?: number;
+};
 
+export class NotificationDto extends PickType(Notification, [
+  'id',
+  'category',
+  'message',
+  'priority',
+  'webAppLocation',
+  'mobileAppLocation',
+  'readAt',
+  'createdAt',
+  'updatedAt',
+  'sendTime',
+]) {
   @ApiProperty({ type: ProfileDto, isArray: true })
   associatedUsers: ProfileDto[];
 
@@ -73,8 +61,24 @@ export class NotificationDto {
   @ApiPropertyOptional()
   contentId?: number;
 
-  constructor(notification: NotificationDto) {
-    Object.assign(this, notification);
+  constructor(input: NotificationDtoArgs) {
+    super();
+    this.id = input.id;
+    this.category = input.category;
+    this.message = input.message;
+    this.webAppLocation = input.webAppLocation;
+    this.mobileAppLocation = input.mobileAppLocation ?? null;
+    this.readAt = input.readAt;
+    this.createdAt = input.createdAt;
+    this.priority = input.priority;
+    this.updatedAt = input.updatedAt;
+    this.sendTime = input.sendTime;
+    this.associatedUsers = input.associatedUsers.map(
+      (user) => new ProfileDto(user),
+    );
+    this.sourceType = input.sourceType;
+    this.contentType = input.contentType;
+    this.contentId = input.contentId;
   }
 
   static fromNotification(notification: Notification): NotificationDto {
@@ -102,9 +106,7 @@ export class NotificationDto {
           : notification.category === NotificationCategory.ActionUpdate
             ? notification.actionUpdate?.id
             : undefined,
-      associatedUsers: notification.associatedUsers
-        ? notification.associatedUsers.map((user) => new ProfileDto(user))
-        : [],
+      associatedUsers: notification.associatedUsers ?? [],
     });
   }
 
@@ -112,13 +114,13 @@ export class NotificationDto {
     id: number;
     category: NotificationCategory;
     message: string;
-    webAppLocation?: string;
+    webAppLocation: string;
     mobileAppLocation?: string;
     readAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
     sendTime: Date;
-    associatedUsers?: ProfileDto[];
+    associatedUsers?: User[];
     contentType: UnreadContentType;
     contentId: number;
   }): NotificationDto {

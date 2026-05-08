@@ -513,7 +513,7 @@ export type Notification = {
     message: string;
     priority: NotifPriority;
     targetContent?: string;
-    webAppLocation: string | null;
+    webAppLocation: string;
     mobileAppLocation: string | null;
     readAt: string | null;
     createdAt: string;
@@ -1090,11 +1090,11 @@ export type NotificationDto = {
     id: number;
     category: NotificationCategory;
     message: string;
-    webAppLocation?: string | null;
-    mobileAppLocation?: string | null;
+    priority: NotifPriority;
+    webAppLocation: string;
+    mobileAppLocation: string | null;
     readAt: string | null;
     createdAt: string;
-    priority: NotifPriority;
     updatedAt: string;
     sendTime: string;
     associatedUsers: Array<ProfileDto>;

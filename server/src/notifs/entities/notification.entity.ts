@@ -109,13 +109,13 @@ export class Notification {
   @ApiPropertyOptional()
   targetContent?: string;
 
-  @Column({ nullable: true })
-  @ApiProperty({ nullable: true })
+  @Column()
+  @ApiProperty()
   webAppLocation: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   @ApiProperty({ nullable: true })
-  mobileAppLocation: string;
+  mobileAppLocation: string | null;
 
   @Column({ type: 'timestamptz', nullable: true })
   @ApiProperty({ type: Date, nullable: true })
