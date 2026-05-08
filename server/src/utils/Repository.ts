@@ -19,7 +19,7 @@ type NonNullableIsRelation<T> = [T] extends [never]
       : typeof relationBrand extends keyof T
         ? true
         : false;
-type IsRelation<T> = NonNullableIsRelation<NonNullable<T>>;
+export type IsRelation<T> = NonNullableIsRelation<NonNullable<T>>;
 type _typecheck_IsRelation =
   | Assert<Equal<IsRelation<null>, false>>
   | Assert<Equal<IsRelation<string>, false>>

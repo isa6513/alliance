@@ -128,9 +128,9 @@ Only DTOs with at least one violation are listed.
 
 ### `ExportActionDto` — `server/src/actions/dto/action.dto.ts:567`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 2: `extends OmitType(Action, [...])` at `action.dto.ts:567`
-- [ ] Rule 4: `actions.controller.ts:1070` — `exportAction`
+- [x] Rule 1: no constructor
+- [x] Rule 2: `extends OmitType(Action, [...])` at `action.dto.ts:567`
+- [x] Rule 4: `actions.controller.ts:1070` — `exportAction`
 
 ### `ScheduledPlansOverviewDto` — `server/src/actions/dto/action.dto.ts:619`
 

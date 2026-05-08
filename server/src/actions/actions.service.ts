@@ -125,7 +125,7 @@ import {
   ReminderGroupTimingMode,
 } from './entities/reminder-group.entity';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
-import type { Relations } from 'src/utils/Repository';
+import type { IsRelation, Relations } from 'src/utils/Repository';
 import { run } from '@alliance/common/run';
 import { CachedFilter } from 'src/utils/cached-filter';
 import { findLeast } from 'src/utils/filter';
@@ -158,6 +158,7 @@ import {
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 import { NotificationChannel } from 'src/notifs/notif-utils';
+import { Assert } from '@alliance/common/types';
 
 type SuspendPlanContext = {
   orderedSuites: Array<{ suiteId: number; pastDate: Date | null }>;
@@ -2525,6 +2526,18 @@ export class ActionsService {
       followUpForms: _followUpForms,
       ...actionCols
     } = importaction;
+
+    // typecheck to ensure that we don't override any relations in prod
+    type _actionCols_relations = {
+      [K in keyof typeof actionCols as K extends keyof Action
+        ? K
+        : never]: IsRelation<(typeof actionCols)[K]> extends true
+        ? K
+        : undefined;
+    }[keyof typeof actionCols];
+    type _ensure_ImportActionDto_noRelations = Assert<
+      _actionCols_relations extends undefined ? true : false
+    >;
 
     let suiteIdToSync: number | undefined;
     const result = await this.actionRepository.manager.transaction(
