@@ -129,7 +129,8 @@ export class AnalyticsController {
   @Get('aggregate-stats')
   @ApiOkResponse({ type: AggregateStatsDto })
   async getAggregateStats(): Promise<AggregateStatsDto> {
-    return await this.analyticsService.getAggregateStats();
+    const stats = await this.analyticsService.getAggregateStats();
+    return new AggregateStatsDto(stats);
   }
 
   @UseGuards(AdminGuard)

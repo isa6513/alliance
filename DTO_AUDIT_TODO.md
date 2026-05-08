@@ -50,8 +50,8 @@ Only DTOs with at least one violation are listed.
 
 ### `AggregateStatsDto` — `server/src/analytics/aggregatestats.dto.ts:3`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `analytics.controller.ts:118` — `getAggregateStats`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `analytics.controller.ts:118` — `getAggregateStats`
 
 ### `InviteFunnelDto` — `server/src/analytics/invite-funnel.dto.ts:3`
 

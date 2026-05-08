@@ -31,6 +31,7 @@ import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.s
 import { ActionCompletionCurve } from './action-completion-curve.dto';
 import { ActionStatsWithOnboarding } from './actionstats-with-onboarding.dto';
 import { InviteFunnelDto } from './invite-funnel.dto';
+import { AggregateStats } from './aggregatestats.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -947,7 +948,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     return samples;
   }
 
-  async getAggregateStats(): Promise<{ signedUsers: number }> {
+  async getAggregateStats(): Promise<AggregateStats> {
     const users = await this.userRepository.find({
       relations: { contractEvents: true },
     });
