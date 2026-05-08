@@ -40,8 +40,8 @@ Only DTOs with at least one violation are listed.
 
 ### `ActionCompletionCurveDto` — `server/src/analytics/action-completion-curve.dto.ts:4`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `analytics.controller.ts:101` — `getActionCompletionCurves`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `analytics.controller.ts:101` — `getActionCompletionCurves`
 
 ### `TimeToChurnSampleDto` — `server/src/analytics/time-to-churn.dto.ts:3`
 

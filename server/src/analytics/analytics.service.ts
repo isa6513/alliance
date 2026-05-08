@@ -29,7 +29,7 @@ import {
 } from './member-completion-retention.dto';
 import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
-import { ActionCompletionCurveDto } from './action-completion-curve.dto';
+import { ActionCompletionCurve } from './action-completion-curve.dto';
 import { ActionStatsWithOnboarding } from './actionstats-with-onboarding.dto';
 import { InviteFunnelDto } from './invite-funnel.dto';
 
@@ -477,7 +477,7 @@ ORDER BY pp.total_session_duration_seconds DESC
   async getActionCompletionCurves(
     actionId?: number,
     granularity: 'daily' | 'hourly' = 'daily',
-  ): Promise<ActionCompletionCurveDto[]> {
+  ): Promise<ActionCompletionCurve[]> {
     const whereClause: { showInChart: boolean; actionId?: number } = {
       showInChart: true,
     };
@@ -597,7 +597,7 @@ ORDER BY pp.total_session_duration_seconds DESC
           completionFractions: fractions,
           bucketHours: 1,
           hourOffsets: Array.from({ length: bucketCount }, (_, index) => index),
-        } satisfies ActionCompletionCurveDto;
+        } satisfies ActionCompletionCurve;
       }
 
       return {
@@ -610,7 +610,7 @@ ORDER BY pp.total_session_duration_seconds DESC
         dayOffsets: Array.from({ length: bucketCount }, (_, index) => index),
         completedCounts: counts,
         completionFractions: fractions,
-      } satisfies ActionCompletionCurveDto;
+      } satisfies ActionCompletionCurve;
     });
   }
 

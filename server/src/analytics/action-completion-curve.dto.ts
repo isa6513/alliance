@@ -1,6 +1,20 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { ActionStatsRecord } from './actionstats.entity';
 
+export type ActionCompletionCurve = {
+  actionId: number;
+  actionName: string;
+  usersJoined: number;
+  memberActionStartDate?: Date;
+  memberActionEndDate?: Date;
+  bucketDays: number;
+  dayOffsets: number[];
+  completedCounts: number[];
+  completionFractions: number[];
+  bucketHours?: number;
+  hourOffsets?: number[];
+};
+
 export class ActionCompletionCurveDto extends PickType(ActionStatsRecord, [
   'actionId',
   'actionName',
@@ -49,4 +63,19 @@ export class ActionCompletionCurveDto extends PickType(ActionStatsRecord, [
       'Bucket offsets (in hours) from the member_action start date (present when granularity is hourly).',
   })
   hourOffsets?: number[];
+
+  constructor(input: ActionCompletionCurve) {
+    super();
+    this.actionId = input.actionId;
+    this.actionName = input.actionName;
+    this.usersJoined = input.usersJoined;
+    this.memberActionStartDate = input.memberActionStartDate;
+    this.memberActionEndDate = input.memberActionEndDate;
+    this.bucketDays = input.bucketDays;
+    this.dayOffsets = input.dayOffsets;
+    this.completedCounts = input.completedCounts;
+    this.completionFractions = input.completionFractions;
+    this.bucketHours = input.bucketHours;
+    this.hourOffsets = input.hourOffsets;
+  }
 }
