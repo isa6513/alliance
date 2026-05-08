@@ -69,8 +69,8 @@ Only DTOs with at least one violation are listed.
 
 ### `HealthCheckDto` — `server/src/app.dto.ts:3`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `app.controller.ts:16` — `healthCheck` returns object literal `{ status: 'OK' }`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `app.controller.ts:16` — `healthCheck` returns object literal `{ status: 'OK' }`
 
 ---
 

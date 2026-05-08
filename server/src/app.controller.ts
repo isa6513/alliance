@@ -13,7 +13,7 @@ export class AppController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: HealthCheckDto })
   healthCheck(): HealthCheckDto {
-    return { status: 'OK' };
+    return new HealthCheckDto('OK');
   }
 
   /**
