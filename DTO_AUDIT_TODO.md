@@ -111,12 +111,12 @@ Only DTOs with at least one violation are listed.
 
 ### `ActionUpdateDto` — `server/src/actions/dto/action.dto.ts:458`
 
-- [ ] Rule 3: `Object.assign(this, actionUpdate)` at `action.dto.ts:482`
-- [ ] Rule 4:
-  - [ ] `actions.controller.ts:917` — `createUpdate`
-  - [ ] `actions.controller.ts:927` — `updateUpdate`
-  - [ ] `actions.controller.ts:941` — `allUpdates`
-  - [ ] `actions.controller.ts:950` — `recentUpdates`
+- [x] Rule 3: `Object.assign(this, actionUpdate)` at `action.dto.ts:482`
+- [x] Rule 4:
+  - [x] `actions.controller.ts:917` — `createUpdate`
+  - [x] `actions.controller.ts:927` — `updateUpdate`
+  - [x] `actions.controller.ts:941` — `allUpdates`
+  - [x] `actions.controller.ts:950` — `recentUpdates`
 
 ### `ActionSuiteDto` — `server/src/actions/dto/action.dto.ts:522`
 

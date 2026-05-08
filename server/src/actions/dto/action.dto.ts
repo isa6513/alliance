@@ -572,7 +572,16 @@ export class ActionUpdateDto extends PickType(ActionUpdate, [
 
   constructor(actionUpdate: ActionUpdate) {
     super();
-    Object.assign(this, actionUpdate);
+    this.id = actionUpdate.id;
+    this.title = actionUpdate.title;
+    this.date = actionUpdate.date;
+    this.actionId = actionUpdate.actionId;
+    this.visibleAt = actionUpdate.visibleAt;
+    this.notifyType = actionUpdate.notifyType;
+    this.shortNotifString = actionUpdate.shortNotifString;
+    this.associatedEvent = actionUpdate.associatedEvent;
+    this.associatedEventId = actionUpdate.associatedEventId;
+    this.tag = actionUpdate.tag;
     this.content = actionUpdate.content
       ? new EditableContentDto(actionUpdate.content)
       : { body: '', attachments: [], id: -1 };

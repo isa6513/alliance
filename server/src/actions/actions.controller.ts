@@ -918,21 +918,25 @@ export class ActionsController {
   @Post('createUpdate/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionUpdateDto })
-  createUpdate(
+  async createUpdate(
     @Param('id', ParseIntPipe) id: number,
     @Body() createActionUpdateDto: CreateActionUpdateDto,
   ): Promise<ActionUpdateDto> {
-    return this.actionsService.createActionUpdate(id, createActionUpdateDto);
+    return new ActionUpdateDto(
+      await this.actionsService.createActionUpdate(id, createActionUpdateDto),
+    );
   }
 
   @Patch('updateUpdate/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionUpdateDto })
-  updateUpdate(
+  async updateUpdate(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateActionUpdateDto: CreateActionUpdateDto,
   ): Promise<ActionUpdateDto> {
-    return this.actionsService.updateActionUpdate(id, updateActionUpdateDto);
+    return new ActionUpdateDto(
+      await this.actionsService.updateActionUpdate(id, updateActionUpdateDto),
+    );
   }
 
   @Delete('deleteUpdate/:id')
@@ -946,7 +950,8 @@ export class ActionsController {
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionUpdateDto, isArray: true })
   async allUpdates(): Promise<ActionUpdateDto[]> {
-    return this.actionsService.getActionUpdates();
+    const updates = await this.actionsService.getActionUpdates();
+    return updates.map((update) => new ActionUpdateDto(update));
   }
 
   @Get('updates')
@@ -955,7 +960,8 @@ export class ActionsController {
   async recentUpdates(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ): Promise<ActionUpdateDto[]> {
-    return this.actionsService.getActionUpdates(limit ?? 20);
+    const updates = await this.actionsService.getActionUpdates(limit ?? 20);
+    return updates.map((update) => new ActionUpdateDto(update));
   }
 
   @Get('suites')

@@ -2165,7 +2165,7 @@ export class ActionsService {
   async createActionUpdate(
     id: number,
     createActionUpdateDto: CreateActionUpdateDto,
-  ): Promise<ActionUpdateDto> {
+  ): Promise<ActionUpdate> {
     const content = this.editableContentRepository.create({
       body: createActionUpdateDto.content.body,
       attachments: createActionUpdateDto.content.attachments ?? [],
@@ -2203,19 +2203,18 @@ export class ActionsService {
       await this.generateNotifsForActionUpdate(actionUpdate);
     }
 
-    return new ActionUpdateDto(actionUpdate);
+    return actionUpdate;
   }
 
   async updateActionUpdate(
     id: number,
     createActionUpdateDto: CreateActionUpdateDto,
-  ): Promise<ActionUpdateDto> {
+  ): Promise<ActionUpdate> {
     const actionUpdate = await this.actionUpdateRepository.findOneOrFail({
       where: { id },
     });
     const updatedActionUpdate = { ...actionUpdate, ...createActionUpdateDto };
-    const saved = await this.actionUpdateRepository.save(updatedActionUpdate);
-    return new ActionUpdateDto(saved);
+    return this.actionUpdateRepository.save(updatedActionUpdate);
   }
 
   async deleteActionUpdate(id: number) {
@@ -2226,8 +2225,8 @@ export class ActionsService {
     return actionUpdate;
   }
 
-  async getActionUpdates(limit?: number): Promise<ActionUpdateDto[]> {
-    const actionUpdates = await this.actionUpdateRepository.find({
+  async getActionUpdates(limit?: number): Promise<ActionUpdate[]> {
+    return this.actionUpdateRepository.find({
       take: limit,
       order: { date: 'DESC' },
       relations: { action: true },
@@ -2237,10 +2236,6 @@ export class ActionsService {
         },
       },
     });
-
-    return actionUpdates.map(
-      (actionUpdate) => new ActionUpdateDto(actionUpdate),
-    );
   }
 
   async generateNotifsForActionUpdate(actionUpdate: ActionUpdate) {
