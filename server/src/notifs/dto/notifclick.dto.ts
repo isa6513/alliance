@@ -9,4 +9,8 @@ export class NotifClickDto {
 export class NotifClickResponseDto {
   @ApiProperty()
   mms: boolean;
+
+  constructor(mms: boolean) {
+    this.mms = mms;
+  }
 }

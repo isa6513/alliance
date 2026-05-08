@@ -89,6 +89,8 @@ export class NotifsController {
   @Post('linkClick')
   @ApiOkResponse({ type: NotifClickResponseDto })
   async linkClick(@Body() body: NotifClickDto): Promise<NotifClickResponseDto> {
-    return this.notifsService.notifLinkClick(body);
+    return new NotifClickResponseDto(
+      await this.notifsService.notifLinkClick(body),
+    );
   }
 }

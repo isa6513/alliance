@@ -257,8 +257,8 @@ Only DTOs with at least one violation are listed.
 
 ### `NotifClickResponseDto` — `server/src/notifs/dto/notifclick.dto.ts:9`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `notifs.controller.ts:90` — `linkClick`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `notifs.controller.ts:90` — `linkClick`
 
 ---
 

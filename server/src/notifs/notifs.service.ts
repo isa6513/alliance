@@ -26,7 +26,7 @@ import {
   UnreadContent,
   UnreadContentType,
 } from './entities/unread-content.entity';
-import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
+import { NotifClickDto } from './dto/notifclick.dto';
 import {
   Comment,
   CommentParentObject,
@@ -237,7 +237,7 @@ export class NotifsService {
     });
   }
 
-  async notifLinkClick(body: NotifClickDto): Promise<NotifClickResponseDto> {
+  async notifLinkClick(body: NotifClickDto): Promise<boolean> {
     const notif = await this.notifsRepository.findOne({
       where: { cid: body.cid },
     });
@@ -247,11 +247,11 @@ export class NotifsService {
 
     const mms = await this.mmsService.setClickedLinkByCid(body.cid);
     if (mms) {
-      return { mms: true };
+      return true;
     }
     await this.mailService.setClickedLinkByCid(body.cid);
 
-    return { mms: false };
+    return false;
   }
 
   async createActionUpdateNotif(actionUpdate: ActionUpdate, user: User) {
