@@ -149,12 +149,12 @@ Only DTOs with at least one violation are listed.
 
 ### `ShareUrlDto` — `server/src/actions/dto/share-url.dto.ts:5`
 
-- [ ] Rule 3: `Object.assign(this, shareUrl)` at `share-url.dto.ts:17`
-- [ ] Rule 4: `actions.controller.ts:1142` — `shareLinksForForm`
+- [x] Rule 3: `Object.assign(this, shareUrl)` at `share-url.dto.ts:17`
+- [x] Rule 4: `actions.controller.ts:1142` — `shareLinksForForm`
 
 ### `ShareUrlStatsDto` — `server/src/actions/dto/share-url.dto.ts:27`
 
-- [ ] Rule 4: `actions.controller.ts:1153` — `shareUrlStats`
+- [x] Rule 4: `actions.controller.ts:1153` — `shareUrlStats`
 
 ### `UserActionRelationsResponseDto` — `server/src/user/dto/user-action-relations.dto.ts:86`
 

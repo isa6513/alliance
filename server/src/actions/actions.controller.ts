@@ -1162,21 +1162,26 @@ export class ActionsController {
   @Get('shareLinksForForm/:formId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ShareUrlDto, isArray: true })
-  shareLinksForForm(
+  async shareLinksForForm(
     @Param('formId', ParseIntPipe) formId: number,
   ): Promise<ShareUrlDto[]> {
-    return this.actionsService.getShareLinksForForm(formId);
+    const shareUrls = await this.actionsService.getShareLinksForForm(formId);
+    return shareUrls.map((shareUrl) => new ShareUrlDto(shareUrl));
   }
 
   @Get('shareUrlStats/:actionId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ShareUrlStatsDto, isArray: true })
   @ApiQuery({ name: 'questionId', required: false, type: String })
-  shareUrlStats(
+  async shareUrlStats(
     @Param('actionId', ParseIntPipe) actionId: number,
     @Query('questionId') questionId?: string,
   ): Promise<ShareUrlStatsDto[]> {
-    return this.actionsService.getShareUrlStats(actionId, questionId);
+    const stats = await this.actionsService.getShareUrlStats(
+      actionId,
+      questionId,
+    );
+    return stats.map((stat) => new ShareUrlStatsDto(stat));
   }
 
   // TODO move ====================================

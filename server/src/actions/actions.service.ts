@@ -124,7 +124,7 @@ import {
   ReminderGroup,
   ReminderGroupTimingMode,
 } from './entities/reminder-group.entity';
-import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
+import { ShareUrlStats } from './dto/share-url.dto';
 import type { IsRelation, Relations } from 'src/utils/Repository';
 import { run } from '@alliance/common/run';
 import { CachedFilter } from 'src/utils/cached-filter';
@@ -3347,25 +3347,21 @@ export class ActionsService {
     }
   }
 
-  async getShareLinksForForm(formId: number): Promise<ShareUrlDto[]> {
+  async getShareLinksForForm(formId: number): Promise<ActionShareUrl[]> {
     const action = await this.findActionByFormId(formId);
     if (!action) {
       throw new NotFoundException('No action found for this form');
     }
-    return this.actionShareUrlRepository
-      .find({
-        where: { action: { id: action.id } },
-        relations: { user: true },
-      })
-      .then((shareUrls) =>
-        shareUrls.map((shareUrl) => new ShareUrlDto(shareUrl)),
-      );
+    return this.actionShareUrlRepository.find({
+      where: { action: { id: action.id } },
+      relations: { user: true },
+    });
   }
 
   async getShareUrlStats(
     actionId: number,
     questionId?: string,
-  ): Promise<ShareUrlStatsDto[]> {
+  ): Promise<ShareUrlStats[]> {
     // Get all share URLs for this action
     const shareUrls = await this.actionShareUrlRepository.find({
       where: { action: { id: actionId } },
@@ -3382,9 +3378,12 @@ export class ActionsService {
       .filter((sid): sid is string => !!sid);
 
     if (sids.length === 0) {
-      return shareUrls.map(
-        (su) => new ShareUrlStatsDto(new ProfileDto(su.user), 0, su.sid ?? ''),
-      );
+      return shareUrls.map((su) => ({
+        user: su.user,
+        inviteCount: 0,
+        sid: su.sid ?? '',
+        yesCount: 0,
+      }));
     }
 
     // Count form responses per sid
@@ -3419,15 +3418,12 @@ export class ActionsService {
     }
 
     const results = shareUrls
-      .map(
-        (su) =>
-          new ShareUrlStatsDto(
-            new ProfileDto(su.user),
-            countMap.get(su.sid ?? '') ?? 0,
-            su.sid ?? '',
-            yesCountMap.get(su.sid ?? '') ?? 0,
-          ),
-      )
+      .map((su) => ({
+        user: su.user,
+        inviteCount: countMap.get(su.sid ?? '') ?? 0,
+        sid: su.sid ?? '',
+        yesCount: yesCountMap.get(su.sid ?? '') ?? 0,
+      }))
       .filter((stat) => stat.inviteCount > 0);
 
     return results.sort((a, b) => b.inviteCount - a.inviteCount);
