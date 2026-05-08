@@ -27,7 +27,6 @@ import {
   MemberCompletionRetentionCohort,
   MemberCompletionRetentionPoint,
 } from './member-completion-retention.dto';
-import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import { ActionCompletionCurve } from './action-completion-curve.dto';
 import { ActionStatsWithOnboarding } from './actionstats-with-onboarding.dto';
@@ -858,7 +857,7 @@ ORDER BY pp.total_session_duration_seconds DESC
       });
   }
 
-  async getTimeToChurnSamples(): Promise<TimeToChurnSampleDto[]> {
+  async getTimeToChurnSamples(): Promise<number[]> {
     const allEvents = await this.contractEventRepository.find({
       relations: { user: true },
       order: { date: 'ASC' },
@@ -926,12 +925,12 @@ ORDER BY pp.total_session_duration_seconds DESC
     }
 
     const msPerDay = 24 * 60 * 60 * 1000;
-    const samples: TimeToChurnSampleDto[] = [];
+    const samples: number[] = [];
 
     for (const [userId, signedAt] of churnedUsers) {
       const lastCompletedAt = lastCompletionByUserId.get(userId);
       if (!lastCompletedAt) {
-        samples.push({ daysToChurn: 0 });
+        samples.push(0);
         continue;
       }
       if (lastCompletedAt < signedAt) {
@@ -942,7 +941,7 @@ ORDER BY pp.total_session_duration_seconds DESC
       if (daysToChurn < 0) {
         continue;
       }
-      samples.push({ daysToChurn });
+      samples.push(daysToChurn);
     }
 
     return samples;

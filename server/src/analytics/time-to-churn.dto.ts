@@ -6,4 +6,8 @@ export class TimeToChurnSampleDto {
       'Days between signing and the last completed action for churned members.',
   })
   daysToChurn: number;
+
+  constructor(daysToChurn: number) {
+    this.daysToChurn = daysToChurn;
+  }
 }

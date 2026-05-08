@@ -45,8 +45,8 @@ Only DTOs with at least one violation are listed.
 
 ### `TimeToChurnSampleDto` — `server/src/analytics/time-to-churn.dto.ts:3`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `analytics.controller.ts:111` — `getTimeToChurnSamples`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `analytics.controller.ts:111` — `getTimeToChurnSamples`
 
 ### `AggregateStatsDto` — `server/src/analytics/aggregatestats.dto.ts:3`
 

@@ -94,7 +94,9 @@ export class AnalyticsController {
   > {
     const cohorts =
       await this.analyticsService.getMemberCompletionRetentionByCohort();
-    return cohorts.map((cohort) => new MemberCompletionRetentionCohortDto(cohort));
+    return cohorts.map(
+      (cohort) => new MemberCompletionRetentionCohortDto(cohort),
+    );
   }
 
   @UseGuards(AdminGuard)
@@ -118,8 +120,9 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('time-to-churn')
   @ApiOkResponse({ type: [TimeToChurnSampleDto] })
-  getTimeToChurnSamples(): Promise<TimeToChurnSampleDto[]> {
-    return this.analyticsService.getTimeToChurnSamples();
+  async getTimeToChurnSamples(): Promise<TimeToChurnSampleDto[]> {
+    const samples = await this.analyticsService.getTimeToChurnSamples();
+    return samples.map((sample) => new TimeToChurnSampleDto(sample));
   }
 
   @UseGuards(AdminGuard)
