@@ -13,10 +13,10 @@ Only DTOs with at least one violation are listed.
 
 ### `TimeSpentForUserDto` — `server/src/analytics/timespent.dto.ts:3`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4:
-  - [ ] `analytics.controller.ts:31` — `getTimeSpentPerUser`
-  - [ ] `analytics.controller.ts:38` — `getTimeSpentPerUserTotal`
+- [x] Rule 1: no constructor
+- [x] Rule 4:
+  - [x] `analytics.controller.ts:31` — `getTimeSpentPerUser`
+  - [x] `analytics.controller.ts:38` — `getTimeSpentPerUserTotal`
 
 ### `DailyStatsDto` — `server/src/analytics/dailystats.dto.ts:4`
 

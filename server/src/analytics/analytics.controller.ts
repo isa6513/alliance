@@ -27,15 +27,17 @@ export class AnalyticsController {
   @Get('time-spent-per-user')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [TimeSpentForUserDto] })
-  getTimeSpentPerUser(): Promise<TimeSpentForUserDto[]> {
-    return this.analyticsService.getTimeSpentPerUser();
+  async getTimeSpentPerUser(): Promise<TimeSpentForUserDto[]> {
+    const entries = await this.analyticsService.getTimeSpentPerUser();
+    return entries.map((entry) => new TimeSpentForUserDto(entry));
   }
 
   @Get('time-spent-per-user-total')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [TimeSpentForUserDto] })
-  getTimeSpentPerUserTotal(): Promise<TimeSpentForUserDto[]> {
-    return this.analyticsService.getTimeSpentPerUserTotal();
+  async getTimeSpentPerUserTotal(): Promise<TimeSpentForUserDto[]> {
+    const entries = await this.analyticsService.getTimeSpentPerUserTotal();
+    return entries.map((entry) => new TimeSpentForUserDto(entry));
   }
 
   @UseGuards(AdminGuard)

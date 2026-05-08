@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { UserService } from 'src/user/user.service';
-import { TimeSpentForUserDto } from './timespent.dto';
+import { TimeSpentForUser } from './timespent.dto';
 import { DailyStatsRecord } from './dailystats.entity';
 import { DailyStatsDto } from './dailystats.dto';
 import { ActionStatsRecord } from './actionstats.entity';
@@ -40,8 +40,8 @@ export class AnalyticsService {
   private readonly PROJECT_ID: string;
   private readonly logger = new Logger(AnalyticsService.name);
 
-  private timeSpentPerUserLast7Days: TimeSpentForUserDto[] = [];
-  private timeSpentPerUserTotal: TimeSpentForUserDto[] = [];
+  private timeSpentPerUserLast7Days: TimeSpentForUser[] = [];
+  private timeSpentPerUserTotal: TimeSpentForUser[] = [];
 
   getQuery(range: 'last7Days' | 'total') {
     return `
@@ -116,7 +116,7 @@ ORDER BY pp.total_session_duration_seconds DESC
 
   async getPosthogData(
     range: 'last7Days' | 'total',
-  ): Promise<TimeSpentForUserDto[]> {
+  ): Promise<TimeSpentForUser[]> {
     const users = await this.userService.findAllUsers();
 
     const emailToUserId = users.reduce((acc, user) => {
@@ -161,12 +161,12 @@ ORDER BY pp.total_session_duration_seconds DESC
       };
     });
 
-    const timeSpentPerUser: TimeSpentForUserDto[] = results.map(
+    const timeSpentPerUser: TimeSpentForUser[] = results.map(
       (result) =>
         ({
           userId: emailToUserId[result.email],
           timeSpent: result.total_session_duration_seconds,
-        }) satisfies TimeSpentForUserDto,
+        }) satisfies TimeSpentForUser,
     );
     return timeSpentPerUser;
   }
@@ -190,11 +190,11 @@ ORDER BY pp.total_session_duration_seconds DESC
     this.timeSpentPerUserTotal = timeSpentPerUserTotal;
   }
 
-  async getTimeSpentPerUser(): Promise<TimeSpentForUserDto[]> {
+  async getTimeSpentPerUser(): Promise<TimeSpentForUser[]> {
     return this.timeSpentPerUserLast7Days;
   }
 
-  async getTimeSpentPerUserTotal(): Promise<TimeSpentForUserDto[]> {
+  async getTimeSpentPerUserTotal(): Promise<TimeSpentForUser[]> {
     return this.timeSpentPerUserTotal;
   }
 
