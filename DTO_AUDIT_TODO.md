@@ -234,12 +234,12 @@ Only DTOs with at least one violation are listed.
 
 ### `MessageDto` — `server/src/messaging/dto/messaging.dto.ts:46`
 
-- [ ] Rule 2: `extends OmitType(Message, [...])` at `messaging.dto.ts:46`
-- [ ] Rule 3: `Object.assign(this, message)` at `messaging.dto.ts:65`
-- [ ] Rule 4:
-  - [ ] `message.controller.ts:40` — `getConversationMessagesForAdmin`
-  - [ ] `message.controller.ts:54` — `sendMessage`
-  - [ ] `message.controller.ts:66` — `getMessages`
+- [x] Rule 2: `extends OmitType(Message, [...])` at `messaging.dto.ts:46`
+- [x] Rule 3: `Object.assign(this, message)` at `messaging.dto.ts:65`
+- [x] Rule 4:
+  - [x] `message.controller.ts:40` — `getConversationMessagesForAdmin`
+  - [x] `message.controller.ts:54` — `sendMessage`
+  - [x] `message.controller.ts:66` — `getMessages`
 
 ---
 

@@ -99,10 +99,11 @@ export class MessageService {
       },
     });
 
-    const dtoMessage = new MessageDto(
-      hydratedMessage,
-      hydratedMessage.conversation?.id ?? participant.conversation.id,
-    );
+    const dtoMessage = new MessageDto({
+      message: hydratedMessage,
+      conversationId:
+        hydratedMessage.conversation?.id ?? participant.conversation.id,
+    });
 
     this.eventEmitter.emit(MessagingEvents.MessageCreated, {
       conversationId: dto.conversationId,
@@ -138,7 +139,7 @@ export class MessageService {
     const messages = await qb.getMany();
     return messages
       .reverse()
-      .map((message) => new MessageDto(message, conversationId));
+      .map((message) => new MessageDto({ message, conversationId }));
   }
 
   async getConversationMessagesForAdmin(
@@ -164,7 +165,7 @@ export class MessageService {
     const messages = await qb.getMany();
     return messages
       .reverse()
-      .map((message) => new MessageDto(message, conversationId));
+      .map((message) => new MessageDto({ message, conversationId }));
   }
 
   private async assertParticipant(

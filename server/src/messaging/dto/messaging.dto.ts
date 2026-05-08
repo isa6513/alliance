@@ -43,11 +43,17 @@ export class MessageReferenceDto extends PickType(Message, [
   }
 }
 
-export class MessageDto extends OmitType(Message, [
-  'conversation',
-  'author',
-  'replyTo',
-  'replies',
+export type MessageDtoArgs = {
+  message: Message;
+  conversationId: number;
+};
+
+export class MessageDto extends PickType(Message, [
+  'id',
+  'body',
+  'attachments',
+  'createdAt',
+  'deletedAt',
 ]) {
   @ApiProperty({ type: () => ProfileDto })
   @Type(() => ProfileDto)
@@ -60,15 +66,18 @@ export class MessageDto extends OmitType(Message, [
   @Type(() => MessageReferenceDto)
   replyTo?: MessageReferenceDto;
 
-  constructor(message: Message, conversationId?: number) {
+  constructor(input: MessageDtoArgs) {
     super();
-    Object.assign(this, message);
-    this.author = new ProfileDto(message.author);
-    this.conversationId =
-      conversationId ?? message.conversation?.id ?? this.conversationId;
+    const { message, conversationId } = input;
+    this.id = message.id;
+    this.body = message.body;
     this.attachments = (message.attachments ?? []).map((attachment) =>
       getImageSource(attachment),
     );
+    this.createdAt = message.createdAt;
+    this.deletedAt = message.deletedAt;
+    this.author = new ProfileDto(message.author);
+    this.conversationId = conversationId;
     this.replyTo = message.replyTo
       ? new MessageReferenceDto(message.replyTo)
       : undefined;
@@ -151,7 +160,10 @@ export class ConversationDto extends PickType(Conversation, [
       ? new CommunityDto(conversation.community)
       : undefined;
     this.lastMessage = lastMessage
-      ? new MessageDto(lastMessage, conversation.id)
+      ? new MessageDto({
+          message: lastMessage,
+          conversationId: conversation.id,
+        })
       : undefined;
     this.unreadCount = unreadCount ?? 0;
 
