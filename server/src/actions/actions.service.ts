@@ -68,9 +68,7 @@ import { UserService } from '../user/user.service';
 import {
   ActionActivityDto,
   ActionDto,
-  ActionEventDto,
   ActionSharePreview,
-  ActionUpdateDto,
   CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
@@ -3731,21 +3729,25 @@ export class ActionsService {
     ]);
 
     for (const event of events) {
-      feedItems.push({
-        type: TimelineFeedItemType.ActionEvent,
-        date: event.date,
-        action: new ActionDto(event.action),
-        actionEvent: new ActionEventDto(event),
-      });
+      feedItems.push(
+        new TimelineFeedItemDto({
+          type: TimelineFeedItemType.ActionEvent,
+          date: event.date,
+          action: event.action,
+          actionEvent: event,
+        }),
+      );
     }
 
     for (const actionUpdate of actionUpdates) {
-      feedItems.push({
-        type: TimelineFeedItemType.ActionUpdate,
-        date: actionUpdate.date,
-        action: new ActionDto(actionUpdate.action),
-        actionUpdate: new ActionUpdateDto(actionUpdate),
-      });
+      feedItems.push(
+        new TimelineFeedItemDto({
+          type: TimelineFeedItemType.ActionUpdate,
+          date: actionUpdate.date,
+          action: actionUpdate.action,
+          actionUpdate,
+        }),
+      );
     }
 
     feedItems.sort((a, b) => b.date.getTime() - a.date.getTime());

@@ -932,6 +932,22 @@ export enum TimelineFeedItemType {
   ActionEvent = 'action_event',
 }
 
+export type TimelineFeedItem = {
+  date: Date;
+  action: Action;
+} & (
+  | {
+      type: TimelineFeedItemType.ActionEvent;
+      actionEvent: ActionEvent;
+      actionUpdate?: undefined;
+    }
+  | {
+      type: TimelineFeedItemType.ActionUpdate;
+      actionEvent?: undefined;
+      actionUpdate: ActionUpdate;
+    }
+);
+
 export class TimelineFeedItemDto {
   @ApiProperty({ enum: TimelineFeedItemType, enumName: 'TimelineFeedItemType' })
   @Allow()
@@ -956,6 +972,17 @@ export class TimelineFeedItemDto {
   @Type(() => ActionEventDto)
   @IsOptional()
   actionEvent?: ActionEventDto;
+
+  constructor(input: TimelineFeedItem) {
+    this.type = input.type;
+    this.date = input.date;
+    this.action = new ActionDto(input.action);
+    if (input.type === TimelineFeedItemType.ActionEvent) {
+      this.actionEvent = new ActionEventDto(input.actionEvent);
+    } else {
+      this.actionUpdate = new ActionUpdateDto(input.actionUpdate);
+    }
+  }
 }
 
 export class EvaluateCohortExpressionDto {

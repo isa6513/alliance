@@ -172,8 +172,8 @@ Only DTOs with at least one violation are listed.
 
 ### `TimelineFeedItemDto` — `server/src/actions/dto/action.dto.ts:761`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:1198` — `getTimelineFeed`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:1198` — `getTimelineFeed`
 
 ### `GlobalFeedItemDto` — `server/src/actions/dto/action.dto.ts:725`
 
