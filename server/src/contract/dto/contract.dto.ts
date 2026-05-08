@@ -6,10 +6,8 @@ import type { ContractField } from '@alliance/common/forms/form-schema';
 export class ContractDto extends PickType(Contract, ['id', 'markdown']) {
   constructor(contract: Contract) {
     super();
-    Object.assign(this, {
-      id: contract.id,
-      markdown: contract.markdown,
-    });
+    this.id = contract.id;
+    this.markdown = contract.markdown;
   }
 }
 
@@ -23,6 +21,10 @@ export class SignContractDto {
 export class ContractEventDateDto {
   @ApiProperty()
   date: Date;
+
+  constructor(date: Date) {
+    this.date = date;
+  }
 }
 
 export class ContractAdminDto extends PickType(Contract, [
@@ -35,14 +37,12 @@ export class ContractAdminDto extends PickType(Contract, [
 ]) {
   constructor(contract: Contract) {
     super();
-    Object.assign(this, {
-      id: contract.id,
-      name: contract.name,
-      createdAt: contract.createdAt,
-      markdown: contract.markdown,
-      startDate: contract.startDate,
-      endDate: contract.endDate,
-    });
+    this.id = contract.id;
+    this.name = contract.name;
+    this.createdAt = contract.createdAt;
+    this.markdown = contract.markdown;
+    this.startDate = contract.startDate;
+    this.endDate = contract.endDate;
   }
 }
 

@@ -74,7 +74,7 @@ export class ContractController {
       signedName: body.signedName,
       contractId,
     });
-    return { date };
+    return new ContractEventDateDto(date);
   }
 
   @Post('suspend')
@@ -84,7 +84,7 @@ export class ContractController {
     @Request() req: JwtRequest,
   ): Promise<ContractEventDateDto> {
     const date = await this.contractService.suspendContract(req.user.sub);
-    return { date };
+    return new ContractEventDateDto(date);
   }
 
   @Post('create')

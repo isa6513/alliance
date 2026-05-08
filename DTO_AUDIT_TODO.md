@@ -120,18 +120,18 @@ Only DTOs with at least one violation are listed.
 
 ### `ContractDto` — `server/src/contract/dto/contract.dto.ts:6`
 
-- [ ] Rule 3: `Object.assign(this, {...})` at `contract.dto.ts:9`
+- [x] Rule 3: `Object.assign(this, {...})` at `contract.dto.ts:9`
 
 ### `ContractAdminDto` — `server/src/contract/dto/contract.dto.ts:28`
 
-- [ ] Rule 3: `Object.assign(this, {...})` at `contract.dto.ts:38`
+- [x] Rule 3: `Object.assign(this, {...})` at `contract.dto.ts:38`
 
 ### `ContractEventDateDto` — `server/src/contract/dto/contract.dto.ts:23`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4:
-  - [ ] `contract.controller.ts:77` — `signContract` returns object literal `{ date }`
-  - [ ] `contract.controller.ts:87` — `suspendContract` returns object literal `{ date }`
+- [x] Rule 1: no constructor
+- [x] Rule 4:
+  - [x] `contract.controller.ts:77` — `signContract` returns object literal `{ date }`
+  - [x] `contract.controller.ts:87` — `suspendContract` returns object literal `{ date }`
 
 ---
 
