@@ -185,7 +185,9 @@ export class ConversationController {
   async getUnreadSummary(
     @Request() req: JwtRequest,
   ): Promise<UnreadMessageSummaryDto> {
-    return this.conversationService.getUnreadSummary(req.user.sub);
+    return new UnreadMessageSummaryDto(
+      await this.conversationService.getUnreadSummary(req.user.sub),
+    );
   }
 
   @Post(':conversationId/leave')

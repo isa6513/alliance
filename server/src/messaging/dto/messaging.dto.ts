@@ -348,6 +348,12 @@ export class UnreadMessagesDto {
   }
 }
 
+export type UnreadMessageSummary = {
+  messageCount: number;
+  messageRequestCount: number;
+  totalCount: number;
+};
+
 export class UnreadMessageSummaryDto {
   @ApiProperty({ type: Number })
   @IsInt()
@@ -360,4 +366,10 @@ export class UnreadMessageSummaryDto {
   @ApiProperty({ type: Number })
   @IsInt()
   totalCount: number;
+
+  constructor(input: UnreadMessageSummary) {
+    this.messageCount = input.messageCount;
+    this.messageRequestCount = input.messageRequestCount;
+    this.totalCount = input.totalCount;
+  }
 }

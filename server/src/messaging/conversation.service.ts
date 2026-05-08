@@ -22,7 +22,7 @@ import {
   CreateDirectConversationDto,
   CreateGroupConversationDto,
   ConversationParticipantDto,
-  UnreadMessageSummaryDto,
+  UnreadMessageSummary,
   UpdateConversationDto,
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
@@ -894,7 +894,7 @@ export class ConversationService {
     return Number(result?.unreadCount ?? 0);
   }
 
-  async getUnreadSummary(userId: number): Promise<UnreadMessageSummaryDto> {
+  async getUnreadSummary(userId: number): Promise<UnreadMessageSummary> {
     const [messageCount, messageRequestCount] = await Promise.all([
       this.sumUnreadCountsByParticipantState(userId, ParticipantState.Joined),
       this.countConversationsByParticipantState(

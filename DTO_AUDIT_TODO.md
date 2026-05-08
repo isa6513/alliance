@@ -225,8 +225,8 @@ Only DTOs with at least one violation are listed.
 
 ### `UnreadMessageSummaryDto` — `server/src/messaging/dto/messaging.dto.ts:336`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `conversation.controller.ts:185` — `getUnreadSummary`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `conversation.controller.ts:185` — `getUnreadSummary`
 
 ---
 
