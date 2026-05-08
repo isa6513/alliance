@@ -11,6 +11,16 @@ export enum SearchItemType {
   Other = 'other',
 }
 
+export type SearchItem = {
+  id: string;
+  name: string;
+  date?: Date;
+  image?: string;
+  webAppLocation: string;
+  secondaryData?: string[];
+  type: SearchItemType;
+};
+
 export class SearchItemDto {
   @ApiProperty()
   @IsString()
@@ -43,4 +53,14 @@ export class SearchItemDto {
   })
   @IsEnum(SearchItemType)
   type: SearchItemType;
+
+  constructor(input: SearchItem) {
+    this.id = input.id;
+    this.name = input.name;
+    this.date = input.date;
+    this.image = input.image;
+    this.webAppLocation = input.webAppLocation;
+    this.secondaryData = input.secondaryData;
+    this.type = input.type;
+  }
 }

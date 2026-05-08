@@ -12,7 +12,7 @@ import { UserService } from 'src/user/user.service';
 import type { Repository } from 'typeorm';
 import { actionUrl, postUrl, profileUrl } from './approutes';
 import { RecentSearch } from './recentsearch.entity';
-import { SearchItemDto, SearchItemType } from './searchitem.dto';
+import { SearchItem, SearchItemDto, SearchItemType } from './searchitem.dto';
 import { infoPageSearchItems } from './informationpages';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class SearchService {
     private searchRepository: Repository<RecentSearch>,
   ) {}
 
-  async search(query: string, userId: number): Promise<SearchItemDto[]> {
+  async search(query: string, userId: number): Promise<SearchItem[]> {
     const maxItemsPerType = 5;
 
     if (!query.length) {
@@ -50,7 +50,7 @@ export class SearchService {
       }
 
       const recentSearchesItems = await Promise.all(
-        recentSearches.map(async (search): Promise<SearchItemDto | null> => {
+        recentSearches.map(async (search): Promise<SearchItem | null> => {
           if (search.objectType === SearchItemType.User) {
             const user = await this.usersService.findOne(search.objectId);
             if (!user) {
@@ -104,7 +104,7 @@ export class SearchService {
     return [...userItems, ...actionItems, ...postItems, ...infoPageItems];
   }
 
-  userToSearchItem(user: User, friends: boolean, self: boolean): SearchItemDto {
+  userToSearchItem(user: User, friends: boolean, self: boolean): SearchItem {
     const profile = new ProfileDto(user);
     return {
       id: 'u' + user.id,
@@ -115,7 +115,7 @@ export class SearchService {
       secondaryData: friends ? ['Friend'] : self ? ['This is you!'] : [],
     };
   }
-  actionToSearchItem(action: Action): SearchItemDto {
+  actionToSearchItem(action: Action): SearchItem {
     return {
       id: 'a' + action.id,
       name: action.name,
@@ -126,7 +126,7 @@ export class SearchService {
   }
   postToSearchItem(
     post: Pick<Post, 'id' | 'title' | 'createdAt' | 'likesIds'>,
-  ): SearchItemDto {
+  ): SearchItem {
     return {
       id: 'p' + post.id,
       name: post.title,

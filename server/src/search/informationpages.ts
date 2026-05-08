@@ -1,6 +1,6 @@
-import { SearchItemDto, SearchItemType } from './searchitem.dto';
+import { SearchItem, SearchItemType } from './searchitem.dto';
 
-export const infoPageSearchItems: SearchItemDto[] = [
+export const infoPageSearchItems: SearchItem[] = [
   {
     id: 'faq',
     name: 'Frequently asked questions',

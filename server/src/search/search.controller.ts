@@ -15,7 +15,7 @@ import { SearchItemDto } from './searchitem.dto';
 
 @Controller('search')
 export class SearchController {
-  constructor(private readonly searchService: SearchService) { }
+  constructor(private readonly searchService: SearchService) {}
 
   @Get('all')
   @UseGuards(AuthGuard)
@@ -24,7 +24,8 @@ export class SearchController {
     @Query('query') query: string,
     @Request() req: JwtRequest,
   ): Promise<SearchItemDto[]> {
-    return this.searchService.search(query, req.user.sub);
+    const items = await this.searchService.search(query, req.user.sub);
+    return items.map((item) => new SearchItemDto(item));
   }
 
   @Post('selected')

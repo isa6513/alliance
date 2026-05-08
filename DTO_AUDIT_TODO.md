@@ -266,8 +266,8 @@ Only DTOs with at least one violation are listed.
 
 ### `SearchItemDto` — `server/src/search/searchitem.dto.ts:14`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `search.controller.ts:27` — `all`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `search.controller.ts:27` — `all`
 
 ---
 
