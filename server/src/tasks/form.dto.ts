@@ -17,6 +17,7 @@ import {
   IsString,
 } from 'class-validator';
 import { AiDetectionResultDto } from 'src/ai-detection/dto/ai-detection-result.dto';
+import { AiDetectionResult } from 'src/ai-detection/entities/ai-detection-result.entity';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { UserDto } from 'src/user/dto/user.dto';
 import { Form } from './entities/form.entity';
@@ -116,6 +117,11 @@ export class FormAggregateViewsDto {
   aggregateViews: AggregateViewSchema[];
 }
 
+export type FormResponseDtoArgs = {
+  response: FormResponse;
+  aiDetectionResults?: AiDetectionResult[];
+};
+
 export class FormResponseDto extends PickType(FormResponse, [
   'id',
   'answers',
@@ -144,11 +150,9 @@ export class FormResponseDto extends PickType(FormResponse, [
   @Type(() => AiDetectionResultDto)
   aiDetectionResults?: AiDetectionResultDto[];
 
-  constructor(
-    response: FormResponse,
-    extras: { aiDetectionResults?: AiDetectionResultDto[] } = {},
-  ) {
+  constructor(input: FormResponseDtoArgs) {
     super();
+    const { response, aiDetectionResults } = input;
     this.id = response.id;
     this.formId = response.formId;
     this.formSnapshotId = response.formSnapshotId;
@@ -162,7 +166,9 @@ export class FormResponseDto extends PickType(FormResponse, [
     this.phDistinctId = response.phDistinctId;
     this.createdAt = response.createdAt;
     this.user = response.user;
-    this.aiDetectionResults = extras.aiDetectionResults;
+    this.aiDetectionResults = aiDetectionResults?.map(
+      (result) => new AiDetectionResultDto(result),
+    );
   }
 }
 
@@ -173,7 +179,7 @@ export class LinkedGuestDraftDto {
   draft?: FormResponseDto;
 
   constructor(draft?: FormResponse | null) {
-    this.draft = draft ? new FormResponseDto(draft) : undefined;
+    this.draft = draft ? new FormResponseDto({ response: draft }) : undefined;
   }
 }
 
@@ -268,6 +274,6 @@ export class GuestFormResponseDto {
   response?: FormResponseDto;
 
   constructor(response?: FormResponse | null) {
-    this.response = response ? new FormResponseDto(response) : undefined;
+    this.response = response ? new FormResponseDto({ response }) : undefined;
   }
 }

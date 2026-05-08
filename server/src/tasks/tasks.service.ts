@@ -1090,8 +1090,9 @@ export class TasksService {
 
     return responses.map(
       (response) =>
-        new FormResponseDto(response, {
-          aiDetectionResults: aiDetectionByResponseId.get(response.id) ?? [],
+        new FormResponseDto({
+          response,
+          aiDetectionResults: aiDetectionByResponseId.get(response.id),
         }),
     );
   }

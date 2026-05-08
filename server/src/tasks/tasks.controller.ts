@@ -67,9 +67,9 @@ export class TasksController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: SubmitFormDto,
   ): Promise<FormResponseDto> {
-    return new FormResponseDto(
-      await this.tasksService.submitForm(+id, req.user.sub, body),
-    );
+    return new FormResponseDto({
+      response: await this.tasksService.submitForm(+id, req.user.sub, body),
+    });
   }
 
   @Post('submitPublicForm/:id')
@@ -94,13 +94,13 @@ export class TasksController {
       await this.authService.createGuestSession(incomingToken);
     this.authService.setGuestCookie(res, guestToken);
     res.setHeader(GUEST_TOKEN_RESPONSE_HEADER, guestToken);
-    return new FormResponseDto(
-      await this.tasksService.submitFormPublic({
+    return new FormResponseDto({
+      response: await this.tasksService.submitFormPublic({
         formId: +id,
         submitFormDto: body,
         guestId,
       }),
-    );
+    });
   }
 
   @Post('submitFollowUpForm/:followUpFormId')
@@ -111,13 +111,13 @@ export class TasksController {
     @Param('followUpFormId', ParseIntPipe) followUpFormId: number,
     @Body() body: SubmitFollowUpFormDto,
   ): Promise<FormResponseDto> {
-    return new FormResponseDto(
-      await this.tasksService.submitFollowUpForm(
+    return new FormResponseDto({
+      response: await this.tasksService.submitFollowUpForm(
         followUpFormId,
         req.user.sub,
         body,
       ),
-    );
+    });
   }
 
   @Post('createForm')
@@ -173,9 +173,9 @@ export class TasksController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<FormResponseDto> {
-    return new FormResponseDto(
-      await this.tasksService.getMyFormResponse(req.user.sub, id),
-    );
+    return new FormResponseDto({
+      response: await this.tasksService.getMyFormResponse(req.user.sub, id),
+    });
   }
 
   @Get('guestResponse/:id')
@@ -322,7 +322,7 @@ export class TasksController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<FormResponseDto[]> {
     return (await this.tasksService.getFormsForUserSID(userId)).map(
-      (response) => new FormResponseDto(response),
+      (response) => new FormResponseDto({ response }),
     );
   }
 }

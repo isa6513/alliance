@@ -275,7 +275,7 @@ Only DTOs with at least one violation are listed.
 
 ### `FormResponseDto` — `server/src/tasks/form.dto.ts:119`
 
-- [ ] Rule 4: `tasks.controller.ts:143` — `getFormResponses` (other returns are clean)
+- [x] Rule 4: `tasks.controller.ts:143` — `getFormResponses` (other returns are clean)
 
 ### `FormDto` — `server/src/tasks/form.dto.ts:93`
 
