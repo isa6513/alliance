@@ -84,7 +84,6 @@ import {
   GlobalFeedItemDto,
   GlobalFeedItemType,
   GlobalFeedNewMembersDto,
-  ReminderGroupPlanDto,
   SetPriorityDto,
   SuspensionPlan,
   TimelineFeedItemDto,
@@ -3266,10 +3265,6 @@ export class ActionsService {
       date = new Date(date.getTime() + stepMs);
     }
     return plans;
-  }
-
-  async getReminderPlansOverview(): Promise<ReminderGroupPlanDto[]> {
-    return [];
   }
 
   private generateCIDForShareUrl() {

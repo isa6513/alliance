@@ -67,7 +67,6 @@ import {
   PreviewTextDto,
   PreviewTextMessageResponseDto,
   ReminderGroupDto,
-  ReminderGroupPlanDto,
   ScheduledPlansOverviewDto,
   SetPriorityDto,
   SuspensionPlanDto,
@@ -1105,13 +1104,6 @@ export class ActionsController {
   @ApiOkResponse({ type: ActionDto })
   async pasteJson(@Body() body: PasteJsonDto): Promise<ActionDto> {
     return new ActionDto(await this.actionsService.importAction(body.body));
-  }
-
-  @Get('reminderPlansOverview')
-  @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: ReminderGroupPlanDto, isArray: true })
-  reminderPlansOverview(): Promise<ReminderGroupPlanDto[]> {
-    return this.actionsService.getReminderPlansOverview();
   }
 
   @Get('scheduledPlans')

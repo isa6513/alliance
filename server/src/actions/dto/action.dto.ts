@@ -39,7 +39,6 @@ import { ActionSuite } from '../entities/action-suite.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 import { SubmitFormDto } from 'src/tasks/form.dto';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
 import { GeneralUpdate } from '../entities/general-update.entity';
 import { GeneralUpdateDto } from './general-update.dto';
 import type { CohortExpression } from '../cohort-expression.types';
@@ -814,18 +813,6 @@ export class ScheduledPlansOverviewDto {
       (plan) => new ForumAutocompletePlanDto(plan),
     );
   }
-}
-
-export class ReminderGroupPlanDto {
-  @ApiProperty({ type: () => ReminderGroup })
-  @Type(() => ReminderGroup)
-  @IsDefined()
-  reminderGroup: ReminderGroup;
-
-  @ApiProperty({ type: () => PreviewNotificationPlanDto, isArray: true })
-  @Type(() => PreviewNotificationPlanDto)
-  @IsDefined()
-  willNotify: PreviewNotificationPlanDto[];
 }
 
 export enum GlobalFeedItemType {

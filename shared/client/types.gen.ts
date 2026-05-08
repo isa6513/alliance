@@ -2260,11 +2260,6 @@ export type PasteJsonDto = {
     body: string;
 };
 
-export type ReminderGroupPlanDto = {
-    reminderGroup: ReminderGroup;
-    willNotify: Array<PreviewNotificationPlanDto>;
-};
-
 export type SuspensionPlanDto = {
     date: string;
     users: Array<ProfileDto>;
@@ -6203,19 +6198,6 @@ export type ActionsPasteJsonResponses = {
 };
 
 export type ActionsPasteJsonResponse = ActionsPasteJsonResponses[keyof ActionsPasteJsonResponses];
-
-export type ActionsReminderPlansOverviewData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/actions/reminderPlansOverview';
-};
-
-export type ActionsReminderPlansOverviewResponses = {
-    200: Array<ReminderGroupPlanDto>;
-};
-
-export type ActionsReminderPlansOverviewResponse = ActionsReminderPlansOverviewResponses[keyof ActionsReminderPlansOverviewResponses];
 
 export type ActionsScheduledPlansData = {
     body?: never;

@@ -192,8 +192,8 @@ Only DTOs with at least one violation are listed.
 
 ### `ReminderGroupPlanDto` — `server/src/actions/dto/action.dto.ts:631`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:1090` — `reminderPlansOverview`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:1090` — `reminderPlansOverview`
 
 ---
 
