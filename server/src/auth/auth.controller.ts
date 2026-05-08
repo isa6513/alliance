@@ -21,7 +21,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Request as ExpressRequest, Response } from 'express';
-import { UserDto } from '../user/dto/user.dto';
 import { AuthService } from './auth.service';
 import {
   AuthMeResponseDto,
@@ -168,11 +167,10 @@ export class AuthController {
   @ApiOkResponse({ type: AuthMeResponseDto })
   async me(@Request() req: JwtRequest): Promise<AuthMeResponseDto> {
     const profile = await this.authService.getProfile(req.user.email);
-    const user = new UserDto(profile);
-    return {
-      user,
-      ...(req.user.isImpersonation && { isImpersonation: true }),
-    };
+    return new AuthMeResponseDto({
+      user: profile,
+      isImpersonation: req.user.isImpersonation ? true : undefined,
+    });
   }
 
   @Post('logout')

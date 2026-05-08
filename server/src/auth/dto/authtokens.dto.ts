@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { User } from '../../user/entities/user.entity';
 import { UserDto } from '../../user/dto/user.dto';
 
 export class RefreshTokensResponseDto {
@@ -24,10 +25,20 @@ export class AccessToken {
   access_token: string;
 }
 
+export type AuthMeResponse = {
+  user: User;
+  isImpersonation?: boolean;
+};
+
 export class AuthMeResponseDto {
   @ApiProperty({ type: () => UserDto })
   user: UserDto;
 
   @ApiPropertyOptional()
   isImpersonation?: boolean;
+
+  constructor(input: AuthMeResponse) {
+    this.user = new UserDto(input.user);
+    this.isImpersonation = input.isImpersonation;
+  }
 }

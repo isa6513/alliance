@@ -91,8 +91,8 @@ Only DTOs with at least one violation are listed.
 
 ### `AuthMeResponseDto` — `server/src/auth/dto/authtokens.dto.ts:17`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `auth.controller.ts:172` — `me`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `auth.controller.ts:172` — `me`
 
 ---
 
