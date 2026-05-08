@@ -1156,7 +1156,7 @@ export class ActionsController {
     @Request() req: JwtRequest,
   ): Promise<ShareLinkDto> {
     const url = await this.actionsService.getShareLink(id, req.user.sub);
-    return { url };
+    return new ShareLinkDto(url);
   }
 
   @Get('shareLinksForForm/:formId')

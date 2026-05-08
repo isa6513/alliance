@@ -144,8 +144,8 @@ Only DTOs with at least one violation are listed.
 
 ### `ShareLinkDto` — `server/src/actions/dto/share-url.dto.ts:22`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:1133` — `getShareLink` returns object literal `{ url }`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:1133` — `getShareLink` returns object literal `{ url }`
 
 ### `ShareUrlDto` — `server/src/actions/dto/share-url.dto.ts:5`
 

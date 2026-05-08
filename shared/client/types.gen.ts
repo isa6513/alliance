@@ -2027,7 +2027,7 @@ export type ReminderGroupDto = {
     excludeOptionalActions: boolean;
 };
 
-export type NotificationChannel = 'email' | 'text' | 'push';
+export type NotificationChannel = 'text' | 'email' | 'push';
 
 export type PreviewNotificationPlanDto = {
     scheduledFor: string;
