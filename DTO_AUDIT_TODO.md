@@ -26,12 +26,12 @@ Only DTOs with at least one violation are listed.
 
 ### `ActionStatsWithOnboardingDto` — `server/src/analytics/actionstats-with-onboarding.dto.ts:4`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 2: `extends OmitType(ActionStatsRecord, [] as const)` at `actionstats-with-onboarding.dto.ts:4`
-- [ ] Rule 4:
-  - [ ] `analytics.controller.ts:55` — `getActionStats`
-  - [ ] `analytics.controller.ts:64` — `getActionStatsById`
-  - [ ] `analytics.controller.ts:78` — `recalculateActionStats`
+- [x] Rule 1: no constructor
+- [x] Rule 2: `extends OmitType(ActionStatsRecord, [] as const)` at `actionstats-with-onboarding.dto.ts:4`
+- [x] Rule 4:
+  - [x] `analytics.controller.ts:55` — `getActionStats`
+  - [x] `analytics.controller.ts:64` — `getActionStatsById`
+  - [x] `analytics.controller.ts:78` — `recalculateActionStats`
 
 ### `MemberCompletionRetentionCohortDto` — `server/src/analytics/member-completion-retention.dto.ts:46`
 

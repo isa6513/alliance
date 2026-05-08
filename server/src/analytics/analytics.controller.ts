@@ -57,8 +57,9 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('action-stats')
   @ApiOkResponse({ type: [ActionStatsWithOnboardingDto] })
-  getActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
-    return this.analyticsService.getActionStats();
+  async getActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
+    const stats = await this.analyticsService.getActionStats();
+    return stats.map((stat) => new ActionStatsWithOnboardingDto(stat));
   }
 
   @UseGuards(AdminGuard)
@@ -73,7 +74,7 @@ export class AnalyticsController {
     if (!stats) {
       throw new NotFoundException('Action stats not found');
     }
-    return stats;
+    return new ActionStatsWithOnboardingDto(stats);
   }
 
   @UseGuards(AdminGuard)
@@ -81,7 +82,8 @@ export class AnalyticsController {
   @ApiOkResponse({ type: [ActionStatsWithOnboardingDto] })
   async recalculateActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
     await this.analyticsService.calculateActionStats();
-    return this.analyticsService.getActionStats();
+    const stats = await this.analyticsService.getActionStats();
+    return stats.map((stat) => new ActionStatsWithOnboardingDto(stat));
   }
 
   @UseGuards(AdminGuard)

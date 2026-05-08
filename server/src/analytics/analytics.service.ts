@@ -30,7 +30,7 @@ import {
 import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import { ActionCompletionCurveDto } from './action-completion-curve.dto';
-import { ActionStatsWithOnboardingDto } from './actionstats-with-onboarding.dto';
+import { ActionStatsWithOnboarding } from './actionstats-with-onboarding.dto';
 import { InviteFunnelDto } from './invite-funnel.dto';
 
 @Injectable()
@@ -423,7 +423,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     this.logger.log('Finished action stats calculation');
   }
 
-  async getActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
+  async getActionStats(): Promise<ActionStatsWithOnboarding[]> {
     const records = await this.actionStatsRepository.find({
       order: { actionId: 'ASC' },
     });
@@ -445,7 +445,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     }
 
     return records.map((record) => ({
-      ...record,
+      actionStatsRecord: record,
       onboarding: onboardingByActionId.get(record.actionId) ?? false,
       optional: optionalByActionId.get(record.actionId) ?? false,
     }));
@@ -453,7 +453,7 @@ ORDER BY pp.total_session_duration_seconds DESC
 
   async getActionStatsById(
     actionId: number,
-  ): Promise<ActionStatsWithOnboardingDto | null> {
+  ): Promise<ActionStatsWithOnboarding | null> {
     const record = await this.actionStatsRepository.findOne({
       where: { actionId },
     });
@@ -468,7 +468,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     });
 
     return {
-      ...record,
+      actionStatsRecord: record,
       onboarding: action?.onboarding ?? false,
       optional: action?.optional ?? false,
     };
