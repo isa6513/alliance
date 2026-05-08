@@ -1048,7 +1048,9 @@ export class ActionsController {
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: PreviewEmailHtmlDto,
   ): Promise<PreviewEmailHtmlResponseDto> {
-    return this.actionEventReminderService.previewEmailHtml(eventId, body);
+    return new PreviewEmailHtmlResponseDto(
+      await this.actionEventReminderService.previewEmailHtml(eventId, body),
+    );
   }
 
   @Post('previewTextMessage/:eventId')

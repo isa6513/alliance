@@ -187,8 +187,8 @@ Only DTOs with at least one violation are listed.
 
 ### `PreviewEmailHtmlResponseDto` — `server/src/actions/dto/action.dto.ts:140`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:1026` — `previewEmailHtml`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:1026` — `previewEmailHtml`
 
 ### `ReminderGroupPlanDto` — `server/src/actions/dto/action.dto.ts:631`
 

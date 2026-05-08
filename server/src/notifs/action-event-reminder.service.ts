@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateReminderGroupDto,
   PreviewEmailHtmlDto,
-  PreviewEmailHtmlResponseDto,
+  PreviewEmailHtmlResponse,
   PreviewTextDto,
 } from 'src/actions/dto/action.dto';
 import { NotificationScheduleEntryDto } from 'src/actions/dto/notification-schedule.dto';
@@ -496,7 +496,7 @@ export class ActionEventReminderService {
     eventId: number,
     dto: PreviewEmailHtmlDto,
     sendTime?: Date,
-  ): Promise<PreviewEmailHtmlResponseDto> {
+  ): Promise<PreviewEmailHtmlResponse> {
     const context = await this.getKeywordContextForPreview(
       eventId,
       dto,

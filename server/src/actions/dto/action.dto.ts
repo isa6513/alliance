@@ -159,7 +159,12 @@ export class ActionReferralCodeDto {
   }
 }
 
-export class PreviewEmailHtmlResponseDto {
+export interface PreviewEmailHtmlResponse {
+  subject: string;
+  html: string;
+}
+
+export class PreviewEmailHtmlResponseDto implements PreviewEmailHtmlResponse {
   @ApiProperty({ type: String })
   @IsDefined()
   @IsString()
@@ -169,6 +174,11 @@ export class PreviewEmailHtmlResponseDto {
   @IsDefined()
   @IsString()
   html: string;
+
+  constructor(data: PreviewEmailHtmlResponse) {
+    this.subject = data.subject;
+    this.html = data.html;
+  }
 }
 
 export class ActionEventDto extends PickType(ActionEvent, [
