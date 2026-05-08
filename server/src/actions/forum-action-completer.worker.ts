@@ -20,14 +20,14 @@ import {
   type Repository,
 } from 'typeorm';
 import { ActionsService } from './actions.service';
-import { ActionSummaryDto, ForumAutocompletePlanDto } from './dto/action.dto';
+import { ForumAutocompletePlan } from './dto/action.dto';
 import {
   ActionActivity,
   ActionActivityType,
 } from './entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
-import { ProfileDto } from 'src/user/dto/user.dto';
+import { User } from 'src/user/entities/user.entity';
 import { EventLogService } from 'src/eventlog/eventlog.service';
 import { EventType } from 'src/eventlog/event-log.entity';
 
@@ -116,7 +116,7 @@ export class ForumActionCompleterWorker {
     memberActionEvent: ActionEvent;
     runAt: Date;
     dryRun?: boolean;
-  }): Promise<ProfileDto[]> {
+  }): Promise<User[]> {
     const { action, memberActionEvent, runAt, dryRun = false } = params;
     const shouldWrite = !dryRun;
 
@@ -240,9 +240,7 @@ export class ForumActionCompleterWorker {
     );
 
     const toCompleteSet = new Set(toComplete);
-    const plannedUsers = baseUsers
-      .filter((user) => toCompleteSet.has(user.id))
-      .map((user) => new ProfileDto(user));
+    const plannedUsers = baseUsers.filter((user) => toCompleteSet.has(user.id));
 
     if (shouldWrite) {
       for (const userId of toComplete) {
@@ -306,7 +304,7 @@ export class ForumActionCompleterWorker {
   async getAutocompletePlans(
     rangeStart: Date,
     rangeEnd: Date,
-  ): Promise<ForumAutocompletePlanDto[]> {
+  ): Promise<ForumAutocompletePlan[]> {
     const actions = await this.actionRepository.find({
       where: {
         isForumParticipationAction: true,
@@ -315,7 +313,7 @@ export class ForumActionCompleterWorker {
       relations: { events: true },
     });
 
-    const plans: ForumAutocompletePlanDto[] = [];
+    const plans: ForumAutocompletePlan[] = [];
 
     for (const action of actions) {
       const phases = this.getMemberActionPhases(action.events);
@@ -351,11 +349,7 @@ export class ForumActionCompleterWorker {
         continue;
       }
 
-      const plan = new ForumAutocompletePlanDto();
-      plan.date = upcomingPhase.runAt;
-      plan.users = users;
-      plan.action = new ActionSummaryDto(action);
-      plans.push(plan);
+      plans.push({ date: upcomingPhase.runAt, users, action });
     }
 
     return plans.sort((a, b) => a.date.getTime() - b.date.getTime());

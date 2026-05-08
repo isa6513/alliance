@@ -90,7 +90,7 @@ import {
   GlobalFeedNewMembersDto,
   ReminderGroupPlanDto,
   SetPriorityDto,
-  SuspensionPlanDto,
+  SuspensionPlan,
   TimelineFeedItemDto,
   TimelineFeedItemType,
   UpdateActionActivityDto,
@@ -3245,14 +3245,14 @@ export class ActionsService {
     rangeStart: Date,
     rangeEnd: Date,
     stepHours: number = 1,
-  ): Promise<SuspensionPlanDto[]> {
+  ): Promise<SuspensionPlan[]> {
     const actions = await this.findAllSorted({
       events: true,
       suite: true,
     });
     const context = await this.buildSuspendPlanContext(actions, rangeEnd);
 
-    const plans: SuspensionPlanDto[] = [];
+    const plans: SuspensionPlan[] = [];
     let date = rangeStart;
     const suspendedUsers = new Set<number>();
     const rangeEndMs = rangeEnd.getTime();
@@ -3270,10 +3270,7 @@ export class ActionsService {
         for (const user of notAlreadySuspended) {
           suspendedUsers.add(user.id);
         }
-        plans.push({
-          date,
-          users: notAlreadySuspended.map((user) => new ProfileDto(user)),
-        });
+        plans.push({ date, users: notAlreadySuspended });
       }
       date = new Date(date.getTime() + stepMs);
     }

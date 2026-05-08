@@ -65,6 +65,33 @@ class MaybeFormResponseDto {
 
 NestJS serializes a `null` return as a **200 with empty body** (not JSON `null`). The hey-api fetch client parses the empty body as `{}`, which is truthy and passes `value ?? fallback` — callers expecting `null` get a malformed empty DTO and crash downstream.
 
+## Constructors
+
+Response DTOs take a single `input` parameter. Assign each field manually to prevent leakage — no `Object.assign`. If the input type requires a new type, name it after the DTO without the `Dto` suffix; for entity-backed DTOs the entity itself is the input type.
+
+```ts
+// ✅
+export class SuspensionPlanDto {
+  @ApiProperty({ type: Date }) date: Date;
+  @ApiProperty({ type: () => ProfileDto, isArray: true }) users: ProfileDto[];
+
+  constructor(input: SuspensionPlan) {
+    this.date = input.date;
+    this.users = input.users.map((u) => new ProfileDto(u));
+  }
+}
+export type SuspensionPlan = { date: Date; users: User[] };
+
+// ❌ — Object.assign hides which fields are part of the response
+constructor(input: SuspensionPlan) {
+  Object.assign(this, input);
+}
+```
+
+**Inputs are raw data, never other DTOs.** The DTO is responsible for converting entities/raw values into its inner DTOs. Services return raw input shapes (`SuspensionPlan[]`, not `SuspensionPlanDto[]`); the controller calls `new XxxDto(...)`.
+
+Use `PickType` over `OmitType` — explicit field lists don't silently grow when the entity gains a column, except in specific cases.
+
 ## File location
 
 DTOs live in files ending in `.dto.ts` (e.g. `thing.dto.ts`, `action.dto.ts`) by convention.

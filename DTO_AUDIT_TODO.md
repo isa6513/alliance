@@ -134,13 +134,13 @@ Only DTOs with at least one violation are listed.
 
 ### `ScheduledPlansOverviewDto` — `server/src/actions/dto/action.dto.ts:619`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:1107-1110` — `scheduledPlans` (calls `new` but mutates fields after instead of passing through ctor)
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:1107-1110` — `scheduledPlans` (calls `new` but mutates fields after instead of passing through ctor)
 
 ### `SuspensionPlanDto` — `server/src/actions/dto/action.dto.ts:592`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:1122` — `suspendPlans`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:1122` — `suspendPlans`
 
 ### `ShareLinkDto` — `server/src/actions/dto/share-url.dto.ts:22`
 

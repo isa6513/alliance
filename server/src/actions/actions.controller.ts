@@ -1129,22 +1129,23 @@ export class ActionsController {
       this.forumActionCompleterWorker.getAutocompletePlans(start, end),
     ]);
 
-    const response = new ScheduledPlansOverviewDto();
-    response.suspensionPlans = suspensionPlans;
-    response.forumAutocompletePlans = forumAutocompletePlans;
-    return response;
+    return new ScheduledPlansOverviewDto({
+      suspensionPlans,
+      forumAutocompletePlans,
+    });
   }
 
   @Get('suspendPlans')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: SuspensionPlanDto, isArray: true })
-  suspendPlans(
+  async suspendPlans(
     @Query('rangeStart') rangeStart: Date,
     @Query('rangeEnd') rangeEnd: Date,
   ): Promise<SuspensionPlanDto[]> {
     const start = new Date(rangeStart);
     const end = new Date(rangeEnd);
-    return this.actionsService.getSuspendPlans(start, end, 6);
+    const plans = await this.actionsService.getSuspendPlans(start, end, 6);
+    return plans.map((plan) => new SuspensionPlanDto(plan));
   }
 
   @Post('getShareLink/:id')
