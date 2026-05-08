@@ -18,7 +18,8 @@ export class GeoController {
     @Query('latitude') latitude: number,
     @Query('longitude') longitude: number,
   ): Promise<CitySearchDto[]> {
-    return this.geoService.searchCity(query, latitude, longitude);
+    const cities = await this.geoService.searchCity(query, latitude, longitude);
+    return cities.map((city) => new CitySearchDto(city));
   }
 
   @Get('load-country-data')

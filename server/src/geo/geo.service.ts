@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CitySearchDto } from './city.dto';
 import { City } from './city.entity';
 import type { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -131,7 +130,7 @@ export class GeoService {
     query: string,
     latitude?: number,
     longitude?: number,
-  ): Promise<CitySearchDto[]> {
+  ): Promise<City[]> {
     const qb = this.cityRepository
       .createQueryBuilder('c')
       .where('(c.name ILIKE :q OR c.englishName ILIKE :q)', {

@@ -25,7 +25,16 @@ export class CitySearchDto extends PickType(City, [
   'countryName',
   'countryCode',
   'admin1',
-]) {}
+]) {
+  constructor(city: City) {
+    super();
+    this.id = city.id;
+    this.name = city.name;
+    this.countryName = city.countryName;
+    this.countryCode = city.countryCode;
+    this.admin1 = city.admin1;
+  }
+}
 
 export class MaybeUserLocationDto {
   @ApiPropertyOptional({ type: () => City })

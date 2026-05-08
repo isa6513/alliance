@@ -175,8 +175,8 @@ Only DTOs with at least one violation are listed.
 
 ### `CitySearchDto` — `server/src/geo/city.dto.ts:22`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `geo.controller.ts:21` — `searchCity`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `geo.controller.ts:21` — `searchCity`
 
 ---
 
