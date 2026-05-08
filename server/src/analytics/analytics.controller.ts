@@ -43,11 +43,15 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('daily-stats')
   @ApiOkResponse({ type: [DailyStatsDto] })
-  getDailyStats(
+  async getDailyStats(
     @Query('date') startDate: string,
     @Query('endDate') endDate: string,
   ): Promise<DailyStatsDto[]> {
-    return this.analyticsService.getDailyStats(startDate, endDate);
+    const records = await this.analyticsService.getDailyStats(
+      startDate,
+      endDate,
+    );
+    return records.map((record) => new DailyStatsDto(record));
   }
 
   @UseGuards(AdminGuard)

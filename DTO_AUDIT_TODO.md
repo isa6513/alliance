@@ -20,9 +20,9 @@ Only DTOs with at least one violation are listed.
 
 ### `DailyStatsDto` — `server/src/analytics/dailystats.dto.ts:4`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 2: `extends OmitType(DailyStatsRecord, [] as const)` at `dailystats.dto.ts:4`
-- [ ] Rule 4: `analytics.controller.ts:48` — `getDailyStats`
+- [x] Rule 1: no constructor
+- [x] Rule 2: `extends OmitType(DailyStatsRecord, [] as const)` at `dailystats.dto.ts:4`
+- [x] Rule 4: `analytics.controller.ts:48` — `getDailyStats`
 
 ### `ActionStatsWithOnboardingDto` — `server/src/analytics/actionstats-with-onboarding.dto.ts:4`
 
