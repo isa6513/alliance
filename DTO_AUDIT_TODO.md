@@ -78,11 +78,11 @@ Only DTOs with at least one violation are listed.
 
 ### `SignInResponseDto` — `server/src/auth/dto/signin.dto.ts:35`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4:
-  - [ ] `auth.controller.ts:73,75` — `login`
-  - [ ] `auth.controller.ts:94,96` — `adminLogin`
-  - [ ] `auth.controller.ts:135,137` — `register`
+- [x] Rule 1: no constructor
+- [x] Rule 4:
+  - [x] `auth.controller.ts:73,75` — `login`
+  - [x] `auth.controller.ts:94,96` — `adminLogin`
+  - [x] `auth.controller.ts:135,137` — `register`
 
 ### `RefreshTokensResponseDto` — `server/src/auth/dto/authtokens.dto.ts:4`
 

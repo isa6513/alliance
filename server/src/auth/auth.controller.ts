@@ -70,9 +70,9 @@ export class AuthController {
     this.authService.setAuthCookies(res, access_token, refresh_token);
     await this.mergeGuestSession(signInDto.guestToken, req, res, userId);
     if (signInDto.mode === 'header') {
-      return { access_token, refresh_token, isAdmin };
+      return new SignInResponseDto({ access_token, refresh_token, isAdmin });
     }
-    return { isAdmin };
+    return new SignInResponseDto({ isAdmin });
   }
 
   @Public()
@@ -91,9 +91,9 @@ export class AuthController {
     this.authService.setAuthCookies(res, access_token, refresh_token);
     await this.mergeGuestSession(signInDto.guestToken, req, res, userId);
     if (signInDto.mode === 'header') {
-      return { access_token, refresh_token, isAdmin };
+      return new SignInResponseDto({ access_token, refresh_token, isAdmin });
     }
-    return { isAdmin: true };
+    return new SignInResponseDto({ isAdmin: true });
   }
 
   private async mergeGuestSession(
@@ -132,9 +132,9 @@ export class AuthController {
     this.authService.setAuthCookies(res, access_token, refresh_token);
     await this.mergeGuestSession(signUp.guestToken, req, res, userId);
     if (signUp.mode === 'header') {
-      return { access_token, refresh_token, isAdmin };
+      return new SignInResponseDto({ access_token, refresh_token, isAdmin });
     }
-    return { isAdmin };
+    return new SignInResponseDto({ isAdmin });
   }
 
   @Post('refresh')

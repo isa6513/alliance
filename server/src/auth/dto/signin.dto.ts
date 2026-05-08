@@ -41,4 +41,16 @@ export class SignInResponseDto {
 
   @ApiPropertyOptional()
   refresh_token?: string;
+
+  constructor(input: SignInResponse) {
+    this.isAdmin = input.isAdmin;
+    this.access_token = input.access_token;
+    this.refresh_token = input.refresh_token;
+  }
 }
+
+export type SignInResponse = {
+  isAdmin: boolean;
+  access_token?: string;
+  refresh_token?: string;
+};
