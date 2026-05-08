@@ -89,10 +89,12 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('member-completion-retention')
   @ApiOkResponse({ type: [MemberCompletionRetentionCohortDto] })
-  getMemberCompletionRetention(): Promise<
+  async getMemberCompletionRetention(): Promise<
     MemberCompletionRetentionCohortDto[]
   > {
-    return this.analyticsService.getMemberCompletionRetentionByCohort();
+    const cohorts =
+      await this.analyticsService.getMemberCompletionRetentionByCohort();
+    return cohorts.map((cohort) => new MemberCompletionRetentionCohortDto(cohort));
   }
 
   @UseGuards(AdminGuard)

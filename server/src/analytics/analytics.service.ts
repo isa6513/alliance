@@ -24,8 +24,8 @@ import {
 } from 'src/actions/entities/action-event.entity';
 import { ContractEvent } from 'src/user/entities/contract-event.entity';
 import {
-  MemberCompletionRetentionCohortDto,
-  MemberCompletionRetentionPointDto,
+  MemberCompletionRetentionCohort,
+  MemberCompletionRetentionPoint,
 } from './member-completion-retention.dto';
 import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
@@ -619,7 +619,7 @@ ORDER BY pp.total_session_duration_seconds DESC
   }
 
   async getMemberCompletionRetentionByCohort(): Promise<
-    MemberCompletionRetentionCohortDto[]
+    MemberCompletionRetentionCohort[]
   > {
     const signedEvents = await this.contractEventRepository
       .createQueryBuilder('event')
@@ -815,7 +815,7 @@ ORDER BY pp.total_session_duration_seconds DESC
         );
         let cumulativeJoined = 0;
         let cumulativeCompleted = 0;
-        const points: MemberCompletionRetentionPointDto[] = weeks.map(
+        const points: MemberCompletionRetentionPoint[] = weeks.map(
           ([weekIndex, counts]) => {
             const actionIndex = cohortIndex + weekIndex;
             const actionStartDate = actionStartDates[actionIndex];

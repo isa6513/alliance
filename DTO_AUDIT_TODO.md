@@ -35,8 +35,8 @@ Only DTOs with at least one violation are listed.
 
 ### `MemberCompletionRetentionCohortDto` — `server/src/analytics/member-completion-retention.dto.ts:46`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `analytics.controller.ts:87` — `getMemberCompletionRetention`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `analytics.controller.ts:87` — `getMemberCompletionRetention`
 
 ### `ActionCompletionCurveDto` — `server/src/analytics/action-completion-curve.dto.ts:4`
 
