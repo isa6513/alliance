@@ -35,7 +35,6 @@ import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import type { FormSchema } from '@alliance/common/forms/form-schema';
 import {
-  CommunityUserInfoDto,
   UserActionRelationDetail,
   UserActionRelations,
   UserActionRelationsForUser,
@@ -2866,7 +2865,7 @@ export class ActionsService {
 
   async findMemberInfoByCommunityId(
     communityId: number,
-  ): Promise<CommunityUserInfoDto> {
+  ): Promise<UserActionRelations> {
     const usersPromise = this.communityService
       .findOneOrFail(communityId, {
         users: { awayRanges: true, contractEvents: true, tags: true },
@@ -2878,7 +2877,7 @@ export class ActionsService {
   async findMemberInfo(
     userId: number,
     communityId: number,
-  ): Promise<CommunityUserInfoDto> {
+  ): Promise<UserActionRelations> {
     const usersPromise = run(async () => {
       const community = await this.communityService.findOneOrFail(communityId, {
         users: { awayRanges: true, contractEvents: true, tags: true },

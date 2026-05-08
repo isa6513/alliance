@@ -1211,7 +1211,9 @@ export class ActionsController {
   async getCommunityMemberInfoAdmin(
     @Param('communityId', ParseIntPipe) communityId: number,
   ): Promise<CommunityUserInfoDto> {
-    return this.actionsService.findMemberInfoByCommunityId(communityId);
+    return new CommunityUserInfoDto(
+      await this.actionsService.findMemberInfoByCommunityId(communityId),
+    );
   }
 
   @Get('communityMemberInfo/:communityId')
@@ -1221,7 +1223,9 @@ export class ActionsController {
     @Request() req: JwtRequest,
     @Param('communityId', ParseIntPipe) communityId: number,
   ): Promise<CommunityUserInfoDto> {
-    return this.actionsService.findMemberInfo(req.user.sub, communityId);
+    return new CommunityUserInfoDto(
+      await this.actionsService.findMemberInfo(req.user.sub, communityId),
+    );
   }
 
   @Get('timeline-feed')

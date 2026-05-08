@@ -165,10 +165,10 @@ Only DTOs with at least one violation are listed.
 
 ### `CommunityUserInfoDto` — `server/src/user/dto/user-action-relations.dto.ts:97`
 
-- [ ] Rule 1: no constructor (inherits from `UserActionRelationsResponseDto`)
-- [ ] Rule 4:
-  - [ ] `actions.controller.ts:1179` — `getCommunityMemberInfoAdmin`
-  - [ ] `actions.controller.ts:1189` — `getCommunityMemberInfo`
+- [x] Rule 1: no constructor (inherits from `UserActionRelationsResponseDto`)
+- [x] Rule 4:
+  - [x] `actions.controller.ts:1179` — `getCommunityMemberInfoAdmin`
+  - [x] `actions.controller.ts:1189` — `getCommunityMemberInfo`
 
 ### `TimelineFeedItemDto` — `server/src/actions/dto/action.dto.ts:761`
 
