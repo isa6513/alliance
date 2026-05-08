@@ -1189,7 +1189,9 @@ export class ActionsController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserActionRelationsResponseDto })
   async actionRelations(): Promise<UserActionRelationsResponseDto> {
-    return this.actionsService.findUserActionRelations();
+    return new UserActionRelationsResponseDto(
+      await this.actionsService.findUserActionRelations(),
+    );
   }
 
   @Get('action-relations/:userId')
@@ -1198,7 +1200,9 @@ export class ActionsController {
   async actionRelationsForUser(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<UserActionRelationsResponseDto> {
-    return this.actionsService.findUserActionRelationsForUser(userId);
+    return new UserActionRelationsResponseDto(
+      await this.actionsService.findUserActionRelationsForUser(userId),
+    );
   }
 
   @Get('communityMemberInfo/:communityId/admin')

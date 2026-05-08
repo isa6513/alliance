@@ -35,13 +35,12 @@ import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import type { FormSchema } from '@alliance/common/forms/form-schema';
 import {
-  ActionSuiteSummaryDto,
   CommunityUserInfoDto,
-  UserActionRelationDetailDto,
-  UserActionRelationsForUserDto,
-  UserActionRelationsResponseDto,
+  UserActionRelationDetail,
+  UserActionRelations,
+  UserActionRelationsForUser,
   UserActionRelationPillStatus,
-  UserActionSummaryDto,
+  UserActionSummary,
 } from 'src/user/dto/user-action-relations.dto';
 import {
   ContractEvent,
@@ -2607,7 +2606,7 @@ export class ActionsService {
   async findActionRelationsForUsers(
     usersP: Promise<User[]>,
     actionLimit: number = 8,
-  ): Promise<UserActionRelationsResponseDto> {
+  ): Promise<UserActionRelations> {
     const actionsP: Promise<Action[]> = run(async () => {
       const actions = await this.findAllSorted(
         { events: true, suite: true },
@@ -2643,7 +2642,7 @@ export class ActionsService {
       return joinedUsers;
     });
 
-    const suitesP: Promise<ActionSuiteSummaryDto[]> = run(async () => {
+    const suitesP: Promise<ActionSuite[]> = run(async () => {
       const actions = await actionsP;
       return await this.actionSuiteRepository.find({
         where: { id: In(actions.map((a) => a.suite?.id)) },
@@ -2671,7 +2670,7 @@ export class ActionsService {
     const actions = await actionsP;
 
     const allMembersTagId = await allMembersTagIdP;
-    const actionSummaries: UserActionSummaryDto[] = actions.map((action) => {
+    const actionSummaries: UserActionSummary[] = actions.map((action) => {
       return {
         id: action.id,
         name: action.name,
@@ -2683,7 +2682,7 @@ export class ActionsService {
         suiteId: action.suite?.id,
         memberActionDeadline:
           action.memberActionPhase?.deadline?.getTime() ?? null,
-      } satisfies UserActionSummaryDto;
+      } satisfies UserActionSummary;
     });
 
     const actionIds = actions.map((a) => a.id);
@@ -2693,7 +2692,7 @@ export class ActionsService {
       number,
       Map<
         number,
-        Omit<UserActionRelationDetailDto, 'latestActivityAt'> & {
+        Omit<UserActionRelationDetail, 'latestActivityAt'> & {
           latestActivityAt?: Date;
         }
       >
@@ -2785,15 +2784,10 @@ export class ActionsService {
       }
     }
 
-    const suites = (await suitesP).map((suite) => ({
-      id: suite.id,
-      name: suite.name,
-    }));
-
-    const userRelations: UserActionRelationsForUserDto[] = Array.from(
+    const userRelations: UserActionRelationsForUser[] = Array.from(
       relationByUserThenAction.entries(),
     ).map(([userId, actionMap]) => {
-      const relations: UserActionRelationDetailDto[] = Array.from(
+      const relations: UserActionRelationDetail[] = Array.from(
         actionMap.entries(),
       )
         .map(([actionId, detail]) => ({
@@ -2814,12 +2808,12 @@ export class ActionsService {
       return {
         userId,
         relations,
-      } satisfies UserActionRelationsForUserDto;
+      } satisfies UserActionRelationsForUser;
     });
 
     return {
       actions: actionSummaries,
-      suites,
+      suites: await suitesP,
       users: userRelations,
     };
   }
@@ -2848,7 +2842,7 @@ export class ActionsService {
     return results;
   }
 
-  async findUserActionRelations(): Promise<UserActionRelationsResponseDto> {
+  async findUserActionRelations(): Promise<UserActionRelations> {
     const usersPromise = this.userService.findAll({
       awayRanges: true,
       contractEvents: true,
@@ -2859,7 +2853,7 @@ export class ActionsService {
 
   async findUserActionRelationsForUser(
     userId: number,
-  ): Promise<UserActionRelationsResponseDto> {
+  ): Promise<UserActionRelations> {
     const userPromise = this.userService
       .findOneOrFail(userId, {
         awayRanges: true,

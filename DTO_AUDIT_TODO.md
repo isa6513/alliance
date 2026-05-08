@@ -158,10 +158,10 @@ Only DTOs with at least one violation are listed.
 
 ### `UserActionRelationsResponseDto` — `server/src/user/dto/user-action-relations.dto.ts:86`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4:
-  - [ ] `actions.controller.ts:1161` — `actionRelations`
-  - [ ] `actions.controller.ts:1170` — `actionRelationsForUser`
+- [x] Rule 1: no constructor
+- [x] Rule 4:
+  - [x] `actions.controller.ts:1161` — `actionRelations`
+  - [x] `actions.controller.ts:1170` — `actionRelationsForUser`
 
 ### `CommunityUserInfoDto` — `server/src/user/dto/user-action-relations.dto.ts:97`
 

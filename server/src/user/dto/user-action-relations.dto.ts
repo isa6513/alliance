@@ -4,6 +4,7 @@ import { ActionActivityType } from 'src/actions/entities/action-activity.entity'
 import { User } from '../entities/user.entity';
 import { Temporal } from '@js-temporal/polyfill';
 import { UserAwayRangeDto } from './away-range.dto';
+import { ActionSuite } from 'src/actions/entities/action-suite.entity';
 
 export enum UserActionRelationPillStatus {
   Away = 'away',
@@ -14,6 +15,16 @@ export enum UserActionRelationPillStatus {
   Todo = 'todo',
   WontComplete = 'wont_complete',
 }
+
+export type UserActionSummary = {
+  id: number;
+  name: string;
+  status: ActionStatus;
+  weekNumber: number | null;
+  allMembersParticipating: boolean;
+  suiteId?: number;
+  memberActionDeadline: number | null;
+};
 
 export class UserActionSummaryDto {
   @ApiProperty()
@@ -36,6 +47,16 @@ export class UserActionSummaryDto {
 
   @ApiProperty({ type: Number, nullable: true })
   memberActionDeadline: number | null;
+
+  constructor(input: UserActionSummary) {
+    this.id = input.id;
+    this.name = input.name;
+    this.status = input.status;
+    this.weekNumber = input.weekNumber;
+    this.allMembersParticipating = input.allMembersParticipating;
+    this.suiteId = input.suiteId;
+    this.memberActionDeadline = input.memberActionDeadline;
+  }
 }
 
 export class ActionSuiteSummaryDto {
@@ -44,7 +65,22 @@ export class ActionSuiteSummaryDto {
 
   @ApiProperty()
   name: string;
+
+  constructor(input: Pick<ActionSuite, 'id' | 'name'>) {
+    this.id = input.id;
+    this.name = input.name;
+  }
 }
+
+export type UserActionRelationDetail = {
+  actionId: number;
+  status: UserActionRelationPillStatus;
+  latestActivityType?: ActionActivityType;
+  latestActivityAt?: string;
+  declineReason?: string;
+  isMoral?: boolean;
+  outOfTime?: boolean;
+};
 
 export class UserActionRelationDetailDto {
   @ApiProperty()
@@ -73,7 +109,22 @@ export class UserActionRelationDetailDto {
 
   @ApiPropertyOptional()
   outOfTime?: boolean;
+
+  constructor(input: UserActionRelationDetail) {
+    this.actionId = input.actionId;
+    this.status = input.status;
+    this.latestActivityType = input.latestActivityType;
+    this.latestActivityAt = input.latestActivityAt;
+    this.declineReason = input.declineReason;
+    this.isMoral = input.isMoral;
+    this.outOfTime = input.outOfTime;
+  }
 }
+
+export type UserActionRelationsForUser = {
+  userId: number;
+  relations: UserActionRelationDetail[];
+};
 
 export class UserActionRelationsForUserDto {
   @ApiProperty()
@@ -81,7 +132,20 @@ export class UserActionRelationsForUserDto {
 
   @ApiProperty({ type: () => UserActionRelationDetailDto, isArray: true })
   relations: UserActionRelationDetailDto[];
+
+  constructor(input: UserActionRelationsForUser) {
+    this.userId = input.userId;
+    this.relations = input.relations.map(
+      (relation) => new UserActionRelationDetailDto(relation),
+    );
+  }
 }
+
+export type UserActionRelations = {
+  actions: UserActionSummary[];
+  suites: ActionSuite[];
+  users: UserActionRelationsForUser[];
+};
 
 export class UserActionRelationsResponseDto {
   @ApiProperty({ type: () => UserActionSummaryDto, isArray: true })
@@ -92,6 +156,16 @@ export class UserActionRelationsResponseDto {
 
   @ApiProperty({ type: () => UserActionRelationsForUserDto, isArray: true })
   users: UserActionRelationsForUserDto[];
+
+  constructor(input: UserActionRelations) {
+    this.actions = input.actions.map(
+      (action) => new UserActionSummaryDto(action),
+    );
+    this.suites = input.suites.map((suite) => new ActionSuiteSummaryDto(suite));
+    this.users = input.users.map(
+      (user) => new UserActionRelationsForUserDto(user),
+    );
+  }
 }
 
 export class CommunityUserInfoDto extends UserActionRelationsResponseDto {}
