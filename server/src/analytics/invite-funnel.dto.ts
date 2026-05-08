@@ -17,4 +17,18 @@ export class InviteFunnelDto {
       'Invited users who finished onboarding (completed 4+ actions)',
   })
   onboardingCompleted: number;
+
+  constructor(input: InviteFunnel) {
+    this.invitesCreated = input.invitesCreated;
+    this.invitesUsed = input.invitesUsed;
+    this.contractSigned = input.contractSigned;
+    this.onboardingCompleted = input.onboardingCompleted;
+  }
 }
+
+export type InviteFunnel = {
+  invitesCreated: number;
+  invitesUsed: number;
+  contractSigned: number;
+  onboardingCompleted: number;
+};

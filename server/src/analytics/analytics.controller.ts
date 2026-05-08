@@ -142,7 +142,11 @@ export class AnalyticsController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ): Promise<InviteFunnelDto> {
-    return await this.analyticsService.getInviteFunnel(startDate, endDate);
+    const funnel = await this.analyticsService.getInviteFunnel(
+      startDate,
+      endDate,
+    );
+    return new InviteFunnelDto(funnel);
   }
 
   @UseGuards(AdminGuard)

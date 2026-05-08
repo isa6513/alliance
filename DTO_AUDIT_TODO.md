@@ -55,8 +55,8 @@ Only DTOs with at least one violation are listed.
 
 ### `InviteFunnelDto` — `server/src/analytics/invite-funnel.dto.ts:3`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `analytics.controller.ts:130` — `getInviteFunnel`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `analytics.controller.ts:130` — `getInviteFunnel`
 
 ### `ContractStatusPointDto` — `server/src/analytics/contract-status-history.dto.ts:3`
 

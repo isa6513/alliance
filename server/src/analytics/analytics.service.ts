@@ -30,7 +30,7 @@ import {
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import { ActionCompletionCurve } from './action-completion-curve.dto';
 import { ActionStatsWithOnboarding } from './actionstats-with-onboarding.dto';
-import { InviteFunnelDto } from './invite-funnel.dto';
+import { InviteFunnel } from './invite-funnel.dto';
 import { AggregateStats } from './aggregatestats.dto';
 
 @Injectable()
@@ -1060,7 +1060,7 @@ ORDER BY pp.total_session_duration_seconds DESC
   async getInviteFunnel(
     startDate?: string,
     endDate?: string,
-  ): Promise<InviteFunnelDto> {
+  ): Promise<InviteFunnel> {
     const dateFilter =
       startDate && endDate
         ? { createdAt: Between(new Date(startDate), new Date(endDate)) }
