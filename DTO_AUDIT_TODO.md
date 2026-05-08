@@ -198,20 +198,20 @@ Only DTOs with at least one violation are listed.
 
 ### `ConversationDto` — `server/src/messaging/dto/messaging.dto.ts:101`
 
-- [ ] Rule 2: `extends OmitType(Conversation, [...])` at `messaging.dto.ts:101`
-- [ ] Rule 3: `Object.assign(this, conversation)` at `messaging.dto.ts:136`
-- [ ] Rule 4:
-  - [ ] `conversation.controller.ts:47` — `getMyConversations`
-  - [ ] `conversation.controller.ts:57` — `getCommunityConversations`
-  - [ ] `conversation.controller.ts:70` — `createDirectConversation`
-  - [ ] `conversation.controller.ts:80` — `createGroupConversation`
-  - [ ] `conversation.controller.ts:94` — `updateInfo`
-  - [ ] `conversation.controller.ts:110` — `acceptInvite`
-  - [ ] `conversation.controller.ts:122` — `declineInvite`
-  - [ ] `conversation.controller.ts:135` — `addParticipant`
-  - [ ] `conversation.controller.ts:150` — `removeParticipant`
-  - [ ] `conversation.controller.ts:164` — `markRead`
-  - [ ] `conversation.controller.ts:195` — `leave`
+- [x] Rule 2: `extends OmitType(Conversation, [...])` at `messaging.dto.ts:101`
+- [x] Rule 3: `Object.assign(this, conversation)` at `messaging.dto.ts:136`
+- [x] Rule 4:
+  - [x] `conversation.controller.ts:47` — `getMyConversations`
+  - [x] `conversation.controller.ts:57` — `getCommunityConversations`
+  - [x] `conversation.controller.ts:70` — `createDirectConversation`
+  - [x] `conversation.controller.ts:80` — `createGroupConversation`
+  - [x] `conversation.controller.ts:94` — `updateInfo`
+  - [x] `conversation.controller.ts:110` — `acceptInvite`
+  - [x] `conversation.controller.ts:122` — `declineInvite`
+  - [x] `conversation.controller.ts:135` — `addParticipant`
+  - [x] `conversation.controller.ts:150` — `removeParticipant`
+  - [x] `conversation.controller.ts:164` — `markRead`
+  - [x] `conversation.controller.ts:195` — `leave`
 
 ### `ConversationAdminSummaryDto` — `server/src/messaging/dto/messaging.dto.ts:222`
 

@@ -17,8 +17,8 @@ import {
   ParticipantState,
 } from './entities/participant.entity';
 import {
-  ConversationDto,
   ConversationAdminSummaryDto,
+  ConversationDto,
   CreateDirectConversationDto,
   CreateGroupConversationDto,
   ConversationParticipantDto,
@@ -89,7 +89,8 @@ export class ConversationService {
 
     return conversations.map(
       (conversation) =>
-        new ConversationAdminSummaryDto(conversation, {
+        new ConversationAdminSummaryDto({
+          conversation,
           lastMessage: lastMessages.get(conversation.id),
           messageCount: messageCounts.get(conversation.id) ?? 0,
         }),
@@ -130,7 +131,8 @@ export class ConversationService {
 
     return conversations.map(
       (conversation) =>
-        new ConversationDto(conversation, {
+        new ConversationDto({
+          conversation,
           contextUserId: userId,
           lastMessage: lastMessages.get(conversation.id),
           unreadCount: unreadCounts.get(conversation.id) ?? 0,
@@ -208,7 +210,8 @@ export class ConversationService {
         existingConversation.id,
       );
       const lastMessage = await this.findLastMessage(existingConversation.id);
-      return new ConversationDto(hydrated, {
+      return new ConversationDto({
+        conversation: hydrated,
         contextUserId: userId,
         lastMessage,
       });
@@ -243,7 +246,8 @@ export class ConversationService {
       conversation.id,
     );
     await this.emitConversationUpdate(hydratedConversation);
-    return new ConversationDto(hydratedConversation, {
+    return new ConversationDto({
+      conversation: hydratedConversation,
       contextUserId: userId,
     });
   }
@@ -290,7 +294,8 @@ export class ConversationService {
         existingConversation.id,
       );
       const lastMessage = await this.findLastMessage(existingConversation.id);
-      return new ConversationDto(hydrated, {
+      return new ConversationDto({
+        conversation: hydrated,
         contextUserId: userId,
         lastMessage,
       });
@@ -343,7 +348,8 @@ export class ConversationService {
       conversation.id,
     );
     await this.emitConversationUpdate(hydratedConversation);
-    return new ConversationDto(hydratedConversation, {
+    return new ConversationDto({
+      conversation: hydratedConversation,
       contextUserId: userId,
     });
   }
@@ -379,9 +385,9 @@ export class ConversationService {
     await this.emitConversationUpdate(conversation);
     if (conversation.type === ConversationType.Direct) {
       await this.conversationRepository.delete(conversationId);
-      return new ConversationDto(conversation, { contextUserId: userId }); // return with info despite delete so decliner sees declined state
+      return new ConversationDto({ conversation, contextUserId: userId }); // return with info despite delete so decliner sees declined state
     }
-    return new ConversationDto(conversation, { contextUserId: userId });
+    return new ConversationDto({ conversation, contextUserId: userId });
   }
 
   async updateConversation(
@@ -401,7 +407,7 @@ export class ConversationService {
     }
 
     await this.conversationRepository.save(conversation);
-    return new ConversationDto(conversation, { contextUserId: userId });
+    return new ConversationDto({ conversation, contextUserId: userId });
   }
 
   async addParticipantToConversation(
@@ -443,7 +449,8 @@ export class ConversationService {
     const updatedConversation =
       await this.getConversationEntity(conversationId);
     await this.emitConversationUpdate(updatedConversation);
-    return new ConversationDto(updatedConversation, {
+    return new ConversationDto({
+      conversation: updatedConversation,
       contextUserId: actingUserId,
     });
   }
@@ -482,7 +489,8 @@ export class ConversationService {
     const updatedConversation =
       await this.getConversationEntity(conversationId);
     await this.emitConversationUpdate(updatedConversation);
-    return new ConversationDto(updatedConversation, {
+    return new ConversationDto({
+      conversation: updatedConversation,
       contextUserId: actingUserId,
     });
   }
@@ -496,7 +504,8 @@ export class ConversationService {
     const updatedConversation =
       await this.getConversationEntity(conversationId);
     await this.emitConversationUpdate(updatedConversation);
-    return new ConversationDto(updatedConversation, {
+    return new ConversationDto({
+      conversation: updatedConversation,
       contextUserId: userId,
     });
   }
@@ -624,7 +633,8 @@ export class ConversationService {
     );
     await this.emitConversationUpdate(conversation);
 
-    return new ConversationDto(conversation, {
+    return new ConversationDto({
+      conversation,
       contextUserId: userId,
       lastMessage,
       unreadCount,
@@ -707,7 +717,8 @@ export class ConversationService {
     const unreadCount = contextUserId
       ? await this.countUnreadForConversation(conversationId, contextUserId)
       : 0;
-    return new ConversationDto(conversation, {
+    return new ConversationDto({
+      conversation,
       contextUserId,
       lastMessage,
       unreadCount,
@@ -887,7 +898,10 @@ export class ConversationService {
   async getUnreadSummary(userId: number): Promise<UnreadMessageSummaryDto> {
     const [messageCount, messageRequestCount] = await Promise.all([
       this.sumUnreadCountsByParticipantState(userId, ParticipantState.Joined),
-      this.countConversationsByParticipantState(userId, ParticipantState.Invited),
+      this.countConversationsByParticipantState(
+        userId,
+        ParticipantState.Invited,
+      ),
     ]);
 
     return {
@@ -911,7 +925,9 @@ export class ConversationService {
       .andWhere(
         'message.createdAt > COALESCE(lastReadMessage.createdAt, participant.joinedAt)',
       )
-      .andWhere('(message.id != lastReadMessage.id OR lastReadMessage.id IS NULL)')
+      .andWhere(
+        '(message.id != lastReadMessage.id OR lastReadMessage.id IS NULL)',
+      )
       .getQuery();
     const unreadCountExpression =
       minimumPerConversation > 0

@@ -98,11 +98,23 @@ export class ParticipantDto extends OmitType(Participant, [
   }
 }
 
-export class ConversationDto extends OmitType(Conversation, [
-  'messages',
-  'participants',
-  'community',
+export type ConversationDtoArgs = {
+  conversation: Conversation;
+  lastMessage?: Message | null;
+  contextUserId?: number;
+  unreadCount?: number;
+};
+
+export class ConversationDto extends PickType(Conversation, [
+  'id',
+  'createdAt',
+  'updatedAt',
+  'type',
+  'title',
 ]) {
+  @ApiPropertyOptional({ type: String })
+  photo?: string;
+
   @ApiProperty({ type: () => ParticipantDto, isArray: true })
   @Type(() => ParticipantDto)
   participants: ParticipantDto[];
@@ -124,29 +136,27 @@ export class ConversationDto extends OmitType(Conversation, [
   @ApiProperty({ type: Number })
   unreadCount: number;
 
-  constructor(
-    conversation: Conversation,
-    extras?: {
-      lastMessage?: Message | null;
-      contextUserId?: number;
-      unreadCount?: number;
-    },
-  ) {
+  constructor(input: ConversationDtoArgs) {
     super();
-    Object.assign(this, conversation);
+    const { conversation, lastMessage, contextUserId, unreadCount } = input;
+    this.id = conversation.id;
+    this.createdAt = conversation.createdAt;
+    this.updatedAt = conversation.updatedAt;
+    this.type = conversation.type;
+    this.title = conversation.title;
     this.participants = (conversation.participants ?? []).map(
       (participant) => new ParticipantDto(participant),
     );
     this.community = conversation.community
       ? new CommunityDto(conversation.community)
       : undefined;
-    this.lastMessage = extras?.lastMessage
-      ? new MessageDto(extras.lastMessage, conversation.id)
+    this.lastMessage = lastMessage
+      ? new MessageDto(lastMessage, conversation.id)
       : undefined;
-    this.unreadCount = extras?.unreadCount ?? 0;
+    this.unreadCount = unreadCount ?? 0;
 
     if (conversation.type === ConversationType.Direct) {
-      const directTitle = this.resolveDirectTitle(extras?.contextUserId);
+      const directTitle = this.resolveDirectTitle(contextUserId);
       if (directTitle) {
         this.title = directTitle;
       }
@@ -154,12 +164,12 @@ export class ConversationDto extends OmitType(Conversation, [
     this.photo = conversation.photo
       ? getImageSource(conversation.photo)
       : conversation.type === ConversationType.Direct
-        ? this.resolveDirectPhoto(extras?.contextUserId)
+        ? this.resolveDirectPhoto(contextUserId)
         : undefined;
 
-    if (extras?.contextUserId) {
+    if (contextUserId) {
       const currentParticipant = conversation.participants?.find(
-        (participant) => participant.user.id === extras.contextUserId,
+        (participant) => participant.user.id === contextUserId,
       );
       this.isMessageRequest =
         currentParticipant?.state === ParticipantState.Invited;
@@ -219,16 +229,17 @@ export class ConversationDto extends OmitType(Conversation, [
   }
 }
 
+export type ConversationAdminSummary = ConversationDtoArgs & {
+  messageCount: number;
+};
+
 export class ConversationAdminSummaryDto extends ConversationDto {
   @ApiProperty({ type: Number })
   messageCount: number;
 
-  constructor(
-    conversation: Conversation,
-    extras: { messageCount: number; lastMessage?: Message | null },
-  ) {
-    super(conversation, { lastMessage: extras.lastMessage });
-    this.messageCount = extras.messageCount;
+  constructor(input: ConversationAdminSummary) {
+    super(input);
+    this.messageCount = input.messageCount;
   }
 }
 

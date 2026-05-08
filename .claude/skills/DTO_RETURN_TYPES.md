@@ -94,7 +94,11 @@ Pick the input type by this order:
 
 1. **Entity-backed DTO** — input type is the entity itself (`constructor(input: SuspensionPlan)` above is the entity case; the named-type case below is for non-entity DTOs).
 2. **Single primitive field** — take the value positionally.
-3. **Otherwise** — define a named type alongside the DTO, named after the DTO without the `Dto` suffix. Never use an inline anonymous type.
+3. **Otherwise** — define a named type alongside the DTO. Never use an inline anonymous type. Name it:
+   - `<DtoName-without-Dto>` by default — e.g. `UploadImageResponseDto` → `UploadImageResponse`, `ConversationAdminSummaryDto` → `ConversationAdminSummary`.
+   - `<DtoName>Args` (keep the `Dto` suffix, append `Args`) only when the natural name would collide with an existing type — e.g. `ConversationDto` can't use `Conversation` (the entity), so use `ConversationDtoArgs`.
+
+   Don't reach for `Input`/`Params`/etc. — pick one of the two above.
 
 ```ts
 // ✅ single primitive — positional
