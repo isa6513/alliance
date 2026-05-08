@@ -154,20 +154,20 @@ Only DTOs with at least one violation are listed.
 
 ### `PostDto` — `server/src/forum/dto/post.dto.ts:20`
 
-- [ ] Rule 3: `Object.assign(this, post)` at `post.dto.ts:69`
-- [ ] Rule 4:
-  - [ ] `forum.controller.ts:57` — `findAllPosts`
-  - [ ] `forum.controller.ts:80` — `findOnePost`
+- [x] Rule 3: `Object.assign(this, post)` at `post.dto.ts:69`
+- [x] Rule 4:
+  - [x] `forum.controller.ts:57` — `findAllPosts`
+  - [x] `forum.controller.ts:80` — `findOnePost`
 
 ### `CommentDto` — `server/src/forum/dto/comment.dto.ts:16`
 
-- [ ] Rule 3: `Object.assign(this, comment)` at `comment.dto.ts:40`
-- [ ] Rule 4: `forum.controller.ts:176` — `createComment`
+- [x] Rule 3: `Object.assign(this, comment)` at `comment.dto.ts:40`
+- [x] Rule 4: `forum.controller.ts:176` — `createComment`
 
 ### `UserCommentDto` — `server/src/forum/dto/comment.dto.ts:50`
 
-- [ ] (Inherits Rule 3 via parent `CommentDto` ctor — fixing parent fixes this)
-- [ ] Rule 4: `forum.controller.ts:131` — `findCommentsByUser`
+- [x] (Inherits Rule 3 via parent `CommentDto` ctor — fixing parent fixes this)
+- [x] Rule 4: `forum.controller.ts:131` — `findCommentsByUser`
 
 ---
 

@@ -37,11 +37,18 @@ export class CommentDto extends PickType(Comment, [
 
   constructor(comment: Comment) {
     super();
-    Object.assign(this, comment);
+    this.id = comment.id;
+    this.parentObjectId = comment.parentObjectId;
+    this.parentId = comment.parentId;
+    this.parentObjectType = comment.parentObjectType;
+    this.createdAt = comment.createdAt;
+    this.updatedAt = comment.updatedAt;
+    this.deleted = comment.deleted;
+    this.pinned = comment.pinned;
+    this.author = new ProfileDto(comment.author);
     this.children = comment.children
       ? comment.children.map((child) => new CommentDto(child))
       : undefined;
-    this.author = new ProfileDto(comment.author);
     this.likes = (comment.likes ?? []).map((like) => new ProfileDto(like));
     this.editableContent = new EditableContentDto(comment.editableContent);
   }
@@ -51,11 +58,13 @@ export class UserCommentDto extends CommentDto {
   @ApiPropertyOptional()
   parentTitle?: string;
 
-  constructor(comment: Comment, parentTitle?: string) {
+  constructor({ comment, parentTitle }: UserComment) {
     super(comment);
     this.parentTitle = parentTitle;
   }
 }
+
+export type UserComment = { comment: Comment; parentTitle?: string };
 
 export class CreateCommentDto extends PickType(Comment, [
   'parentObjectId',

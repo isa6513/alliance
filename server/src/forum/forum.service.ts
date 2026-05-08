@@ -14,12 +14,11 @@ import { Notification } from '../notifs/entities/notification.entity';
 import { UnreadContentType } from 'src/notifs/entities/unread-content.entity';
 import { User } from '../user/entities/user.entity';
 import {
-  CommentDto,
   CreateCommentDto,
   UpdateCommentDto,
-  UserCommentDto,
+  UserComment,
 } from './dto/comment.dto';
-import { CreatePostDto, PostDto, UpdatePostDto } from './dto/post.dto';
+import { CreatePostDto, PostDtoArgs, UpdatePostDto } from './dto/post.dto';
 import { Comment, CommentParentObject } from './entities/comment.entity';
 import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
@@ -103,7 +102,7 @@ export class ForumService {
     );
   }
 
-  async findAllPosts(userId?: number): Promise<PostDto[]> {
+  async findAllPosts(userId?: number): Promise<PostDtoArgs[]> {
     const qb = this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.author', 'author')
@@ -173,15 +172,11 @@ export class ForumService {
       lastComments.map((c) => [c.parentObjectId, c]),
     );
 
-    return posts.map((post, index) => {
-      const commentCount = Number(raw[index].commentCount ?? 0);
-      const lastComment = lastCommentByPostId.get(post.id) ?? undefined;
-
-      return new PostDto(post, {
-        commentCount,
-        lastComment,
-      });
-    });
+    return posts.map((post, index) => ({
+      post,
+      commentCount: Number(raw[index].commentCount ?? 0),
+      lastComment: lastCommentByPostId.get(post.id) ?? undefined,
+    }));
   }
 
   async findPostsByAction(actionId: number): Promise<Post[]> {
@@ -234,7 +229,7 @@ export class ForumService {
     return post;
   }
 
-  async findOnePost(id: number, userId?: number): Promise<PostDto> {
+  async findOnePost(id: number, userId?: number): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
       relations: {
@@ -249,7 +244,7 @@ export class ForumService {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
 
-    return new PostDto(post);
+    return post;
   }
 
   async findCommentsForPostRaw(postId: number): Promise<Comment[]> {
@@ -396,7 +391,7 @@ export class ForumService {
     id: number,
     updatePostDto: UpdatePostDto,
     userId: number,
-  ): Promise<PostDto> {
+  ): Promise<Post> {
     const post = await this.findOnePost(id, userId);
 
     if (
@@ -441,7 +436,7 @@ export class ForumService {
   async createComment(
     createCommentDto: CreateCommentDto,
     userId: number,
-  ): Promise<CommentDto> {
+  ): Promise<Comment> {
     // Validate parent reply if provided
     let parentReply: Comment | null = null;
     if (createCommentDto.parentId) {
@@ -513,7 +508,7 @@ export class ForumService {
 
     await this.sendNotifsForNewComment(replyWithAuthor);
 
-    return new CommentDto(replyWithAuthor);
+    return replyWithAuthor;
   }
 
   async sendNotifsForNewComment(comment: Comment): Promise<void> {
@@ -859,7 +854,7 @@ export class ForumService {
     return posts.filter((post) => this.postIsVisible(post, userId));
   }
 
-  async findCommentsByUser(userId: number): Promise<UserCommentDto[]> {
+  async findCommentsByUser(userId: number): Promise<UserComment[]> {
     const comments = await this.commentRepository.find({
       where: {
         authorId: userId,
@@ -888,18 +883,16 @@ export class ForumService {
       where: { id: In(actionIds) },
     });
 
-    return comments.map(
-      (comment) =>
-        new UserCommentDto(
-          comment,
-          comment.parentObjectType === CommentParentObject.Post
-            ? posts.find((post) => post.id === comment.parentObjectId)?.title
-            : comment.parentObjectType === CommentParentObject.Action
-              ? actions.find((action) => action.id === comment.parentObjectId)
-                  ?.name
-              : undefined,
-        ),
-    );
+    return comments.map((comment) => ({
+      comment,
+      parentTitle:
+        comment.parentObjectType === CommentParentObject.Post
+          ? posts.find((post) => post.id === comment.parentObjectId)?.title
+          : comment.parentObjectType === CommentParentObject.Action
+            ? actions.find((action) => action.id === comment.parentObjectId)
+                ?.name
+            : undefined,
+    }));
   }
 
   async findForumCommentsByUser(userId: number): Promise<Comment[]> {

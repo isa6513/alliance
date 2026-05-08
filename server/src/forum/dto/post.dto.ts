@@ -61,31 +61,45 @@ export class PostDto extends PickType(Post, [
   @ApiPropertyOptional({ type: () => ProfileDto, isArray: true })
   authors?: ProfileDto[];
 
-  constructor(
-    post: Post,
-    extras?: { commentCount?: number; lastComment?: Comment },
-  ) {
+  constructor({ post, commentCount, lastComment }: PostDtoArgs) {
     super();
-    Object.assign(this, post);
+    this.id = post.id;
+    this.title = post.title;
+    this.actionId = post.actionId;
+    this.authorId = post.authorId;
+    this.createdAt = post.visibleAt ?? post.createdAt;
+    this.visibleAt = post.visibleAt;
+    this.updatedAt = post.updatedAt;
+    this.pinned = post.pinned;
+    this.qaMode = post.qaMode;
+    this.deleted = post.deleted;
+    this.expertIds = post.expertIds;
+    this.expertLabel = post.expertLabel;
+    this.authorIds = post.authorIds;
+    this.notifyForReplies = post.notifyForReplies;
+    this.action = post.action ? new ActionDto(post.action) : undefined;
     this.author = new ProfileDto(post.author);
-    this.commentCount = extras?.commentCount;
+    this.commentCount = commentCount;
+    this.editableContent = new EditableContentDto(post.editableContent);
     this.likes = post.likes
       ? post.likes.map((like) => new ProfileDto(like))
       : undefined;
+    this.lastComment = lastComment ? new CommentDto(lastComment) : undefined;
+    this.likeCount = post.likesIds?.length;
     this.experts = post.experts
       ? post.experts.map((expert) => new ProfileDto(expert))
       : undefined;
     this.authors = post.authors
       ? post.authors.map((author) => new ProfileDto(author))
       : undefined;
-    this.editableContent = new EditableContentDto(post.editableContent);
-    this.createdAt = post.visibleAt ?? post.createdAt;
-    this.lastComment = extras?.lastComment
-      ? new CommentDto(extras?.lastComment)
-      : undefined;
-    this.likeCount = post.likesIds?.length;
   }
 }
+
+export type PostDtoArgs = {
+  post: Post;
+  commentCount?: number;
+  lastComment?: Comment;
+};
 
 export class CreatePostDto extends PickType(Post, [
   'title',

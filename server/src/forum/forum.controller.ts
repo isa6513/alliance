@@ -44,9 +44,9 @@ export class ForumController {
     @Body() createPostDto: CreatePostDto,
     @ReqUser() user: JwtPayload,
   ): Promise<PostDto> {
-    return new PostDto(
-      await this.forumService.createPost(createPostDto, user.sub),
-    );
+    return new PostDto({
+      post: await this.forumService.createPost(createPostDto, user.sub),
+    });
   }
 
   @Get('posts')
@@ -54,7 +54,8 @@ export class ForumController {
   @ApiOkResponse({ type: [PostDto] })
   @UseGuards(AuthGuard)
   async findAllPosts(@Request() req: JwtRequest): Promise<PostDto[]> {
-    return this.forumService.findAllPosts(req.user.sub);
+    const results = await this.forumService.findAllPosts(req.user.sub);
+    return results.map((args) => new PostDto(args));
   }
 
   @Get('posts/action/:actionId')
@@ -66,7 +67,7 @@ export class ForumController {
   ): Promise<PostDto[]> {
     return this.forumService
       .findPostsByAction(+actionId)
-      .then((posts) => posts.map((post) => new PostDto(post)));
+      .then((posts) => posts.map((post) => new PostDto({ post })));
   }
 
   @Get('posts/:id')
@@ -77,7 +78,9 @@ export class ForumController {
     @Param('id') id: string,
     @Request() req: JwtRequest,
   ): Promise<PostDto> {
-    return await this.forumService.findOnePost(+id, req.user?.sub);
+    return new PostDto({
+      post: await this.forumService.findOnePost(+id, req.user?.sub),
+    });
   }
 
   @Get('posts/:id/comments')
@@ -117,7 +120,7 @@ export class ForumController {
   ): Promise<PostDto[]> {
     return this.forumService
       .findPostsByUser(id)
-      .then((posts) => posts.map((post) => new PostDto(post)));
+      .then((posts) => posts.map((post) => new PostDto({ post })));
   }
 
   @Get('posts/user/:id/comments')
@@ -128,7 +131,8 @@ export class ForumController {
   async findCommentsByUser(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserCommentDto[]> {
-    return this.forumService.findCommentsByUser(id);
+    const userComments = await this.forumService.findCommentsByUser(id);
+    return userComments.map((userComment) => new UserCommentDto(userComment));
   }
 
   @Get('posts/user/:id/forumComments')
@@ -151,7 +155,9 @@ export class ForumController {
     @Body() updatePostDto: UpdatePostDto,
     @ReqUser() user: JwtPayload,
   ): Promise<PostDto> {
-    return await this.forumService.updatePost(id, updatePostDto, user.sub);
+    return new PostDto({
+      post: await this.forumService.updatePost(id, updatePostDto, user.sub),
+    });
   }
 
   @Delete('posts/:id')
@@ -173,7 +179,9 @@ export class ForumController {
     @Body() createReplyDto: CreateCommentDto,
     @ReqUser() user: JwtPayload,
   ): Promise<CommentDto> {
-    return this.forumService.createComment(createReplyDto, user.sub);
+    return new CommentDto(
+      await this.forumService.createComment(createReplyDto, user.sub),
+    );
   }
 
   @Patch('comments/:id')
@@ -251,7 +259,7 @@ export class ForumController {
   @ApiOkResponse({ type: [PostDto] })
   async getPostsForAdmin(): Promise<PostDto[]> {
     const posts = await this.forumService.getPostsForAdmin();
-    return posts.map((post) => new PostDto(post));
+    return posts.map((post) => new PostDto({ post }));
   }
 
   @Patch('admin/posts/:id/experts')
@@ -269,7 +277,7 @@ export class ForumController {
       updatePostExpertsDto.expertLabel,
       updatePostExpertsDto.notifyForReplies,
     );
-    return new PostDto(post);
+    return new PostDto({ post });
   }
 
   @Patch('admin/posts/:id/authors')
@@ -284,7 +292,7 @@ export class ForumController {
       id,
       updatePostAuthorsDto.authorIds,
     );
-    return new PostDto(post);
+    return new PostDto({ post });
   }
 
   @Patch('admin/comments/:id/pin')
