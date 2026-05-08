@@ -86,8 +86,8 @@ Only DTOs with at least one violation are listed.
 
 ### `RefreshTokensResponseDto` — `server/src/auth/dto/authtokens.dto.ts:4`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `auth.controller.ts:161,163` — `refreshTokens`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `auth.controller.ts:161,163` — `refreshTokens`
 
 ### `AuthMeResponseDto` — `server/src/auth/dto/authtokens.dto.ts:17`
 

@@ -7,7 +7,17 @@ export class RefreshTokensResponseDto {
 
   @ApiPropertyOptional()
   refresh_token?: string;
+
+  constructor(input: RefreshTokensResponse) {
+    this.access_token = input.access_token;
+    this.refresh_token = input.refresh_token;
+  }
 }
+
+export type RefreshTokensResponse = {
+  access_token?: string;
+  refresh_token?: string;
+};
 
 export class AccessToken {
   @ApiProperty()

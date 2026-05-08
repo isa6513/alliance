@@ -158,9 +158,9 @@ export class AuthController {
           : 'header';
     if (mode === 'cookie') {
       this.authService.setAuthCookies(res, access_token, refresh_token);
-      return {};
+      return new RefreshTokensResponseDto({});
     }
-    return { access_token, refresh_token };
+    return new RefreshTokensResponseDto({ access_token, refresh_token });
   }
 
   @Get('/me')
