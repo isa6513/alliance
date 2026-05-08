@@ -17,13 +17,13 @@ import {
 
 @Controller('eventlog')
 export class EventLogController {
-  constructor(private readonly eventLogService: EventLogService) { }
+  constructor(private readonly eventLogService: EventLogService) {}
 
   @Get()
   @ApiOkResponse({ type: EventLogListDto })
   @UseGuards(AdminGuard)
-  findAll(@Query() query: EventLogQueryDto): Promise<EventLogListDto> {
-    return this.eventLogService.findAll(query);
+  async findAll(@Query() query: EventLogQueryDto): Promise<EventLogListDto> {
+    return new EventLogListDto(await this.eventLogService.findAll(query));
   }
 
   @Get(':id')
@@ -34,6 +34,6 @@ export class EventLogController {
     if (!event) {
       throw new NotFoundException(`Event log with id ${id} not found`);
     }
-    return event;
+    return new EventLogDto(event);
   }
 }

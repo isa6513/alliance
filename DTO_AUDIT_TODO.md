@@ -139,14 +139,14 @@ Only DTOs with at least one violation are listed.
 
 ### `EventLogListDto` — `server/src/eventlog/dto/event-log.dto.ts:19`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `eventlog.controller.ts:26` — `findAll`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `eventlog.controller.ts:26` — `findAll`
 
 ### `EventLogDto` — `server/src/eventlog/dto/event-log.dto.ts:14`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 2: `extends OmitType(EventLog, ['user'])` at `event-log.dto.ts:14`
-- [ ] Rule 4: `eventlog.controller.ts:37` — `findOne`
+- [x] Rule 1: no constructor
+- [x] Rule 2: `extends OmitType(EventLog, ['user'])` at `event-log.dto.ts:14`
+- [x] Rule 4: `eventlog.controller.ts:37` — `findOne`
 
 ---
 

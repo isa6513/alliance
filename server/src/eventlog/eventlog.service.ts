@@ -5,7 +5,7 @@ import type { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   EventLogDto,
-  EventLogListDto,
+  EventLogList,
   EventLogQueryDto,
 } from './dto/event-log.dto';
 import { EventLogEvents } from './eventlog.events';
@@ -19,17 +19,7 @@ export class EventLogService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  private toDto(eventLog: EventLog): EventLogDto {
-    const { user, ...rest } = eventLog;
-    return {
-      ...rest,
-      user: user
-        ? { id: user.id, displayName: user.anonymous ? 'Someone' : user.name }
-        : undefined,
-    };
-  }
-
-  async findAll(query: EventLogQueryDto): Promise<EventLogListDto> {
+  async findAll(query: EventLogQueryDto): Promise<EventLogList> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 50;
 
@@ -49,7 +39,7 @@ export class EventLogService {
     const [items, totalCount] = await qb.getManyAndCount();
 
     return {
-      items: items.map((item) => this.toDto(item)),
+      items,
       totalCount,
       page,
       limit,
@@ -57,12 +47,11 @@ export class EventLogService {
     };
   }
 
-  async findOne(id: string): Promise<EventLogDto | null> {
-    const eventLog = await this.eventLogRepository.findOne({
+  async findOne(id: string): Promise<EventLog | null> {
+    return this.eventLogRepository.findOne({
       where: { id },
       relations: ['user'],
     });
-    return eventLog ? this.toDto(eventLog) : null;
   }
 
   async sendMessage(data: {
@@ -88,7 +77,10 @@ export class EventLogService {
       relations: ['user'],
     });
     if (fullEvent) {
-      this.eventEmitter.emit(EventLogEvents.Created, this.toDto(fullEvent));
+      this.eventEmitter.emit(
+        EventLogEvents.Created,
+        new EventLogDto(fullEvent),
+      );
     }
     const webhookUrl = process.env.SLACK_WEBHOOK_URL;
     if (!webhookUrl) {
