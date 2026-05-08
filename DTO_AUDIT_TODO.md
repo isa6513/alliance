@@ -262,20 +262,6 @@ Only DTOs with at least one violation are listed.
 
 ---
 
-## payments/payments.controller.ts
-
-### `ClientSecretDto` — `server/src/payments/dto/client-secret.dto.ts:3`
-
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `payments.controller.ts:100` — `createPaymentIntent` returns object literal
-
-### `PaymentMethodDto` — `server/src/payments/dto/payment-method.dto.ts:3`
-
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `payments.controller.ts:171` — `paymentMethod` returns object literal spread
-
----
-
 ## search/search.controller.ts
 
 ### `SearchItemDto` — `server/src/search/searchitem.dto.ts:14`
