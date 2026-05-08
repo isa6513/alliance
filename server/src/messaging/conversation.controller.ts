@@ -173,7 +173,10 @@ export class ConversationController {
   async getUnreadMessages(
     @Request() req: JwtRequest,
   ): Promise<UnreadMessagesDto> {
-    return this.conversationService.getUnreadMessages(req.user.sub);
+    const count = await this.conversationService.getUnreadMessages(
+      req.user.sub,
+    );
+    return new UnreadMessagesDto(count);
   }
 
   @Get('unread-summary')

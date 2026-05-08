@@ -213,15 +213,15 @@ Only DTOs with at least one violation are listed.
   - [x] `conversation.controller.ts:164` — `markRead`
   - [x] `conversation.controller.ts:195` — `leave`
 
-### `ConversationAdminSummaryDto` — `server/src/messaging/dto/messaging.dto.ts:222`
+### `ConversationAdminSummaryDto` — `server/src/messaging/dto/messaging.dto.ts:236`
 
-- [ ] (Inherits Rule 2/3 via parent — fixing parent fixes these)
-- [ ] Rule 4: `conversation.controller.ts:38` — `getAllConversationsForAdmin`
+- [x] (Inherits Rule 2/3 via parent — fixing parent fixes these)
+- [x] Rule 4: `conversation.controller.ts:37` — `getAllConversationsForAdmin`
 
 ### `UnreadMessagesDto` — `server/src/messaging/dto/messaging.dto.ts:330`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `conversation.controller.ts:176` — `getUnreadMessages`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `conversation.controller.ts:176` — `getUnreadMessages`
 
 ### `UnreadMessageSummaryDto` — `server/src/messaging/dto/messaging.dto.ts:336`
 

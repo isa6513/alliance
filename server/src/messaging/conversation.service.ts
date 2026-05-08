@@ -23,7 +23,6 @@ import {
   CreateGroupConversationDto,
   ConversationParticipantDto,
   UnreadMessageSummaryDto,
-  UnreadMessagesDto,
   UpdateConversationDto,
 } from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
@@ -866,7 +865,7 @@ export class ConversationService {
     );
   }
 
-  async getUnreadMessages(userId: number): Promise<UnreadMessagesDto> {
+  async getUnreadMessages(userId: number): Promise<number> {
     const result = await this.participantRepository
       .createQueryBuilder('participant')
       .leftJoin('participant.lastReadMessage', 'lastReadMessage')
@@ -892,7 +891,7 @@ export class ConversationService {
       .select('COUNT(DISTINCT participant.conversationId)', 'unreadCount')
       .getRawOne<{ unreadCount?: string }>();
 
-    return { count: Number(result?.unreadCount ?? 0) };
+    return Number(result?.unreadCount ?? 0);
   }
 
   async getUnreadSummary(userId: number): Promise<UnreadMessageSummaryDto> {

@@ -342,6 +342,10 @@ export class UnreadMessagesDto {
   @ApiProperty({ type: Number })
   @IsInt()
   count: number;
+
+  constructor(count: number) {
+    this.count = count;
+  }
 }
 
 export class UnreadMessageSummaryDto {
