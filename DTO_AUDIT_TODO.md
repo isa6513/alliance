@@ -182,8 +182,8 @@ Only DTOs with at least one violation are listed.
 
 ### `PreviewTextMessageResponseDto` — `server/src/actions/dto/action.dto.ts:115`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:1036` — `previewTextMessage` returns object literal `{ text }`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:1036` — `previewTextMessage` returns object literal `{ text }`
 
 ### `PreviewEmailHtmlResponseDto` — `server/src/actions/dto/action.dto.ts:140`
 

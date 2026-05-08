@@ -1058,12 +1058,9 @@ export class ActionsController {
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: PreviewTextDto,
   ): Promise<PreviewTextMessageResponseDto> {
-    return {
-      text: await this.actionEventReminderService.previewTextMessage(
-        eventId,
-        body,
-      ),
-    };
+    return new PreviewTextMessageResponseDto(
+      await this.actionEventReminderService.previewTextMessage(eventId, body),
+    );
   }
 
   @Get('reloadAllActionUsersJoined')

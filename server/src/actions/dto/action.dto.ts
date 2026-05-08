@@ -119,6 +119,10 @@ export class PreviewTextMessageResponseDto {
   @IsDefined()
   @IsString()
   text: string;
+
+  constructor(text: string) {
+    this.text = text;
+  }
 }
 
 export interface ActionSharePreview {
