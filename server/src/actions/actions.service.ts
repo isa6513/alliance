@@ -3514,11 +3514,13 @@ export class ActionsService {
         count: uniqueUsers.size,
       };
 
-      feedItems.push({
-        type: GlobalFeedItemType.ActivityGroup,
-        date: group.latestDate,
-        activityGroup,
-      });
+      feedItems.push(
+        new GlobalFeedItemDto({
+          type: GlobalFeedItemType.ActivityGroup,
+          date: group.latestDate,
+          activityGroup,
+        }),
+      );
     }
 
     const actionUpdates = await this.actionUpdateRepository.find({
@@ -3542,11 +3544,13 @@ export class ActionsService {
           actionName: update.action?.name || 'Unknown Action',
         };
 
-        feedItems.push({
-          type: GlobalFeedItemType.ActionUpdate,
-          date: update.date,
-          actionUpdate: actionUpdateDto,
-        });
+        feedItems.push(
+          new GlobalFeedItemDto({
+            type: GlobalFeedItemType.ActionUpdate,
+            date: update.date,
+            actionUpdate: actionUpdateDto,
+          }),
+        );
       }
     }
 
@@ -3597,11 +3601,13 @@ export class ActionsService {
           count: uniqueNewMembers.size,
         };
 
-        feedItems.push({
-          type: GlobalFeedItemType.NewMembers,
-          date: latestMemberDate,
-          newMembers,
-        });
+        feedItems.push(
+          new GlobalFeedItemDto({
+            type: GlobalFeedItemType.NewMembers,
+            date: latestMemberDate,
+            newMembers,
+          }),
+        );
       }
     }
 
@@ -3691,11 +3697,13 @@ export class ActionsService {
             usersArray.length === 1 ? usersArray[0].commentId : undefined,
         };
 
-        feedItems.push({
-          type: GlobalFeedItemType.ForumComments,
-          date: group.latestDate,
-          forumComments,
-        });
+        feedItems.push(
+          new GlobalFeedItemDto({
+            type: GlobalFeedItemType.ForumComments,
+            date: group.latestDate,
+            forumComments,
+          }),
+        );
       }
     }
 

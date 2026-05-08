@@ -896,6 +896,39 @@ export class GlobalFeedForumCommentsDto {
   commentId?: number;
 }
 
+export type GlobalFeedItem = {
+  date: Date;
+} & (
+  | {
+      type: GlobalFeedItemType.ActivityGroup;
+      activityGroup: GlobalFeedActivityGroupDto;
+      actionUpdate?: undefined;
+      newMembers?: undefined;
+      forumComments?: undefined;
+    }
+  | {
+      type: GlobalFeedItemType.ActionUpdate;
+      activityGroup?: undefined;
+      actionUpdate: GlobalFeedActionUpdateDto;
+      newMembers?: undefined;
+      forumComments?: undefined;
+    }
+  | {
+      type: GlobalFeedItemType.NewMembers;
+      activityGroup?: undefined;
+      actionUpdate?: undefined;
+      newMembers: GlobalFeedNewMembersDto;
+      forumComments?: undefined;
+    }
+  | {
+      type: GlobalFeedItemType.ForumComments;
+      activityGroup?: undefined;
+      actionUpdate?: undefined;
+      newMembers?: undefined;
+      forumComments: GlobalFeedForumCommentsDto;
+    }
+);
+
 export class GlobalFeedItemDto {
   @ApiProperty({ enum: GlobalFeedItemType, enumName: 'GlobalFeedItemType' })
   @Allow()
@@ -925,6 +958,20 @@ export class GlobalFeedItemDto {
   @Type(() => GlobalFeedForumCommentsDto)
   @IsOptional()
   forumComments?: GlobalFeedForumCommentsDto;
+
+  constructor(input: GlobalFeedItem) {
+    this.type = input.type;
+    this.date = input.date;
+    if (input.type === GlobalFeedItemType.ActivityGroup) {
+      this.activityGroup = input.activityGroup;
+    } else if (input.type === GlobalFeedItemType.ActionUpdate) {
+      this.actionUpdate = input.actionUpdate;
+    } else if (input.type === GlobalFeedItemType.NewMembers) {
+      this.newMembers = input.newMembers;
+    } else if (input.type === GlobalFeedItemType.ForumComments) {
+      this.forumComments = input.forumComments;
+    }
+  }
 }
 
 export enum TimelineFeedItemType {

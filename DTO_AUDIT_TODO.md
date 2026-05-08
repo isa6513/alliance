@@ -177,8 +177,8 @@ Only DTOs with at least one violation are listed.
 
 ### `GlobalFeedItemDto` — `server/src/actions/dto/action.dto.ts:725`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `actions.controller.ts:322` — `getGlobalFeed`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `actions.controller.ts:322` — `getGlobalFeed`
 
 ### `PreviewTextMessageResponseDto` — `server/src/actions/dto/action.dto.ts:115`
 
