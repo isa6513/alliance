@@ -156,9 +156,10 @@ export class AnalyticsController {
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
   ): Promise<ContractStatusPointDto[]> {
-    return await this.analyticsService.getContractStatusHistory(
+    const points = await this.analyticsService.getContractStatusHistory(
       startDate,
       endDate,
     );
+    return points.map((p) => new ContractStatusPointDto(p));
   }
 }

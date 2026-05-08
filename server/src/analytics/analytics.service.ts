@@ -32,6 +32,7 @@ import { ActionCompletionCurve } from './action-completion-curve.dto';
 import { ActionStatsWithOnboarding } from './actionstats-with-onboarding.dto';
 import { InviteFunnel } from './invite-funnel.dto';
 import { AggregateStats } from './aggregatestats.dto';
+import { ContractStatusPoint } from './contract-status-history.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -964,14 +965,7 @@ ORDER BY pp.total_session_duration_seconds DESC
   async getContractStatusHistory(
     startDate: string,
     endDate: string,
-  ): Promise<
-    {
-      date: string;
-      activeCount: number;
-      churnedCount: number;
-      totalEverSigned: number;
-    }[]
-  > {
+  ): Promise<ContractStatusPoint[]> {
     // Get all contract events ordered by date
     const allEvents = await this.contractEventRepository.find({
       relations: { user: true },
@@ -1002,12 +996,7 @@ ORDER BY pp.total_session_duration_seconds DESC
     // Generate daily data points
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const results: {
-      date: string;
-      activeCount: number;
-      churnedCount: number;
-      totalEverSigned: number;
-    }[] = [];
+    const results: ContractStatusPoint[] = [];
 
     const currentDate = new Date(start);
     while (currentDate <= end) {

@@ -60,8 +60,8 @@ Only DTOs with at least one violation are listed.
 
 ### `ContractStatusPointDto` — `server/src/analytics/contract-status-history.dto.ts:3`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `analytics.controller.ts:140` — `getContractStatusHistory`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `analytics.controller.ts:140` — `getContractStatusHistory`
 
 ---
 
