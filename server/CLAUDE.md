@@ -1,8 +1,8 @@
 ## Endpoints
 
-Every controller endpoint needs `@ApiOkResponse({ type: })` (or `@ApiResponse`) matching its return type (omit `type` for void).
+Before editing any `*.dto.ts` or `*.controller.ts`, read `../.claude/skills/DTO_RETURN_TYPES.md` — it covers constructor patterns, return-type rules, and the post-edit `bun run gen-api` step (run from the repo root with the dev server on port 3005, since `shared/client/` is consumed by frontend/admin/mobile).
 
-**Before adding or editing an endpoint's return type or existing DTO, read `../.claude/skills/DTO_RETURN_TYPES.md`.** Controller return types must be a DTO class — never a primitive, never `DtoType | null`. Wrap primitives in a DTO; for "not found" use `NotFoundException` or a wrapper DTO.
+Every controller endpoint needs `@ApiOkResponse({ type: })` (or `@ApiResponse`) matching its return type (omit `type` for void).
 
 DTOs: use mapped types over entities, e.g. `SampleDto extends OmitType(SampleEntity, ['sample']) {}`. Mark optional (`?`) fields with `@ApiPropertyOptional`, not `nullable`.
 

@@ -2692,6 +2692,11 @@ export type SearchItemDto = {
     type: SearchItemType;
 };
 
+export type SaveSearchSelectionDto = {
+    id: string;
+    type: SearchItemType;
+};
+
 export type SubmitFormDto = {
     answers: {
         [key: string]: unknown;
@@ -6972,7 +6977,7 @@ export type SearchAllResponses = {
 export type SearchAllResponse = SearchAllResponses[keyof SearchAllResponses];
 
 export type SearchSaveSelectedData = {
-    body: SearchItemDto;
+    body: SaveSearchSelectionDto;
     path?: never;
     query?: never;
     url: '/search/selected';

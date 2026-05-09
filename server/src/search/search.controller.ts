@@ -11,7 +11,7 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { SearchService } from './search.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
-import { SearchItemDto } from './searchitem.dto';
+import { SaveSearchSelectionDto, SearchItemDto } from './searchitem.dto';
 
 @Controller('search')
 export class SearchController {
@@ -32,7 +32,7 @@ export class SearchController {
   @UseGuards(AuthGuard)
   @ApiOkResponse()
   async saveSelected(
-    @Body() body: SearchItemDto,
+    @Body() body: SaveSearchSelectionDto,
     @Request() req: JwtRequest,
   ): Promise<void> {
     return this.searchService.saveSelected(body, req.user.sub);

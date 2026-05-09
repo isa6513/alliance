@@ -370,7 +370,7 @@ describe('Forum (e2e)', () => {
 
       expect(response.body.editableContent.body).toBe('This is a test reply');
       expect(response.body.parentObjectId).toBe(testPostId);
-      expect(response.body.authorId).toBe(ctx.testUserId);
+      expect(response.body.author.id).toBe(ctx.testUserId);
     });
 
     it('should update a reply', async () => {
@@ -524,7 +524,7 @@ describe('Forum (e2e)', () => {
       );
       expect(childResponse.body.parentObjectId).toBe(testPostId);
       expect(childResponse.body.parentId).toBe(parentReplyId);
-      expect(childResponse.body.authorId).toBe(ctx.testUserId);
+      expect(childResponse.body.author.id).toBe(ctx.testUserId);
     });
 
     it('should organize replies hierarchically when fetching post', async () => {

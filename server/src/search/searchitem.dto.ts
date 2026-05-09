@@ -64,3 +64,16 @@ export class SearchItemDto {
     this.type = input.type;
   }
 }
+
+export class SaveSearchSelectionDto {
+  @ApiProperty()
+  @IsString()
+  id: string;
+
+  @ApiProperty({
+    enum: SearchItemType,
+    enumName: 'SearchItemType',
+  })
+  @IsEnum(SearchItemType)
+  type: SearchItemType;
+}

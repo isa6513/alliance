@@ -12,7 +12,11 @@ import { UserService } from 'src/user/user.service';
 import type { Repository } from 'typeorm';
 import { actionUrl, postUrl, profileUrl } from './approutes';
 import { RecentSearch } from './recentsearch.entity';
-import { SearchItem, SearchItemDto, SearchItemType } from './searchitem.dto';
+import {
+  SaveSearchSelectionDto,
+  SearchItem,
+  SearchItemType,
+} from './searchitem.dto';
 import { infoPageSearchItems } from './informationpages';
 
 @Injectable()
@@ -136,7 +140,10 @@ export class SearchService {
     };
   }
 
-  async saveSelected(item: SearchItemDto, userId: number): Promise<void> {
+  async saveSelected(
+    item: SaveSearchSelectionDto,
+    userId: number,
+  ): Promise<void> {
     if (
       item.type === SearchItemType.Other ||
       item.type === SearchItemType.Page
