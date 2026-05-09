@@ -48,18 +48,11 @@ const GuidePage: React.FC = () => {
           <TableOfContents tocSections={tocSections} />
 
           <div className="flex flex-col gap-y-4 max-w-184 w-full min-w-0">
-            <div className="mb-8 md:mb-16 flex flex-col">
-              <h1 className="text-title-large mb-4">Guide to the Alliance</h1>
-              <div className="flex flex-col gap-y-6 text-xl md:text-2xl text-zinc-500">
-                <p>
-                  The Alliance is a global group of people cooperating to
-                  improve the world.
-                </p>
-              </div>
+            <div className="mb-4 flex flex-col">
+              <h1 className="text-title-large">Guide to the Alliance</h1>
             </div>
             <div className="flex flex-col gap-y-12">
               <GuideSection id="introduction">
-                <GuideH1>Introduction</GuideH1>
                 <GuideP>
                   The Alliance aims to facilitate{" "}
                   <GuideStrong>large-scale coordination</GuideStrong> over the

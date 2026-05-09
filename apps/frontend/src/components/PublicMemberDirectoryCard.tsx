@@ -23,12 +23,14 @@ const PublicMemberDirectoryCard: React.FC<PublicMemberDirectoryCardProps> = ({
     <div
       key={member.id}
       onClick={handleDescriptionOpen}
-      className="p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 cursor-pointer"
+      className="cursor-pointer"
     >
       <div
         className={cn(
           "flex flex-col md:flex-row gap-2",
-          showDescription || descriptionOpen ? "items-start" : "md:items-center"
+          showDescription || descriptionOpen
+            ? "items-start"
+            : "md:items-center",
         )}
       >
         <AvatarProfile pfp={member.profilePicture ?? null} size="medium" />

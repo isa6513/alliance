@@ -13,11 +13,11 @@ import { useLoaderData } from "react-router";
 
 const LANDING_MAIN_COL = "mx-auto w-full max-w-5xl px-6 sm:px-10 lg:px-16";
 const LANDING_BIG_COL = "mx-auto px-6 sm:px-10 lg:px-16 max-w-7xl w-full";
-const LANDING_BODY = "gap-16 sm:gap-24 lg:gap-36 py-18 lg:py-28";
+const LANDING_BODY = "gap-16 sm:gap-24 py-18 lg:py-24";
 const SECTION_STACK = "flex flex-col gap-y-8 lg:gap-y-10";
 const SECTION_HEAD = "flex flex-col gap-3 lg:gap-4";
 
-const SUBTITLE_CLASS = "text-xl lg:text-2xl";
+const SUBTITLE_CLASS = "text-lg lg:text-xl";
 
 export async function loader() {
   const res = await userNmembers();
@@ -179,7 +179,7 @@ const PeoplePage: React.FC = () => {
             </div>
           </div>
           <div className={`${LANDING_BIG_COL}`}>
-            <div className="grid grid-cols-1 gap-y-12 gap-x-20 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-y-8 gap-x-16 sm:grid-cols-2">
               {staffProfiles
                 .filter((member) => member.id !== undefined)
                 .map((member) => (
@@ -187,7 +187,8 @@ const PeoplePage: React.FC = () => {
                     <div className="hidden md:block">
                       <AvatarProfile
                         pfp={member.profilePicture ?? null}
-                        size="huge"
+                        size="override"
+                        className="w-20 h-20 rounded"
                       />
                     </div>
                     <div className="block md:hidden">
@@ -261,19 +262,20 @@ const PeoplePage: React.FC = () => {
                   their information public.
                 </p>
               </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Search members..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded border border-zinc-200 bg-white py-2 px-3 text-lg"
+                />
+              </div>
             </div>
-            <div>
-              <input
-                type="text"
-                placeholder="Search members..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded border border-zinc-200 bg-white py-2 px-3 text-lg"
-              />
-            </div>
+
             {filteredMembers.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3">
                   {displayedMembers.map((member) => (
                     <PublicMemberDirectoryCard
                       key={member.id}

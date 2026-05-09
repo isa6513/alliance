@@ -11,7 +11,7 @@ const FeaturedImpactCard: React.FC<
     <Link
       to={href("/actions/:id", { id: actionId.toString() })}
       className={cn(
-        "flex flex-col gap-4 group hover:border-grey-3 rounded-md p-4 sm:p-10",
+        "flex flex-col gap-4 group hover:border-grey-3 rounded-md p-4 sm:p-8",
         cardStyle,
       )}
     >
