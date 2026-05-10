@@ -161,10 +161,12 @@ export class TasksController {
     @Param('formId', ParseIntPipe) formId: number,
     @Body() body: MigrateResponseSnapshotsDto,
   ): Promise<MigrateResponseSnapshotsResultDto> {
-    return this.tasksService.migrateResponseSnapshots(
-      formId,
-      body.responseIds,
-      body.targetSnapshotId,
+    return new MigrateResponseSnapshotsResultDto(
+      await this.tasksService.migrateResponseSnapshots(
+        formId,
+        body.responseIds,
+        body.targetSnapshotId,
+      ),
     );
   }
 

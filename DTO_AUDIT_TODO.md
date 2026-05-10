@@ -288,8 +288,8 @@ Only DTOs with at least one violation are listed.
 
 ### `MigrateResponseSnapshotsResultDto` — `server/src/tasks/form.dto.ts:259`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `tasks.controller.ts:162` — `migrateResponseSnapshots`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `tasks.controller.ts:162` — `migrateResponseSnapshots`
 
 ### `FormAggregateViewsDto` — `server/src/tasks/form.dto.ts:114`
 

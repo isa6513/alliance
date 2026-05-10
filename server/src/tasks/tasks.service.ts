@@ -48,7 +48,6 @@ import {
   FormDto,
   FormResponseDto,
   type FormSnapshotMigration,
-  MigrateResponseSnapshotsResultDto,
   type SnapshotResponseGroup,
   SubmitFollowUpFormDto,
   SubmitFormDto,
@@ -1132,7 +1131,7 @@ export class TasksService {
     formId: number,
     responseIds: number[],
     targetSnapshotId: number,
-  ): Promise<MigrateResponseSnapshotsResultDto> {
+  ): Promise<number> {
     const form = await this.getForm(formId);
     if (form.formSnapshotId !== targetSnapshotId) {
       throw new ConflictException(
@@ -1157,9 +1156,7 @@ export class TasksService {
       .where('formId = :formId', { formId })
       .andWhere('id IN (:...responseIds)', { responseIds })
       .execute();
-    const dto = new MigrateResponseSnapshotsResultDto();
-    dto.updatedCount = result.affected ?? 0;
-    return dto;
+    return result.affected ?? 0;
   }
 
   async getMyFormResponse(

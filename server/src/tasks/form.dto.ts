@@ -290,6 +290,10 @@ export class MigrateResponseSnapshotsDto {
 export class MigrateResponseSnapshotsResultDto {
   @ApiProperty()
   updatedCount: number;
+
+  constructor(updatedCount: number) {
+    this.updatedCount = updatedCount;
+  }
 }
 
 export class GuestFormResponseDto {
