@@ -331,11 +331,11 @@ Only DTOs with at least one violation are listed.
 
 ### `ProfileDto` — `server/src/user/dto/user.dto.ts:27`
 
-- [ ] Rule 4:
-  - [ ] `user.controller.ts:226` — `listReceivedRequests`
-  - [ ] `user.controller.ts:234` — `listSentRequests`
-  - [ ] `user.controller.ts:282` — `listFriends`
-  - [ ] `user.controller.ts:294` — `listMessageableUsers`
+- [x] Rule 4:
+  - [x] `user.controller.ts:226` — `listReceivedRequests`
+  - [x] `user.controller.ts:234` — `listSentRequests`
+  - [x] `user.controller.ts:282` — `listFriends`
+  - [x] `user.controller.ts:294` — `listMessageableUsers`
 
 ### `UserAwayRangeDto` — `server/src/user/dto/away-range.dto.ts:36`
 

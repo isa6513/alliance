@@ -392,7 +392,7 @@ export class UserService {
       .execute();
   }
 
-  async findFriends(userId: number): Promise<ProfileDto[]> {
+  async findFriends(userId: number): Promise<User[]> {
     const rels = await this.friendRepository.find({
       where: [
         { requester: { id: userId }, status: FriendStatus.Accepted },
@@ -401,11 +401,9 @@ export class UserService {
       relations: { requester: true, addressee: true },
     });
 
-    const others = rels.map((r) =>
+    return rels.map((r) =>
       r.requester!.id === userId ? r.addressee! : r.requester!,
     );
-
-    return others.map((o) => new ProfileDto(o));
   }
 
   private async findFriendUsersWithProfilePictures(
@@ -512,18 +510,16 @@ export class UserService {
     return new SignupSocialProofDto(profiles);
   }
 
-  async findMessageableUsers(userId: number): Promise<ProfileDto[]> {
+  async findMessageableUsers(userId: number): Promise<User[]> {
     const user = await this.findOneOrFail(userId, {
       communities: true,
       leaderOf: true,
     });
 
-    // Staff can message everyone
     if (user.staff) {
-      const allUsers = await this.userRepository.find({
+      return this.userRepository.find({
         where: { id: Not(userId) },
       });
-      return allUsers.map((u) => new ProfileDto(u));
     }
 
     const memberCommunityIds = user.communities.map((c) => c.id);
@@ -573,7 +569,7 @@ export class UserService {
       if (u?.id && u.id !== userId) byId.set(u.id, u);
     }
 
-    return [...byId.values()].map((o) => new ProfileDto(o));
+    return [...byId.values()];
   }
 
   async notifyReferrerOfNewMember(referrer: User, newMember: User) {
@@ -608,29 +604,27 @@ export class UserService {
   async findPendingRequests(
     userId: number,
     direction: 'sent' | 'received',
-  ): Promise<ProfileDto[]> {
-    const users =
-      direction === 'sent'
-        ? (
-            await this.friendRepository.find({
-              where: {
-                requester: { id: userId },
-                status: FriendStatus.Pending,
-              },
-              relations: { addressee: true },
-            })
-          ).map((r) => r.addressee!)
-        : (
-            await this.friendRepository.find({
-              where: {
-                addressee: { id: userId },
-                status: FriendStatus.Pending,
-              },
-              relations: { requester: true },
-            })
-          ).map((r) => r.requester!);
-
-    return users.map((u) => new ProfileDto(u));
+  ): Promise<User[]> {
+    if (direction === 'sent') {
+      return (
+        await this.friendRepository.find({
+          where: {
+            requester: { id: userId },
+            status: FriendStatus.Pending,
+          },
+          relations: { addressee: true },
+        })
+      ).map((r) => r.addressee!);
+    }
+    return (
+      await this.friendRepository.find({
+        where: {
+          addressee: { id: userId },
+          status: FriendStatus.Pending,
+        },
+        relations: { requester: true },
+      })
+    ).map((r) => r.requester!);
   }
 
   async getRelationshipStatus(

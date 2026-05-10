@@ -223,7 +223,9 @@ export class UserController {
   async listReceivedRequests(
     @Request() req: JwtRequest,
   ): Promise<ProfileDto[]> {
-    return this.userService.findPendingRequests(req.user.sub, 'received');
+    return (
+      await this.userService.findPendingRequests(req.user.sub, 'received')
+    ).map((user) => new ProfileDto(user));
   }
 
   @Get('friends/requests/sent')
@@ -231,7 +233,9 @@ export class UserController {
   @ApiOperation({ summary: 'Requests I sent that are still pending' })
   @ApiOkResponse({ type: [ProfileDto] })
   async listSentRequests(@Request() req: JwtRequest): Promise<ProfileDto[]> {
-    return this.userService.findPendingRequests(req.user.sub, 'sent');
+    return (
+      await this.userService.findPendingRequests(req.user.sub, 'sent')
+    ).map((user) => new ProfileDto(user));
   }
 
   @Get('myfriendrelationship/:id')
@@ -279,7 +283,9 @@ export class UserController {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
     }
-    return this.userService.findFriends(id);
+    return (await this.userService.findFriends(id)).map(
+      (user) => new ProfileDto(user),
+    );
   }
 
   @Get('listMessageableUsers')
@@ -291,7 +297,9 @@ export class UserController {
     if (!req.user) {
       throw new UnauthorizedException('User not found');
     }
-    return this.userService.findMessageableUsers(req.user.sub);
+    return (await this.userService.findMessageableUsers(req.user.sub)).map(
+      (user) => new ProfileDto(user),
+    );
   }
 
   @Get('list')
