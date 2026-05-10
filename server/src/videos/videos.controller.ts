@@ -121,7 +121,7 @@ export class VideosController {
   ): Promise<ReplaceVideoResponseDto> {
     const video = await this.videosService.replaceVideoContent(id, files);
     if (!video) throw new NotFoundException();
-    return { id: video.id, key: video.key, status: video.status };
+    return new ReplaceVideoResponseDto(video);
   }
 
   @Get(':id/:filename')

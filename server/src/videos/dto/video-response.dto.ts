@@ -199,4 +199,11 @@ export class ReplaceVideoResponseDto extends PickType(Video, [
   'id',
   'key',
   'status',
-]) {}
+]) {
+  constructor(input: Video) {
+    super();
+    this.id = input.id;
+    this.key = input.key;
+    this.status = input.status;
+  }
+}
