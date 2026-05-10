@@ -72,6 +72,10 @@ export class CreateCustomValidatorResponseDto {
   @ApiProperty()
   @IsNotEmpty()
   id: number;
+
+  constructor(id: number) {
+    this.id = id;
+  }
 }
 
 export type CustomValidatorResponse = {

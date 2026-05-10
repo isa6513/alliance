@@ -291,7 +291,7 @@ export class TasksController {
       body.idArgument,
       body.expression,
     );
-    return validator;
+    return new CreateCustomValidatorResponseDto(validator.id);
   }
 
   @Post('testCustomExpression')

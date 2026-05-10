@@ -313,8 +313,8 @@ Only DTOs with at least one violation are listed.
 
 ### `CreateCustomValidatorResponseDto` — `server/src/tasks/customvalidator.dto.ts:44`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `tasks.controller.ts:283` — `createCustomValidator`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `tasks.controller.ts:283` — `createCustomValidator`
 
 ### `TestCustomExpressionResponseDto` — `server/src/tasks/customvalidator.dto.ts:83`
 
