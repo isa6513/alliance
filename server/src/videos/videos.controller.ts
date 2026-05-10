@@ -82,12 +82,7 @@ export class VideosController {
     const video = await this.videosService.getVideo(id);
     if (!video) throw new NotFoundException();
     res.setHeader('Cache-Control', 'no-store');
-    return {
-      id: video.id,
-      key: video.key,
-      status: video.status,
-      duration: video.duration,
-    };
+    return new VideoStatusResponseDto(video);
   }
 
   @Get(':id/details')

@@ -19,7 +19,15 @@ export class VideoStatusResponseDto extends PickType(Video, [
   'key',
   'status',
   'duration',
-]) {}
+]) {
+  constructor(input: Video) {
+    super();
+    this.id = input.id;
+    this.key = input.key;
+    this.status = input.status;
+    this.duration = input.duration;
+  }
+}
 
 export class DeleteVideoResponseDto {
   @ApiProperty({ type: Boolean })
