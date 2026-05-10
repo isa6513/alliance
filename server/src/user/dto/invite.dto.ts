@@ -89,7 +89,15 @@ export class OnetimeInviteDto extends PickType(OnetimeInvite, [
 
   constructor(onetimeInvite: OnetimeInvite) {
     super();
-    Object.assign(this, onetimeInvite);
+    this.id = onetimeInvite.id;
+    this.invitee = onetimeInvite.invitee;
+    this.inviteeDescription = onetimeInvite.inviteeDescription;
+    this.info = onetimeInvite.info;
+    this.code = onetimeInvite.code;
+    this.status = onetimeInvite.status;
+    this.createdAt = onetimeInvite.createdAt;
+    this.community = onetimeInvite.community;
+    this.invitedUserId = onetimeInvite.invitedUserId;
     this.invitingUser = onetimeInvite.invitingUser
       ? new ProfileDto(onetimeInvite.invitingUser)
       : undefined;

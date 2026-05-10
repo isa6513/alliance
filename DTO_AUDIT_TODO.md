@@ -362,7 +362,7 @@ Only DTOs with at least one violation are listed.
 
 ### `OnetimeInviteDto` — `server/src/user/dto/invite.dto.ts:67`
 
-- [ ] Rule 3: `Object.assign(this, onetimeInvite)` at `invite.dto.ts:88`
+- [x] Rule 3: `Object.assign(this, onetimeInvite)` at `invite.dto.ts:88`
 
 ### `TagDto` — `server/src/user/dto/tag.dto.ts:7`
 
