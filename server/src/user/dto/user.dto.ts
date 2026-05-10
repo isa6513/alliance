@@ -17,11 +17,22 @@ import { FriendStatus } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
 import { ContractEvent } from '../entities/contract-event.entity';
 
+export type FriendStatusDtoArgs = {
+  status: FriendStatus;
+  didReceiveRequest: boolean;
+};
+
 export class FriendStatusDto {
   @ApiProperty({ enum: FriendStatus, nullable: true, enumName: 'FriendStatus' })
   status: FriendStatus;
+
   @ApiProperty()
   didReceiveRequest: boolean;
+
+  constructor(input: FriendStatusDtoArgs) {
+    this.status = input.status;
+    this.didReceiveRequest = input.didReceiveRequest;
+  }
 }
 
 export class ProfileDto extends PickType(User, [

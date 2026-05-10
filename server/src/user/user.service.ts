@@ -26,7 +26,7 @@ import { Friend, FriendStatus } from './entities/friend.entity';
 import { PrefillUser } from './entities/prefill-user.entity';
 import {
   AssignGroupsDto,
-  FriendStatusDto,
+  FriendStatusDtoArgs,
   ProfileDto,
   SignupSocialProofDto,
   UpdateProfileDto,
@@ -630,7 +630,7 @@ export class UserService {
   async getRelationshipStatus(
     userId: number,
     targetUserId: number,
-  ): Promise<FriendStatusDto> {
+  ): Promise<FriendStatusDtoArgs> {
     const rel =
       (await this.friendRepository.findOne({
         where: { requester: { id: userId }, addressee: { id: targetUserId } },

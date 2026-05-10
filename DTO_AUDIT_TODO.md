@@ -348,8 +348,8 @@ Only DTOs with at least one violation are listed.
 
 ### `FriendStatusDto` — `server/src/user/dto/user.dto.ts:20`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `user.controller.ts:248` — `myFriendRelationship`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `user.controller.ts:248` — `myFriendRelationship`
 
 ### `PrefillUserDto` — `server/src/user/prefill-user.dto.ts:4`
 

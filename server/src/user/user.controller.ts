@@ -245,11 +245,9 @@ export class UserController {
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<FriendStatusDto> {
-    const status = await this.userService.getRelationshipStatus(
-      req.user.sub,
-      +id,
+    return new FriendStatusDto(
+      await this.userService.getRelationshipStatus(req.user.sub, +id),
     );
-    return status;
   }
 
   @Get('prefill/:id')
