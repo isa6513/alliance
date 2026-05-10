@@ -382,8 +382,8 @@ Only DTOs with at least one violation are listed.
 
 ### `UploadVideoResponseDto` — `server/src/videos/dto/video-response.dto.ts:4`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `videos.controller.ts:64` — `uploadVideo` returns object literal `{ id, key, status }`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `videos.controller.ts:64` — `uploadVideo` returns object literal `{ id, key, status }`
 
 ### `VideoListResponseDto` — `server/src/videos/dto/video-response.dto.ts:38`
 

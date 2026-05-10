@@ -5,14 +5,21 @@ export class UploadVideoResponseDto extends PickType(Video, [
   'id',
   'key',
   'status',
-]) { }
+]) {
+  constructor(input: Video) {
+    super();
+    this.id = input.id;
+    this.key = input.key;
+    this.status = input.status;
+  }
+}
 
 export class VideoStatusResponseDto extends PickType(Video, [
   'id',
   'key',
   'status',
   'duration',
-]) { }
+]) {}
 
 export class DeleteVideoResponseDto {
   @ApiProperty({ type: Boolean })
@@ -109,4 +116,4 @@ export class ReplaceVideoResponseDto extends PickType(Video, [
   'id',
   'key',
   'status',
-]) { }
+]) {}

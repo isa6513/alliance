@@ -1,7 +1,4 @@
-import {
-  GetObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   Controller,
   Delete,
@@ -37,13 +34,17 @@ export class VideosController {
   constructor(
     private readonly videosService: VideosService,
     @Inject('S3_CLIENT') private readonly s3: S3Client,
-  ) { }
+  ) {}
 
   private readonly bucket = process.env.ASSETS_BUCKET!;
 
   @Post('upload')
   @UseGuards(AdminGuard)
-  @UseInterceptors(FilesInterceptor('files', 200, { limits: { fileSize: 5000 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FilesInterceptor('files', 200, {
+      limits: { fileSize: 5000 * 1024 * 1024 },
+    }),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -61,7 +62,7 @@ export class VideosController {
     @UploadedFiles() files: Express.Multer.File[],
   ): Promise<UploadVideoResponseDto> {
     const video = await this.videosService.uploadVideo(files);
-    return { id: video.id, key: video.key, status: video.status };
+    return new UploadVideoResponseDto(video);
   }
 
   @Get()
@@ -122,7 +123,9 @@ export class VideosController {
       duration: video.duration,
       segments,
       totalOutputSize,
-      processingInfo: (video.processingInfo as unknown as VideoProcessingInfoDto) ?? undefined,
+      processingInfo:
+        (video.processingInfo as unknown as VideoProcessingInfoDto) ??
+        undefined,
       dateCreated: video.dateCreated,
       dateUpdated: video.dateUpdated,
     };
@@ -130,7 +133,11 @@ export class VideosController {
 
   @Post(':id/replace')
   @UseGuards(AdminGuard)
-  @UseInterceptors(FilesInterceptor('files', 200, { limits: { fileSize: 5000 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FilesInterceptor('files', 200, {
+      limits: { fileSize: 5000 * 1024 * 1024 },
+    }),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -182,7 +189,7 @@ export class VideosController {
         ? 'application/vnd.apple.mpegurl'
         : filename.endsWith('.ts')
           ? 'video/MP2T'
-          : out.ContentType ?? 'application/octet-stream';
+          : (out.ContentType ?? 'application/octet-stream');
 
       res.setHeader('Content-Type', contentType);
       res.setHeader(
@@ -194,7 +201,7 @@ export class VideosController {
       body.on('error', () => {
         try {
           body.destroy();
-        } catch { }
+        } catch {}
         if (!res.headersSent) res.status(500);
         res.end();
       });
@@ -209,9 +216,7 @@ export class VideosController {
   @Delete(':id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: DeleteVideoResponseDto })
-  async deleteVideo(
-    @Param('id') id: number,
-  ): Promise<DeleteVideoResponseDto> {
+  async deleteVideo(@Param('id') id: number): Promise<DeleteVideoResponseDto> {
     const video = await this.videosService.getVideo(id);
     if (!video) throw new NotFoundException();
     await this.videosService.deleteVideo(id);
