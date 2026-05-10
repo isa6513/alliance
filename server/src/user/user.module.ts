@@ -9,7 +9,6 @@ import { Action } from '../actions/entities/action.entity';
 import { City } from '../geo/city.entity';
 import { Notification } from '../notifs/entities/notification.entity';
 import { Friend } from './entities/friend.entity';
-import { PrefillUser } from './entities/prefill-user.entity';
 import { UserController } from './user.controller';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
@@ -43,7 +42,6 @@ import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
       Friend,
       Notification,
       OnetimeInvite,
-      PrefillUser,
       Tag,
       UserDevice,
       UserAwayRange,

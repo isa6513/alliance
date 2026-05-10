@@ -23,7 +23,6 @@ import {
 } from 'typeorm';
 import { sqlUserHasActiveContractAt } from './has-active-contract-at';
 import { Friend, FriendStatus } from './entities/friend.entity';
-import { PrefillUser } from './entities/prefill-user.entity';
 import {
   AssignGroupsDto,
   FriendStatusDtoArgs,
@@ -81,8 +80,6 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(PrefillUser)
-    private prefillUserRepository: Repository<PrefillUser>,
     @InjectRepository(City)
     private cityRepository: Repository<City>,
     @InjectRepository(Friend)
@@ -741,16 +738,6 @@ export class UserService {
         longitude: null,
       },
     ];
-  }
-
-  async findOnePrefill(id: number): Promise<PrefillUser> {
-    const user = await this.prefillUserRepository.findOne({
-      where: { id },
-    });
-    if (!user) {
-      throw new NotFoundException(`User ${id} not found`);
-    }
-    return user;
   }
 
   async findOneByStripeCustomerId(

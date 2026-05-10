@@ -28,7 +28,6 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from '../auth/public.decorator';
 import { FriendStatus } from './entities/friend.entity';
-import { PrefillUserDto } from './prefill-user.dto';
 import {
   AssignGroupsDto,
   FriendStatusDto,
@@ -248,27 +247,6 @@ export class UserController {
     return new FriendStatusDto(
       await this.userService.getRelationshipStatus(req.user.sub, +id),
     );
-  }
-
-  @Get('prefill/:id')
-  @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: ProfileDto })
-  @ApiUnauthorizedResponse()
-  async prefill(
-    @Request() req: JwtRequest,
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<PrefillUserDto> {
-    const user = await this.userService.findOnePrefill(id);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return {
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phone: user.phone,
-      city: user.city,
-    };
   }
 
   @Get('listfriends/:id')

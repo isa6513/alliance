@@ -3483,25 +3483,6 @@ export type UserMyFriendRelationshipResponses = {
 
 export type UserMyFriendRelationshipResponse = UserMyFriendRelationshipResponses[keyof UserMyFriendRelationshipResponses];
 
-export type UserPrefillData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/user/prefill/{id}';
-};
-
-export type UserPrefillErrors = {
-    401: unknown;
-};
-
-export type UserPrefillResponses = {
-    200: ProfileDto;
-};
-
-export type UserPrefillResponse = UserPrefillResponses[keyof UserPrefillResponses];
-
 export type UserListFriendsData = {
     body?: never;
     path: {
