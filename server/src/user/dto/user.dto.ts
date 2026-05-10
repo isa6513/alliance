@@ -255,6 +255,15 @@ export class ReferralDto {
   referralCode: string;
 }
 
+export type UserCityCount = {
+  cityId: number | null;
+  cityName: string | null;
+  countryCode: string | null;
+  count: number;
+  latitude: number | null;
+  longitude: number | null;
+};
+
 export class UserCityCountDto {
   @ApiPropertyOptional({ type: Number, nullable: true })
   @IsOptional()
@@ -279,6 +288,15 @@ export class UserCityCountDto {
   @ApiPropertyOptional({ type: Number, nullable: true })
   @IsOptional()
   longitude?: number | null;
+
+  constructor(input: UserCityCount) {
+    this.cityId = input.cityId;
+    this.cityName = input.cityName;
+    this.countryCode = input.countryCode;
+    this.count = input.count;
+    this.latitude = input.latitude;
+    this.longitude = input.longitude;
+  }
 }
 
 export class SingleGroupAssignmentDto {

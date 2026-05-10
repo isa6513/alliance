@@ -353,8 +353,8 @@ Only DTOs with at least one violation are listed.
 
 ### `UserCityCountDto` — `server/src/user/dto/user.dto.ts:247`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `user.controller.ts:324` — `cityCounts`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `user.controller.ts:324` — `cityCounts`
 
 ### `SignupSocialProofDto` — `server/src/user/dto/user.dto.ts:101`
 

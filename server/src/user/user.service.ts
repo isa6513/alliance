@@ -29,7 +29,7 @@ import {
   ProfileDto,
   SignupSocialProofDto,
   UpdateProfileDto,
-  UserCityCountDto,
+  UserCityCount,
 } from './dto/user.dto';
 import { DEFAULT_TIME_ZONE, User } from './entities/user.entity';
 import { groupUrl, profileUrl } from 'src/search/approutes';
@@ -681,7 +681,7 @@ export class UserService {
     return user.city ?? undefined;
   }
 
-  async getUserCityCounts(): Promise<UserCityCountDto[]> {
+  async getUserCityCounts(): Promise<UserCityCount[]> {
     // return (
     //   await this.userRepository.find({
     //     relations: { contractEvents: true },
@@ -723,7 +723,7 @@ export class UserService {
           count,
           latitude: city?.latitude ?? null,
           longitude: city?.longitude ?? null,
-        } as UserCityCountDto;
+        } satisfies UserCityCount;
       },
     );
 

@@ -305,7 +305,9 @@ export class UserController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [UserCityCountDto] })
   async cityCounts(): Promise<UserCityCountDto[]> {
-    return this.userService.getUserCityCounts();
+    return (await this.userService.getUserCityCounts()).map(
+      (c) => new UserCityCountDto(c),
+    );
   }
 
   @Get('userdetail/:id')
