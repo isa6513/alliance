@@ -264,7 +264,9 @@ export class TasksController {
     @Request() req: JwtRequest,
     @Body() body: RunValidatorDto,
   ): Promise<CustomValidatorResponseDto> {
-    return this.tasksService.runValidator(id, req.user.sub, body.fieldValue);
+    return new CustomValidatorResponseDto(
+      await this.tasksService.runValidator(id, req.user.sub, body.fieldValue),
+    );
   }
 
   @Get('findOneCustomValidator/:id')

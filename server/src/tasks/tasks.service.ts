@@ -27,7 +27,7 @@ import { UserService } from 'src/user/user.service';
 import { In, IsNull, type Repository } from 'typeorm';
 import {
   CustomValidatorDto,
-  CustomValidatorResponseDto,
+  CustomValidatorResponse,
   CustomValidatorTypeDtoArgs,
   TestCustomExpressionResponseDto,
 } from './customvalidator.dto';
@@ -1348,7 +1348,7 @@ export class TasksService {
     id: number,
     userId: number,
     fieldValue?: string,
-  ): Promise<CustomValidatorResponseDto> {
+  ): Promise<CustomValidatorResponse> {
     const validator = await this.customValidatorRepository.findOneOrFail({
       where: { id },
     });

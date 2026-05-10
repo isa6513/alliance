@@ -303,8 +303,8 @@ Only DTOs with at least one violation are listed.
 
 ### `CustomValidatorResponseDto` — `server/src/tasks/customvalidator.dto.ts:50`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `tasks.controller.ts:260` — `runValidator`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `tasks.controller.ts:260` — `runValidator`
 
 ### `CustomValidatorDto` — `server/src/tasks/customvalidator.dto.ts:42`
 

@@ -61,6 +61,11 @@ export class CreateCustomValidatorResponseDto {
   id: number;
 }
 
+export type CustomValidatorResponse = {
+  isValid: boolean;
+  message?: string;
+};
+
 export class CustomValidatorResponseDto {
   @ApiProperty()
   @IsNotEmpty()
@@ -69,6 +74,11 @@ export class CustomValidatorResponseDto {
   @ApiPropertyOptional()
   @IsOptional()
   message?: string;
+
+  constructor(input: CustomValidatorResponse) {
+    this.isValid = input.isValid;
+    this.message = input.message;
+  }
 }
 
 export class RunValidatorDto {
