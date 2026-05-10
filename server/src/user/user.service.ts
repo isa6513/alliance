@@ -26,8 +26,6 @@ import { Friend, FriendStatus } from './entities/friend.entity';
 import {
   AssignGroupsDto,
   FriendStatusDtoArgs,
-  ProfileDto,
-  SignupSocialProofDto,
   UpdateProfileDto,
   UserCityCount,
 } from './dto/user.dto';
@@ -461,11 +459,9 @@ export class UserService {
    * Up to 5 member profiles with avatars for the signup page.
    * Prefer accepted friends of the referrer (from invite or referral code), then random members with photos.
    */
-  async getSignupSocialProof(
-    referralCode?: string,
-  ): Promise<SignupSocialProofDto> {
+  async getSignupSocialProof(referralCode?: string): Promise<User[]> {
     const minProfiles = 5;
-    const profiles: ProfileDto[] = [];
+    const users: User[] = [];
     const usedIds: number[] = [];
 
     const trimmed = referralCode?.trim();
@@ -483,28 +479,26 @@ export class UserService {
     if (inviterId != null) {
       const friends = await this.findFriendUsersWithProfilePictures(inviterId);
       for (const u of friends) {
-        if (profiles.length >= minProfiles) {
+        if (users.length >= minProfiles) {
           break;
         }
         if (!usedIds.includes(u.id)) {
           usedIds.push(u.id);
-          profiles.push(new ProfileDto(u));
+          users.push(u);
         }
       }
     }
 
-    const need = minProfiles - profiles.length;
+    const need = minProfiles - users.length;
     if (need > 0) {
       const fillers = await this.pickRandomUsersWithProfilePictures(
         need,
         usedIds,
       );
-      for (const u of fillers) {
-        profiles.push(new ProfileDto(u));
-      }
+      users.push(...fillers);
     }
 
-    return new SignupSocialProofDto(profiles);
+    return users;
   }
 
   async findMessageableUsers(userId: number): Promise<User[]> {

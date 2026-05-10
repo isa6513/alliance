@@ -113,8 +113,8 @@ export class SignupSocialProofDto {
   @ApiProperty({ type: ProfileDto, isArray: true })
   profiles: ProfileDto[];
 
-  constructor(profiles: ProfileDto[]) {
-    this.profiles = profiles;
+  constructor(users: User[]) {
+    this.profiles = users.map((u) => new ProfileDto(u));
   }
 }
 

@@ -475,7 +475,9 @@ export class UserController {
   async signupSocialProof(
     @Query('code') code?: string,
   ): Promise<SignupSocialProofDto> {
-    return this.userService.getSignupSocialProof(code);
+    return new SignupSocialProofDto(
+      await this.userService.getSignupSocialProof(code),
+    );
   }
 
   @Get('referrerProfile/:code')

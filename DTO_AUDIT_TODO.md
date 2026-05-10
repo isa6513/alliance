@@ -358,7 +358,7 @@ Only DTOs with at least one violation are listed.
 
 ### `SignupSocialProofDto` — `server/src/user/dto/user.dto.ts:101`
 
-- [ ] Rule 4: `user.controller.ts:492` — `signupSocialProof`
+- [x] Rule 4: `user.controller.ts:492` — `signupSocialProof`
 
 ### `OnetimeInviteDto` — `server/src/user/dto/invite.dto.ts:67`
 
