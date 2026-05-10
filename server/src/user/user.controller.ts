@@ -161,7 +161,7 @@ export class UserController {
   @ApiOkResponse({ type: MaybeUserLocationDto })
   async myLocation(@Request() req: JwtRequest): Promise<MaybeUserLocationDto> {
     const city = await this.userService.getUserLocation(req.user.sub);
-    return { city };
+    return new MaybeUserLocationDto(city);
   }
 
   @Post('friends/:targetUserId')

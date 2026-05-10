@@ -343,8 +343,8 @@ Only DTOs with at least one violation are listed.
 
 ### `MaybeUserLocationDto` — `server/src/geo/city.dto.ts:30`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `user.controller.ts:164` — `myLocation` returns object literal `{ city }`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `user.controller.ts:164` — `myLocation` returns object literal `{ city }`
 
 ### `FriendStatusDto` — `server/src/user/dto/user.dto.ts:20`
 

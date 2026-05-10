@@ -40,6 +40,10 @@ export class MaybeUserLocationDto {
   @ApiPropertyOptional({ type: () => City })
   @Type(() => City)
   city?: City;
+
+  constructor(city: City | undefined) {
+    this.city = city;
+  }
 }
 
 type _typecheck = Assert<CitySearchDto extends CityFieldValue ? true : false>;
