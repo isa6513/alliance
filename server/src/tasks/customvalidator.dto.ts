@@ -53,7 +53,20 @@ export class CreateCustomValidatorDto {
   expression?: string;
 }
 
-export class CustomValidatorDto extends CustomValidator {}
+export class CustomValidatorDto extends PickType(CustomValidator, [
+  'id',
+  'type',
+  'idArgument',
+  'expression',
+]) {
+  constructor(input: CustomValidator) {
+    super();
+    this.id = input.id;
+    this.type = input.type;
+    this.idArgument = input.idArgument;
+    this.expression = input.expression;
+  }
+}
 
 export class CreateCustomValidatorResponseDto {
   @ApiProperty()

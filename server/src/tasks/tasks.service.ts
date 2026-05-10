@@ -26,7 +26,6 @@ import { welcomeMessage } from 'src/notifs/textnotifcontents';
 import { UserService } from 'src/user/user.service';
 import { In, IsNull, type Repository } from 'typeorm';
 import {
-  CustomValidatorDto,
   CustomValidatorResponse,
   CustomValidatorTypeDtoArgs,
   TestCustomExpressionResponseDto,
@@ -1237,7 +1236,7 @@ export class TasksService {
     return validator;
   }
 
-  async findOneCustomValidator(id: number): Promise<CustomValidatorDto> {
+  async findOneCustomValidator(id: number): Promise<CustomValidator> {
     return this.customValidatorRepository.findOneOrFail({ where: { id } });
   }
 

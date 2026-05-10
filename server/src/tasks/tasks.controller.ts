@@ -275,7 +275,9 @@ export class TasksController {
   async findOneCustomValidator(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomValidatorDto> {
-    return this.tasksService.findOneCustomValidator(id);
+    return new CustomValidatorDto(
+      await this.tasksService.findOneCustomValidator(id),
+    );
   }
 
   @Post('createCustomValidator')
