@@ -32,6 +32,10 @@ export class VideoStatusResponseDto extends PickType(Video, [
 export class DeleteVideoResponseDto {
   @ApiProperty({ type: Boolean })
   deleted: boolean;
+
+  constructor(deleted: boolean) {
+    this.deleted = deleted;
+  }
 }
 
 export class VideoListItemDto extends PickType(Video, [

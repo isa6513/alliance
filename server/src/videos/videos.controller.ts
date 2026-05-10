@@ -184,6 +184,6 @@ export class VideosController {
     const video = await this.videosService.getVideo(id);
     if (!video) throw new NotFoundException();
     await this.videosService.deleteVideo(id);
-    return { deleted: true };
+    return new DeleteVideoResponseDto(true);
   }
 }
