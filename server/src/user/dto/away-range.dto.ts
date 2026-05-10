@@ -43,13 +43,11 @@ export class UserAwayRangeDto extends PickType(UserAwayRange, [
 ]) {
   constructor(awayRange: UserAwayRange) {
     super();
-    Object.assign(this, {
-      id: awayRange.id,
-      startDate: awayRange.startDate,
-      endDate: awayRange.endDate,
-      reason: awayRange.reason,
-      note: awayRange.note,
-      createdAt: awayRange.createdAt,
-    });
+    this.id = awayRange.id;
+    this.startDate = awayRange.startDate;
+    this.endDate = awayRange.endDate;
+    this.reason = awayRange.reason;
+    this.note = awayRange.note;
+    this.createdAt = awayRange.createdAt;
   }
 }

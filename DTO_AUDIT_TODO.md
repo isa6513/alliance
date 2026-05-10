@@ -339,7 +339,7 @@ Only DTOs with at least one violation are listed.
 
 ### `UserAwayRangeDto` — `server/src/user/dto/away-range.dto.ts:36`
 
-- [ ] Rule 3: `Object.assign(this, {...})` at `away-range.dto.ts:46`
+- [x] Rule 3: `Object.assign(this, {...})` at `away-range.dto.ts:46`
 
 ### `MaybeUserLocationDto` — `server/src/geo/city.dto.ts:30`
 
