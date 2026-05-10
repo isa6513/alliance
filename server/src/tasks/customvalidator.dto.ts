@@ -7,6 +7,13 @@ import {
   CustomValidatorType,
 } from './entities/customvalidator.entity';
 
+export type CustomValidatorTypeDtoArgs = {
+  name: string;
+  id: CustomValidatorType;
+  withIdField: boolean;
+  usableForVisibility: boolean;
+};
+
 export class CustomValidatorTypeDto {
   @ApiProperty()
   @IsNotEmpty()
@@ -23,6 +30,13 @@ export class CustomValidatorTypeDto {
   @ApiProperty()
   @IsNotEmpty()
   usableForVisibility: boolean;
+
+  constructor(input: CustomValidatorTypeDtoArgs) {
+    this.name = input.name;
+    this.id = input.id;
+    this.withIdField = input.withIdField;
+    this.usableForVisibility = input.usableForVisibility;
+  }
 }
 
 export class CreateCustomValidatorDto {

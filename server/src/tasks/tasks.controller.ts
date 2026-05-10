@@ -252,7 +252,8 @@ export class TasksController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CustomValidatorTypeDto, isArray: true })
   async customValidators(): Promise<CustomValidatorTypeDto[]> {
-    return this.tasksService.customValidators();
+    const types = await this.tasksService.customValidators();
+    return types.map((t) => new CustomValidatorTypeDto(t));
   }
 
   @Post('runValidator/:id')

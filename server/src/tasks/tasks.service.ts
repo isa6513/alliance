@@ -28,7 +28,7 @@ import { In, IsNull, type Repository } from 'typeorm';
 import {
   CustomValidatorDto,
   CustomValidatorResponseDto,
-  CustomValidatorTypeDto,
+  CustomValidatorTypeDtoArgs,
   TestCustomExpressionResponseDto,
 } from './customvalidator.dto';
 import {
@@ -1204,7 +1204,7 @@ export class TasksService {
     return draft;
   }
 
-  async customValidators(): Promise<CustomValidatorTypeDto[]> {
+  async customValidators(): Promise<CustomValidatorTypeDtoArgs[]> {
     const types = Object.values(CustomValidatorType);
     return types.map((type) => ({
       name: typeName[type],
