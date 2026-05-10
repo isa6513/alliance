@@ -293,8 +293,8 @@ Only DTOs with at least one violation are listed.
 
 ### `FormAggregateViewsDto` — `server/src/tasks/form.dto.ts:114`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `tasks.controller.ts:225` — `getFormAggregateViews`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `tasks.controller.ts:225` — `getFormAggregateViews`
 
 ### `CustomValidatorTypeDto` — `server/src/tasks/customvalidator.dto.ts:10`
 

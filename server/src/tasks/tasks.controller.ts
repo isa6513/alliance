@@ -226,7 +226,9 @@ export class TasksController {
   async getFormAggregateViews(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<FormAggregateViewsDto> {
-    return this.tasksService.findFormAggregateViews(id);
+    return new FormAggregateViewsDto(
+      await this.tasksService.findFormAggregateViews(id),
+    );
   }
 
   @Put('updateForm/:formId')

@@ -44,7 +44,6 @@ import { FormSnapshot } from './entities/formsnapshot.entity';
 import { FormSnapshotService } from './formsnapshot.service';
 import {
   CreateFormDto,
-  FormAggregateViewsDto,
   FormDto,
   FormResponseDto,
   type FormSnapshotMigration,
@@ -53,6 +52,7 @@ import {
   SubmitFormDto,
 } from './form.dto';
 import {
+  type AggregateViewSchema,
   type AggregateViewValue,
   type AnyField,
   type CheckboxExtractionTarget,
@@ -175,7 +175,7 @@ export class TasksService {
     return totalsByFieldId.get(value.fieldId) ?? 0;
   }
 
-  async findFormAggregateViews(formId: number): Promise<FormAggregateViewsDto> {
+  async findFormAggregateViews(formId: number): Promise<AggregateViewSchema[]> {
     const form = await this.formRepository.findOneOrFail({
       where: { id: formId },
       relations: { formSnapshot: true },
@@ -184,7 +184,7 @@ export class TasksService {
     const aggregateViews =
       (form.formSnapshot.schema as unknown as FormSchema).aggregateViews ?? [];
     if (aggregateViews.length === 0) {
-      return { aggregateViews: [] };
+      return [];
     }
 
     const responses = await this.formResponseRepository.find({
@@ -205,19 +205,17 @@ export class TasksService {
       }
     }
 
-    return {
-      aggregateViews: aggregateViews.map((view) => ({
-        ...view,
-        numerator: {
-          ...view.numerator,
-          value: this.resolveAggregateValue(view.numerator, totalsByFieldId),
-        },
-        denominator: {
-          ...view.denominator,
-          value: this.resolveAggregateValue(view.denominator, totalsByFieldId),
-        },
-      })),
-    };
+    return aggregateViews.map((view) => ({
+      ...view,
+      numerator: {
+        ...view.numerator,
+        value: this.resolveAggregateValue(view.numerator, totalsByFieldId),
+      },
+      denominator: {
+        ...view.denominator,
+        value: this.resolveAggregateValue(view.denominator, totalsByFieldId),
+      },
+    }));
   }
 
   private cloneFormSnapshotWithSchema(

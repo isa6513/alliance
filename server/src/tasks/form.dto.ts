@@ -115,6 +115,10 @@ export class FormDto extends PickType(Form, ['id', 'title', 'formSnapshotId']) {
 export class FormAggregateViewsDto {
   @ApiProperty({ type: Object, isArray: true })
   aggregateViews: AggregateViewSchema[];
+
+  constructor(aggregateViews: AggregateViewSchema[]) {
+    this.aggregateViews = aggregateViews;
+  }
 }
 
 export type FormResponseDtoArgs = {
