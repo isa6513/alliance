@@ -371,10 +371,10 @@ Only DTOs with at least one violation are listed.
 
 ### `UserDeviceDto` — `server/src/user/dto/device.dto.ts:28`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4:
-  - [ ] `user.controller.ts:668` — `registerDevice` returns object literal `{ id: device.id }`
-  - [ ] `user.controller.ts:689` — `registerLiveActivityPushToStartToken`
+- [x] Rule 1: no constructor
+- [x] Rule 4:
+  - [x] `user.controller.ts:668` — `registerDevice` returns object literal `{ id: device.id }`
+  - [x] `user.controller.ts:689` — `registerLiveActivityPushToStartToken`
 
 ---
 

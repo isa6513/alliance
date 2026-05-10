@@ -25,7 +25,12 @@ export class RegisterDeviceDto {
   deviceId?: string;
 }
 
-export class UserDeviceDto extends PickType(UserDevice, ['id']) {}
+export class UserDeviceDto extends PickType(UserDevice, ['id']) {
+  constructor(id: string) {
+    super();
+    this.id = id;
+  }
+}
 
 export class TestPushNotificationDto {
   @ApiProperty()

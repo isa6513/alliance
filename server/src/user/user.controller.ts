@@ -652,8 +652,8 @@ export class UserController {
     @Request() req: JwtRequest,
     @Body() body: RegisterDeviceDto,
   ): Promise<UserDeviceDto> {
-    const device = await this.userService.registerDevice(req.user.sub, body);
-    return { id: device.id };
+    const id = await this.userService.registerDevice(req.user.sub, body);
+    return new UserDeviceDto(id);
   }
 
   @Post('sendPushNotification')
@@ -674,10 +674,11 @@ export class UserController {
     @Request() req: JwtRequest,
     @Body() body: RegisterLiveActivityPushToStartTokenDto,
   ): Promise<UserDeviceDto> {
-    return this.userService.registerLiveActivityPushToStartToken(
+    const id = await this.userService.registerLiveActivityPushToStartToken(
       req.user.sub,
       body,
     );
+    return new UserDeviceDto(id);
   }
 
   @Post('registerLiveActivityUpdateToken')

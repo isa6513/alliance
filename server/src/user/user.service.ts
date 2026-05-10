@@ -53,7 +53,6 @@ import {
   RegisterDeviceDto,
   RegisterLiveActivityPushToStartTokenDto,
   RegisterLiveActivityUpdateTokenDto,
-  UserDeviceDto,
 } from './dto/device.dto';
 import { UserDevice } from './entities/user-device.entity';
 import { LiveActivityRegistration } from 'src/apns/entities/live-activity-registration.entity';
@@ -1452,7 +1451,7 @@ export class UserService {
   async registerDevice(
     userId: number,
     body: RegisterDeviceDto,
-  ): Promise<UserDeviceDto> {
+  ): Promise<string> {
     const user = await this.findOneOrFail(userId, { devices: true });
     if (body.deviceId) {
       const existingDevice = await this.userDeviceRepository.findOne({
@@ -1462,7 +1461,7 @@ export class UserService {
         await this.userDeviceRepository.update(existingDevice.id, {
           expoPushToken: body.expoPushToken,
         });
-        return existingDevice;
+        return existingDevice.id;
       }
     }
 
@@ -1479,7 +1478,7 @@ export class UserService {
             deviceType: body.deviceType ?? existingByToken.deviceType,
           });
         }
-        return existingByToken;
+        return existingByToken.id;
       }
     }
 
@@ -1489,7 +1488,7 @@ export class UserService {
       user,
     });
     const savedDevice = await this.userDeviceRepository.save(device);
-    return savedDevice;
+    return savedDevice.id;
   }
 
   async testPushNotification(userId: number, message: string): Promise<Push> {
@@ -1516,7 +1515,7 @@ export class UserService {
   async registerLiveActivityPushToStartToken(
     userId: number,
     body: RegisterLiveActivityPushToStartTokenDto,
-  ): Promise<UserDeviceDto> {
+  ): Promise<string> {
     const user = await this.findOneOrFail(userId, { devices: true });
 
     // Find the device to update - match by deviceId if provided, otherwise first device
@@ -1538,7 +1537,7 @@ export class UserService {
       liveActivityPushToStartToken: body.pushToStartToken,
     });
 
-    return { id: device.id };
+    return device.id;
   }
 
   async registerLiveActivityUpdateToken(
