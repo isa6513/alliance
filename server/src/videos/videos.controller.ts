@@ -70,19 +70,7 @@ export class VideosController {
   @ApiOkResponse({ type: VideoListResponseDto })
   async listVideos(): Promise<VideoListResponseDto> {
     const videos = await this.videosService.listVideos();
-    return {
-      videos: videos.map((v) => ({
-        id: v.id,
-        key: v.key,
-        originalFilename: v.originalFilename,
-        mime: v.mime,
-        size: v.size,
-        status: v.status,
-        duration: v.duration,
-        dateCreated: v.dateCreated,
-        dateUpdated: v.dateUpdated,
-      })),
-    };
+    return new VideoListResponseDto(videos);
   }
 
   @Get(':id/status')

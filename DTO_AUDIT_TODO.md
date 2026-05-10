@@ -387,8 +387,8 @@ Only DTOs with at least one violation are listed.
 
 ### `VideoListResponseDto` — `server/src/videos/dto/video-response.dto.ts:38`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `videos.controller.ts:72` — `listVideos` returns object literal `{ videos }`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `videos.controller.ts:72` — `listVideos` returns object literal `{ videos }`
 
 ### `VideoStatusResponseDto` — `server/src/videos/dto/video-response.dto.ts:10`
 

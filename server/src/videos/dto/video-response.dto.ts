@@ -40,11 +40,28 @@ export class VideoListItemDto extends PickType(Video, [
 
   @ApiProperty()
   dateUpdated: Date;
+
+  constructor(input: Video) {
+    super();
+    this.id = input.id;
+    this.key = input.key;
+    this.originalFilename = input.originalFilename;
+    this.mime = input.mime;
+    this.size = input.size;
+    this.status = input.status;
+    this.duration = input.duration;
+    this.dateCreated = input.dateCreated;
+    this.dateUpdated = input.dateUpdated;
+  }
 }
 
 export class VideoListResponseDto {
   @ApiProperty({ isArray: true, type: VideoListItemDto })
   videos: VideoListItemDto[];
+
+  constructor(videos: Video[]) {
+    this.videos = videos.map((v) => new VideoListItemDto(v));
+  }
 }
 
 export class VideoSegmentDto {
