@@ -72,6 +72,8 @@ export class VideoListResponseDto {
   }
 }
 
+export type VideoSegment = { filename: string; size: number; key: string };
+
 export class VideoSegmentDto {
   @ApiProperty()
   filename: string;
@@ -81,7 +83,25 @@ export class VideoSegmentDto {
 
   @ApiProperty()
   key: string;
+
+  constructor(input: VideoSegment) {
+    this.filename = input.filename;
+    this.size = input.size;
+    this.key = input.key;
+  }
 }
+
+export type VideoProcessingInfo = {
+  codec: string;
+  preset: string;
+  crf: number;
+  maxrate: string;
+  bufsize: string;
+  scale: string;
+  audioCodec: string;
+  audioBitrate: string;
+  hlsTime: number;
+};
 
 export class VideoProcessingInfoDto {
   @ApiProperty()
@@ -110,7 +130,25 @@ export class VideoProcessingInfoDto {
 
   @ApiProperty()
   hlsTime: number;
+
+  constructor(input: VideoProcessingInfo) {
+    this.codec = input.codec;
+    this.preset = input.preset;
+    this.crf = input.crf;
+    this.maxrate = input.maxrate;
+    this.bufsize = input.bufsize;
+    this.scale = input.scale;
+    this.audioCodec = input.audioCodec;
+    this.audioBitrate = input.audioBitrate;
+    this.hlsTime = input.hlsTime;
+  }
 }
+
+export type VideoDetailResponse = {
+  video: Video;
+  segments: VideoSegment[];
+  totalOutputSize: number;
+};
 
 export class VideoDetailResponseDto extends PickType(Video, [
   'id',
@@ -135,6 +173,26 @@ export class VideoDetailResponseDto extends PickType(Video, [
 
   @ApiProperty()
   dateUpdated: Date;
+
+  constructor(input: VideoDetailResponse) {
+    super();
+    this.id = input.video.id;
+    this.key = input.video.key;
+    this.originalFilename = input.video.originalFilename;
+    this.mime = input.video.mime;
+    this.size = input.video.size;
+    this.status = input.video.status;
+    this.duration = input.video.duration;
+    this.segments = input.segments.map((s) => new VideoSegmentDto(s));
+    this.totalOutputSize = input.totalOutputSize;
+    this.processingInfo = input.video.processingInfo
+      ? new VideoProcessingInfoDto(
+          input.video.processingInfo as unknown as VideoProcessingInfo,
+        )
+      : undefined;
+    this.dateCreated = input.video.dateCreated;
+    this.dateUpdated = input.video.dateUpdated;
+  }
 }
 
 export class ReplaceVideoResponseDto extends PickType(Video, [

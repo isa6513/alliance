@@ -7,6 +7,7 @@ import {
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
+import type { VideoDetailResponse } from './dto/video-response.dto';
 import { Video } from './entities/video.entity';
 
 @Injectable()
@@ -74,11 +75,7 @@ export class VideosService {
     return this.videoRepository.find({ order: { dateCreated: 'DESC' } });
   }
 
-  async getVideoDetails(id: number): Promise<{
-    video: Video;
-    segments: { filename: string; size: number; key: string }[];
-    totalOutputSize: number;
-  } | null> {
+  async getVideoDetails(id: number): Promise<VideoDetailResponse | null> {
     const video = await this.videoRepository.findOneBy({ id });
     if (!video) return null;
 

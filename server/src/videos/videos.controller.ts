@@ -25,7 +25,6 @@ import {
   UploadVideoResponseDto,
   VideoDetailResponseDto,
   VideoListResponseDto,
-  VideoProcessingInfoDto,
   VideoStatusResponseDto,
 } from './dto/video-response.dto';
 
@@ -93,25 +92,7 @@ export class VideosController {
   ): Promise<VideoDetailResponseDto> {
     const result = await this.videosService.getVideoDetails(id);
     if (!result) throw new NotFoundException();
-
-    const { video, segments, totalOutputSize } = result;
-
-    return {
-      id: video.id,
-      key: video.key,
-      originalFilename: video.originalFilename,
-      mime: video.mime,
-      size: video.size,
-      status: video.status,
-      duration: video.duration,
-      segments,
-      totalOutputSize,
-      processingInfo:
-        (video.processingInfo as unknown as VideoProcessingInfoDto) ??
-        undefined,
-      dateCreated: video.dateCreated,
-      dateUpdated: video.dateUpdated,
-    };
+    return new VideoDetailResponseDto(result);
   }
 
   @Post(':id/replace')
