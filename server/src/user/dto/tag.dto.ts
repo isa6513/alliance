@@ -1,10 +1,17 @@
-import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Tag } from '../entities/tag.entity';
 import { ProfileDto } from './user.dto';
 import { Type } from 'class-transformer';
 import { Allow, IsNumber } from 'class-validator';
 
-export class TagDto extends OmitType(Tag, ['users']) {
+export class TagDto extends PickType(Tag, [
+  'id',
+  'name',
+  'description',
+  'publicDisplayName',
+  'createdAt',
+  'updatedAt',
+] as const) {
   @Allow()
   @ApiProperty({ type: ProfileDto, isArray: true })
   @Type(() => ProfileDto)
@@ -12,7 +19,12 @@ export class TagDto extends OmitType(Tag, ['users']) {
 
   constructor(tag: Tag) {
     super();
-    Object.assign(this, tag);
+    this.id = tag.id;
+    this.name = tag.name;
+    this.description = tag.description;
+    this.publicDisplayName = tag.publicDisplayName;
+    this.createdAt = tag.createdAt;
+    this.updatedAt = tag.updatedAt;
     this.users = tag.users ? tag.users.map((user) => new ProfileDto(user)) : [];
   }
 }

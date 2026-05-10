@@ -854,7 +854,6 @@ export type TagDto = {
     publicDisplayName?: string;
     createdAt: string;
     updatedAt: string;
-    generalUpdates: Array<GeneralUpdate>;
     users: Array<ProfileDto>;
 };
 

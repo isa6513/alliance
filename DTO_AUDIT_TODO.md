@@ -366,8 +366,8 @@ Only DTOs with at least one violation are listed.
 
 ### `TagDto` — `server/src/user/dto/tag.dto.ts:7`
 
-- [ ] Rule 2: `extends OmitType(Tag, ['users'])` at `tag.dto.ts:7`
-- [ ] Rule 3: `Object.assign(this, tag)` at `tag.dto.ts:15`
+- [x] Rule 2: `extends OmitType(Tag, ['users'])` at `tag.dto.ts:7`
+- [x] Rule 3: `Object.assign(this, tag)` at `tag.dto.ts:15`
 
 ### `UserDeviceDto` — `server/src/user/dto/device.dto.ts:28`
 
