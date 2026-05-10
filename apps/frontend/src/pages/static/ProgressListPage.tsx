@@ -73,7 +73,7 @@ const ProgressListPage: React.FC = () => {
                 learn and build our processes.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="columns-1 sm:columns-2 gap-2 *:break-inside-avoid *:mb-2">
               {FEATURED_IMPACT_ACTIONS.map((action) => (
                 <FeaturedImpactCard key={action.actionId} {...action} />
               ))}

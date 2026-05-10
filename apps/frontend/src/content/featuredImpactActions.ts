@@ -2,6 +2,8 @@ export type FeaturedImpactAction = {
   actionId: number;
   emphasis: string;
   rest: string;
+  imageSrc?: string;
+  imageAlt?: string;
 };
 
 export const FEATURED_IMPACT_ACTIONS: readonly FeaturedImpactAction[] = [
@@ -25,6 +27,7 @@ export const FEATURED_IMPACT_ACTIONS: readonly FeaturedImpactAction[] = [
     emphasis:
       "We caused 11 cafe locations to adopt bring-your-own-cup policies",
     rest: "by helping them attain media recognition.",
+    imageSrc: "https://worldalliance.org/api/images/1759964091349.webp",
   },
   {
     actionId: 91,
@@ -56,6 +59,7 @@ export const FEATURED_IMPACT_ACTIONS: readonly FeaturedImpactAction[] = [
     actionId: 64,
     emphasis: "We collected and recycled 57 kg (126 lbs) of e-waste",
     rest: "from around our own homes.",
+    imageSrc: "https://dj92mxbdjuclo.cloudfront.net/1768418139810.webp",
   },
   {
     actionId: 49,
@@ -83,5 +87,6 @@ export const FEATURED_IMPACT_ACTIONS: readonly FeaturedImpactAction[] = [
     actionId: 50,
     emphasis: "We filled up to 20 potholes",
     rest: "by reporting them to our local governments.",
+    imageSrc: "https://worldalliance.org/api/images/1762827853197.webp",
   },
 ] as const;

@@ -3,7 +3,6 @@ import { useQueries } from "@tanstack/react-query";
 import { Link } from "react-router";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import alliancePeople from "../../assets/alliance_people.webp";
-import ewaste from "../../assets/ewaste.webp";
 import { userFindOne } from "@alliance/shared/client";
 import type { ProfileDto } from "@alliance/shared/client";
 import Footer from "../../components/Footer";
@@ -15,7 +14,7 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@alliance/shared/styles/util";
 
 /** Shared width + horizontal padding for all landing content. */
-const LANDING_MAIN_COL = "mx-auto w-full max-w-5xl px-6 sm:px-10 lg:px-16";
+const LANDING_MAIN_COL = "mx-auto w-full max-w-5xl px-4 sm:px-10 lg:px-16";
 
 const LANDING_SECTION_GAP = "flex flex-col gap-y-6 lg:gap-y-8";
 /** Same max-width + inner stack gap; vertical rhythm between blocks uses `space-y` on the parent. */
@@ -43,6 +42,8 @@ const MEMBER_QUOTES = [
     memberId: 55,
   },
 ];
+
+const FEATURED_IMPACT_ACTIONS_IDS = [14, 75, 56, 84, 64, 95];
 
 function useMemberQuoteProfiles(memberIds: number[]) {
   return useQueries({
@@ -235,25 +236,27 @@ const PrelaunchLandingPage: React.FC = () => {
               </Link>
             </div>
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {FEATURED_IMPACT_ACTIONS.slice(0, 4).map((action) => (
-                  <FeaturedImpactCard key={action.actionId} {...action} />
-                ))}
+              <div className="columns-1 sm:columns-2 gap-2 *:break-inside-avoid *:mb-2">
+                {FEATURED_IMPACT_ACTIONS.filter((action) =>
+                  FEATURED_IMPACT_ACTIONS_IDS.includes(action.actionId),
+                )
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      FEATURED_IMPACT_ACTIONS_IDS.indexOf(a.actionId) -
+                      FEATURED_IMPACT_ACTIONS_IDS.indexOf(b.actionId),
+                  )
+                  .map((action) => (
+                    <FeaturedImpactCard key={action.actionId} {...action} />
+                  ))}
               </div>
-            </div>
-            <div className="flex w-full flex-col gap-4">
-              <img
-                src={ewaste}
-                alt="E-waste"
-                className="h-full w-full object-cover rounded-md"
-              />
             </div>
           </div>
         </section>
 
         <section className="w-full">
           <div className={LANDING_SECTION} id="join-us">
-            <div className="flex flex-col gap-4 p-8 sm:p-12 lg:p-16 bg-grey-0">
+            <div className="flex flex-col gap-4 p-8 sm:p-12 lg:p-16 bg-grey-0 rounded-md">
               <p className="text-title-medium w-full text-black">Join us</p>
               <p className={SUBTITLE_CLASS}>
                 Membership is currently by invitation only. If you want to join,{" "}
