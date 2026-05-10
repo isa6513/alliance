@@ -28,7 +28,7 @@ import { In, IsNull, type Repository } from 'typeorm';
 import {
   CustomValidatorResponse,
   CustomValidatorTypeDtoArgs,
-  TestCustomExpressionResponseDto,
+  TestCustomExpressionResponse,
 } from './customvalidator.dto';
 import {
   CustomValidator,
@@ -1243,7 +1243,7 @@ export class TasksService {
   async testCustomExpression(
     expression: string,
     userId?: number,
-  ): Promise<TestCustomExpressionResponseDto> {
+  ): Promise<TestCustomExpressionResponse> {
     if (!expression?.trim()) {
       throw new BadRequestException('Expression is empty');
     }
@@ -1303,32 +1303,16 @@ export class TasksService {
 
     let passCount = 0;
     let failCount = 0;
-    const passUsers: {
-      id: number;
-      name: string;
-      anonymous: boolean;
-      hasActiveContract: boolean;
-    }[] = [];
-    const failUsers: {
-      id: number;
-      name: string;
-      anonymous: boolean;
-      hasActiveContract: boolean;
-    }[] = [];
-    const toSummary = (user: User) => ({
-      id: user.id,
-      name: user.name,
-      anonymous: user.anonymous,
-      hasActiveContract: user.hasActiveContract,
-    });
+    const passUsers: User[] = [];
+    const failUsers: User[] = [];
     for (const user of users) {
       const isValid = runForUser(user);
       if (isValid) {
         passCount += 1;
-        passUsers.push(toSummary(user));
+        passUsers.push(user);
       } else {
         failCount += 1;
-        failUsers.push(toSummary(user));
+        failUsers.push(user);
       }
     }
 

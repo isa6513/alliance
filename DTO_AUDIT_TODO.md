@@ -318,8 +318,8 @@ Only DTOs with at least one violation are listed.
 
 ### `TestCustomExpressionResponseDto` — `server/src/tasks/customvalidator.dto.ts:83`
 
-- [ ] Rule 1: no constructor
-- [ ] Rule 4: `tasks.controller.ts:292` — `testCustomExpression`
+- [x] Rule 1: no constructor
+- [x] Rule 4: `tasks.controller.ts:292` — `testCustomExpression`
 
 ### `ActionActivityDto` (already listed above under actions controller)
 

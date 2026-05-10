@@ -108,8 +108,14 @@ export class CustomExpressionUserDto extends PickType(User, [
   'id',
   'name',
   'anonymous',
-  'hasActiveContract',
-] as const) {}
+]) {
+  constructor(input: User) {
+    super();
+    this.id = input.id;
+    this.name = input.name;
+    this.anonymous = input.anonymous;
+  }
+}
 
 export class TestCustomExpressionDto {
   @ApiProperty()
@@ -120,6 +126,16 @@ export class TestCustomExpressionDto {
   @IsOptional()
   userId?: number;
 }
+
+export type TestCustomExpressionResponse = {
+  passCount: number;
+  failCount: number;
+  totalCount: number;
+  passUsers: User[];
+  failUsers: User[];
+  selectedUserId?: number;
+  selectedUserResult?: boolean;
+};
 
 export class TestCustomExpressionResponseDto {
   @ApiProperty()
@@ -151,4 +167,14 @@ export class TestCustomExpressionResponseDto {
   @ApiPropertyOptional()
   @IsOptional()
   selectedUserResult?: boolean;
+
+  constructor(input: TestCustomExpressionResponse) {
+    this.passCount = input.passCount;
+    this.failCount = input.failCount;
+    this.totalCount = input.totalCount;
+    this.passUsers = input.passUsers.map((u) => new CustomExpressionUserDto(u));
+    this.failUsers = input.failUsers.map((u) => new CustomExpressionUserDto(u));
+    this.selectedUserId = input.selectedUserId;
+    this.selectedUserResult = input.selectedUserResult;
+  }
 }

@@ -300,7 +300,12 @@ export class TasksController {
   async testCustomExpression(
     @Body() body: TestCustomExpressionDto,
   ): Promise<TestCustomExpressionResponseDto> {
-    return this.tasksService.testCustomExpression(body.expression, body.userId);
+    return new TestCustomExpressionResponseDto(
+      await this.tasksService.testCustomExpression(
+        body.expression,
+        body.userId,
+      ),
+    );
   }
 
   @Post('optout/:id')
