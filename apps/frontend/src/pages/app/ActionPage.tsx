@@ -202,7 +202,7 @@ export default function ActionPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="referral-invite-popup-title"
-            className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl"
+            className="relative w-full max-w-lg rounded-md bg-white p-6 shadow-2xl"
           >
             <button
               type="button"

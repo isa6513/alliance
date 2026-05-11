@@ -186,15 +186,15 @@ export const clipboardCopy = {
 
 export const guestReferral = {
   inviteToTryTask: (firstName: string) =>
-    `${firstName} has invited you to try this task.`,
+    `${firstName} invited you to try this task.`,
   defaultReferrerName: "Your friend",
   allianceIntro:
-    "The Alliance is a global group of people cooperating to improve the world. Join us!",
+    "The Alliance is a global group of people cooperating to improve the world. Join us to participate in actions like this every week.",
   tryOutTaskButton: "Try out this task",
   completionIntegrityExplanation:
-    "To maintain the integrity of our data, only member-submitted forms are formally processed.",
+    "Usually, we only process task completions from Alliance members.",
   joinToCountContributions:
-    "Want your work to count? Join the Alliance to ensure your future contributions are acted upon.",
+    "Join the Alliance as member to ensure your completions count.",
   createAccountToSubmit: "Create an account to submit",
 } as const;
 

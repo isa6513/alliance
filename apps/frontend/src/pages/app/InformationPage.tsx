@@ -100,8 +100,7 @@ const InformationPage: React.FC = () => {
     },
     {
       title: "Governance",
-      description:
-        "The office plans actions, and members participate in a simple oversight process.",
+      description: "Members participate in a regular oversight process.",
       href: href("/internal-governance"),
       icon: Scale,
     },
@@ -119,7 +118,7 @@ const InformationPage: React.FC = () => {
         <h1 className="text-title">Information</h1>
 
         <div className="flex flex-col gap-y-6">
-          <h2 className="text-title-small">Contact the office</h2>
+          <h2 className="text-title-small">Contact</h2>
 
           <div className="grid grid-cols-1 gap-2 grid-flow-row">
             {contacts.map((contact) => (
