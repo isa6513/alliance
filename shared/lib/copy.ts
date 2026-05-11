@@ -194,7 +194,7 @@ export const guestReferral = {
   completionIntegrityExplanation:
     "Usually, we only process task completions from Alliance members.",
   joinToCountContributions:
-    "Join the Alliance as member to ensure your completions count.",
+    "Join the Alliance as a member to ensure your completions count.",
   createAccountToSubmit: "Create an account to submit",
 } as const;
 
