@@ -81,7 +81,8 @@ const PeoplePage: React.FC = () => {
     },
     {
       name: "Romina Picolotti",
-      description: "President, Center for Human Rights and Environment",
+      description:
+        "President, Center for Human Rights and Environment; former Argentine Secretary of the Environment",
     },
     {
       name: "Gernot Wagner",
@@ -106,6 +107,15 @@ const PeoplePage: React.FC = () => {
     {
       name: "Oran Young",
       description: "Professor Emeritus, UC Santa Barbara",
+    },
+    {
+      name: "Santiago Creuheras",
+      description:
+        "Harvard Ash Center Fellow; former Mexico Deputy Minister for the Environment and Sustainable Energy",
+    },
+    {
+      name: "Travis Williams",
+      description: "Professor of Chemistry, University of Southern California",
     },
   ];
 
