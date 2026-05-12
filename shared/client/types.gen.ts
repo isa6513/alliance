@@ -5546,6 +5546,11 @@ export type ActionsGetSharePreviewData = {
         id: number;
     };
     query?: {
+        sid?: string;
+        /**
+         * Deprecated alias for `sid`; retained for older clients.
+         * @deprecated
+         */
         ref?: string;
     };
     url: '/actions/{id}/sharePreview';
