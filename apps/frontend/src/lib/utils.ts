@@ -32,7 +32,7 @@ export const useCIDFromParams = (actionId?: number) => {
     }
   }, [cid, setSearchParams, searchParams, actionId, refreshNotifications]);
 
-  const sid = searchParams.get("sid");
+  const sid = searchParams.get("sid") ?? searchParams.get("ref");
   useEffect(() => {
     if (sid) {
       posthog.register_for_session({ sid });

@@ -1,29 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import type { UserDto } from "@alliance/shared/client";
-import {
-  FormResponseDto,
-  SubmitFormDto,
-  imagesUploadImage,
-  tasksRunValidator,
-  tasksGetForm,
-  tasksGetMyFormResponse,
-  tasksGetFormResponses,
-} from "@alliance/shared/client";
-import { useOutsideClick } from "../../sharedweb/lib/useOutsideClick";
-import Dropdown from "../ui/Dropdown";
-import { cn } from "@alliance/shared/styles/util";
-import {
-  guestReferral,
-  outputFieldPublicToggle,
-} from "@alliance/shared/lib/copy";
-import RenderDisplayBlock from "./RenderDisplayBlock";
-import RenderField from "./RenderField";
+import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import type {
   DisplayBlock,
   PreviousAnswerBlock,
@@ -36,27 +11,52 @@ import {
   type ListField,
   type VisibleIfFormula,
 } from "@alliance/common/forms/form-schema";
-import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
+import type { UserDto } from "@alliance/shared/client";
+import {
+  FormResponseDto,
+  SubmitFormDto,
+  imagesUploadImage,
+  tasksGetForm,
+  tasksGetFormResponses,
+  tasksGetMyFormResponse,
+  tasksRunValidator,
+} from "@alliance/shared/client";
 import {
   applyDefaultValues,
   computeFormStorageKey,
   filterAnswersByFieldIds,
+  getListSubFieldErrors,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
   resolveFieldDefaultValue,
   validateFieldValue as validateFieldValueShared,
-  getListSubFieldErrors,
 } from "@alliance/shared/formrenderer";
-import { useSearchParams } from "react-router";
 import {
-  useFormPageDurationTracking,
-  useFormValidationErrorTracking,
-} from "./formAnalytics";
+  guestReferral,
+  outputFieldPublicToggle,
+} from "@alliance/shared/lib/copy";
+import { cn } from "@alliance/shared/styles/util";
+import { Ellipsis } from "lucide-react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useSearchParams } from "react-router";
+import { useOutsideClick } from "../../sharedweb/lib/useOutsideClick";
 import BaseButton, {
   BaseButtonSize,
   BaseButtonVariant,
 } from "../ui/BaseButton";
 import ConfettiWrapper from "../ui/ConfettiWrapper";
-import { Ellipsis } from "lucide-react";
+import Dropdown from "../ui/Dropdown";
+import {
+  useFormPageDurationTracking,
+  useFormValidationErrorTracking,
+} from "./formAnalytics";
+import RenderDisplayBlock from "./RenderDisplayBlock";
+import RenderField from "./RenderField";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -1198,7 +1198,7 @@ const FormRenderer = ({
 
     const sanitizedAnswers = filterAnswersByFieldIds(formData, fieldLookup);
 
-    const sid = searchParams.get("sid");
+    const sid = searchParams.get("sid") ?? searchParams.get("ref");
 
     const submissionPayload: SubmitFormDto = {
       answers: sanitizedAnswers,

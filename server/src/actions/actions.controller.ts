@@ -28,12 +28,12 @@ import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 import { ActionEventReminderService } from 'src/notifs/action-event-reminder.service';
 import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
 import { ActionEventNotifDto } from 'src/notifs/entities/action-event-notif.dto';
+import { ShareLinkDto } from 'src/share-urls/dto/share-url.dto';
+import { ShareUrlsService } from 'src/share-urls/share-urls.service';
 import {
   CommunityUserInfoDto,
   UserActionRelationsResponseDto,
 } from 'src/user/dto/user-action-relations.dto';
-import { ShareLinkDto } from 'src/share-urls/dto/share-url.dto';
-import { ShareUrlsService } from 'src/share-urls/share-urls.service';
 import { ProfileDto } from 'src/user/dto/user.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -539,14 +539,22 @@ export class ActionsController {
 
   @Get(':id/sharePreview')
   @Public()
-  @ApiQuery({ name: 'ref', required: false, type: String })
+  @ApiQuery({ name: 'sid', required: false, type: String })
+  @ApiQuery({
+    name: 'ref',
+    required: false,
+    type: String,
+    deprecated: true,
+    description: 'Deprecated alias for `sid`; retained for older clients.',
+  })
   @ApiOkResponse({ type: ActionSharePreviewDto })
   async getSharePreview(
     @Param('id', ParseIntPipe) id: number,
-    @Query('ref') shareCode?: string,
+    @Query('sid') sid?: string,
+    @Query('ref') ref?: string,
   ): Promise<ActionSharePreviewDto> {
     return new ActionSharePreviewDto(
-      await this.actionsService.getSharePreview(id, shareCode),
+      await this.actionsService.getSharePreview(id, sid ?? ref),
     );
   }
 

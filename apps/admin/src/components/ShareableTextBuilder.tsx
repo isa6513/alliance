@@ -1,12 +1,12 @@
 import type { AnyField, FormSchema } from "@alliance/common/forms/form-schema";
-import TextareaWithHighlights from "./TextareaWithHighlights";
-import type React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@alliance/shared/styles/util";
 import {
   FIRST_NAME_TOKEN,
   FULL_NAME_TOKEN,
 } from "@alliance/shared/lib/shareText";
+import { cn } from "@alliance/shared/styles/util";
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import TextareaWithHighlights from "./TextareaWithHighlights";
 
 interface ShareableTextBuilderProps {
   schema: FormSchema;
@@ -14,7 +14,7 @@ interface ShareableTextBuilderProps {
 }
 
 const REFERRAL_URL_PREVIEW =
-  "https://alliance.example/actions/123?ref=member-code";
+  "https://alliance.example/actions/123?sid=member-code";
 const SHAREABLE_TOKEN_PATTERN = /#\{[^}]*\}/g;
 const DEFAULT_TEMPLATE_ALLOWED_TOKENS = new Set<string>([
   FIRST_NAME_TOKEN,

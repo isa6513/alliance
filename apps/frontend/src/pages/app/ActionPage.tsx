@@ -2,6 +2,14 @@ import {
   actionsFindOne,
   actionsGetSharePreview,
 } from "@alliance/shared/client";
+import { useActionHandlers } from "@alliance/shared/lib/actionPage";
+import { guestReferral, taskHeaders } from "@alliance/shared/lib/copy";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { X } from "lucide-react";
+import { useCallback, useState } from "react";
 import {
   href,
   Link,
@@ -12,23 +20,15 @@ import {
   useParams,
   useSearchParams,
 } from "react-router";
+import { ActionActivityDetailContext } from "../../components/ActionActivityDetail";
 import ActionActivityList from "../../components/ActionActivityList";
 import { TaskPanelContext } from "../../components/ActionPageTaskPanel";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { useAuth } from "../../lib/AuthContext";
-import { useCIDFromParams } from "../../lib/utils";
-import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
-import useActivities, {
-  ActivityList,
-} from "@alliance/shared/lib/useActivities";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import { useActionHandlers } from "@alliance/shared/lib/actionPage";
-import { useCallback, useState } from "react";
-import { ActionActivityDetailContext } from "../../components/ActionActivityDetail";
+import { useAuth } from "../../lib/AuthContext";
 import { useNavbarOptions } from "../../lib/NavbarOptionsContext";
 import { isNonmemberOnPublicActionReferral } from "../../lib/publicActionReferral";
-import { guestReferral, taskHeaders } from "@alliance/shared/lib/copy";
-import { X } from "lucide-react";
+import { useCIDFromParams } from "../../lib/utils";
+import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 
 export async function loader({
   params,
@@ -39,14 +39,14 @@ export async function loader({
 }) {
   const { id } = params;
   const url = new URL(request.url);
-  const refCode = url.searchParams.get("ref");
+  const refCode = url.searchParams.get("sid") ?? url.searchParams.get("ref");
 
   const [action, sharePreview] = await Promise.all([
     actionsFindOne({ path: { id: parseInt(id) } }),
     refCode
       ? actionsGetSharePreview({
           path: { id: parseInt(id) },
-          query: { ref: refCode },
+          query: { sid: refCode },
         })
           .then((res) => res.data ?? null)
           .catch(() => null)
@@ -94,7 +94,7 @@ export default function ActionPage() {
 
   const { isAuthenticated, user, loading: userLoading } = useAuth();
   const [searchParams] = useSearchParams();
-  const rawRefCode = searchParams.get("ref");
+  const rawRefCode = searchParams.get("sid") ?? searchParams.get("ref");
   const refCode = sharePreview?.validReferral ? rawRefCode : null;
   const signupHref = refCode
     ? `/signup?ref=${encodeURIComponent(refCode)}`

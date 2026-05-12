@@ -1,7 +1,7 @@
 import type { FormResponseDto } from "../client/types.gen";
 import { buildShareText } from "./shareText";
 
-const URL = "https://example.com/actions/1?ref=share-abc";
+const URL = "https://example.com/actions/1?sid=share-abc";
 
 const makeFormResponse = (
   overrides: Partial<FormResponseDto> = {},
