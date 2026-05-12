@@ -1,36 +1,22 @@
-import { useEffect, useState } from "react";
-import { setStringAsync as setClipboardStringAsync } from "expo-clipboard";
-import { useQuery } from "@tanstack/react-query";
-import { actionsGetShareLink } from "@alliance/shared/client";
-import { CardStyle } from "@alliance/shared/styles/card";
-import Card from "../system/Card";
-import Button, { ButtonColor, ButtonSize } from "../system/Button";
-import Text from "../system/Text";
 import type { CustomComponentProps } from "@alliance/shared/forms/customComponents";
+import {
+  shareLinkTargetFromConfig,
+  useShareLink,
+} from "@alliance/shared/forms/useShareLink";
+import { CardStyle } from "@alliance/shared/styles/card";
+import { setStringAsync as setClipboardStringAsync } from "expo-clipboard";
+import { useEffect, useState } from "react";
+import Button, { ButtonColor, ButtonSize } from "../system/Button";
+import Card from "../system/Card";
+import Text from "../system/Text";
 
-const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
+const ShareUrlComponent = ({ field }: CustomComponentProps) => {
   const [copied, setCopied] = useState(false);
 
-  const actionId =
-    typeof field.componentConfig?.actionId === "number"
-      ? field.componentConfig?.actionId
-      : null;
+  const target = shareLinkTargetFromConfig(field.componentConfig);
+  const isConfigured = target !== null;
 
-  const {
-    data: shareUrl,
-    isPending,
-    isError,
-  } = useQuery({
-    queryKey: ["actionsGetShareLink", actionId],
-    queryFn: async () => {
-      const res = await actionsGetShareLink({ path: { id: actionId! } });
-      if (res.error || !res.data) {
-        throw res.error ?? new Error("Failed to load share link");
-      }
-      return res.data.url;
-    },
-    enabled: actionId !== null,
-  });
+  const { data: shareUrl, isPending, isError } = useShareLink(target);
 
   useEffect(() => {
     if (!copied) return;
@@ -44,11 +30,11 @@ const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
     setCopied(true);
   };
 
-  if (actionId === null) {
+  if (!isConfigured) {
     return (
       <Card cardStyle={CardStyle.Grey} className="flex-row items-center !p-0">
         <Text className="flex-1 p-2 pl-3 text-zinc-500">
-          No action configured
+          No share configured
         </Text>
       </Card>
     );
@@ -78,4 +64,4 @@ const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
   );
 };
 
-export default ActionShareUrlComponent;
+export default ShareUrlComponent;

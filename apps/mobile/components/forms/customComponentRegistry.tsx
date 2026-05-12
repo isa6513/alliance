@@ -1,7 +1,7 @@
 import type { CustomComponentDefinition } from "@alliance/shared/forms/customComponents";
 import ExampleContractComponent from "./ExampleContractComponent";
-import ActionShareUrlComponent from "./ActionShareUrlComponent";
 import ShareInfoPubliclyToggleComponent from "./ShareInfoPubliclyToggleComponent";
+import ShareUrlComponent from "./ShareUrlComponent";
 
 export const customComponentRegistry: CustomComponentDefinition[] = [
   {
@@ -14,13 +14,29 @@ export const customComponentRegistry: CustomComponentDefinition[] = [
     id: "action-share-url",
     label: "Action Share URL Component",
     description: "Component to share the URL of an action",
-    component: ActionShareUrlComponent,
+    component: ShareUrlComponent,
     configFields: [
       {
         name: "actionId",
         label: "Action ID",
         description:
           "Specify which action to reference. Defaults to the current action when left blank.",
+        type: "number",
+      },
+    ],
+  },
+  {
+    id: "share-url",
+    label: "Share External URL",
+    description:
+      "Component to share an admin-configured external URL with the user's share code appended.",
+    component: ShareUrlComponent,
+    configFields: [
+      {
+        name: "externalTargetId",
+        label: "External Share Target ID",
+        description:
+          "ID of the admin-configured external share target. Manage targets in the admin panel.",
         type: "number",
       },
     ],

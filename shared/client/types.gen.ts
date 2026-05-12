@@ -59,7 +59,7 @@ export type ContractEvent = {
     contract?: Contract | null;
 };
 
-export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link';
+export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link' | 'external_share_link';
 
 export type NotificationPreference = 'all' | 'digest' | 'none';
 
@@ -960,6 +960,36 @@ export type UploadImageDto = {
 export type UploadImageResponseDto = {
     url: string;
     key: string;
+};
+
+export type GetShareLinkDto = {
+    actionId?: number;
+    externalTargetId?: number;
+};
+
+export type ShareLinkDto = {
+    url: string;
+};
+
+export type ExternalShareTargetDto = {
+    id: number;
+    name: string;
+    url: string;
+    paramName: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type CreateExternalShareTargetDto = {
+    name: string;
+    url: string;
+    paramName: string;
+};
+
+export type UpdateExternalShareTargetDto = {
+    name?: string;
+    url?: string;
+    paramName?: string;
 };
 
 export type ConversationType = 'direct' | 'multiple' | 'community';
@@ -2284,11 +2314,8 @@ export type ScheduledPlansOverviewDto = {
     forumAutocompletePlans: Array<ForumAutocompletePlanDto>;
 };
 
-export type ShareLinkDto = {
-    url: string;
-};
-
 export type ShareUrlDto = {
+    url: string;
     sid?: string;
     data?: {
         [key: string]: unknown;
@@ -4089,6 +4116,88 @@ export type MailgunWebhookHandleData = {
 export type MailgunWebhookHandleResponses = {
     200: unknown;
 };
+
+export type ShareUrlsGetShareLinkData = {
+    body: GetShareLinkDto;
+    path?: never;
+    query?: never;
+    url: '/share-urls/get-share-link';
+};
+
+export type ShareUrlsGetShareLinkResponses = {
+    200: ShareLinkDto;
+};
+
+export type ShareUrlsGetShareLinkResponse = ShareUrlsGetShareLinkResponses[keyof ShareUrlsGetShareLinkResponses];
+
+export type ExternalShareTargetsFindAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/external-share-targets';
+};
+
+export type ExternalShareTargetsFindAllResponses = {
+    200: Array<ExternalShareTargetDto>;
+};
+
+export type ExternalShareTargetsFindAllResponse = ExternalShareTargetsFindAllResponses[keyof ExternalShareTargetsFindAllResponses];
+
+export type ExternalShareTargetsCreateData = {
+    body: CreateExternalShareTargetDto;
+    path?: never;
+    query?: never;
+    url: '/external-share-targets';
+};
+
+export type ExternalShareTargetsCreateResponses = {
+    200: ExternalShareTargetDto;
+};
+
+export type ExternalShareTargetsCreateResponse = ExternalShareTargetsCreateResponses[keyof ExternalShareTargetsCreateResponses];
+
+export type ExternalShareTargetsRemoveData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/external-share-targets/{id}';
+};
+
+export type ExternalShareTargetsRemoveResponses = {
+    200: unknown;
+};
+
+export type ExternalShareTargetsFindOneData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/external-share-targets/{id}';
+};
+
+export type ExternalShareTargetsFindOneResponses = {
+    200: ExternalShareTargetDto;
+};
+
+export type ExternalShareTargetsFindOneResponse = ExternalShareTargetsFindOneResponses[keyof ExternalShareTargetsFindOneResponses];
+
+export type ExternalShareTargetsUpdateData = {
+    body: UpdateExternalShareTargetDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/external-share-targets/{id}';
+};
+
+export type ExternalShareTargetsUpdateResponses = {
+    200: ExternalShareTargetDto;
+};
+
+export type ExternalShareTargetsUpdateResponse = ExternalShareTargetsUpdateResponses[keyof ExternalShareTargetsUpdateResponses];
 
 export type ConversationGetAllConversationsForAdminData = {
     body?: never;

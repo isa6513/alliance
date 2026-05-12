@@ -23,11 +23,30 @@ import {
 } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { MaybeUserLocationDto } from 'src/geo/city.dto';
-import { AuthGuard } from '../auth/guards/auth.guard';
+import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
+import { MaybeUserLocationDto } from 'src/geo/city.dto';
+import { PushDto } from 'src/push/dto/push.dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { Public } from '../auth/public.decorator';
-import { FriendStatus } from './entities/friend.entity';
+import {
+  CreateAwayRangeDto,
+  UpdateAwayRangeDto,
+  UserAwayRangeDto,
+} from './dto/away-range.dto';
+import {
+  RegisterDeviceDto,
+  RegisterLiveActivityPushToStartTokenDto,
+  RegisterLiveActivityUpdateTokenDto,
+  TestPushNotificationDto,
+  UserDeviceDto,
+} from './dto/device.dto';
+import {
+  CreateOnetimeInviteDto,
+  OnetimeInviteDto,
+  RequestOnetimeInviteDto,
+} from './dto/invite.dto';
+import { AddUserToTagDto, CreateTagDto, TagDto } from './dto/tag.dto';
 import {
   AssignGroupsDto,
   FriendStatusDto,
@@ -39,27 +58,8 @@ import {
   UserCityCountDto,
   UserDto,
 } from './dto/user.dto';
+import { FriendStatus } from './entities/friend.entity';
 import { UserService } from './user.service';
-import { AddUserToTagDto, CreateTagDto, TagDto } from './dto/tag.dto';
-import {
-  CreateOnetimeInviteDto,
-  OnetimeInviteDto,
-  RequestOnetimeInviteDto,
-} from './dto/invite.dto';
-import {
-  CreateAwayRangeDto,
-  UpdateAwayRangeDto,
-  UserAwayRangeDto,
-} from './dto/away-range.dto';
-import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
-import {
-  RegisterDeviceDto,
-  RegisterLiveActivityPushToStartTokenDto,
-  RegisterLiveActivityUpdateTokenDto,
-  TestPushNotificationDto,
-  UserDeviceDto,
-} from './dto/device.dto';
-import { PushDto } from 'src/push/dto/push.dto';
 
 class VerifyEmailBody {
   @IsString()
@@ -488,7 +488,7 @@ export class UserController {
     if (invite) {
       return new ProfileDto(invite.invitingUser);
     }
-    const shareUrlUser = await this.userService.findUserByActionShareSid(code);
+    const shareUrlUser = await this.userService.findUserByShareSid(code);
     if (shareUrlUser) {
       return new ProfileDto(shareUrlUser);
     }

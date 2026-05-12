@@ -1,14 +1,21 @@
+import type { FormSchema } from '@alliance/common/forms/form-schema';
+import { run } from '@alliance/common/run';
+import { Assert } from '@alliance/common/types';
 import {
   BadRequestException,
   ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
-  forwardRef,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { randomBytes } from 'crypto';
+import { LiveActivityService } from 'src/apns/live-activity.service';
+import { CommunityService } from 'src/community/community.service';
+import { Community } from 'src/community/entities/community.entity';
+import { EventType } from 'src/eventlog/event-log.entity';
+import { EventLogService } from 'src/eventlog/eventlog.service';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 import { EditableContentDto } from 'src/forum/dto/editablecontent.dto';
 import {
@@ -16,6 +23,7 @@ import {
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
+import { Post } from 'src/forum/entities/post.entity';
 import { ForumService } from 'src/forum/forum.service';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import {
@@ -24,34 +32,43 @@ import {
 } from 'src/notifs/action-event-reminder.service';
 import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
 import { LikeNotificationService } from 'src/notifs/like-notification.service';
+import { NotificationChannel } from 'src/notifs/notif-utils';
 import {
   NotifsService,
   userActionNotifsEnabled_email,
-  userActionNotifsEnabled_text,
   userActionNotifsEnabled_push,
+  userActionNotifsEnabled_text,
 } from 'src/notifs/notifs.service';
-import { actionActivityUrl, actionUrl, withSid } from 'src/search/approutes';
+import { actionActivityUrl } from 'src/search/approutes';
+import { ShareUrl } from 'src/share-urls/entities/share-url.entity';
+import { ShareUrlsService } from 'src/share-urls/share-urls.service';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import type { FormSchema } from '@alliance/common/forms/form-schema';
 import {
   UserActionRelationDetail,
+  UserActionRelationPillStatus,
   UserActionRelations,
   UserActionRelationsForUser,
-  UserActionRelationPillStatus,
   UserActionSummary,
 } from 'src/user/dto/user-action-relations.dto';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import {
   ContractEvent,
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
 import { Tag } from 'src/user/entities/tag.entity';
-import {
-  expressionReferencesTag,
-  type CohortExpression,
-} from './cohort-expression.types';
 import { User } from 'src/user/entities/user.entity';
-import { ProfileDto } from 'src/user/dto/user.dto';
+import {
+  computeIsAwayDuringAnyOfMemberAction,
+  computeIsContractActiveDuringEntireMemberAction,
+  computeIsTaggedOrInManualCohort,
+  computeShouldParticipate,
+} from 'src/utils/action-user';
+import { CachedFilter } from 'src/utils/cached-filter';
+import { findLeast } from 'src/utils/filter';
+import { startDatePriorityComparator } from 'src/utils/general-update';
+import type { IsRelation, Relations } from 'src/utils/Repository';
+import { computeIsAwayInRange } from 'src/utils/user';
 import {
   DeepPartial,
   ILike,
@@ -61,10 +78,18 @@ import {
   MoreThan,
   Not,
   Or,
-  QueryFailedError,
   type Repository,
 } from 'typeorm';
 import { UserService } from '../user/user.service';
+import { ActionFormVariantService } from './action-form-variant.service';
+import {
+  evaluateCohortExpressionForUser,
+  SingleUserCohortContext,
+} from './cohort-expression.evaluator';
+import {
+  expressionReferencesTag,
+  type CohortExpression,
+} from './cohort-expression.types';
 import {
   ActionActivityDto,
   ActionDto,
@@ -93,7 +118,15 @@ import {
   UpdateActionEventDto,
   UserActionRelation,
 } from './dto/action.dto';
-import { Post } from 'src/forum/entities/post.entity';
+import {
+  CreateFollowUpFormDto,
+  UpdateFollowUpFormDto,
+} from './dto/follow-up-form.dto';
+import {
+  CreateGeneralUpdateDto,
+  UpdateGeneralUpdateDto,
+} from './dto/general-update.dto';
+import { ShareUrlStats } from './dto/share-url.dto';
 import {
   ActionActivity,
   ActionActivityType,
@@ -101,7 +134,7 @@ import {
   ALLOW_DUPLICATE,
 } from './entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from './entities/action-event.entity';
-import { ActionShareUrl } from './entities/action-share-url.entity';
+import { ActionFormVariant } from './entities/action-form-variant.entity';
 import { ActionSuite } from './entities/action-suite.entity';
 import {
   ActionUpdate,
@@ -112,48 +145,16 @@ import {
   ActionTaskType,
   VisibilityMode,
 } from './entities/action.entity';
-import { ActionFormVariant } from './entities/action-form-variant.entity';
 import { FollowUpForm } from './entities/follow-up-form.entity';
-import { ActionFormVariantService } from './action-form-variant.service';
+import {
+  GeneralUpdateActivity,
+  GeneralUpdateActivityType,
+} from './entities/general-update-activity.entity';
+import { GeneralUpdate } from './entities/general-update.entity';
 import {
   ReminderGroup,
   ReminderGroupTimingMode,
 } from './entities/reminder-group.entity';
-import { ShareUrlStats } from './dto/share-url.dto';
-import type { IsRelation, Relations } from 'src/utils/Repository';
-import { run } from '@alliance/common/run';
-import { CachedFilter } from 'src/utils/cached-filter';
-import { findLeast } from 'src/utils/filter';
-import {
-  computeIsAwayDuringAnyOfMemberAction,
-  computeIsContractActiveDuringEntireMemberAction,
-  computeIsTaggedOrInManualCohort,
-  computeShouldParticipate,
-} from 'src/utils/action-user';
-import { computeIsAwayInRange } from 'src/utils/user';
-import { CommunityService } from 'src/community/community.service';
-import { Community } from 'src/community/entities/community.entity';
-import { LiveActivityService } from 'src/apns/live-activity.service';
-import { GeneralUpdate } from './entities/general-update.entity';
-import { GeneralUpdateActivity } from './entities/general-update-activity.entity';
-import { GeneralUpdateActivityType } from './entities/general-update-activity.entity';
-import {
-  CreateGeneralUpdateDto,
-  UpdateGeneralUpdateDto,
-} from './dto/general-update.dto';
-import { startDatePriorityComparator } from 'src/utils/general-update';
-import {
-  CreateFollowUpFormDto,
-  UpdateFollowUpFormDto,
-} from './dto/follow-up-form.dto';
-import {
-  evaluateCohortExpressionForUser,
-  SingleUserCohortContext,
-} from './cohort-expression.evaluator';
-import { EventLogService } from 'src/eventlog/eventlog.service';
-import { EventType } from 'src/eventlog/event-log.entity';
-import { NotificationChannel } from 'src/notifs/notif-utils';
-import { Assert } from '@alliance/common/types';
 
 type SuspendPlanContext = {
   orderedSuites: Array<{ suiteId: number; pastDate: Date | null }>;
@@ -188,8 +189,8 @@ export class ActionsService {
     private readonly actionSuiteRepository: Repository<ActionSuite>,
     @InjectRepository(Form)
     private readonly formRepository: Repository<Form>,
-    @InjectRepository(ActionShareUrl)
-    private readonly actionShareUrlRepository: Repository<ActionShareUrl>,
+    @Inject(forwardRef(() => ShareUrlsService))
+    private readonly shareUrlsService: ShareUrlsService,
     @InjectRepository(FormResponse)
     private readonly formResponseRepository: Repository<FormResponse>,
     @InjectRepository(ContractEvent)
@@ -233,6 +234,10 @@ export class ActionsService {
         action.taskFormId = formId;
       }
     }
+  }
+
+  async findActionById(id: number): Promise<Action | null> {
+    return this.actionRepository.findOne({ where: { id } });
   }
 
   async findActionByFormId(formId: number): Promise<Action | null> {
@@ -733,13 +738,10 @@ export class ActionsService {
       return { completedByReferrer: false, validReferral: false };
     }
 
-    const shareUrl = await this.actionShareUrlRepository.findOne({
-      where: {
-        action: { id: actionId },
-        sid: trimmedCode,
-      },
-      relations: { user: true },
-    });
+    const shareUrl = await this.shareUrlsService.findActionShareByActionAndSid(
+      actionId,
+      trimmedCode,
+    );
 
     if (!shareUrl?.user) {
       return { completedByReferrer: false, validReferral: false };
@@ -758,7 +760,10 @@ export class ActionsService {
     actionId: number,
     userId: number,
   ): Promise<string> {
-    const shareUrl = await this.getOrCreateActionShareUrl(actionId, userId);
+    const shareUrl = await this.shareUrlsService.getOrCreateForAction(
+      actionId,
+      userId,
+    );
     if (!shareUrl.sid) {
       throw new BadRequestException('Unable to create share code');
     }
@@ -3267,92 +3272,19 @@ export class ActionsService {
     return plans;
   }
 
-  private generateCIDForShareUrl() {
-    return 'share-' + randomBytes(5).toString('hex');
-  }
-
-  async getShareLink(actionId: number, userId: number): Promise<string> {
-    const shareUrl = await this.getOrCreateActionShareUrl(actionId, userId);
-    return shareUrl.url;
-  }
-
-  private async getOrCreateActionShareUrl(
-    actionId: number,
-    userId: number,
-  ): Promise<ActionShareUrl> {
-    const existing = await this.actionShareUrlRepository.findOne({
-      where: {
-        action: { id: actionId },
-        user: { id: userId },
-      },
-    });
-    if (existing) {
-      return existing;
-    }
-
-    const sid = this.generateCIDForShareUrl();
-    const url = withSid(actionUrl(actionId, true), sid);
-
-    const action = await this.actionRepository.findOne({
-      where: { id: actionId },
-    });
-    if (!action) {
-      throw new BadRequestException('specified action not found');
-    }
-
-    const shareUrl = this.actionShareUrlRepository.create({
-      url,
-      user: { id: userId },
-      action,
-      sid,
-      data: {
-        sid,
-      },
-    });
-
-    try {
-      return await this.actionShareUrlRepository.save(shareUrl);
-    } catch (err) {
-      // Lost a race with a concurrent creator; the unique (actionId, userId)
-      // constraint guarantees exactly one row exists now — return it.
-      if (
-        err instanceof QueryFailedError &&
-        (err as { code?: string }).code === '23505'
-      ) {
-        const winner = await this.actionShareUrlRepository.findOne({
-          where: {
-            action: { id: actionId },
-            user: { id: userId },
-          },
-        });
-        if (winner) {
-          return winner;
-        }
-      }
-      throw err;
-    }
-  }
-
-  async getShareLinksForForm(formId: number): Promise<ActionShareUrl[]> {
+  async getShareLinksForForm(formId: number): Promise<ShareUrl[]> {
     const action = await this.findActionByFormId(formId);
     if (!action) {
       throw new NotFoundException('No action found for this form');
     }
-    return this.actionShareUrlRepository.find({
-      where: { action: { id: action.id } },
-      relations: { user: true },
-    });
+    return this.shareUrlsService.findForAction(action.id);
   }
 
   async getShareUrlStats(
     actionId: number,
     questionId?: string,
   ): Promise<ShareUrlStats[]> {
-    // Get all share URLs for this action
-    const shareUrls = await this.actionShareUrlRepository.find({
-      where: { action: { id: actionId } },
-      relations: ['user'],
-    });
+    const shareUrls = await this.shareUrlsService.findForAction(actionId);
 
     if (shareUrls.length === 0) {
       return [];
@@ -3365,7 +3297,7 @@ export class ActionsService {
 
     if (sids.length === 0) {
       return shareUrls.map((su) => ({
-        user: su.user,
+        user: su.user!,
         inviteCount: 0,
         sid: su.sid ?? '',
         yesCount: 0,
@@ -3405,7 +3337,7 @@ export class ActionsService {
 
     const results = shareUrls
       .map((su) => ({
-        user: su.user,
+        user: su.user!,
         inviteCount: countMap.get(su.sid ?? '') ?? 0,
         sid: su.sid ?? '',
         yesCount: yesCountMap.get(su.sid ?? '') ?? 0,

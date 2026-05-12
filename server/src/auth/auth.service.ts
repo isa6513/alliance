@@ -4,13 +4,16 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import type { Request, Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
+import type { Request, Response } from 'express';
+import { ShareUrlsService } from 'src/share-urls/share-urls.service';
+import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import { Repository } from 'typeorm';
 import { MailService } from '../mail/mail.service';
 import { ReferralSource, User } from '../user/entities/user.entity';
 import { type PWResetJwtPayload, UserService } from '../user/user.service';
 import { SignUpDto } from './dto/sign-up.dto';
+import { Guest } from './entities/guest.entity';
 import {
   extractAccessTokenFromCookie,
   extractTokenFromHeader,
@@ -20,9 +23,6 @@ import {
   type JwtPayload,
   JWTTokenType,
 } from './guards/jwtreq';
-import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
-import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
-import { Guest } from './entities/guest.entity';
 
 @Injectable()
 export class AuthService {
@@ -30,8 +30,7 @@ export class AuthService {
     private usersService: UserService,
     private jwtService: JwtService,
     private mailService: MailService,
-    @InjectRepository(ActionShareUrl)
-    private actionShareUrlRepository: Repository<ActionShareUrl>,
+    private shareUrlsService: ShareUrlsService,
     @InjectRepository(Guest)
     private guestRepository: Repository<Guest>,
   ) {}
@@ -197,15 +196,15 @@ export class AuthService {
         referralSource: ReferralSource.OnetimeInvite,
       };
     }
-    const shareUrl = await this.actionShareUrlRepository.findOne({
-      where: { sid: referralCode },
-      relations: { user: true },
-    });
+    const shareUrl =
+      await this.shareUrlsService.findByReferralSid(referralCode);
     if (shareUrl?.user) {
       return {
         invite: null,
         referringUser: shareUrl.user,
-        referralSource: ReferralSource.ActionShareLink,
+        referralSource: shareUrl.externalTarget
+          ? ReferralSource.ExternalShareLink
+          : ReferralSource.ActionShareLink,
       };
     }
     const referringUser =

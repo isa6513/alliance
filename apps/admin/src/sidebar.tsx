@@ -3,6 +3,34 @@ import {
   actionsFindAllWithDrafts,
   actionsPasteJson,
 } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
+import { isProduction } from "@alliance/sharedweb/lib/config";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Dropdown from "@alliance/sharedweb/ui/Dropdown";
+import SidebarIcon from "@alliance/sharedweb/ui/icons/SidebarIcon";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import {
+  BarChart2,
+  Calendar,
+  ChevronDown,
+  ChevronRight,
+  CirclePile,
+  Database,
+  FileText,
+  Film,
+  ImageUp,
+  Link2,
+  ListOrdered,
+  Map,
+  MessageSquare,
+  MoreHorizontal,
+  Newspaper,
+  ScrollText,
+  SquareActivity,
+  TowerControl,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import React, {
   useCallback,
   useEffect,
@@ -11,34 +39,7 @@ import React, {
 } from "react";
 import { Link, Outlet, useNavigate } from "react-router";
 import { useAuth } from "./lib/AuthContext";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import SidebarIcon from "@alliance/sharedweb/ui/icons/SidebarIcon";
-import { isProduction } from "@alliance/sharedweb/lib/config";
-import Dropdown from "@alliance/sharedweb/ui/Dropdown";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import {
-  Database,
-  Film,
-  FileText,
-  SquareActivity,
-  Users,
-  UserPlus,
-  CirclePile,
-  Calendar,
-  ImageUp,
-  BarChart2,
-  Map,
-  Newspaper,
-  ChevronDown,
-  ChevronRight,
-  MessageSquare,
-  MoreHorizontal,
-  ScrollText,
-  TowerControl,
-  ListOrdered,
-} from "lucide-react";
 import { useGroupAssignment } from "./lib/GroupAssignmentContext";
-import { cn } from "@alliance/shared/styles/util";
 
 const Sidebar: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -303,6 +304,11 @@ const Sidebar: React.FC = () => {
                     to: "/member-map",
                     label: "Member Map",
                     icon: <Map size={16} />,
+                  },
+                  {
+                    to: "/share-targets",
+                    label: "Share Targets",
+                    icon: <Link2 size={16} />,
                   },
                 ].map((link) => (
                   <Link

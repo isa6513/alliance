@@ -1,9 +1,10 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { ActionShareUrl } from '../entities/action-share-url.entity';
-import { ProfileDto } from 'src/user/dto/user.dto';
 import { Type } from 'class-transformer';
+import { ShareUrl } from 'src/share-urls/entities/share-url.entity';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
-export class ShareUrlDto extends PickType(ActionShareUrl, [
+
+export class ShareUrlDto extends PickType(ShareUrl, [
   'url',
   'sid',
   'id',
@@ -13,22 +14,13 @@ export class ShareUrlDto extends PickType(ActionShareUrl, [
   @Type(() => ProfileDto)
   user: ProfileDto;
 
-  constructor(shareUrl: ActionShareUrl) {
+  constructor(shareUrl: ShareUrl) {
     super();
     this.url = shareUrl.url;
     this.sid = shareUrl.sid;
     this.id = shareUrl.id;
     this.data = shareUrl.data;
-    this.user = new ProfileDto(shareUrl.user);
-  }
-}
-
-export class ShareLinkDto {
-  @ApiProperty()
-  url: string;
-
-  constructor(url: string) {
-    this.url = url;
+    this.user = new ProfileDto(shareUrl.user!);
   }
 }
 

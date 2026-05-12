@@ -1,34 +1,20 @@
 import type { CustomComponentProps } from "@alliance/shared/forms/customComponents";
-import Card from "../../ui/Card";
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { actionsGetShareLink } from "@alliance/shared/client";
-import Button, { ButtonColor } from "../../ui/Button";
+import {
+  shareLinkTargetFromConfig,
+  useShareLink,
+} from "@alliance/shared/forms/useShareLink";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { useEffect, useState } from "react";
+import Button, { ButtonColor } from "../../ui/Button";
+import Card from "../../ui/Card";
 
-const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
+const ShareUrlComponent = ({ field }: CustomComponentProps) => {
   const [copied, setCopied] = useState(false);
 
-  const actionId =
-    typeof field.componentConfig?.actionId === "number"
-      ? field.componentConfig?.actionId
-      : null;
+  const target = shareLinkTargetFromConfig(field.componentConfig);
+  const isConfigured = target !== null;
 
-  const {
-    data: shareUrl,
-    isPending,
-    isError,
-  } = useQuery({
-    queryKey: ["actionsGetShareLink", actionId],
-    queryFn: async () => {
-      const res = await actionsGetShareLink({ path: { id: actionId! } });
-      if (res.error || !res.data) {
-        throw res.error ?? new Error("Failed to load share link");
-      }
-      return res.data.url;
-    },
-    enabled: actionId !== null,
-  });
+  const { data: shareUrl, isPending, isError } = useShareLink(target);
 
   useEffect(() => {
     if (!copied) return;
@@ -36,10 +22,10 @@ const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
     return () => clearTimeout(timer);
   }, [copied]);
 
-  if (actionId === null) {
+  if (!isConfigured) {
     return (
-      <Card style={CardStyle.Grey} className="flex-row items-center !p-0">
-        <p className="flex-1 p-2 pl-3 text-zinc-500">No action configured</p>
+      <Card style={CardStyle.Grey} className="flex flex-row items-center !p-0">
+        <p className="flex-1 p-2 pl-3 text-zinc-500">No share configured</p>
       </Card>
     );
   }
@@ -72,4 +58,4 @@ const ActionShareUrlComponent = ({ field }: CustomComponentProps) => {
   );
 };
 
-export default ActionShareUrlComponent;
+export default ShareUrlComponent;

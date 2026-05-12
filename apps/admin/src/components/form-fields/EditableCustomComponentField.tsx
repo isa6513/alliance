@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  customComponentRegistry,
-  getCustomComponentById,
-} from "@alliance/sharedweb/forms/components";
+import type { CustomComponentField } from "@alliance/common/forms/form-schema";
+import { externalShareTargetsFindAll } from "@alliance/shared/client";
 import type {
   CustomComponentConfigField,
   CustomComponentDefinition,
 } from "@alliance/sharedweb/forms/components";
-import type { CustomComponentField } from "@alliance/common/forms/form-schema";
+import {
+  customComponentRegistry,
+  getCustomComponentById,
+} from "@alliance/sharedweb/forms/components";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router";
 import { RequiredToggle } from "./CommonControls";
 import { FieldLabelEditor } from "./FieldLabelEditor";
 import { FieldWrapper } from "./FieldWrapper";
@@ -220,6 +223,27 @@ export function EditableCustomComponentField({
     const description = configField.description;
     const draftValue = configDrafts[configField.name] ?? "";
 
+    if (
+      field.componentId === "share-url" &&
+      configField.name === "externalTargetId"
+    ) {
+      return (
+        <ExternalShareTargetSelect
+          key={configField.name}
+          label={label}
+          description={description}
+          value={
+            typeof componentConfig[configField.name] === "number"
+              ? (componentConfig[configField.name] as number)
+              : null
+          }
+          onChange={(id) => handleNumberChange(configField.name, String(id))}
+          onClear={() => handleNumberChange(configField.name, "")}
+          error={error}
+        />
+      );
+    }
+
     if (configField.type === "boolean") {
       const checked =
         typeof componentConfig[configField.name] === "boolean"
@@ -353,5 +377,90 @@ export function EditableCustomComponentField({
         </div>
       )}
     </FieldWrapper>
+  );
+}
+
+interface ExternalShareTargetSelectProps {
+  label: string;
+  description?: string;
+  value: number | null;
+  onChange: (id: number) => void;
+  onClear: () => void;
+  error?: string;
+}
+
+function ExternalShareTargetSelect({
+  label,
+  description,
+  value,
+  onChange,
+  onClear,
+  error,
+}: ExternalShareTargetSelectProps) {
+  const { data: targets, isPending } = useQuery({
+    queryKey: ["externalShareTargetsFindAll"],
+    queryFn: async () => {
+      const res = await externalShareTargetsFindAll();
+      return res.data ?? [];
+    },
+  });
+
+  const hasTargets = !!targets && targets.length > 0;
+  const isOrphaned =
+    !isPending &&
+    value !== null &&
+    !!targets &&
+    !targets.some((t) => t.id === value);
+  const showSelect = hasTargets || isOrphaned;
+
+  return (
+    <div className="space-y-1">
+      <label className="block text-xs font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      {isPending ? (
+        <p className="text-xs text-gray-500">Loading targets…</p>
+      ) : showSelect ? (
+        <select
+          value={value ?? ""}
+          onChange={(event) => {
+            const next = event.target.value;
+            if (!next) {
+              onClear();
+            } else {
+              onChange(Number(next));
+            }
+          }}
+          className="bg-white w-full rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="">Select a target…</option>
+          {targets!.map((target) => (
+            <option key={target.id} value={target.id}>
+              {target.name}
+            </option>
+          ))}
+          {isOrphaned && (
+            <option value={value!}>Missing target #{value}</option>
+          )}
+        </select>
+      ) : (
+        <p className="text-xs text-gray-500">
+          No external share targets configured yet.
+        </p>
+      )}
+      <p className="text-xs text-gray-500">
+        {description}
+        {description ? " " : ""}
+        <Link to="/share-targets" className="text-blue-600 hover:underline">
+          Manage targets →
+        </Link>
+      </p>
+      {isOrphaned && (
+        <p className="text-xs text-amber-600">
+          Selected target #{value} no longer exists. Pick another.
+        </p>
+      )}
+      {error && <p className="text-xs text-red-600">{error}</p>}
+    </div>
   );
 }

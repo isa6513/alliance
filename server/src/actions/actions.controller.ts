@@ -23,6 +23,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthOptionalGuard } from 'src/auth/guards/authoptional.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 import { ActionEventReminderService } from 'src/notifs/action-event-reminder.service';
 import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
@@ -31,10 +32,11 @@ import {
   CommunityUserInfoDto,
   UserActionRelationsResponseDto,
 } from 'src/user/dto/user-action-relations.dto';
+import { ShareLinkDto } from 'src/share-urls/dto/share-url.dto';
+import { ShareUrlsService } from 'src/share-urls/share-urls.service';
 import { ProfileDto } from 'src/user/dto/user.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from '../auth/public.decorator';
 import { ActionFormVariantService } from './action-form-variant.service';
 import { ActionsService } from './actions.service';
@@ -48,16 +50,19 @@ import {
   ActionActivityDto,
   ActionDto,
   ActionEventDto,
+  ActionReferralCodeDto,
+  ActionSharePreviewDto,
   ActionSuiteDto,
   ActionUpdateDto,
+  ActionWithdrawalDto,
   CreateActionActivityDto,
   CreateActionDto,
   CreateActionEventDto,
   CreateActionSuiteDto,
   CreateActionUpdateDto,
   CreateReminderGroupDto,
-  ActionReferralCodeDto,
-  ActionSharePreviewDto,
+  EvaluateCohortExpressionDto,
+  EvaluateCohortExpressionResponseDto,
   ExportActionDto,
   GlobalFeedItemDto,
   OptOutActionDto,
@@ -74,22 +79,14 @@ import {
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
-  EvaluateCohortExpressionDto,
-  EvaluateCohortExpressionResponseDto,
-  ActionWithdrawalDto,
   UserActionRelationDto,
 } from './dto/action.dto';
 import { CommunityCompletedActionsCountDto } from './dto/community-completed-actions-count.dto';
 import {
-  NotificationScheduleEntryDto,
-  NotificationScheduleQueryDto,
-} from './dto/notification-schedule.dto';
-import {
-  ShareLinkDto,
-  ShareUrlDto,
-  ShareUrlStatsDto,
-} from './dto/share-url.dto';
-import { ForumActionCompleterWorker } from './forum-action-completer.worker';
+  CreateFollowUpFormDto,
+  FollowUpFormDto,
+  UpdateFollowUpFormDto,
+} from './dto/follow-up-form.dto';
 import {
   CreateGeneralUpdateDto,
   GeneralUpdateAdminDto,
@@ -97,10 +94,11 @@ import {
   UpdateGeneralUpdateDto,
 } from './dto/general-update.dto';
 import {
-  CreateFollowUpFormDto,
-  FollowUpFormDto,
-  UpdateFollowUpFormDto,
-} from './dto/follow-up-form.dto';
+  NotificationScheduleEntryDto,
+  NotificationScheduleQueryDto,
+} from './dto/notification-schedule.dto';
+import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
+import { ForumActionCompleterWorker } from './forum-action-completer.worker';
 
 @Controller('actions')
 export class ActionsController {
@@ -110,6 +108,7 @@ export class ActionsController {
     private readonly actionEventReminderService: ActionEventReminderService,
     private readonly forumActionCompleterWorker: ForumActionCompleterWorker,
     private readonly actionFormVariantService: ActionFormVariantService,
+    private readonly shareUrlsService: ShareUrlsService,
   ) {}
 
   @Post('optout/:id')
@@ -1141,12 +1140,19 @@ export class ActionsController {
 
   @Post('getShareLink/:id')
   @UseGuards(AuthGuard)
+  @ApiOperation({
+    deprecated: true,
+    summary: 'Deprecated. Use POST /share-urls/get-share-link instead.',
+  })
   @ApiOkResponse({ type: ShareLinkDto })
   async getShareLink(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<ShareLinkDto> {
-    const url = await this.actionsService.getShareLink(id, req.user.sub);
+    const url = await this.shareUrlsService.getShareLink({
+      userId: req.user.sub,
+      actionId: id,
+    });
     return new ShareLinkDto(url);
   }
 

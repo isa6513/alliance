@@ -1,3 +1,4 @@
+import { appendQueryParam } from '@alliance/common/url';
 import {
   Comment,
   CommentParentObject,
@@ -76,9 +77,9 @@ export function conversationUrl(conversationId: number) {
 }
 
 export function withCid(url: string, cid: string) {
-  return url.includes('?') ? `${url}&cid=${cid}` : `${url}?cid=${cid}`;
+  return appendQueryParam(url, 'cid', cid);
 }
 
 export function withSid(url: string, sid: string) {
-  return url.includes('?') ? `${url}&sid=${sid}` : `${url}?sid=${sid}`;
+  return appendQueryParam(url, 'sid', sid);
 }

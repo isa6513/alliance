@@ -1,19 +1,20 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { UserModule } from '../user/user.module';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthController } from './auth.controller';
 import { ConfigService } from '@nestjs/config';
-import { MailModule } from 'src/mail/mail.module';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MailModule } from 'src/mail/mail.module';
+import { ShareUrlsModule } from 'src/share-urls/share-urls.module';
 import { User } from 'src/user/entities/user.entity';
-import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
+import { UserModule } from '../user/user.module';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 import { Guest } from './entities/guest.entity';
 
 @Module({
   imports: [
     UserModule,
     MailModule,
+    ShareUrlsModule,
     JwtModule.registerAsync({
       global: true,
       inject: [ConfigService],
@@ -22,7 +23,7 @@ import { Guest } from './entities/guest.entity';
         signOptions: { expiresIn: '1d' },
       }),
     }),
-    TypeOrmModule.forFeature([User, ActionShareUrl, Guest]),
+    TypeOrmModule.forFeature([User, Guest]),
   ],
   providers: [AuthService],
   controllers: [AuthController],

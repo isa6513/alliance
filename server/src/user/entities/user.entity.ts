@@ -1,5 +1,6 @@
 /* eslint-disable @darraghor/nestjs-typed/all-properties-have-explicit-defined */
 /* eslint-disable @darraghor/nestjs-typed/all-properties-are-whitelisted */
+import { Temporal } from '@js-temporal/polyfill';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import bcrypt from 'bcryptjs';
 import { Exclude, Expose, Type } from 'class-transformer';
@@ -12,10 +13,21 @@ import {
   IsOptional,
 } from 'class-validator';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
+import { Action } from 'src/actions/entities/action.entity';
 import { GeneralUpdateActivity } from 'src/actions/entities/general-update-activity.entity';
+import { CommunityInvite } from 'src/community/entities/community-invite.entity';
+import { Community } from 'src/community/entities/community.entity';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
 import { City } from 'src/geo/city.entity';
 import { Mail } from 'src/mail/mail.entity';
+import { Participant } from 'src/messaging/entities/participant.entity';
+import { Mms } from 'src/mms/mms.entity';
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
+import { findLeast } from 'src/utils/filter';
+import type { Relation } from 'src/utils/Repository';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -30,24 +42,12 @@ import {
   RelationId,
 } from 'typeorm';
 import { Notification } from '../../notifs/entities/notification.entity';
+import { ContractEvent, ContractEventType } from './contract-event.entity';
 import { Friend, FriendStatus } from './friend.entity';
+import { OnetimeInvite } from './onetime-invite.entity';
 import { Tag } from './tag.entity';
 import { UserAwayRange } from './user-away-range.entity';
-import {
-  CreateDateColumnTz,
-  UpdateDateColumnTz,
-} from 'src/datasources/basecolumns';
-import { Temporal } from '@js-temporal/polyfill';
-import { Community } from 'src/community/entities/community.entity';
-import { CommunityInvite } from 'src/community/entities/community-invite.entity';
-import { Participant } from 'src/messaging/entities/participant.entity';
-import type { Relation } from 'src/utils/Repository';
-import { ContractEvent, ContractEventType } from './contract-event.entity';
-import { Action } from 'src/actions/entities/action.entity';
 import { UserDevice } from './user-device.entity';
-import { Mms } from 'src/mms/mms.entity';
-import { findLeast } from 'src/utils/filter';
-import { OnetimeInvite } from './onetime-invite.entity';
 
 export const DEFAULT_TIME_ZONE = 'America/Los_Angeles';
 
@@ -72,6 +72,7 @@ export enum ReferralSource {
   ReferralLink = 'referral_link',
   OnetimeInvite = 'onetime_invite',
   ActionShareLink = 'action_share_link',
+  ExternalShareLink = 'external_share_link',
 }
 
 @Entity()

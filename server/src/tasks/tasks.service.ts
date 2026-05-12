@@ -1,3 +1,21 @@
+import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
+import {
+  type AggregateViewSchema,
+  type AggregateViewValue,
+  type AnyField,
+  type CheckboxExtractionTarget,
+  type CheckboxField,
+  type CityFieldValue,
+  collectSourceFormIds,
+  type CustomComponentField,
+  FormSchema,
+  type FormValue,
+  isQuestionField,
+  isQuestionVisible,
+  type ListField,
+  Page,
+} from '@alliance/common/forms/form-schema';
+import { validateFormSchema } from '@alliance/common/forms/form-schema-validate';
 import { Temporal } from '@js-temporal/polyfill';
 import {
   BadRequestException,
@@ -10,20 +28,28 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
-import { AiDetectionQueryService } from 'src/ai-detection/ai-detection-query.service';
-import { AiDetectionQueueService } from 'src/ai-detection/ai-detection-queue.service';
-import { DetectableEntity } from 'src/ai-detection/entities/ai-detection-result.entity';
 import { ActionFormVariantService } from 'src/actions/action-form-variant.service';
 import { ActionsService } from 'src/actions/actions.service';
+import { ActionDto } from 'src/actions/dto/action.dto';
 import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { FollowUpForm } from 'src/actions/entities/follow-up-form.entity';
+import { AiDetectionQueryService } from 'src/ai-detection/ai-detection-query.service';
+import { AiDetectionQueueService } from 'src/ai-detection/ai-detection-queue.service';
+import { DetectableEntity } from 'src/ai-detection/entities/ai-detection-result.entity';
+import { ContractService } from 'src/contract/contract.service';
+import { ContractDto } from 'src/contract/dto/contract.dto';
+import { EventType } from 'src/eventlog/event-log.entity';
+import { EventLogService } from 'src/eventlog/eventlog.service';
 import { ForumService } from 'src/forum/forum.service';
 import { getImageSource } from 'src/images/images.service';
-import { getVideoSource } from 'src/videos/videos.service';
 import { MmsService } from 'src/mms/mms.service';
 import { welcomeMessage } from 'src/notifs/textnotifcontents';
+import { ShareUrlsService } from 'src/share-urls/share-urls.service';
+import { UpdateProfileDto } from 'src/user/dto/user.dto';
+import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
+import { getVideoSource } from 'src/videos/videos.service';
 import { In, IsNull, type Repository } from 'typeorm';
 import {
   CustomValidatorResponse,
@@ -40,7 +66,6 @@ import {
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
 import { FormSnapshot } from './entities/formsnapshot.entity';
-import { FormSnapshotService } from './formsnapshot.service';
 import {
   CreateFormDto,
   FormDto,
@@ -50,32 +75,7 @@ import {
   SubmitFollowUpFormDto,
   SubmitFormDto,
 } from './form.dto';
-import {
-  type AggregateViewSchema,
-  type AggregateViewValue,
-  type AnyField,
-  type CheckboxExtractionTarget,
-  type CheckboxField,
-  type CityFieldValue,
-  type CustomComponentField,
-  type FormValue,
-  collectSourceFormIds,
-  FormSchema,
-  isQuestionField,
-  isQuestionVisible,
-  type ListField,
-  Page,
-} from '@alliance/common/forms/form-schema';
-import { validateFormSchema } from '@alliance/common/forms/form-schema-validate';
-import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
-import { ActionDto } from 'src/actions/dto/action.dto';
-import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
-import { EventLogService } from 'src/eventlog/eventlog.service';
-import { UpdateProfileDto } from 'src/user/dto/user.dto';
-import { User } from 'src/user/entities/user.entity';
-import { EventType } from 'src/eventlog/event-log.entity';
-import { ContractService } from 'src/contract/contract.service';
-import { ContractDto } from 'src/contract/dto/contract.dto';
+import { FormSnapshotService } from './formsnapshot.service';
 
 @Injectable()
 export class TasksService {
@@ -95,8 +95,7 @@ export class TasksService {
     private mmsService: MmsService,
     @InjectRepository(CustomValidator)
     private customValidatorRepository: Repository<CustomValidator>,
-    @InjectRepository(ActionShareUrl)
-    private actionShareUrlRepository: Repository<ActionShareUrl>,
+    private shareUrlsService: ShareUrlsService,
     private contractService: ContractService,
     private eventLogService: EventLogService,
     private aiDetectionQueueService: AiDetectionQueueService,
@@ -1472,26 +1471,12 @@ export class TasksService {
   }
 
   async getFormsForUserSID(userId: number): Promise<FormResponse[]> {
-    const shareUrl = await this.actionShareUrlRepository.findOne({
-      where: {
-        user: { id: userId },
-      },
-    });
-    if (!shareUrl) {
+    const sids = await this.shareUrlsService.findActionShareSidsForUser(userId);
+    if (sids.length === 0) {
       return [];
     }
-
-    const sid: string | null =
-      shareUrl.sid ?? (shareUrl.data?.['sid'] as string) ?? null;
-
-    if (!sid) {
-      return [];
-    }
-
     return this.formResponseRepository.find({
-      where: {
-        sid,
-      },
+      where: { sid: In(sids) },
       relations: { formSnapshot: true },
     });
   }

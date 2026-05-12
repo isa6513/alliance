@@ -37,6 +37,7 @@ export default [
       route("/general-updates/:id", "pages/GeneralUpdatePage.tsx"),
       route("/contracts", "pages/ContractsPage.tsx"),
       route("/contracts/:id", "pages/ContractPage.tsx"),
+      route("/share-targets", "pages/ExternalShareTargetsPage.tsx"),
       route("/priority", "pages/PriorityPage.tsx"),
       route("/member-map", "pages/MemberMapPage.tsx"),
     ]),

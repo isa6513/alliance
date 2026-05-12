@@ -1,3 +1,4 @@
+import { Temporal } from '@js-temporal/polyfill';
 import {
   BadRequestException,
   Injectable,
@@ -6,12 +7,26 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { LiveActivityRegistration } from 'src/apns/entities/live-activity-registration.entity';
+import { CommunityService } from 'src/community/community.service';
+import { Community } from 'src/community/entities/community.entity';
 import { ALL_MEMBERS_TAG_NAME } from 'src/constants';
+import { EventType } from 'src/eventlog/event-log.entity';
+import { EventLogService } from 'src/eventlog/eventlog.service';
 import { City } from 'src/geo/city.entity';
 import { ImagesService } from 'src/images/images.service';
 import { MailService } from 'src/mail/mail.service';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
+import {
+  type CreateNotifParams,
+  NotifsService,
+} from 'src/notifs/notifs.service';
 import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity';
+import { Push } from 'src/push/push.entity';
+import { PushService } from 'src/push/push.service';
+import { groupUrl, profileUrl } from 'src/search/approutes';
+import { ShareUrlsService } from 'src/share-urls/share-urls.service';
+import type { Relations } from 'src/utils/Repository';
 import {
   Brackets,
   DeepPartial,
@@ -21,51 +36,36 @@ import {
   Not,
   type Repository,
 } from 'typeorm';
-import { sqlUserHasActiveContractAt } from './has-active-contract-at';
-import { Friend, FriendStatus } from './entities/friend.entity';
+import { CreateAwayRangeDto, UpdateAwayRangeDto } from './dto/away-range.dto';
+import {
+  RegisterDeviceDto,
+  RegisterLiveActivityPushToStartTokenDto,
+  RegisterLiveActivityUpdateTokenDto,
+} from './dto/device.dto';
+import {
+  CreateOnetimeInviteDto,
+  RequestOnetimeInviteDto,
+} from './dto/invite.dto';
+import { CreateTagDto } from './dto/tag.dto';
 import {
   AssignGroupsDto,
   FriendStatusDtoArgs,
   UpdateProfileDto,
   UserCityCount,
 } from './dto/user.dto';
-import { DEFAULT_TIME_ZONE, User } from './entities/user.entity';
-import { groupUrl, profileUrl } from 'src/search/approutes';
-import { Tag } from './entities/tag.entity';
-import { CreateTagDto } from './dto/tag.dto';
-import { Community } from 'src/community/entities/community.entity';
+import { Friend, FriendStatus } from './entities/friend.entity';
 import {
   OnetimeInvite,
   OnetimeInviteStatus,
 } from './entities/onetime-invite.entity';
-import {
-  CreateOnetimeInviteDto,
-  RequestOnetimeInviteDto,
-} from './dto/invite.dto';
+import { Tag } from './entities/tag.entity';
 import {
   UserAwayRange,
   UserAwayRangeReason,
 } from './entities/user-away-range.entity';
-import { CreateAwayRangeDto, UpdateAwayRangeDto } from './dto/away-range.dto';
-import { Temporal } from '@js-temporal/polyfill';
-import type { Relations } from 'src/utils/Repository';
-import {
-  RegisterDeviceDto,
-  RegisterLiveActivityPushToStartTokenDto,
-  RegisterLiveActivityUpdateTokenDto,
-} from './dto/device.dto';
 import { UserDevice } from './entities/user-device.entity';
-import { LiveActivityRegistration } from 'src/apns/entities/live-activity-registration.entity';
-import { ActionShareUrl } from 'src/actions/entities/action-share-url.entity';
-import { PushService } from 'src/push/push.service';
-import { Push } from 'src/push/push.entity';
-import { EventLogService } from 'src/eventlog/eventlog.service';
-import {
-  type CreateNotifParams,
-  NotifsService,
-} from 'src/notifs/notifs.service';
-import { CommunityService } from 'src/community/community.service';
-import { EventType } from 'src/eventlog/event-log.entity';
+import { DEFAULT_TIME_ZONE, User } from './entities/user.entity';
+import { sqlUserHasActiveContractAt } from './has-active-contract-at';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -93,8 +93,7 @@ export class UserService {
     private readonly userDeviceRepository: Repository<UserDevice>,
     @InjectRepository(LiveActivityRegistration)
     private readonly liveActivityRegistrationRepository: Repository<LiveActivityRegistration>,
-    @InjectRepository(ActionShareUrl)
-    private readonly actionShareUrlRepository: Repository<ActionShareUrl>,
+    private readonly shareUrlsService: ShareUrlsService,
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
@@ -227,14 +226,8 @@ export class UserService {
     return this.userRepository.findOne({ where: { referralCode }, relations });
   }
 
-  async findUserByActionShareSid(sid: string): Promise<User | null> {
-    const trimmed = sid.trim();
-    if (!trimmed) return null;
-    const shareUrl = await this.actionShareUrlRepository.findOne({
-      where: { sid: trimmed },
-      relations: { user: true },
-    });
-    return shareUrl?.user ?? null;
+  async findUserByShareSid(sid: string): Promise<User | null> {
+    return this.shareUrlsService.findUserBySid(sid);
   }
 
   async remove(id: number): Promise<void> {

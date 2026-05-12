@@ -10,28 +10,29 @@ import multer from 'multer';
 import { ActionsModule } from './actions/actions.module';
 import { AdminViewerModule } from './admin-viewer/admin-viewer.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { ApnsModule } from './apns/apns.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
+import { CommunityModule } from './community/community.module';
+import { ContractModule } from './contract/contract.module';
 import { connectionOptions } from './datasources/dataSource';
+import { EventLogModule } from './eventlog/eventlog.module';
 import { ForumModule } from './forum/forum.module';
 import { GeoModule } from './geo/geo.module';
 import { ImagesModule } from './images/images.module';
 import { MailModule } from './mail/mail.module';
+import { MessagingModule } from './messaging/messaging.module';
 import { MmsModule } from './mms/mms.module';
 import { NotifsModule } from './notifs/notifs.module';
+import { PushModule } from './push/push.module';
 import { S3Module } from './s3/s3.module';
 import { SearchModule } from './search/search.module';
+import { ShareUrlsModule } from './share-urls/share-urls.module';
 import { TasksModule } from './tasks/tasks.module';
+import { ReferralSource } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 import { UserService } from './user/user.service';
-import { MessagingModule } from './messaging/messaging.module';
-import { PushModule } from './push/push.module';
-import { EventLogModule } from './eventlog/eventlog.module';
-import { CommunityModule } from './community/community.module';
-import { ContractModule } from './contract/contract.module';
 import { VideosModule } from './videos/videos.module';
-import { ApnsModule } from './apns/apns.module';
-import { ReferralSource } from './user/entities/user.entity';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { ReferralSource } from './user/entities/user.entity';
     MailModule,
     AdminViewerModule,
     SearchModule,
+    ShareUrlsModule,
     TasksModule,
     MmsModule,
     AnalyticsModule,

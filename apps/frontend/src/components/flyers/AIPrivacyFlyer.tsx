@@ -1,24 +1,17 @@
+import {
+  ShareLinkTargetKind,
+  useShareLink,
+} from "@alliance/shared/forms/useShareLink";
 import { Clock } from "lucide-react";
 import { generateBarcodeUrl } from "../../lib/utils";
-import { actionsGetShareLink } from "@alliance/shared/client";
-import { useState, useEffect } from "react";
 
 const AIPrivacyFlyer: React.FC = () => {
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
-
   const publicActionId = 55;
-
-  useEffect(() => {
-    const fetchShareUrl = async () => {
-      const shareUrlRes = await actionsGetShareLink({
-        path: { id: publicActionId },
-      });
-      if (shareUrlRes.data) {
-        setQrCodeUrl(generateBarcodeUrl(shareUrlRes.data.url, 200));
-      }
-    };
-    fetchShareUrl();
-  }, []);
+  const { data: shareUrl } = useShareLink({
+    kind: ShareLinkTargetKind.Action,
+    actionId: publicActionId,
+  });
+  const qrCodeUrl = shareUrl ? generateBarcodeUrl(shareUrl, 200) : "";
 
   return (
     <div className="flex flex-col justify-between h-full">
