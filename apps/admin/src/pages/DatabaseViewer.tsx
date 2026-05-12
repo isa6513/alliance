@@ -750,27 +750,28 @@ const DatabaseViewer: React.FC = () => {
         ? "cursor-pointer hover:bg-gray-100 p-1 rounded"
         : "";
 
+      const renderRelationEditButton = (title: string) =>
+        !column.isPrimary &&
+        !isInteractionBlocked &&
+        rowIndex !== undefined &&
+        columnIndex !== undefined ? (
+          <button
+            type="button"
+            title={title}
+            onClick={() => beginEditingCell(rowIndex, columnIndex, value)}
+            className="text-gray-400 hover:text-gray-700 cursor-pointer text-xs leading-none"
+          >
+            <Pencil size={12} />
+          </button>
+        ) : null;
+
       let element: React.ReactNode | null = null;
       if (value === null || value === undefined) {
-        const isEditableRelation =
-          column.dataType === "relation" &&
-          !column.isPrimary &&
-          !isInteractionBlocked &&
-          rowIndex !== undefined &&
-          columnIndex !== undefined;
         element = (
           <span className="inline-flex items-center gap-1.5">
             <span className={cn("text-gray-400", baseClassName)}>null</span>
-            {isEditableRelation && (
-              <button
-                type="button"
-                title="Set foreign key"
-                onClick={() => beginEditingCell(rowIndex!, columnIndex!, value)}
-                className="text-gray-400 hover:text-gray-700 cursor-pointer text-xs leading-none"
-              >
-                <Pencil size={12} />
-              </button>
-            )}
+            {column.dataType === "relation" &&
+              renderRelationEditButton("Set foreign key")}
           </span>
         );
       } else {
@@ -786,21 +787,7 @@ const DatabaseViewer: React.FC = () => {
                 >
                   {value}
                 </button>
-                {!column.isPrimary &&
-                  !isInteractionBlocked &&
-                  rowIndex !== undefined &&
-                  columnIndex !== undefined && (
-                    <button
-                      type="button"
-                      title="Edit foreign key"
-                      onClick={() =>
-                        beginEditingCell(rowIndex, columnIndex, value)
-                      }
-                      className="text-gray-400 hover:text-gray-700 cursor-pointer text-xs leading-none"
-                    >
-                      <Pencil size={12} />
-                    </button>
-                  )}
+                {renderRelationEditButton("Edit foreign key")}
               </span>
             );
             break;

@@ -129,36 +129,40 @@ const CellEditor: React.FC<CellEditorProps> = ({
   };
 
   const parseValueFromInput = (inputVal: string): any => {
-    inputVal = inputVal.trim();
-
-    if (inputVal === "") return null;
+    const trimmed = inputVal.trim();
 
     switch (column.dataType) {
       case "number": {
-        const num = Number(inputVal);
-        return isNaN(num) ? inputVal : num;
+        if (trimmed === "") return null;
+        const num = Number(trimmed);
+        return isNaN(num) ? trimmed : num;
       }
 
       case "relation": {
+        if (trimmed === "") return null;
         if (column.relationTargetPkType === "number") {
-          const num = Number(inputVal);
-          return isNaN(num) ? inputVal : num;
+          const num = Number(trimmed);
+          return isNaN(num) ? trimmed : num;
         }
-        return inputVal;
+        return trimmed;
       }
 
       case "boolean":
-        return inputVal === "true";
+        return trimmed === "true";
 
-      case "json":
-        return JSON.parse(inputVal);
+      case "json": {
+        if (trimmed === "") return null;
+        return JSON.parse(trimmed);
+      }
 
       case "date":
-      case "datetime":
-        return inputVal;
+      case "datetime": {
+        if (trimmed === "") return null;
+        return trimmed;
+      }
 
       default:
-        return inputVal;
+        return inputVal === "" ? null : inputVal;
     }
   };
 
@@ -222,7 +226,6 @@ const CellEditor: React.FC<CellEditorProps> = ({
             {...commonProps}
             type={isNumericFk ? "number" : "text"}
             step={isNumericFk ? "1" : undefined}
-            min={isNumericFk ? 1 : undefined}
             value={formatValueForInput(editValue)}
             placeholder={
               column.relationTarget
