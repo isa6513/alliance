@@ -2,13 +2,10 @@ import { run } from '@alliance/common/run';
 import { appendQueryParam } from '@alliance/common/url';
 import {
   BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ActionsService } from 'src/actions/actions.service';
 import { Action } from 'src/actions/entities/action.entity';
 import { generateCIDForShareUrl } from 'src/notifs/notif-utils';
 import { actionUrl, withSid } from 'src/search/approutes';
@@ -47,8 +44,8 @@ export class ShareUrlsService {
   constructor(
     @InjectRepository(ShareUrl)
     private readonly shareUrlRepository: Repository<ShareUrl>,
-    @Inject(forwardRef(() => ActionsService))
-    private readonly actionsService: ActionsService,
+    @InjectRepository(Action)
+    private readonly actionRepository: Repository<Action>,
   ) {}
 
   async getShareLink(params: {
@@ -200,9 +197,9 @@ export class ShareUrlsService {
       }> => {
         switch (input.kind) {
           case ShareUrlKind.Action: {
-            const action = await this.actionsService.findActionById(
-              input.actionId,
-            );
+            const action = await this.actionRepository.findOne({
+              where: { id: input.actionId },
+            });
             if (!action) {
               throw new NotFoundException(NOT_FOUND_MESSAGE[input.kind]);
             }
