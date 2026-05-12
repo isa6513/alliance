@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6wbUhdIHexSSg2JERKWq28r4faa7zXU44TFASFrqmIXQv5B76r0eBMjUykYFEWm
+\restrict XKDuXjiiZfnKVLGs93rGC5hGCr8a3vyUkHnClAXd9rn83XMwdikDsKrtxebIiqE
 
 -- Dumped from database version 18.3 (Homebrew)
 -- Dumped by pg_dump version 18.3 (Homebrew)
@@ -1003,20 +1003,6 @@ COPY public.action_reminder_users_user ("actionReminderId", "userId") FROM stdin
 
 
 --
--- Data for Name: action_share_url; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.action_share_url (id, url, "createdAt", "updatedAt", data, "userId", "actionId", sid) FROM stdin;
-7ba997f4-7f69-41d1-8b11-6ee94506c172	https://worldalliance.org/actions/55?sid=share-13592774af	2025-12-16 21:00:51.259354-08	2025-12-16 21:00:51.259354-08	{"sid": "share-13592774af"}	10	55	share-13592774af
-925266a7-d937-426d-b499-d0315a4b9641	https://worldalliance.org/actions/55?sid=share-c4e8d495af	2025-12-16 23:05:16.895035-08	2025-12-16 23:05:16.895035-08	{"sid": "share-c4e8d495af"}	15	55	share-c4e8d495af
-ffca3736-f581-49a4-8c58-c43b8e2fc723	https://worldalliance.org/actions/55?sid=share-4f026733e9	2025-12-11 18:33:44.400888-08	2025-12-11 18:33:44.400888-08	{"sid": "share-4f026733e9"}	7	55	share-4f026733e9
-5bad5e4f-1767-45d8-b826-893185d45da8	https://worldalliance.org/actions/55?sid=share-0c0a07d27e	2025-12-11 19:10:06.42049-08	2025-12-11 19:10:06.42049-08	{"sid": "share-0c0a07d27e"}	24	55	share-0c0a07d27e
-bc65f342-9eac-4bcd-9d3c-7d6cb29de2a5	https://worldalliance.org/actions/55?sid=share-ac6731adf1	2025-12-11 20:05:16.202338-08	2025-12-11 20:05:16.202338-08	{"sid": "share-ac6731adf1"}	11	55	share-ac6731adf1
-9b7c2798-8a10-427f-8929-01c2472033cc	https://worldalliance.org/actions/55?sid=share-466ef08cae	2025-12-19 12:58:10.584147-08	2025-12-19 12:58:10.584147-08	{"sid": "share-466ef08cae"}	23	55	share-466ef08cae
-\.
-
-
---
 -- Data for Name: action_stats_record; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -1391,6 +1377,14 @@ COPY public.daily_stats_record (id, "dayId", date, "signedMembers", "suspendedMe
 --
 
 COPY public.event_log (id, event, message, blob, "createdAt", "userId") FROM stdin;
+\.
+
+
+--
+-- Data for Name: external_share_target; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.external_share_target (id, name, url, "paramName", "createdAt", "updatedAt") FROM stdin;
 \.
 
 
@@ -2398,6 +2392,20 @@ COPY public.reminder_group_users ("reminderGroupId", "userId") FROM stdin;
 
 
 --
+-- Data for Name: share_url; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.share_url (id, url, "createdAt", "updatedAt", data, "userId", "actionId", sid, "externalTargetId") FROM stdin;
+7ba997f4-7f69-41d1-8b11-6ee94506c172	https://worldalliance.org/actions/55?sid=share-13592774af	2025-12-16 21:00:51.259354-08	2025-12-16 21:00:51.259354-08	{"sid": "share-13592774af"}	10	55	share-13592774af	\N
+925266a7-d937-426d-b499-d0315a4b9641	https://worldalliance.org/actions/55?sid=share-c4e8d495af	2025-12-16 23:05:16.895035-08	2025-12-16 23:05:16.895035-08	{"sid": "share-c4e8d495af"}	15	55	share-c4e8d495af	\N
+ffca3736-f581-49a4-8c58-c43b8e2fc723	https://worldalliance.org/actions/55?sid=share-4f026733e9	2025-12-11 18:33:44.400888-08	2025-12-11 18:33:44.400888-08	{"sid": "share-4f026733e9"}	7	55	share-4f026733e9	\N
+5bad5e4f-1767-45d8-b826-893185d45da8	https://worldalliance.org/actions/55?sid=share-0c0a07d27e	2025-12-11 19:10:06.42049-08	2025-12-11 19:10:06.42049-08	{"sid": "share-0c0a07d27e"}	24	55	share-0c0a07d27e	\N
+bc65f342-9eac-4bcd-9d3c-7d6cb29de2a5	https://worldalliance.org/actions/55?sid=share-ac6731adf1	2025-12-11 20:05:16.202338-08	2025-12-11 20:05:16.202338-08	{"sid": "share-ac6731adf1"}	11	55	share-ac6731adf1	\N
+9b7c2798-8a10-427f-8929-01c2472033cc	https://worldalliance.org/actions/55?sid=share-466ef08cae	2025-12-19 12:58:10.584147-08	2025-12-19 12:58:10.584147-08	{"sid": "share-466ef08cae"}	23	55	share-466ef08cae	\N
+\.
+
+
+--
 -- Data for Name: tag_general_updates_general_update; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2588,6 +2596,13 @@ SELECT pg_catalog.setval('public.contract_event_id_seq', 123, true);
 
 
 --
+-- Name: contract_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.contract_id_seq', 1, true);
+
+
+--
 -- Name: conversation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2613,6 +2628,13 @@ SELECT pg_catalog.setval('public.daily_stats_record_id_seq', 62, true);
 --
 
 SELECT pg_catalog.setval('public.editable_content_id_seq', 355, true);
+
+
+--
+-- Name: external_share_target_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.external_share_target_id_seq', 1, false);
 
 
 --
@@ -2697,6 +2719,13 @@ SELECT pg_catalog.setval('public.live_activity_registration_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.mail_id_seq', 752, true);
+
+
+--
+-- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.migrations_id_seq', 310, true);
 
 
 --
@@ -2815,5 +2844,5 @@ SELECT pg_catalog.setval('public.video_id_seq', 1, false);
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6wbUhdIHexSSg2JERKWq28r4faa7zXU44TFASFrqmIXQv5B76r0eBMjUykYFEWm
+\unrestrict XKDuXjiiZfnKVLGs93rGC5hGCr8a3vyUkHnClAXd9rn83XMwdikDsKrtxebIiqE
 
