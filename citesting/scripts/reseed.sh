@@ -130,10 +130,14 @@ EXCLUDE_ARGS=()
 for t in "${EXCLUDE_TABLE_DATA[@]}"; do
   EXCLUDE_ARGS+=(--exclude-table-data="$t")
 done
+SEED_TMP="$(mktemp "$SEED_FILE.XXXXXX")"
+trap 'rm -f "$SEED_TMP"' EXIT
 pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME" -d "$DB_NAME" \
   --data-only --no-owner --no-privileges \
   "${EXCLUDE_ARGS[@]}" \
-  > "$SEED_FILE"
+  > "$SEED_TMP"
+mv "$SEED_TMP" "$SEED_FILE"
+trap - EXIT
 
 echo "==> Updating $SEED_TIMESTAMP_FILE"
 latest_migration_timestamp > "$SEED_TIMESTAMP_FILE"
