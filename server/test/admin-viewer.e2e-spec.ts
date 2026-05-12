@@ -1,23 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Repository } from 'typeorm';
-import request from 'supertest';
-import { User } from '../src/user/entities/user.entity';
-import { Action } from '../src/actions/entities/action.entity';
-import { createTestApp, TestContext } from './e2e-test-utils';
-import { AdminViewerModule } from '../src/admin-viewer/admin-viewer.module';
-import { TableMetadataDto } from 'src/admin-viewer/dto/table-list.dto';
-import { ColumnMetadataDto } from 'src/admin-viewer/dto/column-metadata.dto';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import { ColumnMetadataDto } from 'src/admin-viewer/dto/column-metadata.dto';
+import { TableMetadataDto } from 'src/admin-viewer/dto/table-list.dto';
+import request from 'supertest';
+import type { Repository } from 'typeorm';
+import { ActionSuite } from '../src/actions/entities/action-suite.entity';
+import { Action } from '../src/actions/entities/action.entity';
+import { AdminViewerModule } from '../src/admin-viewer/admin-viewer.module';
+import { User } from '../src/user/entities/user.entity';
+import { createTestApp, TestContext } from './e2e-test-utils';
 
 describe('AdminViewer (e2e)', () => {
   let ctx: TestContext;
   let userRepository: Repository<User>;
   let actionRepository: Repository<Action>;
+  let actionSuiteRepository: Repository<ActionSuite>;
 
   beforeAll(async () => {
     ctx = await createTestApp([AdminViewerModule]);
     userRepository = ctx.dataSource.getRepository(User);
     actionRepository = ctx.dataSource.getRepository(Action);
+    actionSuiteRepository = ctx.dataSource.getRepository(ActionSuite);
   }, 50000);
 
   describe('GET /admin-viewer/tables', () => {
@@ -329,6 +332,172 @@ describe('AdminViewer (e2e)', () => {
         .expect(200);
 
       expect(response.body.limit).toBe(1000);
+    });
+  });
+
+  describe('PUT /admin-viewer/tables/:tableName/records (relation columns)', () => {
+    let suiteA: ActionSuite;
+    let suiteB: ActionSuite;
+    let action: Action;
+
+    beforeEach(async () => {
+      suiteA = await actionSuiteRepository.save(
+        actionSuiteRepository.create({ name: 'fk-test-suite-a' }),
+      );
+      suiteB = await actionSuiteRepository.save(
+        actionSuiteRepository.create({ name: 'fk-test-suite-b' }),
+      );
+      action = await actionRepository.save(
+        actionRepository.create({
+          name: 'fk-test-action',
+          category: 'Test',
+          body: 'fk-test',
+          status: ActionStatus.MemberAction,
+          suite: suiteA,
+        }),
+      );
+    });
+
+    afterEach(async () => {
+      await actionRepository.query('DELETE FROM "action" WHERE name = $1', [
+        'fk-test-action',
+      ]);
+      await actionSuiteRepository.query(
+        'DELETE FROM "action_suite" WHERE name IN ($1, $2)',
+        ['fk-test-suite-a', 'fk-test-suite-b'],
+      );
+    });
+
+    it('updates a relation column to a valid foreign key', async () => {
+      const response = await request(ctx.app.getHttpServer())
+        .put('/admin-viewer/tables/action/records')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          primaryKeyValue: action.id,
+          updates: { suiteId: suiteB.id },
+        })
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+
+      const refreshed = await actionRepository.findOne({
+        where: { id: action.id },
+        relations: ['suite'],
+      });
+      expect(refreshed?.suite?.id).toBe(suiteB.id);
+    });
+
+    it('rejects an update to a non-existent foreign key and preserves the original value', async () => {
+      const response = await request(ctx.app.getHttpServer())
+        .put('/admin-viewer/tables/action/records')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          primaryKeyValue: action.id,
+          updates: { suiteId: 99999999 },
+        })
+        .expect(400);
+
+      expect(response.body.message).toMatch(/^Foreign key violation:/);
+      expect(response.body.message).toContain('action_suite');
+      expect(response.body.message).toContain('99999999');
+
+      const refreshed = await actionRepository.findOne({
+        where: { id: action.id },
+        relations: ['suite'],
+      });
+      expect(refreshed?.suite?.id).toBe(suiteA.id);
+    });
+
+    it('clears a nullable foreign key when set to null', async () => {
+      const response = await request(ctx.app.getHttpServer())
+        .put('/admin-viewer/tables/action/records')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          primaryKeyValue: action.id,
+          updates: { suiteId: null },
+        })
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+
+      const refreshed = await actionRepository.findOne({
+        where: { id: action.id },
+        relations: ['suite'],
+      });
+      expect(refreshed?.suite).toBeNull();
+    });
+
+    it('rejects clearing a non-nullable column and preserves the original value', async () => {
+      const response = await request(ctx.app.getHttpServer())
+        .put('/admin-viewer/tables/action/records')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          primaryKeyValue: action.id,
+          updates: { name: '' },
+        })
+        .expect(400);
+
+      expect(response.body.message).toEqual(
+        'Column name is not nullable and has no default; cannot set to null',
+      );
+
+      const refreshed = await actionRepository.findOne({
+        where: { id: action.id },
+      });
+      expect(refreshed?.name).toBe('fk-test-action');
+    });
+  });
+
+  describe('POST /admin-viewer/tables/:tableName/records (defaults)', () => {
+    afterEach(async () => {
+      await actionRepository.query('DELETE FROM "action" WHERE name = $1', [
+        'create-default-test',
+      ]);
+    });
+
+    it('fills non-nullable columns with their database defaults when omitted or sent empty', async () => {
+      const response = await request(ctx.app.getHttpServer())
+        .post('/admin-viewer/tables/action/records')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          record: {
+            name: 'create-default-test',
+            category: 'Test',
+            body: 'create-default-test',
+            // isContractSigningAction omitted entirely -> DB default false
+            // usersJoined sent as empty string -> DB default 0
+            usersJoined: '',
+          },
+        })
+        .expect(201);
+
+      expect(response.body.success).toBe(true);
+
+      const created = await actionRepository.findOne({
+        where: { name: 'create-default-test' },
+      });
+      expect(created).not.toBeNull();
+      expect(created?.isContractSigningAction).toBe(false);
+      expect(created?.usersJoined).toBe(0);
+      expect(created?.createdAt).toBeInstanceOf(Date);
+    });
+
+    it('still rejects empty values on create for non-nullable columns without defaults', async () => {
+      const response = await request(ctx.app.getHttpServer())
+        .post('/admin-viewer/tables/action/records')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          record: {
+            name: '',
+            category: 'Test',
+            body: 'create-default-test',
+          },
+        })
+        .expect(400);
+
+      expect(response.body.message).toContain(
+        'Column name is not nullable and has no default; cannot set to null',
+      );
     });
   });
 

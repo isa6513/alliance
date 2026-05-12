@@ -5,16 +5,17 @@ import {
   adminViewerUpdateRecord,
 } from "@alliance/shared/client";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
+import { Pencil } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import AddRowModal from "../components/AddRowModal";
 import CellEditor from "../components/CellEditor";
 import ConfirmDialog from "../components/ConfirmDialog";
-import AddRowModal from "../components/AddRowModal";
-import { useDatabaseViewerState } from "../components/dbviewer/DatabaseViewer.hooks";
 import DatabaseSidebar from "../components/dbviewer/DatabaseSidebar";
-import DatabaseToolbar from "../components/dbviewer/DatabaseToolbar";
 import DatabaseTable from "../components/dbviewer/DatabaseTable";
+import DatabaseToolbar from "../components/dbviewer/DatabaseToolbar";
+import { useDatabaseViewerState } from "../components/dbviewer/DatabaseViewer.hooks";
 import {
   formatTimeForDisplayValue,
   isTimeOnlyColumn,
@@ -24,7 +25,7 @@ import {
 
 const describeConfirmValue = (
   raw: unknown,
-  display?: string | null
+  display?: string | null,
 ): string => {
   if (display !== undefined) {
     if (!display) {
@@ -170,21 +171,21 @@ const DatabaseViewer: React.FC = () => {
     (columnName: string) => {
       setSortWithOrder(columnName, "ASC");
     },
-    [setSortWithOrder]
+    [setSortWithOrder],
   );
 
   const handleSortDescending = useCallback(
     (columnName: string) => {
       setSortWithOrder(columnName, "DESC");
     },
-    [setSortWithOrder]
+    [setSortWithOrder],
   );
 
   const handleFilterColumn = useCallback(
     (columnName: string, value: string) => {
       applyColumnFilter(columnName, value);
     },
-    [applyColumnFilter]
+    [applyColumnFilter],
   );
 
   const handleClearColumnFilter = useCallback(() => {
@@ -195,28 +196,28 @@ const DatabaseViewer: React.FC = () => {
     (newPage: number) => {
       setPage(newPage);
     },
-    [setPage]
+    [setPage],
   );
 
   const handleSearch = useCallback(
     (search: string) => {
       setSearchInput(search);
     },
-    [setSearchInput]
+    [setSearchInput],
   );
 
   const handleSelectRow = useCallback(
     (primaryKeyValue: string | number, checked: boolean) => {
       toggleRowSelection(primaryKeyValue, checked);
     },
-    [toggleRowSelection]
+    [toggleRowSelection],
   );
 
   const handleSelectAllRows = useCallback(
     (checked: boolean) => {
       toggleAllRowSelection(checked);
     },
-    [toggleAllRowSelection]
+    [toggleAllRowSelection],
   );
 
   const clearSelectedRow = useCallback(() => {
@@ -230,7 +231,21 @@ const DatabaseViewer: React.FC = () => {
       setSelectedRow({ tableName, rowId });
       applyImmediateSearch(String(rowId));
     },
-    [selectTable, setSelectedRow, applyImmediateSearch]
+    [selectTable, setSelectedRow, applyImmediateSearch],
+  );
+
+  const beginEditingCell = useCallback(
+    (rowIndex: number, columnIndex: number, cellValue: any) => {
+      if (isInteractionBlocked) {
+        return;
+      }
+      setEditingCell({
+        rowIndex,
+        columnIndex,
+        originalValue: cellValue,
+      });
+    },
+    [isInteractionBlocked],
   );
 
   const handleCellClick = useCallback(
@@ -238,23 +253,14 @@ const DatabaseViewer: React.FC = () => {
       rowIndex: number,
       columnIndex: number,
       cellValue: any,
-      column: ColumnMetadataDto
+      column: ColumnMetadataDto,
     ) => {
-      if (isInteractionBlocked) {
-        return;
-      }
-
       if (column.isPrimary || column.dataType === "relation") {
         return;
       }
-
-      setEditingCell({
-        rowIndex,
-        columnIndex,
-        originalValue: cellValue,
-      });
+      beginEditingCell(rowIndex, columnIndex, cellValue);
     },
-    [isInteractionBlocked]
+    [beginEditingCell],
   );
 
   const handleCellSave = useCallback(
@@ -275,7 +281,7 @@ const DatabaseViewer: React.FC = () => {
       }
 
       const primaryKeyIndex = tableData.columns.findIndex(
-        (col) => col.isPrimary
+        (col) => col.isPrimary,
       );
       const primaryKeyValue = row[primaryKeyIndex];
 
@@ -312,7 +318,7 @@ const DatabaseViewer: React.FC = () => {
 
       setEditingCell(null);
     },
-    [editingCell, tableData, selectedTable, showError]
+    [editingCell, tableData, selectedTable, showError],
   );
 
   const handleCellCancel = useCallback(() => {
@@ -342,7 +348,9 @@ const DatabaseViewer: React.FC = () => {
     } catch (error) {
       console.error("Update failed:", error);
       showError(
-        error instanceof Error ? error.message : "Unknown error updating record"
+        error instanceof Error
+          ? error.message
+          : "Unknown error updating record",
       );
     } finally {
       setPendingUpdate(null);
@@ -370,7 +378,7 @@ const DatabaseViewer: React.FC = () => {
         path: { tableName: pendingDelete.tableName },
         body: {
           primaryKeyValues: pendingDelete.primaryKeyValues.map((value) =>
-            String(value)
+            String(value),
           ),
         },
       });
@@ -380,7 +388,7 @@ const DatabaseViewer: React.FC = () => {
           selectedRow &&
           selectedRow.tableName === pendingDelete.tableName &&
           pendingDelete.primaryKeyValues.some(
-            (deletedId) => String(deletedId) === String(selectedRow.rowId)
+            (deletedId) => String(deletedId) === String(selectedRow.rowId),
           )
         ) {
           setSelectedRow(null);
@@ -392,7 +400,7 @@ const DatabaseViewer: React.FC = () => {
         showSuccess(
           `Deleted ${response.data.deletedCount} record${
             response.data.deletedCount === 1 ? "" : "s"
-          }`
+          }`,
         );
       } else {
         showError(response.data?.message || "Delete failed");
@@ -402,7 +410,7 @@ const DatabaseViewer: React.FC = () => {
       showError(
         error instanceof Error
           ? error.message
-          : "Unknown error deleting records"
+          : "Unknown error deleting records",
       );
     } finally {
       setPendingDelete(null);
@@ -448,7 +456,7 @@ const DatabaseViewer: React.FC = () => {
   const parseNewRecordValue = useCallback(
     (
       column: ColumnMetadataDto,
-      rawValue: string
+      rawValue: string,
     ): { value: unknown; error?: string } => {
       const trimmed = rawValue.trim();
 
@@ -539,7 +547,7 @@ const DatabaseViewer: React.FC = () => {
             return {
               value: undefined,
               error: `${columnLabel} must be one of: ${column.enumValues.join(
-                ", "
+                ", ",
               )}.`,
             };
           }
@@ -580,7 +588,7 @@ const DatabaseViewer: React.FC = () => {
           return { value: rawValue };
       }
     },
-    []
+    [],
   );
 
   const handleNewRecordInputChange = useCallback(
@@ -608,7 +616,7 @@ const DatabaseViewer: React.FC = () => {
       setNewRecordError(null);
       setNewRecordSuccess(null);
     },
-    [editableColumns, parseNewRecordValue]
+    [editableColumns, parseNewRecordValue],
   );
 
   const handleCreateRecord = useCallback(async () => {
@@ -684,13 +692,15 @@ const DatabaseViewer: React.FC = () => {
         await refreshTableData();
       } else {
         setNewRecordError(
-          (response.error as Error)?.message || "Failed to create record"
+          (response.error as Error)?.message || "Failed to create record",
         );
       }
     } catch (error) {
       console.error("Failed to create record:", error);
       setNewRecordError(
-        error instanceof Error ? error.message : "Unknown error creating record"
+        error instanceof Error
+          ? error.message
+          : "Unknown error creating record",
       );
     } finally {
       setIsCreatingRecord(false);
@@ -710,7 +720,7 @@ const DatabaseViewer: React.FC = () => {
       value: any,
       column: ColumnMetadataDto,
       rowIndex?: number,
-      columnIndex?: number
+      columnIndex?: number,
     ) => {
       let editor: React.ReactNode | null = null;
 
@@ -742,21 +752,56 @@ const DatabaseViewer: React.FC = () => {
 
       let element: React.ReactNode | null = null;
       if (value === null || value === undefined) {
+        const isEditableRelation =
+          column.dataType === "relation" &&
+          !column.isPrimary &&
+          !isInteractionBlocked &&
+          rowIndex !== undefined &&
+          columnIndex !== undefined;
         element = (
-          <span className={cn("text-gray-400", baseClassName)}>null</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className={cn("text-gray-400", baseClassName)}>null</span>
+            {isEditableRelation && (
+              <button
+                type="button"
+                title="Set foreign key"
+                onClick={() => beginEditingCell(rowIndex!, columnIndex!, value)}
+                className="text-gray-400 hover:text-gray-700 cursor-pointer text-xs leading-none"
+              >
+                <Pencil size={12} />
+              </button>
+            )}
+          </span>
         );
       } else {
         switch (column.dataType) {
           case "relation":
             element = (
-              <button
-                onClick={() =>
-                  navigateToRelatedRow(column.relationTarget!, value)
-                }
-                className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
-              >
-                {value}
-              </button>
+              <span className="inline-flex items-center gap-1.5">
+                <button
+                  onClick={() =>
+                    navigateToRelatedRow(column.relationTarget!, value)
+                  }
+                  className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                >
+                  {value}
+                </button>
+                {!column.isPrimary &&
+                  !isInteractionBlocked &&
+                  rowIndex !== undefined &&
+                  columnIndex !== undefined && (
+                    <button
+                      type="button"
+                      title="Edit foreign key"
+                      onClick={() =>
+                        beginEditingCell(rowIndex, columnIndex, value)
+                      }
+                      className="text-gray-400 hover:text-gray-700 cursor-pointer text-xs leading-none"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                  )}
+              </span>
             );
             break;
 
@@ -765,7 +810,7 @@ const DatabaseViewer: React.FC = () => {
               <span
                 className={cn(
                   value ? "text-green-600" : "text-red-600",
-                  baseClassName
+                  baseClassName,
                 )}
               >
                 {value ? "true" : "false"}
@@ -829,7 +874,7 @@ const DatabaseViewer: React.FC = () => {
               <span
                 className={cn(
                   "bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs",
-                  baseClassName
+                  baseClassName,
                 )}
               >
                 {value}
@@ -865,9 +910,10 @@ const DatabaseViewer: React.FC = () => {
       editingCell,
       handleCellSave,
       handleCellCancel,
+      beginEditingCell,
       navigateToRelatedRow,
       isInteractionBlocked,
-    ]
+    ],
   );
 
   return (
@@ -888,7 +934,7 @@ const DatabaseViewer: React.FC = () => {
               "px-4 py-3 text-sm flex items-start justify-between",
               banner.type === "success"
                 ? "border-green-200 bg-[#e4ffd1] text-green-900"
-                : "border-red-200 bg-red-50 text-red-900"
+                : "border-red-200 bg-red-50 text-red-900",
             )}
           >
             <span>{banner.message}</span>
@@ -999,10 +1045,10 @@ const DatabaseViewer: React.FC = () => {
                 pendingUpdate.columnName
               }" from "${describeConfirmValue(
                 pendingUpdate.originalValue,
-                pendingUpdate.originalDisplayValue
+                pendingUpdate.originalDisplayValue,
               )}" to "${describeConfirmValue(
                 pendingUpdate.newValue,
-                pendingUpdate.newDisplayValue
+                pendingUpdate.newDisplayValue,
               )}"?`
             : ""
         }

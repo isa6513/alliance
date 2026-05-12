@@ -2576,6 +2576,10 @@ export type ColumnMetadataDto = {
      */
     isNullable: boolean;
     /**
+     * Whether this column has a database default (explicit default, generated, or create/update/version column). When true, omitting the column on create lets the database fill it in.
+     */
+    hasDefault: boolean;
+    /**
      * Target table name for relation columns
      */
     relationTarget?: string;
@@ -2583,6 +2587,10 @@ export type ColumnMetadataDto = {
      * Type of relation if this is a relation column
      */
     relationType?: 'one-to-one' | 'one-to-many' | 'many-to-one' | 'many-to-many';
+    /**
+     * Semantic data type of the related table primary key, for relation columns
+     */
+    relationTargetPkType?: ColumnDataType;
     /**
      * Possible values for enum columns
      */

@@ -1,17 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityMetadata } from 'typeorm';
+import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 import { ColumnMetadataDto } from './dto/column-metadata.dto';
 import { ColumnDataType } from './dto/column-type.enum';
-import {
-  DeleteRecordsDto,
-  DeleteRecordsResponseDto,
-} from './dto/delete-records.dto';
 import {
   CreateRecordDto,
   CreateRecordResponseDto,
 } from './dto/create-record.dto';
+import {
+  DeleteRecordsDto,
+  DeleteRecordsResponseDto,
+} from './dto/delete-records.dto';
 import { TableDataDto, TableDataQueryDto } from './dto/table-data.dto';
 import { TableListDto, TableMetadataDto } from './dto/table-list.dto';
 import {
@@ -24,7 +29,7 @@ export class AdminViewerService {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
-  ) { }
+  ) {}
 
   async getTables(): Promise<TableListDto> {
     const entityMetadatas = this.dataSource.entityMetadatas;
@@ -222,12 +227,14 @@ export class AdminViewerService {
 
         const convertedValue = this.convertValueForDatabase(value, columnMeta);
 
-        if (convertedValue !== undefined) {
-          columnNames.push(`"${columnName}"`);
-          valuePlaceholders.push(`$${paramIndex}`);
-          values.push(convertedValue);
-          paramIndex++;
+        if (convertedValue === undefined) {
+          continue;
         }
+
+        columnNames.push(`"${columnName}"`);
+        valuePlaceholders.push(`$${paramIndex}`);
+        values.push(convertedValue);
+        paramIndex++;
       }
 
       if (columnNames.length === 0) {
@@ -255,11 +262,17 @@ export class AdminViewerService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
-      if (error instanceof NotFoundException) {
-        throw error;
+      const translated = this.translateDbError(error);
+      if (
+        translated instanceof BadRequestException ||
+        translated instanceof NotFoundException
+      ) {
+        throw translated;
       }
 
-      throw new BadRequestException(`Failed to create record: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to create record: ${error.message}`,
+      );
     } finally {
       await queryRunner.release();
     }
@@ -325,20 +338,16 @@ export class AdminViewerService {
           continue;
         }
 
-        // Skip relation columns for now
-        if (columnMeta.dataType === ColumnDataType.RELATION) {
+        const convertedValue = this.convertValueForDatabase(value, columnMeta);
+
+        if (convertedValue === undefined) {
           continue;
         }
 
-        // Validate and convert value based on data type
-        const convertedValue = this.convertValueForDatabase(value, columnMeta);
-
-        if (convertedValue !== undefined) {
-          updateColumns.push(`"${columnName}" = $${paramIndex}`);
-          updateValues.push(convertedValue);
-          sanitizedUpdates[columnName] = convertedValue;
-          paramIndex++;
-        }
+        updateColumns.push(`"${columnName}" = $${paramIndex}`);
+        updateValues.push(convertedValue);
+        sanitizedUpdates[columnName] = convertedValue;
+        paramIndex++;
       }
 
       if (updateColumns.length === 0) {
@@ -373,11 +382,17 @@ export class AdminViewerService {
       // Rollback transaction on error
       await queryRunner.rollbackTransaction();
 
-      if (error instanceof NotFoundException) {
-        throw error;
+      const translated = this.translateDbError(error);
+      if (
+        translated instanceof BadRequestException ||
+        translated instanceof NotFoundException
+      ) {
+        throw translated;
       }
 
-      throw new Error(`Failed to update record: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to update record: ${error.message}`,
+      );
     } finally {
       await queryRunner.release();
     }
@@ -488,13 +503,41 @@ export class AdminViewerService {
     }
   }
 
+  private translateDbError(error: any): Error {
+    const code = error?.driverError?.code ?? error?.code;
+    const detail = error?.driverError?.detail ?? error?.detail;
+    if (code === '23503') {
+      return new BadRequestException(
+        `Foreign key violation: ${detail ?? error.message}`,
+      );
+    }
+    if (code === '23505') {
+      return new BadRequestException(
+        `Unique constraint violation: ${detail ?? error.message}`,
+      );
+    }
+    if (code === '23502') {
+      return new BadRequestException(
+        `Not-null constraint violation: ${detail ?? error.message}`,
+      );
+    }
+    return error;
+  }
+
   private convertValueForDatabase(
     value: any,
     columnMeta: ColumnMetadataDto,
   ): any {
-    // Handle null values
     if (value === null || value === undefined || value === '') {
-      return columnMeta.isNullable ? null : undefined;
+      if (columnMeta.isNullable) {
+        return null;
+      }
+      if (columnMeta.hasDefault) {
+        return undefined;
+      }
+      throw new BadRequestException(
+        `Column ${columnMeta.name} is not nullable and has no default; cannot set to null`,
+      );
     }
 
     switch (columnMeta.dataType) {
@@ -547,8 +590,60 @@ export class AdminViewerService {
         }
         return String(value);
 
+      case ColumnDataType.RELATION: {
+        if (this.isNumericRelationTarget(columnMeta)) {
+          const fk = Number(value);
+          if (!Number.isInteger(fk)) {
+            throw new BadRequestException(
+              `Invalid foreign key "${value}" for column ${columnMeta.name}: expected an integer id`,
+            );
+          }
+          return fk;
+        }
+        return String(value);
+      }
+
       default:
         return value;
+    }
+  }
+
+  private getRelationTargetPkType(
+    relation: RelationMetadata,
+  ): ColumnDataType | undefined {
+    const pks = relation.inverseEntityMetadata?.primaryColumns;
+    if (!pks || pks.length !== 1) return undefined;
+    const pk = pks[0];
+    let rawType: string;
+    if (typeof pk.type === 'function') {
+      rawType = pk.type.name.toLowerCase();
+    } else if (typeof pk.type === 'string') {
+      rawType = pk.type;
+    } else {
+      return undefined;
+    }
+    const mapped = this.mapColumnType(rawType);
+    return mapped === ColumnDataType.UNKNOWN ? undefined : mapped;
+  }
+
+  private isNumericRelationTarget(columnMeta: ColumnMetadataDto): boolean {
+    const pkType = columnMeta.relationTargetPkType;
+    switch (pkType) {
+      case ColumnDataType.NUMBER:
+        return true;
+      case ColumnDataType.STRING:
+      case ColumnDataType.UUID:
+      case ColumnDataType.BOOLEAN:
+      case ColumnDataType.DATE:
+      case ColumnDataType.DATETIME:
+      case ColumnDataType.JSON:
+      case ColumnDataType.ENUM:
+      case ColumnDataType.RELATION:
+      case ColumnDataType.UNKNOWN:
+      case undefined:
+        return false;
+      default:
+        throw new Error(`unknown kind: ${pkType satisfies never}`);
     }
   }
 
@@ -842,14 +937,23 @@ export class AdminViewerService {
         return `"${column.name}"::text ILIKE $${params.length}`;
       }
       case ColumnDataType.RELATION: {
-        const parts = trimmedValue.split(',').map((p) => p.trim()).filter(Boolean);
+        const parts = trimmedValue
+          .split(',')
+          .map((p) => p.trim())
+          .filter(Boolean);
         if (parts.length > 1) {
           const numerics = parts.map(Number);
           if (numerics.every((n) => !Number.isNaN(n) && Number.isInteger(n))) {
-            const placeholders = numerics.map((n) => { params.push(n); return `$${params.length}`; });
+            const placeholders = numerics.map((n) => {
+              params.push(n);
+              return `$${params.length}`;
+            });
             return `"${column.name}" IN (${placeholders.join(', ')})`;
           }
-          const placeholders = parts.map((p) => { params.push(p); return `$${params.length}`; });
+          const placeholders = parts.map((p) => {
+            params.push(p);
+            return `$${params.length}`;
+          });
           return `"${column.name}"::text IN (${placeholders.join(', ')})`;
         }
         const numericFk = Number(trimmedValue);
@@ -893,12 +997,20 @@ export class AdminViewerService {
 
       const dataType = this.mapColumnType(rawType);
 
+      const hasDefault =
+        column.default !== undefined ||
+        column.isGenerated ||
+        column.isCreateDate ||
+        column.isUpdateDate ||
+        column.isVersion;
+
       columns.push({
         name: column.databaseName,
         dataType,
         rawType,
         isPrimary: column.isPrimary,
         isNullable: column.isNullable,
+        hasDefault,
         enumValues: column.enum
           ? Object.values(column.enum as object)
           : undefined,
@@ -908,6 +1020,7 @@ export class AdminViewerService {
     // Add relation columns
     for (const relation of metadata.relations) {
       if (relation.joinColumns && relation.joinColumns.length > 0) {
+        const relationTargetPkType = this.getRelationTargetPkType(relation);
         // Foreign key columns
         for (const joinColumn of relation.joinColumns) {
           const existingIndex = columns.findIndex(
@@ -923,6 +1036,7 @@ export class AdminViewerService {
               isNullable: relation.isNullable ?? existing.isNullable,
               relationTarget: relation.inverseEntityMetadata.tableName,
               relationType: relation.relationType,
+              relationTargetPkType,
             };
             continue;
           }
@@ -933,8 +1047,10 @@ export class AdminViewerService {
             rawType: 'relation',
             isPrimary: false,
             isNullable: relation.isNullable,
+            hasDefault: false,
             relationTarget: relation.inverseEntityMetadata.tableName,
             relationType: relation.relationType,
+            relationTargetPkType,
           });
         }
       }

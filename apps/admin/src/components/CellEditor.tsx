@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useRef } from "react";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
 import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
+import React, { useEffect, useRef, useState } from "react";
 import {
   isTimeOnlyColumn,
   normalizeTimeValue,
@@ -32,7 +32,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
       return typeof value === "string" ? value : JSON.stringify(value, null, 2);
     }
 
-    return timeOnlyColumn ? normalizeTimeValue(value) ?? "" : value;
+    return timeOnlyColumn ? (normalizeTimeValue(value) ?? "") : value;
   });
   const [jsonError, setJsonError] = useState<string | null>(null);
   const inputRef = useRef<
@@ -129,12 +129,22 @@ const CellEditor: React.FC<CellEditorProps> = ({
   };
 
   const parseValueFromInput = (inputVal: string): any => {
+    inputVal = inputVal.trim();
+
     if (inputVal === "") return null;
 
     switch (column.dataType) {
       case "number": {
         const num = Number(inputVal);
         return isNaN(num) ? inputVal : num;
+      }
+
+      case "relation": {
+        if (column.relationTargetPkType === "number") {
+          const num = Number(inputVal);
+          return isNaN(num) ? inputVal : num;
+        }
+        return inputVal;
       }
 
       case "boolean":
@@ -205,6 +215,25 @@ const CellEditor: React.FC<CellEditorProps> = ({
           />
         );
 
+      case "relation": {
+        const isNumericFk = column.relationTargetPkType === "number";
+        return (
+          <input
+            {...commonProps}
+            type={isNumericFk ? "number" : "text"}
+            step={isNumericFk ? "1" : undefined}
+            min={isNumericFk ? 1 : undefined}
+            value={formatValueForInput(editValue)}
+            placeholder={
+              column.relationTarget
+                ? `${column.relationTarget} id (empty = null)`
+                : "id (empty = null)"
+            }
+            onChange={(e) => setEditValue(parseValueFromInput(e.target.value))}
+          />
+        );
+      }
+
       case "date":
         return (
           <DateTimePicker
@@ -249,7 +278,7 @@ const CellEditor: React.FC<CellEditorProps> = ({
         const jsonValue = formatValueForInput(editValue);
         const lineCount = Math.min(
           Math.max(3, jsonValue.split("\n").length || 1),
-          60
+          60,
         );
         return (
           <textarea

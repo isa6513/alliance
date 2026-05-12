@@ -29,6 +29,12 @@ export class ColumnMetadataDto {
   })
   isNullable: boolean;
 
+  @ApiProperty({
+    description:
+      'Whether this column has a database default (explicit default, generated, or create/update/version column). When true, omitting the column on create lets the database fill it in.',
+  })
+  hasDefault: boolean;
+
   @ApiPropertyOptional({
     required: false,
     description: 'Target table name for relation columns',
@@ -41,6 +47,15 @@ export class ColumnMetadataDto {
     description: 'Type of relation if this is a relation column',
   })
   relationType?: 'one-to-one' | 'one-to-many' | 'many-to-one' | 'many-to-many';
+
+  @ApiPropertyOptional({
+    required: false,
+    enum: ColumnDataType,
+    enumName: 'ColumnDataType',
+    description:
+      'Semantic data type of the related table primary key, for relation columns',
+  })
+  relationTargetPkType?: ColumnDataType;
 
   @ApiPropertyOptional({
     required: false,
