@@ -25,6 +25,7 @@ import FeaturedImpactCard from "../../components/FeaturedImpactCard";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
 import { ChevronRight } from "lucide-react";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import AllianceIntroYouTubeEmbed from "../../components/AllianceIntroYouTubeEmbed";
 import Footer from "../../components/Footer";
 
 function formatSignupSocialProofNames(
@@ -409,6 +410,9 @@ const SignupPage: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+            <div className="w-full">
+              <AllianceIntroYouTubeEmbed />
             </div>
             <div className="flex flex-col">
               <h2 className="font-semibold text-2xl md:text-3xl font-serif mb-2">

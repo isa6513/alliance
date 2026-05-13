@@ -1,17 +1,18 @@
-import React from "react";
-import { useQueries } from "@tanstack/react-query";
-import { Link } from "react-router";
-import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import alliancePeople from "../../assets/alliance_people.webp";
-import { userFindOne } from "@alliance/shared/client";
 import type { ProfileDto } from "@alliance/shared/client";
-import Footer from "../../components/Footer";
+import { userFindOne } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import { useQueries } from "@tanstack/react-query";
+import { ArrowRight } from "lucide-react";
+import React from "react";
+import { Link } from "react-router";
+import alliancePeople from "../../assets/alliance_people.webp";
+import AllianceIntroYouTubeEmbed from "../../components/AllianceIntroYouTubeEmbed";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
 import FeaturedImpactCard from "../../components/FeaturedImpactCard";
+import Footer from "../../components/Footer";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import { ArrowRight } from "lucide-react";
-import { cn } from "@alliance/shared/styles/util";
 
 /** Shared width + horizontal padding for all landing content. */
 const LANDING_MAIN_COL = "mx-auto w-full max-w-5xl px-4 sm:px-10 lg:px-16";
@@ -217,6 +218,13 @@ const PrelaunchLandingPage: React.FC = () => {
             <ExamplePriorityCardList titleClass="text-lg lg:text-xl" />
           </div>
         </section>
+
+        <section className="w-full bg-white">
+          <div className={LANDING_MAIN_COL}>
+            <AllianceIntroYouTubeEmbed />
+          </div>
+        </section>
+
         <section className="w-full bg-white">
           <div className={LANDING_SECTION}>
             <div className="flex flex-col gap-4">
