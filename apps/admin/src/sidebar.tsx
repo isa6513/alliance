@@ -19,14 +19,15 @@ import {
   FileText,
   Film,
   ImageUp,
-  Link2,
   ListOrdered,
   Map,
   MessageSquare,
   MoreHorizontal,
   Newspaper,
   ScrollText,
+  Share2,
   SquareActivity,
+  SquareMousePointer,
   TowerControl,
   UserPlus,
   Users,
@@ -308,7 +309,12 @@ const Sidebar: React.FC = () => {
                   {
                     to: "/share-targets",
                     label: "Share Targets",
-                    icon: <Link2 size={16} />,
+                    icon: <SquareMousePointer size={16} />,
+                  },
+                  {
+                    to: "/share-links",
+                    label: "Share Links",
+                    icon: <Share2 size={16} />,
                   },
                 ].map((link) => (
                   <Link

@@ -39,6 +39,25 @@ type GetOrCreateInput =
       userId: number;
     };
 
+type BuildRowInput = GetOrCreateInput & {
+  duplicate: boolean;
+  label?: string | null;
+};
+
+function assertExactlyOneTarget(
+  actionId: number | undefined,
+  externalTargetId: number | undefined,
+): void {
+  if (
+    (actionId === undefined && externalTargetId === undefined) ||
+    (actionId !== undefined && externalTargetId !== undefined)
+  ) {
+    throw new BadRequestException(
+      'Exactly one of actionId or externalTargetId must be provided',
+    );
+  }
+}
+
 @Injectable()
 export class ShareUrlsService {
   constructor(
@@ -54,19 +73,94 @@ export class ShareUrlsService {
     externalTargetId?: number;
   }): Promise<string> {
     const { userId, actionId, externalTargetId } = params;
-    if (
-      (actionId === undefined && externalTargetId === undefined) ||
-      (actionId !== undefined && externalTargetId !== undefined)
-    ) {
-      throw new BadRequestException(
-        'Exactly one of actionId or externalTargetId must be provided',
-      );
-    }
+    assertExactlyOneTarget(actionId, externalTargetId);
     const shareUrl =
       externalTargetId !== undefined
         ? await this.getOrCreateForExternalTargetId(externalTargetId, userId)
         : await this.getOrCreateForAction(actionId!, userId);
     return shareUrl.url;
+  }
+
+  async createDuplicate(params: {
+    userId: number;
+    actionId?: number;
+    externalTargetId?: number;
+    label?: string;
+  }): Promise<ShareUrl> {
+    const { userId, actionId, externalTargetId, label } = params;
+    assertExactlyOneTarget(actionId, externalTargetId);
+    const trimmedLabel = label?.trim();
+    const labelValue = trimmedLabel ? trimmedLabel : null;
+    if (externalTargetId !== undefined) {
+      return this.createDuplicateForExternalTargetId(
+        externalTargetId,
+        userId,
+        labelValue,
+      );
+    }
+    return this.createDuplicateForAction(actionId!, userId, labelValue);
+  }
+
+  private async createDuplicateForExternalTargetId(
+    externalTargetId: number,
+    userId: number,
+    label: string | null,
+  ): Promise<ShareUrl> {
+    return this.shareUrlRepository.manager.transaction(async (m) => {
+      const target = await m.findOne(ExternalShareTarget, {
+        where: { id: externalTargetId },
+        lock: { mode: 'pessimistic_read' },
+      });
+      if (!target) {
+        throw new NotFoundException('specified share target not found');
+      }
+      return this.buildAndSaveRow(m, {
+        kind: ShareUrlKind.ExternalTarget,
+        externalTarget: target,
+        userId,
+        duplicate: true,
+        label,
+      });
+    });
+  }
+
+  private async createDuplicateForAction(
+    actionId: number,
+    userId: number,
+    label: string | null,
+  ): Promise<ShareUrl> {
+    return this.buildAndSaveRow(this.shareUrlRepository.manager, {
+      kind: ShareUrlKind.Action,
+      actionId,
+      userId,
+      duplicate: true,
+      label,
+    });
+  }
+
+  async findForUser(userId: number): Promise<ShareUrl[]> {
+    return this.shareUrlRepository.find({
+      where: { user: { id: userId } },
+      relations: { action: true, externalTarget: true },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async updateLabel(
+    id: string,
+    rawLabel: string | undefined,
+  ): Promise<ShareUrl> {
+    const trimmed = rawLabel?.trim();
+    const nextLabel = trimmed ? trimmed : null;
+    const row = await this.shareUrlRepository.findOne({
+      where: { id },
+      relations: { action: true, externalTarget: true },
+    });
+    if (!row) {
+      throw new NotFoundException('share url not found');
+    }
+    row.label = nextLabel;
+    return this.shareUrlRepository.save(row);
   }
 
   private async getOrCreateForExternalTargetId(
@@ -171,11 +265,13 @@ export class ShareUrlsService {
           return {
             user: { id: input.userId },
             action: { id: input.actionId },
+            duplicate: false,
           };
         case ShareUrlKind.ExternalTarget:
           return {
             user: { id: input.userId },
             externalTarget: { id: input.externalTarget.id },
+            duplicate: false,
           };
         default:
           throw new Error(
@@ -188,6 +284,30 @@ export class ShareUrlsService {
       return existing;
     }
 
+    try {
+      return await this.buildAndSaveRow(manager, {
+        ...input,
+        duplicate: false,
+      });
+    } catch (err) {
+      if (err instanceof QueryFailedError) {
+        const code = (err as { code?: string }).code;
+        if (code === '23505') {
+          const winner = await repo.findOne({ where });
+          if (winner) {
+            return winner;
+          }
+        }
+      }
+      throw err;
+    }
+  }
+
+  private async buildAndSaveRow(
+    manager: EntityManager,
+    input: BuildRowInput,
+  ): Promise<ShareUrl> {
+    const repo = manager.getRepository(ShareUrl);
     const sid = generateCIDForShareUrl();
     const built = await run(
       async (): Promise<{
@@ -221,7 +341,7 @@ export class ShareUrlsService {
             };
           default:
             throw new Error(
-              `getOrCreate: unknown share url kind: ${input satisfies never}`,
+              `buildAndSaveRow: unknown share url kind: ${input satisfies never}`,
             );
         }
       },
@@ -234,22 +354,18 @@ export class ShareUrlsService {
       externalTarget: built.externalTarget,
       sid,
       data: { sid },
+      duplicate: input.duplicate,
+      label: input.label ?? null,
     });
 
     try {
       return await repo.save(shareUrl);
     } catch (err) {
-      if (err instanceof QueryFailedError) {
-        const code = (err as { code?: string }).code;
-        if (code === '23505') {
-          const winner = await repo.findOne({ where });
-          if (winner) {
-            return winner;
-          }
-        }
-        if (code === '23503') {
-          throw new NotFoundException(NOT_FOUND_MESSAGE[input.kind]);
-        }
+      if (
+        err instanceof QueryFailedError &&
+        (err as { code?: string }).code === '23503'
+      ) {
+        throw new NotFoundException(NOT_FOUND_MESSAGE[input.kind]);
       }
       throw err;
     }

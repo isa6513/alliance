@@ -246,6 +246,319 @@ describe('Share URLs (e2e)', () => {
     });
   });
 
+  describe('POST /share-urls/create-duplicate', () => {
+    const sidOf = (url: string): string => {
+      const match = /share-[a-f0-9]{10}/.exec(url);
+      if (!match) throw new Error(`No sid in url: ${url}`);
+      return match[0];
+    };
+
+    it('returns 401 without auth', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .send({ userId: ctx.testUserId, actionId: action.id })
+        .expect(401);
+    });
+
+    it('returns 401 for non-admin', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ userId: ctx.testUserId, actionId: action.id })
+        .expect(401);
+    });
+
+    it('admin creates an action duplicate with a fresh sid and label', async () => {
+      const first = await request(ctx.app.getHttpServer())
+        .post('/share-urls/get-share-link')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ actionId: action.id })
+        .expect(201);
+
+      const dup = await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, actionId: action.id, label: 'Alice' })
+        .expect(201);
+
+      expect(sidOf(dup.body.url)).not.toBe(sidOf(first.body.url));
+      expect(dup.body.url).toMatch(
+        new RegExp(`/actions/${action.id}\\?sid=share-[a-f0-9]{10}$`),
+      );
+      expect(dup.body.duplicate).toBe(true);
+      expect(dup.body.label).toBe('Alice');
+      expect(dup.body.action?.id).toBe(action.id);
+
+      const rows = await shareUrlRepo.find({
+        where: { user: { id: ctx.testUserId }, action: { id: action.id } },
+      });
+      expect(rows.length).toBe(2);
+      expect(rows.filter((r) => r.duplicate).length).toBe(1);
+    });
+
+    it('omits label when not provided (stored as null)', async () => {
+      const dup = await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, actionId: action.id })
+        .expect(201);
+      expect(dup.body.label).toBeNull();
+    });
+
+    it('whitespace-only label is stored as null', async () => {
+      const dup = await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, actionId: action.id, label: '   ' })
+        .expect(201);
+      expect(dup.body.label).toBeNull();
+    });
+
+    it('admin creates an external-target duplicate with a fresh sid', async () => {
+      const first = await request(ctx.app.getHttpServer())
+        .post('/share-urls/get-share-link')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ externalTargetId: target.id })
+        .expect(201);
+
+      const dup = await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, externalTargetId: target.id })
+        .expect(201);
+
+      expect(sidOf(dup.body.url)).not.toBe(sidOf(first.body.url));
+      expect(dup.body.url).toMatch(
+        /^https:\/\/example\.com\/route\?code=share-[a-f0-9]{10}$/,
+      );
+    });
+
+    it('two duplicates for the same (user, action) get distinct sids', async () => {
+      const a = await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, actionId: action.id })
+        .expect(201);
+      const b = await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, actionId: action.id })
+        .expect(201);
+      expect(sidOf(a.body.url)).not.toBe(sidOf(b.body.url));
+    });
+
+    it('get-share-link still returns the canonical sid after duplicates exist', async () => {
+      const canonical = await request(ctx.app.getHttpServer())
+        .post('/share-urls/get-share-link')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ actionId: action.id })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, actionId: action.id })
+        .expect(201);
+
+      const again = await request(ctx.app.getHttpServer())
+        .post('/share-urls/get-share-link')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ actionId: action.id })
+        .expect(201);
+
+      expect(sidOf(again.body.url)).toBe(sidOf(canonical.body.url));
+    });
+
+    it('returns 400 when neither actionId nor externalTargetId is set', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId })
+        .expect(400);
+    });
+
+    it('returns 400 when both actionId and externalTargetId are set', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          userId: ctx.testUserId,
+          actionId: action.id,
+          externalTargetId: target.id,
+        })
+        .expect(400);
+    });
+
+    it('returns 404 for a non-existent actionId', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, actionId: 999999 })
+        .expect(404);
+    });
+
+    it('returns 404 for a non-existent externalTargetId', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, externalTargetId: 999999 })
+        .expect(404);
+    });
+  });
+
+  describe('GET /share-urls/for-user/:userId', () => {
+    it('returns 401 without auth', async () => {
+      await request(ctx.app.getHttpServer())
+        .get(`/share-urls/for-user/${ctx.testUserId}`)
+        .expect(401);
+    });
+
+    it('returns 401 for non-admin', async () => {
+      await request(ctx.app.getHttpServer())
+        .get(`/share-urls/for-user/${ctx.testUserId}`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .expect(401);
+    });
+
+    it('returns an empty list when the user has no share urls', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .get(`/share-urls/for-user/${ctx.testUserId}`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
+    });
+
+    it('returns canonical + duplicate rows with joined targets and labels', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/get-share-link')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ actionId: action.id })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, actionId: action.id, label: 'Bob' })
+        .expect(201);
+
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({
+          userId: ctx.testUserId,
+          externalTargetId: target.id,
+          label: 'Carol',
+        })
+        .expect(201);
+
+      const res = await request(ctx.app.getHttpServer())
+        .get(`/share-urls/for-user/${ctx.testUserId}`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .expect(200);
+
+      expect(res.body.length).toBe(3);
+      const canonicalAction = res.body.find(
+        (r: { duplicate: boolean; action: { id: number } | null }) =>
+          !r.duplicate && r.action?.id === action.id,
+      );
+      const dupAction = res.body.find(
+        (r: {
+          duplicate: boolean;
+          label: string | null;
+          action: { id: number } | null;
+        }) => r.duplicate && r.action?.id === action.id && r.label === 'Bob',
+      );
+      const dupExternal = res.body.find(
+        (r: {
+          duplicate: boolean;
+          label: string | null;
+          externalTarget: { id: number } | null;
+        }) =>
+          r.duplicate &&
+          r.externalTarget?.id === target.id &&
+          r.label === 'Carol',
+      );
+
+      expect(canonicalAction).toBeDefined();
+      expect(canonicalAction.action.name).toBe(action.name);
+      expect(canonicalAction.label).toBeNull();
+      expect(dupAction).toBeDefined();
+      expect(dupExternal).toBeDefined();
+      expect(dupExternal.externalTarget.name).toBe(target.name);
+    });
+  });
+
+  describe('PATCH /share-urls/:id/label', () => {
+    const createDuplicateWithLabel = async (label: string): Promise<string> => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, actionId: action.id, label })
+        .expect(201);
+      return res.body.id as string;
+    };
+
+    it('returns 401 without auth', async () => {
+      const id = await createDuplicateWithLabel('orig');
+      await request(ctx.app.getHttpServer())
+        .patch(`/share-urls/${id}/label`)
+        .send({ label: 'new' })
+        .expect(401);
+    });
+
+    it('returns 401 for non-admin', async () => {
+      const id = await createDuplicateWithLabel('orig');
+      await request(ctx.app.getHttpServer())
+        .patch(`/share-urls/${id}/label`)
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ label: 'new' })
+        .expect(401);
+    });
+
+    it('updates the label and returns the updated row', async () => {
+      const id = await createDuplicateWithLabel('orig');
+      const res = await request(ctx.app.getHttpServer())
+        .patch(`/share-urls/${id}/label`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ label: 'Alice' })
+        .expect(200);
+      expect(res.body.id).toBe(id);
+      expect(res.body.label).toBe('Alice');
+
+      const row = await shareUrlRepo.findOne({ where: { id } });
+      expect(row?.label).toBe('Alice');
+    });
+
+    it('clears the label when sent an empty string', async () => {
+      const id = await createDuplicateWithLabel('orig');
+      const res = await request(ctx.app.getHttpServer())
+        .patch(`/share-urls/${id}/label`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ label: '' })
+        .expect(200);
+      expect(res.body.label).toBeNull();
+    });
+
+    it('whitespace-only label clears it', async () => {
+      const id = await createDuplicateWithLabel('orig');
+      const res = await request(ctx.app.getHttpServer())
+        .patch(`/share-urls/${id}/label`)
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ label: '   ' })
+        .expect(200);
+      expect(res.body.label).toBeNull();
+    });
+
+    it('returns 404 for an unknown id', async () => {
+      await request(ctx.app.getHttpServer())
+        .patch('/share-urls/00000000-0000-0000-0000-000000000000/label')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ label: 'whatever' })
+        .expect(404);
+    });
+  });
+
   describe('admin CRUD: /external-share-targets', () => {
     it('GET (admin) returns the list', async () => {
       const res = await request(ctx.app.getHttpServer())

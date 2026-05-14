@@ -24,11 +24,11 @@ import { ExternalShareTarget } from './external-share-target.entity';
 )
 @Index('UQ_share_url_user_action', ['user', 'action'], {
   unique: true,
-  where: '"actionId" IS NOT NULL',
+  where: '"actionId" IS NOT NULL AND "duplicate" = false',
 })
 @Index('UQ_share_url_user_external_target', ['user', 'externalTarget'], {
   unique: true,
-  where: '"externalTargetId" IS NOT NULL',
+  where: '"externalTargetId" IS NOT NULL AND "duplicate" = false',
 })
 export class ShareUrl {
   @PrimaryGeneratedColumn('uuid')
@@ -59,6 +59,19 @@ export class ShareUrl {
   @Column({ nullable: true })
   @ApiPropertyOptional()
   sid?: string;
+
+  @Column({ default: false })
+  @ApiProperty({
+    description:
+      'When true, this row is an additional share URL for the same (user, action) or (user, externalTarget) — only set by the admin "create duplicate share link" endpoint, used to hand out distinct trackable links to different recruits for the same target. Most rows have this set to false.',
+  })
+  duplicate: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  @ApiProperty({
+    description: 'Human-readable name, only viewable in the admin panel',
+  })
+  label: string | null;
 
   @CreateDateColumnTz()
   createdAt: Date;

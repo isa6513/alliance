@@ -971,6 +971,44 @@ export type ShareLinkDto = {
     url: string;
 };
 
+export type CreateDuplicateShareLinkDto = {
+    userId: number;
+    actionId?: number;
+    externalTargetId?: number;
+    /**
+     * Optional label to distinguish this duplicate at a glance.
+     */
+    label?: string;
+};
+
+export type ShareUrlAdminActionDto = {
+    id: number;
+    name: string;
+};
+
+export type ShareUrlAdminExternalTargetDto = {
+    id: number;
+    name: string;
+};
+
+export type ShareUrlAdminDto = {
+    id: string;
+    sid?: string;
+    url: string;
+    duplicate: boolean;
+    label: string | null;
+    createdAt: string;
+    action?: ShareUrlAdminActionDto | null;
+    externalTarget?: ShareUrlAdminExternalTargetDto | null;
+};
+
+export type UpdateShareLinkLabelDto = {
+    /**
+     * New label for the share URL. Send an empty string or omit to clear.
+     */
+    label?: string;
+};
+
 export type ExternalShareTargetDto = {
     id: number;
     name: string;
@@ -4137,6 +4175,49 @@ export type ShareUrlsGetShareLinkResponses = {
 };
 
 export type ShareUrlsGetShareLinkResponse = ShareUrlsGetShareLinkResponses[keyof ShareUrlsGetShareLinkResponses];
+
+export type ShareUrlsCreateDuplicateData = {
+    body: CreateDuplicateShareLinkDto;
+    path?: never;
+    query?: never;
+    url: '/share-urls/create-duplicate';
+};
+
+export type ShareUrlsCreateDuplicateResponses = {
+    200: ShareUrlAdminDto;
+};
+
+export type ShareUrlsCreateDuplicateResponse = ShareUrlsCreateDuplicateResponses[keyof ShareUrlsCreateDuplicateResponses];
+
+export type ShareUrlsFindForUserData = {
+    body?: never;
+    path: {
+        userId: number;
+    };
+    query?: never;
+    url: '/share-urls/for-user/{userId}';
+};
+
+export type ShareUrlsFindForUserResponses = {
+    200: Array<ShareUrlAdminDto>;
+};
+
+export type ShareUrlsFindForUserResponse = ShareUrlsFindForUserResponses[keyof ShareUrlsFindForUserResponses];
+
+export type ShareUrlsUpdateLabelData = {
+    body: UpdateShareLinkLabelDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/share-urls/{id}/label';
+};
+
+export type ShareUrlsUpdateLabelResponses = {
+    200: ShareUrlAdminDto;
+};
+
+export type ShareUrlsUpdateLabelResponse = ShareUrlsUpdateLabelResponses[keyof ShareUrlsUpdateLabelResponses];
 
 export type ExternalShareTargetsFindAllData = {
     body?: never;

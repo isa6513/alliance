@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import {
   createContext,
   type CSSProperties,
@@ -7,10 +8,10 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
-import { cn } from "@alliance/shared/styles/util";
 
 type ToastVariant = "info" | "success" | "error" | "warning" | "confirm";
 
@@ -107,7 +108,7 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setTimeout(() => removeToast(id), durationMs);
       }
     },
-    [removeToast]
+    [removeToast],
   );
 
   const confirm = useCallback(
@@ -144,7 +145,7 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setToasts((prev) => [...prev, toast]);
       });
     },
-    []
+    [],
   );
 
   const handleConfirm = useCallback(
@@ -152,19 +153,34 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
       toast.resolve(value);
       removeToast(toast.id);
     },
-    [removeToast]
+    [removeToast],
   );
 
-  const value: ToastContextValue = {
-    showToast,
-    success: (message, title) =>
+  const success = useCallback(
+    (message: string, title?: string) =>
       showToast({ variant: "success", message, title }),
-    error: (message, title) => showToast({ variant: "error", message, title }),
-    info: (message, title) => showToast({ variant: "info", message, title }),
-    warning: (message, title) =>
+    [showToast],
+  );
+  const error = useCallback(
+    (message: string, title?: string) =>
+      showToast({ variant: "error", message, title }),
+    [showToast],
+  );
+  const info = useCallback(
+    (message: string, title?: string) =>
+      showToast({ variant: "info", message, title }),
+    [showToast],
+  );
+  const warning = useCallback(
+    (message: string, title?: string) =>
       showToast({ variant: "warning", message, title }),
-    confirm,
-  };
+    [showToast],
+  );
+
+  const value = useMemo<ToastContextValue>(
+    () => ({ showToast, success, error, info, warning, confirm }),
+    [showToast, success, error, info, warning, confirm],
+  );
 
   return (
     <ToastContext.Provider value={value}>
@@ -206,16 +222,16 @@ const DefaultToastItem: FC<DefaultToastItemProps> = ({ toast, onDismiss }) => {
     toast.variant === "success"
       ? "bg-emerald-600 text-white"
       : toast.variant === "error"
-      ? "bg-white text-red-500 border border-red-500"
-      : toast.variant === "warning"
-      ? "bg-amber-500 text-white"
-      : "bg-slate-700 text-white";
+        ? "bg-white text-red-500 border border-red-500"
+        : toast.variant === "warning"
+          ? "bg-amber-500 text-white"
+          : "bg-slate-700 text-white";
 
   return (
     <div
       className={cn(
         "pointer-events-auto mb-2 w-full max-w-sm rounded-xl shadow-lg ring-1 ring-black/5",
-        colorClasses
+        colorClasses,
       )}
     >
       <div className="flex items-start gap-3 px-4 py-3">
@@ -257,14 +273,14 @@ const ConfirmToastItem: FC<ConfirmToastItemProps> = ({ toast, onConfirm }) => {
     confirmLabelTone === "delete"
       ? "bg-red-600 text-white hover:bg-red-700"
       : confirmLabelTone === "create"
-      ? "bg-green text-white hover:bg-green-700"
-      : "bg-zinc-900 text-white hover:bg-zinc-800";
+        ? "bg-green text-white hover:bg-green-700"
+        : "bg-zinc-900 text-white hover:bg-zinc-800";
   const popoverConfirmTextClass =
     confirmLabelTone === "delete"
       ? "text-red-500"
       : confirmLabelTone === "create"
-      ? "text-emerald-600"
-      : "text-black";
+        ? "text-emerald-600"
+        : "text-black";
 
   const handleConfirmClick = () => {
     if (confirmDisabled) {
@@ -341,7 +357,7 @@ const ConfirmToastItem: FC<ConfirmToastItemProps> = ({ toast, onConfirm }) => {
             "rounded-md px-4 py-2 text-sm font-semibold transition",
             confirmDisabled
               ? "cursor-not-allowed bg-zinc-200 text-zinc-400"
-              : confirmAccentClass
+              : confirmAccentClass,
           )}
           onClick={handleConfirmClick}
           disabled={confirmDisabled}
@@ -464,7 +480,7 @@ const ConfirmToastItem: FC<ConfirmToastItemProps> = ({ toast, onConfirm }) => {
           className={cn(
             "rounded-md px-3 py-1 font-medium hover:bg-zinc-100",
             popoverConfirmTextClass,
-            confirmDisabled && "cursor-not-allowed opacity-60"
+            confirmDisabled && "cursor-not-allowed opacity-60",
           )}
           onClick={handleConfirmClick}
           disabled={confirmDisabled}
