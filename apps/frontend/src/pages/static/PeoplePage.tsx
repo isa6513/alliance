@@ -3,13 +3,13 @@ import {
   userMembersPublic,
   userNmembers,
 } from "@alliance/shared/client";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import React, { useEffect, useMemo, useState } from "react";
+import { useLoaderData } from "react-router";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import PublicMemberDirectoryCard from "../../components/PublicMemberDirectoryCard";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
-import { useLoaderData } from "react-router";
 
 const LANDING_MAIN_COL = "mx-auto w-full max-w-5xl px-6 sm:px-10 lg:px-16";
 const LANDING_BIG_COL = "mx-auto px-6 sm:px-10 lg:px-16 max-w-7xl w-full";
@@ -74,6 +74,10 @@ const PeoplePage: React.FC = () => {
       name: "Durwood Zaelke",
       description:
         "President, Institute for Governance & Sustainable Development",
+    },
+    {
+      name: "Dustin Palmer",
+      description: "Executive Director, US Programs at GiveDirectly",
     },
     {
       name: "Tom Luben",
