@@ -15,6 +15,7 @@ import {
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { GeneralUpdateActivity } from 'src/actions/entities/general-update-activity.entity';
+import { Cluster } from 'src/cluster/entities/cluster.entity';
 import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 import { Community } from 'src/community/entities/community.entity';
 import {
@@ -417,6 +418,15 @@ export class User {
 
   @OneToMany(() => UserDevice, (device) => device.user)
   devices: Relation<UserDevice>[];
+
+  @ManyToOne(() => Cluster, (cluster) => cluster.members, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @ApiPropertyOptional({ type: () => Cluster, nullable: true })
+  @Type(() => Cluster)
+  @IsOptional()
+  cluster?: Relation<Cluster> | null;
 
   // Methods
 

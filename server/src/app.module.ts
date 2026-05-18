@@ -13,6 +13,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { ApnsModule } from './apns/apns.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
+import { ClusterModule } from './cluster/cluster.module';
 import { CommunityModule } from './community/community.module';
 import { ContractModule } from './contract/contract.module';
 import { connectionOptions } from './datasources/dataSource';
@@ -66,6 +67,7 @@ import { VideosModule } from './videos/videos.module';
     UserModule,
     CommunityModule,
     ContractModule,
+    ClusterModule,
     TypeOrmModule.forRoot({ ...connectionOptions(), autoLoadEntities: true }),
     ScheduleModule.forRoot(),
     ActionsModule,

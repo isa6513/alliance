@@ -1,0 +1,161 @@
+// Pure clustering algorithm. No DB or framework dependencies — IO lives in the
+// service, this file is the math.
+//
+// Scoring is lexicographic: friend pairs are forbidden outright (no cluster may
+// contain two users who are friends). Among friend-safe placements, maximize
+// the number of in-cluster pairs that share at least one community.
+
+export const CLUSTER_TARGET_SIZE = 10;
+const MAX_REFINEMENT_PASSES = 50;
+
+export interface ClusterUser {
+  id: number;
+  communities: Set<number>;
+  friends: Set<number>;
+}
+
+function sharesCommunity(a: ClusterUser, b: ClusterUser): boolean {
+  for (const c of a.communities) if (b.communities.has(c)) return true;
+  return false;
+}
+
+function hasFriendIn(
+  u: ClusterUser,
+  others: ClusterUser[],
+  excludeIdx: number,
+): boolean {
+  for (let k = 0; k < others.length; k++) {
+    if (k === excludeIdx) continue;
+    if (u.friends.has(others[k].id)) return true;
+  }
+  return false;
+}
+
+// Returns the community-match score for adding `candidate` to `cluster`, or
+// -Infinity if the candidate is friends with any current member (forbidden).
+function scoreAdd(candidate: ClusterUser, cluster: ClusterUser[]): number {
+  let s = 0;
+  for (const m of cluster) {
+    if (candidate.friends.has(m.id)) return -Infinity;
+    if (sharesCommunity(candidate, m)) s++;
+  }
+  return s;
+}
+
+function shuffleInPlace<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Greedy + hill-climbing refinement for an entire fresh pool of users.
+export function bulkAssign(users: ClusterUser[]): ClusterUser[][] {
+  const clusters = greedyAssign(users);
+  refine(clusters);
+  return clusters;
+}
+
+function greedyAssign(users: ClusterUser[]): ClusterUser[][] {
+  // Seed hardest-to-place users first: those in fewest communities.
+  const seedOrder = shuffleInPlace([...users]);
+  seedOrder.sort((a, b) => a.communities.size - b.communities.size);
+
+  const remaining = new Set(users.map((u) => u.id));
+  const byId = new Map(users.map((u) => [u.id, u]));
+  const clusters: ClusterUser[][] = [];
+
+  for (const seed of seedOrder) {
+    if (!remaining.has(seed.id)) continue;
+    const cluster: ClusterUser[] = [seed];
+    remaining.delete(seed.id);
+
+    while (cluster.length < CLUSTER_TARGET_SIZE && remaining.size > 0) {
+      let bestId: number | null = null;
+      let bestScore = -Infinity;
+      for (const id of remaining) {
+        const cand = byId.get(id)!;
+        const s = scoreAdd(cand, cluster);
+        if (s === -Infinity) continue;
+        if (s > bestScore) {
+          bestScore = s;
+          bestId = id;
+        }
+      }
+      if (bestId === null) break;
+      cluster.push(byId.get(bestId)!);
+      remaining.delete(bestId);
+    }
+    clusters.push(cluster);
+  }
+  return clusters;
+}
+
+function refine(clusters: ClusterUser[][]): void {
+  let passes = 0;
+  while (passes < MAX_REFINEMENT_PASSES) {
+    passes++;
+    let bestDelta = 0;
+    let bestSwap: [number, number, number, number] | null = null;
+
+    for (let ca = 0; ca < clusters.length; ca++) {
+      for (let cb = ca + 1; cb < clusters.length; cb++) {
+        const A = clusters[ca];
+        const B = clusters[cb];
+        for (let i = 0; i < A.length; i++) {
+          const ai = A[i];
+          for (let j = 0; j < B.length; j++) {
+            const bj = B[j];
+            if (hasFriendIn(bj, A, i)) continue;
+            if (hasFriendIn(ai, B, j)) continue;
+            let cur = 0;
+            let next = 0;
+            for (let k = 0; k < A.length; k++) {
+              if (k === i) continue;
+              if (sharesCommunity(ai, A[k])) cur++;
+              if (sharesCommunity(bj, A[k])) next++;
+            }
+            for (let k = 0; k < B.length; k++) {
+              if (k === j) continue;
+              if (sharesCommunity(bj, B[k])) cur++;
+              if (sharesCommunity(ai, B[k])) next++;
+            }
+            const delta = next - cur;
+            if (delta > bestDelta) {
+              bestDelta = delta;
+              bestSwap = [ca, i, cb, j];
+            }
+          }
+        }
+      }
+    }
+
+    if (!bestSwap || bestDelta <= 0) break;
+    const [ca, i, cb, j] = bestSwap;
+    [clusters[ca][i], clusters[cb][j]] = [clusters[cb][j], clusters[ca][i]];
+  }
+}
+
+// Returns the index of the cluster in `existingClusters` that `newUser` should
+// join, or null if every cluster contains a friend (caller should create a new
+// singleton cluster). Ties break toward smaller clusters.
+export function placeIncremental(
+  newUser: ClusterUser,
+  existingClusters: ClusterUser[][],
+): number | null {
+  let bestIdx: number | null = null;
+  let bestScore = -Infinity;
+  let bestSize = Infinity;
+  for (let idx = 0; idx < existingClusters.length; idx++) {
+    const cluster = existingClusters[idx];
+    const s = scoreAdd(newUser, cluster);
+    if (s === -Infinity) continue;
+    if (s > bestScore || (s === bestScore && cluster.length < bestSize)) {
+      bestScore = s;
+      bestSize = cluster.length;
+      bestIdx = idx;
+    }
+  }
+  return bestIdx;
+}
