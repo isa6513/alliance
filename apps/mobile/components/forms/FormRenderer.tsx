@@ -1,23 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  Linking,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setStringAsync as setClipboardStringAsync } from "expo-clipboard";
-import AppMarkdownWrapper from "../AppMarkdownWrapper";
-import type { UserDto } from "@alliance/shared/client";
-import {
-  FormResponseDto,
-  SubmitFormDto,
-  tasksGetForm,
-  tasksGetMyFormResponse,
-  tasksRunValidator,
-} from "@alliance/shared/client";
+import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import type {
   BigLinkIcon,
   DisplayBlock,
@@ -30,7 +11,14 @@ import {
   type FormValue,
   type VisibleIfFormula,
 } from "@alliance/common/forms/form-schema";
-import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
+import type { UserDto } from "@alliance/shared/client";
+import {
+  FormResponseDto,
+  SubmitFormDto,
+  tasksGetForm,
+  tasksGetMyFormResponse,
+  tasksRunValidator,
+} from "@alliance/shared/client";
 import {
   applyDefaultValues,
   computeFormStorageKey,
@@ -39,26 +27,37 @@ import {
   resolveFieldDefaultValue,
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
-import { RenderField } from "./RenderField";
-import FormModal from "./FormModal";
-import RenderPreviousAnswer from "./RenderPreviousAnswer";
-import VideoPlayer from "./VideoPlayer";
-import Button, { ButtonColor, ButtonSize } from "../system/Button";
-import Checkbox from "../system/Checkbox";
+import { outputFieldPublicToggle } from "@alliance/shared/lib/copy";
+import { cn } from "@alliance/shared/styles/util";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setStringAsync as setClipboardStringAsync } from "expo-clipboard";
 import {
   Check,
   CircleCheck,
   Copy,
   Ellipsis,
-  MessagesSquare,
-  FileText,
-  FileCheck,
-  Signature,
   File,
+  FileCheck,
+  FileText,
+  MessagesSquare,
+  Signature,
 } from "lucide-react-native";
-import { cn } from "@alliance/shared/styles/util";
-import { outputFieldPublicToggle } from "@alliance/shared/lib/copy";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import AppMarkdownWrapper, { useHandleLinkPress } from "../AppMarkdownWrapper";
+import Button, { ButtonColor, ButtonSize } from "../system/Button";
+import Checkbox from "../system/Checkbox";
 import Text, { FontWeight } from "../system/Text";
+import FormModal from "./FormModal";
+import { RenderField } from "./RenderField";
+import RenderPreviousAnswer from "./RenderPreviousAnswer";
+import VideoPlayer from "./VideoPlayer";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -157,6 +156,7 @@ export function RenderDisplayBlockMobile({
   hasRenderedNeighborBelow = false,
   user,
 }: RenderDisplayBlockMobileProps) {
+  const handleLinkPress = useHandleLinkPress();
   switch (block.kind) {
     case "header":
       const headerClass = {
@@ -226,7 +226,7 @@ export function RenderDisplayBlockMobile({
       return (
         <TouchableOpacity
           className="flex-row items-center gap-3 rounded-lg border border-zinc-200 bg-white px-5 py-4 mr-3"
-          onPress={() => Linking.openURL(block.url)}
+          onPress={() => handleLinkPress(block.url)}
         >
           <IconComponent size={20} />
           <View className="">
