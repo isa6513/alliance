@@ -79,9 +79,9 @@ BEGIN
   FOR resp IN
     SELECT fr.id       AS resp_id,
            fr.answers  AS answers,
-           f.schema    AS form_schema
+           fs.schema   AS form_schema
     FROM   form_response fr
-    JOIN   form f ON f.id = fr."formId"
+    JOIN   form_snapshot fs ON fs.id = fr."formSnapshotId"
     WHERE  fr.answers IS NOT NULL
       AND  fr.answers != '{}'::jsonb
   LOOP
