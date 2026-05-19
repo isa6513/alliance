@@ -1,8 +1,9 @@
+import { ClusterSummaryDto } from "@alliance/shared/client";
 import { cn } from "@alliance/shared/styles/util";
 import { Earth, UserCircle } from "lucide-react-native";
 import { View } from "react-native";
 import { colors } from "../lib/style/colors";
-import ClusterTag, { ClusterTagInfo } from "./ClusterTag";
+import ClusterTag from "./ClusterTag";
 import Text, { FontWeight } from "./system/Text";
 
 interface UserDisplayNameProps {
@@ -11,7 +12,7 @@ interface UserDisplayNameProps {
   grouplead?: boolean;
   expert?: boolean;
   expertLabel?: string;
-  cluster?: ClusterTagInfo | null;
+  cluster?: ClusterSummaryDto | null;
   sameClusterAsViewer?: boolean;
   small?: boolean;
   className?: string;

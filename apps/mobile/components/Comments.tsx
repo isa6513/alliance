@@ -46,7 +46,6 @@ export interface CommentsProps {
   expertIds?: number[];
   expertLabel?: string;
   showClusterTags?: boolean;
-  showUserBadges?: boolean;
 }
 
 const uploadAttachments = async (attachments: string[]) => {
@@ -136,7 +135,6 @@ type ReplyItemSharedProps = {
   expertIds: number[];
   expertLabel?: string;
   showClusterTags: boolean;
-  showUserBadges: boolean;
   onSubmitReply: (
     content: CreateEditableContentDto,
     parentId?: number | null,
@@ -234,7 +232,8 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
           <ProfileImage pfp={reply.author.profilePicture} size="small" />
           <UserDisplayName
             name={reply.author.displayName}
-            staff={shared.showUserBadges && reply.author.staff}
+            staff={reply.author.staff}
+            grouplead={reply.author.isCommunityLeader}
             expert={shared.expertIds.includes(reply.author.id)}
             expertLabel={shared.expertLabel}
             cluster={shared.showClusterTags ? reply.author.cluster : null}
@@ -402,7 +401,6 @@ export default function Comments({
   expertIds: expertIdsProp = [],
   expertLabel,
   showClusterTags = false,
-  showUserBadges = true,
 }: CommentsProps) {
   const expertIds = qaMode ? expertIdsProp : [];
   const { user } = useAuth();
@@ -687,7 +685,6 @@ export default function Comments({
               expertIds={expertIds}
               expertLabel={expertLabel}
               showClusterTags={showClusterTags}
-              showUserBadges={showUserBadges}
               onSubmitReply={handleSubmitReply}
               onUpdateReply={handleUpdateReply}
               onDeleteReply={handleDeleteReply}

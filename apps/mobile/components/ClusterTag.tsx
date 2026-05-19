@@ -2,11 +2,6 @@ import { cn } from "@alliance/shared/styles/util";
 import { View } from "react-native";
 import Text from "./system/Text";
 
-export interface ClusterTagInfo {
-  id: number;
-  displayName: string;
-}
-
 interface ClusterTagProps {
   name: string;
   sameAsViewer: boolean;
