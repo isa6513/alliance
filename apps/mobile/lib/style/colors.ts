@@ -2,6 +2,8 @@ export const colors = {
   green: "#62a124",
   blue: "#318dde",
   white: "#fff",
+  staff: "#399ee6",
+  grouplead: "#f2ae49",
 
   // Primary colors
   primary: "#333333", // Dark primary

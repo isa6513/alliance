@@ -1,25 +1,26 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, TouchableOpacity, View } from "react-native";
-import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
-import { router, useLocalSearchParams } from "expo-router";
 import {
   forumFindOnePost,
   forumRemovePost,
   PostDto,
 } from "@alliance/shared/client";
 import { usePostLikeMutation } from "@alliance/shared/lib/usePostLikeMutation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatTime } from "@alliance/shared/lib/utils";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { router, useLocalSearchParams } from "expo-router";
 import { Pin } from "lucide-react-native";
-import { useAuth } from "../../../../lib/AuthContext";
-import ProfileImage from "../../../../components/ProfileImage";
-import Text, { FontWeight } from "../../../../components/system/Text";
-import { colors } from "../../../../lib/style/colors";
-import EditableContentRenderer from "../../../../components/EditableContentRenderer";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Alert, TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import Comments from "../../../../components/Comments";
-import LikeButton from "../../../../components/LikeButton";
+import EditableContentRenderer from "../../../../components/EditableContentRenderer";
 import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
+import LikeButton from "../../../../components/LikeButton";
+import ProfileImage from "../../../../components/ProfileImage";
 import BackButton from "../../../../components/system/BackButton";
+import Text, { FontWeight } from "../../../../components/system/Text";
+import UserDisplayName from "../../../../components/UserDisplayName";
+import { useAuth } from "../../../../lib/AuthContext";
+import { colors } from "../../../../lib/style/colors";
 
 const renderAvatar = (author: PostDto["author"]) => {
   return <ProfileImage pfp={author.profilePicture} size="small" />;
@@ -151,13 +152,15 @@ export default function PostDetailScreen() {
 
           <View className="flex-row flex-wrap items-center gap-x-2 mt-2">
             {renderAvatar(post.author)}
+            <UserDisplayName
+              name={post.author.displayName}
+              staff={post.author.staff}
+              grouplead={post.author.isCommunityLeader}
+            />
             <Text className="text-sm text-zinc-500">
-              <Text className="text-zinc-700" weight={FontWeight.Medium}>
-                {post.author.displayName}
-              </Text>
-              {` ${formatTime(new Date(post.createdAt), {
+              {formatTime(new Date(post.createdAt), {
                 addSuffix: true,
-              })}`}
+              })}
             </Text>
             {action && (
               <TouchableOpacity
@@ -199,6 +202,10 @@ export default function PostDetailScreen() {
             highlightedReplyId={highlightedReplyId}
             scrollViewRef={scrollViewRef}
             repliesAsCards={false}
+            qaMode={post.qaMode}
+            expertIds={post.expertIds ?? []}
+            expertLabel={post.expertLabel}
+            showClusterTags={post.showClusterTags}
           />
         </View>
       </View>

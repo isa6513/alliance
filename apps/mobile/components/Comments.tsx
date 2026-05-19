@@ -1,6 +1,3 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
-import type { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import {
   CommentDto,
   CommentParentObject,
@@ -16,19 +13,23 @@ import {
   forumUpdateComment,
   imagesUploadImage,
 } from "@alliance/shared/client";
-import { formatTime } from "@alliance/shared/lib/utils";
+import { useCommentLikeMutation } from "@alliance/shared/lib/useCommentLikeMutation";
 import { useMarkUnreadContentRead } from "@alliance/shared/lib/useUnreadContentRead";
+import { formatTime } from "@alliance/shared/lib/utils";
+import { cn } from "@alliance/shared/styles/util";
+import { useQueryClient } from "@tanstack/react-query";
 import { Pin } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert, TouchableOpacity, View } from "react-native";
+import type { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import { useAuth } from "../lib/AuthContext";
+import { colors } from "../lib/style/colors";
 import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
 import LikeButton from "./LikeButton";
 import ProfileImage from "./ProfileImage";
-import Text, { FontWeight } from "./system/Text";
-import { colors } from "../lib/style/colors";
-import { cn } from "@alliance/shared/styles/util";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCommentLikeMutation } from "@alliance/shared/lib/useCommentLikeMutation";
+import Text from "./system/Text";
+import UserDisplayName from "./UserDisplayName";
 
 export interface CommentsProps {
   objectId: number;
@@ -41,6 +42,11 @@ export interface CommentsProps {
   highlightedReplyId?: number | null;
   scrollViewRef?: React.RefObject<KeyboardAwareScrollViewRef | null>;
   repliesAsCards?: boolean;
+  qaMode?: boolean;
+  expertIds?: number[];
+  expertLabel?: string;
+  showClusterTags?: boolean;
+  showUserBadges?: boolean;
 }
 
 const uploadAttachments = async (attachments: string[]) => {
@@ -127,6 +133,10 @@ type ReplyItemSharedProps = {
   scrollViewRef?: React.RefObject<KeyboardAwareScrollViewRef | null>;
   newlyAddedReplies: Set<number>;
   user: UserDto | undefined;
+  expertIds: number[];
+  expertLabel?: string;
+  showClusterTags: boolean;
+  showUserBadges: boolean;
   onSubmitReply: (
     content: CreateEditableContentDto,
     parentId?: number | null,
@@ -220,18 +230,22 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
       )}
     >
       <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-x-2">
+        <View className="flex-row items-center gap-x-2 flex-1 flex-wrap">
           <ProfileImage pfp={reply.author.profilePicture} size="small" />
+          <UserDisplayName
+            name={reply.author.displayName}
+            staff={shared.showUserBadges && reply.author.staff}
+            expert={shared.expertIds.includes(reply.author.id)}
+            expertLabel={shared.expertLabel}
+            cluster={shared.showClusterTags ? reply.author.cluster : null}
+            sameClusterAsViewer={
+              !!reply.author.cluster &&
+              reply.author.cluster.id === shared.user?.clusterId
+            }
+            small={shared.small}
+          />
           <Text className={cn("text-zinc-500", metaTextClass)}>
-            <Text
-              className={cn("text-zinc-700", metaTextClass)}
-              weight={FontWeight.Medium}
-            >
-              {reply.author.displayName}
-            </Text>
-            {` ${formatTime(new Date(reply.createdAt), {
-              addSuffix: true,
-            })}`}
+            {formatTime(new Date(reply.createdAt), { addSuffix: true })}
           </Text>
           {hasChildren && isCollapsed && (
             <Text
@@ -384,7 +398,13 @@ export default function Comments({
   highlightedReplyId,
   scrollViewRef,
   repliesAsCards = false,
+  qaMode = false,
+  expertIds: expertIdsProp = [],
+  expertLabel,
+  showClusterTags = false,
+  showUserBadges = true,
 }: CommentsProps) {
+  const expertIds = qaMode ? expertIdsProp : [];
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [editableContent, setEditableContent] =
@@ -664,6 +684,10 @@ export default function Comments({
               scrollViewRef={scrollViewRef}
               newlyAddedReplies={newlyAddedReplies}
               user={user}
+              expertIds={expertIds}
+              expertLabel={expertLabel}
+              showClusterTags={showClusterTags}
+              showUserBadges={showUserBadges}
               onSubmitReply={handleSubmitReply}
               onUpdateReply={handleUpdateReply}
               onDeleteReply={handleDeleteReply}
