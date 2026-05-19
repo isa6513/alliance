@@ -1,10 +1,3 @@
-// Pure clustering algorithm. No DB or framework dependencies — IO lives in the
-// service, this file is the math.
-//
-// Scoring is lexicographic: friend pairs are forbidden outright (no cluster may
-// contain two users who are friends). Among friend-safe placements, maximize
-// the number of in-cluster pairs that share at least one community.
-
 export const CLUSTER_TARGET_SIZE = 10;
 const MAX_REFINEMENT_PASSES = 50;
 
@@ -31,8 +24,6 @@ function hasFriendIn(
   return false;
 }
 
-// Returns the community-match score for adding `candidate` to `cluster`, or
-// -Infinity if the candidate is friends with any current member (forbidden).
 function scoreAdd(candidate: ClusterUser, cluster: ClusterUser[]): number {
   let s = 0;
   for (const m of cluster) {
@@ -50,7 +41,6 @@ function shuffleInPlace<T>(arr: T[]): T[] {
   return arr;
 }
 
-// Greedy + hill-climbing refinement for an entire fresh pool of users.
 export function bulkAssign(users: ClusterUser[]): ClusterUser[][] {
   const clusters = greedyAssign(users);
   refine(clusters);
@@ -58,7 +48,16 @@ export function bulkAssign(users: ClusterUser[]): ClusterUser[][] {
 }
 
 function greedyAssign(users: ClusterUser[]): ClusterUser[][] {
-  // Seed hardest-to-place users first: those in fewest communities.
+  if (users.length === 0) return [];
+
+  // Fix cluster count upfront so sizes stay near-equal; filling each cluster
+  // to TARGET before the next would strand friend-blocked users in a tiny tail.
+  const numClusters = Math.max(
+    1,
+    Math.ceil(users.length / CLUSTER_TARGET_SIZE),
+  );
+
+  // Seed hardest-to-place users first (fewest communities to match on).
   const seedOrder = shuffleInPlace([...users]);
   seedOrder.sort((a, b) => a.communities.size - b.communities.size);
 
@@ -68,10 +67,15 @@ function greedyAssign(users: ClusterUser[]): ClusterUser[][] {
 
   for (const seed of seedOrder) {
     if (!remaining.has(seed.id)) continue;
+    if (clusters.length >= numClusters) break;
     const cluster: ClusterUser[] = [seed];
     remaining.delete(seed.id);
 
-    while (cluster.length < CLUSTER_TARGET_SIZE && remaining.size > 0) {
+    // Recomputed per cluster so later clusters absorb earlier shortfalls.
+    const clustersLeft = numClusters - clusters.length;
+    const target = Math.ceil((remaining.size + cluster.length) / clustersLeft);
+
+    while (cluster.length < target && remaining.size > 0) {
       let bestId: number | null = null;
       let bestScore = -Infinity;
       for (const id of remaining) {
@@ -89,6 +93,26 @@ function greedyAssign(users: ClusterUser[]): ClusterUser[][] {
     }
     clusters.push(cluster);
   }
+
+  // Slight over-target placement beats singletons for friend-blocked leftovers.
+  for (const id of remaining) {
+    const u = byId.get(id)!;
+    let bestIdx: number | null = null;
+    let bestSize = Infinity;
+    for (let idx = 0; idx < clusters.length; idx++) {
+      if (scoreAdd(u, clusters[idx]) === -Infinity) continue;
+      if (clusters[idx].length < bestSize) {
+        bestSize = clusters[idx].length;
+        bestIdx = idx;
+      }
+    }
+    if (bestIdx !== null) {
+      clusters[bestIdx].push(u);
+    } else {
+      clusters.push([u]);
+    }
+  }
+
   return clusters;
 }
 
@@ -137,9 +161,7 @@ function refine(clusters: ClusterUser[][]): void {
   }
 }
 
-// Returns the index of the cluster in `existingClusters` that `newUser` should
-// join, or null if every cluster contains a friend (caller should create a new
-// singleton cluster). Ties break toward smaller clusters.
+// Null = no friend-safe cluster; caller should create a new one.
 export function placeIncremental(
   newUser: ClusterUser,
   existingClusters: ClusterUser[][],
