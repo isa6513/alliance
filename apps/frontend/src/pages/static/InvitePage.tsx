@@ -130,7 +130,7 @@ const InvitePage: React.FC = () => {
               </li>
               <li>
                 We provided actionable feedback on the websites of three
-                potential partner non-profits.
+                potential partner nonprofits.
               </li>
               <li>We voted on proposals for a small grant.</li>
             </ol>
@@ -140,8 +140,8 @@ const InvitePage: React.FC = () => {
                 <LargeActionCard
                   action={exampleMemberTaskAction}
                   userRelation={"none"}
-                  onUpdateActionState={() => {}}
-                  onCompleteAction={() => {}}
+                  onUpdateActionState={() => { }}
+                  onCompleteAction={() => { }}
                   showDetails={false}
                   className="pointer-events-none transform-[scale(0.9)] bg-white"
                 />
