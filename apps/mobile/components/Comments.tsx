@@ -422,6 +422,7 @@ export default function Comments({
     attachments: [],
   });
   const [showForm, setShowForm] = useState(showFormProp);
+  const [isComposing, setIsComposing] = useState(!!autofocus);
 
   useEffect(() => {
     setShowForm(showFormProp);
@@ -499,6 +500,7 @@ export default function Comments({
         setEditableContent({ body: "", attachments: [] });
         setNestedDraft({ body: "", attachments: [] });
         setReplyingTo(null);
+        setIsComposing(false);
         setError(null);
       } catch (err) {
         console.error("Error posting reply:", err);
@@ -643,15 +645,26 @@ export default function Comments({
   return (
     <View className="gap-y-3">
       {user && !replyingTo && showForm ? (
-        <ReplyForm
-          parentId={null}
-          content={editableContent}
-          setContent={setEditableContent}
-          autofocus={autofocus}
-          objectId={objectId}
-          isSubmitting={isSubmitting}
-          onSubmit={handleSubmitReply}
-        />
+        isComposing ? (
+          <ReplyForm
+            parentId={null}
+            content={editableContent}
+            setContent={setEditableContent}
+            autofocus
+            onCancel={() => setIsComposing(false)}
+            objectId={objectId}
+            isSubmitting={isSubmitting}
+            onSubmit={handleSubmitReply}
+          />
+        ) : (
+          <TouchableOpacity
+            onPress={() => setIsComposing(true)}
+            activeOpacity={0.7}
+            className="p-3 bg-zinc-100 rounded"
+          >
+            <Text className="text-zinc-500">Add a comment...</Text>
+          </TouchableOpacity>
+        )
       ) : !user && !compact ? (
         <View className="py-6 bg-zinc-50 rounded border border-zinc-100">
           <Text className="text-zinc-600 text-center">
