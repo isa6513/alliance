@@ -32,7 +32,7 @@ const PeoplePage: React.FC = () => {
       7: "Sidney Hough",
       64: "Charles Lien",
       11: "Grant Hough",
-      127: "Alex Hockett",
+      38: "Akash Borde",
     };
   }, []);
 
