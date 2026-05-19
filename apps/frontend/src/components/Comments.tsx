@@ -4,14 +4,8 @@ import {
   communityGetMyCommunities,
   userListFriends,
 } from "@alliance/shared/client";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { Link, href } from "react-router";
-import { useAuth } from "../lib/AuthContext";
-import ReplyComponent, { countAllReplies } from "./forum/ReplyComponent";
-import ReplyForm from "./forum/ReplyForm";
-import { CommentsProvider, useCommentTree } from "./forum/CommentsContext";
-import { ArrowUpDown } from "lucide-react";
+import { useOptionalNotifications } from "@alliance/shared/lib/useNotifications";
+import { useMarkUnreadContentRead } from "@alliance/shared/lib/useUnreadContentRead";
 import { cn } from "@alliance/shared/styles/util";
 import BaseButton, {
   BaseButtonVariant,
@@ -22,8 +16,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@alliance/sharedweb/ui/DropdownMenu";
-import { useMarkUnreadContentRead } from "@alliance/shared/lib/useUnreadContentRead";
-import { useOptionalNotifications } from "@alliance/shared/lib/useNotifications";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowUpDown } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Link, href } from "react-router";
+import { useAuth } from "../lib/AuthContext";
+import { CommentsProvider, useCommentTree } from "./forum/CommentsContext";
+import ReplyComponent, { countAllReplies } from "./forum/ReplyComponent";
+import ReplyForm from "./forum/ReplyForm";
 
 export type CommentFilter =
   | "all"
@@ -42,6 +42,7 @@ export interface CommentsProps {
   initialComments?: CommentDto[];
   expertIds?: number[];
   expertLabel?: string;
+  showClusterTags?: boolean;
   qaMode?: boolean;
   className?: string;
   showUserBadges?: boolean;
@@ -59,7 +60,7 @@ const hasExpertReply = (comment: CommentDto, expertIds: number[]): boolean => {
 
 const hasExpertChildReply = (
   comment: CommentDto,
-  expertIds: number[]
+  expertIds: number[],
 ): boolean => {
   if (!comment.children) return false;
   return comment.children.some((child) => hasExpertReply(child, expertIds));
@@ -129,6 +130,7 @@ const Comments = ({
   initialComments,
   expertIds = [],
   expertLabel,
+  showClusterTags = false,
   qaMode = false,
   className,
   showUserBadges = true,
@@ -145,7 +147,7 @@ const Comments = ({
 
   const commentIds = useMemo(
     () => collectCommentIds(tree.comments ?? []),
-    [tree.comments]
+    [tree.comments],
   );
 
   useMarkUnreadContentRead({
@@ -161,7 +163,7 @@ const Comments = ({
     queryKey: ["userListFriends", user?.id],
     queryFn: () =>
       userListFriends({ path: { id: user!.id } }).then((res) =>
-        (res.data ?? []).map((friend) => friend.id)
+        (res.data ?? []).map((friend) => friend.id),
       ),
     enabled: !!user && type === "post",
   });
@@ -184,22 +186,22 @@ const Comments = ({
   const friendIdSet = useMemo(() => new Set(friendIds), [friendIds]);
   const groupMemberIdSet = useMemo(
     () => new Set(groupMemberIds),
-    [groupMemberIds]
+    [groupMemberIds],
   );
 
   const topLevelComments = useMemo(
     () =>
       (tree.comments ?? []).filter(
-        (comment) => !comment.deleted || comment.children?.length
+        (comment) => !comment.deleted || comment.children?.length,
       ),
-    [tree.comments]
+    [tree.comments],
   );
 
   const hasMineComments = useMemo(
     () =>
       !!user &&
       topLevelComments.some((comment) => comment.author.id === user.id),
-    [topLevelComments, user]
+    [topLevelComments, user],
   );
 
   const filterOptions = useMemo(() => {
@@ -262,14 +264,14 @@ const Comments = ({
 
       return true;
     },
-    [activeQaMode, expertIds, user, friendIdSet, groupMemberIdSet]
+    [activeQaMode, expertIds, user, friendIdSet, groupMemberIdSet],
   );
 
   const commentCounts = useMemo(() => {
     const counts = {} as Record<CommentFilter, number>;
     for (const filter of filterOptions) {
       counts[filter] = topLevelComments.filter((comment) =>
-        matchesFilter(comment, filter)
+        matchesFilter(comment, filter),
       ).length;
     }
     return counts;
@@ -319,6 +321,7 @@ const Comments = ({
       highlightedReplyId: tree.highlightedReplyId,
       expertIds,
       expertLabel,
+      showClusterTags,
       compact,
       showUserBadges,
     }),
@@ -336,9 +339,10 @@ const Comments = ({
       tree.highlightedReplyId,
       expertIds,
       expertLabel,
+      showClusterTags,
       compact,
       showUserBadges,
-    ]
+    ],
   );
 
   return (
@@ -379,7 +383,7 @@ const Comments = ({
                       "px-3 py-2 rounded",
                       commentFilter === filter
                         ? "bg-zinc-200/70 text-black font-medium"
-                        : "text-zinc-600"
+                        : "text-zinc-600",
                     )}
                   >
                     {commentFilterLabels[filter]} ({commentCounts[filter] ?? 0})

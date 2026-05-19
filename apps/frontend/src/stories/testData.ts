@@ -146,6 +146,7 @@ export const testAuthUser: UserDto = {
   leaderOfIds: [],
   pushesForMessages: true,
   pushesForActionUpdates: true,
+  clusterId: null,
 };
 
 export const testFriends: ProfileDto[] = [testUser, testUser, testUser];
@@ -170,6 +171,7 @@ export const testForumPosts: PostDto[] = [
     expertIds: [],
     authorIds: [],
     notifyForReplies: false,
+    showClusterTags: false,
   },
 ];
 

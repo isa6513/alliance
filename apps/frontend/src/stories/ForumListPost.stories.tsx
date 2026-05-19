@@ -1,7 +1,7 @@
-import { Meta, StoryObj } from "@storybook/react";
-import ForumListPost from "../components/ForumListPost";
 import { PostDto } from "@alliance/shared/client";
 import List from "@alliance/sharedweb/ui/List";
+import { Meta, StoryObj } from "@storybook/react";
+import ForumListPost from "../components/ForumListPost";
 
 const samplePost: PostDto = {
   id: 1,
@@ -30,6 +30,7 @@ const samplePost: PostDto = {
   expertIds: [],
   authorIds: [],
   notifyForReplies: false,
+  showClusterTags: false,
 };
 
 export const ManyPosts: Story = {

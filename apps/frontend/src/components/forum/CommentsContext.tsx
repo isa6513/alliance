@@ -12,6 +12,7 @@ import {
   forumUpdateComment,
   UserDto,
 } from "@alliance/shared/client";
+import { useCommentLikeMutation } from "@alliance/shared/lib/useCommentLikeMutation";
 import posthog from "posthog-js";
 import {
   createContext,
@@ -23,7 +24,6 @@ import {
 import { useSearchParams } from "react-router";
 import { useAuth } from "../../lib/AuthContext";
 import { uploadAttachments } from "../../lib/uploadAttachments";
-import { useCommentLikeMutation } from "@alliance/shared/lib/useCommentLikeMutation";
 
 interface CommentsContextValue {
   user?: UserDto;
@@ -45,6 +45,7 @@ interface CommentsContextValue {
   highlightedReplyId: number | null;
   expertIds: number[];
   expertLabel?: string;
+  showClusterTags?: boolean;
   compact?: boolean;
   showUserBadges?: boolean;
 }

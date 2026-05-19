@@ -39,6 +39,7 @@ export const FORM_BUILDER_PREVIEW_USER: UserDto = {
   leaderOfIds: [],
   receiveReplyNotifications: false,
   pushesForActionUpdates: false,
+  clusterId: null,
 };
 
 export const testActions: CreateActionDto[] = [

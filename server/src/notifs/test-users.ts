@@ -1,3 +1,4 @@
+import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import {
   ForumDigestPreference,
   NotificationPreference,
@@ -5,7 +6,6 @@ import {
   ReferralSource,
   User,
 } from 'src/user/entities/user.entity';
-import { ContractEventType } from 'src/user/entities/contract-event.entity';
 
 export const testUser = new User({
   id: -1,
@@ -82,6 +82,7 @@ export const testUser = new User({
   receiveReplyNotifications: true,
   pushesForMessages: true,
   pushesForActionUpdates: true,
+  clusterId: null,
 } satisfies Omit<
   User,
   | 'friends'

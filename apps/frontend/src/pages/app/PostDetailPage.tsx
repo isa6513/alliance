@@ -1,25 +1,22 @@
-import {
-  forumFindOnePost,
-  forumRemovePost,
-} from "@alliance/shared/client";
+import { forumFindOnePost, forumRemovePost } from "@alliance/shared/client";
 import { formatFullDateTime } from "@alliance/shared/lib/dateFormatters";
-import Card from "@alliance/sharedweb/ui/Card";
+import { usePostLikeMutation } from "@alliance/shared/lib/usePostLikeMutation";
+import { formatTime } from "@alliance/shared/lib/utils";
+import { CardStyle } from "@alliance/shared/styles/card";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import Card from "@alliance/sharedweb/ui/Card";
+import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import React, { useState } from "react";
 import { Link, href, useNavigate, useParams } from "react-router";
 import Comments from "../../components/Comments";
 import PostLikeButton from "../../components/PostLikeButton";
-import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
-import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import { useAuth } from "../../lib/AuthContext";
-import { formatTime } from "@alliance/shared/lib/utils";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useCIDFromParams } from "../../lib/utils";
-import { CardStyle } from "@alliance/shared/styles/card";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { usePostLikeMutation } from "@alliance/shared/lib/usePostLikeMutation";
-import { ArrowLeft } from "lucide-react";
 
 const PostDetailPage: React.FC = () => {
   const { id: postId } = useParams<{ id: string }>();
@@ -222,6 +219,7 @@ const PostDetailPage: React.FC = () => {
           qaMode={post.qaMode}
           expertIds={post.qaMode ? (post.expertIds ?? []) : []}
           expertLabel={post.qaMode ? post.expertLabel : undefined}
+          showClusterTags={post.showClusterTags}
           className="px-2 md:px-4"
         />
       </div>

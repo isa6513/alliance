@@ -1,19 +1,20 @@
 import { CommentDto } from "@alliance/shared/client";
-import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
+import { cn } from "@alliance/shared/styles/util";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import { formatDistanceToNow } from "date-fns";
-import { useState } from "react";
-import CommentLikeButton from "../CommentLikeButton";
-import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
+import ClusterTag from "@alliance/sharedweb/ui/ClusterTag";
 import EditableContentForm from "@alliance/sharedweb/ui/EditableContentForm";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
-import ReplyForm from "./ReplyForm";
+import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
+import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
+import { formatDistanceToNow } from "date-fns";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { Link, href } from "react-router";
+import { useCommentEditing } from "../../hooks/useCommentEditing";
+import CommentLikeButton from "../CommentLikeButton";
 import CommentActionsMenu from "./CommentActionsMenu";
 import { useCommentsContext } from "./CommentsContext";
-import { useCommentEditing } from "../../hooks/useCommentEditing";
-import { Link, href } from "react-router";
-import { ChevronDown } from "lucide-react";
-import { cn } from "@alliance/shared/styles/util";
+import ReplyForm from "./ReplyForm";
 
 const INDENT_PX = 40;
 
@@ -55,7 +56,13 @@ const ReplyContent = ({
   onToggleCollapse,
 }: ReplyContentProps) => {
   const ctx = useCommentsContext();
-  const { user, compact = false, expertIds = [], expertLabel } = ctx;
+  const {
+    user,
+    compact = false,
+    expertIds = [],
+    expertLabel,
+    showClusterTags = false,
+  } = ctx;
   const isExpert = expertIds.includes(reply.author.id);
   const editing = useCommentEditing(reply, ctx.onUpdateReply);
 
@@ -88,6 +95,13 @@ const ReplyContent = ({
                 >
                   {reply.author.displayName}
                 </UserDisplayName>
+                {showClusterTags && reply.author.cluster && (
+                  <ClusterTag
+                    name={reply.author.cluster.displayName}
+                    sameAsViewer={reply.author.cluster.id === user?.clusterId}
+                    className="ml-1"
+                  />
+                )}
               </Link>
               <span className="text-zinc-500 text-sm">
                 {formatDistanceToNow(new Date(reply.createdAt), {
@@ -100,7 +114,7 @@ const ReplyContent = ({
                 onClick={onToggleCollapse}
                 className={cn(
                   "text-black cursor-pointer transition-transform duration-200",
-                  isCollapsed ? "-rotate-90" : "rotate-0"
+                  isCollapsed ? "-rotate-90" : "rotate-0",
                 )}
                 aria-label={isCollapsed ? "Expand" : "Collapse"}
               >
@@ -170,7 +184,7 @@ const ReplyContent = ({
                 handleLike={() =>
                   ctx.onLikeReply(
                     reply.id,
-                    reply.likes.some((like) => like.id === user?.id)
+                    reply.likes.some((like) => like.id === user?.id),
                   )
                 }
               />
@@ -225,7 +239,7 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
   const newReplyClass = isNewlyAdded ? "!bg-green/10" : "";
 
   const filteredChildren = (reply.children ?? []).filter(
-    (child) => !child.deleted || child.children?.length
+    (child) => !child.deleted || child.children?.length,
   );
 
   const renderChildren = () => {
@@ -239,7 +253,7 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
             <div
               className={cn(
                 ctx.compact ? "my-3" : "my-3 sm:my-4",
-                "-mx-2 sm:-mx-4"
+                "-mx-2 sm:-mx-4",
               )}
             />
             <ReplyComponent reply={childReply} depth={depth + 1} />
@@ -294,7 +308,7 @@ const ReplyComponent = ({ reply, depth = 0 }: ReplyComponentProps) => {
           "!display-block transition-colors duration-1000",
           newReplyClass,
           ctx.compact ? "!p-1 !border-none" : "!py-2 sm:!py-4",
-          ctx.user && isReplyingToThis && !isCollapsed && "rounded-b-none"
+          ctx.user && isReplyingToThis && !isCollapsed && "rounded-b-none",
         )}
       >
         <div id={`reply-${reply.id}`}>{replyContent}</div>

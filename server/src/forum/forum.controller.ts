@@ -11,10 +11,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import type { JwtPayload } from 'src/auth/guards/jwtreq';
-import type { JwtRequest } from 'src/auth/guards/jwtreq';
+import type { JwtPayload, JwtRequest } from 'src/auth/guards/jwtreq';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { ReqUser } from '../auth/user.decorator';
 import {
   CommentDto,
@@ -25,8 +24,8 @@ import {
 import {
   CreatePostDto,
   PostDto,
-  UpdatePostDto,
   UpdatePostAuthorsDto,
+  UpdatePostDto,
   UpdatePostExpertsDto,
 } from './dto/post.dto';
 import { ForumService } from './forum.service';
@@ -276,6 +275,7 @@ export class ForumController {
       updatePostExpertsDto.qaMode,
       updatePostExpertsDto.expertLabel,
       updatePostExpertsDto.notifyForReplies,
+      updatePostExpertsDto.showClusterTags,
     );
     return new PostDto({ post });
   }

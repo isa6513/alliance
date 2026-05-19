@@ -8,13 +8,13 @@ import { Type } from 'class-transformer';
 import { IsDefined, IsOptional, ValidateNested } from 'class-validator';
 import { ActionDto } from 'src/actions/dto/action.dto';
 import { ProfileDto } from '../../user/dto/user.dto';
+import { Comment } from '../entities/comment.entity';
 import { Post } from '../entities/post.entity';
+import { CommentDto } from './comment.dto';
 import {
   CreateEditableContentDto,
   EditableContentDto,
 } from './editablecontent.dto';
-import { CommentDto } from './comment.dto';
-import { Comment } from '../entities/comment.entity';
 
 // return object for get requests
 export class PostDto extends PickType(Post, [
@@ -32,6 +32,7 @@ export class PostDto extends PickType(Post, [
   'expertLabel',
   'authorIds',
   'notifyForReplies',
+  'showClusterTags',
 ]) {
   //redefine to use compacted dto types
   @ApiPropertyOptional({ type: () => ActionDto })
@@ -77,6 +78,7 @@ export class PostDto extends PickType(Post, [
     this.expertLabel = post.expertLabel;
     this.authorIds = post.authorIds;
     this.notifyForReplies = post.notifyForReplies;
+    this.showClusterTags = post.showClusterTags;
     this.action = post.action ? new ActionDto(post.action) : undefined;
     this.author = new ProfileDto(post.author);
     this.commentCount = commentCount;
@@ -131,6 +133,10 @@ export class UpdatePostExpertsDto {
   @ApiPropertyOptional()
   @IsOptional()
   notifyForReplies?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  showClusterTags?: boolean;
 }
 
 export class UpdatePostAuthorsDto {

@@ -659,6 +659,7 @@ export type User = {
     participants: Array<Participant>;
     authoredActions?: Array<Action>;
     cluster?: Cluster | null;
+    clusterId: number | null;
     isCommunityLeader: boolean;
 };
 
@@ -708,6 +709,7 @@ export type UserDto = {
     tags: Array<Tag>;
     communities: Array<Community>;
     leaderOfIds: Array<number>;
+    clusterId: number | null;
     email: string;
     hasActiveContract: boolean;
     referredById?: number;
@@ -727,6 +729,11 @@ export type ResetPasswordDto = {
     password: string;
 };
 
+export type ClusterSummaryDto = {
+    id: number;
+    displayName: string;
+};
+
 export type ProfileDto = {
     id: number;
     admin: boolean;
@@ -738,6 +745,7 @@ export type ProfileDto = {
     hasActiveContract: boolean;
     isCommunityLeader: boolean;
     lastContractEvent?: ContractEvent;
+    cluster?: ClusterSummaryDto;
 };
 
 export type UserAwayRangeReason = 'vacation' | 'emergency' | 'other';
@@ -838,6 +846,7 @@ export type ProfileDtoWithFriends = {
     hasActiveContract: boolean;
     isCommunityLeader: boolean;
     lastContractEvent?: ContractEvent;
+    cluster?: ClusterSummaryDto;
     friends: Array<ProfileDto>;
 };
 
@@ -2475,6 +2484,7 @@ export type PostDto = {
     expertIds: Array<number>;
     authorIds: Array<number>;
     notifyForReplies: boolean;
+    showClusterTags: boolean;
     action?: ActionDto;
     author: ProfileDto;
     commentCount?: number;
@@ -2521,6 +2531,7 @@ export type UpdatePostExpertsDto = {
     qaMode: boolean;
     expertLabel?: string;
     notifyForReplies?: boolean;
+    showClusterTags?: boolean;
 };
 
 export type UpdatePostAuthorsDto = {

@@ -2,6 +2,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Allow, IsNotEmpty, IsOptional } from 'class-validator';
 import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/datasources/basecolumns';
+import type { Relation } from 'src/utils/Repository';
+import {
   Column,
   Entity,
   JoinColumn,
@@ -15,11 +20,6 @@ import {
 import { Action } from '../../actions/entities/action.entity';
 import { User } from '../../user/entities/user.entity';
 import { EditableContent } from './editablecontent.entity';
-import {
-  CreateDateColumnTz,
-  UpdateDateColumnTz,
-} from 'src/datasources/basecolumns';
-import type { Relation } from 'src/utils/Repository';
 
 @Entity()
 export class Post {
@@ -149,4 +149,9 @@ export class Post {
   @ApiProperty()
   @Allow()
   notifyForReplies: boolean;
+
+  @Column({ default: false })
+  @ApiProperty()
+  @Allow()
+  showClusterTags: boolean;
 }

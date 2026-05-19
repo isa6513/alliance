@@ -13,9 +13,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { getImageSource } from 'src/images/images.service';
+import { ClusterSummaryDto } from '../../cluster/dto/cluster.dto';
+import { Cluster } from '../../cluster/entities/cluster.entity';
+import { ContractEvent } from '../entities/contract-event.entity';
 import { FriendStatus } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
-import { ContractEvent } from '../entities/contract-event.entity';
 
 export type FriendStatusDtoArgs = {
   status: FriendStatus;
@@ -55,6 +57,9 @@ export class ProfileDto extends PickType(User, [
   @ApiPropertyOptional({ type: ContractEvent })
   lastContractEvent?: ContractEvent;
 
+  @ApiPropertyOptional({ type: ClusterSummaryDto })
+  cluster?: ClusterSummaryDto;
+
   constructor(
     user: Pick<
       User,
@@ -69,7 +74,7 @@ export class ProfileDto extends PickType(User, [
       | 'hasActiveContract'
       | 'isCommunityLeader'
       | 'contractEvents'
-    >,
+    > & { cluster?: Pick<Cluster, 'id' | 'displayName'> | null },
   ) {
     super();
     this.id = user.id;
@@ -92,6 +97,10 @@ export class ProfileDto extends PickType(User, [
 
     if (user.profilePicture) {
       this.profilePicture = getImageSource(user.profilePicture);
+    }
+
+    if (user.cluster) {
+      this.cluster = new ClusterSummaryDto(user.cluster);
     }
   }
 }
@@ -154,6 +163,7 @@ export class UserDto extends PickType(User, [
   'undergoingGroupAssignment',
   'receiveReplyNotifications',
   'tags',
+  'clusterId',
 ]) {
   @ApiProperty()
   @Allow()
@@ -213,6 +223,7 @@ export class UserDto extends PickType(User, [
     this.hasActiveContract = user.hasActiveContract;
     this.profilePicture = getImageSource(user.profilePicture);
     this.referredById = user.referredBy?.id ?? null;
+    this.clusterId = user.clusterId;
   }
 }
 

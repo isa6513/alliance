@@ -4,14 +4,27 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
+import { Action } from 'src/actions/entities/action.entity';
 import { AiDetectionQueueService } from 'src/ai-detection/ai-detection-queue.service';
 import { DetectableEntity } from 'src/ai-detection/entities/ai-detection-result.entity';
-import { ActionActivity } from 'src/actions/entities/action-activity.entity';
+import { EventType } from 'src/eventlog/event-log.entity';
+import { EventLogService } from 'src/eventlog/eventlog.service';
+import { EmailType } from 'src/mail/mail.entity';
+import { MailService } from 'src/mail/mail.service';
+import { MmsService } from 'src/mms/mms.service';
+import { UnreadContentType } from 'src/notifs/entities/unread-content.entity';
+import { LikeNotificationService } from 'src/notifs/like-notification.service';
+import { generateCIDForNotif } from 'src/notifs/notif-utils';
+import {
+  NotifsService,
+  userActionNotifsEnabled_email,
+  userActionNotifsEnabled_text,
+} from 'src/notifs/notifs.service';
 import { commentUrl, postUrl, withCid } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/dto/user.dto';
 import { ILike, In, Not, type Repository } from 'typeorm';
 import { Notification } from '../notifs/entities/notification.entity';
-import { UnreadContentType } from 'src/notifs/entities/unread-content.entity';
 import { User } from '../user/entities/user.entity';
 import {
   CreateCommentDto,
@@ -22,19 +35,6 @@ import { CreatePostDto, PostDtoArgs, UpdatePostDto } from './dto/post.dto';
 import { Comment, CommentParentObject } from './entities/comment.entity';
 import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
-import { Action } from 'src/actions/entities/action.entity';
-import { LikeNotificationService } from 'src/notifs/like-notification.service';
-import { EventLogService } from 'src/eventlog/eventlog.service';
-import {
-  NotifsService,
-  userActionNotifsEnabled_email,
-  userActionNotifsEnabled_text,
-} from 'src/notifs/notifs.service';
-import { EventType } from 'src/eventlog/event-log.entity';
-import { MailService } from 'src/mail/mail.service';
-import { MmsService } from 'src/mms/mms.service';
-import { generateCIDForNotif } from 'src/notifs/notif-utils';
-import { EmailType } from 'src/mail/mail.entity';
 
 @Injectable()
 export class ForumService {
@@ -266,7 +266,11 @@ export class ForumService {
         parentObjectId: postId,
         parentObjectType: CommentParentObject.Post,
       },
-      relations: { author: true, editableContent: true, likes: true },
+      relations: {
+        author: { cluster: true },
+        editableContent: true,
+        likes: true,
+      },
       order: { createdAt: 'ASC' },
     });
 
@@ -919,6 +923,7 @@ export class ForumService {
     qaMode: boolean,
     expertLabel?: string,
     notifyForReplies?: boolean,
+    showClusterTags?: boolean,
   ): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id: postId },
@@ -941,6 +946,9 @@ export class ForumService {
     post.expertLabel = expertLabel;
     if (notifyForReplies !== undefined) {
       post.notifyForReplies = notifyForReplies;
+    }
+    if (showClusterTags !== undefined) {
+      post.showClusterTags = showClusterTags;
     }
 
     return this.postRepository.save(post);

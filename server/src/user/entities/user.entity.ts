@@ -428,6 +428,11 @@ export class User {
   @IsOptional()
   cluster?: Relation<Cluster> | null;
 
+  @RelationId((user: User) => user.cluster)
+  @ApiProperty({ type: Number, nullable: true })
+  @IsOptional()
+  clusterId: number | null;
+
   // Methods
 
   @Expose()

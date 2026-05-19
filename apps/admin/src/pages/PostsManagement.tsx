@@ -1,5 +1,3 @@
-import React, { useEffect, useState } from "react";
-import { href, useParams, useNavigate } from "react-router";
 import {
   forumGetPostsForAdmin,
   forumUpdatePostAuthors,
@@ -7,12 +5,14 @@ import {
   userList,
 } from "@alliance/shared/client";
 import type { PostDto } from "@alliance/shared/client/types.gen";
-import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { cn } from "@alliance/shared/styles/util";
-import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import React, { useEffect, useState } from "react";
+import { href, useNavigate, useParams } from "react-router";
 
 const PostsManagementPage: React.FC = () => {
   const { postId } = useParams();
@@ -29,6 +29,7 @@ const PostsManagementPage: React.FC = () => {
   const [qaMode, setQaMode] = useState(false);
   const [expertLabel, setExpertLabel] = useState("");
   const [notifyForReplies, setNotifyForReplies] = useState(false);
+  const [showClusterTags, setShowClusterTags] = useState(false);
   const { success, error: pushError } = useToast();
 
   useEffect(() => {
@@ -57,6 +58,7 @@ const PostsManagementPage: React.FC = () => {
         setQaMode(match.qaMode ?? false);
         setExpertLabel(match.expertLabel ?? "");
         setNotifyForReplies(match.notifyForReplies ?? false);
+        setShowClusterTags(match.showClusterTags ?? false);
       }
     }
   }, [postId, posts, selectedPost?.id]);
@@ -71,7 +73,7 @@ const PostsManagementPage: React.FC = () => {
             id: user.id,
             name: user.name ?? `User #${user.id}`,
             profilePicture: user.profilePicture ?? null,
-          }))
+          })),
         );
       })
       .catch((err) => {
@@ -87,6 +89,7 @@ const PostsManagementPage: React.FC = () => {
     setQaMode(post.qaMode ?? false);
     setExpertLabel(post.expertLabel ?? "");
     setNotifyForReplies(post.notifyForReplies ?? false);
+    setShowClusterTags(post.showClusterTags ?? false);
     navigate(href(`/posts/:postId?`, { postId: post.id.toString() }));
   };
 
@@ -102,6 +105,7 @@ const PostsManagementPage: React.FC = () => {
             qaMode,
             expertLabel: expertLabel || undefined,
             notifyForReplies,
+            showClusterTags,
           },
         }),
         forumUpdatePostAuthors({
@@ -115,7 +119,7 @@ const PostsManagementPage: React.FC = () => {
       if (updatedPost) {
         setSelectedPost(updatedPost);
         setPosts((prev) =>
-          prev.map((p) => (p.id === updatedPost!.id ? updatedPost! : p))
+          prev.map((p) => (p.id === updatedPost!.id ? updatedPost! : p)),
         );
         success("Post updated", "Settings saved successfully");
       }
@@ -160,7 +164,7 @@ const PostsManagementPage: React.FC = () => {
                         "text-left border rounded px-3 py-2",
                         selectedPost?.id === post.id
                           ? "border-blue bg-blue/10"
-                          : "border-zinc-200 hover:bg-zinc-50"
+                          : "border-zinc-200 hover:bg-zinc-50",
                       )}
                     >
                       <div className="flex flex-col gap-0.5">
@@ -178,6 +182,11 @@ const PostsManagementPage: React.FC = () => {
                         {post.notifyForReplies && (
                           <span className="text-xs text-purple-600 font-medium">
                             Reply Notifications On
+                          </span>
+                        )}
+                        {post.showClusterTags && (
+                          <span className="text-xs text-teal-600 font-medium">
+                            Cluster Tags On
                           </span>
                         )}
                         {(post.authorIds?.length ?? 0) > 1 && (
@@ -259,6 +268,25 @@ const PostsManagementPage: React.FC = () => {
                   <p className="text-xs text-zinc-500">
                     When enabled, commenters will receive text/email
                     notifications when someone replies to their comment.
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showClusterTags}
+                        onChange={(e) => setShowClusterTags(e.target.checked)}
+                        className="w-4 h-4 rounded border-zinc-300"
+                      />
+                      <span className="text-sm font-medium">
+                        Show Cluster Tags
+                      </span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-zinc-500">
+                    When enabled, each author&apos;s cluster name appears as a
+                    tag next to their name on this post. Tags are green when the
+                    viewer shares the author&apos;s cluster, grey otherwise.
                   </p>
 
                   <div>

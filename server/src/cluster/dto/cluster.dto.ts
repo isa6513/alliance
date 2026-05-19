@@ -5,6 +5,17 @@ import { User } from 'src/user/entities/user.entity';
 import type { ClusterAssignResult } from '../cluster.service';
 import { Cluster } from '../entities/cluster.entity';
 
+export class ClusterSummaryDto extends PickType(Cluster, [
+  'id',
+  'displayName',
+]) {
+  constructor(cluster: Pick<Cluster, 'id' | 'displayName'>) {
+    super();
+    this.id = cluster.id;
+    this.displayName = cluster.displayName;
+  }
+}
+
 export class ClusterMemberDto {
   @ApiProperty()
   id: number;

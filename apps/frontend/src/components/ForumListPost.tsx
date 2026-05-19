@@ -1,12 +1,12 @@
 import { CommentDto, PostDto } from "@alliance/shared/client";
-import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import { Link, href, useNavigate } from "react-router";
 import { formatTime } from "@alliance/shared/lib/utils";
+import { cn } from "@alliance/shared/styles/util";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
+import PinnedIcon from "@alliance/sharedweb/ui/icons/PinnedIcon";
 import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
 import { MessageCircle } from "lucide-react";
-import { cn } from "@alliance/shared/styles/util";
+import { Link, href, useNavigate } from "react-router";
 
 export interface ForumListPostProps {
   post: PostDto;
@@ -28,7 +28,7 @@ const ForumListPost = ({
     e.preventDefault();
     if (post.lastComment?.author) {
       navigate(
-        href("/member/:id", { id: post.lastComment.author.id.toString() })
+        href("/member/:id", { id: post.lastComment.author.id.toString() }),
       );
     }
   };
@@ -43,7 +43,7 @@ const ForumListPost = ({
         "w-full mb-0 !gap-y-1 p-4 cursor-pointer",
         isPrivateFuturePost
           ? "bg-sky-50 hover:bg-sky-100/60"
-          : "hover:bg-zinc-50 bg-white"
+          : "hover:bg-zinc-50 bg-white",
       )}
     >
       <div className="flex flex-col gap-y-0 mb-3">
