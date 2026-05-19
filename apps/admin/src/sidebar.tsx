@@ -23,6 +23,7 @@ import {
   Map,
   MessageSquare,
   MoreHorizontal,
+  Network,
   Newspaper,
   ScrollText,
   Share2,
@@ -315,6 +316,11 @@ const Sidebar: React.FC = () => {
                     to: "/share-links",
                     label: "Share Links",
                     icon: <Share2 size={16} />,
+                  },
+                  {
+                    to: "/clusters",
+                    label: "Clusters",
+                    icon: <Network size={16} />,
                   },
                 ].map((link) => (
                   <Link

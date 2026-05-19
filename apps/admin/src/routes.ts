@@ -9,6 +9,7 @@ export default [
       route("/invites/graph", "pages/InviteGraphPage.tsx"),
       route("/groups", "pages/GroupsPage.tsx"),
       route("/groups/:id", "pages/GroupDetailPage.tsx"),
+      route("/clusters", "pages/ClustersPage.tsx"),
       route("/actions/:actionId", "pages/ActionDashboard.tsx"),
       route("/scheduled", "pages/ScheduledPlansPage.tsx"),
       route("/suites/:suiteId", "pages/ActionSuitePage.tsx"),

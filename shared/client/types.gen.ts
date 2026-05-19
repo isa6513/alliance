@@ -602,6 +602,13 @@ export type Participant = {
     userHidden: boolean;
 };
 
+export type Cluster = {
+    id: number;
+    displayName: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type User = {
     id: number;
     name: string;
@@ -651,6 +658,7 @@ export type User = {
     invitedCommunities: Array<CommunityInvite>;
     participants: Array<Participant>;
     authoredActions?: Array<Action>;
+    cluster?: Cluster | null;
     isCommunityLeader: boolean;
 };
 
@@ -1317,6 +1325,29 @@ export type UpdateContractDto = {
     name: string | null;
     startDate: string | null;
     endDate: string | null;
+};
+
+export type ClusterMemberDto = {
+    id: number;
+    displayName: string;
+    profilePicture?: string;
+};
+
+export type ClusterAdminDto = {
+    id: number;
+    displayName: string;
+    createdAt: string;
+    updatedAt: string;
+    members: Array<ClusterMemberDto>;
+};
+
+export type ReassignAllClustersResultDto = {
+    clustersCreated: number;
+    usersAssigned: number;
+};
+
+export type UpdateClusterDto = {
+    displayName: string;
 };
 
 export type OptOutActionDto = {
@@ -5167,6 +5198,47 @@ export type ContractUpdateResponses = {
 };
 
 export type ContractUpdateResponse = ContractUpdateResponses[keyof ContractUpdateResponses];
+
+export type ClusterListAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/cluster/admin';
+};
+
+export type ClusterListAdminResponses = {
+    200: Array<ClusterAdminDto>;
+};
+
+export type ClusterListAdminResponse = ClusterListAdminResponses[keyof ClusterListAdminResponses];
+
+export type ClusterReassignAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/cluster/admin/reassign-all';
+};
+
+export type ClusterReassignAllResponses = {
+    200: ReassignAllClustersResultDto;
+};
+
+export type ClusterReassignAllResponse = ClusterReassignAllResponses[keyof ClusterReassignAllResponses];
+
+export type ClusterUpdateAdminData = {
+    body: UpdateClusterDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/cluster/admin/{id}';
+};
+
+export type ClusterUpdateAdminResponses = {
+    200: ClusterAdminDto;
+};
+
+export type ClusterUpdateAdminResponse = ClusterUpdateAdminResponses[keyof ClusterUpdateAdminResponses];
 
 export type ActionsOptoutData = {
     body: OptOutActionDto;

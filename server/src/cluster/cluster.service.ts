@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { DataSource, EntityManager } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import {
   bulkAssign,
   placeIncremental,
   type ClusterUser,
 } from './cluster.algorithm';
+import { Cluster } from './entities/cluster.entity';
 
 export interface ClusterAssignResult {
   clustersCreated: number;
@@ -18,7 +20,29 @@ const CLUSTER_LOCK_KEY = 73954294;
 
 @Injectable()
 export class ClusterService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    @InjectRepository(Cluster)
+    private readonly clusterRepository: Repository<Cluster>,
+  ) {}
+
+  async findAllWithMembers(): Promise<Cluster[]> {
+    return this.clusterRepository.find({
+      relations: { members: true },
+      order: { id: 'ASC' },
+    });
+  }
+
+  async updateDisplayName(id: number, displayName: string): Promise<Cluster> {
+    const result = await this.clusterRepository.update(id, { displayName });
+    if (result.affected === 0) {
+      throw new NotFoundException(`Cluster ${id} not found`);
+    }
+    return this.clusterRepository.findOneOrFail({
+      where: { id },
+      relations: { members: true },
+    });
+  }
 
   /**
    * Wipes all existing clusters and re-clusters every eligible user (active
@@ -83,7 +107,8 @@ export class ClusterService {
   /**
    * Places a single newly-signed user into the best-fit existing cluster, or
    * creates a new singleton if every existing cluster contains one of their
-   * friends. Idempotent — does nothing if the user is already clustered.
+   * friends. Idempotent — does nothing if the user is already clustered, and
+   * no-op if no clusters exist yet (admin must run a bulk reassign to seed).
    *
    * Call from the contract-signing flow when a user transitions to 'signed'.
    */
@@ -100,6 +125,11 @@ export class ClusterService {
       );
       if (userRow.length === 0 || userRow[0].clusterId !== null) return;
 
+      const clusterRows = await manager.query<{ id: number }[]>(
+        `SELECT id FROM "cluster" ORDER BY id ASC`,
+      );
+      if (clusterRows.length === 0) return;
+
       const clusteredRows = await manager.query<
         { id: number; clusterId: number }[]
       >(`SELECT id, "clusterId" FROM "user" WHERE "clusterId" IS NOT NULL`);
@@ -108,17 +138,13 @@ export class ClusterService {
       const byId = await loadClusterUsers(manager, relevantIds);
 
       // ----- Compute -----
-      const clustersById = new Map<number, ClusterUser[]>();
+      const clusterIds = clusterRows.map((r) => r.id);
+      const clustersById = new Map<number, ClusterUser[]>(
+        clusterIds.map((id) => [id, []]),
+      );
       for (const row of clusteredRows) {
-        const u = byId.get(row.id)!;
-        let arr = clustersById.get(row.clusterId);
-        if (!arr) {
-          arr = [];
-          clustersById.set(row.clusterId, arr);
-        }
-        arr.push(u);
+        clustersById.get(row.clusterId)!.push(byId.get(row.id)!);
       }
-      const clusterIds = [...clustersById.keys()];
       const clusters = clusterIds.map((id) => clustersById.get(id)!);
 
       const idx = placeIncremental(byId.get(userId)!, clusters);
@@ -126,10 +152,7 @@ export class ClusterService {
       // ----- Write -----
       let targetClusterId: number;
       if (idx === null) {
-        const countRow = await manager.query<{ count: string }[]>(
-          `SELECT COUNT(*)::text AS count FROM "cluster"`,
-        );
-        const nextNumber = Number(countRow[0].count) + 1;
+        const nextNumber = clusterIds.length + 1;
         const inserted = await manager.query<{ id: number }[]>(
           `INSERT INTO "cluster" ("displayName") VALUES ($1) RETURNING id`,
           [`Group ${nextNumber}`],
