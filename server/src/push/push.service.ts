@@ -1,7 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
-import { Push } from './push.entity';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { PickType } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
+import { UserDevice } from 'src/user/entities/user-device.entity';
 import {
   IsNull,
   LessThan,
@@ -11,9 +13,7 @@ import {
   QueryFailedError,
   type Repository,
 } from 'typeorm';
-import { PickType } from '@nestjs/swagger';
-import { UserDevice } from 'src/user/entities/user-device.entity';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Push } from './push.entity';
 
 export const EXPO_CLIENT = Symbol('EXPO_CLIENT');
 
@@ -189,7 +189,6 @@ export class PushService {
       try {
         const receipts =
           await this.expo.getPushNotificationReceiptsAsync(chunk);
-        console.log(receipts);
 
         for (const receiptId in receipts) {
           const receipt = receipts[receiptId];
