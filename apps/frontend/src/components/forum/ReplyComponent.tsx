@@ -1,4 +1,5 @@
 import { CommentDto } from "@alliance/shared/client";
+import { countAllReplies } from "@alliance/shared/lib/commentsFilter";
 import { cn } from "@alliance/shared/styles/util";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import ClusterTag from "@alliance/sharedweb/ui/ClusterTag";
@@ -17,17 +18,6 @@ import { useCommentsContext } from "./CommentsContext";
 import ReplyForm from "./ReplyForm";
 
 const INDENT_PX = 40;
-
-export const countAllReplies = (replies: CommentDto[]): number => {
-  let count = 0;
-  for (const reply of replies) {
-    count += 1;
-    if (reply.children && reply.children.length > 0) {
-      count += countAllReplies(reply.children);
-    }
-  }
-  return count;
-};
 
 export interface ReplyComponentProps {
   reply: CommentDto;

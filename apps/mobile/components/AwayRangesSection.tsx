@@ -1,14 +1,3 @@
-import React, { useCallback, useEffect, useState } from "react";
-import {
-  Alert,
-  Modal,
-  Platform,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { X, ChevronDown } from "lucide-react-native";
 import {
   UserAwayRangeDto,
   UserAwayRangeReason,
@@ -16,10 +5,20 @@ import {
   userDeleteAwayRange,
   userGetAwayRanges,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "./system/Button";
 import { awayRangesDescription } from "@alliance/shared/lib/copy";
 import { cn } from "@alliance/shared/styles/util";
+import { ChevronDown, X } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Alert,
+  Platform,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { colors } from "../lib/style/colors";
+import BottomSheetOptionPicker from "./BottomSheetOptionPicker";
+import Button, { ButtonColor } from "./system/Button";
 import Text, { FontWeight } from "./system/Text";
 
 const REASON_OPTIONS: { value: UserAwayRangeReason; label: string }[] = [
@@ -340,58 +339,14 @@ export default function AwayRangesSection() {
         </View>
       </View>
 
-      <Modal
+      <BottomSheetOptionPicker
         visible={reasonModalOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setReasonModalOpen(false)}
-      >
-        <View className="flex-1 bg-black/40 justify-end">
-          <View className="bg-white rounded-t-2xl p-4">
-            <View className="flex-row justify-between items-center mb-3">
-              <Text
-                className="text-lg text-zinc-900"
-                weight={FontWeight.Semibold}
-              >
-                Select Reason
-              </Text>
-              <TouchableOpacity onPress={() => setReasonModalOpen(false)}>
-                <Text className="text-blue-600" weight={FontWeight.Medium}>
-                  Close
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView>
-              {REASON_OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  className="py-3 flex-row items-center"
-                  onPress={() => {
-                    setSelectedReason(option.value);
-                    setReasonModalOpen(false);
-                  }}
-                >
-                  <View
-                    className={cn(
-                      "w-5 h-5 rounded-full border mr-3 items-center justify-center",
-                      selectedReason === option.value
-                        ? "border-green-600"
-                        : "border-zinc-200",
-                    )}
-                  >
-                    {selectedReason === option.value && (
-                      <View className="w-2.5 h-2.5 rounded-full bg-green-600" />
-                    )}
-                  </View>
-                  <Text className="text-base text-zinc-800">
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setReasonModalOpen(false)}
+        title="Select Reason"
+        options={REASON_OPTIONS}
+        value={selectedReason}
+        onSelect={setSelectedReason}
+      />
     </View>
   );
 }

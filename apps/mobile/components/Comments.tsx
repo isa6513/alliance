@@ -13,17 +13,29 @@ import {
   forumUpdateComment,
   imagesUploadImage,
 } from "@alliance/shared/client";
+import {
+  CommentFilter,
+  CommentSort,
+  commentFilterLabels,
+  getCommentFilterOptions,
+  matchesCommentFilter,
+  sortComments,
+  sortLabels,
+  sortOptions,
+  useCommentFilterData,
+} from "@alliance/shared/lib/commentsFilter";
 import { useCommentLikeMutation } from "@alliance/shared/lib/useCommentLikeMutation";
 import { useMarkUnreadContentRead } from "@alliance/shared/lib/useUnreadContentRead";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { cn } from "@alliance/shared/styles/util";
 import { useQueryClient } from "@tanstack/react-query";
-import { Pin } from "lucide-react-native";
+import { ArrowUpDown, ListFilter, Pin } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, TouchableOpacity, View } from "react-native";
 import type { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import { useAuth } from "../lib/AuthContext";
 import { colors } from "../lib/style/colors";
+import BottomSheetOptionPicker from "./BottomSheetOptionPicker";
 import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
 import LikeButton from "./LikeButton";
@@ -74,6 +86,86 @@ const collectCommentIds = (comments: CommentDto[]): number[] => {
     }
   }
   return ids;
+};
+
+const SortPicker = ({
+  value,
+  options,
+  onChange,
+}: {
+  value: CommentSort;
+  options: CommentSort[];
+  onChange: (sort: CommentSort) => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  const pickerOptions = useMemo(
+    () => options.map((sort) => ({ value: sort, label: sortLabels[sort] })),
+    [options],
+  );
+  return (
+    <>
+      <TouchableOpacity
+        onPress={() => setOpen(true)}
+        activeOpacity={0.7}
+        className="flex-row items-center gap-x-1 px-2 py-1"
+      >
+        <Text className="text-sm text-zinc-600">{sortLabels[value]}</Text>
+        <ArrowUpDown size={14} color={colors.text.tertiary} />
+      </TouchableOpacity>
+      <BottomSheetOptionPicker
+        visible={open}
+        onClose={() => setOpen(false)}
+        title="Sort by"
+        options={pickerOptions}
+        value={value}
+        onSelect={onChange}
+      />
+    </>
+  );
+};
+
+const FilterPicker = ({
+  value,
+  options,
+  counts,
+  onChange,
+}: {
+  value: CommentFilter;
+  options: CommentFilter[];
+  counts: Record<CommentFilter, number>;
+  onChange: (filter: CommentFilter) => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  const pickerOptions = useMemo(
+    () =>
+      options.map((filter) => ({
+        value: filter,
+        label: `${commentFilterLabels[filter]} (${counts[filter] ?? 0})`,
+      })),
+    [options, counts],
+  );
+  return (
+    <>
+      <TouchableOpacity
+        onPress={() => setOpen(true)}
+        activeOpacity={0.7}
+        className="flex-row items-center gap-x-1 px-2 py-1"
+      >
+        <ListFilter size={14} color={colors.text.tertiary} />
+        <Text className="text-sm text-zinc-600">
+          {commentFilterLabels[value]} ({counts[value] ?? 0})
+        </Text>
+      </TouchableOpacity>
+      <BottomSheetOptionPicker
+        visible={open}
+        onClose={() => setOpen(false)}
+        title="Filter"
+        options={pickerOptions}
+        value={value}
+        onSelect={onChange}
+      />
+    </>
+  );
 };
 
 type ReplyFormProps = {
@@ -402,9 +494,14 @@ export default function Comments({
   expertLabel,
   showClusterTags = false,
 }: CommentsProps) {
-  const expertIds = qaMode ? expertIdsProp : [];
+  const expertIds = useMemo(
+    () => (qaMode ? expertIdsProp : []),
+    [qaMode, expertIdsProp],
+  );
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const isPostComments = type === "post";
+  const activeQaMode = isPostComments && qaMode;
   const [editableContent, setEditableContent] =
     useState<CreateEditableContentDto>({ body: "", attachments: [] });
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
@@ -423,6 +520,22 @@ export default function Comments({
   });
   const [showForm, setShowForm] = useState(showFormProp);
   const [isComposing, setIsComposing] = useState(!!autofocus);
+
+  // useAuth() is hydrated before this mounts in the common case, so the initializer
+  // picks the right default without needing an effect to react to late-arriving user data.
+  const [commentFilter, setCommentFilter] = useState<CommentFilter>(
+    showClusterTags && user?.clusterId != null
+      ? CommentFilter.SameGroup
+      : CommentFilter.All,
+  );
+  const [commentSort, setCommentSort] = useState<CommentSort>(
+    CommentSort.Newest,
+  );
+  const [randomSeed, setRandomSeed] = useState(() => String(Math.random()));
+  const handleSortChange = useCallback((sort: CommentSort) => {
+    setCommentSort(sort);
+    if (sort === CommentSort.Random) setRandomSeed(String(Math.random()));
+  }, []);
 
   useEffect(() => {
     setShowForm(showFormProp);
@@ -587,15 +700,77 @@ export default function Comments({
     fetchComments,
   });
 
+  const { friendIdSet, groupMemberIdSet } = useCommentFilterData({
+    enabled: !!user && isPostComments,
+    userId: user?.id,
+  });
+
+  const topLevelComments = useMemo(
+    () => (comments ?? []).filter(shouldShowComment),
+    [comments],
+  );
+
+  const hasMineComments = useMemo(
+    () =>
+      !!user &&
+      topLevelComments.some((comment) => comment.author.id === user.id),
+    [topLevelComments, user],
+  );
+
+  const filterOptions = useMemo(
+    () =>
+      getCommentFilterOptions({
+        activeQaMode,
+        hasMineComments,
+        hasSameGroup: showClusterTags && user?.clusterId != null,
+      }),
+    [activeQaMode, hasMineComments, showClusterTags, user?.clusterId],
+  );
+
+  useEffect(() => {
+    if (!filterOptions.includes(commentFilter)) {
+      setCommentFilter(CommentFilter.All);
+    }
+  }, [filterOptions, commentFilter]);
+
+  const filterContext = useMemo(
+    () => ({
+      userId: user?.id,
+      userClusterId: user?.clusterId,
+      expertIds,
+      friendIdSet,
+      groupMemberIdSet,
+    }),
+    [user?.id, user?.clusterId, expertIds, friendIdSet, groupMemberIdSet],
+  );
+
+  const commentCounts = useMemo(() => {
+    const counts = {} as Record<CommentFilter, number>;
+    for (const filter of filterOptions) {
+      counts[filter] = topLevelComments.filter((comment) =>
+        matchesCommentFilter(comment, filter, filterContext),
+      ).length;
+    }
+    return counts;
+  }, [filterOptions, topLevelComments, filterContext]);
+
   const sortedComments = useMemo(() => {
     if (!comments) return null;
-    return [...comments]
-      .filter(shouldShowComment)
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-  }, [comments]);
+    return sortComments(
+      topLevelComments.filter((comment) =>
+        matchesCommentFilter(comment, commentFilter, filterContext),
+      ),
+      commentSort,
+      { randomSeed },
+    );
+  }, [
+    comments,
+    topLevelComments,
+    commentFilter,
+    commentSort,
+    filterContext,
+    randomSeed,
+  ]);
 
   const commentIds = useMemo(
     () => collectCommentIds(comments ?? []),
@@ -674,6 +849,22 @@ export default function Comments({
       ) : null}
 
       {error && <Text className="text-red-500">{error}</Text>}
+
+      {isPostComments && topLevelComments.length > 0 && (
+        <View className="flex-row items-center justify-between">
+          <FilterPicker
+            value={commentFilter}
+            options={filterOptions}
+            counts={commentCounts}
+            onChange={setCommentFilter}
+          />
+          <SortPicker
+            value={commentSort}
+            options={sortOptions}
+            onChange={handleSortChange}
+          />
+        </View>
+      )}
 
       {sortedComments && sortedComments.length > 0 ? (
         <View className="gap-y-3">

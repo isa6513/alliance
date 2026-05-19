@@ -1,24 +1,30 @@
-import React, { type PropsWithChildren } from "react";
-import { Modal, View, Pressable, ScrollView } from "react-native";
+import { type PropsWithChildren } from "react";
+import { Modal, Pressable, ScrollView, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface FormModalProps {
   visible: boolean;
   onClose: () => void;
+  animationType?: "none" | "fade" | "slide";
 }
 
 function FormModal({
   visible,
   onClose,
+  animationType = "fade",
   children,
 }: PropsWithChildren<FormModalProps>) {
   const insets = useSafeAreaInsets();
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType={animationType}>
       {/* Backdrop */}
-      <Pressable onPress={onClose} className="flex-1 bg-black/50 justify-end" style={{ paddingTop: insets.top }}>
+      <Pressable
+        onPress={onClose}
+        className="flex-1 bg-black/50 justify-end"
+        style={{ paddingTop: insets.top }}
+      >
         <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={-50}>
           {/* Prevent backdrop press from closing when tapping content */}
           <Pressable onPress={(e) => e.stopPropagation()}>

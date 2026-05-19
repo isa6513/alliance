@@ -1,18 +1,3 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  Image,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { Check, ChevronDown } from "lucide-react-native";
-import Checkbox from "../system/Checkbox";
-import { launchImageLibraryAsync } from "expo-image-picker";
-import TimeZoneSelect from "./TimeZoneSelect";
-import CityAutosuggest from "./CityAutosuggest";
-import FormModal from "./FormModal";
 import type {
   AnyField,
   CityField,
@@ -24,19 +9,35 @@ import type {
   TimeField,
 } from "@alliance/common/forms/form-schema";
 import type { UserDto } from "@alliance/shared/client";
-import { getCustomComponentById } from "./customComponentRegistry";
 import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
 import {
   formatTimeForDisplay,
   parseTimeInput,
 } from "@alliance/shared/forms/timeUtils";
-import AppMarkdownWrapper from "../AppMarkdownWrapper";
-import InlineLabelMarkdownWrapper from "../InlineLabelMarkdownWrapper";
 import { cn } from "@alliance/shared/styles/util";
-import Card, { CardStyle } from "../system/Card";
-import Button, { ButtonColor, ButtonSize } from "../system/Button";
+import { launchImageLibraryAsync } from "expo-image-picker";
+import { Check, ChevronDown } from "lucide-react-native";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { colors } from "../../lib/style/colors";
+import AppMarkdownWrapper from "../AppMarkdownWrapper";
+import BottomSheetOptionPicker from "../BottomSheetOptionPicker";
+import InlineLabelMarkdownWrapper from "../InlineLabelMarkdownWrapper";
+import Button, { ButtonColor, ButtonSize } from "../system/Button";
+import Card, { CardStyle } from "../system/Card";
+import Checkbox from "../system/Checkbox";
 import Text, { FontWeight } from "../system/Text";
+import CityAutosuggest from "./CityAutosuggest";
+import { getCustomComponentById } from "./customComponentRegistry";
+import FormModal from "./FormModal";
+import TimeZoneSelect from "./TimeZoneSelect";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -434,45 +435,14 @@ export function RenderField({
             </Text>
             <ChevronDown size={18} color={colors.text.icon} />
           </TouchableOpacity>
-          <FormModal visible={selectOpen} onClose={() => setSelectOpen(false)}>
-            <View className="flex-row justify-between items-center mb-2">
-              <Text
-                className="text-base text-zinc-900"
-                weight={FontWeight.Semibold}
-              >
-                Select
-              </Text>
-            </View>
-            <ScrollView>
-              {options.map((option: ChoiceOption, optIndex: number) => (
-                <TouchableOpacity
-                  key={optIndex}
-                  className="py-3 flex-row items-center"
-                  onPress={() => {
-                    onChange?.(option.value);
-                    setSelectOpen(false);
-                  }}
-                  disabled={disabled}
-                >
-                  <View
-                    className={cn(
-                      "w-5 h-5 rounded-full border mr-3 items-center justify-center",
-                      value === option.value
-                        ? "border-green"
-                        : "border-zinc-200",
-                    )}
-                  >
-                    {value === option.value && (
-                      <View className="w-2.5 h-2.5 rounded-full bg-green" />
-                    )}
-                  </View>
-                  <Text className="text-base text-zinc-800">
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </FormModal>
+          <BottomSheetOptionPicker
+            visible={selectOpen}
+            onClose={() => setSelectOpen(false)}
+            title="Select"
+            options={options}
+            value={value as string | undefined}
+            onSelect={(v) => onChange?.(v)}
+          />
           {renderValidationMessage(errorMessage)}
         </View>
       );
