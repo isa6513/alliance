@@ -51,7 +51,94 @@ SET
   "phoneNumber" = '15550100';
 UPDATE "user" SET "password" = 'pw';
 
-UPDATE "form_response" SET "answers" = '{}';
+-- ============================================================================
+-- Selectively redact text-based answers in form_response instead of wiping all
+-- answers. Preserves non-text values (numbers, booleans, radio/select choices,
+-- dates, cities, etc.) so staging data remains structurally useful.
+--
+-- Text-like field kinds that get redacted: text, textarea, email, phone
+-- List fields are walked recursively to redact nested text sub-fields.
+-- ============================================================================
+DO $$
+DECLARE
+  resp        RECORD;
+  page        JSONB;
+  field       JSONB;
+  sub_field   JSONB;
+  field_id    TEXT;
+  field_kind  TEXT;
+  new_answers JSONB;
+  list_val    JSONB;
+  item        JSONB;
+  new_item    JSONB;
+  new_list    JSONB;
+  text_kinds  TEXT[] := ARRAY['text', 'textarea', 'email', 'phone'];
+  redacted    CONSTANT JSONB := '"answer"';
+  updated_count INT := 0;
+BEGIN
+  FOR resp IN
+    SELECT fr.id       AS resp_id,
+           fr.answers  AS answers,
+           f.schema    AS form_schema
+    FROM   form_response fr
+    JOIN   form f ON f.id = fr."formId"
+    WHERE  fr.answers IS NOT NULL
+      AND  fr.answers != '{}'::jsonb
+  LOOP
+    new_answers := resp.answers;
+
+    FOR page IN SELECT * FROM jsonb_array_elements(resp.form_schema -> 'pages')
+    LOOP
+      FOR field IN SELECT * FROM jsonb_array_elements(page -> 'fields')
+      LOOP
+        field_id   := field ->> 'id';
+        field_kind := field ->> 'kind';
+
+        CONTINUE WHEN NOT (new_answers ? field_id);
+
+        IF field_kind = ANY(text_kinds) THEN
+          new_answers := jsonb_set(new_answers, ARRAY[field_id], redacted);
+
+        ELSIF field_kind = 'list' THEN
+          list_val := new_answers -> field_id;
+
+          IF jsonb_typeof(list_val) = 'array' THEN
+            new_list := '[]'::jsonb;
+
+            FOR item IN SELECT * FROM jsonb_array_elements(list_val)
+            LOOP
+              new_item := item;
+
+              FOR sub_field IN SELECT * FROM jsonb_array_elements(field -> 'fields')
+              LOOP
+                IF (sub_field ->> 'kind') = ANY(text_kinds)
+                   AND new_item ? (sub_field ->> 'id')
+                THEN
+                  new_item := jsonb_set(
+                    new_item,
+                    ARRAY[sub_field ->> 'id'],
+                    redacted
+                  );
+                END IF;
+              END LOOP;
+
+              new_list := new_list || jsonb_build_array(new_item);
+            END LOOP;
+
+            new_answers := jsonb_set(new_answers, ARRAY[field_id], new_list);
+          END IF;
+        END IF;
+      END LOOP;
+    END LOOP;
+
+    IF new_answers IS DISTINCT FROM resp.answers THEN
+      UPDATE form_response SET answers = new_answers WHERE id = resp.resp_id;
+      updated_count := updated_count + 1;
+    END IF;
+  END LOOP;
+
+  RAISE NOTICE 'Redacted text answers in % form response(s).', updated_count;
+END $$;
 
 UPDATE "mail" SET "to" = 'user'||id||'@example.com';
 UPDATE "mms" SET "from" = 'pruned';
