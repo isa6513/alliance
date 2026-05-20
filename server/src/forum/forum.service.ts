@@ -23,7 +23,14 @@ import {
 } from 'src/notifs/notifs.service';
 import { commentUrl, postUrl, withCid } from 'src/search/approutes';
 import { ProfileDto } from 'src/user/dto/user.dto';
-import { ILike, In, Not, type Repository } from 'typeorm';
+import {
+  ILike,
+  In,
+  Not,
+  type ObjectLiteral,
+  type Repository,
+  type SelectQueryBuilder,
+} from 'typeorm';
 import { Notification } from '../notifs/entities/notification.entity';
 import { User } from '../user/entities/user.entity';
 import {
@@ -35,6 +42,14 @@ import { CreatePostDto, PostDtoArgs, UpdatePostDto } from './dto/post.dto';
 import { Comment, CommentParentObject } from './entities/comment.entity';
 import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
+
+export type ClusterFeedComment = {
+  comment: Comment;
+  postId: number;
+  postTitle: string;
+  likedByMe: boolean;
+  likesCount: number;
+};
 
 @Injectable()
 export class ForumService {
@@ -92,14 +107,52 @@ export class ForumService {
     return this.postRepository.save(post);
   }
 
-  postIsVisible(post: Post, userId?: number): boolean {
-    const isAuthor =
-      userId !== undefined &&
-      (post.authorId === userId || (post.authorIds ?? []).includes(userId));
-    return (
-      (!post.visibleAt || post.visibleAt < new Date() || isAuthor) &&
-      !post.deleted
-    );
+  private addPostVisibilityFilter<T extends ObjectLiteral>(
+    qb: SelectQueryBuilder<T>,
+    postAlias: string,
+    userId?: number,
+  ): SelectQueryBuilder<T> {
+    qb.andWhere(`${postAlias}.deleted = false`);
+    const clauses = [
+      `${postAlias}.visibleAt IS NULL`,
+      `${postAlias}.visibleAt < :postVisibility_now`,
+    ];
+    const params: Record<string, unknown> = {
+      postVisibility_now: new Date(),
+    };
+    if (userId !== undefined) {
+      const coAuthorSubQuery = qb
+        .subQuery()
+        .select('1')
+        .from(Post, 'visPost')
+        .innerJoin('visPost.authors', 'visAuthor')
+        .where(`visPost.id = ${postAlias}.id`)
+        .andWhere('visAuthor.id = :postVisibility_userId')
+        .getQuery();
+      clauses.push(`${postAlias}.authorId = :postVisibility_userId`);
+      clauses.push(`EXISTS ${coAuthorSubQuery}`);
+      params.postVisibility_userId = userId;
+    }
+    qb.andWhere(`(${clauses.join(' OR ')})`, params);
+    return qb;
+  }
+
+  private async getLikedCommentIds(
+    commentIds: number[],
+    userId: number,
+  ): Promise<Set<number>> {
+    if (!commentIds.length || !userId) {
+      return new Set();
+    }
+
+    const rows = await this.commentRepository
+      .createQueryBuilder('comment')
+      .innerJoin('comment.likes', 'liker', 'liker.id = :userId', { userId })
+      .where('comment.id IN (:...commentIds)', { commentIds })
+      .select('comment.id', 'id')
+      .getRawMany<{ id: number }>();
+
+    return new Set(rows.map((r) => r.id));
   }
 
   async findAllPosts(userId?: number): Promise<PostDtoArgs[]> {
@@ -116,29 +169,20 @@ export class ForumService {
           'AND comment.deleted = false',
         { parentType: CommentParentObject.Post },
       )
-      .where('post.deleted = :deleted', { deleted: false })
       .orderBy('post.updatedAt', 'DESC')
-      // aggregate comment count
       .addSelect('COUNT(comment.id)', 'commentCount')
-      // group by PKs of selected entities (Postgres-friendly)
       .groupBy('post.id')
       .addGroupBy('author.id')
       .addGroupBy('action.id')
       .addGroupBy('editableContent.id');
+    this.addPostVisibilityFilter(qb, 'post', userId);
 
-    const { entities: allPosts, raw: allRaw } = await qb.getRawAndEntities();
+    const { entities: posts, raw } = await qb.getRawAndEntities();
 
-    // Filter by visibility in memory (user-specific logic)
-    const visible = allPosts
-      .map((post, index) => ({ post, raw: allRaw[index] }))
-      .filter(({ post }) => this.postIsVisible(post, userId));
-
-    if (!visible.length) {
+    if (!posts.length) {
       return [];
     }
 
-    const posts = visible.map((v) => v.post);
-    const raw = visible.map((v) => v.raw);
     const postIds = posts.map((p) => p.id);
 
     // 2) Fetch authors per post (ManyToMany can't be joined in the grouped query)
@@ -180,18 +224,16 @@ export class ForumService {
   }
 
   async findPostsByAction(actionId: number): Promise<Post[]> {
-    const posts = (
-      await this.postRepository.find({
-        where: { actionId, deleted: false },
-        relations: {
-          author: true,
-          action: true,
-          editableContent: true,
-          authors: true,
-        },
-        order: { updatedAt: 'DESC' },
-      })
-    ).filter((post) => this.postIsVisible(post));
+    const qb = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('post.action', 'action')
+      .leftJoinAndSelect('post.editableContent', 'editableContent')
+      .leftJoinAndSelect('post.authors', 'authors')
+      .where('post.actionId = :actionId', { actionId })
+      .orderBy('post.updatedAt', 'DESC');
+    this.addPostVisibilityFilter(qb, 'post');
+    const posts = await qb.getMany();
 
     const postsWithComments = await Promise.all(
       posts.map(async (post) => {
@@ -211,40 +253,28 @@ export class ForumService {
     return postsWithComments;
   }
 
-  async findOnePostFull(id: number, userId?: number): Promise<Post> {
-    const post = await this.postRepository.findOne({
-      where: { id },
-      relations: {
-        author: true,
-        action: true,
-        editableContent: true,
-        authors: true,
-      },
-    });
-
-    if (!post || !this.postIsVisible(post, userId)) {
+  private async findOneVisiblePost(id: number, userId?: number): Promise<Post> {
+    const qb = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('post.action', 'action')
+      .leftJoinAndSelect('post.editableContent', 'editableContent')
+      .leftJoinAndSelect('post.authors', 'authors')
+      .where('post.id = :id', { id });
+    this.addPostVisibilityFilter(qb, 'post', userId);
+    const post = await qb.getOne();
+    if (!post) {
       throw new NotFoundException(`Post with ID "${id}" not found`);
     }
-
     return post;
   }
 
+  async findOnePostFull(id: number, userId?: number): Promise<Post> {
+    return this.findOneVisiblePost(id, userId);
+  }
+
   async findOnePost(id: number, userId?: number): Promise<Post> {
-    const post = await this.postRepository.findOne({
-      where: { id },
-      relations: {
-        author: true,
-        action: true,
-        editableContent: true,
-        authors: true,
-      },
-    });
-
-    if (!post || !this.postIsVisible(post, userId)) {
-      throw new NotFoundException(`Post with ID "${id}" not found`);
-    }
-
-    return post;
+    return this.findOneVisiblePost(id, userId);
   }
 
   async findCommentsForPostRaw(postId: number): Promise<Comment[]> {
@@ -333,6 +363,58 @@ export class ForumService {
     });
 
     return grouped;
+  }
+
+  async findClusterCommentsForFeed(params: {
+    userId: number;
+    userClusterId: number | null;
+    limit: number;
+    before?: Date;
+  }): Promise<ClusterFeedComment[]> {
+    const { userId, userClusterId, limit, before } = params;
+    if (userClusterId == null) return [];
+
+    const qb = this.commentRepository
+      .createQueryBuilder('comment')
+      .innerJoin(Post, 'post', 'post.id = comment.parentObjectId')
+      .innerJoinAndSelect('comment.author', 'author')
+      .innerJoinAndSelect('comment.editableContent', 'editableContent')
+      .addSelect(['post.id', 'post.title'])
+      .where('comment.parentObjectType = :postType', {
+        postType: CommentParentObject.Post,
+      })
+      .andWhere('comment.deleted = false')
+      .andWhere('post.showClusterTags = true')
+      .andWhere('author.clusterId = :userClusterId', { userClusterId })
+      .andWhere('author.id != :userId', { userId });
+    this.addPostVisibilityFilter(qb, 'post', userId);
+    if (before) {
+      qb.andWhere('comment.createdAt < :before', { before });
+    }
+    qb.orderBy('comment.createdAt', 'DESC').limit(limit);
+
+    const { entities, raw } = await qb.getRawAndEntities();
+    const likedCommentIds = await this.getLikedCommentIds(
+      entities.map((c) => c.id),
+      userId,
+    );
+    const titleByCommentId = new Map<number, string>();
+    for (const row of raw) {
+      titleByCommentId.set(row.comment_id, row.post_title);
+    }
+    const items: ClusterFeedComment[] = [];
+    for (const comment of entities) {
+      const postTitle = titleByCommentId.get(comment.id);
+      if (postTitle == null) continue;
+      items.push({
+        comment,
+        postId: comment.parentObjectId,
+        postTitle,
+        likedByMe: likedCommentIds.has(comment.id),
+        likesCount: comment.likesCount,
+      });
+    }
+    return items;
   }
 
   async findCommentsForAction(actionId: number): Promise<Comment[]> {
@@ -845,17 +927,16 @@ export class ForumService {
   }
 
   async findPostsByUser(userId: number): Promise<Post[]> {
-    const posts = await this.postRepository
+    const qb = this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('post.action', 'action')
       .leftJoin('post.authors', 'coAuthor')
-      .where('post.deleted = :deleted', { deleted: false })
       .andWhere('(post.authorId = :userId OR coAuthor.id = :userId)', {
         userId,
-      })
-      .getMany();
-    return posts.filter((post) => this.postIsVisible(post, userId));
+      });
+    this.addPostVisibilityFilter(qb, 'post', userId);
+    return qb.getMany();
   }
 
   async findCommentsByUser(userId: number): Promise<UserComment[]> {

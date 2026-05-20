@@ -1749,6 +1749,23 @@ export type SetPriorityDto = {
     generalUpdatePriorities: Array<SetGeneralUpdatePriorityDto>;
 };
 
+export type HomeFeedItemType = 'activity' | 'cluster_forum_comment';
+
+export type HomeFeedClusterForumCommentDto = {
+    comment: CommentDto;
+    postId: number;
+    postTitle: string;
+    likedByMe: boolean;
+    likesCount: number;
+};
+
+export type HomeFeedItemDto = {
+    type: HomeFeedItemType;
+    date: string;
+    activity?: ActionActivityDto;
+    clusterForumComment?: HomeFeedClusterForumCommentDto;
+};
+
 export type CommunityCompletedActionsCountDto = {
     /**
      * Number of member action completions (user_completed activities) recorded for current members of this community
@@ -5647,7 +5664,7 @@ export type ActionsHomeFeedData = {
 };
 
 export type ActionsHomeFeedResponses = {
-    200: Array<ActionActivityDto>;
+    200: Array<HomeFeedItemDto>;
 };
 
 export type ActionsHomeFeedResponse = ActionsHomeFeedResponses[keyof ActionsHomeFeedResponses];

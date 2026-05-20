@@ -109,6 +109,9 @@ import {
   GlobalFeedItemDto,
   GlobalFeedItemType,
   GlobalFeedNewMembersDto,
+  HomeFeedItem,
+  HomeFeedItemDto,
+  HomeFeedItemType,
   SetPriorityDto,
   SuspensionPlan,
   TimelineFeedItemDto,
@@ -1460,17 +1463,20 @@ export class ActionsService {
   async attachComments(
     activities: ActionActivity[],
     requestingUserId?: number,
+    options?: { includeComments?: boolean },
   ): Promise<ActionActivityDto[]> {
+    const includeComments = options?.includeComments ?? true;
     const activityIds = activities.map((activity) => activity.id);
     const likedIds = requestingUserId
       ? await this.getLikedActivityIds(activityIds, requestingUserId)
       : new Set<number>();
 
-    const commentsByActivity =
-      await this.forumService.findCommentsForActivities(activityIds);
+    const commentsByActivity = includeComments
+      ? await this.forumService.findCommentsForActivities(activityIds)
+      : null;
 
     return activities.map((activity) => {
-      const comments = commentsByActivity.get(activity.id) ?? [];
+      const comments = commentsByActivity?.get(activity.id) ?? [];
       return new ActionActivityDto(activity, {
         comments,
         formResponseOutput: activity.taskFormResponse
@@ -1854,7 +1860,7 @@ export class ActionsService {
     limit: number = 20,
     before?: Date,
     comments?: boolean,
-  ): Promise<ActionActivityDto[]> {
+  ): Promise<HomeFeedItemDto[]> {
     const [friends, user] = await Promise.all([
       this.userService.findFriends(userId),
       this.userService.findOne(userId, { communities: true }),
@@ -1863,6 +1869,7 @@ export class ActionsService {
 
     const friendIds = friends.map((f) => f.id);
     const communityIds = (user.communities ?? []).map((c) => c.id);
+    const userClusterId = user.clusterId;
 
     // Get community member IDs in batch
     const communityMemberIds = new Set<number>();
@@ -1877,19 +1884,30 @@ export class ActionsService {
       }
     }
 
-    // Combine and deduplicate, excluding self
     const allUserIds = [
       ...new Set([...friendIds, ...communityMemberIds]),
     ].filter((id) => id !== userId);
 
-    if (allUserIds.length === 0) return [];
+    const clusterComments = await this.forumService.findClusterCommentsForFeed({
+      userId,
+      userClusterId,
+      limit,
+      before,
+    });
+    const clusterCommentItems: HomeFeedItem[] = clusterComments.map((cc) => ({
+      type: HomeFeedItemType.ClusterForumComment,
+      date: cc.comment.createdAt,
+      clusterForumComment: cc,
+    }));
+    const clusterCommentDateMs = clusterCommentItems
+      .map((c) => c.date.getTime())
+      .sort((a, b) => b - a);
 
-    // Page through DB until we collect `limit` contentful results or exhaust data
     const batchSize = limit * 2;
     const contentful: ActionActivity[] = [];
     let cursor = before;
 
-    while (contentful.length < limit) {
+    while (contentful.length < limit && allUserIds.length > 0) {
       const qb = this.buildActivityFeedQuery({
         limit: batchSize,
         before: cursor,
@@ -1914,31 +1932,33 @@ export class ActionsService {
         }
       }
 
-      // No more data in DB
       if (batch.length < batchSize) break;
 
-      // Advance cursor to the last item's createdAt
       cursor = batch[batch.length - 1].createdAt;
+
+      const cursorMs = cursor.getTime();
+      const commentsNewerThanCursor = clusterCommentDateMs.filter(
+        (d) => d > cursorMs,
+      ).length;
+      if (contentful.length + commentsNewerThanCursor >= limit) break;
     }
 
-    if (contentful.length === 0) return [];
+    const activityDtos = await this.attachComments(contentful, userId, {
+      includeComments: !!comments,
+    });
 
-    if (comments) {
-      return this.attachComments(contentful, userId);
-    }
-
-    const likedIds = await this.getLikedActivityIds(
-      contentful.map((a) => a.id),
-      userId,
+    const activityItems = activityDtos.map(
+      (activity): HomeFeedItem => ({
+        type: HomeFeedItemType.Activity,
+        date: activity.createdAt,
+        activity,
+      }),
     );
 
-    return contentful.map(
-      (activity) =>
-        new ActionActivityDto(activity, {
-          formResponseOutput: this.buildOutputFormResponse(activity),
-          likedByMe: likedIds.has(activity.id),
-        }),
-    );
+    const merged: HomeFeedItem[] = [...activityItems, ...clusterCommentItems];
+    merged.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    return merged.slice(0, limit).map((item) => new HomeFeedItemDto(item));
   }
 
   async findByName(name: string): Promise<Action[]> {

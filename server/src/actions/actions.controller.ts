@@ -65,6 +65,7 @@ import {
   EvaluateCohortExpressionResponseDto,
   ExportActionDto,
   GlobalFeedItemDto,
+  HomeFeedItemDto,
   OptOutActionDto,
   PasteJsonDto,
   PreviewEmailHtmlDto,
@@ -454,10 +455,10 @@ export class ActionsController {
 
   @Get('homeFeed')
   @UseGuards(AuthGuard)
-  @ApiOkResponse({ type: [ActionActivityDto] })
+  @ApiOkResponse({ type: [HomeFeedItemDto] })
   @ApiOperation({
     summary:
-      'Get contentful completions from friends and group members for the home feed',
+      'Get contentful completions from friends and group members, interleaved with cluster-mate forum comments on cluster-tagged posts',
   })
   async homeFeed(
     @Request() req: JwtRequest,
@@ -465,7 +466,7 @@ export class ActionsController {
     @Query('before') before?: string,
     @Query('comments', new ParseBoolPipe({ optional: true }))
     comments?: boolean,
-  ): Promise<ActionActivityDto[]> {
+  ): Promise<HomeFeedItemDto[]> {
     const limitNum = limit ? parseInt(limit) : 20;
     const beforeDate = before ? new Date(before) : undefined;
     if (before && isNaN(beforeDate!.getTime())) {

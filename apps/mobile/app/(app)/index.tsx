@@ -1,10 +1,8 @@
-import {
-  View,
-  ActivityIndicator,
-  RefreshControl,
-  TouchableOpacity,
-} from "react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type {
+  FollowUpForm,
+  GeneralUpdateDto,
+  HomeFeedItemDto,
+} from "@alliance/shared/client";
 import {
   actionsDismissAction,
   actionsDismissGeneralUpdate,
@@ -12,40 +10,41 @@ import {
   userGetAwayRanges,
 } from "@alliance/shared/client";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
-import type {
-  ActionActivityDto,
-  FollowUpForm,
-  GeneralUpdateDto,
-} from "@alliance/shared/client";
-import { colors } from "../../lib/style/colors";
-import Text from "../../components/system/Text";
 import {
   ActionWithAwayStatus,
   getAwayStatus,
   homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
-import useActivities, {
-  ActivityList,
-} from "@alliance/shared/lib/useActivities";
+import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
+import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
+import useHomeFeed from "@alliance/shared/lib/useHomeFeed";
+import { LegendList } from "@legendapp/list";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { Check } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
+import ClusterForumCommentCard from "../../components/ClusterForumCommentCard";
+import FollowUpFormPanel from "../../components/FollowUpFormPanel";
+import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import LargeActionCard from "../../components/LargeActionCard";
 import LargeGeneralUpdateCard from "../../components/LargeGeneralUpdateCard";
-import { Check } from "lucide-react-native";
-import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
+import ProfileImage from "../../components/ProfileImage";
 import SuccessOverlay from "../../components/SuccessOverlay";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
-import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
-import { useAuth } from "../../lib/AuthContext";
-import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import { TaskNavigatorStepper } from "../../components/system/TaskNavigatorStepper";
-import { router } from "expo-router";
-import ProfileImage from "../../components/ProfileImage";
+import Text from "../../components/system/Text";
 import UserActivityCard from "../../components/UserActivityCard";
-import FollowUpFormPanel from "../../components/FollowUpFormPanel";
-import { LegendList } from "@legendapp/list";
+import { useAuth } from "../../lib/AuthContext";
+import { colors } from "../../lib/style/colors";
 
 type HomeScreenItem =
   | { kind: "action"; action: ActionWithAwayStatus }
@@ -81,14 +80,14 @@ export default function HomeScreen() {
 
   const { user } = useAuth();
   const {
-    activities: homeFeedActivities,
+    items: homeFeedItems,
     handleLikeActivity: handleLikeHomeFeedActivity,
+    handleLikeClusterForumComment,
     loading: homeFeedLoading,
     fetchNextPage: fetchNextHomeFeedPage,
     hasNextPage: homeFeedHasNextPage,
     isFetchingNextPage: homeFeedFetchingNextPage,
-  } = useActivities({
-    list: ActivityList.HomeFeed,
+  } = useHomeFeed({
     comments: true,
     limit: 5,
   });
@@ -228,16 +227,51 @@ export default function HomeScreen() {
     }
   }, [homeFeedHasNextPage, homeFeedFetchingNextPage, fetchNextHomeFeedPage]);
 
-  const renderHomeFeedActivity = useCallback(
-    ({ item: activity }: { item: ActionActivityDto }) => (
-      <View className={`border-b-3`} style={{ borderColor: colors.grey[1] }}>
-        <UserActivityCard
-          activity={activity}
-          handleLike={() => handleHomeFeedLike(activity.id)}
-        />
-      </View>
-    ),
-    [handleHomeFeedLike],
+  const renderHomeFeedItem = useCallback(
+    ({ item }: { item: HomeFeedItemDto }) => {
+      switch (item.type) {
+        case "activity": {
+          if (!item.activity) return null;
+          const activity = item.activity;
+          return (
+            <View
+              className={`border-b-3`}
+              style={{ borderColor: colors.grey[1] }}
+            >
+              <UserActivityCard
+                activity={activity}
+                handleLike={() => handleHomeFeedLike(activity.id)}
+              />
+            </View>
+          );
+        }
+        case "cluster_forum_comment": {
+          if (!item.clusterForumComment) return null;
+          const { comment, postId, postTitle, likedByMe, likesCount } =
+            item.clusterForumComment;
+          return (
+            <View
+              className={`border-b-3`}
+              style={{ borderColor: colors.grey[1] }}
+            >
+              <ClusterForumCommentCard
+                comment={comment}
+                postId={postId}
+                postTitle={postTitle}
+                likedByMe={likedByMe}
+                likesCount={likesCount}
+                handleLike={() => handleLikeClusterForumComment(comment.id)}
+              />
+            </View>
+          );
+        }
+        default:
+          throw new Error(
+            `unknown home feed item type: ${item.type satisfies never}`,
+          );
+      }
+    },
+    [handleHomeFeedLike, handleLikeClusterForumComment],
   );
 
   useEffect(() => {
@@ -245,7 +279,7 @@ export default function HomeScreen() {
     if (homeFeedLoading || homeFeedFetchingNextPage) return;
     if (!homeFeedHasNextPage) return;
     // Match web behavior where short lists immediately pull the next page.
-    if (homeFeedActivities.length < 5) {
+    if (homeFeedItems.length < 5) {
       void fetchNextHomeFeedPage();
     }
   }, [
@@ -253,7 +287,7 @@ export default function HomeScreen() {
     homeFeedLoading,
     homeFeedFetchingNextPage,
     homeFeedHasNextPage,
-    homeFeedActivities.length,
+    homeFeedItems.length,
     fetchNextHomeFeedPage,
   ]);
 
@@ -361,7 +395,7 @@ export default function HomeScreen() {
     handleSubmitSuccess,
   ]);
 
-  const showHomeFeedList = !homeFeedLoading && homeFeedActivities.length > 0;
+  const showHomeFeedList = !homeFeedLoading && homeFeedItems.length > 0;
 
   const header = (
     <SimplePageTitle title={title}>
@@ -403,9 +437,13 @@ export default function HomeScreen() {
       {showHomeFeedList ? (
         <LegendList
           className="flex-1"
-          data={homeFeedActivities}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderHomeFeedActivity}
+          data={homeFeedItems}
+          keyExtractor={(item) =>
+            item.type === "activity"
+              ? `activity-${item.activity?.id}`
+              : `comment-${item.clusterForumComment?.comment.id}`
+          }
+          renderItem={renderHomeFeedItem}
           onEndReached={onHomeFeedEndReached}
           onEndReachedThreshold={0.3}
           recycleItems

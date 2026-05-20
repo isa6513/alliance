@@ -1,23 +1,22 @@
 import {
   ActionActivityDto,
+  actionsCommunityActivity,
   actionsFindCompletedForUser,
   actionsFriendActivity,
+  actionsFriendActivityForAction,
   actionsGetActionActivities,
   actionsGetActivityFeed,
-  actionsCommunityActivity,
-  actionsHomeFeed,
   actionsLikeActivity,
   actionsUnlikeActivity,
-  actionsFriendActivityForAction,
 } from "@alliance/shared/client";
-import { useCallback, useMemo } from "react";
 import {
+  InfiniteData,
   useInfiniteQuery,
   useMutation,
   useQueryClient,
-  InfiniteData,
 } from "@tanstack/react-query";
 import posthog from "posthog-js";
+import { useCallback, useMemo } from "react";
 import { actionActivityViewable } from "./actionActivityConstants";
 
 export enum ActivityList {
@@ -27,7 +26,6 @@ export enum ActivityList {
   Action = "action",
   Global = "global",
   Community = "community",
-  HomeFeed = "homeFeed",
 }
 
 export type UseActivitiesProps = {
@@ -43,7 +41,7 @@ export type UseActivitiesProps = {
       limit?: number;
     }
   | {
-      list: ActivityList.Global | ActivityList.Friends | ActivityList.HomeFeed;
+      list: ActivityList.Global | ActivityList.Friends;
       objectId?: never;
       limit?: number;
     }
@@ -53,8 +51,7 @@ const supportsCursor = (list: ActivityList) =>
   list === ActivityList.Global ||
   list === ActivityList.Friends ||
   list === ActivityList.Community ||
-  list === ActivityList.Action ||
-  list === ActivityList.HomeFeed;
+  list === ActivityList.Action;
 
 const generateQueryKey = (props: UseActivitiesProps) => {
   return [
@@ -110,15 +107,6 @@ const callActivityApi = async (props: UseActivitiesProps, before?: string) => {
       break;
     case ActivityList.Global:
       apiCall = actionsGetActivityFeed({
-        query: {
-          limit: limit.toString(),
-          before: beforeStr,
-          comments,
-        },
-      });
-      break;
-    case ActivityList.HomeFeed:
-      apiCall = actionsHomeFeed({
         query: {
           limit: limit.toString(),
           before: beforeStr,

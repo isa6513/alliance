@@ -1518,7 +1518,7 @@ export const actionsFriendActivity = <ThrowOnError extends boolean = false>(opti
 };
 
 /**
- * Get contentful completions from friends and group members for the home feed
+ * Get contentful completions from friends and group members, interleaved with cluster-mate forum comments on cluster-tagged posts
  */
 export const actionsHomeFeed = <ThrowOnError extends boolean = false>(options: Options<ActionsHomeFeedData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<ActionsHomeFeedResponse, unknown, ThrowOnError>({

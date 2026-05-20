@@ -21,28 +21,28 @@ import {
   CreateEditableContentDto,
   EditableContentDto,
 } from 'src/forum/dto/editablecontent.dto';
+import type { Comment } from 'src/forum/entities/comment.entity';
+import { getImageSource } from 'src/images/images.service';
+import { Form } from 'src/tasks/entities/form.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { SubmitFormDto } from 'src/tasks/form.dto';
 import { ProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
+import type { CohortExpression } from '../cohort-expression.types';
 import {
   ActionActivity,
   ActionActivityType,
 } from '../entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
-import { Action } from '../entities/action.entity';
-import { getImageSource } from 'src/images/images.service';
-import { ActionUpdate } from '../entities/action-update.entity';
-import {
-  ReminderGroup,
-  ReminderCohortType,
-} from '../entities/reminder-group.entity';
 import { ActionSuite } from '../entities/action-suite.entity';
-import { Form } from 'src/tasks/entities/form.entity';
-import { SubmitFormDto } from 'src/tasks/form.dto';
-import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { ActionUpdate } from '../entities/action-update.entity';
+import { Action } from '../entities/action.entity';
 import { GeneralUpdate } from '../entities/general-update.entity';
+import {
+  ReminderCohortType,
+  ReminderGroup,
+} from '../entities/reminder-group.entity';
 import { GeneralUpdateDto } from './general-update.dto';
-import type { CohortExpression } from '../cohort-expression.types';
-import type { Comment } from 'src/forum/entities/comment.entity';
 
 export class CreateReminderGroupDto extends PickType(ReminderGroup, [
   'name',
@@ -1025,10 +1025,117 @@ export class TimelineFeedItemDto {
     this.type = input.type;
     this.date = input.date;
     this.action = new ActionDto(input.action);
-    if (input.type === TimelineFeedItemType.ActionEvent) {
-      this.actionEvent = new ActionEventDto(input.actionEvent);
-    } else {
-      this.actionUpdate = new ActionUpdateDto(input.actionUpdate);
+    switch (input.type) {
+      case TimelineFeedItemType.ActionEvent:
+        this.actionEvent = new ActionEventDto(input.actionEvent);
+        break;
+      case TimelineFeedItemType.ActionUpdate:
+        this.actionUpdate = new ActionUpdateDto(input.actionUpdate);
+        break;
+      default:
+        input satisfies never;
+        throw new Error(
+          `Unknown timeline feed item type: ${(input as { type: unknown }).type}`,
+        );
+    }
+  }
+}
+
+export enum HomeFeedItemType {
+  Activity = 'activity',
+  ClusterForumComment = 'cluster_forum_comment',
+}
+
+export class HomeFeedClusterForumCommentDto {
+  @ApiProperty({ type: () => CommentDto })
+  @Type(() => CommentDto)
+  comment: CommentDto;
+
+  @ApiProperty()
+  postId: number;
+
+  @ApiProperty()
+  postTitle: string;
+
+  @ApiProperty()
+  likedByMe: boolean;
+
+  @ApiProperty()
+  likesCount: number;
+
+  constructor(input: {
+    comment: Comment;
+    postId: number;
+    postTitle: string;
+    likedByMe: boolean;
+    likesCount: number;
+  }) {
+    this.comment = new CommentDto(input.comment);
+    this.postId = input.postId;
+    this.postTitle = input.postTitle;
+    this.likedByMe = input.likedByMe;
+    this.likesCount = input.likesCount;
+  }
+}
+
+export type HomeFeedItem = {
+  date: Date;
+} & (
+  | {
+      type: HomeFeedItemType.Activity;
+      activity: ActionActivityDto;
+      clusterForumComment?: undefined;
+    }
+  | {
+      type: HomeFeedItemType.ClusterForumComment;
+      activity?: undefined;
+      clusterForumComment: {
+        comment: Comment;
+        postId: number;
+        postTitle: string;
+        likedByMe: boolean;
+        likesCount: number;
+      };
+    }
+);
+
+export class HomeFeedItemDto {
+  @ApiProperty({ enum: HomeFeedItemType, enumName: 'HomeFeedItemType' })
+  @Allow()
+  type: HomeFeedItemType;
+
+  @ApiProperty()
+  @Type(() => Date)
+  @Allow()
+  date: Date;
+
+  @ApiPropertyOptional({ type: () => ActionActivityDto })
+  @Type(() => ActionActivityDto)
+  @IsOptional()
+  activity?: ActionActivityDto;
+
+  @ApiPropertyOptional({ type: () => HomeFeedClusterForumCommentDto })
+  @Type(() => HomeFeedClusterForumCommentDto)
+  @IsOptional()
+  clusterForumComment?: HomeFeedClusterForumCommentDto;
+
+  constructor(input: HomeFeedItem) {
+    this.type = input.type;
+    this.date = input.date;
+    switch (input.type) {
+      case HomeFeedItemType.Activity:
+        this.activity = input.activity;
+        break;
+      case HomeFeedItemType.ClusterForumComment:
+        this.clusterForumComment = new HomeFeedClusterForumCommentDto(
+          input.clusterForumComment,
+        );
+        break;
+      default:
+        input satisfies never;
+        throw new Error(
+          `Unknown home feed item type: ${(input as { type: unknown }).type}`,
+        );
     }
   }
 }
