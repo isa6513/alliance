@@ -1156,7 +1156,7 @@ export class TasksService {
   ): Promise<FormResponse> {
     const response = await this.formResponseRepository.findOne({
       where: { formId, user: { id: userId } },
-      relations: { formSnapshot: true },
+      relations: { formSnapshot: true, user: true },
       order: { createdAt: 'DESC', id: 'DESC' },
     });
     if (!response) {
