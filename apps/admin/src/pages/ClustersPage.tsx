@@ -5,6 +5,7 @@ import {
 } from "@alliance/shared/client";
 import type { ClusterAdminDto } from "@alliance/shared/client/types.gen";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { memberProfileUrl } from "@alliance/sharedweb/lib/config";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -66,6 +67,43 @@ const ClustersPage: React.FC = () => {
 
   const totalMembers = clusters.reduce((acc, c) => acc + c.members.length, 0);
 
+  const handleExportClustermates = useCallback(async () => {
+    const escapeMdLabel = (s: string) => s.replace(/[\\[\]*_`~<>]/g, "\\$&");
+    const payload: Record<string, string> = {};
+    for (const cluster of clusters) {
+      for (const member of cluster.members) {
+        const others = cluster.members
+          .filter((m) => m.id !== member.id)
+          .sort((a, b) => a.id - b.id);
+        if (others.length === 0) {
+          payload[String(member.id)] =
+            "You are the only member of your introduction group.";
+          continue;
+        }
+        const list = others
+          .map(
+            (m) =>
+              `- [${escapeMdLabel(m.displayName)}](${memberProfileUrl(m.id)})`,
+          )
+          .join("\n");
+        payload[String(member.id)] =
+          `The other members of your introduction group are:\n\n${list}`;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+      const userCount = Object.keys(payload).length;
+      success(
+        `Copied clustermates for ${userCount} user${
+          userCount === 1 ? "" : "s"
+        } to clipboard.`,
+      );
+    } catch (err) {
+      console.error("Failed to copy clustermates", err);
+      toastError("Could not copy to clipboard.");
+    }
+  }, [clusters, success, toastError]);
+
   return (
     <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-4">
       <title>Clusters - Admin</title>
@@ -77,13 +115,23 @@ const ClustersPage: React.FC = () => {
               Friend-disjoint groupings of signed members, used for matching.
             </p>
           </div>
-          <Button
-            color={ButtonColor.Red}
-            onClick={() => setConfirmOpen(true)}
-            disabled={loading || reassigning}
-          >
-            Reassign all
-          </Button>
+          <div className="flex flex-row items-center gap-2">
+            <Button
+              color={ButtonColor.White}
+              onClick={handleExportClustermates}
+              disabled={loading || reassigning || clusters.length === 0}
+              title="Copy a JSON object mapping each user id to a markdown list of their clustermates"
+            >
+              Export clustermates
+            </Button>
+            <Button
+              color={ButtonColor.Red}
+              onClick={() => setConfirmOpen(true)}
+              disabled={loading || reassigning}
+            >
+              Reassign all
+            </Button>
+          </div>
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}

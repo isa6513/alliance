@@ -27,6 +27,9 @@ export const getBaseUrl = (): string => {
   }
 };
 
+export const memberProfileUrl = (id: number | string): string =>
+  `${getBaseUrl()}/member/${id}`;
+
 export const getApiUrl = (): string => {
   if (mode === "development") {
     return "http://localhost:3005";

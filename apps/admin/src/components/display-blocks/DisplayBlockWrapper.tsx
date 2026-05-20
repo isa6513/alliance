@@ -1,14 +1,8 @@
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import type {
-  DisplayBlock,
-  ManualDisplayBlockContent,
+  MANUAL_IMPORT_FIELD_BY_KIND,
+  manualImportClipboardSchema,
+  type DisplayBlock,
+  type ManualDisplayBlockContent,
 } from "@alliance/common/forms/display-blocks";
 import type {
   AnyField,
@@ -16,12 +10,21 @@ import type {
 } from "@alliance/common/forms/form-schema";
 import type { UserDto } from "@alliance/shared/client";
 import { userList } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import { CheckCircle2, Circle } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   ConditionalVisibility,
   type OutputBlockOption,
 } from "../form-fields/CommonControls";
-import { CheckCircle2, Circle } from "lucide-react";
-import { cn } from "@alliance/shared/styles/util";
 
 type ManualUserListEntry = Pick<UserDto, "id" | "name" | "hasActiveContract">;
 
@@ -35,6 +38,15 @@ const stripManualFields = (
   } = updates as Partial<DisplayBlock>;
   return rest;
 };
+
+const baseManualContentFromBlock = (
+  block: DisplayBlock,
+): ManualDisplayBlockContent =>
+  stripManualFields({
+    ...block,
+    manualPerUser: undefined,
+    manualUserContent: undefined,
+  }) as ManualDisplayBlockContent;
 
 type DisplayBlockChildRenderProps<T extends DisplayBlock> = {
   block: T;
@@ -68,6 +80,10 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   previousFields,
   outputBlocks,
 }: DisplayBlockWrapperProps<T>) {
+  const manualImportField = block
+    ? MANUAL_IMPORT_FIELD_BY_KIND[block.kind]
+    : null;
+  const { success, error: toastError, confirm } = useToast();
   const showConditional = Boolean(block && onUpdate);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const optionsMenuRef = useRef<HTMLDivElement | null>(null);
@@ -364,11 +380,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
       if (manualPerUserEnabled && activeManualUserId) {
         const existingContent =
           manualUserContent[activeManualUserId] ??
-          stripManualFields({
-            ...block,
-            manualPerUser: undefined,
-            manualUserContent: undefined,
-          });
+          baseManualContentFromBlock(block);
 
         const nextManualContent: Record<string, ManualDisplayBlockContent> = {
           ...manualUserContent,
@@ -396,6 +408,110 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
       onUpdate,
     ],
   );
+
+  const handleImportFromClipboard = useCallback(async () => {
+    if (!onUpdate || !block || !manualImportField) return;
+    let clipboardText: string;
+    try {
+      clipboardText = await navigator.clipboard.readText();
+    } catch (err) {
+      console.error("Could not read from clipboard", err);
+      toastError("Could not read from clipboard.");
+      return;
+    }
+    let rawJson: unknown;
+    try {
+      rawJson = JSON.parse(clipboardText);
+    } catch (err) {
+      console.error("Could not parse clipboard JSON", err);
+      toastError("Clipboard does not contain valid JSON.");
+      return;
+    }
+    const parseResult = manualImportClipboardSchema.safeParse(rawJson);
+    if (!parseResult.success) {
+      toastError('Expected a JSON object like {"42": "text for user 42"}.');
+      return;
+    }
+    const parsed = parseResult.data;
+
+    const baseContent = baseManualContentFromBlock(block);
+
+    const nextManualContent: Record<string, ManualDisplayBlockContent> = {
+      ...manualUserContent,
+    };
+
+    const parsedEntries = Object.entries(parsed);
+    let importedCount = 0;
+    let overwriteCount = 0;
+    for (const [userId, value] of parsedEntries) {
+      const existingContent = nextManualContent[userId] ?? baseContent;
+      const existingValue = (
+        existingContent as Record<string, unknown> | undefined
+      )?.[manualImportField];
+      if (nextManualContent[userId] && existingValue === value) {
+        continue;
+      }
+      if (
+        nextManualContent[userId] &&
+        typeof existingValue === "string" &&
+        existingValue.length > 0 &&
+        existingValue !== value
+      ) {
+        overwriteCount++;
+      }
+      nextManualContent[userId] = {
+        ...existingContent,
+        [manualImportField]: value,
+        kind: existingContent.kind ?? block.kind,
+        id: block.id,
+      } as ManualDisplayBlockContent;
+      importedCount++;
+    }
+
+    if (parsedEntries.length === 0) {
+      toastError("No string entries found in clipboard JSON.");
+      return;
+    }
+    if (importedCount === 0) {
+      toastError("Clipboard content already matches existing per-user values.");
+      return;
+    }
+
+    if (overwriteCount > 0) {
+      const ok = await confirm({
+        title: "Overwrite existing per-user content?",
+        message: `${overwriteCount} user${
+          overwriteCount === 1 ? " already has" : "s already have"
+        } a different ${manualImportField} value. Continue and replace ${
+          overwriteCount === 1 ? "it" : "them"
+        }?`,
+        confirmLabel: "Overwrite",
+        cancelLabel: "Cancel",
+        mode: "fullscreen",
+      });
+      if (!ok) return;
+    }
+
+    onUpdate({
+      manualPerUser: true,
+      manualUserContent: nextManualContent,
+    } as Partial<T>);
+
+    setIsMenuOpen(false);
+    success(
+      `Imported content for ${importedCount} user${
+        importedCount === 1 ? "" : "s"
+      }.`,
+    );
+  }, [
+    block,
+    confirm,
+    manualImportField,
+    manualUserContent,
+    onUpdate,
+    success,
+    toastError,
+  ]);
 
   const clearContentForActiveUser = () => {
     if (!onUpdate || !block || !activeManualUserId) {
@@ -517,6 +633,18 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
                     />
                     Manual content per user
                   </label>
+                  {manualImportField && onUpdate && (
+                    <div className="px-3 py-1.5">
+                      <button
+                        type="button"
+                        className="block w-full rounded-md border border-blue-200 bg-blue-50 px-2 py-1.5 text-left text-sm font-medium text-blue-700 hover:bg-blue-100"
+                        onClick={() => void handleImportFromClipboard()}
+                        title={`Read a {userId: string} JSON object from the clipboard and apply each string to ${manualImportField} per user.`}
+                      >
+                        Import from clipboard…
+                      </button>
+                    </div>
+                  )}
                   {manualPerUserEnabled && (
                     <div className="px-3 pb-1 pt-1 space-y-2">
                       <div className="flex items-center justify-between gap-2">

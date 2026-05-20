@@ -1,3 +1,4 @@
+import z from "zod";
 import type { VisibleIfFormula } from "./visible-if-formula";
 
 export type DisplayKind =
@@ -123,4 +124,36 @@ export type DisplayBlock =
 export type ManualDisplayBlockContent = Omit<
   DisplayBlock,
   "manualPerUser" | "manualUserContent"
+>;
+
+export type ManualImportField = "text" | "html";
+
+/**
+ * For each display-block kind, the single string field that
+ * "Import from clipboard" should write per-user content into.
+ * `null` means the kind doesn't support clipboard import.
+ */
+export const MANUAL_IMPORT_FIELD_BY_KIND: Record<
+  DisplayKind,
+  ManualImportField | null
+> = {
+  header: "text",
+  text: "text",
+  label: "text",
+  quote: "text",
+  copytext: "text",
+  html: "html",
+  divider: null,
+  spacer: null,
+  image: null,
+  video: null,
+  biglink: null,
+  previousAnswer: null,
+};
+
+export const manualImportClipboardSchema = z
+  .record(z.string(), z.string())
+  .refine((v) => !Array.isArray(v), "Expected a JSON object, not an array.");
+export type ManualImportClipboardPayload = z.infer<
+  typeof manualImportClipboardSchema
 >;
