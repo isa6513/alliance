@@ -1,11 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
-import {
-  bulkAssign,
-  placeIncremental,
-  type ClusterUser,
-} from './cluster.algorithm';
+import { bulkAssign, type ClusterUser } from './cluster.algorithm';
 import { Cluster } from './entities/cluster.entity';
 
 export interface ClusterAssignResult {
@@ -101,70 +97,6 @@ export class ClusterService {
         clustersCreated: clusters.length,
         usersAssigned: eligibleIds.length,
       };
-    });
-  }
-
-  /**
-   * Places a single newly-signed user into the best-fit existing cluster, or
-   * creates a new singleton if every existing cluster contains one of their
-   * friends. Idempotent — does nothing if the user is already clustered, and
-   * no-op if no clusters exist yet (admin must run a bulk reassign to seed).
-   *
-   * Call from the contract-signing flow when a user transitions to 'signed'.
-   */
-  async placeNewlySignedUser(userId: number): Promise<void> {
-    await this.dataSource.transaction(async (manager) => {
-      await manager.query(`SELECT pg_advisory_xact_lock($1)`, [
-        CLUSTER_LOCK_KEY,
-      ]);
-
-      // ----- Fetch -----
-      const userRow = await manager.query<{ clusterId: number | null }[]>(
-        `SELECT "clusterId" FROM "user" WHERE id = $1`,
-        [userId],
-      );
-      if (userRow.length === 0 || userRow[0].clusterId !== null) return;
-
-      const clusterRows = await manager.query<{ id: number }[]>(
-        `SELECT id FROM "cluster" ORDER BY id ASC`,
-      );
-      if (clusterRows.length === 0) return;
-
-      const clusteredRows = await manager.query<
-        { id: number; clusterId: number }[]
-      >(`SELECT id, "clusterId" FROM "user" WHERE "clusterId" IS NOT NULL`);
-
-      const relevantIds = [userId, ...clusteredRows.map((r) => r.id)];
-      const byId = await loadClusterUsers(manager, relevantIds);
-
-      // ----- Compute -----
-      const clusterIds = clusterRows.map((r) => r.id);
-      const clustersById = new Map<number, ClusterUser[]>(
-        clusterIds.map((id) => [id, []]),
-      );
-      for (const row of clusteredRows) {
-        clustersById.get(row.clusterId)!.push(byId.get(row.id)!);
-      }
-      const clusters = clusterIds.map((id) => clustersById.get(id)!);
-
-      const idx = placeIncremental(byId.get(userId)!, clusters);
-
-      // ----- Write -----
-      let targetClusterId: number;
-      if (idx === null) {
-        const nextNumber = clusterIds.length + 1;
-        const inserted = await manager.query<{ id: number }[]>(
-          `INSERT INTO "cluster" ("displayName") VALUES ($1) RETURNING id`,
-          [`Group ${nextNumber}`],
-        );
-        targetClusterId = inserted[0].id;
-      } else {
-        targetClusterId = clusterIds[idx];
-      }
-      await manager.query(`UPDATE "user" SET "clusterId" = $1 WHERE id = $2`, [
-        targetClusterId,
-        userId,
-      ]);
     });
   }
 }

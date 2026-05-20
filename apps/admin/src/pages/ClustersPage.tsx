@@ -1,8 +1,4 @@
-import {
-  clusterListAdmin,
-  clusterReassignAll,
-  clusterUpdateAdmin,
-} from "@alliance/shared/client";
+import { clusterListAdmin, clusterUpdateAdmin } from "@alliance/shared/client";
 import type { ClusterAdminDto } from "@alliance/shared/client/types.gen";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { memberProfileUrl } from "@alliance/sharedweb/lib/config";
@@ -13,14 +9,11 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { Pencil } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import ConfirmDialog from "../components/ConfirmDialog";
 
 const ClustersPage: React.FC = () => {
   const [clusters, setClusters] = useState<ClusterAdminDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
-  const [reassigning, setReassigning] = useState<boolean>(false);
   const { success, error: toastError } = useToast();
 
   const load = useCallback(async () => {
@@ -40,30 +33,6 @@ const ClustersPage: React.FC = () => {
   useEffect(() => {
     void load();
   }, [load]);
-
-  const handleReassign = useCallback(async () => {
-    setReassigning(true);
-    try {
-      const response = await clusterReassignAll();
-      const r = response.data;
-      if (r) {
-        success(
-          `Reassigned ${r.usersAssigned} member${
-            r.usersAssigned === 1 ? "" : "s"
-          } into ${r.clustersCreated} cluster${
-            r.clustersCreated === 1 ? "" : "s"
-          }.`,
-        );
-      }
-      setConfirmOpen(false);
-      await load();
-    } catch (err) {
-      console.error("Failed to reassign clusters", err);
-      toastError("Reassign failed.");
-    } finally {
-      setReassigning(false);
-    }
-  }, [load, success, toastError]);
 
   const totalMembers = clusters.reduce((acc, c) => acc + c.members.length, 0);
 
@@ -119,17 +88,10 @@ const ClustersPage: React.FC = () => {
             <Button
               color={ButtonColor.White}
               onClick={handleExportClustermates}
-              disabled={loading || reassigning || clusters.length === 0}
+              disabled={loading || clusters.length === 0}
               title="Copy a JSON object mapping each user id to a markdown list of their clustermates"
             >
               Export clustermates
-            </Button>
-            <Button
-              color={ButtonColor.Red}
-              onClick={() => setConfirmOpen(true)}
-              disabled={loading || reassigning}
-            >
-              Reassign all
             </Button>
           </div>
         </div>
@@ -150,10 +112,7 @@ const ClustersPage: React.FC = () => {
         {loading ? (
           <p className="text-sm text-zinc-500">Loading clusters…</p>
         ) : clusters.length === 0 ? (
-          <p className="text-sm text-zinc-500">
-            No clusters yet. Click &quot;Reassign all&quot; to generate them
-            from currently-signed members.
-          </p>
+          <p className="text-sm text-zinc-500">No clusters yet.</p>
         ) : (
           <div className="flex flex-col gap-3">
             {clusters.map((cluster) => (
@@ -170,19 +129,6 @@ const ClustersPage: React.FC = () => {
           </div>
         )}
       </div>
-
-      <ConfirmDialog
-        isOpen={confirmOpen}
-        title="Reassign all clusters?"
-        message={
-          "This wipes every existing cluster and re-clusters every member with an active signed contract from scratch. Members will likely end up in different clusters than they're in now."
-        }
-        confirmText="Reassign all"
-        cancelText="Cancel"
-        isLoading={reassigning}
-        onConfirm={handleReassign}
-        onCancel={() => setConfirmOpen(false)}
-      />
     </div>
   );
 };

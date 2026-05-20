@@ -160,24 +160,3 @@ function refine(clusters: ClusterUser[][]): void {
     [clusters[ca][i], clusters[cb][j]] = [clusters[cb][j], clusters[ca][i]];
   }
 }
-
-// Null = no friend-safe cluster; caller should create a new one.
-export function placeIncremental(
-  newUser: ClusterUser,
-  existingClusters: ClusterUser[][],
-): number | null {
-  let bestIdx: number | null = null;
-  let bestScore = -Infinity;
-  let bestSize = Infinity;
-  for (let idx = 0; idx < existingClusters.length; idx++) {
-    const cluster = existingClusters[idx];
-    const s = scoreAdd(newUser, cluster);
-    if (s === -Infinity) continue;
-    if (s > bestScore || (s === bestScore && cluster.length < bestSize)) {
-      bestScore = s;
-      bestSize = cluster.length;
-      bestIdx = idx;
-    }
-  }
-  return bestIdx;
-}

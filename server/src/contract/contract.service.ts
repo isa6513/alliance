@@ -1,7 +1,6 @@
 import { run } from '@alliance/common/run';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ClusterService } from 'src/cluster/cluster.service';
 import { CommunityService } from 'src/community/community.service';
 import { communityHasCapacity } from 'src/community/community.utils';
 import { Community } from 'src/community/entities/community.entity';
@@ -31,8 +30,6 @@ import { Contract } from './entities/contract.entity';
 
 @Injectable()
 export class ContractService {
-  private readonly logger = new Logger(ContractService.name);
-
   constructor(
     @InjectRepository(Contract)
     private readonly contractRepository: Repository<Contract>,
@@ -44,7 +41,6 @@ export class ContractService {
     private readonly communityService: CommunityService,
     private readonly notifsService: NotifsService,
     private readonly eventLogService: EventLogService,
-    private readonly clusterService: ClusterService,
   ) {}
 
   async findAll(): Promise<Contract[]> {
@@ -110,7 +106,6 @@ export class ContractService {
 
     if (switchingContracts) {
       await saveContractEventP;
-      this.schedulePlaceInCluster(user.id);
       return contractEvent.date;
     }
 
@@ -232,20 +227,7 @@ export class ContractService {
       ...promises,
     ]);
 
-    this.schedulePlaceInCluster(user.id);
-
     return contractEvent.date;
-  }
-
-  private schedulePlaceInCluster(userId: number): void {
-    setImmediate(() => {
-      void this.clusterService.placeNewlySignedUser(userId).catch((err) => {
-        this.logger.error(
-          `Failed to place user ${userId} into a cluster after signing`,
-          err instanceof Error ? err.stack : String(err),
-        );
-      });
-    });
   }
 
   async suspendContract(

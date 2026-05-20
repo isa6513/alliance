@@ -1,6 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClusterModule } from 'src/cluster/cluster.module';
 import { CommunityModule } from 'src/community/community.module';
 import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { NotifsModule } from 'src/notifs/notifs.module';
@@ -18,7 +17,6 @@ import { Contract } from './entities/contract.entity';
     CommunityModule,
     EventLogModule,
     NotifsModule,
-    ClusterModule,
   ],
   controllers: [ContractController],
   providers: [ContractService],
