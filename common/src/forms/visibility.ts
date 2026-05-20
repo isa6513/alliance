@@ -106,9 +106,6 @@ export function evaluateCondition(
   data: Record<string, FormValue>,
   extras: ConditionExtras,
 ): boolean {
-  if ("expr" in cond) {
-    return true;
-  }
   if ("deviceType" in cond) {
     if (!Array.isArray(cond.deviceType) || cond.deviceType.length === 0) {
       return false;
@@ -207,7 +204,6 @@ export function isElementCurrentlyVisible(
   const results: Record<string, boolean> = {};
   for (const [name, cond] of Object.entries(formula!.conditions)) {
     if (
-      "expr" in cond ||
       "deviceType" in cond ||
       "validatorId" in cond ||
       "outputBlockVisible" in cond

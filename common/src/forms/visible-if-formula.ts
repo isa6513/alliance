@@ -9,7 +9,6 @@ export type Condition =
   | { when: string; includesOption: string; sourceFormId?: number }
   | { when: string; anySelected: boolean; sourceFormId?: number }
   | { when: string; hasValue: boolean; sourceFormId?: number }
-  | { expr: string }
   | { validatorId: number; resultEquals?: boolean }
   | { deviceType: DeviceVisibilityTarget[] }
   | { outputBlockVisible: string; isVisible?: boolean };

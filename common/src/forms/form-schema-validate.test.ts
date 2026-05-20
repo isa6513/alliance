@@ -1,3 +1,4 @@
+import type { LabelBlock } from "./display-blocks";
 import type {
   AnyField,
   FormSchema,
@@ -7,9 +8,8 @@ import type {
   Page,
   TextField,
 } from "./form-schema";
-import type { LabelBlock } from "./display-blocks";
-import type { Condition, VisibleIfFormula } from "./visible-if-formula";
 import { validateFormSchema } from "./form-schema-validate";
+import type { Condition, VisibleIfFormula } from "./visible-if-formula";
 
 const formula = (conditions: Record<string, Condition>): VisibleIfFormula => ({
   conditions,
@@ -210,9 +210,7 @@ describe("validateFormSchema", () => {
 
   it("flags a 3-block cycle of outputBlockVisible references", () => {
     const schema = baseSchema({
-      pages: [
-        page("p1", [textField("f1"), textField("f2"), textField("f3")]),
-      ],
+      pages: [page("p1", [textField("f1"), textField("f2"), textField("f3")])],
       outputViews: [
         view("v1", [
           fieldBlock("blk-a", "f1", {
@@ -245,9 +243,7 @@ describe("validateFormSchema", () => {
 
   it("allows a valid DAG of outputBlockVisible references (no cycle)", () => {
     const schema = baseSchema({
-      pages: [
-        page("p1", [textField("f1"), textField("f2"), textField("f3")]),
-      ],
+      pages: [page("p1", [textField("f1"), textField("f2"), textField("f3")])],
       outputViews: [
         view("v1", [
           fieldBlock("blk-a", "f1"),
@@ -381,7 +377,6 @@ describe("validateFormSchema", () => {
           textField("f1", {
             visibleIfFormula: formula({
               c1: { when: "f2", equals: "yes" },
-              c2: { expr: "1 + 1" },
               c3: { validatorId: 42 },
               c4: { deviceType: ["mobile"] },
             }),
