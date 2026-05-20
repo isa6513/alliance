@@ -18,10 +18,10 @@ import {
   CommentSort,
   commentFilterLabels,
   getCommentFilterOptions,
+  getSortOptions,
   matchesCommentFilter,
   sortComments,
   sortLabels,
-  sortOptions,
   useCommentFilterData,
 } from "@alliance/shared/lib/commentsFilter";
 import { useCommentLikeMutation } from "@alliance/shared/lib/useCommentLikeMutation";
@@ -524,12 +524,12 @@ export default function Comments({
   // useAuth() is hydrated before this mounts in the common case, so the initializer
   // picks the right default without needing an effect to react to late-arriving user data.
   const [commentFilter, setCommentFilter] = useState<CommentFilter>(
-    showClusterTags && user?.clusterId != null
-      ? CommentFilter.SameGroup
-      : CommentFilter.All,
+    CommentFilter.All,
   );
   const [commentSort, setCommentSort] = useState<CommentSort>(
-    CommentSort.Newest,
+    showClusterTags && user?.clusterId != null
+      ? CommentSort.SameCluster
+      : CommentSort.Newest,
   );
   const [randomSeed, setRandomSeed] = useState(() => String(Math.random()));
   const handleSortChange = useCallback((sort: CommentSort) => {
@@ -717,14 +717,21 @@ export default function Comments({
     [topLevelComments, user],
   );
 
+  const hasSameGroup = showClusterTags && user?.clusterId != null;
+
   const filterOptions = useMemo(
     () =>
       getCommentFilterOptions({
         activeQaMode,
         hasMineComments,
-        hasSameGroup: showClusterTags && user?.clusterId != null,
+        hasSameGroup,
       }),
-    [activeQaMode, hasMineComments, showClusterTags, user?.clusterId],
+    [activeQaMode, hasMineComments, hasSameGroup],
+  );
+
+  const sortOptions = useMemo(
+    () => getSortOptions({ hasSameGroup }),
+    [hasSameGroup],
   );
 
   useEffect(() => {
@@ -732,6 +739,12 @@ export default function Comments({
       setCommentFilter(CommentFilter.All);
     }
   }, [filterOptions, commentFilter]);
+
+  useEffect(() => {
+    if (!sortOptions.includes(commentSort)) {
+      setCommentSort(CommentSort.Newest);
+    }
+  }, [sortOptions, commentSort]);
 
   const filterContext = useMemo(
     () => ({
@@ -761,7 +774,7 @@ export default function Comments({
         matchesCommentFilter(comment, commentFilter, filterContext),
       ),
       commentSort,
-      { randomSeed },
+      { randomSeed, userClusterId: user?.clusterId },
     );
   }, [
     comments,
@@ -770,6 +783,7 @@ export default function Comments({
     commentSort,
     filterContext,
     randomSeed,
+    user?.clusterId,
   ]);
 
   const commentIds = useMemo(

@@ -4,10 +4,10 @@ import {
   CommentSort,
   commentFilterLabels,
   getCommentFilterOptions,
+  getSortOptions,
   matchesCommentFilter,
   sortComments,
   sortLabels,
-  sortOptions,
   useCommentFilterData,
 } from "@alliance/shared/lib/commentsFilter";
 import { useOptionalNotifications } from "@alliance/shared/lib/useNotifications";
@@ -58,9 +58,11 @@ const collectCommentIds = (comments: CommentDto[]): number[] => {
 
 const SortDropdown = ({
   commentSort,
+  sortOptions,
   onChange,
 }: {
   commentSort: CommentSort;
+  sortOptions: CommentSort[];
   onChange: (sort: CommentSort) => void;
 }) => (
   <div className="ml-auto">
@@ -108,12 +110,12 @@ const Comments = ({
   // useAuth() is hydrated before this mounts in the common case, so the initializer
   // picks the right default without needing an effect to react to late-arriving user data.
   const [commentFilter, setCommentFilter] = useState<CommentFilter>(
-    showClusterTags && user?.clusterId != null
-      ? CommentFilter.SameGroup
-      : CommentFilter.All,
+    CommentFilter.All,
   );
   const [commentSort, setCommentSort] = useState<CommentSort>(
-    CommentSort.Newest,
+    showClusterTags && user?.clusterId != null
+      ? CommentSort.SameCluster
+      : CommentSort.Newest,
   );
   const [randomSeed, setRandomSeed] = useState(() => String(Math.random()));
 
@@ -156,14 +158,21 @@ const Comments = ({
     [topLevelComments, user],
   );
 
+  const hasSameGroup = showClusterTags && user?.clusterId != null;
+
   const filterOptions = useMemo(
     () =>
       getCommentFilterOptions({
         activeQaMode,
         hasMineComments,
-        hasSameGroup: showClusterTags && user?.clusterId != null,
+        hasSameGroup,
       }),
-    [activeQaMode, hasMineComments, showClusterTags, user?.clusterId],
+    [activeQaMode, hasMineComments, hasSameGroup],
+  );
+
+  const sortOptions = useMemo(
+    () => getSortOptions({ hasSameGroup }),
+    [hasSameGroup],
   );
 
   useEffect(() => {
@@ -171,6 +180,12 @@ const Comments = ({
       setCommentFilter(CommentFilter.All);
     }
   }, [filterOptions, commentFilter]);
+
+  useEffect(() => {
+    if (!sortOptions.includes(commentSort)) {
+      setCommentSort(CommentSort.Newest);
+    }
+  }, [sortOptions, commentSort]);
 
   const filterContext = useMemo(
     () => ({
@@ -200,9 +215,16 @@ const Comments = ({
           matchesCommentFilter(comment, commentFilter, filterContext),
         ),
         commentSort,
-        { randomSeed },
+        { randomSeed, userClusterId: user?.clusterId },
       ),
-    [topLevelComments, commentFilter, commentSort, filterContext, randomSeed],
+    [
+      topLevelComments,
+      commentFilter,
+      commentSort,
+      filterContext,
+      randomSeed,
+      user?.clusterId,
+    ],
   );
 
   const ctxValue = useMemo(
@@ -292,6 +314,7 @@ const Comments = ({
             </div>
             <SortDropdown
               commentSort={commentSort}
+              sortOptions={sortOptions}
               onChange={(sort) => {
                 setCommentSort(sort);
                 if (sort === CommentSort.Random) {

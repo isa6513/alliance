@@ -9,7 +9,7 @@ import { useMemo } from "react";
 
 export enum CommentFilter {
   All = "all",
-  SameGroup = "sameGroup",
+  SameCluster = "sameGroup",
   Mine = "mine",
   Answered = "answered",
   Unanswered = "unanswered",
@@ -19,7 +19,7 @@ export enum CommentFilter {
 
 export const commentFilterLabels: Record<CommentFilter, string> = {
   [CommentFilter.All]: "All",
-  [CommentFilter.SameGroup]: "Same group",
+  [CommentFilter.SameCluster]: "Same group",
   [CommentFilter.Mine]: "Mine",
   [CommentFilter.Answered]: "Answered",
   [CommentFilter.Unanswered]: "Unanswered",
@@ -29,21 +29,28 @@ export const commentFilterLabels: Record<CommentFilter, string> = {
 
 export enum CommentSort {
   Newest = "newest",
+  SameCluster = "sameGroup",
   Discussion = "discussion",
   Random = "random",
 }
 
 export const sortLabels: Record<CommentSort, string> = {
   [CommentSort.Newest]: "Newest",
+  [CommentSort.SameCluster]: "Same group",
   [CommentSort.Discussion]: "Most discussion",
   [CommentSort.Random]: "Random",
 };
 
-export const sortOptions: CommentSort[] = [
-  CommentSort.Newest,
-  CommentSort.Discussion,
-  CommentSort.Random,
-];
+export function getSortOptions({
+  hasSameGroup,
+}: {
+  hasSameGroup: boolean;
+}): CommentSort[] {
+  const options: CommentSort[] = [CommentSort.Newest];
+  if (hasSameGroup) options.push(CommentSort.SameCluster);
+  options.push(CommentSort.Discussion, CommentSort.Random);
+  return options;
+}
 
 export function countAllReplies(replies: CommentDto[]): number {
   let count = 0;
@@ -91,7 +98,7 @@ export function getCommentFilterOptions({
     base.splice(1, 0, CommentFilter.Mine);
   }
   if (hasSameGroup) {
-    base.splice(1, 0, CommentFilter.SameGroup);
+    base.splice(1, 0, CommentFilter.SameCluster);
   }
   return base;
 }
@@ -116,7 +123,7 @@ export function matchesCommentFilter(
       return true;
     case CommentFilter.Mine:
       return userId != null && comment.author.id === userId;
-    case CommentFilter.SameGroup:
+    case CommentFilter.SameCluster:
       if (userId == null || userClusterId == null) return false;
       return comment.author.cluster?.id === userClusterId;
     case CommentFilter.Answered:
@@ -143,7 +150,7 @@ export function matchesCommentFilter(
 export function sortComments(
   comments: CommentDto[],
   sort: CommentSort,
-  options?: { randomSeed?: string },
+  options?: { randomSeed?: string; userClusterId?: number | null },
 ): CommentDto[] {
   switch (sort) {
     case CommentSort.Random: {
@@ -167,6 +174,20 @@ export function sortComments(
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
       });
+    case CommentSort.SameCluster: {
+      const userClusterId = options?.userClusterId;
+      return [...comments].sort((a, b) => {
+        if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+        if (userClusterId != null) {
+          const aSame = a.author.cluster?.id === userClusterId;
+          const bSame = b.author.cluster?.id === userClusterId;
+          if (aSame !== bSame) return aSame ? -1 : 1;
+        }
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+    }
     case CommentSort.Discussion:
       return [...comments].sort((a, b) => {
         if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
