@@ -217,6 +217,7 @@ describe('Tasks (e2e)', () => {
       },
       formSnapshotId: updateResponse.body.formSnapshotId as number,
       actionId: testAction.id,
+      deviceType: 'desktop' as const,
     };
 
     const submitResponse = await request(ctx.app.getHttpServer())
@@ -357,6 +358,7 @@ describe('Tasks (e2e)', () => {
         answers: { amount: 250 },
         formSnapshotId: createResponse.body.formSnapshotId as number,
         actionId: testAction.id,
+        deviceType: 'desktop' as const,
       })
       .expect(201);
 
@@ -473,6 +475,7 @@ describe('Tasks (e2e)', () => {
           'private-output': false,
           'public-output': true,
         },
+        deviceType: 'desktop' as const,
       })
       .expect(201);
 
@@ -952,6 +955,7 @@ describe('Tasks (e2e)', () => {
           answers: {},
           formSnapshotId: formOne.body.formSnapshotId as number,
           actionId: actionOne.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
 
@@ -983,6 +987,7 @@ describe('Tasks (e2e)', () => {
           answers: {},
           formSnapshotId: formTwo.body.formSnapshotId as number,
           actionId: actionTwo.id,
+          deviceType: 'desktop' as const,
         })
         .expect(400);
 
@@ -993,6 +998,7 @@ describe('Tasks (e2e)', () => {
           answers: { proof: 'Confirmed' },
           formSnapshotId: formTwo.body.formSnapshotId as number,
           actionId: actionTwo.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
 
@@ -1080,6 +1086,7 @@ describe('Tasks (e2e)', () => {
           answers: { role: 'volunteer' },
           formSnapshotId: sourceFormRes.body.formSnapshotId as number,
           actionId: sourceAction.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
 
@@ -1137,6 +1144,7 @@ describe('Tasks (e2e)', () => {
           answers: { 'general-question': 'Hello' },
           formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
     });
@@ -1180,6 +1188,7 @@ describe('Tasks (e2e)', () => {
           answers: { role: 'organizer' },
           formSnapshotId: sourceFormRes.body.formSnapshotId as number,
           actionId: sourceAction.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
 
@@ -1231,6 +1240,7 @@ describe('Tasks (e2e)', () => {
           answers: {},
           formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
+          deviceType: 'desktop' as const,
         })
         .expect(400);
 
@@ -1242,6 +1252,7 @@ describe('Tasks (e2e)', () => {
           answers: { 'organizer-detail': 'My organizer info' },
           formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
     });
@@ -1285,6 +1296,7 @@ describe('Tasks (e2e)', () => {
           answers: { interest: 'tech' },
           formSnapshotId: sourceFormRes.body.formSnapshotId as number,
           actionId: sourceAction.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
 
@@ -1336,6 +1348,7 @@ describe('Tasks (e2e)', () => {
           answers: {},
           formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
+          deviceType: 'desktop' as const,
         })
         .expect(400);
 
@@ -1347,6 +1360,7 @@ describe('Tasks (e2e)', () => {
           answers: { 'tech-question': 'I love TypeScript' },
           formSnapshotId: dependentFormRes.body.formSnapshotId as number,
           actionId: dependentAction.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
     });
@@ -1464,6 +1478,7 @@ describe('Tasks (e2e)', () => {
           },
           formSnapshotId: formResponse.body.formSnapshotId as number,
           actionId: action.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
 
@@ -1526,6 +1541,7 @@ describe('Tasks (e2e)', () => {
           },
           formSnapshotId: formResponse.body.formSnapshotId as number,
           actionId: action.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
 
@@ -1590,6 +1606,7 @@ describe('Tasks (e2e)', () => {
           },
           formSnapshotId: formResponse.body.formSnapshotId as number,
           actionId: action.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
 
@@ -1648,6 +1665,7 @@ describe('Tasks (e2e)', () => {
           },
           formSnapshotId: formResponse.body.formSnapshotId as number,
           actionId: action.id,
+          deviceType: 'desktop' as const,
         })
         .expect(201);
 
