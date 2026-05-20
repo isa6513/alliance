@@ -1751,7 +1751,7 @@ export type SetPriorityDto = {
 
 export type HomeFeedItemType = 'activity' | 'cluster_forum_comment';
 
-export type HomeFeedClusterForumCommentDto = {
+export type HomeFeedForumCommentDto = {
     comment: CommentDto;
     postId: number;
     postTitle: string;
@@ -1763,7 +1763,7 @@ export type HomeFeedItemDto = {
     type: HomeFeedItemType;
     date: string;
     activity?: ActionActivityDto;
-    clusterForumComment?: HomeFeedClusterForumCommentDto;
+    clusterForumComment?: HomeFeedForumCommentDto;
 };
 
 export type CommunityCompletedActionsCountDto = {

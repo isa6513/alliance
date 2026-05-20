@@ -1,7 +1,10 @@
-import useHomeFeed from "@alliance/shared/lib/useHomeFeed";
+import useHomeFeed, {
+  getForumComment,
+  isForumCommentType,
+} from "@alliance/shared/lib/useHomeFeed";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useCallback, useRef } from "react";
-import ClusterForumCommentCard from "./ClusterForumCommentCard";
+import ForumCommentCard from "./ForumCommentCard";
 import UserActivityCard from "./UserActivityCard";
 
 const LIMIT = 5;
@@ -10,7 +13,7 @@ const HomeFeed = () => {
   const {
     items,
     handleLikeActivity,
-    handleLikeClusterForumComment,
+    handleLikeForumComment,
     loading,
     fetchNextPage,
     hasNextPage,
@@ -78,38 +81,37 @@ const HomeFeed = () => {
       <p className="text-title font-serif mb-4">Activity</p>
       <div className="flex flex-col gap-y-2 *:p-4">
         {items.map((item) => {
-          switch (item.type) {
-            case "activity":
-              if (!item.activity) return null;
-              return (
-                <UserActivityCard
-                  activity={item.activity}
-                  key={`activity-${item.activity.id}`}
-                  handleLike={() => handleLike(item.activity!.id)}
-                />
-              );
-            case "cluster_forum_comment":
-              if (!item.clusterForumComment) return null;
-              return (
-                <ClusterForumCommentCard
-                  key={`comment-${item.clusterForumComment.comment.id}`}
-                  comment={item.clusterForumComment.comment}
-                  postId={item.clusterForumComment.postId}
-                  postTitle={item.clusterForumComment.postTitle}
-                  likedByMe={item.clusterForumComment.likedByMe}
-                  likesCount={item.clusterForumComment.likesCount}
-                  handleLike={() =>
-                    handleLikeClusterForumComment(
-                      item.clusterForumComment!.comment.id,
-                    )
-                  }
-                />
-              );
-            default:
-              throw new Error(
-                `unknown home feed item type: ${item.type satisfies never}`,
-              );
+          if (item.type === "activity") {
+            if (!item.activity) return null;
+            return (
+              <UserActivityCard
+                activity={item.activity}
+                key={`activity-${item.activity.id}`}
+                handleLike={() => handleLike(item.activity!.id)}
+              />
+            );
           }
+          // TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
+          // alias once the server emits 'forum_comment' exclusively and
+          // types.gen.ts is regenerated.
+          if (isForumCommentType(item.type)) {
+            const fc = getForumComment(item);
+            if (!fc) return null;
+            return (
+              <ForumCommentCard
+                key={`comment-${fc.comment.id}`}
+                comment={fc.comment}
+                postId={fc.postId}
+                postTitle={fc.postTitle}
+                likedByMe={fc.likedByMe}
+                likesCount={fc.likesCount}
+                handleLike={() => handleLikeForumComment(fc.comment.id)}
+              />
+            );
+          }
+          throw new Error(
+            `unknown home feed item type: ${item.type as string}`,
+          );
         })}
       </div>
       {isFetchingNextPage && (

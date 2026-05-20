@@ -1043,10 +1043,13 @@ export class TimelineFeedItemDto {
 
 export enum HomeFeedItemType {
   Activity = 'activity',
-  ClusterForumComment = 'cluster_forum_comment',
+  // TODO(forum-comment-rename): rename wire value to 'forum_comment' once all
+  // deployed clients (mobile especially) have shipped with the new name. The
+  // symbol is ForumComment because the feed is no longer cluster-only.
+  ForumComment = 'cluster_forum_comment',
 }
 
-export class HomeFeedClusterForumCommentDto {
+export class HomeFeedForumCommentDto {
   @ApiProperty({ type: () => CommentDto })
   @Type(() => CommentDto)
   comment: CommentDto;
@@ -1087,7 +1090,7 @@ export type HomeFeedItem = {
       clusterForumComment?: undefined;
     }
   | {
-      type: HomeFeedItemType.ClusterForumComment;
+      type: HomeFeedItemType.ForumComment;
       activity?: undefined;
       clusterForumComment: {
         comment: Comment;
@@ -1114,10 +1117,12 @@ export class HomeFeedItemDto {
   @IsOptional()
   activity?: ActionActivityDto;
 
-  @ApiPropertyOptional({ type: () => HomeFeedClusterForumCommentDto })
-  @Type(() => HomeFeedClusterForumCommentDto)
+  // TODO(forum-comment-rename): rename to `forumComment` once all deployed
+  // clients (mobile especially) have shipped with the new name.
+  @ApiPropertyOptional({ type: () => HomeFeedForumCommentDto })
+  @Type(() => HomeFeedForumCommentDto)
   @IsOptional()
-  clusterForumComment?: HomeFeedClusterForumCommentDto;
+  clusterForumComment?: HomeFeedForumCommentDto;
 
   constructor(input: HomeFeedItem) {
     this.type = input.type;
@@ -1126,8 +1131,8 @@ export class HomeFeedItemDto {
       case HomeFeedItemType.Activity:
         this.activity = input.activity;
         break;
-      case HomeFeedItemType.ClusterForumComment:
-        this.clusterForumComment = new HomeFeedClusterForumCommentDto(
+      case HomeFeedItemType.ForumComment:
+        this.clusterForumComment = new HomeFeedForumCommentDto(
           input.clusterForumComment,
         );
         break;

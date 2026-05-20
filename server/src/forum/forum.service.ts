@@ -43,7 +43,7 @@ import { Comment, CommentParentObject } from './entities/comment.entity';
 import { EditableContent } from './entities/editablecontent.entity';
 import { Post } from './entities/post.entity';
 
-export type ClusterFeedComment = {
+export type ForumFeedComment = {
   comment: Comment;
   postId: number;
   postTitle: string;
@@ -365,14 +365,15 @@ export class ForumService {
     return grouped;
   }
 
-  async findClusterCommentsForFeed(params: {
+  async findForumCommentsForFeed(params: {
     userId: number;
     userClusterId: number | null;
+    friendAndGroupMemberIds: number[];
     limit: number;
     before?: Date;
-  }): Promise<ClusterFeedComment[]> {
-    const { userId, userClusterId, limit, before } = params;
-    if (userClusterId == null) return [];
+  }): Promise<ForumFeedComment[]> {
+    const { userId, userClusterId, friendAndGroupMemberIds, limit, before } =
+      params;
 
     const qb = this.commentRepository
       .createQueryBuilder('comment')
@@ -383,10 +384,21 @@ export class ForumService {
       .where('comment.parentObjectType = :postType', {
         postType: CommentParentObject.Post,
       })
-      .andWhere('comment.deleted = false')
-      .andWhere('post.showClusterTags = true')
-      .andWhere('author.clusterId = :userClusterId', { userClusterId })
-      .andWhere('author.id != :userId', { userId });
+      .andWhere('comment.deleted = false');
+
+    const authorClauses: string[] = ['author.id = :feedUserId'];
+    const authorParams: Record<string, unknown> = { feedUserId: userId };
+    if (friendAndGroupMemberIds.length > 0) {
+      authorClauses.push('author.id IN (:...feedFriendIds)');
+      authorParams.feedFriendIds = friendAndGroupMemberIds;
+    }
+    if (userClusterId != null) {
+      authorClauses.push(
+        '(post.showClusterTags = true AND author.clusterId = :feedClusterId)',
+      );
+      authorParams.feedClusterId = userClusterId;
+    }
+    qb.andWhere(`(${authorClauses.join(' OR ')})`, authorParams);
     this.addPostVisibilityFilter(qb, 'post', userId);
     if (before) {
       qb.andWhere('comment.createdAt < :before', { before });
@@ -402,7 +414,7 @@ export class ForumService {
     for (const row of raw) {
       titleByCommentId.set(row.comment_id, row.post_title);
     }
-    const items: ClusterFeedComment[] = [];
+    const items: ForumFeedComment[] = [];
     for (const comment of entities) {
       const postTitle = titleByCommentId.get(comment.id);
       if (postTitle == null) continue;

@@ -1,6 +1,6 @@
 import {
   ActionActivityDto,
-  HomeFeedClusterForumCommentDto,
+  HomeFeedForumCommentDto,
   HomeFeedItemDto,
   actionsHomeFeed,
   actionsLikeActivity,
@@ -31,17 +31,33 @@ const generateQueryKey = (props: UseHomeFeedProps) => [
   props.comments ?? false,
 ];
 
+// TODO(forum-comment-rename): server currently emits the legacy
+// 'cluster_forum_comment' type and 'clusterForumComment' field. Once all
+// deployed clients ship reading 'forum_comment' / 'forumComment', flip the
+// server, regenerate types.gen.ts, and drop the legacy branches in the
+// helpers below.
+type HomeFeedItemWithForumComment = HomeFeedItemDto & {
+  forumComment?: HomeFeedForumCommentDto;
+};
+
+export const isForumCommentType = (type: string): boolean =>
+  type === "cluster_forum_comment" || type === "forum_comment";
+
+export const getForumComment = (
+  item: HomeFeedItemDto,
+): HomeFeedForumCommentDto | undefined => {
+  const extended = item as HomeFeedItemWithForumComment;
+  return extended.clusterForumComment ?? extended.forumComment;
+};
+
 const isViewable = (item: HomeFeedItemDto): boolean => {
-  switch (item.type) {
-    case "activity":
-      return item.activity ? actionActivityViewable[item.activity.type] : false;
-    case "cluster_forum_comment":
-      return item.clusterForumComment != null;
-    default:
-      throw new Error(
-        `unknown home feed item type: ${item.type satisfies never}`,
-      );
+  if (item.type === "activity") {
+    return item.activity ? actionActivityViewable[item.activity.type] : false;
   }
+  if (isForumCommentType(item.type)) {
+    return getForumComment(item) != null;
+  }
+  throw new Error(`unknown home feed item type: ${item.type as string}`);
 };
 
 const processItems = (data: HomeFeedItemDto[] | undefined): HomeFeedItemDto[] =>
@@ -93,22 +109,26 @@ const mapActivities = (
   };
 };
 
-const mapClusterComments = (
+const mapForumComments = (
   old: InfiniteHomeFeedData | undefined,
-  mapper: (
-    comment: HomeFeedClusterForumCommentDto,
-  ) => HomeFeedClusterForumCommentDto,
+  mapper: (comment: HomeFeedForumCommentDto) => HomeFeedForumCommentDto,
 ): InfiniteHomeFeedData | undefined => {
   if (!old) return old;
   return {
     ...old,
     pages: old.pages.map((page) => ({
       ...page,
-      items: page.items.map((item) =>
-        item.type === "cluster_forum_comment" && item.clusterForumComment
-          ? { ...item, clusterForumComment: mapper(item.clusterForumComment) }
-          : item,
-      ),
+      items: page.items.map((item) => {
+        if (!isForumCommentType(item.type)) return item;
+        const fc = getForumComment(item);
+        if (!fc) return item;
+        const mapped = mapper(fc);
+        const extended = item as HomeFeedItemWithForumComment;
+        if (extended.clusterForumComment) {
+          return { ...item, clusterForumComment: mapped };
+        }
+        return { ...item, forumComment: mapped } as HomeFeedItemDto;
+      }),
     })),
   };
 };
@@ -242,7 +262,7 @@ const useHomeFeed = (props: UseHomeFeedProps = {}) => {
       queryClient.setQueriesData<InfiniteHomeFeedData>(
         { queryKey: [QUERY_KEY_ROOT] },
         (old) =>
-          mapClusterComments(old, (c) =>
+          mapForumComments(old, (c) =>
             c.comment.id === commentId
               ? {
                   ...c,
@@ -267,17 +287,16 @@ const useHomeFeed = (props: UseHomeFeedProps = {}) => {
     },
   });
 
-  const handleLikeClusterForumComment = useCallback(
+  const handleLikeForumComment = useCallback(
     async (commentId: number) => {
-      const clusterComment = items.find(
-        (i) =>
-          i.type === "cluster_forum_comment" &&
-          i.clusterForumComment?.comment.id === commentId,
-      )?.clusterForumComment;
-      if (!clusterComment) return;
+      const forumComment = items
+        .filter((i) => isForumCommentType(i.type))
+        .map(getForumComment)
+        .find((fc) => fc?.comment.id === commentId);
+      if (!forumComment) return;
       await commentLikeMutation.mutateAsync({
         commentId,
-        isLiked: clusterComment.likedByMe,
+        isLiked: forumComment.likedByMe,
       });
     },
     [items, commentLikeMutation],
@@ -287,7 +306,7 @@ const useHomeFeed = (props: UseHomeFeedProps = {}) => {
     loading,
     items,
     handleLikeActivity,
-    handleLikeClusterForumComment,
+    handleLikeForumComment,
     fetchNextPage,
     hasNextPage: hasNextPage ?? false,
     isFetchingNextPage,

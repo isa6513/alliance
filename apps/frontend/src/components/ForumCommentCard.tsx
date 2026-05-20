@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { Link, href, useNavigate } from "react-router";
 import ActivityLikeButton from "./ActivityLikeButton";
 
-interface ClusterForumCommentCardProps {
+interface ForumCommentCardProps {
   comment: CommentDto;
   postId: number;
   postTitle: string;
@@ -16,14 +16,14 @@ interface ClusterForumCommentCardProps {
   handleLike: () => Promise<unknown>;
 }
 
-const ClusterForumCommentCard = ({
+const ForumCommentCard = ({
   comment,
   postId,
   postTitle,
   likedByMe,
   likesCount,
   handleLike,
-}: ClusterForumCommentCardProps) => {
+}: ForumCommentCardProps) => {
   const navigate = useNavigate();
 
   const postUrlWithReply = `${href("/forum/post/:id", { id: postId.toString() })}?replyId=${comment.id}`;
@@ -106,4 +106,4 @@ const ClusterForumCommentCard = ({
   );
 };
 
-export default ClusterForumCommentCard;
+export default ForumCommentCard;

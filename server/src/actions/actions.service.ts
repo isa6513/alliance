@@ -1888,18 +1888,19 @@ export class ActionsService {
       ...new Set([...friendIds, ...communityMemberIds]),
     ].filter((id) => id !== userId);
 
-    const clusterComments = await this.forumService.findClusterCommentsForFeed({
+    const forumComments = await this.forumService.findForumCommentsForFeed({
       userId,
       userClusterId,
+      friendAndGroupMemberIds: allUserIds,
       limit,
       before,
     });
-    const clusterCommentItems: HomeFeedItem[] = clusterComments.map((cc) => ({
-      type: HomeFeedItemType.ClusterForumComment,
-      date: cc.comment.createdAt,
-      clusterForumComment: cc,
+    const forumCommentItems: HomeFeedItem[] = forumComments.map((fc) => ({
+      type: HomeFeedItemType.ForumComment,
+      date: fc.comment.createdAt,
+      clusterForumComment: fc,
     }));
-    const clusterCommentDateMs = clusterCommentItems
+    const forumCommentDateMs = forumCommentItems
       .map((c) => c.date.getTime())
       .sort((a, b) => b - a);
 
@@ -1937,7 +1938,7 @@ export class ActionsService {
       cursor = batch[batch.length - 1].createdAt;
 
       const cursorMs = cursor.getTime();
-      const commentsNewerThanCursor = clusterCommentDateMs.filter(
+      const commentsNewerThanCursor = forumCommentDateMs.filter(
         (d) => d > cursorMs,
       ).length;
       if (contentful.length + commentsNewerThanCursor >= limit) break;
@@ -1955,7 +1956,7 @@ export class ActionsService {
       }),
     );
 
-    const merged: HomeFeedItem[] = [...activityItems, ...clusterCommentItems];
+    const merged: HomeFeedItem[] = [...activityItems, ...forumCommentItems];
     merged.sort((a, b) => b.date.getTime() - a.date.getTime());
 
     return merged.slice(0, limit).map((item) => new HomeFeedItemDto(item));

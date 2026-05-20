@@ -8,7 +8,7 @@ import LikeButton from "./LikeButton";
 import ProfileImage from "./ProfileImage";
 import Text, { FontWeight } from "./system/Text";
 
-interface ClusterForumCommentCardProps {
+interface ForumCommentCardProps {
   comment: CommentDto;
   postId: number;
   postTitle: string;
@@ -17,14 +17,14 @@ interface ClusterForumCommentCardProps {
   handleLike: () => Promise<unknown>;
 }
 
-export default function ClusterForumCommentCard({
+export default function ForumCommentCard({
   comment,
   postId,
   postTitle,
   likedByMe,
   likesCount,
   handleLike,
-}: ClusterForumCommentCardProps) {
+}: ForumCommentCardProps) {
   const timeSinceCommented = formatTime(new Date(comment.createdAt), {
     addSuffix: true,
   });
