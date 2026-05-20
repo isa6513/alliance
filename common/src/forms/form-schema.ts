@@ -269,8 +269,23 @@ export function isQuestionField(
 export function collectSourceFormIds(schema: FormSchema): number[] {
   const ids = new Set<number>();
   const collectFromCondition = (c: Condition) => {
-    if ("sourceFormId" in c && typeof c.sourceFormId === "number") {
-      ids.add(c.sourceFormId);
+    switch (c.kind) {
+      case "equals":
+      case "includesOption":
+      case "anySelected":
+      case "hasValue":
+        if (typeof c.sourceFormId === "number") {
+          ids.add(c.sourceFormId);
+        }
+        break;
+      case "validator":
+      case "deviceType":
+      case "outputBlockVisible":
+        break;
+      default:
+        throw new Error(
+          `unknown condition kind: ${(c satisfies never as Condition).kind}`,
+        );
     }
   };
   const collectFromElement = (el: AnyField | DisplayBlock) => {

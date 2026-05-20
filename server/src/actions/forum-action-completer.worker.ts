@@ -1,17 +1,20 @@
+import type { FormSchema } from '@alliance/common/forms/form-schema';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EventType } from 'src/eventlog/event-log.entity';
+import { EventLogService } from 'src/eventlog/eventlog.service';
 import { ForumService } from 'src/forum/forum.service';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
-import { withPgAdvisoryLock } from 'src/notifs/lock-utils';
 import { LOCK_KEYS } from 'src/notifs/lock-keys';
+import { withPgAdvisoryLock } from 'src/notifs/lock-utils';
 import {
   CustomValidator,
   CustomValidatorType,
 } from 'src/tasks/entities/customvalidator.entity';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import type { FormSchema } from '@alliance/common/forms/form-schema';
+import { User } from 'src/user/entities/user.entity';
 import {
   DataSource,
   In,
@@ -27,9 +30,6 @@ import {
 } from './entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
-import { User } from 'src/user/entities/user.entity';
-import { EventLogService } from 'src/eventlog/eventlog.service';
-import { EventType } from 'src/eventlog/event-log.entity';
 
 const [PROCESS_ONE_LOCK_KEY1, PROCESS_ONE_LOCK_KEY2] =
   LOCK_KEYS.forumActionCompleter;
@@ -279,18 +279,14 @@ export class ForumActionCompleterWorker {
         }
         if ('requiredIf' in element && element.requiredIf) {
           const requiredIf = element.requiredIf;
-          if ('validatorId' in requiredIf) {
+          if (requiredIf.kind === 'validator') {
             validatorIds.add(requiredIf.validatorId);
           }
         }
         const formula = element.visibleIfFormula;
         if (formula?.conditions) {
           for (const condition of Object.values(formula.conditions)) {
-            if (
-              condition &&
-              'validatorId' in condition &&
-              condition.validatorId != null
-            ) {
+            if (condition && condition.kind === 'validator') {
               validatorIds.add(condition.validatorId);
             }
           }

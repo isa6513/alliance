@@ -282,11 +282,7 @@ export class TasksService {
         const formula = element.visibleIfFormula;
         if (formula?.conditions) {
           for (const condition of Object.values(formula.conditions)) {
-            if (
-              condition &&
-              'validatorId' in condition &&
-              condition.validatorId != null
-            ) {
+            if (condition && condition.kind === 'validator') {
               validatorIds.add(condition.validatorId);
             }
           }
@@ -298,11 +294,7 @@ export class TasksService {
               const subFormula = sub.visibleIfFormula;
               if (subFormula?.conditions) {
                 for (const condition of Object.values(subFormula.conditions)) {
-                  if (
-                    condition &&
-                    'validatorId' in condition &&
-                    condition.validatorId != null
-                  ) {
+                  if (condition && condition.kind === 'validator') {
                     validatorIds.add(condition.validatorId);
                   }
                 }

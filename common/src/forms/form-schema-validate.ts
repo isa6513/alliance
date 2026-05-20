@@ -65,7 +65,7 @@ function collectCycleErrors(
       block.visibleIfFormula?.conditions ?? {},
     )) {
       if (
-        "outputBlockVisible" in cond &&
+        cond.kind === "outputBlockVisible" &&
         outputBlockIds.has(cond.outputBlockVisible)
       ) {
         edges.push(cond.outputBlockVisible);
@@ -118,17 +118,9 @@ function collectInputErrors(
   errors: FormSchemaValidationError[],
 ): void {
   const blockId = item.id ?? "<unnamed>";
-  checkConditions(
-    item.visibleIfFormula,
-    { context: "input", blockId },
-    errors,
-  );
+  checkConditions(item.visibleIfFormula, { context: "input", blockId }, errors);
   if ("requiredIf" in item && item.requiredIf) {
-    checkCondition(
-      item.requiredIf,
-      { context: "input", blockId },
-      errors,
-    );
+    checkCondition(item.requiredIf, { context: "input", blockId }, errors);
   }
   if ("kind" in item && item.kind === "list") {
     const listField = item as ListField;
@@ -162,7 +154,7 @@ function checkCondition(
   ctx: CheckCtx,
   errors: FormSchemaValidationError[],
 ): void {
-  if (!("outputBlockVisible" in cond)) return;
+  if (cond.kind !== "outputBlockVisible") return;
   if (ctx.context !== "output") {
     errors.push({
       viewId: ctx.viewId,

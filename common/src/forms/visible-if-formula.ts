@@ -2,16 +2,38 @@ import type { DeviceVisibilityTarget } from "./device";
 
 export type Condition =
   | {
+      kind: "equals";
       when: string;
       equals: string | number | boolean | null;
       sourceFormId?: number;
     }
-  | { when: string; includesOption: string; sourceFormId?: number }
-  | { when: string; anySelected: boolean; sourceFormId?: number }
-  | { when: string; hasValue: boolean; sourceFormId?: number }
-  | { validatorId: number; resultEquals?: boolean }
-  | { deviceType: DeviceVisibilityTarget[] }
-  | { outputBlockVisible: string; isVisible?: boolean };
+  | {
+      kind: "includesOption";
+      when: string;
+      includesOption: string;
+      sourceFormId?: number;
+    }
+  | {
+      kind: "anySelected";
+      when: string;
+      anySelected: boolean;
+      sourceFormId?: number;
+    }
+  | {
+      kind: "hasValue";
+      when: string;
+      hasValue: boolean;
+      sourceFormId?: number;
+    }
+  | { kind: "validator"; validatorId: number; resultEquals?: boolean }
+  | { kind: "deviceType"; deviceType: DeviceVisibilityTarget[] }
+  | {
+      kind: "outputBlockVisible";
+      outputBlockVisible: string;
+      isVisible?: boolean;
+    };
+
+export type ConditionKind = Condition["kind"];
 
 /** Formula tree for visibility: AND/OR of two operands, NOT of one. Leaves are condition names (e.g. condition1, condition2). */
 export type FormulaNode =

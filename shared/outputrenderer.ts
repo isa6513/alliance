@@ -1,4 +1,4 @@
-import { isElementCurrentlyVisible } from "./formrenderer";
+import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
 import type {
   AnyField,
@@ -10,7 +10,7 @@ import type {
   OutputFieldBlock,
   OutputViewSchema,
 } from "@alliance/common/forms/form-schema";
-import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
+import { isElementCurrentlyVisible } from "./formrenderer";
 
 export type ResolvedOutputDisplayItem = {
   type: "display";
@@ -284,7 +284,7 @@ export const resolveOutputItems = ({
     for (const cond of Object.values(
       block.visibleIfFormula?.conditions ?? {},
     )) {
-      if ("outputBlockVisible" in cond) {
+      if (cond.kind === "outputBlockVisible") {
         const dep = blockById.get(cond.outputBlockVisible);
         if (dep && dep.id && !outputBlockVisibility.has(dep.id)) {
           computeVisibility(dep);

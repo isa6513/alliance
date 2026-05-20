@@ -1,25 +1,7 @@
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-} from "react";
-import {
-  CustomValidatorType,
-  CustomValidatorTypeDto,
-  tasksCustomValidators,
-  tasksFindOneCustomValidator,
-  tasksGetForm,
-  tasksListForms,
-  tasksTestCustomExpression,
-  userGetTags,
-  userList,
-  type TagDto,
-  type UserDto,
-  CustomExpressionUserDto,
-} from "@alliance/shared/client";
+  DEVICE_VISIBILITY_TARGETS,
+  type DeviceVisibilityTarget,
+} from "@alliance/common/forms/device";
 import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
 import {
   type AnyField,
@@ -31,30 +13,48 @@ import {
   type MultiSelectField,
   type NumberField,
   type PhoneField,
-  type RangeField,
   type RadioField,
+  type RangeField,
   type SelectField,
   type TextField,
   type TextareaField,
   type VisibleIfFormula,
 } from "@alliance/common/forms/form-schema";
 import {
+  CustomExpressionUserDto,
+  CustomValidatorType,
+  CustomValidatorTypeDto,
+  tasksCustomValidators,
+  tasksFindOneCustomValidator,
+  tasksGetForm,
+  tasksListForms,
+  tasksTestCustomExpression,
+  userGetTags,
+  userList,
+  type TagDto,
+  type UserDto,
+} from "@alliance/shared/client";
+import {
   conditionNameForIndex,
   defaultFormulaForConditionCount,
   parseVisibilityFormula,
   serializeVisibilityFormula,
 } from "@alliance/shared/forms/visibilityFormula";
+import { CardStyle } from "@alliance/shared/styles/card";
+import { cn } from "@alliance/shared/styles/util";
+import Card from "@alliance/sharedweb/ui/Card";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 import {
   isDraftValidatorId,
   useCustomValidatorDrafts,
 } from "./customValidatorDrafts";
-import Card from "@alliance/sharedweb/ui/Card";
-import { CardStyle } from "@alliance/shared/styles/card";
-import { cn } from "@alliance/shared/styles/util";
-import {
-  DEVICE_VISIBILITY_TARGETS,
-  type DeviceVisibilityTarget,
-} from "@alliance/common/forms/device";
 
 function getFormulaConditionRefs(node: VisibleIfFormula["formula"]): string[] {
   if (typeof node === "string") return [node];
@@ -250,60 +250,62 @@ function defaultNumberEqualsForVisibility(controller: NumberField): number {
   return 0;
 }
 
-type FieldCondition = Extract<Condition, { when: string }>;
-type ValidatorCondition = Extract<Condition, { validatorId: number }>;
-type DeviceCondition = Extract<
+type FieldCondition = Extract<
   Condition,
-  { deviceType: DeviceVisibilityTarget[] }
+  { kind: "equals" | "includesOption" | "anySelected" | "hasValue" }
 >;
+type ValidatorCondition = Extract<Condition, { kind: "validator" }>;
+type DeviceCondition = Extract<Condition, { kind: "deviceType" }>;
 type OutputBlockVisibleCondition = Extract<
   Condition,
-  { outputBlockVisible: string }
+  { kind: "outputBlockVisible" }
 >;
 
 function isFieldCondition(cond: Condition): cond is FieldCondition {
-  return "when" in cond;
+  return (
+    cond.kind === "equals" ||
+    cond.kind === "includesOption" ||
+    cond.kind === "anySelected" ||
+    cond.kind === "hasValue"
+  );
 }
 
 function isValidatorCondition(cond: Condition): cond is ValidatorCondition {
-  return "validatorId" in cond;
+  return cond.kind === "validator";
 }
 
 function isDeviceCondition(cond: Condition): cond is DeviceCondition {
-  return "deviceType" in cond;
+  return cond.kind === "deviceType";
 }
 
 function isOutputBlockVisibleCondition(
   cond: Condition,
 ): cond is OutputBlockVisibleCondition {
-  return "outputBlockVisible" in cond;
+  return cond.kind === "outputBlockVisible";
 }
 
 function isHasValueCondition(
   condition: Condition,
-): condition is Extract<Condition, { hasValue: boolean }> {
-  return "hasValue" in condition;
+): condition is Extract<Condition, { kind: "hasValue" }> {
+  return condition.kind === "hasValue";
 }
 
 function isIncludesOptionCondition(
   condition: Condition,
-): condition is Extract<Condition, { includesOption: string }> {
-  return "includesOption" in condition;
+): condition is Extract<Condition, { kind: "includesOption" }> {
+  return condition.kind === "includesOption";
 }
 
 function isAnySelectedCondition(
   condition: Condition,
-): condition is Extract<Condition, { anySelected: boolean }> {
-  return "anySelected" in condition;
+): condition is Extract<Condition, { kind: "anySelected" }> {
+  return condition.kind === "anySelected";
 }
 
 function isEqualsCondition(
   condition: Condition,
-): condition is Extract<
-  Condition,
-  { equals: string | number | boolean | null }
-> {
-  return "equals" in condition;
+): condition is Extract<Condition, { kind: "equals" }> {
+  return condition.kind === "equals";
 }
 
 export function ConditionalVisibility({
@@ -331,7 +333,7 @@ export function ConditionalVisibility({
     const formula = field.visibleIfFormula;
     if (formula?.conditions) {
       for (const cond of Object.values(formula.conditions)) {
-        if ("sourceFormId" in cond && typeof cond.sourceFormId === "number") {
+        if (isFieldCondition(cond) && typeof cond.sourceFormId === "number") {
           ids.add(cond.sourceFormId);
         }
       }
@@ -447,31 +449,34 @@ export function ConditionalVisibility({
         ? { when: controller.id, sourceFormId }
         : { when: controller.id };
       if (isTextContentController(controller)) {
-        return { ...base, hasValue: true };
+        return { kind: "hasValue", ...base, hasValue: true };
       }
       if (controller.kind === "checkbox") {
-        return { ...base, equals: true };
+        return { kind: "equals", ...base, equals: true };
       }
       if (controller.kind === "contract") {
-        return { ...base, equals: true };
+        return { kind: "equals", ...base, equals: true };
       }
       if (controller.kind === "multiselect") {
         return {
+          kind: "includesOption",
           ...base,
           includesOption: controller.options?.[0]?.value ?? "",
         };
       }
       if (controller.kind === "number") {
         return {
+          kind: "equals",
           ...base,
           equals: defaultNumberEqualsForVisibility(controller),
         };
       }
       if (controller.kind === "range") {
         const values = getRangeValues(controller);
-        return { ...base, equals: values[0] ?? 1 };
+        return { kind: "equals", ...base, equals: values[0] ?? 1 };
       }
       return {
+        kind: "equals",
         ...base,
         equals: controller.options?.[0]?.value ?? "",
       };
@@ -701,6 +706,7 @@ export function ConditionalVisibility({
         expression: opts?.expression,
       });
       const nextCondition: ValidatorCondition = {
+        kind: "validator",
         validatorId: draftId,
         resultEquals: opts?.resultEquals ?? true,
       };
@@ -735,10 +741,11 @@ export function ConditionalVisibility({
       } else {
         const next = [...conditions];
         next[index] = {
+          kind: "hasValue",
           when: "",
           hasValue: true,
           sourceFormId: formId,
-        } as FieldCondition;
+        };
         updateConditions(next, true);
         tasksGetForm({ path: { id: formId } }).then((response) => {
           const schema = (response.data as Record<string, unknown> | undefined)
@@ -774,15 +781,17 @@ export function ConditionalVisibility({
       }
     }
     const placeholder: FieldCondition = {
+      kind: "hasValue",
       when: "",
       hasValue: true,
       sourceFormId: firstFormId,
-    } as FieldCondition;
+    };
     updateConditions([...conditions, placeholder]);
   }, [buildConditionForField, conditions, formList, updateConditions]);
 
   const addDeviceCondition = useCallback(() => {
     const defaultCondition: DeviceCondition = {
+      kind: "deviceType",
       deviceType: [...DEVICE_VISIBILITY_TARGETS],
     };
     const next = [...conditions, defaultCondition];
@@ -794,6 +803,7 @@ export function ConditionalVisibility({
     const firstId = outputBlocks.find((b) => b.id !== field.id)?.id;
     if (!firstId) return;
     const defaultCondition: OutputBlockVisibleCondition = {
+      kind: "outputBlockVisible",
       outputBlockVisible: firstId,
       isVisible: true,
     };
@@ -830,6 +840,7 @@ export function ConditionalVisibility({
         currentSelection.delete(target);
       }
       next[index] = {
+        kind: "deviceType",
         deviceType: DEVICE_VISIBILITY_TARGETS.filter((type) =>
           currentSelection.has(type),
         ),
@@ -840,8 +851,8 @@ export function ConditionalVisibility({
   );
 
   const getConditionSourceFormId = (cond: Condition): number | undefined => {
-    if (isFieldCondition(cond) && "sourceFormId" in cond) {
-      return (cond as FieldCondition & { sourceFormId?: number }).sourceFormId;
+    if (isFieldCondition(cond)) {
+      return cond.sourceFormId;
     }
     return undefined;
   };
@@ -893,15 +904,15 @@ export function ConditionalVisibility({
         ? { when: controller.id, sourceFormId }
         : { when: controller.id };
       if (mode === "has_value") {
-        next[index] = { ...base, hasValue: true };
+        next[index] = { kind: "hasValue", ...base, hasValue: true };
       } else if (mode === "empty") {
-        next[index] = { ...base, hasValue: false };
+        next[index] = { kind: "hasValue", ...base, hasValue: false };
       } else {
         const existingNum =
           isEqualsCondition(current) && typeof current.equals === "number"
             ? current.equals
             : defaultNumberEqualsForVisibility(controller);
-        next[index] = { ...base, equals: existingNum };
+        next[index] = { kind: "equals", ...base, equals: existingNum };
       }
       updateConditions(next, true);
     },
@@ -932,7 +943,7 @@ export function ConditionalVisibility({
           : defaultNumberEqualsForVisibility(controller);
       const n = raw.trim() === "" ? NaN : parseFloat(raw);
       const equals = Number.isFinite(n) ? n : prev;
-      next[index] = { ...base, equals };
+      next[index] = { kind: "equals", ...base, equals };
       updateConditions(next, true);
     },
     [conditions, controllers, getExternalControllers, updateConditions],
@@ -957,28 +968,29 @@ export function ConditionalVisibility({
         ? { when: controller.id, sourceFormId }
         : { when: controller.id };
       if (isTextContentController(controller)) {
-        next[index] = { ...base, hasValue: value === "true" };
+        next[index] = { kind: "hasValue", ...base, hasValue: value === "true" };
       } else if (controller.kind === "checkbox") {
-        next[index] = { ...base, equals: value === "true" };
+        next[index] = { kind: "equals", ...base, equals: value === "true" };
       } else if (controller.kind === "contract") {
-        next[index] = { ...base, equals: value === "true" };
+        next[index] = { kind: "equals", ...base, equals: value === "true" };
       } else if (controller.kind === "multiselect") {
         next[index] =
           value === ANY_SELECTED_VALUE
-            ? { ...base, anySelected: true }
-            : { ...base, includesOption: value };
+            ? { kind: "anySelected", ...base, anySelected: true }
+            : { kind: "includesOption", ...base, includesOption: value };
       } else if (controller.kind === "range") {
-        next[index] = { ...base, equals: Number(value) };
+        next[index] = { kind: "equals", ...base, equals: Number(value) };
       } else if (controller.kind === "number") {
         const n = parseFloat(value);
         next[index] = {
+          kind: "equals",
           ...base,
           equals: Number.isFinite(n)
             ? n
             : defaultNumberEqualsForVisibility(controller),
         };
       } else {
-        next[index] = { ...base, equals: value };
+        next[index] = { kind: "equals", ...base, equals: value };
       }
       updateConditions(next, true);
     },
@@ -1015,6 +1027,7 @@ export function ConditionalVisibility({
         : createDraftId();
       setDraft(draftId, { type: validatorType, idArgument, expression });
       next[index] = {
+        kind: "validator",
         validatorId: draftId,
         resultEquals,
       };
@@ -1040,10 +1053,7 @@ export function ConditionalVisibility({
   );
 
   const renderFieldCondition = (condition: FieldCondition, index: number) => {
-    const sourceFormId =
-      "sourceFormId" in condition
-        ? (condition as FieldCondition & { sourceFormId?: number }).sourceFormId
-        : undefined;
+    const sourceFormId = condition.sourceFormId;
     const isCrossForm = sourceFormId != null;
     const pool = isCrossForm
       ? getExternalControllers(sourceFormId)
@@ -1375,7 +1385,8 @@ export function ConditionalVisibility({
               const isSelf = b.id === field.id;
               return (
                 <option key={b.id} value={b.id} disabled={isSelf}>
-                  ({b.id}) {b.label}{isSelf ? " (current block)" : ""}
+                  ({b.id}) {b.label}
+                  {isSelf ? " (current block)" : ""}
                 </option>
               );
             })}

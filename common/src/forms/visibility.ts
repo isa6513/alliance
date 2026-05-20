@@ -29,16 +29,17 @@ export type ConditionExtras = {
   outputBlockVisibility?: Map<string, boolean>;
 };
 
+type ValueBasedCondition = Extract<
+  Condition,
+  { kind: "equals" | "includesOption" | "anySelected" | "hasValue" }
+>;
+
 function resolveConditionValue(
-  cond: Condition & { when: string },
+  cond: ValueBasedCondition,
   data: Record<string, FormValue>,
   extras: ConditionExtras,
 ): FormValue | undefined {
-  if (
-    "sourceFormId" in cond &&
-    cond.sourceFormId != null &&
-    extras.previousAnswerData
-  ) {
+  if (cond.sourceFormId != null && extras.previousAnswerData) {
     return extras.previousAnswerData[cond.sourceFormId]?.[
       cond.when
     ] as FormValue;
@@ -47,18 +48,18 @@ function resolveConditionValue(
 }
 
 const evaluateValueBasedCondition = (
-  cond: Condition,
+  cond: ValueBasedCondition,
   val: FormValue | undefined,
 ): boolean => {
-  if ("hasValue" in cond) {
+  if (cond.kind === "hasValue") {
     const present = hasContent(val);
     return cond.hasValue ? present : !present;
   }
-  if ("anySelected" in cond) {
+  if (cond.kind === "anySelected") {
     const selections = Array.isArray(val) ? val : [];
     return cond.anySelected ? selections.length > 0 : selections.length === 0;
   }
-  if ("includesOption" in cond) {
+  if (cond.kind === "includesOption") {
     if (!cond.includesOption) {
       return false;
     }
@@ -67,9 +68,6 @@ const evaluateValueBasedCondition = (
       val.every((e) => typeof e === "string") &&
       (val as string[]).includes(cond.includesOption)
     );
-  }
-  if (!("equals" in cond)) {
-    return true;
   }
   const equals = cond.equals;
   if (typeof equals === "boolean") {
@@ -106,28 +104,38 @@ export function evaluateCondition(
   data: Record<string, FormValue>,
   extras: ConditionExtras,
 ): boolean {
-  if ("deviceType" in cond) {
-    if (!Array.isArray(cond.deviceType) || cond.deviceType.length === 0) {
-      return false;
+  switch (cond.kind) {
+    case "deviceType":
+      if (!Array.isArray(cond.deviceType) || cond.deviceType.length === 0) {
+        return false;
+      }
+      return cond.deviceType.includes(extras.deviceType);
+    case "validator": {
+      const expected = cond.resultEquals ?? true;
+      const actual = extras.visibilityValidatorResults?.[cond.validatorId];
+      if (actual === undefined) {
+        return false;
+      }
+      return actual === expected;
     }
-    return cond.deviceType.includes(extras.deviceType);
-  }
-  if ("validatorId" in cond) {
-    const expected = cond.resultEquals ?? true;
-    const actual = extras.visibilityValidatorResults?.[cond.validatorId];
-    if (actual === undefined) {
-      return false;
+    case "outputBlockVisible": {
+      const expected = cond.isVisible ?? true;
+      const actual =
+        extras.outputBlockVisibility?.get(cond.outputBlockVisible) ?? true;
+      return actual === expected;
     }
-    return actual === expected;
+    case "equals":
+    case "includesOption":
+    case "anySelected":
+    case "hasValue": {
+      const val = resolveConditionValue(cond, data, extras);
+      return evaluateValueBasedCondition(cond, val);
+    }
+    default:
+      throw new Error(
+        `unknown condition kind: ${(cond satisfies never as Condition).kind}`,
+      );
   }
-  if ("outputBlockVisible" in cond) {
-    const expected = cond.isVisible ?? true;
-    const actual =
-      extras.outputBlockVisibility?.get(cond.outputBlockVisible) ?? true;
-    return actual === expected;
-  }
-  const val = resolveConditionValue(cond, data, extras);
-  return evaluateValueBasedCondition(cond, val);
 }
 
 export function isElementCurrentlyVisible(
@@ -186,14 +194,8 @@ export function isElementCurrentlyVisible(
     return visible;
   };
 
-  const resolveValue = (
-    cond: Condition & { when: string },
-  ): FormValue | undefined => {
-    if (
-      "sourceFormId" in cond &&
-      cond.sourceFormId != null &&
-      extras.previousAnswerData
-    ) {
+  const resolveValue = (cond: ValueBasedCondition): FormValue | undefined => {
+    if (cond.sourceFormId != null && extras.previousAnswerData) {
       return extras.previousAnswerData[cond.sourceFormId]?.[
         cond.when
       ] as FormValue;
@@ -203,15 +205,24 @@ export function isElementCurrentlyVisible(
 
   const results: Record<string, boolean> = {};
   for (const [name, cond] of Object.entries(formula!.conditions)) {
-    if (
-      "deviceType" in cond ||
-      "validatorId" in cond ||
-      "outputBlockVisible" in cond
-    ) {
-      results[name] = evaluateCondition(cond, data, extras);
-    } else {
-      const value = resolveValue(cond as Condition & { when: string });
-      results[name] = evaluateValueBasedCondition(cond, value);
+    switch (cond.kind) {
+      case "deviceType":
+      case "validator":
+      case "outputBlockVisible":
+        results[name] = evaluateCondition(cond, data, extras);
+        break;
+      case "equals":
+      case "includesOption":
+      case "anySelected":
+      case "hasValue": {
+        const value = resolveValue(cond);
+        results[name] = evaluateValueBasedCondition(cond, value);
+        break;
+      }
+      default:
+        throw new Error(
+          `unknown condition kind: ${(cond satisfies never as Condition).kind}`,
+        );
     }
   }
   return evaluateVisibilityFormula(formula!.formula, results);

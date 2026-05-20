@@ -1,17 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  tasksCreateForm,
-  tasksCreateCustomValidator,
-  tasksGetForm,
-  tasksUpdateForm,
-  userList,
-} from "@alliance/shared/client";
 import type {
   DisplayBlock,
   DisplayKind,
 } from "@alliance/common/forms/display-blocks";
-import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
-import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
 import type {
   AnyField,
   Condition,
@@ -23,8 +14,23 @@ import type {
 } from "@alliance/common/forms/form-schema";
 import { validateFormSchema } from "@alliance/common/forms/form-schema-validate";
 import type { UserDto } from "@alliance/shared/client";
+import {
+  tasksCreateCustomValidator,
+  tasksCreateForm,
+  tasksGetForm,
+  tasksUpdateForm,
+  userList,
+} from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
+import { customComponentRegistry } from "@alliance/sharedweb/forms/components";
+import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PreviewAsUserBar } from "./PreviewAsUserBar";
+import { useBeforeUnload, useBlocker, useSearchParams } from "react-router";
+import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
+import { AggregateBuilder } from "./AggregateBuilder";
 import {
   EditableBigLinkBlock,
   EditableCopyTextBlock,
@@ -32,48 +38,42 @@ import {
   EditableHeaderBlock,
   EditableHtmlBlock,
   EditableImageBlock,
-  EditableVideoBlock,
   EditableLabelBlock,
+  EditablePreviousAnswerBlock,
   EditableSpacerBlock,
   EditableTextBlock,
-  EditablePreviousAnswerBlock,
+  EditableVideoBlock,
 } from "./display-blocks";
+import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { ElementSelect } from "./ElementSelect";
 import {
   EditableCheckboxField,
+  EditableCityField,
+  EditableContractField,
+  EditableCustomComponentField,
   EditableDateField,
   EditableEmailField,
   EditableFileField,
+  EditableListField,
   EditableMultiSelectField,
   EditableNumberField,
   EditablePhoneField,
   EditableRadioField,
+  EditableRangeField,
   EditableSelectField,
-  EditableTimeField,
-  EditableTimezoneField,
-  EditableCityField,
-  EditableContractField,
-  EditableListField,
   EditableTextField,
   EditableTextareaField,
-  EditableCustomComponentField,
-  EditableRangeField,
+  EditableTimeField,
+  EditableTimezoneField,
 } from "./form-fields";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useBeforeUnload, useBlocker, useSearchParams } from "react-router";
-import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
-import { customComponentRegistry } from "@alliance/sharedweb/forms/components";
-import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
-import { AggregateBuilder } from "./AggregateBuilder";
-import { OutputBuilder } from "./OutputBuilder";
-import { ShareableTextBuilder } from "./ShareableTextBuilder";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {
   CustomValidatorDraft,
   CustomValidatorDraftsContext,
   isDraftValidatorId,
 } from "./form-fields/customValidatorDrafts";
-import { cn } from "@alliance/shared/styles/util";
+import { OutputBuilder } from "./OutputBuilder";
+import { PreviewAsUserBar } from "./PreviewAsUserBar";
+import { ShareableTextBuilder } from "./ShareableTextBuilder";
 
 const FIELD_NAMES = {
   textarea: "Text Area Field",
@@ -239,22 +239,40 @@ const mapConditionForOptionValue = (
   previousValue: string,
   nextValue: string,
 ): { condition: Condition; updated: boolean } => {
-  if (!("when" in condition) || condition.when !== controllerId) {
-    return { condition, updated: false };
+  switch (condition.kind) {
+    case "includesOption":
+      if (
+        condition.when === controllerId &&
+        condition.includesOption === previousValue
+      ) {
+        return {
+          condition: { ...condition, includesOption: nextValue },
+          updated: true,
+        };
+      }
+      return { condition, updated: false };
+    case "equals":
+      if (
+        condition.when === controllerId &&
+        condition.equals === previousValue
+      ) {
+        return {
+          condition: { ...condition, equals: nextValue },
+          updated: true,
+        };
+      }
+      return { condition, updated: false };
+    case "anySelected":
+    case "deviceType":
+    case "hasValue":
+    case "outputBlockVisible":
+    case "validator":
+      return { condition, updated: false };
+    default:
+      throw new Error(
+        `Unknown condition kind: ${(condition satisfies never as Condition).kind}`,
+      );
   }
-  if (
-    "includesOption" in condition &&
-    condition.includesOption === previousValue
-  ) {
-    return {
-      condition: { ...condition, includesOption: nextValue },
-      updated: true,
-    };
-  }
-  if ("equals" in condition && condition.equals === previousValue) {
-    return { condition: { ...condition, equals: nextValue }, updated: true };
-  }
-  return { condition, updated: false };
 };
 
 const getUpdatedVisibilityFormula = (
@@ -474,7 +492,7 @@ export function FormBuilder({
       if (!visibleIfFormula?.conditions) return;
       Object.values(visibleIfFormula.conditions).forEach((condition) => {
         if (
-          "validatorId" in condition &&
+          condition.kind === "validator" &&
           isDraftValidatorId(condition.validatorId)
         ) {
           activeDraftIds.add(condition.validatorId);
@@ -893,7 +911,7 @@ export function FormBuilder({
         if (!visibleIfFormula?.conditions) return;
         Object.values(visibleIfFormula.conditions).forEach((condition) => {
           if (
-            "validatorId" in condition &&
+            condition.kind === "validator" &&
             isDraftValidatorId(condition.validatorId)
           ) {
             draftIds.add(condition.validatorId);
@@ -946,7 +964,7 @@ export function FormBuilder({
 
       const mapCondition = (condition: Condition): Condition => {
         if (
-          "validatorId" in condition &&
+          condition.kind === "validator" &&
           isDraftValidatorId(condition.validatorId)
         ) {
           const nextId = resolvedIds.get(condition.validatorId);

@@ -1,15 +1,4 @@
-import type { Repository } from 'typeorm';
-import {
-  createFormWithSnapshot,
-  createTestApp,
-  TestContext,
-} from './e2e-test-utils';
-import { ForumActionCompleterWorker } from 'src/actions/forum-action-completer.worker';
-import {
-  Action,
-  ActionTaskType,
-  VisibilityMode,
-} from 'src/actions/entities/action.entity';
+import type { FormSchema } from '@alliance/common/forms/form-schema';
 import {
   ActionActivity,
   ActionActivityType,
@@ -18,20 +7,31 @@ import {
   ActionEvent,
   ActionStatus,
 } from 'src/actions/entities/action-event.entity';
-import { Form } from 'src/tasks/entities/form.entity';
-import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import {
-  CustomValidator,
-  CustomValidatorType,
-} from 'src/tasks/entities/customvalidator.entity';
-import type { FormSchema } from '@alliance/common/forms/form-schema';
-import { Post } from 'src/forum/entities/post.entity';
+  Action,
+  ActionTaskType,
+  VisibilityMode,
+} from 'src/actions/entities/action.entity';
+import { ForumActionCompleterWorker } from 'src/actions/forum-action-completer.worker';
 import {
   Comment,
   CommentParentObject,
 } from 'src/forum/entities/comment.entity';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
+import { Post } from 'src/forum/entities/post.entity';
+import {
+  CustomValidator,
+  CustomValidatorType,
+} from 'src/tasks/entities/customvalidator.entity';
+import { Form } from 'src/tasks/entities/form.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { User } from 'src/user/entities/user.entity';
+import type { Repository } from 'typeorm';
+import {
+  createFormWithSnapshot,
+  createTestApp,
+  TestContext,
+} from './e2e-test-utils';
 
 const addMinutes = (date: Date, minutes: number) =>
   new Date(date.getTime() + minutes * 60 * 1000);
@@ -153,7 +153,7 @@ describe('ForumActionCompleterWorker (e2e)', () => {
               label: 'Reply',
               visibleIfFormula: {
                 conditions: {
-                  condition1: { validatorId },
+                  condition1: { kind: 'validator', validatorId },
                 },
                 formula: 'condition1',
               },

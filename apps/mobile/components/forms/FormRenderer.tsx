@@ -692,7 +692,7 @@ const FormRenderer = ({
         return;
       }
       for (const condition of Object.values(visibleIfFormula.conditions)) {
-        if (condition && "validatorId" in condition) {
+        if (condition.kind === "validator") {
           ids.add(condition.validatorId);
         }
       }

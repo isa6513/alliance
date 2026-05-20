@@ -1,43 +1,43 @@
-import request from 'supertest';
-import type { Repository } from 'typeorm';
-import { createTestApp, TestContext } from './e2e-test-utils';
-import { TasksModule } from 'src/tasks/tasks.module';
-import { Form } from 'src/tasks/entities/form.entity';
-import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import type { FormSchema } from '@alliance/common/forms/form-schema';
+import { CreateActionDto } from 'src/actions/dto/action.dto';
+import {
+  ActionActivity,
+  ActionActivityType,
+} from 'src/actions/entities/action-activity.entity';
+import {
+  ActionEvent,
+  ActionStatus,
+} from 'src/actions/entities/action-event.entity';
 import {
   Action,
   ActionTaskType,
   VisibilityMode,
 } from 'src/actions/entities/action.entity';
+import { Community } from 'src/community/entities/community.entity';
 import {
-  ActionEvent,
-  ActionStatus,
-} from 'src/actions/entities/action-event.entity';
-import { User } from 'src/user/entities/user.entity';
-import type { FormSchema } from '@alliance/common/forms/form-schema';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from 'src/actions/entities/action-activity.entity';
-import { CreateActionDto } from 'src/actions/dto/action.dto';
+  Comment,
+  CommentParentObject,
+} from 'src/forum/entities/comment.entity';
+import { EditableContent } from 'src/forum/entities/editablecontent.entity';
+import { Post } from 'src/forum/entities/post.entity';
+import { CustomValidatorTypeDto } from 'src/tasks/customvalidator.dto';
 import {
   CustomValidator,
   CustomValidatorType,
   typeUsableForVisibility,
   typeUsesIdArgument,
 } from 'src/tasks/entities/customvalidator.entity';
+import { Form } from 'src/tasks/entities/form.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { TasksModule } from 'src/tasks/tasks.module';
 import {
   ContractEvent,
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
-import { Community } from 'src/community/entities/community.entity';
-import {
-  Comment,
-  CommentParentObject,
-} from 'src/forum/entities/comment.entity';
-import { Post } from 'src/forum/entities/post.entity';
-import { EditableContent } from 'src/forum/entities/editablecontent.entity';
-import { CustomValidatorTypeDto } from 'src/tasks/customvalidator.dto';
+import { User } from 'src/user/entities/user.entity';
+import request from 'supertest';
+import type { Repository } from 'typeorm';
+import { createTestApp, TestContext } from './e2e-test-utils';
 
 const sampleSchema: FormSchema = {
   title: 'Volunteer Signup',
@@ -920,7 +920,10 @@ describe('Tasks (e2e)', () => {
                 required: true,
                 visibleIfFormula: {
                   conditions: {
-                    condition1: { validatorId: visibilityValidatorId },
+                    condition1: {
+                      kind: 'validator',
+                      validatorId: visibilityValidatorId,
+                    },
                   },
                   formula: 'condition1',
                 },
@@ -1100,6 +1103,7 @@ describe('Tasks (e2e)', () => {
                 visibleIfFormula: {
                   conditions: {
                     condition1: {
+                      kind: 'equals',
                       when: 'role',
                       equals: 'organizer',
                       sourceFormId,
@@ -1193,6 +1197,7 @@ describe('Tasks (e2e)', () => {
                 visibleIfFormula: {
                   conditions: {
                     condition1: {
+                      kind: 'equals',
                       when: 'role',
                       equals: 'organizer',
                       sourceFormId,
@@ -1297,6 +1302,7 @@ describe('Tasks (e2e)', () => {
                 visibleIfFormula: {
                   conditions: {
                     isTech: {
+                      kind: 'equals',
                       when: 'interest',
                       equals: 'tech',
                       sourceFormId,

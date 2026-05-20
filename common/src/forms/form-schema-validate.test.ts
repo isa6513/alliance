@@ -78,7 +78,11 @@ describe("validateFormSchema", () => {
           fieldBlock("blk-field", "f1"),
           labelBlock("blk-label", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-field", isVisible: true },
+              c1: {
+                kind: "outputBlockVisible",
+                outputBlockVisible: "blk-field",
+                isVisible: true,
+              },
             }),
           }),
         ]),
@@ -93,7 +97,10 @@ describe("validateFormSchema", () => {
         view("v1", [
           labelBlock("blk-label", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "does-not-exist" },
+              c1: {
+                kind: "outputBlockVisible",
+                outputBlockVisible: "does-not-exist",
+              },
             }),
           }),
         ]),
@@ -115,7 +122,10 @@ describe("validateFormSchema", () => {
           labelBlock("other-label"),
           labelBlock("blk", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "other-label" },
+              c1: {
+                kind: "outputBlockVisible",
+                outputBlockVisible: "other-label",
+              },
             }),
           }),
         ]),
@@ -132,7 +142,7 @@ describe("validateFormSchema", () => {
           labelBlock("disp"),
           fieldBlock("blk-field", "f1", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "disp" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "disp" },
             }),
           }),
         ]),
@@ -149,7 +159,11 @@ describe("validateFormSchema", () => {
           fieldBlock("blk-a", "f1"),
           fieldBlock("blk-b", "f2", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-a", isVisible: true },
+              c1: {
+                kind: "outputBlockVisible",
+                outputBlockVisible: "blk-a",
+                isVisible: true,
+              },
             }),
           }),
         ]),
@@ -165,12 +179,12 @@ describe("validateFormSchema", () => {
         view("v1", [
           fieldBlock("blk-a", "f1", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-b" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "blk-b" },
             }),
           }),
           fieldBlock("blk-b", "f2", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-a" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "blk-a" },
             }),
           }),
         ]),
@@ -193,7 +207,7 @@ describe("validateFormSchema", () => {
         view("v1", [
           fieldBlock("blk-a", "f1", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-a" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "blk-a" },
             }),
           }),
         ]),
@@ -215,17 +229,17 @@ describe("validateFormSchema", () => {
         view("v1", [
           fieldBlock("blk-a", "f1", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-b" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "blk-b" },
             }),
           }),
           fieldBlock("blk-b", "f2", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-c" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "blk-c" },
             }),
           }),
           fieldBlock("blk-c", "f3", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-a" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "blk-a" },
             }),
           }),
         ]),
@@ -249,12 +263,12 @@ describe("validateFormSchema", () => {
           fieldBlock("blk-a", "f1"),
           fieldBlock("blk-b", "f2", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-a" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "blk-a" },
             }),
           }),
           fieldBlock("blk-c", "f3", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "blk-b" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "blk-b" },
             }),
           }),
         ]),
@@ -269,7 +283,7 @@ describe("validateFormSchema", () => {
         view("v1", [
           labelBlock("blk", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "" },
             }),
           }),
         ]),
@@ -290,7 +304,10 @@ describe("validateFormSchema", () => {
         page("p1", [
           textField("f1", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "anything" },
+              c1: {
+                kind: "outputBlockVisible",
+                outputBlockVisible: "anything",
+              },
             }),
           }),
         ]),
@@ -310,7 +327,10 @@ describe("validateFormSchema", () => {
       pages: [
         page("p1", [
           textField("f1", {
-            requiredIf: { outputBlockVisible: "anything" },
+            requiredIf: {
+              kind: "outputBlockVisible",
+              outputBlockVisible: "anything",
+            },
           }),
         ]),
       ],
@@ -330,7 +350,7 @@ describe("validateFormSchema", () => {
         page("p1", [
           labelBlock("disp", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "x" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "x" },
             }),
           }),
         ]),
@@ -353,7 +373,7 @@ describe("validateFormSchema", () => {
       fields: [
         textField("inner", {
           visibleIfFormula: formula({
-            c1: { outputBlockVisible: "nope" },
+            c1: { kind: "outputBlockVisible", outputBlockVisible: "nope" },
           }),
         }),
       ],
@@ -376,9 +396,9 @@ describe("validateFormSchema", () => {
         page("p1", [
           textField("f1", {
             visibleIfFormula: formula({
-              c1: { when: "f2", equals: "yes" },
-              c3: { validatorId: 42 },
-              c4: { deviceType: ["mobile"] },
+              c1: { kind: "equals", when: "f2", equals: "yes" },
+              c3: { kind: "validator", validatorId: 42 },
+              c4: { kind: "deviceType", deviceType: ["mobile"] },
             }),
           }),
         ]),
@@ -388,8 +408,8 @@ describe("validateFormSchema", () => {
           fieldBlock("blk-field", "f1"),
           labelBlock("blk", {
             visibleIfFormula: formula({
-              c1: { when: "f1", hasValue: true },
-              c2: { validatorId: 7, resultEquals: false },
+              c1: { kind: "hasValue", when: "f1", hasValue: true },
+              c2: { kind: "validator", validatorId: 7, resultEquals: false },
             }),
           }),
         ]),
@@ -404,7 +424,7 @@ describe("validateFormSchema", () => {
         page("p1", [
           textField("f1", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "x" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "x" },
             }),
           }),
         ]),
@@ -413,7 +433,7 @@ describe("validateFormSchema", () => {
         view("v1", [
           labelBlock("blk", {
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "missing" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "missing" },
             }),
           }),
         ]),
@@ -441,7 +461,7 @@ describe("validateFormSchema", () => {
             kind: "label",
             text: "no-id",
             visibleIfFormula: formula({
-              c1: { outputBlockVisible: "missing" },
+              c1: { kind: "outputBlockVisible", outputBlockVisible: "missing" },
             }),
           },
         ]),
