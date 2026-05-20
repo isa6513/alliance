@@ -19,7 +19,7 @@ export enum CommentFilter {
 
 export const commentFilterLabels: Record<CommentFilter, string> = {
   [CommentFilter.All]: "All",
-  [CommentFilter.SameCluster]: "Same group",
+  [CommentFilter.SameCluster]: "Introduction group",
   [CommentFilter.Mine]: "Mine",
   [CommentFilter.Answered]: "Answered",
   [CommentFilter.Unanswered]: "Unanswered",
@@ -36,7 +36,7 @@ export enum CommentSort {
 
 export const sortLabels: Record<CommentSort, string> = {
   [CommentSort.Newest]: "Newest",
-  [CommentSort.SameCluster]: "Same group",
+  [CommentSort.SameCluster]: "Introduction group",
   [CommentSort.Discussion]: "Most discussion",
   [CommentSort.Random]: "Random",
 };
