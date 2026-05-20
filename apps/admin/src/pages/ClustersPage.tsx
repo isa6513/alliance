@@ -46,7 +46,7 @@ const ClustersPage: React.FC = () => {
           .sort((a, b) => a.id - b.id);
         if (others.length === 0) {
           payload[String(member.id)] =
-            "You are the only member of your introduction group.";
+            `You are the only member of your introduction group (${cluster.displayName}).`;
           continue;
         }
         const list = others
@@ -56,7 +56,7 @@ const ClustersPage: React.FC = () => {
           )
           .join("\n");
         payload[String(member.id)] =
-          `The other members of your introduction group are:\n\n${list}`;
+          `The other members of your introduction group (${cluster.displayName}) are:\n\n${list}`;
       }
     }
     try {
