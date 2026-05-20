@@ -34,6 +34,7 @@ import { outputFieldPublicToggle } from "@alliance/shared/lib/copy";
 import { cn } from "@alliance/shared/styles/util";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setStringAsync as setClipboardStringAsync } from "expo-clipboard";
+import { DeviceType, deviceType as expoDeviceType } from "expo-device";
 import {
   Check,
   CircleCheck,
@@ -88,7 +89,24 @@ type FormRendererProps = {
   scrollToEnd: (animated?: boolean) => void;
 };
 
-const DEVICE_TYPE: DeviceVisibilityTarget = "mobile";
+const detectDeviceType = (): DeviceVisibilityTarget => {
+  if (expoDeviceType === null) return "mobile";
+  switch (expoDeviceType) {
+    case DeviceType.PHONE:
+      return "mobile";
+    case DeviceType.TABLET:
+      return "tablet";
+    case DeviceType.DESKTOP:
+      return "desktop";
+    case DeviceType.UNKNOWN:
+    case DeviceType.TV:
+      return "mobile";
+    default:
+      throw new Error(`unknown device type: ${expoDeviceType satisfies never}`);
+  }
+};
+
+const DEVICE_TYPE: DeviceVisibilityTarget = detectDeviceType();
 
 function CopyTextDisplayMobile({
   text,
