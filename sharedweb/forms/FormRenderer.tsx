@@ -27,6 +27,7 @@ import {
   computeActiveUserKey,
   computeFormStorageKey,
   filterAnswersByFieldIds,
+  findUnknownFormElementKind,
   getListSubFieldErrors,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
   resolveDisplayBlockForUser,
@@ -103,42 +104,6 @@ type FormRendererProps = {
 );
 
 export { computeFormStorageKey };
-
-type FieldKind = FormSchema["pages"][number]["fields"][number]["kind"];
-const KNOWN_FIELD_KINDS_RECORD = {
-  text: true,
-  textarea: true,
-  email: true,
-  number: true,
-  range: true,
-  phone: true,
-  checkbox: true,
-  radio: true,
-  select: true,
-  multiselect: true,
-  date: true,
-  time: true,
-  timezone: true,
-  file: true,
-  city: true,
-  contract: true,
-  list: true,
-  custom: true,
-  header: true,
-  label: true,
-  divider: true,
-  spacer: true,
-  html: true,
-  image: true,
-  video: true,
-  quote: true,
-  biglink: true,
-  copytext: true,
-  previousAnswer: true,
-} as const satisfies Record<FieldKind, unknown>;
-const KNOWN_FIELD_KINDS = new Set(
-  Object.keys(KNOWN_FIELD_KINDS_RECORD),
-) as Set<FieldKind>;
 
 const DEFAULT_DEVICE_TYPE: DeviceVisibilityTarget = "desktop";
 
@@ -236,16 +201,10 @@ const FormRenderer = ({
     return { fieldLookup: lookup, defaultValueMap: defaults };
   }, [schema]);
 
-  const unknownKind = useMemo(() => {
-    for (const page of schema.pages ?? []) {
-      for (const element of page.fields ?? []) {
-        if (!KNOWN_FIELD_KINDS.has(element.kind)) {
-          return element.kind;
-        }
-      }
-    }
-    return null;
-  }, [schema]);
+  const unknownKind = useMemo(
+    () => findUnknownFormElementKind(schema),
+    [schema],
+  );
 
   const pageCount = schema.pages?.length ?? 0;
   const maxPageIndex = Math.max(0, (pageCount || 1) - 1);

@@ -25,6 +25,7 @@ import {
   computeActiveUserKey,
   computeFormStorageKey,
   filterAnswersByFieldIds,
+  findUnknownFormElementKind,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
   resolveDisplayBlockForUser,
   resolveFieldDefaultValue,
@@ -368,6 +369,11 @@ const FormRenderer = ({
 
     return { fieldLookup: lookup, defaultValueMap: defaults };
   }, [schema]);
+
+  const unknownKind = useMemo(
+    () => findUnknownFormElementKind(schema),
+    [schema],
+  );
 
   const previousAnswerSourceFormIds = useMemo(() => {
     const ids = new Set<number>();
@@ -1116,6 +1122,19 @@ const FormRenderer = ({
     }
     return false;
   };
+
+  if (unknownKind) {
+    return (
+      <View className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3">
+        <Text weight={FontWeight.Medium} className="text-amber-800">
+          This form can&apos;t be displayed
+        </Text>
+        <Text className="text-sm text-amber-800 mt-1">
+          Downloading the latest app version may fix the issue.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View className="flex flex-col gap-y-8">

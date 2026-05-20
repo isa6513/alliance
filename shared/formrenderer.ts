@@ -4,6 +4,7 @@ import {
   type AnyField,
   type CityFieldValue,
   type Condition,
+  type FormSchema,
   type FormValue,
   type ListField,
   type NumberField,
@@ -32,6 +33,62 @@ export function computeFormStorageKey(args: {
     args.instanceId !== null &&
     args.instanceId !== "";
   return hasInstance ? `${base}:${String(args.instanceId)}` : base;
+}
+
+type FormElementKind = FormSchema["pages"][number]["fields"][number]["kind"];
+
+const KNOWN_FORM_ELEMENT_KINDS_RECORD = {
+  text: true,
+  textarea: true,
+  email: true,
+  number: true,
+  range: true,
+  phone: true,
+  checkbox: true,
+  radio: true,
+  select: true,
+  multiselect: true,
+  date: true,
+  time: true,
+  timezone: true,
+  file: true,
+  city: true,
+  contract: true,
+  list: true,
+  custom: true,
+  header: true,
+  label: true,
+  divider: true,
+  spacer: true,
+  html: true,
+  image: true,
+  video: true,
+  quote: true,
+  biglink: true,
+  copytext: true,
+  previousAnswer: true,
+} as const satisfies Record<FormElementKind, true>;
+
+const KNOWN_FORM_ELEMENT_KINDS = new Set(
+  Object.keys(KNOWN_FORM_ELEMENT_KINDS_RECORD),
+) as Set<FormElementKind>;
+
+/**
+ * Returns the first element kind in the schema that the current client doesn't
+ * recognize, or null if every element kind is known. Callers use this to block
+ * rendering when the schema references blocks added in a newer client version.
+ */
+export function findUnknownFormElementKind(
+  schema: FormSchema,
+): FormElementKind | null {
+  for (const page of schema.pages ?? []) {
+    for (const element of page.fields ?? []) {
+      if (!KNOWN_FORM_ELEMENT_KINDS.has(element.kind)) {
+        return element.kind;
+      }
+    }
+  }
+  return null;
 }
 
 const isNonEmptyString = (value: unknown): value is string =>
