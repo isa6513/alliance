@@ -11,11 +11,14 @@ import {
   FormSchema,
   type FormValue,
   isQuestionField,
-  isQuestionVisible,
   type ListField,
   Page,
 } from '@alliance/common/forms/form-schema';
 import { validateFormSchema } from '@alliance/common/forms/form-schema-validate';
+import {
+  type ConditionExtras,
+  isElementCurrentlyVisible,
+} from '@alliance/common/forms/visibility';
 import { Temporal } from '@js-temporal/polyfill';
 import {
   BadRequestException,
@@ -354,22 +357,24 @@ export class TasksService {
         if (entry) previousAnswerData[entry[0]] = entry[1];
       }
     }
-    const hasPreviousAnswerData =
-      Object.keys(previousAnswerData).length > 0
-        ? previousAnswerData
-        : undefined;
+    const visibilityExtras: ConditionExtras = {
+      deviceType: submitFormDto.deviceType,
+      visibilityValidatorResults: validatorResults,
+      previousAnswerData:
+        Object.keys(previousAnswerData).length > 0
+          ? previousAnswerData
+          : undefined,
+    };
 
     for (const page of schema.pages) {
       for (const field of page.fields) {
         if (isQuestionField(field)) {
           if (
             field.required &&
-            isQuestionVisible(
+            isElementCurrentlyVisible(
               field,
               submitFormDto.answers,
-              validatorResults,
-              submitFormDto.deviceType,
-              hasPreviousAnswerData,
+              visibilityExtras,
             )
           ) {
             if (
@@ -382,12 +387,10 @@ export class TasksService {
             field.kind === 'multiselect' &&
             typeof field.maxSelections === 'number' &&
             field.maxSelections > 0 &&
-            isQuestionVisible(
+            isElementCurrentlyVisible(
               field,
               submitFormDto.answers,
-              validatorResults,
-              submitFormDto.deviceType,
-              hasPreviousAnswerData,
+              visibilityExtras,
             )
           ) {
             const answer = submitFormDto.answers[field.id];
@@ -400,12 +403,10 @@ export class TasksService {
           if (field.kind === 'list') {
             const listField = field as ListField;
             if (
-              !isQuestionVisible(
+              !isElementCurrentlyVisible(
                 listField,
                 submitFormDto.answers,
-                validatorResults,
-                submitFormDto.deviceType,
-                hasPreviousAnswerData,
+                visibilityExtras,
               )
             ) {
               continue;
@@ -455,13 +456,7 @@ export class TasksService {
                 if (
                   !isQuestionField(sub) ||
                   !sub.required ||
-                  !isQuestionVisible(
-                    sub,
-                    mergedData,
-                    validatorResults,
-                    submitFormDto.deviceType,
-                    hasPreviousAnswerData,
-                  )
+                  !isElementCurrentlyVisible(sub, mergedData, visibilityExtras)
                 ) {
                   continue;
                 }
@@ -881,7 +876,7 @@ export class TasksService {
       // mobile version sends formSnapshotId.
       schemaSnapshot?: Record<string, unknown>;
       visibilityValidatorResults?: Record<string, boolean>;
-      deviceType?: DeviceVisibilityTarget;
+      deviceType: DeviceVisibilityTarget;
       publicAnswers?: Record<string, boolean>;
       phDistinctId?: string;
       sessionReplayUrl?: string;

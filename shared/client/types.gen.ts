@@ -2842,7 +2842,7 @@ export type SubmitFormDto = {
     visibilityValidatorResults?: {
         [key: string]: unknown;
     };
-    deviceType?: 'mobile' | 'tablet' | 'desktop';
+    deviceType: 'mobile' | 'tablet' | 'desktop';
     publicAnswers?: {
         [key: string]: unknown;
     };
@@ -2899,7 +2899,7 @@ export type SubmitFollowUpFormDto = {
     visibilityValidatorResults?: {
         [key: string]: unknown;
     };
-    deviceType?: 'mobile' | 'tablet' | 'desktop';
+    deviceType: 'mobile' | 'tablet' | 'desktop';
     publicAnswers?: {
         [key: string]: unknown;
     };

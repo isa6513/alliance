@@ -1,15 +1,10 @@
 import type { DisplayBlock, ManualDisplayBlockContent } from "./display-blocks";
-import type { DeviceVisibilityTarget } from "./device";
-import {
-  evaluateVisibilityFormula,
-  type Condition,
-  type VisibleIfFormula,
-} from "./visible-if-formula";
+import type { Condition, VisibleIfFormula } from "./visible-if-formula";
 
 export type {
   Condition,
   FormulaNode,
-  VisibleIfFormula,
+  VisibleIfFormula
 } from "./visible-if-formula";
 
 /** City answer shape; matches API `CitySearchDto` / server `CitySearchDto` structurally. */
@@ -268,105 +263,6 @@ export function isQuestionField(
   field: AnyField | DisplayBlock,
 ): field is AnyField {
   return "label" in field;
-}
-
-export function isQuestionVisible(
-  element: AnyField | DisplayBlock,
-  formData: Record<string, FormValue>,
-  validatorResults?: Record<number, boolean>,
-  deviceType?: DeviceVisibilityTarget,
-  previousAnswerData?: Record<number, Record<string, unknown>>,
-): boolean {
-  const normalizedDeviceType: DeviceVisibilityTarget = deviceType ?? "desktop";
-  const hasContent = (value: FormValue | undefined): boolean => {
-    if (value === undefined || value === null) {
-      return false;
-    }
-    if (typeof value === "string") {
-      return value.trim().length > 0;
-    }
-    if (Array.isArray(value)) {
-      return value.length > 0;
-    }
-    return true;
-  };
-  const resolveValue = (c: Condition & { when: string }): FormValue => {
-    if ("sourceFormId" in c && c.sourceFormId != null && previousAnswerData) {
-      return previousAnswerData[c.sourceFormId]?.[c.when] as FormValue;
-    }
-    return formData[c.when];
-  };
-  const evalCond = (c: Condition): boolean => {
-    if ("expr" in c) return true;
-    if ("deviceType" in c) {
-      if (!Array.isArray(c.deviceType) || c.deviceType.length === 0)
-        return false;
-      return c.deviceType.includes(normalizedDeviceType);
-    }
-    if ("validatorId" in c) {
-      const expected = c.resultEquals ?? true;
-      const actual = validatorResults?.[c.validatorId];
-      if (actual === undefined) return false;
-      return actual === expected;
-    }
-    if ("outputBlockVisible" in c) {
-      // Output-view visibility is evaluated by resolveOutputItems, not here.
-      // Fall back to "visible" so form-level checks don't accidentally hide things.
-      return c.isVisible ?? true;
-    }
-    const val = resolveValue(c as Condition & { when: string });
-    if ("hasValue" in c) {
-      const present = hasContent(val as FormValue | undefined);
-      return c.hasValue ? present : !present;
-    }
-    if ("anySelected" in c) {
-      const selections = Array.isArray(val) ? val : [];
-      return c.anySelected ? selections.length > 0 : selections.length === 0;
-    }
-    if ("includesOption" in c) {
-      if (!c.includesOption) return false;
-      return (
-        Array.isArray(val) &&
-        val.length > 0 &&
-        typeof val[0] === "string" &&
-        (val as string[]).includes(c.includesOption)
-      );
-    }
-    if (!("equals" in c)) return true;
-    if (typeof c.equals === "boolean") return Boolean(val) === c.equals;
-    if (typeof c.equals === "number" && Number.isFinite(c.equals)) {
-      if (val === "" || val === undefined || val === null) return false;
-      if (typeof val === "number" && Number.isFinite(val))
-        return val === c.equals;
-      if (typeof val === "string" && val.trim() !== "") {
-        const n = Number(val);
-        return Number.isFinite(n) && n === c.equals;
-      }
-      return false;
-    }
-    if (Array.isArray(val) && c.equals !== null && c.equals !== undefined) {
-      if (val.length > 0 && typeof val[0] === "string") {
-        return (val as string[]).includes(c.equals as string);
-      }
-      return false;
-    }
-    return val === c.equals;
-  };
-
-  const formula = element.visibleIfFormula;
-  if (
-    formula?.conditions &&
-    Object.keys(formula.conditions).length > 0 &&
-    formula.formula
-  ) {
-    const results: Record<string, boolean> = {};
-    for (const [name, cond] of Object.entries(formula.conditions)) {
-      results[name] = evalCond(cond);
-    }
-    return evaluateVisibilityFormula(formula.formula, results);
-  }
-
-  return true;
 }
 
 /** Scan a form schema for all sourceFormIds referenced in visibility conditions. */

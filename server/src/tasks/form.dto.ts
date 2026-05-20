@@ -1,5 +1,11 @@
 // src/forms/dto/create-form.dto.ts
 import {
+  DEVICE_VISIBILITY_TARGETS,
+  type DeviceVisibilityTarget,
+} from '@alliance/common/forms/device';
+import type { AggregateViewSchema } from '@alliance/common/forms/form-schema';
+import { MIGRATE_RESPONSE_SNAPSHOTS_MAX_BATCH } from '@alliance/common/forms/snapshot-migration';
+import {
   ApiProperty,
   ApiPropertyOptional,
   OmitType,
@@ -16,20 +22,14 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { ActionDto } from 'src/actions/dto/action.dto';
 import { AiDetectionResultDto } from 'src/ai-detection/dto/ai-detection-result.dto';
 import { AiDetectionResult } from 'src/ai-detection/entities/ai-detection-result.entity';
-import { ActionDto } from 'src/actions/dto/action.dto';
 import { UserDto } from 'src/user/dto/user.dto';
 import { Form } from './entities/form.entity';
 import { FormResponse } from './entities/formresponse.entity';
 import { FormSnapshot } from './entities/formsnapshot.entity';
 import type { Ty } from './entities/type';
-import type { AggregateViewSchema } from '@alliance/common/forms/form-schema';
-import {
-  DEVICE_VISIBILITY_TARGETS,
-  type DeviceVisibilityTarget,
-} from '@alliance/common/forms/device';
-import { MIGRATE_RESPONSE_SNAPSHOTS_MAX_BATCH } from '@alliance/common/forms/snapshot-migration';
 
 export class CreateFormDto extends PickType(Form, ['title']) {
   @ApiProperty()
@@ -71,10 +71,10 @@ export class SubmitFormDto extends PickType(FormResponse, [
   @Type(() => Object)
   visibilityValidatorResults?: Record<number, boolean>;
 
-  @ApiPropertyOptional({ enum: DEVICE_VISIBILITY_TARGETS })
+  @ApiProperty({ enum: DEVICE_VISIBILITY_TARGETS })
   @IsEnum(DEVICE_VISIBILITY_TARGETS)
-  @IsOptional()
-  deviceType?: DeviceVisibilityTarget;
+  @IsDefined()
+  deviceType: DeviceVisibilityTarget;
 
   @ApiPropertyOptional({ type: Object })
   @Type(() => Object)
