@@ -1,29 +1,8 @@
 import { UpdateProfileDto } from "@alliance/shared/client";
-import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card from "@alliance/sharedweb/ui/Card";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { href, useLocation, useNavigate, useParams } from "react-router";
-import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
-import ForumListPost from "../../components/ForumListPost";
-import FriendRequestButton from "../../components/FriendRequestButton";
-import FriendsTab from "../../components/FriendsTab";
-import UserActivityCard from "../../components/UserActivityCard";
-import UserProfileTab from "../../components/UserProfileTab";
-import { useAuth } from "../../lib/AuthContext";
+import { Features } from "@alliance/shared/lib/features";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
-import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
-import List from "@alliance/sharedweb/ui/List";
-import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
-import ImageEditor from "../../components/ImageEditor";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { MessageSquare } from "lucide-react";
-import { Features } from "@alliance/shared/lib/features";
-import { isFeatureEnabled } from "../../lib/config";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {
   buildForumActivityItems,
   useAcceptFriendRequestMutation,
@@ -36,12 +15,33 @@ import {
   useUserFriendsQuery,
   useUserProfileQuery,
 } from "@alliance/shared/lib/user";
-import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
+import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@alliance/sharedweb/ui/HoverCard";
+import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
+import List from "@alliance/sharedweb/ui/List";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import { MessageSquare } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { href, useLocation, useNavigate, useParams } from "react-router";
+import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
+import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
+import ForumListPost from "../../components/ForumListPost";
+import FriendRequestButton from "../../components/FriendRequestButton";
+import FriendsTab from "../../components/FriendsTab";
+import ImageEditor from "../../components/ImageEditor";
+import UserActivityCard from "../../components/UserActivityCard";
+import UserProfileTab from "../../components/UserProfileTab";
+import { useAuth } from "../../lib/AuthContext";
+import { isFeatureEnabled } from "../../lib/config";
 
 enum ProfileTabs {
   Activity = "Actions",
@@ -63,7 +63,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
 const UserProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
   const isMe = id === user?.id.toString();
 
   const { state } = useLocation();
@@ -202,7 +202,9 @@ const UserProfilePage: React.FC = () => {
 
       if (response && id) {
         setIsEditing(false);
-        navigate(href("/member/:id", { id })); // to make navbar pfp reload
+        if (isMe) {
+          await refreshUser();
+        }
       }
     } catch (err: unknown) {
       console.error(err);
