@@ -198,11 +198,12 @@ export default function HomeScreen() {
         refetch(),
         refetchGeneralUpdates(),
         refetchAwayRanges(),
+        queryClient.invalidateQueries({ queryKey: ["form"] }),
       ]);
     } finally {
       setRefreshing(false);
     }
-  }, [refetch, refetchGeneralUpdates, refetchAwayRanges]);
+  }, [refetch, refetchGeneralUpdates, refetchAwayRanges, queryClient]);
 
   const scrollPageTo = useCallback((y: number, animated = true) => {
     if (scrollViewRef.current) {
