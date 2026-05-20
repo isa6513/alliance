@@ -1,11 +1,11 @@
+import { RelativePathString, router } from "expo-router";
 import React, { useCallback, useMemo } from "react";
-import { Linking, Image, StyleSheet, View } from "react-native";
+import { Image, Linking, StyleSheet, View } from "react-native";
 import Markdown, {
   ASTNode,
   RenderRules,
   renderRules as defaultRenderRules,
 } from "react-native-markdown-display";
-import { RelativePathString, router } from "expo-router";
 import { getApiUrl } from "../lib/config";
 import { colors } from "../lib/style/colors";
 import Text from "./system/Text";
@@ -19,10 +19,20 @@ const INTERNAL_ROUTE_PATTERNS: {
   pattern: RegExp;
   getRoute: (match: RegExpMatchArray) => string;
 }[] = [
+  // Action activity detail: /actions/123/activity/456
+  {
+    pattern: /^\/actions?\/(\d+)\/activity\/(\d+)\/?$/,
+    getRoute: (match) => `/actions/${match[1]}/activity/${match[2]}`,
+  },
   // Action pages: /actions/123 or /action/123
   {
-    pattern: /^\/actions?\/(\d+)$/,
+    pattern: /^\/actions?\/(\d+)\/?$/,
     getRoute: (match) => `/actions/${match[1]}`,
+  },
+  // Actions list: /actions
+  {
+    pattern: /^\/actions\/?$/,
+    getRoute: () => "/actions",
   },
   // Forum index: /forum
   {
@@ -31,8 +41,23 @@ const INTERNAL_ROUTE_PATTERNS: {
   },
   // Forum post: /forum/post/123 or /forum/123
   {
-    pattern: /^\/forum\/(?:post\/)?(\d+)$/,
+    pattern: /^\/forum\/(?:post\/)?(\d+)\/?$/,
     getRoute: (match) => `/forum/post/${match[1]}`,
+  },
+  // Member profile: /member/123
+  {
+    pattern: /^\/member\/(\d+)\/?$/,
+    getRoute: (match) => `/member/${match[1]}`,
+  },
+  // Messages list: /messages
+  {
+    pattern: /^\/messages\/?$/,
+    getRoute: () => "/messages",
+  },
+  // Activity feed: /feed
+  {
+    pattern: /^\/feed\/?$/,
+    getRoute: () => "/feed",
   },
   // User profile: /profile
   {
@@ -49,10 +74,30 @@ const INTERNAL_ROUTE_PATTERNS: {
     pattern: /^\/notifications\/?$/,
     getRoute: () => "/notifications",
   },
-  // Actions list: /actions
+  // Contract: /contract
   {
-    pattern: /^\/actions\/?$/,
-    getRoute: () => "/actions",
+    pattern: /^\/contract\/?$/,
+    getRoute: () => "/contract",
+  },
+  // Groups: /groups
+  {
+    pattern: /^\/groups\/?$/,
+    getRoute: () => "/groups",
+  },
+  // Invites: /invites
+  {
+    pattern: /^\/invites\/?$/,
+    getRoute: () => "/invites",
+  },
+  // Information: /information
+  {
+    pattern: /^\/information\/?$/,
+    getRoute: () => "/information",
+  },
+  // Search: /search
+  {
+    pattern: /^\/search\/?$/,
+    getRoute: () => "/search",
   },
 ];
 
@@ -585,10 +630,11 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
 export default AppMarkdownWrapper;
 
 export {
-  getInternalRoute,
-  extractPathFromInternalUrl,
-  transformImageUrl,
-  INTERNAL_ROUTE_PATTERNS,
   INTERNAL_DOMAINS,
-  useHandleLinkPress,
+  INTERNAL_ROUTE_PATTERNS,
+  extractPathFromInternalUrl,
+  getInternalRoute,
+  transformImageUrl,
+  useHandleLinkPress
 };
+

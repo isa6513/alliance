@@ -1,3 +1,13 @@
+import { SearchItemDto, searchSaveSelected } from "@alliance/shared/client";
+import {
+  getSearchCategoriesWithItems,
+  getSearchSecondaryText,
+  SEARCH_CATEGORY_NAMES,
+  useSearchResults,
+} from "@alliance/shared/lib/search";
+import { cn } from "@alliance/shared/styles/util";
+import { RelativePathString, router } from "expo-router";
+import { Search } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Image,
@@ -7,21 +17,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { RelativePathString, router } from "expo-router";
+import { getInternalRoute } from "../../components/AppMarkdownWrapper";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
-import { Search } from "lucide-react-native";
-import { searchSaveSelected, SearchItemDto } from "@alliance/shared/client";
-import {
-  getSearchCategoriesWithItems,
-  getSearchSecondaryText,
-  SEARCH_CATEGORY_NAMES,
-  useSearchResults,
-} from "@alliance/shared/lib/search";
-import Text, { FontWeight } from "../../components/system/Text";
 import ProfileImage from "../../components/ProfileImage";
-import { getImageSource } from "../../lib/config";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
-import { cn } from "@alliance/shared/styles/util";
+import Text, { FontWeight } from "../../components/system/Text";
+import { getImageSource } from "../../lib/config";
 
 const resolveItemImage = (image?: string): string | null => {
   if (!image) return null;
@@ -33,26 +34,6 @@ const resolveItemImage = (image?: string): string | null => {
     return image;
   }
   return getImageSource(image);
-};
-
-const splitPathAndSuffix = (url: string) => {
-  const queryIndex = url.indexOf("?");
-  const hashIndex = url.indexOf("#");
-  const suffixStart =
-    queryIndex >= 0 && hashIndex >= 0
-      ? Math.min(queryIndex, hashIndex)
-      : queryIndex >= 0
-        ? queryIndex
-        : hashIndex;
-  const path = suffixStart >= 0 ? url.slice(0, suffixStart) : url;
-  const suffix = suffixStart >= 0 ? url.slice(suffixStart) : "";
-  return { path, suffix };
-};
-
-const getInternalRoute = (location: string) => {
-  if (!location.startsWith("/")) return null;
-  const { path, suffix } = splitPathAndSuffix(location);
-  return `${path}${suffix}`;
 };
 
 const openWebLocation = (location: string) => {
@@ -86,7 +67,7 @@ export default function SearchScreen() {
       setSelectedItem(null);
 
       const internalRoute = getInternalRoute(item.webAppLocation);
-      if (internalRoute && !internalRoute.startsWith("/invite")) {
+      if (internalRoute) {
         router.push(internalRoute as RelativePathString);
         return;
       }
