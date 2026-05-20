@@ -23,10 +23,13 @@ import {
 } from "@alliance/shared/client";
 import {
   applyDefaultValues,
+  collectManualSourceFormIds,
+  computeActiveUserKey,
   computeFormStorageKey,
   filterAnswersByFieldIds,
   getListSubFieldErrors,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
+  resolveDisplayBlockForUser,
   resolveFieldDefaultValue,
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
@@ -190,31 +193,20 @@ const FormRenderer = ({
     formId: id,
     instanceId: persistKey ?? undefined,
   });
+  const activeUserKey = useMemo(
+    () => computeActiveUserKey(user?.id, userId),
+    [user?.id, userId],
+  );
   const randomizationKey = useMemo(() => {
     const base = `form:${id}`;
-    const normalizedUserId =
-      user?.id !== undefined && user?.id !== null ? user.id : userId;
-    if (
-      normalizedUserId !== undefined &&
-      normalizedUserId !== null &&
-      normalizedUserId !== ""
-    ) {
-      return `${base}:user:${String(normalizedUserId)}`;
+    if (activeUserKey) {
+      return `${base}:user:${activeUserKey}`;
     }
     if (persistKey !== undefined && persistKey !== null && persistKey !== "") {
       return `${base}:persist:${String(persistKey)}`;
     }
     return base;
-  }, [id, user?.id, userId, persistKey]);
-  const activeUserKey = useMemo(() => {
-    const normalizedUserId =
-      user?.id !== undefined && user?.id !== null ? user.id : userId;
-    if (normalizedUserId === undefined || normalizedUserId === null) {
-      return undefined;
-    }
-    const asString = String(normalizedUserId);
-    return asString.length > 0 ? asString : undefined;
-  }, [user?.id, userId]);
+  }, [id, activeUserKey, persistKey]);
 
   const [searchParams] = useSearchParams();
 
@@ -548,6 +540,9 @@ const FormRenderer = ({
           if (block.sourceFormId) {
             ids.add(block.sourceFormId);
           }
+          for (const id of collectManualSourceFormIds(block)) {
+            ids.add(id);
+          }
         }
         // Also collect from list fields with prefillFromPreviousAnswer
         if ("label" in element && (element as AnyField).kind === "list") {
@@ -800,27 +795,6 @@ const FormRenderer = ({
       visibilityValidatorResults,
       previousAnswerData,
     ],
-  );
-
-  const resolveDisplayBlockForUser = useCallback<
-    <T extends DisplayBlock>(candidate: T) => T
-  >(
-    (candidate) => {
-      if (!candidate.manualPerUser || !activeUserKey) {
-        return candidate;
-      }
-      const manualContent = candidate.manualUserContent?.[activeUserKey];
-      if (!manualContent) {
-        return candidate;
-      }
-      return {
-        ...candidate,
-        ...manualContent,
-        manualPerUser: candidate.manualPerUser,
-        manualUserContent: candidate.manualUserContent,
-      };
-    },
-    [activeUserKey],
   );
 
   const validateFieldValue = useCallback(
@@ -1565,13 +1539,16 @@ const FormRenderer = ({
       }
       return renderField(element as AnyField, index);
     }
-    const resolvedBlock = resolveDisplayBlockForUser(element as DisplayBlock);
+    const resolvedBlock = resolveDisplayBlockForUser(
+      element as DisplayBlock,
+      activeUserKey,
+    );
     if (!isElementCurrentlyVisible(resolvedBlock)) {
       return null;
     }
     return (
       <RenderDisplayBlock
-        key={index}
+        key={resolvedBlock.id ?? `block-${index}`}
         block={resolvedBlock}
         previousAnswerData={previousAnswerData}
         previousAnswerSchemas={previousAnswerSchemas}

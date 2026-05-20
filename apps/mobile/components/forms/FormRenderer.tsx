@@ -21,9 +21,12 @@ import {
 } from "@alliance/shared/client";
 import {
   applyDefaultValues,
+  collectManualSourceFormIds,
+  computeActiveUserKey,
   computeFormStorageKey,
   filterAnswersByFieldIds,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
+  resolveDisplayBlockForUser,
   resolveFieldDefaultValue,
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
@@ -312,22 +315,21 @@ const FormRenderer = ({
     [id, persistKey],
   );
 
+  const activeUserKey = useMemo(
+    () => computeActiveUserKey(user?.id, userId),
+    [user?.id, userId],
+  );
+
   const randomizationKey = useMemo(() => {
     const base = `form:${id}`;
-    const normalizedUserId =
-      user?.id !== undefined && user?.id !== null ? user.id : userId;
-    if (
-      normalizedUserId !== undefined &&
-      normalizedUserId !== null &&
-      normalizedUserId !== ""
-    ) {
-      return `${base}:user:${String(normalizedUserId)}`;
+    if (activeUserKey) {
+      return `${base}:user:${activeUserKey}`;
     }
     if (persistKey !== undefined && persistKey !== null && persistKey !== "") {
       return `${base}:persist:${String(persistKey)}`;
     }
     return base;
-  }, [id, user?.id, userId, persistKey]);
+  }, [id, activeUserKey, persistKey]);
 
   const { fieldLookup, defaultValueMap } = useMemo(() => {
     const lookup = new Map<string, AnyField>();
@@ -360,6 +362,9 @@ const FormRenderer = ({
           const block = element as PreviousAnswerBlock;
           if (block.sourceFormId) {
             ids.add(block.sourceFormId);
+          }
+          for (const id of collectManualSourceFormIds(block)) {
+            ids.add(id);
           }
         }
       }
@@ -1066,16 +1071,30 @@ const FormRenderer = ({
   const isFirstPage = currentPageIndex === 0;
   const isLastPage = currentPageIndex === maxPageIndex;
 
-  const pageFields = currentPage?.fields ?? [];
+  const pageFields = currentPage?.fields;
+  const resolvedPageElements = useMemo(
+    () =>
+      (pageFields ?? []).map((element) =>
+        "label" in element
+          ? element
+          : resolveDisplayBlockForUser(element as DisplayBlock, activeUserKey),
+      ),
+    [pageFields, activeUserKey],
+  );
+  const pageElementVisible = useMemo(
+    () =>
+      resolvedPageElements.map((element) => isElementCurrentlyVisible(element)),
+    [resolvedPageElements, isElementCurrentlyVisible],
+  );
   const hasRenderedNeighborAbove = (idx: number): boolean => {
     for (let j = idx - 1; j >= 0; j--) {
-      if (isElementCurrentlyVisible(pageFields[j])) return true;
+      if (pageElementVisible[j]) return true;
     }
     return false;
   };
   const hasRenderedNeighborBelow = (idx: number): boolean => {
-    for (let j = idx + 1; j < pageFields.length; j++) {
-      if (isElementCurrentlyVisible(pageFields[j])) return true;
+    for (let j = idx + 1; j < pageElementVisible.length; j++) {
+      if (pageElementVisible[j]) return true;
     }
     return false;
   };
@@ -1084,11 +1103,15 @@ const FormRenderer = ({
     <View className="flex flex-col gap-y-8">
       <View className="gap-y-4">
         {currentPage?.fields.map((element, idx) => {
+          if (!pageElementVisible[idx]) {
+            return null;
+          }
           if (!("label" in element)) {
+            const resolvedBlock = resolvedPageElements[idx] as DisplayBlock;
             return (
-              <View key={`block-${idx}`}>
+              <View key={resolvedBlock.id ?? `block-${idx}`}>
                 <RenderDisplayBlockMobile
-                  block={element as DisplayBlock}
+                  block={resolvedBlock}
                   previousAnswerData={previousAnswerData}
                   previousAnswerSchemas={previousAnswerSchemas}
                   hasRenderedNeighborAbove={hasRenderedNeighborAbove(idx)}
@@ -1099,9 +1122,6 @@ const FormRenderer = ({
             );
           }
           const field = element as AnyField;
-          if (!isElementCurrentlyVisible(field)) {
-            return null;
-          }
           return (
             <View
               key={field.id}

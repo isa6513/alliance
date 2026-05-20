@@ -121,10 +121,11 @@ export type DisplayBlock =
   | CopyTextBlock
   | PreviousAnswerBlock;
 
-export type ManualDisplayBlockContent = Omit<
-  DisplayBlock,
-  "manualPerUser" | "manualUserContent"
->;
+export type ManualDisplayBlockContent = DisplayBlock extends infer B
+  ? B extends DisplayBlock
+    ? Omit<B, "kind" | "id" | "manualPerUser" | "manualUserContent">
+    : never
+  : never;
 
 export type ManualImportField = "text" | "html";
 

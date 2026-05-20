@@ -1,3 +1,4 @@
+import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
 import {
   type AnyField,
@@ -9,9 +10,8 @@ import {
   type OutputFieldBlock,
   type RangeField,
 } from "@alliance/common/forms/form-schema";
-import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
-import { parseTimeToMinutes } from "@alliance/shared/forms/timeUtils";
 import { evaluateVisibilityFormula } from "@alliance/common/forms/visible-if-formula";
+import { parseTimeToMinutes } from "@alliance/shared/forms/timeUtils";
 
 export const FALLBACK_TIMEZONE = "America/Los_Angeles";
 const DEFAULT_RANGE_OPTION_COUNT = 10;
@@ -187,6 +187,65 @@ export function applyDefaultValues(
   }
 
   return base ? base : {};
+}
+
+/**
+ * Normalize a user id (or fallback id) into the string key used by
+ * `DisplayBlock.manualUserContent`. Returns undefined when neither id resolves
+ * to a non-empty value.
+ */
+export function computeActiveUserKey(
+  primaryUserId: string | number | null | undefined,
+  fallbackUserId: string | number | null | undefined,
+): string | undefined {
+  const normalizedUserId =
+    primaryUserId !== undefined && primaryUserId !== null
+      ? primaryUserId
+      : fallbackUserId;
+  if (normalizedUserId === undefined || normalizedUserId === null) {
+    return undefined;
+  }
+  const asString = String(normalizedUserId);
+  return asString.length > 0 ? asString : undefined;
+}
+
+/**
+ * Collect any `sourceFormId` overrides stored in a block's per-user manual
+ * content. Used to prefetch previous-answer schemas/data for users other than
+ * the active viewer (e.g. admin previewing different users).
+ */
+export function collectManualSourceFormIds(block: DisplayBlock): number[] {
+  if (!block.manualPerUser || !block.manualUserContent) return [];
+  const ids: number[] = [];
+  for (const content of Object.values(block.manualUserContent)) {
+    const sourceFormId = (content as { sourceFormId?: number }).sourceFormId;
+    if (typeof sourceFormId === "number") ids.push(sourceFormId);
+  }
+  return ids;
+}
+
+/**
+ * Apply a `manualPerUser` display block's per-user override to the candidate.
+ */
+export function resolveDisplayBlockForUser<T extends DisplayBlock>(
+  candidate: T,
+  activeUserKey: string | undefined,
+): T {
+  if (!candidate.manualPerUser || !activeUserKey) {
+    return candidate;
+  }
+  const manualContent = candidate.manualUserContent?.[activeUserKey];
+  if (!manualContent) {
+    return candidate;
+  }
+  return {
+    ...candidate,
+    ...manualContent,
+    kind: candidate.kind,
+    id: candidate.id,
+    manualPerUser: candidate.manualPerUser,
+    manualUserContent: candidate.manualUserContent,
+  };
 }
 
 export function filterAnswersByFieldIds(

@@ -10,6 +10,7 @@ import type {
 } from "@alliance/common/forms/form-schema";
 import type { UserDto } from "@alliance/shared/client";
 import { userList } from "@alliance/shared/client";
+import { resolveDisplayBlockForUser } from "@alliance/shared/formrenderer";
 import { cn } from "@alliance/shared/styles/util";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { CheckCircle2, Circle } from "lucide-react";
@@ -39,14 +40,23 @@ const stripManualFields = (
   return rest;
 };
 
+const stripIdentityFields = <T extends Record<string, unknown>>(
+  value: T,
+): Omit<T, "kind" | "id"> => {
+  const { kind: _kind, id: _id, ...rest } = value;
+  return rest;
+};
+
 const baseManualContentFromBlock = (
   block: DisplayBlock,
 ): ManualDisplayBlockContent =>
-  stripManualFields({
-    ...block,
-    manualPerUser: undefined,
-    manualUserContent: undefined,
-  }) as ManualDisplayBlockContent;
+  stripIdentityFields(
+    stripManualFields({
+      ...block,
+      manualPerUser: undefined,
+      manualUserContent: undefined,
+    }) as Record<string, unknown>,
+  ) as ManualDisplayBlockContent;
 
 type DisplayBlockChildRenderProps<T extends DisplayBlock> = {
   block: T;
@@ -264,18 +274,10 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
   const effectiveBlock = useMemo(() => {
     if (!block) return block;
     if (manualPerUserEnabled && activeManualUserId) {
-      const manualContent = manualUserContent[activeManualUserId];
-      if (manualContent) {
-        return {
-          ...block,
-          ...manualContent,
-          manualPerUser: block.manualPerUser,
-          manualUserContent: block.manualUserContent,
-        } as T;
-      }
+      return resolveDisplayBlockForUser(block, activeManualUserId);
     }
     return block;
-  }, [activeManualUserId, block, manualPerUserEnabled, manualUserContent]);
+  }, [activeManualUserId, block, manualPerUserEnabled]);
 
   const hasContentForActiveUser = Boolean(
     activeManualUserId && manualUserContent[activeManualUserId],
@@ -384,12 +386,10 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
 
         const nextManualContent: Record<string, ManualDisplayBlockContent> = {
           ...manualUserContent,
-          [activeManualUserId]: {
+          [activeManualUserId]: stripIdentityFields({
             ...existingContent,
-            ...stripManualFields(updates),
-            kind: existingContent.kind ?? block.kind,
-            id: block.id,
-          },
+            ...(stripManualFields(updates) as Record<string, unknown>),
+          }) as ManualDisplayBlockContent,
         };
 
         onUpdate({
@@ -459,12 +459,10 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
       ) {
         overwriteCount++;
       }
-      nextManualContent[userId] = {
+      nextManualContent[userId] = stripIdentityFields({
         ...existingContent,
         [manualImportField]: value,
-        kind: existingContent.kind ?? block.kind,
-        id: block.id,
-      } as ManualDisplayBlockContent;
+      }) as ManualDisplayBlockContent;
       importedCount++;
     }
 
