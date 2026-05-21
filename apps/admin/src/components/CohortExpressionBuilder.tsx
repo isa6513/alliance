@@ -1,4 +1,32 @@
 /* eslint-disable react/prop-types */
+import type { AnyField, FormSchema } from "@alliance/common/forms/form-schema";
+import { isQuestionField } from "@alliance/common/forms/form-schema";
+import type { FormDto, TagDto } from "@alliance/shared/client";
+import { actionsFindOneAdmin, tasksGetForm } from "@alliance/shared/client";
+import type {
+  AndOperator,
+  BooleanOperator,
+  CohortExpression,
+  CompletedActionCondition,
+  FormFieldValueCondition,
+  InProgressActionCondition,
+  LeafCondition,
+  ManualCondition,
+  OrOperator,
+  TagCondition,
+} from "@alliance/shared/cohort-expression.types";
+import { cn } from "@alliance/shared/styles/util";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import type { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import UserSelect from "@alliance/sharedweb/ui/UserSelect";
+import {
+  ClipboardPaste,
+  Copy,
+  CopyMinus,
+  EllipsisVertical,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import React, {
   useCallback,
   useEffect,
@@ -6,34 +34,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type { TagDto, FormDto } from "@alliance/shared/client";
-import { tasksGetForm, actionsFindOneAdmin } from "@alliance/shared/client";
-import type { AnyField, FormSchema } from "@alliance/common/forms/form-schema";
-import type { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
-import UserSelect from "@alliance/sharedweb/ui/UserSelect";
-import { cn } from "@alliance/shared/styles/util";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import {
-  Plus,
-  Trash2,
-  EllipsisVertical,
-  Copy,
-  ClipboardPaste,
-  CopyMinus,
-} from "lucide-react";
 import CohortVisualization from "./CohortVisualization";
-import type {
-  CohortExpression,
-  LeafCondition,
-  BooleanOperator,
-  TagCondition,
-  ManualCondition,
-  CompletedActionCondition,
-  InProgressActionCondition,
-  FormFieldValueCondition,
-  AndOperator,
-  OrOperator,
-} from "@alliance/shared/cohort-expression.types";
 
 export type { CohortExpression } from "@alliance/shared/cohort-expression.types";
 
@@ -163,8 +164,8 @@ const FormFieldEditor: React.FC<{
         const fields: AnyField[] = [];
         for (const page of schema.pages ?? []) {
           for (const element of page.fields ?? []) {
-            if ("label" in element) {
-              fields.push(element as AnyField);
+            if (isQuestionField(element)) {
+              fields.push(element);
             }
           }
         }
@@ -289,16 +290,16 @@ const ExpressionNodeEditor: React.FC<{
         isSelected
           ? "border-blue-400 ring-1 ring-blue-200"
           : depth === 0
-          ? "border-gray-300"
-          : "border-gray-200",
-        depth > 0 && "ml-4"
+            ? "border-gray-300"
+            : "border-gray-200",
+        depth > 0 && "ml-4",
       )}
     >
       <div
         className={cn(
           "flex items-center gap-2 px-3 py-2 rounded-t-md",
           isSelected ? "bg-blue-50" : "bg-gray-50",
-          onSelect && "cursor-pointer"
+          onSelect && "cursor-pointer",
         )}
         onClick={(e) => {
           if (onSelect && !(e.target instanceof HTMLSelectElement)) {
@@ -508,7 +509,7 @@ const BooleanOperatorEditor: React.FC<{
 // --- Main Component ---
 
 const CohortExpressionBuilder: React.FC<CohortExpressionBuilderProps> = (
-  props
+  props,
 ) => {
   const {
     value,
@@ -592,7 +593,7 @@ const CohortExpressionBuilder: React.FC<CohortExpressionBuilderProps> = (
       .then((res) => {
         if (!cancelled && res.data) {
           setCompareExpression(
-            (res.data.cohortExpression as unknown as CohortExpression) ?? null
+            (res.data.cohortExpression as unknown as CohortExpression) ?? null,
           );
         }
       })
@@ -609,7 +610,7 @@ const CohortExpressionBuilder: React.FC<CohortExpressionBuilderProps> = (
       onChange(expr);
       setSelectedSubExpr(null);
     },
-    [onChange]
+    [onChange],
   );
 
   const handleClear = useCallback(() => {
@@ -751,7 +752,7 @@ const CohortExpressionBuilder: React.FC<CohortExpressionBuilderProps> = (
             value={compareActionId ?? ""}
             onChange={(e) => {
               setCompareActionId(
-                e.target.value ? parseInt(e.target.value) : null
+                e.target.value ? parseInt(e.target.value) : null,
               );
               setSelectedSubExpr(null);
             }}

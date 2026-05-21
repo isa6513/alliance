@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
 import type {
   AnyField,
   FieldKind,
   FormSchema,
   ListField,
 } from "@alliance/common/forms/form-schema";
-import { tasksListForms, tasksGetForm } from "@alliance/shared/client";
-import { FieldLabelEditor } from "./FieldLabelEditor";
-import { FieldWrapper } from "./FieldWrapper";
-import type { BaseFieldProps } from "./types";
+import { isQuestionField } from "@alliance/common/forms/form-schema";
+import { tasksGetForm, tasksListForms } from "@alliance/shared/client";
+import { useEffect, useState } from "react";
 import { EditableCheckboxField } from "./EditableCheckboxField";
 import { EditableChoiceField } from "./EditableChoiceField";
 import { EditableCityField } from "./EditableCityField";
@@ -22,6 +20,9 @@ import { EditableTextField } from "./EditableTextField";
 import { EditableTextareaField } from "./EditableTextareaField";
 import { EditableTimeField } from "./EditableTimeField";
 import { EditableTimezoneField } from "./EditableTimezoneField";
+import { FieldLabelEditor } from "./FieldLabelEditor";
+import { FieldWrapper } from "./FieldWrapper";
+import type { BaseFieldProps } from "./types";
 
 type FormListItem = { id: number; title: string };
 
@@ -54,6 +55,7 @@ function createDefaultSubField(parentId: string, kind: SubFieldKind): AnyField {
     .slice(2, 9)}`;
   const base = {
     id,
+    type: "input" as const,
     kind,
     label: `${kind.charAt(0).toUpperCase() + kind.slice(1)}`,
     required: false,
@@ -222,8 +224,8 @@ export function EditableListField({
           const fields: AnyField[] = [];
           for (const page of schema.pages ?? []) {
             for (const element of page.fields ?? []) {
-              if ("label" in element) {
-                fields.push(element as AnyField);
+              if (isQuestionField(element)) {
+                fields.push(element);
               }
             }
           }

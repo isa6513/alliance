@@ -2,10 +2,10 @@ import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import type {
   BigLinkIcon,
   DisplayBlock,
-  PreviousAnswerBlock,
 } from "@alliance/common/forms/display-blocks";
 import {
   collectSourceFormIds,
+  isQuestionField,
   type AnyField,
   type FormSchema,
   type FormValue,
@@ -356,12 +356,11 @@ const FormRenderer = ({
 
     for (const page of schema.pages) {
       for (const element of page.fields) {
-        if ("label" in element) {
-          const field = element as AnyField;
-          lookup.set(field.id, field);
-          const defaultValue = resolveFieldDefaultValue(field);
+        if (isQuestionField(element)) {
+          lookup.set(element.id, element);
+          const defaultValue = resolveFieldDefaultValue(element);
           if (defaultValue !== undefined) {
-            defaults.set(field.id, defaultValue);
+            defaults.set(element.id, defaultValue);
           }
         }
       }
@@ -379,15 +378,11 @@ const FormRenderer = ({
     const ids = new Set<number>();
     for (const page of schema.pages) {
       for (const element of page.fields) {
-        if (
-          !("label" in element) &&
-          (element as PreviousAnswerBlock).kind === "previousAnswer"
-        ) {
-          const block = element as PreviousAnswerBlock;
-          if (block.sourceFormId) {
-            ids.add(block.sourceFormId);
+        if (!isQuestionField(element) && element.kind === "previousAnswer") {
+          if (element.sourceFormId) {
+            ids.add(element.sourceFormId);
           }
-          for (const id of collectManualSourceFormIds(block)) {
+          for (const id of collectManualSourceFormIds(element)) {
             ids.add(id);
           }
         }
@@ -486,12 +481,11 @@ const FormRenderer = ({
     const defaults = new Map<string, boolean>();
     for (const page of schema.pages ?? []) {
       for (const element of page.fields ?? []) {
-        if ("label" in element) {
-          const field = element as AnyField;
-          if (field.output?.output) {
+        if (isQuestionField(element)) {
+          if (element.output?.output) {
             defaults.set(
-              field.id,
-              field.output.privateByDefault ? false : userDefaultPublic,
+              element.id,
+              element.output.privateByDefault ? false : userDefaultPublic,
             );
           }
         }
@@ -700,10 +694,9 @@ const FormRenderer = ({
     for (const page of schema.pages) {
       for (const element of page.fields) {
         collectFromVisibleIfFormula(element.visibleIfFormula);
-        if ("label" in element && (element as AnyField).kind === "list") {
-          const listField = element as AnyField & { fields?: AnyField[] };
-          if (Array.isArray(listField.fields)) {
-            for (const sub of listField.fields) {
+        if (isQuestionField(element) && element.kind === "list") {
+          if (Array.isArray(element.fields)) {
+            for (const sub of element.fields) {
               collectFromVisibleIfFormula(sub.visibleIfFormula);
             }
           }
@@ -876,9 +869,7 @@ const FormRenderer = ({
       }
 
       const updates: Record<string, string | null> = {};
-      const fieldsOnPage = page.fields.filter(
-        (element): element is AnyField => "label" in element,
-      );
+      const fieldsOnPage = page.fields.filter(isQuestionField);
       const visibleFields = fieldsOnPage.filter((field) =>
         isElementCurrentlyVisible(field),
       );
@@ -1099,9 +1090,9 @@ const FormRenderer = ({
   const resolvedPageElements = useMemo(
     () =>
       (pageFields ?? []).map((element) =>
-        "label" in element
+        isQuestionField(element)
           ? element
-          : resolveDisplayBlockForUser(element as DisplayBlock, activeUserKey),
+          : resolveDisplayBlockForUser(element, activeUserKey),
       ),
     [pageFields, activeUserKey],
   );
@@ -1143,7 +1134,7 @@ const FormRenderer = ({
           if (!pageElementVisible[idx]) {
             return null;
           }
-          if (!("label" in element)) {
+          if (!isQuestionField(element)) {
             const resolvedBlock = resolvedPageElements[idx] as DisplayBlock;
             return (
               <View key={resolvedBlock.id ?? `block-${idx}`}>

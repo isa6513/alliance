@@ -5,6 +5,7 @@ import type {
   FormValue,
   ListField,
 } from "@alliance/common/forms/form-schema";
+import { isQuestionField } from "@alliance/common/forms/form-schema";
 
 export function findFieldInSchema(
   schema: FormSchema,
@@ -12,10 +13,9 @@ export function findFieldInSchema(
 ): AnyField | undefined {
   for (const page of schema.pages) {
     for (const element of page.fields) {
-      if ("label" in element) {
-        const field = element as AnyField;
-        if (field.id === fieldId) {
-          return field;
+      if (isQuestionField(element)) {
+        if (element.id === fieldId) {
+          return element;
         }
       }
     }

@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import type {
   DisplayBlock,
   DisplayKind,
@@ -11,7 +10,11 @@ import type {
   OutputFieldBlock,
   OutputViewSchema,
 } from "@alliance/common/forms/form-schema";
+import { cn } from "@alliance/shared/styles/util";
 import OutputRenderer from "@alliance/sharedweb/forms/OutputRenderer";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import {
   EditableDividerBlock,
   EditableHeaderBlock,
@@ -23,9 +26,6 @@ import {
 } from "./display-blocks";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { EditableOutputFieldBlock } from "./output-builder/EditableOutputFieldBlock";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { cn } from "@alliance/shared/styles/util";
-import { X } from "lucide-react";
 
 const DISPLAY_BLOCK_KINDS = [
   "header",
@@ -44,28 +44,55 @@ const createDisplayBlock = (kind: DisplayKind): DisplayBlock => {
     .slice(2, 6)}`;
   switch (kind) {
     case "header":
-      return { kind, id: blockId, text: "Header", level: 2 };
+      return {
+        type: "display" as const,
+        kind,
+        id: blockId,
+        text: "Header",
+        level: 2,
+      };
     case "text":
-      return { kind, id: blockId, text: "Text content" };
+      return {
+        type: "display" as const,
+        kind,
+        id: blockId,
+        text: "Text content",
+      };
     case "label":
-      return { kind, id: blockId, text: "Label" };
+      return { type: "display" as const, kind, id: blockId, text: "Label" };
     case "divider":
-      return { kind, id: blockId, thickness: "thin" };
+      return { type: "display" as const, kind, id: blockId, thickness: "thin" };
     case "spacer":
-      return { kind, id: blockId, size: "md" };
+      return { type: "display" as const, kind, id: blockId, size: "md" };
     case "html":
-      return { kind, id: blockId, html: "<p>Custom HTML</p>" };
+      return {
+        type: "display" as const,
+        kind,
+        id: blockId,
+        html: "<p>Custom HTML</p>",
+      };
     case "image":
       return {
+        type: "display" as const,
         kind,
         id: blockId,
         alt: "Image",
         src: "https://via.placeholder.com/400x200",
       };
     case "quote":
-      return { kind, id: blockId, text: "Quote text" };
+      return {
+        type: "display" as const,
+        kind,
+        id: blockId,
+        text: "Quote text",
+      };
     default:
-      return { kind: "text", id: blockId, text: "Text content" };
+      return {
+        type: "display",
+        kind: "text",
+        id: blockId,
+        text: "Text content",
+      };
   }
 };
 
@@ -73,10 +100,9 @@ const collectOutputFields = (schema: FormSchema): AnyField[] => {
   const result: AnyField[] = [];
   schema.pages.forEach((page) => {
     page.fields.forEach((field) => {
-      if ("kind" in field && (field as AnyField).label !== undefined) {
-        const typedField = field as AnyField;
-        if (typedField.output?.output) {
-          result.push(typedField);
+      if (field.type === "input") {
+        if (field.output?.output) {
+          result.push(field);
         }
       }
     });

@@ -1,4 +1,5 @@
 import type { AnyField, FormSchema } from "@alliance/common/forms/form-schema";
+import { isQuestionField } from "@alliance/common/forms/form-schema";
 import {
   FIRST_NAME_TOKEN,
   FULL_NAME_TOKEN,
@@ -61,7 +62,7 @@ const collectShareableFields = (schema: FormSchema): ShareableField[] => {
   const fields: ShareableField[] = [];
   schema.pages.forEach((page, pageIndex) => {
     page.fields.forEach((field) => {
-      if (!("label" in field) || !field.label) {
+      if (!isQuestionField(field) || !field.label) {
         return;
       }
       fields.push({

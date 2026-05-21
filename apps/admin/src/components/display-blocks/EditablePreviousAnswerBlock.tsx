@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
 import type { PreviousAnswerBlock } from "@alliance/common/forms/display-blocks";
-import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
-import type { BaseDisplayBlockProps } from "./types";
-import { tasksListForms, tasksGetForm } from "@alliance/shared/client";
 import type {
   AnyField,
   FormSchema,
   ListField,
 } from "@alliance/common/forms/form-schema";
+import { isQuestionField } from "@alliance/common/forms/form-schema";
+import { tasksGetForm, tasksListForms } from "@alliance/shared/client";
+import { useEffect, useState } from "react";
+import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
+import type { BaseDisplayBlockProps } from "./types";
 
 type FormListItem = { id: number; title: string };
 
@@ -64,8 +65,8 @@ export function EditablePreviousAnswerBlock({
           const fields: AnyField[] = [];
           for (const page of schema.pages ?? []) {
             for (const element of page.fields ?? []) {
-              if ("label" in element) {
-                fields.push(element as AnyField);
+              if (isQuestionField(element)) {
+                fields.push(element);
               }
             }
           }

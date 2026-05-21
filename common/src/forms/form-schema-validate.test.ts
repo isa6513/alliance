@@ -21,6 +21,7 @@ const textField = (
   overrides: Partial<TextField> = {},
 ): TextField => ({
   id,
+  type: "input",
   kind: "text",
   label: id,
   ...overrides,
@@ -31,6 +32,7 @@ const labelBlock = (
   overrides: Partial<LabelBlock> = {},
 ): LabelBlock => ({
   id,
+  type: "display",
   kind: "label",
   text: id,
   ...overrides,
@@ -368,6 +370,7 @@ describe("validateFormSchema", () => {
   it("recurses into list sub-fields", () => {
     const nested: ListField = {
       id: "list1",
+      type: "input",
       kind: "list",
       label: "list1",
       fields: [
@@ -458,6 +461,7 @@ describe("validateFormSchema", () => {
       outputViews: [
         view("v1", [
           {
+            type: "display",
             kind: "label",
             text: "no-id",
             visibleIfFormula: formula({

@@ -16,6 +16,7 @@ export type DisplayKind =
   | "previousAnswer"; // show a user's answer from another form
 
 interface BaseBlock {
+  type: "display";
   kind: DisplayKind;
   id?: string;
   visibleIfFormula?: VisibleIfFormula;
@@ -123,7 +124,7 @@ export type DisplayBlock =
 
 export type ManualDisplayBlockContent = DisplayBlock extends infer B
   ? B extends DisplayBlock
-    ? Omit<B, "kind" | "id" | "manualPerUser" | "manualUserContent">
+    ? Omit<B, "type" | "kind" | "id" | "manualPerUser" | "manualUserContent">
     : never
   : never;
 

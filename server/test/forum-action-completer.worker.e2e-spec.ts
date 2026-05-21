@@ -149,6 +149,7 @@ describe('ForumActionCompleterWorker (e2e)', () => {
           fields: [
             {
               id: 'reply',
+              type: 'input',
               kind: 'text',
               label: 'Reply',
               visibleIfFormula: {

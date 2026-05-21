@@ -1,3 +1,4 @@
+import { isQuestionField } from "@alliance/common/forms/form-schema";
 import type { ActionSuiteDto, TagDto } from "@alliance/shared/client";
 import {
   ActionDto,
@@ -8,8 +9,8 @@ import {
   actionsFindOneAdmin,
   actionsGetIncompleteUsers,
   actionsRemove,
-  actionsSuites,
   actionsShareUrlStats,
+  actionsSuites,
   actionsUnarchive,
   actionsUpdate,
   analyticsGetActionStatsById,
@@ -24,24 +25,26 @@ import {
   userGetTags,
   userMembers,
 } from "@alliance/shared/client";
-import type { CohortExpression } from "@alliance/shared/cohort-expression.types";
 import type {
   ActionStatsWithOnboardingDto,
   ActionStatus,
   ProfileDto,
   ShareUrlStatsDto,
 } from "@alliance/shared/client/types.gen";
-import FormResponseStatistics from "../components/FormResponseStatistics";
-import type { FormResponseFilter, FormWithSchema } from "./FormResponses";
+import type { CohortExpression } from "@alliance/shared/cohort-expression.types";
+import { clipboardCopy } from "@alliance/shared/lib/copy";
+import { CardStyle } from "@alliance/shared/styles/card";
+import { cn } from "@alliance/shared/styles/util";
 import { getApiUrl, getBaseUrl } from "@alliance/sharedweb/lib/config";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import Dropdown from "@alliance/sharedweb/ui/Dropdown";
 import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
 import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
 import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   CheckIcon,
@@ -49,25 +52,23 @@ import {
   ChevronUp,
   EyeOff,
   ListChecks,
-  Users,
+  TrendingUp,
   UserCheck,
   UserMinus,
+  Users,
   UserX,
-  TrendingUp,
 } from "lucide-react";
-import ActionCompletionCurveChart from "../components/ActionCompletionCurveChart";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
+import ActionCompletionCurveChart from "../components/ActionCompletionCurveChart";
+import ActionFollowUpFormsTab from "../components/ActionFollowUpFormsTab";
 import ActionForm from "../components/ActionForm";
+import ActionFormVariantsTab from "../components/ActionFormVariantsTab";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import EventManagementTab from "../components/EventManagementTab";
 import { FormBuilder } from "../components/FormBuilder";
-import ActionFollowUpFormsTab from "../components/ActionFollowUpFormsTab";
-import ActionFormVariantsTab from "../components/ActionFormVariantsTab";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import { CardStyle } from "@alliance/shared/styles/card";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import { cn } from "@alliance/shared/styles/util";
-import { clipboardCopy } from "@alliance/shared/lib/copy";
+import FormResponseStatistics from "../components/FormResponseStatistics";
+import type { FormResponseFilter, FormWithSchema } from "./FormResponses";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -896,7 +897,7 @@ const ActionDashboard: React.FC = () => {
         formWords += countWords(page.description);
 
         for (const field of page.fields) {
-          if ("label" in field) formWords += countWords(field.label);
+          if (isQuestionField(field)) formWords += countWords(field.label);
           if ("description" in field)
             formWords += countWords(field.description as string);
           if ("options" in field && Array.isArray(field.options)) {

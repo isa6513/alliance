@@ -47,18 +47,21 @@ const sampleSchema: FormSchema = {
       fields: [
         {
           id: 'hero-image',
+          type: 'display',
           kind: 'image',
           alt: 'Hero Image',
           src: 'local-image-key',
         },
         {
           id: 'full-name',
+          type: 'input',
           kind: 'text',
           label: 'Full name',
           required: true,
         },
         {
           id: 'phone-number',
+          type: 'input',
           kind: 'phone',
           label: 'Phone Number',
           autoExtractUserData: true,
@@ -284,6 +287,7 @@ describe('Tasks (e2e)', () => {
           fields: [
             {
               id: 'amount',
+              type: 'input',
               kind: 'number',
               label: 'Amount',
               required: true,
@@ -385,6 +389,7 @@ describe('Tasks (e2e)', () => {
           fields: [
             {
               id: 'private-output',
+              type: 'input',
               kind: 'text',
               label: 'Private output',
               required: true,
@@ -395,6 +400,7 @@ describe('Tasks (e2e)', () => {
             },
             {
               id: 'public-output',
+              type: 'input',
               kind: 'text',
               label: 'Public output',
               required: true,
@@ -404,6 +410,7 @@ describe('Tasks (e2e)', () => {
             },
             {
               id: 'non-output',
+              type: 'input',
               kind: 'text',
               label: 'Non output',
             },
@@ -918,6 +925,7 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'proof',
+                type: 'input',
                 kind: 'text',
                 label: 'Phone proof',
                 required: true,
@@ -1056,6 +1064,7 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'role',
+                type: 'input',
                 kind: 'radio',
                 label: 'Role',
                 required: true,
@@ -1098,12 +1107,14 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'general-question',
+                type: 'input',
                 kind: 'text',
                 label: 'General question',
                 required: true,
               },
               {
                 id: 'organizer-detail',
+                type: 'input',
                 kind: 'text',
                 label: 'Organizer detail',
                 required: true,
@@ -1158,6 +1169,7 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'role',
+                type: 'input',
                 kind: 'radio',
                 label: 'Role',
                 required: true,
@@ -1200,6 +1212,7 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'organizer-detail',
+                type: 'input',
                 kind: 'text',
                 label: 'Organizer detail',
                 required: true,
@@ -1266,6 +1279,7 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'interest',
+                type: 'input',
                 kind: 'radio',
                 label: 'Interest',
                 required: true,
@@ -1308,6 +1322,7 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'tech-question',
+                type: 'input',
                 kind: 'text',
                 label: 'Tech question',
                 required: true,
@@ -1426,24 +1441,28 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'phone-field',
+                type: 'input',
                 kind: 'phone',
                 label: 'Phone Number',
                 autoExtractUserData: true,
               },
               {
                 id: 'timezone-field',
+                type: 'input',
                 kind: 'timezone',
                 label: 'Time Zone',
                 autoExtractUserData: true,
               },
               {
                 id: 'city-field',
+                type: 'input',
                 kind: 'city',
                 label: 'City',
                 autoExtractUserData: true,
               },
               {
                 id: 'share-publicly-field',
+                type: 'input',
                 kind: 'checkbox',
                 label: 'Share my info publicly',
                 autoExtractUserData: { target: 'shareInfoPublicly' },
@@ -1511,6 +1530,7 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'time-field',
+                type: 'input',
                 kind: 'time',
                 label: 'Preferred Reminder Time',
                 autoExtractUserData: true,
@@ -1571,11 +1591,13 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'regular-text',
+                type: 'input',
                 kind: 'text',
                 label: 'Regular Text Field',
               },
               {
                 id: 'regular-checkbox',
+                type: 'input',
                 kind: 'checkbox',
                 label: 'Regular Checkbox',
               },
@@ -1635,6 +1657,7 @@ describe('Tasks (e2e)', () => {
             fields: [
               {
                 id: 'phone-field',
+                type: 'input',
                 kind: 'phone',
                 label: 'Phone',
                 autoExtractUserData: true,

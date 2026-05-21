@@ -12,6 +12,7 @@ import type {
   Page,
   VisibleIfFormula,
 } from "@alliance/common/forms/form-schema";
+import { isQuestionField } from "@alliance/common/forms/form-schema";
 import { validateFormSchema } from "@alliance/common/forms/form-schema-validate";
 import type { UserDto } from "@alliance/shared/client";
 import {
@@ -229,9 +230,6 @@ const findSingleOptionValueChange = (
 
   return null;
 };
-
-const isSchemaFormField = (field: AnyField | DisplayBlock): field is AnyField =>
-  "label" in field;
 
 const mapConditionForOptionValue = (
   condition: Condition,
@@ -502,7 +500,7 @@ export function FormBuilder({
 
     schema.pages.forEach((page) => {
       page.fields.forEach((field) => {
-        if (isSchemaFormField(field)) {
+        if (isQuestionField(field)) {
           if (isDraftValidatorId(field.customValidatorId)) {
             activeDraftIds.add(field.customValidatorId);
           }
@@ -620,6 +618,7 @@ export function FormBuilder({
       case "text":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "text",
           label: "Text Field",
           required: false,
@@ -628,6 +627,7 @@ export function FormBuilder({
       case "textarea":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "textarea",
           label: "Textarea Field",
           required: false,
@@ -637,6 +637,7 @@ export function FormBuilder({
       case "email":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "email",
           label: "Email Field",
           required: false,
@@ -645,6 +646,7 @@ export function FormBuilder({
       case "phone":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "phone",
           label: "Phone Field",
           required: false,
@@ -655,6 +657,7 @@ export function FormBuilder({
       case "number":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "number",
           label: "Number Field",
           required: false,
@@ -663,6 +666,7 @@ export function FormBuilder({
       case "range":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "range",
           label: "Range Field",
           required: false,
@@ -674,6 +678,7 @@ export function FormBuilder({
       case "checkbox":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "checkbox",
           label: "Checkbox Field",
           required: false,
@@ -682,6 +687,7 @@ export function FormBuilder({
       case "radio":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "radio",
           label: "Radio Field",
           required: false,
@@ -691,6 +697,7 @@ export function FormBuilder({
       case "select":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "select",
           label: "Select Field",
           required: false,
@@ -700,6 +707,7 @@ export function FormBuilder({
       case "multiselect":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "multiselect",
           label: "Multi-Select Field",
           required: false,
@@ -709,6 +717,7 @@ export function FormBuilder({
       case "date":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "date",
           label: "Date Field",
           required: false,
@@ -717,6 +726,7 @@ export function FormBuilder({
       case "time":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "time",
           label: "Time Field",
           required: false,
@@ -726,6 +736,7 @@ export function FormBuilder({
       case "timezone":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "timezone",
           label: "Timezone Field",
           required: false,
@@ -736,6 +747,7 @@ export function FormBuilder({
       case "city":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "city",
           label: "City Field",
           required: false,
@@ -746,6 +758,7 @@ export function FormBuilder({
       case "file":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "file",
           label: "File Field",
           required: false,
@@ -754,6 +767,7 @@ export function FormBuilder({
       case "contract":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "contract",
           label: "Contract Field",
           required: false,
@@ -766,6 +780,7 @@ export function FormBuilder({
       case "list":
         newField = {
           id: fieldId,
+          type: "input",
           kind: "list",
           label: "List Field",
           fields: [],
@@ -778,6 +793,7 @@ export function FormBuilder({
         const defaultComponent = customComponentRegistry[0];
         newField = {
           id: fieldId,
+          type: "input",
           kind: "custom",
           label: "Custom Component",
           required: false,
@@ -809,6 +825,7 @@ export function FormBuilder({
     switch (kind) {
       case "header":
         newBlock = {
+          type: "display",
           kind: "header",
           id: blockId,
           text: "Header Text",
@@ -817,22 +834,34 @@ export function FormBuilder({
         break;
       case "text":
         newBlock = {
+          type: "display",
           kind: "text",
           id: blockId,
           text: "Text content",
         };
         break;
       case "label":
-        newBlock = { kind: "label", id: blockId, text: "Label text" };
+        newBlock = {
+          type: "display",
+          kind: "label",
+          id: blockId,
+          text: "Label text",
+        };
         break;
       case "divider":
-        newBlock = { kind: "divider", id: blockId, thickness: "thin" };
+        newBlock = {
+          type: "display",
+          kind: "divider",
+          id: blockId,
+          thickness: "thin",
+        };
         break;
       case "spacer":
-        newBlock = { kind: "spacer", id: blockId, size: "md" };
+        newBlock = { type: "display", kind: "spacer", id: blockId, size: "md" };
         break;
       case "html":
         newBlock = {
+          type: "display",
           kind: "html",
           id: blockId,
           html: "<p>Custom HTML content</p>",
@@ -840,6 +869,7 @@ export function FormBuilder({
         break;
       case "image":
         newBlock = {
+          type: "display",
           kind: "image",
           id: blockId,
           alt: "Image",
@@ -848,16 +878,23 @@ export function FormBuilder({
         break;
       case "video":
         newBlock = {
+          type: "display",
           kind: "video",
           id: blockId,
           src: "",
         };
         break;
       case "quote":
-        newBlock = { kind: "quote", id: blockId, text: "body text" };
+        newBlock = {
+          type: "display",
+          kind: "quote",
+          id: blockId,
+          text: "body text",
+        };
         break;
       case "biglink":
         newBlock = {
+          type: "display",
           kind: "biglink",
           id: blockId,
           text: "Link title",
@@ -866,6 +903,7 @@ export function FormBuilder({
         break;
       case "copytext":
         newBlock = {
+          type: "display",
           kind: "copytext",
           id: blockId,
           text: "",
@@ -873,6 +911,7 @@ export function FormBuilder({
         break;
       case "previousAnswer":
         newBlock = {
+          type: "display",
           kind: "previousAnswer",
           id: blockId,
           sourceFormId: 0,
@@ -922,7 +961,7 @@ export function FormBuilder({
       schemaToSave.pages.forEach((page) => {
         page.fields.forEach((field) => {
           if (
-            isSchemaFormField(field) &&
+            isQuestionField(field) &&
             isDraftValidatorId(field.customValidatorId)
           ) {
             draftIds.add(field.customValidatorId);
@@ -1000,7 +1039,7 @@ export function FormBuilder({
             const nextVisibleIfFormula = mapVisibleIfFormula(
               field.visibleIfFormula,
             );
-            if (isSchemaFormField(field)) {
+            if (isQuestionField(field)) {
               const nextValidatorId = isDraftValidatorId(
                 field.customValidatorId,
               )
@@ -1580,10 +1619,9 @@ export function FormBuilder({
           onDragOver={handleDragOver(index)}
           onDrop={handleDrop(index)}
         >
-          {/* Check if it's a form field (has 'label' property) vs display block */}
-          {"label" in field
+          {isQuestionField(field)
             ? (() => {
-                const formField = field as AnyField;
+                const formField = field;
                 switch (formField.kind) {
                   case "text":
                     return (

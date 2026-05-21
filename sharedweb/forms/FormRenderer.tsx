@@ -1,14 +1,11 @@
 import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
-import type {
-  DisplayBlock,
-  PreviousAnswerBlock,
-} from "@alliance/common/forms/display-blocks";
+import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
 import {
   collectSourceFormIds,
+  isQuestionField,
   type AnyField,
   type FormSchema,
   type FormValue,
-  type ListField,
   type VisibleIfFormula,
 } from "@alliance/common/forms/form-schema";
 import type { UserDto } from "@alliance/shared/client";
@@ -181,16 +178,15 @@ const FormRenderer = ({
 
     for (const page of schema.pages) {
       for (const element of page.fields) {
-        if ("label" in element) {
-          const field = element as AnyField;
-          lookup.set(field.id, field);
-          const defaultValue = resolveFieldDefaultValue(field);
+        if (isQuestionField(element)) {
+          lookup.set(element.id, element);
+          const defaultValue = resolveFieldDefaultValue(element);
           if (defaultValue !== undefined) {
-            defaults.set(field.id, defaultValue);
+            defaults.set(element.id, defaultValue);
           }
           // Include list sub-fields so conditional visibility can reference them
-          if (field.kind === "list" && Array.isArray(field.fields)) {
-            for (const sub of field.fields) {
+          if (element.kind === "list" && Array.isArray(element.fields)) {
+            for (const sub of element.fields) {
               lookup.set(sub.id, sub);
             }
           }
@@ -214,12 +210,11 @@ const FormRenderer = ({
     const defaults = new Map<string, boolean>();
     for (const page of schema.pages ?? []) {
       for (const element of page.fields ?? []) {
-        if ("label" in element) {
-          const field = element as AnyField;
-          if (field.output?.output) {
+        if (isQuestionField(element)) {
+          if (element.output?.output) {
             defaults.set(
-              field.id,
-              field.output.privateByDefault ? false : userDefaultPublic,
+              element.id,
+              element.output.privateByDefault ? false : userDefaultPublic,
             );
           }
         }
@@ -389,10 +384,9 @@ const FormRenderer = ({
     for (const page of schema.pages) {
       for (const element of page.fields) {
         collectFromVisibleIfFormula(element.visibleIfFormula);
-        if ("label" in element && (element as AnyField).kind === "list") {
-          const listField = element as AnyField & { fields?: AnyField[] };
-          if (Array.isArray(listField.fields)) {
-            for (const sub of listField.fields) {
+        if (isQuestionField(element) && element.kind === "list") {
+          if (Array.isArray(element.fields)) {
+            for (const sub of element.fields) {
               collectFromVisibleIfFormula(sub.visibleIfFormula);
             }
           }
@@ -491,23 +485,18 @@ const FormRenderer = ({
     const ids = new Set<number>();
     for (const page of schema.pages) {
       for (const element of page.fields) {
-        if (
-          !("label" in element) &&
-          (element as PreviousAnswerBlock).kind === "previousAnswer"
-        ) {
-          const block = element as PreviousAnswerBlock;
-          if (block.sourceFormId) {
-            ids.add(block.sourceFormId);
+        if (!isQuestionField(element) && element.kind === "previousAnswer") {
+          if (element.sourceFormId) {
+            ids.add(element.sourceFormId);
           }
-          for (const id of collectManualSourceFormIds(block)) {
+          for (const id of collectManualSourceFormIds(element)) {
             ids.add(id);
           }
         }
         // Also collect from list fields with prefillFromPreviousAnswer
-        if ("label" in element && (element as AnyField).kind === "list") {
-          const listField = element as ListField;
-          if (listField.prefillFromPreviousAnswer?.sourceFormId) {
-            ids.add(listField.prefillFromPreviousAnswer.sourceFormId);
+        if (isQuestionField(element) && element.kind === "list") {
+          if (element.prefillFromPreviousAnswer?.sourceFormId) {
+            ids.add(element.prefillFromPreviousAnswer.sourceFormId);
           }
         }
       }
@@ -635,15 +624,14 @@ const FormRenderer = ({
 
       for (const page of schema.pages) {
         for (const element of page.fields) {
-          if (!("label" in element)) continue;
-          const field = element as AnyField;
-          if (field.kind !== "list") continue;
-          const listField = field as ListField;
+          if (!isQuestionField(element)) continue;
+          if (element.kind !== "list") continue;
+          const listField = element;
           const prefill = listField.prefillFromPreviousAnswer;
           if (!prefill) continue;
 
           // Only prefill if untouched (undefined, null, or array of all-empty objects from defaultNumber)
-          const cur = next[field.id];
+          const cur = next[listField.id];
           const isUntouched =
             cur === undefined ||
             cur === null ||
@@ -677,7 +665,7 @@ const FormRenderer = ({
             },
           );
 
-          next[field.id] = prefilledCards;
+          next[listField.id] = prefilledCards;
           didUpdate = true;
         }
       }
@@ -832,9 +820,7 @@ const FormRenderer = ({
       }
 
       const updates: Record<string, string | null> = {};
-      const fieldsOnPage = page.fields.filter(
-        (element): element is AnyField => "label" in element,
-      );
+      const fieldsOnPage = page.fields.filter(isQuestionField);
       const visibleFields = fieldsOnPage.filter((field) =>
         isElementCurrentlyVisible(field),
       );
@@ -1492,16 +1478,13 @@ const FormRenderer = ({
   };
 
   const renderElement = (element: AnyField | DisplayBlock, index: number) => {
-    if ("label" in element) {
+    if (isQuestionField(element)) {
       if (!isElementCurrentlyVisible(element)) {
         return null;
       }
-      return renderField(element as AnyField, index);
+      return renderField(element, index);
     }
-    const resolvedBlock = resolveDisplayBlockForUser(
-      element as DisplayBlock,
-      activeUserKey,
-    );
+    const resolvedBlock = resolveDisplayBlockForUser(element, activeUserKey);
     if (!isElementCurrentlyVisible(resolvedBlock)) {
       return null;
     }

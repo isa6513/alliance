@@ -4,6 +4,7 @@ import {
 } from "@alliance/common/forms/device";
 import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
 import {
+  isQuestionField,
   type AnyField,
   type CheckboxField,
   type Condition,
@@ -370,7 +371,7 @@ export function ConditionalVisibility({
           const allFields: AnyField[] = [];
           for (const page of schema.pages) {
             for (const el of page.fields) {
-              if ("label" in el) allFields.push(el as AnyField);
+              if (isQuestionField(el)) allFields.push(el);
             }
           }
           externalSchemaCache.set(fid, allFields);
@@ -754,7 +755,7 @@ export function ConditionalVisibility({
           const allFields: AnyField[] = [];
           for (const page of schema.pages) {
             for (const el of page.fields) {
-              if ("label" in el) allFields.push(el as AnyField);
+              if (isQuestionField(el)) allFields.push(el);
             }
           }
           externalSchemaCache.set(formId, allFields);

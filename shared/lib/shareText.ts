@@ -1,4 +1,5 @@
 import type { FormSchema } from "@alliance/common/forms/form-schema";
+import { isQuestionField } from "@alliance/common/forms/form-schema";
 import { actionsGetActionReferralCode } from "../client/sdk.gen";
 import type { FormResponseDto } from "../client/types.gen";
 
@@ -112,7 +113,7 @@ const findSchemaField = (schema: FormSchema, token: string) => {
         "id" in field &&
         ((typeof field.id === "string" &&
           field.id.trim().toLowerCase() === normalizedToken) ||
-          ("label" in field &&
+          (isQuestionField(field) &&
             typeof field.label === "string" &&
             field.label.trim().toLowerCase() === normalizedToken)),
     );

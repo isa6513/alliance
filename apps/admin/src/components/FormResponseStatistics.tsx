@@ -1,9 +1,10 @@
-import { FormResponseDto } from "@alliance/shared/client";
 import type {
   AnyField,
   FieldKind,
   RangeField,
 } from "@alliance/common/forms/form-schema";
+import { isQuestionField } from "@alliance/common/forms/form-schema";
+import { FormResponseDto } from "@alliance/shared/client";
 import Card from "@alliance/sharedweb/ui/Card";
 import FormMarkdownWrapper from "@alliance/sharedweb/ui/FormMarkdownWrapper";
 import React, { useMemo } from "react";
@@ -549,15 +550,14 @@ const FormResponseStatistics: React.FC<FormResponseStatisticsProps> = ({
     const seen = new Set<string>();
     form.schema.pages.forEach((page) => {
       page.fields.forEach((field) => {
-        const candidate = field as AnyField;
         if (
-          typeof candidate?.id === "string" &&
-          "label" in candidate &&
-          STAT_FIELD_KINDS.has(candidate.kind)
+          isQuestionField(field) &&
+          typeof field.id === "string" &&
+          STAT_FIELD_KINDS.has(field.kind)
         ) {
-          if (!seen.has(candidate.id)) {
-            fields.push(candidate);
-            seen.add(candidate.id);
+          if (!seen.has(field.id)) {
+            fields.push(field);
+            seen.add(field.id);
           }
         }
       });

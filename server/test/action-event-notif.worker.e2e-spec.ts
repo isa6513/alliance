@@ -1,36 +1,36 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { ActionTaskType, Action } from 'src/actions/entities/action.entity';
-import {
-  ActionEvent,
-  ActionStatus,
-} from 'src/actions/entities/action-event.entity';
-import {
-  ReminderCohortType,
-  ReminderGroup,
-  ReminderGroupTimingMode,
-} from 'src/actions/entities/reminder-group.entity';
-import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
-import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
-import { Tag } from 'src/user/entities/tag.entity';
-import { User } from 'src/user/entities/user.entity';
-import { Community } from 'src/community/entities/community.entity';
-import type { Repository } from 'typeorm';
 import {
   ActionActivity,
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
 import {
-  createFormWithSnapshot,
-  createTestApp,
-  TestContext,
-} from './e2e-test-utils';
+  ActionEvent,
+  ActionStatus,
+} from 'src/actions/entities/action-event.entity';
 import { ActionSuite } from 'src/actions/entities/action-suite.entity';
+import { Action, ActionTaskType } from 'src/actions/entities/action.entity';
+import {
+  ReminderCohortType,
+  ReminderGroup,
+  ReminderGroupTimingMode,
+} from 'src/actions/entities/reminder-group.entity';
+import { Community } from 'src/community/entities/community.entity';
+import { ActionEventNotifWorker } from 'src/notifs/action-event-notif.worker';
+import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
+import { Form } from 'src/tasks/entities/form.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import {
   ContractEvent,
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
-import { Form } from 'src/tasks/entities/form.entity';
-import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { Tag } from 'src/user/entities/tag.entity';
+import { User } from 'src/user/entities/user.entity';
+import type { Repository } from 'typeorm';
+import {
+  createFormWithSnapshot,
+  createTestApp,
+  TestContext,
+} from './e2e-test-utils';
 
 describe('ActionEventNotifWorker (e2e)', () => {
   let ctx: TestContext;
@@ -1660,7 +1660,9 @@ describe('ActionEventNotifWorker (e2e)', () => {
           pages: [
             {
               id: 'page-1',
-              fields: [{ id: 'field-1', kind: 'text', label: 'Answer' }],
+              fields: [
+                { id: 'field-1', type: 'input', kind: 'text', label: 'Answer' },
+              ],
             },
           ],
           outputViews: [],

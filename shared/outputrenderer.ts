@@ -10,6 +10,7 @@ import type {
   OutputFieldBlock,
   OutputViewSchema,
 } from "@alliance/common/forms/form-schema";
+import { isQuestionField } from "@alliance/common/forms/form-schema";
 import { isElementCurrentlyVisible } from "./formrenderer";
 
 export type ResolvedOutputDisplayItem = {
@@ -84,7 +85,7 @@ export const collectOutputFieldMap = (
   const map = new Map<string, AnyField>();
   schema.pages.forEach((page) => {
     page.fields.forEach((field) => {
-      if ("kind" in field && "label" in field) {
+      if (isQuestionField(field)) {
         map.set(field.id, field);
       }
     });

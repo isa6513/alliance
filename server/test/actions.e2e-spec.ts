@@ -1,8 +1,15 @@
-import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import type { ActionActivity } from 'src/actions/entities/action-activity.entity';
-import { CommentParentObject } from 'src/forum/entities/comment.entity';
-import { UserService } from 'src/user/user.service';
+import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import { ContractService } from 'src/contract/contract.service';
+import { CommentParentObject } from 'src/forum/entities/comment.entity';
+import {
+  Notification,
+  NotificationCategory,
+} from 'src/notifs/entities/notification.entity';
+import type { Form } from 'src/tasks/entities/form.entity';
+import type { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { ContractEventType } from 'src/user/entities/contract-event.entity';
+import { UserService } from 'src/user/user.service';
 import request from 'supertest';
 import type { Repository } from 'typeorm';
 import {
@@ -22,20 +29,13 @@ import {
   ActionTaskType,
   VisibilityMode,
 } from '../src/actions/entities/action.entity';
-import {
-  createTestApp,
-  createFormWithSnapshot,
-  TestContext,
-} from './e2e-test-utils';
+import type { Community } from '../src/community/entities/community.entity';
 import { User } from '../src/user/entities/user.entity';
 import {
-  Notification,
-  NotificationCategory,
-} from 'src/notifs/entities/notification.entity';
-import { ContractEventType } from 'src/user/entities/contract-event.entity';
-import type { Community } from '../src/community/entities/community.entity';
-import type { Form } from 'src/tasks/entities/form.entity';
-import type { FormResponse } from 'src/tasks/entities/formresponse.entity';
+  createFormWithSnapshot,
+  createTestApp,
+  TestContext,
+} from './e2e-test-utils';
 
 describe('Actions (e2e)', () => {
   let ctx: TestContext;
@@ -809,6 +809,7 @@ describe('Actions (e2e)', () => {
               fields: [
                 {
                   id: 'favorite-color',
+                  type: 'input',
                   kind: 'text',
                   label: 'Favorite Color',
                   required: true,
@@ -937,6 +938,7 @@ describe('Actions (e2e)', () => {
                 fields: [
                   {
                     id: 'field-1',
+                    type: 'input',
                     kind: 'text',
                     label: 'Field 1',
                     required: true,

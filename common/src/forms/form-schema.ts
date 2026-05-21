@@ -54,6 +54,7 @@ export interface FieldOutputConfig {
 
 interface BaseField<TKind extends FieldKind> {
   id: string;
+  type: "input";
   kind: TKind;
   label: string | null;
   description?: string;
@@ -262,7 +263,7 @@ export interface OutputViewSchema {
 export function isQuestionField(
   field: AnyField | DisplayBlock,
 ): field is AnyField {
-  return "label" in field;
+  return field.type === "input";
 }
 
 /** Scan a form schema for all sourceFormIds referenced in visibility conditions. */
