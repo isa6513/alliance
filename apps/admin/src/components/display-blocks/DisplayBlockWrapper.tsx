@@ -4,12 +4,9 @@ import {
   type DisplayBlock,
   type ManualDisplayBlockContent,
 } from "@alliance/common/forms/display-blocks";
-import type {
-  AnyField,
-  VisibleIfFormula,
-} from "@alliance/common/forms/form-schema";
-import type { UserDto } from "@alliance/shared/client";
-import { userList } from "@alliance/shared/client";
+import { type AnyField } from "@alliance/common/forms/form-schema";
+import { type VisibleIfFormula } from "@alliance/common/forms/visible-if-formula";
+import { userList, type UserDto } from "@alliance/shared/client";
 import { resolveDisplayBlockForUser } from "@alliance/shared/formrenderer";
 import { cn } from "@alliance/shared/styles/util";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";

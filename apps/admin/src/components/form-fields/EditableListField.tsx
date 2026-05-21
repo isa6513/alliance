@@ -3,6 +3,7 @@ import type {
   FieldKind,
   FormSchema,
   ListField,
+  ListSubField,
 } from "@alliance/common/forms/form-schema";
 import { isQuestionField } from "@alliance/common/forms/form-schema";
 import { tasksGetForm, tasksListForms } from "@alliance/shared/client";
@@ -49,7 +50,10 @@ type SubFieldKind = keyof typeof SUB_FIELD_KINDS_OPTIONS;
 
 const SUB_FIELD_KINDS = Object.keys(SUB_FIELD_KINDS_OPTIONS) as SubFieldKind[];
 
-function createDefaultSubField(parentId: string, kind: SubFieldKind): AnyField {
+function createDefaultSubField(
+  parentId: string,
+  kind: SubFieldKind,
+): ListSubField {
   const id = `${parentId}-sub-${Date.now()}-${Math.random()
     .toString(36)
     .slice(2, 9)}`;
@@ -255,7 +259,7 @@ export function EditableListField({
 
   const updateSubField = (index: number, updates: Partial<AnyField>) => {
     const next = [...(field.fields ?? [])];
-    next[index] = { ...next[index], ...updates } as AnyField;
+    next[index] = { ...next[index], ...updates } as ListSubField;
     onUpdate({ fields: next });
   };
 

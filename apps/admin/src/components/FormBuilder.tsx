@@ -1,26 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type {
-  DisplayBlock,
-  DisplayKind,
+import {
+  type DisplayBlock,
+  type DisplayKind,
 } from "@alliance/common/forms/display-blocks";
-import type {
-  AnyField,
-  Condition,
-  FieldKind,
-  FormSchema,
-  MultiSelectField,
-  Page,
-  VisibleIfFormula,
+import {
+  isQuestionField,
+  type AnyField,
+  type FieldKind,
+  type FormSchema,
+  type MultiSelectField,
+  type Page,
 } from "@alliance/common/forms/form-schema";
-import { isQuestionField } from "@alliance/common/forms/form-schema";
 import { validateFormSchema } from "@alliance/common/forms/form-schema-validate";
-import type { UserDto } from "@alliance/shared/client";
+import {
+  type Condition,
+  type VisibleIfFormula,
+} from "@alliance/common/forms/visible-if-formula";
 import {
   tasksCreateCustomValidator,
   tasksCreateForm,
   tasksGetForm,
   tasksUpdateForm,
   userList,
+  type UserDto,
 } from "@alliance/shared/client";
 import { cn } from "@alliance/shared/styles/util";
 import { customComponentRegistry } from "@alliance/sharedweb/forms/components";

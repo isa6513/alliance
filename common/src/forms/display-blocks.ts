@@ -1,132 +1,231 @@
 import z from "zod";
-import type { VisibleIfFormula } from "./visible-if-formula";
+import { visibleIfFormulaSchema } from "./visible-if-formula";
 
-export type DisplayKind =
-  | "header" // H1–H6
-  | "text" // plain or markdown text
-  | "label" // small label/caption
-  | "divider" // horizontal rule
-  | "spacer" // vertical space
-  | "html" // controlled/allowlisted HTML snippet
-  | "image" // decorative image
-  | "video" // video player (HLS)
-  | "quote" // quote block
-  | "biglink" // prominent link card
-  | "copytext" // copiable text snippet (email, URL, etc.)
-  | "previousAnswer"; // show a user's answer from another form
-
-interface BaseBlock {
-  type: "display";
-  kind: DisplayKind;
-  id?: string;
-  visibleIfFormula?: VisibleIfFormula;
-  width?: "full" | "1/2" | "1/3";
-  manualPerUser?: boolean;
-  manualUserContent?: Record<string, ManualDisplayBlockContent>;
-}
-
-export type HeaderBlock = BaseBlock & {
-  kind: "header";
-  text: string;
-  level?: 1 | 2 | 3 | 4 | 5 | 6; // default 2
+const baseContentFields = {
+  visibleIfFormula: visibleIfFormulaSchema.optional(),
+  width: z
+    .union([z.literal("full"), z.literal("1/2"), z.literal("1/3")])
+    .optional(),
 };
 
-export type TextBlock = BaseBlock & {
-  kind: "text";
-  text: string;
+const headerContentSchema = z.strictObject({
+  ...baseContentFields,
+  text: z.string(),
+  level: z
+    .union([
+      z.literal(1),
+      z.literal(2),
+      z.literal(3),
+      z.literal(4),
+      z.literal(5),
+      z.literal(6),
+    ])
+    .optional(),
+});
+
+const textContentSchema = z.strictObject({
+  ...baseContentFields,
+  text: z.string(),
+});
+
+const quoteContentSchema = z.strictObject({
+  ...baseContentFields,
+  text: z.string(),
+});
+
+const labelContentSchema = z.strictObject({
+  ...baseContentFields,
+  text: z.string(),
+});
+
+const dividerContentSchema = z.strictObject({
+  ...baseContentFields,
+  thickness: z.enum(["hairline", "thin", "medium", "thick"]).optional(),
+});
+
+const spacerContentSchema = z.strictObject({
+  ...baseContentFields,
+  size: z.enum(["xs", "sm", "md", "lg", "xl"]).optional(),
+});
+
+const htmlContentSchema = z.strictObject({
+  ...baseContentFields,
+  html: z.string(),
+});
+
+const imageContentSchema = z.strictObject({
+  ...baseContentFields,
+  alt: z.string(),
+  src: z.string(),
+  aspectRatio: z.number().optional(),
+  caption: z.string().optional(),
+});
+
+const videoContentSchema = z.strictObject({
+  ...baseContentFields,
+  src: z.string(),
+  videoId: z.number().optional(),
+  caption: z.string().optional(),
+});
+
+const bigLinkIconSchema = z.enum([
+  "messages-square",
+  "file",
+  "file-text",
+  "file-check",
+  "signature",
+]);
+export type BigLinkIcon = z.infer<typeof bigLinkIconSchema>;
+
+const bigLinkContentSchema = z.strictObject({
+  ...baseContentFields,
+  text: z.string(),
+  url: z.string(),
+  icon: bigLinkIconSchema.optional(),
+});
+
+const copyTextContentSchema = z.strictObject({
+  ...baseContentFields,
+  text: z.string(),
+  title: z.string().optional(),
+});
+
+const previousAnswerContentSchema = z.strictObject({
+  ...baseContentFields,
+  sourceFormId: z.number(),
+  sourceFieldId: z.string(),
+  title: z.string().optional(),
+  visibleSubFieldIds: z.array(z.string()).optional(),
+  emptyText: z.string().optional(),
+});
+
+const manualDisplayBlockContentSchema = z.union([
+  headerContentSchema,
+  textContentSchema,
+  quoteContentSchema,
+  labelContentSchema,
+  dividerContentSchema,
+  spacerContentSchema,
+  htmlContentSchema,
+  imageContentSchema,
+  videoContentSchema,
+  bigLinkContentSchema,
+  copyTextContentSchema,
+  previousAnswerContentSchema,
+]);
+export type ManualDisplayBlockContent = z.infer<
+  typeof manualDisplayBlockContentSchema
+>;
+
+const baseBlockFields = {
+  type: z.literal("display"),
+  id: z.string().optional(),
+  manualPerUser: z.boolean().optional(),
+  manualUserContent: z
+    .record(z.string(), manualDisplayBlockContentSchema)
+    .optional(),
 };
 
-export type QuoteBlock = BaseBlock & {
-  kind: "quote";
-  text: string;
-};
+const headerBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("header"),
+  ...headerContentSchema.shape,
+});
+export type HeaderBlock = z.infer<typeof headerBlockSchema>;
 
-export type LabelBlock = BaseBlock & {
-  kind: "label";
-  text: string;
-};
+const textBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("text"),
+  ...textContentSchema.shape,
+});
+export type TextBlock = z.infer<typeof textBlockSchema>;
 
-export type DividerBlock = BaseBlock & {
-  kind: "divider";
-  thickness?: "hairline" | "thin" | "medium" | "thick";
-};
+const quoteBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("quote"),
+  ...quoteContentSchema.shape,
+});
+export type QuoteBlock = z.infer<typeof quoteBlockSchema>;
 
-export type SpacerBlock = BaseBlock & {
-  kind: "spacer";
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
-};
+const labelBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("label"),
+  ...labelContentSchema.shape,
+});
+export type LabelBlock = z.infer<typeof labelBlockSchema>;
 
-export type HtmlBlock = BaseBlock & {
-  kind: "html";
-  /** store a sanitized/whitelisted HTML snippet on the server */
-  html: string;
-};
+const dividerBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("divider"),
+  ...dividerContentSchema.shape,
+});
+export type DividerBlock = z.infer<typeof dividerBlockSchema>;
 
-export type ImageBlock = BaseBlock & {
-  kind: "image";
-  alt: string;
-  src: string; // or { key: string } if you want S3 keys
-  aspectRatio?: number; // e.g. 16/9
-  caption?: string;
-};
+const spacerBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("spacer"),
+  ...spacerContentSchema.shape,
+});
+export type SpacerBlock = z.infer<typeof spacerBlockSchema>;
 
-export type VideoBlock = BaseBlock & {
-  kind: "video";
-  src: string; // S3 key prefix, e.g. "videos/1707564123456"
-  videoId?: number; // DB id for status polling during processing
-  caption?: string;
-};
+const htmlBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("html"),
+  ...htmlContentSchema.shape,
+});
+export type HtmlBlock = z.infer<typeof htmlBlockSchema>;
 
-export type BigLinkIcon =
-  | "messages-square"
-  | "file"
-  | "file-text"
-  | "file-check"
-  | "signature";
+const imageBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("image"),
+  ...imageContentSchema.shape,
+});
+export type ImageBlock = z.infer<typeof imageBlockSchema>;
 
-export type BigLinkBlock = BaseBlock & {
-  kind: "biglink";
-  text: string;
-  url: string;
-  icon?: BigLinkIcon;
-};
+const videoBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("video"),
+  ...videoContentSchema.shape,
+});
+export type VideoBlock = z.infer<typeof videoBlockSchema>;
 
-export type CopyTextBlock = BaseBlock & {
-  kind: "copytext";
-  text: string;
-  title?: string;
-};
+const bigLinkBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("biglink"),
+  ...bigLinkContentSchema.shape,
+});
+export type BigLinkBlock = z.infer<typeof bigLinkBlockSchema>;
 
-export type PreviousAnswerBlock = BaseBlock & {
-  kind: "previousAnswer";
-  sourceFormId: number;
-  sourceFieldId: string;
-  title?: string;
-  /** Sub-field IDs to SHOW (whitelist). Empty = show all. */
-  visibleSubFieldIds?: string[];
-  /** Custom placeholder text when no previous answer exists. */
-  emptyText?: string;
-};
+const copyTextBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("copytext"),
+  ...copyTextContentSchema.shape,
+});
+export type CopyTextBlock = z.infer<typeof copyTextBlockSchema>;
 
-export type DisplayBlock =
-  | HeaderBlock
-  | TextBlock
-  | QuoteBlock
-  | LabelBlock
-  | DividerBlock
-  | SpacerBlock
-  | HtmlBlock
-  | ImageBlock
-  | VideoBlock
-  | BigLinkBlock
-  | CopyTextBlock
-  | PreviousAnswerBlock;
+const previousAnswerBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("previousAnswer"),
+  ...previousAnswerContentSchema.shape,
+});
+export type PreviousAnswerBlock = z.infer<typeof previousAnswerBlockSchema>;
 
-export type ManualDisplayBlockContent = DisplayBlock extends infer B
-  ? B extends DisplayBlock
-    ? Omit<B, "type" | "kind" | "id" | "manualPerUser" | "manualUserContent">
-    : never
-  : never;
+export const displayBlockSchema = z.discriminatedUnion("kind", [
+  headerBlockSchema,
+  textBlockSchema,
+  quoteBlockSchema,
+  labelBlockSchema,
+  dividerBlockSchema,
+  spacerBlockSchema,
+  htmlBlockSchema,
+  imageBlockSchema,
+  videoBlockSchema,
+  bigLinkBlockSchema,
+  copyTextBlockSchema,
+  previousAnswerBlockSchema,
+]);
+export type DisplayBlock = z.infer<typeof displayBlockSchema>;
+export type DisplayKind = DisplayBlock["kind"];
 
 export type ManualImportField = "text" | "html";
 

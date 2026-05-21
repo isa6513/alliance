@@ -1,7 +1,7 @@
-import type { DeviceVisibilityTarget } from "@alliance/common/forms/device";
-import type {
-  BigLinkIcon,
-  DisplayBlock,
+import { type DeviceVisibilityTarget } from "@alliance/common/forms/device";
+import {
+  type BigLinkIcon,
+  type DisplayBlock,
 } from "@alliance/common/forms/display-blocks";
 import {
   collectSourceFormIds,
@@ -9,15 +9,15 @@ import {
   type AnyField,
   type FormSchema,
   type FormValue,
-  type VisibleIfFormula,
 } from "@alliance/common/forms/form-schema";
-import type { UserDto } from "@alliance/shared/client";
+import { type VisibleIfFormula } from "@alliance/common/forms/visible-if-formula";
 import {
   FormResponseDto,
   SubmitFormDto,
   tasksGetForm,
   tasksGetMyFormResponse,
   tasksRunValidator,
+  type UserDto,
 } from "@alliance/shared/client";
 import {
   applyDefaultValues,

@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
-import type {
-  AnyField,
-  OutputFieldBlock,
-  VisibleIfFormula,
+import {
+  type AnyField,
+  type OutputFieldBlock,
 } from "@alliance/common/forms/form-schema";
+import { type VisibleIfFormula } from "@alliance/common/forms/visible-if-formula";
+import { cn } from "@alliance/shared/styles/util";
+import { useEffect, useState } from "react";
 import {
   ConditionalVisibility,
   type OutputBlockOption,
 } from "../form-fields/CommonControls";
-import { cn } from "@alliance/shared/styles/util";
 
 interface EditableOutputFieldBlockProps {
   block: OutputFieldBlock;

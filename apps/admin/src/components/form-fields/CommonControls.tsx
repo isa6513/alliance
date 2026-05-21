@@ -7,7 +7,6 @@ import {
   isQuestionField,
   type AnyField,
   type CheckboxField,
-  type Condition,
   type ContractField,
   type EmailField,
   type FormSchema,
@@ -19,8 +18,11 @@ import {
   type SelectField,
   type TextField,
   type TextareaField,
-  type VisibleIfFormula,
 } from "@alliance/common/forms/form-schema";
+import {
+  type Condition,
+  type VisibleIfFormula,
+} from "@alliance/common/forms/visible-if-formula";
 import {
   CustomExpressionUserDto,
   CustomValidatorType,
