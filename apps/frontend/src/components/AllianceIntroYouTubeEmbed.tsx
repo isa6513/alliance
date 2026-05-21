@@ -1,8 +1,8 @@
 import { cn } from "@alliance/shared/styles/util";
 import React from "react";
 
-const VIDEO_ID = "K1Wf6gkBIu0";
-const EMBED_QUERY = "si=JGkRXMCtXM-NgQbj";
+const VIDEO_ID = "VS6aFXXxtmY";
+const EMBED_QUERY = "si=zjbq4T1scUAWnAvx";
 
 /** YouTube thumbnail until hover or keyboard activation, then full embed (lazy iframe). */
 export default function AllianceIntroYouTubeEmbed() {
