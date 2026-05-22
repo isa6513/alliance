@@ -185,16 +185,16 @@ export class ForumService {
 
     const postIds = posts.map((p) => p.id);
 
-    // 2) Fetch authors per post (ManyToMany can't be joined in the grouped query)
     const postsWithAuthors = await this.postRepository.find({
       where: { id: In(postIds) },
       relations: { authors: true },
     });
-    const authorsByPostId = new Map(
-      postsWithAuthors.map((p) => [p.id, p.authors]),
-    );
+    const relationsByPostId = new Map(postsWithAuthors.map((p) => [p.id, p]));
     for (const post of posts) {
-      post.authors = authorsByPostId.get(post.id) ?? [];
+      const loaded = relationsByPostId.get(post.id);
+      post.authors = loaded?.authors ?? [];
+      post.likes = loaded?.likes ?? [];
+      post.likesIds = loaded?.likesIds ?? [];
     }
 
     // 3) Fetch last comment per post in one query using DISTINCT ON (Postgres)
@@ -230,6 +230,7 @@ export class ForumService {
       .leftJoinAndSelect('post.action', 'action')
       .leftJoinAndSelect('post.editableContent', 'editableContent')
       .leftJoinAndSelect('post.authors', 'authors')
+      .leftJoinAndSelect('post.likes', 'likes')
       .where('post.actionId = :actionId', { actionId })
       .orderBy('post.updatedAt', 'DESC');
     this.addPostVisibilityFilter(qb, 'post');
