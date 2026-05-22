@@ -1,7 +1,4 @@
-import useHomeFeed, {
-  getForumComment,
-  isForumCommentType,
-} from "@alliance/shared/lib/useHomeFeed";
+import useHomeFeed, { getForumComment } from "@alliance/shared/lib/useHomeFeed";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useCallback, useRef } from "react";
 import ForumCommentCard from "./ForumCommentCard";
@@ -81,37 +78,40 @@ const HomeFeed = () => {
       <p className="text-title font-serif mb-4">Activity</p>
       <div className="flex flex-col gap-y-2 *:p-4">
         {items.map((item) => {
-          if (item.type === "activity") {
-            if (!item.activity) return null;
-            return (
-              <UserActivityCard
-                activity={item.activity}
-                key={`activity-${item.activity.id}`}
-                handleLike={() => handleLike(item.activity!.id)}
-              />
-            );
+          switch (item.type) {
+            case "activity": {
+              if (!item.activity) return null;
+              return (
+                <UserActivityCard
+                  activity={item.activity}
+                  key={`activity-${item.activity.id}`}
+                  handleLike={() => handleLike(item.activity!.id)}
+                />
+              );
+            }
+            case "cluster_forum_comment":
+            // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
+            case "forum_comment": {
+              const fc = getForumComment(item);
+              if (!fc) return null;
+              return (
+                <ForumCommentCard
+                  key={`comment-${fc.comment.id}`}
+                  comment={fc.comment}
+                  postId={fc.postId}
+                  postTitle={fc.postTitle}
+                  likedByMe={fc.likedByMe}
+                  likesCount={fc.likesCount}
+                  handleLike={() => handleLikeForumComment(fc.comment.id)}
+                />
+              );
+            }
+            default: {
+              // Drop unknown variants so older clients don't crash on new server types.
+              item.type satisfies never;
+              return null;
+            }
           }
-          // TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
-          // alias once the server emits 'forum_comment' exclusively and
-          // types.gen.ts is regenerated.
-          if (isForumCommentType(item.type)) {
-            const fc = getForumComment(item);
-            if (!fc) return null;
-            return (
-              <ForumCommentCard
-                key={`comment-${fc.comment.id}`}
-                comment={fc.comment}
-                postId={fc.postId}
-                postTitle={fc.postTitle}
-                likedByMe={fc.likedByMe}
-                likesCount={fc.likesCount}
-                handleLike={() => handleLikeForumComment(fc.comment.id)}
-              />
-            );
-          }
-          throw new Error(
-            `unknown home feed item type: ${item.type as string}`,
-          );
         })}
       </div>
       {isFetchingNextPage && (

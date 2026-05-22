@@ -1,8 +1,9 @@
-import { UpdateProfileDto } from "@alliance/shared/client";
+import {
+  UpdateProfileDto,
+  actionsUserCompletedCount,
+} from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
-import useActivities, {
-  ActivityList,
-} from "@alliance/shared/lib/useActivities";
+import { getForumComment } from "@alliance/shared/lib/useHomeFeed";
 import {
   buildForumActivityItems,
   useAcceptFriendRequestMutation,
@@ -15,6 +16,7 @@ import {
   useUserFriendsQuery,
   useUserProfileQuery,
 } from "@alliance/shared/lib/user";
+import useUserFeed from "@alliance/shared/lib/useUserFeed";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
@@ -29,11 +31,19 @@ import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import { useQuery } from "@tanstack/react-query";
 import { MessageSquare } from "lucide-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { href, useLocation, useNavigate, useParams } from "react-router";
 import { Route } from "../../../.react-router/types/src/pages/app/+types/UserProfilePage";
 import ForumActivityCommentCard from "../../components/ForumActivityCommentCard";
+import ForumCommentCard from "../../components/ForumCommentCard";
 import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
 import FriendsTab from "../../components/FriendsTab";
@@ -115,18 +125,62 @@ const UserProfilePage: React.FC = () => {
 
   const forumActivityCount = forumActivityItems.length;
 
-  const { activities, handleLikeActivity } = useActivities({
-    list: ActivityList.User,
-    objectId: userId ?? 0,
+  const {
+    items: feedItems,
+    handleLikeActivity,
+    handleLikeForumComment,
+    fetchNextPage: fetchNextFeedPage,
+    hasNextPage: feedHasNextPage,
+    isFetchingNextPage: feedIsFetchingNextPage,
+  } = useUserFeed({
+    userId: userId ?? 0,
     comments: true,
   });
 
-  const completedActionCount = useMemo(() => {
-    return (
-      activities?.filter((activity) => activity.type === "user_completed")
-        .length ?? 0
+  const feedPaginationRef = useRef({
+    fetchNextPage: fetchNextFeedPage,
+    hasNextPage: feedHasNextPage,
+    isFetchingNextPage: feedIsFetchingNextPage,
+  });
+  feedPaginationRef.current = {
+    fetchNextPage: fetchNextFeedPage,
+    hasNextPage: feedHasNextPage,
+    isFetchingNextPage: feedIsFetchingNextPage,
+  };
+
+  const feedObserverRef = useRef<IntersectionObserver | null>(null);
+  const feedSentinelRef = useCallback((node: HTMLDivElement | null) => {
+    if (feedObserverRef.current) {
+      feedObserverRef.current.disconnect();
+      feedObserverRef.current = null;
+    }
+    if (!node) return;
+
+    feedObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        const p = feedPaginationRef.current;
+        for (const entry of entries) {
+          if (entry.isIntersecting && p.hasNextPage && !p.isFetchingNextPage) {
+            p.fetchNextPage();
+          }
+        }
+      },
+      { rootMargin: "200px" },
     );
-  }, [activities]);
+    feedObserverRef.current.observe(node);
+  }, []);
+
+  const { data: completedCountData } = useQuery({
+    queryKey: ["userCompletedCount", userId],
+    queryFn: async () => {
+      const resp = await actionsUserCompletedCount({
+        path: { id: userId! },
+      });
+      return resp.data;
+    },
+    enabled: Boolean(userId),
+  });
+  const completedActionCount = completedCountData?.completedCount ?? 0;
 
   useEffect(() => {
     if (!profile || !isMe || isEditing) return;
@@ -443,18 +497,53 @@ const UserProfilePage: React.FC = () => {
         <div className="pb-24 mt-2">
           {selectedTab === ProfileTabs.Activity && (
             <div className="mb-10 *:p-4 flex flex-col gap-y-2">
-              {(!activities || activities.length === 0) && (
+              {feedItems.length === 0 && (
                 <p className="my-4 text-center text-zinc-500">
-                  No actions completed yet
+                  No activity yet
                 </p>
               )}
-              {activities?.map((activity) => (
-                <UserActivityCard
-                  activity={activity}
-                  key={activity.id}
-                  handleLike={handleLikeActivity}
-                />
-              ))}
+              {feedItems.map((item) => {
+                switch (item.type) {
+                  case "activity": {
+                    if (!item.activity) return null;
+                    return (
+                      <UserActivityCard
+                        activity={item.activity}
+                        key={`activity-${item.activity.id}`}
+                        handleLike={handleLikeActivity}
+                      />
+                    );
+                  }
+                  case "cluster_forum_comment":
+                  // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
+                  case "forum_comment": {
+                    const fc = getForumComment(item);
+                    if (!fc) return null;
+                    return (
+                      <ForumCommentCard
+                        key={`comment-${fc.comment.id}`}
+                        comment={fc.comment}
+                        postId={fc.postId}
+                        postTitle={fc.postTitle}
+                        likedByMe={fc.likedByMe}
+                        likesCount={fc.likesCount}
+                        handleLike={() => handleLikeForumComment(fc.comment.id)}
+                      />
+                    );
+                  }
+                  default: {
+                    // Drop unknown variants so older clients don't crash on new server types.
+                    item.type satisfies never;
+                    return null;
+                  }
+                }
+              })}
+              {feedIsFetchingNextPage && (
+                <div className="flex justify-center py-4 text-zinc-400">
+                  Loading more...
+                </div>
+              )}
+              <div ref={feedSentinelRef} className="h-1" />
             </div>
           )}
 

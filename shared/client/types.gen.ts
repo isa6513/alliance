@@ -2084,6 +2084,10 @@ export type UpdateActionDto = {
     authorIds?: Array<number>;
 };
 
+export type UserCompletedActionsCountDto = {
+    completedCount: number;
+};
+
 export type CreateActionEventDto = {
     /**
      * Title of the event
@@ -5993,6 +5997,40 @@ export type ActionsFindCompletedForUserResponses = {
 };
 
 export type ActionsFindCompletedForUserResponse = ActionsFindCompletedForUserResponses[keyof ActionsFindCompletedForUserResponses];
+
+export type ActionsUserFeedData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query: {
+        limit: string;
+        before: string;
+        comments: boolean;
+    };
+    url: '/actions/userFeed/{id}';
+};
+
+export type ActionsUserFeedResponses = {
+    200: Array<HomeFeedItemDto>;
+};
+
+export type ActionsUserFeedResponse = ActionsUserFeedResponses[keyof ActionsUserFeedResponses];
+
+export type ActionsUserCompletedCountData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/actions/userCompletedCount/{id}';
+};
+
+export type ActionsUserCompletedCountResponses = {
+    200: UserCompletedActionsCountDto;
+};
+
+export type ActionsUserCompletedCountResponse = ActionsUserCompletedCountResponses[keyof ActionsUserCompletedCountResponses];
 
 export type ActionsAddEventData = {
     body: CreateActionEventDto;

@@ -1,18 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Alert,
-  Pressable,
-  TextInput,
-  TouchableOpacity,
-  View,
-  FlatList,
-} from "react-native";
-import { RelativePathString, router, useLocalSearchParams } from "expo-router";
-import { launchImageLibraryAsync } from "expo-image-picker";
-import { UpdateProfileDto } from "@alliance/shared/client";
+  HomeFeedItemDto,
+  UpdateProfileDto,
+  actionsUserCompletedCount,
+} from "@alliance/shared/client";
+import { getForumComment } from "@alliance/shared/lib/useHomeFeed";
+import useUserFeed from "@alliance/shared/lib/useUserFeed";
 import {
   buildForumActivityItems,
-  type ForumActivityItem,
   useAcceptFriendRequestMutation,
   useDeclineFriendRequestMutation,
   useMessageableUsersQuery,
@@ -26,32 +20,43 @@ import {
   useUserProfileQuery,
   useUserReceivedFriendRequestsQuery,
   useUserSentFriendRequestsQuery,
+  type ForumActivityItem,
 } from "@alliance/shared/lib/user";
-import useActivities, {
-  ActivityList,
-} from "@alliance/shared/lib/useActivities";
 import { formatTime } from "@alliance/shared/lib/utils";
+import { cn } from "@alliance/shared/styles/util";
+import { useQuery } from "@tanstack/react-query";
+import { launchImageLibraryAsync } from "expo-image-picker";
+import { RelativePathString, router, useLocalSearchParams } from "expo-router";
 import { ChevronDown, Edit, Menu, MessageSquare } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import AppMarkdownWrapper from "../../../components/AppMarkdownWrapper";
 import EditableContentRenderer from "../../../components/EditableContentRenderer";
+import ForumCommentCard from "../../../components/ForumCommentCard";
 import { ImageLightboxModal } from "../../../components/ImageLightbox";
+import KeyboardAwareScrollView from "../../../components/KeyboardAwareScrollView";
 import ProfileImage, {
   resolveProfileImageUri,
 } from "../../../components/ProfileImage";
 import UserActivityCard from "../../../components/UserActivityCard";
+import BackButton from "../../../components/system/BackButton";
 import Button, {
   ButtonColor,
   ButtonSize,
 } from "../../../components/system/Button";
-import Text, { FontWeight } from "../../../components/system/Text";
-import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
-import BackButton from "../../../components/system/BackButton";
 import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
-import { useAuth } from "../../../lib/AuthContext";
+import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
+import Text, { FontWeight } from "../../../components/system/Text";
 import { useAppDrawer } from "../../../lib/AppDrawerContext";
+import { useAuth } from "../../../lib/AuthContext";
 import { colors } from "../../../lib/style/colors";
-import { cn } from "@alliance/shared/styles/util";
-import KeyboardAwareScrollView from "../../../components/KeyboardAwareScrollView";
 
 enum ProfileTab {
   Actions = "actions",
@@ -122,15 +127,28 @@ export default function UserProfileScreen() {
   const removeFriend = useRemoveFriendMutation();
   const updateProfileMutation = useUpdateProfileMutation(userId);
 
-  const { activities, handleLikeActivity } = useActivities({
-    list: ActivityList.User,
-    objectId: userId ?? 0,
+  const {
+    items: feedItems,
+    handleLikeActivity,
+    handleLikeForumComment,
+    fetchNextPage: fetchNextFeedPage,
+    hasNextPage: feedHasNextPage,
+    isFetchingNextPage: feedFetchingNextPage,
+  } = useUserFeed({
+    userId: userId ?? 0,
     comments: true,
   });
 
   const [selectedTab, setSelectedTab] = useState<ProfileTab>(
     ProfileTab.Actions,
   );
+
+  const onFeedEndReached = useCallback(() => {
+    if (selectedTab !== ProfileTab.Actions) return;
+    if (feedHasNextPage && !feedFetchingNextPage) {
+      void fetchNextFeedPage();
+    }
+  }, [selectedTab, feedHasNextPage, feedFetchingNextPage, fetchNextFeedPage]);
   const [friendsTab, setFriendsTab] = useState<FriendsTab>(FriendsTab.Friends);
   const [friendActionsOpen, setFriendActionsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -140,12 +158,17 @@ export default function UserProfileScreen() {
   const [isPickingAvatar, setIsPickingAvatar] = useState(false);
   const [pfpLightboxOpen, setPfpLightboxOpen] = useState(false);
 
-  const completedActionCount = useMemo(() => {
-    return (
-      activities?.filter((activity) => activity.type === "user_completed")
-        .length ?? 0
-    );
-  }, [activities]);
+  const { data: completedCountData } = useQuery({
+    queryKey: ["userCompletedCount", userId],
+    queryFn: async () => {
+      const resp = await actionsUserCompletedCount({
+        path: { id: userId! },
+      });
+      return resp.data;
+    },
+    enabled: Boolean(userId),
+  });
+  const completedActionCount = completedCountData?.completedCount ?? 0;
 
   const forumActivityItems = useMemo(
     () => buildForumActivityItems(forumPosts, forumComments),
@@ -374,12 +397,45 @@ export default function UserProfileScreen() {
   ]);
 
   const renderActionItem = useCallback(
-    ({ item: activity }: { item: NonNullable<typeof activities>[number] }) => (
-      <View className="border-b border-zinc-200">
-        <UserActivityCard activity={activity} handleLike={handleLikeActivity} />
-      </View>
-    ),
-    [handleLikeActivity],
+    ({ item }: { item: HomeFeedItemDto }) => {
+      switch (item.type) {
+        case "activity": {
+          if (!item.activity) return null;
+          return (
+            <View className="border-b border-zinc-200">
+              <UserActivityCard
+                activity={item.activity}
+                handleLike={handleLikeActivity}
+              />
+            </View>
+          );
+        }
+        case "cluster_forum_comment":
+        // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
+        case "forum_comment": {
+          const fc = getForumComment(item);
+          if (!fc) return null;
+          return (
+            <View className="border-b border-zinc-200">
+              <ForumCommentCard
+                comment={fc.comment}
+                postId={fc.postId}
+                postTitle={fc.postTitle}
+                likedByMe={fc.likedByMe}
+                likesCount={fc.likesCount}
+                handleLike={() => handleLikeForumComment(fc.comment.id)}
+              />
+            </View>
+          );
+        }
+        default: {
+          // Drop unknown variants so older clients don't crash on new server types.
+          item.type satisfies never;
+          return null;
+        }
+      }
+    },
+    [handleLikeActivity, handleLikeForumComment],
   );
 
   const renderForumItem = useCallback(
@@ -525,7 +581,7 @@ export default function UserProfileScreen() {
   );
 
   const listData = useMemo((): any[] => {
-    if (selectedTab === ProfileTab.Actions) return activities ?? [];
+    if (selectedTab === ProfileTab.Actions) return feedItems;
     if (selectedTab === ProfileTab.Forum) return forumActivityItems;
     if (friendsTab === FriendsTab.Received && isMe) return receivedRequests;
     if (friendsTab === FriendsTab.Sent && isMe) return sentRequests;
@@ -534,7 +590,7 @@ export default function UserProfileScreen() {
     selectedTab,
     friendsTab,
     isMe,
-    activities,
+    feedItems,
     forumActivityItems,
     receivedRequests,
     sentRequests,
@@ -543,6 +599,13 @@ export default function UserProfileScreen() {
 
   const listKeyExtractor = useCallback(
     (item: any) => {
+      if (selectedTab === ProfileTab.Actions) {
+        const feedItem = item as HomeFeedItemDto;
+        if (feedItem.type === "activity") {
+          return `activity-${feedItem.activity?.id}`;
+        }
+        return `comment-${getForumComment(feedItem)?.comment.id}`;
+      }
       if (selectedTab === ProfileTab.Forum) {
         return item.type === "post"
           ? `post-${item.post.id}`
@@ -576,7 +639,13 @@ export default function UserProfileScreen() {
   );
 
   const listEmptyComponent = useMemo(() => {
-    if (selectedTab === ProfileTab.Actions) return undefined;
+    if (selectedTab === ProfileTab.Actions) {
+      return (
+        <Text className="text-center text-zinc-500 py-6 px-4">
+          No activity yet
+        </Text>
+      );
+    }
     if (selectedTab === ProfileTab.Forum) {
       return (
         <Text className="text-center text-zinc-500 py-6 px-4">
@@ -664,7 +733,9 @@ export default function UserProfileScreen() {
           ) : (
             <>
               <TouchableOpacity
-                onPress={() => profile.profilePicture && setPfpLightboxOpen(true)}
+                onPress={() =>
+                  profile.profilePicture && setPfpLightboxOpen(true)
+                }
                 activeOpacity={profile.profilePicture ? 0.9 : 1}
               >
                 <ProfileImage pfp={profile.profilePicture} size="larger" />
@@ -814,6 +885,15 @@ export default function UserProfileScreen() {
       profileHeader
     );
 
+  const listFooter = (
+    <>
+      {selectedTab === ProfileTab.Actions && feedFetchingNextPage && (
+        <Text className="text-center text-zinc-400 py-4">Loading more...</Text>
+      )}
+      <View className="h-16" />
+    </>
+  );
+
   return (
     <FlatList
       data={listData}
@@ -821,7 +901,9 @@ export default function UserProfileScreen() {
       renderItem={listRenderItem}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={listEmptyComponent}
-      ListFooterComponent={<View className="h-16" />}
+      ListFooterComponent={listFooter}
+      onEndReached={onFeedEndReached}
+      onEndReachedThreshold={0.3}
       renderScrollComponent={(props) => <KeyboardAwareScrollView {...props} />}
       contentContainerStyle={{ backgroundColor: "white" }}
       keyboardShouldPersistTaps="handled"

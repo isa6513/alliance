@@ -1,25 +1,26 @@
-import { actionsHomeFeed } from "@alliance/shared/client";
+import { actionsUserFeed } from "@alliance/shared/client";
 import { buildFeedPage, useFeedQuery } from "./feedHelpers";
 
-export { getForumComment } from "./feedHelpers";
-
-export type UseHomeFeedProps = {
+export type UseUserFeedProps = {
+  userId: number;
   comments?: boolean;
   limit?: number;
 };
 
-const QUERY_KEY_ROOT = "useHomeFeed";
+const QUERY_KEY_ROOT = "useUserFeed";
 
-const useHomeFeed = (props: UseHomeFeedProps = {}) => {
+const useUserFeed = (props: UseUserFeedProps) => {
   const limit = props.limit ?? 20;
   const comments = props.comments ?? false;
 
   return useFeedQuery({
     queryKeyRoot: QUERY_KEY_ROOT,
-    queryKey: [QUERY_KEY_ROOT, limit, comments],
+    queryKey: [QUERY_KEY_ROOT, props.userId, limit, comments],
     limit,
+    enabled: Boolean(props.userId),
     fetchPage: async (before) => {
-      const resp = await actionsHomeFeed({
+      const resp = await actionsUserFeed({
+        path: { id: props.userId },
         query: {
           limit: limit.toString(),
           before: before ?? new Date().toISOString(),
@@ -31,4 +32,4 @@ const useHomeFeed = (props: UseHomeFeedProps = {}) => {
   });
 };
 
-export default useHomeFeed;
+export default useUserFeed;

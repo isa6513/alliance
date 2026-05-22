@@ -99,6 +99,7 @@ import {
   NotificationScheduleQueryDto,
 } from './dto/notification-schedule.dto';
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
+import { UserCompletedActionsCountDto } from './dto/user-completed-actions-count.dto';
 import { ForumActionCompleterWorker } from './forum-action-completer.worker';
 
 @Controller('actions')
@@ -756,6 +757,51 @@ export class ActionsController {
       +id,
       comments,
       req.user?.sub,
+    );
+  }
+
+  @Get('userFeed/:id')
+  @UseGuards(AuthOptionalGuard)
+  @ApiOkResponse({ type: [HomeFeedItemDto] })
+  @ApiOperation({
+    summary:
+      "Get a single user's profile feed: their action completions interleaved with their forum comments (visibility-filtered for the requester)",
+  })
+  async userFeed(
+    @Request() req: JwtRequest,
+    @Param('id', ParseIntPipe) id: number,
+    @Query('limit') limit?: string,
+    @Query('before') before?: string,
+    @Query('comments', new ParseBoolPipe({ optional: true }))
+    comments?: boolean,
+  ): Promise<HomeFeedItemDto[]> {
+    const limitNum = limit ? parseInt(limit) : 20;
+    const beforeDate = before ? new Date(before) : undefined;
+    if (before && isNaN(beforeDate!.getTime())) {
+      throw new BadRequestException('Invalid "before" cursor');
+    }
+
+    return this.actionsService.userFeed(
+      +id,
+      req.user?.sub,
+      limitNum,
+      beforeDate,
+      comments,
+    );
+  }
+
+  @Get('userCompletedCount/:id')
+  @UseGuards(AuthOptionalGuard)
+  @ApiOkResponse({ type: UserCompletedActionsCountDto })
+  @ApiOperation({
+    summary:
+      "Total count of a user's completed-action activities (independent of feed pagination)",
+  })
+  async userCompletedCount(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserCompletedActionsCountDto> {
+    return new UserCompletedActionsCountDto(
+      await this.actionsService.countUserCompletedActions(id),
     );
   }
 

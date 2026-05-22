@@ -19,10 +19,7 @@ import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
 import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
-import useHomeFeed, {
-  getForumComment,
-  isForumCommentType,
-} from "@alliance/shared/lib/useHomeFeed";
+import useHomeFeed, { getForumComment } from "@alliance/shared/lib/useHomeFeed";
 import { LegendList } from "@legendapp/list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -233,45 +230,49 @@ export default function HomeScreen() {
 
   const renderHomeFeedItem = useCallback(
     ({ item }: { item: HomeFeedItemDto }) => {
-      if (item.type === "activity") {
-        if (!item.activity) return null;
-        const activity = item.activity;
-        return (
-          <View
-            className={`border-b-3`}
-            style={{ borderColor: colors.grey[1] }}
-          >
-            <UserActivityCard
-              activity={activity}
-              handleLike={() => handleHomeFeedLike(activity.id)}
-            />
-          </View>
-        );
+      switch (item.type) {
+        case "activity": {
+          if (!item.activity) return null;
+          const activity = item.activity;
+          return (
+            <View
+              className={`border-b-3`}
+              style={{ borderColor: colors.grey[1] }}
+            >
+              <UserActivityCard
+                activity={activity}
+                handleLike={() => handleHomeFeedLike(activity.id)}
+              />
+            </View>
+          );
+        }
+        case "cluster_forum_comment":
+        // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
+        case "forum_comment": {
+          const fc = getForumComment(item);
+          if (!fc) return null;
+          const { comment, postId, postTitle, likedByMe, likesCount } = fc;
+          return (
+            <View
+              className={`border-b-3`}
+              style={{ borderColor: colors.grey[1] }}
+            >
+              <ForumCommentCard
+                comment={comment}
+                postId={postId}
+                postTitle={postTitle}
+                likedByMe={likedByMe}
+                likesCount={likesCount}
+                handleLike={() => handleLikeForumComment(comment.id)}
+              />
+            </View>
+          );
+        }
+        default: {
+          item.type satisfies never;
+          return null;
+        }
       }
-      // TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
-      // alias once the server emits 'forum_comment' exclusively and
-      // types.gen.ts is regenerated.
-      if (isForumCommentType(item.type)) {
-        const fc = getForumComment(item);
-        if (!fc) return null;
-        const { comment, postId, postTitle, likedByMe, likesCount } = fc;
-        return (
-          <View
-            className={`border-b-3`}
-            style={{ borderColor: colors.grey[1] }}
-          >
-            <ForumCommentCard
-              comment={comment}
-              postId={postId}
-              postTitle={postTitle}
-              likedByMe={likedByMe}
-              likesCount={likesCount}
-              handleLike={() => handleLikeForumComment(comment.id)}
-            />
-          </View>
-        );
-      }
-      throw new Error(`unknown home feed item type: ${item.type as string}`);
     },
     [handleHomeFeedLike, handleLikeForumComment],
   );

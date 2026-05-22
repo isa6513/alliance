@@ -1962,6 +1962,75 @@ export class ActionsService {
     return merged.slice(0, limit).map((item) => new HomeFeedItemDto(item));
   }
 
+  async userFeed(
+    userId: number,
+    requestingUserId?: number,
+    limit: number = 20,
+    before?: Date,
+    comments?: boolean,
+  ): Promise<HomeFeedItemDto[]> {
+    const [activities, forumComments] = await Promise.all([
+      this.actionActivityRepository.find({
+        where: {
+          userId,
+          type: In([
+            ActionActivityType.USER_COMPLETED,
+            ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM,
+          ]),
+          ...(before ? { createdAt: LessThan(before) } : {}),
+        },
+        relations: {
+          action: true,
+          user: true,
+          taskFormResponse: { formSnapshot: true },
+        },
+        order: { createdAt: 'DESC' },
+        take: limit,
+      }),
+      this.forumService.findForumCommentsByUserForFeed({
+        authorId: userId,
+        requestingUserId,
+        limit,
+        before,
+      }),
+    ]);
+
+    const activityDtos = await this.attachComments(
+      activities,
+      requestingUserId,
+      {
+        includeComments: !!comments,
+      },
+    );
+
+    const activityItems = activityDtos.map(
+      (activity): HomeFeedItem => ({
+        type: HomeFeedItemType.Activity,
+        date: activity.createdAt,
+        activity,
+      }),
+    );
+    const forumCommentItems: HomeFeedItem[] = forumComments.map((fc) => ({
+      type: HomeFeedItemType.ForumComment,
+      date: fc.comment.createdAt,
+      clusterForumComment: fc,
+    }));
+
+    const merged: HomeFeedItem[] = [...activityItems, ...forumCommentItems];
+    merged.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    return merged.slice(0, limit).map((item) => new HomeFeedItemDto(item));
+  }
+
+  async countUserCompletedActions(userId: number): Promise<number> {
+    return this.actionActivityRepository.count({
+      where: {
+        userId,
+        type: ActionActivityType.USER_COMPLETED,
+      },
+    });
+  }
+
   async findByName(name: string): Promise<Action[]> {
     const actions = await this.actionRepository.find({
       where: { name: ILike(`%${name}%`) },

@@ -31,7 +31,8 @@ Don't switch on an enum (or union discriminator) with a ternary or an open `if`/
   }
   ```
 
-  `satisfies never` makes any unhandled variant a compile error (because `kind` is no longer narrowed to `never` in `default`); the runtime throw is the safety net. Wrap in an arrow IIFE if you want the switch as an expression.
+  `satisfies never` is the load-bearing part — it makes any unhandled variant a compile error (because `kind` is no longer narrowed to `never` in `default`). The runtime throw is optional; if you'd rather silently drop unknown variants (e.g. so an older client doesn't crash when the server adds a new type), `default: kind satisfies never; return null;` (or similar) is fine — just keep the `satisfies never`.
+
 - `const TABLE: Record<MyEnum, T> = { [MyEnum.A]: ..., [MyEnum.B]: ... }` and index in — `Record<MyEnum, T>` forces every variant to be listed.
 
 Apply this to any branch keyed on a closed set (enum, string-literal union, tagged union `kind`), even when there are only two variants today.
