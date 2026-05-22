@@ -1,3 +1,4 @@
+import { cn } from "@alliance/shared/styles/util";
 import {
   createContext,
   useCallback,
@@ -9,7 +10,6 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from "react";
-import { cn } from "@alliance/shared/styles/util";
 
 export const GuideSection = ({
   id,
@@ -56,7 +56,10 @@ export const GuideP = ({
   ...props
 }: HTMLAttributes<HTMLParagraphElement>) => (
   <p
-    className={cn("text-zinc-800 text-lg first:mt-0 mt-2 md:mt-5", className)}
+    className={cn(
+      "text-zinc-800 text-base md:text-lg first:mt-0 mt-3 md:mt-5",
+      className,
+    )}
     {...props}
   />
 );
@@ -74,7 +77,7 @@ export const GuideOl = ({
 }: HTMLAttributes<HTMLOListElement>) => (
   <ol
     className={cn(
-      "text-lg text-zinc-800 list-decimal list-inside first:mt-0 mt-2 md:mt-5 pl-4",
+      "text-base md:text-lg text-zinc-800 list-decimal list-inside first:mt-0 mt-2 md:mt-5 pl-4",
       className,
     )}
     {...props}
@@ -87,7 +90,7 @@ export const GuideUl = ({
 }: HTMLAttributes<HTMLUListElement>) => (
   <ul
     className={cn(
-      "text-lg text-zinc-800 list-disc list-inside first:mt-0 mt-2 md:mt-5 pl-4",
+      "text-base md:text-lg text-zinc-800 list-disc list-inside first:mt-0 mt-2 md:mt-5 pl-4",
       className,
     )}
     {...props}
