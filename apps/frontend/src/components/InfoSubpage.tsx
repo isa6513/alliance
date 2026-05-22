@@ -1,7 +1,7 @@
-import React from "react";
-import TableOfContents from "./TableOfContents";
 import { cn } from "@alliance/shared/styles/util";
+import React from "react";
 import { useNavbarOptions } from "../lib/NavbarOptionsContext";
+import TableOfContents, { TocSection } from "./TableOfContents";
 
 export type InfoSubpageTocSections = {
   id: string;
@@ -21,7 +21,9 @@ const InfoSubpage: React.FC<InfoSubpageProps> = ({ tocSections, children }) => {
     <div className="bg-white min-h-screen">
       <div className="max-w-6xl mx-auto px-3 pt-6 sm:py-10 md:py-16 pb-32 md:pb-64">
         <div className="flex md:gap-8 lg:gap-12">
-          {tocSections && <TableOfContents tocSections={tocSections} />}
+          {tocSections && (
+            <TableOfContents tocSections={tocSections as TocSection[]} />
+          )}
           <div
             className={cn(
               "min-w-0 flex-1 max-w-3xl flex flex-col",
