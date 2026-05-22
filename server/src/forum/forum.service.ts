@@ -813,11 +813,11 @@ export class ForumService {
   }
 
   async refreshLikesCount(comment: Comment): Promise<void> {
-    const withLikes = await this.commentRepository.findOneOrFail({
-      where: { id: comment.id },
-      relations: { likes: true },
-    });
-    const likesCount = withLikes.likes.length;
+    const likesCount = await this.commentRepository
+      .createQueryBuilder('comment')
+      .innerJoin('comment.likes', 'like')
+      .where('comment.id = :id', { id: comment.id })
+      .getCount();
     await this.commentRepository.update(comment.id, { likesCount });
   }
 
