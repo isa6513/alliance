@@ -1,6 +1,7 @@
 import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import InfoSubpage from "../../components/InfoSubpage";
+import OversightQuestionDisplay from "../../components/OversightQuestionDisplay";
 
 const GovernancePage: React.FC = () => {
   useWhiteBackground();
@@ -46,16 +47,7 @@ const GovernancePage: React.FC = () => {
               question that measures overall approval of the Alliance:
             </p>
 
-            <div className="flex flex-col gap-y-2 bg-zinc-50 p-6 rounded border border-zinc-200 my-2">
-              <p>Which do you prefer?</p>
-              <ul className="list-disc list-inside pl-4 space-y-2">
-                <li>I prefer the Alliance to continue to operate.</li>
-                <li>
-                  I prefer the Alliance to stop planning and running all actions
-                  until it changes how it operates.
-                </li>
-              </ul>
-            </div>
+            <OversightQuestionDisplay className="my-2" />
             <p>
               If more than 1/4th of members prefer the Alliance to stop planning
               and running all actions until it changes how it operates, the

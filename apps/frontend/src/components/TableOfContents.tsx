@@ -1,7 +1,38 @@
 import React, { useEffect, useState } from "react";
 
+export type TocLevel = 1 | 2 | 3 | 4;
+
+export type TocSection = { id: string; label: string; level: TocLevel };
+
 interface TableOfContentsProps {
-  tocSections: { id: string; label: string; level: number }[];
+  tocSections: TocSection[];
+}
+
+function tocLinkClassName(level: TocLevel, active: boolean): string {
+  switch (level) {
+    case 1:
+      return `block py-3 pb-0.5 font-medium first:pt-0 text-xl transition-colors ${
+        active ? "text-black" : "text-zinc-900 hover:text-black"
+      }`;
+    case 2:
+      return `block py-3 text-base lg:text-lg transition-colors ${
+        active ? "text-black font-medium" : "text-zinc-500 hover:text-black"
+      }`;
+    case 3:
+      return `block pl-4 py-1 text-base lg:text-lg transition-colors border-l-2 ${
+        active
+          ? "text-green font-medium border-green"
+          : "text-zinc-500 hover:text-zinc-900 border-zinc-300"
+      }`;
+    case 4:
+      return `block pl-8 py-1 text-sm lg:text-base transition-colors border-l-2 ${
+        active
+          ? "text-green font-medium border-green"
+          : "text-zinc-500 hover:text-zinc-900 border-zinc-300"
+      }`;
+    default:
+      throw new Error(`unknown toc level: ${level satisfies never}`);
+  }
 }
 
 const TableOfContents: React.FC<TableOfContentsProps> = ({ tocSections }) => {
@@ -52,25 +83,10 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ tocSections }) => {
             key={id}
             href={`#${id}`}
             aria-current={activeSectionId === id ? "location" : undefined}
-            className={
-              level === 1
-                ? `block py-3 pb-0.5 font-medium first:pt-0 text-xl transition-colors ${
-                    activeSectionId === id
-                      ? "text-black"
-                      : "text-zinc-900 hover:text-black"
-                  }`
-                : level === 2
-                  ? `block py-3 text-base lg:text-lg transition-colors ${
-                      activeSectionId === id
-                        ? "text-black font-medium"
-                        : "text-zinc-500 hover:text-black"
-                    }`
-                  : `block pl-4 py-1 text-base lg:text-lg transition-colors border-l-2 ${
-                      activeSectionId === id
-                        ? "text-green font-medium border-green"
-                        : "text-zinc-500 hover:text-zinc-900 border-zinc-300"
-                    }`
-            }
+            className={tocLinkClassName(
+              level,
+              activeSectionId === id,
+            )}
           >
             {label}
           </a>

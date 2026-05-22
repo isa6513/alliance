@@ -1,18 +1,20 @@
+import { ArrowRight } from "lucide-react";
 import React from "react";
+import { href, Link } from "react-router";
+import ExampleActionCardList from "../../components/ExampleActionCardList";
+import ExampleActionCategoryList from "../../components/ExampleActionCategoryList";
 import Footer from "../../components/Footer";
 import MemberContract from "../../components/MemberContract";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import { href, Link } from "react-router";
-import LargeActionCard from "../app/LargeActionCard";
-import ExampleActionCardList from "../../components/ExampleActionCardList";
-import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
-import ExampleActionCategoryList from "../../components/ExampleActionCategoryList";
-import TableOfContents from "../../components/TableOfContents";
+import TableOfContents, {
+  type TocSection,
+} from "../../components/TableOfContents";
 import {
   alliancePriorities,
   type AlliancePriority,
 } from "../../lib/alliancePriorities";
-import { ArrowRight } from "lucide-react";
+import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
+import LargeActionCard from "../app/LargeActionCard";
 import {
   GuideH1,
   GuideH2,
@@ -25,7 +27,7 @@ import {
 } from "./StaticDocShared";
 
 const GuidePage: React.FC = () => {
-  const tocSections = [
+  const tocSections: TocSection[] = [
     { id: "guide-to-the-alliance", label: "About", level: 2 },
     { id: "introduction", label: "Introduction", level: 3 },
     { id: "structure", label: "Structure", level: 3 },
