@@ -498,8 +498,8 @@ const ExpertDescriptionPage: React.FC = () => {
                 </GuideUl>
                 <GuideP>
                   <GuideStrong>With 10-100M members</GuideStrong>, we will
-                  drastically alter the incentives of politics and the world
-                  economy. For example, we could:
+                  drastically alter the world&apos;s political and economic
+                  incentives. For example, we could:
                 </GuideP>
                 <GuideUl>
                   <GuideLi>
