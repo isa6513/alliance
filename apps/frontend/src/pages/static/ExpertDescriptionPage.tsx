@@ -352,7 +352,7 @@ const ExpertDescriptionPage: React.FC = () => {
                     leave, an opportunity to redirect the Alliance to their
                     satisfaction. This process also biases towards action by
                     asking members to decide whether or not their disagreements
-                    are worth inhibiting general progress.
+                    are worth inhibiting overall progress.
                   </GuideP>
 
                   <GuideH2>Withdrawing from actions</GuideH2>
