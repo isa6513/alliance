@@ -811,6 +811,10 @@ export class ForumService {
       ? this.commentRepository.save(object)
       : this.postRepository.save(object));
 
+    if (type === 'comment') {
+      await this.refreshLikesCount(obj as Comment);
+    }
+
     if (!unlike) {
       if (type === 'comment') {
         await this.sendCommentLikeNotification(object as Comment, user);
