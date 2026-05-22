@@ -5,11 +5,12 @@ import { Link, href } from "react-router";
 
 import InfoSubpage from "../../components/InfoSubpage";
 import MemberContract from "../../components/MemberContract";
+import { TocSection } from "../../components/TableOfContents";
 
 const TerminologyPage: React.FC = () => {
   useWhiteBackground();
 
-  const tocSections = [
+  const tocSections: TocSection[] = [
     { id: "membership", label: "Membership", level: 1 },
     { id: "member-roles", label: "Roles", level: 2 },
     { id: "actions", label: "Actions", level: 1 },

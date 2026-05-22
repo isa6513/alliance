@@ -4,11 +4,12 @@ import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { Link, href } from "react-router";
 import groupPillsExample from "../../assets/group-pills-example.png";
 import InfoSubpage from "../../components/InfoSubpage";
+import { TocSection } from "../../components/TableOfContents";
 
 const GroupsGuidePage: React.FC = () => {
   useWhiteBackground();
 
-  const tocSections = [
+  const tocSections: TocSection[] = [
     { id: "about", label: "About groups", level: 1 },
     { id: "leading-a-group", label: "Group leads", level: 2 },
     { id: "responsibilities", label: "Responsibilities", level: 3 },

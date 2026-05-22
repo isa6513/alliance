@@ -1,9 +1,8 @@
 import React from "react";
-import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { Link, href } from "react-router";
-import InfoSubpage, {
-  type InfoSubpageTocSections,
-} from "../../components/InfoSubpage";
+import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
+import InfoSubpage from "../../components/InfoSubpage";
+import { TocSection } from "../../components/TableOfContents";
 
 enum Section {
   DesigningActions = "designing-actions",
@@ -16,7 +15,7 @@ enum Section {
   SubmitActionIdea = "submit-action-idea",
 }
 
-const SECTIONS: InfoSubpageTocSections = [
+const SECTIONS: TocSection[] = [
   { id: Section.DesigningActions, label: "Action design", level: 1 },
   { id: Section.InitialIdea, label: "Initial idea", level: 2 },
   { id: Section.MakingAPlan, label: "Making a plan", level: 2 },

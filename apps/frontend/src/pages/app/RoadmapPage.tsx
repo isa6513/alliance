@@ -1,13 +1,14 @@
 import React from "react";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 
-import InfoSubpage from "../../components/InfoSubpage";
 import ExampleActionCategoryList from "../../components/ExampleActionCategoryList";
+import InfoSubpage from "../../components/InfoSubpage";
+import { TocSection } from "../../components/TableOfContents";
 
 const RoadmapPage: React.FC = () => {
   useWhiteBackground();
 
-  const tocSections = [
+  const tocSections: TocSection[] = [
     { id: "experimental-phase", label: "Experimental phase", level: 3 },
     { id: "public-launch", label: "Public launch", level: 3 },
     { id: "current-activities", label: "Current activities", level: 3 },
