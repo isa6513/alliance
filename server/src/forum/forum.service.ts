@@ -260,6 +260,7 @@ export class ForumService {
       .leftJoinAndSelect('post.action', 'action')
       .leftJoinAndSelect('post.editableContent', 'editableContent')
       .leftJoinAndSelect('post.authors', 'authors')
+      .leftJoinAndSelect('post.likes', 'likes')
       .where('post.id = :id', { id });
     this.addPostVisibilityFilter(qb, 'post', userId);
     const post = await qb.getOne();
