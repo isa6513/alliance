@@ -93,45 +93,46 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     );
   }
 
+  const canSubmit = canCompleteAction(action) || forceRenderTask;
+
   let completionElement = null;
-  if (canCompleteAction(action) || forceRenderTask) {
-    if (action.type === "Activity" && action.taskFormId) {
-      completionElement = (
-        <ActionTaskPanelForm
-          publicAction={action.publicOnly || guestMode}
-          taskFormId={action.taskFormId}
-          onCompleteAction={handleCompleteWithTracking}
-          onFormStarted={handleFormStarted}
-          onAbandonAction={handleAbandonAction}
-          card={card}
-          actionId={action.id}
-          redirectOnComplete={redirectOnComplete}
-          onSubmitted={onFormSubmitted}
-          scrollContainerRef={scrollContainerRef}
-        />
-      );
-    }
-    if (action.type === "Activity" && !action.taskFormId) {
-      completionElement = <p>Couldn&apos;t load action contents</p>;
-    }
-    if (action.type === "Ongoing") {
-      completionElement = (
-        <ActionTaskPanelActivity
-          action={action}
-          onCompleteAction={handleCompleteWithTracking}
-          disabled={disabled}
-          createAccountHref={guestMode ? createAccountHref : undefined}
-        />
-      );
-    }
-    if (completionElement) {
-      return (
-        <>
-          {completionElement}
-          {errorMessageNode}
-        </>
-      );
-    }
+  if (action.type === "Activity" && action.taskFormId) {
+    completionElement = (
+      <ActionTaskPanelForm
+        publicAction={action.publicOnly || guestMode}
+        taskFormId={action.taskFormId}
+        onCompleteAction={canSubmit ? handleCompleteWithTracking : null}
+        onFormStarted={handleFormStarted}
+        onAbandonAction={handleAbandonAction}
+        card={card}
+        actionId={action.id}
+        redirectOnComplete={redirectOnComplete}
+        onSubmitted={onFormSubmitted}
+        scrollContainerRef={scrollContainerRef}
+        disabled={disabled || !canSubmit}
+      />
+    );
+  }
+  if (action.type === "Activity" && !action.taskFormId) {
+    completionElement = <p>Couldn&apos;t load action contents</p>;
+  }
+  if (action.type === "Ongoing" && (canSubmit || forceRenderTask)) {
+    completionElement = (
+      <ActionTaskPanelActivity
+        action={action}
+        onCompleteAction={handleCompleteWithTracking}
+        disabled={disabled || !canSubmit}
+        createAccountHref={guestMode ? createAccountHref : undefined}
+      />
+    );
+  }
+  if (completionElement) {
+    return (
+      <>
+        {completionElement}
+        {errorMessageNode}
+      </>
+    );
   }
 
   if (action.status === "draft") {

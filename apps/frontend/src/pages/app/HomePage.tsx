@@ -434,8 +434,7 @@ const HomePage = () => {
           <p className="text-title">Tasks</p>
           {taskNavigatorListContent}
 
-          {selectedTaskNavigatorItem?.kind === "action" &&
-          selectedTaskNavigatorItem.action.userRelation ? (
+          {selectedTaskNavigatorItem?.kind === "action" ? (
             <LargeActionCard
               action={selectedTaskNavigatorItem.action}
               dismissProps={
@@ -449,7 +448,9 @@ const HomePage = () => {
                     }
                   : undefined
               }
-              userRelation={selectedTaskNavigatorItem.action.userRelation}
+              userRelation={
+                selectedTaskNavigatorItem.action.userRelation ?? "none"
+              }
               onCompleteAction={() => {
                 queryClient.setQueryData<ActionDto[] | undefined>(
                   ["actions"],

@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState, type RefObject } from "react";
-import { href, useNavigate } from "react-router";
+import { href, Link, useNavigate } from "react-router";
 import { cn } from "@alliance/shared/styles/util";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ActionTaskPanel from "../../components/ActionTaskPanel";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 import TaskTimeInfo from "./TaskTimeInfo";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { useAuth } from "../../lib/AuthContext";
+import { taskHeaders } from "@alliance/shared/lib/copy";
 import {
   getNextEvent,
   LargeActionCardPropsShared,
@@ -46,6 +48,10 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   scrollContainerRef,
 }: LargeActionCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const contractSigned = user?.hasActiveContract ?? false;
+  const mustSignContractFirst =
+    action.onboarding && !contractSigned && !action.isContractSigningAction;
 
   const [state, setState] = useState<LargeActionCardState>(
     LargeActionCardState.Default,
@@ -134,12 +140,25 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             textSize="base"
           />
           <div className="mt-6 border-t border-zinc-200 pt-6">
+            {mustSignContractFirst && (
+              <div className="mb-4 flex flex-row justify-between items-center gap-x-2 rounded-md border border-zinc-200 bg-zinc-50 p-4">
+                <p>{taskHeaders.actionPage.onboardingSignContractFirst}</p>
+                <Link
+                  to="/tasks"
+                  className="text-green flex items-center gap-x-2 shrink-0"
+                >
+                  Go back
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
             <ActionTaskPanel
               action={action}
               userRelation={userRelation}
               onCompleteAction={handleCompleteAction}
               onOptOutAction={handleUpdateActionState}
               scrollContainerRef={scrollContainerRef}
+              disabled={mustSignContractFirst}
             />
           </div>
         </div>
