@@ -85,7 +85,7 @@ const ExpertDescriptionPage: React.FC = () => {
                     . This plan will strategically direct members&apos;
                     collective economic, political, and social resources in
                     order to make rapid progress on humanity&apos;s most
-                    pressing global crises .
+                    pressing global crises.
                   </GuideP>
                   <GuideP>
                     We will{" "}

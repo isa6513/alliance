@@ -77,7 +77,7 @@ export const GuideOl = ({
 }: HTMLAttributes<HTMLOListElement>) => (
   <ol
     className={cn(
-      "text-base md:text-lg text-zinc-800 list-decimal list-inside first:mt-0 mt-2 md:mt-5 pl-4",
+      "text-base md:text-lg text-zinc-800 list-decimal list-inside first:mt-0 mt-3 md:mt-5 pl-4",
       className,
     )}
     {...props}
@@ -90,7 +90,7 @@ export const GuideUl = ({
 }: HTMLAttributes<HTMLUListElement>) => (
   <ul
     className={cn(
-      "text-base md:text-lg text-zinc-800 list-disc list-inside first:mt-0 mt-2 md:mt-5 pl-4",
+      "text-base md:text-lg text-zinc-800 list-disc list-inside first:mt-0 mt-3 md:mt-5 pl-4",
       className,
     )}
     {...props}
