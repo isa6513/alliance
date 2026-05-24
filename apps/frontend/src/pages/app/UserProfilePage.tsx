@@ -3,6 +3,9 @@ import {
   actionsUserCompletedCount,
 } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 import { getForumComment } from "@alliance/shared/lib/useHomeFeed";
 import {
   buildForumActivityItems,
@@ -54,9 +57,10 @@ import { useAuth } from "../../lib/AuthContext";
 import { isFeatureEnabled } from "../../lib/config";
 
 enum ProfileTabs {
-  Activity = "Actions",
+  Activity = "Activity",
   Forum = "Forum Activity",
   Friends = "Friends",
+  ActionsCompleted = "Actions Completed",
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -181,6 +185,15 @@ const UserProfilePage: React.FC = () => {
     enabled: Boolean(userId),
   });
   const completedActionCount = completedCountData?.completedCount ?? 0;
+
+  const {
+    activities: completedActivities,
+    handleLikeActivity: handleLikeCompletedActivity,
+  } = useActivities({
+    list: ActivityList.User,
+    objectId: userId,
+    comments: true,
+  });
 
   useEffect(() => {
     if (!profile || !isMe || isEditing) return;
@@ -415,11 +428,16 @@ const UserProfilePage: React.FC = () => {
           {/* stats row */}
           <div className="mt-2 flex flex-row gap-x-2 transition-none">
             <UserProfileTab
+              label="Activity"
+              selected={selectedTab === ProfileTabs.Activity}
+              onClick={() => setSelectedTab(ProfileTabs.Activity)}
+            />
+            <UserProfileTab
               number={completedActionCount}
               label={`action${completedActionCount === 1 ? "" : "s"} completed`}
               shortLabel={`action${completedActionCount === 1 ? "" : "s"}`}
-              selected={selectedTab === ProfileTabs.Activity}
-              onClick={() => setSelectedTab(ProfileTabs.Activity)}
+              selected={selectedTab === ProfileTabs.ActionsCompleted}
+              onClick={() => setSelectedTab(ProfileTabs.ActionsCompleted)}
             />
             <UserProfileTab
               number={forumActivityCount}
@@ -544,6 +562,23 @@ const UserProfilePage: React.FC = () => {
                 </div>
               )}
               <div ref={feedSentinelRef} className="h-1" />
+            </div>
+          )}
+
+          {selectedTab === ProfileTabs.ActionsCompleted && (
+            <div className="mb-10 *:p-4 flex flex-col gap-y-2">
+              {completedActivities.length === 0 && (
+                <p className="my-4 text-center text-zinc-500">
+                  No actions completed yet
+                </p>
+              )}
+              {completedActivities.map((activity) => (
+                <UserActivityCard
+                  activity={activity}
+                  key={`activity-${activity.id}`}
+                  handleLike={handleLikeCompletedActivity}
+                />
+              ))}
             </div>
           )}
 

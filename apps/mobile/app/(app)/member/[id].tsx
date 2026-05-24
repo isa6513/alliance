@@ -1,8 +1,13 @@
+import { run } from "@alliance/common/run";
 import {
+  ActionActivityDto,
   HomeFeedItemDto,
   UpdateProfileDto,
   actionsUserCompletedCount,
 } from "@alliance/shared/client";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
 import { getForumComment } from "@alliance/shared/lib/useHomeFeed";
 import useUserFeed from "@alliance/shared/lib/useUserFeed";
 import {
@@ -59,7 +64,8 @@ import { useAuth } from "../../../lib/AuthContext";
 import { colors } from "../../../lib/style/colors";
 
 enum ProfileTab {
-  Actions = "actions",
+  Activity = "activity",
+  ActionsCompleted = "actionsCompleted",
   Forum = "forum",
   Friends = "friends",
 }
@@ -71,12 +77,14 @@ enum FriendsTab {
 }
 
 const PROFILE_TABS_ORDER: ProfileTab[] = [
-  ProfileTab.Actions,
+  ProfileTab.Activity,
+  ProfileTab.ActionsCompleted,
   ProfileTab.Forum,
   ProfileTab.Friends,
 ];
 const PROFILE_TAB_LABELS: Record<ProfileTab, string> = {
-  [ProfileTab.Actions]: "Actions",
+  [ProfileTab.Activity]: "Activity",
+  [ProfileTab.ActionsCompleted]: "Actions",
   [ProfileTab.Forum]: "Posts",
   [ProfileTab.Friends]: "Friends",
 };
@@ -140,11 +148,11 @@ export default function UserProfileScreen() {
   });
 
   const [selectedTab, setSelectedTab] = useState<ProfileTab>(
-    ProfileTab.Actions,
+    ProfileTab.Activity,
   );
 
   const onFeedEndReached = useCallback(() => {
-    if (selectedTab !== ProfileTab.Actions) return;
+    if (selectedTab !== ProfileTab.Activity) return;
     if (feedHasNextPage && !feedFetchingNextPage) {
       void fetchNextFeedPage();
     }
@@ -175,6 +183,15 @@ export default function UserProfileScreen() {
     [forumPosts, forumComments],
   );
 
+  const {
+    activities: completedActivities,
+    handleLikeActivity: handleLikeCompletedActivity,
+  } = useActivities({
+    list: ActivityList.User,
+    objectId: userId,
+    comments: true,
+  });
+
   useEffect(() => {
     if (!profile || !isMe || isEditing) return;
 
@@ -184,7 +201,7 @@ export default function UserProfileScreen() {
   }, [profile, isMe, isEditing]);
 
   useEffect(() => {
-    setSelectedTab(ProfileTab.Actions);
+    setSelectedTab(ProfileTab.Activity);
     setFriendsTab(FriendsTab.Friends);
     setIsEditing(false);
   }, [userId]);
@@ -438,6 +455,18 @@ export default function UserProfileScreen() {
     [handleLikeActivity, handleLikeForumComment],
   );
 
+  const renderCompletedActivityItem = useCallback(
+    ({ item }: { item: ActionActivityDto }) => (
+      <View className="border-b border-zinc-200">
+        <UserActivityCard
+          activity={item}
+          handleLike={handleLikeCompletedActivity}
+        />
+      </View>
+    ),
+    [handleLikeCompletedActivity],
+  );
+
   const renderForumItem = useCallback(
     ({ item }: { item: ForumActivityItem }) => {
       if (item.type === "post") {
@@ -581,16 +610,35 @@ export default function UserProfileScreen() {
   );
 
   const listData = useMemo((): any[] => {
-    if (selectedTab === ProfileTab.Actions) return feedItems;
-    if (selectedTab === ProfileTab.Forum) return forumActivityItems;
-    if (friendsTab === FriendsTab.Received && isMe) return receivedRequests;
-    if (friendsTab === FriendsTab.Sent && isMe) return sentRequests;
-    return friends;
+    switch (selectedTab) {
+      case ProfileTab.Activity:
+        return feedItems;
+      case ProfileTab.ActionsCompleted:
+        return completedActivities;
+      case ProfileTab.Forum:
+        return forumActivityItems;
+      case ProfileTab.Friends:
+        switch (friendsTab) {
+          case FriendsTab.Received:
+            return isMe ? receivedRequests : friends;
+          case FriendsTab.Sent:
+            return isMe ? sentRequests : friends;
+          case FriendsTab.Friends:
+            return friends;
+          default:
+            throw new Error(
+              `Unknown friends tab: ${friendsTab satisfies never}`,
+            );
+        }
+      default:
+        throw new Error(`Unknown profile tab: ${selectedTab satisfies never}`);
+    }
   }, [
     selectedTab,
     friendsTab,
     isMe,
     feedItems,
+    completedActivities,
     forumActivityItems,
     receivedRequests,
     sentRequests,
@@ -599,38 +647,69 @@ export default function UserProfileScreen() {
 
   const listKeyExtractor = useCallback(
     (item: any) => {
-      if (selectedTab === ProfileTab.Actions) {
-        const feedItem = item as HomeFeedItemDto;
-        if (feedItem.type === "activity") {
-          return `activity-${feedItem.activity?.id}`;
+      switch (selectedTab) {
+        case ProfileTab.Activity: {
+          const feedItem = item as HomeFeedItemDto;
+          if (feedItem.type === "activity") {
+            return `activity-${feedItem.activity?.id}`;
+          }
+          return `comment-${getForumComment(feedItem)?.comment.id}`;
         }
-        return `comment-${getForumComment(feedItem)?.comment.id}`;
+        case ProfileTab.ActionsCompleted:
+          return `activity-${(item as ActionActivityDto).id}`;
+        case ProfileTab.Forum:
+          return item.type === "post"
+            ? `post-${item.post.id}`
+            : `comment-${item.comment.id}`;
+        case ProfileTab.Friends:
+          return item.id.toString();
+        default:
+          throw new Error(
+            `Unknown profile tab: ${selectedTab satisfies never}`,
+          );
       }
-      if (selectedTab === ProfileTab.Forum) {
-        return item.type === "post"
-          ? `post-${item.post.id}`
-          : `comment-${item.comment.id}`;
-      }
-      return item.id.toString();
     },
     [selectedTab],
   );
 
   const listRenderItem = useCallback(
     ({ item }: { item: any }) => {
-      if (selectedTab === ProfileTab.Actions) return renderActionItem({ item });
-      if (selectedTab === ProfileTab.Forum) return renderForumItem({ item });
-      if (friendsTab === FriendsTab.Received && isMe)
-        return renderReceivedItem({ item });
-      if (friendsTab === FriendsTab.Sent && isMe)
-        return renderSentItem({ item });
-      return renderFriendItem({ item });
+      switch (selectedTab) {
+        case ProfileTab.Activity:
+          return renderActionItem({ item });
+        case ProfileTab.ActionsCompleted:
+          return renderCompletedActivityItem({ item });
+        case ProfileTab.Forum:
+          return renderForumItem({ item });
+        case ProfileTab.Friends:
+          switch (friendsTab) {
+            case FriendsTab.Received:
+              return isMe
+                ? renderReceivedItem({ item })
+                : renderFriendItem({ item });
+            case FriendsTab.Sent:
+              return isMe
+                ? renderSentItem({ item })
+                : renderFriendItem({ item });
+            case FriendsTab.Friends:
+              return renderFriendItem({ item });
+            default:
+              throw new Error(
+                `Unknown friends tab: ${friendsTab satisfies never}`,
+              );
+          }
+        default:
+          throw new Error(
+            `Unknown profile tab: ${selectedTab satisfies never}`,
+          );
+      }
     },
     [
       selectedTab,
       friendsTab,
       isMe,
       renderActionItem,
+      renderCompletedActivityItem,
       renderForumItem,
       renderReceivedItem,
       renderSentItem,
@@ -639,38 +718,39 @@ export default function UserProfileScreen() {
   );
 
   const listEmptyComponent = useMemo(() => {
-    if (selectedTab === ProfileTab.Actions) {
-      return (
-        <Text className="text-center text-zinc-500 py-6 px-4">
-          No activity yet
-        </Text>
-      );
+    const friendsEmptyMessage = (): string => {
+      switch (friendsTab) {
+        case FriendsTab.Received:
+          return isMe ? "No incoming requests." : "No friends yet.";
+        case FriendsTab.Sent:
+          return isMe ? "No outgoing requests." : "No friends yet.";
+        case FriendsTab.Friends:
+          return "No friends yet.";
+        default:
+          throw new Error(`Unknown friends tab: ${friendsTab satisfies never}`);
+      }
+    };
+
+    let message: string;
+    switch (selectedTab) {
+      case ProfileTab.Activity:
+        message = "No activity yet";
+        break;
+      case ProfileTab.ActionsCompleted:
+        message = "No actions completed yet";
+        break;
+      case ProfileTab.Forum:
+        message = "No forum activity yet";
+        break;
+      case ProfileTab.Friends:
+        message = friendsEmptyMessage();
+        break;
+      default:
+        throw new Error(`Unknown profile tab: ${selectedTab satisfies never}`);
     }
-    if (selectedTab === ProfileTab.Forum) {
-      return (
-        <Text className="text-center text-zinc-500 py-6 px-4">
-          No forum activity yet
-        </Text>
-      );
-    }
-    if (friendsTab === FriendsTab.Received && isMe) {
-      return (
-        <Text className="text-center text-zinc-500 py-6 px-4">
-          No incoming requests.
-        </Text>
-      );
-    }
-    if (friendsTab === FriendsTab.Sent && isMe) {
-      return (
-        <Text className="text-center text-zinc-500 py-6 px-4">
-          No outgoing requests.
-        </Text>
-      );
-    }
+
     return (
-      <Text className="text-center text-zinc-500 py-6 px-4">
-        No friends yet.
-      </Text>
+      <Text className="text-center text-zinc-500 py-6 px-4">{message}</Text>
     );
   }, [selectedTab, friendsTab, isMe]);
 
@@ -887,9 +967,28 @@ export default function UserProfileScreen() {
 
   const listFooter = (
     <>
-      {selectedTab === ProfileTab.Actions && feedFetchingNextPage && (
-        <Text className="text-center text-zinc-400 py-4">Loading more...</Text>
-      )}
+      {run(() => {
+        switch (selectedTab) {
+          case ProfileTab.Activity: {
+            if (feedFetchingNextPage) {
+              return (
+                <Text className="text-center text-zinc-400 py-4">
+                  Loading more...
+                </Text>
+              );
+            }
+            return null;
+          }
+          case ProfileTab.ActionsCompleted:
+          case ProfileTab.Forum:
+          case ProfileTab.Friends:
+            return null;
+          default:
+            throw new Error(
+              `Unknown profile tab: ${selectedTab satisfies never}`,
+            );
+        }
+      })}
       <View className="h-16" />
     </>
   );
