@@ -238,6 +238,32 @@ const ExpertDescriptionPage: React.FC = () => {
                   </GuideP>
 
                   <GuideP>
+                    In devising actions, we will be able to draw inspiration
+                    from many analogous efforts, such as grassroots activist
+                    organizations, citizen science projects, and political
+                    campaigns. However, our action development process will
+                    differ from other efforts in several ways.
+                  </GuideP>
+
+                  <GuideP>
+                    The most important difference is that, as a result of having
+                    a reliable, continuous membership who lend a predictable
+                    amount of time and resources, we can plan actions with high
+                    precision and run them at a rapid pace. To take full
+                    advantage of this fact, we will also aim to evaluate the
+                    effectiveness of our actions with scientific rigor, and
+                    learn systematically over time as we experiment with
+                    different strategies.
+                  </GuideP>
+
+                  <GuideP>
+                    We want to answer the general question: how best to make use
+                    of the time and resources of our members? We believe this
+                    difference opens up a vast space of possibilities for
+                    actions that are as-of-yet unexplored.
+                  </GuideP>
+
+                  <GuideP>
                     Each action will be unique. However, templates include
                     raising funds, changing consumer behavior, concentrating
                     social pressure, educating members, and coordinating
