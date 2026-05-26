@@ -339,15 +339,18 @@ const ExpertDescriptionPage: React.FC = () => {
 
                   <GuideH2>Leaving</GuideH2>
                   <GuideP>
-                    Membership in the Alliance is voluntary. All power that the
-                    Alliance holds is continuously, explicitly entrusted to it
-                    by members. Members who substantially disapprove of the
+                    Membership in the Alliance is voluntary; this means that any
+                    power that the Alliance has is continuously, explicitly
+                    entrusted to it by members. Members who disapprove of the
                     Alliance can easily leave.
                   </GuideP>
 
                   <GuideP>
                     As a result, the basic structure of the Alliance holds the
-                    office accountable to members.
+                    office accountable to members. We hope that this
+                    accountability will drive the office to deeply understand
+                    members&apos; preferences and values, and to make decisions
+                    that align with them.
                   </GuideP>
 
                   <GuideH2>Expressing disapproval</GuideH2>
@@ -550,9 +553,9 @@ const ExpertDescriptionPage: React.FC = () => {
                     </GuideLi>
                   </GuideUl>
                   <GuideP>
-                    <GuideStrong>With 10-100M members</GuideStrong>, we will
-                    drastically alter the world&apos;s political and economic
-                    incentives. For example, we could:
+                    <GuideStrong>With 10-100M members</GuideStrong>, we may be
+                    able to drastically alter the world&apos;s political and
+                    economic incentives. For example, we could:
                   </GuideP>
                   <GuideUl>
                     <GuideLi>
@@ -571,7 +574,7 @@ const ExpertDescriptionPage: React.FC = () => {
                     </GuideLi>
                   </GuideUl>
                   <GuideP>
-                    With 1B+ members, the Alliance could{" "}
+                    With 1B+ members, the Alliance could potentially{" "}
                     <GuideStrong>
                       resolve certain global crises in their entirety
                     </GuideStrong>{" "}
