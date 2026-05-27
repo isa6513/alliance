@@ -6,13 +6,13 @@ import {
   TagDto,
   VisibilityMode,
 } from "@alliance/shared/client";
-import type { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
-import React, { useMemo, useRef } from "react";
-import FormTextarea from "./FormTextarea";
-import { cn } from "@alliance/shared/styles/util";
-import CohortExpressionBuilder from "./CohortExpressionBuilder";
 import type { CohortExpression } from "@alliance/shared/cohort-expression.types";
+import { cn } from "@alliance/shared/styles/util";
+import type { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import UserSelect from "@alliance/sharedweb/ui/UserSelect";
+import React, { useMemo, useRef } from "react";
+import CohortExpressionBuilder from "./CohortExpressionBuilder";
+import FormTextarea from "./FormTextarea";
 
 interface ActionFormProps {
   form: CreateActionDto;
@@ -330,6 +330,25 @@ const ActionForm: React.FC<ActionFormProps> = ({
         section: "settings",
         helpText:
           "Autocomplete action for users who leave comment but dont hit complete",
+      },
+      {
+        name: "forumParticipationPostId",
+        label: "Forum Post ID (override)",
+        type: "number",
+        section: "settings",
+        gridCol: true,
+        show: (f) => !!f.isForumParticipationAction,
+        helpText:
+          "Autocomplete based on replies to this post, ignoring any forum validator on the form. Leave blank to use the form's validator.",
+      },
+      {
+        name: "forumParticipationIncludeChildren",
+        label: "Include child replies",
+        type: "checkbox",
+        section: "settings",
+        show: (f) => !!f.isForumParticipationAction,
+        helpText:
+          "Also count replies to nested child posts of the override post",
       },
     ],
     [

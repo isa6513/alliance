@@ -11,8 +11,9 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/datasources/basecolumns';
-import type { Relation } from 'src/utils/Repository';
 import { User } from 'src/user/entities/user.entity';
+import { findLeast } from 'src/utils/filter';
+import type { Relation } from 'src/utils/Repository';
 import {
   Column,
   Entity,
@@ -23,14 +24,13 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
+import type { CohortExpression } from '../cohort-expression.types';
 import { ActionActivity } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 import { ActionFormVariant } from './action-form-variant.entity';
 import { ActionSuite } from './action-suite.entity';
 import { ActionUpdate } from './action-update.entity';
 import { FollowUpForm } from './follow-up-form.entity';
-import { findLeast } from 'src/utils/filter';
-import type { CohortExpression } from '../cohort-expression.types';
 
 export enum CustomActionStat {
   NONE = 'none',
@@ -250,6 +250,23 @@ export class Action {
   })
   @Allow()
   isForumParticipationAction: boolean;
+
+  @Column({ type: 'int', nullable: true })
+  @ApiPropertyOptional({
+    description:
+      'Manual override: forum post id whose repliers should be autocompleted. ' +
+      'When set, takes precedence over any forum validator on the task form.',
+  })
+  @IsOptional()
+  forumParticipationPostId?: number;
+
+  @Column({ default: false })
+  @ApiPropertyOptional({
+    description:
+      'When using forumParticipationPostId, also count replies to nested child posts',
+  })
+  @IsOptional()
+  forumParticipationIncludeChildren?: boolean;
 
   @Column({ type: 'timestamptz', nullable: true })
   @ApiPropertyOptional({

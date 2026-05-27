@@ -176,8 +176,15 @@ describe('ForumActionCompleterWorker (e2e)', () => {
   const createActionWithEvents = async (params: {
     formId: number;
     now: Date;
+    forumParticipationPostId?: number;
+    forumParticipationIncludeChildren?: boolean;
   }) => {
-    const { formId, now } = params;
+    const {
+      formId,
+      now,
+      forumParticipationPostId,
+      forumParticipationIncludeChildren,
+    } = params;
     const action = await actionRepo.save(
       actionRepo.create({
         name: 'Forum Action',
@@ -189,6 +196,8 @@ describe('ForumActionCompleterWorker (e2e)', () => {
         shouldCompleteAfterDeadline: false,
         visibilityMode: VisibilityMode.Public,
         isForumParticipationAction: true,
+        forumParticipationPostId,
+        forumParticipationIncludeChildren,
         taskFormId: formId,
         cohortExpression: { type: 'Tag', tagId: ctx.defaultTag.id },
       }),
@@ -433,5 +442,116 @@ describe('ForumActionCompleterWorker (e2e)', () => {
     });
     expect(completions).toHaveLength(1);
     expect(completions[0].userId).toBe(responder.id);
+  });
+
+  it('uses the manual post override instead of the form validator', async () => {
+    const now = new Date();
+    const overrideResponder = await createUser(
+      'override@example.com',
+      'Override Responder',
+    );
+    const validatorResponder = await createUser(
+      'validator@example.com',
+      'Validator Responder',
+    );
+
+    const postAuthor = await userRepo.findOneOrFail({
+      where: { id: ctx.adminUserId },
+    });
+    const validatorPost = await createPost(postAuthor, 'Validator Thread');
+    const overridePost = await createPost(postAuthor, 'Override Thread');
+
+    // Form points at validatorPost, but the action overrides to overridePost.
+    const validator = await createForumValidator(
+      CustomValidatorType.RepliedToForumPost,
+      validatorPost.id,
+    );
+    const form = await createFormWithValidator(validator.id);
+
+    const action = await createActionWithEvents({
+      formId: form.id,
+      now,
+      forumParticipationPostId: overridePost.id,
+    });
+
+    await createComment({
+      author: overrideResponder,
+      post: overridePost,
+      body: 'Reply on the override post',
+    });
+    await createComment({
+      author: validatorResponder,
+      post: validatorPost,
+      body: 'Reply on the validator post',
+    });
+
+    await worker.autocompleteForumActions();
+
+    const completions = await activityRepo.find({
+      where: { actionId: action.id, type: ActionActivityType.USER_COMPLETED },
+    });
+    const completionIds = completions.map((activity) => activity.userId);
+
+    expect(completionIds).toContain(overrideResponder.id);
+    expect(completionIds).not.toContain(validatorResponder.id);
+  });
+
+  it('includes child replies when the override sets includeChildren', async () => {
+    const now = new Date();
+    const childResponder = await createUser(
+      'override-child@example.com',
+      'Override Child Responder',
+    );
+
+    const postAuthor = await userRepo.findOneOrFail({
+      where: { id: ctx.adminUserId },
+    });
+    const overridePost = await createPost(postAuthor, 'Override Child Thread');
+
+    // Form has no forum validator at all — only the override drives this.
+    const { form } = await createFormWithSnapshot(ctx.dataSource, {
+      title: 'No Validator Form',
+      schema: {
+        title: 'No Validator Form',
+        pages: [],
+        outputViews: [],
+        aggregateViews: [],
+      },
+    });
+
+    const action = await createActionWithEvents({
+      formId: form.id,
+      now,
+      forumParticipationPostId: overridePost.id,
+      forumParticipationIncludeChildren: true,
+    });
+
+    const nonCohortCommenter = await userRepo.save(
+      userRepo.create({
+        email: 'override-child-top@example.com',
+        password: 'pass',
+        name: 'Override Child Top',
+        tags: [],
+      }),
+    );
+    const topLevelComment = await createComment({
+      author: nonCohortCommenter,
+      post: overridePost,
+      body: 'Top level',
+    });
+    await createComment({
+      author: childResponder,
+      post: overridePost,
+      body: 'Child reply',
+      parentId: topLevelComment.id,
+    });
+
+    await worker.autocompleteForumActions();
+
+    const completions = await activityRepo.find({
+      where: { actionId: action.id, type: ActionActivityType.USER_COMPLETED },
+    });
+    expect(completions).toHaveLength(1);
+    expect(completions[0].userId).toBe(childResponder.id);
   });
 });

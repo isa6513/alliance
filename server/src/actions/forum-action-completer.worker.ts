@@ -144,42 +144,53 @@ export class ForumActionCompleterWorker {
       return [];
     }
 
-    const forumValidator = await this.findForumValidator(form);
-    if (!forumValidator) {
-      if (shouldWrite) {
-        this.logger.warn(
-          `Action ${action.id} task form ${form.id} has no forum validator`,
-        );
-        await this.markComputed(action.id, runAt);
+    let postId: number;
+    let replyMatchType: CustomValidatorType;
+
+    if (action.forumParticipationPostId != null) {
+      // Manual override takes precedence over any forum validator on the form.
+      postId = action.forumParticipationPostId;
+      replyMatchType = action.forumParticipationIncludeChildren
+        ? CustomValidatorType.RepliedToForumPostOrChild
+        : CustomValidatorType.RepliedToForumPost;
+    } else {
+      const forumValidator = await this.findForumValidator(form);
+      if (!forumValidator) {
+        if (shouldWrite) {
+          this.logger.warn(
+            `Action ${action.id} task form ${form.id} has no forum validator`,
+          );
+          await this.markComputed(action.id, runAt);
+        }
+        return [];
       }
-      return [];
+
+      if (!forumValidator.idArgument) {
+        if (shouldWrite) {
+          this.logger.warn(
+            `Action ${action.id} forum validator ${forumValidator.id} has no id argument`,
+          );
+          await this.markComputed(action.id, runAt);
+        }
+        return [];
+      }
+
+      const parsedPostId = Number(forumValidator.idArgument);
+      if (!Number.isFinite(parsedPostId)) {
+        if (shouldWrite) {
+          this.logger.warn(
+            `Action ${action.id} forum validator ${forumValidator.id} has invalid post id ${forumValidator.idArgument}`,
+          );
+          await this.markComputed(action.id, runAt);
+        }
+        return [];
+      }
+
+      postId = parsedPostId;
+      replyMatchType = forumValidator.type;
     }
 
-    if (!forumValidator.idArgument) {
-      if (shouldWrite) {
-        this.logger.warn(
-          `Action ${action.id} forum validator ${forumValidator.id} has no id argument`,
-        );
-        await this.markComputed(action.id, runAt);
-      }
-      return [];
-    }
-
-    const postId = Number(forumValidator.idArgument);
-    if (!Number.isFinite(postId)) {
-      if (shouldWrite) {
-        this.logger.warn(
-          `Action ${action.id} forum validator ${forumValidator.id} has invalid post id ${forumValidator.idArgument}`,
-        );
-        await this.markComputed(action.id, runAt);
-      }
-      return [];
-    }
-
-    const replyAuthorIds = await this.getReplyAuthorIds(
-      postId,
-      forumValidator.type,
-    );
+    const replyAuthorIds = await this.getReplyAuthorIds(postId, replyMatchType);
 
     if (replyAuthorIds.size === 0) {
       if (shouldWrite) {

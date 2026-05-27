@@ -242,6 +242,8 @@ export class ActionDto extends PickType(Action, [
   'publicOnly',
   'shouldCompleteAfterDeadline',
   'isForumParticipationAction',
+  'forumParticipationPostId',
+  'forumParticipationIncludeChildren',
   'computedAutocompleteAt',
   'customStatType',
   'customStatLabel',

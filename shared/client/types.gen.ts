@@ -447,6 +447,14 @@ export type Action = {
      */
     isForumParticipationAction: boolean;
     /**
+     * Manual override: forum post id whose repliers should be autocompleted. When set, takes precedence over any forum validator on the task form.
+     */
+    forumParticipationPostId?: number;
+    /**
+     * When using forumParticipationPostId, also count replies to nested child posts
+     */
+    forumParticipationIncludeChildren?: boolean;
+    /**
      * Date and time when the action was computed for autocomplete
      */
     computedAutocompleteAt?: string;
@@ -1579,6 +1587,14 @@ export type ActionDto = {
      */
     isForumParticipationAction: boolean;
     /**
+     * Manual override: forum post id whose repliers should be autocompleted. When set, takes precedence over any forum validator on the task form.
+     */
+    forumParticipationPostId?: number;
+    /**
+     * When using forumParticipationPostId, also count replies to nested child posts
+     */
+    forumParticipationIncludeChildren?: boolean;
+    /**
      * Date and time when the action was computed for autocomplete
      */
     computedAutocompleteAt?: string;
@@ -1970,6 +1986,14 @@ export type CreateActionDto = {
      */
     isForumParticipationAction: boolean;
     /**
+     * Manual override: forum post id whose repliers should be autocompleted. When set, takes precedence over any forum validator on the task form.
+     */
+    forumParticipationPostId?: number;
+    /**
+     * When using forumParticipationPostId, also count replies to nested child posts
+     */
+    forumParticipationIncludeChildren?: boolean;
+    /**
      * Date and time when the action was computed for autocomplete
      */
     computedAutocompleteAt?: string;
@@ -2067,6 +2091,14 @@ export type UpdateActionDto = {
      * Whether to autocomplete action based on forum participation
      */
     isForumParticipationAction?: boolean;
+    /**
+     * Manual override: forum post id whose repliers should be autocompleted. When set, takes precedence over any forum validator on the task form.
+     */
+    forumParticipationPostId?: number;
+    /**
+     * When using forumParticipationPostId, also count replies to nested child posts
+     */
+    forumParticipationIncludeChildren?: boolean;
     /**
      * Date and time when the action was computed for autocomplete
      */
@@ -2361,6 +2393,14 @@ export type ExportActionDto = {
      * Whether to autocomplete action based on forum participation
      */
     isForumParticipationAction: boolean;
+    /**
+     * Manual override: forum post id whose repliers should be autocompleted. When set, takes precedence over any forum validator on the task form.
+     */
+    forumParticipationPostId?: number;
+    /**
+     * When using forumParticipationPostId, also count replies to nested child posts
+     */
+    forumParticipationIncludeChildren?: boolean;
     /**
      * Date and time when the action was computed for autocomplete
      */
