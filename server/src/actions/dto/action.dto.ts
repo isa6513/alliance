@@ -326,6 +326,9 @@ export class ActionDto extends PickType(Action, [
     this.publicOnly = action.publicOnly;
     this.shouldCompleteAfterDeadline = action.shouldCompleteAfterDeadline;
     this.isForumParticipationAction = action.isForumParticipationAction;
+    this.forumParticipationPostId = action.forumParticipationPostId;
+    this.forumParticipationIncludeChildren =
+      action.forumParticipationIncludeChildren;
     this.computedAutocompleteAt = action.computedAutocompleteAt;
     this.customStatType = action.customStatType;
     this.customStatLabel = action.customStatLabel;
