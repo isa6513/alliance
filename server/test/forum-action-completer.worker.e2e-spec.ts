@@ -215,7 +215,7 @@ describe('ForumActionCompleterWorker (e2e)', () => {
         title: 'Resolution phase',
         description: 'Action deadline',
         newStatus: ActionStatus.Resolution,
-        date: addMinutes(now, 60),
+        date: addMinutes(now, 5),
         action,
       }),
     ]);

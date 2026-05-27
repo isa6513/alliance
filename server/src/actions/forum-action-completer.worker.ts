@@ -33,7 +33,7 @@ import { Action } from './entities/action.entity';
 
 const [PROCESS_ONE_LOCK_KEY1, PROCESS_ONE_LOCK_KEY2] =
   LOCK_KEYS.forumActionCompleter;
-const AUTOCOMPLETE_TARGET_OFFSET_MS = 60 * 60 * 1000;
+const AUTOCOMPLETE_TARGET_OFFSET_MS = 5 * 60 * 1000;
 const AUTOCOMPLETE_WINDOW_MS = 5 * 60 * 1000;
 
 @Injectable()
