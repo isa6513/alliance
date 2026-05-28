@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LiveActivityRegistration } from 'src/apns/entities/live-activity-registration.entity';
 import { CommunityService } from 'src/community/community.service';
+import { getCommunityFreeSlots } from 'src/community/community.utils';
 import { Community } from 'src/community/entities/community.entity';
 import { ALL_MEMBERS_TAG_NAME } from 'src/constants';
 import { EventType } from 'src/eventlog/event-log.entity';
@@ -1349,7 +1350,7 @@ export class UserService {
     const allowedMemberCounts = new Map<number, number>(
       communities.map((community) => [
         community.id,
-        community.maxCapacity! - community.users.length,
+        getCommunityFreeSlots(community),
       ]),
     );
     for (const { communityId } of body.assignments) {
