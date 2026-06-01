@@ -40,6 +40,7 @@ import {
 import type { JwtRequest } from './guards/jwtreq';
 import { RefreshTokenGuard } from './guards/refresh.guard';
 import { Public } from './public.decorator';
+import { SIGNUP_THROTTLE } from './signup-throttle.config';
 
 class TokenModeQuery {
   @ApiPropertyOptional({ enum: ['cookie', 'header'] })
@@ -112,8 +113,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(ThrottlerGuard)
-  @Throttle({ signup: { limit: 20, ttl: 60 * 60 * 1000 } })
-  @Throttle({ signup: { limit: 5, ttl: 60 * 1000 } })
+  @Throttle(SIGNUP_THROTTLE)
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiResponse({

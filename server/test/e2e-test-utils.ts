@@ -1,28 +1,30 @@
+import { FormSchema } from '@alliance/common/forms/form-schema';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { INestApplication, Type, ValidationPipe } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { AuthModule } from '../src/auth/auth.module';
-import { ActionsModule } from '../src/actions/actions.module';
-import { ContractModule } from '../src/contract/contract.module';
-import { UserModule } from '../src/user/user.module';
-import { ReferralSource, User } from '../src/user/entities/user.entity';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import TestAgent from 'supertest/lib/agent';
-import supertest from 'supertest';
+import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import cookieParser from 'cookie-parser';
-import { NotifsModule } from 'src/notifs/notifs.module';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { testConnectionOptions } from 'src/datasources/dataSourceTest';
-import { Tag } from 'src/user/entities/tag.entity';
-import { ForumModule } from 'src/forum/forum.module';
 import { Contract } from 'src/contract/entities/contract.entity';
+import { testConnectionOptions } from 'src/datasources/dataSourceTest';
+import { ForumModule } from 'src/forum/forum.module';
+import { NotifsModule } from 'src/notifs/notifs.module';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormSnapshot } from 'src/tasks/entities/formsnapshot.entity';
 import { FormSnapshotService } from 'src/tasks/formsnapshot.service';
-import { FormSchema } from '@alliance/common/forms/form-schema';
+import { Tag } from 'src/user/entities/tag.entity';
+import supertest from 'supertest';
+import TestAgent from 'supertest/lib/agent';
+import { DataSource } from 'typeorm';
+import { ActionsModule } from '../src/actions/actions.module';
+import { AuthModule } from '../src/auth/auth.module';
+import { SIGNUP_THROTTLERS } from '../src/auth/signup-throttle.config';
+import { ContractModule } from '../src/contract/contract.module';
+import { ReferralSource, User } from '../src/user/entities/user.entity';
+import { UserModule } from '../src/user/user.module';
 
 export interface TestContext {
   app: INestApplication;
@@ -53,6 +55,7 @@ export async function createTestApp(
         template: {},
       }),
       EventEmitterModule.forRoot(),
+      ThrottlerModule.forRoot(SIGNUP_THROTTLERS),
       TypeOrmModule.forRoot(testConnectionOptions()),
       AuthModule,
       ForumModule,

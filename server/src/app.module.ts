@@ -14,6 +14,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { ApnsModule } from './apns/apns.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
+import { SIGNUP_THROTTLERS } from './auth/signup-throttle.config';
 import { ClusterModule } from './cluster/cluster.module';
 import { CommunityModule } from './community/community.module';
 import { ContractModule } from './contract/contract.module';
@@ -64,9 +65,7 @@ import { VideosModule } from './videos/videos.module';
       storage: multer.memoryStorage(),
     }),
     EventEmitterModule.forRoot(),
-    ThrottlerModule.forRoot([
-      { name: 'signup', limit: 5, ttl: 60 * 60 * 1000 },
-    ]),
+    ThrottlerModule.forRoot(SIGNUP_THROTTLERS),
     AuthModule,
     UserModule,
     CommunityModule,
