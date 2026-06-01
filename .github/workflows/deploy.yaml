@@ -272,7 +272,38 @@ jobs:
             EOF
             fi
 
-            sudo systemctl restart nginx
+            CONF=/etc/nginx/conf.d/alliance.conf
+            # The block above only writes CONF on first install. Servers
+            # provisioned before the X-Forwarded-For headers were added need them
+            # patched in, or req.ip collapses to loopback and the signup rate
+            # limit becomes global. Scope the check to the /api/ block —
+            # /socket.io/ already sets the header.
+            api_has_xff() {
+              awk '/location \/api\//{f=1} f&&/X-Forwarded-For/{print;exit} f&&/}/{exit}' "$1" | grep -q .
+            }
+            if [ -f "$CONF" ] && ! api_has_xff "$CONF"; then
+              awk '
+                /location \/api\// { inapi=1 }
+                { print }
+                inapi && /proxy_pass http:\/\/localhost:3005\/;/ {
+                  print "                  proxy_set_header X-Real-IP $remote_addr;"
+                  print "                  proxy_set_header X-Forwarded-Proto $scheme;"
+                  print "                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
+                  inapi=0
+                }
+              ' "$CONF" | sudo tee "$CONF.tmp" > /dev/null && sudo mv "$CONF.tmp" "$CONF"
+
+              # nginx -t only checks syntax; it can't tell that the headers were
+              # actually inserted. If the proxy_pass line didn't match, the patch
+              # silently no-ops and req.ip stays loopback, turning the per-IP
+              # signup throttle into a global one. Fail the deploy instead.
+              if ! api_has_xff "$CONF"; then
+                echo "ERROR: failed to patch X-Forwarded-For into the /api/ block of $CONF" >&2
+                exit 1
+              fi
+            fi
+
+            sudo nginx -t && sudo systemctl reload nginx
 
   deploy-admin-app:
     runs-on: ubuntu-latest
@@ -807,6 +838,7 @@ jobs:
             export DB_CA_CERT="${{ secrets.DB_CA_CERT }}"
             export PANGRAM_API_KEY=${{ secrets.PANGRAM_API_KEY }}
             export PANGRAM_API_URL=https://text.api.pangram.com/v3
+            export TURNSTILE_SECRET_KEY=${{ secrets.TURNSTILE_SECRET_KEY }}
             export EXPO_ACCESS_TOKEN=${{ secrets.EXPO_ACCESS_TOKEN }}
 
             rm -rf nest-backend-deploy-backup || true

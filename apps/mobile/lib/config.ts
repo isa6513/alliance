@@ -26,6 +26,11 @@ export const getImageSource = (string: string) => {
   return `${getApiUrl()}/images/${string}`;
 };
 
+export const getTurnstileSiteKey = (): string | undefined => {
+  const key = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY;
+  return key ? key : undefined;
+};
+
 export const getWebSocketUrl = (): string => {
   const baseUrl = getBaseUrl();
   if (baseUrl.startsWith("https://")) {

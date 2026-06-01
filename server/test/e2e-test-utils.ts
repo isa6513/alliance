@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import cookieParser from 'cookie-parser';
 import { Contract } from 'src/contract/entities/contract.entity';
@@ -22,6 +22,7 @@ import { DataSource } from 'typeorm';
 import { ActionsModule } from '../src/actions/actions.module';
 import { AuthModule } from '../src/auth/auth.module';
 import { SIGNUP_THROTTLERS } from '../src/auth/signup-throttle.config';
+import { TurnstileService } from '../src/auth/turnstile.service';
 import { ContractModule } from '../src/contract/contract.module';
 import { ReferralSource, User } from '../src/user/entities/user.entity';
 import { UserModule } from '../src/user/user.module';
@@ -41,8 +42,9 @@ export interface TestContext {
 
 export async function createTestApp(
   modules: Type<unknown>[],
+  options: { enableTurnstile?: boolean; enableThrottle?: boolean } = {},
 ): Promise<TestContext> {
-  const moduleFixture: TestingModule = await Test.createTestingModule({
+  const builder = Test.createTestingModule({
     imports: [
       ConfigModule.forRoot({
         isGlobal: true,
@@ -65,7 +67,27 @@ export async function createTestApp(
       UserModule,
       ...modules,
     ],
-  }).compile();
+  });
+
+  // Disable Turnstile by default so tests don't depend on whether
+  // TURNSTILE_SECRET_KEY happens to be set in the runner's environment
+  // (bun auto-loads server/.env, which enables enforcement locally). Tests that
+  // specifically exercise captcha enforcement opt in with { enableTurnstile: true }.
+  if (!options.enableTurnstile) {
+    builder
+      .overrideProvider(TurnstileService)
+      .useValue({ verify: async () => {} });
+  }
+
+  // Disable signup rate limiting by default. The burst limit is 5/min per IP and
+  // the in-memory counter is shared across a whole spec (and never reset between
+  // tests), so any spec that issues several registrations would hit 429. Tests
+  // that specifically exercise the limit opt in with { enableThrottle: true }.
+  if (!options.enableThrottle) {
+    builder.overrideGuard(ThrottlerGuard).useValue({ canActivate: () => true });
+  }
+
+  const moduleFixture: TestingModule = await builder.compile();
 
   const app = moduleFixture.createNestApplication();
   app.useGlobalPipes(new ValidationPipe());

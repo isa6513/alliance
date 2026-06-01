@@ -1,21 +1,17 @@
-import React, { useState } from "react";
-import {
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-} from "react-native";
-import { Link, useRouter } from "expo-router";
 import { authRegister } from "@alliance/shared/client";
-import {
-  clearGuestToken,
-  getStoredGuestToken,
-} from "../../lib/guestSession";
+import { Link, useRouter } from "expo-router";
+import { useRef, useState } from "react";
+import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Button from "../../components/system/Button";
 import Input from "../../components/system/Input";
 import PasswordVisibilityToggle from "../../components/system/PasswordVisibilityToggle";
 import Text from "../../components/system/Text";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import TurnstileWebView, {
+  type TurnstileWebViewHandle,
+} from "../../components/TurnstileWebView";
+import { getTurnstileSiteKey } from "../../lib/config";
+import { clearGuestToken, getStoredGuestToken } from "../../lib/guestSession";
 
 const SignupScreen = () => {
   const router = useRouter();
@@ -29,6 +25,19 @@ const SignupScreen = () => {
     email: "",
     password: "",
   });
+
+  const turnstileSiteKey = getTurnstileSiteKey();
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(
+    undefined,
+  );
+  const [turnstileError, setTurnstileError] = useState(false);
+  const turnstileRef = useRef<TurnstileWebViewHandle>(null);
+
+  const retryTurnstile = () => {
+    setTurnstileError(false);
+    setTurnstileToken(undefined);
+    turnstileRef.current?.reset();
+  };
 
   const validateForm = () => {
     let isValid = true;
@@ -64,6 +73,11 @@ const SignupScreen = () => {
       return;
     }
 
+    if (turnstileSiteKey && !turnstileToken) {
+      Alert.alert("Verification required", "Please complete the captcha.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const guestToken = (await getStoredGuestToken()) ?? undefined;
@@ -74,6 +88,7 @@ const SignupScreen = () => {
           password,
           mode: "header",
           guestToken,
+          turnstileToken,
         },
       });
       if (guestToken) {
@@ -88,7 +103,7 @@ const SignupScreen = () => {
             text: "Log In",
             onPress: () => router.replace("/auth/login"),
           },
-        ]
+        ],
       );
     } catch (error) {
       const errorMessage =
@@ -99,13 +114,16 @@ const SignupScreen = () => {
       Alert.alert("Registration Failed", errorMessage);
     } finally {
       setIsSubmitting(false);
+      // Turnstile tokens are single-use; fetch a fresh one for any retry.
+      if (turnstileSiteKey) {
+        setTurnstileToken(undefined);
+        turnstileRef.current?.reset();
+      }
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior="padding"
-    >
+    <KeyboardAvoidingView behavior="padding">
       <ScrollView keyboardShouldPersistTaps="handled">
         <View className="flex flex-col gap-y-4">
           <Text className="text-sm text-zinc-500">Create an Account</Text>
@@ -169,12 +187,51 @@ const SignupScreen = () => {
             ) : null}
           </View>
 
-          <Button onPress={handleSignup} disabled={isSubmitting} loading={isSubmitting}>
+          {turnstileSiteKey ? (
+            <View>
+              <TurnstileWebView
+                ref={turnstileRef}
+                siteKey={turnstileSiteKey}
+                onToken={(token) => {
+                  setTurnstileToken(token);
+                  setTurnstileError(false);
+                }}
+                onExpire={() => setTurnstileToken(undefined)}
+                onError={() => {
+                  setTurnstileToken(undefined);
+                  setTurnstileError(true);
+                }}
+              />
+              {turnstileError ? (
+                <Text className="text-sm text-red-600">
+                  Couldn&apos;t load the verification challenge. Check your
+                  connection, then{" "}
+                  <Text
+                    className="text-sm text-red-600 underline"
+                    onPress={retryTurnstile}
+                  >
+                    try again
+                  </Text>
+                  .
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
+
+          <Button
+            onPress={handleSignup}
+            disabled={
+              isSubmitting || (Boolean(turnstileSiteKey) && !turnstileToken)
+            }
+            loading={isSubmitting}
+          >
             <Text className="text-white text-base">Create Account</Text>
           </Button>
 
           <View className="flex flex-row gap-x-2">
-            <Text className="text-sm text-zinc-500">Already have an account?</Text>
+            <Text className="text-sm text-zinc-500">
+              Already have an account?
+            </Text>
             <Link href="/auth/login" asChild>
               <TouchableOpacity>
                 <Text className="text-sm text-zinc-500">Log In</Text>

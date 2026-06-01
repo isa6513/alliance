@@ -1,14 +1,14 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
-  IsDefined,
-  IsNotEmpty,
-  IsEmail,
-  IsOptional,
-  IsEnum,
-  IsString,
   Allow,
+  IsDefined,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { TokenMode } from './signin.dto';
 
 export class SignUpDto {
@@ -42,4 +42,9 @@ export class SignUpDto {
   @IsString()
   @ApiPropertyOptional()
   readonly guestToken?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  readonly turnstileToken?: string;
 }

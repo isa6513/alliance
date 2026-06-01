@@ -1,8 +1,8 @@
+import { Features, isEnabled } from "@alliance/shared/lib/features";
 import {
   getApiUrl,
   getWebSocketUrl as getWebSocketUrlShared,
 } from "@alliance/sharedweb/lib/config";
-import { Features, isEnabled } from "@alliance/shared/lib/features";
 
 export const getWebSocketUrl = (): string => {
   return getWebSocketUrlShared(import.meta.env.MODE);
@@ -18,4 +18,9 @@ export const getBulkActionSSEUrl = (actionIds: number[]) => {
 
 export const isFeatureEnabled = (feature: Features) => {
   return isEnabled(feature, import.meta.env.MODE);
+};
+
+export const getTurnstileSiteKey = (): string | undefined => {
+  const key = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+  return key ? key : undefined;
 };
