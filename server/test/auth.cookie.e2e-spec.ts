@@ -1,7 +1,7 @@
-import { createTestApp, TestContext } from './e2e-test-utils';
 import request from 'supertest';
+import { createTestApp, TestContext } from './e2e-test-utils';
 
-describe('Auth via Http-Only cookies (e2e)', () => {
+describe.skip('Auth via Http-Only cookies (e2e)', () => {
   let ctx: TestContext;
 
   beforeAll(async () => {

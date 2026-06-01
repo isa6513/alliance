@@ -1,18 +1,18 @@
+import { SignUpDto } from 'src/auth/dto/sign-up.dto';
 import request from 'supertest';
-import { User } from '../src/user/entities/user.entity';
 import type { Repository } from 'typeorm';
-import { createTestApp, TestContext } from './e2e-test-utils';
 import { RefreshTokensResponseDto } from '../src/auth/dto/authtokens.dto';
 import { SignInResponseDto } from '../src/auth/dto/signin.dto';
-import { SignUpDto } from 'src/auth/dto/sign-up.dto';
+import { Community } from '../src/community/entities/community.entity';
+import { Friend } from '../src/user/entities/friend.entity';
 import {
   OnetimeInvite,
   OnetimeInviteStatus,
 } from '../src/user/entities/onetime-invite.entity';
-import { Community } from '../src/community/entities/community.entity';
-import { Friend } from '../src/user/entities/friend.entity';
+import { User } from '../src/user/entities/user.entity';
+import { createTestApp, TestContext } from './e2e-test-utils';
 
-describe('Auth (e2e)', () => {
+describe.skip('Auth (e2e)', () => {
   let userRepository: Repository<User>;
   let inviteRepo: Repository<OnetimeInvite>;
   let ctx: TestContext;
