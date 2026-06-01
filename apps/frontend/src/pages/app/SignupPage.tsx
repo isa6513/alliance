@@ -10,23 +10,23 @@ import {
   userSignupSocialProof,
 } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Card from "@alliance/sharedweb/ui/Card";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import posthog from "posthog-js";
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, href, useSearchParams } from "react-router";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { href, Link, useSearchParams } from "react-router";
 import SignupForm from "../../components/SignupForm";
 import { isFeatureEnabled } from "../../lib/config";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 
 import { CardStyle } from "@alliance/shared/styles/card";
+import { ChevronRight } from "lucide-react";
+import AllianceIntroYouTubeEmbed from "../../components/AllianceIntroYouTubeEmbed";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
 import FeaturedImpactCard from "../../components/FeaturedImpactCard";
-import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
-import { ChevronRight } from "lucide-react";
-import PrelaunchNavbar from "../../components/PrelaunchNavbar";
-import AllianceIntroYouTubeEmbed from "../../components/AllianceIntroYouTubeEmbed";
 import Footer from "../../components/Footer";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
 
 function formatSignupSocialProofNames(
   profiles: Pick<ProfileDto, "displayName">[],
@@ -244,6 +244,11 @@ const SignupPage: React.FC = () => {
               <span className="text-red-700">{error}</span>
             </Card>
           )}
+
+          <Card style={CardStyle.Red}>
+            Account creation has been temporarily disabled. Please contact us if
+            you are interested in joining.
+          </Card>
 
           <div className="relative">
             {isInviteValid ? (
