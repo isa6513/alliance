@@ -205,9 +205,18 @@ jobs:
             unzip -o ~/react-build.zip
 
             cd ~/output
-            sed -i '/"@alliance\/shared": "workspace:\*"/d' package.json
-            sed -i '/"@alliance\/sharedweb": "workspace:\*"/d' package.json
-            npm install --omit=dev
+            # Strip ALL workspace:* deps before npm install — npm can't resolve the
+            # `workspace:` protocol and aborts the entire install on the first one it
+            # sees (EUNSUPPORTEDPROTOCOL), so a single un-stripped dep silently
+            # installs nothing. None of the @alliance/* workspace packages are needed
+            # at runtime: shared/sharedweb are bundled via vite ssr.noExternal and
+            # common is inlined into the server bundle. Match any workspace:* line so
+            # new workspace deps don't reintroduce this.
+            sed -i '/workspace:\*/d' package.json
+            # appleboy/ssh-action runs this script without `set -e`, so a failed
+            # install here would otherwise be swallowed and we'd ship a crash-looping
+            # SSR (missing deps) with a green checkmark. Make it fatal explicitly.
+            npm install --omit=dev || { echo "npm install failed"; exit 1; }
 
             pm2 delete client-ssr || true
             pm2 start "NODE_ENV=${{ github.ref_name == 'production' && 'production' || 'staging' }} node server.js" --name client-ssr
@@ -221,6 +230,10 @@ jobs:
             # otherwise `nginx -t` fails on a non-existent cert path.
             sed "s/__DOMAIN__/${{ vars.DOMAIN_NAME }}/g" ~/alliance.conf \
               | sudo tee /etc/nginx/conf.d/alliance.conf > /dev/null
+            # Remove the legacy hand-rolled vhost; alliance.conf fully replaces it
+            # (same server_name + listen 443). Leaving it produces a conflicting
+            # server_name where nginx silently picks one by filename order.
+            sudo rm -f /etc/nginx/conf.d/react.conf
             sudo nginx -t && sudo systemctl reload nginx
 
   deploy-admin-app:
