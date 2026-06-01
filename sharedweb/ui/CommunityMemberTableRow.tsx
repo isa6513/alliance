@@ -5,7 +5,7 @@ import {
 import { formatNextTaskDue } from "@alliance/shared/lib/formatNextTaskDue";
 import { useAwayRanges } from "@alliance/shared/lib/useAwayRanges";
 import { useCallback, useMemo, useState } from "react";
-import { Link, href } from "react-router";
+import { Link } from "react-router";
 import { cn } from "@alliance/shared/styles/util";
 import {
   CommunityMemberContactInfoDto,
@@ -106,7 +106,7 @@ const CommunityMemberTableRow = ({
               </div>
             )}
             <Link
-              to={href("/member/:id", { id: profile.id.toString() })}
+              to={`/member/${profile.id}`}
               className="flex-shrink-0 group flex items-center gap-x-1 md:gap-x-2 mr-3 text-ellipsis overflow-hidden line-clamp-2 wrap-words w-full"
             >
               <div className="hidden md:flex shrink-0 items-center justify-center">
