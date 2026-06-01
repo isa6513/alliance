@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MulterModule } from '@nestjs/platform-express';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import multer from 'multer';
 import { ActionsModule } from './actions/actions.module';
@@ -63,6 +64,9 @@ import { VideosModule } from './videos/videos.module';
       storage: multer.memoryStorage(),
     }),
     EventEmitterModule.forRoot(),
+    ThrottlerModule.forRoot([
+      { name: 'signup', limit: 5, ttl: 60 * 60 * 1000 },
+    ]),
     AuthModule,
     UserModule,
     CommunityModule,

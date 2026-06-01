@@ -12,7 +12,7 @@ import {
 import { User } from '../src/user/entities/user.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
 
-describe.skip('Auth (e2e)', () => {
+describe('Auth (e2e)', () => {
   let userRepository: Repository<User>;
   let inviteRepo: Repository<OnetimeInvite>;
   let ctx: TestContext;

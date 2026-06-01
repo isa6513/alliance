@@ -245,11 +245,6 @@ const SignupPage: React.FC = () => {
             </Card>
           )}
 
-          <Card style={CardStyle.Red}>
-            Account creation has been temporarily disabled. Please contact us if
-            you are interested in joining.
-          </Card>
-
           <div className="relative">
             {isInviteValid ? (
               <div>

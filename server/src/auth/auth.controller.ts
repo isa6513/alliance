@@ -10,7 +10,6 @@ import {
   Query,
   Request,
   Res,
-  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -21,6 +20,7 @@ import {
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { IsEnum, IsOptional } from 'class-validator';
 import type { Request as ExpressRequest, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -29,6 +29,7 @@ import {
   RefreshTokensResponseDto,
 } from './dto/authtokens.dto';
 import ForgotPasswordDto, { ResetPasswordDto } from './dto/forgotpassword.dto';
+import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto, SignInResponseDto, type TokenMode } from './dto/signin.dto';
 import { AdminGuard } from './guards/admin.guard';
 import {
@@ -110,6 +111,9 @@ export class AuthController {
   }
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ signup: { limit: 20, ttl: 60 * 60 * 1000 } })
+  @Throttle({ signup: { limit: 5, ttl: 60 * 1000 } })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiResponse({
@@ -118,22 +122,22 @@ export class AuthController {
     type: SignInResponseDto,
   })
   @ApiUnauthorizedResponse()
-  async register() // @Request() req: ExpressRequest,
-  // @Body() signUp: SignUpDto,
-  // @Res({ passthrough: true }) res: Response,
-  : Promise<SignInResponseDto> {
-    throw new ServiceUnavailableException();
-    // await this.authService.register(signUp);
+  async register(
+    @Request() req: ExpressRequest,
+    @Body() signUp: SignUpDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SignInResponseDto> {
+    await this.authService.register(signUp);
 
-    // const { access_token, refresh_token, isAdmin, userId } =
-    //   await this.authService.login(signUp.email, signUp.password);
+    const { access_token, refresh_token, isAdmin, userId } =
+      await this.authService.login(signUp.email, signUp.password);
 
-    // this.authService.setAuthCookies(res, access_token, refresh_token);
-    // await this.mergeGuestSession(signUp.guestToken, req, res, userId);
-    // if (signUp.mode === 'header') {
-    //   return new SignInResponseDto({ access_token, refresh_token, isAdmin });
-    // }
-    // return new SignInResponseDto({ isAdmin });
+    this.authService.setAuthCookies(res, access_token, refresh_token);
+    await this.mergeGuestSession(signUp.guestToken, req, res, userId);
+    if (signUp.mode === 'header') {
+      return new SignInResponseDto({ access_token, refresh_token, isAdmin });
+    }
+    return new SignInResponseDto({ isAdmin });
   }
 
   @Post('refresh')
