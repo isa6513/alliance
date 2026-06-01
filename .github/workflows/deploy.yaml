@@ -171,6 +171,19 @@ jobs:
       - visual-regression
     environment: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Upload nginx vhost to EC2
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.INSTANCE_IP }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "deploy/nginx/alliance.conf"
+          target: "~/"
+          strip_components: 2
+
       - name: SSH and Deploy frontend SSR on EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -200,109 +213,14 @@ jobs:
             pm2 start "NODE_ENV=${{ github.ref_name == 'production' && 'production' || 'staging' }} node server.js" --name client-ssr
             pm2 save
 
-            if [ ! -f /etc/nginx/conf.d/alliance.conf ]; then
-              cat <<EOF | sudo tee /etc/nginx/conf.d/alliance.conf
-              map $http_upgrade $connection_upgrade {
-                default upgrade;
-                ''	  close;
-              }
-
-              server {
-                server_name ${vars.DOMAIN_NAME};
-
-                root /home/ec2-user/output/build/client;
-                index index.html;
-
-                location ^~ /assets/ {
-                  try_files $uri =404;
-                  access_log off;
-                  add_header Cache-Control "public, max-age=31536000, immutable";
-                }
-
-                location / {
-                  proxy_pass http://localhost:3000;
-                  proxy_http_version 1.1;
-                  proxy_set_header Host $host;
-                  proxy_set_header X-Forwarded-Proto $scheme;
-
-                }
-
-                location /api/ {
-                  proxy_pass http://localhost:3005/;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade $http_upgrade;
-                  proxy_set_header Connection 'upgrade';
-                  proxy_set_header Host $host;
-                  proxy_set_header X-Real-IP $remote_addr;
-                  proxy_set_header X-Forwarded-Proto $scheme;
-                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                  proxy_cache_bypass $http_upgrade;
-                }
-
-                  location /socket.io/ {
-                    proxy_pass         http://localhost:3005;
-                    proxy_http_version 1.1;
-                    proxy_set_header   Upgrade $http_upgrade;
-                    proxy_set_header   Connection $connection_upgrade;
-                    proxy_set_header   Host $host;
-                    proxy_set_header   X-Real-IP $remote_addr;
-                    proxy_set_header   X-Forwarded-Proto $scheme;
-                    proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-                }
-
-                  listen 443 ssl http2; # managed by Certbot
-                  ssl_certificate /etc/letsencrypt/live/worldalliance.org/fullchain.pem; # managed by Certbot
-                  ssl_certificate_key /etc/letsencrypt/live/worldalliance.org/privkey.pem; # managed by Certbot
-                  include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-                  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
-              }
-              server {
-                  if ($host = worldalliance.org) {
-                      return 301 https://$host$request_uri;
-                  } # managed by Certbot
-
-
-                listen 80;
-                server_name worldalliance.org;
-                  return 404; # managed by Certbot
-
-
-              }
-            EOF
-            fi
-
-            CONF=/etc/nginx/conf.d/alliance.conf
-            # The block above only writes CONF on first install. Servers
-            # provisioned before the X-Forwarded-For headers were added need them
-            # patched in, or req.ip collapses to loopback and the signup rate
-            # limit becomes global. Scope the check to the /api/ block —
-            # /socket.io/ already sets the header.
-            api_has_xff() {
-              awk '/location \/api\//{f=1} f&&/X-Forwarded-For/{print;exit} f&&/}/{exit}' "$1" | grep -q .
-            }
-            if [ -f "$CONF" ] && ! api_has_xff "$CONF"; then
-              awk '
-                /location \/api\// { inapi=1 }
-                { print }
-                inapi && /proxy_pass http:\/\/localhost:3005\/;/ {
-                  print "                  proxy_set_header X-Real-IP $remote_addr;"
-                  print "                  proxy_set_header X-Forwarded-Proto $scheme;"
-                  print "                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;"
-                  inapi=0
-                }
-              ' "$CONF" | sudo tee "$CONF.tmp" > /dev/null && sudo mv "$CONF.tmp" "$CONF"
-
-              # nginx -t only checks syntax; it can't tell that the headers were
-              # actually inserted. If the proxy_pass line didn't match, the patch
-              # silently no-ops and req.ip stays loopback, turning the per-IP
-              # signup throttle into a global one. Fail the deploy instead.
-              if ! api_has_xff "$CONF"; then
-                echo "ERROR: failed to patch X-Forwarded-For into the /api/ block of $CONF" >&2
-                exit 1
-              fi
-            fi
-
+            # Install the http-context proxy headers (X-Forwarded-For etc.) so the
+            # backend sees the real client IP for the signup rate limiter. Source
+            # of truth is deploy/nginx/alliance.conf, uploaded to ~/alliance.conf.
+            # The vhost ships with a __DOMAIN__ placeholder for server_name and the
+            # cert paths; substitute the per-environment domain before installing,
+            # otherwise `nginx -t` fails on a non-existent cert path.
+            sed "s/__DOMAIN__/${{ vars.DOMAIN_NAME }}/g" ~/alliance.conf \
+              | sudo tee /etc/nginx/conf.d/alliance.conf > /dev/null
             sudo nginx -t && sudo systemctl reload nginx
 
   deploy-admin-app:
