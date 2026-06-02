@@ -1,8 +1,10 @@
+import { registerAnalytics } from "@alliance/shared/lib/analytics";
 import {
-  PostHogProvider as RNPostHogProvider,
   PostHogProviderProps,
+  PostHogProvider as RNPostHogProvider,
+  usePostHog,
 } from "posthog-react-native";
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 
 const postHogProviderProps: Omit<PostHogProviderProps, "children"> = __DEV__
   ? {
@@ -29,8 +31,19 @@ const postHogProviderProps: Omit<PostHogProviderProps, "children"> = __DEV__
       },
     };
 
+function AnalyticsBridge() {
+  const posthog = usePostHog();
+  useEffect(() => {
+    if (posthog) registerAnalytics(posthog);
+  }, [posthog]);
+  return null;
+}
+
 export default function PostHogProvider({ children }: { children: ReactNode }) {
   return (
-    <RNPostHogProvider {...postHogProviderProps}>{children}</RNPostHogProvider>
+    <RNPostHogProvider {...postHogProviderProps}>
+      <AnalyticsBridge />
+      {children}
+    </RNPostHogProvider>
   );
 }

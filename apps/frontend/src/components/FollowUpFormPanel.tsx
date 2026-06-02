@@ -1,25 +1,27 @@
+import { ExceptionEvent } from "@alliance/common/analytics";
+import { FormSchema } from "@alliance/common/forms/form-schema";
 import {
   FormDto,
   tasksGetForm,
   tasksSubmitFollowUpForm,
 } from "@alliance/shared/client";
 import type {
-  SubmitFormDto,
-  SubmitFollowUpFormDto,
   FollowUpForm,
+  SubmitFollowUpFormDto,
+  SubmitFormDto,
 } from "@alliance/shared/client/types.gen";
+import { captureException } from "@alliance/shared/lib/analytics";
+import { CardStyle } from "@alliance/shared/styles/card";
 import FormRenderer, {
   computeFormStorageKey,
 } from "@alliance/sharedweb/forms/FormRenderer";
-import { FormSchema } from "@alliance/common/forms/form-schema";
-import Card from "@alliance/sharedweb/ui/Card";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import Card from "@alliance/sharedweb/ui/Card";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import posthog from "posthog-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/AuthContext";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { CardStyle } from "@alliance/shared/styles/card";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 
 interface FollowUpFormPanelProps {
   followUpForm: FollowUpForm;
@@ -87,9 +89,9 @@ export default function FollowUpFormPanel({
         return true;
       }
       console.error(response.error);
-      posthog.captureException(response.error, {
-        event: "follow_up_form_submit_error",
-        properties: { actionId, followUpFormId: followUpForm.id },
+      captureException(ExceptionEvent.FollowUpFormSubmitError, response.error, {
+        actionId,
+        followUpFormId: followUpForm.id,
       });
       setError("Failed to submit. Please try again.");
       return false;

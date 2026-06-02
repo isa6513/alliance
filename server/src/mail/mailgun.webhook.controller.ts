@@ -1,11 +1,13 @@
-import { Body, Controller, Post, BadRequestException } from '@nestjs/common';
+import { AnalyticsEvent } from '@alliance/common/analytics';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
+import { InjectRepository } from '@nestjs/typeorm';
 import crypto from 'crypto';
 import { PostHog } from 'posthog-node';
-import type { MailgunWebhookBody } from './mailgun';
 import { User } from 'src/user/entities/user.entity';
 import type { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { captureEvent } from '../utils/posthog';
+import type { MailgunWebhookBody } from './mailgun';
 
 function verifyMailgunSignature(sig: {
   timestamp: string;
@@ -25,20 +27,20 @@ function verifyMailgunSignature(sig: {
   );
 }
 
-function toPostHogEventName(event: string): string {
+function toPostHogEvent(event: string): AnalyticsEvent | string {
   switch (event) {
     case 'delivered':
-      return 'emaildelivered';
+      return AnalyticsEvent.EmailDelivered;
     case 'opened':
-      return 'emailopened';
+      return AnalyticsEvent.EmailOpened;
     case 'clicked':
-      return 'emailclicked';
+      return AnalyticsEvent.EmailClicked;
     case 'bounced':
-      return 'emailbounced';
+      return AnalyticsEvent.EmailBounced;
     case 'complained':
-      return 'emailcomplained';
+      return AnalyticsEvent.EmailComplained;
     case 'unsubscribed':
-      return 'emailunsubscribed';
+      return AnalyticsEvent.EmailUnsubscribed;
     default:
       return `email${event}`;
   }
@@ -67,7 +69,7 @@ export class MailgunWebhookController {
     }
 
     const e = body['event-data'];
-    const eventName = toPostHogEventName(e.event);
+    const event = toPostHogEvent(e.event);
     const email = e.recipient ?? 'unknown';
     const phTimestamp = e.timestamp ? new Date(e.timestamp * 1000) : undefined;
 
@@ -79,20 +81,21 @@ export class MailgunWebhookController {
       return;
     }
 
-    const posthogEvent = {
-      event: eventName,
-      distinctId,
-      properties: {
-        recipient: email,
-        timestamp: phTimestamp,
-        subject: e.message?.headers?.subject,
-        mailgunId: e.id,
-        headers: e.message?.headers,
-        messageId: e.message?.headers?.['message-id'],
-      },
+    const properties = {
+      recipient: email,
+      timestamp: phTimestamp,
+      subject: e.message?.headers?.subject,
+      mailgunId: e.id,
+      headers: e.message?.headers,
+      messageId: e.message?.headers?.['message-id'],
     };
 
-    this.posthog.capture(posthogEvent);
+    captureEvent({
+      client: this.posthog,
+      event: event as AnalyticsEvent,
+      distinctId,
+      properties,
+    });
 
     await this.posthog.flush();
   }

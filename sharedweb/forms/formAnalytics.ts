@@ -1,5 +1,6 @@
+import { AnalyticsEvent } from "@alliance/common/analytics";
+import { captureEvent } from "@alliance/shared/lib/analytics";
 import { useCallback, useEffect, useRef } from "react";
-import posthog from "posthog-js";
 
 const MAX_PAGE_DURATION_SECONDS = 900; // 15 minute cap
 
@@ -26,9 +27,9 @@ export function useFormPageDurationTracking({
     isTrackingRef.current = false;
     const durationSeconds = Math.min(
       Math.round((Date.now() - pageEnteredAtRef.current) / 1000),
-      MAX_PAGE_DURATION_SECONDS
+      MAX_PAGE_DURATION_SECONDS,
     );
-    posthog.capture("form_page_exited", {
+    captureEvent(AnalyticsEvent.FormPageExited, {
       form_id: formId,
       action_id: actionId,
       page_index: currentPageIndex,
@@ -44,7 +45,7 @@ export function useFormPageDurationTracking({
 
     pageEnteredAtRef.current = Date.now();
     isTrackingRef.current = true;
-    posthog.capture("form_page_viewed", {
+    captureEvent(AnalyticsEvent.FormPageViewed, {
       form_id: formId,
       action_id: actionId,
       page_index: currentPageIndex,
@@ -64,7 +65,7 @@ export function useFormPageDurationTracking({
       } else {
         pageEnteredAtRef.current = Date.now();
         isTrackingRef.current = true;
-        posthog.capture("form_page_viewed", {
+        captureEvent(AnalyticsEvent.FormPageViewed, {
           form_id: formId,
           action_id: actionId,
           page_index: currentPageIndex,
@@ -90,7 +91,7 @@ export function useFormValidationErrorTracking({
   return useCallback(
     (firstInvalidFieldId?: string) => {
       if (!enabled) return;
-      posthog.capture("form_validation_error", {
+      captureEvent(AnalyticsEvent.FormValidationError, {
         form_id: formId,
         action_id: actionId,
         page_index: currentPageIndex,
@@ -98,6 +99,6 @@ export function useFormValidationErrorTracking({
         first_invalid_field_id: firstInvalidFieldId,
       });
     },
-    [formId, actionId, currentPageIndex, pageCount, enabled]
+    [formId, actionId, currentPageIndex, pageCount, enabled],
   );
 }

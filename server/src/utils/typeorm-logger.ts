@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Logger as TypeOrmLogger } from 'typeorm';
+import { AnalyticsEvent } from '@alliance/common/analytics';
 import { Logger as NestLogger } from '@nestjs/common';
 import { PostHog } from 'posthog-node';
 import client from 'prom-client';
+import { Logger as TypeOrmLogger } from 'typeorm';
 import { register } from '../metrics';
+import { captureEvent } from './posthog';
 import { requestContext } from './request-context';
 
 const dbQueryTotal = new client.Counter({
@@ -105,9 +107,10 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
 
     const ctx = requestContext.getStore();
 
-    this.client.capture({
+    captureEvent({
+      client: this.client,
       distinctId: ctx?.userId ? `user:${ctx.userId}` : 'server',
-      event: 'db.slow_query',
+      event: AnalyticsEvent.DbSlowQuery,
       properties: {
         durationMs: time,
         sql: query,

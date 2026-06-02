@@ -34,6 +34,8 @@ export class PosthogExceptionFilter extends BaseExceptionFilter {
 
     const posthogSessionId = req.headers['x-posthog-session-id'] ?? undefined;
 
+    // Bypasses the typed `captureEvent` wrapper `captureException` is only
+    // ever called here on the backend.
     this.posthog.captureException(exception, 'server', {
       event: '$exception',
       properties: {

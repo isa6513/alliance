@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
   ActionActivityDto,
   actionsCommunityActivity,
@@ -15,9 +16,9 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import posthog from "posthog-js";
 import { useCallback, useMemo } from "react";
 import { actionActivityViewable } from "./actionActivityConstants";
+import { captureEvent } from "./analytics";
 
 export enum ActivityList {
   Friends = "friends",
@@ -254,7 +255,10 @@ const useActivities = (props: UseActivitiesProps) => {
       );
 
       if (!isLiked) {
-        posthog.capture("activity_liked", { activityId, activityType });
+        captureEvent(AnalyticsEvent.ActivityLiked, {
+          activityId,
+          activityType,
+        });
       }
     },
   });

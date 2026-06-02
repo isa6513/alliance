@@ -1,7 +1,8 @@
+import { AnalyticsEvent } from "@alliance/common/analytics";
+import { captureEvent } from "@alliance/shared/lib/analytics";
+import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Platform, Text, View } from "react-native";
-import { VideoView, useVideoPlayer } from "expo-video";
-import { usePostHog } from "posthog-react-native";
 import { getApiUrl } from "../../lib/config";
 
 type VideoPlayerProps = {
@@ -23,7 +24,6 @@ const resolveManifestUrl = (src: string, videoId?: number) => {
 };
 
 const VideoPlayer = ({ src, videoId, caption }: VideoPlayerProps) => {
-  const posthog = usePostHog();
   const [status, setStatus] = useState<"loading" | "ready" | "failed">(
     videoId ? "loading" : "ready",
   );
@@ -116,8 +116,8 @@ const VideoPlayer = ({ src, videoId, caption }: VideoPlayerProps) => {
   }, [status, videoId]);
 
   useEffect(() => {
-    posthog?.capture("video_seen", { videoId });
-  }, [posthog, videoId]);
+    captureEvent(AnalyticsEvent.VideoSeen, { videoId });
+  }, [videoId]);
 
   useEffect(() => {
     if (!player) return;
@@ -137,7 +137,7 @@ const VideoPlayer = ({ src, videoId, caption }: VideoPlayerProps) => {
         if (!isPlaying || hasTrackedPlayRef.current) return;
 
         hasTrackedPlayRef.current = true;
-        posthog?.capture("video_started", { videoId, src });
+        captureEvent(AnalyticsEvent.VideoStarted, { videoId, src });
       },
     );
 
@@ -152,12 +152,12 @@ const VideoPlayer = ({ src, videoId, caption }: VideoPlayerProps) => {
           duration - currentTime <= 3
         ) {
           hasTrackedCompleteRef.current = true;
-          posthog?.capture("video_fully_watched", { videoId, src });
+          captureEvent(AnalyticsEvent.VideoFullyWatched, { videoId, src });
         }
 
         if (currentTime > lastTrackedTimeRef.current + 5) {
           lastTrackedTimeRef.current = currentTime;
-          posthog?.capture("video_progress", {
+          captureEvent(AnalyticsEvent.VideoProgress, {
             videoId,
             src,
             progress: Math.floor(currentTime),
@@ -171,7 +171,7 @@ const VideoPlayer = ({ src, videoId, caption }: VideoPlayerProps) => {
       if (hasTrackedCompleteRef.current) return;
 
       hasTrackedCompleteRef.current = true;
-      posthog?.capture("video_fully_watched", { videoId, src });
+      captureEvent(AnalyticsEvent.VideoFullyWatched, { videoId, src });
     });
 
     return () => {
@@ -180,7 +180,7 @@ const VideoPlayer = ({ src, videoId, caption }: VideoPlayerProps) => {
       timeSubscription.remove();
       endSubscription.remove();
     };
-  }, [player, posthog, src, videoId]);
+  }, [player, src, videoId]);
 
   if (!hasVideo) return null;
 

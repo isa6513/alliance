@@ -1,16 +1,14 @@
-import { useCallback, useMemo, type RefObject } from "react";
-import ActionTaskPanelForm from "./ActionTaskPanelForm";
-// import ActionTaskPanelFunding from "./ActionTaskPanelFunding";
-// import { StripeWrapper } from "./StripeWrapper";
+import { AnalyticsEvent } from "@alliance/common/analytics";
+import { FormResponseDto, UserActionRelation } from "@alliance/shared/client";
 import {
   ActionTaskPanelPropsShared,
   useTaskFormHandlers,
 } from "@alliance/shared/lib/actionTaskPanel";
-import posthog from "posthog-js";
 import { canCompleteAction } from "@alliance/shared/lib/actionUtils";
-import { UserActionRelation } from "@alliance/shared/client";
+import { captureEvent } from "@alliance/shared/lib/analytics";
+import { useCallback, useMemo, type RefObject } from "react";
 import ActionTaskPanelActivity from "./ActionTaskPanelActivity";
-import { FormResponseDto } from "@alliance/shared/client";
+import ActionTaskPanelForm from "./ActionTaskPanelForm";
 
 export type ActionTaskPanelProps = ActionTaskPanelPropsShared & {
   userRelation: UserActionRelation;
@@ -42,7 +40,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     if (didSucceed === false) {
       return false;
     }
-    posthog.capture("action_completed", {
+    captureEvent(AnalyticsEvent.ActionCompleted, {
       actionId: action.id,
       actionType: action.type,
       actionName: action.name,
@@ -51,7 +49,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   }, [onCompleteAction, action.id, action.type, action.name]);
 
   const handleFormStarted = useCallback(() => {
-    posthog.capture("form_started", {
+    captureEvent(AnalyticsEvent.FormStarted, {
       actionId: action.id,
       actionType: action.type,
       actionName: action.name,

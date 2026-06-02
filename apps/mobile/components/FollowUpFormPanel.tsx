@@ -1,21 +1,22 @@
-import { ActivityIndicator, Alert, View } from "react-native";
-import { useCallback, useState } from "react";
+import { ExceptionEvent } from "@alliance/common/analytics";
+import { FormSchema } from "@alliance/common/forms/form-schema";
 import { tasksGetForm, tasksSubmitFollowUpForm } from "@alliance/shared/client";
 import type {
-  SubmitFormDto,
-  SubmitFollowUpFormDto,
   FollowUpForm,
+  SubmitFollowUpFormDto,
+  SubmitFormDto,
 } from "@alliance/shared/client/types.gen";
-import { FormSchema } from "@alliance/common/forms/form-schema";
 import { computeFormStorageKey } from "@alliance/shared/formrenderer";
+import { captureException } from "@alliance/shared/lib/analytics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { usePostHog } from "posthog-react-native";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, Alert, View } from "react-native";
+import { useAuth } from "../lib/AuthContext";
+import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import FormRenderer from "./forms/FormRenderer";
 import Card, { CardStyle } from "./system/Card";
 import Text, { FontWeight } from "./system/Text";
-import AppMarkdownWrapper from "./AppMarkdownWrapper";
-import { useAuth } from "../lib/AuthContext";
 
 interface FollowUpFormPanelProps {
   followUpForm: FollowUpForm;
@@ -32,7 +33,6 @@ export default function FollowUpFormPanel({
   scrollToEnd,
   onSubmitted,
 }: FollowUpFormPanelProps) {
-  const posthog = usePostHog();
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [formInstanceKey, setFormInstanceKey] = useState(0);
@@ -79,14 +79,18 @@ export default function FollowUpFormPanel({
         onSubmitted?.();
       } else {
         console.error(response.error);
-        posthog?.captureException(response.error, {
-          event: "follow_up_form_submit_error",
-          properties: { actionId, followUpFormId: followUpForm.id },
-        });
+        captureException(
+          ExceptionEvent.FollowUpFormSubmitError,
+          response.error,
+          {
+            actionId,
+            followUpFormId: followUpForm.id,
+          },
+        );
         setError("Failed to submit. Please try again.");
       }
     },
-    [followUpForm.id, form, actionId, onSubmitted, posthog],
+    [followUpForm.id, form, actionId, onSubmitted],
   );
 
   if (isPending) {

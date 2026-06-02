@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { Link, href, useSearchParams, useNavigate } from "react-router";
-import LargeActionCard from "../app/LargeActionCard";
+import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
   ProfileDto,
-  userReferrerProfile,
   userOnetimeInvite,
+  userReferrerProfile,
 } from "@alliance/shared/client";
+import { captureEvent } from "@alliance/shared/lib/analytics";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import posthog from "posthog-js";
-import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import posthog from "posthog-js";
+import React, { useEffect, useState } from "react";
+import { Link, href, useNavigate, useSearchParams } from "react-router";
+import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
+import LargeActionCard from "../app/LargeActionCard";
 
 const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -40,7 +42,7 @@ const InvitePage: React.FC = () => {
     posthog.register_once({
       referral_code: referralCode,
     });
-    posthog.capture("invite_page_opened", {
+    captureEvent(AnalyticsEvent.InvitePageOpened, {
       referral_code: referralCode,
     });
   }, [referralCode]);
@@ -140,8 +142,8 @@ const InvitePage: React.FC = () => {
                 <LargeActionCard
                   action={exampleMemberTaskAction}
                   userRelation={"none"}
-                  onUpdateActionState={() => { }}
-                  onCompleteAction={() => { }}
+                  onUpdateActionState={() => {}}
+                  onCompleteAction={() => {}}
                   showDetails={false}
                   className="pointer-events-none transform-[scale(0.9)] bg-white"
                 />

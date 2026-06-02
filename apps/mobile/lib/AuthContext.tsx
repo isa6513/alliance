@@ -1,9 +1,16 @@
+import { AnalyticsEvent } from "@alliance/common/analytics";
+import { run } from "@alliance/common/run";
+import { client } from "@alliance/shared/client/client.gen";
+import { captureEvent } from "@alliance/shared/lib/analytics";
+import type { QueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { usePostHog } from "posthog-react-native";
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import {
   appHealthCheck,
@@ -12,17 +19,12 @@ import {
   authMe,
   UserDto,
 } from "../../../shared/client";
-import { useRouter } from "expo-router";
-import { client } from "@alliance/shared/client/client.gen";
+import { clearGuestToken, getStoredGuestToken } from "./guestSession";
+import { SecureStorage, SecureStorageKey } from "./SecureStorage";
 import {
   getVisualTestAutoLoginCredentials,
   isVisualTestMode,
 } from "./visualTest";
-import { usePostHog } from "posthog-react-native";
-import { run } from "@alliance/common/run";
-import type { QueryClient } from "@tanstack/react-query";
-import { SecureStorage, SecureStorageKey } from "./SecureStorage";
-import { clearGuestToken, getStoredGuestToken } from "./guestSession";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -99,13 +101,13 @@ export const AuthProvider: React.FC<
         const profile = (await authMe()).data;
         setUser(profile?.user);
       } catch {
-        posthog?.capture("auth_failed_to_refresh");
+        captureEvent(AnalyticsEvent.AuthFailedToRefresh);
         logout();
       } finally {
         setIsLoading(false);
       }
     })();
-  }, [logout, getAccessToken, posthog]);
+  }, [logout, getAccessToken]);
 
   useEffect(() => {
     let cancelled = false;

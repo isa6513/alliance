@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
   authMe,
   authRegister,
@@ -9,24 +10,24 @@ import {
   userReferrerProfile,
   userSignupSocialProof,
 } from "@alliance/shared/client";
+import { captureEvent } from "@alliance/shared/lib/analytics";
 import { Features } from "@alliance/shared/lib/features";
+import { CardStyle } from "@alliance/shared/styles/card";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Card from "@alliance/sharedweb/ui/Card";
 import { useQueries, useQuery } from "@tanstack/react-query";
+import { ChevronRight } from "lucide-react";
 import posthog from "posthog-js";
 import React, { useEffect, useMemo, useState } from "react";
 import { href, Link, useSearchParams } from "react-router";
-import SignupForm from "../../components/SignupForm";
-import { isFeatureEnabled } from "../../lib/config";
-
-import { CardStyle } from "@alliance/shared/styles/card";
-import { ChevronRight } from "lucide-react";
 import AllianceIntroYouTubeEmbed from "../../components/AllianceIntroYouTubeEmbed";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
 import FeaturedImpactCard from "../../components/FeaturedImpactCard";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import SignupForm from "../../components/SignupForm";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
+import { isFeatureEnabled } from "../../lib/config";
 
 function formatSignupSocialProofNames(
   profiles: Pick<ProfileDto, "displayName">[],
@@ -152,7 +153,7 @@ const SignupPage: React.FC = () => {
     posthog.register_once({
       referral_code: referralCode,
     });
-    posthog.capture("invite_page_opened", {
+    captureEvent(AnalyticsEvent.InvitePageOpened, {
       referral_code: referralCode,
     });
   }, [referralCode, isPreviewMode]);
@@ -177,7 +178,7 @@ const SignupPage: React.FC = () => {
               name: user.name,
               referral_code: referralCode,
             });
-            posthog.capture("new_user", {
+            captureEvent(AnalyticsEvent.NewUser, {
               email: user.email,
               name: user.name,
               referral_code: referralCode,

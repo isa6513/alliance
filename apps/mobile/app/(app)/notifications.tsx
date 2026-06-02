@@ -1,20 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  RefreshControl,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { router, RelativePathString } from "expo-router";
-import { Ellipsis } from "lucide-react-native";
+import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
   NotificationDto,
   notifsFindAll,
-  notifsSetReadAll,
   notifsSetRead,
+  notifsSetReadAll,
 } from "@alliance/shared/client";
+import { captureEvent } from "@alliance/shared/lib/analytics";
 import {
   buildNotificationRenderItems,
   getNotificationTime,
@@ -25,14 +16,24 @@ import {
   getNotificationIdentityKey,
   getNotificationReadRequest,
 } from "@alliance/shared/lib/notificationIdentity";
-import { usePostHog } from "posthog-react-native";
-import Text from "../../components/system/Text";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LegendList } from "@legendapp/list";
-import SwipeableNotification from "../../components/SwipeableNotification";
-import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { RelativePathString, router } from "expo-router";
+import { Ellipsis } from "lucide-react-native";
+import { useCallback, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  RefreshControl,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import MobileLikesGroup from "../../components/LikesGroup";
 import ProfileImage from "../../components/ProfileImage";
+import SwipeableNotification from "../../components/SwipeableNotification";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import Text from "../../components/system/Text";
 import { useAuth } from "../../lib/AuthContext";
 
 const normalizeLocation = (location: string | null) => {
@@ -49,7 +50,6 @@ const normalizeLocation = (location: string | null) => {
 };
 
 export default function NotificationsScreen() {
-  const posthog = usePostHog();
   const queryClient = useQueryClient();
 
   const { user } = useAuth();
@@ -150,8 +150,8 @@ export default function NotificationsScreen() {
       }
     }
 
-    posthog?.capture("notifications_marked_all_as_read");
-  }, [posthog, queryClient, unreadTotal]);
+    captureEvent(AnalyticsEvent.NotificationsMarkedAllAsRead);
+  }, [queryClient, unreadTotal]);
 
   const markAllOverflow = (() => {
     if (unreadTotal === 0) return null;
@@ -238,12 +238,12 @@ export default function NotificationsScreen() {
     (notification: NotificationDto) => {
       notifsSetRead(getNotificationReadRequest(notification));
       markNotificationsRead([notification]);
-      posthog?.capture("notification_marked_read", {
+      captureEvent(AnalyticsEvent.NotificationMarkedRead, {
         notificationId: notification.id,
         notificationSourceType: notification.sourceType,
       });
     },
-    [markNotificationsRead, posthog],
+    [markNotificationsRead],
   );
 
   const handleMarkBucketAsRead = useCallback(
@@ -274,7 +274,7 @@ export default function NotificationsScreen() {
         notification.mobileAppLocation ?? notification.webAppLocation ?? null,
       );
 
-      posthog?.capture("notification_clicked", {
+      captureEvent(AnalyticsEvent.NotificationClicked, {
         notificationId: notification.id,
         notificationSourceType: notification.sourceType,
         category: notification.category ?? "unknown category",
@@ -285,7 +285,7 @@ export default function NotificationsScreen() {
         router.push(destination as RelativePathString);
       }
     },
-    [markNotificationsRead, posthog],
+    [markNotificationsRead],
   );
 
   const renderNotification = useCallback(
@@ -383,7 +383,10 @@ export default function NotificationsScreen() {
         data={renderItems}
         keyExtractor={(item) => item.key}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refreshNotifications} />
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refreshNotifications}
+          />
         }
         recycleItems
         renderItem={({ item }) => (

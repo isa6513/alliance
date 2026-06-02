@@ -1,3 +1,5 @@
+import { ExceptionEvent } from "@alliance/common/analytics";
+import { FormSchema } from "@alliance/common/forms/form-schema";
 import {
   FormResponseDto,
   SubmitFormDto,
@@ -5,16 +7,15 @@ import {
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
+import { captureException } from "@alliance/shared/lib/analytics";
 import { noop } from "@alliance/shared/lib/constants";
-import { useState } from "react";
-import FormRenderer from "./forms/FormRenderer";
-import { FormSchema } from "@alliance/common/forms/form-schema";
-import { ActivityIndicator, View } from "react-native";
-import { usePostHog } from "posthog-react-native";
-import Text from "./system/Text";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../lib/AuthContext";
 import { getStoredGuestToken, setStoredGuestToken } from "../lib/guestSession";
+import FormRenderer from "./forms/FormRenderer";
+import Text from "./system/Text";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -45,7 +46,6 @@ const ActionTaskPanelForm = ({
   disabled,
   formResponse,
 }: ActionTaskPanelFormProps) => {
-  const posthog = usePostHog();
   const { user, isAuthenticated } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
@@ -102,12 +102,9 @@ const ActionTaskPanelForm = ({
           onSubmitSuccess();
         } else {
           console.error(response.error);
-          posthog.captureException(response.error, {
-            event: "form_submit_error",
-            properties: {
-              actionId,
-              $exception_fingerprint: "FormSubmitError",
-            },
+          captureException(ExceptionEvent.FormSubmitError, response.error, {
+            actionId,
+            $exception_fingerprint: "FormSubmitError",
           });
           setError("Failed to submit action.");
         }

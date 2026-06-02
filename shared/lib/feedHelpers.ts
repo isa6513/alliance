@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
   ActionActivityDto,
   HomeFeedForumCommentDto,
@@ -13,9 +14,9 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import posthog from "posthog-js";
 import { useCallback, useMemo } from "react";
 import { actionActivityViewable } from "./actionActivityConstants";
+import { captureEvent } from "./analytics";
 
 // TODO(forum-comment-rename): server currently emits the legacy
 // 'cluster_forum_comment' type and 'clusterForumComment' field. Once all
@@ -190,7 +191,10 @@ export const useFeedLikeMutations = (
       );
 
       if (!isLiked) {
-        posthog.capture("activity_liked", { activityId, activityType });
+        captureEvent(AnalyticsEvent.ActivityLiked, {
+          activityId,
+          activityType,
+        });
       }
     },
   });
@@ -253,7 +257,7 @@ export const useFeedLikeMutations = (
     },
     onSuccess: (_data, { commentId, isLiked }) => {
       if (!isLiked) {
-        posthog.capture("forum_comment_liked", { commentId });
+        captureEvent(AnalyticsEvent.ForumCommentLiked, { commentId });
       }
     },
   });

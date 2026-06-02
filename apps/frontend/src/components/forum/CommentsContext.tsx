@@ -1,3 +1,4 @@
+import { ExceptionEvent } from "@alliance/common/analytics";
 import {
   CommentDto,
   CommentParentObject,
@@ -12,8 +13,8 @@ import {
   forumUpdateComment,
   UserDto,
 } from "@alliance/shared/client";
+import { captureException } from "@alliance/shared/lib/analytics";
 import { useCommentLikeMutation } from "@alliance/shared/lib/useCommentLikeMutation";
-import posthog from "posthog-js";
 import {
   createContext,
   useCallback,
@@ -220,7 +221,7 @@ export function useCommentTree(
       setError(null);
     } catch (err) {
       console.error("Error posting reply:", err);
-      posthog.capture("error", { error: err });
+      captureException(ExceptionEvent.PostReplyError, err);
       setError("Failed to submit reply");
     } finally {
       setIsSubmitting(false);

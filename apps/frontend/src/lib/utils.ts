@@ -1,4 +1,6 @@
+import { AnalyticsEvent } from "@alliance/common/analytics";
 import { notifsLinkClick } from "@alliance/shared/client";
+import { captureEvent } from "@alliance/shared/lib/analytics";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
 import { posthog } from "posthog-js";
 import { useEffect } from "react";
@@ -22,7 +24,7 @@ export const useCIDFromParams = (actionId?: number) => {
           searchParams.delete("cid");
           setSearchParams(searchParams);
         }
-        posthog.capture("notif_link_click", {
+        captureEvent(AnalyticsEvent.NotifLinkClick, {
           cid,
           platform,
           actionId,
@@ -36,7 +38,7 @@ export const useCIDFromParams = (actionId?: number) => {
   useEffect(() => {
     if (sid) {
       posthog.register_for_session({ sid });
-      posthog.capture("sid_load", {
+      captureEvent(AnalyticsEvent.SidLoad, {
         sid,
         actionId,
       });

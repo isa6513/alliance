@@ -1,12 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-  ReactNode,
-} from "react";
+import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
   NotificationDto,
   notifsFindAll,
@@ -15,8 +7,17 @@ import {
   notifsSetReadAll,
   UnreadContentType,
 } from "@alliance/shared/client";
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router";
-import posthog from "posthog-js";
+import { captureEvent } from "./analytics";
 import {
   getNotificationIdentityKey,
   getNotificationReadRequest,
@@ -129,7 +130,7 @@ export const NotificationsProvider = ({
           ? getWebAppLocation(notification.webAppLocation)
           : window.location.pathname;
 
-        posthog.capture("notification_clicked", {
+        captureEvent(AnalyticsEvent.NotificationClicked, {
           notificationId: notification.id,
           notificationSourceType:
             clickedNotif?.sourceType ?? notification.sourceType,
@@ -147,7 +148,7 @@ export const NotificationsProvider = ({
 
         markNotificationRead(notification);
 
-        posthog.capture("notification_read_via_click", {
+        captureEvent(AnalyticsEvent.NotificationReadViaClick, {
           notificationId: notification.id,
           notificationSourceType:
             clickedNotif?.sourceType ?? notification.sourceType,
@@ -158,7 +159,7 @@ export const NotificationsProvider = ({
 
   const handleMarkAsRead = useCallback(
     (notification: Pick<NotificationDto, "id" | "sourceType">) => () => {
-      posthog.capture("notification_marked_read", {
+      captureEvent(AnalyticsEvent.NotificationMarkedRead, {
         notificationId: notification.id,
         notificationSourceType: notification.sourceType,
       });
@@ -176,7 +177,7 @@ export const NotificationsProvider = ({
     );
     setUnreadCount(0);
 
-    posthog.capture("notifications_marked_all_as_read");
+    captureEvent(AnalyticsEvent.NotificationsMarkedAllAsRead);
   }, []);
 
   const applyNotificationsReadByContent = useCallback(

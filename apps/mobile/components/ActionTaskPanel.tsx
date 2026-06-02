@@ -1,11 +1,12 @@
+import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
   ActionTaskPanelPropsShared,
   useTaskFormHandlers,
 } from "@alliance/shared/lib/actionTaskPanel";
+import { captureEvent } from "@alliance/shared/lib/analytics";
 import { noop } from "@alliance/shared/lib/constants";
-import ActionTaskPanelForm from "./ActionTaskPanelForm";
 import { useCallback } from "react";
-import { usePostHog } from "posthog-react-native";
+import ActionTaskPanelForm from "./ActionTaskPanelForm";
 
 export type ActionTaskPanelProps = ActionTaskPanelPropsShared & {
   scrollPageTo: (y: number, animated?: boolean) => void;
@@ -30,16 +31,13 @@ const ActionTaskPanel = ({
       onOptOutAction,
     });
 
-  const posthog = usePostHog();
-
   const handleFormStarted = useCallback(() => {
-    if (!posthog) return;
-    posthog.capture("form_started", {
+    captureEvent(AnalyticsEvent.FormStarted, {
       actionId: action.id,
       actionType: action.type,
       actionName: action.name,
     });
-  }, [action, posthog]);
+  }, [action]);
 
   if ((disabled || formResponse) && action.taskFormId !== undefined) {
     return (

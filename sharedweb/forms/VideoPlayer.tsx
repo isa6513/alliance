@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { AnalyticsEvent } from "@alliance/common/analytics";
+import { captureEvent } from "@alliance/shared/lib/analytics";
 import Hls from "hls.js";
-import posthog from "posthog-js";
+import { useEffect, useRef, useState } from "react";
 import { getApiUrl } from "../lib/config";
 
 type VideoPlayerProps = {
@@ -17,7 +18,7 @@ export default function VideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">(
-    videoId ? "loading" : "ready"
+    videoId ? "loading" : "ready",
   );
   const [mediaReady, setMediaReady] = useState(false);
   const hasVideo = !!(src || videoId);
@@ -74,7 +75,7 @@ export default function VideoPlayer({
   }, [videoId, status]);
 
   useEffect(() => {
-    posthog.capture("video_seen", { videoId });
+    captureEvent(AnalyticsEvent.VideoSeen, { videoId });
   }, [videoId]);
 
   useEffect(() => {
@@ -87,19 +88,25 @@ export default function VideoPlayer({
     const onPlay = () => {
       if (hasTrackedPlay) return;
       hasTrackedPlay = true;
-      posthog.capture("video_started", { videoId, src });
+      captureEvent(AnalyticsEvent.VideoStarted, {
+        videoId,
+        src,
+      });
     };
 
     const onTimeUpdate = () => {
       if (hasTrackedComplete || !video.duration) return;
       if (video.duration - video.currentTime <= 3) {
         hasTrackedComplete = true;
-        posthog.capture("video_fully_watched", { videoId, src });
+        captureEvent(AnalyticsEvent.VideoFullyWatched, {
+          videoId,
+          src,
+        });
       }
 
       if (video.currentTime > lastTrackedTimeRef.current + 5) {
         lastTrackedTimeRef.current = video.currentTime;
-        posthog.capture("video_progress", {
+        captureEvent(AnalyticsEvent.VideoProgress, {
           videoId,
           src,
           progress: Math.floor(video.currentTime),
@@ -123,8 +130,8 @@ export default function VideoPlayer({
     const manifestUrl = src.startsWith("http")
       ? `${src}/playlist.m3u8`
       : videoId
-      ? `${getApiUrl()}/videos/${videoId}/playlist.m3u8`
-      : src;
+        ? `${getApiUrl()}/videos/${videoId}/playlist.m3u8`
+        : src;
 
     const video = videoRef.current;
 

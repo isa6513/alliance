@@ -1,3 +1,5 @@
+import { ExceptionEvent } from "@alliance/common/analytics";
+import { FormSchema } from "@alliance/common/forms/form-schema";
 import {
   FormResponseDto,
   SubmitFormDto,
@@ -6,18 +8,18 @@ import {
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
+import { captureException } from "@alliance/shared/lib/analytics";
+import { CardStyle } from "@alliance/shared/styles/card";
+import { cn } from "@alliance/shared/styles/util";
 import FormRenderer, {
   computeFormStorageKey,
 } from "@alliance/sharedweb/forms/FormRenderer";
-import { FormSchema } from "@alliance/common/forms/form-schema";
 import Card from "@alliance/sharedweb/ui/Card";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { useQuery } from "@tanstack/react-query";
 import posthog from "posthog-js";
 import { useMemo, useState, type RefObject } from "react";
 import { useAuth } from "../lib/AuthContext";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { CardStyle } from "@alliance/shared/styles/card";
-import { cn } from "@alliance/shared/styles/util";
-import { useQuery } from "@tanstack/react-query";
 
 interface ActionTaskPanelFormProps {
   taskFormId: number;
@@ -130,12 +132,9 @@ const ActionTaskPanelForm = ({
           return false;
         }
         console.error(response.error);
-        posthog.captureException(response.error, {
-          event: "form_submit_error",
-          properties: {
-            actionId,
-            $exception_fingerprint: "FormSubmitError",
-          },
+        captureException(ExceptionEvent.FormSubmitError, response.error, {
+          actionId,
+          $exception_fingerprint: "FormSubmitError",
         });
         setError("Failed to submit action.");
         return false;
