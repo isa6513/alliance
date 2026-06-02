@@ -85,9 +85,7 @@ export function captureException(
 ): void {
   backend.captureException(error, {
     event,
-    properties: {
-      ...properties,
-      [SLACK_PROPERTY]: SEND_TO_SLACK[event],
-    },
+    [SLACK_PROPERTY]: SEND_TO_SLACK[event],
+    properties: properties ?? {},
   });
 }
