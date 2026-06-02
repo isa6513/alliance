@@ -198,18 +198,22 @@ jobs:
             sudo yum install -y unzip nginx
 
             # Install Bun
-            if ! command -v bun &> /dev/null; then
-              curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.6"
-            fi
+            BUN_VERSION=1.3.6
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"
+            if [ "$(bun --version 2>/dev/null)" != "$BUN_VERSION" ]; then
+              curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}"
+            fi
+            bun --version | grep -qx "$BUN_VERSION" || { echo "bun $BUN_VERSION required, got $(bun --version 2>/dev/null || echo none)"; exit 1; }
 
-            # Ensure pm2 is available (still needs Node for pm2)
+            # Node is needed for pm2.
             export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/nvm.sh" ] || { echo "nvm missing ($NVM_DIR/nvm.sh) — provision node on this host before deploying"; exit 1; }
+            \. "$NVM_DIR/nvm.sh"
             nvm install 22
             nvm use 22
             nvm alias default 22
+            command -v node &> /dev/null || { echo "node missing after nvm setup"; exit 1; }
             command -v pm2 &> /dev/null || bun add -g pm2
 
             cd ~/
@@ -726,15 +730,19 @@ jobs:
             set -Euo pipefail
 
             # Install Bun
-            if ! command -v bun &> /dev/null; then
-              curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.6"
-            fi
+            BUN_VERSION=1.3.6
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"
+            if [ "$(bun --version 2>/dev/null)" != "$BUN_VERSION" ]; then
+              curl -fsSL https://bun.sh/install | bash -s "bun-v${BUN_VERSION}"
+            fi
+            bun --version | grep -qx "$BUN_VERSION" || { echo "bun $BUN_VERSION required, got $(bun --version 2>/dev/null || echo none)"; exit 1; }
 
-            # Ensure pm2 is available (still needs Node for pm2)
+            # Node is needed for pm2.
             export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/nvm.sh" ] || { echo "nvm missing ($NVM_DIR/nvm.sh) — provision node on this host before deploying"; exit 1; }
+            \. "$NVM_DIR/nvm.sh"
+            command -v node &> /dev/null || { echo "node missing after nvm setup"; exit 1; }
             command -v pm2 &> /dev/null || bun add -g pm2
 
             cd ~/
