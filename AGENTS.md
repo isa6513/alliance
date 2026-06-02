@@ -8,7 +8,7 @@ For DTOs, use mapped types based on database entities rather than redefining val
 
 For new endpoints, use either @AuthGuard, @AdminGuard, or @CommunityLeaderGuard depending on the appropriate level of security.
 
-Test server code with `npm run test:agents` which runs the end to end tests with a custom postgres instance.
+Test server code with `(cd server && bun run test:e2e)` which runs the end to end tests.
 
 Generate migrations with `cd server && bun migration:generate -- migrations/{migration-name}`. Do not write migration files from scratch. The generated migration may not always be correct (e.g. a renamed column will generate a DROP + ADD, which deletes all existing data). Review the output and edit the generated file if needed.
 

@@ -18,7 +18,7 @@ Existing methods often don't follow this. Don't refactor just to fix shape, but 
 
 ## Tests
 
-`npm run test:agents` — end-to-end tests against a custom postgres.
+`(cd server && bun run test:e2e)` — end-to-end tests
 
 ## Migrations
 
