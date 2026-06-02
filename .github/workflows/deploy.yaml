@@ -217,8 +217,9 @@ jobs:
             unzip -o ~/react-build.zip
 
             cd ~/output
-            # `unzip -o` can't remove files the zip doesn't contain
-            rm -rf node_modules package-lock.json
+            # node_modules isn't in the zip; clear it so the frozen install
+            # builds a clean tree
+            rm -rf node_modules
             # appleboy/ssh-action runs this script without `set -e`
             # Make it fatal explicitly.
             bun install --frozen-lockfile --production || { echo "bun install failed"; exit 1; }
@@ -227,19 +228,13 @@ jobs:
             pm2 start "NODE_ENV=${{ github.ref_name == 'production' && 'production' || 'staging' }} node server.js" --name client-ssr
             pm2 save
 
-            # Install the http-context proxy headers (X-Forwarded-For etc.) so the
-            # backend sees the real client IP for the signup rate limiter. Source
-            # of truth is deploy/nginx/alliance.conf, uploaded to ~/alliance.conf.
-            # The vhost ships with a __DOMAIN__ placeholder for server_name and the
-            # cert paths; substitute the per-environment domain before installing,
-            # otherwise `nginx -t` fails on a non-existent cert path.
+            # Source of truth is deploy/nginx/alliance.conf, uploaded to
+            # ~/alliance.conf; substitute the per-environment domain into
+            # server_name + cert paths.
             sed "s/__DOMAIN__/${{ vars.DOMAIN_NAME }}/g" ~/alliance.conf \
               | sudo tee /etc/nginx/conf.d/alliance.conf > /dev/null
-            # Remove the legacy hand-rolled vhost; alliance.conf fully replaces it
-            # (same server_name + listen 443). Leaving it produces a conflicting
-            # server_name where nginx silently picks one by filename order.
-            sudo rm -f /etc/nginx/conf.d/react.conf
-            sudo nginx -t && sudo systemctl reload nginx
+            sudo nginx -t || { echo "nginx config invalid"; exit 1; }
+            sudo systemctl reload nginx
 
   deploy-admin-app:
     runs-on: ubuntu-latest
