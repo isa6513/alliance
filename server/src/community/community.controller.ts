@@ -1,18 +1,29 @@
+import { AnalyticsEvent } from '@alliance/common/analytics';
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Patch,
-  HttpCode,
   Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
+import type { JwtRequest } from 'src/auth/guards/jwtreq';
+import { PosthogService } from 'src/posthog/posthog.service';
+import {
+  CommunityInviteDto,
+  CreateCommunityInviteDto,
+  RequestCommunityInviteDto,
+} from 'src/user/dto/invite.dto';
+import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
 import { CommunityService } from './community.service';
 import {
   CommunityDto,
@@ -20,20 +31,14 @@ import {
   CreateCommunityDto,
   UpdateCommunityDto,
 } from './dto/community.dto';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import type { JwtRequest } from 'src/auth/guards/jwtreq';
-import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
-import { CommunityMemberContactInfoDto } from 'src/user/dto/user-action-relations.dto';
-import {
-  CommunityInviteDto,
-  CreateCommunityInviteDto,
-  RequestCommunityInviteDto,
-} from 'src/user/dto/invite.dto';
 
 @ApiTags('community')
 @Controller('community')
 export class CommunityController {
-  constructor(private readonly communityService: CommunityService) {}
+  constructor(
+    private readonly communityService: CommunityService,
+    private readonly posthog: PosthogService,
+  ) {}
 
   @Post('create/admin')
   @UseGuards(AdminGuard)
@@ -53,9 +58,18 @@ export class CommunityController {
     @Request() req: JwtRequest,
     @Body() body: CreateCommunityDto,
   ): Promise<CommunityDto> {
-    return new CommunityDto(
-      await this.communityService.createCommunity(req.user.sub, body),
+    const community = await this.communityService.createCommunity(
+      req.user.sub,
+      body,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.CommunityCreated,
+      distinctId: String(req.user.sub),
+      properties: {
+        communityId: community.id,
+      },
+    });
+    return new CommunityDto(community);
   }
 
   @Get('list')
@@ -93,12 +107,19 @@ export class CommunityController {
     @Request() req: JwtRequest,
     @Param('communityId', ParseIntPipe) communityId: number,
   ): Promise<CommunityDto> {
-    return new CommunityDto(
-      await this.communityService.joinPublicCommunity(
-        req.user.sub,
-        communityId,
-      ),
+    const community = await this.communityService.joinPublicCommunity(
+      req.user.sub,
+      communityId,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.CommunityJoined,
+      distinctId: String(req.user.sub),
+      properties: {
+        communityId,
+        via: 'public',
+      },
+    });
+    return new CommunityDto(community);
   }
 
   @Patch(':communityId')
@@ -159,6 +180,13 @@ export class CommunityController {
     @Request() req: JwtRequest,
   ): Promise<void> {
     await this.communityService.leaveCommunity(communityId, req.user.sub);
+    this.posthog.capture({
+      event: AnalyticsEvent.CommunityLeft,
+      distinctId: String(req.user.sub),
+      properties: {
+        communityId,
+      },
+    });
   }
 
   @Delete(':communityId')
@@ -352,7 +380,19 @@ export class CommunityController {
     @Param('inviteId', ParseIntPipe) inviteId: number,
     @Request() req: JwtRequest,
   ): Promise<void> {
-    await this.communityService.acceptCommunityInvite(inviteId, req.user.sub);
+    const communityId = await this.communityService.acceptCommunityInvite(
+      inviteId,
+      req.user.sub,
+    );
+    this.posthog.capture({
+      event: AnalyticsEvent.CommunityJoined,
+      distinctId: String(req.user.sub),
+      properties: {
+        communityId,
+        via: 'invite',
+        inviteId,
+      },
+    });
   }
 
   @Post('communityInvites/:inviteId/reject')

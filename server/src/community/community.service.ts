@@ -1,3 +1,4 @@
+import { run } from '@alliance/common/run';
 import {
   BadRequestException,
   Injectable,
@@ -5,29 +6,28 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, In, IsNull, type Repository } from 'typeorm';
-import { Community } from './entities/community.entity';
-import type { Relations } from 'src/utils/Repository';
 import { ImagesService } from 'src/images/images.service';
 import { ConversationService } from 'src/messaging/conversation.service';
-import { CreateCommunityDto, UpdateCommunityDto } from './dto/community.dto';
-import { DEFAULT_TIME_ZONE, User } from 'src/user/entities/user.entity';
+import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import {
   type CreateNotifParams,
   NotifsService,
 } from 'src/notifs/notifs.service';
-import { run } from '@alliance/common/run';
-import { NotificationCategory } from 'src/notifs/entities/notification.entity';
 import { groupUrl } from 'src/search/approutes';
-import { CommunityMemberContactInfo } from 'src/user/dto/user-action-relations.dto';
-import {
-  CommunityInvite,
-  CommunityInviteStatus,
-} from './entities/community-invite.entity';
 import {
   CreateCommunityInviteDto,
   RequestCommunityInviteDto,
 } from 'src/user/dto/invite.dto';
+import { CommunityMemberContactInfo } from 'src/user/dto/user-action-relations.dto';
+import { DEFAULT_TIME_ZONE, User } from 'src/user/entities/user.entity';
+import type { Relations } from 'src/utils/Repository';
+import { DeepPartial, In, IsNull, type Repository } from 'typeorm';
+import { CreateCommunityDto, UpdateCommunityDto } from './dto/community.dto';
+import {
+  CommunityInvite,
+  CommunityInviteStatus,
+} from './entities/community-invite.entity';
+import { Community } from './entities/community.entity';
 
 const COMMUNITY_DEFAULT_RELATIONS: Readonly<Relations<Community>> =
   Object.freeze({
@@ -989,7 +989,10 @@ export class CommunityService {
     return invites;
   }
 
-  async acceptCommunityInvite(inviteId: number, userId: number): Promise<void> {
+  async acceptCommunityInvite(
+    inviteId: number,
+    userId: number,
+  ): Promise<number> {
     const invite = await this.communityInviteRepository.findOneOrFail({
       where: { id: inviteId, deletedAt: IsNull() },
       relations: {
@@ -1072,6 +1075,8 @@ export class CommunityService {
         communityInvite: invite,
       }),
     ]);
+
+    return community.id;
   }
 
   async rejectCommunityInvite(inviteId: number, userId: number): Promise<void> {

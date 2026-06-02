@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from '@alliance/common/analytics';
 import {
   Body,
   Controller,
@@ -14,13 +15,14 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
+import { PosthogService } from 'src/posthog/posthog.service';
 import { ConversationService } from './conversation.service';
 import {
-  ConversationDto,
   ConversationAdminSummaryDto,
+  ConversationDto,
+  ConversationParticipantDto,
   CreateDirectConversationDto,
   CreateGroupConversationDto,
-  ConversationParticipantDto,
   UnreadMessageSummaryDto,
   UnreadMessagesDto,
   UpdateConversationDto,
@@ -29,7 +31,10 @@ import {
 @ApiTags('messaging')
 @Controller('messaging/conversations')
 export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(
+    private readonly conversationService: ConversationService,
+    private readonly posthog: PosthogService,
+  ) {}
 
   @Get('admin')
   @ApiOkResponse({ type: ConversationAdminSummaryDto, isArray: true })
@@ -63,24 +68,47 @@ export class ConversationController {
   @Post('direct')
   @ApiOkResponse({ type: ConversationDto })
   @UseGuards(AuthGuard)
-  createDirectConversation(
+  async createDirectConversation(
     @Body() dto: CreateDirectConversationDto,
     @Request() req: JwtRequest,
   ): Promise<ConversationDto> {
-    return this.conversationService.createDirectConversation(req.user.sub, dto);
+    const conversation =
+      await this.conversationService.createDirectConversation(
+        req.user.sub,
+        dto,
+      );
+    this.posthog.capture({
+      event: AnalyticsEvent.ConversationCreated,
+      distinctId: String(req.user.sub),
+      properties: {
+        conversationId: conversation.id,
+        kind: 'direct',
+      },
+    });
+    return conversation;
   }
 
   @Post('group')
   @ApiOkResponse({ type: ConversationDto })
   @UseGuards(AuthGuard)
-  createGroupConversation(
+  async createGroupConversation(
     @Body() dto: CreateGroupConversationDto,
     @Request() req: JwtRequest,
   ): Promise<ConversationDto> {
-    return this.conversationService.createOrGetGroupConversation(
-      req.user.sub,
-      dto,
-    );
+    const conversation =
+      await this.conversationService.createOrGetGroupConversation(
+        req.user.sub,
+        dto,
+      );
+    this.posthog.capture({
+      event: AnalyticsEvent.ConversationCreated,
+      distinctId: String(req.user.sub),
+      properties: {
+        conversationId: conversation.id,
+        kind: 'group',
+      },
+    });
+    return conversation;
   }
 
   @Post(':conversationId/update')

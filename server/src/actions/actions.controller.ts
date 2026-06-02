@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from '@alliance/common/analytics';
 import {
   BadRequestException,
   Body,
@@ -28,6 +29,7 @@ import { CommentDto, CreateCommentDto } from 'src/forum/dto/comment.dto';
 import { ActionEventReminderService } from 'src/notifs/action-event-reminder.service';
 import { PreviewNotificationPlanDto } from 'src/notifs/dto/notification-plan.dto';
 import { ActionEventNotifDto } from 'src/notifs/entities/action-event-notif.dto';
+import { PosthogService } from 'src/posthog/posthog.service';
 import { ShareLinkDto } from 'src/share-urls/dto/share-url.dto';
 import { ShareUrlsService } from 'src/share-urls/share-urls.service';
 import {
@@ -111,6 +113,7 @@ export class ActionsController {
     private readonly forumActionCompleterWorker: ForumActionCompleterWorker,
     private readonly actionFormVariantService: ActionFormVariantService,
     private readonly shareUrlsService: ShareUrlsService,
+    private readonly posthog: PosthogService,
   ) {}
 
   @Post('optout/:id')
@@ -121,14 +124,20 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: OptOutActionDto,
   ): Promise<ActionActivityDto> {
-    return new ActionActivityDto(
-      await this.actionsService.optoutAction(
-        id,
-        req.user.sub,
-        body.reason,
-        body.outOfTime,
-      ),
+    const activity = await this.actionsService.optoutAction(
+      id,
+      req.user.sub,
+      body.reason,
+      body.outOfTime,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.ActionOptedOut,
+      distinctId: String(req.user.sub),
+      properties: {
+        actionId: id,
+      },
+    });
+    return new ActionActivityDto(activity);
   }
 
   @Post('complete/:id')
@@ -138,9 +147,17 @@ export class ActionsController {
     @Request() req: JwtRequest,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ActionActivityDto> {
-    return new ActionActivityDto(
-      await this.actionsService.completeAction(id, req.user.sub),
-    );
+    const activity = await this.actionsService.completeAction(id, req.user.sub);
+    this.posthog.capture({
+      event: AnalyticsEvent.ActionCompleted,
+      distinctId: String(req.user.sub),
+      properties: {
+        actionId: id,
+        actionType: activity.action?.type,
+        actionName: activity.action?.name,
+      },
+    });
+    return new ActionActivityDto(activity);
   }
 
   @Get('myStatus/:id')
@@ -881,11 +898,20 @@ export class ActionsController {
   @Post('likeActivity/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  likeActivity(
+  async likeActivity(
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<ActionActivityDto> {
-    return this.actionsService.likeActivity(id, req.user.sub);
+    const activity = await this.actionsService.likeActivity(id, req.user.sub);
+    this.posthog.capture({
+      event: AnalyticsEvent.ActivityLiked,
+      distinctId: String(req.user.sub),
+      properties: {
+        activityId: id,
+        activityType: activity.type,
+      },
+    });
+    return activity;
   }
 
   @Post('unlikeActivity/:id')
@@ -895,18 +921,41 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Request() req: JwtRequest,
   ): Promise<ActionActivityDto> {
-    return this.actionsService.likeActivity(id, req.user.sub, true);
+    const activity = await this.actionsService.likeActivity(
+      id,
+      req.user.sub,
+      true,
+    );
+    this.posthog.capture({
+      event: AnalyticsEvent.ActivityUnliked,
+      distinctId: String(req.user.sub),
+      properties: {
+        activityId: id,
+        activityType: activity.type,
+      },
+    });
+    return activity;
   }
 
   @Post('addActivityComment/:id')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: CommentDto })
-  addActivityComment(
+  async addActivityComment(
     @Param('id', ParseIntPipe) id: number,
     @Body() commentDto: CreateCommentDto,
     @Request() req: JwtRequest,
   ): Promise<CommentDto> {
-    return this.actionsService.addActivityComment(id, commentDto, req.user.sub);
+    const comment = await this.actionsService.addActivityComment(
+      id,
+      commentDto,
+      req.user.sub,
+    );
+    this.posthog.capture({
+      event: AnalyticsEvent.ActivityCommentCreated,
+      distinctId: String(req.user.sub),
+      properties: { activityId: id, commentId: comment.id },
+    });
+    return comment;
   }
 
   @Post('updateActivity/:id')

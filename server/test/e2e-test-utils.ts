@@ -12,6 +12,7 @@ import { Contract } from 'src/contract/entities/contract.entity';
 import { testConnectionOptions } from 'src/datasources/dataSourceTest';
 import { ForumModule } from 'src/forum/forum.module';
 import { NotifsModule } from 'src/notifs/notifs.module';
+import { PosthogModule } from 'src/posthog/posthog.module';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormSnapshot } from 'src/tasks/entities/formsnapshot.entity';
 import { FormSnapshotService } from 'src/tasks/formsnapshot.service';
@@ -59,6 +60,7 @@ export async function createTestApp(
       EventEmitterModule.forRoot(),
       ThrottlerModule.forRoot(SIGNUP_THROTTLERS),
       TypeOrmModule.forRoot(testConnectionOptions()),
+      PosthogModule,
       AuthModule,
       ForumModule,
       ActionsModule,

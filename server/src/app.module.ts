@@ -27,6 +27,7 @@ import { MailModule } from './mail/mail.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { MmsModule } from './mms/mms.module';
 import { NotifsModule } from './notifs/notifs.module';
+import { PosthogModule } from './posthog/posthog.module';
 import { PushModule } from './push/push.module';
 import { S3Module } from './s3/s3.module';
 import { SearchModule } from './search/search.module';
@@ -66,6 +67,7 @@ import { VideosModule } from './videos/videos.module';
     }),
     EventEmitterModule.forRoot(),
     ThrottlerModule.forRoot(SIGNUP_THROTTLERS),
+    PosthogModule,
     AuthModule,
     UserModule,
     CommunityModule,

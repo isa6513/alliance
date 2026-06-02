@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from '@alliance/common/analytics';
 import {
   Body,
   Controller,
@@ -26,6 +27,7 @@ import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { CommunityLeaderGuard } from 'src/auth/guards/communityleader.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { MaybeUserLocationDto } from 'src/geo/city.dto';
+import { PosthogService } from 'src/posthog/posthog.service';
 import { PushDto } from 'src/push/dto/push.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { Public } from '../auth/public.decorator';
@@ -69,7 +71,10 @@ class VerifyEmailBody {
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly posthog: PosthogService,
+  ) {}
 
   @Get('me')
   @UseGuards(AuthGuard)
@@ -172,6 +177,13 @@ export class UserController {
     @Request() req: JwtRequest,
   ): Promise<void> {
     await this.userService.createFriendRequest(req.user.sub, targetUserId);
+    this.posthog.capture({
+      event: AnalyticsEvent.FriendRequestSent,
+      distinctId: String(req.user.sub),
+      properties: {
+        targetUserId,
+      },
+    });
   }
 
   @Patch('friends/:requesterId/accept')
@@ -187,6 +199,13 @@ export class UserController {
       req.user.sub,
       FriendStatus.Accepted,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.FriendRequestAccepted,
+      distinctId: String(req.user.sub),
+      properties: {
+        requesterId,
+      },
+    });
   }
 
   @Patch('friends/:requesterId/decline')
@@ -212,7 +231,14 @@ export class UserController {
     @Param('targetUserId', ParseIntPipe) targetUserId: number,
     @Request() req: JwtRequest,
   ): Promise<void> {
-    return this.userService.removeFriend(req.user.sub, targetUserId);
+    await this.userService.removeFriend(req.user.sub, targetUserId);
+    this.posthog.capture({
+      event: AnalyticsEvent.FriendRemoved,
+      distinctId: String(req.user.sub),
+      properties: {
+        targetUserId,
+      },
+    });
   }
 
   @Get('friends/requests/received')

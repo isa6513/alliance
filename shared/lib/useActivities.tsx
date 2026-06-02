@@ -1,4 +1,3 @@
-import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
   ActionActivityDto,
   actionsCommunityActivity,
@@ -18,7 +17,6 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { actionActivityViewable } from "./actionActivityConstants";
-import { captureEvent } from "./analytics";
 
 export enum ActivityList {
   Friends = "friends",
@@ -238,7 +236,7 @@ const useActivities = (props: UseActivitiesProps) => {
         queryClient.setQueryData(key, data);
       });
     },
-    onSuccess: (data, { activityId, isLiked, activityType }) => {
+    onSuccess: (data, { activityId }) => {
       queryClient.setQueriesData<InfiniteActivityData>(
         { queryKey: ["useActivities"] },
         (old) =>
@@ -253,13 +251,6 @@ const useActivities = (props: UseActivitiesProps) => {
               : a,
           ),
       );
-
-      if (!isLiked) {
-        captureEvent(AnalyticsEvent.ActivityLiked, {
-          activityId,
-          activityType,
-        });
-      }
     },
   });
 

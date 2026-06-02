@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from '@alliance/common/analytics';
 import {
   Body,
   Controller,
@@ -12,6 +13,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   ApiBearerAuth,
   ApiCookieAuth,
@@ -23,6 +25,7 @@ import {
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { IsEnum, IsOptional } from 'class-validator';
 import type { Request as ExpressRequest, Response } from 'express';
+import { PosthogService } from 'src/posthog/posthog.service';
 import { AuthService } from './auth.service';
 import {
   AuthMeResponseDto,
@@ -34,10 +37,12 @@ import { SignInDto, SignInResponseDto, type TokenMode } from './dto/signin.dto';
 import { AdminGuard } from './guards/admin.guard';
 import {
   AuthGuard,
+  extractAccessTokenFromCookie,
   extractGuestTokenFromCookie,
   extractRefreshTokenFromCookie,
+  extractTokenFromHeader,
 } from './guards/auth.guard';
-import type { JwtRequest } from './guards/jwtreq';
+import type { JwtPayload, JwtRequest } from './guards/jwtreq';
 import { RefreshTokenGuard } from './guards/refresh.guard';
 import { Public } from './public.decorator';
 import { SIGNUP_THROTTLE } from './signup-throttle.config';
@@ -57,6 +62,8 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private turnstileService: TurnstileService,
+    private jwtService: JwtService,
+    private posthog: PosthogService,
   ) {}
 
   @Public()
@@ -74,6 +81,15 @@ export class AuthController {
 
     this.authService.setAuthCookies(res, access_token, refresh_token);
     await this.mergeGuestSession(signInDto.guestToken, req, res, userId);
+    this.posthog.identify({
+      distinctId: String(userId),
+      properties: { email: signInDto.email },
+    });
+    this.posthog.capture({
+      event: AnalyticsEvent.Login,
+      distinctId: String(userId),
+      properties: { isAdmin },
+    });
     if (signInDto.mode === 'header') {
       return new SignInResponseDto({ access_token, refresh_token, isAdmin });
     }
@@ -95,6 +111,15 @@ export class AuthController {
 
     this.authService.setAuthCookies(res, access_token, refresh_token);
     await this.mergeGuestSession(signInDto.guestToken, req, res, userId);
+    this.posthog.identify({
+      distinctId: String(userId),
+      properties: { email: signInDto.email },
+    });
+    this.posthog.capture({
+      event: AnalyticsEvent.Login,
+      distinctId: String(userId),
+      properties: { isAdmin: true },
+    });
     if (signInDto.mode === 'header') {
       return new SignInResponseDto({ access_token, refresh_token, isAdmin });
     }
@@ -139,6 +164,19 @@ export class AuthController {
 
     this.authService.setAuthCookies(res, access_token, refresh_token);
     await this.mergeGuestSession(signUp.guestToken, req, res, userId);
+    this.posthog.identify({
+      distinctId: String(userId),
+      properties: { email: signUp.email, name: signUp.name },
+    });
+    this.posthog.capture({
+      event: AnalyticsEvent.NewUser,
+      distinctId: String(userId),
+      properties: {
+        email: signUp.email,
+        name: signUp.name,
+        referral_code: signUp.referralCode,
+      },
+    });
     if (signUp.mode === 'header') {
       return new SignInResponseDto({ access_token, refresh_token, isAdmin });
     }
@@ -185,8 +223,29 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
-  async logout(@Res({ passthrough: true }) res: Response): Promise<void> {
+  async logout(
+    @Request() req: ExpressRequest,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
     this.authService.clearAuthCookies(res);
+
+    // Logout is unauthenticated; best-effort resolve the user from a still-valid
+    // access token so we can attribute the event.
+    const token =
+      extractTokenFromHeader(req) ?? extractAccessTokenFromCookie(req);
+    if (token) {
+      try {
+        const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
+          secret: process.env.JWT_SECRET,
+        });
+        this.posthog.capture({
+          event: AnalyticsEvent.Logout,
+          distinctId: String(payload.sub),
+        });
+      } catch {
+        // expired/invalid token — nothing to attribute
+      }
+    }
   }
 
   @Public()

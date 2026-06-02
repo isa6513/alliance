@@ -178,11 +178,6 @@ const SignupPage: React.FC = () => {
               name: user.name,
               referral_code: referralCode,
             });
-            captureEvent(AnalyticsEvent.NewUser, {
-              email: user.email,
-              name: user.name,
-              referral_code: referralCode,
-            });
           }
           window.location.href = href("/tasks");
         } else {

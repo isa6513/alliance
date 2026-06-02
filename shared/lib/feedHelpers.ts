@@ -1,4 +1,3 @@
-import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
   ActionActivityDto,
   HomeFeedForumCommentDto,
@@ -16,7 +15,6 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { actionActivityViewable } from "./actionActivityConstants";
-import { captureEvent } from "./analytics";
 
 // TODO(forum-comment-rename): server currently emits the legacy
 // 'cluster_forum_comment' type and 'clusterForumComment' field. Once all
@@ -174,7 +172,7 @@ export const useFeedLikeMutations = (
         queryClient.setQueryData(key, data);
       });
     },
-    onSuccess: (data, { activityId, isLiked, activityType }) => {
+    onSuccess: (data, { activityId }) => {
       queryClient.setQueriesData<InfiniteFeedData>(
         { queryKey: [queryKeyRoot] },
         (old) =>
@@ -189,13 +187,6 @@ export const useFeedLikeMutations = (
               : a,
           ),
       );
-
-      if (!isLiked) {
-        captureEvent(AnalyticsEvent.ActivityLiked, {
-          activityId,
-          activityType,
-        });
-      }
     },
   });
 
@@ -254,11 +245,6 @@ export const useFeedLikeMutations = (
       context?.previousQueries?.forEach(([key, data]) => {
         queryClient.setQueryData(key, data);
       });
-    },
-    onSuccess: (_data, { commentId, isLiked }) => {
-      if (!isLiked) {
-        captureEvent(AnalyticsEvent.ForumCommentLiked, { commentId });
-      }
     },
   });
 

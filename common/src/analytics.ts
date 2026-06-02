@@ -33,6 +33,28 @@ export enum AnalyticsEvent {
 
   // Auth
   AuthFailedToRefresh = "auth_failed_to_refresh",
+  Login = "login",
+  Logout = "logout",
+
+  // Visible actions (server-side). Each is forwarded to Slack.
+  ForumPostCreated = "forum_post_created",
+  ForumCommentCreated = "forum_comment_created",
+  ForumPostLiked = "forum_post_liked",
+  ForumPostUnliked = "forum_post_unliked",
+  ForumCommentUnliked = "forum_comment_unliked",
+  ActivityCommentCreated = "activity_comment_created",
+  ActivityUnliked = "activity_unliked",
+  ActionOptedOut = "action_opted_out",
+  ContractSigned = "contract_signed",
+  ContractSuspended = "contract_suspended",
+  CommunityCreated = "community_created",
+  CommunityJoined = "community_joined",
+  CommunityLeft = "community_left",
+  FriendRequestSent = "friend_request_sent",
+  FriendRequestAccepted = "friend_request_accepted",
+  FriendRemoved = "friend_removed",
+  ConversationCreated = "conversation_created",
+  MessageSent = "message_sent",
 
   // Email (Mailgun webhook). Unrecognized Mailgun event types fall back to a
   // dynamic `email<event>` name
@@ -91,6 +113,28 @@ export const SEND_TO_SLACK: Record<AnalyticsEvent | ExceptionEvent, boolean> = {
 
   // Auth
   [AnalyticsEvent.AuthFailedToRefresh]: false,
+  [AnalyticsEvent.Login]: true,
+  [AnalyticsEvent.Logout]: true,
+
+  // Visible actions (server-side)
+  [AnalyticsEvent.ForumPostCreated]: true,
+  [AnalyticsEvent.ForumCommentCreated]: true,
+  [AnalyticsEvent.ForumPostLiked]: true,
+  [AnalyticsEvent.ForumPostUnliked]: true,
+  [AnalyticsEvent.ForumCommentUnliked]: true,
+  [AnalyticsEvent.ActivityCommentCreated]: true,
+  [AnalyticsEvent.ActivityUnliked]: true,
+  [AnalyticsEvent.ActionOptedOut]: true,
+  [AnalyticsEvent.ContractSigned]: true,
+  [AnalyticsEvent.ContractSuspended]: true,
+  [AnalyticsEvent.CommunityCreated]: true,
+  [AnalyticsEvent.CommunityJoined]: true,
+  [AnalyticsEvent.CommunityLeft]: true,
+  [AnalyticsEvent.FriendRequestSent]: true,
+  [AnalyticsEvent.FriendRequestAccepted]: true,
+  [AnalyticsEvent.FriendRemoved]: true,
+  [AnalyticsEvent.ConversationCreated]: true,
+  [AnalyticsEvent.MessageSent]: true,
 
   // Email (Mailgun webhook)
   [AnalyticsEvent.EmailDelivered]: false,

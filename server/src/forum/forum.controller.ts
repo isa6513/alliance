@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from '@alliance/common/analytics';
 import {
   Body,
   Controller,
@@ -12,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { JwtPayload, JwtRequest } from 'src/auth/guards/jwtreq';
+import { PosthogService } from 'src/posthog/posthog.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { ReqUser } from '../auth/user.decorator';
@@ -33,7 +35,10 @@ import { ForumService } from './forum.service';
 @ApiTags('forum')
 @Controller('forum')
 export class ForumController {
-  constructor(private readonly forumService: ForumService) {}
+  constructor(
+    private readonly forumService: ForumService,
+    private readonly posthog: PosthogService,
+  ) {}
 
   @Post('posts')
   @UseGuards(AuthGuard)
@@ -43,9 +48,15 @@ export class ForumController {
     @Body() createPostDto: CreatePostDto,
     @ReqUser() user: JwtPayload,
   ): Promise<PostDto> {
-    return new PostDto({
-      post: await this.forumService.createPost(createPostDto, user.sub),
+    const post = await this.forumService.createPost(createPostDto, user.sub);
+    this.posthog.capture({
+      event: AnalyticsEvent.ForumPostCreated,
+      distinctId: String(user.sub),
+      properties: {
+        postId: post.id,
+      },
     });
+    return new PostDto({ post });
   }
 
   @Get('posts')
@@ -178,9 +189,18 @@ export class ForumController {
     @Body() createReplyDto: CreateCommentDto,
     @ReqUser() user: JwtPayload,
   ): Promise<CommentDto> {
-    return new CommentDto(
-      await this.forumService.createComment(createReplyDto, user.sub),
+    const comment = await this.forumService.createComment(
+      createReplyDto,
+      user.sub,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.ForumCommentCreated,
+      distinctId: String(user.sub),
+      properties: {
+        commentId: comment.id,
+      },
+    });
+    return new CommentDto(comment);
   }
 
   @Patch('comments/:id')
@@ -206,6 +226,13 @@ export class ForumController {
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
     await this.forumService.likePostOrComment(id, user.sub, false, 'comment');
+    this.posthog.capture({
+      event: AnalyticsEvent.ForumCommentLiked,
+      distinctId: String(user.sub),
+      properties: {
+        commentId: id,
+      },
+    });
   }
 
   @Post('comments/:id/unlike')
@@ -217,6 +244,13 @@ export class ForumController {
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
     await this.forumService.likePostOrComment(id, user.sub, true, 'comment');
+    this.posthog.capture({
+      event: AnalyticsEvent.ForumCommentUnliked,
+      distinctId: String(user.sub),
+      properties: {
+        commentId: id,
+      },
+    });
   }
 
   @Post('posts/:id/like')
@@ -228,6 +262,13 @@ export class ForumController {
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
     await this.forumService.likePostOrComment(id, user.sub, false, 'post');
+    this.posthog.capture({
+      event: AnalyticsEvent.ForumPostLiked,
+      distinctId: String(user.sub),
+      properties: {
+        postId: id,
+      },
+    });
   }
 
   @Post('posts/:id/unlike')
@@ -239,6 +280,13 @@ export class ForumController {
     @ReqUser() user: JwtPayload,
   ): Promise<void> {
     await this.forumService.likePostOrComment(id, user.sub, true, 'post');
+    this.posthog.capture({
+      event: AnalyticsEvent.ForumPostUnliked,
+      distinctId: String(user.sub),
+      properties: {
+        postId: id,
+      },
+    });
   }
 
   @Delete('comments/:id')

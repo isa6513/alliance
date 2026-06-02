@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from '@alliance/common/analytics';
 import {
   Body,
   Controller,
@@ -14,13 +15,14 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
-import { MessageService } from './message.service';
+import { PosthogService } from 'src/posthog/posthog.service';
+import { ConversationService } from './conversation.service';
 import {
   ConversationMessagesQueryDto,
   CreateMessageDto,
   MessageDto,
 } from './dto/messaging.dto';
-import { ConversationService } from './conversation.service';
+import { MessageService } from './message.service';
 
 @ApiTags('messaging')
 @Controller('messaging/messages')
@@ -28,6 +30,7 @@ export class MessageController {
   constructor(
     private readonly messageService: MessageService,
     private readonly conversationService: ConversationService,
+    private readonly posthog: PosthogService,
   ) {}
 
   @Get('admin/:conversationId')
@@ -51,7 +54,16 @@ export class MessageController {
     @Request() req: JwtRequest,
   ): Promise<MessageDto> {
     await this.ensureParticipant(dto.conversationId, req.user.sub);
-    return this.messageService.sendMessage(req.user.sub, dto);
+    const message = await this.messageService.sendMessage(req.user.sub, dto);
+    this.posthog.capture({
+      event: AnalyticsEvent.MessageSent,
+      distinctId: String(req.user.sub),
+      properties: {
+        conversationId: dto.conversationId,
+        messageId: message.id,
+      },
+    });
+    return message;
   }
 
   @Get(':conversationId')

@@ -40,13 +40,8 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     if (didSucceed === false) {
       return false;
     }
-    captureEvent(AnalyticsEvent.ActionCompleted, {
-      actionId: action.id,
-      actionType: action.type,
-      actionName: action.name,
-    });
     return true;
-  }, [onCompleteAction, action.id, action.type, action.name]);
+  }, [onCompleteAction]);
 
   const handleFormStarted = useCallback(() => {
     captureEvent(AnalyticsEvent.FormStarted, {

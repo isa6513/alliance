@@ -1,3 +1,4 @@
+import { AnalyticsEvent } from '@alliance/common/analytics';
 import {
   Body,
   Controller,
@@ -13,6 +14,8 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
+import { PosthogService } from 'src/posthog/posthog.service';
+import { ContractService } from './contract.service';
 import {
   ContractAdminDto,
   ContractDto,
@@ -21,11 +24,13 @@ import {
   SignContractDto,
   UpdateContractDto,
 } from './dto/contract.dto';
-import { ContractService } from './contract.service';
 
 @Controller('contract')
 export class ContractController {
-  constructor(private readonly contractService: ContractService) {}
+  constructor(
+    private readonly contractService: ContractService,
+    private readonly posthog: PosthogService,
+  ) {}
 
   @Get('current')
   @UseGuards(AuthGuard)
@@ -74,6 +79,13 @@ export class ContractController {
       signedName: body.signedName,
       contractId,
     });
+    this.posthog.capture({
+      event: AnalyticsEvent.ContractSigned,
+      distinctId: String(req.user.sub),
+      properties: {
+        contractId,
+      },
+    });
     return new ContractEventDateDto(date);
   }
 
@@ -84,6 +96,10 @@ export class ContractController {
     @Request() req: JwtRequest,
   ): Promise<ContractEventDateDto> {
     const date = await this.contractService.suspendContract(req.user.sub);
+    this.posthog.capture({
+      event: AnalyticsEvent.ContractSuspended,
+      distinctId: String(req.user.sub),
+    });
     return new ContractEventDateDto(date);
   }
 

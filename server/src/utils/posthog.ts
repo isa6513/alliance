@@ -10,7 +10,7 @@ import type { EventMessage, PostHog } from 'posthog-node';
  */
 export function captureEvent(
   params: {
-    client: PostHog;
+    client: Pick<PostHog, 'capture'>;
     event: AnalyticsEvent;
   } & Omit<EventMessage, 'event'>,
 ): void {
