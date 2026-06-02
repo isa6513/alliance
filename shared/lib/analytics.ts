@@ -1,4 +1,9 @@
-import { AnalyticsEvent, ExceptionEvent } from "@alliance/common/analytics";
+import {
+  AnalyticsEvent,
+  ExceptionEvent,
+  SEND_TO_SLACK,
+  SLACK_PROPERTY,
+} from "@alliance/common/analytics";
 
 type JsonValue =
   | string
@@ -66,7 +71,10 @@ export function captureEvent(
   event: AnalyticsEvent,
   properties?: AnalyticsProperties,
 ): void {
-  backend.capture(event, properties);
+  backend.capture(event, {
+    ...properties,
+    [SLACK_PROPERTY]: SEND_TO_SLACK[event],
+  });
 }
 
 /** Reports an exception to posthog (wired up per-platform via {@link registerAnalytics}). */
@@ -77,6 +85,9 @@ export function captureException(
 ): void {
   backend.captureException(error, {
     event,
-    properties: properties === undefined ? {} : properties,
+    properties: {
+      ...properties,
+      [SLACK_PROPERTY]: SEND_TO_SLACK[event],
+    },
   });
 }

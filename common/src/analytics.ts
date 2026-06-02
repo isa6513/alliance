@@ -53,3 +53,58 @@ export enum ExceptionEvent {
   FollowUpFormSubmitError = "follow_up_form_submit_error",
   PostReplyError = "post_reply_error",
 }
+
+export const SLACK_PROPERTY = "send_to_slack";
+
+// Events that should be forwarded to Slack.
+export const SEND_TO_SLACK: Record<AnalyticsEvent | ExceptionEvent, boolean> = {
+  // Actions
+  [AnalyticsEvent.ActionCompleted]: true,
+  [AnalyticsEvent.FormStarted]: false,
+
+  // Forms
+  [AnalyticsEvent.FormPageViewed]: false,
+  [AnalyticsEvent.FormPageExited]: false,
+  [AnalyticsEvent.FormValidationError]: false,
+
+  // Video
+  [AnalyticsEvent.VideoSeen]: false,
+  [AnalyticsEvent.VideoStarted]: false,
+  [AnalyticsEvent.VideoProgress]: false,
+  [AnalyticsEvent.VideoFullyWatched]: false,
+
+  // Activities / forum
+  [AnalyticsEvent.ActivityLiked]: true,
+  [AnalyticsEvent.ForumCommentLiked]: true,
+
+  // Notifications
+  [AnalyticsEvent.NotificationClicked]: false,
+  [AnalyticsEvent.NotificationReadViaClick]: false,
+  [AnalyticsEvent.NotificationMarkedRead]: false,
+  [AnalyticsEvent.NotificationsMarkedAllAsRead]: false,
+  [AnalyticsEvent.NotifLinkClick]: false,
+
+  // Signup / invites
+  [AnalyticsEvent.InvitePageOpened]: false,
+  [AnalyticsEvent.NewUser]: true,
+  [AnalyticsEvent.SidLoad]: false,
+
+  // Auth
+  [AnalyticsEvent.AuthFailedToRefresh]: false,
+
+  // Email (Mailgun webhook)
+  [AnalyticsEvent.EmailDelivered]: false,
+  [AnalyticsEvent.EmailOpened]: false,
+  [AnalyticsEvent.EmailClicked]: false,
+  [AnalyticsEvent.EmailBounced]: false,
+  [AnalyticsEvent.EmailComplained]: false,
+  [AnalyticsEvent.EmailUnsubscribed]: false,
+
+  // Server
+  [AnalyticsEvent.DbSlowQuery]: false,
+
+  // Exceptions
+  [ExceptionEvent.FormSubmitError]: false,
+  [ExceptionEvent.FollowUpFormSubmitError]: false,
+  [ExceptionEvent.PostReplyError]: false,
+};
