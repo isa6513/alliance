@@ -18,16 +18,16 @@ import {
   UserActionSummaryDto,
   UserDto,
 } from "@alliance/shared/client/types.gen";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { cn } from "@alliance/shared/styles/util";
-import UserCard from "../components/UserCard";
-import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
-import { href, Link, useSearchParams } from "react-router";
-import { LayoutGrid, List, Shuffle } from "lucide-react";
-import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
-import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
-import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
 import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
+import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
+import { cn } from "@alliance/shared/styles/util";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
+import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
+import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
+import { LayoutGrid, List, Shuffle } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { href, Link, useSearchParams } from "react-router";
+import UserCard from "../components/UserCard";
 
 type ViewMode = "cards" | "rows";
 
@@ -44,7 +44,7 @@ const UsersList: React.FC = () => {
     UserActionSummaryDto[]
   >([]);
   const [activeActions, setActiveActions] = useState<UserActionSummaryDto[]>(
-    []
+    [],
   );
   const [userActionRelations, setUserActionRelations] = useState<
     Record<number, UserActionRelationDetailDto[]>
@@ -57,7 +57,7 @@ const UsersList: React.FC = () => {
   const [isTagFilterOpen, setIsTagFilterOpen] = useState(false);
   const tagDropdownRef = useOutsideClick(() => setIsTagFilterOpen(false));
   const [pendingTagOps, setPendingTagOps] = useState<Set<string>>(
-    () => new Set()
+    () => new Set(),
   );
   const [tagMutationError, setTagMutationError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -100,7 +100,7 @@ const UsersList: React.FC = () => {
 
       setActionSummaries(data.actions);
       setActiveActions(
-        data.actions.filter((action) => action.status === "member_action")
+        data.actions.filter((action) => action.status === "member_action"),
       );
       const relationMap: Record<number, UserActionRelationDetailDto[]> = {};
       for (const entry of data.users ?? []) {
@@ -111,17 +111,23 @@ const UsersList: React.FC = () => {
   }, []);
 
   const userToTimeSpent = useMemo(() => {
-    return timeSpentPerUserLast7.reduce((acc, time) => {
-      acc[time.userId] = time.timeSpent;
-      return acc;
-    }, {} as Record<number, number>);
+    return timeSpentPerUserLast7.reduce(
+      (acc, time) => {
+        acc[time.userId] = time.timeSpent;
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
   }, [timeSpentPerUserLast7]);
 
   const userToTimeSpentTotal = useMemo(() => {
-    return timeSpentPerUserTotal.reduce((acc, time) => {
-      acc[time.userId] = time.timeSpent;
-      return acc;
-    }, {} as Record<number, number>);
+    return timeSpentPerUserTotal.reduce(
+      (acc, time) => {
+        acc[time.userId] = time.timeSpent;
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
   }, [timeSpentPerUserTotal]);
 
   const sortedUsers = useMemo(() => {
@@ -133,15 +139,18 @@ const UsersList: React.FC = () => {
   }, [users, userToTimeSpentTotal]);
 
   const userTagsMap = useMemo(() => {
-    return tags.reduce((acc, tag) => {
-      tag.users.forEach((profile) => {
-        if (!acc[profile.id]) {
-          acc[profile.id] = [];
-        }
-        acc[profile.id].push(tag);
-      });
-      return acc;
-    }, {} as Record<number, TagDto[]>);
+    return tags.reduce(
+      (acc, tag) => {
+        tag.users.forEach((profile) => {
+          if (!acc[profile.id]) {
+            acc[profile.id] = [];
+          }
+          acc[profile.id].push(tag);
+        });
+        return acc;
+      },
+      {} as Record<number, TagDto[]>,
+    );
   }, [tags]);
 
   const filteredByTags = useMemo(() => {
@@ -174,8 +183,8 @@ const UsersList: React.FC = () => {
     setShuffledIds(
       shuffleWithSeed(
         current.map((u) => u.id),
-        seed
-      )
+        seed,
+      ),
     );
   }, [filteredBySearch]);
 
@@ -223,7 +232,7 @@ const UsersList: React.FC = () => {
   const usersAsProfiles = useMemo((): ProfileDto[] => {
     return filteredBySearch.map((user) => {
       const lastEvent = user.contractEvents?.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       )[0];
       return {
         id: user.id,
@@ -292,16 +301,17 @@ const UsersList: React.FC = () => {
     communityGetAllMemberContactInfoAdmin().then((resp) => {
       if (resp.data) {
         setMemberContactInfo(
-          resp.data.reduce((acc, contactInfo) => {
-            acc[contactInfo.id] = contactInfo;
-            return acc;
-          }, {} as Record<number, CommunityMemberContactInfoDto>)
+          resp.data.reduce(
+            (acc, contactInfo) => {
+              acc[contactInfo.id] = contactInfo;
+              return acc;
+            },
+            {} as Record<number, CommunityMemberContactInfoDto>,
+          ),
         );
       }
     });
   }, []);
-
-
 
   const updateTagInState = useCallback((updatedTag: TagDto) => {
     setTags((prev) => {
@@ -351,7 +361,7 @@ const UsersList: React.FC = () => {
         });
       }
     },
-    [updateTagInState]
+    [updateTagInState],
   );
 
   return (
@@ -453,7 +463,7 @@ const UsersList: React.FC = () => {
             onClick={() => setParams({ viewMode: "rows" })}
             className={cn(
               "p-2 rounded",
-              viewMode === "rows" ? "bg-zinc-200" : "hover:bg-zinc-100"
+              viewMode === "rows" ? "bg-zinc-200" : "hover:bg-zinc-100",
             )}
             title="Table view"
           >
@@ -464,7 +474,7 @@ const UsersList: React.FC = () => {
             onClick={() => setParams({ viewMode: "cards" })}
             className={cn(
               "p-2 rounded",
-              viewMode === "cards" ? "bg-zinc-200" : "hover:bg-zinc-100"
+              viewMode === "cards" ? "bg-zinc-200" : "hover:bg-zinc-100",
             )}
             title="Card view"
           >
@@ -503,6 +513,9 @@ const UsersList: React.FC = () => {
             leaders={[]}
             members={displayedProfiles}
             amLeader={true}
+            memberHref={(id) =>
+              href("/member/:userId", { userId: id.toString() })
+            }
             userActionRelations={userActionRelations}
             memberContactInfo={memberContactInfo}
             actions={actionSummaries}

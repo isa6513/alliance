@@ -1,26 +1,26 @@
 import {
-  formatAwayRange,
-  formatAwayReason,
-} from "@alliance/shared/lib/awayRangesFormatters";
-import { formatNextTaskDue } from "@alliance/shared/lib/formatNextTaskDue";
-import { useAwayRanges } from "@alliance/shared/lib/useAwayRanges";
-import { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router";
-import { cn } from "@alliance/shared/styles/util";
-import {
   CommunityMemberContactInfoDto,
   communityRemoveMember,
   ProfileDto,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
 } from "@alliance/shared/client";
+import {
+  formatAwayRange,
+  formatAwayReason,
+} from "@alliance/shared/lib/awayRangesFormatters";
+import { formatNextTaskDue } from "@alliance/shared/lib/formatNextTaskDue";
+import { useAwayRanges } from "@alliance/shared/lib/useAwayRanges";
+import { cn } from "@alliance/shared/styles/util";
+import { useCallback, useMemo, useState } from "react";
+import { Link } from "react-router";
 import { AvatarProfile } from "./Avatar";
-import UserProgressPills from "./UserProgressPills";
-import DropdownIcon from "./icons/DropdownIcon";
-import UserDisplayName from "./UserDisplayName";
 import Button, { ButtonColor } from "./Button";
-import { useToast } from "./ToastProvider";
+import DropdownIcon from "./icons/DropdownIcon";
 import InfoTooltip from "./InfoTooltip";
+import { useToast } from "./ToastProvider";
+import UserDisplayName from "./UserDisplayName";
+import UserProgressPills from "./UserProgressPills";
 
 const CommunityMemberTableRow = ({
   profile,
@@ -35,6 +35,7 @@ const CommunityMemberTableRow = ({
   maxActionsPerWeek,
   deadlineTimestamp,
   showInfoTooltip = false,
+  memberHref,
 }: {
   profile: ProfileDto;
   canExpand?: boolean;
@@ -48,6 +49,7 @@ const CommunityMemberTableRow = ({
   actionRelations: UserActionRelationDetailDto[];
   deadlineTimestamp?: number | null;
   showInfoTooltip?: boolean;
+  memberHref: (memberId: number) => string;
 }) => {
   const relationByActionId = useMemo(() => {
     return actionRelations.reduce(
@@ -106,7 +108,7 @@ const CommunityMemberTableRow = ({
               </div>
             )}
             <Link
-              to={`/member/${profile.id}`}
+              to={memberHref(profile.id)}
               className="flex-shrink-0 group flex items-center gap-x-1 md:gap-x-2 mr-3 text-ellipsis overflow-hidden line-clamp-2 wrap-words w-full"
             >
               <div className="hidden md:flex shrink-0 items-center justify-center">

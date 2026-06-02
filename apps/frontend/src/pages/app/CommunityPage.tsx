@@ -9,41 +9,40 @@ import {
   UserActionRelationDetailDto,
   UserActionSummaryDto,
 } from "@alliance/shared/client";
-import { groupSettings } from "@alliance/shared/lib/copy";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { cn } from "@alliance/shared/styles/util";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card from "@alliance/sharedweb/ui/Card";
-import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import ImageEditor from "../../components/ImageEditor";
-import { useAuth } from "../../lib/AuthContext";
-import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
-import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
-import CompletedBar from "@alliance/sharedweb/ui/CompletedBar";
-import { useSearchParams } from "react-router";
-import CommunityActivityTab from "../../components/CommunityActivityTab";
-import TwoColumnLayout from "../../components/TwoColumnLayout";
-import FloatingChatPanel from "../../components/FloatingChatpanel";
-import { MessageSquare } from "lucide-react";
-import { Features } from "@alliance/shared/lib/features";
-import { isFeatureEnabled } from "../../lib/config";
-import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
-import { useMediaQuery } from "../../lib/useMediaQuery";
 import {
   calculateAllCompletionData,
   CompletionData,
 } from "@alliance/shared/lib/actionUtils";
-import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
-import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
-import CommunitySelectDropdown from "../../components/CommunitySelectDropdown";
-import MyGroupsPage from "./MyGroupsPage";
-import { Link } from "react-router";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
-import { useMyCommunities } from "../../lib/useMyCommunities";
+import { groupSettings } from "@alliance/shared/lib/copy";
+import { Features } from "@alliance/shared/lib/features";
+import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
+import { cn } from "@alliance/shared/styles/util";
+import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import BottomSpacer from "@alliance/sharedweb/ui/BottomSpacer";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
+import CompletedBar from "@alliance/sharedweb/ui/CompletedBar";
+import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { MessageSquare } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { href, Link, useSearchParams } from "react-router";
+import CommunityActivityTab from "../../components/CommunityActivityTab";
 import CommunityInvitesLeaderTab from "../../components/CommunityInvitesLeaderTab";
+import CommunitySelectDropdown from "../../components/CommunitySelectDropdown";
+import FloatingChatPanel from "../../components/FloatingChatpanel";
+import ImageEditor from "../../components/ImageEditor";
+import TwoColumnLayout from "../../components/TwoColumnLayout";
 import UserProfileTab from "../../components/UserProfileTab";
+import { useAuth } from "../../lib/AuthContext";
+import { isFeatureEnabled } from "../../lib/config";
+import { useMediaQuery } from "../../lib/useMediaQuery";
+import { useMyCommunities } from "../../lib/useMyCommunities";
+import MyGroupsPage from "./MyGroupsPage";
 
 export type Tab = "activity" | "members" | "groups" | "invites";
 
@@ -773,6 +772,9 @@ const CommunityPage = () => {
                   leaders={leaders}
                   members={nonLeaderMembers}
                   communityId={community.id}
+                  memberHref={(id) =>
+                    href("/member/:id", { id: id.toString() })
+                  }
                   onRemoveMember={(memberId) =>
                     removeMemberFromCommunity(community.id, memberId)
                   }

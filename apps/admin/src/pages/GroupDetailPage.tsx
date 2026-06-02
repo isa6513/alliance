@@ -1,5 +1,3 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { href, Link, useNavigate, useParams } from "react-router";
 import {
   actionsGetCommunityMemberInfoAdmin,
   communityAddLeaderAdmin,
@@ -20,17 +18,19 @@ import type {
   UserActionRelationDetailDto,
   UserActionSummaryDto,
 } from "@alliance/shared/client/types.gen";
-import Card from "@alliance/sharedweb/ui/Card";
-import { CardStyle } from "@alliance/shared/styles/card";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
 import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
-import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
+import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 import { groupSettings } from "@alliance/shared/lib/copy";
-import { getMemberCount } from "@alliance/shared/lib/communityUtils";
+import { CardStyle } from "@alliance/shared/styles/card";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import { useMaxActionsPerWeek } from "@alliance/sharedweb/ui/UserProgressPills";
+import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { href, Link, useNavigate, useParams } from "react-router";
 
 const CommunityDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -58,10 +58,10 @@ const CommunityDetailPage: React.FC = () => {
   const [addingMember, setAddingMember] = useState(false);
   const [addingLeader, setAddingLeader] = useState(false);
   const [pendingMemberIds, setPendingMemberIds] = useState<Set<number>>(
-    () => new Set<number>()
+    () => new Set<number>(),
   );
   const [pendingLeaderIds, setPendingLeaderIds] = useState<Set<number>>(
-    () => new Set<number>()
+    () => new Set<number>(),
   );
   const { confirm, success, error: pushError } = useToast();
   const requiresMaxCapacity =
@@ -113,7 +113,7 @@ const CommunityDetailPage: React.FC = () => {
     userActionRelations,
   });
   const [activeActions, setActiveActions] = useState<UserActionSummaryDto[]>(
-    []
+    [],
   );
 
   const [memberContactInfo, setMemberContactInfo] = useState<Record<
@@ -131,29 +131,35 @@ const CommunityDetailPage: React.FC = () => {
           setActionSummaries(resp.data.actions);
           setActiveActions(
             resp.data.actions.filter(
-              (action) => action.status === "member_action"
-            )
+              (action) => action.status === "member_action",
+            ),
           );
           const relationMap: Record<number, UserActionRelationDetailDto[]> =
-            resp.data.users.reduce((acc, user) => {
-              acc[user.userId] = user.relations;
-              return acc;
-            }, {} as Record<number, UserActionRelationDetailDto[]>);
+            resp.data.users.reduce(
+              (acc, user) => {
+                acc[user.userId] = user.relations;
+                return acc;
+              },
+              {} as Record<number, UserActionRelationDetailDto[]>,
+            );
           setUserActionRelations(relationMap);
         }
-      }
+      },
     );
     communityGetMemberContactInfoAdmin({ path: { communityId } }).then(
       (resp) => {
         if (resp.data) {
           setMemberContactInfo(
-            resp.data.reduce((acc, contactInfo) => {
-              acc[contactInfo.id] = contactInfo;
-              return acc;
-            }, {} as Record<number, CommunityMemberContactInfoDto>)
+            resp.data.reduce(
+              (acc, contactInfo) => {
+                acc[contactInfo.id] = contactInfo;
+                return acc;
+              },
+              {} as Record<number, CommunityMemberContactInfoDto>,
+            ),
           );
         }
-      }
+      },
     );
   }, [communityId]);
 
@@ -169,7 +175,7 @@ const CommunityDetailPage: React.FC = () => {
             id: user.id,
             name: user.name ?? `User #${user.id}`,
             profilePicture: user.profilePicture ?? null,
-          }))
+          })),
         );
       })
       .catch((err) => {
@@ -266,7 +272,7 @@ const CommunityDetailPage: React.FC = () => {
       setCommunity,
       success,
       setError,
-    ]
+    ],
   );
 
   const mutateMembers = useCallback(
@@ -277,7 +283,7 @@ const CommunityDetailPage: React.FC = () => {
         | "add-leader"
         | "remove-leader"
         | "promote-leader",
-      userId?: number
+      userId?: number,
     ) => {
       if (!community) {
         return;
@@ -405,7 +411,7 @@ const CommunityDetailPage: React.FC = () => {
       pushError,
       setAddingLeader,
       refreshUserActionRelations,
-    ]
+    ],
   );
 
   const handleDelete = useCallback(async () => {
@@ -453,7 +459,7 @@ const CommunityDetailPage: React.FC = () => {
     return [...(community?.users ?? [])].sort((a, b) =>
       (a.displayName ?? "").localeCompare(b.displayName ?? "", undefined, {
         sensitivity: "base",
-      })
+      }),
     );
   }, [community]);
 
@@ -461,7 +467,7 @@ const CommunityDetailPage: React.FC = () => {
     return [...(community?.leaders ?? [])].sort((a, b) =>
       (a.displayName ?? "").localeCompare(b.displayName ?? "", undefined, {
         sensitivity: "base",
-      })
+      }),
     );
   }, [community]);
 
@@ -469,7 +475,7 @@ const CommunityDetailPage: React.FC = () => {
     async (
       event: React.MouseEvent<HTMLElement>,
       userId: number,
-      displayName?: string | null
+      displayName?: string | null,
     ) => {
       if (!community) return;
       const anchorEl = event.currentTarget;
@@ -489,7 +495,7 @@ const CommunityDetailPage: React.FC = () => {
       }
       await mutateMembers("promote-leader", userId);
     },
-    [community, confirm, mutateMembers]
+    [community, confirm, mutateMembers],
   );
 
   if (loading) {
@@ -754,7 +760,7 @@ const CommunityDetailPage: React.FC = () => {
                                 void confirmLeaderPromotion(
                                   event,
                                   member.id,
-                                  member.displayName
+                                  member.displayName,
                                 )
                               }
                               disabled={leaderPending}
@@ -860,6 +866,9 @@ const CommunityDetailPage: React.FC = () => {
           members={sortedMembers}
           amLeader={true}
           communityId={community.id}
+          memberHref={(id) =>
+            href("/member/:userId", { userId: id.toString() })
+          }
           userActionRelations={userActionRelations ?? undefined}
           actions={actionSummaries}
           maxActionsPerWeek={maxActionsPerWeek}

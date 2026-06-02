@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import {
   CommunityMemberContactInfoDto,
   ProfileDto,
@@ -9,6 +8,7 @@ import {
   getDeadlineTimestampByUserId,
   sortMembersByNextTaskDue,
 } from "@alliance/shared/lib/communityMemberActions";
+import { useMemo, useState } from "react";
 import CommunityMemberTableRow from "./CommunityMemberTableRow";
 import DropdownSelect from "./DropdownSelect";
 
@@ -39,6 +39,7 @@ type CommunityMembersTableProps = {
   showInfoTooltip?: boolean;
   showContractFilter?: boolean;
   disableSort?: boolean;
+  memberHref: (memberId: number) => string;
 };
 
 const CommunityMembersTable = ({
@@ -55,10 +56,10 @@ const CommunityMembersTable = ({
   showInfoTooltip = false,
   showContractFilter = false,
   disableSort = false,
+  memberHref,
 }: CommunityMembersTableProps) => {
-  const [completionFilter, setCompletionFilter] = useState<CompletionFilterMode>(
-    CompletionFilterMode.All,
-  );
+  const [completionFilter, setCompletionFilter] =
+    useState<CompletionFilterMode>(CompletionFilterMode.All);
   const [contractFilter, setContractFilter] = useState<ContractFilterMode>(
     showContractFilter ? ContractFilterMode.SIGNED : ContractFilterMode.ALL,
   );
@@ -213,6 +214,7 @@ const CommunityMembersTable = ({
                     maxActionsPerWeek={maxActionsPerWeek}
                     deadlineTimestamp={deadlineTimestampByUserId.get(user.id)}
                     showInfoTooltip={showInfoTooltip}
+                    memberHref={memberHref}
                   />
                 ))}
               </tbody>
@@ -292,6 +294,7 @@ const CommunityMembersTable = ({
                 maxActionsPerWeek={maxActionsPerWeek}
                 deadlineTimestamp={deadlineTimestampByUserId.get(user.id)}
                 showInfoTooltip={showInfoTooltip}
+                memberHref={memberHref}
               />
             ))}
           </tbody>
