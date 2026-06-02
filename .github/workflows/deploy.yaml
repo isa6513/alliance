@@ -204,19 +204,33 @@ jobs:
 
             unzip -o ~/react-build.zip
 
+            # Install the dependency manager the rest of the repo uses.
+            # appleboy/ssh-action runs a non-interactive shell, so bun won't
+            # be on PATH even if it's installed — bootstrap + export it exactly
+            # like the backend job.
+            if ! command -v bun &> /dev/null; then
+              curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.6"
+            fi
+            export BUN_INSTALL="$HOME/.bun"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+
             cd ~/output
-            # Strip ALL workspace:* deps before npm install — npm can't resolve the
-            # `workspace:` protocol and aborts the entire install on the first one it
-            # sees (EUNSUPPORTEDPROTOCOL), so a single un-stripped dep silently
-            # installs nothing. None of the @alliance/* workspace packages are needed
-            # at runtime: shared/sharedweb are bundled via vite ssr.noExternal and
-            # common is inlined into the server bundle. Match any workspace:* line so
-            # new workspace deps don't reintroduce this.
+            # Strip ALL workspace:* deps before install — bun can't resolve the
+            # `workspace:` protocol outside the workspace root, and it aborts
+            # the whole install. None of the @alliance/* workspace packages are
+            # needed at runtime: shared/sharedweb are bundled via vite
+            # ssr.noExternal and common is inlined into the server bundle. Match
+            # any workspace:* line so new workspace deps don't reintroduce this.
             sed -i '/workspace:\*/d' package.json
+            # `unzip -o` overwrites files but leaves the previous deploy's
+            # node_modules in place. Wipe it so every deploy is a clean install
+            # (the bundle ships no lockfile, so this is a fresh resolve
+            # regardless).
+            rm -rf node_modules
             # appleboy/ssh-action runs this script without `set -e`, so a failed
             # install here would otherwise be swallowed and we'd ship a crash-looping
             # SSR (missing deps) with a green checkmark. Make it fatal explicitly.
-            npm install --omit=dev || { echo "npm install failed"; exit 1; }
+            bun install --production || { echo "bun install failed"; exit 1; }
 
             pm2 delete client-ssr || true
             pm2 start "NODE_ENV=${{ github.ref_name == 'production' && 'production' || 'staging' }} node server.js" --name client-ssr
@@ -725,9 +739,9 @@ jobs:
           script: |
             set -Euo pipefail
 
-            # Install/update Bun
+            # Install Bun
             if ! command -v bun &> /dev/null; then
-              curl -fsSL https://bun.sh/install | bash
+              curl -fsSL https://bun.sh/install | bash -s "bun-v1.3.6"
             fi
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"
