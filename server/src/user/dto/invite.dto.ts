@@ -1,9 +1,10 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
-import { Allow, IsNumber, IsOptional } from 'class-validator';
-import { OnetimeInvite } from '../entities/onetime-invite.entity';
-import { CommunityInvite } from 'src/community/entities/community-invite.entity';
-import { ProfileDto } from './user.dto';
 import { Type } from 'class-transformer';
+import { Allow, IsNumber, IsOptional } from 'class-validator';
+import { CommunityDto } from 'src/community/dto/community.dto';
+import { CommunityInvite } from 'src/community/entities/community-invite.entity';
+import { OnetimeInvite } from '../entities/onetime-invite.entity';
+import { ProfileDto } from './user.dto';
 
 export class CreateOnetimeInviteDto extends PickType(OnetimeInvite, [
   'invitee',
@@ -44,8 +45,11 @@ export class CommunityInviteDto extends PickType(CommunityInvite, [
   'status',
   'createdAt',
   'updatedAt',
-  'community',
 ]) {
+  @ApiProperty({ type: CommunityDto })
+  @Type(() => CommunityDto)
+  community: CommunityDto;
+
   @ApiPropertyOptional({ type: ProfileDto })
   invitedUser?: ProfileDto;
 
@@ -58,7 +62,7 @@ export class CommunityInviteDto extends PickType(CommunityInvite, [
     this.status = communityInvite.status;
     this.createdAt = communityInvite.createdAt;
     this.updatedAt = communityInvite.updatedAt;
-    this.community = communityInvite.community;
+    this.community = new CommunityDto(communityInvite.community);
     this.invitedUser = communityInvite.invitedUser
       ? new ProfileDto(communityInvite.invitedUser)
       : undefined;
@@ -76,9 +80,12 @@ export class OnetimeInviteDto extends PickType(OnetimeInvite, [
   'code',
   'status',
   'createdAt',
-  'community',
   'invitedUserId',
 ]) {
+  @ApiPropertyOptional({ type: CommunityDto })
+  @Type(() => CommunityDto)
+  community?: CommunityDto | null;
+
   @ApiPropertyOptional({ type: ProfileDto })
   @Type(() => ProfileDto)
   invitingUser?: ProfileDto;
@@ -96,7 +103,9 @@ export class OnetimeInviteDto extends PickType(OnetimeInvite, [
     this.code = onetimeInvite.code;
     this.status = onetimeInvite.status;
     this.createdAt = onetimeInvite.createdAt;
-    this.community = onetimeInvite.community;
+    this.community = onetimeInvite.community
+      ? new CommunityDto(onetimeInvite.community)
+      : onetimeInvite.community;
     this.invitedUserId = onetimeInvite.invitedUserId;
     this.invitingUser = onetimeInvite.invitingUser
       ? new ProfileDto(onetimeInvite.invitingUser)
