@@ -543,9 +543,20 @@ export class UserController {
     @Body() body: RequestOnetimeInviteDto,
     @Request() req: JwtRequest,
   ): Promise<OnetimeInviteDto> {
-    return new OnetimeInviteDto(
-      await this.userService.requestOnetimeInvite(body, req.user.sub),
+    const invite = await this.userService.requestOnetimeInvite(
+      body,
+      req.user.sub,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.OnetimeInviteRequested,
+      distinctId: String(req.user.sub),
+      properties: {
+        inviteId: invite.id,
+        communityId: invite.communityId ?? invite.community?.id,
+        invitee: invite.invitee,
+      },
+    });
+    return new OnetimeInviteDto(invite);
   }
 
   @Post('onetimeInvite/:inviteId/approve')
@@ -555,12 +566,20 @@ export class UserController {
     @Param('inviteId', ParseIntPipe) inviteId: number,
     @Request() req: JwtRequest,
   ): Promise<OnetimeInviteDto> {
-    return new OnetimeInviteDto(
-      await this.userService.approveOnetimeInviteRequest(
-        inviteId,
-        req.user.sub,
-      ),
+    const invite = await this.userService.approveOnetimeInviteRequest(
+      inviteId,
+      req.user.sub,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.OnetimeInviteApproved,
+      distinctId: String(req.user.sub),
+      properties: {
+        inviteId: invite.id,
+        communityId: invite.communityId ?? invite.community?.id,
+        invitee: invite.invitee,
+      },
+    });
+    return new OnetimeInviteDto(invite);
   }
 
   @Post('onetimeInvite/:inviteId/reject')
@@ -580,9 +599,20 @@ export class UserController {
     @Body() body: CreateOnetimeInviteDto,
     @Request() req: JwtRequest,
   ): Promise<OnetimeInviteDto> {
-    return new OnetimeInviteDto(
-      await this.userService.createOnetimeInvite(body, req.user.sub),
+    const invite = await this.userService.createOnetimeInvite(
+      body,
+      req.user.sub,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.OnetimeInviteCreated,
+      distinctId: String(req.user.sub),
+      properties: {
+        inviteId: invite.id,
+        communityId: invite.communityId ?? invite.community?.id,
+        invitee: invite.invitee,
+      },
+    });
+    return new OnetimeInviteDto(invite);
   }
 
   @Delete('onetimeInvites/:inviteId')

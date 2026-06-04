@@ -290,9 +290,20 @@ export class CommunityController {
     @Body() body: CreateCommunityInviteDto,
     @Request() req: JwtRequest,
   ): Promise<CommunityInviteDto> {
-    return new CommunityInviteDto(
-      await this.communityService.createCommunityInvite(body, req.user.sub),
+    const invite = await this.communityService.createCommunityInvite(
+      body,
+      req.user.sub,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.CommunityInviteCreated,
+      distinctId: String(req.user.sub),
+      properties: {
+        inviteId: invite.id,
+        communityId: invite.community?.id,
+        invitedUserId: invite.invitedUser?.id,
+      },
+    });
+    return new CommunityInviteDto(invite);
   }
 
   @Delete('communityInvites/:inviteId')
@@ -312,9 +323,20 @@ export class CommunityController {
     @Body() body: RequestCommunityInviteDto,
     @Request() req: JwtRequest,
   ): Promise<CommunityInviteDto> {
-    return new CommunityInviteDto(
-      await this.communityService.requestCommunityInvite(body, req.user.sub),
+    const invite = await this.communityService.requestCommunityInvite(
+      body,
+      req.user.sub,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.CommunityInviteRequested,
+      distinctId: String(req.user.sub),
+      properties: {
+        inviteId: invite.id,
+        communityId: invite.community?.id,
+        invitedUserId: invite.invitedUser?.id,
+      },
+    });
+    return new CommunityInviteDto(invite);
   }
 
   @Post('communityInvites/:inviteId/approveRequest')
@@ -324,12 +346,20 @@ export class CommunityController {
     @Param('inviteId', ParseIntPipe) inviteId: number,
     @Request() req: JwtRequest,
   ): Promise<CommunityInviteDto> {
-    return new CommunityInviteDto(
-      await this.communityService.approveCommunityInviteRequest(
-        inviteId,
-        req.user.sub,
-      ),
+    const invite = await this.communityService.approveCommunityInviteRequest(
+      inviteId,
+      req.user.sub,
     );
+    this.posthog.capture({
+      event: AnalyticsEvent.CommunityInviteApproved,
+      distinctId: String(req.user.sub),
+      properties: {
+        inviteId: invite.id,
+        communityId: invite.community?.id,
+        invitedUserId: invite.invitedUser?.id,
+      },
+    });
+    return new CommunityInviteDto(invite);
   }
 
   @Post('communityInvites/:inviteId/rejectRequest')
