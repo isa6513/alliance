@@ -8,6 +8,12 @@ export type FeaturedImpactAction = {
 
 export const FEATURED_IMPACT_ACTIONS: readonly FeaturedImpactAction[] = [
   {
+    actionId: 130,
+    emphasis:
+      "We helped 77% of members bring their privacy in line with their preferences",
+    rest: "by explaining why and how to adjust their Meta privacy settings.",
+  },
+  {
     actionId: 84,
     emphasis: "We raised $2,702 for Helen Keller International",
     rest: "by making small adjustments to our personal spending habits.",
