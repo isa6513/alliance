@@ -1,13 +1,13 @@
 import { formatLongDateEnUS } from "@alliance/shared/lib/dateFormatters";
+import List from "@alliance/sharedweb/ui/List";
 import matter from "gray-matter";
+import { ChevronRight } from "lucide-react";
 import React from "react";
 import { Link, href, useLoaderData } from "react-router";
-import Footer from "../../components/Footer";
 import FeaturedImpactCard from "../../components/FeaturedImpactCard";
+import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
-import List from "@alliance/sharedweb/ui/List";
-import { ChevronRight } from "lucide-react";
 
 export async function loader() {
   const postFiles = import.meta.glob("/src/action-posts/*.md", {
@@ -34,7 +34,7 @@ const ProgressListPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
-      <div className="flex-1 container mx-auto pt-16 md:pt-28 pb-56 flex flex-col px-5">
+      <div className="flex-1 container mx-auto pt-16 md:pt-24 pb-56 flex flex-col px-5">
         <div className="mx-auto w-full max-w-4xl flex flex-col gap-8 md:gap-20">
           <h1 className="text-title-large text-center">Progress</h1>
 

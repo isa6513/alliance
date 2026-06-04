@@ -174,7 +174,7 @@ const PeoplePage: React.FC = () => {
   return (
     <div className="flex flex-col bg-white">
       <div className={LANDING_PAGE_STACK}>
-        <section className={cn("relative w-full bg-white", "")}>
+        <section className={cn("relative w-full bg-white")}>
           <PrelaunchNavbar transparent={false} absolute={false} />
           <div className={cn(LANDING_WIDE_SECTION, "pt-6 sm:pt-8 lg:pt-12")}>
             <p className="text-title-large w-full text-center text-black">
@@ -233,11 +233,11 @@ const PeoplePage: React.FC = () => {
                 Expert group
               </p>
               <div className="flex flex-col gap-1">
-                <p className={`${SUBTITLE_CLASS} !text-white/90`}>
+                <p className={cn(SUBTITLE_CLASS, "text-white/90")}>
                   Experts occasionally lend time, knowledge, or resources to the
                   Alliance.
                 </p>
-                <p className={`${SUBTITLE_CLASS} !text-white/60`}>
+                <p className={cn(SUBTITLE_CLASS, "text-white/60")}>
                   This list only includes experts who have chosen to make their
                   information public.
                 </p>

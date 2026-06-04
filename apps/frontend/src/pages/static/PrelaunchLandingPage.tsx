@@ -10,6 +10,7 @@ import AllianceIntroYouTubeEmbed from "../../components/AllianceIntroYouTubeEmbe
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
 import FeaturedImpactCard from "../../components/FeaturedImpactCard";
 import Footer from "../../components/Footer";
+import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
 import {
@@ -132,6 +133,8 @@ function HowItWorksCard({
 }
 
 const PrelaunchLandingPage: React.FC = () => {
+  useWhiteBackground();
+
   const memberQuoteQueries = useMemberQuoteProfiles(
     MEMBER_QUOTES.map((q) => q.memberId),
   );
