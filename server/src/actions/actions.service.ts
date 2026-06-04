@@ -427,44 +427,100 @@ export class ActionsService {
   }
 
   async findJoinedUsersForAction(action: Action): Promise<number[]> {
-    const event = action.events.find(
-      (event) => event.newStatus === ActionStatus.MemberAction,
-    );
-    if (!event) return [];
+    const result = await this.findJoinedUsersForActions([action]);
+    return result.get(action.id) ?? [];
+  }
 
-    const baseUsers =
-      await this.actionEventRecipientService.findBaseUsersForEvent({
-        eventId: event.id,
-        action,
+  /**
+   * Batched version of findJoinedUsersForAction: fetches the shared data in a
+   * handful of bulk queries instead of per-action. Returns a map of
+   * actionId -> joined userIds. Parity with findJoinedUsersForAction.
+   */
+  async findJoinedUsersForActions(
+    actions: Action[],
+  ): Promise<Map<number, number[]>> {
+    // Build entries for actions that have a MemberAction event
+    const entries: Array<{ action: Action; event: ActionEvent }> = [];
+    for (const action of actions) {
+      const event = action.events.find(
+        (e) => e.newStatus === ActionStatus.MemberAction,
+      );
+      if (event) {
+        entries.push({ action, event });
+      }
+    }
+
+    if (entries.length === 0) {
+      return new Map(actions.map((a) => [a.id, []]));
+    }
+
+    const actionIds = entries.map((e) => e.action.id);
+
+    // 1. Batched base users (1 user query, 1 dismissed query, deduplicated cohorts)
+    const baseUsersByAction =
+      await this.actionEventRecipientService.findBaseUsersForEvents({
+        entries: entries.map((e) => ({
+          action: e.action,
+          eventId: e.event.id,
+        })),
         includeDismissed: true,
       });
 
-    const notAwayDuringMemberActionPhase = baseUsers.filter(
-      (user) => !computeIsAwayDuringAnyOfMemberAction({ action, user }),
-    );
-
-    const completionActivities = await this.actionActivityRepository.find({
+    // 2. One query: all completion + withdrawal activities for these actions
+    const allActivities = await this.actionActivityRepository.find({
       where: {
-        actionId: action.id,
-        type: ActionActivityType.USER_COMPLETED,
+        actionId: In(actionIds),
+        type: In([
+          ActionActivityType.USER_COMPLETED,
+          ActionActivityType.USER_WONT_COMPLETE,
+        ]),
       },
     });
-    const withdrawalActivities = await this.actionActivityRepository.find({
-      where: {
-        actionId: action.id,
-        type: ActionActivityType.USER_WONT_COMPLETE,
-      },
-    });
-    const notAwayUsersMinusWithdrawals = notAwayDuringMemberActionPhase.filter(
-      (user) =>
-        !withdrawalActivities.some((activity) => activity.userId === user.id),
-    );
-    const set = new Set([
-      ...notAwayUsersMinusWithdrawals.map((user) => user.id),
-      ...completionActivities.map((activity) => activity.userId),
-    ]);
+    const completionsByAction = new Map<number, number[]>();
+    const withdrawalsByAction = new Map<number, Set<number>>();
+    for (const act of allActivities) {
+      if (act.type === ActionActivityType.USER_COMPLETED) {
+        if (!completionsByAction.has(act.actionId)) {
+          completionsByAction.set(act.actionId, []);
+        }
+        completionsByAction.get(act.actionId)!.push(act.userId);
+      } else {
+        if (!withdrawalsByAction.has(act.actionId)) {
+          withdrawalsByAction.set(act.actionId, new Set());
+        }
+        withdrawalsByAction.get(act.actionId)!.add(act.userId);
+      }
+    }
 
-    return Array.from(set);
+    // 3. Per-action assembly (same logic as findJoinedUsersForAction)
+    const result = new Map<number, number[]>();
+    for (const action of actions) {
+      const baseUsers = baseUsersByAction.get(action.id);
+      if (!baseUsers) {
+        result.set(action.id, []);
+        continue;
+      }
+
+      const notAwayDuringMemberActionPhase = baseUsers.filter(
+        (user) => !computeIsAwayDuringAnyOfMemberAction({ action, user }),
+      );
+
+      const withdrawals = withdrawalsByAction.get(action.id) ?? new Set();
+      const completions = completionsByAction.get(action.id) ?? [];
+
+      const notAwayUsersMinusWithdrawals =
+        notAwayDuringMemberActionPhase.filter(
+          (user) => !withdrawals.has(user.id),
+        );
+      const set = new Set([
+        ...notAwayUsersMinusWithdrawals.map((user) => user.id),
+        ...completions,
+      ]);
+
+      result.set(action.id, Array.from(set));
+    }
+
+    return result;
   }
 
   async findIncompleteUsersForAction(actionId: number): Promise<User[]> {
@@ -2716,18 +2772,13 @@ export class ActionsService {
 
     const joinedUsersP: Promise<Record<number, number[]>> = run(async () => {
       const actions = await actionsP;
-      const joinedUsersPromises = await Promise.all(
-        actions.map(async (action) => ({
-          actionId: action.id,
-          usersJoined: await this.findJoinedUsersForAction(action),
-        })),
-      );
+      const joinedUsersMap = await this.findJoinedUsersForActions(actions);
 
       const userIdsSet = await userIdsSetP;
       const joinedUsers: Record<number, number[]> = {};
-      for (const { actionId, usersJoined } of joinedUsersPromises) {
-        joinedUsers[actionId] = usersJoined.filter((uid) =>
-          userIdsSet.has(uid),
+      for (const action of actions) {
+        joinedUsers[action.id] = (joinedUsersMap.get(action.id) ?? []).filter(
+          (uid) => userIdsSet.has(uid),
         );
       }
       return joinedUsers;

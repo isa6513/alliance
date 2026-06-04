@@ -1,39 +1,41 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { UserService } from 'src/user/user.service';
-import { TimeSpentForUser } from './timespent.dto';
-import { DailyStatsRecord } from './dailystats.entity';
-import { ActionStatsRecord } from './actionstats.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, IsNull, type Repository } from 'typeorm';
 import {
   ActionActivity,
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
 import {
+  ActionEvent,
+  ActionStatus,
+} from 'src/actions/entities/action-event.entity';
+import { Action } from 'src/actions/entities/action.entity';
+import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import {
+  ContractEvent,
+  ContractEventType,
+} from 'src/user/entities/contract-event.entity';
+import {
   OnetimeInvite,
   OnetimeInviteStatus,
 } from 'src/user/entities/onetime-invite.entity';
 import { User } from 'src/user/entities/user.entity';
-import { ContractEventType } from 'src/user/entities/contract-event.entity';
-import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { Action } from 'src/actions/entities/action.entity';
-import {
-  ActionEvent,
-  ActionStatus,
-} from 'src/actions/entities/action-event.entity';
-import { ContractEvent } from 'src/user/entities/contract-event.entity';
+import { UserService } from 'src/user/user.service';
+import { Between, In, IsNull, type Repository } from 'typeorm';
+import { ActionCompletionCurve } from './action-completion-curve.dto';
+import { ActionStatsWithOnboarding } from './actionstats-with-onboarding.dto';
+import { ActionStatsRecord } from './actionstats.entity';
+import { AggregateStats } from './aggregatestats.dto';
+import { ContractStatusPoint } from './contract-status-history.dto';
+import { DailyStatsRecord } from './dailystats.entity';
+import { InviteFunnel } from './invite-funnel.dto';
 import {
   MemberCompletionRetentionCohort,
   MemberCompletionRetentionPoint,
 } from './member-completion-retention.dto';
-import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
-import { ActionCompletionCurve } from './action-completion-curve.dto';
-import { ActionStatsWithOnboarding } from './actionstats-with-onboarding.dto';
-import { InviteFunnel } from './invite-funnel.dto';
-import { AggregateStats } from './aggregatestats.dto';
-import { ContractStatusPoint } from './contract-status-history.dto';
 import { PlatformTenureCohortStats } from './platform-tenure-cohort.dto';
+import { TimeSpentForUser } from './timespent.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -758,15 +760,21 @@ ORDER BY pp.total_session_duration_seconds DESC
       cohortMembers.set(cohortIndex, members);
     }
 
+    const baseUsersByAction =
+      await this.actionEventRecipientService.findBaseUsersForEvents({
+        entries: actionGroups.flatMap((group) =>
+          group.entries.map((entry) => ({
+            action: entry.action,
+            eventId: entry.memberActionEvent.id,
+          })),
+        ),
+        includeSuspended: true,
+      });
+
     for (const [actionIndex, group] of actionGroups.entries()) {
       for (const entry of group.entries) {
-        const { action, memberActionEvent } = entry;
-        const baseUsers =
-          await this.actionEventRecipientService.findBaseUsersForEvent({
-            action,
-            eventId: memberActionEvent.id,
-            includeSuspended: true,
-          });
+        const { action } = entry;
+        const baseUsers = baseUsersByAction.get(action.id) ?? [];
 
         for (const user of baseUsers) {
           const signedAt = memberSignedAtByUserId.get(user.id);
@@ -922,6 +930,11 @@ ORDER BY pp.total_session_duration_seconds DESC
 
     const actionStats: PlatformTenureCohortStats['actions'] = [];
 
+    const eligible: {
+      action: Action;
+      memberActionEvent: ActionEvent;
+      memberActionEndEvent: ActionEvent | undefined;
+    }[] = [];
     for (const action of actions) {
       if (
         action.publicOnly ||
@@ -950,12 +963,24 @@ ORDER BY pp.total_session_duration_seconds DESC
           event.newStatus !== ActionStatus.MemberAction,
       );
 
-      const baseUsers =
-        await this.actionEventRecipientService.findBaseUsersForEvent({
-          action,
-          eventId: memberActionEvent.id,
-          includeSuspended: true,
-        });
+      eligible.push({ action, memberActionEvent, memberActionEndEvent });
+    }
+
+    const baseUsersByAction =
+      await this.actionEventRecipientService.findBaseUsersForEvents({
+        entries: eligible.map((e) => ({
+          action: e.action,
+          eventId: e.memberActionEvent.id,
+        })),
+        includeSuspended: true,
+      });
+
+    for (const {
+      action,
+      memberActionEvent,
+      memberActionEndEvent,
+    } of eligible) {
+      const baseUsers = baseUsersByAction.get(action.id) ?? [];
 
       const assignedCohortUsers = baseUsers.filter((user) =>
         cohortUserIds.has(user.id),

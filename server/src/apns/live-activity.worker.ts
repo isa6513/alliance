@@ -1,18 +1,18 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, IsNull, Not, Repository } from 'typeorm';
-import { LiveActivityRegistration } from './entities/live-activity-registration.entity';
-import { ApnsService } from './apns.service';
-import { Action } from 'src/actions/entities/action.entity';
+import { ActionsService } from 'src/actions/actions.service';
 import {
   ActionActivity,
   ActionActivityType,
 } from 'src/actions/entities/action-activity.entity';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
-import { UserDevice } from 'src/user/entities/user-device.entity';
-import { withPgAdvisoryLock } from 'src/notifs/lock-utils';
+import { Action } from 'src/actions/entities/action.entity';
 import { LOCK_KEYS } from 'src/notifs/lock-keys';
-import { ActionsService } from 'src/actions/actions.service';
+import { withPgAdvisoryLock } from 'src/notifs/lock-utils';
+import { UserDevice } from 'src/user/entities/user-device.entity';
+import { DataSource, IsNull, Not, Repository } from 'typeorm';
+import { ApnsService } from './apns.service';
+import { LiveActivityRegistration } from './entities/live-activity-registration.entity';
 
 const [LOCK_KEY_1, LOCK_KEY_2] = LOCK_KEYS.liveActivity;
 const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000;
@@ -60,18 +60,24 @@ export class LiveActivityWorker {
       relations: { events: true },
     });
 
+    // Only start if deadline is within 8 hours and hasn't passed
+    const eligible: { action: Action; deadline: Date }[] = [];
     for (const action of actions) {
       if (action.status !== ActionStatus.MemberAction) continue;
       const deadline = action.memberActionPhase?.deadline;
       if (!deadline) continue;
-
-      // Only start if deadline is within 8 hours and hasn't passed
       if (deadline.getTime() > eightHoursFromNow.getTime()) continue;
       if (deadline.getTime() < now.getTime()) continue;
+      eligible.push({ action, deadline });
+    }
 
-      // Find users who joined but haven't completed
-      const joinedUserIds =
-        await this.actionsService.findJoinedUsersForAction(action);
+    // Find users who joined but haven't completed
+    const joinedByAction = await this.actionsService.findJoinedUsersForActions(
+      eligible.map((e) => e.action),
+    );
+
+    for (const { action, deadline } of eligible) {
+      const joinedUserIds = joinedByAction.get(action.id) ?? [];
       const completedActivities = await this.actionActivityRepository.find({
         where: { actionId: action.id, type: ActionActivityType.USER_COMPLETED },
       });

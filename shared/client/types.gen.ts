@@ -883,12 +883,34 @@ export type TagDto = {
     users: Array<ProfileDto>;
 };
 
+export type TagSummaryDto = {
+    id: string;
+    name: string;
+    description: string;
+    publicDisplayName?: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type AddUserToTagDto = {
     userId: number;
 };
 
 export type SignupSocialProofDto = {
     profiles: Array<ProfileDto>;
+};
+
+export type CommunityDto = {
+    id: number;
+    name: string;
+    description: string;
+    photo?: string;
+    public: boolean;
+    allowMemberInvites: boolean;
+    allowStaffAssignments: boolean;
+    maxCapacity: number | null;
+    users: Array<ProfileDto>;
+    leaders: Array<ProfileDto>;
 };
 
 export type OnetimeInviteDto = {
@@ -900,7 +922,7 @@ export type OnetimeInviteDto = {
     createdAt: string;
     status: OnetimeInviteStatus;
     invitedUserId?: number;
-    community?: Community | null;
+    community?: CommunityDto;
     invitingUser?: ProfileDto;
     invitedUser?: ProfileDto;
 };
@@ -1085,19 +1107,6 @@ export type MessageDto = {
     author: ProfileDto;
     conversationId: number;
     replyTo?: MessageReferenceDto;
-};
-
-export type CommunityDto = {
-    id: number;
-    name: string;
-    description: string;
-    photo?: string;
-    public: boolean;
-    allowMemberInvites: boolean;
-    allowStaffAssignments: boolean;
-    maxCapacity: number | null;
-    users: Array<ProfileDto>;
-    leaders: Array<ProfileDto>;
 };
 
 export type ConversationAdminSummaryDto = {
@@ -1300,7 +1309,7 @@ export type CommunityInviteDto = {
     status: CommunityInviteStatus;
     createdAt: string;
     updatedAt: string;
-    community: Community;
+    community: CommunityDto;
     invitedUser?: ProfileDto;
     invitingUser?: ProfileDto;
 };
@@ -3176,6 +3185,25 @@ export type MemberCompletionRetentionCohortDto = {
     points: Array<MemberCompletionRetentionPointDto>;
 };
 
+export type PlatformTenureCohortActionStatsDto = {
+    actionId: number;
+    actionName: string;
+    assignedCount: number;
+    completedCount: number;
+    completionRate: number;
+    memberActionStartDate: string;
+    memberActionEndDate?: string;
+};
+
+export type PlatformTenureCohortStatsDto = {
+    weeksOnPlatform: number;
+    cohortSize: number;
+    assignedCount: number;
+    completedCount: number;
+    completionRate: number;
+    actions: Array<PlatformTenureCohortActionStatsDto>;
+};
+
 export type ActionCompletionCurveDto = {
     /**
      * ID of the action this record is for
@@ -3876,6 +3904,19 @@ export type UserGetTagsResponses = {
 };
 
 export type UserGetTagsResponse = UserGetTagsResponses[keyof UserGetTagsResponses];
+
+export type UserGetTagSummariesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/tag-summaries';
+};
+
+export type UserGetTagSummariesResponses = {
+    200: Array<TagSummaryDto>;
+};
+
+export type UserGetTagSummariesResponse = UserGetTagSummariesResponses[keyof UserGetTagSummariesResponses];
 
 export type UserAddUserToTagData = {
     body: AddUserToTagDto;
@@ -7762,6 +7803,21 @@ export type AnalyticsGetMemberCompletionRetentionResponses = {
 };
 
 export type AnalyticsGetMemberCompletionRetentionResponse = AnalyticsGetMemberCompletionRetentionResponses[keyof AnalyticsGetMemberCompletionRetentionResponses];
+
+export type AnalyticsGetPlatformTenureCohortData = {
+    body?: never;
+    path?: never;
+    query: {
+        weeksOnPlatform: number;
+    };
+    url: '/analytics/platform-tenure-cohort';
+};
+
+export type AnalyticsGetPlatformTenureCohortResponses = {
+    200: PlatformTenureCohortStatsDto;
+};
+
+export type AnalyticsGetPlatformTenureCohortResponse = AnalyticsGetPlatformTenureCohortResponses[keyof AnalyticsGetPlatformTenureCohortResponses];
 
 export type AnalyticsGetActionCompletionCurvesData = {
     body?: never;

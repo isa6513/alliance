@@ -48,7 +48,12 @@ import {
   OnetimeInviteDto,
   RequestOnetimeInviteDto,
 } from './dto/invite.dto';
-import { AddUserToTagDto, CreateTagDto, TagDto } from './dto/tag.dto';
+import {
+  AddUserToTagDto,
+  CreateTagDto,
+  TagDto,
+  TagSummaryDto,
+} from './dto/tag.dto';
 import {
   AssignGroupsDto,
   FriendStatusDto,
@@ -343,6 +348,7 @@ export class UserController {
     const user = await this.userService.findOne(id, {
       contractEvents: true,
       referredBy: true,
+      tags: true,
     });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -446,6 +452,15 @@ export class UserController {
   @ApiOkResponse({ type: [TagDto] })
   async getTags(): Promise<TagDto[]> {
     return (await this.userService.findAllTags()).map((tag) => new TagDto(tag));
+  }
+
+  @Get('tag-summaries')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [TagSummaryDto] })
+  async getTagSummaries(): Promise<TagSummaryDto[]> {
+    return (await this.userService.findAllTagSummaries()).map(
+      (tag) => new TagSummaryDto(tag),
+    );
   }
 
   @Post('tags/:tagId/addUser')

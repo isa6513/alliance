@@ -1,40 +1,41 @@
 import {
+  actionsActionRelationsForUser,
   analyticsGetTimeSpentPerUser,
   analyticsGetTimeSpentPerUserTotal,
   notifsNotifsForUser,
-  userAddUserToTag,
-  userGetTags,
-  userRemoveUserFromTag,
-  userGetAwayRangeForUser,
   tasksGetFormsForUserSid,
-  actionsActionRelationsForUser,
+  userAddUserToTag,
+  userGetAwayRangeForUser,
+  userGetTagSummaries,
+  userRemoveUserFromTag,
   userUserDetail,
 } from "@alliance/shared/client";
-import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import {
   ActionEventNotifDto,
   TagDto,
+  TagSummaryDto,
   TimeSpentForUserDto,
   UserActionRelationDetailDto,
   UserActionRelationsResponseDto,
   UserActionSummaryDto,
   UserAwayRangeDto,
 } from "@alliance/shared/client/types.gen";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
-import { Link, useLoaderData, useNavigate } from "react-router";
-import { Route } from "../../.react-router/types/src/pages/+types/UserDetailView";
+import { getApiUrl } from "@alliance/sharedweb/lib/config";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import CreateActivityControls from "../components/CreateActivityControls";
-import { ChevronDown, ChevronRight, Database, Mail, Phone } from "lucide-react";
-import { PILL_STATUS_DATA } from "@alliance/sharedweb/ui/UserProgressPills";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@alliance/sharedweb/ui/HoverCard";
+import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
+import { PILL_STATUS_DATA } from "@alliance/sharedweb/ui/UserProgressPills";
+import { ChevronDown, ChevronRight, Database, Mail, Phone } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useLoaderData, useNavigate } from "react-router";
+import { Route } from "../../.react-router/types/src/pages/+types/UserDetailView";
+import CreateActivityControls from "../components/CreateActivityControls";
 
 export async function clientLoader({ params }: Route.LoaderArgs) {
   const userIdParam = params.userId;
@@ -58,7 +59,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
   ] = await Promise.all([
     userUserDetail({ path: { id: userId } }),
     userGetAwayRangeForUser({ path: { id: userId } }),
-    userGetTags(),
+    userGetTagSummaries(),
     actionsActionRelationsForUser({ path: { userId } }),
     analyticsGetTimeSpentPerUser(),
     analyticsGetTimeSpentPerUserTotal(),
@@ -108,7 +109,7 @@ const UserDetailView: React.FC = () => {
 
   const [actionRelationsState, setActionRelationsState] =
     useState<UserActionRelationDetailDto[]>(actionRelations);
-  const [allTags, setAllTags] = useState<TagDto[]>(loaderData.allTags);
+  const [allTags, setAllTags] = useState<TagSummaryDto[]>(loaderData.allTags);
   const [pendingTagOps, setPendingTagOps] = useState<Set<string>>(
     () => new Set(),
   );
@@ -129,15 +130,21 @@ const UserDetailView: React.FC = () => {
     navigate(window.location.pathname);
   }, [navigate]);
 
-  const userTags = useMemo(() => {
-    return allTags.filter((tag) =>
-      tag.users.some((profile) => profile.id === user.id),
-    );
-  }, [allTags, user.id]);
+  const [userTagIds, setUserTagIds] = useState<Set<string>>(
+    () => new Set((user.tags ?? []).map((tag) => tag.id)),
+  );
 
-  const userTagIds = useMemo(() => {
-    return new Set(userTags.map((tag) => tag.id));
-  }, [userTags]);
+  useEffect(() => {
+    setUserTagIds(new Set((user.tags ?? []).map((tag) => tag.id)));
+  }, [user.tags]);
+
+  useEffect(() => {
+    setAllTags(loaderData.allTags);
+  }, [loaderData.allTags]);
+
+  const userTags = useMemo(() => {
+    return allTags.filter((tag) => userTagIds.has(tag.id));
+  }, [allTags, userTagIds]);
 
   const relationByActionId = useMemo(() => {
     return actionRelationsState.reduce(
@@ -233,12 +240,20 @@ const UserDetailView: React.FC = () => {
   );
 
   const updateTagInState = useCallback((updatedTag: TagDto) => {
+    const summary: TagSummaryDto = {
+      id: updatedTag.id,
+      name: updatedTag.name,
+      description: updatedTag.description,
+      publicDisplayName: updatedTag.publicDisplayName,
+      createdAt: updatedTag.createdAt,
+      updatedAt: updatedTag.updatedAt,
+    };
     setAllTags((prev) => {
-      const exists = prev.some((tag) => tag.id === updatedTag.id);
+      const exists = prev.some((tag) => tag.id === summary.id);
       if (exists) {
-        return prev.map((tag) => (tag.id === updatedTag.id ? updatedTag : tag));
+        return prev.map((tag) => (tag.id === summary.id ? summary : tag));
       }
-      return [...prev, updatedTag];
+      return [...prev, summary];
     });
   }, []);
 
@@ -259,6 +274,7 @@ const UserDetailView: React.FC = () => {
           });
           if (res.data) {
             updateTagInState(res.data);
+            setUserTagIds((prev) => new Set([...prev, tagId]));
           }
         } else {
           const res = await userRemoveUserFromTag({
@@ -267,6 +283,11 @@ const UserDetailView: React.FC = () => {
           });
           if (res.data) {
             updateTagInState(res.data);
+            setUserTagIds((prev) => {
+              const next = new Set(prev);
+              next.delete(tagId);
+              return next;
+            });
           }
         }
       } catch (error) {

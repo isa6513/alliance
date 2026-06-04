@@ -1,34 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  evaluateCohortExpression,
+  type CohortEvaluationContext,
+} from 'src/actions/cohort-expression.evaluator';
+import type { CohortExpression } from 'src/actions/cohort-expression.types';
+import { ActionSuite } from 'src/actions/entities/action-suite.entity';
+import {
+  ReminderCohortType,
+  ReminderGroup,
+} from 'src/actions/entities/reminder-group.entity';
+import { CommunityService } from 'src/community/community.service';
+import { Community } from 'src/community/entities/community.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { Tag } from 'src/user/entities/tag.entity';
+import { computeShouldParticipate } from 'src/utils/action-user';
+import { computeIsAwayInRange } from 'src/utils/user';
 import { In, type Repository } from 'typeorm';
 import {
   ActionActivity,
   ActionActivityType,
 } from '../actions/entities/action-activity.entity';
-import { Action } from '../actions/entities/action.entity';
 import {
   ActionEvent,
   ActionStatus,
 } from '../actions/entities/action-event.entity';
+import { Action } from '../actions/entities/action.entity';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { ActionEventNotifType } from './entities/action-event-notif.entity';
-import {
-  ReminderCohortType,
-  ReminderGroup,
-} from 'src/actions/entities/reminder-group.entity';
-import { ActionSuite } from 'src/actions/entities/action-suite.entity';
-import { computeIsAwayInRange } from 'src/utils/user';
-import { computeShouldParticipate } from 'src/utils/action-user';
-import { CommunityService } from 'src/community/community.service';
-import type { CohortExpression } from 'src/actions/cohort-expression.types';
-import {
-  evaluateCohortExpression,
-  type CohortEvaluationContext,
-} from 'src/actions/cohort-expression.evaluator';
-import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import { Community } from 'src/community/entities/community.entity';
-import { Tag } from 'src/user/entities/tag.entity';
 
 @Injectable()
 export class ActionEventRecipientService {
@@ -159,6 +159,100 @@ export class ActionEventRecipientService {
     return sortedEvents[currentEventIndex + 1] ?? null;
   }
 
+  /**
+   * Batched version of findBaseUsersForEvent: loads shared data once
+   * (active users, dismissed activities, cohort expressions) and filters
+   * per action. Returns a map from actionId -> eligible users.
+   */
+  public async findBaseUsersForEvents(params: {
+    entries: Array<{ action: Action; eventId: number }>;
+    includeSuspended?: boolean;
+    includeDismissed?: boolean;
+  }): Promise<Map<number, User[]>> {
+    const { entries, includeSuspended, includeDismissed } = params;
+    if (entries.length === 0) return new Map();
+
+    const actionIds = entries.map((e) => e.action.id);
+
+    // 1. One query: all active users
+    const allUsers = await this.userService.findActiveUsersWithTags();
+
+    // 2. One query: all dismissed activities for these actions
+    const allDismissed = await this.actionActivityRepository.find({
+      where: {
+        actionId: In(actionIds),
+        type: ActionActivityType.USER_DISMISSED,
+      },
+    });
+    const dismissedByAction = new Map<number, Set<number>>();
+    for (const act of allDismissed) {
+      if (!dismissedByAction.has(act.actionId)) {
+        dismissedByAction.set(act.actionId, new Set());
+      }
+      dismissedByAction.get(act.actionId)!.add(act.userId);
+    }
+
+    // 3. Deduplicated cohort resolution
+    const cohortCache = new Map<string, Promise<Set<number> | null>>();
+    const cohortByAction = new Map<number, Promise<Set<number> | null>>();
+    for (const { action } of entries) {
+      const key = action.cohortExpression
+        ? JSON.stringify(action.cohortExpression)
+        : '';
+      if (!cohortCache.has(key)) {
+        cohortCache.set(
+          key,
+          this.resolveCohortMemberIds(action.cohortExpression),
+        );
+      }
+      cohortByAction.set(action.id, cohortCache.get(key)!);
+    }
+    // Await all unique cohort resolutions in parallel
+    await Promise.all(cohortCache.values());
+
+    // 4. Per-action filtering
+    const result = new Map<number, User[]>();
+    for (const { action, eventId } of entries) {
+      const events = action.events;
+      const event = events.find((e) => e.id === eventId);
+      if (!event) {
+        result.set(action.id, []);
+        continue;
+      }
+
+      const deadlineEvent = this.getNextEvent({
+        events,
+        currentEventId: eventId,
+      });
+      const usersDismissed = dismissedByAction.get(action.id) ?? new Set();
+      const cohortMemberIds = await cohortByAction.get(action.id)!;
+
+      const eligible = allUsers.filter(
+        (user) =>
+          computeShouldParticipate({
+            eventDate: event.date,
+            deadlineDate: deadlineEvent?.date ?? null,
+            everyoneShouldComplete: action.everyoneShouldComplete,
+            cohortMemberIds,
+            user,
+            userDismissed: usersDismissed.has(user.id),
+            onboarding: action.onboarding,
+            includeSuspended,
+            includeDismissed,
+          }) &&
+          !computeIsAwayInRange({
+            user,
+            startDate: event.date,
+            endDate: deadlineEvent?.date,
+          }),
+      );
+
+      result.set(action.id, eligible);
+    }
+
+    return result;
+  }
+
   public async findBaseUsersForEvent(params: {
     action: Action;
     eventId: number;
@@ -166,54 +260,17 @@ export class ActionEventRecipientService {
     includeDismissed?: boolean;
   }): Promise<User[]> {
     const { action, eventId, includeSuspended, includeDismissed } = params;
-    const events = action.events;
 
-    const event = events.find((event) => event.id === eventId);
-
-    if (!event) {
+    if (!action.events.some((event) => event.id === eventId)) {
       throw new Error(`Event not found: ${eventId}`);
     }
 
-    const deadlineEvent = this.getNextEvent({
-      events,
-      currentEventId: eventId,
+    const result = await this.findBaseUsersForEvents({
+      entries: [{ action, eventId }],
+      includeSuspended,
+      includeDismissed,
     });
-
-    const [usersDismissed, cohortMemberIds] = await Promise.all([
-      this.actionActivityRepository
-        .find({
-          where: {
-            action: { id: action.id },
-            type: ActionActivityType.USER_DISMISSED,
-          },
-        })
-        .then((acts) => new Set(acts.map((a) => a.userId))),
-      this.resolveCohortMemberIds(action.cohortExpression),
-    ]);
-
-    const filterToEligible = (user: User) =>
-      computeShouldParticipate({
-        eventDate: event.date,
-        deadlineDate: deadlineEvent?.date ?? null,
-        everyoneShouldComplete: action.everyoneShouldComplete,
-        cohortMemberIds,
-        user,
-        userDismissed: usersDismissed.has(user.id),
-        onboarding: action.onboarding,
-        includeSuspended,
-        includeDismissed,
-      }) &&
-      !computeIsAwayInRange({
-        user,
-        startDate: event.date,
-        endDate: this.getNextEvent({
-          events,
-          currentEventId: eventId,
-        })?.date,
-      });
-
-    const users = await this.userService.findActiveUsersWithTags();
-    return users.filter(filterToEligible);
+    return result.get(action.id) ?? [];
   }
 
   async filterForShouldRemind(

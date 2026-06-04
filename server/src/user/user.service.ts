@@ -959,6 +959,10 @@ export class UserService {
     return this.tagRepository.find({ relations: { users: true } });
   }
 
+  async findAllTagSummaries(): Promise<Tag[]> {
+    return this.tagRepository.find();
+  }
+
   async findTagByName(name: string): Promise<Tag | null> {
     return this.tagRepository.findOne({ where: { name } });
   }
