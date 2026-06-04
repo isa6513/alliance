@@ -1,6 +1,7 @@
 import { cn } from "@alliance/shared/styles/util";
 import React from "react";
 import { Link, href } from "react-router";
+import { LANDING_MAIN_COL } from "../pages/static/prelaunchLayout";
 
 interface FooterProps {
   className?: string;
@@ -38,7 +39,7 @@ function FooterLink({ to, label }: { to: string; label: string }) {
 const Footer: React.FC<FooterProps> = ({ className }) => {
   return (
     <footer className={cn("w-full bg-navy text-white", className)}>
-      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-10 md:py-12 lg:px-24">
+      <div className={cn(LANDING_MAIN_COL, "py-10 md:py-12")}>
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="flex max-w-sm flex-col gap-3">
             <p className="font-berlingske text-lg font-bold tracking-wide md:text-xl">
