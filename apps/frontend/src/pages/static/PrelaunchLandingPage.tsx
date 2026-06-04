@@ -12,22 +12,14 @@ import FeaturedImpactCard from "../../components/FeaturedImpactCard";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
-
-/** Shared width + horizontal padding for all landing content. */
-const LANDING_MAIN_COL = "mx-auto w-full max-w-5xl px-4 sm:px-10 lg:px-16";
-/** Wider column for hero + quote cards so they use more of the viewport. */
-const LANDING_QUOTES_COL =
-  "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:max-w-[90rem] lg:px-10";
-
-const LANDING_SECTION_GAP = "flex flex-col gap-y-6 lg:gap-y-8";
-/** Same max-width + inner stack gap; vertical rhythm between blocks uses `space-y` on the parent. */
-const LANDING_SECTION = `${LANDING_MAIN_COL} ${LANDING_SECTION_GAP}`;
-const LANDING_PAGE_STACK = "flex flex-col";
-
-const LANDING_SECTION_PY = "py-12 md:py-16 lg:py-24";
-
-const SECTION_TITLE_CLASS = "text-title-large w-full text-black";
-const SUBTITLE_CLASS = "text-lg text-zinc-900 lg:text-xl";
+import {
+  LANDING_PAGE_STACK,
+  LANDING_QUOTES_COL,
+  LANDING_SECTION,
+  LANDING_SECTION_PY,
+  SECTION_TITLE_CLASS,
+  SUBTITLE_CLASS,
+} from "./prelaunchLayout";
 
 const MEMBER_QUOTES = [
   {

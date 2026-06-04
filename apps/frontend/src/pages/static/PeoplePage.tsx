@@ -3,6 +3,7 @@ import {
   userMembersPublic,
   userNmembers,
 } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import React, { useEffect, useMemo, useState } from "react";
@@ -10,14 +11,14 @@ import { useLoaderData } from "react-router";
 import Footer from "../../components/Footer";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import PublicMemberDirectoryCard from "../../components/PublicMemberDirectoryCard";
+import {
+  LANDING_PAGE_STACK,
+  LANDING_SECTION_PY,
+  LANDING_WIDE_SECTION,
+  SUBTITLE_CLASS,
+} from "./prelaunchLayout";
 
-const LANDING_MAIN_COL = "mx-auto w-full max-w-5xl px-6 sm:px-10 lg:px-16";
-const LANDING_BIG_COL = "mx-auto px-6 sm:px-10 lg:px-16 max-w-7xl w-full";
-const LANDING_BODY = "gap-16 sm:gap-24 py-18 lg:py-24";
-const SECTION_STACK = "flex flex-col gap-y-8 lg:gap-y-10";
-const SECTION_HEAD = "flex flex-col gap-3 lg:gap-4";
-
-const SUBTITLE_CLASS = "text-lg lg:text-xl";
+const SECTION_TITLE_CLASS = "text-title-medium w-full text-black";
 
 export async function loader() {
   const res = await userNmembers();
@@ -171,29 +172,27 @@ const PeoplePage: React.FC = () => {
   const hasMoreMembers = filteredMembers.length > displayCount;
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <PrelaunchNavbar transparent={false} absolute={false} />
-      <div
-        className={`flex flex-1 flex-col text-base md:text-lg ${LANDING_BODY} pb-32 lg:pb-56`}
-      >
-        <section className="w-full">
-          <div className={LANDING_MAIN_COL}>
-            <h1 className="text-title-large text-center text-black">People</h1>
+    <div className="flex flex-col bg-white">
+      <div className={LANDING_PAGE_STACK}>
+        <section className={cn("relative w-full bg-white", "")}>
+          <PrelaunchNavbar transparent={false} absolute={false} />
+          <div className={cn(LANDING_WIDE_SECTION, "pt-6 sm:pt-8 lg:pt-12")}>
+            <p className="text-title-large w-full text-center text-black">
+              People
+            </p>
           </div>
         </section>
 
-        <section className="w-full flex flex-col gap-16">
-          <div className={`${LANDING_MAIN_COL} ${SECTION_STACK}`}>
-            <div className={SECTION_HEAD}>
-              <h2 className="text-heading-public">Office</h2>
+        <section className={cn("w-full bg-white", LANDING_SECTION_PY)}>
+          <div className={LANDING_WIDE_SECTION}>
+            <div className="flex flex-col gap-4">
+              <p className={SECTION_TITLE_CLASS}>Office</p>
               <p className={SUBTITLE_CLASS}>
-                Members of the office plan actions and develop our online
-                platform.
+                Members of the office plan actions, write software, and manage
+                the Alliance.
               </p>
             </div>
-          </div>
-          <div className={`${LANDING_BIG_COL}`}>
-            <div className="grid grid-cols-1 gap-y-8 gap-x-16 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-16 gap-y-8 sm:grid-cols-2">
               {staffProfiles
                 .filter((member) => member.id !== undefined)
                 .map((member) => (
@@ -212,10 +211,10 @@ const PeoplePage: React.FC = () => {
                       />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg md:text-xl font-medium text-zinc-900">
+                      <p className="text-lg font-medium text-zinc-900 md:text-xl">
                         {member.displayName}
-                      </h3>
-                      <div className="text-zinc-500 text-base md:mt-1">
+                      </p>
+                      <div className="text-base text-zinc-500 md:mt-1">
                         <AppMarkdownWrapper
                           markdownContent={member.profileDescription ?? ""}
                         />
@@ -227,30 +226,30 @@ const PeoplePage: React.FC = () => {
           </div>
         </section>
 
-        <section className="w-full bg-grey-0 py-16 lg:py-24 flex flex-col gap-16">
-          <div className={`${LANDING_MAIN_COL} ${SECTION_STACK}`}>
-            <div className={SECTION_HEAD}>
-              <h2 className="text-heading-public">Expert group</h2>
-              <div className="flex flex-col gap-2">
-                <p className={SUBTITLE_CLASS}>
+        <section className={cn("w-full bg-green-bg", LANDING_SECTION_PY)}>
+          <div className={LANDING_WIDE_SECTION}>
+            <div className="flex flex-col gap-4">
+              <p className={`${SECTION_TITLE_CLASS} text-white`}>
+                Expert group
+              </p>
+              <div className="flex flex-col gap-1">
+                <p className={`${SUBTITLE_CLASS} !text-white/90`}>
                   Experts occasionally lend time, knowledge, or resources to the
                   Alliance.
                 </p>
-                <p className={`${SUBTITLE_CLASS} text-zinc-500`}>
+                <p className={`${SUBTITLE_CLASS} !text-white/60`}>
                   This list only includes experts who have chosen to make their
                   information public.
                 </p>
               </div>
             </div>
-          </div>
-          <div className={`${LANDING_BIG_COL}`}>
             <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-3">
               {experts.map((expert) => (
                 <div key={expert.name}>
-                  <p className="text-zinc-900 text-base md:text-lg">
+                  <p className="text-base font-medium text-white md:text-lg">
                     {expert.name}
                   </p>
-                  <p className="text-zinc-500 text-base md:text-lg">
+                  <p className="text-base text-white/60 md:text-lg">
                     {expert.description}
                   </p>
                 </div>
@@ -259,11 +258,11 @@ const PeoplePage: React.FC = () => {
           </div>
         </section>
 
-        <section className="w-full">
-          <div className={`${LANDING_MAIN_COL} ${SECTION_STACK}`}>
-            <div className={SECTION_HEAD}>
-              <h2 className="text-heading-public">Members</h2>
-              <div className="flex flex-col gap-2">
+        <section className={cn("w-full bg-grey-0", LANDING_SECTION_PY)}>
+          <div className={LANDING_WIDE_SECTION}>
+            <div className="flex flex-col gap-4">
+              <p className={SECTION_TITLE_CLASS}>Members</p>
+              <div className="flex flex-col gap-1">
                 {nmembers !== undefined && (
                   <p className={SUBTITLE_CLASS}>
                     The Alliance has {nmembers}{" "}
@@ -271,7 +270,7 @@ const PeoplePage: React.FC = () => {
                     currently by invitation only.
                   </p>
                 )}
-                <p className={`${SUBTITLE_CLASS} text-zinc-500`}>
+                <p className={`${SUBTITLE_CLASS} !text-zinc-500`}>
                   This directory only includes members who have chosen to make
                   their information public.
                 </p>
@@ -282,14 +281,14 @@ const PeoplePage: React.FC = () => {
                   placeholder="Search members..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded border border-zinc-200 bg-white py-2 px-3 text-lg"
+                  className="w-full rounded-md outline-none bg-white py-3 px-4 text-lg"
                 />
               </div>
             </div>
 
             {filteredMembers.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3">
+                <div className="gap-6 md:gap-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   {displayedMembers.map((member) => (
                     <PublicMemberDirectoryCard
                       key={member.id}
