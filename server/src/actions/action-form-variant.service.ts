@@ -9,6 +9,7 @@ import { EntityManager, In, QueryFailedError, Repository } from 'typeorm';
 import { Form } from 'src/tasks/entities/form.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { FormSnapshotService } from 'src/tasks/formsnapshot.service';
+import { User } from 'src/user/entities/user.entity';
 import { Action } from './entities/action.entity';
 import { ActionFormAssignment } from './entities/action-form-assignment.entity';
 import { ActionFormVariant } from './entities/action-form-variant.entity';
@@ -42,6 +43,8 @@ export class ActionFormVariantService {
     private readonly assignmentRepo: Repository<ActionFormAssignment>,
     @InjectRepository(Action)
     private readonly actionRepo: Repository<Action>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
     @InjectRepository(Form)
     private readonly formRepo: Repository<Form>,
     private readonly formSnapshotService: FormSnapshotService,
@@ -158,6 +161,8 @@ export class ActionFormVariantService {
     actionId: number,
     userId: number,
   ): Promise<number | null> {
+    if (!(await this.userExists(userId))) return null;
+
     const variants = await this.listForAction(actionId);
     if (variants.length === 0) return null;
 
@@ -206,6 +211,7 @@ export class ActionFormVariantService {
     userId: number,
   ): Promise<Map<number, number>> {
     if (actionIds.length === 0) return new Map();
+    if (!(await this.userExists(userId))) return new Map();
 
     const [allVariants, existingAssignments] = await Promise.all([
       this.variantRepo.find({
@@ -381,6 +387,10 @@ export class ActionFormVariantService {
       if (r < acc) return v.id;
     }
     return null;
+  }
+
+  private async userExists(userId: number): Promise<boolean> {
+    return this.userRepo.exists({ where: { id: userId } });
   }
 
   private assertSplitValid(splitValue: number): void {

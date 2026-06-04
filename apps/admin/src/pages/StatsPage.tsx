@@ -11,6 +11,7 @@ import {
   actionsReminderGroupsForEvent,
   actionsSentNotifsForGroup,
 } from "@alliance/shared/client";
+import { client } from "@alliance/shared/client/client.gen";
 import {
   TimeSeriesChart,
   formatDateAsLocal,
@@ -111,6 +112,23 @@ type ReminderActionChannelBar = {
 type HoveredReminderActionBar = {
   bar: ReminderActionChannelBar;
   channel: "email" | "text";
+};
+type PlatformTenureCohortActionStats = {
+  actionId: number;
+  actionName: string;
+  assignedCount: number;
+  completedCount: number;
+  completionRate: number;
+  memberActionStartDate: string;
+  memberActionEndDate?: string;
+};
+type PlatformTenureCohortStats = {
+  weeksOnPlatform: number;
+  cohortSize: number;
+  assignedCount: number;
+  completedCount: number;
+  completionRate: number;
+  actions: PlatformTenureCohortActionStats[];
 };
 
 const buildRoundedLeftPath = (
@@ -226,6 +244,21 @@ const runInBatches = async <T, R>(
   return results;
 };
 
+const fetchPlatformTenureCohort = async (
+  weeksOnPlatform: number,
+): Promise<PlatformTenureCohortStats> => {
+  const response = await client.get<PlatformTenureCohortStats>({
+    url: "/analytics/platform-tenure-cohort",
+    query: { weeksOnPlatform },
+  });
+
+  if (!response.data) {
+    throw new Error("No platform tenure cohort data returned");
+  }
+
+  return response.data;
+};
+
 const StatsPage: React.FC = () => {
   const defaultRange = useMemo(() => getDefaultRange(), []);
   const [startInput, setStartInput] = useState<string>(defaultRange.start);
@@ -260,6 +293,15 @@ const StatsPage: React.FC = () => {
     TimeToChurnSampleDto[]
   >([]);
   const [timeToChurnLoading, setTimeToChurnLoading] = useState<boolean>(false);
+  const [platformTenureWeeksInput, setPlatformTenureWeeksInput] =
+    useState<string>("4");
+  const [platformTenureCohort, setPlatformTenureCohort] =
+    useState<PlatformTenureCohortStats | null>(null);
+  const [platformTenureCohortLoading, setPlatformTenureCohortLoading] =
+    useState<boolean>(false);
+  const [platformTenureCohortError, setPlatformTenureCohortError] = useState<
+    string | null
+  >(null);
   const [dailyStatsTableOpen, setDailyStatsTableOpen] = useState(false);
   const [actionStatsTableOpen, setActionStatsTableOpen] = useState(false);
   const [weekRange, setWeekRange] = useState({ min: 0, max: 20 });
@@ -541,6 +583,36 @@ const StatsPage: React.FC = () => {
     }
   }, []);
 
+  const loadPlatformTenureCohort = useCallback(async (weeks: number) => {
+    setPlatformTenureCohortLoading(true);
+    setPlatformTenureCohortError(null);
+    try {
+      const cohort = await fetchPlatformTenureCohort(weeks);
+      setPlatformTenureCohort(cohort);
+    } catch (err) {
+      console.error("Failed to load platform tenure cohort", err);
+      setPlatformTenureCohort(null);
+      setPlatformTenureCohortError(
+        "Unable to load this cohort right now. Please try again soon.",
+      );
+    } finally {
+      setPlatformTenureCohortLoading(false);
+    }
+  }, []);
+
+  const handleApplyPlatformTenureCohort = useCallback(() => {
+    const weeks = Number(platformTenureWeeksInput);
+    if (!Number.isInteger(weeks) || weeks < 0) {
+      setPlatformTenureCohortError("Weeks on platform must be a whole number.");
+      return;
+    }
+    void loadPlatformTenureCohort(weeks);
+  }, [loadPlatformTenureCohort, platformTenureWeeksInput]);
+
+  useEffect(() => {
+    void loadPlatformTenureCohort(4);
+  }, [loadPlatformTenureCohort]);
+
   const handleRecalculateActionStats = useCallback(async () => {
     setActionStatsLoading(true);
     try {
@@ -629,6 +701,16 @@ const StatsPage: React.FC = () => {
     () => actionStats.filter((a) => a.showInChart),
     [actionStats],
   );
+
+  const platformTenureMaxAssigned = useMemo(() => {
+    return Math.max(
+      max(
+        platformTenureCohort?.actions ?? [],
+        (action) => action.assignedCount,
+      ) ?? 0,
+      1,
+    );
+  }, [platformTenureCohort]);
 
   const actionBarsGeometry = useMemo(() => {
     if (chartActionStats.length === 0) {
@@ -1542,6 +1624,135 @@ const StatsPage: React.FC = () => {
           </div>
         </div>
       ) : null}
+
+      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="flex flex-col gap-3 border-b border-gray-200 px-4 py-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h3 className="font-semibold text-gray-900">
+              Platform Tenure Cohort
+            </h3>
+          </div>
+          <form
+            className="flex flex-wrap items-end gap-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleApplyPlatformTenureCohort();
+            }}
+          >
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold text-gray-600">
+                Weeks on platform
+              </span>
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={platformTenureWeeksInput}
+                onChange={(event) =>
+                  setPlatformTenureWeeksInput(event.target.value)
+                }
+                className="w-32 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={platformTenureCohortLoading}
+              className="rounded-md bg-green px-4 py-2 text-sm text-white shadow hover:bg-green-500 disabled:opacity-50"
+            >
+              {platformTenureCohortLoading ? "Loading..." : "Create"}
+            </button>
+          </form>
+        </div>
+        <div className="p-4">
+          {platformTenureCohortError && (
+            <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {platformTenureCohortError}
+            </div>
+          )}
+          {platformTenureCohortLoading && !platformTenureCohort ? (
+            <p className="text-sm text-gray-600">Loading cohort...</p>
+          ) : platformTenureCohort ? (
+            <div className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-4">
+                <div className="rounded-md border border-gray-200 px-3 py-2">
+                  <div className="text-xs font-semibold text-gray-600">
+                    Cohort size
+                  </div>
+                  <div className="mt-1 text-2xl font-bold text-gray-900">
+                    {platformTenureCohort.cohortSize}
+                  </div>
+                </div>
+                <div className="rounded-md border border-gray-200 px-3 py-2">
+                  <div className="text-xs font-semibold text-gray-600">
+                    Reliability
+                  </div>
+                  <div className="mt-1 text-2xl font-bold text-gray-900">
+                    {(platformTenureCohort.completionRate * 100).toFixed(1)}%
+                  </div>
+                </div>
+                <div className="rounded-md border border-gray-200 px-3 py-2">
+                  <div className="text-xs font-semibold text-gray-600">
+                    Completed
+                  </div>
+                  <div className="mt-1 text-2xl font-bold text-gray-900">
+                    {platformTenureCohort.completedCount}
+                  </div>
+                </div>
+                <div className="rounded-md border border-gray-200 px-3 py-2">
+                  <div className="text-xs font-semibold text-gray-600">
+                    Assigned
+                  </div>
+                  <div className="mt-1 text-2xl font-bold text-gray-900">
+                    {platformTenureCohort.assignedCount}
+                  </div>
+                </div>
+              </div>
+
+              {platformTenureCohort.actions.length === 0 ? (
+                <p className="text-sm text-gray-600">
+                  No assigned reliability actions for this cohort.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {platformTenureCohort.actions.slice(0, 12).map((action) => {
+                    const assignedWidth =
+                      (action.assignedCount / platformTenureMaxAssigned) * 100;
+                    const completedWidth =
+                      action.assignedCount > 0
+                        ? (action.completedCount / action.assignedCount) *
+                          assignedWidth
+                        : 0;
+                    return (
+                      <div
+                        key={action.actionId}
+                        className="grid gap-2 text-sm md:grid-cols-[220px_1fr_120px]"
+                      >
+                        <div className="truncate text-gray-700">
+                          {action.actionName}
+                        </div>
+                        <div className="relative h-6 overflow-hidden rounded bg-gray-100">
+                          <div
+                            className="absolute inset-y-0 left-0 bg-gray-200"
+                            style={{ width: `${assignedWidth}%` }}
+                          />
+                          <div
+                            className="absolute inset-y-0 left-0 bg-green-600"
+                            style={{ width: `${completedWidth}%` }}
+                          />
+                        </div>
+                        <div className="text-right text-gray-600">
+                          {action.completedCount}/{action.assignedCount} (
+                          {(action.completionRate * 100).toFixed(0)}%)
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : null}
+        </div>
+      </div>
 
       {/* Invite Conversion Funnel */}
       <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">

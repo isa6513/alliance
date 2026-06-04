@@ -545,7 +545,7 @@ export class ActionsService {
       }
     }
 
-    await this.applyAssignedFormIds(filtered, userId);
+    await this.applyAssignedFormIds(filtered, user?.id);
 
     const actionsDismissed = new Set(
       (

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   NotFoundException,
@@ -19,6 +20,7 @@ import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionCompletionCurveDto } from './action-completion-curve.dto';
 import { ActionStatsWithOnboardingDto } from './actionstats-with-onboarding.dto';
 import { InviteFunnelDto } from './invite-funnel.dto';
+import { PlatformTenureCohortStatsDto } from './platform-tenure-cohort.dto';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -97,6 +99,26 @@ export class AnalyticsController {
     return cohorts.map(
       (cohort) => new MemberCompletionRetentionCohortDto(cohort),
     );
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('platform-tenure-cohort')
+  @ApiOkResponse({ type: PlatformTenureCohortStatsDto })
+  @ApiQuery({ name: 'weeksOnPlatform', required: true, type: Number })
+  async getPlatformTenureCohort(
+    @Query('weeksOnPlatform') weeksOnPlatform: string,
+  ): Promise<PlatformTenureCohortStatsDto> {
+    const parsedWeeks = Number(weeksOnPlatform);
+    if (
+      !Number.isFinite(parsedWeeks) ||
+      parsedWeeks < 0 ||
+      !Number.isInteger(parsedWeeks)
+    ) {
+      throw new BadRequestException('weeksOnPlatform must be a whole number');
+    }
+    const stats =
+      await this.analyticsService.getPlatformTenureCohortStats(parsedWeeks);
+    return new PlatformTenureCohortStatsDto(stats);
   }
 
   @UseGuards(AdminGuard)

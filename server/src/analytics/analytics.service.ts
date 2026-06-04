@@ -33,6 +33,7 @@ import { ActionStatsWithOnboarding } from './actionstats-with-onboarding.dto';
 import { InviteFunnel } from './invite-funnel.dto';
 import { AggregateStats } from './aggregatestats.dto';
 import { ContractStatusPoint } from './contract-status-history.dto';
+import { PlatformTenureCohortStats } from './platform-tenure-cohort.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -857,6 +858,150 @@ ORDER BY pp.total_session_duration_seconds DESC
           points,
         };
       });
+  }
+
+  async getPlatformTenureCohortStats(
+    weeksOnPlatform: number,
+  ): Promise<PlatformTenureCohortStats> {
+    const normalizedWeeks = Math.max(0, Math.floor(weeksOnPlatform));
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const now = new Date();
+
+    const activeUsers = (
+      await this.userRepository.find({
+        relations: { contractEvents: true },
+      })
+    ).filter((user) => user.hasActiveContract);
+
+    const cohortUserIds = new Set<number>();
+
+    for (const user of activeUsers) {
+      const signedAt = (user.contractEvents ?? [])
+        .filter((event) => event.type === ContractEventType.SIGNED)
+        .sort((a, b) => a.date.getTime() - b.date.getTime())[0]?.date;
+
+      if (!signedAt) {
+        continue;
+      }
+
+      const tenureWeeks = Math.floor(
+        (now.getTime() - signedAt.getTime()) / msPerWeek,
+      );
+      if (tenureWeeks === normalizedWeeks) {
+        cohortUserIds.add(user.id);
+      }
+    }
+
+    if (cohortUserIds.size === 0) {
+      return {
+        weeksOnPlatform: normalizedWeeks,
+        cohortSize: 0,
+        assignedCount: 0,
+        completedCount: 0,
+        completionRate: 0,
+        actions: [],
+      };
+    }
+
+    const completionActivities = await this.actionActivityRepository.find({
+      where: {
+        userId: In(Array.from(cohortUserIds)),
+        type: ActionActivityType.USER_COMPLETED,
+      },
+      select: { userId: true, actionId: true },
+    });
+
+    const completedLookup = new Set<string>();
+    for (const activity of completionActivities) {
+      completedLookup.add(`${activity.userId}:${activity.actionId}`);
+    }
+
+    const actions = await this.actionRepository.find({
+      relations: { events: true },
+    });
+
+    const actionStats: PlatformTenureCohortStats['actions'] = [];
+
+    for (const action of actions) {
+      if (
+        action.publicOnly ||
+        action.onboarding ||
+        action.optional ||
+        action.everyoneShouldComplete
+      ) {
+        continue;
+      }
+
+      const sortedEvents = (action.events ?? []).sort(
+        (a, b) => a.date.getTime() - b.date.getTime(),
+      );
+      const memberActionEvent = sortedEvents.find(
+        (event) =>
+          event.newStatus === ActionStatus.MemberAction && event.date <= now,
+      );
+
+      if (!memberActionEvent) {
+        continue;
+      }
+
+      const memberActionEndEvent = sortedEvents.find(
+        (event) =>
+          event.date > memberActionEvent.date &&
+          event.newStatus !== ActionStatus.MemberAction,
+      );
+
+      const baseUsers =
+        await this.actionEventRecipientService.findBaseUsersForEvent({
+          action,
+          eventId: memberActionEvent.id,
+          includeSuspended: true,
+        });
+
+      const assignedCohortUsers = baseUsers.filter((user) =>
+        cohortUserIds.has(user.id),
+      );
+      if (assignedCohortUsers.length === 0) {
+        continue;
+      }
+
+      const completedCount = assignedCohortUsers.filter((user) =>
+        completedLookup.has(`${user.id}:${action.id}`),
+      ).length;
+
+      actionStats.push({
+        actionId: action.id,
+        actionName: action.name,
+        assignedCount: assignedCohortUsers.length,
+        completedCount,
+        completionRate: completedCount / assignedCohortUsers.length,
+        memberActionStartDate: memberActionEvent.date,
+        memberActionEndDate: memberActionEndEvent?.date,
+      });
+    }
+
+    actionStats.sort(
+      (a, b) =>
+        b.assignedCount - a.assignedCount ||
+        a.memberActionStartDate.getTime() - b.memberActionStartDate.getTime(),
+    );
+
+    const assignedCount = actionStats.reduce(
+      (sum, action) => sum + action.assignedCount,
+      0,
+    );
+    const completedCount = actionStats.reduce(
+      (sum, action) => sum + action.completedCount,
+      0,
+    );
+
+    return {
+      weeksOnPlatform: normalizedWeeks,
+      cohortSize: cohortUserIds.size,
+      assignedCount,
+      completedCount,
+      completionRate: assignedCount > 0 ? completedCount / assignedCount : 0,
+      actions: actionStats,
+    };
   }
 
   async getTimeToChurnSamples(): Promise<number[]> {
