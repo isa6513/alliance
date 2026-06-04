@@ -67,6 +67,8 @@
   --color-grey-3: oklch(90.5% 0 0);
 
   --color-green: rgb(98, 161, 36);
+  --color-green-bg: rgb(35, 74, 27);
+  --color-green-bg-card: rgb(48, 96, 40);
   --color-navy: rgb(7, 30, 64);
   --color-staff: #399ee6;
   --color-grouplead: #f2ae49;
@@ -197,10 +199,7 @@ input[type="number"]:disabled {
 
 .text-link {
   color: var(--color-green);
-
-  &:hover {
-    text-decoration: underline;
-  }
+  text-decoration: underline;
 }
 
 .text-invite-form-body {

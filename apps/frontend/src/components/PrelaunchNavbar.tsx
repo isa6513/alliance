@@ -1,6 +1,6 @@
+import { cn } from "@alliance/shared/styles/util";
 import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import { cn } from "@alliance/shared/styles/util";
 
 enum NavbarPage {
   People = "People",
@@ -76,7 +76,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
               <Link
                 to={destinations[link]}
                 className={cn(
-                  "py-1 md:py-1.5 px-3 md:px-5 rounded-full whitespace-nowrap font-medium",
+                  "py-1 md:py-1.5 px-3 md:px-5 rounded-md whitespace-nowrap font-medium",
                   transparent
                     ? "bg-white text-black hover:bg-zinc-100"
                     : "bg-black text-white hover:bg-zinc-800",

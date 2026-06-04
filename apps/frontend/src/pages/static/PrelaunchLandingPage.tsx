@@ -3,7 +3,6 @@ import { userFindOne } from "@alliance/shared/client";
 import { cn } from "@alliance/shared/styles/util";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useQueries } from "@tanstack/react-query";
-import { ArrowRight } from "lucide-react";
 import React from "react";
 import { Link } from "react-router";
 import alliancePeople from "../../assets/alliance_people.webp";
@@ -16,13 +15,18 @@ import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
 
 /** Shared width + horizontal padding for all landing content. */
 const LANDING_MAIN_COL = "mx-auto w-full max-w-5xl px-4 sm:px-10 lg:px-16";
+/** Wider column for hero + quote cards so they use more of the viewport. */
+const LANDING_QUOTES_COL =
+  "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:max-w-[90rem] lg:px-10";
 
 const LANDING_SECTION_GAP = "flex flex-col gap-y-6 lg:gap-y-8";
 /** Same max-width + inner stack gap; vertical rhythm between blocks uses `space-y` on the parent. */
 const LANDING_SECTION = `${LANDING_MAIN_COL} ${LANDING_SECTION_GAP}`;
-const LANDING_PAGE_STACK =
-  "flex flex-col space-y-12 md:space-y-16 lg:space-y-20 pb-16 lg:pb-20";
+const LANDING_PAGE_STACK = "flex flex-col";
 
+const LANDING_SECTION_PY = "py-12 md:py-16 lg:py-24";
+
+const SECTION_TITLE_CLASS = "text-title-large w-full text-black";
 const SUBTITLE_CLASS = "text-lg text-zinc-900 lg:text-xl";
 
 const MEMBER_QUOTES = [
@@ -83,26 +87,36 @@ function MemberQuoteCard({
   );
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-row items-start gap-4 rounded-md">
-      <div className="shrink-0">
-        {isPending ? (
-          <div
-            className="size-9 animate-pulse rounded bg-zinc-200"
+    <div className="flex h-full w-full flex-col rounded-lg bg-green-bg-card p-5 sm:p-6">
+      <figure className="flex flex-1 flex-col justify-between gap-6">
+        <div className="relative">
+          <span
+            className="pointer-events-none absolute top-0 left-0 font-serif text-4xl leading-none text-white/35 select-none lg:text-7xl"
             aria-hidden
-          />
-        ) : (
-          avatar
-        )}
-      </div>
-      <figure className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
-        <blockquote className="text-base lg:text-lg text-zinc-900 leading-snug">
-          {quote}
-        </blockquote>
-        {profile?.displayName ? (
-          <figcaption className="text-base lg:text-lg text-zinc-500">
-            {profile.displayName}
-          </figcaption>
-        ) : null}
+          >
+            &ldquo;
+          </span>
+          <blockquote className="pt-5 text-base leading-normal text-white lg:pt-12 lg:text-lg">
+            {quote}
+          </blockquote>
+        </div>
+        <figcaption className="flex shrink-0 flex-row items-center gap-3">
+          <div className="shrink-0">
+            {isPending ? (
+              <div
+                className="size-12 animate-pulse rounded bg-white/20"
+                aria-hidden
+              />
+            ) : (
+              avatar
+            )}
+          </div>
+          {profile?.displayName ? (
+            <span className="text-sm font-medium text-white/75 lg:text-base">
+              {profile.displayName}
+            </span>
+          ) : null}
+        </figcaption>
       </figure>
     </div>
   );
@@ -133,47 +147,54 @@ const PrelaunchLandingPage: React.FC = () => {
   return (
     <div className="flex flex-col bg-white">
       <div className={LANDING_PAGE_STACK}>
-        <section className="relative w-full bg-white">
+        <section
+          className={cn("relative w-full bg-white", "pb-12 md:pb-16 lg:pb-20")}
+        >
           <PrelaunchNavbar transparent={false} absolute={false} />
           <div
-            className={`${LANDING_MAIN_COL} flex flex-col gap-y-4 pt-6 sm:pt-8 lg:pt-10`}
+            className={cn(
+              LANDING_QUOTES_COL,
+              "flex flex-col gap-8 pt-6 sm:pt-8 md:gap-10 lg:flex-row lg:items-center lg:gap-16 lg:pt-12",
+            )}
           >
-            <p className="hidden md:block text-center font-serif font-semibold text-4xl text-black sm:text-5xl lg:text-6xl">
-              The Alliance
-            </p>
-            <div className="text-center flex flex-col gap-y-4 text-lg text-zinc-900 sm:gap-y-5 sm:text-xl lg:text-2xl">
-              <p>
-                We&apos;re a global group of people cooperating to improve the
-                world.
+            <div className="flex min-w-0 flex-1 flex-col gap-y-4 lg:items-start">
+              <p className="hidden text-center font-serif font-semibold text-5xl text-black sm:text-6xl md:block lg:text-left lg:text-7xl">
+                The Alliance
               </p>
-              <Link
-                to="#join-us"
-                className="mx-auto self-start font-medium rounded-full bg-green px-6 py-3 text-base lg:text-lg text-white hover:bg-green/80"
-              >
-                Request an invite
-              </Link>
+              <div className="flex flex-col gap-y-4 text-center text-xl text-zinc-900 sm:gap-y-5 sm:text-2xl lg:text-left lg:text-3xl">
+                <p>
+                  We&apos;re a global group of people cooperating to improve the
+                  world.
+                </p>
+                <Link
+                  to="#join-us"
+                  className="mx-auto self-start font-medium rounded-md bg-green-bg-card px-6 py-3 text-base text-white hover:bg-green-bg lg:mx-0 lg:text-lg"
+                >
+                  Request an invite
+                </Link>
+              </div>
             </div>
-          </div>
-          <div className={LANDING_MAIN_COL}>
-            <img
-              src={alliancePeople}
-              alt="Alliance members at a meetup"
-              className="mt-8 md:mt-12 w-full h-auto rounded-md"
-            />
+            <div className="min-w-0 flex-1">
+              <img
+                src={alliancePeople}
+                alt="Alliance members at a meetup"
+                className="w-full h-auto rounded-md"
+              />
+            </div>
           </div>
         </section>
 
-        <section className="w-full bg-white">
+        <section className={cn("w-full bg-grey-0", LANDING_SECTION_PY)}>
           <div className={LANDING_SECTION}>
             <div className="flex flex-col gap-4">
-              <p className="text-title-medium w-full text-black">How we work</p>
+              <p className={SECTION_TITLE_CLASS}>How we work</p>
               <p className={SUBTITLE_CLASS}>
                 Each member contributes a consistent amount of their time each
                 week, providing the reliability needed to plan precise,
                 effective actions.
               </p>
             </div>
-            <div className="flex flex-row divide-x divide-zinc-200">
+            <div className="flex flex-row divide-x divide-zinc-200 mb-8">
               <HowItWorksCard title="Members" className="w-1/2 pr-6 lg:pr-12">
                 Alliance members complete weekly tasks on our online platform.
                 Tasks take no more than 15 minutes per week, so members can
@@ -186,29 +207,30 @@ const PrelaunchLandingPage: React.FC = () => {
                 succeed.
               </HowItWorksCard>
             </div>
+            <AllianceIntroYouTubeEmbed />
           </div>
         </section>
 
-        <section className="w-full bg-white py-4">
-          <div className={LANDING_SECTION}>
-            {MEMBER_QUOTES.map((item, index) => (
-              <MemberQuoteCard
-                key={`${item.memberId}-${index}`}
-                memberId={item.memberId}
-                quote={item.quote}
-                profile={memberQuoteQueries[index]?.data ?? null}
-                isPending={memberQuoteQueries[index]?.isPending ?? true}
-              />
-            ))}
+        <section className={cn("w-full bg-green-bg", LANDING_SECTION_PY)}>
+          <div className={LANDING_QUOTES_COL}>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:gap-5">
+              {MEMBER_QUOTES.map((item, index) => (
+                <MemberQuoteCard
+                  key={`${item.memberId}-${index}`}
+                  memberId={item.memberId}
+                  quote={item.quote}
+                  profile={memberQuoteQueries[index]?.data ?? null}
+                  isPending={memberQuoteQueries[index]?.isPending ?? true}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="w-full">
+        <section className={cn("w-full bg-grey-0", LANDING_SECTION_PY)}>
           <div className={LANDING_SECTION}>
             <div className="flex flex-col gap-4">
-              <p className="text-title-medium w-full text-black">
-                Our priorities
-              </p>
+              <p className={SECTION_TITLE_CLASS}>Our priorities</p>
               <p className={SUBTITLE_CLASS}>
                 We focus on global crises that are interconnected, affect
                 billions of people, and are possible to solve with coordinated
@@ -219,29 +241,24 @@ const PrelaunchLandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="w-full bg-white">
-          <div className={LANDING_MAIN_COL}>
-            <AllianceIntroYouTubeEmbed />
-          </div>
-        </section>
-
-        <section className="w-full bg-white">
+        <section className={cn("w-full bg-white", LANDING_SECTION_PY)}>
           <div className={LANDING_SECTION}>
             <div className="flex flex-col gap-4">
-              <p className="text-title-medium w-full text-black">Our impact</p>
-              <p className={SUBTITLE_CLASS}>
-                At this stage, we are taking small-scale actions in order to
-                learn and build our processes.
-              </p>
-              <Link
-                to="/progress"
-                className="self-start flex flex-row items-center gap-2 bg-black hover:bg-zinc-800 text-white px-6 py-3 rounded-full hover:cursor-pointer"
-              >
-                <p className="whitespace-nowrap flex flex-row items-center gap-x-1 text-base lg:text-lg">
-                  More examples
+              <p className={SECTION_TITLE_CLASS}>Our impact</p>
+              <div className="flex flex-col gap-2">
+                <p className={SUBTITLE_CLASS}>
+                  At this stage, we are taking small-scale actions in order to
+                  learn and build our processes.
                 </p>
-                <ArrowRight className="w-4 h-4 " />
-              </Link>
+                <Link
+                  to="/progress"
+                  className="self-start flex flex-row items-center gap-1 font-medium text-link"
+                >
+                  <p className="whitespace-nowrap flex flex-row items-center gap-x-1 text-base lg:text-lg">
+                    See more
+                  </p>
+                </Link>
+              </div>
             </div>
             <div className="flex flex-col gap-4">
               <div className="columns-1 sm:columns-2 gap-2 *:break-inside-avoid *:mb-2">
@@ -262,13 +279,16 @@ const PrelaunchLandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="w-full">
-          <div className={LANDING_SECTION} id="join-us">
-            <div className="flex flex-col gap-4 p-8 sm:p-12 lg:p-16 bg-grey-0 rounded-md">
-              <p className="text-title-medium w-full text-black">Join us</p>
+        <section
+          id="join-us"
+          className={cn("w-full bg-grey-0", LANDING_SECTION_PY)}
+        >
+          <div className={LANDING_SECTION}>
+            <div className="flex flex-col gap-4">
+              <p className={SECTION_TITLE_CLASS}>Join us</p>
               <p className={SUBTITLE_CLASS}>
-                Membership is currently by invitation only. If you want to join,{" "}
-                send us an{" "}
+                Membership is currently by invitation only. If you&apos;d like
+                to join, please send us an{" "}
                 <a
                   href="mailto:contact@worldalliance.org"
                   className="text-link"
@@ -281,7 +301,7 @@ const PrelaunchLandingPage: React.FC = () => {
           </div>
         </section>
       </div>
-      <Footer className="bg-white" />
+      <Footer />
     </div>
   );
 };

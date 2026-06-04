@@ -6,37 +6,78 @@ interface FooterProps {
   className?: string;
 }
 
+const EXPLORE_LINKS = [
+  { label: "People", to: href("/people") },
+  { label: "Guide", to: href("/guide") },
+  { label: "Progress", to: href("/progress") },
+] as const;
+
+const LEGAL_LINKS = [
+  { label: "FAQ", to: href("/faq") },
+  { label: "Privacy", to: href("/privacypolicy") },
+  { label: "Terms", to: href("/terms") },
+] as const;
+
+function FooterLinkGroup({ children }: { children: React.ReactNode }) {
+  return <ul className="flex flex-col gap-2">{children}</ul>;
+}
+
+function FooterLink({ to, label }: { to: string; label: string }) {
+  return (
+    <li>
+      <Link
+        to={to}
+        className="text-sm text-white/85 transition-colors hover:text-white sm:text-base"
+      >
+        {label}
+      </Link>
+    </li>
+  );
+}
+
 const Footer: React.FC<FooterProps> = ({ className }) => {
   return (
-    <footer
-      className={cn("w-full text-zinc-900  py-5 md:py-12 px-5", className)}
-    >
-      <div className="container mx-auto flex flex-col">
-        <div className="flex flex-col items-center justify-center">
-          <div className="flex w-full flex-row flex-wrap justify-center gap-4 md:gap-6 text-sm sm:text-base">
-            <Link to={href("/people")} className="hover:underline">
-              People
-            </Link>
-            <Link to={href("/guide")} className="hover:underline">
-              Guide
-            </Link>
-            <Link to={href("/progress")} className="hover:underline">
-              Progress
-            </Link>
-            <Link to={href("/faq")} className="hover:underline">
-              FAQ
-            </Link>
-            <Link to={href("/privacypolicy")} className="hover:underline">
-              Privacy
-            </Link>
-            <Link to={href("/terms")} className="hover:underline">
-              Terms
-            </Link>
-            <a href="mailto:contact@worldalliance.org" className="">
-              Contact
-            </a>
+    <footer className={cn("w-full bg-navy text-white", className)}>
+      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-10 md:py-12 lg:px-16">
+        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
+          <div className="flex max-w-sm flex-col gap-3">
+            <p className="font-berlingske text-lg font-bold tracking-wide md:text-xl">
+              THE ALLIANCE
+            </p>
+            <p className="text-sm leading-relaxed text-white/70 sm:text-base">
+              A global group of people cooperating to improve the world.
+            </p>
           </div>
-          <p className="text-sm md:text-base mt-4 text-zinc-500">
+
+          <nav
+            className="flex flex-col gap-8 sm:flex-row sm:gap-12 md:gap-16"
+            aria-label="Footer"
+          >
+            <FooterLinkGroup>
+              {EXPLORE_LINKS.map((link) => (
+                <FooterLink key={link.to} {...link} />
+              ))}
+            </FooterLinkGroup>
+            <FooterLinkGroup>
+              {LEGAL_LINKS.map((link) => (
+                <FooterLink key={link.to} {...link} />
+              ))}
+            </FooterLinkGroup>
+            <FooterLinkGroup>
+              <li>
+                <a
+                  href="mailto:contact@worldalliance.org"
+                  className="text-sm text-white/85 transition-colors hover:text-white sm:text-base"
+                >
+                  contact@worldalliance.org
+                </a>
+              </li>
+            </FooterLinkGroup>
+          </nav>
+        </div>
+
+        <div className="mt-10 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+          <p className="text-sm text-white/40">
             &copy; {new Date().getFullYear()} Alliance Foundation
           </p>
         </div>

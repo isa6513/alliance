@@ -322,7 +322,7 @@ const PeoplePage: React.FC = () => {
           </div>
         </section>
       </div>
-      <Footer className="bg-white" />
+      <Footer />
     </div>
   );
 };

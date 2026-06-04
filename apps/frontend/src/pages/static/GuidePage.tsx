@@ -72,8 +72,7 @@ const GuidePage: React.FC = () => {
                 </GuideP>
                 <GuideP>
                   We are in an experimental, invite-only stage. Eventually, we
-                  hope to unite millions or hundreds of millions of people
-                  behind an{" "}
+                  hope to unite millions of people behind an{" "}
                   <GuideStrong>
                     expert-guided, democratically approved plan
                   </GuideStrong>{" "}
