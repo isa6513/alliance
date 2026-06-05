@@ -702,7 +702,11 @@ export class ForumService {
 
     await this.notifsService.sendUnreadContents(
       uniqueUsersToNotify
-        .filter((user) => user.id !== comment.authorId)
+        // parentAuthor is notified via createForumReplyNotif below; skip here to avoid a duplicate
+        .filter(
+          (user) =>
+            user.id !== comment.authorId && user.id !== parentAuthor?.id,
+        )
         .map((user) => {
           return {
             user,
