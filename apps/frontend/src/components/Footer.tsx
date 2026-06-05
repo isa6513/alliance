@@ -28,7 +28,7 @@ function FooterLink({ to, label }: { to: string; label: string }) {
     <li>
       <Link
         to={to}
-        className="text-sm text-white/85 transition-colors hover:text-white sm:text-base"
+        className="text-sm text-white/85 hover:underline sm:text-base"
       >
         {label}
       </Link>
@@ -68,7 +68,7 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
               <li>
                 <a
                   href="mailto:contact@worldalliance.org"
-                  className="text-sm text-white/85 transition-colors hover:text-white sm:text-base"
+                  className="text-sm text-white/85 hover:underline sm:text-base"
                 >
                   contact@worldalliance.org
                 </a>
