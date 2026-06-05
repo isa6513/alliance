@@ -106,8 +106,8 @@ const PeoplePage: React.FC = () => {
       description: "General Counsel at Encode AI",
     },
     {
-      name: "Paul Gambill",
-      description: "Climate entrepreneur, previous co-founder of Nori",
+      name: "Kim Stanley Robinson",
+      description: "Science fiction writer",
     },
     {
       name: "Oran Young",
