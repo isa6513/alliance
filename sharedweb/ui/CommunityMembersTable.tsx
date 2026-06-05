@@ -8,7 +8,8 @@ import {
   getDeadlineTimestampByUserId,
   sortMembersByNextTaskDue,
 } from "@alliance/shared/lib/communityMemberActions";
-import { useMemo, useState } from "react";
+import { useOnNextDeadline } from "@alliance/shared/lib/useOnNextDeadline";
+import { useCallback, useMemo, useState } from "react";
 import CommunityMemberTableRow from "./CommunityMemberTableRow";
 import DropdownSelect from "./DropdownSelect";
 
@@ -66,13 +67,19 @@ const CommunityMembersTable = ({
   const visibleActions = useMemo(() => {
     return actions.filter((action) => action.status !== "planned");
   }, [actions]);
+  const [now, setNow] = useState(() => Date.now());
+  useOnNextDeadline(
+    actions,
+    useCallback(() => setNow(Date.now()), []),
+  );
   const deadlineTimestampByUserId = useMemo(
     () =>
       getDeadlineTimestampByUserId({
         userActionRelations,
         actions,
+        now,
       }),
-    [userActionRelations, actions],
+    [userActionRelations, actions, now],
   );
 
   const filteredByContract = useMemo(() => {

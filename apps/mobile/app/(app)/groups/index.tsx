@@ -1,17 +1,4 @@
 import {
-  View,
-  TouchableOpacity,
-  RefreshControl,
-  ActivityIndicator,
-  FlatList,
-  ScrollView,
-  Alert,
-} from "react-native";
-import { launchImageLibraryAsync } from "expo-image-picker";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { router } from "expo-router";
-import { ChevronDown, Settings, X } from "lucide-react-native";
-import {
   actionsGetCommunityMemberInfo,
   communityGetCommunityInvites,
   communityGetMemberContactInfo,
@@ -19,7 +6,6 @@ import {
   communityUpdate,
   userGetOnetimeInvitesByCommunity,
 } from "@alliance/shared/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   CommunityDto,
   CommunityMemberContactInfoDto,
@@ -32,28 +18,43 @@ import {
 } from "@alliance/shared/lib/communityMemberActions";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { groupSettings } from "@alliance/shared/lib/copy";
-import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
+import { useOnNextDeadline } from "@alliance/shared/lib/useOnNextDeadline";
+import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import { LegendList } from "@legendapp/list";
-import Text, { FontWeight } from "../../../components/system/Text";
-import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
-import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
-import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
-import { SectionHeader } from "../../../components/system/SectionHeader";
-import { colors } from "../../../lib/style/colors";
-import UserActivityCard from "../../../components/UserActivityCard";
-import { GroupMemberRow } from "../../../components/GroupMemberRow";
-import ProfileImage from "../../../components/ProfileImage";
-import { useAuth } from "../../../lib/AuthContext";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { launchImageLibraryAsync } from "expo-image-picker";
+import { router, useFocusEffect } from "expo-router";
+import { ChevronDown, Settings, X } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import FormModal from "../../../components/forms/FormModal";
+import { GroupMemberRow } from "../../../components/GroupMemberRow";
+import { CreateGroupForm } from "../../../components/groups/CreateGroupForm";
+import KeyboardAwareScrollView from "../../../components/KeyboardAwareScrollView";
+import ProfileImage from "../../../components/ProfileImage";
 import Button, {
   ButtonColor,
   ButtonSize,
 } from "../../../components/system/Button";
-import { CreateGroupForm } from "../../../components/groups/CreateGroupForm";
-import KeyboardAwareScrollView from "../../../components/KeyboardAwareScrollView";
+import { ScreenWithLoading } from "../../../components/system/ScreenWithLoading";
+import { SectionHeader } from "../../../components/system/SectionHeader";
+import { SegmentedTabs } from "../../../components/system/SegmentedTabs";
+import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
+import Text, { FontWeight } from "../../../components/system/Text";
+import UserActivityCard from "../../../components/UserActivityCard";
+import { useAuth } from "../../../lib/AuthContext";
+import { colors } from "../../../lib/style/colors";
 
 type Tab = "activity" | "members" | "invites" | "settings";
 
@@ -451,6 +452,7 @@ function GroupMembersTab({
   community: CommunityDto;
   amLeader: boolean;
 }) {
+  const { user } = useAuth();
   const leaders = community.leaders;
   const leaderIds = useMemo(() => new Set(leaders.map((l) => l.id)), [leaders]);
   const nonLeaderMembers = useMemo(
@@ -458,18 +460,50 @@ function GroupMembersTab({
     [community.users, leaderIds],
   );
 
+  const queryClient = useQueryClient();
+
   const {
     data: memberInfo,
     isPending: memberInfoLoading,
     isSuccess: memberInfoLoaded,
+    refetch: refetchMemberInfo,
   } = useQuery({
-    queryKey: ["communityMemberInfo", community.id],
+    queryKey: ["communityMemberInfo", community.id, user?.id ?? null],
     queryFn: () =>
       actionsGetCommunityMemberInfo({
         path: { communityId: community.id },
       }).then((r) => r.data ?? null),
     enabled: true,
+    // "Next task due" depends on server request-time `now` (a passed deadline
+    // becomes "missed") and on member completion state, so a stale snapshot
+    // diverges from web. Keep this query fresh like the web app does (web uses
+    // the default staleTime of 0). The global mobile default is 5min.
+    staleTime: 0,
   });
+
+  // Refetch when the screen regains focus (the global mobile QueryClient sets
+  // refetchOnWindowFocus: false).
+  useFocusEffect(
+    useCallback(() => {
+      void refetchMemberInfo();
+    }, [refetchMemberInfo]),
+  );
+
+  // Once the soonest upcoming deadline passes, the server recomputes it as
+  // "missed". Bump local `now` so the deadline map rolls "next task due"
+  // forward immediately (offline-safe, like the web members table), and also
+  // invalidate to pull fresh server state — without the user leaving and
+  // returning.
+  const [now, setNow] = useState(() => Date.now());
+  useOnNextDeadline(
+    memberInfo?.actions,
+    useCallback(() => {
+      setNow(Date.now());
+      void queryClient.invalidateQueries({
+        queryKey: ["communityMemberInfo", community.id, user?.id ?? null],
+      });
+    }, [queryClient, community.id, user?.id]),
+  );
 
   const { data: memberContactInfoList } = useQuery({
     queryKey: ["communityMemberContactInfo", community.id],
@@ -506,8 +540,9 @@ function GroupMembersTab({
     return getDeadlineTimestampByUserId({
       userActionRelations,
       actions: memberInfo.actions,
+      now,
     });
-  }, [memberInfo]);
+  }, [memberInfo, now]);
 
   const sortedNonLeaderMembers = useMemo(() => {
     return sortMembersByNextTaskDue(

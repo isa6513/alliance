@@ -17,6 +17,7 @@ import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { groupSettings } from "@alliance/shared/lib/copy";
 import { Features } from "@alliance/shared/lib/features";
 import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
+import { useOnNextDeadline } from "@alliance/shared/lib/useOnNextDeadline";
 import { cn } from "@alliance/shared/styles/util";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
@@ -191,32 +192,18 @@ const CommunityPage = () => {
 
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!communityMemberInfo?.actions?.length || community?.id == null) {
-      return;
-    }
-
-    const now = Date.now();
-    const futureDeadlines = communityMemberInfo.actions
-      .map((a) => a.memberActionDeadline)
-      .filter((d): d is number => d != null && d > now);
-
-    if (futureDeadlines.length === 0) return;
-
-    const soonestDeadline = Math.min(...futureDeadlines);
-    const delayMs = soonestDeadline - now;
-
-    const timeoutId = window.setTimeout(() => {
+  useOnNextDeadline(
+    communityMemberInfo?.actions,
+    useCallback(() => {
+      if (community?.id == null) return;
       void queryClient.invalidateQueries({
         queryKey: ["communityMemberInfo", community.id, user?.id ?? null],
       });
       void queryClient.invalidateQueries({
         queryKey: ["communityCompletedActionsCount", community.id],
       });
-    }, delayMs);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [communityMemberInfo?.actions, community?.id, user?.id, queryClient]);
+    }, [queryClient, community?.id, user?.id]),
+  );
 
   useEffect(() => {
     if (!communityMemberInfo) {

@@ -22,8 +22,9 @@ export const DEADLINE_IN_CONSIDERATION: Record<
 export function getDeadlineTimestampByUserId(params: {
   userActionRelations: Record<number, UserActionRelationDetailDto[]>;
   actions: UserActionSummaryDto[];
+  now: number;
 }): Map<number, number> {
-  const { userActionRelations, actions } = params;
+  const { userActionRelations, actions, now } = params;
   const visibleActions = actions.filter((a) => a.status !== "planned");
   const visibleActionsById = new Map(
     visibleActions.map((action) => [action.id, action]),
@@ -37,7 +38,8 @@ export function getDeadlineTimestampByUserId(params: {
         if (
           !action ||
           !DEADLINE_IN_CONSIDERATION[relation.status] ||
-          action.memberActionDeadline === null
+          action.memberActionDeadline === null ||
+          action.memberActionDeadline < now
         ) {
           continue;
         }
