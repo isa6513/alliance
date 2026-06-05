@@ -118,16 +118,14 @@ function MemberQuoteCard({
 function HowItWorksCard({
   title,
   children,
-  className,
 }: {
   title: string;
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col gap-2 rounded-md", className)}>
-      <p className="text-xl font-medium text-black lg:text-2xl">{title}</p>
-      <p className="text-base text-zinc-900 lg:text-xl">{children}</p>
+    <div className="flex h-full flex-col gap-1 rounded-md bg-white p-4 sm:p-6">
+      <p className="text-xl font-semibold text-green-bg lg:text-2xl">{title}</p>
+      <p className="text-base text-zinc-800 lg:text-lg">{children}</p>
     </div>
   );
 }
@@ -189,13 +187,13 @@ const PrelaunchLandingPage: React.FC = () => {
                 effective actions.
               </p>
             </div>
-            <div className="flex flex-row divide-x divide-zinc-200 mb-8">
-              <HowItWorksCard title="Members" className="w-1/2 pr-6 lg:pr-12">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              <HowItWorksCard title="Members">
                 Alliance members complete weekly tasks on our online platform.
                 Tasks take no more than 15 minutes per week, so members can
                 easily fit them into their weekly routines.
               </HowItWorksCard>
-              <HowItWorksCard title="Office" className="w-1/2 pl-6 lg:pl-12">
+              <HowItWorksCard title="Office">
                 Alliance staff design tasks in order to achieve a measurable
                 impact. Since the office knows how many members will
                 participate, it can predict how likely each action is to
@@ -208,7 +206,7 @@ const PrelaunchLandingPage: React.FC = () => {
 
         <section className={cn("w-full bg-green-bg", LANDING_SECTION_PY)}>
           <div className={LANDING_QUOTES_COL}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3 lg:gap-5">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {MEMBER_QUOTES.map((item, index) => (
                 <MemberQuoteCard
                   key={`${item.memberId}-${index}`}

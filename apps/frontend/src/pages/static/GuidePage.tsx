@@ -45,7 +45,7 @@ const GuidePage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
 
-      <div className="mx-6 md:mx-12 pt-8 md:pt-24 pb-56">
+      <div className="mx-4 md:mx-12 pt-8 md:pt-24 pb-56">
         <div className="flex flex-row md:gap-8 lg:gap-12 justify-center">
           <TableOfContents tocSections={tocSections} />
 
