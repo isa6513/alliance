@@ -226,7 +226,10 @@ const PeoplePage: React.FC = () => {
           </div>
         </section>
 
-        <section className={cn("w-full bg-green-bg", LANDING_SECTION_PY)}>
+        <section
+          className={cn("w-full bg-green-bg", LANDING_SECTION_PY)}
+          id="expert-group"
+        >
           <div className={LANDING_WIDE_SECTION}>
             <div className="flex flex-col gap-4">
               <p className={`${SECTION_TITLE_CLASS} text-white`}>
