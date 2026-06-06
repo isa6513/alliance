@@ -31,6 +31,11 @@ const ActionTaskPanel = ({
       onOptOutAction,
     });
 
+  // Contract signing actions cannot be withdrawn from.
+  const onAbandonAction = action.isContractSigningAction
+    ? undefined
+    : handleAbandonAction;
+
   const handleFormStarted = useCallback(() => {
     captureEvent(AnalyticsEvent.FormStarted, {
       actionId: action.id,
@@ -47,7 +52,7 @@ const ActionTaskPanel = ({
         scrollToEnd={scrollToEnd}
         onCompleteAction={null}
         onFormStarted={handleFormStarted}
-        onAbandonAction={handleAbandonAction}
+        onAbandonAction={onAbandonAction}
         actionId={action.id}
         onSubmitSuccess={onSubmitSuccess}
         disabled={true}
@@ -64,7 +69,7 @@ const ActionTaskPanel = ({
         scrollToEnd={scrollToEnd}
         onCompleteAction={handleCompleteWithTracking}
         onFormStarted={handleFormStarted}
-        onAbandonAction={handleAbandonAction}
+        onAbandonAction={onAbandonAction}
         actionId={action.id}
         onSubmitSuccess={onSubmitSuccess}
         disabled={disabled}

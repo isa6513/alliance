@@ -25,7 +25,7 @@ interface ActionTaskPanelFormProps {
   taskFormId: number;
   onCompleteAction: ((sendComplete: boolean) => void) | null;
   onFormStarted: () => void;
-  onAbandonAction: (
+  onAbandonAction?: (
     outOfTime: boolean,
     reason: string,
     partialFormData: SubmitFormDto,

@@ -1255,13 +1255,15 @@ const FormRenderer = ({
                   </>
                 )}
               </Button>
-              <Button
-                onPress={() => setWithdrawOpen(true)}
-                color={ButtonColor.Outline}
-                size={ButtonSize.Medium}
-              >
-                <Ellipsis size={15} />
-              </Button>
+              {onAbandonAction && (
+                <Button
+                  onPress={() => setWithdrawOpen(true)}
+                  color={ButtonColor.Outline}
+                  size={ButtonSize.Medium}
+                >
+                  <Ellipsis size={15} />
+                </Button>
+              )}
             </View>
           </View>
           {Object.keys(fieldErrors).length > 0 && (

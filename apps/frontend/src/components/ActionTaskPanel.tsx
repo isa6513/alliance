@@ -59,6 +59,11 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       guestMode,
     });
 
+  // Contract signing actions cannot be withdrawn from.
+  const onAbandonAction = action.isContractSigningAction
+    ? undefined
+    : handleAbandonAction;
+
   const errorMessageNode = useMemo(() => {
     if (!actionError) {
       return null;
@@ -76,7 +81,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         taskFormId={action.taskFormId}
         onCompleteAction={null}
         onFormStarted={handleFormStarted}
-        onAbandonAction={handleAbandonAction}
+        onAbandonAction={onAbandonAction}
         card={card}
         actionId={action.id}
         disabled={true}
@@ -96,7 +101,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         taskFormId={action.taskFormId}
         onCompleteAction={canSubmit ? handleCompleteWithTracking : null}
         onFormStarted={handleFormStarted}
-        onAbandonAction={handleAbandonAction}
+        onAbandonAction={onAbandonAction}
         card={card}
         actionId={action.id}
         redirectOnComplete={redirectOnComplete}
@@ -136,7 +141,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
             taskFormId={action.taskFormId}
             onCompleteAction={null}
             onFormStarted={handleFormStarted}
-            onAbandonAction={handleAbandonAction}
+            onAbandonAction={onAbandonAction}
             card={card}
             actionId={action.id}
           />

@@ -1134,6 +1134,16 @@ export class ActionsService {
     } = options;
     const action = await this.findOneOrFail({ id: actionId, userId });
 
+    if (
+      type === ActionActivityType.USER_WONT_COMPLETE &&
+      action.isContractSigningAction &&
+      !adminCreated
+    ) {
+      throw new BadRequestException(
+        'Contract signing actions cannot be withdrawn from',
+      );
+    }
+
     if (type === ActionActivityType.USER_COMPLETED && !adminCreated) {
       await this.ensureUserEligibleForAction(action, userId);
     }
