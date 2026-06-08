@@ -2396,15 +2396,31 @@ export class ActionsService {
 
   async generateNotifsForActionUpdate(actionUpdate: ActionUpdate) {
     let users: User[] = [];
-    if (actionUpdate.notifyType === ActionUpdateNotifyType.ActionCohort) {
-      users = await this.userService.findAll();
-    } else if (actionUpdate.notifyType === ActionUpdateNotifyType.Tag) {
-      if (!actionUpdate.tag) {
-        throw new BadRequestException('Tag is required');
+    switch (actionUpdate.notifyType) {
+      case ActionUpdateNotifyType.None:
+        return;
+      case ActionUpdateNotifyType.ActionCohort: {
+        const userIds = await this.findUsersJoinedForActionById(
+          actionUpdate.actionId,
+        );
+        users = await this.userService.findByIds(userIds);
+        break;
       }
-      users = (await this.userService.findTagOrFail(actionUpdate.tag.id)).users;
-    } else if (actionUpdate.notifyType === ActionUpdateNotifyType.AllMembers) {
-      users = await this.userService.findAllUsers();
+      case ActionUpdateNotifyType.Tag: {
+        if (!actionUpdate.tag) {
+          throw new BadRequestException('Tag is required');
+        }
+        users = (await this.userService.findTagOrFail(actionUpdate.tag.id))
+          .users;
+        break;
+      }
+      case ActionUpdateNotifyType.AllMembers:
+        users = await this.userService.findAllUsers();
+        break;
+      default:
+        throw new Error(
+          `unknown notifyType: ${actionUpdate.notifyType satisfies never}`,
+        );
     }
 
     for (const user of users) {
