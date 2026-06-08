@@ -1,4 +1,5 @@
 import { actionsHomeFeed } from "@alliance/shared/client";
+import type { QueryClient } from "@tanstack/react-query";
 import { buildFeedPage, useFeedQuery } from "./feedHelpers";
 
 export { getForumComment } from "./feedHelpers";
@@ -9,6 +10,12 @@ export type UseHomeFeedProps = {
 };
 
 const QUERY_KEY_ROOT = "useHomeFeed";
+
+// Surface a just-completed action / follow-up in the user's own feed.
+// resetQueries (not invalidate) avoids refetching every loaded page of the
+// paginated feed.
+export const resetHomeFeed = (queryClient: QueryClient) =>
+  queryClient.resetQueries({ queryKey: [QUERY_KEY_ROOT] });
 
 const useHomeFeed = (props: UseHomeFeedProps = {}) => {
   const limit = props.limit ?? 20;

@@ -4,22 +4,23 @@ import {
   getNextEvent,
   LargeActionCardPropsShared,
 } from "@alliance/shared/lib/largeActionCard";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
+import { router } from "expo-router";
+import { ArrowRight } from "lucide-react-native";
 import { ActionCompletedBarWithInfo } from "./ActionCompletedBarWithInfo";
+import ActionTaskPanel from "./ActionTaskPanel";
 import Button, { ButtonColor } from "./system/Button";
 import Card from "./system/Card";
 import Text, { FontFamily, FontWeight } from "./system/Text";
 import TaskTimeInfo from "./TaskTimeInfo";
-import { router } from "expo-router";
-import { ArrowRight } from "lucide-react-native";
-import ActionTaskPanel from "./ActionTaskPanel";
-import useActivities, {
-  ActivityList,
-} from "@alliance/shared/lib/useActivities";
 
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;
   onSubmitSuccess: () => void;
+  onCompleteAction?: () => void;
 }
 
 function DismissBanner({
@@ -54,6 +55,7 @@ export default function LargeActionCard({
   scrollPageTo,
   scrollToEnd,
   onSubmitSuccess,
+  onCompleteAction = onUpdateActionState,
 }: LargeActionCardProps) {
   const nextEvent = getNextEvent(action);
   const { activities: friendActivities } = useActivities({
@@ -104,7 +106,7 @@ export default function LargeActionCard({
       <View className="mt-6 border-t border-zinc-200 pt-6">
         <ActionTaskPanel
           action={action}
-          onCompleteAction={onUpdateActionState}
+          onCompleteAction={onCompleteAction}
           onOptOutAction={onUpdateActionState}
           scrollPageTo={scrollPageTo}
           scrollToEnd={scrollToEnd}

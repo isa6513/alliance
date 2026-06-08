@@ -1,47 +1,48 @@
-import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import type { AggregateViewSchema } from "@alliance/common/forms/form-schema";
 import { ActionDto, FollowUpForm } from "@alliance/shared/client";
-import { Link, href } from "react-router";
-import BasicErrorMessage from "../../components/BasicErrorMessage";
-import GlobalFeed from "../../components/GlobalFeed";
-import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import TwoColumnLayout from "../../components/TwoColumnLayout";
-import { useAuth } from "../../lib/AuthContext";
-import { useCIDFromParams } from "../../lib/utils";
-import LargeActionCard from "./LargeActionCard";
-import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
-import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
-import useGlobalFeed from "@alliance/shared/lib/useGlobalFeed";
-import { useMediaQuery } from "../../lib/useMediaQuery";
 import {
   ActionWithAwayStatus,
   homePagePriorityComparator,
   showActionInSidebarList,
 } from "@alliance/shared/lib/actionUtils";
 import {
-  compareFollowUpFormsByStartDateDesc,
-  useHomePageActions,
-} from "@alliance/shared/lib/homePage";
-import {
   noTasksContractSuspended,
   noTasksToDoRightNow,
 } from "@alliance/shared/lib/copy";
-import FollowUpFormPanel from "../../components/FollowUpFormPanel";
-import { useTaskActionsData } from "../../lib/useTaskActionsData";
-import HomeUpdatesRow from "../../components/HomeUpdatesRow";
-import SeeAll from "../../components/SeeAll";
-import HomeFeed from "../../components/HomeFeed";
-import type { AggregateViewSchema } from "@alliance/common/forms/form-schema";
-import { runAsync } from "@alliance/shared/lib/utils";
+import {
+  compareFollowUpFormsByStartDateDesc,
+  useHomePageActions,
+} from "@alliance/shared/lib/homePage";
+import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
 import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
+import useGlobalFeed from "@alliance/shared/lib/useGlobalFeed";
+import { resetHomeFeed } from "@alliance/shared/lib/useHomeFeed";
+import { runAsync } from "@alliance/shared/lib/utils";
+import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
+import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
+import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Link, href } from "react-router";
+import BasicErrorMessage from "../../components/BasicErrorMessage";
+import FollowUpFormPanel from "../../components/FollowUpFormPanel";
+import GlobalFeed from "../../components/GlobalFeed";
+import HomeFeed from "../../components/HomeFeed";
+import HomeUpdatesRow from "../../components/HomeUpdatesRow";
+import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
+import SeeAll from "../../components/SeeAll";
+import TwoColumnLayout from "../../components/TwoColumnLayout";
+import { useAuth } from "../../lib/AuthContext";
 import {
   fetchTaskFormProgressViewsByFormId,
   mapFormViewsToActionIds,
   sidebarProgressActionCandidates,
 } from "../../lib/fetchTaskFormProgressViews";
+import { useMediaQuery } from "../../lib/useMediaQuery";
+import { useTaskActionsData } from "../../lib/useTaskActionsData";
+import { useCIDFromParams } from "../../lib/utils";
+import LargeActionCard from "./LargeActionCard";
 import {
   TaskNavigatorCompletedRow,
   TaskNavigatorTodoActionRow,
@@ -462,6 +463,7 @@ const HomePage = () => {
                     ),
                 );
                 queryClient.invalidateQueries({ queryKey: ["actions"] });
+                resetHomeFeed(queryClient);
               }}
               onUpdateActionState={() => {
                 queryClient.invalidateQueries({ queryKey: ["actions"] });
@@ -487,6 +489,7 @@ const HomePage = () => {
                   queryClient.invalidateQueries({
                     queryKey: ["actions"],
                   });
+                  resetHomeFeed(queryClient);
                 }}
               />
             </div>

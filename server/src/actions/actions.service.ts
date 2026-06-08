@@ -1951,8 +1951,8 @@ export class ActionsService {
     }
 
     const allUserIds = [
-      ...new Set([...friendIds, ...communityMemberIds]),
-    ].filter((id) => id !== userId);
+      ...new Set([...friendIds, ...communityMemberIds, userId]),
+    ];
 
     const forumComments = await this.forumService.findForumCommentsForFeed({
       userId,

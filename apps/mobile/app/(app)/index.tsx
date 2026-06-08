@@ -19,7 +19,10 @@ import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
 import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
-import useHomeFeed, { getForumComment } from "@alliance/shared/lib/useHomeFeed";
+import useHomeFeed, {
+  getForumComment,
+  resetHomeFeed,
+} from "@alliance/shared/lib/useHomeFeed";
 import { LegendList } from "@legendapp/list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -360,6 +363,7 @@ export default function HomeScreen() {
               scrollToEnd={scrollToEnd}
               onSubmitted={() => {
                 queryClient.invalidateQueries({ queryKey: ["actions"] });
+                resetHomeFeed(queryClient);
               }}
             />
           </View>
@@ -377,6 +381,10 @@ export default function HomeScreen() {
             dismissProps={dismissProps}
             onUpdateActionState={() => {
               refetch();
+            }}
+            onCompleteAction={() => {
+              refetch();
+              resetHomeFeed(queryClient);
             }}
             scrollPageTo={scrollPageTo}
             scrollToEnd={scrollToEnd}
