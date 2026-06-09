@@ -1,7 +1,7 @@
 export const GROUP_MAX_CAPACITY_DEFAULT = 10;
 
 /** Alliance-wide member count target shown on invites and growth messaging. */
-export const MEMBER_GOAL = 200;
+export const MEMBER_GOAL = 250;
 
 export const NAV_BAR_ICON_HEIGHT = 22;
 export const NAV_BAR_CONTAINER_HEIGHT = 12;
