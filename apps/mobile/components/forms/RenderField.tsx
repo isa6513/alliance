@@ -360,6 +360,7 @@ export function RenderField({
             error={hasError}
             onChange={(next) => onChange?.(next)}
             label={field.label}
+            required={field.required}
           />
           {renderValidationMessage(errorMessage)}
         </View>
