@@ -23,7 +23,7 @@ import useHomeFeed, {
   getForumComment,
   resetHomeFeed,
 } from "@alliance/shared/lib/useHomeFeed";
-import { LegendList } from "@legendapp/list";
+import { LegendList, type LegendListRef } from "@legendapp/list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Check } from "lucide-react-native";
@@ -190,6 +190,7 @@ export default function HomeScreen() {
   const currentItem = allItems[safeIndex] ?? null;
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
+  const legendListRef = useRef<LegendListRef>(null);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -206,13 +207,18 @@ export default function HomeScreen() {
   }, [refetch, refetchGeneralUpdates, refetchAwayRanges, queryClient]);
 
   const scrollPageTo = useCallback((y: number, animated = true) => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({
-        y,
-        animated,
-      });
-    }
+    scrollViewRef.current?.scrollTo({ y, animated });
   }, []);
+
+  const scrollToTop = useCallback(() => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    legendListRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, []);
+
+  const handleOverlayFadeIn = useCallback(() => {
+    refetch();
+    scrollToTop();
+  }, [refetch, scrollToTop]);
 
   const scrollToEnd = useCallback((animated = true) => {
     scrollViewRef.current?.scrollToEnd({ animated });
@@ -385,6 +391,7 @@ export default function HomeScreen() {
             onCompleteAction={() => {
               refetch();
               resetHomeFeed(queryClient);
+              scrollToTop();
             }}
             scrollPageTo={scrollPageTo}
             scrollToEnd={scrollToEnd}
@@ -403,6 +410,7 @@ export default function HomeScreen() {
     refetch,
     scrollPageTo,
     scrollToEnd,
+    scrollToTop,
     handleSubmitSuccess,
   ]);
 
@@ -447,6 +455,7 @@ export default function HomeScreen() {
       {header}
       {showHomeFeedList ? (
         <LegendList
+          ref={legendListRef}
           className="flex-1"
           data={homeFeedItems}
           keyExtractor={(item) =>
@@ -499,7 +508,7 @@ export default function HomeScreen() {
       )}
       <SuccessOverlay
         visible={showSuccess}
-        onFadeInComplete={refetch}
+        onFadeInComplete={handleOverlayFadeIn}
         onComplete={handleSuccessComplete}
       />
     </View>
