@@ -48,7 +48,7 @@ export const FEATURED_IMPACT_ACTIONS: readonly FeaturedImpactAction[] = [
   {
     actionId: 95,
     emphasis:
-      "We asked a small electronics company to open-source their software to prevent hardware bricking",
+      "We helped a small electronics company replace two components with environmentally friendly alternatives",
     rest: "in exchange for feedback on their product.",
   },
   {
