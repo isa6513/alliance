@@ -158,6 +158,10 @@ import {
   ReminderGroup,
   ReminderGroupTimingMode,
 } from './entities/reminder-group.entity';
+import {
+  ACTIVITY_TYPE_TO_PILL_STATUS,
+  resolveUserActionPillStatus,
+} from './user-action-pill-status';
 
 type SuspendPlanContext = {
   orderedSuites: Array<{ suiteId: number; pastDate: Date | null }>;
@@ -2862,6 +2866,10 @@ export class ActionsService {
         number,
         Omit<UserActionRelationDetail, 'latestActivityAt'> & {
           latestActivityAt?: Date;
+          // Transient resolver inputs; not serialized (see final mapping below).
+          isJoined: boolean;
+          isAway: boolean;
+          activityStatus: UserActionRelationPillStatus | null;
         }
       >
     >();
@@ -2877,21 +2885,19 @@ export class ActionsService {
           declineReason: undefined,
           isMoral: undefined,
           outOfTime: undefined,
+          isJoined: false,
+          isAway: false,
+          activityStatus: null,
         });
       }
       return relationByUserThenAction.get(userId)!.get(actionId)!;
     }
 
-    // Initialize defaults if no action was taken
+    // Status is resolved in one pass below, not in this gather loop.
+    const actionById = new Map(actions.map((action) => [action.id, action]));
     for (const action of actions) {
       for (const userId of (await joinedUsersP)[action.id]) {
-        const detail = getDetail({ userId, actionId: action.id });
-        detail.status = action.optional
-          ? UserActionRelationPillStatus.OptionalTask
-          : action.memberActionPhase?.deadline &&
-              action.memberActionPhase.deadline < now
-            ? UserActionRelationPillStatus.MissedDeadline
-            : UserActionRelationPillStatus.Todo;
+        getDetail({ userId, actionId: action.id }).isJoined = true;
       }
       for (const userId of await userIdsP) {
         const detail = getDetail({ userId, actionId: action.id });
@@ -2906,28 +2912,11 @@ export class ActionsService {
             cohortExpression: action.cohortExpression,
           }))
         ) {
-          detail.status = UserActionRelationPillStatus.Away;
+          detail.isAway = true;
         }
       }
     }
 
-    function typeToStatus(
-      activityType: ActionActivityType,
-    ): UserActionRelationPillStatus | null {
-      switch (activityType) {
-        case ActionActivityType.USER_COMPLETED:
-          return UserActionRelationPillStatus.Completed;
-        case ActionActivityType.USER_WONT_COMPLETE:
-          return UserActionRelationPillStatus.WontComplete;
-        case ActionActivityType.USER_DISMISSED:
-        case ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM:
-          return null;
-        default:
-          throw new Error(
-            `Invalid activity type: ${activityType satisfies never}`,
-          );
-      }
-    }
     for (const activity of await activitiesP) {
       const detail = getDetail({
         userId: activity.userId,
@@ -2939,16 +2928,31 @@ export class ActionsService {
       ) {
         detail.latestActivityAt = activity.createdAt;
         detail.latestActivityType = activity.type;
-        const status = typeToStatus(activity.type);
-        if (status) {
-          detail.status = status;
-        }
+        // activitiesP is createdAt ASC; fold so the latest status-bearing
+        // activity wins.
+        detail.activityStatus =
+          ACTIVITY_TYPE_TO_PILL_STATUS[activity.type] ?? detail.activityStatus;
         // Capture withdrawal reason details for wont_complete and declined activities
         if (activity.type === ActionActivityType.USER_WONT_COMPLETE) {
           detail.declineReason = activity.declineReason;
           detail.isMoral = activity.isMoral;
           detail.outOfTime = activity.outOfTime;
         }
+      }
+    }
+
+    for (const actionMap of relationByUserThenAction.values()) {
+      for (const [actionId, detail] of actionMap) {
+        const action = actionById.get(actionId)!;
+        detail.status = resolveUserActionPillStatus({
+          isJoined: detail.isJoined,
+          isAway: detail.isAway,
+          optional: action.optional,
+          deadlinePassed:
+            !!action.memberActionPhase?.deadline &&
+            action.memberActionPhase.deadline < now,
+          activityStatus: detail.activityStatus,
+        });
       }
     }
 
