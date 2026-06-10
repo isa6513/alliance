@@ -222,9 +222,7 @@ export function RenderDisplayBlockMobile({
     case "quote":
       return (
         <View className="bg-zinc-100 p-4 rounded-lg">
-          <Text className="text-base text-zinc-800 leading-6">
-            {block.text}
-          </Text>
+          <AppMarkdownWrapper>{block.text}</AppMarkdownWrapper>
         </View>
       );
     case "image":

@@ -146,6 +146,17 @@ select {
     sans-serif;
 }
 
+/*
+ * Unlayered override so `font-mono` beats the global `* { font-family }` rule
+ * above (unlayered rules win over Tailwind's layered utilities in v4), matching
+ * the `.font-serif` / `.font-sans` workarounds.
+ */
+.font-mono {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
 .font-title {
   @apply font-serif font-semibold;
 }

@@ -184,17 +184,7 @@ html {
   scrollbar-color: #bbb transparent;
 }
 
-h1,
-h2,
-h3,
-p,
-ol,
-ul,
-span,
-label,
-input,
-div,
-button {
+* {
   font-family: "Source Sans 3", sans-serif;
 }
 
@@ -219,7 +209,22 @@ img {
 }
 
 .font-sans {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+/*
+ * Unlayered override so `font-mono` beats the global `* { font-family }` rule
+ * (unlayered rules win over Tailwind's layered utilities in v4), matching the
+ * `.font-serif` / `.font-sans` workarounds.
+ */
+.font-mono {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 
 .font-sabon {
@@ -271,13 +276,13 @@ img {
   opacity: 0.2;
 }
 
-input[type=number]:disabled::-webkit-inner-spin-button,
-input[type=number]:disabled::-webkit-outer-spin-button {
+input[type="number"]:disabled::-webkit-inner-spin-button,
+input[type="number"]:disabled::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type=number]:disabled {
+input[type="number"]:disabled {
   -moz-appearance: textfield;
 }
 

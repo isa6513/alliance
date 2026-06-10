@@ -1,6 +1,6 @@
+import { cn } from "@alliance/shared/styles/util";
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { cn } from "@alliance/shared/styles/util";
 
 interface FormMarkdownWrapper {
   markdownContent: string;
@@ -58,6 +58,27 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
             {...props}
             target="_blank"
             rel="noreferrer"
+          />
+        ),
+        code: ({ node: _node, className: _className, ...props }) => (
+          <code
+            className={cn(
+              "rounded bg-zinc-100 px-1 py-0.5 font-mono text-[0.9em]",
+              inlineClass,
+            )}
+            {...props}
+          />
+        ),
+        pre: ({ node: _node, ...props }) => (
+          <pre
+            className="my-4 overflow-x-auto rounded bg-zinc-100 p-3 font-mono text-[0.85em] [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-[1em]"
+            {...props}
+          />
+        ),
+        blockquote: ({ node: _node, ...props }) => (
+          <blockquote
+            className="border-l-2 border-zinc-300 pl-4 my-4 text-zinc-800"
+            {...props}
           />
         ),
       }}
