@@ -397,9 +397,10 @@ export function RenderField({
                     )}
                   </View>
                   <Text
-                    className={
-                      "text-base " + (hasError ? "text-red-600" : "text-black")
-                    }
+                    className={cn(
+                      "flex-1 text-base",
+                      hasError ? "text-red-600" : "text-black",
+                    )}
                   >
                     {option.label}
                   </Text>
@@ -504,7 +505,12 @@ export function RenderField({
                       <Check size={14} color="#fff" strokeWidth={3} />
                     )}
                   </View>
-                  <Text className={hasError ? "text-red-600" : "text-zinc-700"}>
+                  <Text
+                    className={cn(
+                      "flex-1",
+                      hasError ? "text-red-600" : "text-zinc-700",
+                    )}
+                  >
                     {option.label}
                   </Text>
                 </TouchableOpacity>

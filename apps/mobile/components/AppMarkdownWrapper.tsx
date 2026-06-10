@@ -580,6 +580,9 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
         color: "#18181b",
       },
       paragraph: {},
+      textgroup: {
+        flexShrink: 1,
+      },
       strong: {
         fontWeight: "600" as const,
       },
