@@ -117,19 +117,6 @@ export enum FilterMode {
   Past = "Past",
 }
 
-export const getPastEvents = (action: ActionDto) => {
-  return action.events.filter((event) => new Date(event.date) <= new Date());
-};
-
-export const getLatestEvent = (action: ActionDto) => {
-  const pastEvents = getPastEvents(action);
-  return pastEvents.length > 0
-    ? pastEvents.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-      )[0]
-    : null;
-};
-
 export function getActionEventAt(
   action: ActionDto,
   date: Date,
@@ -150,7 +137,7 @@ export enum TaskAwayStatus {
   NOT_AWAY = "not_away",
 }
 
-export function getAwayStatus(
+export function getAwayStatusAt(
   action: ActionDto,
   awayRanges: UserAwayRangeDto[],
   date: Date,
@@ -217,9 +204,9 @@ export function getDeadlineTimestamp(
 
 export function canCompleteAction(action: ActionDto) {
   return (
-    getPastEvents(action).some(
-      (event) => event.newStatus === "member_action",
-    ) &&
+    action.events
+      .filter((event) => new Date(event.date) <= new Date())
+      .some((event) => event.newStatus === "member_action") &&
     action.userRelation !== "completed" &&
     action.userRelation !== "declined" &&
     (action.canParticipate || action.publicOnly)

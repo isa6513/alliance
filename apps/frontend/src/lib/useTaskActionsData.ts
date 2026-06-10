@@ -1,3 +1,4 @@
+import type { GeneralUpdateDto } from "@alliance/shared/client";
 import {
   ActionDto,
   actionsDismissAction,
@@ -5,11 +6,10 @@ import {
   actionsUnreadGeneralUpdates,
   userGetAwayRanges,
 } from "@alliance/shared/client";
-import type { GeneralUpdateDto } from "@alliance/shared/client";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import {
   ActionWithAwayStatus,
-  getAwayStatus,
+  getAwayStatusAt,
 } from "@alliance/shared/lib/actionUtils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
@@ -63,7 +63,7 @@ export function useTaskActionsData(options?: {
     const now = new Date();
     return (actionsData ?? []).map((action) => ({
       ...action,
-      awayStatus: getAwayStatus(action, awayRanges, now),
+      awayStatus: getAwayStatusAt(action, awayRanges, now),
     }));
   }, [actionsData, awayRanges, loading, actionsError, awayRangesError]);
 

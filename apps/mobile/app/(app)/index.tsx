@@ -12,7 +12,7 @@ import {
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import {
   ActionWithAwayStatus,
-  getAwayStatus,
+  getAwayStatusAt,
   homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
@@ -149,7 +149,7 @@ export default function HomeScreen() {
     if (!actions || !awayRanges) return [];
     return actions.map((action) => ({
       ...action,
-      awayStatus: getAwayStatus(action, awayRanges, new Date()),
+      awayStatus: getAwayStatusAt(action, awayRanges, new Date()),
     }));
   }, [actions, awayRanges]);
 

@@ -1,24 +1,24 @@
-import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
-import { View, Pressable, Animated, useWindowDimensions } from "react-native";
-import { usePathname, useRouter } from "expo-router";
-import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
-import { colors } from "../lib/style/colors";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect, useMemo, useRef } from "react";
-import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
-import {
-  getAwayStatus,
-  showActionInSidebarList,
-} from "@alliance/shared/lib/actionUtils";
-import { useQuery } from "@tanstack/react-query";
 import {
   notifsGetUnreadCount,
   userGetAwayRanges,
 } from "@alliance/shared/client";
-import { useMessagingUnread } from "../lib/messages";
-import { isPathActive } from "../lib/isPathActive";
-import Text, { FontWeight } from "./system/Text";
+import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
+import {
+  getAwayStatusAt,
+  showActionInSidebarList,
+} from "@alliance/shared/lib/actionUtils";
 import { cn } from "@alliance/shared/styles/util";
+import { useQuery } from "@tanstack/react-query";
+import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
+import { usePathname, useRouter } from "expo-router";
+import { Bell, ListTodo, MessageSquare, Users } from "lucide-react-native";
+import { useEffect, useMemo, useRef } from "react";
+import { Animated, Pressable, useWindowDimensions, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { isPathActive } from "../lib/isPathActive";
+import { useMessagingUnread } from "../lib/messages";
+import { colors } from "../lib/style/colors";
+import Text, { FontWeight } from "./system/Text";
 
 const tabs = [
   {
@@ -132,7 +132,7 @@ export default function TabBar() {
     return actions.filter((action) =>
       showActionInSidebarList({
         ...action,
-        awayStatus: getAwayStatus(action, awayRanges, now),
+        awayStatus: getAwayStatusAt(action, awayRanges, now),
       }),
     ).length;
   }, [actions, awayRanges]);
