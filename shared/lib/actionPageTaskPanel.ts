@@ -1,6 +1,6 @@
 import { ActionDto, UserActionRelation } from "../client/types.gen";
 import { CardStyle } from "../styles/card";
-import { getLatestEvent } from "./actionUtils";
+import { deadlineHasPassed } from "./actionUtils";
 
 export enum ActionPageTaskPanelState {
   PublicOnly = "public_only",
@@ -31,7 +31,8 @@ const stateIsDisabled = {
   [ActionPageTaskPanelState.NotAuthenticated]:
     ActionPageTaskPanelEnabled.Disabled,
   [ActionPageTaskPanelState.GuestRef]: ActionPageTaskPanelEnabled.Enabled,
-  [ActionPageTaskPanelState.GuestCompleted]: ActionPageTaskPanelEnabled.Disabled,
+  [ActionPageTaskPanelState.GuestCompleted]:
+    ActionPageTaskPanelEnabled.Disabled,
   [ActionPageTaskPanelState.NotAssigned]: ActionPageTaskPanelEnabled.Disabled,
   [ActionPageTaskPanelState.Completed]: ActionPageTaskPanelEnabled.Disabled,
   [ActionPageTaskPanelState.Declined]: ActionPageTaskPanelEnabled.Disabled,
@@ -101,6 +102,7 @@ export function getActionPageTaskPanelState(params: {
   isAuthenticated: boolean;
   hasRefCode: boolean;
   hasGuestResponse: boolean;
+  now: Date;
 }): ActionPageTaskPanelState {
   const {
     action,
@@ -109,6 +111,7 @@ export function getActionPageTaskPanelState(params: {
     isAuthenticated,
     hasRefCode,
     hasGuestResponse,
+    now,
   } = params;
 
   if (!isAuthenticated && hasGuestResponse) {
@@ -151,13 +154,7 @@ export function getActionPageTaskPanelState(params: {
     return ActionPageTaskPanelState.MemberActionClosed;
   }
 
-  const latestEvent = getLatestEvent(action);
-  const didMissDeadline =
-    action.events.some((event) => event.newStatus === "member_action") &&
-    (latestEvent?.newStatus === "office_action" ||
-      latestEvent?.newStatus === "resolution");
-
-  if (didMissDeadline) {
+  if (deadlineHasPassed(action, now)) {
     return ActionPageTaskPanelState.ShowTaskWithMissedDeadline;
   }
 

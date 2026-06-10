@@ -1,41 +1,40 @@
 import { FormResponseDto, UserActionRelation } from "@alliance/shared/client";
 import {
-  useCompletedTaskForm,
-  useGuestTaskForm,
-  useTaskForm,
-} from "@alliance/shared/lib/actionTaskPanelCompleted";
-import Card from "@alliance/sharedweb/ui/Card";
-import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
-import { ArrowRight, Link2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { isRouteErrorResponse, useOutletContext } from "react-router";
-import { Link } from "react-router";
-import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
-import { ActionTaskPanelPropsShared } from "@alliance/shared/lib/actionTaskPanel";
-import ActionTaskPanel from "./ActionTaskPanel";
-import StackedCard from "./system/StackedCard";
-import { useAuth } from "../lib/AuthContext";
-import {
   ActionPageTaskPanelState,
   cardStylesForState,
   getActionPageTaskPanelState,
   isFormDisabledByState,
   shouldLoadCompletedTaskFormByState,
 } from "@alliance/shared/lib/actionPageTaskPanel";
+import { ActionTaskPanelPropsShared } from "@alliance/shared/lib/actionTaskPanel";
+import {
+  useCompletedTaskForm,
+  useGuestTaskForm,
+  useTaskForm,
+} from "@alliance/shared/lib/actionTaskPanelCompleted";
 import {
   clipboardCopy,
   guestReferral,
   taskHeaders,
 } from "@alliance/shared/lib/copy";
-import { getBaseUrl } from "@alliance/sharedweb/lib/config";
-import { copyToClipboard } from "@alliance/sharedweb/lib/clipboard";
 import {
   buildActionShareUrl,
   buildShareText,
   getCompletedShareableTextTemplate,
 } from "@alliance/shared/lib/shareText";
-import ShareButton from "./ShareButton";
+import { copyToClipboard } from "@alliance/sharedweb/lib/clipboard";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import Card from "@alliance/sharedweb/ui/Card";
+import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
+import { ArrowRight, Link2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { isRouteErrorResponse, Link, useOutletContext } from "react-router";
+import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
+import { useAuth } from "../lib/AuthContext";
 import { isNonmemberOnPublicActionReferral } from "../lib/publicActionReferral";
+import ActionTaskPanel from "./ActionTaskPanel";
+import ShareButton from "./ShareButton";
+import StackedCard from "./system/StackedCard";
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   console.error(error);
@@ -161,6 +160,7 @@ const ActionPageTaskPanel = () => {
     isAuthenticated,
     hasRefCode: !!refCode,
     hasGuestResponse,
+    now: new Date(),
   });
   const resolvedUserRelation = userRelation ?? "none";
   const guestCompleted = state === ActionPageTaskPanelState.GuestCompleted;

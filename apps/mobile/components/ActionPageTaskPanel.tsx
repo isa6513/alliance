@@ -13,23 +13,23 @@ import {
   useTaskForm,
 } from "@alliance/shared/lib/actionTaskPanelCompleted";
 import { clipboardCopy, taskHeaders } from "@alliance/shared/lib/copy";
-import { ArrowRight, Link2 } from "lucide-react-native";
-import { Link } from "expo-router";
-import { ReactNode, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
-import { colors } from "../lib/style/colors";
-import { getBaseUrl } from "../lib/config";
-import CheckIcon from "./system/CheckIcon";
-import StackedCard from "./system/StackedCard";
-import Text, { FontWeight } from "./system/Text";
-import ActionTaskPanel from "./ActionTaskPanel";
-import { useAuth } from "../lib/AuthContext";
-import * as Clipboard from "expo-clipboard";
 import {
   buildActionShareUrl,
   buildShareText,
   getCompletedShareableTextTemplate,
 } from "@alliance/shared/lib/shareText";
+import * as Clipboard from "expo-clipboard";
+import { Link } from "expo-router";
+import { ArrowRight, Link2 } from "lucide-react-native";
+import { ReactNode, useState } from "react";
+import { TouchableOpacity, View } from "react-native";
+import { useAuth } from "../lib/AuthContext";
+import { getBaseUrl } from "../lib/config";
+import { colors } from "../lib/style/colors";
+import ActionTaskPanel from "./ActionTaskPanel";
+import CheckIcon from "./system/CheckIcon";
+import StackedCard from "./system/StackedCard";
+import Text, { FontWeight } from "./system/Text";
 
 export interface ActionPageTaskPanelProps {
   action: ActionDto;
@@ -120,6 +120,7 @@ const ActionPageTaskPanel = ({
     isAuthenticated,
     hasRefCode: false,
     hasGuestResponse: false,
+    now: new Date(),
   });
   const formResponse = useCompletedTaskForm(
     action,
