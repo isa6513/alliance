@@ -10,7 +10,7 @@
 
 ## Typechecking
 
-`bun run typecheck` works in any package (`server`, `apps/{frontend,admin,mobile}`, `sharedweb`, `shared`, `common`). **Never run `tsc` (or `tsc -b`) without `--noEmit`** — it emits `.d.ts` and `.js` files across the repo.
+**Always typecheck with `bun run typecheck`** — it works in any package (`server`, `apps/{frontend,admin,mobile}`, `sharedweb`, `shared`, `common`) and resolves the correct config (e.g. `tsconfig.typecheck.json`, which pulls shared sources in directly). Do **not** substitute a bare `tsc` invocation, even with `--noEmit`.
 
 ## Dependencies
 
