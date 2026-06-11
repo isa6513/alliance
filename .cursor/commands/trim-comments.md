@@ -21,6 +21,10 @@ Focus on comments that add noise, restate obvious code, are stale/misleading, du
 
 Do **not** remove useful comments that explain intent, invariants, tradeoffs, non-obvious behavior, external constraints, security reasoning, compatibility concerns, or surprising edge cases.
 
+# Don't narrate history
+
+Delete comments that explain what a past change fixed or why the code no longer does something ("we used to X but now Y", "fixed bug where..."). To a fresh reader this just says "a bug existed here once" — it describes a state the code is no longer in, which belongs in the commit message, not the source. A bug-fix rationale earns its place only when it actively guards against a _likely_ re-introduction in _this_ code — and even then, rewrite it as a forward-looking constraint ("must stay in sync with X", "do not reorder these — Y depends on Z") rather than a recounting of the fix. If the current code reads clearly on its own, drop the comment.
+
 # Check comment correctness
 
 Every comment you keep must be _true of the current code_. Read the code it describes and verify the claim still holds — names, types, control flow, return values, conditions, and any cross-references (`{@link ...}`, file paths, function names) it mentions. Flag comments that are stale, misleading, or describe behavior the code no longer has. Prefer fixing an incorrect-but-useful comment to match reality over deleting it; delete it only if the underlying point is no longer worth making.
