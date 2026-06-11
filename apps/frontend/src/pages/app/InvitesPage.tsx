@@ -1,11 +1,11 @@
-import { OnetimeInviteDto, userNmembers } from "@alliance/shared/client";
+import { OnetimeInviteDto } from "@alliance/shared/client";
 import { MEMBER_GOAL } from "@alliance/shared/lib/constants";
 import {
   deleteInviteConfirmation,
   inviteBuckets,
 } from "@alliance/shared/lib/copy";
 import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
-import { queryKeys } from "@alliance/shared/lib/queryKeys";
+import { useAllianceMemberCount } from "@alliance/shared/lib/useAllianceMemberCount";
 import { useOnetimeInvitesOverview } from "@alliance/shared/lib/useOnetimeInvitesOverview";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
@@ -14,7 +14,6 @@ import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import { useQuery } from "@tanstack/react-query";
 import { UserCheck } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import InviteForm from "../../components/InviteForm";
@@ -132,11 +131,7 @@ const InvitesPage = () => {
   );
 
   const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
-    useQuery({
-      queryKey: queryKeys.allianceMemberCount(),
-      queryFn: () => userNmembers().then((res) => res.data?.count ?? 0),
-      enabled: Boolean(user),
-    });
+    useAllianceMemberCount({ enabled: Boolean(user) });
 
   const allianceProgressPercent = useMemo(() => {
     const n = allianceMemberCount ?? 0;

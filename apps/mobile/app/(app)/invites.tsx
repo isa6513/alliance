@@ -1,36 +1,23 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { View, RefreshControl } from "react-native";
-import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import type { OnetimeInviteDto } from "@alliance/shared/client";
-import {
-  userApproveOnetimeInvite,
-  userDeleteOnetimeInvite,
-  userGetOnetimeInvitesOverview,
-  userNmembers,
-  userRejectOnetimeInvite,
-} from "@alliance/shared/client";
-import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
 import { MEMBER_GOAL } from "@alliance/shared/lib/constants";
 import { inviteBuckets } from "@alliance/shared/lib/copy";
-import { runAsync } from "@alliance/shared/lib/utils";
+import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
+import { useAllianceMemberCount } from "@alliance/shared/lib/useAllianceMemberCount";
+import { useOnetimeInvitesOverview } from "@alliance/shared/lib/useOnetimeInvitesOverview";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "../../lib/AuthContext";
-import { useReferralLink } from "../../lib/useReferralLink";
-import { SimplePageTitle } from "../../components/system/SimplePageTitle";
-import { SegmentedTabs } from "../../components/system/SegmentedTabs";
-import { ScreenWithLoading } from "../../components/system/ScreenWithLoading";
-import Text, { FontWeight } from "../../components/system/Text";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Alert, RefreshControl, View } from "react-native";
 import InviteForm from "../../components/InviteForm";
 import { InviteSection } from "../../components/InviteSection";
+import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import ReferralQrSection from "../../components/ReferralQrSection";
+import { ScreenWithLoading } from "../../components/system/ScreenWithLoading";
+import { SegmentedTabs } from "../../components/system/SegmentedTabs";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import Text, { FontWeight } from "../../components/system/Text";
+import { useAuth } from "../../lib/AuthContext";
 import { colors } from "../../lib/style/colors";
+import { useReferralLink } from "../../lib/useReferralLink";
 
 enum InvitesTab {
   ReferralQr = "referral_qr",
@@ -54,10 +41,17 @@ const INVITES_EMPTY_MESSAGE = "Your invites will appear here.";
 
 export default function InvitesScreen() {
   const { user } = useAuth();
-  const [loadingInvites, setLoadingInvites] = useState(true);
+  const {
+    invites,
+    isLoading: loadingInvites,
+    isError,
+    refetch,
+    upsertInvite,
+    approveInvite,
+    rejectInvite,
+    deleteInvite,
+  } = useOnetimeInvitesOverview({ enabled: Boolean(user) });
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
   const [sharedInviteId, setSharedInviteId] = useState<number | null>(null);
   const [selectedTab, setSelectedTab] = useState<InvitesTab>(
     InvitesTab.ReferralQr,
@@ -66,31 +60,10 @@ export default function InvitesScreen() {
 
   const referralLink = useReferralLink(user);
 
-  const loadInvites = useCallback(async () => {
-    const response = await userGetOnetimeInvitesOverview();
-    if (response.data) {
-      setInvites(response.data);
-      setError(null);
-    } else {
-      setError("Failed to load invites");
-    }
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoadingInvites(true);
-    loadInvites().finally(() => {
-      if (!cancelled) setLoadingInvites(false);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [loadInvites]);
-
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    loadInvites().finally(() => setRefreshing(false));
-  }, [loadInvites]);
+    refetch().finally(() => setRefreshing(false));
+  }, [refetch]);
 
   const leaderCommunityIds = useMemo(
     () => getLeaderCommunityIds(user ?? undefined),
@@ -130,43 +103,39 @@ export default function InvitesScreen() {
     }, 2000);
   }, []);
 
-  const handleApproveInvite = useCallback((inviteId: number) => {
-    runAsync(async () => {
-      const response = await userApproveOnetimeInvite({ path: { inviteId } });
-      if (response.data) {
-        setInvites((prev) =>
-          prev.map((invite) =>
-            invite.id === inviteId ? response.data! : invite,
-          ),
-        );
-      }
-    });
-  }, []);
+  const handleApproveInvite = useCallback(
+    (inviteId: number) => {
+      void approveInvite(inviteId).catch(() => {
+        Alert.alert("Error", "Failed to approve invite");
+      });
+    },
+    [approveInvite],
+  );
 
-  const handleRejectInvite = useCallback((inviteId: number) => {
-    runAsync(async () => {
-      const response = await userRejectOnetimeInvite({ path: { inviteId } });
-      if (response.data) {
-        setInvites((prev) => prev.filter((request) => request.id !== inviteId));
-      }
-    });
-  }, []);
+  const handleRejectInvite = useCallback(
+    (inviteId: number) => {
+      void rejectInvite(inviteId).catch(() => {
+        Alert.alert("Error", "Failed to reject invite");
+      });
+    },
+    [rejectInvite],
+  );
 
   const handleDeleteInvite = useCallback(
     (inviteId: number, _event: unknown) => {
-      runAsync(async () => {
-        const response = await userDeleteOnetimeInvite({ path: { inviteId } });
-        if (!response.error) {
-          setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
-        }
+      void deleteInvite(inviteId).catch(() => {
+        Alert.alert("Error", "Failed to delete invite");
       });
     },
-    [],
+    [deleteInvite],
   );
 
-  const handleInviteCreated = useCallback((invite: OnetimeInviteDto) => {
-    setInvites((prev) => [invite, ...prev]);
-  }, []);
+  const handleInviteCreated = useCallback(
+    (invite: OnetimeInviteDto) => {
+      upsertInvite(invite);
+    },
+    [upsertInvite],
+  );
 
   const isEmptyPast =
     actionable.length === 0 &&
@@ -175,14 +144,7 @@ export default function InvitesScreen() {
     settled.length === 0;
 
   const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
-    useQuery({
-      queryKey: ["userNmembers"],
-      queryFn: async () => {
-        const res = await userNmembers();
-        return res.data?.count ?? 0;
-      },
-      enabled: Boolean(user),
-    });
+    useAllianceMemberCount({ enabled: Boolean(user) });
 
   const allianceProgressPercent = useMemo(() => {
     const n = allianceMemberCount ?? 0;
@@ -198,8 +160,8 @@ export default function InvitesScreen() {
     [InvitesTab.New]: (
       <>
         <InviteForm onInviteCreated={handleInviteCreated} />
-        {error !== null && (
-          <Text className="text-sm text-red-500">{error}</Text>
+        {isError && (
+          <Text className="text-sm text-red-500">Failed to load invites</Text>
         )}
         <InviteSection
           title={inviteBuckets.unverifiableActionable.title}
@@ -216,8 +178,8 @@ export default function InvitesScreen() {
     ),
     [InvitesTab.Past]: (
       <>
-        {error !== null && (
-          <Text className="text-sm text-red-500">{error}</Text>
+        {isError && (
+          <Text className="text-sm text-red-500">Failed to load invites</Text>
         )}
         {isEmptyPast && (
           <Text className="text-center text-zinc-500 py-8">

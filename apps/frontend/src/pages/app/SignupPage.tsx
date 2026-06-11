@@ -5,13 +5,13 @@ import {
   ProfileDto,
   SignUpDto,
   userFindOne,
-  userNmembers,
   userOnetimeInvite,
   userReferrerProfile,
   userSignupSocialProof,
 } from "@alliance/shared/client";
 import { captureEvent } from "@alliance/shared/lib/analytics";
 import { Features } from "@alliance/shared/lib/features";
+import { useAllianceMemberCount } from "@alliance/shared/lib/useAllianceMemberCount";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -90,9 +90,7 @@ const SignupPage: React.FC = () => {
     return p === "1" || p === "true";
   }, [searchParams]);
 
-  const { data: memberCount } = useQuery({
-    queryKey: ["userNmembers"],
-    queryFn: () => userNmembers().then((res) => res.data?.count ?? 0),
+  const { data: memberCount } = useAllianceMemberCount({
     enabled: isFeatureEnabled(Features.PublicSignup) || Boolean(referralCode),
   });
 
