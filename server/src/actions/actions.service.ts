@@ -81,6 +81,10 @@ import {
   type Repository,
 } from 'typeorm';
 import { UserService } from '../user/user.service';
+import {
+  findLatestTerminalActivity,
+  resolveUserActionRelation,
+} from './action-activity-status';
 import { ActionFormVariantService } from './action-form-variant.service';
 import {
   evaluateCohortExpressionForUser,
@@ -616,6 +620,9 @@ export class ActionsService {
       ).map((activity) => activity.actionId),
     );
 
+    // Index viewer's activities once, rather than rescanning per action.
+    const userActivities = user ? new CachedFilter(user.activities!) : null;
+
     return await Promise.all(
       filtered.map(async (action) => {
         const dismissed = actionsDismissed.has(action.id);
@@ -651,13 +658,14 @@ export class ActionsService {
             ? await this.isEligibleForAction(action, user)
             : false,
           shouldParticipate,
-          userRelation: user
-            ? await this.getActionRelationFromActivities(
-                user.activities!.filter(
-                  (activity) => activity.actionId === action.id,
-                ),
-              )
-            : undefined,
+          userRelation:
+            user && userActivities
+              ? resolveUserActionRelation({
+                  activities: userActivities,
+                  userId: user.id,
+                  actionId: action.id,
+                })
+              : undefined,
           reqAuthenticated: !!user,
         });
       }),
@@ -1071,34 +1079,6 @@ export class ActionsService {
     );
   }
 
-  // assumes pre-filtered for one users activities!
-  async getActionRelationFromActivities(
-    activities: ActionActivity[],
-  ): Promise<UserActionRelation> {
-    if (
-      activities.some(
-        (activity) => activity.type === ActionActivityType.USER_WONT_COMPLETE,
-      )
-    ) {
-      return UserActionRelation.Declined;
-    }
-    if (
-      activities.some(
-        (activity) => activity.type === ActionActivityType.USER_DISMISSED,
-      )
-    ) {
-      return UserActionRelation.Dismissed;
-    }
-    if (
-      activities.some(
-        (activity) => activity.type === ActionActivityType.USER_COMPLETED,
-      )
-    ) {
-      return UserActionRelation.Completed;
-    }
-    return UserActionRelation.None;
-  }
-
   async getActionRelation(
     actionId: number,
     userId: number,
@@ -1106,7 +1086,11 @@ export class ActionsService {
     const activities = await this.actionActivityRepository.find({
       where: { action: { id: actionId }, user: { id: userId } },
     });
-    return this.getActionRelationFromActivities(activities);
+    return resolveUserActionRelation({
+      activities: new CachedFilter(activities),
+      userId,
+      actionId,
+    });
   }
 
   async dismissAction(
@@ -2872,7 +2856,7 @@ export class ActionsService {
           // Transient resolver inputs; not serialized (see final mapping below).
           isJoined: boolean;
           isAway: boolean;
-          activityStatus: UserActionRelationPillStatus | null;
+          activities: ActionActivity[];
         }
       >
     >();
@@ -2890,7 +2874,7 @@ export class ActionsService {
           outOfTime: undefined,
           isJoined: false,
           isAway: false,
-          activityStatus: null,
+          activities: [],
         });
       }
       return relationByUserThenAction.get(userId)!.get(actionId)!;
@@ -2925,38 +2909,38 @@ export class ActionsService {
         userId: activity.userId,
         actionId: activity.actionId,
       });
+      // latestActivity* track the last activity of *any* type; the terminal
+      // (status-bearing) one is resolved in the pass below.
       detail.latestActivityAt = activity.createdAt;
       detail.latestActivityType = activity.type;
-      switch (activity.type) {
-        case ActionActivityType.USER_WONT_COMPLETE: {
-          // Capture withdrawal reason details for wont_complete activities.
-          detail.declineReason = activity.declineReason;
-          detail.isMoral = activity.isMoral;
-          detail.outOfTime = activity.outOfTime;
-          detail.activityStatus = UserActionRelationPillStatus.WontComplete;
-          break;
-        }
-        case ActionActivityType.USER_COMPLETED: {
-          // Clear any previous decline reason details.
-          detail.declineReason = undefined;
-          detail.isMoral = undefined;
-          detail.outOfTime = undefined;
-          detail.activityStatus = UserActionRelationPillStatus.Completed;
-          break;
-        }
-        case ActionActivityType.USER_DISMISSED:
-        case ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM:
-          break;
-        default:
-          throw new Error(
-            `Unknown activity type: ${activity.type satisfies never}`,
-          );
-      }
+      detail.activities.push(activity);
     }
 
     for (const actionMap of relationByUserThenAction.values()) {
       for (const [actionId, detail] of actionMap) {
         const action = actionById.get(actionId)!;
+        const terminal = findLatestTerminalActivity(detail.activities);
+
+        let activityStatus: UserActionRelationPillStatus | null = null;
+        if (terminal) {
+          switch (terminal.type) {
+            case ActionActivityType.USER_COMPLETED:
+              activityStatus = UserActionRelationPillStatus.Completed;
+              break;
+            case ActionActivityType.USER_WONT_COMPLETE:
+              activityStatus = UserActionRelationPillStatus.WontComplete;
+              // Surface withdrawal reason for the leader view.
+              detail.declineReason = terminal.declineReason;
+              detail.isMoral = terminal.isMoral;
+              detail.outOfTime = terminal.outOfTime;
+              break;
+            default:
+              throw new Error(
+                `unknown terminal activity type: ${terminal.type satisfies never}`,
+              );
+          }
+        }
+
         detail.status = resolveUserActionPillStatus({
           isJoined: detail.isJoined,
           isAway: detail.isAway,
@@ -2964,7 +2948,7 @@ export class ActionsService {
           deadlinePassed:
             !!action.memberActionPhase?.deadline &&
             action.memberActionPhase.deadline < now,
-          activityStatus: detail.activityStatus,
+          activityStatus,
         });
       }
     }
