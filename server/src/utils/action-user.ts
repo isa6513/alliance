@@ -1,11 +1,12 @@
 /** @fileoverview Utils for relationships between actions and users */
-import { Action } from 'src/actions/entities/action.entity';
-import { User } from 'src/user/entities/user.entity';
-import type { Repository } from 'typeorm';
 import type { ActionActivity } from 'src/actions/entities/action-activity.entity';
-import type { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import { Action } from 'src/actions/entities/action.entity';
 import type { Community } from 'src/community/entities/community.entity';
+import type { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import { User } from 'src/user/entities/user.entity';
 import { findLeast } from 'src/utils/filter';
+import type { Repository } from 'typeorm';
 
 export function computeIsContractActiveDuringEntireMemberAction(params: {
   action: Pick<Action, 'events' | 'memberActionPhase'>;
@@ -22,6 +23,41 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
     startDate: memberActionEvent.date,
     endDate: deadline,
   });
+}
+
+/**
+ * Self-view "is this user expected to take this action?" predicate — source of
+ * the viewer's own `ActionDto.shouldParticipate`.
+ *
+ * Distinct from {@link computeShouldParticipate} (the event-recipient variant
+ * driven by a precomputed cohort-member set, for notifications/roster). This one
+ * consumes the full cohort-*expression* result (`computeIsInCohortExpression`)
+ * as `inCohort`, and stays pure/sync so the caller controls when the DB-hitting
+ * cohort evaluation runs. Not yet unified; see `docs/action-relationships-audit.md`.
+ */
+export function computeShouldParticipateInAction(params: {
+  action: Pick<
+    Action,
+    'events' | 'memberActionPhase' | 'everyoneShouldComplete'
+  >;
+  user: Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'> | null;
+  inCohort: boolean;
+  dismissed: boolean;
+}): boolean {
+  const { action, user, inCohort, dismissed } = params;
+  if (!user) {
+    return false;
+  }
+  const hasMemberActionEvent = action.events.some(
+    (event) => event.newStatus === ActionStatus.MemberAction,
+  );
+  return (
+    hasMemberActionEvent &&
+    !dismissed &&
+    inCohort &&
+    (action.everyoneShouldComplete ||
+      computeIsContractActiveDuringEntireMemberAction({ action, user }))
+  );
 }
 
 export function computeIsAwayDuringAnyOfMemberAction(params: {

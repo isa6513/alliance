@@ -60,9 +60,9 @@ import { Tag } from 'src/user/entities/tag.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   computeIsAwayDuringAnyOfMemberAction,
-  computeIsContractActiveDuringEntireMemberAction,
   computeIsTaggedOrInManualCohort,
   computeShouldParticipate,
+  computeShouldParticipateInAction,
 } from 'src/utils/action-user';
 import { CachedFilter } from 'src/utils/cached-filter';
 import { findLeast } from 'src/utils/filter';
@@ -618,21 +618,26 @@ export class ActionsService {
 
     return await Promise.all(
       filtered.map(async (action) => {
-        const shouldParticipate =
+        const dismissed = actionsDismissed.has(action.id);
+        // Preserve the original short-circuit: only run the (potentially
+        // DB-hitting) cohort-expression evaluation when the cheap gates pass.
+        const inCohort =
           !!user &&
+          !dismissed &&
           action.events.some(
             (event) => event.newStatus === ActionStatus.MemberAction,
-          ) &&
-          !actionsDismissed.has(action.id) &&
-          (await this.computeIsInCohortExpression({
-            user,
-            cohortExpression: action.cohortExpression,
-          })) &&
-          (action.everyoneShouldComplete ||
-            computeIsContractActiveDuringEntireMemberAction({
-              action,
-              user,
-            }));
+          )
+            ? await this.computeIsInCohortExpression({
+                user,
+                cohortExpression: action.cohortExpression,
+              })
+            : false;
+        const shouldParticipate = computeShouldParticipateInAction({
+          action,
+          user,
+          inCohort,
+          dismissed,
+        });
 
         if (user && action.followUpForms) {
           action.followUpForms = await this.filterFollowUpFormsByCohort(
