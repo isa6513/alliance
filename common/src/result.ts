@@ -8,9 +8,9 @@ export type Failure<E> = {
   error: E;
 };
 
-export type Result<T, E> = Success<T> | Failure<E>;
+export type Result<T, E = Error> = Success<T> | Failure<E>;
 
-export type AsyncResult<T, E> = Promise<Result<T, E>>;
+export type AsyncResult<T, E = Error> = Promise<Result<T, E>>;
 
 function success<T>(value: T): Success<T> {
   return { ok: true, value };
@@ -83,7 +83,11 @@ function match<T, E, U>(
     : handlers.failure(result.error);
 }
 
-function fromThrowable<T>(fn: () => T): Result<T, unknown>;
+function toError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+function fromThrowable<T>(fn: () => T): Result<T, Error>;
 function fromThrowable<T, E>(
   fn: () => T,
   mapThrown: (error: unknown) => E,
@@ -91,15 +95,15 @@ function fromThrowable<T, E>(
 function fromThrowable<T, E>(
   fn: () => T,
   mapThrown?: (error: unknown) => E,
-): Result<T, E | unknown> {
+): Result<T, E | Error> {
   try {
     return success(fn());
   } catch (error) {
-    return failure(mapThrown ? mapThrown(error) : error);
+    return failure(mapThrown ? mapThrown(error) : toError(error));
   }
 }
 
-function fromPromise<T>(promise: Promise<T>): AsyncResult<T, unknown>;
+function fromPromise<T>(promise: Promise<T>): AsyncResult<T, Error>;
 function fromPromise<T, E>(
   promise: Promise<T>,
   mapRejected: (error: unknown) => E,
@@ -107,15 +111,15 @@ function fromPromise<T, E>(
 async function fromPromise<T, E>(
   promise: Promise<T>,
   mapRejected?: (error: unknown) => E,
-): AsyncResult<T, E | unknown> {
+): AsyncResult<T, E | Error> {
   try {
     return success(await promise);
   } catch (error) {
-    return failure(mapRejected ? mapRejected(error) : error);
+    return failure(mapRejected ? mapRejected(error) : toError(error));
   }
 }
 
-function fromPromiseFn<T>(fn: () => Promise<T>): AsyncResult<T, unknown>;
+function fromPromiseFn<T>(fn: () => Promise<T>): AsyncResult<T, Error>;
 function fromPromiseFn<T, E>(
   fn: () => Promise<T>,
   mapRejected: (error: unknown) => E,
@@ -123,11 +127,11 @@ function fromPromiseFn<T, E>(
 async function fromPromiseFn<T, E>(
   fn: () => Promise<T>,
   mapRejected?: (error: unknown) => E,
-): AsyncResult<T, E | unknown> {
+): AsyncResult<T, E | Error> {
   try {
     return success(await fn());
   } catch (error) {
-    return failure(mapRejected ? mapRejected(error) : error);
+    return failure(mapRejected ? mapRejected(error) : toError(error));
   }
 }
 
@@ -147,22 +151,23 @@ function toUndefined<T, E>(result: Result<T, E>): T | undefined {
 }
 
 /**
- * Import `Result` and use it as both the type and the helper namespace:
+ * `Result<T, E>` is the type; `R` is the helper namespace. Import the value
+ * (`R`) and the type (`Result`) separately:
  *
  * ```ts
- * import { Result } from "@alliance/common/result";
+ * import { R, type Result } from "@alliance/common/result";
  *
  * function parse(input: string): Result<number, string> {
  *   const n = Number(input);
- *   return Number.isNaN(n) ? Result.failure("not a number") : Result.success(n);
+ *   return Number.isNaN(n) ? R.failure("not a number") : R.success(n);
  * }
  *
  * const result = parse("42");
- * const doubled = Result.map(result, (n) => n * 2);
- * const value = Result.unwrapOr(doubled, 0);
+ * const doubled = R.map(result, (n) => n * 2);
+ * const value = R.unwrapOr(doubled, 0);
  * ```
  */
-export const Result = {
+export const R = {
   success,
   failure,
   isSuccess,
@@ -176,6 +181,7 @@ export const Result = {
   unwrapOr,
   unwrapOrElse,
   match,
+  toError,
   fromThrowable,
   fromPromise,
   fromPromiseFn,
