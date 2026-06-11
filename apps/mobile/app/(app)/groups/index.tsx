@@ -2,7 +2,6 @@ import {
   actionsGetCommunityMemberInfo,
   communityGetCommunityInvites,
   communityGetMemberContactInfo,
-  communityGetMyCommunities,
   communityUpdate,
   userGetOnetimeInvitesByCommunity,
 } from "@alliance/shared/client";
@@ -21,6 +20,7 @@ import { groupSettings } from "@alliance/shared/lib/copy";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
+import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
 import { useOnNextDeadline } from "@alliance/shared/lib/useOnNextDeadline";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
 import { LegendList } from "@legendapp/list";
@@ -67,8 +67,12 @@ const TAB_DISPLAY_NAMES: Record<Tab, string> = {
 
 export default function GroupsScreen() {
   const { user } = useAuth();
-  const [communities, setCommunities] = useState<CommunityDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    communities,
+    isLoading,
+    refreshCommunities,
+    updateCommunity: onCommunityUpdated,
+  } = useMyCommunities({});
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(
     null,
@@ -76,38 +80,19 @@ export default function GroupsScreen() {
   const [tab, setTab] = useState<Tab>("activity");
   const [groupPickerOpen, setGroupPickerOpen] = useState(false);
 
-  const loadCommunities = useCallback(async () => {
-    try {
-      const response = await communityGetMyCommunities();
-      const data = response.data ?? [];
-      setCommunities(data);
-      setSelectedCommunityId((prev) => {
-        if (prev === null && data.length > 0) return data[0].id;
-        if (data.some((c) => c.id === prev)) return prev;
-        return data[0]?.id ?? null;
-      });
-    } catch (err) {
-      console.error("Failed to load communities", err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
+  // Keep the selected group valid as communities load or change.
   useEffect(() => {
-    void loadCommunities();
-  }, [loadCommunities]);
+    setSelectedCommunityId((prev) => {
+      if (prev === null && communities.length > 0) return communities[0].id;
+      if (communities.some((c) => c.id === prev)) return prev;
+      return communities[0]?.id ?? null;
+    });
+  }, [communities]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    void loadCommunities();
-  }, [loadCommunities]);
-
-  const onCommunityUpdated = useCallback((updated: CommunityDto) => {
-    setCommunities((prev) =>
-      prev.map((c) => (c.id === updated.id ? updated : c)),
-    );
-  }, []);
+    void refreshCommunities().finally(() => setRefreshing(false));
+  }, [refreshCommunities]);
 
   const selectedCommunity = useMemo(
     () => communities.find((c) => c.id === selectedCommunityId) ?? null,
@@ -137,7 +122,7 @@ export default function GroupsScreen() {
     }
   }, [tab, amLeader]);
 
-  if (loading) {
+  if (isLoading) {
     return <ScreenWithLoading title="Groups" loading />;
   }
 

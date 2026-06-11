@@ -6,9 +6,17 @@ import {
   userJoinGroupAssignment,
   userLeaveGroupAssignment,
 } from "@alliance/shared/client";
-import List from "@alliance/sharedweb/ui/List";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { getMemberCount } from "@alliance/shared/lib/communityUtils";
+import { requestGroupAssignmentConfirmation } from "@alliance/shared/lib/copy";
+import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
+import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
+import { cn } from "@alliance/shared/styles/util";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import List from "@alliance/sharedweb/ui/List";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { ChevronDown, ChevronLeft, Minus, Plus } from "lucide-react";
 import {
   Fragment,
@@ -18,17 +26,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@alliance/shared/styles/util";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
-import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
-import { requestGroupAssignmentConfirmation } from "@alliance/shared/lib/copy";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { useAuth } from "../../lib/AuthContext";
-import CommunityInviteList from "../../components/CommunityInviteList";
 import CommunityCreateForm from "../../components/CommunityCreateForm";
-import { getMemberCount } from "@alliance/shared/lib/communityUtils";
-import { useMyCommunities } from "../../lib/useMyCommunities";
+import CommunityInviteList from "../../components/CommunityInviteList";
+import { useAuth } from "../../lib/AuthContext";
 
 export type MyGroupsPageProps = {
   onSelectCommunity: (communityId: number | null | undefined) => void;
@@ -42,7 +42,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
   });
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [leavingCommunityId, setLeavingCommunityId] = useState<number | null>(
-    null
+    null,
   );
   const justOpenedDialogRef = useRef(false);
   const { confirm, error: showError, success } = useToast();
@@ -53,7 +53,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
     setLeavingCommunityId(null);
   }, []);
   const confirmationDialogRef = useOutsideClick(
-    handleCloseLeaveGroupConfirmation
+    handleCloseLeaveGroupConfirmation,
   );
 
   useEffect(() => {
@@ -76,19 +76,19 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
     (inviteId: number) => {
       void declineCommunityInvite(inviteId);
     },
-    [declineCommunityInvite]
+    [declineCommunityInvite],
   );
 
   const { leaderCommunities, nonLeaderCommunities } = useMemo(() => {
     return {
       leaderCommunities:
         communities?.filter((community) =>
-          community.leaders.some((leader) => leader.id === user?.id)
+          community.leaders.some((leader) => leader.id === user?.id),
         ) ?? [],
       nonLeaderCommunities:
         communities?.filter(
           (community) =>
-            !community.leaders.some((leader) => leader.id === user?.id)
+            !community.leaders.some((leader) => leader.id === user?.id),
         ) ?? [],
     };
   }, [communities, user?.id]);
@@ -98,7 +98,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
   }, [communities]);
 
   const [publicCommunities, setPublicCommunities] = useState<CommunityDto[]>(
-    []
+    [],
   );
   const [publicCommunitiesLoading, setPublicCommunitiesLoading] =
     useState(false);
@@ -106,7 +106,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
     string | null
   >(null);
   const [joiningCommunityId, setJoiningCommunityId] = useState<number | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -138,7 +138,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
       }
       return `Joining ${targetName} will remove you from ${base}.`;
     },
-    [nonLeaderCommunities]
+    [nonLeaderCommunities],
   );
 
   const handleAcceptInvite = useCallback(
@@ -158,7 +158,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
       if (ok) {
         void acceptCommunityInvite(inviteId).then(() => {
           onSelectCommunity(
-            incomingCommunityInvitesById.get(inviteId)?.community.id
+            incomingCommunityInvitesById.get(inviteId)?.community.id,
           );
         });
       }
@@ -169,14 +169,14 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
       acceptCommunityInvite,
       confirm,
       getRemovalMessage,
-    ]
+    ],
   );
 
   const onLeaveGroup = useCallback(
     (community: CommunityDto) => {
       setLeavingCommunityId(community.id);
     },
-    [setLeavingCommunityId]
+    [setLeavingCommunityId],
   );
 
   const onConfirmLeaveGroup = useCallback(
@@ -190,7 +190,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
         removeCommunity(community.id);
       }
     },
-    [onSelectCommunity, removeCommunity]
+    [onSelectCommunity, removeCommunity],
   );
 
   const handleRequestAssignment = useCallback(
@@ -210,7 +210,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
         await refreshUser();
       }
     },
-    [confirm, nonLeaderCommunities.length, refreshUser]
+    [confirm, nonLeaderCommunities.length, refreshUser],
   );
 
   const handleCancelAssignment = useCallback(async () => {
@@ -259,7 +259,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
       refreshUser,
       showError,
       success,
-    ]
+    ],
   );
 
   const handleCreateSuccess = useCallback(
@@ -267,7 +267,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
       setShowCreateForm(false);
       onSelectCommunity(community.id);
     },
-    [onSelectCommunity]
+    [onSelectCommunity],
   );
 
   const handleCreateCancel = useCallback(() => {
@@ -329,7 +329,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
                   "w-full !rounded-none",
                   leaderCommunities.length
                     ? "border-t border-t-zinc-200 border-x-0 border-b-0"
-                    : "border-0"
+                    : "border-0",
                 )}
               >
                 <div className="w-full flex flex-row gap-x-2 items-center justify-center p-2 text-zinc-500">
@@ -360,8 +360,8 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
               {!user?.undergoingGroupAssignment
                 ? ""
                 : nonLeaderCommunities.length
-                ? " (reassigning...)"
-                : " (assigning...)"}
+                  ? " (reassigning...)"
+                  : " (assigning...)"}
             </p>
             <p className="text-zinc-500 text-base">
               For now, you can only be a member of one group.
@@ -550,7 +550,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
             {publicCommunities.map((community) => {
               const isMember = memberCommunityIds.has(community.id);
               const isLeader = community.leaders.some(
-                (leader) => leader.id === user?.id
+                (leader) => leader.id === user?.id,
               );
               const memberCount = getMemberCount(community);
               const isFull =
@@ -562,12 +562,12 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
               const joinLabel = isLeader
                 ? "Leader"
                 : isMember
-                ? "Member"
-                : isFull
-                ? "Full"
-                : isJoining
-                ? "Joining..."
-                : "Join";
+                  ? "Member"
+                  : isFull
+                    ? "Full"
+                    : isJoining
+                      ? "Joining..."
+                      : "Join";
 
               return (
                 <div
@@ -598,7 +598,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
                       onClick={(event) =>
                         void handleJoinPublicCommunity(
                           community,
-                          event.currentTarget
+                          event.currentTarget,
                         )
                       }
                     >

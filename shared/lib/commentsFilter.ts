@@ -1,9 +1,6 @@
-import {
-  CommentDto,
-  communityGetMyCommunities,
-  userListFriends,
-} from "@alliance/shared/client";
+import { CommentDto, userListFriends } from "@alliance/shared/client";
 import { hashStringToSeed } from "@alliance/shared/forms/randomutils";
+import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -216,26 +213,20 @@ export function useCommentFilterData({
     enabled: enabled && userId != null,
   });
 
-  const { data: groupMemberIds = [] } = useQuery({
-    queryKey: ["communityGetMyCommunities", userId],
-    queryFn: () =>
-      communityGetMyCommunities().then((res) => {
-        const ids = new Set<number>();
-        for (const community of res.data ?? []) {
-          for (const member of community.users ?? []) {
-            ids.add(member.id);
-          }
-        }
-        return Array.from(ids);
-      }),
+  const { communities } = useMyCommunities({
     enabled: enabled && userId != null,
   });
 
   const friendIdSet = useMemo(() => new Set(friendIds), [friendIds]);
-  const groupMemberIdSet = useMemo(
-    () => new Set(groupMemberIds),
-    [groupMemberIds],
-  );
+  const groupMemberIdSet = useMemo(() => {
+    const ids = new Set<number>();
+    for (const community of communities) {
+      for (const member of community.users ?? []) {
+        ids.add(member.id);
+      }
+    }
+    return ids;
+  }, [communities]);
 
   return { friendIdSet, groupMemberIdSet };
 }

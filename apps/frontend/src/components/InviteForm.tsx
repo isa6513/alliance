@@ -1,27 +1,27 @@
 import {
   CommunityDto,
-  communityGetMyCommunities,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   userCreateOnetimeInvite,
 } from "@alliance/shared/client";
-import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
-import Card from "@alliance/sharedweb/ui/Card";
-import { CardStyle } from "@alliance/shared/styles/card";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAuth } from "../lib/AuthContext";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import CommunityCreateForm from "./CommunityCreateForm";
-import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
+import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 import { getOnetimeInviteSignupUrl } from "@alliance/shared/lib/inviteUrls";
+import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
+import { CardStyle } from "@alliance/shared/styles/card";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
-import { Link } from "react-router";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import { getMemberCount } from "@alliance/shared/lib/communityUtils";
-import OnetimeInviteForm from "./OnetimeInviteForm";
+import Card from "@alliance/sharedweb/ui/Card";
+import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
+import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router";
+import { useAuth } from "../lib/AuthContext";
+import CommunityCreateForm from "./CommunityCreateForm";
+import OnetimeInviteForm from "./OnetimeInviteForm";
 
 const inviteTitleClass = "font-semibold text-xl text-zinc-900";
 const inviteSectionLabelClass = "text-lg font-semibold text-zinc-900";
@@ -45,28 +45,21 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   const [inviteeName, setInviteeName] = useState("");
   const [info, setInfo] = useState("");
   const [creatingInvite, setCreatingInvite] = useState(false);
-  const [communities, setCommunities] = useState<CommunityDto[]>([]);
+  const { communities, refreshCommunities } = useMyCommunities({});
 
-  const refreshCommunities = useCallback(
-    async (resetSelectedCommunityId: boolean) => {
-      const response = await communityGetMyCommunities();
-      if (response.data) {
-        setCommunities(response.data);
-        if (resetSelectedCommunityId && user) {
-          const led = response.data.find((community) =>
-            community.leaders.some((leader) => leader.id === user.id),
-          );
-          setPlacement(
-            led ? { kind: "community", id: led.id } : { kind: "new" },
-          );
-        }
-      }
-    },
-    [user],
-  );
+  // Default placement to a group the user leads. Runs once so it never clobbers
+  // a manual selection on a later refetch.
+  const didInitPlacement = useRef(false);
   useEffect(() => {
-    void refreshCommunities(true);
-  }, [refreshCommunities]);
+    if (didInitPlacement.current || communities.length === 0 || !user) {
+      return;
+    }
+    didInitPlacement.current = true;
+    const led = communities.find((community) =>
+      community.leaders.some((leader) => leader.id === user.id),
+    );
+    setPlacement(led ? { kind: "community", id: led.id } : { kind: "new" });
+  }, [communities, user]);
 
   const { leaderCommunities, memberCommunities } = useMemo(() => {
     const leaderCommunities: CommunityDto[] = [];
@@ -178,7 +171,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     async (community: CommunityDto) => {
       try {
         await handleCreateInvite(community.id);
-        await refreshCommunities(false);
+        await refreshCommunities();
         setPlacement({ kind: "community", id: community.id });
       } catch {
         errorToast("Failed to refresh groups");

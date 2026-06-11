@@ -1,43 +1,43 @@
 import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
-  Alert,
-} from "react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { router } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
-import {
-  communityGetMyCommunities,
-  communityGetPublicCommunities,
+  communityAcceptCommunityInvite,
   communityCreateCommunity,
+  communityGetIncomingCommunityInvitesForUser,
+  communityGetPublicCommunities,
   communityJoinPublicCommunity,
   communityLeave,
-  communityGetIncomingCommunityInvitesForUser,
-  communityAcceptCommunityInvite,
   communityRejectCommunityInvite,
   userJoinGroupAssignment,
   userLeaveGroupAssignment,
 } from "@alliance/shared/client";
 import type {
   CommunityDto,
-  CreateCommunityDto,
   CommunityInviteDto,
+  CreateCommunityDto,
 } from "@alliance/shared/client/types.gen";
 import { getMemberCount } from "@alliance/shared/lib/communityUtils";
-import { requestGroupAssignmentConfirmation } from "@alliance/shared/lib/copy";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
-import Text, { FontWeight, FontFamily } from "../../../components/system/Text";
-import { colors } from "../../../lib/style/colors";
-import { useAuth } from "../../../lib/AuthContext";
+import { requestGroupAssignmentConfirmation } from "@alliance/shared/lib/copy";
+import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
+import { router } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { CreateGroupForm } from "../../../components/groups/CreateGroupForm";
 import Button, {
   ButtonColor,
   ButtonSize,
 } from "../../../components/system/Button";
 import { SimplePageTitle } from "../../../components/system/SimplePageTitle";
-import { CreateGroupForm } from "../../../components/groups/CreateGroupForm";
+import Text, { FontFamily, FontWeight } from "../../../components/system/Text";
+import { useAuth } from "../../../lib/AuthContext";
+import { colors } from "../../../lib/style/colors";
 
 const sortByName = (a: CommunityDto, b: CommunityDto) =>
   a.name
@@ -74,7 +74,11 @@ function getRemovalMessage(
 
 export default function GroupManageScreen() {
   const { user, refreshUser } = useAuth();
-  const [communities, setCommunities] = useState<CommunityDto[]>([]);
+  const {
+    communities,
+    isLoading: myCommunitiesLoading,
+    refreshCommunities,
+  } = useMyCommunities({});
   const [publicCommunities, setPublicCommunities] = useState<CommunityDto[]>(
     [],
   );
@@ -84,7 +88,7 @@ export default function GroupManageScreen() {
   const [publicCommunitiesError, setPublicCommunitiesError] = useState<
     string | null
   >(null);
-  const [loading, setLoading] = useState(true);
+  const [publicLoading, setPublicLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newCommunity, setNewCommunity] =
@@ -133,14 +137,13 @@ export default function GroupManageScreen() {
     [publicCommunities],
   );
 
-  const loadCommunities = useCallback(async () => {
+  // Own communities come from the shared useMyCommunities cache, not here.
+  const loadPublicAndInvites = useCallback(async () => {
     try {
-      const [myRes, publicRes, invitesRes] = await Promise.all([
-        communityGetMyCommunities(),
+      const [publicRes, invitesRes] = await Promise.all([
         communityGetPublicCommunities(),
         communityGetIncomingCommunityInvitesForUser(),
       ]);
-      setCommunities(myRes.data ?? []);
       if (invitesRes.data) {
         setPendingInvites(
           invitesRes.data.filter((i) => i.status === "invitee_pending"),
@@ -159,19 +162,25 @@ export default function GroupManageScreen() {
       setError("Unable to load communities. Please try again.");
       setPublicCommunitiesError("Unable to load public groups.");
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setPublicLoading(false);
     }
   }, []);
 
+  // Refresh everything the screen shows after a membership change.
+  const refreshAll = useCallback(async () => {
+    await Promise.all([refreshCommunities(), loadPublicAndInvites()]);
+  }, [refreshCommunities, loadPublicAndInvites]);
+
   useEffect(() => {
-    void loadCommunities();
-  }, [loadCommunities]);
+    void loadPublicAndInvites();
+  }, [loadPublicAndInvites]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    void loadCommunities();
-  }, [loadCommunities]);
+    void refreshAll().finally(() => setRefreshing(false));
+  }, [refreshAll]);
+
+  const loading = myCommunitiesLoading || publicLoading;
 
   const handleCreateCommunity = useCallback(async () => {
     const name = newCommunity.name.trim();
@@ -217,7 +226,7 @@ export default function GroupManageScreen() {
       }
       setNewCommunity(INITIAL_COMMUNITY);
       setShowCreateForm(false);
-      void loadCommunities();
+      void refreshAll();
       await refreshUser();
     } catch (err) {
       console.error("Failed to create community", err);
@@ -225,7 +234,7 @@ export default function GroupManageScreen() {
     } finally {
       setCreating(false);
     }
-  }, [newCommunity, requiresMaxCapacity, loadCommunities, refreshUser]);
+  }, [newCommunity, requiresMaxCapacity, refreshAll, refreshUser]);
 
   const runLeaveGroup = useCallback(
     async (community: CommunityDto) => {
@@ -237,7 +246,7 @@ export default function GroupManageScreen() {
         if (!res.response.ok) {
           throw new Error("leave failed");
         }
-        await loadCommunities();
+        await refreshAll();
         await refreshUser();
       } catch (e) {
         console.error("Failed to leave community", e);
@@ -246,7 +255,7 @@ export default function GroupManageScreen() {
         setLeavingCommunityId(null);
       }
     },
-    [loadCommunities, refreshUser],
+    [refreshAll, refreshUser],
   );
 
   const promptLeaveGroup = useCallback(
@@ -282,7 +291,7 @@ export default function GroupManageScreen() {
           if (!res.data) {
             throw new Error("no community returned");
           }
-          await loadCommunities();
+          await refreshAll();
           await refreshUser();
         } catch (e) {
           console.error("Failed to join public group", e);
@@ -300,7 +309,7 @@ export default function GroupManageScreen() {
         void proceed();
       }
     },
-    [memberCommunities, loadCommunities, refreshUser],
+    [memberCommunities, refreshAll, refreshUser],
   );
 
   const handleRequestAssignment = useCallback(() => {
@@ -310,7 +319,7 @@ export default function GroupManageScreen() {
       try {
         await userJoinGroupAssignment();
         await refreshUser();
-        await loadCommunities();
+        await refreshAll();
       } catch (e) {
         console.error("Failed to join group assignment", e);
         Alert.alert("Error", "Unable to start reassignment. Please try again.");
@@ -326,7 +335,7 @@ export default function GroupManageScreen() {
     } else {
       void run();
     }
-  }, [memberCommunities.length, refreshUser, loadCommunities]);
+  }, [memberCommunities.length, refreshUser, refreshAll]);
 
   const handleCancelAssignment = useCallback(async () => {
     setAssignmentBusy(true);
@@ -356,7 +365,7 @@ export default function GroupManageScreen() {
           if (!res.response.ok) {
             throw new Error("accept failed");
           }
-          await loadCommunities();
+          await refreshAll();
           await refreshUser();
         } catch (e) {
           console.error("Failed to accept invite", e);
@@ -374,7 +383,7 @@ export default function GroupManageScreen() {
         void run();
       }
     },
-    [memberCommunities, loadCommunities, refreshUser],
+    [memberCommunities, refreshAll, refreshUser],
   );
 
   const handleDeclineInvite = useCallback(
@@ -387,7 +396,7 @@ export default function GroupManageScreen() {
         if (!res.response.ok) {
           throw new Error("decline failed");
         }
-        await loadCommunities();
+        await refreshAll();
       } catch (e) {
         console.error("Failed to decline invite", e);
         Alert.alert("Error", "Unable to decline this invite.");
@@ -395,7 +404,7 @@ export default function GroupManageScreen() {
         setDecliningInviteId(null);
       }
     },
-    [loadCommunities],
+    [refreshAll],
   );
 
   const inviteRowBusy =

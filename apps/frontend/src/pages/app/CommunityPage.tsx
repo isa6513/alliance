@@ -17,6 +17,7 @@ import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { groupSettings } from "@alliance/shared/lib/copy";
 import { Features } from "@alliance/shared/lib/features";
 import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
+import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
 import { useOnNextDeadline } from "@alliance/shared/lib/useOnNextDeadline";
 import { cn } from "@alliance/shared/styles/util";
 import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
@@ -42,7 +43,6 @@ import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";
 import { isFeatureEnabled } from "../../lib/config";
 import { useMediaQuery } from "../../lib/useMediaQuery";
-import { useMyCommunities } from "../../lib/useMyCommunities";
 import MyGroupsPage from "./MyGroupsPage";
 
 export type Tab = "activity" | "members" | "groups" | "invites";

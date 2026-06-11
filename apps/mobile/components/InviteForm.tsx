@@ -1,12 +1,3 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  View,
-  Alert,
-  TouchableOpacity,
-  ScrollView,
-  Linking,
-} from "react-native";
-import { ChevronDown, ChevronRight } from "lucide-react-native";
 import type {
   CommunityDto,
   CreateOnetimeInviteDto,
@@ -14,21 +5,30 @@ import type {
 } from "@alliance/shared/client";
 import {
   communityCreateCommunity,
-  communityGetMyCommunities,
   userCreateOnetimeInvite,
 } from "@alliance/shared/client";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 import { getOnetimeInviteSignupUrl } from "@alliance/shared/lib/inviteUrls";
-import Card, { CardStyle } from "./system/Card";
-import Button, { ButtonColor } from "./system/Button";
-import Input from "./system/Input";
-import Text, { FontWeight } from "./system/Text";
+import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
+import { ChevronDown, ChevronRight } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Alert,
+  Linking,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useAuth } from "../lib/AuthContext";
+import { getBaseUrl } from "../lib/config";
+import { colors } from "../lib/style/colors";
 import AppMarkdownWrapper from "./AppMarkdownWrapper";
 import FormModal from "./forms/FormModal";
-import { colors } from "../lib/style/colors";
-import { getBaseUrl } from "../lib/config";
-import { useAuth } from "../lib/AuthContext";
+import Button, { ButtonColor } from "./system/Button";
+import Card, { CardStyle } from "./system/Card";
+import Input from "./system/Input";
+import Text, { FontWeight } from "./system/Text";
 
 type PlacementSelection =
   | { kind: "community"; id: number }
@@ -47,35 +47,25 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
   const [inviteeName, setInviteeName] = useState("");
   const [info, setInfo] = useState("");
   const [creatingInvite, setCreatingInvite] = useState(false);
-  const [communities, setCommunities] = useState<CommunityDto[]>([]);
+  const { communities, refreshCommunities } = useMyCommunities({});
   const [groupSelectModalOpen, setGroupSelectModalOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDescription, setNewGroupDescription] = useState("");
   const [creatingGroup, setCreatingGroup] = useState(false);
 
-  const refreshCommunities = useCallback(
-    async (resetSelection: boolean) => {
-      const response = await communityGetMyCommunities();
-      if (response.data) {
-        setCommunities(response.data);
-        if (resetSelection && user) {
-          const led = response.data.find((community: CommunityDto) =>
-            community.leaders.some(
-              (leader: { id: number }) => leader.id === user.id,
-            ),
-          );
-          setPlacement(
-            led ? { kind: "community", id: led.id } : { kind: "new" },
-          );
-        }
-      }
-    },
-    [user],
-  );
-
+  // Default placement to a group the user leads. Runs once so it never clobbers
+  // a manual selection on a later refetch.
+  const didInitPlacement = useRef(false);
   useEffect(() => {
-    void refreshCommunities(true);
-  }, [refreshCommunities]);
+    if (didInitPlacement.current || communities.length === 0 || !user) {
+      return;
+    }
+    didInitPlacement.current = true;
+    const led = communities.find((community: CommunityDto) =>
+      community.leaders.some((leader: { id: number }) => leader.id === user.id),
+    );
+    setPlacement(led ? { kind: "community", id: led.id } : { kind: "new" });
+  }, [communities, user]);
 
   const leaderCommunities = useMemo(() => {
     if (!user) return [] as CommunityDto[];
@@ -177,7 +167,7 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
         const community = response.data;
         setNewGroupName("");
         setNewGroupDescription("");
-        await refreshCommunities(false);
+        await refreshCommunities();
         setPlacement({ kind: "community", id: community.id });
         if (inviteeName.trim()) {
           await handleCreateInvite(community.id);
