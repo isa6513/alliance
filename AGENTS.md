@@ -39,8 +39,8 @@ Apply this to any branch keyed on a closed set (enum, string-literal union, tagg
 
 ## Result type
 
-Prefer the `Result<T, E>` type in `common/` for operations that can fail in expected ways (parsing, validation, fallible I/O you want callers to handle explicitly) instead of throwing or returning `null`/`undefined`. Import it as both the type and the helper namespace: `import { Result } from "@alliance/common/result"`. Use the helpers (`Result.map`, `Result.flatMap`, `Result.match`, `Result.unwrapOr`, `Result.fromPromise`, `Result.fromThrowable`, etc.) rather than hand-rolling `{ ok, ... }` objects or re-implementing this pattern. Don't reach for it where throwing is already idiomatic (e.g. NestJS controllers that rely on exception filters) — it's for making expected failure explicit, not replacing every `throw`.
+Prefer the `Result<T, E>` type in `common/` for operations that can fail in expected ways (parsing, validation, fallible I/O you want callers to handle explicitly) instead of throwing or returning `null`/`undefined`. Import it as both the type and the helper namespace: `import { Result } from "@alliance/common/result"`. Use the helpers rather than hand-rolling `{ ok, ... }` objects or re-implementing this pattern. Don't reach for it where throwing is already idiomatic (e.g. NestJS controllers that rely on exception filters) — it's for making expected failure explicit, not replacing every `throw`.
 
-The full source (it's small):
+The full source:
 
 @common/src/result.ts
