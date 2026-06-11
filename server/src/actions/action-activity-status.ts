@@ -43,7 +43,7 @@ function isTerminalActivity<T extends Pick<ActionActivity, 'type'>>(
  * Latest wins chronologically, so a completion after a withdrawal (or vice
  * versa) reflects most recent intent. Single source of truth for both the
  * self-view relation ({@link resolveUserActionRelation}) and the admin/leader
- * pill status; see `docs/action-relationships-audit.md`.
+ * pill status.
  *
  * Assumes `activities` are pre-filtered to one user + one action.
  */

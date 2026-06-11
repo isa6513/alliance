@@ -33,7 +33,7 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
  * driven by a precomputed cohort-member set, for notifications/roster). This one
  * consumes the full cohort-*expression* result (`computeIsInCohortExpression`)
  * as `inCohort`, and stays pure/sync so the caller controls when the DB-hitting
- * cohort evaluation runs. Not yet unified; see `docs/action-relationships-audit.md`.
+ * cohort evaluation runs. Not yet unified.
  */
 export function computeShouldParticipateInAction(params: {
   action: Pick<
