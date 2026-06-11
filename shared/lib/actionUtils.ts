@@ -272,6 +272,52 @@ export type CompletionData = {
   nTotal: number;
 };
 
+/** One (user, status) pair feeding completion aggregation. */
+type CompletionObservation = {
+  userId: number;
+  status: UserActionRelationDetailDto["status"];
+};
+
+/**
+ * Shared core for completion aggregation. A user counts as having completed
+ * everything only when none of their observed statuses are `incomplete` (see
+ * {@link STATUS_TO_COMPLETION}); users with only `none` statuses are omitted
+ * entirely. Callers supply their own iteration order, so this stays
+ * O(observations) regardless of how they're grouped.
+ */
+function summarizeCompletion(observations: Iterable<CompletionObservation>): {
+  completedAllCurrentActions: Record<number, boolean>;
+  nCompleted: number;
+  nTotal: number;
+} {
+  const anyComplete = new Set<number>();
+  const anyIncomplete = new Set<number>();
+  for (const { userId, status } of observations) {
+    const completion = STATUS_TO_COMPLETION[status];
+    if (completion === "complete") {
+      anyComplete.add(userId);
+    }
+    if (completion === "incomplete") {
+      anyIncomplete.add(userId);
+    }
+  }
+
+  const completedAllCurrentActions: Record<number, boolean> =
+    Object.fromEntries(
+      Array.from(new Set([...anyComplete, ...anyIncomplete])).map((userId) => [
+        userId,
+        !anyIncomplete.has(userId),
+      ]),
+    );
+  const completedAllValues = Object.values(completedAllCurrentActions);
+
+  return {
+    completedAllCurrentActions,
+    nCompleted: completedAllValues.filter((completed) => completed).length,
+    nTotal: completedAllValues.length,
+  };
+}
+
 export function calculateCompletionData(params: {
   filteredActionIds: number[];
   userActionRelations: Record<number, UserActionRelationDetailDto[]>;
@@ -281,45 +327,23 @@ export function calculateCompletionData(params: {
   nTotal: number;
 } {
   const { filteredActionIds, userActionRelations } = params;
-
   const filteredActionIdSet = new Set(filteredActionIds);
-  const anyComplete = new Set<number>();
-  const anyIncomplete = new Set<number>();
-  for (const [userIdKey, relationDetails] of Object.entries(
-    userActionRelations,
-  )) {
-    const userId = Number(userIdKey);
-    for (const relationDetail of relationDetails) {
-      if (!filteredActionIdSet.has(relationDetail.actionId)) {
-        continue;
-      }
-      const completion = STATUS_TO_COMPLETION[relationDetail.status];
-      if (completion === "complete") {
-        anyComplete.add(userId);
-      }
-      if (completion === "incomplete") {
-        anyIncomplete.add(userId);
+
+  function* observe(): Generator<CompletionObservation> {
+    for (const [userIdKey, relationDetails] of Object.entries(
+      userActionRelations,
+    )) {
+      const userId = Number(userIdKey);
+      for (const relationDetail of relationDetails) {
+        if (!filteredActionIdSet.has(relationDetail.actionId)) {
+          continue;
+        }
+        yield { userId, status: relationDetail.status };
       }
     }
   }
 
-  const completedAllCurrentActions: Record<number, boolean> = {};
-  for (const userIdKey of Object.keys(userActionRelations)) {
-    const userId = Number(userIdKey);
-    if (anyComplete.has(userId)) {
-      completedAllCurrentActions[userId] = true;
-    }
-    if (anyIncomplete.has(userId)) {
-      completedAllCurrentActions[userId] = false;
-    }
-  }
-  const completedAllValues = Object.values(completedAllCurrentActions);
-
-  return {
-    completedAllCurrentActions,
-    nCompleted: completedAllValues.filter((completed) => completed).length,
-    nTotal: completedAllValues.length,
-  };
+  return summarizeCompletion(observe());
 }
 
 export function calculateAllCompletionData(params: {
@@ -356,42 +380,22 @@ export function calculateAllCompletionData(params: {
   function calculateCompletionData(
     actionIds: UserActionSummaryDto[],
   ): CompletionData {
-    const { anyComplete, anyIncomplete } = actionIds.reduce(
-      (acc, action) => {
+    function* observe(): Generator<CompletionObservation> {
+      for (const action of actionIds) {
         const relationDetailByUser = relationDetailByActionThenUser.get(
           action.id,
         );
         if (!relationDetailByUser) {
-          return acc;
+          continue;
         }
         for (const [userId, relationDetail] of relationDetailByUser) {
-          const completion = STATUS_TO_COMPLETION[relationDetail.status];
-          if (completion === "complete") {
-            acc.anyComplete.add(userId);
-          }
-          if (completion === "incomplete") {
-            acc.anyIncomplete.add(userId);
-          }
+          yield { userId, status: relationDetail.status };
         }
-        return acc;
-      },
-      {
-        anyComplete: new Set<number>(),
-        anyIncomplete: new Set<number>(),
-      },
-    );
+      }
+    }
 
-    const completedAllCurrentActions = Object.fromEntries(
-      Array.from(new Set([...anyComplete, ...anyIncomplete])).map((userId) => [
-        userId,
-        !anyIncomplete.has(userId),
-      ]),
-    );
-    const completedAllValues = Object.values(completedAllCurrentActions);
     return {
-      completedAllCurrentActions,
-      nCompleted: completedAllValues.filter((completed) => completed).length,
-      nTotal: completedAllValues.length,
+      ...summarizeCompletion(observe()),
       nActions: actionIds.length,
     };
   }
