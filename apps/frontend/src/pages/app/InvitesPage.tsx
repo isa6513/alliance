@@ -1,53 +1,40 @@
-import {
-  OnetimeInviteDto,
-  userApproveOnetimeInvite,
-  userDeleteOnetimeInvite,
-  userGetOnetimeInvitesOverview,
-  userNmembers,
-  userRejectOnetimeInvite,
-} from "@alliance/shared/client";
+import { OnetimeInviteDto, userNmembers } from "@alliance/shared/client";
 import { MEMBER_GOAL } from "@alliance/shared/lib/constants";
+import {
+  deleteInviteConfirmation,
+  inviteBuckets,
+} from "@alliance/shared/lib/copy";
+import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
+import { queryKeys } from "@alliance/shared/lib/queryKeys";
+import { useOnetimeInvitesOverview } from "@alliance/shared/lib/useOnetimeInvitesOverview";
+import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "../../lib/AuthContext";
-import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import OnetimeInviteListItem from "../../components/OnetimeInviteListItem";
-import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
-import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
-import {
-  inviteBuckets,
-  deleteInviteConfirmation,
-} from "@alliance/shared/lib/copy";
-import InviteForm from "../../components/InviteForm";
-import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import { useQuery } from "@tanstack/react-query";
 import { UserCheck } from "lucide-react";
-import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
+import { useCallback, useMemo, useRef, useState } from "react";
+import InviteForm from "../../components/InviteForm";
+import OnetimeInviteListItem from "../../components/OnetimeInviteListItem";
+import { useAuth } from "../../lib/AuthContext";
 
 const InvitesPage = () => {
   const { user } = useAuth();
   const { error: errorToast, confirm } = useToast();
-  const [loadingInvites, setLoadingInvites] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [invites, setInvites] = useState<OnetimeInviteDto[]>([]);
+  const {
+    invites,
+    isLoading: loadingInvites,
+    isError,
+    upsertInvite,
+    approveInvite,
+    rejectInvite,
+    deleteInvite,
+  } = useOnetimeInvitesOverview({ enabled: Boolean(user) });
   const [copiedInviteId, setCopiedInviteId] = useState<number | null>(null);
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      setLoadingInvites(true);
-      const response = await userGetOnetimeInvitesOverview();
-      if (response.data) {
-        setInvites(response.data);
-        setError(null);
-      } else {
-        setError("Failed to load invites");
-      }
-      setLoadingInvites(false);
-    })();
-  }, []);
 
   const leaderCommunityIds = useMemo(
     () => getLeaderCommunityIds(user ?? undefined),
@@ -94,45 +81,20 @@ const InvitesPage = () => {
 
   const handleApproveInvite = useCallback(
     (inviteId: number) => {
-      void (async () => {
-        const response = await userApproveOnetimeInvite({
-          path: { inviteId },
-        });
-        if (!response.data) {
-          errorToast(
-            `Failed to approve invite: ${response.response.statusText}`,
-          );
-          return;
-        }
-
-        setInvites((prev) =>
-          prev.map((invite) =>
-            invite.id === inviteId ? response.data : invite,
-          ),
-        );
-      })();
+      void approveInvite(inviteId).catch((err: Error) => {
+        errorToast(`Failed to approve invite: ${err.message}`);
+      });
     },
-    [errorToast],
+    [approveInvite, errorToast],
   );
 
   const handleRejectInvite = useCallback(
     (inviteId: number) => {
-      void (async () => {
-        const response = await userRejectOnetimeInvite({
-          path: { inviteId },
-        });
-
-        if (response.error) {
-          errorToast(
-            `Failed to reject invite: ${response.response.statusText}`,
-          );
-          return;
-        }
-
-        setInvites((prev) => prev.filter((request) => request.id !== inviteId));
-      })();
+      void rejectInvite(inviteId).catch((err: Error) => {
+        errorToast(`Failed to reject invite: ${err.message}`);
+      });
     },
-    [errorToast],
+    [rejectInvite, errorToast],
   );
 
   const handleDeleteInvite = useCallback(
@@ -149,31 +111,29 @@ const InvitesPage = () => {
           return;
         }
 
-        const response = await userDeleteOnetimeInvite({ path: { inviteId } });
-        if (!response.error) {
-          setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
-        }
+        await deleteInvite(inviteId).catch(() => {});
       })();
     },
-    [confirm],
+    [confirm, deleteInvite],
   );
 
-  const handleDeleteRequest = useCallback((inviteId: number) => {
-    void (async () => {
-      const response = await userDeleteOnetimeInvite({ path: { inviteId } });
-      if (!response.error) {
-        setInvites((prev) => prev.filter((invite) => invite.id !== inviteId));
-      }
-    })();
-  }, []);
+  const handleDeleteRequest = useCallback(
+    (inviteId: number) => {
+      void deleteInvite(inviteId).catch(() => {});
+    },
+    [deleteInvite],
+  );
 
-  const handleInviteCreated = useCallback((invite: OnetimeInviteDto) => {
-    setInvites((prev) => [invite, ...prev]);
-  }, []);
+  const handleInviteCreated = useCallback(
+    (invite: OnetimeInviteDto) => {
+      upsertInvite(invite);
+    },
+    [upsertInvite],
+  );
 
   const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
     useQuery({
-      queryKey: ["userNmembers"],
+      queryKey: queryKeys.allianceMemberCount(),
       queryFn: () => userNmembers().then((res) => res.data?.count ?? 0),
       enabled: Boolean(user),
     });
@@ -242,7 +202,9 @@ const InvitesPage = () => {
           </div>
 
           <InviteForm onInviteCreated={handleInviteCreated} />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {isError && (
+            <p className="text-red-500 text-sm">Failed to load invites</p>
+          )}
         </div>
 
         {actionable.length === 0 &&
