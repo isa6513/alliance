@@ -4,19 +4,27 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ActionUpdate } from 'src/actions/entities/action-update.entity';
+import { toString as mdastToString } from 'mdast-util-to-string';
+import { remark } from 'remark';
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
+import { ActionUpdate } from 'src/actions/entities/action-update.entity';
+import {
+  Comment,
+  CommentParentObject,
+} from 'src/forum/entities/comment.entity';
 import { MailService } from 'src/mail/mail.service';
 import { MmsService } from 'src/mms/mms.service';
 import { actionUrl, commentUrl } from 'src/search/approutes';
+import { ProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
 import { DeepPartial, In, IsNull, LessThan, type Repository } from 'typeorm';
-import { ActionEventNotif } from './entities/action-event-notif.entity';
+import { NotifClickDto } from './dto/notifclick.dto';
 import {
   NotificationDto,
   NotificationSourceType,
 } from './dto/notification.dto';
 import { MarkUnreadContentReadDto } from './dto/unread-content.dto';
+import { ActionEventNotif } from './entities/action-event-notif.entity';
 import {
   NOTIFICATION_CATEGORY_PRIORITIES,
   Notification,
@@ -26,14 +34,6 @@ import {
   UnreadContent,
   UnreadContentType,
 } from './entities/unread-content.entity';
-import { NotifClickDto } from './dto/notifclick.dto';
-import {
-  Comment,
-  CommentParentObject,
-} from 'src/forum/entities/comment.entity';
-import { ProfileDto } from 'src/user/dto/user.dto';
-import { remark } from 'remark';
-import { toString as mdastToString } from 'mdast-util-to-string';
 
 export type CreateNotifParams = Required<
   Pick<
@@ -233,6 +233,7 @@ export class NotifsService {
         user: true,
         mail: true,
         mms: true,
+        pushes: true,
       },
     });
   }

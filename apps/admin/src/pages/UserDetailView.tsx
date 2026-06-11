@@ -12,6 +12,7 @@ import {
 } from "@alliance/shared/client";
 import {
   ActionEventNotifDto,
+  Push,
   TagDto,
   TagSummaryDto,
   TimeSpentForUserDto,
@@ -156,25 +157,25 @@ const UserDetailView: React.FC = () => {
     );
   }, [actionRelationsState]);
 
-  const { emailNotifs, textNotifs, otherNotifs } = useMemo(() => {
+  const { emailNotifs, textNotifs, pushNotifs } = useMemo(() => {
+    // Categorize each channel independently
     const email: ActionEventNotifDto[] = [];
     const text: ActionEventNotifDto[] = [];
-    const other: ActionEventNotifDto[] = [];
+    const push: Push[] = [];
     notifs.forEach((notif) => {
-      if (notif.mail) {
-        email.push(notif);
-      } else if (notif.mms) {
-        text.push(notif);
-      } else {
-        other.push(notif);
-      }
+      if (notif.mail) email.push(notif);
+      if (notif.mms) text.push(notif);
+      notif.pushes?.forEach((p) => push.push(p));
     });
     const sortDesc = (arr: ActionEventNotifDto[]) =>
       [...arr].sort((a, b) => notifTimestamp(b) - notifTimestamp(a));
     return {
       emailNotifs: sortDesc(email),
       textNotifs: sortDesc(text),
-      otherNotifs: sortDesc(other),
+      pushNotifs: [...push].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      ),
     };
   }, [notifs]);
 
@@ -189,6 +190,12 @@ const UserDetailView: React.FC = () => {
     const clicked = textNotifs.filter((n) => n.mms?.clickedLink).length;
     return Math.round((clicked / textNotifs.length) * 100);
   }, [textNotifs]);
+
+  const pushOpenRate = useMemo(() => {
+    if (!pushNotifs.length) return null;
+    const opened = pushNotifs.filter((p) => p.openedAt).length;
+    return Math.round((opened / pushNotifs.length) * 100);
+  }, [pushNotifs]);
 
   const sortedAwayRanges = useMemo(() => {
     return [...awayRanges].sort(
@@ -497,13 +504,8 @@ const UserDetailView: React.FC = () => {
           <section>
             <h2 className="text-sm font-semibold text-zinc-700 mb-2">
               Notifications ({notifs.length})
-              {otherNotifs.length > 0 && (
-                <span className="font-normal text-zinc-400 ml-1">
-                  + {otherNotifs.length} push
-                </span>
-              )}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Texts */}
               <div className="border border-zinc-200 rounded overflow-hidden">
                 <div className="bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200 flex items-center justify-between">
@@ -655,6 +657,82 @@ const UserDetailView: React.FC = () => {
                 ) : (
                   <p className="px-3 py-2 text-xs text-zinc-500">
                     No emails sent.
+                  </p>
+                )}
+              </div>
+
+              {/* Push */}
+              <div className="border border-zinc-200 rounded overflow-hidden">
+                <div className="bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200 flex items-center justify-between">
+                  <span>Push ({pushNotifs.length})</span>
+                  {pushOpenRate !== null && (
+                    <span className="font-normal text-zinc-500">
+                      {pushOpenRate}% open rate
+                    </span>
+                  )}
+                </div>
+                {pushNotifs.length ? (
+                  <div className="max-h-64 overflow-y-auto divide-y divide-zinc-100">
+                    {pushNotifs.map((push) => {
+                      const status =
+                        push.receiptStatus ||
+                        push.ticketStatus ||
+                        (push.errorCode ? "error" : "sent");
+                      return (
+                        <div
+                          key={push.id}
+                          className="px-3 py-2 text-xs hover:bg-zinc-50 flex flex-row items-center w-full"
+                        >
+                          <Link
+                            to={`/database/?table=push&id=${push.id}`}
+                            target="_blank"
+                            className="p-1 shrink-0 pr-3 text-zinc-600 hover:text-black"
+                          >
+                            <Database size={12} />
+                          </Link>
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span
+                                className={cn(
+                                  "font-medium",
+                                  ["ok", "delivered"].includes(
+                                    status.toLowerCase(),
+                                  )
+                                    ? "text-green-600"
+                                    : ["error", "failed"].includes(
+                                          status.toLowerCase(),
+                                        )
+                                      ? "text-red-600"
+                                      : "text-amber-600",
+                                )}
+                              >
+                                {status}
+                              </span>
+                              <span className="text-zinc-400">
+                                {new Date(push.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {push.body && (
+                              <p className="text-zinc-600 line-clamp-2 mt-0.5">
+                                {push.body}
+                              </p>
+                            )}
+                            {push.errorMessage && (
+                              <p className="text-red-500 line-clamp-2 mt-0.5">
+                                {push.errorMessage}
+                              </p>
+                            )}
+                            {push.openedAt && (
+                              <span className="text-green-600">Opened</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="px-3 py-2 text-xs text-zinc-500">
+                    No push notifications sent.
                   </p>
                 )}
               </div>
