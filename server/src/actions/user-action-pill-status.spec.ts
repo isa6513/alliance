@@ -1,7 +1,6 @@
 import { UserActionRelationPillStatus } from '../user/dto/user-action-relations.dto';
 import { ActionActivityType } from './entities/action-activity.entity';
 import {
-  ACTIVITY_TYPE_TO_PILL_STATUS,
   resolveUserActionPillStatus,
   UserActionPillStatusInput,
 } from './user-action-pill-status';
@@ -20,48 +19,34 @@ function input(
 }
 
 /**
- * Fold a chronological sequence of activity types into a single status, the
- * same way the service does: most recent status-bearing activity wins, and a
- * non-terminal activity (`?? prev`) leaves the prior status intact.
+ * Fold a chronological (oldest-first) sequence of activity types into a single
+ * status, mirroring the fold in `ActionsService`: a status-bearing activity
+ * sets the status, and a non-terminal activity (dismissal / follow-up form)
+ * leaves the prior status intact.
  */
 function foldActivities(
   ...types: ActionActivityType[]
 ): UserActionRelationPillStatus | null {
-  return types.reduce<UserActionRelationPillStatus | null>(
-    (status, type) => ACTIVITY_TYPE_TO_PILL_STATUS[type] ?? status,
-    null,
-  );
+  let status: UserActionRelationPillStatus | null = null;
+  for (const type of types) {
+    switch (type) {
+      case ActionActivityType.USER_COMPLETED:
+        status = UserActionRelationPillStatus.Completed;
+        break;
+      case ActionActivityType.USER_WONT_COMPLETE:
+        status = UserActionRelationPillStatus.WontComplete;
+        break;
+      case ActionActivityType.USER_DISMISSED:
+      case ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM:
+        break;
+      default:
+        throw new Error(`Unknown activity type: ${type satisfies never}`);
+    }
+  }
+  return status;
 }
 
-describe('ACTIVITY_TYPE_TO_PILL_STATUS', () => {
-  it('maps USER_COMPLETED to completed', () => {
-    expect(
-      ACTIVITY_TYPE_TO_PILL_STATUS[ActionActivityType.USER_COMPLETED],
-    ).toBe(UserActionRelationPillStatus.Completed);
-  });
-
-  it('maps USER_WONT_COMPLETE to wont_complete', () => {
-    expect(
-      ACTIVITY_TYPE_TO_PILL_STATUS[ActionActivityType.USER_WONT_COMPLETE],
-    ).toBe(UserActionRelationPillStatus.WontComplete);
-  });
-
-  it('returns null for dismissals (leaves underlying status untouched)', () => {
-    expect(
-      ACTIVITY_TYPE_TO_PILL_STATUS[ActionActivityType.USER_DISMISSED],
-    ).toBeNull();
-  });
-
-  it('returns null for follow-up form submissions', () => {
-    expect(
-      ACTIVITY_TYPE_TO_PILL_STATUS[
-        ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM
-      ],
-    ).toBeNull();
-  });
-});
-
-describe('ACTIVITY_TYPE_TO_PILL_STATUS folding', () => {
+describe('foldActivities', () => {
   it('is null with no activities', () => {
     expect(foldActivities()).toBeNull();
   });

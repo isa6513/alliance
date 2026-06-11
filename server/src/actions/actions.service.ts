@@ -158,10 +158,7 @@ import {
   ReminderGroup,
   ReminderGroupTimingMode,
 } from './entities/reminder-group.entity';
-import {
-  ACTIVITY_TYPE_TO_PILL_STATUS,
-  resolveUserActionPillStatus,
-} from './user-action-pill-status';
+import { resolveUserActionPillStatus } from './user-action-pill-status';
 
 type SuspendPlanContext = {
   orderedSuites: Array<{ suiteId: number; pastDate: Date | null }>;
@@ -2821,7 +2818,8 @@ export class ActionsService {
       });
     });
 
-    const activitiesP = run(async () => {
+    /** oldest activity first */
+    const temporallySortedActivitiesP = run(async () => {
       const actions = await actionsP;
       const actionIds = actions.map((a) => a.id);
       return this.actionActivityRepository.find({
@@ -2917,27 +2915,37 @@ export class ActionsService {
       }
     }
 
-    for (const activity of await activitiesP) {
+    for (const activity of await temporallySortedActivitiesP) {
       const detail = getDetail({
         userId: activity.userId,
         actionId: activity.actionId,
       });
-      if (
-        !detail.latestActivityAt ||
-        detail.latestActivityAt < activity.createdAt
-      ) {
-        detail.latestActivityAt = activity.createdAt;
-        detail.latestActivityType = activity.type;
-        // activitiesP is createdAt ASC; fold so the latest status-bearing
-        // activity wins.
-        detail.activityStatus =
-          ACTIVITY_TYPE_TO_PILL_STATUS[activity.type] ?? detail.activityStatus;
-        // Capture withdrawal reason details for wont_complete and declined activities
-        if (activity.type === ActionActivityType.USER_WONT_COMPLETE) {
+      detail.latestActivityAt = activity.createdAt;
+      detail.latestActivityType = activity.type;
+      switch (activity.type) {
+        case ActionActivityType.USER_WONT_COMPLETE: {
+          // Capture withdrawal reason details for wont_complete activities.
           detail.declineReason = activity.declineReason;
           detail.isMoral = activity.isMoral;
           detail.outOfTime = activity.outOfTime;
+          detail.activityStatus = UserActionRelationPillStatus.WontComplete;
+          break;
         }
+        case ActionActivityType.USER_COMPLETED: {
+          // Clear any previous decline reason details.
+          detail.declineReason = undefined;
+          detail.isMoral = undefined;
+          detail.outOfTime = undefined;
+          detail.activityStatus = UserActionRelationPillStatus.Completed;
+          break;
+        }
+        case ActionActivityType.USER_DISMISSED:
+        case ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM:
+          break;
+        default:
+          throw new Error(
+            `Unknown activity type: ${activity.type satisfies never}`,
+          );
       }
     }
 
