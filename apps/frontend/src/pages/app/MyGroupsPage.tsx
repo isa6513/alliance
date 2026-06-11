@@ -1,6 +1,5 @@
 import {
   CommunityDto,
-  communityGetPublicCommunities,
   communityJoinPublicCommunity,
   communityLeave,
   userJoinGroupAssignment,
@@ -10,6 +9,7 @@ import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { requestGroupAssignmentConfirmation } from "@alliance/shared/lib/copy";
 import useIncomingCommunityInvites from "@alliance/shared/lib/useIncomingCommunityInvites";
 import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
+import { usePublicCommunities } from "@alliance/shared/lib/usePublicCommunities";
 import { cn } from "@alliance/shared/styles/util";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
@@ -37,9 +37,11 @@ export type MyGroupsPageProps = {
 
 const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
   const { user, refreshUser } = useAuth();
-  const { communities, removeCommunity } = useMyCommunities({
-    selectedCommunityId: null,
-  });
+  const { communities, removeCommunity, refreshCommunities } = useMyCommunities(
+    {
+      selectedCommunityId: null,
+    },
+  );
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [leavingCommunityId, setLeavingCommunityId] = useState<number | null>(
     null,
@@ -97,31 +99,15 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
     return new Set((communities ?? []).map((community) => community.id));
   }, [communities]);
 
-  const [publicCommunities, setPublicCommunities] = useState<CommunityDto[]>(
-    [],
-  );
-  const [publicCommunitiesLoading, setPublicCommunitiesLoading] =
-    useState(false);
-  const [publicCommunitiesError, setPublicCommunitiesError] = useState<
-    string | null
-  >(null);
+  const {
+    publicCommunities,
+    isLoading: publicCommunitiesLoading,
+    isError: publicCommunitiesError,
+    refetch: refetchPublicCommunities,
+  } = usePublicCommunities();
   const [joiningCommunityId, setJoiningCommunityId] = useState<number | null>(
     null,
   );
-
-  useEffect(() => {
-    setPublicCommunitiesLoading(true);
-    setPublicCommunitiesError(null);
-    void (async () => {
-      const response = await communityGetPublicCommunities();
-      if (response.data) {
-        setPublicCommunities(response.data);
-      } else {
-        setPublicCommunitiesError("Unable to load public groups.");
-      }
-      setPublicCommunitiesLoading(false);
-    })();
-  }, []);
 
   const getRemovalMessage = useCallback(
     (targetName?: string) => {
@@ -243,7 +229,11 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
           throw new Error("No group returned");
         }
         success(`You joined ${community.name}.`);
-        await refreshUser();
+        await Promise.all([
+          refreshUser(),
+          refreshCommunities(),
+          refetchPublicCommunities(),
+        ]);
         onSelectCommunity(response.data.id);
       } catch (err) {
         console.error("Failed to join public group", err);
@@ -257,6 +247,8 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
       getRemovalMessage,
       onSelectCommunity,
       refreshUser,
+      refreshCommunities,
+      refetchPublicCommunities,
       showError,
       success,
     ],
@@ -544,7 +536,7 @@ const MyGroupsPage = ({ onSelectCommunity, onBack }: MyGroupsPageProps) => {
             <span>Loading public groups...</span>
           </div>
         ) : publicCommunitiesError ? (
-          <span className="text-red-500">{publicCommunitiesError}</span>
+          <span className="text-red-500">Unable to load public groups.</span>
         ) : publicCommunities.length ? (
           <List>
             {publicCommunities.map((community) => {

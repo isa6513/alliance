@@ -2,7 +2,6 @@ import {
   communityAcceptCommunityInvite,
   communityCreateCommunity,
   communityGetIncomingCommunityInvitesForUser,
-  communityGetPublicCommunities,
   communityJoinPublicCommunity,
   communityLeave,
   communityRejectCommunityInvite,
@@ -18,6 +17,7 @@ import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { GROUP_MAX_CAPACITY_DEFAULT } from "@alliance/shared/lib/constants";
 import { requestGroupAssignmentConfirmation } from "@alliance/shared/lib/copy";
 import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
+import { usePublicCommunities } from "@alliance/shared/lib/usePublicCommunities";
 import { router } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -79,16 +79,15 @@ export default function GroupManageScreen() {
     isLoading: myCommunitiesLoading,
     refreshCommunities,
   } = useMyCommunities({});
-  const [publicCommunities, setPublicCommunities] = useState<CommunityDto[]>(
-    [],
-  );
+  const {
+    publicCommunities,
+    isLoading: publicLoading,
+    isError: publicCommunitiesError,
+    refetch: refetchPublicCommunities,
+  } = usePublicCommunities();
   const [pendingInvites, setPendingInvites] = useState<CommunityInviteDto[]>(
     [],
   );
-  const [publicCommunitiesError, setPublicCommunitiesError] = useState<
-    string | null
-  >(null);
-  const [publicLoading, setPublicLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [newCommunity, setNewCommunity] =
@@ -137,13 +136,11 @@ export default function GroupManageScreen() {
     [publicCommunities],
   );
 
-  // Own communities come from the shared useMyCommunities cache, not here.
-  const loadPublicAndInvites = useCallback(async () => {
+  // Public communities come from the shared usePublicCommunities cache; own
+  // communities come from useMyCommunities. Only invites are fetched here.
+  const loadInvites = useCallback(async () => {
     try {
-      const [publicRes, invitesRes] = await Promise.all([
-        communityGetPublicCommunities(),
-        communityGetIncomingCommunityInvitesForUser(),
-      ]);
+      const invitesRes = await communityGetIncomingCommunityInvitesForUser();
       if (invitesRes.data) {
         setPendingInvites(
           invitesRes.data.filter((i) => i.status === "invitee_pending"),
@@ -151,29 +148,24 @@ export default function GroupManageScreen() {
       } else {
         setPendingInvites([]);
       }
-      if (publicRes.data) {
-        setPublicCommunities(publicRes.data);
-        setPublicCommunitiesError(null);
-      } else {
-        setPublicCommunitiesError("Unable to load public groups.");
-      }
     } catch (err) {
-      console.error("Failed to load communities", err);
+      console.error("Failed to load invites", err);
       setError("Unable to load communities. Please try again.");
-      setPublicCommunitiesError("Unable to load public groups.");
-    } finally {
-      setPublicLoading(false);
     }
   }, []);
 
   // Refresh everything the screen shows after a membership change.
   const refreshAll = useCallback(async () => {
-    await Promise.all([refreshCommunities(), loadPublicAndInvites()]);
-  }, [refreshCommunities, loadPublicAndInvites]);
+    await Promise.all([
+      refreshCommunities(),
+      refetchPublicCommunities(),
+      loadInvites(),
+    ]);
+  }, [refreshCommunities, refetchPublicCommunities, loadInvites]);
 
   useEffect(() => {
-    void loadPublicAndInvites();
-  }, [loadPublicAndInvites]);
+    void loadInvites();
+  }, [loadInvites]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -637,7 +629,7 @@ export default function GroupManageScreen() {
                 {publicCommunitiesError ? (
                   <View className="px-4 py-4">
                     <Text className="text-sm text-red-500">
-                      {publicCommunitiesError}
+                      Unable to load public groups.
                     </Text>
                   </View>
                 ) : sortedPublicCommunities.length ? (
