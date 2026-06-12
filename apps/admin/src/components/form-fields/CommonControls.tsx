@@ -32,9 +32,7 @@ import {
   tasksGetForm,
   tasksListForms,
   tasksTestCustomExpression,
-  userGetTags,
   userList,
-  type TagDto,
   type UserDto,
 } from "@alliance/shared/client";
 import {
@@ -43,6 +41,7 @@ import {
   parseVisibilityFormula,
   serializeVisibilityFormula,
 } from "@alliance/shared/forms/visibilityFormula";
+import { useTagsAdmin } from "@alliance/shared/lib/useTagsAdmin";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { cn } from "@alliance/shared/styles/util";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -1792,79 +1791,6 @@ function useUsers(enabled: boolean): {
   };
 }
 
-let cachedTags: TagDto[] | null = null;
-let cachedTagsError: string | null = null;
-let pendingTagsRequest: Promise<TagDto[]> | null = null;
-
-async function fetchTags(): Promise<TagDto[]> {
-  const response = await userGetTags();
-  if (response.data) {
-    return response.data;
-  }
-  if (response.error) {
-    throw response.error;
-  }
-  throw new Error("Unknown error loading tags");
-}
-
-function useTags(enabled: boolean): {
-  tags: TagDto[];
-  loading: boolean;
-  error: string | null;
-} {
-  const [tags, setTags] = useState<TagDto[]>(() => cachedTags ?? []);
-  const [loading, setLoading] = useState<boolean>(
-    () => enabled && !cachedTags && !cachedTagsError,
-  );
-  const [error, setError] = useState<string | null>(() => cachedTagsError);
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    if (cachedTags) {
-      setTags(cachedTags);
-      setLoading(false);
-      return;
-    }
-
-    let isCancelled = false;
-    if (!pendingTagsRequest) {
-      pendingTagsRequest = fetchTags();
-    }
-
-    setLoading(true);
-
-    pendingTagsRequest
-      .then((data) => {
-        if (isCancelled) return;
-        cachedTags = data;
-        cachedTagsError = null;
-        setTags(data);
-        setError(null);
-        setLoading(false);
-      })
-      .catch((err: unknown) => {
-        if (isCancelled) return;
-        const message =
-          err instanceof Error ? err.message : "Failed to load tags";
-        cachedTagsError = message;
-        setError(message);
-        setLoading(false);
-      })
-      .finally(() => {
-        pendingTagsRequest = null;
-      });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [enabled]);
-
-  return { tags, loading, error };
-}
-
 type FormListItem = { id: number; title: string };
 
 let cachedFormList: FormListItem[] | null = null;
@@ -1946,7 +1872,9 @@ export function CustomValidatorSelect({
   const { validators, loading, error } = useCustomValidators();
   const isMemberTag = type === "MemberTag";
   const isCustomExpression = type === "CustomExpression";
-  const { tags, loading: tagsLoading } = useTags(isMemberTag);
+  const { tags, isLoading: tagsLoading } = useTagsAdmin({
+    enabled: isMemberTag,
+  });
   const {
     users,
     loading: usersLoading,

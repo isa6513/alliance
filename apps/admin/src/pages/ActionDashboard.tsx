@@ -1,5 +1,5 @@
 import { isQuestionField } from "@alliance/common/forms/form-schema";
-import type { ActionSuiteDto, TagDto } from "@alliance/shared/client";
+import type { ActionSuiteDto } from "@alliance/shared/client";
 import {
   ActionDto,
   actionsArchive,
@@ -22,7 +22,6 @@ import {
   tasksGetForm,
   tasksGetFormResponses,
   tasksListForms,
-  userGetTags,
   userMembers,
 } from "@alliance/shared/client";
 import type {
@@ -33,6 +32,7 @@ import type {
 } from "@alliance/shared/client/types.gen";
 import type { CohortExpression } from "@alliance/shared/cohort-expression.types";
 import { clipboardCopy } from "@alliance/shared/lib/copy";
+import { useTagsAdmin } from "@alliance/shared/lib/useTagsAdmin";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { cn } from "@alliance/shared/styles/util";
 import { getApiUrl, getBaseUrl } from "@alliance/sharedweb/lib/config";
@@ -130,8 +130,7 @@ const ActionDashboard: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [availableForms, setAvailableForms] = useState<FormDto[]>([]);
   const [formsLoading, setFormsLoading] = useState<boolean>(true);
-  const [availableTags, setAvailableTags] = useState<TagDto[]>([]);
-  const [tagsLoading, setTagsLoading] = useState<boolean>(true);
+  const { tags: availableTags, isLoading: tagsLoading } = useTagsAdmin();
   const [availableSuites, setAvailableSuites] = useState<ActionSuiteDto[]>([]);
   const [suitesLoading, setSuitesLoading] = useState<boolean>(true);
   const [cohortExpression, setCohortExpression] =
@@ -206,31 +205,6 @@ const ActionDashboard: React.FC = () => {
     };
 
     loadSuites();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadTags = async () => {
-      try {
-        const response = await userGetTags();
-        if (!cancelled && response.data) {
-          setAvailableTags(response.data);
-        }
-      } catch (err) {
-        console.error("Failed to load groups:", err);
-      } finally {
-        if (!cancelled) {
-          setTagsLoading(false);
-        }
-      }
-    };
-
-    loadTags();
 
     return () => {
       cancelled = true;

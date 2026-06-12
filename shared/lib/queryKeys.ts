@@ -6,4 +6,7 @@ export const queryKeys = {
   myAwayRanges: () => ["userGetAwayRanges"] as const,
   onetimeInvitesOverview: () => ["userGetOnetimeInvitesOverview"] as const,
   publicCommunities: () => ["communityGetPublicCommunities"] as const,
+
+  // Admin
+  tagsAdmin: () => ["userGetTagsAdmin"] as const,
 } as const;

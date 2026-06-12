@@ -1,23 +1,22 @@
+import type { FormSchema } from "@alliance/common/forms/form-schema";
 import {
-  ActionSuiteDto,
   actionsCreateGeneralUpdate,
   actionsFindOneGeneralUpdate,
   actionsSuites,
+  ActionSuiteDto,
   actionsUpdateGeneralUpdate,
   CreateGeneralUpdateDto,
   GeneralUpdateAdminDto,
-  TagDto,
   UpdateGeneralUpdateDto,
-  userGetTags,
   userMembers,
 } from "@alliance/shared/client";
-import type { FormSchema } from "@alliance/common/forms/form-schema";
-import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
-import React, { useCallback, useEffect, useState } from "react";
+import { useTagsAdmin } from "@alliance/shared/lib/useTagsAdmin";
 import { cn } from "@alliance/shared/styles/util";
+import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import { X } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { FormBuilder } from "../components/FormBuilder";
-import { X } from "lucide-react";
 
 const FormSection: React.FC<{
   title: string;
@@ -73,8 +72,7 @@ const GeneralUpdatePage: React.FC = () => {
 
   const [form, setForm] = useState<GeneralUpdateForm>(emptyForm);
 
-  const [availableTags, setAvailableTags] = useState<TagDto[]>([]);
-  const [tagsLoading, setTagsLoading] = useState<boolean>(true);
+  const { tags: availableTags, isLoading: tagsLoading } = useTagsAdmin();
   const [availableSuites, setAvailableSuites] = useState<ActionSuiteDto[]>([]);
   const [suitesLoading, setSuitesLoading] = useState<boolean>(true);
   const [availableUsers, setAvailableUsers] = useState<UserSelectUser[]>([]);
@@ -104,25 +102,7 @@ const GeneralUpdatePage: React.FC = () => {
     [setSearchParams],
   );
 
-  // Load tags, suites, users
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const response = await userGetTags();
-        if (!cancelled && response.data) setAvailableTags(response.data);
-      } catch (err) {
-        console.error("Failed to load tags:", err);
-      } finally {
-        if (!cancelled) setTagsLoading(false);
-      }
-    };
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+  // Load suites, users
   useEffect(() => {
     let cancelled = false;
     const load = async () => {

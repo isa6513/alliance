@@ -3,10 +3,7 @@ import {
   analyticsGetTimeSpentPerUser,
   analyticsGetTimeSpentPerUserTotal,
   communityGetAllMemberContactInfoAdmin,
-  userAddUserToTag,
-  userGetTags,
   userList,
-  userRemoveUserFromTag,
 } from "@alliance/shared/client";
 import {
   CommunityMemberContactInfoDto,
@@ -20,6 +17,7 @@ import {
 } from "@alliance/shared/client/types.gen";
 import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
 import { calculateCompletionData } from "@alliance/shared/lib/actionUtils";
+import { useTagsAdmin } from "@alliance/shared/lib/useTagsAdmin";
 import { cn } from "@alliance/shared/styles/util";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
 import CommunityMembersTable from "@alliance/sharedweb/ui/CommunityMembersTable";
@@ -39,7 +37,7 @@ const UsersList: React.FC = () => {
   const [timeSpentPerUserTotal, setTimeSpentPerUserTotal] = useState<
     TimeSpentForUserDto[]
   >([]);
-  const [tags, setTags] = useState<TagDto[]>([]);
+  const { tags, addUserToTag, removeUserFromTag } = useTagsAdmin();
   const [actionSummaries, setActionSummaries] = useState<
     UserActionSummaryDto[]
   >([]);
@@ -82,10 +80,6 @@ const UsersList: React.FC = () => {
 
   useEffect(() => {
     userList().then((res) => setUsers(res.data || []));
-  }, []);
-
-  useEffect(() => {
-    userGetTags().then((res) => setTags(res.data || []));
   }, []);
 
   useEffect(() => {
@@ -313,16 +307,6 @@ const UsersList: React.FC = () => {
     });
   }, []);
 
-  const updateTagInState = useCallback((updatedTag: TagDto) => {
-    setTags((prev) => {
-      const tagExists = prev.some((tag) => tag.id === updatedTag.id);
-      if (tagExists) {
-        return prev.map((tag) => (tag.id === updatedTag.id ? updatedTag : tag));
-      }
-      return [...prev, updatedTag];
-    });
-  }, []);
-
   const handleUserTagToggle = useCallback(
     async (userId: number, tagId: string, nextChecked: boolean) => {
       const key = `${userId}-${tagId}`;
@@ -333,23 +317,10 @@ const UsersList: React.FC = () => {
       });
       setTagMutationError(null);
       try {
-        if (nextChecked) {
-          const res = await userAddUserToTag({
-            path: { tagId },
-            body: { userId },
-          });
-          if (res.data) {
-            updateTagInState(res.data);
-          }
-        } else {
-          const res = await userRemoveUserFromTag({
-            path: { tagId },
-            body: { userId },
-          });
-          if (res.data) {
-            updateTagInState(res.data);
-          }
-        }
+        const mutateAsync = nextChecked
+          ? addUserToTag.mutateAsync
+          : removeUserFromTag.mutateAsync;
+        await mutateAsync({ tagId, body: { userId } });
       } catch (error) {
         console.error("Failed to update tag membership", error);
         setTagMutationError("Failed to update tag membership. Try again.");
@@ -361,7 +332,7 @@ const UsersList: React.FC = () => {
         });
       }
     },
-    [updateTagInState],
+    [addUserToTag.mutateAsync, removeUserFromTag.mutateAsync],
   );
 
   return (

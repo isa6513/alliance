@@ -10,10 +10,9 @@ import {
   actionsUpdateReminderGroup,
   PreviewNotificationPlanDto,
   ReminderGroupDto,
-  TagDto,
-  userGetTags,
   userList,
 } from "@alliance/shared/client";
+import { useTagsAdmin } from "@alliance/shared/lib/useTagsAdmin";
 import { CardStyle } from "@alliance/shared/styles/card";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -84,10 +83,13 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     memberEvents.length > 0 ? memberEvents[0].id : null, //TODO: collate or move between events
   );
   const [users, setUsers] = useState<UserSelectUser[]>([]);
-  const [userTags, setUserTags] = useState<TagDto[]>([]);
+  const {
+    tags: userTags,
+    isLoading: loadingUserTags,
+    isError: userTagsLoadFailed,
+  } = useTagsAdmin();
+  const userTagsError = userTagsLoadFailed ? "Failed to load user tags." : null;
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
-  const [loadingUserTags, setLoadingUserTags] = useState<boolean>(false);
-  const [userTagsError, setUserTagsError] = useState<string | null>(null);
 
   const [createGroupExpanded, setCreateGroupExpanded] =
     useState<boolean>(false);
@@ -133,30 +135,6 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
         setCreateError("Failed to load users.");
       })
       .finally(() => setLoadingUsers(false));
-  }, []);
-
-  useEffect(() => {
-    setLoadingUserTags(true);
-    setUserTagsError(null);
-    userGetTags()
-      .then((response) => {
-        if (response.error) {
-          throw new Error(
-            errorMessage({
-              error: response.error,
-              fallback: "Failed to load user groups.",
-            }),
-          );
-        }
-        setUserTags(response.data ?? []);
-      })
-      .catch((err) => {
-        console.error(err);
-        setUserTagsError(
-          err instanceof Error ? err.message : "Failed to load user tags.",
-        );
-      })
-      .finally(() => setLoadingUserTags(false));
   }, []);
 
   const refreshReminderGroups = useCallback(async (eventId: number) => {

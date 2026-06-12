@@ -1,15 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  userCreateTag,
-  userDeleteTag,
-  userGetTags,
-  userUpdateTag,
-} from "@alliance/shared/client";
 import { CreateTagDto, TagDto } from "@alliance/shared/client/types.gen";
-import Card from "@alliance/sharedweb/ui/Card";
+import { useTagsAdmin } from "@alliance/shared/lib/useTagsAdmin";
 import { CardStyle } from "@alliance/shared/styles/card";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Badge from "@alliance/sharedweb/ui/Badge";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 const INITIAL_NEW_TAG = {
@@ -19,37 +14,13 @@ const INITIAL_NEW_TAG = {
 };
 
 const TagManagement: React.FC = () => {
-  const [tags, setTags] = useState<TagDto[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { tags, isLoading, isError, createTag, updateTag, deleteTag } =
+    useTagsAdmin();
+  const { mutateAsync: createTagAsync } = createTag;
+  const { mutateAsync: updateTagAsync } = updateTag;
+  const { mutateAsync: deleteTagAsync } = deleteTag;
   const [error, setError] = useState<string | null>(null);
   const [newTag, setNewTag] = useState<CreateTagDto>(INITIAL_NEW_TAG);
-  const [creating, setCreating] = useState(false);
-  const [updatingTags, setUpdatingTags] = useState<Set<string>>(
-    () => new Set()
-  );
-  const [deletingTags, setDeletingTags] = useState<Set<string>>(
-    () => new Set()
-  );
-
-  const loadTags = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await userGetTags();
-      if (res.data) {
-        setTags(res.data);
-      }
-    } catch (err) {
-      console.error("Failed to load tags", err);
-      setError("Failed to load tags. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadTags();
-  }, [loadTags]);
 
   const sortedTags = useMemo(() => {
     return [...tags].sort((a, b) => a.name.localeCompare(b.name));
@@ -65,99 +36,67 @@ const TagManagement: React.FC = () => {
         setError("Name and description are required.");
         return;
       }
-      setCreating(true);
       setError(null);
       try {
-        const res = await userCreateTag({
-          body: {
-            name,
-            description,
-            publicDisplayName: publicDisplayName || undefined,
-          },
+        await createTagAsync({
+          name,
+          description,
+          publicDisplayName: publicDisplayName || undefined,
         });
-        if (res.data) {
-          setTags((prev) => [...prev, res.data]);
-          setNewTag(INITIAL_NEW_TAG);
-        }
+        setNewTag(INITIAL_NEW_TAG);
       } catch (err) {
         console.error("Failed to create tag", err);
         setError("Unable to create tag. Please try again.");
-      } finally {
-        setCreating(false);
       }
     },
-    [newTag]
+    [newTag, createTagAsync],
   );
 
   const handleUpdateTag = useCallback(
     async (tagId: string, values: CreateTagDto) => {
-      setUpdatingTags((prev) => {
-        const next = new Set(prev);
-        next.add(tagId);
-        return next;
-      });
       setError(null);
       try {
-        const res = await userUpdateTag({
-          path: { tagId },
+        await updateTagAsync({
+          tagId,
           body: {
             name: values.name.trim(),
             description: values.description.trim(),
             publicDisplayName: values.publicDisplayName?.trim() || undefined,
           },
         });
-        if (res.data) {
-          setTags((prev) =>
-            prev.map((tag) => (tag.id === res.data.id ? res.data : tag))
-          );
-          return true;
-        }
+        return true;
       } catch (err) {
         console.error("Failed to update tag", err);
         setError("Unable to update tag. Please try again.");
-      } finally {
-        setUpdatingTags((prev) => {
-          const next = new Set(prev);
-          next.delete(tagId);
-          return next;
-        });
+        return false;
       }
-      return false;
     },
-    []
+    [updateTagAsync],
   );
 
-  const handleDeleteTag = useCallback(async (tagId: string) => {
-    setDeletingTags((prev) => {
-      const next = new Set(prev);
-      next.add(tagId);
-      return next;
-    });
-    setError(null);
-    try {
-      await userDeleteTag({
-        path: { tagId },
-      });
-      setTags((prev) => prev.filter((tag) => tag.id !== tagId));
-      return true;
-    } catch (err) {
-      console.error("Failed to delete tag", err);
-      setError("Unable to delete tag. Please try again.");
-    } finally {
-      setDeletingTags((prev) => {
-        const next = new Set(prev);
-        next.delete(tagId);
-        return next;
-      });
-    }
-    return false;
-  }, []);
+  const handleDeleteTag = useCallback(
+    async (tagId: string) => {
+      setError(null);
+      try {
+        await deleteTagAsync(tagId);
+        return true;
+      } catch (err) {
+        console.error("Failed to delete tag", err);
+        setError("Unable to delete tag. Please try again.");
+        return false;
+      }
+    },
+    [deleteTagAsync],
+  );
+
+  const errorMessage =
+    error ?? (isError ? "Failed to load tags. Please try again." : null);
 
   return (
     <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-4">
-      {error && (
+      {errorMessage && (
         <div className="w-full">
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-sm text-red-500">{errorMessage}</p>
         </div>
       )}
 
@@ -168,7 +107,7 @@ const TagManagement: React.FC = () => {
             Back to members
           </Link>
         </div>
-        {loading ? (
+        {isLoading ? (
           <p className="text-sm text-zinc-500">Loading groups...</p>
         ) : sortedTags.length ? (
           sortedTags.map((tag) => (
@@ -177,8 +116,10 @@ const TagManagement: React.FC = () => {
               tag={tag}
               onSave={(values) => handleUpdateTag(tag.id, values)}
               onDelete={() => handleDeleteTag(tag.id)}
-              isUpdating={updatingTags.has(tag.id)}
-              isDeleting={deletingTags.has(tag.id)}
+              isUpdating={
+                updateTag.isPending && updateTag.variables?.tagId === tag.id
+              }
+              isDeleting={deleteTag.isPending && deleteTag.variables === tag.id}
             />
           ))
         ) : (
@@ -235,9 +176,9 @@ const TagManagement: React.FC = () => {
             type="submit"
             color={ButtonColor.Blue}
             className="self-start"
-            disabled={creating}
+            disabled={createTag.isPending}
           >
-            {creating ? "Creating..." : "Create tag"}
+            {createTag.isPending ? "Creating..." : "Create tag"}
           </Button>
         </form>
       </Card>
@@ -286,7 +227,7 @@ const TagCard: React.FC<TagCardProps> = ({
 
   const confirmAndDelete = async () => {
     const confirmed = window.confirm(
-      `Delete tag "${tag.name}"? This cannot be undone.`
+      `Delete tag "${tag.name}"? This cannot be undone.`,
     );
     if (!confirmed) {
       return;
