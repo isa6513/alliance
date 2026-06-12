@@ -5,13 +5,7 @@ import {
   communityGetCommunityInvites,
   CommunityInviteDto,
   CreateOnetimeInviteDto,
-  OnetimeInviteDto,
   ProfileDto,
-  userApproveOnetimeInvite,
-  userCreateOnetimeInvite,
-  userDeleteOnetimeInvite,
-  userGetOnetimeInvitesByCommunity,
-  userRejectOnetimeInvite,
 } from "@alliance/shared/client";
 import {
   deleteInviteConfirmation,
@@ -22,6 +16,7 @@ import {
   bucketCommunityInvitesByActionability,
   bucketOnetimeInvitesByActionability,
 } from "@alliance/shared/lib/inviteUtils";
+import { useCommunityOnetimeInvites } from "@alliance/shared/lib/useCommunityOnetimeInvites";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
@@ -61,7 +56,14 @@ const CommunityInvitesLeaderTab = ({
 
   const [creatingInvite, setCreatingInvite] = useState(false);
 
-  const [onetimeInvites, setOnetimeInvites] = useState<OnetimeInviteDto[]>([]);
+  const {
+    invites: onetimeInvites,
+    isError: onetimeInvitesError,
+    createInvite,
+    approveInvite,
+    rejectInvite,
+    deleteInvite,
+  } = useCommunityOnetimeInvites(communityId);
   const [communityInvites, setCommunityInvites] = useState<
     CommunityInviteDto[]
   >([]);
@@ -92,15 +94,6 @@ const CommunityInvitesLeaderTab = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    userGetOnetimeInvitesByCommunity({ path: { communityId } }).then(
-      (response) => {
-        if (response.data) {
-          setOnetimeInvites(response.data);
-        } else {
-          setError("Failed to load new member invites");
-        }
-      },
-    );
     communityGetCommunityInvites({ path: { communityId } }).then((response) => {
       if (response.data) {
         setCommunityInvites(response.data);
@@ -186,14 +179,14 @@ const CommunityInvitesLeaderTab = ({
       ...(info.trim() && { info: info.trim() }),
     } satisfies CreateOnetimeInviteDto;
 
-    userCreateOnetimeInvite({ body })
-      .then((response) => {
-        if (response.data) {
-          setName("");
-          setInfo("");
-          setOnetimeInvites((prev) => [response.data, ...prev]);
-          setError(null);
-        }
+    createInvite(body)
+      .then(() => {
+        setName("");
+        setInfo("");
+        setError(null);
+      })
+      .catch(() => {
+        setError("Failed to create invite");
       })
       .finally(() => {
         setCreatingInvite(false);
@@ -228,36 +221,15 @@ const CommunityInvitesLeaderTab = ({
   };
 
   const onApproveOnetimeInvite = (inviteId: number) => {
-    (async () => {
-      const response = await userApproveOnetimeInvite({
-        path: { inviteId },
-      });
-      if (!response.data) {
-        errorToast(`Failed to approve invite: ${response.response.statusText}`);
-        return;
-      }
-
-      setOnetimeInvites((prev) =>
-        prev.map((invite) => (invite.id === inviteId ? response.data : invite)),
-      );
-    })();
+    approveInvite(inviteId).catch(() => {
+      errorToast("Failed to approve invite");
+    });
   };
 
   const onRejectOnetimeInvite = (inviteId: number) => {
-    (async () => {
-      const response = await userRejectOnetimeInvite({
-        path: { inviteId },
-      });
-
-      if (response.error) {
-        errorToast(`Failed to reject invite: ${response.response.statusText}`);
-        return;
-      }
-
-      setOnetimeInvites((prev) =>
-        prev.filter((invite) => invite.id !== inviteId),
-      );
-    })();
+    rejectInvite(inviteId).catch(() => {
+      errorToast("Failed to reject invite");
+    });
   };
 
   const handleDeleteInvite = (
@@ -276,12 +248,8 @@ const CommunityInvitesLeaderTab = ({
         return;
       }
 
-      userDeleteOnetimeInvite({ path: { inviteId } }).then((response) => {
-        if (!response.error) {
-          setOnetimeInvites((prev) =>
-            prev.filter((invite) => invite.id !== inviteId),
-          );
-        }
+      deleteInvite(inviteId).catch(() => {
+        errorToast("Failed to delete invite");
       });
     })();
   };
@@ -359,6 +327,11 @@ const CommunityInvitesLeaderTab = ({
               </Button>
             </div>
           </Card>
+        )}
+        {onetimeInvitesError && (
+          <p className="text-red-500 text-sm">
+            Failed to load new member invites
+          </p>
         )}
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
