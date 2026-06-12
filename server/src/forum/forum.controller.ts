@@ -313,7 +313,7 @@ export class ForumController {
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Update post experts and Q&A mode' })
   @ApiOkResponse({ type: PostDto })
-  async updatePostExperts(
+  async updatePostExpertsAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostExpertsDto: UpdatePostExpertsDto,
   ): Promise<PostDto> {
@@ -332,7 +332,7 @@ export class ForumController {
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Update post authors' })
   @ApiOkResponse({ type: PostDto })
-  async updatePostAuthors(
+  async updatePostAuthorsAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostAuthorsDto: UpdatePostAuthorsDto,
   ): Promise<PostDto> {
@@ -347,7 +347,9 @@ export class ForumController {
   @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Toggle pin status of a comment' })
   @ApiOkResponse({ type: CommentDto })
-  async pinComment(@Param('id', ParseIntPipe) id: number): Promise<CommentDto> {
+  async pinCommentAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CommentDto> {
     return new CommentDto(await this.forumService.togglePinComment(id));
   }
 }

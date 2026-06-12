@@ -1,47 +1,39 @@
 import {
-  analyticsGetDailyStats,
-  analyticsGetActionStats,
-  analyticsRecalculateActionStats,
-  analyticsGetMemberCompletionRetention,
-  analyticsGetAggregateStats,
-  analyticsGetContractStatusHistory,
-  analyticsGetTimeToChurnSamples,
-  analyticsGetInviteFunnel,
-  actionsFindAllWithDrafts,
-  actionsReminderGroupsForEvent,
-  actionsSentNotifsForGroup,
+  actionsFindAllWithDraftsAdmin,
+  actionsReminderGroupsForEventAdmin,
+  actionsSentNotifsForGroupAdmin,
+  analyticsGetActionStatsAdmin,
+  analyticsGetAggregateStatsAdmin,
+  analyticsGetContractStatusHistoryAdmin,
+  analyticsGetDailyStatsAdmin,
+  analyticsGetInviteFunnelAdmin,
+  analyticsGetMemberCompletionRetentionAdmin,
+  analyticsGetTimeToChurnSamplesAdmin,
+  analyticsRecalculateActionStatsAdmin,
 } from "@alliance/shared/client";
 import { client } from "@alliance/shared/client/client.gen";
 import {
-  TimeSeriesChart,
-  formatDateAsLocal,
-  fullDateFormatter,
-  type ChartSeries,
-  type DataPoint,
-  type MultiLineSeries,
-} from "../components/TimeSeriesChart";
-import {
-  DailyStatsDto,
   ActionStatsWithOnboardingDto,
-  MemberCompletionRetentionCohortDto,
   AggregateStatsDto,
   ContractStatusPointDto,
-  TimeToChurnSampleDto,
+  DailyStatsDto,
   InviteFunnelDto,
+  MemberCompletionRetentionCohortDto,
+  TimeToChurnSampleDto,
 } from "@alliance/shared/client/types.gen";
-import chroma from "chroma-js";
 import { cn } from "@alliance/shared/styles/util";
+import chroma from "chroma-js";
 import {
+  area,
+  bin,
+  curveMonotoneX,
+  extent,
   max,
   min,
-  scaleLinear,
-  scaleBand,
-  scaleTime,
-  area,
-  curveMonotoneX,
   range,
-  bin,
-  extent,
+  scaleBand,
+  scaleLinear,
+  scaleTime,
 } from "d3";
 import React, {
   useCallback,
@@ -51,6 +43,14 @@ import React, {
   useState,
 } from "react";
 import ActionCompletionCurveChart from "../components/ActionCompletionCurveChart";
+import {
+  TimeSeriesChart,
+  formatDateAsLocal,
+  fullDateFormatter,
+  type ChartSeries,
+  type DataPoint,
+  type MultiLineSeries,
+} from "../components/TimeSeriesChart";
 
 type ParsedDailyStats = DailyStatsDto & { parsedDate: Date };
 type ActionStatsWithWithdrawals = ActionStatsWithOnboardingDto & {
@@ -383,7 +383,7 @@ const StatsPage: React.FC = () => {
     }
 
     try {
-      const response = await analyticsGetDailyStats({
+      const response = await analyticsGetDailyStatsAdmin({
         query: {
           date: parsedStart.toISOString(),
           endDate: parsedEnd.toISOString(),
@@ -410,7 +410,7 @@ const StatsPage: React.FC = () => {
   const loadActionStats = useCallback(async () => {
     setActionStatsLoading(true);
     try {
-      const response = await analyticsGetActionStats();
+      const response = await analyticsGetActionStatsAdmin();
       setActionStats(response.data ?? []);
     } catch (err) {
       console.error("Failed to load action stats", err);
@@ -422,7 +422,7 @@ const StatsPage: React.FC = () => {
   const loadReminderGroupClickRates = useCallback(async () => {
     setReminderGroupClickRatesLoading(true);
     try {
-      const actionsResponse = await actionsFindAllWithDrafts();
+      const actionsResponse = await actionsFindAllWithDraftsAdmin();
       const actions = actionsResponse.data ?? [];
 
       const memberActionEvents = actions.flatMap((action) =>
@@ -445,7 +445,7 @@ const StatsPage: React.FC = () => {
         memberActionEvents,
         16,
         async (eventSummary) => {
-          const response = await actionsReminderGroupsForEvent({
+          const response = await actionsReminderGroupsForEventAdmin({
             path: { id: eventSummary.eventId },
           });
           return (response.data ?? []).map((group) => ({
@@ -473,7 +473,7 @@ const StatsPage: React.FC = () => {
         uniqueReminderGroups,
         16,
         async (entry) => {
-          const response = await actionsSentNotifsForGroup({
+          const response = await actionsSentNotifsForGroupAdmin({
             path: { groupId: entry.group.id },
           });
           return {
@@ -550,7 +550,7 @@ const StatsPage: React.FC = () => {
   const loadRetentionCohorts = useCallback(async () => {
     setRetentionLoading(true);
     try {
-      const response = await analyticsGetMemberCompletionRetention();
+      const response = await analyticsGetMemberCompletionRetentionAdmin();
       setRetentionCohorts(response.data ?? []);
     } catch (err) {
       console.error("Failed to load retention cohorts", err);
@@ -562,7 +562,7 @@ const StatsPage: React.FC = () => {
   const loadAggregateStats = useCallback(async () => {
     setAggregateStatsLoading(true);
     try {
-      const response = await analyticsGetAggregateStats();
+      const response = await analyticsGetAggregateStatsAdmin();
       setAggregateStats(response.data ?? null);
     } catch (err) {
       console.error("Failed to load aggregate stats", err);
@@ -574,7 +574,7 @@ const StatsPage: React.FC = () => {
   const loadTimeToChurnSamples = useCallback(async () => {
     setTimeToChurnLoading(true);
     try {
-      const response = await analyticsGetTimeToChurnSamples();
+      const response = await analyticsGetTimeToChurnSamplesAdmin();
       setTimeToChurnSamples(response.data ?? []);
     } catch (err) {
       console.error("Failed to load time to churn samples", err);
@@ -616,7 +616,7 @@ const StatsPage: React.FC = () => {
   const handleRecalculateActionStats = useCallback(async () => {
     setActionStatsLoading(true);
     try {
-      const actionStatsResponse = await analyticsRecalculateActionStats();
+      const actionStatsResponse = await analyticsRecalculateActionStatsAdmin();
       setActionStats(actionStatsResponse.data ?? []);
       setCompletionCurveRefreshKey((prev) => prev + 1);
     } catch (err) {
@@ -649,7 +649,7 @@ const StatsPage: React.FC = () => {
   const loadInviteFunnel = useCallback(async () => {
     setInviteFunnelLoading(true);
     try {
-      const response = await analyticsGetInviteFunnel({
+      const response = await analyticsGetInviteFunnelAdmin({
         query: {
           startDate: inviteFunnelRange.start,
           endDate: inviteFunnelRange.end,
@@ -670,7 +670,7 @@ const StatsPage: React.FC = () => {
   const loadContractStatusHistory = useCallback(async () => {
     setContractStatusLoading(true);
     try {
-      const response = await analyticsGetContractStatusHistory({
+      const response = await analyticsGetContractStatusHistoryAdmin({
         query: {
           startDate: contractStatusRange.start,
           endDate: contractStatusRange.end,

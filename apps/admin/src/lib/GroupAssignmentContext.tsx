@@ -1,6 +1,6 @@
 import {
   UserDto,
-  userGetGroupAssignmentMembers,
+  userGetGroupAssignmentMembersAdmin,
 } from "@alliance/shared/client";
 import {
   createContext,
@@ -29,7 +29,7 @@ export const GroupAssignmentProvider = memo(
     ] = useState<UserDto[]>([]);
 
     useEffect(() => {
-      userGetGroupAssignmentMembers().then((response) => {
+      userGetGroupAssignmentMembersAdmin().then((response) => {
         if (response.data) {
           setMembersUndergoingGroupAssignment(response.data);
         }
@@ -39,7 +39,7 @@ export const GroupAssignmentProvider = memo(
     const assignMembers = useCallback((memberIds: number[]) => {
       const memberIdSet = new Set(memberIds);
       setMembersUndergoingGroupAssignment((prev) =>
-        prev.filter((member) => !memberIdSet.has(member.id))
+        prev.filter((member) => !memberIdSet.has(member.id)),
       );
     }, []);
 
@@ -48,7 +48,7 @@ export const GroupAssignmentProvider = memo(
         membersUndergoingGroupAssignment,
         assignMembers,
       }),
-      [membersUndergoingGroupAssignment, assignMembers]
+      [membersUndergoingGroupAssignment, assignMembers],
     );
 
     return (
@@ -56,7 +56,7 @@ export const GroupAssignmentProvider = memo(
         {children}
       </GroupAssignmentContext.Provider>
     );
-  }
+  },
 );
 
 GroupAssignmentProvider.displayName = "GroupAssignmentProvider";
@@ -71,7 +71,7 @@ export const useGroupAssignment = () => {
   }
   if (!ctx)
     throw new Error(
-      "useGroupAssignment must be used within a GroupAssignmentProvider"
+      "useGroupAssignment must be used within a GroupAssignmentProvider",
     );
   return ctx;
 };

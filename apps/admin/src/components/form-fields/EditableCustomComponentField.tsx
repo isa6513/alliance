@@ -1,5 +1,5 @@
 import type { CustomComponentField } from "@alliance/common/forms/form-schema";
-import { externalShareTargetsFindAll } from "@alliance/shared/client";
+import { externalShareTargetsFindAllAdmin } from "@alliance/shared/client";
 import type {
   CustomComponentConfigField,
   CustomComponentDefinition,
@@ -398,9 +398,9 @@ function ExternalShareTargetSelect({
   error,
 }: ExternalShareTargetSelectProps) {
   const { data: targets, isPending } = useQuery({
-    queryKey: ["externalShareTargetsFindAll"],
+    queryKey: ["externalShareTargetsFindAllAdmin"],
     queryFn: async () => {
-      const res = await externalShareTargetsFindAll();
+      const res = await externalShareTargetsFindAllAdmin();
       return res.data ?? [];
     },
   });

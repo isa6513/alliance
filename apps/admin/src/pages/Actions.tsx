@@ -1,9 +1,12 @@
-import { ActionDto, actionsFindAllWithDrafts } from "@alliance/shared/client";
+import {
+  ActionDto,
+  actionsFindAllWithDraftsAdmin,
+} from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import ActionTimeline from "../components/ActionTimeline";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import ActionListCard from "../components/ActionListCard";
+import ActionTimeline from "../components/ActionTimeline";
 
 export const getLastPastEventDate = (
   action: Pick<ActionDto, "events">,
@@ -47,7 +50,7 @@ const ActionsList: React.FC = () => {
 
   const loadActions = useCallback(async () => {
     try {
-      const response = await actionsFindAllWithDrafts();
+      const response = await actionsFindAllWithDraftsAdmin();
       if (response.data) {
         setActions(response.data.filter((action) => !action.archived));
       }

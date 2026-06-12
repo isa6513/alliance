@@ -1,5 +1,8 @@
 import { errorMessage } from "@alliance/common/errorMessage";
-import { userList, userSendPushNotification } from "@alliance/shared/client";
+import {
+  userListAdmin,
+  userSendPushNotificationAdmin,
+} from "@alliance/shared/client";
 import type {
   PushDto,
   TestPushNotificationDto,
@@ -33,7 +36,7 @@ const TestPushNotification: React.FC = () => {
 
   const loadUsers = useCallback(() => {
     setUsersLoading(true);
-    userList()
+    userListAdmin()
       .then((response) => {
         if (response.error) {
           throw new Error(
@@ -74,7 +77,7 @@ const TestPushNotification: React.FC = () => {
         userId,
         message: trimmed,
       };
-      const response = await userSendPushNotification({ body: payload });
+      const response = await userSendPushNotificationAdmin({ body: payload });
       if (response.error || !response.response.ok) {
         setError(
           errorMessage({

@@ -23,6 +23,10 @@ import {
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AdminViewerService } from './admin-viewer.service';
 import {
+  CreateRecordDto,
+  CreateRecordResponseDto,
+} from './dto/create-record.dto';
+import {
   DeleteRecordsDto,
   DeleteRecordsResponseDto,
 } from './dto/delete-records.dto';
@@ -32,10 +36,6 @@ import {
   UpdateRecordDto,
   UpdateRecordResponseDto,
 } from './dto/update-record.dto';
-import {
-  CreateRecordDto,
-  CreateRecordResponseDto,
-} from './dto/create-record.dto';
 
 @ApiTags('admin-viewer')
 @Controller('admin-viewer')
@@ -45,7 +45,7 @@ export class AdminViewerController {
 
   @Get('tables')
   @ApiOkResponse({ type: TableListDto })
-  async getTables(): Promise<TableListDto> {
+  async getTablesAdmin(): Promise<TableListDto> {
     return this.adminViewerService.getTables();
   }
 
@@ -66,7 +66,7 @@ export class AdminViewerController {
       forbidUnknownValues: true,
     }),
   )
-  getTableData(
+  getTableDataAdmin(
     @Param('tableName') tableName: string,
     @Query() query: TableDataQueryDto,
   ): Promise<TableDataDto> {
@@ -88,7 +88,7 @@ export class AdminViewerController {
       forbidUnknownValues: true,
     }),
   )
-  createRecord(
+  createRecordAdmin(
     @Param('tableName') tableName: string,
     @Body() createData: CreateRecordDto,
   ): Promise<CreateRecordResponseDto> {
@@ -110,7 +110,7 @@ export class AdminViewerController {
       forbidUnknownValues: true,
     }),
   )
-  updateRecord(
+  updateRecordAdmin(
     @Param('tableName') tableName: string,
     @Body() updateData: UpdateRecordDto,
   ): Promise<UpdateRecordResponseDto> {
@@ -132,7 +132,7 @@ export class AdminViewerController {
       forbidUnknownValues: true,
     }),
   )
-  deleteRecords(
+  deleteRecordsAdmin(
     @Param('tableName') tableName: string,
     @Body() deleteData: DeleteRecordsDto,
   ): Promise<DeleteRecordsResponseDto> {

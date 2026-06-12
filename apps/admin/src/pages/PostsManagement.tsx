@@ -1,8 +1,8 @@
 import {
   forumGetPostsForAdmin,
-  forumUpdatePostAuthors,
-  forumUpdatePostExperts,
-  userList,
+  forumUpdatePostAuthorsAdmin,
+  forumUpdatePostExpertsAdmin,
+  userListAdmin,
 } from "@alliance/shared/client";
 import type { PostDto } from "@alliance/shared/client/types.gen";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -65,7 +65,7 @@ const PostsManagementPage: React.FC = () => {
 
   useEffect(() => {
     setUsersLoading(true);
-    userList()
+    userListAdmin()
       .then((response) => {
         const rawUsers = response.data ?? [];
         setUsers(
@@ -98,7 +98,7 @@ const PostsManagementPage: React.FC = () => {
     setSaving(true);
     try {
       const [expertsResponse, authorsResponse] = await Promise.all([
-        forumUpdatePostExperts({
+        forumUpdatePostExpertsAdmin({
           path: { id: selectedPost.id },
           body: {
             expertIds: expertSelection,
@@ -108,7 +108,7 @@ const PostsManagementPage: React.FC = () => {
             showClusterTags,
           },
         }),
-        forumUpdatePostAuthors({
+        forumUpdatePostAuthorsAdmin({
           path: { id: selectedPost.id },
           body: {
             authorIds: authorSelection,

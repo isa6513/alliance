@@ -1,9 +1,9 @@
 import { appendQueryParam, isValidHttpUrl } from "@alliance/common/url";
 import {
-  externalShareTargetsCreate,
-  externalShareTargetsFindAll,
-  externalShareTargetsRemove,
-  externalShareTargetsUpdate,
+  externalShareTargetsCreateAdmin,
+  externalShareTargetsFindAllAdmin,
+  externalShareTargetsRemoveAdmin,
+  externalShareTargetsUpdateAdmin,
 } from "@alliance/shared/client";
 import type {
   CreateExternalShareTargetDto,
@@ -34,7 +34,7 @@ const ExternalShareTargetsPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await externalShareTargetsFindAll();
+      const res = await externalShareTargetsFindAllAdmin();
       if (res.data) {
         setTargets(res.data);
       }
@@ -67,7 +67,7 @@ const ExternalShareTargetsPage: React.FC = () => {
       setCreating(true);
       setError(null);
       try {
-        const res = await externalShareTargetsCreate({
+        const res = await externalShareTargetsCreateAdmin({
           body: { name, url, paramName },
         });
         const created = res.data;
@@ -90,7 +90,7 @@ const ExternalShareTargetsPage: React.FC = () => {
       setUpdatingIds((prev) => new Set(prev).add(id));
       setError(null);
       try {
-        const res = await externalShareTargetsUpdate({
+        const res = await externalShareTargetsUpdateAdmin({
           path: { id },
           body: {
             name: values.name.trim(),
@@ -129,7 +129,7 @@ const ExternalShareTargetsPage: React.FC = () => {
     setDeletingIds((prev) => new Set(prev).add(id));
     setError(null);
     try {
-      await externalShareTargetsRemove({ path: { id } });
+      await externalShareTargetsRemoveAdmin({ path: { id } });
       setTargets((prev) => prev.filter((t) => t.id !== id));
       return true;
     } catch (err) {

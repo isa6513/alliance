@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react";
 import type {
   AnyField,
-  CheckboxField,
   CheckboxExtractionTarget,
+  CheckboxField,
   CityField,
   CustomComponentField,
   PhoneField,
@@ -11,23 +10,24 @@ import type {
 } from "@alliance/common/forms/form-schema";
 import { AUTO_EXTRACT_FIELD_KINDS } from "@alliance/common/forms/form-schema";
 import {
+  CustomValidatorType,
+  tasksFindOneCustomValidatorAdmin,
+} from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
+import RenderField from "@alliance/sharedweb/forms/RenderField";
+import { useEffect, useRef, useState } from "react";
+import { FORM_BUILDER_PREVIEW_USER } from "../../lib/testData";
+import {
   ConditionalVisibility,
   CustomValidatorSelect,
   OutputFieldToggle,
   OutputPrivateByDefaultToggle,
 } from "./CommonControls";
-import type { FieldWrapperProps } from "./types";
-import RenderField from "@alliance/sharedweb/forms/RenderField";
-import { cn } from "@alliance/shared/styles/util";
-import {
-  CustomValidatorType,
-  tasksFindOneCustomValidator,
-} from "@alliance/shared/client";
-import { FORM_BUILDER_PREVIEW_USER } from "../../lib/testData";
 import {
   isDraftValidatorId,
   useCustomValidatorDrafts,
 } from "./customValidatorDrafts";
+import type { FieldWrapperProps } from "./types";
 
 function isFormField(field: unknown): field is AnyField {
   return Boolean(
@@ -145,7 +145,7 @@ export function FieldWrapper<T extends AnyField>({
           setLoadedValidatorId(null);
         }
       } else if (loadedValidatorId !== validatorId) {
-        tasksFindOneCustomValidator({
+        tasksFindOneCustomValidatorAdmin({
           path: {
             id: validatorId,
           },

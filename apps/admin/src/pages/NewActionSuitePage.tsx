@@ -1,5 +1,5 @@
 import { errorMessage } from "@alliance/common/errorMessage";
-import { actionsCreateSuite } from "@alliance/shared/client";
+import { actionsCreateSuiteAdmin } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import { useState } from "react";
@@ -17,7 +17,9 @@ const NewActionSuitePage = () => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
     const suiteName = formData.get("suiteName") as string;
-    const response = await actionsCreateSuite({ body: { name: suiteName } });
+    const response = await actionsCreateSuiteAdmin({
+      body: { name: suiteName },
+    });
     if (response.error) {
       setError(
         errorMessage({

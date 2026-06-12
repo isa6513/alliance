@@ -17,11 +17,11 @@ import {
   type VisibleIfFormula,
 } from "@alliance/common/forms/visible-if-formula";
 import {
-  tasksCreateCustomValidator,
-  tasksCreateForm,
+  tasksCreateCustomValidatorAdmin,
+  tasksCreateFormAdmin,
   tasksGetForm,
-  tasksUpdateForm,
-  userList,
+  tasksUpdateFormAdmin,
+  userListAdmin,
   type UserDto,
 } from "@alliance/shared/client";
 import { cn } from "@alliance/shared/styles/util";
@@ -989,7 +989,7 @@ export function FormBuilder({
           if (!draft) {
             throw new Error("Missing custom validator draft configuration.");
           }
-          const response = await tasksCreateCustomValidator({
+          const response = await tasksCreateCustomValidatorAdmin({
             body: {
               type: draft.type,
               idArgument: draft.idArgument,
@@ -1122,7 +1122,7 @@ export function FormBuilder({
     setIsLoadingPreviewUsers(true);
     setPreviewUserError(null);
     try {
-      const response = await userList();
+      const response = await userListAdmin();
       setPreviewUsers(response.data ?? []);
     } catch (error) {
       console.error("Failed to load users for preview", error);
@@ -1204,7 +1204,7 @@ export function FormBuilder({
 
       if (formId) {
         // Update existing form
-        response = await tasksUpdateForm({
+        response = await tasksUpdateFormAdmin({
           path: { formId },
           body: {
             title: schemaForSave.title,
@@ -1213,7 +1213,7 @@ export function FormBuilder({
         });
       } else {
         // Create new form
-        response = await tasksCreateForm({
+        response = await tasksCreateFormAdmin({
           body: {
             title: schemaForSave.title,
             schema: schemaForSave as unknown as Record<string, unknown>,

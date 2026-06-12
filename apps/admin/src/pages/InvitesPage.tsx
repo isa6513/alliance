@@ -2,17 +2,17 @@ import {
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   userCreateOnetimeInvite,
-  userGetOnetimeInvites,
-  userList,
+  userGetOnetimeInvitesAdmin,
+  userListAdmin,
 } from "@alliance/shared/client";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
-import { useEffect, useMemo, useState } from "react";
-import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
-import List from "@alliance/sharedweb/ui/List";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import CopyIcon from "@alliance/sharedweb/ui/icons/CopyIcon";
-import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import List from "@alliance/sharedweb/ui/List";
+import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 const InvitesPage = () => {
@@ -41,13 +41,13 @@ const InvitesPage = () => {
   const [users, setUsers] = useState<UserSelectUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
   useEffect(() => {
-    userList().then((response) => {
+    userListAdmin().then((response) => {
       setUsers(response.data ?? []);
     });
   }, []);
 
   useEffect(() => {
-    userGetOnetimeInvites().then((response) => {
+    userGetOnetimeInvitesAdmin().then((response) => {
       if (response.data) {
         setInvites(
           response.data.sort(

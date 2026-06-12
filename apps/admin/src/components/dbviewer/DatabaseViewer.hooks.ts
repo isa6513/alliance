@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import {
-  adminViewerGetTableData,
-  adminViewerGetTables,
+  adminViewerGetTableDataAdmin,
+  adminViewerGetTablesAdmin,
 } from "@alliance/shared/client";
 import type {
   ColumnMetadataDto,
   TableDataDto,
   TableMetadataDto,
 } from "@alliance/shared/client/types.gen";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useAdminWebSocket } from "../../lib/useAdminWebSocket";
 
 type SetSearchParamsFn = (
-  nextInit: URLSearchParams | ((prev: URLSearchParams) => URLSearchParams)
+  nextInit: URLSearchParams | ((prev: URLSearchParams) => URLSearchParams),
 ) => void;
 
 export interface SelectedRowState {
@@ -43,7 +43,7 @@ type TableQueryAction =
 
 const tableQueryReducer = (
   state: TableDataQueryState,
-  action: TableQueryAction
+  action: TableQueryAction,
 ): TableDataQueryState => {
   switch (action.type) {
     case "SET_PAGE":
@@ -138,14 +138,14 @@ export const useTableQuery = (initialState: TableDataQueryState) => {
     (column: string, order: "ASC" | "DESC") => {
       dispatch({ type: "SET_SORT_WITH_ORDER", column, order });
     },
-    []
+    [],
   );
 
   const applyDefaultSort = useCallback(
     (column: string, order: "ASC" | "DESC") => {
       dispatch({ type: "APPLY_DEFAULT_SORT", column, order });
     },
-    []
+    [],
   );
 
   const setSearch = useCallback((search?: string) => {
@@ -187,7 +187,7 @@ export const useDebouncedValue = <T>(value: T, delay: number) => {
 export const useTimedSet = (ttlMs: number) => {
   const [values, setValues] = useState<Set<string>>(new Set());
   const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map()
+    new Map(),
   );
 
   const removeInternal = useCallback((key: string) => {
@@ -229,14 +229,14 @@ export const useTimedSet = (ttlMs: number) => {
 
       timeoutsRef.current.set(key, timeout);
     },
-    [ttlMs, removeInternal]
+    [ttlMs, removeInternal],
   );
 
   const remove = useCallback(
     (value: string | number) => {
       removeInternal(String(value));
     },
-    [removeInternal]
+    [removeInternal],
   );
 
   const clear = useCallback(() => {
@@ -346,7 +346,7 @@ interface UseDatabaseViewerStateResult {
   selectedRows: Set<string | number>;
   toggleRowSelection: (
     primaryKeyValue: string | number,
-    checked: boolean
+    checked: boolean,
   ) => void;
   toggleAllRowSelection: (checked: boolean) => void;
   resetRowSelection: () => void;
@@ -357,7 +357,7 @@ interface UseDatabaseViewerStateResult {
   setErrorMessage: (message: string | null) => void;
   getRowPrimaryKey: (
     row: unknown[],
-    columns: ColumnMetadataDto[]
+    columns: ColumnMetadataDto[],
   ) => string | number | null;
 }
 
@@ -377,19 +377,18 @@ export const useDatabaseViewerState = ({
   const [tableData, setTableData] = useState<TableDataDto | null>(null);
   const [loadingTableData, setLoadingTableData] = useState(false);
   const [selectedTable, setSelectedTable] = useState<string>(
-    initialTable ?? ""
+    initialTable ?? "",
   );
   const [selectedRow, setSelectedRowState] = useState<SelectedRowState | null>(
     initialTable && initialRowId
       ? { tableName: initialTable, rowId: initialRowId }
-      : null
+      : null,
   );
   const [searchInput, setSearchInputState] = useState<string>("");
-  const [columnFilter, setColumnFilterState] = useState<ColumnFilterState | null>(
-    null
-  );
+  const [columnFilter, setColumnFilterState] =
+    useState<ColumnFilterState | null>(null);
   const [selectedRows, setSelectedRows] = useState<Set<string | number>>(
-    new Set()
+    new Set(),
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -443,7 +442,7 @@ export const useDatabaseViewerState = ({
       }
 
       const matchingColumn = tableData.columns.find(
-        (col) => col.name.toLowerCase() === columnPart.toLowerCase()
+        (col) => col.name.toLowerCase() === columnPart.toLowerCase(),
       );
 
       if (!matchingColumn) {
@@ -455,7 +454,7 @@ export const useDatabaseViewerState = ({
         value: valuePart,
       };
     },
-    [tableData]
+    [tableData],
   );
 
   useEffect(() => {
@@ -496,7 +495,7 @@ export const useDatabaseViewerState = ({
         return next;
       });
     },
-    [setSearchParams]
+    [setSearchParams],
   );
 
   const {
@@ -510,7 +509,7 @@ export const useDatabaseViewerState = ({
       updateSearchInput(value ?? "");
       setSearch(value ?? undefined);
     },
-    [setSearch, updateSearchInput]
+    [setSearch, updateSearchInput],
   );
 
   const applyColumnFilter = useCallback(
@@ -525,14 +524,14 @@ export const useDatabaseViewerState = ({
       const resolvedColumn =
         tableData?.columns.find((col) => col.name === columnName)?.name ??
         tableData?.columns.find(
-          (col) => col.name.toLowerCase() === columnName.toLowerCase()
+          (col) => col.name.toLowerCase() === columnName.toLowerCase(),
         )?.name ??
         columnName;
 
       const filterString = `${resolvedColumn}: ${trimmedValue}`;
       applyImmediateSearch(filterString);
     },
-    [tableData, applyImmediateSearch]
+    [tableData, applyImmediateSearch],
   );
 
   const clearColumnFilter = useCallback(() => {
@@ -549,7 +548,7 @@ export const useDatabaseViewerState = ({
       reset();
       updateSearchParams({ table: tableName || null, id: null });
     },
-    [clearHighlights, reset, updateSearchParams, applyImmediateSearch]
+    [clearHighlights, reset, updateSearchParams, applyImmediateSearch],
   );
 
   const setSelectedRow = useCallback(
@@ -560,13 +559,13 @@ export const useDatabaseViewerState = ({
         id: row ? String(row.rowId) : null,
       });
     },
-    [selectedTable, updateSearchParams]
+    [selectedTable, updateSearchParams],
   );
 
   const loadTables = useCallback(async () => {
     setLoadingTables(true);
     try {
-      const response = await adminViewerGetTables();
+      const response = await adminViewerGetTablesAdmin();
       if (response.data) {
         setTables(response.data.tables);
         setErrorMessage(null);
@@ -598,7 +597,7 @@ export const useDatabaseViewerState = ({
         ? (row[primaryKeyIndex] as string | number | null)
         : null;
     },
-    []
+    [],
   );
 
   const loadTableData = useCallback(async () => {
@@ -609,7 +608,7 @@ export const useDatabaseViewerState = ({
 
     setLoadingTableData(true);
     try {
-      const response = await adminViewerGetTableData({
+      const response = await adminViewerGetTableDataAdmin({
         path: { tableName: selectedTable },
         query: {
           page: query.page,
@@ -721,7 +720,7 @@ export const useDatabaseViewerState = ({
     applyImmediateSearch(undefined);
     reset();
     setSelectedRowState(
-      initialRowId ? { tableName: initialTable, rowId: initialRowId } : null
+      initialRowId ? { tableName: initialTable, rowId: initialRowId } : null,
     );
   }, [
     initialTable,
@@ -769,7 +768,7 @@ export const useDatabaseViewerState = ({
         return next;
       });
     },
-    []
+    [],
   );
 
   const toggleAllRowSelection = useCallback(
@@ -789,7 +788,7 @@ export const useDatabaseViewerState = ({
         return next;
       });
     },
-    [tableData, getRowPrimaryKey]
+    [tableData, getRowPrimaryKey],
   );
 
   const resetRowSelection = useCallback(() => {
@@ -809,7 +808,7 @@ export const useDatabaseViewerState = ({
       }
 
       const primaryKeyColumn = currentTableData.columns.find(
-        (col) => col.isPrimary
+        (col) => col.isPrimary,
       );
       if (primaryKeyColumn && event.entity) {
         const value = event.entity[primaryKeyColumn.name];
@@ -820,7 +819,7 @@ export const useDatabaseViewerState = ({
 
       refreshTableData();
     },
-    [selectedTable, refreshTableData, highlightRow]
+    [selectedTable, refreshTableData, highlightRow],
   );
 
   const handleRowUpdated = useCallback(
@@ -830,7 +829,7 @@ export const useDatabaseViewerState = ({
       }
       refreshTableData();
     },
-    [selectedTable, refreshTableData]
+    [selectedTable, refreshTableData],
   );
 
   const handleRowDeleted = useCallback(
@@ -840,7 +839,7 @@ export const useDatabaseViewerState = ({
       }
       refreshTableData();
     },
-    [selectedTable, refreshTableData]
+    [selectedTable, refreshTableData],
   );
 
   const { isConnected } = useTableLiveUpdates({

@@ -11,17 +11,17 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
-import { NotificationDto } from './dto/notification.dto';
-import { ActionEventNotifDto } from './entities/action-event-notif.dto';
-import { NotifsService } from './notifs.service';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { NotifClickDto, NotifClickResponseDto } from './dto/notifclick.dto';
+import { NotificationDto } from './dto/notification.dto';
 import {
   MarkUnreadContentReadDto,
   ReadNotificationQueryDto,
 } from './dto/unread-content.dto';
 import { UnreadCountDto } from './dto/unread-count.dto';
+import { ActionEventNotifDto } from './entities/action-event-notif.dto';
+import { NotifsService } from './notifs.service';
 
 @Controller('notifs')
 export class NotifsController {
@@ -78,7 +78,7 @@ export class NotifsController {
   @UseGuards(AdminGuard)
   @Get('for-user/:id')
   @ApiOkResponse({ type: [ActionEventNotifDto] })
-  async notifsForUser(
+  async notifsForUserAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ActionEventNotifDto[]> {
     return this.notifsService

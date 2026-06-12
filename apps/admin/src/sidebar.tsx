@@ -1,7 +1,7 @@
 import {
   ActionDto,
-  actionsFindAllWithDrafts,
-  actionsPasteJson,
+  actionsFindAllWithDraftsAdmin,
+  actionsPasteJsonAdmin,
 } from "@alliance/shared/client";
 import { cn } from "@alliance/shared/styles/util";
 import { isProduction } from "@alliance/sharedweb/lib/config";
@@ -62,7 +62,7 @@ const Sidebar: React.FC = () => {
 
   const loadActions = useCallback(async () => {
     try {
-      const response = await actionsFindAllWithDrafts();
+      const response = await actionsFindAllWithDraftsAdmin();
       if (response.data) {
         setActions(response.data);
       }
@@ -121,7 +121,7 @@ const Sidebar: React.FC = () => {
     setPasteJsonLoading(true);
     const json = await navigator.clipboard.readText();
 
-    const response = await actionsPasteJson({ body: { body: json } });
+    const response = await actionsPasteJsonAdmin({ body: { body: json } });
     if (response.data) {
       navigate(`/actions/${response.data.id}`);
       setCreateActionDropdownOpen(false);

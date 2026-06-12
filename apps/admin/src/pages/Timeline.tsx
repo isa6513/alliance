@@ -1,7 +1,7 @@
-import { actionsFindAllWithDrafts } from "@alliance/shared/client";
+import { actionsFindAllWithDraftsAdmin } from "@alliance/shared/client";
+import { ActionDto } from "@alliance/shared/client/types.gen";
 import React, { useCallback, useEffect, useState } from "react";
 import ActionTimeline from "../components/ActionTimeline";
-import { ActionDto } from "@alliance/shared/client/types.gen";
 
 const Timeline: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
@@ -10,7 +10,7 @@ const Timeline: React.FC = () => {
 
   const loadActions = useCallback(async () => {
     try {
-      const response = await actionsFindAllWithDrafts();
+      const response = await actionsFindAllWithDraftsAdmin();
       if (response.data) {
         setActions(response.data);
       }

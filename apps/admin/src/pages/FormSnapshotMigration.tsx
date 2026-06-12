@@ -1,14 +1,14 @@
+import { MIGRATE_RESPONSE_SNAPSHOTS_MAX_BATCH } from "@alliance/common/forms/snapshot-migration";
 import {
-  tasksGetResponseSnapshotMigration,
-  tasksMigrateResponseSnapshots,
+  tasksGetResponseSnapshotMigrationAdmin,
+  tasksMigrateResponseSnapshotsAdmin,
   type FormSnapshotDto,
   type SnapshotResponseGroupDto,
   type SnapshotResponseSummaryDto,
 } from "@alliance/shared/client";
+import { CardStyle } from "@alliance/shared/styles/card";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
-import { CardStyle } from "@alliance/shared/styles/card";
-import { MIGRATE_RESPONSE_SNAPSHOTS_MAX_BATCH } from "@alliance/common/forms/snapshot-migration";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import jsonStableStringify from "json-stable-stringify";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -317,7 +317,7 @@ const FormSnapshotMigration: React.FC = () => {
 
   const queryClient = useQueryClient();
   const queryKey = useMemo(
-    () => ["tasksGetResponseSnapshotMigration", numericFormId] as const,
+    () => ["tasksGetResponseSnapshotMigrationAdmin", numericFormId] as const,
     [numericFormId],
   );
 
@@ -331,7 +331,7 @@ const FormSnapshotMigration: React.FC = () => {
   } = useQuery({
     queryKey,
     queryFn: async () => {
-      const res = await tasksGetResponseSnapshotMigration({
+      const res = await tasksGetResponseSnapshotMigrationAdmin({
         path: { formId: numericFormId },
       });
       return res.data ?? null;
@@ -342,7 +342,7 @@ const FormSnapshotMigration: React.FC = () => {
   const migrateMutation = useMutation({
     mutationFn: async () => {
       if (!data) throw new Error("Migration data not loaded");
-      const res = await tasksMigrateResponseSnapshots({
+      const res = await tasksMigrateResponseSnapshotsAdmin({
         path: { formId: numericFormId },
         body: {
           responseIds: Array.from(selectedIds),

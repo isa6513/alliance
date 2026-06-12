@@ -1,10 +1,11 @@
+import { FormSchema } from "@alliance/common/forms/form-schema";
 import {
   ActionDto,
-  actionsCreateFollowUpForm,
-  actionsDeleteFollowUpForm,
+  actionsCreateFollowUpFormAdmin,
+  actionsDeleteFollowUpFormAdmin,
   actionsFindOneAdmin,
-  actionsUpdateFollowUpForm,
-  tasksCreateForm,
+  actionsUpdateFollowUpFormAdmin,
+  tasksCreateFormAdmin,
 } from "@alliance/shared/client";
 import type {
   FollowUpFormDto,
@@ -12,18 +13,17 @@ import type {
   TagDto,
 } from "@alliance/shared/client/types.gen";
 import type { CohortExpression } from "@alliance/shared/cohort-expression.types";
+import { CardStyle } from "@alliance/shared/styles/card";
 import BaseButton, {
   BaseButtonVariant,
 } from "@alliance/sharedweb/ui/BaseButton";
 import Card from "@alliance/sharedweb/ui/Card";
 import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
-import { CardStyle } from "@alliance/shared/styles/card";
 import type { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import CohortExpressionBuilder from "./CohortExpressionBuilder";
 import { FormBuilder } from "./FormBuilder";
-import { FormSchema } from "@alliance/common/forms/form-schema";
 
 export interface ActionFollowUpFormsTabProps {
   action: ActionDto;
@@ -90,7 +90,7 @@ export default function ActionFollowUpFormsTab({
   const handleCreateFollowUpForm = useCallback(async () => {
     setCreating(true);
     try {
-      const formRes = await tasksCreateForm({
+      const formRes = await tasksCreateFormAdmin({
         body: {
           title: `${action.name} - follow-up`,
           schema: emptyFormSchema as unknown as Record<string, unknown>,
@@ -99,7 +99,7 @@ export default function ActionFollowUpFormsTab({
       if (!formRes.data?.id) {
         throw new Error("Failed to create form");
       }
-      const createRes = await actionsCreateFollowUpForm({
+      const createRes = await actionsCreateFollowUpFormAdmin({
         path: { id: action.id },
         body: {
           actionId: action.id,
@@ -134,7 +134,7 @@ export default function ActionFollowUpFormsTab({
         const endIso = fields.endDate
           ? new Date(fields.endDate).toISOString()
           : undefined;
-        const res = await actionsUpdateFollowUpForm({
+        const res = await actionsUpdateFollowUpFormAdmin({
           path: { followUpFormId },
           body: {
             name: fields.name?.trim() || null,
@@ -158,7 +158,7 @@ export default function ActionFollowUpFormsTab({
 
   const handleSetFormId = useCallback(
     async (followUpFormId: number, formId: number) => {
-      await actionsUpdateFollowUpForm({
+      await actionsUpdateFollowUpFormAdmin({
         path: { followUpFormId },
         body: { formId },
       });
@@ -178,7 +178,7 @@ export default function ActionFollowUpFormsTab({
       }
       setDeletingId(followUpFormId);
       try {
-        const res = await actionsDeleteFollowUpForm({
+        const res = await actionsDeleteFollowUpFormAdmin({
           path: { followUpFormId },
         });
         if (res.response.ok) {

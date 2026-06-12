@@ -1,8 +1,8 @@
 import {
   ActionDto,
   ActionEventDto,
-  actionsAddEvent,
-  actionsAddSuiteEvent,
+  actionsAddEventAdmin,
+  actionsAddSuiteEventAdmin,
   ActionStatus,
   ActionSuiteDto,
   CreateActionEventDto,
@@ -136,7 +136,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
       let response;
 
       if (suiteMode) {
-        response = await actionsAddSuiteEvent({
+        response = await actionsAddSuiteEventAdmin({
           path: { suiteId: props.suiteId },
           body: eventData,
         });
@@ -144,7 +144,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
           updatedSuite = response.data;
         }
       } else {
-        response = await actionsAddEvent({
+        response = await actionsAddEventAdmin({
           path: { id: action.id },
           body: eventData,
         });
@@ -166,7 +166,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
 
         let officeActionEventResponse;
         if (suiteMode) {
-          officeActionEventResponse = await actionsAddSuiteEvent({
+          officeActionEventResponse = await actionsAddSuiteEventAdmin({
             path: { suiteId: props.suiteId },
             body: officeActionEvent,
           });
@@ -178,7 +178,7 @@ const CreateEventForm = (props: CreateEventFormProps) => {
             console.error(officeActionEventResponse.error);
           }
         } else {
-          officeActionEventResponse = await actionsAddEvent({
+          officeActionEventResponse = await actionsAddEventAdmin({
             path: { id: action.id },
             body: officeActionEvent,
           });

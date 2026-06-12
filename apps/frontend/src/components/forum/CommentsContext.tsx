@@ -9,7 +9,7 @@ import {
   forumFindCommentsForAction,
   forumFindCommentsForActivity,
   forumFindCommentsForPost,
-  forumPinComment,
+  forumPinCommentAdmin,
   forumUpdateComment,
   UserDto,
 } from "@alliance/shared/client";
@@ -285,7 +285,7 @@ export function useCommentTree(
   });
 
   const handlePinReply = async (replyId: number) => {
-    await forumPinComment({ path: { id: replyId } });
+    await forumPinCommentAdmin({ path: { id: replyId } });
     fetchComments();
   };
 

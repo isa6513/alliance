@@ -14,7 +14,7 @@ import {
   SubmitFormDto,
   imagesUploadImage,
   tasksGetForm,
-  tasksGetFormResponses,
+  tasksGetFormResponsesAdmin,
   tasksGetMyFormResponse,
   tasksRunValidator,
   type UserDto,
@@ -551,7 +551,7 @@ const FormRenderer = ({
           try {
             if (previewId) {
               // Admin preview: fetch all responses and find the one for the target user
-              const response = await tasksGetFormResponses({
+              const response = await tasksGetFormResponsesAdmin({
                 path: { id: formId },
               });
               const allResponses = (response.data ?? []) as Array<

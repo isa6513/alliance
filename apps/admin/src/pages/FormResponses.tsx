@@ -1,22 +1,31 @@
-import {
-  actionsGetWithdrawals,
-  actionsShareLinksForForm,
-  tasksGetForm,
-  tasksGetFormResponses,
-  type FormDto,
-  type FormResponseDto,
-  type ActionWithdrawalDto,
-  type ProfileDto,
-} from "@alliance/shared/client";
-import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import type {
   AnyField,
   FieldKind,
   FormSchema,
   Page,
 } from "@alliance/common/forms/form-schema";
+import {
+  actionsGetWithdrawalsAdmin,
+  actionsShareLinksForFormAdmin,
+  tasksGetForm,
+  tasksGetFormResponsesAdmin,
+  type ActionWithdrawalDto,
+  type FormDto,
+  type FormResponseDto,
+  type ProfileDto,
+} from "@alliance/shared/client";
+import { CardStyle } from "@alliance/shared/styles/card";
+import { cn } from "@alliance/shared/styles/util";
+import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@alliance/sharedweb/ui/HoverCard";
+import { useQuery } from "@tanstack/react-query";
+import { CirclePlay } from "lucide-react";
 import React, {
   useCallback,
   useEffect,
@@ -24,17 +33,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { cn } from "@alliance/shared/styles/util";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { CirclePlay } from "lucide-react";
-import { CardStyle } from "@alliance/shared/styles/card";
-import { useQuery } from "@tanstack/react-query";
 import FormResponseStatistics from "../components/FormResponseStatistics";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@alliance/sharedweb/ui/HoverCard";
 
 const WithdrawalBadge: React.FC<{ className?: string }> = ({ className }) => (
   <span
@@ -251,9 +251,9 @@ const FormResponses: React.FC = () => {
 
   const { data: withdrawnUserMap = new Map<number, ActionWithdrawalDto>() } =
     useQuery({
-      queryKey: ["actionsGetWithdrawals", numericFormId],
+      queryKey: ["actionsGetWithdrawalsAdmin", numericFormId],
       queryFn: async () => {
-        const res = await actionsGetWithdrawals({
+        const res = await actionsGetWithdrawalsAdmin({
           path: { formId: numericFormId },
         });
         const map = new Map<number, ActionWithdrawalDto>();
@@ -305,16 +305,18 @@ const FormResponses: React.FC = () => {
 
   useEffect(() => {
     if (form) {
-      actionsShareLinksForForm({ path: { formId: form.id } }).then((res) => {
-        setSidsToUserMap(
-          Object.fromEntries(
-            res.data?.map((r) => [
-              r.sid ?? (r.data as { sid?: string })?.sid,
-              r.user,
-            ]) ?? [],
-          ),
-        );
-      });
+      actionsShareLinksForFormAdmin({ path: { formId: form.id } }).then(
+        (res) => {
+          setSidsToUserMap(
+            Object.fromEntries(
+              res.data?.map((r) => [
+                r.sid ?? (r.data as { sid?: string })?.sid,
+                r.user,
+              ]) ?? [],
+            ),
+          );
+        },
+      );
     }
   }, [form]);
 
@@ -325,7 +327,7 @@ const FormResponses: React.FC = () => {
     try {
       const [formRes, respRes] = await Promise.all([
         tasksGetForm({ path: { id: numericFormId } }),
-        tasksGetFormResponses({ path: { id: numericFormId } }),
+        tasksGetFormResponsesAdmin({ path: { id: numericFormId } }),
       ]);
 
       const formData = formRes.data as unknown as FormWithSchema;

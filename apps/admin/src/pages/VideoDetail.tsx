@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
-import { videosGetVideoDetails } from "@alliance/shared/client";
+import { videosGetVideoDetailsAdmin } from "@alliance/shared/client";
 import type { VideoDetailResponseDto } from "@alliance/shared/client/types.gen";
-import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
+import VideoPlayer from "@alliance/sharedweb/forms/VideoPlayer";
 import Badge from "@alliance/sharedweb/ui/Badge";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import VideoPlayer from "@alliance/sharedweb/forms/VideoPlayer";
-import VideoReplaceForm from "../components/VideoReplaceForm";
+import Card from "@alliance/sharedweb/ui/Card";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import VideoReplaceForm from "../components/VideoReplaceForm";
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -42,7 +42,7 @@ const VideoDetail: React.FC = () => {
     if (!videoId) return;
     setLoading(true);
     try {
-      const response = await videosGetVideoDetails({
+      const response = await videosGetVideoDetailsAdmin({
         path: { id: Number(videoId) },
       });
       setVideo(response.data ?? null);
@@ -89,9 +89,7 @@ const VideoDetail: React.FC = () => {
             &larr; Back
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold">
-              {video.originalFilename}
-            </h1>
+            <h1 className="text-2xl font-semibold">{video.originalFilename}</h1>
             <p className="text-sm text-zinc-500">Video ID: {video.id}</p>
           </div>
         </div>
@@ -139,8 +137,7 @@ const VideoDetail: React.FC = () => {
                 {processingInfo.preset}
               </div>
               <div>
-                <span className="text-zinc-500">CRF:</span>{" "}
-                {processingInfo.crf}
+                <span className="text-zinc-500">CRF:</span> {processingInfo.crf}
               </div>
               <div>
                 <span className="text-zinc-500">Max Rate:</span>{" "}
@@ -168,9 +165,7 @@ const VideoDetail: React.FC = () => {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-zinc-500">
-              Processing info not found.
-            </p>
+            <p className="text-sm text-zinc-500">Processing info not found.</p>
           )}
         </Card>
 
@@ -218,12 +213,12 @@ const VideoDetail: React.FC = () => {
 
         {/* Replace Video Content */}
         <Card style={CardStyle.White} className="space-y-3">
-          <h2 className="font-semibold text-lg">
-            Replace Video Content
-          </h2>
+          <h2 className="font-semibold text-lg">Replace Video Content</h2>
           <p>process the video manually with a command like:</p>
           <code className="text-xs bg-zinc-100 p-2 rounded-md block w-full overflow-x-auto">
-            ffmpeg -i input.mp4 -c:v libx264 -preset fast -crf 28 -maxrate 2M -bufsize 4M -vf scale=-2:720 -c:a aac -b:a 128k -hls_time 6 -hls_list_size 0 -hls_segment_filename segment_%03d.ts output.m3u8
+            ffmpeg -i input.mp4 -c:v libx264 -preset fast -crf 28 -maxrate 2M
+            -bufsize 4M -vf scale=-2:720 -c:a aac -b:a 128k -hls_time 6
+            -hls_list_size 0 -hls_segment_filename segment_%03d.ts output.m3u8
           </code>
           <VideoReplaceForm videoId={video.id} onComplete={loadVideo} />
         </Card>

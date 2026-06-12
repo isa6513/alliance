@@ -8,7 +8,7 @@ import {
   communityRemoveLeaderAdmin,
   communityRemoveMemberAdmin,
   communityUpdate,
-  userList,
+  userListAdmin,
 } from "@alliance/shared/client";
 import type {
   CommunityDto,
@@ -167,7 +167,7 @@ const CommunityDetailPage: React.FC = () => {
 
   useEffect(() => {
     setUsersLoading(true);
-    userList()
+    userListAdmin()
       .then((response) => {
         const rawUsers = response.data ?? [];
         setUsers(

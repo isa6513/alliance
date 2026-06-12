@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { errorMessage as extractErrorMessage } from "@alliance/common/errorMessage";
 import {
-  adminViewerCreateRecord,
-  adminViewerDeleteRecords,
-  adminViewerUpdateRecord,
+  adminViewerCreateRecordAdmin,
+  adminViewerDeleteRecordsAdmin,
+  adminViewerUpdateRecordAdmin,
 } from "@alliance/shared/client";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
 import { cn } from "@alliance/shared/styles/util";
@@ -330,7 +330,7 @@ const DatabaseViewer: React.FC = () => {
     if (!pendingUpdate) return;
 
     try {
-      const response = await adminViewerUpdateRecord({
+      const response = await adminViewerUpdateRecordAdmin({
         path: { tableName: pendingUpdate.tableName },
         body: {
           primaryKeyValue: pendingUpdate.primaryKeyValue,
@@ -375,7 +375,7 @@ const DatabaseViewer: React.FC = () => {
     if (!pendingDelete) return;
 
     try {
-      const response = await adminViewerDeleteRecords({
+      const response = await adminViewerDeleteRecordsAdmin({
         path: { tableName: pendingDelete.tableName },
         body: {
           primaryKeyValues: pendingDelete.primaryKeyValues.map((value) =>
@@ -657,7 +657,7 @@ const DatabaseViewer: React.FC = () => {
     try {
       setIsCreatingRecord(true);
       setNewRecordFieldErrors({});
-      const response = await adminViewerCreateRecord({
+      const response = await adminViewerCreateRecordAdmin({
         path: { tableName: selectedTable },
         body: { record },
       });

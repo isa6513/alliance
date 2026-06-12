@@ -270,7 +270,7 @@ export class AuthController {
     status: 302,
     description: 'Redirects to frontend as the specified user',
   })
-  async impersonate(
+  async impersonateAdmin(
     @Param('userId', ParseIntPipe) userId: number,
     @Res() res: Response,
   ): Promise<void> {

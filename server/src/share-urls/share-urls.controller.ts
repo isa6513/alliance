@@ -44,7 +44,7 @@ export class ShareUrlsController {
   @Post('create-duplicate')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ShareUrlAdminDto })
-  async createDuplicate(
+  async createDuplicateAdmin(
     @Body() body: CreateDuplicateShareLinkDto,
   ): Promise<ShareUrlAdminDto> {
     const row = await this.shareUrlsService.createDuplicate({
@@ -59,7 +59,7 @@ export class ShareUrlsController {
   @Get('for-user/:userId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ShareUrlAdminDto, isArray: true })
-  async findForUser(
+  async findForUserAdmin(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<ShareUrlAdminDto[]> {
     const rows = await this.shareUrlsService.findForUser(userId);
@@ -69,7 +69,7 @@ export class ShareUrlsController {
   @Patch(':id/label')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ShareUrlAdminDto })
-  async updateLabel(
+  async updateLabelAdmin(
     @Param('id') id: string,
     @Body() body: UpdateShareLinkLabelDto,
   ): Promise<ShareUrlAdminDto> {

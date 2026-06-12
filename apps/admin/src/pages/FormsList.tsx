@@ -1,12 +1,12 @@
+import { FormSchema, Page } from "@alliance/common/forms/form-schema";
 import {
   FormDto,
-  tasksDeleteForm,
-  tasksGetFormResponses,
-  tasksListForms,
+  tasksDeleteFormAdmin,
+  tasksGetFormResponsesAdmin,
+  tasksListFormsAdmin,
 } from "@alliance/shared/client";
-import { FormSchema, Page } from "@alliance/common/forms/form-schema";
-import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
+import Card from "@alliance/sharedweb/ui/Card";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -26,7 +26,7 @@ const FormsList: React.FC = () => {
 
   const loadForms = useCallback(async () => {
     try {
-      const response = await tasksListForms();
+      const response = await tasksListFormsAdmin();
       if (response.data) {
         setForms(response.data as unknown as Form[]);
       }
@@ -42,7 +42,7 @@ const FormsList: React.FC = () => {
     async (id: number) => {
       if (confirm("Are you sure you want to delete this form?")) {
         try {
-          await tasksDeleteForm({ path: { id } });
+          await tasksDeleteFormAdmin({ path: { id } });
           // Reload forms after successful deletion
           loadForms();
         } catch (err) {
@@ -65,7 +65,9 @@ const FormsList: React.FC = () => {
       const entries = await Promise.all(
         forms.map(async (f) => {
           try {
-            const res = await tasksGetFormResponses({ path: { id: f.id } });
+            const res = await tasksGetFormResponsesAdmin({
+              path: { id: f.id },
+            });
             return [f.id, (res.data ?? []).length] as const;
           } catch (e) {
             console.error("Failed to get responses for form", f.id, e);

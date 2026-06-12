@@ -1,9 +1,9 @@
 import {
-  actionsFindAllWithDrafts,
-  externalShareTargetsFindAll,
-  shareUrlsCreateDuplicate,
-  shareUrlsFindForUser,
-  shareUrlsUpdateLabel,
+  actionsFindAllWithDraftsAdmin,
+  externalShareTargetsFindAllAdmin,
+  shareUrlsCreateDuplicateAdmin,
+  shareUrlsFindForUserAdmin,
+  shareUrlsUpdateLabelAdmin,
 } from "@alliance/shared/client";
 import type {
   ActionDto,
@@ -81,8 +81,8 @@ const ShareLinksPage: React.FC = () => {
     void (async () => {
       try {
         const [actionsRes, targetsRes] = await Promise.all([
-          actionsFindAllWithDrafts(),
-          externalShareTargetsFindAll(),
+          actionsFindAllWithDraftsAdmin(),
+          externalShareTargetsFindAllAdmin(),
         ]);
         setActions(actionsRes.data ?? []);
         setExternalTargets(targetsRes.data ?? []);
@@ -97,7 +97,7 @@ const ShareLinksPage: React.FC = () => {
     async (userId: number) => {
       setLoadingRows(true);
       try {
-        const res = await shareUrlsFindForUser({ path: { userId } });
+        const res = await shareUrlsFindForUserAdmin({ path: { userId } });
         if (selectedUserIdRef.current !== userId) return;
         setRows(res.data ?? []);
       } catch (err) {
@@ -231,7 +231,7 @@ const ShareLinksPage: React.FC = () => {
     async (id: string, label: string): Promise<boolean> => {
       const requestUserId = selectedUserIdRef.current;
       try {
-        const res = await shareUrlsUpdateLabel({
+        const res = await shareUrlsUpdateLabelAdmin({
           path: { id },
           body: { label },
         });
@@ -260,7 +260,7 @@ const ShareLinksPage: React.FC = () => {
     setCreating(true);
     try {
       const trimmed = labelDraft.trim();
-      const res = await shareUrlsCreateDuplicate({
+      const res = await shareUrlsCreateDuplicateAdmin({
         body: {
           userId: requestUserId,
           actionId:

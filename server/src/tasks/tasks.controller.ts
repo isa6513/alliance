@@ -14,7 +14,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
+import type { Request as ExpressRequest, Response } from 'express';
 import { ActionActivityDto, OptOutActionDto } from 'src/actions/dto/action.dto';
+import { AuthService } from 'src/auth/auth.service';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import {
   AuthGuard,
@@ -23,8 +25,6 @@ import {
 } from 'src/auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import { Public } from 'src/auth/public.decorator';
-import { AuthService } from 'src/auth/auth.service';
-import type { Request as ExpressRequest, Response } from 'express';
 import {
   CreateCustomValidatorDto,
   CreateCustomValidatorResponseDto,
@@ -123,21 +123,21 @@ export class TasksController {
   @Post('createForm')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: FormDto })
-  async createForm(@Body() body: CreateFormDto): Promise<FormDto> {
+  async createFormAdmin(@Body() body: CreateFormDto): Promise<FormDto> {
     return new FormDto(await this.tasksService.createForm(body));
   }
 
   @Get('listForms')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [FormDto] })
-  async listForms(): Promise<FormDto[]> {
+  async listFormsAdmin(): Promise<FormDto[]> {
     return this.tasksService.listForms();
   }
 
   @Get('responses/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [FormResponseDto] })
-  async getFormResponses(
+  async getFormResponsesAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<FormResponseDto[]> {
     return this.tasksService.getFormResponses(id);
@@ -146,7 +146,7 @@ export class TasksController {
   @Get('forms/:formId/snapshotMigration')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: FormSnapshotMigrationDto })
-  async getResponseSnapshotMigration(
+  async getResponseSnapshotMigrationAdmin(
     @Param('formId', ParseIntPipe) formId: number,
   ): Promise<FormSnapshotMigrationDto> {
     return new FormSnapshotMigrationDto(
@@ -157,7 +157,7 @@ export class TasksController {
   @Patch('forms/:formId/responseSnapshots')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: MigrateResponseSnapshotsResultDto })
-  async migrateResponseSnapshots(
+  async migrateResponseSnapshotsAdmin(
     @Param('formId', ParseIntPipe) formId: number,
     @Body() body: MigrateResponseSnapshotsDto,
   ): Promise<MigrateResponseSnapshotsResultDto> {
@@ -234,7 +234,7 @@ export class TasksController {
   @Put('updateForm/:formId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: FormDto })
-  async updateForm(
+  async updateFormAdmin(
     @Param('formId', ParseIntPipe) formId: number,
     @Body() body: CreateFormDto,
   ): Promise<FormDto> {
@@ -244,14 +244,14 @@ export class TasksController {
   @Delete(':id')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteForm(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async deleteFormAdmin(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.tasksService.deleteForm(id);
   }
 
   @Get('customValidators')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CustomValidatorTypeDto, isArray: true })
-  async customValidators(): Promise<CustomValidatorTypeDto[]> {
+  async customValidatorsAdmin(): Promise<CustomValidatorTypeDto[]> {
     const types = await this.tasksService.customValidators();
     return types.map((t) => new CustomValidatorTypeDto(t));
   }
@@ -272,7 +272,7 @@ export class TasksController {
   @Get('findOneCustomValidator/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CustomValidatorDto })
-  async findOneCustomValidator(
+  async findOneCustomValidatorAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomValidatorDto> {
     return new CustomValidatorDto(
@@ -283,7 +283,7 @@ export class TasksController {
   @Post('createCustomValidator')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: CreateCustomValidatorResponseDto })
-  async createCustomValidator(
+  async createCustomValidatorAdmin(
     @Body() body: CreateCustomValidatorDto,
   ): Promise<CreateCustomValidatorResponseDto> {
     const validator = await this.tasksService.findOrCreateCustomValidator(
@@ -297,7 +297,7 @@ export class TasksController {
   @Post('testCustomExpression')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: TestCustomExpressionResponseDto })
-  async testCustomExpression(
+  async testCustomExpressionAdmin(
     @Body() body: TestCustomExpressionDto,
   ): Promise<TestCustomExpressionResponseDto> {
     return new TestCustomExpressionResponseDto(
@@ -334,7 +334,7 @@ export class TasksController {
   @Post('formsForUserSID/:userId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [FormResponseDto] })
-  async getFormsForUserSID(
+  async getFormsForUserSIDAdmin(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<FormResponseDto[]> {
     return (await this.tasksService.getFormsForUserSID(userId)).map(

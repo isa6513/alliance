@@ -27,12 +27,12 @@ import {
   CustomExpressionUserDto,
   CustomValidatorType,
   CustomValidatorTypeDto,
-  tasksCustomValidators,
-  tasksFindOneCustomValidator,
+  tasksCustomValidatorsAdmin,
+  tasksFindOneCustomValidatorAdmin,
   tasksGetForm,
-  tasksListForms,
-  tasksTestCustomExpression,
-  userList,
+  tasksListFormsAdmin,
+  tasksTestCustomExpressionAdmin,
+  userListAdmin,
   type UserDto,
 } from "@alliance/shared/client";
 import {
@@ -647,7 +647,7 @@ export function ConditionalVisibility({
     Promise.all(
       missing.map(async (id) => {
         try {
-          const response = await tasksFindOneCustomValidator({
+          const response = await tasksFindOneCustomValidatorAdmin({
             path: { id },
           });
           if (!response.data) {
@@ -1639,7 +1639,7 @@ let cachedValidatorsError: string | null = null;
 let pendingValidatorsRequest: Promise<CustomValidatorTypeDto[]> | null = null;
 
 async function fetchCustomValidators(): Promise<CustomValidatorTypeDto[]> {
-  const response = await tasksCustomValidators();
+  const response = await tasksCustomValidatorsAdmin();
   if (response.data) {
     return response.data;
   }
@@ -1717,7 +1717,7 @@ let cachedUsersError: string | null = null;
 let pendingUsersRequest: Promise<UserDto[]> | null = null;
 
 async function fetchUsers(): Promise<UserDto[]> {
-  const response = await userList();
+  const response = await userListAdmin();
   if (response.data) {
     return response.data;
   }
@@ -1813,7 +1813,7 @@ function useFormList(): {
     }
     let cancelled = false;
     if (!pendingFormListRequest) {
-      pendingFormListRequest = tasksListForms().then((response) => {
+      pendingFormListRequest = tasksListFormsAdmin().then((response) => {
         const items = (
           (response.data ?? []) as Array<{ id: number; title: string }>
         )
@@ -2007,7 +2007,7 @@ export function CustomValidatorSelect({
 
     setIsTesting(true);
     try {
-      const response = await tasksTestCustomExpression({
+      const response = await tasksTestCustomExpressionAdmin({
         body: {
           expression,
           userId: selectedUserId,

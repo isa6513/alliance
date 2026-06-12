@@ -1,10 +1,10 @@
 import type { FormSchema } from "@alliance/common/forms/form-schema";
 import {
-  actionsCreateGeneralUpdate,
-  actionsFindOneGeneralUpdate,
-  actionsSuites,
+  actionsCreateGeneralUpdateAdmin,
+  actionsFindOneGeneralUpdateAdmin,
+  actionsSuitesAdmin,
   ActionSuiteDto,
-  actionsUpdateGeneralUpdate,
+  actionsUpdateGeneralUpdateAdmin,
   CreateGeneralUpdateDto,
   GeneralUpdateAdminDto,
   UpdateGeneralUpdateDto,
@@ -107,7 +107,7 @@ const GeneralUpdatePage: React.FC = () => {
     let cancelled = false;
     const load = async () => {
       try {
-        const response = await actionsSuites();
+        const response = await actionsSuitesAdmin();
         if (!cancelled && response.data) setAvailableSuites(response.data);
       } catch (err) {
         console.error("Failed to load suites:", err);
@@ -156,7 +156,9 @@ const GeneralUpdatePage: React.FC = () => {
     let cancelled = false;
     const load = async () => {
       try {
-        const response = await actionsFindOneGeneralUpdate({ path: { id } });
+        const response = await actionsFindOneGeneralUpdateAdmin({
+          path: { id },
+        });
 
         if (cancelled) return;
         const data = response.data;
@@ -220,7 +222,7 @@ const GeneralUpdatePage: React.FC = () => {
             tagIds: form.tagIds,
             suiteIds: form.suiteIds,
           };
-          const response = await actionsCreateGeneralUpdate({ body });
+          const response = await actionsCreateGeneralUpdateAdmin({ body });
           if (!response.data) throw new Error("Failed to create");
           navigate(`/general-updates/${response.data.id}`);
         } else if (id != null && update) {
@@ -241,7 +243,7 @@ const GeneralUpdatePage: React.FC = () => {
             tagIds: form.tagIds,
             suiteIds: form.suiteIds,
           };
-          const response = await actionsUpdateGeneralUpdate({
+          const response = await actionsUpdateGeneralUpdateAdmin({
             path: { id },
             body,
           });
@@ -292,7 +294,7 @@ const GeneralUpdatePage: React.FC = () => {
   const handleSaveSchema = useCallback(
     async (schema: FormSchema) => {
       if (id == null) return;
-      const response = await actionsUpdateGeneralUpdate({
+      const response = await actionsUpdateGeneralUpdateAdmin({
         path: { id },
         body: {
           schema: schema as unknown as Record<string, unknown>,

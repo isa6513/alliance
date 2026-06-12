@@ -145,7 +145,7 @@ export class UserController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [UserAwayRangeDto] })
   @ApiUnauthorizedResponse()
-  async getAwayRangeForUser(
+  async getAwayRangeForUserAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserAwayRangeDto[]> {
     return (await this.userService.getAwayRanges(id)).map(
@@ -312,7 +312,7 @@ export class UserController {
   @Get('list')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserDto, isArray: true })
-  async list(): Promise<UserDto[]> {
+  async listAdmin(): Promise<UserDto[]> {
     return (
       await this.userService.findAll({ contractEvents: true, referredBy: true })
     ).map((user) => new UserDto(user));
@@ -321,7 +321,7 @@ export class UserController {
   @Get('list-graph')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserDto, isArray: true })
-  async listForGraph(): Promise<UserDto[]> {
+  async listForGraphAdmin(): Promise<UserDto[]> {
     return (
       await this.userService.findAll({
         contractEvents: true,
@@ -335,7 +335,7 @@ export class UserController {
   @Get('cityCounts')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [UserCityCountDto] })
-  async cityCounts(): Promise<UserCityCountDto[]> {
+  async cityCountsAdmin(): Promise<UserCityCountDto[]> {
     return (await this.userService.getUserCityCounts()).map(
       (c) => new UserCityCountDto(c),
     );
@@ -344,7 +344,9 @@ export class UserController {
   @Get('userdetail/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserDto })
-  async userDetail(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
+  async userDetailAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserDto> {
     const user = await this.userService.findOne(id, {
       contractEvents: true,
       referredBy: true,
@@ -359,7 +361,7 @@ export class UserController {
   @Get('list-public')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserDto, isArray: true })
-  async listPublic(): Promise<UserDto[]> {
+  async listPublicAdmin(): Promise<UserDto[]> {
     return (await this.userService.findAll({ contractEvents: true })).map(
       (user) => new UserDto(user),
     );
@@ -443,21 +445,21 @@ export class UserController {
   @Post('createTag')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: TagDto })
-  async createTag(@Body() body: CreateTagDto): Promise<TagDto> {
+  async createTagAdmin(@Body() body: CreateTagDto): Promise<TagDto> {
     return new TagDto(await this.userService.createTag(body));
   }
 
   @Get('tags')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [TagDto] })
-  async getTags(): Promise<TagDto[]> {
+  async getTagsAdmin(): Promise<TagDto[]> {
     return (await this.userService.findAllTags()).map((tag) => new TagDto(tag));
   }
 
   @Get('tag-summaries')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [TagSummaryDto] })
-  async getTagSummaries(): Promise<TagSummaryDto[]> {
+  async getTagSummariesAdmin(): Promise<TagSummaryDto[]> {
     return (await this.userService.findAllTagSummaries()).map(
       (tag) => new TagSummaryDto(tag),
     );
@@ -466,7 +468,7 @@ export class UserController {
   @Post('tags/:tagId/addUser')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: TagDto })
-  async addUserToTag(
+  async addUserToTagAdmin(
     @Param('tagId') tagId: string,
     @Body() body: AddUserToTagDto,
   ): Promise<TagDto> {
@@ -476,7 +478,7 @@ export class UserController {
   @Post('tags/:tagId/removeUser')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: TagDto })
-  async removeUserFromTag(
+  async removeUserFromTagAdmin(
     @Param('tagId') tagId: string,
     @Body() body: AddUserToTagDto,
   ): Promise<TagDto> {
@@ -488,7 +490,7 @@ export class UserController {
   @Post('tags/:tagId/update')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: TagDto })
-  async updateTag(
+  async updateTagAdmin(
     @Param('tagId') tagId: string,
     @Body() body: CreateTagDto,
   ): Promise<TagDto> {
@@ -498,7 +500,7 @@ export class UserController {
   @Delete('tags/:tagId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteTag(@Param('tagId') tagId: string): Promise<void> {
+  async deleteTagAdmin(@Param('tagId') tagId: string): Promise<void> {
     await this.userService.deleteTag(tagId);
   }
 
@@ -643,7 +645,7 @@ export class UserController {
   @Get('onetimeInvites')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [OnetimeInviteDto] })
-  async getOnetimeInvites(): Promise<OnetimeInviteDto[]> {
+  async getOnetimeInvitesAdmin(): Promise<OnetimeInviteDto[]> {
     return (await this.userService.findAllOnetimeInvites()).map(
       (invite) => new OnetimeInviteDto(invite),
     );
@@ -703,7 +705,7 @@ export class UserController {
   @Post('groupAssignment/members')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserDto, isArray: true })
-  async getGroupAssignmentMembers(): Promise<UserDto[]> {
+  async getGroupAssignmentMembersAdmin(): Promise<UserDto[]> {
     return (await this.userService.findGroupAssignmentMembers()).map(
       (user) => new UserDto(user),
     );
@@ -730,7 +732,7 @@ export class UserController {
   @Post('sendPushNotification')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: PushDto })
-  async sendPushNotification(
+  async sendPushNotificationAdmin(
     @Body() body: TestPushNotificationDto,
   ): Promise<PushDto> {
     return new PushDto(

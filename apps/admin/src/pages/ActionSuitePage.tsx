@@ -1,8 +1,8 @@
 import { errorMessage } from "@alliance/common/errorMessage";
 import {
-  actionsBatchUpdateSuiteEvents,
-  actionsDeleteSuiteEvent,
-  actionsSuite,
+  actionsBatchUpdateSuiteEventsAdmin,
+  actionsDeleteSuiteEventAdmin,
+  actionsSuiteAdmin,
   ActionSuiteDto,
   UpdateActionEventDto,
 } from "@alliance/shared/client";
@@ -41,7 +41,7 @@ const ActionSuitePage = () => {
 
   useEffect(() => {
     const fetchSuiteActions = async () => {
-      const response = await actionsSuite({ path: { id: suiteId } });
+      const response = await actionsSuiteAdmin({ path: { id: suiteId } });
       if (response.data) {
         setSuite(response.data);
       } else {
@@ -61,36 +61,39 @@ const ActionSuitePage = () => {
   }
 
   const handleEditEvent = (eventId: number, body: UpdateActionEventDto) => {
-    actionsBatchUpdateSuiteEvents({ path: { suiteId, eventId }, body }).then(
-      (resp) => {
-        if (resp.data) {
-          setSuite(resp.data as ActionSuiteDto);
-        } else {
-          setError(
-            errorMessage({
-              error: resp.error,
-              fallback: "Failed to update event",
-            }),
-          );
-        }
-      },
-    );
-  };
-
-  const handleDeleteEvent = (eventId: number) => {
-    actionsDeleteSuiteEvent({ path: { suiteId, eventId } }).then((resp) => {
+    actionsBatchUpdateSuiteEventsAdmin({
+      path: { suiteId, eventId },
+      body,
+    }).then((resp) => {
       if (resp.data) {
-        setSuite(resp.data);
+        setSuite(resp.data as ActionSuiteDto);
       } else {
         setError(
           errorMessage({
             error: resp.error,
-            fallback: "Failed to delete event",
-          }) +
-            " (events will fail to delete if reminders depend on their existence)",
+            fallback: "Failed to update event",
+          }),
         );
       }
     });
+  };
+
+  const handleDeleteEvent = (eventId: number) => {
+    actionsDeleteSuiteEventAdmin({ path: { suiteId, eventId } }).then(
+      (resp) => {
+        if (resp.data) {
+          setSuite(resp.data);
+        } else {
+          setError(
+            errorMessage({
+              error: resp.error,
+              fallback: "Failed to delete event",
+            }) +
+              " (events will fail to delete if reminders depend on their existence)",
+          );
+        }
+      },
+    );
   };
   if (suite.actions.length === 0) {
     return (

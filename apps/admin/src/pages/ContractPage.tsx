@@ -1,8 +1,8 @@
 import {
   ContractAdminDto,
-  contractCreate,
+  contractCreateAdmin,
   contractFindOneAdmin,
-  contractUpdate,
+  contractUpdateAdmin,
   CreateContractDto,
   UpdateContractDto,
 } from "@alliance/shared/client";
@@ -11,10 +11,10 @@ import {
   formatLocalDateTime,
   resolveDateValue,
 } from "@alliance/sharedweb/ui/DateTimePicker";
-import FormTextarea from "../components/FormTextarea";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import FormTextarea from "../components/FormTextarea";
 
 type ContractForm = {
   name: string;
@@ -67,10 +67,7 @@ const ContractPage: React.FC = () => {
           name: data.name ?? "",
           markdown: data.markdown,
           startDate: data.startDate
-            ? formatLocalDateTime(
-                resolveDateValue(data.startDate),
-                "minute"
-              )
+            ? formatLocalDateTime(resolveDateValue(data.startDate), "minute")
             : "",
           endDate: data.endDate
             ? formatLocalDateTime(resolveDateValue(data.endDate), "minute")
@@ -106,7 +103,7 @@ const ContractPage: React.FC = () => {
               : null,
             endDate: form.endDate ? new Date(form.endDate).toISOString() : null,
           };
-          const response = await contractCreate({
+          const response = await contractCreateAdmin({
             body,
           });
           if (!response.data) throw new Error("Failed to create");
@@ -119,7 +116,7 @@ const ContractPage: React.FC = () => {
               : null,
             endDate: form.endDate ? new Date(form.endDate).toISOString() : null,
           };
-          const response = await contractUpdate({
+          const response = await contractUpdateAdmin({
             path: { id },
             body,
           });
@@ -134,7 +131,7 @@ const ContractPage: React.FC = () => {
         setSaving(false);
       }
     },
-    [isNew, id, form, navigate, success]
+    [isNew, id, form, navigate, success],
   );
 
   if (loading) {
@@ -164,8 +161,8 @@ const ContractPage: React.FC = () => {
   const pageTitle = isNew
     ? "Create Contract"
     : contract
-    ? contract.name?.trim() || `Contract #${contract.id}`
-    : "Contract";
+      ? contract.name?.trim() || `Contract #${contract.id}`
+      : "Contract";
 
   return (
     <div className="flex flex-col h-full">
@@ -333,8 +330,8 @@ const ContractPage: React.FC = () => {
                   ? "Creating..."
                   : "Saving..."
                 : isNew
-                ? "Create Contract"
-                : "Save Changes"}
+                  ? "Create Contract"
+                  : "Save Changes"}
             </button>
           </div>
         </form>

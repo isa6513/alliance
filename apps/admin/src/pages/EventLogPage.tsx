@@ -1,11 +1,11 @@
-import { eventLogFindAll } from "@alliance/shared/client";
+import { eventLogFindAllAdmin } from "@alliance/shared/client";
 import type {
   EventLogDto,
   EventLogListDto,
   EventType,
 } from "@alliance/shared/client/types.gen";
-import React, { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import {
   useEventLogWebSocket,
@@ -65,7 +65,7 @@ const EventLogPage: React.FC = () => {
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const response = await eventLogFindAll({
+    const response = await eventLogFindAllAdmin({
       query: {
         page,
         limit: 50,
@@ -192,7 +192,7 @@ const EventLogPage: React.FC = () => {
                         className={cn(
                           isExpanded ? "" : "border-b border-zinc-200",
                           "transition-colors duration-1000",
-                          isHighlighted ? "bg-blue-50" : "hover:bg-zinc-50"
+                          isHighlighted ? "bg-blue-50" : "hover:bg-zinc-50",
                         )}
                       >
                         <td className="py-3 px-2">
@@ -200,7 +200,7 @@ const EventLogPage: React.FC = () => {
                             className={cn(
                               "text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap",
                               EVENT_TYPE_COLORS[event.event] ??
-                                "bg-gray-100 text-gray-800"
+                                "bg-gray-100 text-gray-800",
                             )}
                           >
                             {formatEventType(event.event)}
@@ -225,7 +225,7 @@ const EventLogPage: React.FC = () => {
                           {timeAgo(
                             typeof event.createdAt === "string"
                               ? event.createdAt
-                              : (event.createdAt as Date).toISOString()
+                              : (event.createdAt as Date).toISOString(),
                           )}
                         </td>
                         <td className="py-3 px-2">

@@ -27,7 +27,7 @@ export class ExternalShareTargetsController {
   @Get()
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ExternalShareTargetDto, isArray: true })
-  async findAll(): Promise<ExternalShareTargetDto[]> {
+  async findAllAdmin(): Promise<ExternalShareTargetDto[]> {
     const targets = await this.externalShareTargetsService.findAll();
     return targets.map((t) => new ExternalShareTargetDto(t));
   }
@@ -35,7 +35,7 @@ export class ExternalShareTargetsController {
   @Get(':id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ExternalShareTargetDto })
-  async findOne(
+  async findOneAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ExternalShareTargetDto> {
     return new ExternalShareTargetDto(
@@ -46,7 +46,7 @@ export class ExternalShareTargetsController {
   @Post()
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ExternalShareTargetDto })
-  async create(
+  async createAdmin(
     @Body() dto: CreateExternalShareTargetDto,
   ): Promise<ExternalShareTargetDto> {
     return new ExternalShareTargetDto(
@@ -57,7 +57,7 @@ export class ExternalShareTargetsController {
   @Patch(':id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ExternalShareTargetDto })
-  async update(
+  async updateAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateExternalShareTargetDto,
   ): Promise<ExternalShareTargetDto> {
@@ -69,7 +69,7 @@ export class ExternalShareTargetsController {
   @Delete(':id')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async removeAdmin(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.externalShareTargetsService.remove(id);
   }
 }

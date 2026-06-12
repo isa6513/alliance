@@ -1,9 +1,9 @@
 import {
-  actionsActionRelations,
-  analyticsGetTimeSpentPerUser,
-  analyticsGetTimeSpentPerUserTotal,
+  actionsActionRelationsAdmin,
+  analyticsGetTimeSpentPerUserAdmin,
+  analyticsGetTimeSpentPerUserTotalAdmin,
   communityGetAllMemberContactInfoAdmin,
-  userList,
+  userListAdmin,
 } from "@alliance/shared/client";
 import {
   CommunityMemberContactInfoDto,
@@ -66,12 +66,12 @@ const UsersList: React.FC = () => {
   const [shuffledIds, setShuffledIds] = useState<number[] | null>(null);
 
   useEffect(() => {
-    analyticsGetTimeSpentPerUser().then((res) => {
+    analyticsGetTimeSpentPerUserAdmin().then((res) => {
       if (res.data) {
         setTimeSpentPerUserLast7(res.data);
       }
     });
-    analyticsGetTimeSpentPerUserTotal().then((res) => {
+    analyticsGetTimeSpentPerUserTotalAdmin().then((res) => {
       if (res.data) {
         setTimeSpentPerUserTotal(res.data);
       }
@@ -79,11 +79,11 @@ const UsersList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    userList().then((res) => setUsers(res.data || []));
+    userListAdmin().then((res) => setUsers(res.data || []));
   }, []);
 
   useEffect(() => {
-    actionsActionRelations().then((res) => {
+    actionsActionRelationsAdmin().then((res) => {
       const data: UserActionRelationsResponseDto | undefined = res.data;
       if (!data) {
         return;

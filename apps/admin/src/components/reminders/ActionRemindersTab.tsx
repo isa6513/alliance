@@ -1,16 +1,16 @@
 import { errorMessage } from "@alliance/common/errorMessage";
 import {
   ActionEventNotifDto,
-  actionsCreateReminderGroup,
-  actionsDeleteReminderGroup,
-  actionsPlansForGroup,
-  actionsReminderGroupsForEvent,
-  actionsSentNotifsForGroup,
+  actionsCreateReminderGroupAdmin,
+  actionsDeleteReminderGroupAdmin,
+  actionsPlansForGroupAdmin,
+  actionsReminderGroupsForEventAdmin,
+  actionsSentNotifsForGroupAdmin,
   ActionSuiteDto,
-  actionsUpdateReminderGroup,
+  actionsUpdateReminderGroupAdmin,
   PreviewNotificationPlanDto,
   ReminderGroupDto,
-  userList,
+  userListAdmin,
 } from "@alliance/shared/client";
 import { useTagsAdmin } from "@alliance/shared/lib/useTagsAdmin";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -118,7 +118,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
   useEffect(() => {
     setLoadingUsers(true);
-    userList()
+    userListAdmin()
       .then((response) => {
         const mappedUsers = (response.data ?? []).map<UserSelectUser>(
           (user) => ({
@@ -138,7 +138,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
   }, []);
 
   const refreshReminderGroups = useCallback(async (eventId: number) => {
-    const response = await actionsReminderGroupsForEvent({
+    const response = await actionsReminderGroupsForEventAdmin({
       path: { id: eventId },
     });
 
@@ -182,7 +182,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     if (!ok) {
       return;
     }
-    const resp = await actionsDeleteReminderGroup({
+    const resp = await actionsDeleteReminderGroupAdmin({
       path: { groupId },
     });
     if (resp.response.ok) {
@@ -272,10 +272,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     const loadGroupDetails = async (groupId: number) => {
       try {
         const [plansResponse, sentResponse] = await Promise.all([
-          actionsPlansForGroup({
+          actionsPlansForGroupAdmin({
             path: { groupId },
           }),
-          actionsSentNotifsForGroup({
+          actionsSentNotifsForGroupAdmin({
             path: { groupId },
           }),
         ]);
@@ -509,11 +509,12 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       }
     }
 
-    const reminders: Awaited<ReturnType<typeof actionsCreateReminderGroup>>[] =
-      [];
+    const reminders: Awaited<
+      ReturnType<typeof actionsCreateReminderGroupAdmin>
+    >[] = [];
 
     reminders.push(
-      await actionsCreateReminderGroup({
+      await actionsCreateReminderGroupAdmin({
         path: { eventId: selectedEventId },
         body: {
           suiteId: suite.id,
@@ -526,7 +527,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
     const deadlineEvent = nextEventById.get(selectedEventId);
     if (deadlineEvent) {
       reminders.push(
-        await actionsCreateReminderGroup({
+        await actionsCreateReminderGroupAdmin({
           path: { eventId: selectedEventId },
           body: {
             suiteId: suite.id,
@@ -536,7 +537,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       );
 
       reminders.push(
-        await actionsCreateReminderGroup({
+        await actionsCreateReminderGroupAdmin({
           path: { eventId: selectedEventId },
           body: {
             suiteId: suite.id,
@@ -546,7 +547,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       );
 
       reminders.push(
-        await actionsCreateReminderGroup({
+        await actionsCreateReminderGroupAdmin({
           path: { eventId: selectedEventId },
           body: {
             suiteId: suite.id,
@@ -556,7 +557,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       );
 
       reminders.push(
-        await actionsCreateReminderGroup({
+        await actionsCreateReminderGroupAdmin({
           path: { eventId: selectedEventId },
           body: {
             suiteId: suite.id,
@@ -566,7 +567,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       );
 
       reminders.push(
-        await actionsCreateReminderGroup({
+        await actionsCreateReminderGroupAdmin({
           path: { eventId: selectedEventId },
           body: {
             suiteId: suite.id,
@@ -576,7 +577,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       );
 
       reminders.push(
-        await actionsCreateReminderGroup({
+        await actionsCreateReminderGroupAdmin({
           path: { eventId: selectedEventId },
           body: {
             suiteId: suite.id,
@@ -647,7 +648,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       }
 
       setSelectedEventId(eventId);
-      const response = await actionsCreateReminderGroup({
+      const response = await actionsCreateReminderGroupAdmin({
         path: { eventId },
         body: updatedBody,
       });
@@ -690,7 +691,7 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
           throw new Error("Select a member action event first.");
         }
 
-        const response = await actionsUpdateReminderGroup({
+        const response = await actionsUpdateReminderGroupAdmin({
           path: { groupId },
           body: updatedBody,
         });

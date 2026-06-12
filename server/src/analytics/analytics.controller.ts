@@ -9,18 +9,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { AnalyticsService } from './analytics.service';
-import { TimeSpentForUserDto } from './timespent.dto';
-import { DailyStatsDto } from './dailystats.dto';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { MemberCompletionRetentionCohortDto } from './member-completion-retention.dto';
-import { AggregateStatsDto } from './aggregatestats.dto';
-import { ContractStatusPointDto } from './contract-status-history.dto';
-import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { ActionCompletionCurveDto } from './action-completion-curve.dto';
 import { ActionStatsWithOnboardingDto } from './actionstats-with-onboarding.dto';
+import { AggregateStatsDto } from './aggregatestats.dto';
+import { AnalyticsService } from './analytics.service';
+import { ContractStatusPointDto } from './contract-status-history.dto';
+import { DailyStatsDto } from './dailystats.dto';
 import { InviteFunnelDto } from './invite-funnel.dto';
+import { MemberCompletionRetentionCohortDto } from './member-completion-retention.dto';
 import { PlatformTenureCohortStatsDto } from './platform-tenure-cohort.dto';
+import { TimeToChurnSampleDto } from './time-to-churn.dto';
+import { TimeSpentForUserDto } from './timespent.dto';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -29,7 +29,7 @@ export class AnalyticsController {
   @Get('time-spent-per-user')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [TimeSpentForUserDto] })
-  async getTimeSpentPerUser(): Promise<TimeSpentForUserDto[]> {
+  async getTimeSpentPerUserAdmin(): Promise<TimeSpentForUserDto[]> {
     const entries = await this.analyticsService.getTimeSpentPerUser();
     return entries.map((entry) => new TimeSpentForUserDto(entry));
   }
@@ -37,7 +37,7 @@ export class AnalyticsController {
   @Get('time-spent-per-user-total')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [TimeSpentForUserDto] })
-  async getTimeSpentPerUserTotal(): Promise<TimeSpentForUserDto[]> {
+  async getTimeSpentPerUserTotalAdmin(): Promise<TimeSpentForUserDto[]> {
     const entries = await this.analyticsService.getTimeSpentPerUserTotal();
     return entries.map((entry) => new TimeSpentForUserDto(entry));
   }
@@ -45,7 +45,7 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('daily-stats')
   @ApiOkResponse({ type: [DailyStatsDto] })
-  async getDailyStats(
+  async getDailyStatsAdmin(
     @Query('date') startDate: string,
     @Query('endDate') endDate: string,
   ): Promise<DailyStatsDto[]> {
@@ -59,7 +59,7 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('action-stats')
   @ApiOkResponse({ type: [ActionStatsWithOnboardingDto] })
-  async getActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
+  async getActionStatsAdmin(): Promise<ActionStatsWithOnboardingDto[]> {
     const stats = await this.analyticsService.getActionStats();
     return stats.map((stat) => new ActionStatsWithOnboardingDto(stat));
   }
@@ -67,7 +67,7 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('action-stats/:actionId')
   @ApiOkResponse({ type: ActionStatsWithOnboardingDto })
-  async getActionStatsById(
+  async getActionStatsByIdAdmin(
     @Param('actionId') actionId: string,
   ): Promise<ActionStatsWithOnboardingDto> {
     const stats = await this.analyticsService.getActionStatsById(
@@ -82,7 +82,7 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Post('action-stats/recalculate')
   @ApiOkResponse({ type: [ActionStatsWithOnboardingDto] })
-  async recalculateActionStats(): Promise<ActionStatsWithOnboardingDto[]> {
+  async recalculateActionStatsAdmin(): Promise<ActionStatsWithOnboardingDto[]> {
     await this.analyticsService.calculateActionStats();
     const stats = await this.analyticsService.getActionStats();
     return stats.map((stat) => new ActionStatsWithOnboardingDto(stat));
@@ -91,7 +91,7 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('member-completion-retention')
   @ApiOkResponse({ type: [MemberCompletionRetentionCohortDto] })
-  async getMemberCompletionRetention(): Promise<
+  async getMemberCompletionRetentionAdmin(): Promise<
     MemberCompletionRetentionCohortDto[]
   > {
     const cohorts =
@@ -105,7 +105,7 @@ export class AnalyticsController {
   @Get('platform-tenure-cohort')
   @ApiOkResponse({ type: PlatformTenureCohortStatsDto })
   @ApiQuery({ name: 'weeksOnPlatform', required: true, type: Number })
-  async getPlatformTenureCohort(
+  async getPlatformTenureCohortAdmin(
     @Query('weeksOnPlatform') weeksOnPlatform: string,
   ): Promise<PlatformTenureCohortStatsDto> {
     const parsedWeeks = Number(weeksOnPlatform);
@@ -126,7 +126,7 @@ export class AnalyticsController {
   @ApiOkResponse({ type: [ActionCompletionCurveDto] })
   @ApiQuery({ name: 'actionId', required: false, type: String })
   @ApiQuery({ name: 'granularity', required: false, enum: ['daily', 'hourly'] })
-  async getActionCompletionCurves(
+  async getActionCompletionCurvesAdmin(
     @Query('actionId') actionId?: string,
     @Query('granularity') granularity?: string,
   ): Promise<ActionCompletionCurveDto[]> {
@@ -142,7 +142,7 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('time-to-churn')
   @ApiOkResponse({ type: [TimeToChurnSampleDto] })
-  async getTimeToChurnSamples(): Promise<TimeToChurnSampleDto[]> {
+  async getTimeToChurnSamplesAdmin(): Promise<TimeToChurnSampleDto[]> {
     const samples = await this.analyticsService.getTimeToChurnSamples();
     return samples.map((sample) => new TimeToChurnSampleDto(sample));
   }
@@ -150,7 +150,7 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('aggregate-stats')
   @ApiOkResponse({ type: AggregateStatsDto })
-  async getAggregateStats(): Promise<AggregateStatsDto> {
+  async getAggregateStatsAdmin(): Promise<AggregateStatsDto> {
     const stats = await this.analyticsService.getAggregateStats();
     return new AggregateStatsDto(stats);
   }
@@ -160,7 +160,7 @@ export class AnalyticsController {
   @ApiOkResponse({ type: InviteFunnelDto })
   @ApiQuery({ name: 'startDate', required: false, type: String })
   @ApiQuery({ name: 'endDate', required: false, type: String })
-  async getInviteFunnel(
+  async getInviteFunnelAdmin(
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ): Promise<InviteFunnelDto> {
@@ -174,7 +174,7 @@ export class AnalyticsController {
   @UseGuards(AdminGuard)
   @Get('contract-status-history')
   @ApiOkResponse({ type: [ContractStatusPointDto] })
-  async getContractStatusHistory(
+  async getContractStatusHistoryAdmin(
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
   ): Promise<ContractStatusPointDto[]> {

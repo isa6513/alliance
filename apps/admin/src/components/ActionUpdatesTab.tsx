@@ -1,8 +1,8 @@
 import {
   ActionEventDto,
-  actionsCreateUpdate,
-  actionsDeleteUpdate,
-  actionsUpdateUpdate,
+  actionsCreateUpdateAdmin,
+  actionsDeleteUpdateAdmin,
+  actionsUpdateUpdateAdmin,
   ActionUpdateDto,
   ActionUpdateNotifyType,
   CreateActionUpdateDto,
@@ -70,7 +70,7 @@ const ActionUpdatesTab = ({
       return;
     }
 
-    const response = await actionsCreateUpdate({
+    const response = await actionsCreateUpdateAdmin({
       path: { id: actionId },
       body: newUpdate,
     });
@@ -84,7 +84,7 @@ const ActionUpdatesTab = ({
   };
 
   const handleDelete = async (id: number) => {
-    const response = await actionsDeleteUpdate({
+    const response = await actionsDeleteUpdateAdmin({
       path: { id },
     });
     if (response.response.ok) {
@@ -100,7 +100,7 @@ const ActionUpdatesTab = ({
     const existingUpdate = updates.find((u) => u.id === id);
     if (!existingUpdate) return;
 
-    const response = await actionsUpdateUpdate({
+    const response = await actionsUpdateUpdateAdmin({
       path: { id },
       body: {
         title,

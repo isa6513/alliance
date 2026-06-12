@@ -1,19 +1,19 @@
 import {
   Controller,
   Get,
+  NotFoundException,
   Param,
   Query,
   UseGuards,
-  NotFoundException,
 } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { AdminGuard } from '../auth/guards/admin.guard';
-import { EventLogService } from './eventlog.service';
 import {
   EventLogDto,
   EventLogListDto,
   EventLogQueryDto,
 } from './dto/event-log.dto';
+import { EventLogService } from './eventlog.service';
 
 @Controller('eventlog')
 export class EventLogController {
@@ -22,14 +22,16 @@ export class EventLogController {
   @Get()
   @ApiOkResponse({ type: EventLogListDto })
   @UseGuards(AdminGuard)
-  async findAll(@Query() query: EventLogQueryDto): Promise<EventLogListDto> {
+  async findAllAdmin(
+    @Query() query: EventLogQueryDto,
+  ): Promise<EventLogListDto> {
     return new EventLogListDto(await this.eventLogService.findAll(query));
   }
 
   @Get(':id')
   @ApiOkResponse({ type: EventLogDto })
   @UseGuards(AdminGuard)
-  async findOne(@Param('id') id: string): Promise<EventLogDto> {
+  async findOneAdmin(@Param('id') id: string): Promise<EventLogDto> {
     const event = await this.eventLogService.findOne(id);
     if (!event) {
       throw new NotFoundException(`Event log with id ${id} not found`);

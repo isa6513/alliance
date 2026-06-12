@@ -16,9 +16,8 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { basename } from 'path';
-import { Readable } from 'stream';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
-import { VideosService } from './videos.service';
+import { Readable } from 'stream';
 import {
   DeleteVideoResponseDto,
   ReplaceVideoResponseDto,
@@ -27,6 +26,7 @@ import {
   VideoListResponseDto,
   VideoStatusResponseDto,
 } from './dto/video-response.dto';
+import { VideosService } from './videos.service';
 
 @Controller('videos')
 export class VideosController {
@@ -57,7 +57,7 @@ export class VideosController {
     },
   })
   @ApiOkResponse({ type: UploadVideoResponseDto })
-  async uploadVideo(
+  async uploadVideoAdmin(
     @UploadedFiles() files: Express.Multer.File[],
   ): Promise<UploadVideoResponseDto> {
     const video = await this.videosService.uploadVideo(files);
@@ -67,7 +67,7 @@ export class VideosController {
   @Get()
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: VideoListResponseDto })
-  async listVideos(): Promise<VideoListResponseDto> {
+  async listVideosAdmin(): Promise<VideoListResponseDto> {
     const videos = await this.videosService.listVideos();
     return new VideoListResponseDto(videos);
   }
@@ -87,7 +87,7 @@ export class VideosController {
   @Get(':id/details')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: VideoDetailResponseDto })
-  async getVideoDetails(
+  async getVideoDetailsAdmin(
     @Param('id') id: number,
   ): Promise<VideoDetailResponseDto> {
     const result = await this.videosService.getVideoDetails(id);
@@ -115,7 +115,7 @@ export class VideosController {
     },
   })
   @ApiOkResponse({ type: ReplaceVideoResponseDto })
-  async replaceVideo(
+  async replaceVideoAdmin(
     @Param('id') id: number,
     @UploadedFiles() files: Express.Multer.File[],
   ): Promise<ReplaceVideoResponseDto> {
@@ -180,7 +180,9 @@ export class VideosController {
   @Delete(':id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: DeleteVideoResponseDto })
-  async deleteVideo(@Param('id') id: number): Promise<DeleteVideoResponseDto> {
+  async deleteVideoAdmin(
+    @Param('id') id: number,
+  ): Promise<DeleteVideoResponseDto> {
     const video = await this.videosService.getVideo(id);
     if (!video) throw new NotFoundException();
     await this.videosService.deleteVideo(id);

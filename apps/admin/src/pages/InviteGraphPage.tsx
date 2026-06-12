@@ -1,22 +1,22 @@
 import {
   OnetimeInviteDto,
-  userGetOnetimeInvites,
-  userListForGraph,
   UserDto,
+  userGetOnetimeInvitesAdmin,
+  userListForGraphAdmin,
 } from "@alliance/shared/client";
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import type { Selection, SimulationLinkDatum, SimulationNodeDatum } from "d3";
 import {
+  drag,
+  forceCenter,
+  forceCollide,
+  forceLink,
+  forceManyBody,
+  forceSimulation,
   select,
   zoom,
   zoomIdentity,
-  forceSimulation,
-  forceLink,
-  forceManyBody,
-  forceCenter,
-  forceCollide,
-  drag,
 } from "d3";
-import type { Selection, SimulationNodeDatum, SimulationLinkDatum } from "d3";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface GraphNode extends SimulationNodeDatum {
   id: string;
@@ -62,7 +62,7 @@ const InviteGraphPage = () => {
   const [isolateSubgraph, setIsolateSubgraph] = useState(false);
 
   useEffect(() => {
-    Promise.all([userListForGraph(), userGetOnetimeInvites()]).then(
+    Promise.all([userListForGraphAdmin(), userGetOnetimeInvitesAdmin()]).then(
       ([usersRes, invitesRes]) => {
         setUsers(usersRes.data ?? []);
         setInvites(invitesRes.data ?? []);

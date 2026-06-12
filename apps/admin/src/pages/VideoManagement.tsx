@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import {
-  videosListVideos,
-  videosDeleteVideo,
+  videosDeleteVideoAdmin,
+  videosListVideosAdmin,
 } from "@alliance/shared/client";
 import type { VideoListItemDto } from "@alliance/shared/client/types.gen";
 import Badge from "@alliance/sharedweb/ui/Badge";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -38,7 +38,7 @@ const VideoManagement: React.FC = () => {
 
   const loadVideos = useCallback(async () => {
     try {
-      const response = await videosListVideos();
+      const response = await videosListVideosAdmin();
       setVideos(response.data?.videos ?? []);
     } catch (err) {
       console.error("Failed to load videos", err);
@@ -55,12 +55,22 @@ const VideoManagement: React.FC = () => {
 
   const { confirm } = useToast();
 
-  const handleDelete = useCallback(async (e: React.MouseEvent, id: number) => {
-    e.stopPropagation();
-    if (!await confirm({ title: "Confirm Delete", message: `Are you sure you want to delete video ${id}?`, confirmLabel: "Delete" })) return;
-    await videosDeleteVideo({ path: { id } });
-    setVideos((prev) => prev.filter((v) => v.id !== id));
-  }, [confirm]);
+  const handleDelete = useCallback(
+    async (e: React.MouseEvent, id: number) => {
+      e.stopPropagation();
+      if (
+        !(await confirm({
+          title: "Confirm Delete",
+          message: `Are you sure you want to delete video ${id}?`,
+          confirmLabel: "Delete",
+        }))
+      )
+        return;
+      await videosDeleteVideoAdmin({ path: { id } });
+      setVideos((prev) => prev.filter((v) => v.id !== id));
+    },
+    [confirm],
+  );
 
   if (loading) {
     return (

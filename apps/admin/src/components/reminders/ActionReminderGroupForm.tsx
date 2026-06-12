@@ -1,8 +1,8 @@
 import { errorMessage } from "@alliance/common/errorMessage";
 import {
-  actionsPreviewEmailHtml,
-  actionsPreviewTextMessage,
-  actionsTentativePlansForGroup,
+  actionsPreviewEmailHtmlAdmin,
+  actionsPreviewTextMessageAdmin,
+  actionsTentativePlansForGroupAdmin,
   Tag,
   TagDto,
   type ActionEventDto,
@@ -310,7 +310,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
     const relativeRangeStartSeconds = relativeRangeStartHours * 3600;
     const relativeRangeEndSeconds = relativeRangeEndHours * 3600;
 
-    actionsTentativePlansForGroup({
+    actionsTentativePlansForGroupAdmin({
       path: {
         eventId: selectedEventId,
       },
@@ -382,7 +382,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
 
   useEffect(() => {
     if (previewingEmail1Task) {
-      actionsPreviewEmailHtml({
+      actionsPreviewEmailHtmlAdmin({
         path: {
           eventId: selectedEventId ?? 0,
         },
@@ -406,7 +406,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       });
     }
     if (previewingEmail2Task) {
-      actionsPreviewEmailHtml({
+      actionsPreviewEmailHtmlAdmin({
         path: {
           eventId: selectedEventId ?? 0,
         },
@@ -439,7 +439,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
 
   useEffect(() => {
     if (previewingText1Task) {
-      actionsPreviewTextMessage({
+      actionsPreviewTextMessageAdmin({
         path: {
           eventId: selectedEventId ?? 0,
         },
@@ -461,7 +461,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       });
     }
     if (previewingText2Task) {
-      actionsPreviewTextMessage({
+      actionsPreviewTextMessageAdmin({
         path: {
           eventId: selectedEventId ?? 0,
         },
@@ -486,7 +486,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
 
   useEffect(() => {
     if (previewingPushTask) {
-      actionsPreviewTextMessage({
+      actionsPreviewTextMessageAdmin({
         path: {
           eventId: selectedEventId ?? 0,
         },
@@ -508,7 +508,7 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       });
     }
     if (previewingPush2Task) {
-      actionsPreviewTextMessage({
+      actionsPreviewTextMessageAdmin({
         path: {
           eventId: selectedEventId ?? 0,
         },

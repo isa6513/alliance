@@ -1,15 +1,15 @@
 import {
-  actionsScheduledPlans,
+  actionsScheduledPlansAdmin,
   ScheduledPlansOverviewDto,
 } from "@alliance/shared/client";
-import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
-import Card from "@alliance/sharedweb/ui/Card";
+import { cn } from "@alliance/shared/styles/util";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import Card from "@alliance/sharedweb/ui/Card";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { ChevronDown, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { cn } from "@alliance/shared/styles/util";
 import { Link } from "react-router";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
 
 const ScheduledPlansPage = () => {
   const [plans, setPlans] = useState<ScheduledPlansOverviewDto | null>(null);
@@ -25,11 +25,11 @@ const ScheduledPlansPage = () => {
       setError(null);
 
       try {
-        const response = await actionsScheduledPlans({
+        const response = await actionsScheduledPlansAdmin({
           query: {
             rangeStart: new Date(Date.now()).toISOString(),
             rangeEnd: new Date(
-              Date.now() + 1000 * 60 * 60 * 24 * 7
+              Date.now() + 1000 * 60 * 60 * 24 * 7,
             ).toISOString(),
           },
         });
@@ -63,7 +63,7 @@ const ScheduledPlansPage = () => {
         key: `suspension-${plan.date}-${index}`,
         date: plan.date,
         users: plan.users ?? [],
-      })
+      }),
     );
 
     const forumItems = (plans?.forumAutocompletePlans ?? []).map(
@@ -73,11 +73,11 @@ const ScheduledPlansPage = () => {
         date: plan.date,
         users: plan.users ?? [],
         action: plan.action,
-      })
+      }),
     );
 
     return [...suspensionItems, ...forumItems].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
   }, [plans]);
 
@@ -191,7 +191,7 @@ const ScheduledPlansPage = () => {
                           size={18}
                           className={cn(
                             "text-gray-500 transition-transform duration-150",
-                            isExpanded && "-rotate-180"
+                            isExpanded && "-rotate-180",
                           )}
                         />
                       </button>

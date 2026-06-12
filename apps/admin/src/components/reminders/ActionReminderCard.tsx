@@ -1,25 +1,25 @@
 import {
-  actionsPreviewEmailHtml,
-  actionsPreviewTextMessage,
+  ActionEventDto,
+  ActionEventNotifDto,
+  actionsPreviewEmailHtmlAdmin,
+  actionsPreviewTextMessageAdmin,
   PreviewNotificationPlanDto,
   ReminderGroupDto,
+  TagDto,
 } from "@alliance/shared/client";
-import Card from "@alliance/sharedweb/ui/Card";
+import { cn } from "@alliance/shared/styles/util";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import TextareaWithHighlights from "../TextareaWithHighlights";
-import { ActionEventDto } from "@alliance/shared/client";
+import Card from "@alliance/sharedweb/ui/Card";
+import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
+import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
-import { TagDto } from "@alliance/shared/client";
-import { ActionEventNotifDto } from "@alliance/shared/client";
+import { formatDate, formatDistanceToNow } from "date-fns";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router";
+import TextareaWithHighlights from "../TextareaWithHighlights";
 import ActionReminderGroupForm, {
   ActionReminderGroupFormSubmitPayload,
 } from "./ActionReminderGroupForm";
-import DatabaseIcon from "@alliance/sharedweb/ui/icons/DatabaseIcon";
-import { Link } from "react-router";
-import { formatDate, formatDistanceToNow } from "date-fns";
-import { useMemo, useRef, useState, useEffect } from "react";
-import { cn } from "@alliance/shared/styles/util";
-import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
 import { GroupScheduleLabels } from "./ActionRemindersTab";
 
 interface ActionReminderCardProps {
@@ -97,7 +97,7 @@ const ActionReminderCard = ({
       return;
     }
     let ignored = false;
-    actionsPreviewEmailHtml({
+    actionsPreviewEmailHtmlAdmin({
       path: { eventId },
       body: {
         emailMessage: group.emailMessage,
@@ -116,7 +116,7 @@ const ActionReminderCard = ({
         });
       }
     });
-    actionsPreviewTextMessage({
+    actionsPreviewTextMessageAdmin({
       path: { eventId },
       body: {
         textMessage: group.textMessage,
@@ -131,7 +131,7 @@ const ActionReminderCard = ({
         setTextPreview(res.data.text);
       }
     });
-    actionsPreviewTextMessage({
+    actionsPreviewTextMessageAdmin({
       path: { eventId },
       body: {
         textMessage: group.pushMessage,

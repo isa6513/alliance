@@ -2,26 +2,26 @@ import { isQuestionField } from "@alliance/common/forms/form-schema";
 import type { ActionSuiteDto } from "@alliance/shared/client";
 import {
   ActionDto,
-  actionsArchive,
-  actionsCreate,
-  actionsExportAction,
-  actionsFindAllWithDrafts,
+  actionsArchiveAdmin,
+  actionsCreateAdmin,
+  actionsExportActionAdmin,
+  actionsFindAllWithDraftsAdmin,
   actionsFindOneAdmin,
-  actionsGetIncompleteUsers,
-  actionsRemove,
-  actionsShareUrlStats,
-  actionsSuites,
-  actionsUnarchive,
-  actionsUpdate,
-  analyticsGetActionStatsById,
+  actionsGetIncompleteUsersAdmin,
+  actionsRemoveAdmin,
+  actionsShareUrlStatsAdmin,
+  actionsSuitesAdmin,
+  actionsUnarchiveAdmin,
+  actionsUpdateAdmin,
+  analyticsGetActionStatsByIdAdmin,
   CreateActionDto,
   FormDto,
   FormResponseDto,
   imagesUploadImage,
-  tasksCreateForm,
+  tasksCreateFormAdmin,
   tasksGetForm,
-  tasksGetFormResponses,
-  tasksListForms,
+  tasksGetFormResponsesAdmin,
+  tasksListFormsAdmin,
   userMembers,
 } from "@alliance/shared/client";
 import type {
@@ -173,7 +173,7 @@ const ActionDashboard: React.FC = () => {
   useEffect(() => {
     const loadForms = async () => {
       try {
-        const response = await tasksListForms();
+        const response = await tasksListFormsAdmin();
         if (response.data) {
           setAvailableForms(response.data);
         }
@@ -191,7 +191,7 @@ const ActionDashboard: React.FC = () => {
 
     const loadSuites = async () => {
       try {
-        const response = await actionsSuites();
+        const response = await actionsSuitesAdmin();
         if (!cancelled && response.data) {
           setAvailableSuites(response.data);
         }
@@ -251,7 +251,7 @@ const ActionDashboard: React.FC = () => {
 
     const loadAllActions = async () => {
       try {
-        const response = await actionsFindAllWithDrafts();
+        const response = await actionsFindAllWithDraftsAdmin();
         if (!cancelled && response.data) {
           setAllActions(
             response.data.map((a) => ({
@@ -337,7 +337,7 @@ const ActionDashboard: React.FC = () => {
   const setTaskFormId = async (formId: number) => {
     setForm((prev) => ({ ...prev, taskFormId: formId }));
     if (actionId) {
-      const response = await actionsUpdate({
+      const response = await actionsUpdateAdmin({
         path: { id: actionId },
         body: { taskFormId: formId },
       });
@@ -411,7 +411,7 @@ const ActionDashboard: React.FC = () => {
     const loadShareUrlStats = async () => {
       setShareUrlStatsLoading(true);
       try {
-        const response = await actionsShareUrlStats({
+        const response = await actionsShareUrlStatsAdmin({
           path: { actionId },
           query: { questionId: "field-1765411401186" },
         });
@@ -437,7 +437,7 @@ const ActionDashboard: React.FC = () => {
 
     const loadActionStats = async () => {
       try {
-        const response = await analyticsGetActionStatsById({
+        const response = await analyticsGetActionStatsByIdAdmin({
           path: { actionId: actionId.toString() },
         });
         setActionStats(response.data ?? null);
@@ -461,7 +461,7 @@ const ActionDashboard: React.FC = () => {
       try {
         const [formRes, respRes] = await Promise.all([
           tasksGetForm({ path: { id: action.taskFormId! } }),
-          tasksGetFormResponses({ path: { id: action.taskFormId! } }),
+          tasksGetFormResponsesAdmin({ path: { id: action.taskFormId! } }),
         ]);
         if (formRes.data) {
           setTaskForm(formRes.data as unknown as FormWithSchema);
@@ -493,7 +493,7 @@ const ActionDashboard: React.FC = () => {
 
     const loadIncompleteUsers = async () => {
       try {
-        const response = await actionsGetIncompleteUsers({
+        const response = await actionsGetIncompleteUsersAdmin({
           path: { id: actionId },
         });
         setIncompleteUsers(response.data ?? []);
@@ -519,7 +519,7 @@ const ActionDashboard: React.FC = () => {
         path: { id: taskFormId },
       });
       if (taskForm.data) {
-        const newTaskForm = await tasksCreateForm({
+        const newTaskForm = await tasksCreateFormAdmin({
           body: {
             title: taskForm.data.title + " (Copy)",
             schema: taskForm.data.schema,
@@ -534,7 +534,7 @@ const ActionDashboard: React.FC = () => {
       name: `${form.name} (Copy)`,
       taskFormId,
     };
-    const response = await actionsCreate({
+    const response = await actionsCreateAdmin({
       body: duplicateForm,
     });
     const newAction = response.data;
@@ -611,11 +611,11 @@ const ActionDashboard: React.FC = () => {
       }));
     if (confirmed && actionId) {
       if (action?.archived) {
-        await actionsUnarchive({
+        await actionsUnarchiveAdmin({
           path: { id: actionId },
         });
       } else {
-        await actionsArchive({
+        await actionsArchiveAdmin({
           path: { id: actionId },
         });
       }
@@ -673,7 +673,7 @@ const ActionDashboard: React.FC = () => {
       };
 
       if (isNew) {
-        const response = await actionsCreate({
+        const response = await actionsCreateAdmin({
           body: formData,
         });
         const newAction = response.data;
@@ -683,7 +683,7 @@ const ActionDashboard: React.FC = () => {
 
         handleActionCreated(newAction);
       } else if (actionId) {
-        const response = await actionsUpdate({
+        const response = await actionsUpdateAdmin({
           path: { id: actionId },
           body: formData,
         });
@@ -720,7 +720,7 @@ const ActionDashboard: React.FC = () => {
 
   const handleExportAction = async () => {
     if (actionId) {
-      const response = await actionsExportAction({
+      const response = await actionsExportActionAdmin({
         path: { id: actionId },
         query: {
           events: exportActionEvents,
@@ -750,7 +750,7 @@ const ActionDashboard: React.FC = () => {
     ) {
       try {
         setLoading(true);
-        const response = await actionsRemove({
+        const response = await actionsRemoveAdmin({
           path: { id: actionId },
         });
         if (response.error) {

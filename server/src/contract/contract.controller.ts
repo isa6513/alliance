@@ -106,14 +106,14 @@ export class ContractController {
   @Post('create')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ContractAdminDto })
-  async create(@Body() dto: CreateContractDto): Promise<ContractAdminDto> {
+  async createAdmin(@Body() dto: CreateContractDto): Promise<ContractAdminDto> {
     return new ContractAdminDto(await this.contractService.create(dto));
   }
 
   @Patch('update/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ContractAdminDto })
-  async update(
+  async updateAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateContractDto,
   ): Promise<ContractAdminDto> {

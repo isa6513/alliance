@@ -1,6 +1,6 @@
 import {
   ActionActivityType,
-  actionsCreateActivity,
+  actionsCreateActivityAdmin,
 } from "@alliance/shared/client";
 import { useCallback, useState } from "react";
 
@@ -16,7 +16,7 @@ const ACTIVITY_TYPE_OPTIONS = Object.entries({
       ({
         value,
         label,
-      } as { value: ActionActivityType; label: string })
+      }) as { value: ActionActivityType; label: string },
   );
 
 export interface CreateActivityControlsProps {
@@ -40,7 +40,7 @@ const CreateActivityControls = ({
 
       setIsSubmitting(true);
       try {
-        const response = await actionsCreateActivity({
+        const response = await actionsCreateActivityAdmin({
           body: {
             actionId,
             userId,
@@ -60,7 +60,7 @@ const CreateActivityControls = ({
         setIsSubmitting(false);
       }
     },
-    [actionId, isSubmitting, onCreated, userId]
+    [actionId, isSubmitting, onCreated, userId],
   );
 
   return (

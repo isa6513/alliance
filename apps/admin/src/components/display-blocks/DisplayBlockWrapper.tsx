@@ -6,7 +6,7 @@ import {
 } from "@alliance/common/forms/display-blocks";
 import { type AnyField } from "@alliance/common/forms/form-schema";
 import { type VisibleIfFormula } from "@alliance/common/forms/visible-if-formula";
-import { userList, type UserDto } from "@alliance/shared/client";
+import { userListAdmin, type UserDto } from "@alliance/shared/client";
 import { resolveDisplayBlockForUser } from "@alliance/shared/formrenderer";
 import { cn } from "@alliance/shared/styles/util";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
@@ -187,7 +187,7 @@ export function DisplayBlockWrapper<T extends DisplayBlock = DisplayBlock>({
       setIsLoadingUsers(true);
       setUserLoadError(null);
       try {
-        const response = await userList();
+        const response = await userListAdmin();
         setManualUsers(response.data ?? []);
       } catch (error) {
         console.error(

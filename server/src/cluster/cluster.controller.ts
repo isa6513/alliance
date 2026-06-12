@@ -33,7 +33,7 @@ export class ClusterController {
   @Post('admin/reassign-all')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ReassignAllClustersResultDto })
-  async reassignAll(): Promise<ReassignAllClustersResultDto> {
+  async reassignAllAdmin(): Promise<ReassignAllClustersResultDto> {
     return new ReassignAllClustersResultDto(
       await this.clusterService.reassignAllUsers(),
     );

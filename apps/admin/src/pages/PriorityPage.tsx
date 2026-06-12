@@ -1,12 +1,13 @@
 import {
   ActionDto,
   actionsAllGeneralUpdatesAdmin,
-  actionsFindAllWithDrafts,
-  actionsSetPriority,
+  actionsFindAllWithDraftsAdmin,
+  actionsSetPriorityAdmin,
   SetPriorityDto,
   type GeneralUpdateAdminDto,
 } from "@alliance/shared/client";
 import { homePagePriorityComparator } from "@alliance/shared/lib/actionUtils";
+import { cn } from "@alliance/shared/styles/util";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {
@@ -23,7 +24,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { cn } from "@alliance/shared/styles/util";
 import { Link } from "react-router";
 
 type PriorityItem =
@@ -172,7 +172,7 @@ const PriorityPage: React.FC = () => {
     setError(null);
     try {
       const [actionsRes, updatesRes] = await Promise.all([
-        actionsFindAllWithDrafts(),
+        actionsFindAllWithDraftsAdmin(),
         actionsAllGeneralUpdatesAdmin(),
       ]);
       setRawActions(actionsRes.data ?? []);
@@ -327,7 +327,7 @@ const PriorityPage: React.FC = () => {
   const handleSave = useCallback(async () => {
     setSaving(true);
     try {
-      await actionsSetPriority({
+      await actionsSetPriorityAdmin({
         body: newPriorities,
       });
       await load();

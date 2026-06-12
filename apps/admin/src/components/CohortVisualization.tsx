@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { actionsEvaluateCohort } from "@alliance/shared/client";
+import { actionsEvaluateCohortAdmin } from "@alliance/shared/client";
 import type { CohortExpression } from "@alliance/shared/cohort-expression.types";
-import type { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import { cn } from "@alliance/shared/styles/util";
+import type { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import { Search } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 interface CohortVisualizationProps {
   expression: CohortExpression | null | undefined;
@@ -24,7 +24,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
   const [matchedIds, setMatchedIds] = useState<Set<number>>(new Set());
   const [subMatchedIds, setSubMatchedIds] = useState<Set<number>>(new Set());
   const [compareMatchedIds, setCompareMatchedIds] = useState<Set<number>>(
-    new Set()
+    new Set(),
   );
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +43,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
     }
     let cancelled = false;
     setLoading(true);
-    actionsEvaluateCohort({
+    actionsEvaluateCohortAdmin({
       body: { expression: expression as unknown as Record<string, unknown> },
     })
       .then((res) => {
@@ -69,7 +69,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
       return;
     }
     let cancelled = false;
-    actionsEvaluateCohort({
+    actionsEvaluateCohortAdmin({
       body: {
         expression: selectedSubExpression as unknown as Record<string, unknown>,
       },
@@ -94,7 +94,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
       return;
     }
     let cancelled = false;
-    actionsEvaluateCohort({
+    actionsEvaluateCohortAdmin({
       body: {
         expression: compareExpression as unknown as Record<string, unknown>,
       },
@@ -129,7 +129,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
 
   const matchCount = useMemo(
     () => users.filter((u) => matchedIds.has(u.id)).length,
-    [users, matchedIds]
+    [users, matchedIds],
   );
 
   const subMatchCount = useMemo(
@@ -137,7 +137,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
       selectedSubExpression
         ? users.filter((u) => subMatchedIds.has(u.id)).length
         : 0,
-    [users, subMatchedIds, selectedSubExpression]
+    [users, subMatchedIds, selectedSubExpression],
   );
 
   const compareMatchCount = useMemo(
@@ -145,17 +145,17 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
       compareExpression
         ? users.filter((u) => compareMatchedIds.has(u.id)).length
         : 0,
-    [users, compareMatchedIds, compareExpression]
+    [users, compareMatchedIds, compareExpression],
   );
 
   const bothMatchCount = useMemo(
     () =>
       compareExpression && expression
         ? users.filter(
-            (u) => matchedIds.has(u.id) && compareMatchedIds.has(u.id)
+            (u) => matchedIds.has(u.id) && compareMatchedIds.has(u.id),
           ).length
         : 0,
-    [users, matchedIds, compareMatchedIds, compareExpression, expression]
+    [users, matchedIds, compareMatchedIds, compareExpression, expression],
   );
 
   const searchResults = useMemo(() => {
@@ -166,7 +166,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
 
   const searchMatchIds = useMemo(
     () => new Set(searchResults.map((u) => u.id)),
-    [searchResults]
+    [searchResults],
   );
 
   if (users.length === 0) {
@@ -244,7 +244,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
                       "text-xs px-1.5 py-0.5 rounded-full",
                       inCohort
                         ? "bg-emerald-100 text-emerald-700"
-                        : "bg-gray-100 text-gray-500"
+                        : "bg-gray-100 text-gray-500",
                     )}
                   >
                     {inCohort ? "in cohort" : "not in cohort"}
@@ -260,7 +260,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
                       "text-xs px-1.5 py-0.5 rounded-full",
                       inCompare
                         ? "bg-violet-100 text-violet-700"
-                        : "bg-gray-100 text-gray-500"
+                        : "bg-gray-100 text-gray-500",
                     )}
                   >
                     {inCompare ? "in compare" : "not in compare"}
@@ -311,7 +311,7 @@ const CohortVisualization: React.FC<CohortVisualizationProps> = ({
                 bgColor,
                 searchQuery &&
                   searchMatchIds.has(user.id) &&
-                  "ring-2 ring-gray-800 ring-offset-1"
+                  "ring-2 ring-gray-800 ring-offset-1",
               )}
               style={{
                 width: `${DOT_SIZE}px`,

@@ -1,7 +1,7 @@
+import { analyticsGetActionCompletionCurvesAdmin } from "@alliance/shared/client";
+import { ActionCompletionCurveDto } from "@alliance/shared/client/types.gen";
 import chroma from "chroma-js";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { analyticsGetActionCompletionCurves } from "@alliance/shared/client";
-import { ActionCompletionCurveDto } from "@alliance/shared/client/types.gen";
 import {
   TimeSeriesChart,
   type DataPoint,
@@ -26,7 +26,8 @@ function computeMaxOffset(
   for (const curve of curves) {
     if (isHourly) {
       const lastOffset = curve.hourOffsets?.at(-1);
-      if (lastOffset !== undefined && lastOffset + 1 > max) max = lastOffset + 1;
+      if (lastOffset !== undefined && lastOffset + 1 > max)
+        max = lastOffset + 1;
     } else {
       const lastOffset = curve.dayOffsets?.at(-1);
       if (lastOffset !== undefined && lastOffset > max) max = lastOffset;
@@ -53,7 +54,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
   >([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedActionId, setSelectedActionId] = useState<string>(
-    actionId !== undefined ? String(actionId) : "all"
+    actionId !== undefined ? String(actionId) : "all",
   );
   const [granularity, setGranularity] = useState<GranularityMode>("hourly");
   const [minDurationDays, setMinDurationDays] = useState<string>("");
@@ -68,7 +69,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
     setLoading(true);
     try {
       // Always fetch all curves - needed to compute the average line
-      const response = await analyticsGetActionCompletionCurves({
+      const response = await analyticsGetActionCompletionCurvesAdmin({
         query: { granularity },
       });
       setActionCompletionCurves(response.data ?? []);
@@ -106,29 +107,27 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
 
   const completionCurveActionOrder = useMemo(
     () => ["all", ...completionCurveActionOptions.map((option) => option.id)],
-    [completionCurveActionOptions]
+    [completionCurveActionOptions],
   );
 
   const stepCompletionAction = useCallback(
     (direction: -1 | 1) => {
       if (completionCurveActionOrder.length === 0) return;
-      const currentIndex = completionCurveActionOrder.indexOf(
-        selectedActionId
-      );
+      const currentIndex = completionCurveActionOrder.indexOf(selectedActionId);
       const startIndex = currentIndex >= 0 ? currentIndex : 0;
       const nextIndex =
         (startIndex + direction + completionCurveActionOrder.length) %
         completionCurveActionOrder.length;
       setSelectedActionId(completionCurveActionOrder[nextIndex]);
     },
-    [completionCurveActionOrder, selectedActionId]
+    [completionCurveActionOrder, selectedActionId],
   );
 
   useEffect(() => {
     if (actionId !== undefined) return;
     if (selectedActionId === "all") return;
     const exists = completionCurveActionOptions.some(
-      (option) => option.id === selectedActionId
+      (option) => option.id === selectedActionId,
     );
     if (!exists) {
       setSelectedActionId("all");
@@ -136,7 +135,8 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
   }, [actionId, completionCurveActionOptions, selectedActionId]);
 
   // Default duration filter to ±3 days of the selected action's duration
-  const effectiveActionId = actionId !== undefined ? String(actionId) : selectedActionId;
+  const effectiveActionId =
+    actionId !== undefined ? String(actionId) : selectedActionId;
   useEffect(() => {
     if (effectiveActionId === "all") {
       setMinDurationDays("");
@@ -144,7 +144,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
       return;
     }
     const curve = actionCompletionCurves.find(
-      (c) => String(c.actionId) === effectiveActionId
+      (c) => String(c.actionId) === effectiveActionId,
     );
     if (!curve?.memberActionStartDate) return;
     const msPerDay = 24 * 60 * 60 * 1000;
@@ -193,7 +193,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
       return (
         (curve.dayOffsets?.length ?? 0) > 0 &&
         (curve.completionFractions?.length ?? 0) ===
-        (curve.dayOffsets?.length ?? 0)
+          (curve.dayOffsets?.length ?? 0)
       );
     });
 
@@ -224,9 +224,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
         const data: DataPoint[] = [];
         let cumulativeFraction = 0;
         let cumulativeCount = 0;
-        const offsets = isHourly
-          ? (curve.hourOffsets!)
-          : curve.dayOffsets;
+        const offsets = isHourly ? curve.hourOffsets! : curve.dayOffsets;
 
         if (isHourly) {
           // Start with a zero point at x=0 ("at the start of hour 0")
@@ -347,16 +345,19 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
       : selectedActionId === "all"
         ? actionSeries
         : actionSeries.filter(
-          (series) => series.key === `action-${selectedActionId}`
-        );
+            (series) => series.key === `action-${selectedActionId}`,
+          );
 
     // Compute display x-axis range from the selected curves only
     const selectedCurveIds = new Set(
-      filteredActionSeries.map((s) => s.key.replace("action-", ""))
+      filteredActionSeries.map((s) => s.key.replace("action-", "")),
     );
-    const displayedCurves = selectedCurveIds.size > 0
-      ? durationFilteredCurves.filter((c) => selectedCurveIds.has(String(c.actionId)))
-      : durationFilteredCurves;
+    const displayedCurves =
+      selectedCurveIds.size > 0
+        ? durationFilteredCurves.filter((c) =>
+            selectedCurveIds.has(String(c.actionId)),
+          )
+        : durationFilteredCurves;
     const displayedMaxX = computeMaxOffset(displayedCurves, isHourly);
 
     const displayedSeries = [...filteredActionSeries, averageSeries];
@@ -368,7 +369,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
     const allValues = allSeries.flatMap((series) =>
       series.data
         .map((point) => point[yValueKey] as number)
-        .filter((value) => Number.isFinite(value))
+        .filter((value) => Number.isFinite(value)),
     );
     const maxValue = allValues.length ? Math.max(...allValues) : 0;
     const paddedMax =
@@ -379,7 +380,14 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
       maxX: displayedMaxX,
       yDomain: [0, paddedMax] as [number, number],
     };
-  }, [actionCompletionCurves, actionId, selectedActionId, isHourly, minDurationDays, maxDurationDays]);
+  }, [
+    actionCompletionCurves,
+    actionId,
+    selectedActionId,
+    isHourly,
+    minDurationDays,
+    maxDurationDays,
+  ]);
 
   const showDropdown = showSelector && actionId === undefined;
 
@@ -409,7 +417,9 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
       }
       xRange={{ min: 0, max: actionCompletionCurveChartData.maxX }}
       showDataPoints={!isHourly}
-      getHoverXLabel={isHourly ? (d) => formatHourLabel((d.x as number) ?? 0) : undefined}
+      getHoverXLabel={
+        isHourly ? (d) => formatHourLabel((d.x as number) ?? 0) : undefined
+      }
       yDomain={actionCompletionCurveChartData.yDomain}
       yAxisFormat={(v) => `${Math.round(v * 100)}%`}
       height={360}
@@ -444,9 +454,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
               </label>
               <select
                 value={selectedActionId}
-                onChange={(event) =>
-                  setSelectedActionId(event.target.value)
-                }
+                onChange={(event) => setSelectedActionId(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "ArrowLeft") {
                     event.preventDefault();
@@ -515,7 +523,11 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
             : 0;
 
         const xValue = point.x as number;
-        const items: { label: string; value: string | number; color?: string }[] = isHourly
+        const items: {
+          label: string;
+          value: string | number;
+          color?: string;
+        }[] = isHourly
           ? [
               {
                 label: "Cumulative completed",
@@ -550,7 +562,7 @@ const ActionCompletionCurveChart: React.FC<ActionCompletionCurveChartProps> = ({
             {
               label: "Joined",
               value: point.usersJoined as number,
-            }
+            },
           );
         }
 

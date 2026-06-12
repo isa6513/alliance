@@ -1,10 +1,10 @@
 import { errorMessage } from "@alliance/common/errorMessage";
 import type { ActionDto } from "@alliance/shared/client";
 import {
-  actionsCreateFormVariant,
-  actionsDeleteFormVariant,
-  actionsListFormVariants,
-  actionsUpdateFormVariant,
+  actionsCreateFormVariantAdmin,
+  actionsDeleteFormVariantAdmin,
+  actionsListFormVariantsAdmin,
+  actionsUpdateFormVariantAdmin,
 } from "@alliance/shared/client";
 import type {
   ActionFormVariantDto,
@@ -60,7 +60,7 @@ export default function ActionFormVariantsTab({
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
 
   const refresh = useCallback(async () => {
-    const res = await actionsListFormVariants({ path: { id: action.id } });
+    const res = await actionsListFormVariantsAdmin({ path: { id: action.id } });
     if (res.data) {
       const variantsAsPct = res.data.variants.map((v) => ({
         ...v,
@@ -168,7 +168,7 @@ export default function ActionFormVariantsTab({
       let stopAt = staged.length;
       for (let i = 0; i < staged.length; i++) {
         const draft = staged[i];
-        const res = await actionsCreateFormVariant({
+        const res = await actionsCreateFormVariantAdmin({
           path: { id: action.id },
           body: {
             name: draft.name,
@@ -217,7 +217,7 @@ export default function ActionFormVariantsTab({
       if (!edit) return;
       setSavingIds((s) => new Set(s).add(variantId));
       try {
-        const res = await actionsUpdateFormVariant({
+        const res = await actionsUpdateFormVariantAdmin({
           path: { variantId },
           body: {
             name: edit.name,
@@ -252,7 +252,9 @@ export default function ActionFormVariantsTab({
         return;
       setDeletingIds((s) => new Set(s).add(variantId));
       try {
-        const res = await actionsDeleteFormVariant({ path: { variantId } });
+        const res = await actionsDeleteFormVariantAdmin({
+          path: { variantId },
+        });
         if (res.error) {
           toast.error(
             errorMessage({ error: res.error, fallback: "Failed to delete" }),

@@ -266,7 +266,7 @@ export class ActionsController {
   @Get('generalUpdates/admin/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: GeneralUpdateAdminDto })
-  async findOneGeneralUpdate(
+  async findOneGeneralUpdateAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GeneralUpdateAdminDto> {
     return new GeneralUpdateAdminDto(
@@ -277,7 +277,7 @@ export class ActionsController {
   @Post('generalUpdates/create')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: GeneralUpdateAdminDto })
-  async createGeneralUpdate(
+  async createGeneralUpdateAdmin(
     @Body() dto: CreateGeneralUpdateDto,
   ): Promise<GeneralUpdateAdminDto> {
     return new GeneralUpdateAdminDto(
@@ -288,7 +288,7 @@ export class ActionsController {
   @Patch('generalUpdates/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: GeneralUpdateAdminDto })
-  async updateGeneralUpdate(
+  async updateGeneralUpdateAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateGeneralUpdateDto,
   ): Promise<GeneralUpdateAdminDto> {
@@ -300,7 +300,7 @@ export class ActionsController {
   @Delete('generalUpdates/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteGeneralUpdate(
+  async deleteGeneralUpdateAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<void> {
     return this.actionsService.deleteGeneralUpdate(id);
@@ -359,7 +359,7 @@ export class ActionsController {
   @Get('withdrawals/byForm/:formId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionWithdrawalDto, isArray: true })
-  async getWithdrawals(
+  async getWithdrawalsAdmin(
     @Param('formId', ParseIntPipe) formId: number,
   ): Promise<ActionWithdrawalDto[]> {
     const activities = await this.actionsService.getWithdrawalsForForm(formId);
@@ -378,7 +378,7 @@ export class ActionsController {
   @Get('notification-schedule')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: NotificationScheduleEntryDto, isArray: true })
-  async getNotificationSchedule(
+  async getNotificationScheduleAdmin(
     @Query() query: NotificationScheduleQueryDto,
   ): Promise<NotificationScheduleEntryDto[]> {
     const start = new Date(query.windowStart);
@@ -415,14 +415,14 @@ export class ActionsController {
   @Post('priorities')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async setPriority(@Body() dto: SetPriorityDto): Promise<void> {
+  async setPriorityAdmin(@Body() dto: SetPriorityDto): Promise<void> {
     return this.actionsService.setPriorityOrder(dto);
   }
 
   @Get('all')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [ActionDto] })
-  async findAllWithDrafts(): Promise<ActionDto[]> {
+  async findAllWithDraftsAdmin(): Promise<ActionDto[]> {
     const actions = await this.actionsService.findAllSorted({
       events: true,
       suite: true,
@@ -605,7 +605,7 @@ export class ActionsController {
   @Get(':id/follow-up-forms')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [FollowUpFormDto] })
-  async getFollowUpForms(
+  async getFollowUpFormsAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<FollowUpFormDto[]> {
     const action = await this.actionsService.findOneOrFail({
@@ -619,7 +619,7 @@ export class ActionsController {
   @Post(':id/follow-up-forms')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: FollowUpFormDto })
-  async createFollowUpForm(
+  async createFollowUpFormAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: CreateFollowUpFormDto,
   ): Promise<FollowUpFormDto> {
@@ -635,7 +635,7 @@ export class ActionsController {
   @Patch('follow-up-forms/:followUpFormId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: FollowUpFormDto })
-  async updateFollowUpForm(
+  async updateFollowUpFormAdmin(
     @Param('followUpFormId', ParseIntPipe) followUpFormId: number,
     @Body() dto: UpdateFollowUpFormDto,
   ): Promise<FollowUpFormDto> {
@@ -649,7 +649,7 @@ export class ActionsController {
   @Delete('follow-up-forms/:followUpFormId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteFollowUpForm(
+  async deleteFollowUpFormAdmin(
     @Param('followUpFormId', ParseIntPipe) followUpFormId: number,
   ): Promise<void> {
     return this.actionsService.deleteFollowUpForm(followUpFormId);
@@ -658,7 +658,7 @@ export class ActionsController {
   @Get(':id/incomplete-users')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [ProfileDto] })
-  async getIncompleteUsers(
+  async getIncompleteUsersAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ProfileDto[]> {
     const users = await this.actionsService.findIncompleteUsersForAction(id);
@@ -668,7 +668,7 @@ export class ActionsController {
   @Get(':id/completed-users')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: [ProfileDto] })
-  async getCompletedUsers(
+  async getCompletedUsersAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ProfileDto[]> {
     const users = await this.actionsService.findCompletedUsersForAction(id);
@@ -678,7 +678,7 @@ export class ActionsController {
   @Post('evaluate-cohort')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: EvaluateCohortExpressionResponseDto })
-  async evaluateCohort(
+  async evaluateCohortAdmin(
     @Body() dto: EvaluateCohortExpressionDto,
   ): Promise<EvaluateCohortExpressionResponseDto> {
     const userIds = await this.actionsService.evaluateCohortExpressionBatch(
@@ -690,7 +690,7 @@ export class ActionsController {
   @Get(':id/form-variants')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionFormVariantsListDto })
-  async listFormVariants(
+  async listFormVariantsAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ActionFormVariantsListDto> {
     const [variants, stats] = await Promise.all([
@@ -703,7 +703,7 @@ export class ActionsController {
   @Post(':id/form-variants')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionFormVariantDto })
-  async createFormVariant(
+  async createFormVariantAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: CreateActionFormVariantDto,
   ): Promise<ActionFormVariantDto> {
@@ -714,7 +714,7 @@ export class ActionsController {
   @Patch('form-variants/:variantId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionFormVariantDto })
-  async updateFormVariant(
+  async updateFormVariantAdmin(
     @Param('variantId', ParseIntPipe) variantId: number,
     @Body() body: UpdateActionFormVariantDto,
   ): Promise<ActionFormVariantDto> {
@@ -728,7 +728,7 @@ export class ActionsController {
   @Delete('form-variants/:variantId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteFormVariant(
+  async deleteFormVariantAdmin(
     @Param('variantId', ParseIntPipe) variantId: number,
   ): Promise<void> {
     await this.actionFormVariantService.deleteVariant(variantId);
@@ -737,14 +737,16 @@ export class ActionsController {
   @Post('create')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
-  async create(@Body() createActionDto: CreateActionDto): Promise<ActionDto> {
+  async createAdmin(
+    @Body() createActionDto: CreateActionDto,
+  ): Promise<ActionDto> {
     return new ActionDto(await this.actionsService.create(createActionDto));
   }
 
   @Patch(':id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
-  async update(
+  async updateAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateActionDto: UpdateActionDto,
     @Request() req: JwtRequest,
@@ -757,7 +759,7 @@ export class ActionsController {
   @Delete(':id')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  removeAdmin(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.actionsService.remove(id);
   }
 
@@ -825,7 +827,7 @@ export class ActionsController {
   @Post(':id/events')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionEventDto })
-  async addEvent(
+  async addEventAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() actionEventDto: CreateActionEventDto,
     @Request() req: JwtRequest,
@@ -838,7 +840,7 @@ export class ActionsController {
   @Patch('remindergroups/:groupId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ReminderGroupDto })
-  async updateReminderGroup(
+  async updateReminderGroupAdmin(
     @Param('groupId', ParseIntPipe) groupId: number,
     @Body() body: CreateReminderGroupDto,
   ): Promise<ReminderGroupDto> {
@@ -850,7 +852,7 @@ export class ActionsController {
   @Post('events/:eventId/createremindergroup')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ReminderGroupDto })
-  async createReminderGroup(
+  async createReminderGroupAdmin(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: CreateReminderGroupDto,
   ): Promise<ReminderGroupDto> {
@@ -862,7 +864,7 @@ export class ActionsController {
   @Delete('reminders/:groupId')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteReminderGroup(
+  async deleteReminderGroupAdmin(
     @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<void> {
     await this.actionEventReminderService.deleteReminderGroup(groupId);
@@ -871,7 +873,7 @@ export class ActionsController {
   @Get('plansForGroup/:groupId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: PreviewNotificationPlanDto, isArray: true })
-  async plansForGroup(
+  async plansForGroupAdmin(
     @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<PreviewNotificationPlanDto[]> {
     return this.actionEventReminderService.findNotificationPlansForGroup(
@@ -882,7 +884,7 @@ export class ActionsController {
   @Get('sentNotifsForGroup/:groupId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionEventNotifDto, isArray: true })
-  async sentNotifsForGroup(
+  async sentNotifsForGroupAdmin(
     @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<ActionEventNotifDto[]> {
     return this.actionEventReminderService.getSentNotifsForGroup(groupId);
@@ -891,7 +893,7 @@ export class ActionsController {
   @Post('clearDb')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  clearDb(): Promise<void> {
+  clearDbAdmin(): Promise<void> {
     return this.actionsService.clearDb();
   }
 
@@ -984,7 +986,7 @@ export class ActionsController {
   @Post('createActivity')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionActivityDto })
-  async createActivity(
+  async createActivityAdmin(
     @Body() activityDto: CreateActionActivityDto,
   ): Promise<ActionActivityDto> {
     return new ActionActivityDto(
@@ -995,21 +997,25 @@ export class ActionsController {
   @Post('archive/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
-  async archive(@Param('id', ParseIntPipe) id: number): Promise<ActionDto> {
+  async archiveAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ActionDto> {
     return new ActionDto(await this.actionsService.archive(id));
   }
 
   @Post('unarchive/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
-  async unarchive(@Param('id', ParseIntPipe) id: number): Promise<ActionDto> {
+  async unarchiveAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ActionDto> {
     return new ActionDto(await this.actionsService.unarchive(id));
   }
 
   @Get('reminderGroupsForEvent/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ReminderGroupDto, isArray: true })
-  async reminderGroupsForEvent(
+  async reminderGroupsForEventAdmin(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ReminderGroupDto[]> {
     const groups =
@@ -1020,7 +1026,7 @@ export class ActionsController {
   @Post('createUpdate/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionUpdateDto })
-  async createUpdate(
+  async createUpdateAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() createActionUpdateDto: CreateActionUpdateDto,
   ): Promise<ActionUpdateDto> {
@@ -1032,7 +1038,7 @@ export class ActionsController {
   @Patch('updateUpdate/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionUpdateDto })
-  async updateUpdate(
+  async updateUpdateAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateActionUpdateDto: CreateActionUpdateDto,
   ): Promise<ActionUpdateDto> {
@@ -1044,7 +1050,9 @@ export class ActionsController {
   @Delete('deleteUpdate/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async deleteUpdate(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async deleteUpdateAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
     await this.actionsService.deleteActionUpdate(id);
   }
 
@@ -1069,7 +1077,7 @@ export class ActionsController {
   @Get('suites')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto, isArray: true })
-  async suites(): Promise<ActionSuiteDto[]> {
+  async suitesAdmin(): Promise<ActionSuiteDto[]> {
     const suites = await this.actionsService.findSuites();
     return suites.map((suite) => new ActionSuiteDto(suite, []));
   }
@@ -1077,7 +1085,9 @@ export class ActionsController {
   @Get('suite/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto })
-  async suite(@Param('id', ParseIntPipe) id: number): Promise<ActionSuiteDto> {
+  async suiteAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ActionSuiteDto> {
     const suite = await this.actionsService.findSuite(id);
     return new ActionSuiteDto(suite);
   }
@@ -1085,7 +1095,7 @@ export class ActionsController {
   @Post('createSuite')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto })
-  async createSuite(
+  async createSuiteAdmin(
     @Body() createActionSuiteDto: CreateActionSuiteDto,
   ): Promise<ActionSuiteDto> {
     const suite = await this.actionsService.createSuite(createActionSuiteDto);
@@ -1095,7 +1105,7 @@ export class ActionsController {
   @Patch('suite/:suiteId/batchUpdateSuiteEvents/:eventId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto })
-  async batchUpdateSuiteEvents(
+  async batchUpdateSuiteEventsAdmin(
     @Param('suiteId', ParseIntPipe) suiteId: number,
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: UpdateActionEventDto,
@@ -1111,7 +1121,7 @@ export class ActionsController {
   @Post('suite/:suiteId/events')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto })
-  async addSuiteEvent(
+  async addSuiteEventAdmin(
     @Param('suiteId', ParseIntPipe) suiteId: number,
     @Body() actionEventDto: CreateActionEventDto,
   ): Promise<ActionSuiteDto> {
@@ -1125,7 +1135,7 @@ export class ActionsController {
   @Delete('suite/:suiteId/events/:eventId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionSuiteDto })
-  async deleteSuiteEvent(
+  async deleteSuiteEventAdmin(
     @Param('suiteId', ParseIntPipe) suiteId: number,
     @Param('eventId', ParseIntPipe) eventId: number,
   ): Promise<ActionSuiteDto> {
@@ -1136,7 +1146,7 @@ export class ActionsController {
   @Post('events/:eventId/checkTentativePlans')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: PreviewNotificationPlanDto, isArray: true })
-  async tentativePlansForGroup(
+  async tentativePlansForGroupAdmin(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: CreateReminderGroupDto,
   ): Promise<PreviewNotificationPlanDto[]> {
@@ -1146,7 +1156,7 @@ export class ActionsController {
   @Post('previewEmailHtml/:eventId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: PreviewEmailHtmlResponseDto })
-  async previewEmailHtml(
+  async previewEmailHtmlAdmin(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: PreviewEmailHtmlDto,
   ): Promise<PreviewEmailHtmlResponseDto> {
@@ -1158,7 +1168,7 @@ export class ActionsController {
   @Post('previewTextMessage/:eventId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: PreviewTextMessageResponseDto })
-  async previewTextMessage(
+  async previewTextMessageAdmin(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body() body: PreviewTextDto,
   ): Promise<PreviewTextMessageResponseDto> {
@@ -1170,21 +1180,21 @@ export class ActionsController {
   @Get('reloadAllActionUsersJoined')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async reloadAllActionUsersJoined(): Promise<void> {
+  async reloadAllActionUsersJoinedAdmin(): Promise<void> {
     return this.actionsService.reloadAllActionUsersJoined();
   }
 
   @Get('reloadAllActionUsersCompleted')
   @UseGuards(AdminGuard)
   @ApiOkResponse()
-  async reloadAllActionUsersCompleted(): Promise<void> {
+  async reloadAllActionUsersCompletedAdmin(): Promise<void> {
     return this.actionsService.reloadAllActionUsersCompleted();
   }
 
   @Get('export/:id')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ExportActionDto })
-  async exportAction(
+  async exportActionAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Query('events', new ParseBoolPipe({ optional: true })) events?: boolean,
     @Query('taskForm', new ParseBoolPipe({ optional: true }))
@@ -1205,14 +1215,14 @@ export class ActionsController {
   @Post('pasteJson')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ActionDto })
-  async pasteJson(@Body() body: PasteJsonDto): Promise<ActionDto> {
+  async pasteJsonAdmin(@Body() body: PasteJsonDto): Promise<ActionDto> {
     return new ActionDto(await this.actionsService.importAction(body.body));
   }
 
   @Get('scheduledPlans')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ScheduledPlansOverviewDto })
-  async scheduledPlans(
+  async scheduledPlansAdmin(
     @Query('rangeStart') rangeStart: Date,
     @Query('rangeEnd') rangeEnd: Date,
   ): Promise<ScheduledPlansOverviewDto> {
@@ -1232,7 +1242,7 @@ export class ActionsController {
   @Get('suspendPlans')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: SuspensionPlanDto, isArray: true })
-  async suspendPlans(
+  async suspendPlansAdmin(
     @Query('rangeStart') rangeStart: Date,
     @Query('rangeEnd') rangeEnd: Date,
   ): Promise<SuspensionPlanDto[]> {
@@ -1263,7 +1273,7 @@ export class ActionsController {
   @Get('shareLinksForForm/:formId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ShareUrlDto, isArray: true })
-  async shareLinksForForm(
+  async shareLinksForFormAdmin(
     @Param('formId', ParseIntPipe) formId: number,
   ): Promise<ShareUrlDto[]> {
     const shareUrls = await this.actionsService.getShareLinksForForm(formId);
@@ -1274,7 +1284,7 @@ export class ActionsController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ShareUrlStatsDto, isArray: true })
   @ApiQuery({ name: 'questionId', required: false, type: String })
-  async shareUrlStats(
+  async shareUrlStatsAdmin(
     @Param('actionId', ParseIntPipe) actionId: number,
     @Query('questionId') questionId?: string,
   ): Promise<ShareUrlStatsDto[]> {
@@ -1289,7 +1299,7 @@ export class ActionsController {
   @Get('action-relations')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserActionRelationsResponseDto })
-  async actionRelations(): Promise<UserActionRelationsResponseDto> {
+  async actionRelationsAdmin(): Promise<UserActionRelationsResponseDto> {
     return new UserActionRelationsResponseDto(
       await this.actionsService.findUserActionRelations(),
     );
@@ -1298,7 +1308,7 @@ export class ActionsController {
   @Get('action-relations/:userId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: UserActionRelationsResponseDto })
-  async actionRelationsForUser(
+  async actionRelationsForUserAdmin(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<UserActionRelationsResponseDto> {
     return new UserActionRelationsResponseDto(

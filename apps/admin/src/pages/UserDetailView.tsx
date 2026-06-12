@@ -1,14 +1,14 @@
 import {
-  actionsActionRelationsForUser,
-  analyticsGetTimeSpentPerUser,
-  analyticsGetTimeSpentPerUserTotal,
-  notifsNotifsForUser,
-  tasksGetFormsForUserSid,
-  userAddUserToTag,
-  userGetAwayRangeForUser,
-  userGetTagSummaries,
-  userRemoveUserFromTag,
-  userUserDetail,
+  actionsActionRelationsForUserAdmin,
+  analyticsGetTimeSpentPerUserAdmin,
+  analyticsGetTimeSpentPerUserTotalAdmin,
+  notifsNotifsForUserAdmin,
+  tasksGetFormsForUserSidAdmin,
+  userAddUserToTagAdmin,
+  userGetAwayRangeForUserAdmin,
+  userGetTagSummariesAdmin,
+  userRemoveUserFromTagAdmin,
+  userUserDetailAdmin,
 } from "@alliance/shared/client";
 import {
   ActionEventNotifDto,
@@ -58,14 +58,16 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     notifRes,
     formResponsesRes,
   ] = await Promise.all([
-    userUserDetail({ path: { id: userId } }),
-    userGetAwayRangeForUser({ path: { id: userId } }),
-    userGetTagSummaries(),
-    actionsActionRelationsForUser({ path: { userId } }),
-    analyticsGetTimeSpentPerUser(),
-    analyticsGetTimeSpentPerUserTotal(),
-    notifsNotifsForUser({ path: { id: userId } }),
-    tasksGetFormsForUserSid({ path: { userId } }).catch(() => ({ data: [] })),
+    userUserDetailAdmin({ path: { id: userId } }),
+    userGetAwayRangeForUserAdmin({ path: { id: userId } }),
+    userGetTagSummariesAdmin(),
+    actionsActionRelationsForUserAdmin({ path: { userId } }),
+    analyticsGetTimeSpentPerUserAdmin(),
+    analyticsGetTimeSpentPerUserTotalAdmin(),
+    notifsNotifsForUserAdmin({ path: { id: userId } }),
+    tasksGetFormsForUserSidAdmin({ path: { userId } }).catch(() => ({
+      data: [],
+    })),
   ]);
 
   const user = userRes.data;
@@ -275,7 +277,7 @@ const UserDetailView: React.FC = () => {
       setTagMutationError(null);
       try {
         if (nextChecked) {
-          const res = await userAddUserToTag({
+          const res = await userAddUserToTagAdmin({
             path: { tagId },
             body: { userId: user.id },
           });
@@ -284,7 +286,7 @@ const UserDetailView: React.FC = () => {
             setUserTagIds((prev) => new Set([...prev, tagId]));
           }
         } else {
-          const res = await userRemoveUserFromTag({
+          const res = await userRemoveUserFromTagAdmin({
             path: { tagId },
             body: { userId: user.id },
           });

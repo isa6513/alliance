@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { userCityCounts } from "@alliance/shared/client";
+import { userCityCountsAdmin } from "@alliance/shared/client";
 import type { UserCityCountDto } from "@alliance/shared/client/types.gen";
-import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
+import Card from "@alliance/sharedweb/ui/Card";
 import chroma from "chroma-js";
+import React, { useEffect, useMemo, useState } from "react";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore react-simple-maps types are provided via devDependency
 import {
@@ -34,7 +34,7 @@ const MemberMapPage: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    userCityCounts()
+    userCityCountsAdmin()
       .then((resp) => {
         if (resp.data) {
           setCityCounts(resp.data);

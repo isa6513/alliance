@@ -5,7 +5,7 @@ import type {
   ListField,
 } from "@alliance/common/forms/form-schema";
 import { isQuestionField } from "@alliance/common/forms/form-schema";
-import { tasksGetForm, tasksListForms } from "@alliance/shared/client";
+import { tasksGetForm, tasksListFormsAdmin } from "@alliance/shared/client";
 import { useEffect, useState } from "react";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
@@ -27,7 +27,7 @@ export function EditablePreviousAnswerBlock({
   // Load list of forms on mount
   useEffect(() => {
     let cancelled = false;
-    tasksListForms()
+    tasksListFormsAdmin()
       .then((response) => {
         if (cancelled) return;
         const items = (response.data ?? []) as Array<{
