@@ -27,15 +27,8 @@ export function useOnetimeInvitesOverview(params?: { enabled?: boolean }) {
     refetch,
   } = useQuery({
     queryKey: QUERY_KEY,
-    queryFn: async () => {
-      const response = await userGetOnetimeInvitesOverview();
-      if (!response.data) {
-        throw new Error(
-          response.response.statusText || "Failed to load invites",
-        );
-      }
-      return response.data;
-    },
+    queryFn: () =>
+      userGetOnetimeInvitesOverview({ throwOnError: true }).then((r) => r.data),
     enabled,
   });
 
@@ -67,22 +60,16 @@ export function useOnetimeInvitesOverview(params?: { enabled?: boolean }) {
   );
 
   const approveMutation = useMutation({
-    mutationFn: async (inviteId: number) => {
-      const response = await userApproveOnetimeInvite({ path: { inviteId } });
-      if (!response.data) {
-        throw new Error(response.response.statusText || "Failed to approve");
-      }
-      return response.data;
-    },
+    mutationFn: (inviteId: number) =>
+      userApproveOnetimeInvite({ path: { inviteId }, throwOnError: true }).then(
+        (r) => r.data,
+      ),
     onSuccess: (invite) => upsertInvite(invite),
   });
 
   const rejectMutation = useMutation({
     mutationFn: async (inviteId: number) => {
-      const response = await userRejectOnetimeInvite({ path: { inviteId } });
-      if (response.error) {
-        throw new Error(response.response.statusText || "Failed to reject");
-      }
+      await userRejectOnetimeInvite({ path: { inviteId }, throwOnError: true });
       return inviteId;
     },
     onSuccess: (inviteId) => removeInvite(inviteId),
@@ -90,10 +77,7 @@ export function useOnetimeInvitesOverview(params?: { enabled?: boolean }) {
 
   const deleteMutation = useMutation({
     mutationFn: async (inviteId: number) => {
-      const response = await userDeleteOnetimeInvite({ path: { inviteId } });
-      if (response.error) {
-        throw new Error(response.response.statusText || "Failed to delete");
-      }
+      await userDeleteOnetimeInvite({ path: { inviteId }, throwOnError: true });
       return inviteId;
     },
     onSuccess: (inviteId) => removeInvite(inviteId),
