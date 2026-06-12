@@ -84,7 +84,9 @@ function match<T, E, U>(
 }
 
 function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
+  return error instanceof Error
+    ? error
+    : new Error(String(error), { cause: error });
 }
 
 function fromThrowable<T>(fn: () => T): Result<T, Error>;
