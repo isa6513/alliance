@@ -51,7 +51,7 @@ const andThen = flatMap;
 function unwrap<T, E>(result: Result<T, E>): T {
   if (result.ok) return result.value;
 
-  throw result.error;
+  throw toError(result.error);
 }
 
 function expect<T, E>(result: Result<T, E>, message: string): T {
