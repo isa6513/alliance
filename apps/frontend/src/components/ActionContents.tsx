@@ -238,7 +238,7 @@ const ActionContents = () => {
           <div className="flex flex-col">
             {loggedInMode && activeFollowUpForms.length > 0 && (
               <div className="flex flex-col gap-y-4 mb-6">
-                <p className="font-semibold text-xl">Follow-up</p>
+                <p className="text-title-small">Follow-up</p>
                 {activeFollowUpForms.map((fuf) => (
                   <FollowUpFormPanel
                     key={fuf.id}
@@ -251,7 +251,7 @@ const ActionContents = () => {
             )}
             {loggedInMode && (
               <div className="flex flex-col lg:flex-row justify-between lg:items-center mb-4 gap-x-4">
-                <p className="font-semibold text-xl flex-1">Task</p>
+                <p className="text-title-small flex-1">Task</p>
                 <TaskTimeInfo
                   action={action}
                   nextEvent={nextEvent}
@@ -265,7 +265,7 @@ const ActionContents = () => {
         {loggedInMode && (
           <>
             <div id="description">
-              <p className="font-semibold text-xl mb-4">Description</p>
+              <p className="text-title-small mb-4">Description</p>
               <AppMarkdownWrapper
                 markdownContent={action?.body}
                 distinguishActionLinks={true}
@@ -274,7 +274,7 @@ const ActionContents = () => {
 
             {isAuthenticated && (
               <div>
-                <p className="font-semibold text-xl mb-4">Discussion</p>
+                <p className="text-title-small mb-4">Discussion</p>
                 <p className="mb-8">
                   Questions and comments about this action that other members
                   would find helpful.

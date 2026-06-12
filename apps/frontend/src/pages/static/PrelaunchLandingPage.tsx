@@ -123,8 +123,10 @@ function HowItWorksCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-full flex-col gap-1 rounded-md bg-white p-4 sm:p-6">
-      <p className="text-xl font-semibold text-green-bg lg:text-2xl">{title}</p>
+    <div className="flex h-full flex-col gap-1 rounded-md bg-white p-6 sm:p-8">
+      <p className="font-serif text-xl font-semibold text-green-bg lg:text-2xl">
+        {title}
+      </p>
       <p className="text-base text-zinc-800 lg:text-lg">{children}</p>
     </div>
   );
@@ -150,30 +152,29 @@ const PrelaunchLandingPage: React.FC = () => {
               "flex flex-col gap-8 pt-6 sm:pt-8 md:gap-10 lg:flex-row lg:items-center lg:gap-16 lg:pt-12",
             )}
           >
-            <div className="flex min-w-0 flex-1 flex-col gap-y-4 lg:items-start">
-              <p className="hidden text-center font-serif font-semibold text-5xl text-black sm:text-6xl md:block lg:text-left lg:text-7xl">
-                The Alliance
-              </p>
-              <div className="flex flex-col gap-y-4 text-center text-xl text-zinc-900 sm:gap-y-5 sm:text-2xl lg:text-left lg:text-3xl">
-                <p>
-                  We&apos;re a global group of people cooperating to improve the
-                  world.
+            <div className="flex min-w-0 w-full flex-col gap-y-4 lg:w-1/2 lg:items-start">
+              <div className="flex flex-col gap-y-6">
+                <p className="text-center lg:leading-15 font-serif text-xl text-zinc-900 sm:gap-y-5 sm:text-3xl lg:text-left lg:text-5xl">
+                  A global group of people cooperating to improve the world
                 </p>
                 <Link
                   to="#join-us"
-                  className="mx-auto self-start font-medium rounded-md bg-green-bg-card px-6 py-3 text-base text-white hover:bg-green-bg lg:mx-0 lg:text-lg"
+                  className="mx-auto font-medium self-start rounded-md bg-green-bg-card px-6 py-4 text-base text-white hover:bg-green-bg lg:mx-0 lg:text-xl"
                 >
                   Request an invite
                 </Link>
               </div>
             </div>
-            <div className="min-w-0 flex-1">
+            <figure className="min-w-0 w-full lg:w-1/2">
               <img
                 src={alliancePeople}
                 alt="Alliance members at a meetup"
                 className="w-full h-auto rounded-md"
               />
-            </div>
+              <figcaption className="mt-3 text-center text-base text-zinc-500">
+                Members at a meetup in San Francisco, California
+              </figcaption>
+            </figure>
           </div>
         </section>
 

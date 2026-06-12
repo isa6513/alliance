@@ -31,7 +31,7 @@ export const GuideH1 = ({
 }: HTMLAttributes<HTMLHeadingElement>) => (
   <h1
     className={cn(
-      "font-semibold text-3xl md:text-4xl first:mt-0 mt-4 md:mt-8",
+      "font-serif font-semibold text-3xl md:text-4xl first:mt-0 mt-4 md:mt-8",
       className,
     )}
     {...props}
@@ -44,7 +44,7 @@ export const GuideH2 = ({
 }: HTMLAttributes<HTMLHeadingElement>) => (
   <h2
     className={cn(
-      "font-semibold text-xl md:text-2xl first:mt-0 mt-4 md:mt-8",
+      "font-serif font-semibold text-xl md:text-2xl first:mt-0 mt-4 md:mt-8",
       className,
     )}
     {...props}

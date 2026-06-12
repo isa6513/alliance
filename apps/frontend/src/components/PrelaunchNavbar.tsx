@@ -88,7 +88,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
                 <Link
                   to={signupHref}
                   className={cn(
-                    "py-1 md:py-1.5 px-3 md:px-5 rounded-full whitespace-nowrap font-medium",
+                    "py-1 md:py-1.5 px-3 md:px-5 rounded-md whitespace-nowrap font-medium",
                     transparent
                       ? "bg-green text-white hover:bg-[#4d8c1d]"
                       : "bg-green text-white hover:bg-[#4d8c1d]",

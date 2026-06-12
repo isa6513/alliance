@@ -17,8 +17,7 @@ const GroupsGuidePage: React.FC = () => {
     { id: "being-a-member", label: "Group members", level: 2 },
     { id: "joining-leaving", label: "Joining and leaving groups", level: 3 },
     { id: "group-assignment", label: "Group assignment", level: 3 },
-    { id: "how-to-lead", label: "How to lead", level: 1 },
-    { id: "lead-recommendations", label: "Recommendations", level: 2 },
+    { id: "how-to-lead", label: "How to lead", level: 2 },
     { id: "lead-recommendations-1", label: "Sending reminders", level: 3 },
     { id: "lead-recommendations-2", label: "Checking in", level: 3 },
   ];
@@ -26,7 +25,7 @@ const GroupsGuidePage: React.FC = () => {
   return (
     <InfoSubpage tocSections={tocSections}>
       <section className="gap-y-4 flex flex-col">
-        <h1 id="about" className="text-title">
+        <h1 id="about" className="text-title-large mb-2">
           About groups
         </h1>
         <p>
@@ -58,13 +57,13 @@ const GroupsGuidePage: React.FC = () => {
 
         <h2
           id="leading-a-group"
-          className="mt-2 text-2xl font-semibold text-black"
+          className="mt-2 text-title-medium font-semibold text-black"
         >
           Group leads
         </h2>
         <h3
           id="responsibilities"
-          className="text-xl font-semibold text-black mt-2"
+          className="text-title-small font-semibold text-black mt-2"
         >
           Responsibilities
         </h3>
@@ -84,7 +83,7 @@ const GroupsGuidePage: React.FC = () => {
         </p>
         <h3
           id="should-i-lead"
-          className="text-xl font-semibold mt-2 text-black"
+          className="text-title-small font-semibold mt-2 text-black"
         >
           Should I lead a group?
         </h3>
@@ -117,7 +116,7 @@ const GroupsGuidePage: React.FC = () => {
         </p>
         <h2
           id="being-a-member"
-          className="mt-2 text-2xl font-semibold text-black"
+          className="mt-2 text-title-medium font-semibold text-black"
         >
           Group members
         </h2>
@@ -128,7 +127,7 @@ const GroupsGuidePage: React.FC = () => {
         </p>
         <h3
           id="joining-leaving"
-          className="text-xl font-semibold mt-2 text-black"
+          className="text-title-small font-semibold mt-2 text-black"
         >
           Joining and leaving groups
         </h3>
@@ -154,7 +153,7 @@ const GroupsGuidePage: React.FC = () => {
 
         <h3
           id="group-assignment"
-          className="text-xl font-semibold mt-2 text-black"
+          className="text-title-small font-semibold mt-2 text-black"
         >
           Group assignment
         </h3>
@@ -177,27 +176,17 @@ const GroupsGuidePage: React.FC = () => {
       </section>
 
       <section className="gap-y-4 flex flex-col">
-        <h1 id="how-to-lead" className="text-title">
+        <h1 id="how-to-lead" className="text-title-medium">
           How to lead
         </h1>
         <p>
           As a group lead, you are responsible for ensuring that your group
           members complete their tasks on time. You can do this however you see
-          fit.
+          fit. However, the following are some recommendations.
         </p>
-        <p>
-          The goal is not for group members to rely on you, but to feel
-          accountable to and supported by you.
-        </p>
-        <h2
-          id="lead-recommendations"
-          className="mt-2 text-2xl font-semibold text-black"
-        >
-          Recommendations
-        </h2>
         <h3
           id="lead-recommendations-1"
-          className="text-xl font-semibold mt-2 text-black"
+          className="text-title-small font-semibold mt-2 text-black"
         >
           Sending reminders
         </h3>
@@ -229,13 +218,19 @@ const GroupsGuidePage: React.FC = () => {
             completing the action and offer to pass along feedback.
           </li>
         </ol>
+        <p>
+          The goal is not for group members to rely on you, but to feel
+          accountable to and supported by you. Over time, you can encourage your
+          members to take more responsibility for their own tasks. Eventually,
+          you should rarely need to send reminders.
+        </p>
         <h3
           id="lead-recommendations-2"
-          className="text-xl font-semibold mt-2 text-black"
+          className="text-title-small font-semibold mt-2 text-black"
         >
           Checking in
         </h3>
-        <p>These are some extra ways you can check in on your group members:</p>
+        <p>These are some ways you can check in on your group members:</p>
         <ol className="list-decimal list-inside pl-4 space-y-1">
           <li>
             Engage with your group members&apos; activities (

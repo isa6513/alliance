@@ -50,14 +50,14 @@
 }
 
 @font-face {
-  font-family: "Libre Baskerville";
+  font-family: "Literata";
   font-display: swap;
-  src: url("/assets/fonts/LibreBaskerville-VariableFont_wght.ttf")
+  src: url("/assets/fonts/Literata-VariableFont_opsz,wght.ttf")
     format("truetype");
 }
 
 @theme {
-  --font-serif: "Libre Baskerville", "Georgia", serif;
+  --font-serif: "Literata", "Georgia", serif;
   --color-blue: #399ee6;
   --color-page: oklch(98% 0 0);
 
@@ -230,11 +230,7 @@ input[type="number"]:disabled {
 }
 
 .text-title-small {
-  @apply font-semibold text-xl md:text-2xl;
-}
-
-.text-heading-public {
-  @apply font-medium text-3xl md:text-4xl;
+  @apply font-serif font-semibold text-xl md:text-2xl;
 }
 
 a,

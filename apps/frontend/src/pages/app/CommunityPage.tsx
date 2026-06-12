@@ -675,7 +675,7 @@ const CommunityPage = () => {
                       )}
                     </div>
                   ) : (
-                    <>
+                    <div className="flex flex-col gap-y-2">
                       <div className="flex gap-2">
                         <h1 className="text-title-small">{community.name}</h1>
                       </div>
@@ -683,7 +683,7 @@ const CommunityPage = () => {
                         markdownContent={community.description}
                         className="mb-2 text-base"
                       />
-                    </>
+                    </div>
                   )}
                 </div>
 

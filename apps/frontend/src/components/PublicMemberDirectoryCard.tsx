@@ -27,14 +27,14 @@ const PublicMemberDirectoryCard: React.FC<PublicMemberDirectoryCardProps> = ({
     >
       <div
         className={cn(
-          "flex flex-col md:flex-row gap-2",
+          "flex flex-col md:flex-row gap-2 items-center",
           showDescription || descriptionOpen
-            ? "items-start"
+            ? "md:items-start"
             : "md:items-center",
         )}
       >
         <AvatarProfile pfp={member.profilePicture ?? null} size="medium" />
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 text-center md:text-left">
           <p className="text-zinc-900 text-base">{member.displayName}</p>
           {(showDescription || descriptionOpen) && (
             <div className="text-zinc-500 text-sm">

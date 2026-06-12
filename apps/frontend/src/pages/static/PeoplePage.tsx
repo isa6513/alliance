@@ -18,7 +18,7 @@ import {
   SUBTITLE_CLASS,
 } from "./prelaunchLayout";
 
-const SECTION_TITLE_CLASS = "text-title-medium w-full text-black";
+const SECTION_TITLE_CLASS = "text-title-large w-full text-black";
 
 export async function loader() {
   const res = await userNmembers();
@@ -40,7 +40,6 @@ const PeoplePage: React.FC = () => {
   const [staffProfiles, setStaffProfiles] = useState<ProfileDto[]>([]);
 
   const [members, setMembers] = useState<ProfileDto[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const defaultDisplayCount = 100;
   const [displayCount, setDisplayCount] = useState(defaultDisplayCount);
@@ -150,45 +149,25 @@ const PeoplePage: React.FC = () => {
     fetchData();
   }, [staffIds]);
 
-  const filteredMembers = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return members;
-    }
-    const query = searchQuery.toLowerCase().trim();
-    return members.filter((member) =>
-      member.displayName?.toLowerCase().includes(query),
-    );
-  }, [members, searchQuery]);
-
-  // Reset display count when search query changes
-  useEffect(() => {
-    setDisplayCount(defaultDisplayCount);
-  }, [searchQuery]);
-
   const displayedMembers = useMemo(() => {
-    return filteredMembers.slice(0, displayCount);
-  }, [filteredMembers, displayCount]);
+    return members.slice(0, displayCount);
+  }, [members, displayCount]);
 
-  const hasMoreMembers = filteredMembers.length > displayCount;
+  const hasMoreMembers = members.length > displayCount;
 
   return (
     <div className="flex flex-col bg-white">
       <div className={LANDING_PAGE_STACK}>
         <section className={cn("relative w-full bg-white")}>
           <PrelaunchNavbar transparent={false} absolute={false} />
-          <div className={cn(LANDING_WIDE_SECTION, "pt-6 sm:pt-8 lg:pt-12")}>
-            <p className="text-title-large w-full text-center text-black">
-              People
-            </p>
-          </div>
         </section>
 
         <section className={cn("w-full bg-white", LANDING_SECTION_PY)}>
           <div className={LANDING_WIDE_SECTION}>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 text-center mb-6">
               <p className={SECTION_TITLE_CLASS}>Office</p>
               <p className={SUBTITLE_CLASS}>
-                Members of the office plan actions, write software, and manage
+                Alliance staff members plan actions, write software, and manage
                 the Alliance.
               </p>
             </div>
@@ -231,7 +210,7 @@ const PeoplePage: React.FC = () => {
           id="expert-group"
         >
           <div className={LANDING_WIDE_SECTION}>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 text-center mb-6">
               <p className={`${SECTION_TITLE_CLASS} text-white`}>
                 Expert group
               </p>
@@ -263,7 +242,7 @@ const PeoplePage: React.FC = () => {
 
         <section className={cn("w-full bg-grey-0", LANDING_SECTION_PY)}>
           <div className={LANDING_WIDE_SECTION}>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 text-center mb-6">
               <p className={SECTION_TITLE_CLASS}>Members</p>
               <div className="flex flex-col gap-1">
                 {nmembers !== undefined && (
@@ -278,18 +257,9 @@ const PeoplePage: React.FC = () => {
                   their information public.
                 </p>
               </div>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Search members..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-md outline-none bg-white py-3 px-4 text-lg"
-                />
-              </div>
             </div>
 
-            {filteredMembers.length > 0 ? (
+            {members.length > 0 ? (
               <>
                 <div className="gap-6 md:gap-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   {displayedMembers.map((member) => (
@@ -308,17 +278,14 @@ const PeoplePage: React.FC = () => {
                       }
                       className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
                     >
-                      Show more ({filteredMembers.length - displayCount}{" "}
-                      remaining)
+                      Show more ({members.length - displayCount} remaining)
                     </button>
                   </div>
                 )}
               </>
             ) : (
               <p className="py-8 text-center text-zinc-500">
-                {searchQuery.trim()
-                  ? "No members found matching your search."
-                  : "Loading members..."}
+                Loading members...
               </p>
             )}
           </div>

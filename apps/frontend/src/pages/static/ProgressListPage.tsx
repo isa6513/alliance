@@ -39,7 +39,7 @@ const ProgressListPage: React.FC = () => {
           <h1 className="text-title-large text-center">Progress</h1>
 
           <section className="flex flex-col gap-4">
-            <h2 className="text-heading-public">Updates</h2>
+            <h2 className="text-title-medium">Updates</h2>
 
             <List className="w-full">
               {posts.map((post) => (
@@ -67,7 +67,7 @@ const ProgressListPage: React.FC = () => {
 
           <section className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <h2 className="text-heading-public">Impact</h2>
+              <h2 className="text-title-medium">Impact</h2>
               <p className="text-zinc-500 text-lg md:text-xl">
                 At this stage, we are taking small-scale actions in order to
                 learn and build our processes.

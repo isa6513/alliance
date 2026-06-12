@@ -1,26 +1,26 @@
-import React from "react";
-import { href } from "react-router";
+import { Features } from "@alliance/shared/lib/features";
+import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import {
+  BookOpenText,
   BookUser,
   CalendarCheck,
   ClipboardList,
   Info,
+  ListOrdered,
   Mail,
   Map as MapIcon,
   Megaphone,
+  PenTool,
   Scale,
   Users,
-  PenTool,
-  ListOrdered,
-  BookOpenText,
 } from "lucide-react";
-import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import React from "react";
+import { href } from "react-router";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import InfoResourceCard, {
   type InfoResourceCardProps,
 } from "../../components/InfoResourceCard";
 import { isFeatureEnabled } from "../../lib/config";
-import { Features } from "@alliance/shared/lib/features";
 
 const InformationPage: React.FC = () => {
   useWhiteBackground();
@@ -115,8 +115,6 @@ const InformationPage: React.FC = () => {
   return (
     <CenterLayout>
       <div className="gap-y-8 md:gap-y-12 flex flex-col text-base md:text-lg">
-        <h1 className="text-title">Information</h1>
-
         <div className="flex flex-col gap-y-6">
           <h2 className="text-title-small">Contact</h2>
 
