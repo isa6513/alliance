@@ -1,3 +1,4 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import {
   UserAwayRangeDto,
   UserAwayRangeReason,
@@ -8,14 +9,14 @@ import {
 } from "@alliance/shared/client";
 import { awayRangesDescription } from "@alliance/shared/lib/copy";
 import { formatLongDate } from "@alliance/shared/lib/dateFormatters";
+import { cn } from "@alliance/shared/styles/util";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, X } from "lucide-react";
 import React, { useState } from "react";
 import { href, Link } from "react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { cn } from "@alliance/shared/styles/util";
 
 enum ReasonDropdownOption {
   UNSELECTED = "Select a reason",
@@ -46,7 +47,7 @@ function reasonDisplayName(reason: UserAwayRangeReason): string {
 }
 
 function reasonToDropdownOption(
-  reason: UserAwayRangeReason
+  reason: UserAwayRangeReason,
 ): ReasonDropdownOption {
   switch (reason) {
     case "vacation":
@@ -83,7 +84,7 @@ const AwayRangesSection: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [selectedReason, setSelectedReason] = useState<ReasonDropdownOption>(
-    ReasonDropdownOption.UNSELECTED
+    ReasonDropdownOption.UNSELECTED,
   );
   const selectedReasonIsOther = selectedReason === "Other";
 
@@ -93,7 +94,7 @@ const AwayRangesSection: React.FC = () => {
   const [editEndDate, setEditEndDate] = useState("");
   const [editNote, setEditNote] = useState("");
   const [editReason, setEditReason] = useState<ReasonDropdownOption>(
-    ReasonDropdownOption.UNSELECTED
+    ReasonDropdownOption.UNSELECTED,
   );
   const [updating, setUpdating] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
@@ -139,8 +140,10 @@ const AwayRangesSection: React.FC = () => {
       setNoteInput("");
     } else {
       setError(
-        (resp.error as { message: string }).message ??
-          `Error: Could not create away range`
+        errorMessage({
+          error: resp.error,
+          fallback: `Could not create away range`,
+        }),
       );
     }
     setCreating(false);
@@ -205,8 +208,10 @@ const AwayRangesSection: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["userGetAwayRanges"] });
     } else {
       setEditError(
-        (resp.error as { message: string }).message ??
-          `Error: ${resp.response.statusText}`
+        errorMessage({
+          error: resp.error,
+          fallback: `Unable to update away range`,
+        }),
       );
     }
     setUpdating(false);
@@ -244,7 +249,7 @@ const AwayRangesSection: React.FC = () => {
                 "p-4 rounded-lg border",
                 isCurrentlyAway(range)
                   ? "bg-yellow-50 border-yellow-200"
-                  : "bg-gray-50 border-gray-200"
+                  : "bg-gray-50 border-gray-200",
               )}
             >
               {editingId === range.id ? (

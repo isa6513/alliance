@@ -10,8 +10,9 @@ import { randomUUID } from 'node:crypto';
 import { PostHog, setupExpressErrorHandler } from 'posthog-node';
 import type { ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
-import { PosthogExceptionFilter } from './posthog.filter';
 import { MetricsInterceptor } from './metrics';
+import { injectResponseSchemas } from './openapi-errors';
+import { PosthogExceptionFilter } from './posthog.filter';
 import { requestContext } from './utils/request-context';
 
 function validateEnv() {
@@ -129,10 +130,12 @@ async function bootstrap() {
       .build();
 
     const documentFactory = () =>
-      SwaggerModule.createDocument(app, config, {
-        operationIdFactory: (controllerKey: string, methodKey: string) =>
-          controllerKey.replace('Controller', '') + '_' + methodKey,
-      });
+      injectResponseSchemas(
+        SwaggerModule.createDocument(app, config, {
+          operationIdFactory: (controllerKey: string, methodKey: string) =>
+            controllerKey.replace('Controller', '') + '_' + methodKey,
+        }),
+      );
 
     SwaggerModule.setup('openapi', app, documentFactory, {
       yamlDocumentUrl: '/openapi.yaml',

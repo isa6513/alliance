@@ -1,12 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { errorMessage } from "@alliance/common/errorMessage";
 import { userList, userSendPushNotification } from "@alliance/shared/client";
 import type {
   PushDto,
   TestPushNotificationDto,
   UserDto,
 } from "@alliance/shared/client/types.gen";
-import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 const TestPushNotification: React.FC = () => {
   const [users, setUsers] = useState<UserDto[]>([]);
@@ -36,9 +37,10 @@ const TestPushNotification: React.FC = () => {
       .then((response) => {
         if (response.error) {
           throw new Error(
-            typeof response.error === "string"
-              ? response.error
-              : "Failed to load users.",
+            errorMessage({
+              error: response.error,
+              fallback: "Failed to load users.",
+            }),
           );
         }
         setUsers(response.data ?? []);
@@ -75,9 +77,10 @@ const TestPushNotification: React.FC = () => {
       const response = await userSendPushNotification({ body: payload });
       if (response.error || !response.response.ok) {
         setError(
-          typeof response.error === "string"
-            ? response.error
-            : "Failed to send push notification.",
+          errorMessage({
+            error: response.error,
+            fallback: "Failed to send push notification.",
+          }),
         );
         return;
       }

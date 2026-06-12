@@ -1,4 +1,5 @@
 import { AnalyticsEvent } from "@alliance/common/analytics";
+import { errorMessage } from "@alliance/common/errorMessage";
 import {
   authMe,
   authRegister,
@@ -182,7 +183,9 @@ const SignupPage: React.FC = () => {
           setError("please try again");
         }
       } else {
-        setError((resp.error as Error).message || "Registration failed");
+        setError(
+          errorMessage({ error: resp.error, fallback: "Registration failed" }),
+        );
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");

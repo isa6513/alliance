@@ -1,4 +1,5 @@
 import { ExceptionEvent } from "@alliance/common/analytics";
+import { errorMessage } from "@alliance/common/errorMessage";
 import { FormSchema } from "@alliance/common/forms/form-schema";
 import {
   FormResponseDto,
@@ -69,8 +70,10 @@ const ActionTaskPanelForm = ({
 
       if (!response.data) {
         throw new Error(
-          (response.error as Error)?.message ??
-            "Unable to load form - please reload",
+          errorMessage({
+            error: response.error,
+            fallback: "Unable to load form",
+          }),
         );
       }
 
@@ -127,7 +130,7 @@ const ActionTaskPanelForm = ({
           onCompleteAction(false); //tasksSubmitForm handles completion here
           return true;
         }
-        if ((response.error as Error).message === "Form already submitted") {
+        if (response.error?.message === "Form already submitted") {
           window.location.reload();
           return false;
         }

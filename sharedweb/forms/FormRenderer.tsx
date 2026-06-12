@@ -1,3 +1,4 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import { type DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import { type DisplayBlock } from "@alliance/common/forms/display-blocks";
 import {
@@ -995,8 +996,10 @@ const FormRenderer = ({
             } else if (error) {
               setUploadErrors((prev) => ({
                 ...prev,
-                [fieldId]:
-                  (error as Error)?.message ?? "Failed to upload image",
+                [fieldId]: errorMessage({
+                  error,
+                  fallback: "Failed to upload image",
+                }),
               }));
             }
           } catch (error) {

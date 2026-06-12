@@ -3300,12 +3300,27 @@ export type ContractStatusPointDto = {
     totalEverSigned: number;
 };
 
+export type HeyApiError = {
+    statusCode: number;
+    message: string | Array<string>;
+    error?: string;
+};
+
 export type AppHealthCheckData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/';
 };
+
+export type AppHealthCheckErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AppHealthCheckError = AppHealthCheckErrors[keyof AppHealthCheckErrors];
 
 export type AppHealthCheckResponses = {
     200: HealthCheckDto;
@@ -3319,6 +3334,15 @@ export type AppMetricsData = {
     query?: never;
     url: '/metrics';
 };
+
+export type AppMetricsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AppMetricsError = AppMetricsErrors[keyof AppMetricsErrors];
 
 export type AppMetricsResponses = {
     200: string;
@@ -3334,8 +3358,10 @@ export type AuthLoginData = {
 };
 
 export type AuthLoginErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type AuthLoginError = AuthLoginErrors[keyof AuthLoginErrors];
 
 export type AuthLoginResponses = {
     200: SignInResponseDto;
@@ -3351,8 +3377,10 @@ export type AuthAdminLoginData = {
 };
 
 export type AuthAdminLoginErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type AuthAdminLoginError = AuthAdminLoginErrors[keyof AuthAdminLoginErrors];
 
 export type AuthAdminLoginResponses = {
     200: SignInResponseDto;
@@ -3368,8 +3396,10 @@ export type AuthRegisterData = {
 };
 
 export type AuthRegisterErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type AuthRegisterError = AuthRegisterErrors[keyof AuthRegisterErrors];
 
 export type AuthRegisterResponses = {
     /**
@@ -3389,6 +3419,15 @@ export type AuthRefreshTokensData = {
     url: '/auth/refresh';
 };
 
+export type AuthRefreshTokensErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AuthRefreshTokensError = AuthRefreshTokensErrors[keyof AuthRefreshTokensErrors];
+
 export type AuthRefreshTokensResponses = {
     200: RefreshTokensResponseDto;
 };
@@ -3401,6 +3440,15 @@ export type AuthMeData = {
     query?: never;
     url: '/auth/me';
 };
+
+export type AuthMeErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AuthMeError = AuthMeErrors[keyof AuthMeErrors];
 
 export type AuthMeResponses = {
     200: AuthMeResponseDto;
@@ -3415,9 +3463,22 @@ export type AuthLogoutData = {
     url: '/auth/logout';
 };
 
-export type AuthLogoutResponses = {
-    200: unknown;
+export type AuthLogoutErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type AuthLogoutError = AuthLogoutErrors[keyof AuthLogoutErrors];
+
+export type AuthLogoutResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type AuthLogoutResponse = AuthLogoutResponses[keyof AuthLogoutResponses];
 
 export type AuthForgotPasswordData = {
     body: ForgotPasswordDto;
@@ -3426,9 +3487,22 @@ export type AuthForgotPasswordData = {
     url: '/auth/forgot-password';
 };
 
-export type AuthForgotPasswordResponses = {
-    200: unknown;
+export type AuthForgotPasswordErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type AuthForgotPasswordError = AuthForgotPasswordErrors[keyof AuthForgotPasswordErrors];
+
+export type AuthForgotPasswordResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type AuthForgotPasswordResponse = AuthForgotPasswordResponses[keyof AuthForgotPasswordResponses];
 
 export type AuthResetPasswordData = {
     body: ResetPasswordDto;
@@ -3437,9 +3511,22 @@ export type AuthResetPasswordData = {
     url: '/auth/reset-password';
 };
 
-export type AuthResetPasswordResponses = {
-    200: unknown;
+export type AuthResetPasswordErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type AuthResetPasswordError = AuthResetPasswordErrors[keyof AuthResetPasswordErrors];
+
+export type AuthResetPasswordResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type AuthResetPasswordResponse = AuthResetPasswordResponses[keyof AuthResetPasswordResponses];
 
 export type AuthImpersonateData = {
     body?: never;
@@ -3450,6 +3537,24 @@ export type AuthImpersonateData = {
     url: '/auth/impersonate/{userId}';
 };
 
+export type AuthImpersonateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AuthImpersonateError = AuthImpersonateErrors[keyof AuthImpersonateErrors];
+
+export type AuthImpersonateResponses = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AuthImpersonateResponse = AuthImpersonateResponses[keyof AuthImpersonateResponses];
+
 export type UserFindMeData = {
     body?: never;
     path?: never;
@@ -3458,8 +3563,10 @@ export type UserFindMeData = {
 };
 
 export type UserFindMeErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type UserFindMeError = UserFindMeErrors[keyof UserFindMeErrors];
 
 export type UserFindMeResponses = {
     200: ProfileDto;
@@ -3475,8 +3582,10 @@ export type UserGetAwayRangesData = {
 };
 
 export type UserGetAwayRangesErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type UserGetAwayRangesError = UserGetAwayRangesErrors[keyof UserGetAwayRangesErrors];
 
 export type UserGetAwayRangesResponses = {
     200: Array<UserAwayRangeDto>;
@@ -3492,8 +3601,10 @@ export type UserCreateAwayRangeData = {
 };
 
 export type UserCreateAwayRangeErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type UserCreateAwayRangeError = UserCreateAwayRangeErrors[keyof UserCreateAwayRangeErrors];
 
 export type UserCreateAwayRangeResponses = {
     200: UserAwayRangeDto;
@@ -3511,12 +3622,18 @@ export type UserDeleteAwayRangeData = {
 };
 
 export type UserDeleteAwayRangeErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
 
+export type UserDeleteAwayRangeError = UserDeleteAwayRangeErrors[keyof UserDeleteAwayRangeErrors];
+
 export type UserDeleteAwayRangeResponses = {
-    200: unknown;
+    200: {
+        [key: string]: never;
+    };
 };
+
+export type UserDeleteAwayRangeResponse = UserDeleteAwayRangeResponses[keyof UserDeleteAwayRangeResponses];
 
 export type UserGetAwayRangeForUserData = {
     body?: never;
@@ -3528,8 +3645,10 @@ export type UserGetAwayRangeForUserData = {
 };
 
 export type UserGetAwayRangeForUserErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type UserGetAwayRangeForUserError = UserGetAwayRangeForUserErrors[keyof UserGetAwayRangeForUserErrors];
 
 export type UserGetAwayRangeForUserResponses = {
     200: Array<UserAwayRangeDto>;
@@ -3547,8 +3666,10 @@ export type UserUpdateAwayRangeData = {
 };
 
 export type UserUpdateAwayRangeErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type UserUpdateAwayRangeError = UserUpdateAwayRangeErrors[keyof UserUpdateAwayRangeErrors];
 
 export type UserUpdateAwayRangeResponses = {
     200: UserAwayRangeDto;
@@ -3563,6 +3684,15 @@ export type UserUpdateData = {
     url: '/user/update';
 };
 
+export type UserUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserUpdateError = UserUpdateErrors[keyof UserUpdateErrors];
+
 export type UserUpdateResponses = {
     200: ProfileDto;
 };
@@ -3575,6 +3705,15 @@ export type UserMyLocationData = {
     query?: never;
     url: '/user/mylocation';
 };
+
+export type UserMyLocationErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserMyLocationError = UserMyLocationErrors[keyof UserMyLocationErrors];
 
 export type UserMyLocationResponses = {
     200: MaybeUserLocationDto;
@@ -3591,12 +3730,25 @@ export type UserRemoveFriendData = {
     url: '/user/friends/{targetUserId}';
 };
 
+export type UserRemoveFriendErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserRemoveFriendError = UserRemoveFriendErrors[keyof UserRemoveFriendErrors];
+
 export type UserRemoveFriendResponses = {
     /**
      * Relationship removed
      */
-    200: unknown;
+    200: {
+        [key: string]: never;
+    };
 };
+
+export type UserRemoveFriendResponse = UserRemoveFriendResponses[keyof UserRemoveFriendResponses];
 
 export type UserRequestFriendData = {
     body?: never;
@@ -3607,12 +3759,25 @@ export type UserRequestFriendData = {
     url: '/user/friends/{targetUserId}';
 };
 
+export type UserRequestFriendErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserRequestFriendError = UserRequestFriendErrors[keyof UserRequestFriendErrors];
+
 export type UserRequestFriendResponses = {
     /**
      * Friend request is now pending
      */
-    200: unknown;
+    200: {
+        [key: string]: never;
+    };
 };
+
+export type UserRequestFriendResponse = UserRequestFriendResponses[keyof UserRequestFriendResponses];
 
 export type UserAcceptFriendRequestData = {
     body?: never;
@@ -3623,12 +3788,25 @@ export type UserAcceptFriendRequestData = {
     url: '/user/friends/{requesterId}/accept';
 };
 
+export type UserAcceptFriendRequestErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserAcceptFriendRequestError = UserAcceptFriendRequestErrors[keyof UserAcceptFriendRequestErrors];
+
 export type UserAcceptFriendRequestResponses = {
     /**
      * Friend request accepted
      */
-    200: unknown;
+    200: {
+        [key: string]: never;
+    };
 };
+
+export type UserAcceptFriendRequestResponse = UserAcceptFriendRequestResponses[keyof UserAcceptFriendRequestResponses];
 
 export type UserDeclineFriendRequestData = {
     body?: never;
@@ -3639,12 +3817,25 @@ export type UserDeclineFriendRequestData = {
     url: '/user/friends/{requesterId}/decline';
 };
 
+export type UserDeclineFriendRequestErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserDeclineFriendRequestError = UserDeclineFriendRequestErrors[keyof UserDeclineFriendRequestErrors];
+
 export type UserDeclineFriendRequestResponses = {
     /**
      * Friend request declined
      */
-    200: unknown;
+    200: {
+        [key: string]: never;
+    };
 };
+
+export type UserDeclineFriendRequestResponse = UserDeclineFriendRequestResponses[keyof UserDeclineFriendRequestResponses];
 
 export type UserListReceivedRequestsData = {
     body?: never;
@@ -3652,6 +3843,15 @@ export type UserListReceivedRequestsData = {
     query?: never;
     url: '/user/friends/requests/received';
 };
+
+export type UserListReceivedRequestsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserListReceivedRequestsError = UserListReceivedRequestsErrors[keyof UserListReceivedRequestsErrors];
 
 export type UserListReceivedRequestsResponses = {
     200: Array<ProfileDto>;
@@ -3665,6 +3865,15 @@ export type UserListSentRequestsData = {
     query?: never;
     url: '/user/friends/requests/sent';
 };
+
+export type UserListSentRequestsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserListSentRequestsError = UserListSentRequestsErrors[keyof UserListSentRequestsErrors];
 
 export type UserListSentRequestsResponses = {
     200: Array<ProfileDto>;
@@ -3681,6 +3890,15 @@ export type UserMyFriendRelationshipData = {
     url: '/user/myfriendrelationship/{id}';
 };
 
+export type UserMyFriendRelationshipErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserMyFriendRelationshipError = UserMyFriendRelationshipErrors[keyof UserMyFriendRelationshipErrors];
+
 export type UserMyFriendRelationshipResponses = {
     200: FriendStatusDto;
 };
@@ -3696,6 +3914,15 @@ export type UserListFriendsData = {
     url: '/user/listfriends/{id}';
 };
 
+export type UserListFriendsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserListFriendsError = UserListFriendsErrors[keyof UserListFriendsErrors];
+
 export type UserListFriendsResponses = {
     200: Array<ProfileDto>;
 };
@@ -3708,6 +3935,15 @@ export type UserListMessageableUsersData = {
     query?: never;
     url: '/user/listMessageableUsers';
 };
+
+export type UserListMessageableUsersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserListMessageableUsersError = UserListMessageableUsersErrors[keyof UserListMessageableUsersErrors];
 
 export type UserListMessageableUsersResponses = {
     200: Array<ProfileDto>;
@@ -3722,6 +3958,15 @@ export type UserListData = {
     url: '/user/list';
 };
 
+export type UserListErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserListError = UserListErrors[keyof UserListErrors];
+
 export type UserListResponses = {
     200: Array<UserDto>;
 };
@@ -3735,6 +3980,15 @@ export type UserListForGraphData = {
     url: '/user/list-graph';
 };
 
+export type UserListForGraphErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserListForGraphError = UserListForGraphErrors[keyof UserListForGraphErrors];
+
 export type UserListForGraphResponses = {
     200: Array<UserDto>;
 };
@@ -3747,6 +4001,15 @@ export type UserCityCountsData = {
     query?: never;
     url: '/user/cityCounts';
 };
+
+export type UserCityCountsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserCityCountsError = UserCityCountsErrors[keyof UserCityCountsErrors];
 
 export type UserCityCountsResponses = {
     200: Array<UserCityCountDto>;
@@ -3763,6 +4026,15 @@ export type UserUserDetailData = {
     url: '/user/userdetail/{id}';
 };
 
+export type UserUserDetailErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserUserDetailError = UserUserDetailErrors[keyof UserUserDetailErrors];
+
 export type UserUserDetailResponses = {
     200: UserDto;
 };
@@ -3775,6 +4047,15 @@ export type UserListPublicData = {
     query?: never;
     url: '/user/list-public';
 };
+
+export type UserListPublicErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserListPublicError = UserListPublicErrors[keyof UserListPublicErrors];
 
 export type UserListPublicResponses = {
     200: Array<UserDto>;
@@ -3789,6 +4070,15 @@ export type UserMembersData = {
     url: '/user/members';
 };
 
+export type UserMembersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserMembersError = UserMembersErrors[keyof UserMembersErrors];
+
 export type UserMembersResponses = {
     200: Array<ProfileDto>;
 };
@@ -3801,6 +4091,15 @@ export type UserMembersPublicData = {
     query?: never;
     url: '/user/members-public';
 };
+
+export type UserMembersPublicErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserMembersPublicError = UserMembersPublicErrors[keyof UserMembersPublicErrors];
 
 export type UserMembersPublicResponses = {
     200: Array<ProfileDto>;
@@ -3817,6 +4116,15 @@ export type UserMembersWithFriendsData = {
     url: '/user/membersWithFriends';
 };
 
+export type UserMembersWithFriendsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserMembersWithFriendsError = UserMembersWithFriendsErrors[keyof UserMembersWithFriendsErrors];
+
 export type UserMembersWithFriendsResponses = {
     200: Array<ProfileDtoWithFriends>;
 };
@@ -3829,6 +4137,15 @@ export type UserMyProfileData = {
     query?: never;
     url: '/user/myprofile';
 };
+
+export type UserMyProfileErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserMyProfileError = UserMyProfileErrors[keyof UserMyProfileErrors];
 
 export type UserMyProfileResponses = {
     200: ProfileDto;
@@ -3846,8 +4163,10 @@ export type UserFindOneData = {
 };
 
 export type UserFindOneErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type UserFindOneError = UserFindOneErrors[keyof UserFindOneErrors];
 
 export type UserFindOneResponses = {
     200: ProfileDto;
@@ -3862,9 +4181,22 @@ export type UserVerifyEmailData = {
     url: '/user/verifyEmail';
 };
 
-export type UserVerifyEmailResponses = {
-    200: unknown;
+export type UserVerifyEmailErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type UserVerifyEmailError = UserVerifyEmailErrors[keyof UserVerifyEmailErrors];
+
+export type UserVerifyEmailResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserVerifyEmailResponse = UserVerifyEmailResponses[keyof UserVerifyEmailResponses];
 
 export type UserNmembersData = {
     body?: never;
@@ -3872,6 +4204,15 @@ export type UserNmembersData = {
     query?: never;
     url: '/user/nmembers';
 };
+
+export type UserNmembersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserNmembersError = UserNmembersErrors[keyof UserNmembersErrors];
 
 export type UserNmembersResponses = {
     200: NMembersResponseDto;
@@ -3886,6 +4227,15 @@ export type UserCreateTagData = {
     url: '/user/createTag';
 };
 
+export type UserCreateTagErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserCreateTagError = UserCreateTagErrors[keyof UserCreateTagErrors];
+
 export type UserCreateTagResponses = {
     200: TagDto;
 };
@@ -3899,6 +4249,15 @@ export type UserGetTagsData = {
     url: '/user/tags';
 };
 
+export type UserGetTagsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserGetTagsError = UserGetTagsErrors[keyof UserGetTagsErrors];
+
 export type UserGetTagsResponses = {
     200: Array<TagDto>;
 };
@@ -3911,6 +4270,15 @@ export type UserGetTagSummariesData = {
     query?: never;
     url: '/user/tag-summaries';
 };
+
+export type UserGetTagSummariesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserGetTagSummariesError = UserGetTagSummariesErrors[keyof UserGetTagSummariesErrors];
 
 export type UserGetTagSummariesResponses = {
     200: Array<TagSummaryDto>;
@@ -3927,6 +4295,15 @@ export type UserAddUserToTagData = {
     url: '/user/tags/{tagId}/addUser';
 };
 
+export type UserAddUserToTagErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserAddUserToTagError = UserAddUserToTagErrors[keyof UserAddUserToTagErrors];
+
 export type UserAddUserToTagResponses = {
     200: TagDto;
 };
@@ -3941,6 +4318,15 @@ export type UserRemoveUserFromTagData = {
     query?: never;
     url: '/user/tags/{tagId}/removeUser';
 };
+
+export type UserRemoveUserFromTagErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserRemoveUserFromTagError = UserRemoveUserFromTagErrors[keyof UserRemoveUserFromTagErrors];
 
 export type UserRemoveUserFromTagResponses = {
     200: TagDto;
@@ -3957,6 +4343,15 @@ export type UserUpdateTagData = {
     url: '/user/tags/{tagId}/update';
 };
 
+export type UserUpdateTagErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserUpdateTagError = UserUpdateTagErrors[keyof UserUpdateTagErrors];
+
 export type UserUpdateTagResponses = {
     200: TagDto;
 };
@@ -3972,9 +4367,22 @@ export type UserDeleteTagData = {
     url: '/user/tags/{tagId}';
 };
 
-export type UserDeleteTagResponses = {
-    200: unknown;
+export type UserDeleteTagErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type UserDeleteTagError = UserDeleteTagErrors[keyof UserDeleteTagErrors];
+
+export type UserDeleteTagResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserDeleteTagResponse = UserDeleteTagResponses[keyof UserDeleteTagResponses];
 
 export type UserSignupSocialProofData = {
     body?: never;
@@ -3987,6 +4395,15 @@ export type UserSignupSocialProofData = {
     };
     url: '/user/signupSocialProof';
 };
+
+export type UserSignupSocialProofErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserSignupSocialProofError = UserSignupSocialProofErrors[keyof UserSignupSocialProofErrors];
 
 export type UserSignupSocialProofResponses = {
     200: SignupSocialProofDto;
@@ -4003,6 +4420,15 @@ export type UserReferrerProfileData = {
     url: '/user/referrerProfile/{code}';
 };
 
+export type UserReferrerProfileErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserReferrerProfileError = UserReferrerProfileErrors[keyof UserReferrerProfileErrors];
+
 export type UserReferrerProfileResponses = {
     200: ProfileDto;
 };
@@ -4018,6 +4444,15 @@ export type UserOnetimeInviteData = {
     url: '/user/onetimeInvite/{code}';
 };
 
+export type UserOnetimeInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserOnetimeInviteError = UserOnetimeInviteErrors[keyof UserOnetimeInviteErrors];
+
 export type UserOnetimeInviteResponses = {
     200: OnetimeInviteDto;
 };
@@ -4030,6 +4465,15 @@ export type UserRequestOnetimeInviteData = {
     query?: never;
     url: '/user/onetimeInvite/request';
 };
+
+export type UserRequestOnetimeInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserRequestOnetimeInviteError = UserRequestOnetimeInviteErrors[keyof UserRequestOnetimeInviteErrors];
 
 export type UserRequestOnetimeInviteResponses = {
     200: OnetimeInviteDto;
@@ -4046,6 +4490,15 @@ export type UserApproveOnetimeInviteData = {
     url: '/user/onetimeInvite/{inviteId}/approve';
 };
 
+export type UserApproveOnetimeInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserApproveOnetimeInviteError = UserApproveOnetimeInviteErrors[keyof UserApproveOnetimeInviteErrors];
+
 export type UserApproveOnetimeInviteResponses = {
     200: OnetimeInviteDto;
 };
@@ -4061,9 +4514,22 @@ export type UserRejectOnetimeInviteData = {
     url: '/user/onetimeInvite/{inviteId}/reject';
 };
 
-export type UserRejectOnetimeInviteResponses = {
-    200: unknown;
+export type UserRejectOnetimeInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type UserRejectOnetimeInviteError = UserRejectOnetimeInviteErrors[keyof UserRejectOnetimeInviteErrors];
+
+export type UserRejectOnetimeInviteResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserRejectOnetimeInviteResponse = UserRejectOnetimeInviteResponses[keyof UserRejectOnetimeInviteResponses];
 
 export type UserCreateOnetimeInviteData = {
     body: CreateOnetimeInviteDto;
@@ -4071,6 +4537,15 @@ export type UserCreateOnetimeInviteData = {
     query?: never;
     url: '/user/onetimeInvite/create';
 };
+
+export type UserCreateOnetimeInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserCreateOnetimeInviteError = UserCreateOnetimeInviteErrors[keyof UserCreateOnetimeInviteErrors];
 
 export type UserCreateOnetimeInviteResponses = {
     200: OnetimeInviteDto;
@@ -4087,9 +4562,22 @@ export type UserDeleteOnetimeInviteData = {
     url: '/user/onetimeInvites/{inviteId}';
 };
 
-export type UserDeleteOnetimeInviteResponses = {
-    200: unknown;
+export type UserDeleteOnetimeInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type UserDeleteOnetimeInviteError = UserDeleteOnetimeInviteErrors[keyof UserDeleteOnetimeInviteErrors];
+
+export type UserDeleteOnetimeInviteResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserDeleteOnetimeInviteResponse = UserDeleteOnetimeInviteResponses[keyof UserDeleteOnetimeInviteResponses];
 
 export type UserGetOnetimeInvitesData = {
     body?: never;
@@ -4097,6 +4585,15 @@ export type UserGetOnetimeInvitesData = {
     query?: never;
     url: '/user/onetimeInvites';
 };
+
+export type UserGetOnetimeInvitesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserGetOnetimeInvitesError = UserGetOnetimeInvitesErrors[keyof UserGetOnetimeInvitesErrors];
 
 export type UserGetOnetimeInvitesResponses = {
     200: Array<OnetimeInviteDto>;
@@ -4110,6 +4607,15 @@ export type UserGetOnetimeInvitesOverviewData = {
     query?: never;
     url: '/user/onetimeInvites/overview';
 };
+
+export type UserGetOnetimeInvitesOverviewErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserGetOnetimeInvitesOverviewError = UserGetOnetimeInvitesOverviewErrors[keyof UserGetOnetimeInvitesOverviewErrors];
 
 export type UserGetOnetimeInvitesOverviewResponses = {
     200: Array<OnetimeInviteDto>;
@@ -4126,6 +4632,15 @@ export type UserGetOnetimeInvitesByCommunityData = {
     url: '/user/onetimeInvites/{communityId}';
 };
 
+export type UserGetOnetimeInvitesByCommunityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserGetOnetimeInvitesByCommunityError = UserGetOnetimeInvitesByCommunityErrors[keyof UserGetOnetimeInvitesByCommunityErrors];
+
 export type UserGetOnetimeInvitesByCommunityResponses = {
     200: Array<OnetimeInviteDto>;
 };
@@ -4141,6 +4656,15 @@ export type UserGetOnetimeInvitesByRequesterData = {
     url: '/user/onetimeInvites/{communityId}/my';
 };
 
+export type UserGetOnetimeInvitesByRequesterErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserGetOnetimeInvitesByRequesterError = UserGetOnetimeInvitesByRequesterErrors[keyof UserGetOnetimeInvitesByRequesterErrors];
+
 export type UserGetOnetimeInvitesByRequesterResponses = {
     200: Array<OnetimeInviteDto>;
 };
@@ -4154,9 +4678,22 @@ export type UserJoinGroupAssignmentData = {
     url: '/user/groupAssignment/join';
 };
 
-export type UserJoinGroupAssignmentResponses = {
-    200: unknown;
+export type UserJoinGroupAssignmentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type UserJoinGroupAssignmentError = UserJoinGroupAssignmentErrors[keyof UserJoinGroupAssignmentErrors];
+
+export type UserJoinGroupAssignmentResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserJoinGroupAssignmentResponse = UserJoinGroupAssignmentResponses[keyof UserJoinGroupAssignmentResponses];
 
 export type UserLeaveGroupAssignmentData = {
     body?: never;
@@ -4165,9 +4702,22 @@ export type UserLeaveGroupAssignmentData = {
     url: '/user/groupAssignment/leave';
 };
 
-export type UserLeaveGroupAssignmentResponses = {
-    200: unknown;
+export type UserLeaveGroupAssignmentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type UserLeaveGroupAssignmentError = UserLeaveGroupAssignmentErrors[keyof UserLeaveGroupAssignmentErrors];
+
+export type UserLeaveGroupAssignmentResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserLeaveGroupAssignmentResponse = UserLeaveGroupAssignmentResponses[keyof UserLeaveGroupAssignmentResponses];
 
 export type UserGetGroupAssignmentMembersData = {
     body?: never;
@@ -4175,6 +4725,15 @@ export type UserGetGroupAssignmentMembersData = {
     query?: never;
     url: '/user/groupAssignment/members';
 };
+
+export type UserGetGroupAssignmentMembersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserGetGroupAssignmentMembersError = UserGetGroupAssignmentMembersErrors[keyof UserGetGroupAssignmentMembersErrors];
 
 export type UserGetGroupAssignmentMembersResponses = {
     200: Array<UserDto>;
@@ -4189,9 +4748,22 @@ export type UserAssignGroupsAdminData = {
     url: '/user/groupAssignment/assign';
 };
 
-export type UserAssignGroupsAdminResponses = {
-    200: unknown;
+export type UserAssignGroupsAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type UserAssignGroupsAdminError = UserAssignGroupsAdminErrors[keyof UserAssignGroupsAdminErrors];
+
+export type UserAssignGroupsAdminResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserAssignGroupsAdminResponse = UserAssignGroupsAdminResponses[keyof UserAssignGroupsAdminResponses];
 
 export type UserRegisterDeviceData = {
     body: RegisterDeviceDto;
@@ -4199,6 +4771,15 @@ export type UserRegisterDeviceData = {
     query?: never;
     url: '/user/registerDevice';
 };
+
+export type UserRegisterDeviceErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserRegisterDeviceError = UserRegisterDeviceErrors[keyof UserRegisterDeviceErrors];
 
 export type UserRegisterDeviceResponses = {
     200: UserDeviceDto;
@@ -4213,6 +4794,15 @@ export type UserSendPushNotificationData = {
     url: '/user/sendPushNotification';
 };
 
+export type UserSendPushNotificationErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserSendPushNotificationError = UserSendPushNotificationErrors[keyof UserSendPushNotificationErrors];
+
 export type UserSendPushNotificationResponses = {
     200: PushDto;
 };
@@ -4225,6 +4815,15 @@ export type UserRegisterLiveActivityPushToStartTokenData = {
     query?: never;
     url: '/user/registerLiveActivityPushToStartToken';
 };
+
+export type UserRegisterLiveActivityPushToStartTokenErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserRegisterLiveActivityPushToStartTokenError = UserRegisterLiveActivityPushToStartTokenErrors[keyof UserRegisterLiveActivityPushToStartTokenErrors];
 
 export type UserRegisterLiveActivityPushToStartTokenResponses = {
     200: UserDeviceDto;
@@ -4239,9 +4838,22 @@ export type UserRegisterLiveActivityUpdateTokenData = {
     url: '/user/registerLiveActivityUpdateToken';
 };
 
-export type UserRegisterLiveActivityUpdateTokenResponses = {
-    200: unknown;
+export type UserRegisterLiveActivityUpdateTokenErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type UserRegisterLiveActivityUpdateTokenError = UserRegisterLiveActivityUpdateTokenErrors[keyof UserRegisterLiveActivityUpdateTokenErrors];
+
+export type UserRegisterLiveActivityUpdateTokenResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserRegisterLiveActivityUpdateTokenResponse = UserRegisterLiveActivityUpdateTokenResponses[keyof UserRegisterLiveActivityUpdateTokenResponses];
 
 export type UserRequestAccountDeletionData = {
     body?: never;
@@ -4250,9 +4862,22 @@ export type UserRequestAccountDeletionData = {
     url: '/user/requestAccountDeletion';
 };
 
-export type UserRequestAccountDeletionResponses = {
-    200: unknown;
+export type UserRequestAccountDeletionErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type UserRequestAccountDeletionError = UserRequestAccountDeletionErrors[keyof UserRequestAccountDeletionErrors];
+
+export type UserRequestAccountDeletionResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserRequestAccountDeletionResponse = UserRequestAccountDeletionResponses[keyof UserRequestAccountDeletionResponses];
 
 export type ImagesGetImageData = {
     body?: never;
@@ -4262,6 +4887,15 @@ export type ImagesGetImageData = {
     query?: never;
     url: '/images/{key}';
 };
+
+export type ImagesGetImageErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ImagesGetImageError = ImagesGetImageErrors[keyof ImagesGetImageErrors];
 
 export type ImagesGetImageResponses = {
     200: StreamableFile;
@@ -4278,6 +4912,15 @@ export type ImagesDeleteImageData = {
     url: '/images/{id}';
 };
 
+export type ImagesDeleteImageErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ImagesDeleteImageError = ImagesDeleteImageErrors[keyof ImagesDeleteImageErrors];
+
 export type ImagesDeleteImageResponses = {
     200: DeleteImageResponseDto;
 };
@@ -4290,6 +4933,15 @@ export type ImagesUploadImageData = {
     query?: never;
     url: '/images/uploadImage';
 };
+
+export type ImagesUploadImageErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ImagesUploadImageError = ImagesUploadImageErrors[keyof ImagesUploadImageErrors];
 
 export type ImagesUploadImageResponses = {
     200: UploadImageResponseDto;
@@ -4304,9 +4956,22 @@ export type MailgunWebhookHandleData = {
     url: '/mailgun/handle-event';
 };
 
-export type MailgunWebhookHandleResponses = {
-    200: unknown;
+export type MailgunWebhookHandleErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type MailgunWebhookHandleError = MailgunWebhookHandleErrors[keyof MailgunWebhookHandleErrors];
+
+export type MailgunWebhookHandleResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type MailgunWebhookHandleResponse = MailgunWebhookHandleResponses[keyof MailgunWebhookHandleResponses];
 
 export type ShareUrlsGetShareLinkData = {
     body: GetShareLinkDto;
@@ -4314,6 +4979,15 @@ export type ShareUrlsGetShareLinkData = {
     query?: never;
     url: '/share-urls/get-share-link';
 };
+
+export type ShareUrlsGetShareLinkErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsGetShareLinkError = ShareUrlsGetShareLinkErrors[keyof ShareUrlsGetShareLinkErrors];
 
 export type ShareUrlsGetShareLinkResponses = {
     200: ShareLinkDto;
@@ -4327,6 +5001,15 @@ export type ShareUrlsCreateDuplicateData = {
     query?: never;
     url: '/share-urls/create-duplicate';
 };
+
+export type ShareUrlsCreateDuplicateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsCreateDuplicateError = ShareUrlsCreateDuplicateErrors[keyof ShareUrlsCreateDuplicateErrors];
 
 export type ShareUrlsCreateDuplicateResponses = {
     200: ShareUrlAdminDto;
@@ -4343,6 +5026,15 @@ export type ShareUrlsFindForUserData = {
     url: '/share-urls/for-user/{userId}';
 };
 
+export type ShareUrlsFindForUserErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsFindForUserError = ShareUrlsFindForUserErrors[keyof ShareUrlsFindForUserErrors];
+
 export type ShareUrlsFindForUserResponses = {
     200: Array<ShareUrlAdminDto>;
 };
@@ -4358,6 +5050,15 @@ export type ShareUrlsUpdateLabelData = {
     url: '/share-urls/{id}/label';
 };
 
+export type ShareUrlsUpdateLabelErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsUpdateLabelError = ShareUrlsUpdateLabelErrors[keyof ShareUrlsUpdateLabelErrors];
+
 export type ShareUrlsUpdateLabelResponses = {
     200: ShareUrlAdminDto;
 };
@@ -4371,6 +5072,15 @@ export type ExternalShareTargetsFindAllData = {
     url: '/external-share-targets';
 };
 
+export type ExternalShareTargetsFindAllErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ExternalShareTargetsFindAllError = ExternalShareTargetsFindAllErrors[keyof ExternalShareTargetsFindAllErrors];
+
 export type ExternalShareTargetsFindAllResponses = {
     200: Array<ExternalShareTargetDto>;
 };
@@ -4383,6 +5093,15 @@ export type ExternalShareTargetsCreateData = {
     query?: never;
     url: '/external-share-targets';
 };
+
+export type ExternalShareTargetsCreateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ExternalShareTargetsCreateError = ExternalShareTargetsCreateErrors[keyof ExternalShareTargetsCreateErrors];
 
 export type ExternalShareTargetsCreateResponses = {
     200: ExternalShareTargetDto;
@@ -4399,9 +5118,22 @@ export type ExternalShareTargetsRemoveData = {
     url: '/external-share-targets/{id}';
 };
 
-export type ExternalShareTargetsRemoveResponses = {
-    200: unknown;
+export type ExternalShareTargetsRemoveErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ExternalShareTargetsRemoveError = ExternalShareTargetsRemoveErrors[keyof ExternalShareTargetsRemoveErrors];
+
+export type ExternalShareTargetsRemoveResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ExternalShareTargetsRemoveResponse = ExternalShareTargetsRemoveResponses[keyof ExternalShareTargetsRemoveResponses];
 
 export type ExternalShareTargetsFindOneData = {
     body?: never;
@@ -4411,6 +5143,15 @@ export type ExternalShareTargetsFindOneData = {
     query?: never;
     url: '/external-share-targets/{id}';
 };
+
+export type ExternalShareTargetsFindOneErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ExternalShareTargetsFindOneError = ExternalShareTargetsFindOneErrors[keyof ExternalShareTargetsFindOneErrors];
 
 export type ExternalShareTargetsFindOneResponses = {
     200: ExternalShareTargetDto;
@@ -4427,6 +5168,15 @@ export type ExternalShareTargetsUpdateData = {
     url: '/external-share-targets/{id}';
 };
 
+export type ExternalShareTargetsUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ExternalShareTargetsUpdateError = ExternalShareTargetsUpdateErrors[keyof ExternalShareTargetsUpdateErrors];
+
 export type ExternalShareTargetsUpdateResponses = {
     200: ExternalShareTargetDto;
 };
@@ -4440,6 +5190,15 @@ export type ConversationGetAllConversationsForAdminData = {
     url: '/messaging/conversations/admin';
 };
 
+export type ConversationGetAllConversationsForAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetAllConversationsForAdminError = ConversationGetAllConversationsForAdminErrors[keyof ConversationGetAllConversationsForAdminErrors];
+
 export type ConversationGetAllConversationsForAdminResponses = {
     200: Array<ConversationAdminSummaryDto>;
 };
@@ -4452,6 +5211,15 @@ export type ConversationGetMyConversationsData = {
     query?: never;
     url: '/messaging/conversations';
 };
+
+export type ConversationGetMyConversationsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetMyConversationsError = ConversationGetMyConversationsErrors[keyof ConversationGetMyConversationsErrors];
 
 export type ConversationGetMyConversationsResponses = {
     200: Array<ConversationDto>;
@@ -4468,6 +5236,15 @@ export type ConversationGetCommunityConversationsData = {
     url: '/messaging/conversations/community/{communityId}';
 };
 
+export type ConversationGetCommunityConversationsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetCommunityConversationsError = ConversationGetCommunityConversationsErrors[keyof ConversationGetCommunityConversationsErrors];
+
 export type ConversationGetCommunityConversationsResponses = {
     200: ConversationDto;
 };
@@ -4481,6 +5258,15 @@ export type ConversationCreateDirectConversationData = {
     url: '/messaging/conversations/direct';
 };
 
+export type ConversationCreateDirectConversationErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationCreateDirectConversationError = ConversationCreateDirectConversationErrors[keyof ConversationCreateDirectConversationErrors];
+
 export type ConversationCreateDirectConversationResponses = {
     200: ConversationDto;
 };
@@ -4493,6 +5279,15 @@ export type ConversationCreateGroupConversationData = {
     query?: never;
     url: '/messaging/conversations/group';
 };
+
+export type ConversationCreateGroupConversationErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationCreateGroupConversationError = ConversationCreateGroupConversationErrors[keyof ConversationCreateGroupConversationErrors];
 
 export type ConversationCreateGroupConversationResponses = {
     200: ConversationDto;
@@ -4509,6 +5304,15 @@ export type ConversationUpdateInfoData = {
     url: '/messaging/conversations/{conversationId}/update';
 };
 
+export type ConversationUpdateInfoErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationUpdateInfoError = ConversationUpdateInfoErrors[keyof ConversationUpdateInfoErrors];
+
 export type ConversationUpdateInfoResponses = {
     200: ConversationDto;
 };
@@ -4523,6 +5327,15 @@ export type ConversationAcceptInviteData = {
     query?: never;
     url: '/messaging/conversations/{conversationId}/accept';
 };
+
+export type ConversationAcceptInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationAcceptInviteError = ConversationAcceptInviteErrors[keyof ConversationAcceptInviteErrors];
 
 export type ConversationAcceptInviteResponses = {
     200: ConversationDto;
@@ -4539,6 +5352,15 @@ export type ConversationDeclineInviteData = {
     url: '/messaging/conversations/{conversationId}/decline';
 };
 
+export type ConversationDeclineInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationDeclineInviteError = ConversationDeclineInviteErrors[keyof ConversationDeclineInviteErrors];
+
 export type ConversationDeclineInviteResponses = {
     200: ConversationDto;
 };
@@ -4553,6 +5375,15 @@ export type ConversationAddParticipantData = {
     query?: never;
     url: '/messaging/conversations/{conversationId}/participants';
 };
+
+export type ConversationAddParticipantErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationAddParticipantError = ConversationAddParticipantErrors[keyof ConversationAddParticipantErrors];
 
 export type ConversationAddParticipantResponses = {
     200: ConversationDto;
@@ -4570,6 +5401,15 @@ export type ConversationRemoveParticipantData = {
     url: '/messaging/conversations/{conversationId}/participants/{userId}';
 };
 
+export type ConversationRemoveParticipantErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationRemoveParticipantError = ConversationRemoveParticipantErrors[keyof ConversationRemoveParticipantErrors];
+
 export type ConversationRemoveParticipantResponses = {
     200: ConversationDto;
 };
@@ -4585,6 +5425,15 @@ export type ConversationMarkReadData = {
     url: '/messaging/conversations/{conversationId}/read';
 };
 
+export type ConversationMarkReadErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationMarkReadError = ConversationMarkReadErrors[keyof ConversationMarkReadErrors];
+
 export type ConversationMarkReadResponses = {
     200: ConversationDto;
 };
@@ -4598,6 +5447,15 @@ export type ConversationGetUnreadMessagesData = {
     url: '/messaging/conversations/unread';
 };
 
+export type ConversationGetUnreadMessagesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetUnreadMessagesError = ConversationGetUnreadMessagesErrors[keyof ConversationGetUnreadMessagesErrors];
+
 export type ConversationGetUnreadMessagesResponses = {
     200: UnreadMessagesDto;
 };
@@ -4610,6 +5468,15 @@ export type ConversationGetUnreadSummaryData = {
     query?: never;
     url: '/messaging/conversations/unread-summary';
 };
+
+export type ConversationGetUnreadSummaryErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetUnreadSummaryError = ConversationGetUnreadSummaryErrors[keyof ConversationGetUnreadSummaryErrors];
 
 export type ConversationGetUnreadSummaryResponses = {
     200: UnreadMessageSummaryDto;
@@ -4625,6 +5492,15 @@ export type ConversationLeaveData = {
     query?: never;
     url: '/messaging/conversations/{conversationId}/leave';
 };
+
+export type ConversationLeaveErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationLeaveError = ConversationLeaveErrors[keyof ConversationLeaveErrors];
 
 export type ConversationLeaveResponses = {
     200: ConversationDto;
@@ -4644,6 +5520,15 @@ export type MessageGetConversationMessagesForAdminData = {
     url: '/messaging/messages/admin/{conversationId}';
 };
 
+export type MessageGetConversationMessagesForAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type MessageGetConversationMessagesForAdminError = MessageGetConversationMessagesForAdminErrors[keyof MessageGetConversationMessagesForAdminErrors];
+
 export type MessageGetConversationMessagesForAdminResponses = {
     200: Array<MessageDto>;
 };
@@ -4656,6 +5541,15 @@ export type MessageSendMessageData = {
     query?: never;
     url: '/messaging/messages';
 };
+
+export type MessageSendMessageErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type MessageSendMessageError = MessageSendMessageErrors[keyof MessageSendMessageErrors];
 
 export type MessageSendMessageResponses = {
     200: MessageDto;
@@ -4675,6 +5569,15 @@ export type MessageGetMessagesData = {
     url: '/messaging/messages/{conversationId}';
 };
 
+export type MessageGetMessagesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type MessageGetMessagesError = MessageGetMessagesErrors[keyof MessageGetMessagesErrors];
+
 export type MessageGetMessagesResponses = {
     200: Array<MessageDto>;
 };
@@ -4688,9 +5591,22 @@ export type PushMarkOpenedData = {
     url: '/push/opened';
 };
 
-export type PushMarkOpenedResponses = {
-    200: unknown;
+export type PushMarkOpenedErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type PushMarkOpenedError = PushMarkOpenedErrors[keyof PushMarkOpenedErrors];
+
+export type PushMarkOpenedResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type PushMarkOpenedResponse = PushMarkOpenedResponses[keyof PushMarkOpenedResponses];
 
 export type NotifsFindAllData = {
     body?: never;
@@ -4700,6 +5616,15 @@ export type NotifsFindAllData = {
     };
     url: '/notifs';
 };
+
+export type NotifsFindAllErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type NotifsFindAllError = NotifsFindAllErrors[keyof NotifsFindAllErrors];
 
 export type NotifsFindAllResponses = {
     200: Array<NotificationDto>;
@@ -4713,6 +5638,15 @@ export type NotifsGetUnreadCountData = {
     query?: never;
     url: '/notifs/unread-count';
 };
+
+export type NotifsGetUnreadCountErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type NotifsGetUnreadCountError = NotifsGetUnreadCountErrors[keyof NotifsGetUnreadCountErrors];
 
 export type NotifsGetUnreadCountResponses = {
     200: UnreadCountDto;
@@ -4731,9 +5665,22 @@ export type NotifsSetReadData = {
     url: '/notifs/read/{id}';
 };
 
-export type NotifsSetReadResponses = {
-    200: unknown;
+export type NotifsSetReadErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type NotifsSetReadError = NotifsSetReadErrors[keyof NotifsSetReadErrors];
+
+export type NotifsSetReadResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type NotifsSetReadResponse = NotifsSetReadResponses[keyof NotifsSetReadResponses];
 
 export type NotifsSetReadAllData = {
     body?: never;
@@ -4742,9 +5689,22 @@ export type NotifsSetReadAllData = {
     url: '/notifs/read-all';
 };
 
-export type NotifsSetReadAllResponses = {
-    200: unknown;
+export type NotifsSetReadAllErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type NotifsSetReadAllError = NotifsSetReadAllErrors[keyof NotifsSetReadAllErrors];
+
+export type NotifsSetReadAllResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type NotifsSetReadAllResponse = NotifsSetReadAllResponses[keyof NotifsSetReadAllResponses];
 
 export type NotifsSetReadContentData = {
     body: MarkUnreadContentReadDto;
@@ -4753,9 +5713,22 @@ export type NotifsSetReadContentData = {
     url: '/notifs/read-content';
 };
 
-export type NotifsSetReadContentResponses = {
-    200: unknown;
+export type NotifsSetReadContentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type NotifsSetReadContentError = NotifsSetReadContentErrors[keyof NotifsSetReadContentErrors];
+
+export type NotifsSetReadContentResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type NotifsSetReadContentResponse = NotifsSetReadContentResponses[keyof NotifsSetReadContentResponses];
 
 export type NotifsNotifsForUserData = {
     body?: never;
@@ -4765,6 +5738,15 @@ export type NotifsNotifsForUserData = {
     query?: never;
     url: '/notifs/for-user/{id}';
 };
+
+export type NotifsNotifsForUserErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type NotifsNotifsForUserError = NotifsNotifsForUserErrors[keyof NotifsNotifsForUserErrors];
 
 export type NotifsNotifsForUserResponses = {
     200: Array<ActionEventNotifDto>;
@@ -4779,6 +5761,15 @@ export type NotifsLinkClickData = {
     url: '/notifs/linkClick';
 };
 
+export type NotifsLinkClickErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type NotifsLinkClickError = NotifsLinkClickErrors[keyof NotifsLinkClickErrors];
+
 export type NotifsLinkClickResponses = {
     200: NotifClickResponseDto;
 };
@@ -4792,9 +5783,20 @@ export type MmsHandleInboundMmsData = {
     url: '/mms/inbound';
 };
 
-export type MmsHandleInboundMmsResponses = {
-    200: unknown;
+export type MmsHandleInboundMmsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type MmsHandleInboundMmsError = MmsHandleInboundMmsErrors[keyof MmsHandleInboundMmsErrors];
+
+export type MmsHandleInboundMmsResponses = {
+    200: string;
+};
+
+export type MmsHandleInboundMmsResponse = MmsHandleInboundMmsResponses[keyof MmsHandleInboundMmsResponses];
 
 export type EventLogFindAllData = {
     body?: never;
@@ -4806,6 +5808,15 @@ export type EventLogFindAllData = {
     };
     url: '/eventlog';
 };
+
+export type EventLogFindAllErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type EventLogFindAllError = EventLogFindAllErrors[keyof EventLogFindAllErrors];
 
 export type EventLogFindAllResponses = {
     200: EventLogListDto;
@@ -4822,6 +5833,15 @@ export type EventLogFindOneData = {
     url: '/eventlog/{id}';
 };
 
+export type EventLogFindOneErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type EventLogFindOneError = EventLogFindOneErrors[keyof EventLogFindOneErrors];
+
 export type EventLogFindOneResponses = {
     200: EventLogDto;
 };
@@ -4834,6 +5854,15 @@ export type CommunityCreateCommunityAdminData = {
     query?: never;
     url: '/community/create/admin';
 };
+
+export type CommunityCreateCommunityAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityCreateCommunityAdminError = CommunityCreateCommunityAdminErrors[keyof CommunityCreateCommunityAdminErrors];
 
 export type CommunityCreateCommunityAdminResponses = {
     200: CommunityDto;
@@ -4848,6 +5877,15 @@ export type CommunityCreateCommunityData = {
     url: '/community/create';
 };
 
+export type CommunityCreateCommunityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityCreateCommunityError = CommunityCreateCommunityErrors[keyof CommunityCreateCommunityErrors];
+
 export type CommunityCreateCommunityResponses = {
     200: CommunityDto;
 };
@@ -4860,6 +5898,15 @@ export type CommunityGetCommunitiesAdminData = {
     query?: never;
     url: '/community/list';
 };
+
+export type CommunityGetCommunitiesAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityGetCommunitiesAdminError = CommunityGetCommunitiesAdminErrors[keyof CommunityGetCommunitiesAdminErrors];
 
 export type CommunityGetCommunitiesAdminResponses = {
     200: Array<CommunityDto>;
@@ -4874,6 +5921,15 @@ export type CommunityGetPublicCommunitiesData = {
     url: '/community/list/public';
 };
 
+export type CommunityGetPublicCommunitiesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityGetPublicCommunitiesError = CommunityGetPublicCommunitiesErrors[keyof CommunityGetPublicCommunitiesErrors];
+
 export type CommunityGetPublicCommunitiesResponses = {
     200: Array<CommunityDto>;
 };
@@ -4886,6 +5942,15 @@ export type CommunityGetMyCommunitiesData = {
     query?: never;
     url: '/community/list/my';
 };
+
+export type CommunityGetMyCommunitiesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityGetMyCommunitiesError = CommunityGetMyCommunitiesErrors[keyof CommunityGetMyCommunitiesErrors];
 
 export type CommunityGetMyCommunitiesResponses = {
     200: Array<CommunityDto>;
@@ -4902,6 +5967,15 @@ export type CommunityJoinPublicCommunityData = {
     url: '/community/{communityId}/join';
 };
 
+export type CommunityJoinPublicCommunityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityJoinPublicCommunityError = CommunityJoinPublicCommunityErrors[keyof CommunityJoinPublicCommunityErrors];
+
 export type CommunityJoinPublicCommunityResponses = {
     200: CommunityDto;
 };
@@ -4917,9 +5991,22 @@ export type CommunityDeleteData = {
     url: '/community/{communityId}';
 };
 
-export type CommunityDeleteResponses = {
-    200: unknown;
+export type CommunityDeleteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type CommunityDeleteError = CommunityDeleteErrors[keyof CommunityDeleteErrors];
+
+export type CommunityDeleteResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type CommunityDeleteResponse = CommunityDeleteResponses[keyof CommunityDeleteResponses];
 
 export type CommunityUpdateData = {
     body: UpdateCommunityDto;
@@ -4929,6 +6016,15 @@ export type CommunityUpdateData = {
     query?: never;
     url: '/community/{communityId}';
 };
+
+export type CommunityUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityUpdateError = CommunityUpdateErrors[keyof CommunityUpdateErrors];
 
 export type CommunityUpdateResponses = {
     200: CommunityDto;
@@ -4945,6 +6041,15 @@ export type CommunityRemoveMemberData = {
     url: '/community/{communityId}/removeMember';
 };
 
+export type CommunityRemoveMemberErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityRemoveMemberError = CommunityRemoveMemberErrors[keyof CommunityRemoveMemberErrors];
+
 export type CommunityRemoveMemberResponses = {
     200: CommunityDto;
 };
@@ -4959,6 +6064,15 @@ export type CommunityRemoveMemberAdminData = {
     query?: never;
     url: '/community/{communityId}/removeMember/admin';
 };
+
+export type CommunityRemoveMemberAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityRemoveMemberAdminError = CommunityRemoveMemberAdminErrors[keyof CommunityRemoveMemberAdminErrors];
 
 export type CommunityRemoveMemberAdminResponses = {
     200: CommunityDto;
@@ -4975,9 +6089,22 @@ export type CommunityLeaveData = {
     url: '/community/{communityId}/leave';
 };
 
-export type CommunityLeaveResponses = {
-    200: unknown;
+export type CommunityLeaveErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type CommunityLeaveError = CommunityLeaveErrors[keyof CommunityLeaveErrors];
+
+export type CommunityLeaveResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type CommunityLeaveResponse = CommunityLeaveResponses[keyof CommunityLeaveResponses];
 
 export type CommunityDeleteAdminData = {
     body?: never;
@@ -4988,9 +6115,22 @@ export type CommunityDeleteAdminData = {
     url: '/community/{communityId}/admin';
 };
 
-export type CommunityDeleteAdminResponses = {
-    200: unknown;
+export type CommunityDeleteAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type CommunityDeleteAdminError = CommunityDeleteAdminErrors[keyof CommunityDeleteAdminErrors];
+
+export type CommunityDeleteAdminResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type CommunityDeleteAdminResponse = CommunityDeleteAdminResponses[keyof CommunityDeleteAdminResponses];
 
 export type CommunityAddMemberAdminData = {
     body: CommunityMemberDto;
@@ -5000,6 +6140,15 @@ export type CommunityAddMemberAdminData = {
     query?: never;
     url: '/community/{communityId}/addMember/admin';
 };
+
+export type CommunityAddMemberAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityAddMemberAdminError = CommunityAddMemberAdminErrors[keyof CommunityAddMemberAdminErrors];
 
 export type CommunityAddMemberAdminResponses = {
     200: CommunityDto;
@@ -5016,6 +6165,15 @@ export type CommunityAddLeaderAdminData = {
     url: '/community/{communityId}/addLeader/admin';
 };
 
+export type CommunityAddLeaderAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityAddLeaderAdminError = CommunityAddLeaderAdminErrors[keyof CommunityAddLeaderAdminErrors];
+
 export type CommunityAddLeaderAdminResponses = {
     200: CommunityDto;
 };
@@ -5030,6 +6188,15 @@ export type CommunityRemoveLeaderAdminData = {
     query?: never;
     url: '/community/{communityId}/removeLeader/admin';
 };
+
+export type CommunityRemoveLeaderAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityRemoveLeaderAdminError = CommunityRemoveLeaderAdminErrors[keyof CommunityRemoveLeaderAdminErrors];
 
 export type CommunityRemoveLeaderAdminResponses = {
     200: CommunityDto;
@@ -5046,6 +6213,15 @@ export type CommunityGetMemberContactInfoData = {
     url: '/community/memberContactInfo/{communityId}';
 };
 
+export type CommunityGetMemberContactInfoErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityGetMemberContactInfoError = CommunityGetMemberContactInfoErrors[keyof CommunityGetMemberContactInfoErrors];
+
 export type CommunityGetMemberContactInfoResponses = {
     200: Array<CommunityMemberContactInfoDto>;
 };
@@ -5061,6 +6237,15 @@ export type CommunityGetMemberContactInfoAdminData = {
     url: '/community/memberContactInfo/{communityId}/admin';
 };
 
+export type CommunityGetMemberContactInfoAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityGetMemberContactInfoAdminError = CommunityGetMemberContactInfoAdminErrors[keyof CommunityGetMemberContactInfoAdminErrors];
+
 export type CommunityGetMemberContactInfoAdminResponses = {
     200: Array<CommunityMemberContactInfoDto>;
 };
@@ -5074,6 +6259,15 @@ export type CommunityGetAllMemberContactInfoAdminData = {
     url: '/community/memberContactInfo';
 };
 
+export type CommunityGetAllMemberContactInfoAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityGetAllMemberContactInfoAdminError = CommunityGetAllMemberContactInfoAdminErrors[keyof CommunityGetAllMemberContactInfoAdminErrors];
+
 export type CommunityGetAllMemberContactInfoAdminResponses = {
     200: Array<CommunityMemberContactInfoDto>;
 };
@@ -5086,6 +6280,15 @@ export type CommunityCreateCommunityInviteData = {
     query?: never;
     url: '/community/communityInvites/create';
 };
+
+export type CommunityCreateCommunityInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityCreateCommunityInviteError = CommunityCreateCommunityInviteErrors[keyof CommunityCreateCommunityInviteErrors];
 
 export type CommunityCreateCommunityInviteResponses = {
     200: CommunityInviteDto;
@@ -5102,9 +6305,22 @@ export type CommunityDeleteCommunityInviteData = {
     url: '/community/communityInvites/{inviteId}';
 };
 
-export type CommunityDeleteCommunityInviteResponses = {
-    200: unknown;
+export type CommunityDeleteCommunityInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type CommunityDeleteCommunityInviteError = CommunityDeleteCommunityInviteErrors[keyof CommunityDeleteCommunityInviteErrors];
+
+export type CommunityDeleteCommunityInviteResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type CommunityDeleteCommunityInviteResponse = CommunityDeleteCommunityInviteResponses[keyof CommunityDeleteCommunityInviteResponses];
 
 export type CommunityRequestCommunityInviteData = {
     body: RequestCommunityInviteDto;
@@ -5112,6 +6328,15 @@ export type CommunityRequestCommunityInviteData = {
     query?: never;
     url: '/community/communityInvites/request';
 };
+
+export type CommunityRequestCommunityInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityRequestCommunityInviteError = CommunityRequestCommunityInviteErrors[keyof CommunityRequestCommunityInviteErrors];
 
 export type CommunityRequestCommunityInviteResponses = {
     200: CommunityInviteDto;
@@ -5128,6 +6353,15 @@ export type CommunityApproveCommunityInviteRequestData = {
     url: '/community/communityInvites/{inviteId}/approveRequest';
 };
 
+export type CommunityApproveCommunityInviteRequestErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityApproveCommunityInviteRequestError = CommunityApproveCommunityInviteRequestErrors[keyof CommunityApproveCommunityInviteRequestErrors];
+
 export type CommunityApproveCommunityInviteRequestResponses = {
     200: CommunityInviteDto;
 };
@@ -5143,9 +6377,22 @@ export type CommunityRejectCommunityInviteRequestData = {
     url: '/community/communityInvites/{inviteId}/rejectRequest';
 };
 
-export type CommunityRejectCommunityInviteRequestResponses = {
-    200: unknown;
+export type CommunityRejectCommunityInviteRequestErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type CommunityRejectCommunityInviteRequestError = CommunityRejectCommunityInviteRequestErrors[keyof CommunityRejectCommunityInviteRequestErrors];
+
+export type CommunityRejectCommunityInviteRequestResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type CommunityRejectCommunityInviteRequestResponse = CommunityRejectCommunityInviteRequestResponses[keyof CommunityRejectCommunityInviteRequestResponses];
 
 export type CommunityGetCommunityInvitesData = {
     body?: never;
@@ -5155,6 +6402,15 @@ export type CommunityGetCommunityInvitesData = {
     query?: never;
     url: '/community/communityInvites/community/{communityId}';
 };
+
+export type CommunityGetCommunityInvitesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityGetCommunityInvitesError = CommunityGetCommunityInvitesErrors[keyof CommunityGetCommunityInvitesErrors];
 
 export type CommunityGetCommunityInvitesResponses = {
     200: Array<CommunityInviteDto>;
@@ -5168,6 +6424,15 @@ export type CommunityGetIncomingCommunityInvitesForUserData = {
     query?: never;
     url: '/community/communityInvites';
 };
+
+export type CommunityGetIncomingCommunityInvitesForUserErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CommunityGetIncomingCommunityInvitesForUserError = CommunityGetIncomingCommunityInvitesForUserErrors[keyof CommunityGetIncomingCommunityInvitesForUserErrors];
 
 export type CommunityGetIncomingCommunityInvitesForUserResponses = {
     200: Array<CommunityInviteDto>;
@@ -5184,9 +6449,22 @@ export type CommunityAcceptCommunityInviteData = {
     url: '/community/communityInvites/{inviteId}/accept';
 };
 
-export type CommunityAcceptCommunityInviteResponses = {
-    200: unknown;
+export type CommunityAcceptCommunityInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type CommunityAcceptCommunityInviteError = CommunityAcceptCommunityInviteErrors[keyof CommunityAcceptCommunityInviteErrors];
+
+export type CommunityAcceptCommunityInviteResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type CommunityAcceptCommunityInviteResponse = CommunityAcceptCommunityInviteResponses[keyof CommunityAcceptCommunityInviteResponses];
 
 export type CommunityRejectCommunityInviteData = {
     body?: never;
@@ -5197,9 +6475,22 @@ export type CommunityRejectCommunityInviteData = {
     url: '/community/communityInvites/{inviteId}/reject';
 };
 
-export type CommunityRejectCommunityInviteResponses = {
-    200: unknown;
+export type CommunityRejectCommunityInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type CommunityRejectCommunityInviteError = CommunityRejectCommunityInviteErrors[keyof CommunityRejectCommunityInviteErrors];
+
+export type CommunityRejectCommunityInviteResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type CommunityRejectCommunityInviteResponse = CommunityRejectCommunityInviteResponses[keyof CommunityRejectCommunityInviteResponses];
 
 export type ContractGetCurrentData = {
     body?: never;
@@ -5207,6 +6498,15 @@ export type ContractGetCurrentData = {
     query?: never;
     url: '/contract/current';
 };
+
+export type ContractGetCurrentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ContractGetCurrentError = ContractGetCurrentErrors[keyof ContractGetCurrentErrors];
 
 export type ContractGetCurrentResponses = {
     200: ContractDto;
@@ -5220,6 +6520,15 @@ export type ContractAllAdminData = {
     query?: never;
     url: '/contract/admin';
 };
+
+export type ContractAllAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ContractAllAdminError = ContractAllAdminErrors[keyof ContractAllAdminErrors];
 
 export type ContractAllAdminResponses = {
     200: Array<ContractAdminDto>;
@@ -5236,6 +6545,15 @@ export type ContractFindOneAdminData = {
     url: '/contract/admin/{id}';
 };
 
+export type ContractFindOneAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ContractFindOneAdminError = ContractFindOneAdminErrors[keyof ContractFindOneAdminErrors];
+
 export type ContractFindOneAdminResponses = {
     200: ContractAdminDto;
 };
@@ -5250,6 +6568,15 @@ export type ContractGetByIdData = {
     query?: never;
     url: '/contract/detail/{id}';
 };
+
+export type ContractGetByIdErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ContractGetByIdError = ContractGetByIdErrors[keyof ContractGetByIdErrors];
 
 export type ContractGetByIdResponses = {
     200: ContractDto;
@@ -5266,6 +6593,15 @@ export type ContractSignContractData = {
     url: '/contract/sign/{id}';
 };
 
+export type ContractSignContractErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ContractSignContractError = ContractSignContractErrors[keyof ContractSignContractErrors];
+
 export type ContractSignContractResponses = {
     200: ContractEventDateDto;
 };
@@ -5279,6 +6615,15 @@ export type ContractSuspendContractData = {
     url: '/contract/suspend';
 };
 
+export type ContractSuspendContractErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ContractSuspendContractError = ContractSuspendContractErrors[keyof ContractSuspendContractErrors];
+
 export type ContractSuspendContractResponses = {
     200: ContractEventDateDto;
 };
@@ -5291,6 +6636,15 @@ export type ContractCreateData = {
     query?: never;
     url: '/contract/create';
 };
+
+export type ContractCreateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ContractCreateError = ContractCreateErrors[keyof ContractCreateErrors];
 
 export type ContractCreateResponses = {
     200: ContractAdminDto;
@@ -5307,6 +6661,15 @@ export type ContractUpdateData = {
     url: '/contract/update/{id}';
 };
 
+export type ContractUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ContractUpdateError = ContractUpdateErrors[keyof ContractUpdateErrors];
+
 export type ContractUpdateResponses = {
     200: ContractAdminDto;
 };
@@ -5320,6 +6683,15 @@ export type ClusterListAdminData = {
     url: '/cluster/admin';
 };
 
+export type ClusterListAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ClusterListAdminError = ClusterListAdminErrors[keyof ClusterListAdminErrors];
+
 export type ClusterListAdminResponses = {
     200: Array<ClusterAdminDto>;
 };
@@ -5332,6 +6704,15 @@ export type ClusterReassignAllData = {
     query?: never;
     url: '/cluster/admin/reassign-all';
 };
+
+export type ClusterReassignAllErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ClusterReassignAllError = ClusterReassignAllErrors[keyof ClusterReassignAllErrors];
 
 export type ClusterReassignAllResponses = {
     200: ReassignAllClustersResultDto;
@@ -5348,6 +6729,15 @@ export type ClusterUpdateAdminData = {
     url: '/cluster/admin/{id}';
 };
 
+export type ClusterUpdateAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ClusterUpdateAdminError = ClusterUpdateAdminErrors[keyof ClusterUpdateAdminErrors];
+
 export type ClusterUpdateAdminResponses = {
     200: ClusterAdminDto;
 };
@@ -5362,6 +6752,15 @@ export type ActionsOptoutData = {
     query?: never;
     url: '/actions/optout/{id}';
 };
+
+export type ActionsOptoutErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsOptoutError = ActionsOptoutErrors[keyof ActionsOptoutErrors];
 
 export type ActionsOptoutResponses = {
     200: ActionActivityDto;
@@ -5378,6 +6777,15 @@ export type ActionsCompleteData = {
     url: '/actions/complete/{id}';
 };
 
+export type ActionsCompleteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCompleteError = ActionsCompleteErrors[keyof ActionsCompleteErrors];
+
 export type ActionsCompleteResponses = {
     200: ActionActivityDto;
 };
@@ -5393,6 +6801,15 @@ export type ActionsMyStatusData = {
     url: '/actions/myStatus/{id}';
 };
 
+export type ActionsMyStatusErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsMyStatusError = ActionsMyStatusErrors[keyof ActionsMyStatusErrors];
+
 export type ActionsMyStatusResponses = {
     200: UserActionRelationDto;
 };
@@ -5406,6 +6823,15 @@ export type ActionsFindAllData = {
     url: '/actions';
 };
 
+export type ActionsFindAllErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsFindAllError = ActionsFindAllErrors[keyof ActionsFindAllErrors];
+
 export type ActionsFindAllResponses = {
     200: Array<ActionDto>;
 };
@@ -5418,6 +6844,15 @@ export type ActionsFindPublicListData = {
     query?: never;
     url: '/actions/public';
 };
+
+export type ActionsFindPublicListErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsFindPublicListError = ActionsFindPublicListErrors[keyof ActionsFindPublicListErrors];
 
 export type ActionsFindPublicListResponses = {
     200: Array<ActionDto>;
@@ -5434,6 +6869,15 @@ export type ActionsFindAllLoggedInData = {
     url: '/actions/loggedIn';
 };
 
+export type ActionsFindAllLoggedInErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsFindAllLoggedInError = ActionsFindAllLoggedInErrors[keyof ActionsFindAllLoggedInErrors];
+
 export type ActionsFindAllLoggedInResponses = {
     200: Array<ActionDto>;
 };
@@ -5446,6 +6890,15 @@ export type ActionsMyActivityData = {
     query?: never;
     url: '/actions/myActivity';
 };
+
+export type ActionsMyActivityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsMyActivityError = ActionsMyActivityErrors[keyof ActionsMyActivityErrors];
 
 export type ActionsMyActivityResponses = {
     200: Array<ActionActivityDto>;
@@ -5460,6 +6913,15 @@ export type ActionsAllGeneralUpdatesData = {
     url: '/actions/generalUpdates';
 };
 
+export type ActionsAllGeneralUpdatesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsAllGeneralUpdatesError = ActionsAllGeneralUpdatesErrors[keyof ActionsAllGeneralUpdatesErrors];
+
 export type ActionsAllGeneralUpdatesResponses = {
     200: Array<GeneralUpdateDto>;
 };
@@ -5472,6 +6934,15 @@ export type ActionsUnreadGeneralUpdatesData = {
     query?: never;
     url: '/actions/generalUpdates/unread';
 };
+
+export type ActionsUnreadGeneralUpdatesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUnreadGeneralUpdatesError = ActionsUnreadGeneralUpdatesErrors[keyof ActionsUnreadGeneralUpdatesErrors];
 
 export type ActionsUnreadGeneralUpdatesResponses = {
     200: Array<GeneralUpdateDto>;
@@ -5488,9 +6959,22 @@ export type ActionsDismissGeneralUpdateData = {
     url: '/actions/generalUpdates/{generalUpdateId}/dismiss';
 };
 
-export type ActionsDismissGeneralUpdateResponses = {
-    200: unknown;
+export type ActionsDismissGeneralUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsDismissGeneralUpdateError = ActionsDismissGeneralUpdateErrors[keyof ActionsDismissGeneralUpdateErrors];
+
+export type ActionsDismissGeneralUpdateResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsDismissGeneralUpdateResponse = ActionsDismissGeneralUpdateResponses[keyof ActionsDismissGeneralUpdateResponses];
 
 export type ActionsAllGeneralUpdatesAdminData = {
     body?: never;
@@ -5498,6 +6982,15 @@ export type ActionsAllGeneralUpdatesAdminData = {
     query?: never;
     url: '/actions/generalUpdates/admin';
 };
+
+export type ActionsAllGeneralUpdatesAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsAllGeneralUpdatesAdminError = ActionsAllGeneralUpdatesAdminErrors[keyof ActionsAllGeneralUpdatesAdminErrors];
 
 export type ActionsAllGeneralUpdatesAdminResponses = {
     200: Array<GeneralUpdateAdminDto>;
@@ -5514,6 +7007,15 @@ export type ActionsFindOneGeneralUpdateData = {
     url: '/actions/generalUpdates/admin/{id}';
 };
 
+export type ActionsFindOneGeneralUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsFindOneGeneralUpdateError = ActionsFindOneGeneralUpdateErrors[keyof ActionsFindOneGeneralUpdateErrors];
+
 export type ActionsFindOneGeneralUpdateResponses = {
     200: GeneralUpdateAdminDto;
 };
@@ -5526,6 +7028,15 @@ export type ActionsCreateGeneralUpdateData = {
     query?: never;
     url: '/actions/generalUpdates/create';
 };
+
+export type ActionsCreateGeneralUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCreateGeneralUpdateError = ActionsCreateGeneralUpdateErrors[keyof ActionsCreateGeneralUpdateErrors];
 
 export type ActionsCreateGeneralUpdateResponses = {
     200: GeneralUpdateAdminDto;
@@ -5542,9 +7053,22 @@ export type ActionsDeleteGeneralUpdateData = {
     url: '/actions/generalUpdates/{id}';
 };
 
-export type ActionsDeleteGeneralUpdateResponses = {
-    200: unknown;
+export type ActionsDeleteGeneralUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsDeleteGeneralUpdateError = ActionsDeleteGeneralUpdateErrors[keyof ActionsDeleteGeneralUpdateErrors];
+
+export type ActionsDeleteGeneralUpdateResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsDeleteGeneralUpdateResponse = ActionsDeleteGeneralUpdateResponses[keyof ActionsDeleteGeneralUpdateResponses];
 
 export type ActionsUpdateGeneralUpdateData = {
     body: UpdateGeneralUpdateDto;
@@ -5554,6 +7078,15 @@ export type ActionsUpdateGeneralUpdateData = {
     query?: never;
     url: '/actions/generalUpdates/{id}';
 };
+
+export type ActionsUpdateGeneralUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUpdateGeneralUpdateError = ActionsUpdateGeneralUpdateErrors[keyof ActionsUpdateGeneralUpdateErrors];
 
 export type ActionsUpdateGeneralUpdateResponses = {
     200: GeneralUpdateAdminDto;
@@ -5572,6 +7105,15 @@ export type ActionsGetActivityFeedData = {
     url: '/actions/activities/feed';
 };
 
+export type ActionsGetActivityFeedErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetActivityFeedError = ActionsGetActivityFeedErrors[keyof ActionsGetActivityFeedErrors];
+
 export type ActionsGetActivityFeedResponses = {
     200: Array<ActionActivityDto>;
 };
@@ -5586,6 +7128,15 @@ export type ActionsGetGlobalFeedData = {
     };
     url: '/actions/globalFeed';
 };
+
+export type ActionsGetGlobalFeedErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetGlobalFeedError = ActionsGetGlobalFeedErrors[keyof ActionsGetGlobalFeedErrors];
 
 export type ActionsGetGlobalFeedResponses = {
     200: Array<GlobalFeedItemDto>;
@@ -5602,6 +7153,15 @@ export type ActionsGetActivityData = {
     url: '/actions/activities/{id}';
 };
 
+export type ActionsGetActivityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetActivityError = ActionsGetActivityErrors[keyof ActionsGetActivityErrors];
+
 export type ActionsGetActivityResponses = {
     200: ActionActivityDto;
 };
@@ -5617,6 +7177,15 @@ export type ActionsGetWithdrawalsData = {
     url: '/actions/withdrawals/byForm/{formId}';
 };
 
+export type ActionsGetWithdrawalsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetWithdrawalsError = ActionsGetWithdrawalsErrors[keyof ActionsGetWithdrawalsErrors];
+
 export type ActionsGetWithdrawalsResponses = {
     200: Array<ActionWithdrawalDto>;
 };
@@ -5631,6 +7200,15 @@ export type ActionsGetEventData = {
     query?: never;
     url: '/actions/events/{id}';
 };
+
+export type ActionsGetEventErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetEventError = ActionsGetEventErrors[keyof ActionsGetEventErrors];
 
 export type ActionsGetEventResponses = {
     200: ActionEventDto;
@@ -5654,6 +7232,15 @@ export type ActionsGetNotificationScheduleData = {
     url: '/actions/notification-schedule';
 };
 
+export type ActionsGetNotificationScheduleErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetNotificationScheduleError = ActionsGetNotificationScheduleErrors[keyof ActionsGetNotificationScheduleErrors];
+
 export type ActionsGetNotificationScheduleResponses = {
     200: Array<NotificationScheduleEntryDto>;
 };
@@ -5673,6 +7260,15 @@ export type ActionsGetActionActivitiesData = {
     url: '/actions/{id}/activities';
 };
 
+export type ActionsGetActionActivitiesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetActionActivitiesError = ActionsGetActionActivitiesErrors[keyof ActionsGetActionActivitiesErrors];
+
 export type ActionsGetActionActivitiesResponses = {
     200: Array<ActionActivityDto>;
 };
@@ -5686,9 +7282,22 @@ export type ActionsSetPriorityData = {
     url: '/actions/priorities';
 };
 
-export type ActionsSetPriorityResponses = {
-    200: unknown;
+export type ActionsSetPriorityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsSetPriorityError = ActionsSetPriorityErrors[keyof ActionsSetPriorityErrors];
+
+export type ActionsSetPriorityResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsSetPriorityResponse = ActionsSetPriorityResponses[keyof ActionsSetPriorityResponses];
 
 export type ActionsFindAllWithDraftsData = {
     body?: never;
@@ -5696,6 +7305,15 @@ export type ActionsFindAllWithDraftsData = {
     query?: never;
     url: '/actions/all';
 };
+
+export type ActionsFindAllWithDraftsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsFindAllWithDraftsError = ActionsFindAllWithDraftsErrors[keyof ActionsFindAllWithDraftsErrors];
 
 export type ActionsFindAllWithDraftsResponses = {
     200: Array<ActionDto>;
@@ -5715,6 +7333,15 @@ export type ActionsFriendActivityForActionData = {
     url: '/actions/friendActivity/{actionId}';
 };
 
+export type ActionsFriendActivityForActionErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsFriendActivityForActionError = ActionsFriendActivityForActionErrors[keyof ActionsFriendActivityForActionErrors];
+
 export type ActionsFriendActivityForActionResponses = {
     200: Array<ActionActivityDto>;
 };
@@ -5732,6 +7359,15 @@ export type ActionsFriendActivityData = {
     url: '/actions/friendActivity';
 };
 
+export type ActionsFriendActivityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsFriendActivityError = ActionsFriendActivityErrors[keyof ActionsFriendActivityErrors];
+
 export type ActionsFriendActivityResponses = {
     200: Array<ActionActivityDto>;
 };
@@ -5748,6 +7384,15 @@ export type ActionsHomeFeedData = {
     };
     url: '/actions/homeFeed';
 };
+
+export type ActionsHomeFeedErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsHomeFeedError = ActionsHomeFeedErrors[keyof ActionsHomeFeedErrors];
 
 export type ActionsHomeFeedResponses = {
     200: Array<HomeFeedItemDto>;
@@ -5767,6 +7412,15 @@ export type ActionsCommunityActivityData = {
     url: '/actions/communityActivity';
 };
 
+export type ActionsCommunityActivityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCommunityActivityError = ActionsCommunityActivityErrors[keyof ActionsCommunityActivityErrors];
+
 export type ActionsCommunityActivityResponses = {
     200: Array<ActionActivityDto>;
 };
@@ -5781,6 +7435,15 @@ export type ActionsCommunityCompletedActionsCountData = {
     };
     url: '/actions/communityCompletedActionsCount';
 };
+
+export type ActionsCommunityCompletedActionsCountErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCommunityCompletedActionsCountError = ActionsCommunityCompletedActionsCountErrors[keyof ActionsCommunityCompletedActionsCountErrors];
 
 export type ActionsCommunityCompletedActionsCountResponses = {
     200: CommunityCompletedActionsCountDto;
@@ -5798,8 +7461,10 @@ export type ActionsFindOneData = {
 };
 
 export type ActionsFindOneErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type ActionsFindOneError = ActionsFindOneErrors[keyof ActionsFindOneErrors];
 
 export type ActionsFindOneResponses = {
     200: ActionDto;
@@ -5823,6 +7488,15 @@ export type ActionsGetSharePreviewData = {
     url: '/actions/{id}/sharePreview';
 };
 
+export type ActionsGetSharePreviewErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetSharePreviewError = ActionsGetSharePreviewErrors[keyof ActionsGetSharePreviewErrors];
+
 export type ActionsGetSharePreviewResponses = {
     200: ActionSharePreviewDto;
 };
@@ -5837,6 +7511,15 @@ export type ActionsGetActionReferralCodeData = {
     query?: never;
     url: '/actions/{id}/referralCode';
 };
+
+export type ActionsGetActionReferralCodeErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetActionReferralCodeError = ActionsGetActionReferralCodeErrors[keyof ActionsGetActionReferralCodeErrors];
 
 export type ActionsGetActionReferralCodeResponses = {
     200: ActionReferralCodeDto;
@@ -5854,8 +7537,10 @@ export type ActionsFindOneAdminData = {
 };
 
 export type ActionsFindOneAdminErrors = {
-    401: unknown;
+    401: HeyApiError;
 };
+
+export type ActionsFindOneAdminError = ActionsFindOneAdminErrors[keyof ActionsFindOneAdminErrors];
 
 export type ActionsFindOneAdminResponses = {
     200: ActionDto;
@@ -5872,6 +7557,15 @@ export type ActionsGetFollowUpFormsData = {
     url: '/actions/{id}/follow-up-forms';
 };
 
+export type ActionsGetFollowUpFormsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetFollowUpFormsError = ActionsGetFollowUpFormsErrors[keyof ActionsGetFollowUpFormsErrors];
+
 export type ActionsGetFollowUpFormsResponses = {
     200: Array<FollowUpFormDto>;
 };
@@ -5886,6 +7580,15 @@ export type ActionsCreateFollowUpFormData = {
     query?: never;
     url: '/actions/{id}/follow-up-forms';
 };
+
+export type ActionsCreateFollowUpFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCreateFollowUpFormError = ActionsCreateFollowUpFormErrors[keyof ActionsCreateFollowUpFormErrors];
 
 export type ActionsCreateFollowUpFormResponses = {
     200: FollowUpFormDto;
@@ -5902,9 +7605,22 @@ export type ActionsDeleteFollowUpFormData = {
     url: '/actions/follow-up-forms/{followUpFormId}';
 };
 
-export type ActionsDeleteFollowUpFormResponses = {
-    200: unknown;
+export type ActionsDeleteFollowUpFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsDeleteFollowUpFormError = ActionsDeleteFollowUpFormErrors[keyof ActionsDeleteFollowUpFormErrors];
+
+export type ActionsDeleteFollowUpFormResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsDeleteFollowUpFormResponse = ActionsDeleteFollowUpFormResponses[keyof ActionsDeleteFollowUpFormResponses];
 
 export type ActionsUpdateFollowUpFormData = {
     body: UpdateFollowUpFormDto;
@@ -5914,6 +7630,15 @@ export type ActionsUpdateFollowUpFormData = {
     query?: never;
     url: '/actions/follow-up-forms/{followUpFormId}';
 };
+
+export type ActionsUpdateFollowUpFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUpdateFollowUpFormError = ActionsUpdateFollowUpFormErrors[keyof ActionsUpdateFollowUpFormErrors];
 
 export type ActionsUpdateFollowUpFormResponses = {
     200: FollowUpFormDto;
@@ -5930,6 +7655,15 @@ export type ActionsGetIncompleteUsersData = {
     url: '/actions/{id}/incomplete-users';
 };
 
+export type ActionsGetIncompleteUsersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetIncompleteUsersError = ActionsGetIncompleteUsersErrors[keyof ActionsGetIncompleteUsersErrors];
+
 export type ActionsGetIncompleteUsersResponses = {
     200: Array<ProfileDto>;
 };
@@ -5945,6 +7679,15 @@ export type ActionsGetCompletedUsersData = {
     url: '/actions/{id}/completed-users';
 };
 
+export type ActionsGetCompletedUsersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetCompletedUsersError = ActionsGetCompletedUsersErrors[keyof ActionsGetCompletedUsersErrors];
+
 export type ActionsGetCompletedUsersResponses = {
     200: Array<ProfileDto>;
 };
@@ -5957,6 +7700,15 @@ export type ActionsEvaluateCohortData = {
     query?: never;
     url: '/actions/evaluate-cohort';
 };
+
+export type ActionsEvaluateCohortErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsEvaluateCohortError = ActionsEvaluateCohortErrors[keyof ActionsEvaluateCohortErrors];
 
 export type ActionsEvaluateCohortResponses = {
     200: EvaluateCohortExpressionResponseDto;
@@ -5973,6 +7725,15 @@ export type ActionsListFormVariantsData = {
     url: '/actions/{id}/form-variants';
 };
 
+export type ActionsListFormVariantsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsListFormVariantsError = ActionsListFormVariantsErrors[keyof ActionsListFormVariantsErrors];
+
 export type ActionsListFormVariantsResponses = {
     200: ActionFormVariantsListDto;
 };
@@ -5987,6 +7748,15 @@ export type ActionsCreateFormVariantData = {
     query?: never;
     url: '/actions/{id}/form-variants';
 };
+
+export type ActionsCreateFormVariantErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCreateFormVariantError = ActionsCreateFormVariantErrors[keyof ActionsCreateFormVariantErrors];
 
 export type ActionsCreateFormVariantResponses = {
     200: ActionFormVariantDto;
@@ -6003,9 +7773,22 @@ export type ActionsDeleteFormVariantData = {
     url: '/actions/form-variants/{variantId}';
 };
 
-export type ActionsDeleteFormVariantResponses = {
-    200: unknown;
+export type ActionsDeleteFormVariantErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsDeleteFormVariantError = ActionsDeleteFormVariantErrors[keyof ActionsDeleteFormVariantErrors];
+
+export type ActionsDeleteFormVariantResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsDeleteFormVariantResponse = ActionsDeleteFormVariantResponses[keyof ActionsDeleteFormVariantResponses];
 
 export type ActionsUpdateFormVariantData = {
     body: UpdateActionFormVariantDto;
@@ -6015,6 +7798,15 @@ export type ActionsUpdateFormVariantData = {
     query?: never;
     url: '/actions/form-variants/{variantId}';
 };
+
+export type ActionsUpdateFormVariantErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUpdateFormVariantError = ActionsUpdateFormVariantErrors[keyof ActionsUpdateFormVariantErrors];
 
 export type ActionsUpdateFormVariantResponses = {
     200: ActionFormVariantDto;
@@ -6028,6 +7820,15 @@ export type ActionsCreateData = {
     query?: never;
     url: '/actions/create';
 };
+
+export type ActionsCreateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCreateError = ActionsCreateErrors[keyof ActionsCreateErrors];
 
 export type ActionsCreateResponses = {
     200: ActionDto;
@@ -6044,9 +7845,22 @@ export type ActionsRemoveData = {
     url: '/actions/{id}';
 };
 
-export type ActionsRemoveResponses = {
-    200: unknown;
+export type ActionsRemoveErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsRemoveError = ActionsRemoveErrors[keyof ActionsRemoveErrors];
+
+export type ActionsRemoveResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsRemoveResponse = ActionsRemoveResponses[keyof ActionsRemoveResponses];
 
 export type ActionsUpdateData = {
     body: UpdateActionDto;
@@ -6056,6 +7870,15 @@ export type ActionsUpdateData = {
     query?: never;
     url: '/actions/{id}';
 };
+
+export type ActionsUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUpdateError = ActionsUpdateErrors[keyof ActionsUpdateErrors];
 
 export type ActionsUpdateResponses = {
     200: ActionDto;
@@ -6073,6 +7896,15 @@ export type ActionsFindCompletedForUserData = {
     };
     url: '/actions/completed/{id}';
 };
+
+export type ActionsFindCompletedForUserErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsFindCompletedForUserError = ActionsFindCompletedForUserErrors[keyof ActionsFindCompletedForUserErrors];
 
 export type ActionsFindCompletedForUserResponses = {
     200: Array<ActionActivityDto>;
@@ -6093,6 +7925,15 @@ export type ActionsUserFeedData = {
     url: '/actions/userFeed/{id}';
 };
 
+export type ActionsUserFeedErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUserFeedError = ActionsUserFeedErrors[keyof ActionsUserFeedErrors];
+
 export type ActionsUserFeedResponses = {
     200: Array<HomeFeedItemDto>;
 };
@@ -6107,6 +7948,15 @@ export type ActionsUserCompletedCountData = {
     query?: never;
     url: '/actions/userCompletedCount/{id}';
 };
+
+export type ActionsUserCompletedCountErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUserCompletedCountError = ActionsUserCompletedCountErrors[keyof ActionsUserCompletedCountErrors];
 
 export type ActionsUserCompletedCountResponses = {
     200: UserCompletedActionsCountDto;
@@ -6123,6 +7973,15 @@ export type ActionsAddEventData = {
     url: '/actions/{id}/events';
 };
 
+export type ActionsAddEventErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsAddEventError = ActionsAddEventErrors[keyof ActionsAddEventErrors];
+
 export type ActionsAddEventResponses = {
     200: ActionEventDto;
 };
@@ -6137,6 +7996,15 @@ export type ActionsUpdateReminderGroupData = {
     query?: never;
     url: '/actions/remindergroups/{groupId}';
 };
+
+export type ActionsUpdateReminderGroupErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUpdateReminderGroupError = ActionsUpdateReminderGroupErrors[keyof ActionsUpdateReminderGroupErrors];
 
 export type ActionsUpdateReminderGroupResponses = {
     200: ReminderGroupDto;
@@ -6153,6 +8021,15 @@ export type ActionsCreateReminderGroupData = {
     url: '/actions/events/{eventId}/createremindergroup';
 };
 
+export type ActionsCreateReminderGroupErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCreateReminderGroupError = ActionsCreateReminderGroupErrors[keyof ActionsCreateReminderGroupErrors];
+
 export type ActionsCreateReminderGroupResponses = {
     200: ReminderGroupDto;
 };
@@ -6168,9 +8045,22 @@ export type ActionsDeleteReminderGroupData = {
     url: '/actions/reminders/{groupId}';
 };
 
-export type ActionsDeleteReminderGroupResponses = {
-    200: unknown;
+export type ActionsDeleteReminderGroupErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsDeleteReminderGroupError = ActionsDeleteReminderGroupErrors[keyof ActionsDeleteReminderGroupErrors];
+
+export type ActionsDeleteReminderGroupResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsDeleteReminderGroupResponse = ActionsDeleteReminderGroupResponses[keyof ActionsDeleteReminderGroupResponses];
 
 export type ActionsPlansForGroupData = {
     body?: never;
@@ -6180,6 +8070,15 @@ export type ActionsPlansForGroupData = {
     query?: never;
     url: '/actions/plansForGroup/{groupId}';
 };
+
+export type ActionsPlansForGroupErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsPlansForGroupError = ActionsPlansForGroupErrors[keyof ActionsPlansForGroupErrors];
 
 export type ActionsPlansForGroupResponses = {
     200: Array<PreviewNotificationPlanDto>;
@@ -6196,6 +8095,15 @@ export type ActionsSentNotifsForGroupData = {
     url: '/actions/sentNotifsForGroup/{groupId}';
 };
 
+export type ActionsSentNotifsForGroupErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsSentNotifsForGroupError = ActionsSentNotifsForGroupErrors[keyof ActionsSentNotifsForGroupErrors];
+
 export type ActionsSentNotifsForGroupResponses = {
     200: Array<ActionEventNotifDto>;
 };
@@ -6209,9 +8117,22 @@ export type ActionsClearDbData = {
     url: '/actions/clearDb';
 };
 
-export type ActionsClearDbResponses = {
-    200: unknown;
+export type ActionsClearDbErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsClearDbError = ActionsClearDbErrors[keyof ActionsClearDbErrors];
+
+export type ActionsClearDbResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsClearDbResponse = ActionsClearDbResponses[keyof ActionsClearDbResponses];
 
 export type ActionsLikeActivityData = {
     body?: never;
@@ -6221,6 +8142,15 @@ export type ActionsLikeActivityData = {
     query?: never;
     url: '/actions/likeActivity/{id}';
 };
+
+export type ActionsLikeActivityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsLikeActivityError = ActionsLikeActivityErrors[keyof ActionsLikeActivityErrors];
 
 export type ActionsLikeActivityResponses = {
     200: ActionActivityDto;
@@ -6237,6 +8167,15 @@ export type ActionsUnlikeActivityData = {
     url: '/actions/unlikeActivity/{id}';
 };
 
+export type ActionsUnlikeActivityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUnlikeActivityError = ActionsUnlikeActivityErrors[keyof ActionsUnlikeActivityErrors];
+
 export type ActionsUnlikeActivityResponses = {
     200: ActionActivityDto;
 };
@@ -6251,6 +8190,15 @@ export type ActionsAddActivityCommentData = {
     query?: never;
     url: '/actions/addActivityComment/{id}';
 };
+
+export type ActionsAddActivityCommentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsAddActivityCommentError = ActionsAddActivityCommentErrors[keyof ActionsAddActivityCommentErrors];
 
 export type ActionsAddActivityCommentResponses = {
     200: CommentDto;
@@ -6267,6 +8215,15 @@ export type ActionsUpdateActivityData = {
     url: '/actions/updateActivity/{id}';
 };
 
+export type ActionsUpdateActivityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUpdateActivityError = ActionsUpdateActivityErrors[keyof ActionsUpdateActivityErrors];
+
 export type ActionsUpdateActivityResponses = {
     200: ActionActivityDto;
 };
@@ -6282,6 +8239,15 @@ export type ActionsDismissActionData = {
     url: '/actions/dismiss/{id}';
 };
 
+export type ActionsDismissActionErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsDismissActionError = ActionsDismissActionErrors[keyof ActionsDismissActionErrors];
+
 export type ActionsDismissActionResponses = {
     200: ActionActivityDto;
 };
@@ -6294,6 +8260,15 @@ export type ActionsCreateActivityData = {
     query?: never;
     url: '/actions/createActivity';
 };
+
+export type ActionsCreateActivityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCreateActivityError = ActionsCreateActivityErrors[keyof ActionsCreateActivityErrors];
 
 export type ActionsCreateActivityResponses = {
     200: ActionActivityDto;
@@ -6310,6 +8285,15 @@ export type ActionsArchiveData = {
     url: '/actions/archive/{id}';
 };
 
+export type ActionsArchiveErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsArchiveError = ActionsArchiveErrors[keyof ActionsArchiveErrors];
+
 export type ActionsArchiveResponses = {
     200: ActionDto;
 };
@@ -6324,6 +8308,15 @@ export type ActionsUnarchiveData = {
     query?: never;
     url: '/actions/unarchive/{id}';
 };
+
+export type ActionsUnarchiveErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUnarchiveError = ActionsUnarchiveErrors[keyof ActionsUnarchiveErrors];
 
 export type ActionsUnarchiveResponses = {
     200: ActionDto;
@@ -6340,6 +8333,15 @@ export type ActionsReminderGroupsForEventData = {
     url: '/actions/reminderGroupsForEvent/{id}';
 };
 
+export type ActionsReminderGroupsForEventErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsReminderGroupsForEventError = ActionsReminderGroupsForEventErrors[keyof ActionsReminderGroupsForEventErrors];
+
 export type ActionsReminderGroupsForEventResponses = {
     200: Array<ReminderGroupDto>;
 };
@@ -6354,6 +8356,15 @@ export type ActionsCreateUpdateData = {
     query?: never;
     url: '/actions/createUpdate/{id}';
 };
+
+export type ActionsCreateUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCreateUpdateError = ActionsCreateUpdateErrors[keyof ActionsCreateUpdateErrors];
 
 export type ActionsCreateUpdateResponses = {
     200: ActionUpdateDto;
@@ -6370,6 +8381,15 @@ export type ActionsUpdateUpdateData = {
     url: '/actions/updateUpdate/{id}';
 };
 
+export type ActionsUpdateUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsUpdateUpdateError = ActionsUpdateUpdateErrors[keyof ActionsUpdateUpdateErrors];
+
 export type ActionsUpdateUpdateResponses = {
     200: ActionUpdateDto;
 };
@@ -6385,9 +8405,22 @@ export type ActionsDeleteUpdateData = {
     url: '/actions/deleteUpdate/{id}';
 };
 
-export type ActionsDeleteUpdateResponses = {
-    200: unknown;
+export type ActionsDeleteUpdateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsDeleteUpdateError = ActionsDeleteUpdateErrors[keyof ActionsDeleteUpdateErrors];
+
+export type ActionsDeleteUpdateResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsDeleteUpdateResponse = ActionsDeleteUpdateResponses[keyof ActionsDeleteUpdateResponses];
 
 export type ActionsAllUpdatesData = {
     body?: never;
@@ -6395,6 +8428,15 @@ export type ActionsAllUpdatesData = {
     query?: never;
     url: '/actions/allUpdates';
 };
+
+export type ActionsAllUpdatesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsAllUpdatesError = ActionsAllUpdatesErrors[keyof ActionsAllUpdatesErrors];
 
 export type ActionsAllUpdatesResponses = {
     200: Array<ActionUpdateDto>;
@@ -6411,6 +8453,15 @@ export type ActionsRecentUpdatesData = {
     url: '/actions/updates';
 };
 
+export type ActionsRecentUpdatesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsRecentUpdatesError = ActionsRecentUpdatesErrors[keyof ActionsRecentUpdatesErrors];
+
 export type ActionsRecentUpdatesResponses = {
     200: Array<ActionUpdateDto>;
 };
@@ -6423,6 +8474,15 @@ export type ActionsSuitesData = {
     query?: never;
     url: '/actions/suites';
 };
+
+export type ActionsSuitesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsSuitesError = ActionsSuitesErrors[keyof ActionsSuitesErrors];
 
 export type ActionsSuitesResponses = {
     200: Array<ActionSuiteDto>;
@@ -6439,6 +8499,15 @@ export type ActionsSuiteData = {
     url: '/actions/suite/{id}';
 };
 
+export type ActionsSuiteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsSuiteError = ActionsSuiteErrors[keyof ActionsSuiteErrors];
+
 export type ActionsSuiteResponses = {
     200: ActionSuiteDto;
 };
@@ -6451,6 +8520,15 @@ export type ActionsCreateSuiteData = {
     query?: never;
     url: '/actions/createSuite';
 };
+
+export type ActionsCreateSuiteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsCreateSuiteError = ActionsCreateSuiteErrors[keyof ActionsCreateSuiteErrors];
 
 export type ActionsCreateSuiteResponses = {
     200: ActionSuiteDto;
@@ -6468,6 +8546,15 @@ export type ActionsBatchUpdateSuiteEventsData = {
     url: '/actions/suite/{suiteId}/batchUpdateSuiteEvents/{eventId}';
 };
 
+export type ActionsBatchUpdateSuiteEventsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsBatchUpdateSuiteEventsError = ActionsBatchUpdateSuiteEventsErrors[keyof ActionsBatchUpdateSuiteEventsErrors];
+
 export type ActionsBatchUpdateSuiteEventsResponses = {
     200: ActionSuiteDto;
 };
@@ -6482,6 +8569,15 @@ export type ActionsAddSuiteEventData = {
     query?: never;
     url: '/actions/suite/{suiteId}/events';
 };
+
+export type ActionsAddSuiteEventErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsAddSuiteEventError = ActionsAddSuiteEventErrors[keyof ActionsAddSuiteEventErrors];
 
 export type ActionsAddSuiteEventResponses = {
     200: ActionSuiteDto;
@@ -6499,6 +8595,15 @@ export type ActionsDeleteSuiteEventData = {
     url: '/actions/suite/{suiteId}/events/{eventId}';
 };
 
+export type ActionsDeleteSuiteEventErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsDeleteSuiteEventError = ActionsDeleteSuiteEventErrors[keyof ActionsDeleteSuiteEventErrors];
+
 export type ActionsDeleteSuiteEventResponses = {
     200: ActionSuiteDto;
 };
@@ -6513,6 +8618,15 @@ export type ActionsTentativePlansForGroupData = {
     query?: never;
     url: '/actions/events/{eventId}/checkTentativePlans';
 };
+
+export type ActionsTentativePlansForGroupErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsTentativePlansForGroupError = ActionsTentativePlansForGroupErrors[keyof ActionsTentativePlansForGroupErrors];
 
 export type ActionsTentativePlansForGroupResponses = {
     200: Array<PreviewNotificationPlanDto>;
@@ -6529,6 +8643,15 @@ export type ActionsPreviewEmailHtmlData = {
     url: '/actions/previewEmailHtml/{eventId}';
 };
 
+export type ActionsPreviewEmailHtmlErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsPreviewEmailHtmlError = ActionsPreviewEmailHtmlErrors[keyof ActionsPreviewEmailHtmlErrors];
+
 export type ActionsPreviewEmailHtmlResponses = {
     200: PreviewEmailHtmlResponseDto;
 };
@@ -6544,6 +8667,15 @@ export type ActionsPreviewTextMessageData = {
     url: '/actions/previewTextMessage/{eventId}';
 };
 
+export type ActionsPreviewTextMessageErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsPreviewTextMessageError = ActionsPreviewTextMessageErrors[keyof ActionsPreviewTextMessageErrors];
+
 export type ActionsPreviewTextMessageResponses = {
     200: PreviewTextMessageResponseDto;
 };
@@ -6557,9 +8689,22 @@ export type ActionsReloadAllActionUsersJoinedData = {
     url: '/actions/reloadAllActionUsersJoined';
 };
 
-export type ActionsReloadAllActionUsersJoinedResponses = {
-    200: unknown;
+export type ActionsReloadAllActionUsersJoinedErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsReloadAllActionUsersJoinedError = ActionsReloadAllActionUsersJoinedErrors[keyof ActionsReloadAllActionUsersJoinedErrors];
+
+export type ActionsReloadAllActionUsersJoinedResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsReloadAllActionUsersJoinedResponse = ActionsReloadAllActionUsersJoinedResponses[keyof ActionsReloadAllActionUsersJoinedResponses];
 
 export type ActionsReloadAllActionUsersCompletedData = {
     body?: never;
@@ -6568,9 +8713,22 @@ export type ActionsReloadAllActionUsersCompletedData = {
     url: '/actions/reloadAllActionUsersCompleted';
 };
 
-export type ActionsReloadAllActionUsersCompletedResponses = {
-    200: unknown;
+export type ActionsReloadAllActionUsersCompletedErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ActionsReloadAllActionUsersCompletedError = ActionsReloadAllActionUsersCompletedErrors[keyof ActionsReloadAllActionUsersCompletedErrors];
+
+export type ActionsReloadAllActionUsersCompletedResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionsReloadAllActionUsersCompletedResponse = ActionsReloadAllActionUsersCompletedResponses[keyof ActionsReloadAllActionUsersCompletedResponses];
 
 export type ActionsExportActionData = {
     body?: never;
@@ -6586,6 +8744,15 @@ export type ActionsExportActionData = {
     url: '/actions/export/{id}';
 };
 
+export type ActionsExportActionErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsExportActionError = ActionsExportActionErrors[keyof ActionsExportActionErrors];
+
 export type ActionsExportActionResponses = {
     200: ExportActionDto;
 };
@@ -6598,6 +8765,15 @@ export type ActionsPasteJsonData = {
     query?: never;
     url: '/actions/pasteJson';
 };
+
+export type ActionsPasteJsonErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsPasteJsonError = ActionsPasteJsonErrors[keyof ActionsPasteJsonErrors];
 
 export type ActionsPasteJsonResponses = {
     200: ActionDto;
@@ -6615,6 +8791,15 @@ export type ActionsScheduledPlansData = {
     url: '/actions/scheduledPlans';
 };
 
+export type ActionsScheduledPlansErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsScheduledPlansError = ActionsScheduledPlansErrors[keyof ActionsScheduledPlansErrors];
+
 export type ActionsScheduledPlansResponses = {
     200: ScheduledPlansOverviewDto;
 };
@@ -6631,6 +8816,15 @@ export type ActionsSuspendPlansData = {
     url: '/actions/suspendPlans';
 };
 
+export type ActionsSuspendPlansErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsSuspendPlansError = ActionsSuspendPlansErrors[keyof ActionsSuspendPlansErrors];
+
 export type ActionsSuspendPlansResponses = {
     200: Array<SuspensionPlanDto>;
 };
@@ -6646,6 +8840,15 @@ export type ActionsGetShareLinkData = {
     url: '/actions/getShareLink/{id}';
 };
 
+export type ActionsGetShareLinkErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetShareLinkError = ActionsGetShareLinkErrors[keyof ActionsGetShareLinkErrors];
+
 export type ActionsGetShareLinkResponses = {
     200: ShareLinkDto;
 };
@@ -6660,6 +8863,15 @@ export type ActionsShareLinksForFormData = {
     query?: never;
     url: '/actions/shareLinksForForm/{formId}';
 };
+
+export type ActionsShareLinksForFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsShareLinksForFormError = ActionsShareLinksForFormErrors[keyof ActionsShareLinksForFormErrors];
 
 export type ActionsShareLinksForFormResponses = {
     200: Array<ShareUrlDto>;
@@ -6678,6 +8890,15 @@ export type ActionsShareUrlStatsData = {
     url: '/actions/shareUrlStats/{actionId}';
 };
 
+export type ActionsShareUrlStatsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsShareUrlStatsError = ActionsShareUrlStatsErrors[keyof ActionsShareUrlStatsErrors];
+
 export type ActionsShareUrlStatsResponses = {
     200: Array<ShareUrlStatsDto>;
 };
@@ -6690,6 +8911,15 @@ export type ActionsActionRelationsData = {
     query?: never;
     url: '/actions/action-relations';
 };
+
+export type ActionsActionRelationsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsActionRelationsError = ActionsActionRelationsErrors[keyof ActionsActionRelationsErrors];
 
 export type ActionsActionRelationsResponses = {
     200: UserActionRelationsResponseDto;
@@ -6706,6 +8936,15 @@ export type ActionsActionRelationsForUserData = {
     url: '/actions/action-relations/{userId}';
 };
 
+export type ActionsActionRelationsForUserErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsActionRelationsForUserError = ActionsActionRelationsForUserErrors[keyof ActionsActionRelationsForUserErrors];
+
 export type ActionsActionRelationsForUserResponses = {
     200: UserActionRelationsResponseDto;
 };
@@ -6720,6 +8959,15 @@ export type ActionsGetCommunityMemberInfoAdminData = {
     query?: never;
     url: '/actions/communityMemberInfo/{communityId}/admin';
 };
+
+export type ActionsGetCommunityMemberInfoAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetCommunityMemberInfoAdminError = ActionsGetCommunityMemberInfoAdminErrors[keyof ActionsGetCommunityMemberInfoAdminErrors];
 
 export type ActionsGetCommunityMemberInfoAdminResponses = {
     200: CommunityUserInfoDto;
@@ -6736,6 +8984,15 @@ export type ActionsGetCommunityMemberInfoData = {
     url: '/actions/communityMemberInfo/{communityId}';
 };
 
+export type ActionsGetCommunityMemberInfoErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetCommunityMemberInfoError = ActionsGetCommunityMemberInfoErrors[keyof ActionsGetCommunityMemberInfoErrors];
+
 export type ActionsGetCommunityMemberInfoResponses = {
     200: CommunityUserInfoDto;
 };
@@ -6751,6 +9008,15 @@ export type ActionsGetTimelineFeedData = {
     url: '/actions/timeline-feed';
 };
 
+export type ActionsGetTimelineFeedErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetTimelineFeedError = ActionsGetTimelineFeedErrors[keyof ActionsGetTimelineFeedErrors];
+
 export type ActionsGetTimelineFeedResponses = {
     200: Array<TimelineFeedItemDto>;
 };
@@ -6764,6 +9030,15 @@ export type ForumFindAllPostsData = {
     url: '/forum/posts';
 };
 
+export type ForumFindAllPostsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumFindAllPostsError = ForumFindAllPostsErrors[keyof ForumFindAllPostsErrors];
+
 export type ForumFindAllPostsResponses = {
     200: Array<PostDto>;
 };
@@ -6776,6 +9051,15 @@ export type ForumCreatePostData = {
     query?: never;
     url: '/forum/posts';
 };
+
+export type ForumCreatePostErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumCreatePostError = ForumCreatePostErrors[keyof ForumCreatePostErrors];
 
 export type ForumCreatePostResponses = {
     200: PostDto;
@@ -6792,6 +9076,15 @@ export type ForumFindPostsByActionData = {
     url: '/forum/posts/action/{actionId}';
 };
 
+export type ForumFindPostsByActionErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumFindPostsByActionError = ForumFindPostsByActionErrors[keyof ForumFindPostsByActionErrors];
+
 export type ForumFindPostsByActionResponses = {
     200: Array<PostDto>;
 };
@@ -6807,9 +9100,22 @@ export type ForumRemovePostData = {
     url: '/forum/posts/{id}';
 };
 
-export type ForumRemovePostResponses = {
-    200: unknown;
+export type ForumRemovePostErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ForumRemovePostError = ForumRemovePostErrors[keyof ForumRemovePostErrors];
+
+export type ForumRemovePostResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ForumRemovePostResponse = ForumRemovePostResponses[keyof ForumRemovePostResponses];
 
 export type ForumFindOnePostData = {
     body?: never;
@@ -6819,6 +9125,15 @@ export type ForumFindOnePostData = {
     query?: never;
     url: '/forum/posts/{id}';
 };
+
+export type ForumFindOnePostErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumFindOnePostError = ForumFindOnePostErrors[keyof ForumFindOnePostErrors];
 
 export type ForumFindOnePostResponses = {
     200: PostDto;
@@ -6835,6 +9150,15 @@ export type ForumUpdatePostData = {
     url: '/forum/posts/{id}';
 };
 
+export type ForumUpdatePostErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumUpdatePostError = ForumUpdatePostErrors[keyof ForumUpdatePostErrors];
+
 export type ForumUpdatePostResponses = {
     200: PostDto;
 };
@@ -6849,6 +9173,15 @@ export type ForumFindCommentsForPostData = {
     query?: never;
     url: '/forum/posts/{id}/comments';
 };
+
+export type ForumFindCommentsForPostErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumFindCommentsForPostError = ForumFindCommentsForPostErrors[keyof ForumFindCommentsForPostErrors];
 
 export type ForumFindCommentsForPostResponses = {
     200: Array<CommentDto>;
@@ -6865,6 +9198,15 @@ export type ForumFindCommentsForActivityData = {
     url: '/forum/activity/{id}/comments';
 };
 
+export type ForumFindCommentsForActivityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumFindCommentsForActivityError = ForumFindCommentsForActivityErrors[keyof ForumFindCommentsForActivityErrors];
+
 export type ForumFindCommentsForActivityResponses = {
     200: Array<CommentDto>;
 };
@@ -6879,6 +9221,15 @@ export type ForumFindCommentsForActionData = {
     query?: never;
     url: '/forum/actions/{id}/comments';
 };
+
+export type ForumFindCommentsForActionErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumFindCommentsForActionError = ForumFindCommentsForActionErrors[keyof ForumFindCommentsForActionErrors];
 
 export type ForumFindCommentsForActionResponses = {
     200: Array<CommentDto>;
@@ -6895,6 +9246,15 @@ export type ForumFindPostsByUserData = {
     url: '/forum/posts/user/{id}';
 };
 
+export type ForumFindPostsByUserErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumFindPostsByUserError = ForumFindPostsByUserErrors[keyof ForumFindPostsByUserErrors];
+
 export type ForumFindPostsByUserResponses = {
     200: Array<PostDto>;
 };
@@ -6909,6 +9269,15 @@ export type ForumFindCommentsByUserData = {
     query?: never;
     url: '/forum/posts/user/{id}/comments';
 };
+
+export type ForumFindCommentsByUserErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumFindCommentsByUserError = ForumFindCommentsByUserErrors[keyof ForumFindCommentsByUserErrors];
 
 export type ForumFindCommentsByUserResponses = {
     200: Array<UserCommentDto>;
@@ -6925,6 +9294,15 @@ export type ForumFindForumCommentsByUserData = {
     url: '/forum/posts/user/{id}/forumComments';
 };
 
+export type ForumFindForumCommentsByUserErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumFindForumCommentsByUserError = ForumFindForumCommentsByUserErrors[keyof ForumFindForumCommentsByUserErrors];
+
 export type ForumFindForumCommentsByUserResponses = {
     200: Array<CommentDto>;
 };
@@ -6937,6 +9315,15 @@ export type ForumCreateCommentData = {
     query?: never;
     url: '/forum/comments';
 };
+
+export type ForumCreateCommentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumCreateCommentError = ForumCreateCommentErrors[keyof ForumCreateCommentErrors];
 
 export type ForumCreateCommentResponses = {
     200: CommentDto;
@@ -6953,9 +9340,22 @@ export type ForumDeleteCommentData = {
     url: '/forum/comments/{id}';
 };
 
-export type ForumDeleteCommentResponses = {
-    200: unknown;
+export type ForumDeleteCommentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ForumDeleteCommentError = ForumDeleteCommentErrors[keyof ForumDeleteCommentErrors];
+
+export type ForumDeleteCommentResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ForumDeleteCommentResponse = ForumDeleteCommentResponses[keyof ForumDeleteCommentResponses];
 
 export type ForumUpdateCommentData = {
     body: UpdateCommentDto;
@@ -6965,6 +9365,15 @@ export type ForumUpdateCommentData = {
     query?: never;
     url: '/forum/comments/{id}';
 };
+
+export type ForumUpdateCommentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumUpdateCommentError = ForumUpdateCommentErrors[keyof ForumUpdateCommentErrors];
 
 export type ForumUpdateCommentResponses = {
     200: CommentDto;
@@ -6981,9 +9390,22 @@ export type ForumLikeCommentData = {
     url: '/forum/comments/{id}/like';
 };
 
-export type ForumLikeCommentResponses = {
-    200: unknown;
+export type ForumLikeCommentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ForumLikeCommentError = ForumLikeCommentErrors[keyof ForumLikeCommentErrors];
+
+export type ForumLikeCommentResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ForumLikeCommentResponse = ForumLikeCommentResponses[keyof ForumLikeCommentResponses];
 
 export type ForumUnlikeCommentData = {
     body?: never;
@@ -6994,9 +9416,22 @@ export type ForumUnlikeCommentData = {
     url: '/forum/comments/{id}/unlike';
 };
 
-export type ForumUnlikeCommentResponses = {
-    200: unknown;
+export type ForumUnlikeCommentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ForumUnlikeCommentError = ForumUnlikeCommentErrors[keyof ForumUnlikeCommentErrors];
+
+export type ForumUnlikeCommentResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ForumUnlikeCommentResponse = ForumUnlikeCommentResponses[keyof ForumUnlikeCommentResponses];
 
 export type ForumLikePostData = {
     body?: never;
@@ -7007,9 +9442,22 @@ export type ForumLikePostData = {
     url: '/forum/posts/{id}/like';
 };
 
-export type ForumLikePostResponses = {
-    200: unknown;
+export type ForumLikePostErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ForumLikePostError = ForumLikePostErrors[keyof ForumLikePostErrors];
+
+export type ForumLikePostResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ForumLikePostResponse = ForumLikePostResponses[keyof ForumLikePostResponses];
 
 export type ForumUnlikePostData = {
     body?: never;
@@ -7020,9 +9468,22 @@ export type ForumUnlikePostData = {
     url: '/forum/posts/{id}/unlike';
 };
 
-export type ForumUnlikePostResponses = {
-    200: unknown;
+export type ForumUnlikePostErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type ForumUnlikePostError = ForumUnlikePostErrors[keyof ForumUnlikePostErrors];
+
+export type ForumUnlikePostResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ForumUnlikePostResponse = ForumUnlikePostResponses[keyof ForumUnlikePostResponses];
 
 export type ForumGetPostsForAdminData = {
     body?: never;
@@ -7030,6 +9491,15 @@ export type ForumGetPostsForAdminData = {
     query?: never;
     url: '/forum/admin/posts';
 };
+
+export type ForumGetPostsForAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumGetPostsForAdminError = ForumGetPostsForAdminErrors[keyof ForumGetPostsForAdminErrors];
 
 export type ForumGetPostsForAdminResponses = {
     200: Array<PostDto>;
@@ -7046,6 +9516,15 @@ export type ForumUpdatePostExpertsData = {
     url: '/forum/admin/posts/{id}/experts';
 };
 
+export type ForumUpdatePostExpertsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumUpdatePostExpertsError = ForumUpdatePostExpertsErrors[keyof ForumUpdatePostExpertsErrors];
+
 export type ForumUpdatePostExpertsResponses = {
     200: PostDto;
 };
@@ -7060,6 +9539,15 @@ export type ForumUpdatePostAuthorsData = {
     query?: never;
     url: '/forum/admin/posts/{id}/authors';
 };
+
+export type ForumUpdatePostAuthorsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumUpdatePostAuthorsError = ForumUpdatePostAuthorsErrors[keyof ForumUpdatePostAuthorsErrors];
 
 export type ForumUpdatePostAuthorsResponses = {
     200: PostDto;
@@ -7076,6 +9564,15 @@ export type ForumPinCommentData = {
     url: '/forum/admin/comments/{id}/pin';
 };
 
+export type ForumPinCommentErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ForumPinCommentError = ForumPinCommentErrors[keyof ForumPinCommentErrors];
+
 export type ForumPinCommentResponses = {
     200: CommentDto;
 };
@@ -7091,6 +9588,15 @@ export type VideosUploadVideoData = {
     url: '/videos/upload';
 };
 
+export type VideosUploadVideoErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type VideosUploadVideoError = VideosUploadVideoErrors[keyof VideosUploadVideoErrors];
+
 export type VideosUploadVideoResponses = {
     200: UploadVideoResponseDto;
 };
@@ -7103,6 +9609,15 @@ export type VideosListVideosData = {
     query?: never;
     url: '/videos';
 };
+
+export type VideosListVideosErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type VideosListVideosError = VideosListVideosErrors[keyof VideosListVideosErrors];
 
 export type VideosListVideosResponses = {
     200: VideoListResponseDto;
@@ -7119,6 +9634,15 @@ export type VideosGetVideoStatusData = {
     url: '/videos/{id}/status';
 };
 
+export type VideosGetVideoStatusErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type VideosGetVideoStatusError = VideosGetVideoStatusErrors[keyof VideosGetVideoStatusErrors];
+
 export type VideosGetVideoStatusResponses = {
     200: VideoStatusResponseDto;
 };
@@ -7133,6 +9657,15 @@ export type VideosGetVideoDetailsData = {
     query?: never;
     url: '/videos/{id}/details';
 };
+
+export type VideosGetVideoDetailsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type VideosGetVideoDetailsError = VideosGetVideoDetailsErrors[keyof VideosGetVideoDetailsErrors];
 
 export type VideosGetVideoDetailsResponses = {
     200: VideoDetailResponseDto;
@@ -7151,6 +9684,15 @@ export type VideosReplaceVideoData = {
     url: '/videos/{id}/replace';
 };
 
+export type VideosReplaceVideoErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type VideosReplaceVideoError = VideosReplaceVideoErrors[keyof VideosReplaceVideoErrors];
+
 export type VideosReplaceVideoResponses = {
     200: ReplaceVideoResponseDto;
 };
@@ -7167,9 +9709,22 @@ export type VideosStreamVideoFileData = {
     url: '/videos/{id}/{filename}';
 };
 
-export type VideosStreamVideoFileResponses = {
-    200: unknown;
+export type VideosStreamVideoFileErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type VideosStreamVideoFileError = VideosStreamVideoFileErrors[keyof VideosStreamVideoFileErrors];
+
+export type VideosStreamVideoFileResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type VideosStreamVideoFileResponse = VideosStreamVideoFileResponses[keyof VideosStreamVideoFileResponses];
 
 export type VideosDeleteVideoData = {
     body?: never;
@@ -7179,6 +9734,15 @@ export type VideosDeleteVideoData = {
     query?: never;
     url: '/videos/{id}';
 };
+
+export type VideosDeleteVideoErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type VideosDeleteVideoError = VideosDeleteVideoErrors[keyof VideosDeleteVideoErrors];
 
 export type VideosDeleteVideoResponses = {
     200: DeleteVideoResponseDto;
@@ -7197,8 +9761,17 @@ export type GeoSearchCityData = {
     url: '/geo/search-city';
 };
 
+export type GeoSearchCityErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type GeoSearchCityError = GeoSearchCityErrors[keyof GeoSearchCityErrors];
+
 export type GeoSearchCityResponses = {
-    default: Array<CitySearchDto>;
+    200: Array<CitySearchDto>;
 };
 
 export type GeoSearchCityResponse = GeoSearchCityResponses[keyof GeoSearchCityResponses];
@@ -7210,9 +9783,22 @@ export type GeoLoadCountryDataData = {
     url: '/geo/load-country-data';
 };
 
-export type GeoLoadCountryDataResponses = {
-    200: unknown;
+export type GeoLoadCountryDataErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type GeoLoadCountryDataError = GeoLoadCountryDataErrors[keyof GeoLoadCountryDataErrors];
+
+export type GeoLoadCountryDataResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type GeoLoadCountryDataResponse = GeoLoadCountryDataResponses[keyof GeoLoadCountryDataResponses];
 
 export type AdminViewerGetTablesData = {
     body?: never;
@@ -7220,6 +9806,15 @@ export type AdminViewerGetTablesData = {
     query?: never;
     url: '/admin-viewer/tables';
 };
+
+export type AdminViewerGetTablesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AdminViewerGetTablesError = AdminViewerGetTablesErrors[keyof AdminViewerGetTablesErrors];
 
 export type AdminViewerGetTablesResponses = {
     200: TableListDto;
@@ -7264,12 +9859,14 @@ export type AdminViewerGetTableDataErrors = {
     /**
      * Invalid query parameters
      */
-    400: unknown;
+    400: HeyApiError;
     /**
      * Table not found
      */
-    404: unknown;
+    404: HeyApiError;
 };
+
+export type AdminViewerGetTableDataError = AdminViewerGetTableDataErrors[keyof AdminViewerGetTableDataErrors];
 
 export type AdminViewerGetTableDataResponses = {
     200: TableDataDto;
@@ -7293,12 +9890,14 @@ export type AdminViewerDeleteRecordsErrors = {
     /**
      * Invalid delete data or validation failed
      */
-    400: unknown;
+    400: HeyApiError;
     /**
      * Table not found
      */
-    404: unknown;
+    404: HeyApiError;
 };
+
+export type AdminViewerDeleteRecordsError = AdminViewerDeleteRecordsErrors[keyof AdminViewerDeleteRecordsErrors];
 
 export type AdminViewerDeleteRecordsResponses = {
     200: DeleteRecordsResponseDto;
@@ -7322,12 +9921,14 @@ export type AdminViewerCreateRecordErrors = {
     /**
      * Invalid create data or validation failed
      */
-    400: unknown;
+    400: HeyApiError;
     /**
      * Table not found
      */
-    404: unknown;
+    404: HeyApiError;
 };
+
+export type AdminViewerCreateRecordError = AdminViewerCreateRecordErrors[keyof AdminViewerCreateRecordErrors];
 
 export type AdminViewerCreateRecordResponses = {
     200: CreateRecordResponseDto;
@@ -7351,12 +9952,14 @@ export type AdminViewerUpdateRecordErrors = {
     /**
      * Invalid update data or validation failed
      */
-    400: unknown;
+    400: HeyApiError;
     /**
      * Table or record not found
      */
-    404: unknown;
+    404: HeyApiError;
 };
+
+export type AdminViewerUpdateRecordError = AdminViewerUpdateRecordErrors[keyof AdminViewerUpdateRecordErrors];
 
 export type AdminViewerUpdateRecordResponses = {
     200: UpdateRecordResponseDto;
@@ -7373,6 +9976,15 @@ export type SearchAllData = {
     url: '/search/all';
 };
 
+export type SearchAllErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type SearchAllError = SearchAllErrors[keyof SearchAllErrors];
+
 export type SearchAllResponses = {
     200: Array<SearchItemDto>;
 };
@@ -7386,9 +9998,22 @@ export type SearchSaveSelectedData = {
     url: '/search/selected';
 };
 
-export type SearchSaveSelectedResponses = {
-    200: unknown;
+export type SearchSaveSelectedErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type SearchSaveSelectedError = SearchSaveSelectedErrors[keyof SearchSaveSelectedErrors];
+
+export type SearchSaveSelectedResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type SearchSaveSelectedResponse = SearchSaveSelectedResponses[keyof SearchSaveSelectedResponses];
 
 export type TasksSubmitFormData = {
     body: SubmitFormDto;
@@ -7398,6 +10023,15 @@ export type TasksSubmitFormData = {
     query?: never;
     url: '/tasks/submitForm/{id}';
 };
+
+export type TasksSubmitFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksSubmitFormError = TasksSubmitFormErrors[keyof TasksSubmitFormErrors];
 
 export type TasksSubmitFormResponses = {
     200: FormResponseDto;
@@ -7414,6 +10048,15 @@ export type TasksSubmitPublicFormData = {
     url: '/tasks/submitPublicForm/{id}';
 };
 
+export type TasksSubmitPublicFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksSubmitPublicFormError = TasksSubmitPublicFormErrors[keyof TasksSubmitPublicFormErrors];
+
 export type TasksSubmitPublicFormResponses = {
     200: FormResponseDto;
 };
@@ -7429,6 +10072,15 @@ export type TasksSubmitFollowUpFormData = {
     url: '/tasks/submitFollowUpForm/{followUpFormId}';
 };
 
+export type TasksSubmitFollowUpFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksSubmitFollowUpFormError = TasksSubmitFollowUpFormErrors[keyof TasksSubmitFollowUpFormErrors];
+
 export type TasksSubmitFollowUpFormResponses = {
     200: FormResponseDto;
 };
@@ -7442,6 +10094,15 @@ export type TasksCreateFormData = {
     url: '/tasks/createForm';
 };
 
+export type TasksCreateFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksCreateFormError = TasksCreateFormErrors[keyof TasksCreateFormErrors];
+
 export type TasksCreateFormResponses = {
     200: FormDto;
 };
@@ -7454,6 +10115,15 @@ export type TasksListFormsData = {
     query?: never;
     url: '/tasks/listForms';
 };
+
+export type TasksListFormsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksListFormsError = TasksListFormsErrors[keyof TasksListFormsErrors];
 
 export type TasksListFormsResponses = {
     200: Array<FormDto>;
@@ -7470,6 +10140,15 @@ export type TasksGetFormResponsesData = {
     url: '/tasks/responses/{id}';
 };
 
+export type TasksGetFormResponsesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksGetFormResponsesError = TasksGetFormResponsesErrors[keyof TasksGetFormResponsesErrors];
+
 export type TasksGetFormResponsesResponses = {
     200: Array<FormResponseDto>;
 };
@@ -7484,6 +10163,15 @@ export type TasksGetResponseSnapshotMigrationData = {
     query?: never;
     url: '/tasks/forms/{formId}/snapshotMigration';
 };
+
+export type TasksGetResponseSnapshotMigrationErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksGetResponseSnapshotMigrationError = TasksGetResponseSnapshotMigrationErrors[keyof TasksGetResponseSnapshotMigrationErrors];
 
 export type TasksGetResponseSnapshotMigrationResponses = {
     200: FormSnapshotMigrationDto;
@@ -7500,6 +10188,15 @@ export type TasksMigrateResponseSnapshotsData = {
     url: '/tasks/forms/{formId}/responseSnapshots';
 };
 
+export type TasksMigrateResponseSnapshotsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksMigrateResponseSnapshotsError = TasksMigrateResponseSnapshotsErrors[keyof TasksMigrateResponseSnapshotsErrors];
+
 export type TasksMigrateResponseSnapshotsResponses = {
     200: MigrateResponseSnapshotsResultDto;
 };
@@ -7514,6 +10211,15 @@ export type TasksGetMyFormResponseData = {
     query?: never;
     url: '/tasks/myResponse/{id}';
 };
+
+export type TasksGetMyFormResponseErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksGetMyFormResponseError = TasksGetMyFormResponseErrors[keyof TasksGetMyFormResponseErrors];
 
 export type TasksGetMyFormResponseResponses = {
     200: FormResponseDto;
@@ -7530,6 +10236,15 @@ export type TasksGetGuestFormResponseData = {
     url: '/tasks/guestResponse/{id}';
 };
 
+export type TasksGetGuestFormResponseErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksGetGuestFormResponseError = TasksGetGuestFormResponseErrors[keyof TasksGetGuestFormResponseErrors];
+
 export type TasksGetGuestFormResponseResponses = {
     200: GuestFormResponseDto;
 };
@@ -7544,6 +10259,15 @@ export type TasksGetLinkedGuestDraftData = {
     query?: never;
     url: '/tasks/draft/{id}';
 };
+
+export type TasksGetLinkedGuestDraftErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksGetLinkedGuestDraftError = TasksGetLinkedGuestDraftErrors[keyof TasksGetLinkedGuestDraftErrors];
 
 export type TasksGetLinkedGuestDraftResponses = {
     200: LinkedGuestDraftDto;
@@ -7560,6 +10284,15 @@ export type TasksGetFormData = {
     url: '/tasks/slug/{id}';
 };
 
+export type TasksGetFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksGetFormError = TasksGetFormErrors[keyof TasksGetFormErrors];
+
 export type TasksGetFormResponses = {
     200: FormDto;
 };
@@ -7574,6 +10307,15 @@ export type TasksGetFormAggregateViewsData = {
     query?: never;
     url: '/tasks/aggregateViews/{id}';
 };
+
+export type TasksGetFormAggregateViewsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksGetFormAggregateViewsError = TasksGetFormAggregateViewsErrors[keyof TasksGetFormAggregateViewsErrors];
 
 export type TasksGetFormAggregateViewsResponses = {
     200: FormAggregateViewsDto;
@@ -7590,6 +10332,15 @@ export type TasksUpdateFormData = {
     url: '/tasks/updateForm/{formId}';
 };
 
+export type TasksUpdateFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksUpdateFormError = TasksUpdateFormErrors[keyof TasksUpdateFormErrors];
+
 export type TasksUpdateFormResponses = {
     200: FormDto;
 };
@@ -7605,9 +10356,22 @@ export type TasksDeleteFormData = {
     url: '/tasks/{id}';
 };
 
-export type TasksDeleteFormResponses = {
-    200: unknown;
+export type TasksDeleteFormErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
 };
+
+export type TasksDeleteFormError = TasksDeleteFormErrors[keyof TasksDeleteFormErrors];
+
+export type TasksDeleteFormResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type TasksDeleteFormResponse = TasksDeleteFormResponses[keyof TasksDeleteFormResponses];
 
 export type TasksCustomValidatorsData = {
     body?: never;
@@ -7615,6 +10379,15 @@ export type TasksCustomValidatorsData = {
     query?: never;
     url: '/tasks/customValidators';
 };
+
+export type TasksCustomValidatorsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksCustomValidatorsError = TasksCustomValidatorsErrors[keyof TasksCustomValidatorsErrors];
 
 export type TasksCustomValidatorsResponses = {
     200: Array<CustomValidatorTypeDto>;
@@ -7631,6 +10404,15 @@ export type TasksRunValidatorData = {
     url: '/tasks/runValidator/{id}';
 };
 
+export type TasksRunValidatorErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksRunValidatorError = TasksRunValidatorErrors[keyof TasksRunValidatorErrors];
+
 export type TasksRunValidatorResponses = {
     200: CustomValidatorResponseDto;
 };
@@ -7646,6 +10428,15 @@ export type TasksFindOneCustomValidatorData = {
     url: '/tasks/findOneCustomValidator/{id}';
 };
 
+export type TasksFindOneCustomValidatorErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksFindOneCustomValidatorError = TasksFindOneCustomValidatorErrors[keyof TasksFindOneCustomValidatorErrors];
+
 export type TasksFindOneCustomValidatorResponses = {
     200: CustomValidatorDto;
 };
@@ -7659,6 +10450,15 @@ export type TasksCreateCustomValidatorData = {
     url: '/tasks/createCustomValidator';
 };
 
+export type TasksCreateCustomValidatorErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksCreateCustomValidatorError = TasksCreateCustomValidatorErrors[keyof TasksCreateCustomValidatorErrors];
+
 export type TasksCreateCustomValidatorResponses = {
     200: CreateCustomValidatorResponseDto;
 };
@@ -7671,6 +10471,15 @@ export type TasksTestCustomExpressionData = {
     query?: never;
     url: '/tasks/testCustomExpression';
 };
+
+export type TasksTestCustomExpressionErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksTestCustomExpressionError = TasksTestCustomExpressionErrors[keyof TasksTestCustomExpressionErrors];
 
 export type TasksTestCustomExpressionResponses = {
     200: TestCustomExpressionResponseDto;
@@ -7687,6 +10496,15 @@ export type TasksOptoutData = {
     url: '/tasks/optout/{id}';
 };
 
+export type TasksOptoutErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksOptoutError = TasksOptoutErrors[keyof TasksOptoutErrors];
+
 export type TasksOptoutResponses = {
     200: ActionActivityDto;
 };
@@ -7702,6 +10520,15 @@ export type TasksGetFormsForUserSidData = {
     url: '/tasks/formsForUserSID/{userId}';
 };
 
+export type TasksGetFormsForUserSidErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksGetFormsForUserSidError = TasksGetFormsForUserSidErrors[keyof TasksGetFormsForUserSidErrors];
+
 export type TasksGetFormsForUserSidResponses = {
     200: Array<FormResponseDto>;
 };
@@ -7715,6 +10542,15 @@ export type AnalyticsGetTimeSpentPerUserData = {
     url: '/analytics/time-spent-per-user';
 };
 
+export type AnalyticsGetTimeSpentPerUserErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetTimeSpentPerUserError = AnalyticsGetTimeSpentPerUserErrors[keyof AnalyticsGetTimeSpentPerUserErrors];
+
 export type AnalyticsGetTimeSpentPerUserResponses = {
     200: Array<TimeSpentForUserDto>;
 };
@@ -7727,6 +10563,15 @@ export type AnalyticsGetTimeSpentPerUserTotalData = {
     query?: never;
     url: '/analytics/time-spent-per-user-total';
 };
+
+export type AnalyticsGetTimeSpentPerUserTotalErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetTimeSpentPerUserTotalError = AnalyticsGetTimeSpentPerUserTotalErrors[keyof AnalyticsGetTimeSpentPerUserTotalErrors];
 
 export type AnalyticsGetTimeSpentPerUserTotalResponses = {
     200: Array<TimeSpentForUserDto>;
@@ -7744,6 +10589,15 @@ export type AnalyticsGetDailyStatsData = {
     url: '/analytics/daily-stats';
 };
 
+export type AnalyticsGetDailyStatsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetDailyStatsError = AnalyticsGetDailyStatsErrors[keyof AnalyticsGetDailyStatsErrors];
+
 export type AnalyticsGetDailyStatsResponses = {
     200: Array<DailyStatsDto>;
 };
@@ -7756,6 +10610,15 @@ export type AnalyticsGetActionStatsData = {
     query?: never;
     url: '/analytics/action-stats';
 };
+
+export type AnalyticsGetActionStatsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetActionStatsError = AnalyticsGetActionStatsErrors[keyof AnalyticsGetActionStatsErrors];
 
 export type AnalyticsGetActionStatsResponses = {
     200: Array<ActionStatsWithOnboardingDto>;
@@ -7772,6 +10635,15 @@ export type AnalyticsGetActionStatsByIdData = {
     url: '/analytics/action-stats/{actionId}';
 };
 
+export type AnalyticsGetActionStatsByIdErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetActionStatsByIdError = AnalyticsGetActionStatsByIdErrors[keyof AnalyticsGetActionStatsByIdErrors];
+
 export type AnalyticsGetActionStatsByIdResponses = {
     200: ActionStatsWithOnboardingDto;
 };
@@ -7785,6 +10657,15 @@ export type AnalyticsRecalculateActionStatsData = {
     url: '/analytics/action-stats/recalculate';
 };
 
+export type AnalyticsRecalculateActionStatsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsRecalculateActionStatsError = AnalyticsRecalculateActionStatsErrors[keyof AnalyticsRecalculateActionStatsErrors];
+
 export type AnalyticsRecalculateActionStatsResponses = {
     200: Array<ActionStatsWithOnboardingDto>;
 };
@@ -7797,6 +10678,15 @@ export type AnalyticsGetMemberCompletionRetentionData = {
     query?: never;
     url: '/analytics/member-completion-retention';
 };
+
+export type AnalyticsGetMemberCompletionRetentionErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetMemberCompletionRetentionError = AnalyticsGetMemberCompletionRetentionErrors[keyof AnalyticsGetMemberCompletionRetentionErrors];
 
 export type AnalyticsGetMemberCompletionRetentionResponses = {
     200: Array<MemberCompletionRetentionCohortDto>;
@@ -7812,6 +10702,15 @@ export type AnalyticsGetPlatformTenureCohortData = {
     };
     url: '/analytics/platform-tenure-cohort';
 };
+
+export type AnalyticsGetPlatformTenureCohortErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetPlatformTenureCohortError = AnalyticsGetPlatformTenureCohortErrors[keyof AnalyticsGetPlatformTenureCohortErrors];
 
 export type AnalyticsGetPlatformTenureCohortResponses = {
     200: PlatformTenureCohortStatsDto;
@@ -7829,6 +10728,15 @@ export type AnalyticsGetActionCompletionCurvesData = {
     url: '/analytics/action-completion-curves';
 };
 
+export type AnalyticsGetActionCompletionCurvesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetActionCompletionCurvesError = AnalyticsGetActionCompletionCurvesErrors[keyof AnalyticsGetActionCompletionCurvesErrors];
+
 export type AnalyticsGetActionCompletionCurvesResponses = {
     200: Array<ActionCompletionCurveDto>;
 };
@@ -7842,6 +10750,15 @@ export type AnalyticsGetTimeToChurnSamplesData = {
     url: '/analytics/time-to-churn';
 };
 
+export type AnalyticsGetTimeToChurnSamplesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetTimeToChurnSamplesError = AnalyticsGetTimeToChurnSamplesErrors[keyof AnalyticsGetTimeToChurnSamplesErrors];
+
 export type AnalyticsGetTimeToChurnSamplesResponses = {
     200: Array<TimeToChurnSampleDto>;
 };
@@ -7854,6 +10771,15 @@ export type AnalyticsGetAggregateStatsData = {
     query?: never;
     url: '/analytics/aggregate-stats';
 };
+
+export type AnalyticsGetAggregateStatsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetAggregateStatsError = AnalyticsGetAggregateStatsErrors[keyof AnalyticsGetAggregateStatsErrors];
 
 export type AnalyticsGetAggregateStatsResponses = {
     200: AggregateStatsDto;
@@ -7871,6 +10797,15 @@ export type AnalyticsGetInviteFunnelData = {
     url: '/analytics/invite-funnel';
 };
 
+export type AnalyticsGetInviteFunnelErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetInviteFunnelError = AnalyticsGetInviteFunnelErrors[keyof AnalyticsGetInviteFunnelErrors];
+
 export type AnalyticsGetInviteFunnelResponses = {
     200: InviteFunnelDto;
 };
@@ -7886,6 +10821,15 @@ export type AnalyticsGetContractStatusHistoryData = {
     };
     url: '/analytics/contract-status-history';
 };
+
+export type AnalyticsGetContractStatusHistoryErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetContractStatusHistoryError = AnalyticsGetContractStatusHistoryErrors[keyof AnalyticsGetContractStatusHistoryErrors];
 
 export type AnalyticsGetContractStatusHistoryResponses = {
     200: Array<ContractStatusPointDto>;

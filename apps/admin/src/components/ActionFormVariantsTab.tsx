@@ -1,20 +1,20 @@
+import { errorMessage } from "@alliance/common/errorMessage";
+import type { ActionDto } from "@alliance/shared/client";
 import {
   actionsCreateFormVariant,
   actionsDeleteFormVariant,
   actionsListFormVariants,
   actionsUpdateFormVariant,
 } from "@alliance/shared/client";
-import type { ActionDto } from "@alliance/shared/client";
 import type {
   ActionFormVariantDto,
   ActionFormVariantStatsDto,
 } from "@alliance/shared/client/types.gen";
-import { errorMessage } from "@alliance/common/errorMessage";
+import { CardStyle } from "@alliance/shared/styles/card";
 import BaseButton, {
   BaseButtonVariant,
 } from "@alliance/sharedweb/ui/BaseButton";
 import Card from "@alliance/sharedweb/ui/Card";
-import { CardStyle } from "@alliance/shared/styles/card";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
@@ -178,7 +178,10 @@ export default function ActionFormVariantsTab({
         });
         if (res.error) {
           toast.error(
-            errorMessage(res.error) ?? `Failed to publish "${draft.name}"`,
+            errorMessage({
+              error: res.error,
+              fallback: `Failed to publish "${draft.name}"`,
+            }),
           );
           stopAt = i;
           break;
@@ -222,7 +225,9 @@ export default function ActionFormVariantsTab({
           },
         });
         if (res.error) {
-          toast.error(errorMessage(res.error) ?? "Failed to save");
+          toast.error(
+            errorMessage({ error: res.error, fallback: "Failed to save" }),
+          );
         } else {
           await refresh();
         }
@@ -249,7 +254,9 @@ export default function ActionFormVariantsTab({
       try {
         const res = await actionsDeleteFormVariant({ path: { variantId } });
         if (res.error) {
-          toast.error(errorMessage(res.error) ?? "Failed to delete");
+          toast.error(
+            errorMessage({ error: res.error, fallback: "Failed to delete" }),
+          );
         } else {
           await refresh();
         }

@@ -1,4 +1,5 @@
 import { ExceptionEvent } from "@alliance/common/analytics";
+import { errorMessage } from "@alliance/common/errorMessage";
 import { FormSchema } from "@alliance/common/forms/form-schema";
 import {
   FormResponseDto,
@@ -62,8 +63,10 @@ const ActionTaskPanelForm = ({
 
       if (!response.data) {
         throw new Error(
-          (response.error as Error)?.message ??
-            "Unable to load form. Please try again.",
+          errorMessage({
+            error: response.error,
+            fallback: "Unable to load form. Please try again.",
+          }),
         );
       }
 

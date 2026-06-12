@@ -1,3 +1,4 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import {
   actionsPreviewEmailHtml,
   actionsPreviewTextMessage,
@@ -12,20 +13,20 @@ import {
   type ReminderGroupTimingMode,
   type User,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@alliance/shared/styles/util";
-import TextareaWithHighlights from "../TextareaWithHighlights";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import DateTimePicker from "@alliance/sharedweb/ui/DateTimePicker";
+import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
 import UserSelect, { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import TextareaWithHighlights from "../TextareaWithHighlights";
 import {
   defaultEmailContents,
   defaultEmailSubject,
   defaultPushMessage,
   defaultTextMessage,
 } from "./defaultReminderContents";
-import Card from "@alliance/sharedweb/ui/Card";
-import LargeCheckbox from "@alliance/sharedweb/ui/LargeCheckbox";
 
 type ReminderGroupContentFields = Pick<
   ReminderGroupDto,
@@ -346,7 +347,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
       },
     }).then((response) => {
       if (response.error) {
-        setLocalError((response.error as Error).message);
+        setLocalError(
+          errorMessage({
+            error: response.error,
+            fallback: "Unable to get tentative plans",
+          }),
+        );
         setTentativePlans([]);
         return;
       }
@@ -387,7 +393,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         },
       }).then((response) => {
         if (response.error) {
-          setLocalError((response.error as Error).message);
+          setLocalError(
+            errorMessage({
+              error: response.error,
+              fallback: "Unable to preview email",
+            }),
+          );
           return;
         }
         setPreviewEmail1TaskHtml(response.data?.html ?? "");
@@ -406,7 +417,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         },
       }).then((response) => {
         if (response.error) {
-          setLocalError((response.error as Error).message);
+          setLocalError(
+            errorMessage({
+              error: response.error,
+              fallback: "Unable to preview email",
+            }),
+          );
           return;
         }
         setPreviewEmail2TaskHtml(response.data?.html ?? "");
@@ -433,7 +449,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         },
       }).then((response) => {
         if (response.error) {
-          setLocalError((response.error as Error).message);
+          setLocalError(
+            errorMessage({
+              error: response.error,
+              fallback: "Unable to preview text message",
+            }),
+          );
           return;
         }
         setPreviewText1Task(response.data?.text ?? "");
@@ -450,7 +471,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         },
       }).then((response) => {
         if (response.error) {
-          setLocalError((response.error as Error).message);
+          setLocalError(
+            errorMessage({
+              error: response.error,
+              fallback: "Unable to preview text message",
+            }),
+          );
           return;
         }
         setPreviewText2Task(response.data?.text ?? "");
@@ -470,7 +496,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         },
       }).then((response) => {
         if (response.error) {
-          setLocalError((response.error as Error).message);
+          setLocalError(
+            errorMessage({
+              error: response.error,
+              fallback: "Unable to preview text message",
+            }),
+          );
           return;
         }
         setPreviewPushTask(response.data?.text ?? "");
@@ -487,7 +518,12 @@ const ActionReminderGroupForm: React.FC<ActionReminderFormProps> = ({
         },
       }).then((response) => {
         if (response.error) {
-          setLocalError((response.error as Error).message);
+          setLocalError(
+            errorMessage({
+              error: response.error,
+              fallback: "Unable to preview push message",
+            }),
+          );
           return;
         }
         setPreviewPush2Task(response.data?.text ?? "");

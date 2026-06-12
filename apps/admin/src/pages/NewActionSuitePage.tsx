@@ -1,3 +1,4 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import { actionsCreateSuite } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
@@ -18,7 +19,12 @@ const NewActionSuitePage = () => {
     const suiteName = formData.get("suiteName") as string;
     const response = await actionsCreateSuite({ body: { name: suiteName } });
     if (response.error) {
-      setError((response.error as Error).message as string);
+      setError(
+        errorMessage({
+          error: response.error,
+          fallback: "Failed to create suite",
+        }),
+      );
     } else if (response.data) {
       navigate(`/suites/${response.data.id}`);
     }

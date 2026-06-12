@@ -1,42 +1,43 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import {
   communityCreateCommunityInvite,
   communityDeleteCommunityInvite,
+  communityGetCommunityInvites,
   CommunityInviteDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   ProfileDto,
+  userApproveOnetimeInvite,
   userCreateOnetimeInvite,
   userDeleteOnetimeInvite,
   userGetOnetimeInvitesByCommunity,
-  userApproveOnetimeInvite,
   userRejectOnetimeInvite,
-  communityGetCommunityInvites,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "../lib/AuthContext";
-import List from "@alliance/sharedweb/ui/List";
+import {
+  deleteInviteConfirmation,
+  inviteBuckets,
+  onetimeInviteCreation,
+} from "@alliance/shared/lib/copy";
+import {
+  bucketCommunityInvitesByActionability,
+  bucketOnetimeInvitesByActionability,
+} from "@alliance/shared/lib/inviteUtils";
+import { CardStyle } from "@alliance/shared/styles/card";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
+import List from "@alliance/sharedweb/ui/List";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import UserSelect, {
   UserSelectUser,
   useSelectableUserIds,
 } from "@alliance/sharedweb/ui/UserSelect";
-import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
-import Card from "@alliance/sharedweb/ui/Card";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import { CardStyle } from "@alliance/shared/styles/card";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "../lib/AuthContext";
 import CommunityInviteListItem from "./CommunityInviteListItem";
-import OnetimeInviteListItem from "./OnetimeInviteListItem";
-import {
-  bucketOnetimeInvitesByActionability,
-  bucketCommunityInvitesByActionability,
-} from "@alliance/shared/lib/inviteUtils";
-import {
-  inviteBuckets,
-  deleteInviteConfirmation,
-  onetimeInviteCreation,
-} from "@alliance/shared/lib/copy";
 import OnetimeInviteForm from "./OnetimeInviteForm";
+import OnetimeInviteListItem from "./OnetimeInviteListItem";
 
 export interface CommunityInvitesLeaderTabProps {
   communityId: number;
@@ -214,7 +215,10 @@ const CommunityInvitesLeaderTab = ({
           setError(null);
         } else {
           setError(
-            (response.error as Error).message ?? "Failed to invite user",
+            errorMessage({
+              error: response.error,
+              fallback: "Failed to invite user",
+            }),
           );
         }
       })

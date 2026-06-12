@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { errorMessage as extractErrorMessage } from "@alliance/common/errorMessage";
 import {
   adminViewerCreateRecord,
   adminViewerDeleteRecords,
@@ -692,7 +693,10 @@ const DatabaseViewer: React.FC = () => {
         await refreshTableData();
       } else {
         setNewRecordError(
-          (response.error as Error)?.message || "Failed to create record",
+          extractErrorMessage({
+            error: response.error,
+            fallback: "Failed to create record",
+          }),
         );
       }
     } catch (error) {

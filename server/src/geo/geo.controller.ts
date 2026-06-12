@@ -1,8 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { GeoService } from './geo.service';
 import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { ApiResponse } from '@nestjs/swagger';
 import { CitySearchDto } from './city.dto';
+import { GeoService } from './geo.service';
 
 @Controller('geo')
 export class GeoController {
@@ -12,7 +11,7 @@ export class GeoController {
   @ApiQuery({ name: 'query', type: String, required: true })
   @ApiQuery({ name: 'latitude', type: Number, required: false })
   @ApiQuery({ name: 'longitude', type: Number, required: false })
-  @ApiResponse({ type: [CitySearchDto] })
+  @ApiOkResponse({ type: [CitySearchDto] })
   async searchCity(
     @Query('query') query: string,
     @Query('latitude') latitude: number,

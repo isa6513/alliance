@@ -1,6 +1,24 @@
-import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { errorMessage } from "@alliance/common/errorMessage";
 import { tasksGetForm } from "@alliance/shared/client";
 import type { ProfileDto } from "@alliance/shared/client/types.gen";
+import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
+import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
+import { isFollowUpFormActive } from "@alliance/shared/lib/actionUtils";
+import { clipboardCopy } from "@alliance/shared/lib/copy";
+import { getNextEvent } from "@alliance/shared/lib/largeActionCard";
+import {
+  buildActionShareUrl,
+  buildShareText,
+  getCompletedShareableTextTemplate,
+  getDefaultShareableTextTemplate,
+} from "@alliance/shared/lib/shareText";
+import { copyToClipboard } from "@alliance/sharedweb/lib/clipboard";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
+import { useQuery } from "@tanstack/react-query";
+import { ExternalLinkIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
 import {
   Link,
   Outlet,
@@ -10,30 +28,13 @@ import {
 } from "react-router";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
-import { getNextEvent } from "@alliance/shared/lib/largeActionCard";
-import { isFollowUpFormActive } from "@alliance/shared/lib/actionUtils";
+import { useLiveTaskFormAggregateViews } from "../lib/useLiveTaskFormAggregateViews";
+import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
 import TaskTimeInfo from "../pages/app/TaskTimeInfo";
 import ActionEventsPanel from "./ActionEventsPanel";
-import FollowUpFormPanel from "./FollowUpFormPanel";
 import { TaskPanelContext } from "./ActionPageTaskPanel";
 import Comments from "./Comments";
-import { shuffleWithSeed } from "@alliance/shared/forms/randomutils";
-import { useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { ExternalLinkIcon } from "lucide-react";
-import { getBaseUrl } from "@alliance/sharedweb/lib/config";
-import { copyToClipboard } from "@alliance/sharedweb/lib/clipboard";
-import ActionCompletedBarWithInfo from "../pages/app/ActionCompletedBarWithInfo";
-import AggregateProgressBarBlock from "@alliance/sharedweb/ui/AggregateProgressBarBlock";
-import { useLiveTaskFormAggregateViews } from "../lib/useLiveTaskFormAggregateViews";
-import { useCompletedTaskForm } from "@alliance/shared/lib/actionTaskPanelCompleted";
-import {
-  buildActionShareUrl,
-  buildShareText,
-  getCompletedShareableTextTemplate,
-  getDefaultShareableTextTemplate,
-} from "@alliance/shared/lib/shareText";
-import { clipboardCopy } from "@alliance/shared/lib/copy";
+import FollowUpFormPanel from "./FollowUpFormPanel";
 import ShareButton from "./ShareButton";
 
 const ActionContents = () => {
@@ -61,8 +62,10 @@ const ActionContents = () => {
 
       if (!response.data) {
         throw new Error(
-          (response.error as Error)?.message ??
-            "Unable to load form - please reload",
+          errorMessage({
+            error: response.error,
+            fallback: "Unable to load form",
+          }),
         );
       }
 

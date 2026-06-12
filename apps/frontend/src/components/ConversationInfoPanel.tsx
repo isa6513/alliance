@@ -1,3 +1,4 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import {
   conversationAddParticipant,
   ConversationDto,
@@ -6,19 +7,19 @@ import {
   conversationUpdateInfo,
   ProfileDto,
 } from "@alliance/shared/client";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import { Link, href } from "react-router";
-import Card from "@alliance/sharedweb/ui/Card";
-import List from "@alliance/sharedweb/ui/List";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useAuth } from "../lib/AuthContext";
-import { useEffect, useMemo, useState } from "react";
-import CreateIcon from "@alliance/sharedweb/ui/icons/CreateIcon";
-import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
-import ImageEditor from "./ImageEditor";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { CardStyle } from "@alliance/shared/styles/card";
+import { sharp_allowed_mime_types } from "@alliance/sharedweb/lib/config";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import CreateIcon from "@alliance/sharedweb/ui/icons/CreateIcon";
+import List from "@alliance/sharedweb/ui/List";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { href, Link } from "react-router";
+import { useAuth } from "../lib/AuthContext";
+import ImageEditor from "./ImageEditor";
 
 export interface ConversationInfoPanelProps {
   selectedConvo: ConversationDto;
@@ -41,17 +42,17 @@ const ConversationInfoPanel = ({
 
   const participantMe = useMemo(() => {
     return selectedConvo.participants.find(
-      (participant) => participant.user.id === user?.id
+      (participant) => participant.user.id === user?.id,
     );
   }, [selectedConvo, user]);
 
   const [addMemberSearch, setAddMemberSearch] = useState<string>("");
   const [isEditingGroup, setIsEditingGroup] = useState<boolean>(false);
   const [editingGroupTitle, setEditingGroupTitle] = useState<string>(
-    selectedConvo.title
+    selectedConvo.title,
   );
   const [editingGroupPhoto, setEditingGroupPhoto] = useState<string | null>(
-    selectedConvo.photo ?? null
+    selectedConvo.photo ?? null,
   );
 
   const handleRemoveParticipant = async (userId: number) => {
@@ -80,8 +81,8 @@ const ConversationInfoPanel = ({
           .toLowerCase()
           .includes(addMemberSearch.toLowerCase()) &&
         !selectedConvo.participants.some(
-          (participant) => participant.user.id === friend.id
-        )
+          (participant) => participant.user.id === friend.id,
+        ),
     );
   }, [friends, addMemberSearch, selectedConvo.participants]);
 
@@ -110,7 +111,12 @@ const ConversationInfoPanel = ({
       setEditingGroupPhoto(response.data.photo ?? null);
       setError(null);
     } else {
-      setError((response.error as Error).message ?? "Failed to save group");
+      setError(
+        errorMessage({
+          error: response.error,
+          fallback: "Failed to save group",
+        }),
+      );
     }
     setIsSaving(false);
   };

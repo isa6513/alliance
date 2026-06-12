@@ -1,27 +1,24 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import {
-  ActionSuiteDto,
-  TagDto,
-  PreviewNotificationPlanDto,
-  ReminderGroupDto,
+  ActionEventNotifDto,
   actionsCreateReminderGroup,
   actionsDeleteReminderGroup,
   actionsPlansForGroup,
   actionsReminderGroupsForEvent,
   actionsSentNotifsForGroup,
+  ActionSuiteDto,
   actionsUpdateReminderGroup,
+  PreviewNotificationPlanDto,
+  ReminderGroupDto,
+  TagDto,
   userGetTags,
   userList,
 } from "@alliance/shared/client";
+import { CardStyle } from "@alliance/shared/styles/card";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
-import { CardStyle } from "@alliance/shared/styles/card";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
 import {
   format,
   formatDistanceStrict,
@@ -29,13 +26,17 @@ import {
   parseISO,
   subSeconds,
 } from "date-fns";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import ActionReminderCard from "./ActionReminderCard";
 import ActionReminderGroupForm, {
   ActionReminderGroupFormSubmitPayload,
 } from "./ActionReminderGroupForm";
-import { UserSelectUser } from "@alliance/sharedweb/ui/UserSelect";
-import { ActionEventNotifDto } from "@alliance/shared/client";
-import ActionReminderCard from "./ActionReminderCard";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { presetNames, ReminderPresetName, reminderPresets } from "./presets";
 
 interface ActionRemindersTabProps {
@@ -141,9 +142,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
       .then((response) => {
         if (response.error) {
           throw new Error(
-            typeof response.error === "string"
-              ? response.error
-              : "Failed to load user groups.",
+            errorMessage({
+              error: response.error,
+              fallback: "Failed to load user groups.",
+            }),
           );
         }
         setUserTags(response.data ?? []);
@@ -164,9 +166,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
     if (response.error) {
       throw new Error(
-        typeof response.error === "string"
-          ? response.error
-          : "Failed to load reminders.",
+        errorMessage({
+          error: response.error,
+          fallback: "Failed to load reminders.",
+        }),
       );
     }
 
@@ -673,7 +676,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
       if (response.error || !response.data) {
         throw new Error(
-          (response.error as string) ?? "Failed to create reminder.",
+          errorMessage({
+            error: response.error,
+            fallback: "Failed to create reminder.",
+          }),
         );
       }
 
@@ -713,7 +719,10 @@ const ActionRemindersTab: React.FC<ActionRemindersTabProps> = ({
 
         if (!response.data) {
           throw new Error(
-            (response.error as string) ?? "Failed to update reminder.",
+            errorMessage({
+              error: response.error,
+              fallback: "Failed to update reminder.",
+            }),
           );
         }
 

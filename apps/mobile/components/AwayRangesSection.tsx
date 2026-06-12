@@ -1,3 +1,4 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import {
   UserAwayRangeDto,
   UserAwayRangeReason,
@@ -122,10 +123,12 @@ export default function AwayRangesSection() {
         setNoteInput("");
         await loadAwayRanges();
       } else {
-        const errorMessage =
-          (resp.error as { message?: string })?.message ??
-          `Error: ${resp.response.statusText}`;
-        setError(errorMessage);
+        setError(
+          errorMessage({
+            error: resp.error,
+            fallback: "Unable to create away range",
+          }),
+        );
       }
     } catch (err) {
       console.error("Error creating away range:", err);

@@ -1,3 +1,4 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import { userRequestAccountDeletion } from "@alliance/shared/client";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import Button from "@alliance/sharedweb/ui/NewButton";
@@ -11,8 +12,10 @@ const DeleteAccountPage = () => {
       setConfirmed(true);
     } else {
       setError(
-        (resp.error as { message: string })?.message ||
-          "Failed to request account deletion",
+        errorMessage({
+          error: resp.error,
+          fallback: "Failed to request account deletion",
+        }),
       );
     }
   };

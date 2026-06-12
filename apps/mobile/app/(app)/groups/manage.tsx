@@ -1,3 +1,4 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import {
   communityAcceptCommunityInvite,
   communityCreateCommunity,
@@ -208,11 +209,11 @@ export default function GroupManageScreen() {
         },
       });
       if (response.error || !response.data) {
-        const msg =
-          (response.error as { message?: string } | undefined)?.message ??
-          response.response?.statusText;
         setError(
-          msg?.trim() ? msg : "Unable to create community. Please try again.",
+          errorMessage({
+            error: response.error,
+            fallback: "Unable to create community.",
+          }),
         );
         return;
       }

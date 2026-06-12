@@ -1,3 +1,4 @@
+import { errorMessage } from "@alliance/common/errorMessage";
 import {
   actionsBatchUpdateSuiteEvents,
   actionsDeleteSuiteEvent,
@@ -5,15 +6,15 @@ import {
   ActionSuiteDto,
   UpdateActionEventDto,
 } from "@alliance/shared/client";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import ActionListCard from "../components/ActionListCard";
-import ActionRemindersTab from "../components/reminders/ActionRemindersTab";
 import ActionTimeline from "../components/ActionTimeline";
 import GeneralUpdateCard from "../components/GeneralUpdateCard";
+import ActionRemindersTab from "../components/reminders/ActionRemindersTab";
 import SuiteEventList from "../components/SuiteEventList";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import Card from "@alliance/sharedweb/ui/Card";
 
 const ActionSuitePage = () => {
   const { suiteId: suiteIdString } = useParams();
@@ -44,7 +45,12 @@ const ActionSuitePage = () => {
       if (response.data) {
         setSuite(response.data);
       } else {
-        setError((response.error as Error).message as string);
+        setError(
+          errorMessage({
+            error: response.error,
+            fallback: "Failed to fetch suite",
+          }),
+        );
       }
     };
     fetchSuiteActions();
@@ -60,7 +66,12 @@ const ActionSuitePage = () => {
         if (resp.data) {
           setSuite(resp.data as ActionSuiteDto);
         } else {
-          setError((resp.error as Error).message as string);
+          setError(
+            errorMessage({
+              error: resp.error,
+              fallback: "Failed to update event",
+            }),
+          );
         }
       },
     );
@@ -72,8 +83,11 @@ const ActionSuitePage = () => {
         setSuite(resp.data);
       } else {
         setError(
-          ((resp.error as Error).message as string) +
-          " (events will fail to delete if reminders depend on their existence)",
+          errorMessage({
+            error: resp.error,
+            fallback: "Failed to delete event",
+          }) +
+            " (events will fail to delete if reminders depend on their existence)",
         );
       }
     });
