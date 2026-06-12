@@ -13,6 +13,9 @@ export type PlatformTenureCohortActionStats = {
 export type PlatformTenureCohortStats = {
   weeksOnPlatform: number;
   cohortSize: number;
+  activeCount: number;
+  churnedCount: number;
+  churnRate: number;
   assignedCount: number;
   completedCount: number;
   completionRate: number;
@@ -60,6 +63,15 @@ export class PlatformTenureCohortStatsDto {
   cohortSize: number;
 
   @ApiProperty()
+  activeCount: number;
+
+  @ApiProperty()
+  churnedCount: number;
+
+  @ApiProperty()
+  churnRate: number;
+
+  @ApiProperty()
   assignedCount: number;
 
   @ApiProperty()
@@ -77,6 +89,9 @@ export class PlatformTenureCohortStatsDto {
   constructor(input: PlatformTenureCohortStats) {
     this.weeksOnPlatform = input.weeksOnPlatform;
     this.cohortSize = input.cohortSize;
+    this.activeCount = input.activeCount;
+    this.churnedCount = input.churnedCount;
+    this.churnRate = input.churnRate;
     this.assignedCount = input.assignedCount;
     this.completedCount = input.completedCount;
     this.completionRate = input.completionRate;

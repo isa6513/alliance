@@ -875,15 +875,14 @@ ORDER BY pp.total_session_duration_seconds DESC
     const msPerWeek = 7 * 24 * 60 * 60 * 1000;
     const now = new Date();
 
-    const activeUsers = (
-      await this.userRepository.find({
-        relations: { contractEvents: true },
-      })
-    ).filter((user) => user.hasActiveContract);
+    const users = await this.userRepository.find({
+      relations: { contractEvents: true },
+    });
 
     const cohortUserIds = new Set<number>();
+    let activeCount = 0;
 
-    for (const user of activeUsers) {
+    for (const user of users) {
       const signedAt = (user.contractEvents ?? [])
         .filter((event) => event.type === ContractEventType.SIGNED)
         .sort((a, b) => a.date.getTime() - b.date.getTime())[0]?.date;
@@ -897,6 +896,9 @@ ORDER BY pp.total_session_duration_seconds DESC
       );
       if (tenureWeeks === normalizedWeeks) {
         cohortUserIds.add(user.id);
+        if (user.hasActiveContract) {
+          activeCount += 1;
+        }
       }
     }
 
@@ -904,6 +906,9 @@ ORDER BY pp.total_session_duration_seconds DESC
       return {
         weeksOnPlatform: normalizedWeeks,
         cohortSize: 0,
+        activeCount: 0,
+        churnedCount: 0,
+        churnRate: 0,
         assignedCount: 0,
         completedCount: 0,
         completionRate: 0,
@@ -982,8 +987,10 @@ ORDER BY pp.total_session_duration_seconds DESC
     } of eligible) {
       const baseUsers = baseUsersByAction.get(action.id) ?? [];
 
-      const assignedCohortUsers = baseUsers.filter((user) =>
-        cohortUserIds.has(user.id),
+      const assignedCohortUsers = baseUsers.filter(
+        (user) =>
+          cohortUserIds.has(user.id) &&
+          user.hasActiveContractAt(memberActionEvent.date),
       );
       if (assignedCohortUsers.length === 0) {
         continue;
@@ -1018,10 +1025,14 @@ ORDER BY pp.total_session_duration_seconds DESC
       (sum, action) => sum + action.completedCount,
       0,
     );
+    const churnedCount = cohortUserIds.size - activeCount;
 
     return {
       weeksOnPlatform: normalizedWeeks,
       cohortSize: cohortUserIds.size,
+      activeCount,
+      churnedCount,
+      churnRate: churnedCount / cohortUserIds.size,
       assignedCount,
       completedCount,
       completionRate: assignedCount > 0 ? completedCount / assignedCount : 0,
