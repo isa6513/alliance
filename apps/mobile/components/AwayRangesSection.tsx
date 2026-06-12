@@ -1,15 +1,10 @@
 import { errorMessage } from "@alliance/common/errorMessage";
-import {
-  UserAwayRangeDto,
-  UserAwayRangeReason,
-  userCreateAwayRange,
-  userDeleteAwayRange,
-  userGetAwayRanges,
-} from "@alliance/shared/client";
+import { UserAwayRangeDto, UserAwayRangeReason } from "@alliance/shared/client";
 import { awayRangesDescription } from "@alliance/shared/lib/copy";
+import { useMyAwayRanges } from "@alliance/shared/lib/useMyAwayRanges";
 import { cn } from "@alliance/shared/styles/util";
 import { ChevronDown, X } from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Platform,
@@ -59,9 +54,13 @@ function isFutureRange(range: UserAwayRangeDto): boolean {
 }
 
 export default function AwayRangesSection() {
-  const [awayRanges, setAwayRanges] = useState<UserAwayRangeDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
+  const {
+    awayRanges,
+    isPending: loading,
+    createAwayRange,
+    deleteAwayRange,
+  } = useMyAwayRanges();
+  const creating = createAwayRange.isPending;
   const [startDateInput, setStartDateInput] = useState("");
   const [endDateInput, setEndDateInput] = useState("");
   const [noteInput, setNoteInput] = useState("");
@@ -69,23 +68,6 @@ export default function AwayRangesSection() {
     useState<UserAwayRangeReason | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reasonModalOpen, setReasonModalOpen] = useState(false);
-
-  const loadAwayRanges = useCallback(async () => {
-    try {
-      const response = await userGetAwayRanges();
-      if (response.data) {
-        setAwayRanges(response.data);
-      }
-    } catch (err) {
-      console.error("Error loading away ranges:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadAwayRanges();
-  }, [loadAwayRanges]);
 
   const handleCreate = async () => {
     setError(null);
@@ -105,36 +87,23 @@ export default function AwayRangesSection() {
       return;
     }
 
-    setCreating(true);
     try {
-      const resp = await userCreateAwayRange({
-        body: {
-          startDay: startDateInput,
-          endDay: endDateInput,
-          reason: selectedReason,
-          note: noteInput || undefined,
-        },
+      await createAwayRange.mutateAsync({
+        startDay: startDateInput,
+        endDay: endDateInput,
+        reason: selectedReason,
+        note: noteInput || undefined,
       });
 
-      if (resp.response.ok) {
-        setStartDateInput("");
-        setEndDateInput("");
-        setSelectedReason(null);
-        setNoteInput("");
-        await loadAwayRanges();
-      } else {
-        setError(
-          errorMessage({
-            error: resp.error,
-            fallback: "Unable to create away range",
-          }),
-        );
-      }
+      setStartDateInput("");
+      setEndDateInput("");
+      setSelectedReason(null);
+      setNoteInput("");
     } catch (err) {
       console.error("Error creating away range:", err);
-      setError("Failed to create away period. Please try again.");
-    } finally {
-      setCreating(false);
+      setError(
+        errorMessage({ error: err, fallback: "Unable to create away period." }),
+      );
     }
   };
 
@@ -149,8 +118,7 @@ export default function AwayRangesSection() {
           style: "destructive",
           onPress: async () => {
             try {
-              await userDeleteAwayRange({ path: { id } });
-              await loadAwayRanges();
+              await deleteAwayRange.mutateAsync(id);
             } catch (err) {
               console.error("Error deleting away range:", err);
               Alert.alert(

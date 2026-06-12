@@ -4,13 +4,13 @@ import {
   actionsDismissAction,
   actionsDismissGeneralUpdate,
   actionsUnreadGeneralUpdates,
-  userGetAwayRanges,
 } from "@alliance/shared/client";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import {
   ActionWithAwayStatus,
   getAwayStatusAt,
 } from "@alliance/shared/lib/actionUtils";
+import { useMyAwayRanges } from "@alliance/shared/lib/useMyAwayRanges";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
@@ -36,13 +36,10 @@ export function useTaskActionsData(options?: {
     isError: actionsError,
   } = useActionsQuery({ refetchInterval: options?.refetchInterval });
   const {
-    data: awayRanges = [],
-    isLoading: awayRangesLoading,
+    awayRanges,
+    isPending: awayRangesLoading,
     isError: awayRangesError,
-  } = useQuery({
-    queryKey: ["userGetAwayRanges"],
-    queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
-  });
+  } = useMyAwayRanges();
   const {
     data: generalUpdatesData,
     isLoading: generalUpdatesLoading,

@@ -1,12 +1,10 @@
-import {
-  notifsGetUnreadCount,
-  userGetAwayRanges,
-} from "@alliance/shared/client";
+import { notifsGetUnreadCount } from "@alliance/shared/client";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import {
   getAwayStatusAt,
   showActionInSidebarList,
 } from "@alliance/shared/lib/actionUtils";
+import { useMyAwayRanges } from "@alliance/shared/lib/useMyAwayRanges";
 import { cn } from "@alliance/shared/styles/util";
 import { useQuery } from "@tanstack/react-query";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
@@ -111,10 +109,7 @@ export default function TabBar() {
     updateTick,
     refreshUnreadCount,
   } = useMessagingUnread();
-  const { data: awayRanges = [] } = useQuery({
-    queryKey: ["awayRanges"],
-    queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
-  });
+  const { awayRanges } = useMyAwayRanges();
   const { data: unreadNotifications = 0 } = useQuery({
     queryKey: ["notifications", "unreadCount"],
     queryFn: () =>

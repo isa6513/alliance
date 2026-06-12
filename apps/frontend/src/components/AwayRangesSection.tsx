@@ -1,19 +1,12 @@
 import { errorMessage } from "@alliance/common/errorMessage";
-import {
-  UserAwayRangeDto,
-  UserAwayRangeReason,
-  userCreateAwayRange,
-  userDeleteAwayRange,
-  userGetAwayRanges,
-  userUpdateAwayRange,
-} from "@alliance/shared/client";
+import { UserAwayRangeDto, UserAwayRangeReason } from "@alliance/shared/client";
 import { awayRangesDescription } from "@alliance/shared/lib/copy";
 import { formatLongDate } from "@alliance/shared/lib/dateFormatters";
+import { useMyAwayRanges } from "@alliance/shared/lib/useMyAwayRanges";
 import { cn } from "@alliance/shared/styles/util";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import DropdownSelect from "@alliance/sharedweb/ui/DropdownSelect";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, X } from "lucide-react";
 import React, { useState } from "react";
 import { href, Link } from "react-router";
@@ -71,13 +64,16 @@ function formatDateForInput(date: Date | string): string {
 }
 
 const AwayRangesSection: React.FC = () => {
-  const queryClient = useQueryClient();
-  const { data: awayRanges = [], isLoading: loading } = useQuery({
-    queryKey: ["userGetAwayRanges"],
-    queryFn: () => userGetAwayRanges().then((res) => res.data ?? []),
-  });
+  const {
+    awayRanges,
+    isPending: loading,
+    createAwayRange,
+    updateAwayRange,
+    deleteAwayRange,
+  } = useMyAwayRanges();
 
-  const [creating, setCreating] = useState(false);
+  const creating = createAwayRange.isPending;
+  const updating = updateAwayRange.isPending;
   const [startDateInput, setStartDateInput] = useState("");
   const [endDateInput, setEndDateInput] = useState("");
   const [noteInput, setNoteInput] = useState("");
@@ -96,7 +92,6 @@ const AwayRangesSection: React.FC = () => {
   const [editReason, setEditReason] = useState<ReasonDropdownOption>(
     ReasonDropdownOption.UNSELECTED,
   );
-  const [updating, setUpdating] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
   const editReasonIsOther = editReason === "Other";
 
@@ -124,36 +119,30 @@ const AwayRangesSection: React.FC = () => {
       return;
     }
 
-    setCreating(true);
-    const resp = await userCreateAwayRange({
-      body: {
+    try {
+      await createAwayRange.mutateAsync({
         startDay: startDateInput,
         endDay: endDateInput,
         reason,
         note: noteInput || undefined,
-      },
-    });
-    if (resp.response.ok) {
+      });
       setStartDateInput("");
       setEndDateInput("");
       setSelectedReason(ReasonDropdownOption.UNSELECTED);
       setNoteInput("");
-    } else {
+    } catch (error) {
       setError(
         errorMessage({
-          error: resp.error,
+          error,
           fallback: `Could not create away range`,
         }),
       );
     }
-    setCreating(false);
-    queryClient.invalidateQueries({ queryKey: ["userGetAwayRanges"] });
   };
 
   const handleDelete = async (id: number) => {
     try {
-      await userDeleteAwayRange({ path: { id } });
-      queryClient.invalidateQueries({ queryKey: ["userGetAwayRanges"] });
+      await deleteAwayRange.mutateAsync(id);
     } catch (error) {
       console.error("Error deleting away range:", error);
       alert("There was an error deleting your away period. Please try again.");
@@ -193,28 +182,25 @@ const AwayRangesSection: React.FC = () => {
       return;
     }
 
-    setUpdating(true);
-    const resp = await userUpdateAwayRange({
-      path: { id: editingId },
-      body: {
-        startDay: editStartDate,
-        endDay: editEndDate,
-        reason,
-        note: editNote || undefined,
-      },
-    });
-    if (resp.response.ok) {
+    try {
+      await updateAwayRange.mutateAsync({
+        id: editingId,
+        body: {
+          startDay: editStartDate,
+          endDay: editEndDate,
+          reason,
+          note: editNote || undefined,
+        },
+      });
       cancelEditing();
-      queryClient.invalidateQueries({ queryKey: ["userGetAwayRanges"] });
-    } else {
+    } catch (error) {
       setEditError(
         errorMessage({
-          error: resp.error,
+          error,
           fallback: `Unable to update away range`,
         }),
       );
     }
-    setUpdating(false);
   };
 
   const isCurrentlyAway = (range: UserAwayRangeDto) => {

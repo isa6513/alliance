@@ -7,7 +7,6 @@ import {
   actionsDismissAction,
   actionsDismissGeneralUpdate,
   actionsUnreadGeneralUpdates,
-  userGetAwayRanges,
 } from "@alliance/shared/client";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import {
@@ -23,6 +22,7 @@ import useHomeFeed, {
   getForumComment,
   resetHomeFeed,
 } from "@alliance/shared/lib/useHomeFeed";
+import { useMyAwayRanges } from "@alliance/shared/lib/useMyAwayRanges";
 import { LegendList, type LegendListRef } from "@legendapp/list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -122,13 +122,10 @@ export default function HomeScreen() {
   );
 
   const {
-    data: awayRanges,
+    awayRanges,
     isPending: awayRangesPending,
     refetch: refetchAwayRanges,
-  } = useQuery({
-    queryKey: ["awayRanges"],
-    queryFn: () => userGetAwayRanges().then((response) => response.data ?? []),
-  });
+  } = useMyAwayRanges();
 
   const handleDismissGeneralUpdate = useCallback(
     async (generalUpdateId: number) => {
@@ -146,12 +143,12 @@ export default function HomeScreen() {
   const loading = isPending || awayRangesPending || generalUpdatesPending;
 
   const actionsWithAwayStatus = useMemo((): ActionWithAwayStatus[] => {
-    if (!actions || !awayRanges) return [];
+    if (!actions || awayRangesPending) return [];
     return actions.map((action) => ({
       ...action,
       awayStatus: getAwayStatusAt(action, awayRanges, new Date()),
     }));
-  }, [actions, awayRanges]);
+  }, [actions, awayRanges, awayRangesPending]);
 
   const { todoActions, activeCompletableFollowUpForms } = useHomePageActions(
     actionsWithAwayStatus,
