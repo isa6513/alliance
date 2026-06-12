@@ -55,16 +55,10 @@ const GroupsGuidePage: React.FC = () => {
           </p>
         </div>
 
-        <h2
-          id="leading-a-group"
-          className="mt-2 text-title-medium font-semibold text-black"
-        >
+        <h2 id="leading-a-group" className="mt-2 text-title-medium text-black">
           Group leads
         </h2>
-        <h3
-          id="responsibilities"
-          className="text-title-small font-semibold text-black mt-2"
-        >
+        <h3 id="responsibilities" className="text-title-small text-black mt-2">
           Responsibilities
         </h3>
         <p>
@@ -81,10 +75,7 @@ const GroupsGuidePage: React.FC = () => {
           group. Group leads can, but are not expected to, be members of another
           accountability group.
         </p>
-        <h3
-          id="should-i-lead"
-          className="text-title-small font-semibold mt-2 text-black"
-        >
+        <h3 id="should-i-lead" className="text-title-small mt-2 text-black">
           Should I lead a group?
         </h3>
 
@@ -114,10 +105,7 @@ const GroupsGuidePage: React.FC = () => {
           <span className="font-semibold">5-30 minutes</span> running their
           groups per week.
         </p>
-        <h2
-          id="being-a-member"
-          className="mt-2 text-title-medium font-semibold text-black"
-        >
+        <h2 id="being-a-member" className="mt-2 text-title-medium text-black">
           Group members
         </h2>
 
@@ -125,10 +113,7 @@ const GroupsGuidePage: React.FC = () => {
           You can only be a member of one accountability group. Being a member
           of an accountability group is strongly encouraged, but not required.
         </p>
-        <h3
-          id="joining-leaving"
-          className="text-title-small font-semibold mt-2 text-black"
-        >
+        <h3 id="joining-leaving" className="text-title-small mt-2 text-black">
           Joining and leaving groups
         </h3>
 
@@ -151,10 +136,7 @@ const GroupsGuidePage: React.FC = () => {
           <li>Request to be assigned to different group.</li>
         </ol>
 
-        <h3
-          id="group-assignment"
-          className="text-title-small font-semibold mt-2 text-black"
-        >
+        <h3 id="group-assignment" className="text-title-small mt-2 text-black">
           Group assignment
         </h3>
         <p>
@@ -186,7 +168,7 @@ const GroupsGuidePage: React.FC = () => {
         </p>
         <h3
           id="lead-recommendations-1"
-          className="text-title-small font-semibold mt-2 text-black"
+          className="text-title-small mt-2 text-black"
         >
           Sending reminders
         </h3>
@@ -226,7 +208,7 @@ const GroupsGuidePage: React.FC = () => {
         </p>
         <h3
           id="lead-recommendations-2"
-          className="text-title-small font-semibold mt-2 text-black"
+          className="text-title-small mt-2 text-black"
         >
           Checking in
         </h3>
