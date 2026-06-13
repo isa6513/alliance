@@ -26,9 +26,9 @@ const TerminologyPage: React.FC = () => {
 
   return (
     <InfoSubpage tocSections={tocSections}>
-      <h1 className="text-title">Terminology</h1>
+      <h1 className="text-title-large">Terminology</h1>
       <section className="gap-y-4 flex flex-col">
-        <h2 id="membership" className="text-title-small">
+        <h2 id="membership" className="text-title-medium">
           Membership
         </h2>
         <p>
@@ -60,10 +60,7 @@ const TerminologyPage: React.FC = () => {
           Alliance.
         </p>
 
-        <h3
-          id="member-roles"
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h3 id="member-roles" className="text-title-small">
           Roles
         </h3>
         <p>
@@ -88,7 +85,7 @@ const TerminologyPage: React.FC = () => {
       </section>
 
       <section className="gap-y-4 flex flex-col">
-        <h2 id="actions" className="text-title-small">
+        <h2 id="actions" className="text-title-medium">
           Actions
         </h2>
         <p>
@@ -130,10 +127,7 @@ const TerminologyPage: React.FC = () => {
           ).
         </p>
 
-        <h3
-          id="task-assignment"
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h3 id="task-assignment" className="text-title-small">
           Task assignment
         </h3>
         <p>
@@ -159,10 +153,7 @@ const TerminologyPage: React.FC = () => {
             as members who live in a specific area.
           </li>
         </ul>
-        <h3
-          id="away-periods"
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h3 id="away-periods" className="text-title-small">
           Away periods
         </h3>
         <p>
@@ -178,10 +169,7 @@ const TerminologyPage: React.FC = () => {
           Members who have marked themselves as away will not be assigned a task
           if their away period overlaps the task&apos;s completion period.
         </p>
-        <h3
-          id="task-scheduling"
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h3 id="task-scheduling" className="text-title-small">
           Task scheduling
         </h3>
         <p>Tasks are not launched on a consistent day of the week.</p>
@@ -194,10 +182,7 @@ const TerminologyPage: React.FC = () => {
           period.
         </p>
 
-        <h3
-          id="task-completion-fraction"
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h3 id="task-completion-fraction" className="text-title-small">
           Task completion fraction
         </h3>
         <p>

@@ -19,10 +19,7 @@ const RoadmapPage: React.FC = () => {
       <section className="gap-y-4 flex flex-col">
         <h1 className="text-title-medium">Roadmap</h1>
         <p className="text-zinc-500 mb-4">Last updated: March 30, 2026</p>
-        <h2
-          id="experimental-phase"
-          className="text-2xl font-semibold text-black"
-        >
+        <h2 id="experimental-phase" className="text-title-small">
           Experimental phase
         </h2>
         <p>
@@ -63,7 +60,7 @@ const RoadmapPage: React.FC = () => {
         </p>
       </section>
       <section className="gap-y-4 flex flex-col">
-        <h2 id="public-launch" className="text-2xl font-semibold text-black">
+        <h2 id="public-launch" className="text-title-small">
           Public launch
         </h2>
         <p>
@@ -95,10 +92,7 @@ const RoadmapPage: React.FC = () => {
         <ExampleActionCategoryList />
       </section>
       <section className="gap-y-4 flex flex-col">
-        <h2
-          id="current-activities"
-          className="mt-2 text-2xl font-semibold text-black"
-        >
+        <h2 id="current-activities" className="text-title-small">
           Current activities
         </h2>
         <p>Right now, the office is:</p>
