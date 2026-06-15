@@ -75,6 +75,7 @@ export enum ReferralSource {
   OnetimeInvite = 'onetime_invite',
   ActionShareLink = 'action_share_link',
   ExternalShareLink = 'external_share_link',
+  InviteShareLink = 'invite_share_link',
   Campaign = 'campaign',
 }
 

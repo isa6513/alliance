@@ -51,6 +51,7 @@ export class ShareUrlsController {
       userId: req.user.sub,
       actionId: body.actionId,
       externalTargetId: body.externalTargetId,
+      invite: body.invite,
     });
     return new ShareLinkDto(url);
   }
@@ -65,6 +66,7 @@ export class ShareUrlsController {
       owner: ownerFromDto(body),
       actionId: body.actionId,
       externalTargetId: body.externalTargetId,
+      invite: body.invite,
       label: body.label,
     });
     return new ShareUrlAdminDto(row);

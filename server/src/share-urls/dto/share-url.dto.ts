@@ -1,7 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
-import { ShareUrl } from '../entities/share-url.entity';
+import {
+  IsBoolean,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import { ShareUrl, ShareUrlKind } from '../entities/share-url.entity';
 
 export class GetShareLinkDto {
   @ApiPropertyOptional()
@@ -13,6 +19,14 @@ export class GetShareLinkDto {
   @IsOptional()
   @IsInt()
   externalTargetId?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Set true for an invite link to the signup page. Provide exactly one of actionId, externalTargetId, or invite.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  invite?: boolean;
 }
 
 export class CreateDuplicateShareLinkDto {
@@ -40,6 +54,14 @@ export class CreateDuplicateShareLinkDto {
   @IsOptional()
   @IsInt()
   externalTargetId?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Set true for an invite link to the signup page. Provide exactly one of actionId, externalTargetId, or invite.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  invite?: boolean;
 
   @ApiPropertyOptional({
     description: 'Optional label to distinguish this duplicate at a glance.',
@@ -92,6 +114,9 @@ export class ShareUrlAdminDto {
   @ApiProperty()
   id: string;
 
+  @ApiProperty({ enum: ShareUrlKind, enumName: 'ShareUrlKind' })
+  kind: ShareUrlKind;
+
   @ApiPropertyOptional()
   sid?: string;
 
@@ -126,6 +151,7 @@ export class ShareUrlAdminDto {
 
   constructor(input: ShareUrl) {
     this.id = input.id;
+    this.kind = input.kind;
     this.sid = input.sid;
     this.url = input.url;
     this.duplicate = input.duplicate;

@@ -28,6 +28,7 @@ import { PaymentUserDataToken } from 'src/payments/entities/payment-token.entity
 import { Push } from 'src/push/push.entity';
 import { PushService } from 'src/push/push.service';
 import { groupUrl, profileUrl } from 'src/search/approutes';
+import { ShareUrlKind } from 'src/share-urls/entities/share-url.entity';
 import { ShareUrlsService } from 'src/share-urls/share-urls.service';
 import type { Relations } from 'src/utils/Repository';
 import {
@@ -84,6 +85,22 @@ export type ReferrerResolution =
   | { kind: 'campaign'; campaign: Campaign };
 
 /**
+ * Which referral source a user-owned share-url attributes a signup to, keyed by
+ * the share-url's kind. `Record<ShareUrlKind, …>` forces every kind to be
+ * handled when a new one is added.
+ */
+const REFERRAL_SOURCE_BY_SHARE_KIND: Record<
+  ShareUrlKind,
+  | ReferralSource.ActionShareLink
+  | ReferralSource.ExternalShareLink
+  | ReferralSource.InviteShareLink
+> = {
+  [ShareUrlKind.Action]: ReferralSource.ActionShareLink,
+  [ShareUrlKind.ExternalTarget]: ReferralSource.ExternalShareLink,
+  [ShareUrlKind.Invite]: ReferralSource.InviteShareLink,
+};
+
+/**
  * What a referral code/sid points to, resolved in a fixed precedence order
  * (onetime invite → campaign-owned share link → user-owned share link →
  * bare campaign code → user referral code). Side-effect free: callers apply
@@ -99,6 +116,7 @@ export type ReferralResolution =
       referralSource:
         | ReferralSource.ActionShareLink
         | ReferralSource.ExternalShareLink
+        | ReferralSource.InviteShareLink
         | ReferralSource.ReferralLink;
     };
 
@@ -286,9 +304,7 @@ export class UserService {
       return {
         kind: 'user',
         user: shareUrl.user,
-        referralSource: shareUrl.externalTarget
-          ? ReferralSource.ExternalShareLink
-          : ReferralSource.ActionShareLink,
+        referralSource: REFERRAL_SOURCE_BY_SHARE_KIND[shareUrl.kind],
       };
     }
     const campaign = await this.campaignService.findByCode(code);

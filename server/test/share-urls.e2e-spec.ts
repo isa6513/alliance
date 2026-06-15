@@ -5,8 +5,13 @@ import {
   ActionStatus,
 } from '../src/actions/entities/action-event.entity';
 import { Action, VisibilityMode } from '../src/actions/entities/action.entity';
+import { Campaign } from '../src/campaign/entities/campaign.entity';
 import { ExternalShareTarget } from '../src/share-urls/entities/external-share-target.entity';
-import { ShareUrl } from '../src/share-urls/entities/share-url.entity';
+import {
+  ShareUrl,
+  ShareUrlKind,
+} from '../src/share-urls/entities/share-url.entity';
+import { ShareUrlsService } from '../src/share-urls/share-urls.service';
 import { createTestApp, TestContext } from './e2e-test-utils';
 
 describe('Share URLs (e2e)', () => {
@@ -15,6 +20,8 @@ describe('Share URLs (e2e)', () => {
   let eventRepo: Repository<ActionEvent>;
   let targetRepo: Repository<ExternalShareTarget>;
   let shareUrlRepo: Repository<ShareUrl>;
+  let campaignRepo: Repository<Campaign>;
+  let shareUrlsService: ShareUrlsService;
   let action: Action;
   let target: ExternalShareTarget;
 
@@ -24,6 +31,8 @@ describe('Share URLs (e2e)', () => {
     eventRepo = ctx.dataSource.getRepository(ActionEvent);
     targetRepo = ctx.dataSource.getRepository(ExternalShareTarget);
     shareUrlRepo = ctx.dataSource.getRepository(ShareUrl);
+    campaignRepo = ctx.dataSource.getRepository(Campaign);
+    shareUrlsService = ctx.app.get(ShareUrlsService);
 
     action = await actionRepo.save(
       actionRepo.create({
@@ -50,6 +59,7 @@ describe('Share URLs (e2e)', () => {
   beforeEach(async () => {
     await shareUrlRepo.query('DELETE FROM share_url');
     await targetRepo.query('DELETE FROM external_share_target');
+    await campaignRepo.query('DELETE FROM campaign');
     target = await targetRepo.save(
       targetRepo.create({
         name: 'Test target',
@@ -89,6 +99,24 @@ describe('Share URLs (e2e)', () => {
       expect(res.body.url).toMatch(
         /^https:\/\/example\.com\/route\?code=share-[a-f0-9]{10}$/,
       );
+    });
+
+    it('returns the signup URL with ref=sid for an invite', async () => {
+      const res = await request(ctx.app.getHttpServer())
+        .post('/share-urls/get-share-link')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ invite: true })
+        .expect(201);
+
+      expect(res.body.url).toMatch(/\/signup\?ref=share-[a-f0-9]{10}$/);
+    });
+
+    it('returns 400 when invite is combined with a target', async () => {
+      await request(ctx.app.getHttpServer())
+        .post('/share-urls/get-share-link')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ invite: true, actionId: action.id })
+        .expect(400);
     });
 
     it('uses & when the target URL already has a query string', async () => {
@@ -165,7 +193,7 @@ describe('Share URLs (e2e)', () => {
   describe('dedupe / idempotence', () => {
     const fetchUrl = async (
       token: string,
-      body: { actionId?: number; externalTargetId?: number },
+      body: { actionId?: number; externalTargetId?: number; invite?: boolean },
     ) => {
       const res = await request(ctx.app.getHttpServer())
         .post('/share-urls/get-share-link')
@@ -204,6 +232,36 @@ describe('Share URLs (e2e)', () => {
           user: { id: ctx.testUserId },
           externalTarget: { id: target.id },
         },
+      });
+      expect(rows.length).toBe(1);
+    });
+
+    it('same user invite returns same sid across calls', async () => {
+      const a = await fetchUrl(ctx.accessToken, { invite: true });
+      const b = await fetchUrl(ctx.accessToken, { invite: true });
+      expect(sidOf(a)).toBe(sidOf(b));
+      const rows = await shareUrlRepo.find({
+        where: { user: { id: ctx.testUserId }, kind: ShareUrlKind.Invite },
+      });
+      expect(rows.length).toBe(1);
+    });
+
+    it('invite and action share for one user do not collapse', async () => {
+      const a = await fetchUrl(ctx.accessToken, { invite: true });
+      const b = await fetchUrl(ctx.accessToken, { actionId: action.id });
+      expect(sidOf(a)).not.toBe(sidOf(b));
+    });
+
+    it('same campaign invite returns same sid across calls', async () => {
+      const campaign = await campaignRepo.save(
+        campaignRepo.create({ name: 'Promo', code: 'promo-invite' }),
+      );
+      const owner = { type: 'campaign', campaignId: campaign.id } as const;
+      const a = await shareUrlsService.getOrCreateForInvite(owner);
+      const b = await shareUrlsService.getOrCreateForInvite(owner);
+      expect(sidOf(a.url)).toBe(sidOf(b.url));
+      const rows = await shareUrlRepo.find({
+        where: { campaign: { id: campaign.id }, kind: ShareUrlKind.Invite },
       });
       expect(rows.length).toBe(1);
     });
@@ -291,6 +349,63 @@ describe('Share URLs (e2e)', () => {
 
       const rows = await shareUrlRepo.find({
         where: { user: { id: ctx.testUserId }, action: { id: action.id } },
+      });
+      expect(rows.length).toBe(2);
+      expect(rows.filter((r) => r.duplicate).length).toBe(1);
+    });
+
+    it('admin creates an invite duplicate with a fresh sid and label', async () => {
+      const canonical = await request(ctx.app.getHttpServer())
+        .post('/share-urls/get-share-link')
+        .set('Authorization', `Bearer ${ctx.accessToken}`)
+        .send({ invite: true })
+        .expect(201);
+
+      const dup = await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ userId: ctx.testUserId, invite: true, label: 'Bob' })
+        .expect(201);
+
+      expect(sidOf(dup.body.url)).not.toBe(sidOf(canonical.body.url));
+      expect(dup.body.url).toMatch(/\/signup\?ref=share-[a-f0-9]{10}$/);
+      expect(dup.body.kind).toBe(ShareUrlKind.Invite);
+      expect(dup.body.duplicate).toBe(true);
+      expect(dup.body.label).toBe('Bob');
+      expect(dup.body.action).toBeNull();
+      expect(dup.body.externalTarget).toBeNull();
+
+      const rows = await shareUrlRepo.find({
+        where: { user: { id: ctx.testUserId }, kind: ShareUrlKind.Invite },
+      });
+      expect(rows.length).toBe(2);
+      expect(rows.filter((r) => r.duplicate).length).toBe(1);
+    });
+
+    it('admin creates a campaign invite duplicate alongside the canonical', async () => {
+      const campaign = await campaignRepo.save(
+        campaignRepo.create({ name: 'Promo', code: 'promo-dup' }),
+      );
+      const canonical = await shareUrlsService.getOrCreateForInvite({
+        type: 'campaign',
+        campaignId: campaign.id,
+      });
+
+      const dup = await request(ctx.app.getHttpServer())
+        .post('/share-urls/create-duplicate')
+        .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+        .send({ campaignId: campaign.id, invite: true, label: 'Booth' })
+        .expect(201);
+
+      expect(sidOf(dup.body.url)).not.toBe(sidOf(canonical.url));
+      expect(dup.body.url).toMatch(/\/signup\?ref=share-[a-f0-9]{10}$/);
+      expect(dup.body.kind).toBe(ShareUrlKind.Invite);
+      expect(dup.body.duplicate).toBe(true);
+      expect(dup.body.label).toBe('Booth');
+      expect(dup.body.campaignId).toBe(campaign.id);
+
+      const rows = await shareUrlRepo.find({
+        where: { campaign: { id: campaign.id }, kind: ShareUrlKind.Invite },
       });
       expect(rows.length).toBe(2);
       expect(rows.filter((r) => r.duplicate).length).toBe(1);

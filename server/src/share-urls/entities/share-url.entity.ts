@@ -19,13 +19,30 @@ import {
 } from 'typeorm';
 import { ExternalShareTarget } from './external-share-target.entity';
 
+export enum ShareUrlKind {
+  Action = 'action',
+  ExternalTarget = 'externalTarget',
+  // Links directly to the signup page
+  Invite = 'invite',
+}
+
 @Entity()
 @Check(
-  '("actionId" IS NOT NULL AND "externalTargetId" IS NULL) OR ("actionId" IS NULL AND "externalTargetId" IS NOT NULL)',
+  'CHK_share_url_kind',
+  `("kind" = 'action' ` +
+    `AND "actionId" IS NOT NULL ` +
+    `AND "externalTargetId" IS NULL) ` +
+    `OR ("kind" = 'externalTarget' ` +
+    `AND "externalTargetId" IS NOT NULL ` +
+    `AND "actionId" IS NULL) ` +
+    `OR ("kind" = 'invite' ` +
+    `AND "actionId" IS NULL ` +
+    `AND "externalTargetId" IS NULL)`,
 )
 @Check(
   'CHK_share_url_owner',
-  '("userId" IS NOT NULL AND "campaignId" IS NULL) OR ("userId" IS NULL AND "campaignId" IS NOT NULL)',
+  '("userId" IS NOT NULL AND "campaignId" IS NULL) ' +
+    'OR ("userId" IS NULL AND "campaignId" IS NOT NULL)',
 )
 @Index('UQ_share_url_user_action', ['user', 'action'], {
   unique: true,
@@ -49,6 +66,14 @@ import { ExternalShareTarget } from './external-share-target.entity';
       '"externalTargetId" IS NOT NULL AND "campaignId" IS NOT NULL AND "duplicate" = false',
   },
 )
+@Index('UQ_share_url_user_invite', ['user'], {
+  unique: true,
+  where: `"kind" = 'invite' AND "userId" IS NOT NULL AND "duplicate" = false`,
+})
+@Index('UQ_share_url_campaign_invite', ['campaign'], {
+  unique: true,
+  where: `"kind" = 'invite' AND "campaignId" IS NOT NULL AND "duplicate" = false`,
+})
 export class ShareUrl {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -56,6 +81,13 @@ export class ShareUrl {
   @Column()
   @ApiProperty()
   url: string;
+
+  @Column({ type: 'enum', enum: ShareUrlKind })
+  @ApiProperty({
+    enum: ShareUrlKind,
+    enumName: 'ShareUrlKind',
+  })
+  kind: ShareUrlKind;
 
   @Column({ nullable: true })
   userId: number | null;

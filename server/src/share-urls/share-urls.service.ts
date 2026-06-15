@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Action } from 'src/actions/entities/action.entity';
 import { generateCIDForShareUrl } from 'src/notifs/notif-utils';
-import { actionUrl, withSid } from 'src/search/approutes';
+import { actionUrl, signupUrl, withRef, withSid } from 'src/search/approutes';
 import { User } from 'src/user/entities/user.entity';
 import {
   EntityManager,
@@ -19,16 +19,12 @@ import {
   Repository,
 } from 'typeorm';
 import { ExternalShareTarget } from './entities/external-share-target.entity';
-import { ShareUrl } from './entities/share-url.entity';
-
-enum ShareUrlKind {
-  Action = 'action',
-  ExternalTarget = 'externalTarget',
-}
+import { ShareUrl, ShareUrlKind } from './entities/share-url.entity';
 
 const NOT_FOUND_MESSAGE: Record<ShareUrlKind, string> = {
   [ShareUrlKind.Action]: 'specified action not found',
   [ShareUrlKind.ExternalTarget]: 'specified share target not found',
+  [ShareUrlKind.Invite]: 'invite share link could not be created',
 } as const;
 
 export type ShareUrlOwner =
@@ -66,25 +62,48 @@ type GetOrCreateInput =
       kind: ShareUrlKind.ExternalTarget;
       externalTarget: ExternalShareTarget;
       owner: ShareUrlOwner;
-    };
+    }
+  | { kind: ShareUrlKind.Invite; owner: ShareUrlOwner };
 
 type BuildRowInput = GetOrCreateInput & {
   duplicate: boolean;
   label?: string | null;
 };
 
-function assertExactlyOneTarget(
-  actionId: number | undefined,
-  externalTargetId: number | undefined,
-): void {
-  if (
-    (actionId === undefined && externalTargetId === undefined) ||
-    (actionId !== undefined && externalTargetId !== undefined)
-  ) {
+/** Which target a share-url request points at, before the owner is attached. */
+export type ShareTarget =
+  | { kind: ShareUrlKind.Action; actionId: number }
+  | { kind: ShareUrlKind.ExternalTarget; externalTargetId: number }
+  | { kind: ShareUrlKind.Invite };
+
+/**
+ * Resolve the loose `{ actionId?, externalTargetId?, invite? }` request shape
+ * into a discriminated {@link ShareTarget}, enforcing that exactly one is set.
+ */
+function resolveTarget(params: {
+  actionId?: number;
+  externalTargetId?: number;
+  invite?: boolean;
+}): ShareTarget {
+  const provided =
+    Number(params.actionId !== undefined) +
+    Number(params.externalTargetId !== undefined) +
+    Number(params.invite === true);
+  if (provided !== 1) {
     throw new BadRequestException(
-      'Exactly one of actionId or externalTargetId must be provided',
+      'Exactly one of actionId, externalTargetId, or invite must be provided',
     );
   }
+  if (params.actionId !== undefined) {
+    return { kind: ShareUrlKind.Action, actionId: params.actionId };
+  }
+  if (params.externalTargetId !== undefined) {
+    return {
+      kind: ShareUrlKind.ExternalTarget,
+      externalTargetId: params.externalTargetId,
+    };
+  }
+  return { kind: ShareUrlKind.Invite };
 }
 
 @Injectable()
@@ -100,35 +119,82 @@ export class ShareUrlsService {
     userId: number;
     actionId?: number;
     externalTargetId?: number;
+    invite?: boolean;
   }): Promise<string> {
-    const { userId, actionId, externalTargetId } = params;
-    assertExactlyOneTarget(actionId, externalTargetId);
+    const { userId, actionId, externalTargetId, invite } = params;
+    const target = resolveTarget({ actionId, externalTargetId, invite });
     const owner: ShareUrlOwner = { type: 'user', userId };
-    const shareUrl =
-      externalTargetId !== undefined
-        ? await this.getOrCreateForExternalTargetId(externalTargetId, owner)
-        : await this.getOrCreateForAction(actionId!, owner);
+    const shareUrl = await this.getOrCreateForTarget(target, owner);
     return shareUrl.url;
+  }
+
+  private async getOrCreateForTarget(
+    target: ShareTarget,
+    owner: ShareUrlOwner,
+  ): Promise<ShareUrl> {
+    switch (target.kind) {
+      case ShareUrlKind.Action:
+        return this.getOrCreateForAction(target.actionId, owner);
+      case ShareUrlKind.ExternalTarget:
+        return this.getOrCreateForExternalTargetId(
+          target.externalTargetId,
+          owner,
+        );
+      case ShareUrlKind.Invite:
+        return this.getOrCreateForInvite(owner);
+      default:
+        throw new Error(`unknown share target kind: ${target satisfies never}`);
+    }
   }
 
   async createDuplicate(params: {
     owner: ShareUrlOwner;
     actionId?: number;
     externalTargetId?: number;
+    invite?: boolean;
     label?: string;
   }): Promise<ShareUrl> {
-    const { owner, actionId, externalTargetId, label } = params;
-    assertExactlyOneTarget(actionId, externalTargetId);
+    const { owner, actionId, externalTargetId, invite, label } = params;
+    const target = resolveTarget({ actionId, externalTargetId, invite });
     const trimmedLabel = label?.trim();
     const labelValue = trimmedLabel ? trimmedLabel : null;
-    if (externalTargetId !== undefined) {
-      return this.createDuplicateForExternalTargetId(
-        externalTargetId,
-        owner,
-        labelValue,
-      );
+    switch (target.kind) {
+      case ShareUrlKind.Action:
+        return this.createDuplicateForAction(
+          target.actionId,
+          owner,
+          labelValue,
+        );
+      case ShareUrlKind.ExternalTarget:
+        return this.createDuplicateForExternalTargetId(
+          target.externalTargetId,
+          owner,
+          labelValue,
+        );
+      case ShareUrlKind.Invite:
+        return this.createDuplicateForInvite(owner, labelValue);
+      default:
+        throw new Error(`unknown share target kind: ${target satisfies never}`);
     }
-    return this.createDuplicateForAction(actionId!, owner, labelValue);
+  }
+
+  private async createDuplicateForInvite(
+    owner: ShareUrlOwner,
+    label: string | null,
+  ): Promise<ShareUrl> {
+    return this.buildAndSaveRow(this.shareUrlRepository.manager, {
+      kind: ShareUrlKind.Invite,
+      owner,
+      duplicate: true,
+      label,
+    });
+  }
+
+  async getOrCreateForInvite(owner: ShareUrlOwner): Promise<ShareUrl> {
+    return this.getOrCreate(this.shareUrlRepository.manager, {
+      kind: ShareUrlKind.Invite,
+      owner,
+    });
   }
 
   private async createDuplicateForExternalTargetId(
@@ -316,6 +382,12 @@ export class ShareUrlsService {
             externalTarget: { id: input.externalTarget.id },
             duplicate: false,
           };
+        case ShareUrlKind.Invite:
+          return {
+            ...ownerWhere(input.owner),
+            kind: ShareUrlKind.Invite,
+            duplicate: false,
+          };
         default:
           throw new Error(
             `getOrCreate: unknown share url kind: ${input satisfies never}`,
@@ -382,6 +454,12 @@ export class ShareUrlsService {
               action: null,
               externalTarget: input.externalTarget,
             };
+          case ShareUrlKind.Invite:
+            return {
+              url: withRef(signupUrl(true), sid),
+              action: null,
+              externalTarget: null,
+            };
           default:
             throw new Error(
               `buildAndSaveRow: unknown share url kind: ${input satisfies never}`,
@@ -392,6 +470,7 @@ export class ShareUrlsService {
 
     const shareUrl = repo.create({
       url: built.url,
+      kind: input.kind,
       ...ownerColumns(input.owner),
       action: built.action,
       externalTarget: built.externalTarget,

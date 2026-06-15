@@ -60,7 +60,7 @@ export type ContractEvent = {
     contract?: Contract | null;
 };
 
-export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link' | 'external_share_link' | 'campaign';
+export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link' | 'external_share_link' | 'invite_share_link' | 'campaign';
 
 export type NotificationPreference = 'all' | 'digest' | 'none';
 
@@ -1040,6 +1040,10 @@ export type UploadImageResponseDto = {
 export type GetShareLinkDto = {
     actionId?: number;
     externalTargetId?: number;
+    /**
+     * Set true for an invite link to the signup page. Provide exactly one of actionId, externalTargetId, or invite.
+     */
+    invite?: boolean;
 };
 
 export type ShareLinkDto = {
@@ -1058,10 +1062,16 @@ export type CreateDuplicateShareLinkDto = {
     actionId?: number;
     externalTargetId?: number;
     /**
+     * Set true for an invite link to the signup page. Provide exactly one of actionId, externalTargetId, or invite.
+     */
+    invite?: boolean;
+    /**
      * Optional label to distinguish this duplicate at a glance.
      */
     label?: string;
 };
+
+export type ShareUrlKind = 'action' | 'externalTarget' | 'invite';
 
 export type ShareUrlAdminActionDto = {
     id: number;
@@ -1075,6 +1085,7 @@ export type ShareUrlAdminExternalTargetDto = {
 
 export type ShareUrlAdminDto = {
     id: string;
+    kind: ShareUrlKind;
     sid?: string;
     url: string;
     duplicate: boolean;
@@ -3256,6 +3267,9 @@ export type PlatformTenureCohortActionStatsDto = {
 export type PlatformTenureCohortStatsDto = {
     weeksOnPlatform: number;
     cohortSize: number;
+    activeCount: number;
+    churnedCount: number;
+    churnRate: number;
     assignedCount: number;
     completedCount: number;
     completionRate: number;

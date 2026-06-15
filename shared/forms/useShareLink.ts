@@ -4,11 +4,13 @@ import { shareUrlsGetShareLink } from "../client";
 export enum ShareLinkTargetKind {
   Action = "action",
   ExternalTarget = "externalTarget",
+  Invite = "invite",
 }
 
 export type ShareLinkTarget =
   | { kind: ShareLinkTargetKind.Action; actionId: number }
-  | { kind: ShareLinkTargetKind.ExternalTarget; externalTargetId: number };
+  | { kind: ShareLinkTargetKind.ExternalTarget; externalTargetId: number }
+  | { kind: ShareLinkTargetKind.Invite };
 
 export function shareLinkTargetFromConfig(
   config: Record<string, unknown> | undefined,
@@ -20,6 +22,9 @@ export function shareLinkTargetFromConfig(
   const externalTargetId = config?.["externalTargetId"];
   if (typeof externalTargetId === "number") {
     return { kind: ShareLinkTargetKind.ExternalTarget, externalTargetId };
+  }
+  if (config?.["invite"] === true) {
+    return { kind: ShareLinkTargetKind.Invite };
   }
   return null;
 }
@@ -35,6 +40,8 @@ export function useShareLink(target: ShareLinkTarget | null | undefined) {
             return { actionId: target.actionId };
           case ShareLinkTargetKind.ExternalTarget:
             return { externalTargetId: target.externalTargetId };
+          case ShareLinkTargetKind.Invite:
+            return { invite: true };
           default:
             throw new Error(
               `useShareLink: unknown target kind: ${target satisfies never}`,

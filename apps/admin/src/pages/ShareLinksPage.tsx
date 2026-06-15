@@ -34,13 +34,18 @@ import React, {
   useState,
 } from "react";
 
-type TargetKind = "action" | "external";
+type TargetKind = "action" | "external" | "invite";
 
 type Target =
   | { kind: "action"; id: number; name: string }
-  | { kind: "external"; id: number; name: string };
+  | { kind: "external"; id: number; name: string }
+  | { kind: "invite" };
 
-const targetKey = (t: Target): string => `${t.kind}-${t.id}`;
+const targetKey = (t: Target): string =>
+  t.kind === "invite" ? "invite" : `${t.kind}-${t.id}`;
+
+const targetName = (t: Target): string =>
+  t.kind === "invite" ? "Signup invite" : t.name;
 
 const targetKindLabel = (kind: TargetKind): string => {
   switch (kind) {
@@ -48,13 +53,25 @@ const targetKindLabel = (kind: TargetKind): string => {
       return "Action";
     case "external":
       return "External target";
+    case "invite":
+      return "Invite (signup link)";
     default:
       throw new Error(`unknown target kind: ${kind satisfies never}`);
   }
 };
 
-const targetSubtitle = (t: Target): string =>
-  t.kind === "action" ? `Action #${t.id}` : "External share target";
+const targetSubtitle = (t: Target): string => {
+  switch (t.kind) {
+    case "action":
+      return `Action #${t.id}`;
+    case "external":
+      return "External share target";
+    case "invite":
+      return "Signup invite link";
+    default:
+      throw new Error(`unknown target kind: ${t satisfies never}`);
+  }
+};
 
 type OwnerKind = "user" | "campaign";
 
@@ -256,6 +273,8 @@ const ShareLinksPage: React.FC = () => {
           id: t.id,
           name: t.name,
         }));
+      case "invite":
+        return [{ kind: "invite" }];
       default:
         throw new Error(`unknown target kind: ${selectedKind satisfies never}`);
     }
@@ -263,7 +282,8 @@ const ShareLinksPage: React.FC = () => {
 
   const handleKindChange = useCallback((kind: TargetKind) => {
     setSelectedKind(kind);
-    setSelectedTarget(null);
+    // Invite has no target to choose, so select it implicitly.
+    setSelectedTarget(kind === "invite" ? { kind: "invite" } : null);
   }, []);
 
   const groups = useMemo(() => {
@@ -285,6 +305,8 @@ const ShareLinksPage: React.FC = () => {
           id: row.externalTarget.id,
           name: row.externalTarget.name,
         };
+      } else if (row.kind === "invite") {
+        target = { kind: "invite" };
       }
       if (!target) continue;
       const key = targetKey(target);
@@ -389,6 +411,7 @@ const ShareLinksPage: React.FC = () => {
             requestTarget.kind === "action" ? requestTarget.id : undefined,
           externalTargetId:
             requestTarget.kind === "external" ? requestTarget.id : undefined,
+          invite: requestTarget.kind === "invite" ? true : undefined,
           label: trimmed || undefined,
         },
       });
@@ -527,15 +550,23 @@ const ShareLinksPage: React.FC = () => {
                   >
                     <option value="action">Action</option>
                     <option value="external">External target</option>
+                    <option value="invite">Invite (signup link)</option>
                   </select>
                 </div>
-                <TargetPicker
-                  kind={selectedKind}
-                  targets={targetsForKind}
-                  value={selectedTarget}
-                  onChange={setSelectedTarget}
-                  disabled={creating}
-                />
+                {selectedKind === "invite" ? (
+                  <p className="text-xs text-zinc-500">
+                    A single trackable signup link will be created for{" "}
+                    {ownerName}, attributing new signups to them as a source.
+                  </p>
+                ) : (
+                  <TargetPicker
+                    kind={selectedKind}
+                    targets={targetsForKind}
+                    value={selectedTarget}
+                    onChange={setSelectedTarget}
+                    disabled={creating}
+                  />
+                )}
                 <input
                   type="text"
                   className="border border-zinc-300 rounded px-3 py-2 text-sm"
@@ -707,7 +738,7 @@ const TargetPicker: React.FC<{
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase();
     if (!term) return targets;
-    return targets.filter((t) => t.name.toLowerCase().includes(term));
+    return targets.filter((t) => targetName(t).toLowerCase().includes(term));
   }, [targets, query]);
 
   const placeholder =
@@ -720,7 +751,7 @@ const TargetPicker: React.FC<{
       </label>
       {value ? (
         <div className="flex flex-row items-center gap-2 border border-zinc-300 rounded px-3 py-2 text-sm bg-white">
-          <span className="flex-1 truncate">{value.name}</span>
+          <span className="flex-1 truncate">{targetName(value)}</span>
           <button
             type="button"
             className="text-xs text-zinc-500 hover:text-zinc-900"
@@ -760,7 +791,7 @@ const TargetPicker: React.FC<{
                       setOpen(false);
                     }}
                   >
-                    <span className="truncate">{t.name}</span>
+                    <span className="truncate">{targetName(t)}</span>
                   </button>
                 ))
               )}
@@ -802,7 +833,7 @@ const GroupCard: React.FC<{
           <ChevronRight size={16} className="text-zinc-500 shrink-0" />
         )}
         <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-          <h3 className="font-semibold truncate">{target.name}</h3>
+          <h3 className="font-semibold truncate">{targetName(target)}</h3>
           <p className="text-xs text-zinc-500">{targetSubtitle(target)}</p>
         </div>
         <div className="flex flex-row gap-2 shrink-0 text-xs text-zinc-600">

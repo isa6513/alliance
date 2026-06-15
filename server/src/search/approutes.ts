@@ -13,6 +13,11 @@ export function actionUrl(actionId: number, full = false) {
   return full ? `${process.env.APP_URL}${path}` : path;
 }
 
+export function signupUrl(full = false) {
+  const path = `/signup`;
+  return full ? `${process.env.APP_URL}${path}` : path;
+}
+
 export function groupUrl(params?: {
   tab?: 'invites' | 'groups' | 'members';
   communityId?: number;
@@ -82,4 +87,8 @@ export function withCid(url: string, cid: string) {
 
 export function withSid(url: string, sid: string) {
   return appendQueryParam(url, 'sid', sid);
+}
+
+export function withRef(url: string, ref: string) {
+  return appendQueryParam(url, 'ref', ref);
 }

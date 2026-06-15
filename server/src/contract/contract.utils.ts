@@ -43,6 +43,7 @@ export const REFERRAL_COMMUNITY_SELECTORS: Record<
   [ReferralSource.ReferralLink]: selectCommunityForLinkReferral,
   [ReferralSource.ActionShareLink]: selectCommunityForLinkReferral,
   [ReferralSource.ExternalShareLink]: selectCommunityForLinkReferral,
+  [ReferralSource.InviteShareLink]: selectCommunityForLinkReferral,
   [ReferralSource.Campaign]: () => null,
 };
 
