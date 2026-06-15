@@ -162,7 +162,10 @@ const PeoplePage: React.FC = () => {
           <PrelaunchNavbar transparent={false} absolute={false} />
         </section>
 
-        <section className={cn("w-full bg-white", LANDING_SECTION_PY)}>
+        <section
+          className={cn("w-full bg-white", LANDING_SECTION_PY)}
+          id="office"
+        >
           <div className={LANDING_WIDE_SECTION}>
             <div className="flex flex-col gap-4 text-center mb-6">
               <p className={SECTION_TITLE_CLASS}>Office</p>
@@ -240,7 +243,10 @@ const PeoplePage: React.FC = () => {
           </div>
         </section>
 
-        <section className={cn("w-full bg-grey-0", LANDING_SECTION_PY)}>
+        <section
+          className={cn("w-full bg-grey-0", LANDING_SECTION_PY)}
+          id="members"
+        >
           <div className={LANDING_WIDE_SECTION}>
             <div className="flex flex-col gap-4 text-center mb-6">
               <p className={SECTION_TITLE_CLASS}>Members</p>
