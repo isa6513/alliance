@@ -16,9 +16,20 @@ export class GetShareLinkDto {
 }
 
 export class CreateDuplicateShareLinkDto {
-  @ApiProperty()
+  @ApiPropertyOptional({
+    description: 'Owning user. Provide exactly one of userId or campaignId.',
+  })
+  @IsOptional()
   @IsInt()
-  userId: number;
+  userId?: number;
+
+  @ApiPropertyOptional({
+    description:
+      'Owning campaign. Provide exactly one of userId or campaignId.',
+  })
+  @IsOptional()
+  @IsInt()
+  campaignId?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -93,6 +104,12 @@ export class ShareUrlAdminDto {
   @ApiProperty({ type: String, nullable: true })
   label: string | null;
 
+  @ApiProperty({ type: Number, nullable: true })
+  userId: number | null;
+
+  @ApiProperty({ type: Number, nullable: true })
+  campaignId: number | null;
+
   @ApiProperty({ type: Date })
   createdAt: Date;
 
@@ -113,6 +130,8 @@ export class ShareUrlAdminDto {
     this.url = input.url;
     this.duplicate = input.duplicate;
     this.label = input.label ?? null;
+    this.userId = input.userId ?? null;
+    this.campaignId = input.campaignId ?? null;
     this.createdAt = input.createdAt;
     this.action = input.action
       ? new ShareUrlAdminActionDto({

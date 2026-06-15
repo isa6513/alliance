@@ -8,6 +8,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LiveActivityRegistration } from 'src/apns/entities/live-activity-registration.entity';
+import { CampaignService } from 'src/campaign/campaign.service';
+import { Campaign } from 'src/campaign/entities/campaign.entity';
 import { CommunityService } from 'src/community/community.service';
 import { getCommunityFreeSlots } from 'src/community/community.utils';
 import { Community } from 'src/community/entities/community.entity';
@@ -65,13 +67,40 @@ import {
   UserAwayRangeReason,
 } from './entities/user-away-range.entity';
 import { UserDevice } from './entities/user-device.entity';
-import { DEFAULT_TIME_ZONE, User } from './entities/user.entity';
+import {
+  DEFAULT_TIME_ZONE,
+  ReferralSource,
+  User,
+} from './entities/user.entity';
 import { sqlUserHasActiveContractAt } from './has-active-contract-at';
 
 export interface PWResetJwtPayload {
   sub: number;
   type: string;
 }
+
+export type ReferrerResolution =
+  | { kind: 'user'; user: User }
+  | { kind: 'campaign'; campaign: Campaign };
+
+/**
+ * What a referral code/sid points to, resolved in a fixed precedence order
+ * (onetime invite → campaign-owned share link → user-owned share link →
+ * bare campaign code → user referral code). Side-effect free: callers apply
+ * their own behaviour (signup attribution in AuthService, display in
+ * UserService.resolveReferrer). See {@link UserService.resolveReferral}.
+ */
+export type ReferralResolution =
+  | { kind: 'invite'; invite: OnetimeInvite }
+  | { kind: 'campaign'; campaign: Campaign }
+  | {
+      kind: 'user';
+      user: User;
+      referralSource:
+        | ReferralSource.ActionShareLink
+        | ReferralSource.ExternalShareLink
+        | ReferralSource.ReferralLink;
+    };
 
 @Injectable()
 export class UserService {
@@ -95,6 +124,7 @@ export class UserService {
     @InjectRepository(LiveActivityRegistration)
     private readonly liveActivityRegistrationRepository: Repository<LiveActivityRegistration>,
     private readonly shareUrlsService: ShareUrlsService,
+    private readonly campaignService: CampaignService,
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     private readonly mailService: MailService,
@@ -229,6 +259,74 @@ export class UserService {
 
   async findUserByShareSid(sid: string): Promise<User | null> {
     return this.shareUrlsService.findUserBySid(sid);
+  }
+
+  /**
+   * Resolve a referral code/sid to whatever it points to, in a fixed
+   * precedence order, with no side effects. The single source of truth for
+   * referral precedence — both signup attribution (AuthService) and the
+   * signup-page inviter display ({@link resolveReferrer}) build on it, so the
+   * two can't drift. `opts.inviteRelations` lets a caller load the matched
+   * invite with extra relations (AuthService needs the inviting user's
+   * communities and the invited user to detect a spent invite).
+   */
+  async resolveReferral(
+    code: string,
+    opts?: { inviteRelations?: Relations<OnetimeInvite> },
+  ): Promise<ReferralResolution | null> {
+    const invite = await this.findInviteByCode(code, opts?.inviteRelations);
+    if (invite) {
+      return { kind: 'invite', invite };
+    }
+    const shareUrl = await this.shareUrlsService.findByReferralSid(code);
+    if (shareUrl?.campaign) {
+      return { kind: 'campaign', campaign: shareUrl.campaign };
+    }
+    if (shareUrl?.user) {
+      return {
+        kind: 'user',
+        user: shareUrl.user,
+        referralSource: shareUrl.externalTarget
+          ? ReferralSource.ExternalShareLink
+          : ReferralSource.ActionShareLink,
+      };
+    }
+    const campaign = await this.campaignService.findByCode(code);
+    if (campaign) {
+      return { kind: 'campaign', campaign };
+    }
+    const user = await this.findOneByReferralCode(code);
+    if (user) {
+      return {
+        kind: 'user',
+        user,
+        referralSource: ReferralSource.ReferralLink,
+      };
+    }
+    return null;
+  }
+
+  /**
+   * Resolve a referral code/sid to whoever (or whatever) referred the signup:
+   * a referring user, or a userless campaign — for display on the signup page.
+   */
+  async resolveReferrer(code: string): Promise<ReferrerResolution | null> {
+    const resolution = await this.resolveReferral(code);
+    if (!resolution) return null;
+    switch (resolution.kind) {
+      case 'invite':
+        return resolution.invite.invitingUser
+          ? { kind: 'user', user: resolution.invite.invitingUser }
+          : null;
+      case 'campaign':
+        return { kind: 'campaign', campaign: resolution.campaign };
+      case 'user':
+        return { kind: 'user', user: resolution.user };
+      default:
+        throw new Error(
+          `unknown referral resolution: ${resolution satisfies never}`,
+        );
+    }
   }
 
   async remove(id: number): Promise<void> {

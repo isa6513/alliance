@@ -4,6 +4,7 @@ import {
   authMe,
   authRegister,
   ProfileDto,
+  ReferrerProfileDto,
   SignUpDto,
   userFindOne,
   userOnetimeInvite,
@@ -129,7 +130,8 @@ const SignupPage: React.FC = () => {
     ]),
   );
 
-  const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
+  const [inviterProfile, setInviterProfile] =
+    useState<ReferrerProfileDto | null>(null);
   // const [inviteeName, setInviteeName] = useState<string | null>(null);
   const [isInviteValid, setIsInviteValid] = useState(true);
 
@@ -223,7 +225,11 @@ const SignupPage: React.FC = () => {
           {isInviteValid && inviterProfile && (
             <div className="rounded-md">
               <div className="flex flex-row gap-x-1 items-center text-zinc-500">
-                <span>Invited by </span>
+                <span>
+                  {inviterProfile.kind === "campaign"
+                    ? "Invited via "
+                    : "Invited by "}
+                </span>
                 <AvatarProfile
                   pfp={inviterProfile?.profilePicture ?? null}
                   size="small"

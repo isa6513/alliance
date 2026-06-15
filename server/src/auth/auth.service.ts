@@ -6,7 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Request, Response } from 'express';
-import { ShareUrlsService } from 'src/share-urls/share-urls.service';
+import { Campaign } from 'src/campaign/entities/campaign.entity';
 import { OnetimeInvite } from 'src/user/entities/onetime-invite.entity';
 import { Repository } from 'typeorm';
 import { MailService } from '../mail/mail.service';
@@ -30,7 +30,6 @@ export class AuthService {
     private usersService: UserService,
     private jwtService: JwtService,
     private mailService: MailService,
-    private shareUrlsService: ShareUrlsService,
     @InjectRepository(Guest)
     private guestRepository: Repository<Guest>,
   ) {}
@@ -178,45 +177,64 @@ export class AuthService {
   private async resolveReferralCode(referralCode: string): Promise<{
     invite: OnetimeInvite | null;
     referringUser: User | null;
+    referredByCampaign: Campaign | null;
     referralSource: ReferralSource;
   }> {
-    const invite = await this.usersService.findInviteByCode(referralCode, {
-      invitingUser: { communities: true },
-      community: true,
-      invitedUser: true,
+    const resolution = await this.usersService.resolveReferral(referralCode, {
+      inviteRelations: {
+        invitingUser: { communities: true },
+        community: true,
+        invitedUser: true,
+      },
     });
-    if (invite?.invitedUser) {
-      throw new BadRequestException('This invite code has already been used');
-    }
-    if (invite) {
-      await this.usersService.invalidateInvite(invite.id);
-      return {
-        invite,
-        referringUser: invite.invitingUser,
-        referralSource: ReferralSource.OnetimeInvite,
-      };
-    }
-    const shareUrl =
-      await this.shareUrlsService.findByReferralSid(referralCode);
-    if (shareUrl?.user) {
+
+    if (!resolution) {
+      if (process.env.NODE_ENV !== 'test') {
+        throw new BadRequestException('invalid referral code'); // TODO: feature flag
+      }
       return {
         invite: null,
-        referringUser: shareUrl.user,
-        referralSource: shareUrl.externalTarget
-          ? ReferralSource.ExternalShareLink
-          : ReferralSource.ActionShareLink,
+        referringUser: null,
+        referredByCampaign: null,
+        referralSource: ReferralSource.ReferralLink,
       };
     }
-    const referringUser =
-      await this.usersService.findOneByReferralCode(referralCode);
-    if (!referringUser && process.env.NODE_ENV !== 'test') {
-      throw new BadRequestException('invalid referral code'); // TODO: feature flag
+
+    switch (resolution.kind) {
+      case 'invite': {
+        const { invite } = resolution;
+        if (invite.invitedUser) {
+          throw new BadRequestException(
+            'This invite code has already been used',
+          );
+        }
+        await this.usersService.invalidateInvite(invite.id);
+        return {
+          invite,
+          referringUser: invite.invitingUser,
+          referredByCampaign: null,
+          referralSource: ReferralSource.OnetimeInvite,
+        };
+      }
+      case 'campaign':
+        return {
+          invite: null,
+          referringUser: null,
+          referredByCampaign: resolution.campaign,
+          referralSource: ReferralSource.Campaign,
+        };
+      case 'user':
+        return {
+          invite: null,
+          referringUser: resolution.user,
+          referredByCampaign: null,
+          referralSource: resolution.referralSource,
+        };
+      default:
+        throw new Error(
+          `unknown referral resolution: ${resolution satisfies never}`,
+        );
     }
-    return {
-      invite: null,
-      referringUser,
-      referralSource: ReferralSource.ReferralLink,
-    };
   }
 
   async register(signUp: SignUpDto): Promise<User> {
@@ -228,7 +246,7 @@ export class AuthService {
       throw new BadRequestException('No referral code provided');
     }
 
-    const { invite, referringUser, referralSource } =
+    const { invite, referringUser, referredByCampaign, referralSource } =
       await this.resolveReferralCode(signUp.referralCode);
 
     const defaultTag = await this.usersService.findAllMembersTag();
@@ -237,6 +255,7 @@ export class AuthService {
       ...signUp,
       referredBy: referringUser ?? null,
       referredByInvite: invite ?? null,
+      referredByCampaign: referredByCampaign ?? null,
       referralSource,
       tags: defaultTag ? [defaultTag] : undefined,
     });

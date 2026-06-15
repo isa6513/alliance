@@ -18,6 +18,7 @@ import { Cluster } from '../../cluster/entities/cluster.entity';
 import { ContractEvent } from '../entities/contract-event.entity';
 import { FriendStatus } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
+import type { ReferrerResolution } from '../user.service';
 
 export type FriendStatusDtoArgs = {
   status: FriendStatus;
@@ -101,6 +102,43 @@ export class ProfileDto extends PickType(User, [
 
     if (user.cluster) {
       this.cluster = new ClusterSummaryDto(user.cluster);
+    }
+  }
+}
+
+/**
+ * Who referred a signup, for display on the signup page. Either a referring
+ * user or a userless campaign (`kind` tells the client which copy to show —
+ * "Invited by {name}" vs "Invited via {name}").
+ */
+export class ReferrerProfileDto {
+  @ApiProperty({ enum: ['user', 'campaign'], enumName: 'ReferrerKind' })
+  kind: 'user' | 'campaign';
+
+  @ApiProperty()
+  displayName: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  profilePicture: string | null;
+
+  constructor(input: ReferrerResolution) {
+    switch (input.kind) {
+      case 'user':
+        this.kind = 'user';
+        this.displayName = input.user.anonymous ? 'Someone' : input.user.name;
+        this.profilePicture = input.user.profilePicture
+          ? getImageSource(input.user.profilePicture)
+          : null;
+        break;
+      case 'campaign':
+        this.kind = 'campaign';
+        this.displayName = input.campaign.name;
+        this.profilePicture = input.campaign.picture
+          ? getImageSource(input.campaign.picture)
+          : null;
+        break;
+      default:
+        throw new Error(`unknown referrer kind: ${input satisfies never}`);
     }
   }
 }

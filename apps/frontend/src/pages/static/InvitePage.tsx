@@ -1,6 +1,6 @@
 import { AnalyticsEvent } from "@alliance/common/analytics";
 import {
-  ProfileDto,
+  ReferrerProfileDto,
   userOnetimeInvite,
   userReferrerProfile,
 } from "@alliance/shared/client";
@@ -19,7 +19,8 @@ const InvitePage: React.FC = () => {
 
   const referralCode = searchParams.get("ref");
 
-  const [inviterProfile, setInviterProfile] = useState<ProfileDto | null>(null);
+  const [inviterProfile, setInviterProfile] =
+    useState<ReferrerProfileDto | null>(null);
   const [inviteeName, setInviteeName] = useState<string | null>(null);
   const [communityId, setCommunityId] = useState<number | null>(null);
 

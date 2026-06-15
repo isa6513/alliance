@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Action } from 'src/actions/entities/action.entity';
+import { Campaign } from 'src/campaign/entities/campaign.entity';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
@@ -22,6 +23,10 @@ import { ExternalShareTarget } from './external-share-target.entity';
 @Check(
   '("actionId" IS NOT NULL AND "externalTargetId" IS NULL) OR ("actionId" IS NULL AND "externalTargetId" IS NOT NULL)',
 )
+@Check(
+  'CHK_share_url_owner',
+  '("userId" IS NOT NULL AND "campaignId" IS NULL) OR ("userId" IS NULL AND "campaignId" IS NOT NULL)',
+)
 @Index('UQ_share_url_user_action', ['user', 'action'], {
   unique: true,
   where: '"actionId" IS NOT NULL AND "duplicate" = false',
@@ -30,6 +35,20 @@ import { ExternalShareTarget } from './external-share-target.entity';
   unique: true,
   where: '"externalTargetId" IS NOT NULL AND "duplicate" = false',
 })
+@Index('UQ_share_url_campaign_action', ['campaign', 'action'], {
+  unique: true,
+  where:
+    '"actionId" IS NOT NULL AND "campaignId" IS NOT NULL AND "duplicate" = false',
+})
+@Index(
+  'UQ_share_url_campaign_external_target',
+  ['campaign', 'externalTarget'],
+  {
+    unique: true,
+    where:
+      '"externalTargetId" IS NOT NULL AND "campaignId" IS NOT NULL AND "duplicate" = false',
+  },
+)
 export class ShareUrl {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -38,10 +57,21 @@ export class ShareUrl {
   @ApiProperty()
   url: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @Column({ nullable: true })
+  userId: number | null;
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: true })
   @JoinColumn({ name: 'userId' })
   @Type(() => User)
-  user?: Relation<User>;
+  user?: Relation<User> | null;
+
+  @Column({ nullable: true })
+  campaignId: number | null;
+
+  @ManyToOne(() => Campaign, { onDelete: 'CASCADE', nullable: true })
+  @JoinColumn({ name: 'campaignId' })
+  @Type(() => Campaign)
+  campaign?: Relation<Campaign> | null;
 
   @Column({ nullable: true })
   actionId: number | null;

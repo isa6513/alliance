@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -20,7 +21,20 @@ import {
   ShareUrlAdminDto,
   UpdateShareLinkLabelDto,
 } from './dto/share-url.dto';
-import { ShareUrlsService } from './share-urls.service';
+import { type ShareUrlOwner, ShareUrlsService } from './share-urls.service';
+
+function ownerFromDto(body: CreateDuplicateShareLinkDto): ShareUrlOwner {
+  const hasUser = body.userId !== undefined;
+  const hasCampaign = body.campaignId !== undefined;
+  if (hasUser === hasCampaign) {
+    throw new BadRequestException(
+      'Exactly one of userId or campaignId must be provided',
+    );
+  }
+  return hasUser
+    ? { type: 'user', userId: body.userId! }
+    : { type: 'campaign', campaignId: body.campaignId! };
+}
 
 @Controller('share-urls')
 export class ShareUrlsController {
@@ -48,7 +62,7 @@ export class ShareUrlsController {
     @Body() body: CreateDuplicateShareLinkDto,
   ): Promise<ShareUrlAdminDto> {
     const row = await this.shareUrlsService.createDuplicate({
-      userId: body.userId,
+      owner: ownerFromDto(body),
       actionId: body.actionId,
       externalTargetId: body.externalTargetId,
       label: body.label,
@@ -63,6 +77,16 @@ export class ShareUrlsController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<ShareUrlAdminDto[]> {
     const rows = await this.shareUrlsService.findForUser(userId);
+    return rows.map((r) => new ShareUrlAdminDto(r));
+  }
+
+  @Get('for-campaign/:campaignId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ShareUrlAdminDto, isArray: true })
+  async findForCampaignAdmin(
+    @Param('campaignId', ParseIntPipe) campaignId: number,
+  ): Promise<ShareUrlAdminDto[]> {
+    const rows = await this.shareUrlsService.findForCampaign(campaignId);
     return rows.map((r) => new ShareUrlAdminDto(r));
   }
 

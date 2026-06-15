@@ -60,7 +60,7 @@ export type ContractEvent = {
     contract?: Contract | null;
 };
 
-export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link' | 'external_share_link';
+export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link' | 'external_share_link' | 'campaign';
 
 export type NotificationPreference = 'all' | 'digest' | 'none';
 
@@ -587,6 +587,24 @@ export type OnetimeInvite = {
     notifs: Array<Notification>;
 };
 
+export type Campaign = {
+    id: number;
+    /**
+     * Human-readable label, shown in the admin panel
+     */
+    name: string;
+    /**
+     * Bare signup referral code attributing new users to this campaign
+     */
+    code: string;
+    /**
+     * Image key for the campaign avatar, shown on the signup page
+     */
+    picture: string | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type ParticipantRole = 'admin' | 'member' | 'owner';
 
 export type Message = {
@@ -657,6 +675,7 @@ export type User = {
     contractEvents?: Array<ContractEvent>;
     referredByInvite: OnetimeInvite | null;
     referralSource: ReferralSource;
+    referredByCampaign?: Campaign | null;
     tags: Array<Tag>;
     /**
      * The community that the user will join when they sign the contract
@@ -900,6 +919,14 @@ export type SignupSocialProofDto = {
     profiles: Array<ProfileDto>;
 };
 
+export type ReferrerKind = 'user' | 'campaign';
+
+export type ReferrerProfileDto = {
+    kind: ReferrerKind;
+    displayName: string;
+    profilePicture: string | null;
+};
+
 export type CommunityDto = {
     id: number;
     name: string;
@@ -1020,7 +1047,14 @@ export type ShareLinkDto = {
 };
 
 export type CreateDuplicateShareLinkDto = {
-    userId: number;
+    /**
+     * Owning user. Provide exactly one of userId or campaignId.
+     */
+    userId?: number;
+    /**
+     * Owning campaign. Provide exactly one of userId or campaignId.
+     */
+    campaignId?: number;
     actionId?: number;
     externalTargetId?: number;
     /**
@@ -1045,6 +1079,8 @@ export type ShareUrlAdminDto = {
     url: string;
     duplicate: boolean;
     label: string | null;
+    userId: number | null;
+    campaignId: number | null;
     createdAt: string;
     action?: ShareUrlAdminActionDto | null;
     externalTarget?: ShareUrlAdminExternalTargetDto | null;
@@ -1076,6 +1112,28 @@ export type UpdateExternalShareTargetDto = {
     name?: string;
     url?: string;
     paramName?: string;
+};
+
+export type CampaignDto = {
+    id: number;
+    name: string;
+    code: string;
+    picture: string | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type CreateCampaignDto = {
+    name: string;
+    /**
+     * Image key (from POST /images/uploadImage) for the avatar.
+     */
+    picture?: string;
+};
+
+export type UpdateCampaignDto = {
+    name?: string;
+    picture?: string | null;
 };
 
 export type ConversationType = 'direct' | 'multiple' | 'community';
@@ -4430,7 +4488,7 @@ export type UserReferrerProfileErrors = {
 export type UserReferrerProfileError = UserReferrerProfileErrors[keyof UserReferrerProfileErrors];
 
 export type UserReferrerProfileResponses = {
-    200: ProfileDto;
+    200: ReferrerProfileDto;
 };
 
 export type UserReferrerProfileResponse = UserReferrerProfileResponses[keyof UserReferrerProfileResponses];
@@ -5041,6 +5099,30 @@ export type ShareUrlsFindForUserAdminResponses = {
 
 export type ShareUrlsFindForUserAdminResponse = ShareUrlsFindForUserAdminResponses[keyof ShareUrlsFindForUserAdminResponses];
 
+export type ShareUrlsFindForCampaignAdminData = {
+    body?: never;
+    path: {
+        campaignId: number;
+    };
+    query?: never;
+    url: '/share-urls/for-campaign/{campaignId}';
+};
+
+export type ShareUrlsFindForCampaignAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsFindForCampaignAdminError = ShareUrlsFindForCampaignAdminErrors[keyof ShareUrlsFindForCampaignAdminErrors];
+
+export type ShareUrlsFindForCampaignAdminResponses = {
+    200: Array<ShareUrlAdminDto>;
+};
+
+export type ShareUrlsFindForCampaignAdminResponse = ShareUrlsFindForCampaignAdminResponses[keyof ShareUrlsFindForCampaignAdminResponses];
+
 export type ShareUrlsUpdateLabelAdminData = {
     body: UpdateShareLinkLabelDto;
     path: {
@@ -5182,6 +5264,98 @@ export type ExternalShareTargetsUpdateAdminResponses = {
 };
 
 export type ExternalShareTargetsUpdateAdminResponse = ExternalShareTargetsUpdateAdminResponses[keyof ExternalShareTargetsUpdateAdminResponses];
+
+export type CampaignFindAllAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/campaigns';
+};
+
+export type CampaignFindAllAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CampaignFindAllAdminError = CampaignFindAllAdminErrors[keyof CampaignFindAllAdminErrors];
+
+export type CampaignFindAllAdminResponses = {
+    200: Array<CampaignDto>;
+};
+
+export type CampaignFindAllAdminResponse = CampaignFindAllAdminResponses[keyof CampaignFindAllAdminResponses];
+
+export type CampaignCreateAdminData = {
+    body: CreateCampaignDto;
+    path?: never;
+    query?: never;
+    url: '/campaigns';
+};
+
+export type CampaignCreateAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CampaignCreateAdminError = CampaignCreateAdminErrors[keyof CampaignCreateAdminErrors];
+
+export type CampaignCreateAdminResponses = {
+    200: CampaignDto;
+};
+
+export type CampaignCreateAdminResponse = CampaignCreateAdminResponses[keyof CampaignCreateAdminResponses];
+
+export type CampaignFindOneAdminData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/campaigns/{id}';
+};
+
+export type CampaignFindOneAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CampaignFindOneAdminError = CampaignFindOneAdminErrors[keyof CampaignFindOneAdminErrors];
+
+export type CampaignFindOneAdminResponses = {
+    200: CampaignDto;
+};
+
+export type CampaignFindOneAdminResponse = CampaignFindOneAdminResponses[keyof CampaignFindOneAdminResponses];
+
+export type CampaignUpdateAdminData = {
+    body: UpdateCampaignDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/campaigns/{id}';
+};
+
+export type CampaignUpdateAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type CampaignUpdateAdminError = CampaignUpdateAdminErrors[keyof CampaignUpdateAdminErrors];
+
+export type CampaignUpdateAdminResponses = {
+    200: CampaignDto;
+};
+
+export type CampaignUpdateAdminResponse = CampaignUpdateAdminResponses[keyof CampaignUpdateAdminResponses];
 
 export type ConversationGetAllConversationsForAdminData = {
     body?: never;

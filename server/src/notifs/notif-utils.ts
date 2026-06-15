@@ -1,11 +1,11 @@
-import { randomBytes } from 'crypto';
+import { randomToken } from 'src/utils/random';
 
 export function generateCIDForNotif() {
-  return randomBytes(5).toString('hex');
+  return randomToken(5, 'hex');
 }
 
 export function generateCIDForShareUrl() {
-  return 'share-' + randomBytes(5).toString('hex');
+  return 'share-' + randomToken(5, 'hex');
 }
 
 export enum NotificationChannel {

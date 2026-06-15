@@ -835,7 +835,10 @@ export class ActionsService {
   ): Promise<string> {
     const shareUrl = await this.shareUrlsService.getOrCreateForAction(
       actionId,
-      userId,
+      {
+        type: 'user',
+        userId,
+      },
     );
     if (!shareUrl.sid) {
       throw new BadRequestException('Unable to create share code');

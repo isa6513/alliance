@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailModule } from 'src/mail/mail.module';
-import { ShareUrlsModule } from 'src/share-urls/share-urls.module';
 import { User } from 'src/user/entities/user.entity';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
@@ -15,7 +14,6 @@ import { TurnstileService } from './turnstile.service';
   imports: [
     UserModule,
     MailModule,
-    ShareUrlsModule,
     JwtModule.registerAsync({
       global: true,
       inject: [ConfigService],

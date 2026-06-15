@@ -60,6 +60,7 @@ import {
   NMembersResponseDto,
   ProfileDto,
   ProfileDtoWithFriends,
+  ReferrerProfileDto,
   SignupSocialProofDto,
   UpdateProfileDto,
   UserCityCountDto,
@@ -525,21 +526,15 @@ export class UserController {
 
   @Get('referrerProfile/:code')
   @Public()
-  @ApiOkResponse({ type: ProfileDto })
-  async referrerProfile(@Param('code') code: string): Promise<ProfileDto> {
-    const invite = await this.userService.findInviteByCode(code);
-    if (invite) {
-      return new ProfileDto(invite.invitingUser);
-    }
-    const shareUrlUser = await this.userService.findUserByShareSid(code);
-    if (shareUrlUser) {
-      return new ProfileDto(shareUrlUser);
-    }
-    const user = await this.userService.findOneByReferralCode(code);
-    if (!user) {
+  @ApiOkResponse({ type: ReferrerProfileDto })
+  async referrerProfile(
+    @Param('code') code: string,
+  ): Promise<ReferrerProfileDto> {
+    const referrer = await this.userService.resolveReferrer(code);
+    if (!referrer) {
       throw new NotFoundException('Referrer not found');
     }
-    return new ProfileDto(user);
+    return new ReferrerProfileDto(referrer);
   }
 
   @Get('onetimeInvite/:code')

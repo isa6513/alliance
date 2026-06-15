@@ -1,13 +1,13 @@
-import { ReferralSource, User } from 'src/user/entities/user.entity';
-import { Community } from 'src/community/entities/community.entity';
 import {
   communityHasCapacity,
   getCommunityFreeSlots,
   isCommunityLedBy,
 } from 'src/community/community.utils';
-import type { CreateNotifParams } from 'src/notifs/notifs.service';
+import { Community } from 'src/community/entities/community.entity';
 import { NotificationCategory } from 'src/notifs/entities/notification.entity';
+import type { CreateNotifParams } from 'src/notifs/notifs.service';
 import { groupUrl, profileUrl } from 'src/search/approutes';
+import { ReferralSource, User } from 'src/user/entities/user.entity';
 
 /** Community selection strategy per referral source. Extensible for new ReferralSource values. */
 function selectCommunityForLinkReferral(referredBy: User): Community | null {
@@ -43,6 +43,7 @@ export const REFERRAL_COMMUNITY_SELECTORS: Record<
   [ReferralSource.ReferralLink]: selectCommunityForLinkReferral,
   [ReferralSource.ActionShareLink]: selectCommunityForLinkReferral,
   [ReferralSource.ExternalShareLink]: selectCommunityForLinkReferral,
+  [ReferralSource.Campaign]: () => null,
 };
 
 export function memberJoinedCommunityNotif(

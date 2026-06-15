@@ -31,12 +31,41 @@ const NOT_FOUND_MESSAGE: Record<ShareUrlKind, string> = {
   [ShareUrlKind.ExternalTarget]: 'specified share target not found',
 } as const;
 
+export type ShareUrlOwner =
+  | { type: 'user'; userId: number }
+  | { type: 'campaign'; campaignId: number };
+
+function ownerWhere(owner: ShareUrlOwner): FindOptionsWhere<ShareUrl> {
+  switch (owner.type) {
+    case 'user':
+      return { user: { id: owner.userId } };
+    case 'campaign':
+      return { campaign: { id: owner.campaignId } };
+    default:
+      throw new Error(`unknown share url owner: ${owner satisfies never}`);
+  }
+}
+
+function ownerColumns(owner: ShareUrlOwner): {
+  userId: number | null;
+  campaignId: number | null;
+} {
+  switch (owner.type) {
+    case 'user':
+      return { userId: owner.userId, campaignId: null };
+    case 'campaign':
+      return { userId: null, campaignId: owner.campaignId };
+    default:
+      throw new Error(`unknown share url owner: ${owner satisfies never}`);
+  }
+}
+
 type GetOrCreateInput =
-  | { kind: ShareUrlKind.Action; actionId: number; userId: number }
+  | { kind: ShareUrlKind.Action; actionId: number; owner: ShareUrlOwner }
   | {
       kind: ShareUrlKind.ExternalTarget;
       externalTarget: ExternalShareTarget;
-      userId: number;
+      owner: ShareUrlOwner;
     };
 
 type BuildRowInput = GetOrCreateInput & {
@@ -74,36 +103,37 @@ export class ShareUrlsService {
   }): Promise<string> {
     const { userId, actionId, externalTargetId } = params;
     assertExactlyOneTarget(actionId, externalTargetId);
+    const owner: ShareUrlOwner = { type: 'user', userId };
     const shareUrl =
       externalTargetId !== undefined
-        ? await this.getOrCreateForExternalTargetId(externalTargetId, userId)
-        : await this.getOrCreateForAction(actionId!, userId);
+        ? await this.getOrCreateForExternalTargetId(externalTargetId, owner)
+        : await this.getOrCreateForAction(actionId!, owner);
     return shareUrl.url;
   }
 
   async createDuplicate(params: {
-    userId: number;
+    owner: ShareUrlOwner;
     actionId?: number;
     externalTargetId?: number;
     label?: string;
   }): Promise<ShareUrl> {
-    const { userId, actionId, externalTargetId, label } = params;
+    const { owner, actionId, externalTargetId, label } = params;
     assertExactlyOneTarget(actionId, externalTargetId);
     const trimmedLabel = label?.trim();
     const labelValue = trimmedLabel ? trimmedLabel : null;
     if (externalTargetId !== undefined) {
       return this.createDuplicateForExternalTargetId(
         externalTargetId,
-        userId,
+        owner,
         labelValue,
       );
     }
-    return this.createDuplicateForAction(actionId!, userId, labelValue);
+    return this.createDuplicateForAction(actionId!, owner, labelValue);
   }
 
   private async createDuplicateForExternalTargetId(
     externalTargetId: number,
-    userId: number,
+    owner: ShareUrlOwner,
     label: string | null,
   ): Promise<ShareUrl> {
     return this.shareUrlRepository.manager.transaction(async (m) => {
@@ -117,7 +147,7 @@ export class ShareUrlsService {
       return this.buildAndSaveRow(m, {
         kind: ShareUrlKind.ExternalTarget,
         externalTarget: target,
-        userId,
+        owner,
         duplicate: true,
         label,
       });
@@ -126,24 +156,32 @@ export class ShareUrlsService {
 
   private async createDuplicateForAction(
     actionId: number,
-    userId: number,
+    owner: ShareUrlOwner,
     label: string | null,
   ): Promise<ShareUrl> {
     return this.buildAndSaveRow(this.shareUrlRepository.manager, {
       kind: ShareUrlKind.Action,
       actionId,
-      userId,
+      owner,
       duplicate: true,
       label,
     });
   }
 
-  async findForUser(userId: number): Promise<ShareUrl[]> {
+  async findForOwner(owner: ShareUrlOwner): Promise<ShareUrl[]> {
     return this.shareUrlRepository.find({
-      where: { user: { id: userId } },
+      where: ownerWhere(owner),
       relations: { action: true, externalTarget: true },
       order: { createdAt: 'DESC' },
     });
+  }
+
+  async findForUser(userId: number): Promise<ShareUrl[]> {
+    return this.findForOwner({ type: 'user', userId });
+  }
+
+  async findForCampaign(campaignId: number): Promise<ShareUrl[]> {
+    return this.findForOwner({ type: 'campaign', campaignId });
   }
 
   async updateLabel(
@@ -165,7 +203,7 @@ export class ShareUrlsService {
 
   private async getOrCreateForExternalTargetId(
     externalTargetId: number,
-    userId: number,
+    owner: ShareUrlOwner,
   ): Promise<ShareUrl> {
     return this.shareUrlRepository.manager.transaction(async (m) => {
       const target = await m.findOne(ExternalShareTarget, {
@@ -178,19 +216,19 @@ export class ShareUrlsService {
       return this.getOrCreate(m, {
         kind: ShareUrlKind.ExternalTarget,
         externalTarget: target,
-        userId,
+        owner,
       });
     });
   }
 
   async getOrCreateForAction(
     actionId: number,
-    userId: number,
+    owner: ShareUrlOwner,
   ): Promise<ShareUrl> {
     return this.getOrCreate(this.shareUrlRepository.manager, {
       kind: ShareUrlKind.Action,
       actionId,
-      userId,
+      owner,
     });
   }
 
@@ -207,7 +245,12 @@ export class ShareUrlsService {
   async findByReferralSid(sid: string): Promise<ShareUrl | null> {
     return this.shareUrlRepository.findOne({
       where: { sid },
-      relations: { user: true, action: true, externalTarget: true },
+      relations: {
+        user: true,
+        campaign: true,
+        action: true,
+        externalTarget: true,
+      },
     });
   }
 
@@ -263,13 +306,13 @@ export class ShareUrlsService {
       switch (input.kind) {
         case ShareUrlKind.Action:
           return {
-            user: { id: input.userId },
+            ...ownerWhere(input.owner),
             action: { id: input.actionId },
             duplicate: false,
           };
         case ShareUrlKind.ExternalTarget:
           return {
-            user: { id: input.userId },
+            ...ownerWhere(input.owner),
             externalTarget: { id: input.externalTarget.id },
             duplicate: false,
           };
@@ -349,7 +392,7 @@ export class ShareUrlsService {
 
     const shareUrl = repo.create({
       url: built.url,
-      user: { id: input.userId },
+      ...ownerColumns(input.owner),
       action: built.action,
       externalTarget: built.externalTarget,
       sid,

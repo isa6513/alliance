@@ -15,6 +15,7 @@ import {
 import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { GeneralUpdateActivity } from 'src/actions/entities/general-update-activity.entity';
+import { Campaign } from 'src/campaign/entities/campaign.entity';
 import { Cluster } from 'src/cluster/entities/cluster.entity';
 import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 import { Community } from 'src/community/entities/community.entity';
@@ -74,6 +75,7 @@ export enum ReferralSource {
   OnetimeInvite = 'onetime_invite',
   ActionShareLink = 'action_share_link',
   ExternalShareLink = 'external_share_link',
+  Campaign = 'campaign',
 }
 
 @Entity()
@@ -348,6 +350,12 @@ export class User {
   })
   @ApiProperty({ enum: ReferralSource, enumName: 'ReferralSource' })
   referralSource: ReferralSource;
+
+  @ManyToOne(() => Campaign, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'referredByCampaignId' })
+  @Type(() => Campaign)
+  @ApiPropertyOptional({ type: () => Campaign, nullable: true })
+  referredByCampaign?: Relation<Campaign> | null;
 
   @OneToMany(() => User, (user) => user.referredBy)
   referredUsers?: Relation<User>[];

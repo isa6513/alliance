@@ -1,17 +1,24 @@
 import {
   actionsFindAllWithDraftsAdmin,
+  campaignCreateAdmin,
+  campaignFindAllAdmin,
   externalShareTargetsFindAllAdmin,
+  imagesUploadImage,
   shareUrlsCreateDuplicateAdmin,
+  shareUrlsFindForCampaignAdmin,
   shareUrlsFindForUserAdmin,
   shareUrlsUpdateLabelAdmin,
 } from "@alliance/shared/client";
 import type {
   ActionDto,
+  CampaignDto,
   ExternalShareTargetDto,
   ShareUrlAdminDto,
 } from "@alliance/shared/client/types.gen";
+import { getReferralSignupUrl } from "@alliance/shared/lib/inviteUrls";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { cn } from "@alliance/shared/styles/util";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
@@ -49,11 +56,51 @@ const targetKindLabel = (kind: TargetKind): string => {
 const targetSubtitle = (t: Target): string =>
   t.kind === "action" ? `Action #${t.id}` : "External share target";
 
+type OwnerKind = "user" | "campaign";
+
+type Owner =
+  | { type: "user"; id: number; name: string }
+  | { type: "campaign"; id: number; name: string };
+
+const ownerKey = (o: Owner): string => `${o.type}-${o.id}`;
+
+const loadShareUrlsForOwner = (
+  owner: Owner,
+): Promise<{ data?: ShareUrlAdminDto[] }> =>
+  owner.type === "user"
+    ? shareUrlsFindForUserAdmin({ path: { userId: owner.id } })
+    : shareUrlsFindForCampaignAdmin({ path: { campaignId: owner.id } });
+
 const ShareLinksPage: React.FC = () => {
   const users = useSelectableUserIds();
+  const [ownerKind, setOwnerKind] = useState<OwnerKind>("user");
+
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const selectedUserId = selectedUserIds[0] ?? null;
   const selectedUser = users.find((u) => u.id === selectedUserId);
+
+  const [campaigns, setCampaigns] = useState<CampaignDto[]>([]);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(
+    null,
+  );
+  const selectedCampaign =
+    campaigns.find((c) => c.id === selectedCampaignId) ?? null;
+
+  const owner = useMemo((): Owner | null => {
+    if (ownerKind === "user") {
+      return selectedUser
+        ? { type: "user", id: selectedUser.id, name: selectedUser.name }
+        : null;
+    }
+    return selectedCampaign
+      ? {
+          type: "campaign",
+          id: selectedCampaign.id,
+          name: selectedCampaign.name,
+        }
+      : null;
+  }, [ownerKind, selectedUser, selectedCampaign]);
+  const ownerName = owner?.name ?? "this owner";
 
   const [rows, setRows] = useState<ShareUrlAdminDto[]>([]);
   const [loadingRows, setLoadingRows] = useState(false);
@@ -68,14 +115,34 @@ const ShareLinksPage: React.FC = () => {
   const [labelDraft, setLabelDraft] = useState<string>("");
   const [creating, setCreating] = useState(false);
 
+  const [newCampaignName, setNewCampaignName] = useState<string>("");
+  const [newCampaignPicture, setNewCampaignPicture] = useState<string | null>(
+    null,
+  );
+  const [newCampaignPicturePreview, setNewCampaignPicturePreview] = useState<
+    string | null
+  >(null);
+  const [creatingCampaign, setCreatingCampaign] = useState(false);
+
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  const selectedUserIdRef = useRef<number | null>(null);
+  const ownerKeyRef = useRef<string | null>(null);
+  const currentOwnerKey = owner ? ownerKey(owner) : null;
   useEffect(() => {
-    selectedUserIdRef.current = selectedUserId;
-  }, [selectedUserId]);
+    ownerKeyRef.current = currentOwnerKey;
+  }, [currentOwnerKey]);
 
   const { error, success } = useToast();
+
+  const loadCampaigns = useCallback(async () => {
+    try {
+      const res = await campaignFindAllAdmin();
+      setCampaigns(res.data ?? []);
+    } catch (err) {
+      console.error("Failed to load campaigns", err);
+      error("Failed to load campaigns.");
+    }
+  }, [error]);
 
   useEffect(() => {
     void (async () => {
@@ -91,28 +158,30 @@ const ShareLinksPage: React.FC = () => {
         error("Failed to load actions or external targets.");
       }
     })();
-  }, [error]);
+    void loadCampaigns();
+  }, [error, loadCampaigns]);
 
   const loadRows = useCallback(
-    async (userId: number) => {
+    async (target: Owner) => {
+      const key = ownerKey(target);
       setLoadingRows(true);
       try {
-        const res = await shareUrlsFindForUserAdmin({ path: { userId } });
-        if (selectedUserIdRef.current !== userId) return;
+        const res = await loadShareUrlsForOwner(target);
+        if (ownerKeyRef.current !== key) return;
         setRows(res.data ?? []);
       } catch (err) {
-        if (selectedUserIdRef.current !== userId) return;
-        console.error("Failed to load share urls for user", err);
+        if (ownerKeyRef.current !== key) return;
+        console.error("Failed to load share urls for owner", err);
         error("Failed to load share links.");
       } finally {
-        if (selectedUserIdRef.current === userId) setLoadingRows(false);
+        if (ownerKeyRef.current === key) setLoadingRows(false);
       }
     },
     [error],
   );
 
   useEffect(() => {
-    if (selectedUserId === null) {
+    if (!owner) {
       setRows([]);
       setExpanded({});
       setSelectedTarget(null);
@@ -120,8 +189,60 @@ const ShareLinksPage: React.FC = () => {
       setLoadingRows(false);
       return;
     }
-    void loadRows(selectedUserId);
-  }, [selectedUserId, loadRows]);
+    void loadRows(owner);
+  }, [owner, loadRows]);
+
+  const handleCampaignImageChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const dataUrl = reader.result as string;
+        setNewCampaignPicturePreview(dataUrl);
+        try {
+          const uploadResp = await imagesUploadImage({
+            body: { file: dataUrl },
+          });
+          if (uploadResp.data) {
+            setNewCampaignPicture(uploadResp.data.key);
+            setNewCampaignPicturePreview(uploadResp.data.url);
+          }
+        } catch (err) {
+          console.error("Failed to upload campaign image", err);
+          error("Failed to upload image.");
+          setNewCampaignPicturePreview(null);
+        }
+      };
+      reader.readAsDataURL(file);
+    },
+    [error],
+  );
+
+  const handleCreateCampaign = useCallback(async () => {
+    const name = newCampaignName.trim();
+    if (!name) return;
+    setCreatingCampaign(true);
+    try {
+      const res = await campaignCreateAdmin({
+        body: { name, picture: newCampaignPicture ?? undefined },
+      });
+      const created = res.data;
+      if (created) {
+        setCampaigns((prev) => [created, ...prev]);
+        setSelectedCampaignId(created.id);
+        setNewCampaignName("");
+        setNewCampaignPicture(null);
+        setNewCampaignPicturePreview(null);
+        success("Campaign created");
+      }
+    } catch (err) {
+      console.error("Failed to create campaign", err);
+      error("Failed to create campaign.");
+    } finally {
+      setCreatingCampaign(false);
+    }
+  }, [newCampaignName, newCampaignPicture, success, error]);
 
   const targetsForKind = useMemo((): Target[] => {
     switch (selectedKind) {
@@ -229,13 +350,13 @@ const ShareLinksPage: React.FC = () => {
 
   const handleUpdateLabel = useCallback(
     async (id: string, label: string): Promise<boolean> => {
-      const requestUserId = selectedUserIdRef.current;
+      const requestKey = ownerKeyRef.current;
       try {
         const res = await shareUrlsUpdateLabelAdmin({
           path: { id },
           body: { label },
         });
-        if (selectedUserIdRef.current !== requestUserId) return false;
+        if (ownerKeyRef.current !== requestKey) return false;
         const updated = res.data;
         if (updated) {
           setRows((prev) => prev.map((r) => (r.id === id ? updated : r)));
@@ -244,7 +365,7 @@ const ShareLinksPage: React.FC = () => {
         }
         return false;
       } catch (err) {
-        if (selectedUserIdRef.current !== requestUserId) return false;
+        if (ownerKeyRef.current !== requestKey) return false;
         console.error("Failed to update label", err);
         error("Failed to update label.");
         return false;
@@ -254,15 +375,16 @@ const ShareLinksPage: React.FC = () => {
   );
 
   const handleCreateDuplicate = useCallback(async () => {
-    if (selectedUserId === null || !selectedTarget) return;
-    const requestUserId = selectedUserId;
+    if (!owner || !selectedTarget) return;
+    const requestKey = ownerKey(owner);
     const requestTarget = selectedTarget;
     setCreating(true);
     try {
       const trimmed = labelDraft.trim();
       const res = await shareUrlsCreateDuplicateAdmin({
         body: {
-          userId: requestUserId,
+          userId: owner.type === "user" ? owner.id : undefined,
+          campaignId: owner.type === "campaign" ? owner.id : undefined,
           actionId:
             requestTarget.kind === "action" ? requestTarget.id : undefined,
           externalTargetId:
@@ -270,7 +392,7 @@ const ShareLinksPage: React.FC = () => {
           label: trimmed || undefined,
         },
       });
-      if (selectedUserIdRef.current !== requestUserId) return;
+      if (ownerKeyRef.current !== requestKey) return;
       const created = res.data;
       if (created) {
         setRows((prev) => [created, ...prev]);
@@ -279,45 +401,117 @@ const ShareLinksPage: React.FC = () => {
         success("Duplicate link created");
       }
     } catch (err) {
-      if (selectedUserIdRef.current !== requestUserId) return;
+      if (ownerKeyRef.current !== requestKey) return;
       console.error("Failed to create duplicate share link", err);
       error("Failed to create duplicate.");
     } finally {
       setCreating(false);
     }
-  }, [selectedUserId, selectedTarget, labelDraft, success, error]);
+  }, [owner, selectedTarget, labelDraft, success, error]);
 
   return (
     <div className="h-full p-5 pt-20 flex flex-col items-center gap-y-4">
       <title>Share Links - Admin</title>
 
       <div className="w-full max-w-4xl flex flex-col gap-3">
-        <h2 className="text-2xl font-semibold mb-2">Share links by user</h2>
+        <h2 className="text-2xl font-semibold mb-2">Share links</h2>
         <p className="text-sm text-zinc-500">
-          View existing share links on behalf of a user, and generate additional
-          duplicate links so that distinct trackable URLs can be handed out to
-          different recruits for the same action or external target.
+          View existing share links on behalf of a user or a campaign, and
+          generate additional duplicate links so that distinct trackable URLs
+          can be handed out to different recruits for the same action or
+          external target. Campaigns are userless referral owners — new signups
+          via a campaign link are attributed to the campaign as a source.
         </p>
 
         <Card className="w-full" style={CardStyle.White}>
-          <UserSelect
-            users={users}
-            selectedUserIds={selectedUserIds}
-            onChange={setSelectedUserIds}
-            label="User"
-            single
-          />
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-zinc-700">
+                Owner kind
+              </label>
+              <select
+                className="border border-zinc-300 rounded px-3 py-2 text-sm bg-white"
+                value={ownerKind}
+                onChange={(event) =>
+                  setOwnerKind(event.target.value as OwnerKind)
+                }
+              >
+                <option value="user">User</option>
+                <option value="campaign">Campaign</option>
+              </select>
+            </div>
+
+            {ownerKind === "user" ? (
+              <UserSelect
+                users={users}
+                selectedUserIds={selectedUserIds}
+                onChange={setSelectedUserIds}
+                label="User"
+                single
+              />
+            ) : (
+              <CampaignPicker
+                campaigns={campaigns}
+                selectedCampaignId={selectedCampaignId}
+                onSelect={setSelectedCampaignId}
+                newCampaignName={newCampaignName}
+                onNewCampaignNameChange={setNewCampaignName}
+                onCreateCampaign={handleCreateCampaign}
+                creatingCampaign={creatingCampaign}
+                picturePreview={newCampaignPicturePreview}
+                onPictureChange={handleCampaignImageChange}
+              />
+            )}
+          </div>
         </Card>
 
-        {selectedUserId !== null && (
+        {owner?.type === "campaign" && selectedCampaign && (
+          <Card className="w-full" style={CardStyle.White}>
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-row items-center gap-2">
+                {selectedCampaign.picture && (
+                  <img
+                    src={selectedCampaign.picture}
+                    alt={`${selectedCampaign.name} avatar`}
+                    className="w-8 h-8 rounded-full object-cover border border-zinc-200"
+                  />
+                )}
+                <p className="font-semibold">Campaign signup link</p>
+              </div>
+              <p className="text-xs text-zinc-500">
+                Bare signup link attributing new users to this campaign as a
+                source.
+              </p>
+              <div className="flex flex-row items-center gap-2 mt-1">
+                <p className="text-xs text-zinc-600 font-mono break-all flex-1">
+                  {getReferralSignupUrl(getBaseUrl(), selectedCampaign.code)}
+                </p>
+                <Button
+                  type="button"
+                  color={ButtonColor.Light}
+                  onClick={() =>
+                    handleCopy(
+                      getReferralSignupUrl(getBaseUrl(), selectedCampaign.code),
+                    )
+                  }
+                  className="shrink-0"
+                >
+                  <Copy size={14} />
+                  Copy
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {owner && (
           <>
             <Card className="w-full" style={CardStyle.White}>
               <div className="flex flex-col gap-3">
                 <p className="font-semibold">Create duplicate link</p>
                 <p className="text-xs text-zinc-500">
                   Pick any action or external target — duplicates can be created
-                  for targets that {selectedUser?.name ?? "this user"}{" "}
-                  hasn&apos;t shared yet too.
+                  for targets that {ownerName} hasn&apos;t shared yet too.
                 </p>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-zinc-700">
@@ -371,7 +565,7 @@ const ShareLinksPage: React.FC = () => {
               ) : groups.length === 0 ? (
                 <Card className="w-full" style={CardStyle.White}>
                   <p className="text-sm text-zinc-500">
-                    {selectedUser?.name ?? "This user"} has no share links yet.
+                    {ownerName} has no share links yet.
                   </p>
                 </Card>
               ) : (
@@ -391,6 +585,96 @@ const ShareLinksPage: React.FC = () => {
             </div>
           </>
         )}
+      </div>
+    </div>
+  );
+};
+
+const CampaignPicker: React.FC<{
+  campaigns: CampaignDto[];
+  selectedCampaignId: number | null;
+  onSelect: (id: number | null) => void;
+  newCampaignName: string;
+  onNewCampaignNameChange: (value: string) => void;
+  onCreateCampaign: () => void;
+  creatingCampaign: boolean;
+  picturePreview: string | null;
+  onPictureChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}> = ({
+  campaigns,
+  selectedCampaignId,
+  onSelect,
+  newCampaignName,
+  onNewCampaignNameChange,
+  onCreateCampaign,
+  creatingCampaign,
+  picturePreview,
+  onPictureChange,
+}) => {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <label className="text-xs font-medium text-zinc-700">Campaign</label>
+        <select
+          className="border border-zinc-300 rounded px-3 py-2 text-sm bg-white"
+          value={selectedCampaignId ?? ""}
+          onChange={(event) =>
+            onSelect(event.target.value ? Number(event.target.value) : null)
+          }
+        >
+          <option value="">Select a campaign…</option>
+          {campaigns.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="text-xs font-medium text-zinc-700">
+          Create a new campaign
+        </label>
+        <div className="flex flex-row items-center gap-2">
+          <input
+            type="text"
+            className="border border-zinc-300 rounded px-3 py-2 text-sm flex-1"
+            placeholder="Campaign name — e.g. Spring fundraiser"
+            value={newCampaignName}
+            onChange={(event) => onNewCampaignNameChange(event.target.value)}
+            disabled={creatingCampaign}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                onCreateCampaign();
+              }
+            }}
+          />
+          <Button
+            type="button"
+            color={ButtonColor.Blue}
+            onClick={onCreateCampaign}
+            disabled={creatingCampaign || !newCampaignName.trim()}
+            className="shrink-0"
+          >
+            {creatingCampaign ? "Creating…" : "Create"}
+          </Button>
+        </div>
+        <div className="flex flex-row items-center gap-3 mt-1">
+          {picturePreview && (
+            <img
+              src={picturePreview}
+              alt="Campaign avatar preview"
+              className="w-10 h-10 rounded-full object-cover border border-zinc-200"
+            />
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={onPictureChange}
+            disabled={creatingCampaign}
+            className="text-xs text-zinc-600"
+          />
+        </div>
       </div>
     </div>
   );
