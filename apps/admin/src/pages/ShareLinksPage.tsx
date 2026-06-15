@@ -73,6 +73,22 @@ const targetSubtitle = (t: Target): string => {
   }
 };
 
+/** The target identity to send to the create-duplicate endpoint. */
+const targetColumns = (
+  t: Target,
+): { actionId?: number; externalTargetId?: number; invite?: true } => {
+  switch (t.kind) {
+    case "action":
+      return { actionId: t.id };
+    case "external":
+      return { externalTargetId: t.id };
+    case "invite":
+      return { invite: true };
+    default:
+      throw new Error(`unknown target kind: ${t satisfies never}`);
+  }
+};
+
 type OwnerKind = "user" | "campaign";
 
 type Owner =
@@ -81,12 +97,34 @@ type Owner =
 
 const ownerKey = (o: Owner): string => `${o.type}-${o.id}`;
 
+/** The owner identity to send to endpoints keyed by user/campaign id. */
+const ownerColumns = (
+  owner: Owner,
+): { userId?: number; campaignId?: number } => {
+  switch (owner.type) {
+    case "user":
+      return { userId: owner.id };
+    case "campaign":
+      return { campaignId: owner.id };
+    default:
+      throw new Error(`unknown owner type: ${owner satisfies never}`);
+  }
+};
+
 const loadShareUrlsForOwner = (
   owner: Owner,
-): Promise<{ data?: ShareUrlAdminDto[] }> =>
-  owner.type === "user"
-    ? shareUrlsFindForUserAdmin({ path: { userId: owner.id } })
-    : shareUrlsFindForCampaignAdmin({ path: { campaignId: owner.id } });
+): Promise<{ data?: ShareUrlAdminDto[] }> => {
+  switch (owner.type) {
+    case "user":
+      return shareUrlsFindForUserAdmin({ path: { userId: owner.id } });
+    case "campaign":
+      return shareUrlsFindForCampaignAdmin({
+        path: { campaignId: owner.id },
+      });
+    default:
+      throw new Error(`unknown owner type: ${owner satisfies never}`);
+  }
+};
 
 const ShareLinksPage: React.FC = () => {
   const users = useSelectableUserIds();
@@ -405,13 +443,8 @@ const ShareLinksPage: React.FC = () => {
       const trimmed = labelDraft.trim();
       const res = await shareUrlsCreateDuplicateAdmin({
         body: {
-          userId: owner.type === "user" ? owner.id : undefined,
-          campaignId: owner.type === "campaign" ? owner.id : undefined,
-          actionId:
-            requestTarget.kind === "action" ? requestTarget.id : undefined,
-          externalTargetId:
-            requestTarget.kind === "external" ? requestTarget.id : undefined,
-          invite: requestTarget.kind === "invite" ? true : undefined,
+          ...ownerColumns(owner),
+          ...targetColumns(requestTarget),
           label: trimmed || undefined,
         },
       });
