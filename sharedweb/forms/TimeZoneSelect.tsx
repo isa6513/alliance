@@ -192,11 +192,10 @@ export default function TimeZoneSelectPretty({
         )}
       </div>
 
-      {/* click-away close */}
       {open && (
         <button
           type="button"
-          className="fixed inset-0 z-40 cursor-default"
+          className={cn(zIndex.popoverBackdrop, "fixed inset-0 cursor-default")}
           onClick={() => setOpen(false)}
           aria-label="Close"
           tabIndex={-1}
