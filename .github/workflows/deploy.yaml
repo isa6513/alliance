@@ -897,19 +897,32 @@ jobs:
             --data "{\"text\":\"${{ steps.slack_mention.outputs.mention }} Deploy ${{ github.ref_name == 'production' && 'production' || 'staging' }} failed for ${{ github.event.head_commit.message }}. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open run>\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL_DEPLOYMENT }}
 
-  # build-mobile-app:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v4
+  # Publishes an over-the-air JS/asset update to the production EAS Update
+  # channel. Only JS/asset changes ship this way; native changes still require a
+  # store build (the fingerprint runtimeVersion guards compatibility). Runs only
+  # on the production branch, after the backend is live so the OTA bundle never
+  # talks to an API older than itself.
+  publish-mobile-ota:
+    runs-on: ubuntu-latest
+    needs:
+      - deploy-nest-backend
+    if: ${{ github.ref_name == 'production' }}
+    environment: production
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-  #     - name: Setup Bun
-  #       uses: oven-sh/setup-bun@v2
-  #       with:
-  #         bun-version: 1.3.6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.6
 
-  #     - name: Install Dependencies
-  #       run: bun install --frozen-lockfile
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
 
-  #     - name: Build Mobile App
-  #       run: bun run --cwd apps/mobile <script-name>
+      - name: Publish EAS Update
+        run: bunx eas-cli@latest update --branch production --message "$COMMIT_MESSAGE" --non-interactive
+        working-directory: ./apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_ACCESS_TOKEN }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}

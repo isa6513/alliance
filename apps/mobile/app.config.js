@@ -11,6 +11,12 @@ export default {
     userInterfaceStyle: "automatic",
     owner: "alliancefoundation",
     newArchEnabled: true,
+    runtimeVersion: {
+      policy: "fingerprint",
+    },
+    updates: {
+      url: "https://u.expo.dev/49c13cc4-9361-4e91-8de8-27108c7527a6",
+    },
     ios: {
       supportsTablet: true,
       bundleIdentifier: IS_DEV

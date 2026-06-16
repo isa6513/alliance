@@ -15,7 +15,9 @@
     "build:simulator:clean": "bunx expo prebuild --clean && cd ios && pod install && cd .. && bunx expo run:ios",
     "build:device": "bunx expo prebuild && cd ios && pod install && cd .. && bunx expo run:ios --device 00008150-001528163445401C",
     "build:android": "eas build -p android --profile production --local",
-    "build:ios": "APP_VARIANT=production bunx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace"
+    "build:ios": "APP_VARIANT=production bunx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace",
+    "update:production": "eas update --branch production",
+    "update:preview": "eas update --branch preview"
   },
   "dependencies": {
     "@alliance/common": "workspace:*",
@@ -51,6 +53,7 @@
     "expo-status-bar": "~55.0.4",
     "expo-symbols": "~55.0.5",
     "expo-system-ui": "~55.0.9",
+    "expo-updates": "~55.0.24",
     "expo-video": "~55.0.11",
     "expo-web-browser": "~55.0.9",
     "lucide-react-native": "^0.562.0",
