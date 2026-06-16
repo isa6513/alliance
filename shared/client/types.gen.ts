@@ -875,7 +875,7 @@ export type ProfileDtoWithFriends = {
     isCommunityLeader: boolean;
     lastContractEvent?: ContractEvent;
     cluster?: ClusterSummaryDto;
-    friends: Array<ProfileDto>;
+    friendIds: Array<number>;
 };
 
 export type VerifyEmailBody = {

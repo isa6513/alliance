@@ -393,15 +393,19 @@ export class UserController {
     @Query('requireSignedContract', new DefaultValuePipe(false), ParseBoolPipe)
     requireSignedContract: boolean,
   ): Promise<ProfileDtoWithFriends[]> {
-    const users = await this.userService.findAllWithFriendRequests();
+    const [users, friendIdsByUserId] = await Promise.all([
+      this.userService.findAll({ contractEvents: true }),
+      this.userService.findAcceptedFriendIdsByUserId(),
+    ]);
 
-    if (requireSignedContract) {
-      return users
-        .filter((user) => user.hasActiveContract)
-        .map((user) => new ProfileDtoWithFriends(user));
-    } else {
-      return users.map((user) => new ProfileDtoWithFriends(user));
-    }
+    const members = requireSignedContract
+      ? users.filter((user) => user.hasActiveContract)
+      : users;
+
+    return members.map(
+      (user) =>
+        new ProfileDtoWithFriends(user, friendIdsByUserId.get(user.id) ?? []),
+    );
   }
 
   @Get('myprofile')

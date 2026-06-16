@@ -231,14 +231,28 @@ export class UserService {
     });
   }
 
-  findAllWithFriendRequests(): Promise<User[]> {
-    return this.userRepository.find({
-      relations: {
-        sentFriendRequests: { addressee: true },
-        receivedFriendRequests: { requester: true },
-        contractEvents: true,
-      },
-    });
+  async findAcceptedFriendIdsByUserId(): Promise<Map<number, number[]>> {
+    const rows = await this.friendRepository
+      .createQueryBuilder('f')
+      .select('f.requesterId', 'requesterId')
+      .addSelect('f.addresseeId', 'addresseeId')
+      .where('f.status = :status', { status: FriendStatus.Accepted })
+      .getRawMany<{ requesterId: number; addresseeId: number }>();
+
+    const byUser = new Map<number, number[]>();
+    const addFriend = (userId: number, friendId: number) => {
+      const list = byUser.get(userId);
+      if (list) {
+        list.push(friendId);
+        return;
+      }
+      byUser.set(userId, [friendId]);
+    };
+    for (const row of rows) {
+      addFriend(row.requesterId, row.addresseeId);
+      addFriend(row.addresseeId, row.requesterId);
+    }
+    return byUser;
   }
 
   async findAllMembersPublic(): Promise<User[]> {

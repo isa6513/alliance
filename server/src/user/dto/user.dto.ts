@@ -144,14 +144,12 @@ export class ReferrerProfileDto {
 }
 
 export class ProfileDtoWithFriends extends ProfileDto {
-  @ApiProperty({ type: ProfileDto, isArray: true })
-  @Type(() => ProfileDto)
-  @Allow()
-  friends: ProfileDto[];
+  @ApiProperty({ type: Number, isArray: true })
+  friendIds: number[];
 
-  constructor(user: User) {
+  constructor(user: User, friendIds: number[]) {
     super(user);
-    this.friends = user.friends.map((friend) => new ProfileDto(friend));
+    this.friendIds = friendIds;
   }
 }
 

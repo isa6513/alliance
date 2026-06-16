@@ -43,13 +43,12 @@ const MembersListPage = () => {
     [members]
   );
 
-  const { data: sentRequests = [], isLoading: isLoadingSentRequests } =
-    useQuery({
-      queryKey: ["userListSentRequests"],
-      queryFn: () => userListSentRequests().then((res) => res.data ?? []),
-    });
+  const { data: sentRequests = [] } = useQuery({
+    queryKey: ["userListSentRequests"],
+    queryFn: () => userListSentRequests().then((res) => res.data ?? []),
+  });
 
-  const { data: friendsData = [], isLoading: isLoadingFriends } = useQuery({
+  const { data: friendsData = [] } = useQuery({
     queryKey: ["userListFriends", user?.id],
     queryFn: () =>
       userListFriends({ path: { id: user!.id } }).then((res) => res.data ?? []),
@@ -66,7 +65,7 @@ const MembersListPage = () => {
     [friendsData]
   );
 
-  const loading = isLoadingMembers || isLoadingSentRequests || isLoadingFriends;
+  const loading = isLoadingMembers;
   const error = membersError ? "Could not load members" : null;
 
   const [params, setParams] = useSearchParams();
@@ -85,7 +84,7 @@ const MembersListPage = () => {
         if (
           member.id !== user?.id &&
           !friendIds.has(member.id) &&
-          member.friends.some((f) => friendIds.has(f.id))
+          member.friendIds.some((id) => friendIds.has(id))
         ) {
           fofs.push(member);
           fofIds.add(member.id);
