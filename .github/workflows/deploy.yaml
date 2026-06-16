@@ -921,8 +921,13 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Publish EAS Update
-        run: bunx eas-cli@latest update --branch production --message "$COMMIT_MESSAGE" --non-interactive
+        run: bunx eas-cli@16.5.0 update --branch production --message "$COMMIT_MESSAGE" --non-interactive
         working-directory: ./apps/mobile
         env:
+          # `eas update` ignores eas.json build profiles, so pin the variant
+          # here. Must resolve the same app config as the production store build,
+          # or the fingerprint runtimeVersion won't match any installed build and
+          # the OTA never applies.
+          APP_VARIANT: production
           EXPO_TOKEN: ${{ secrets.EXPO_ACCESS_TOKEN }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}

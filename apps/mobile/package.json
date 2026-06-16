@@ -14,10 +14,10 @@
     "build:simulator": "bunx expo prebuild && cd ios && pod install && cd .. && bunx expo run:ios",
     "build:simulator:clean": "bunx expo prebuild --clean && cd ios && pod install && cd .. && bunx expo run:ios",
     "build:device": "bunx expo prebuild && cd ios && pod install && cd .. && bunx expo run:ios --device 00008150-001528163445401C",
-    "build:android": "eas build -p android --profile production --local",
+    "build:android": "APP_VARIANT=production eas build -p android --profile production --local",
     "build:ios": "APP_VARIANT=production bunx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace",
-    "update:production": "eas update --branch production",
-    "update:preview": "eas update --branch preview"
+    "update:production": "APP_VARIANT=production eas update --branch production",
+    "update:preview": "APP_VARIANT=production eas update --branch preview"
   },
   "dependencies": {
     "@alliance/common": "workspace:*",

@@ -5,7 +5,10 @@
   },
   "build": {
     "base": {
-      "node": "20.19.1"
+      "node": "20.19.1",
+      "env": {
+        "APP_VARIANT": "production"
+      }
     },
     "development": {
       "extends": "base",
