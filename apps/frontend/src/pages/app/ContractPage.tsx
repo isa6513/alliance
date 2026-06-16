@@ -262,7 +262,7 @@ const ContractPage: React.FC = () => {
                 </li>
                 <li className="text-base">
                   You can mark yourself as away in Settings if you won&apos;t be
-                  able to complete an action for a prolonged period, such as
+                  able to complete actions for a prolonged period, such as
                   during a vacation.
                 </li>
               </ol>
