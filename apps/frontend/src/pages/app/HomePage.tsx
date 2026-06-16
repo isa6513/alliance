@@ -420,6 +420,7 @@ const HomePage = () => {
                         }
                         userId={user?.id}
                         user={user}
+                        loadCurrentUserLocation={!!user}
                       />
                     ))}
                   </div>
@@ -554,6 +555,7 @@ const HomePage = () => {
                     }
                     userId={user?.id}
                     user={user}
+                    loadCurrentUserLocation={!!user}
                   />
                 ))}
               </div>

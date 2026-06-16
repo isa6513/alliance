@@ -99,6 +99,12 @@ const previousAnswerContentSchema = z.strictObject({
   emptyText: z.string().optional(),
 });
 
+const userLocationContentSchema = z.strictObject({
+  ...baseContentFields,
+  title: z.string().optional(),
+  emptyText: z.string().optional(),
+});
+
 const manualDisplayBlockContentSchema = z.union([
   headerContentSchema,
   textContentSchema,
@@ -112,6 +118,7 @@ const manualDisplayBlockContentSchema = z.union([
   bigLinkContentSchema,
   copyTextContentSchema,
   previousAnswerContentSchema,
+  userLocationContentSchema,
 ]);
 export type ManualDisplayBlockContent = z.infer<
   typeof manualDisplayBlockContentSchema
@@ -210,6 +217,13 @@ const previousAnswerBlockSchema = z.strictObject({
 });
 export type PreviousAnswerBlock = z.infer<typeof previousAnswerBlockSchema>;
 
+const userLocationBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("userLocation"),
+  ...userLocationContentSchema.shape,
+});
+export type UserLocationBlock = z.infer<typeof userLocationBlockSchema>;
+
 export const displayBlockSchema = z.discriminatedUnion("kind", [
   headerBlockSchema,
   textBlockSchema,
@@ -223,6 +237,7 @@ export const displayBlockSchema = z.discriminatedUnion("kind", [
   bigLinkBlockSchema,
   copyTextBlockSchema,
   previousAnswerBlockSchema,
+  userLocationBlockSchema,
 ]);
 export type DisplayBlock = z.infer<typeof displayBlockSchema>;
 export type DisplayKind = DisplayBlock["kind"];
@@ -250,6 +265,7 @@ export const MANUAL_IMPORT_FIELD_BY_KIND: Record<
   video: null,
   biglink: null,
   previousAnswer: null,
+  userLocation: null,
 };
 
 export const manualImportClipboardSchema = z

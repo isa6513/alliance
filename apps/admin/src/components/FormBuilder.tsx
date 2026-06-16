@@ -45,6 +45,7 @@ import {
   EditablePreviousAnswerBlock,
   EditableSpacerBlock,
   EditableTextBlock,
+  EditableUserLocationBlock,
   EditableVideoBlock,
 } from "./display-blocks";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
@@ -111,6 +112,7 @@ const BLOCK_NAMES = {
   biglink: "Big Link Block",
   copytext: "Copy Text Block",
   previousAnswer: "Previous Answer Block",
+  userLocation: "User Location Block",
 } as const satisfies Record<
   Exclude<DisplayKind, "text"> | "text-block",
   string
@@ -919,6 +921,15 @@ export function FormBuilder({
           sourceFormId: 0,
           sourceFieldId: "",
           title: "",
+        };
+        break;
+      case "userLocation":
+        newBlock = {
+          type: "display",
+          kind: "userLocation",
+          id: blockId,
+          title: "Your location",
+          emptyText: "No location set",
         };
         break;
       default:
@@ -1838,6 +1849,13 @@ export function FormBuilder({
                   case "previousAnswer":
                     return (
                       <EditablePreviousAnswerBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "userLocation":
+                    return (
+                      <EditableUserLocationBlock
                         block={block as any}
                         {...commonProps}
                       />

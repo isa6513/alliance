@@ -346,6 +346,7 @@ export default function HomeScreen() {
               }
               userId={user?.id}
               user={user}
+              loadCurrentUserLocation={!!user}
             />
           </View>
         ),

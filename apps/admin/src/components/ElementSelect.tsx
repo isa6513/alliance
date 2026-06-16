@@ -8,40 +8,44 @@ interface ElementSelectProps {
   displayBlocksOnly?: boolean;
 }
 
-const FIELD_TYPES: FieldKind[] = [
-  "textarea",
-  "email",
-  "phone",
-  "number",
-  "range",
-  "checkbox",
-  "radio",
-  "select",
-  "multiselect",
-  "date",
-  "time",
-  "timezone",
-  "city",
-  "file",
-  "contract",
-  "list",
-  "custom",
-] as const;
+const FIELD_LABELS: Record<FieldKind, string> = {
+  text: "Text Field",
+  textarea: "Text Field",
+  email: "Email Field",
+  phone: "Phone Field",
+  number: "Number Field",
+  range: "Range Field",
+  checkbox: "Checkbox Field",
+  radio: "Radio Field",
+  select: "Select Field",
+  multiselect: "Multiselect Field",
+  date: "Date Field",
+  time: "Time Field",
+  timezone: "Timezone Field",
+  city: "City Field",
+  file: "File Field",
+  contract: "Contract Field",
+  list: "List Field",
+  custom: "Custom Component Field",
+};
+const FIELD_TYPES = Object.keys(FIELD_LABELS) as FieldKind[];
 
-const BLOCK_TYPES: DisplayKind[] = [
-  "header",
-  "text",
-  "label",
-  "divider",
-  "spacer",
-  "html",
-  "image",
-  "video",
-  "quote",
-  "biglink",
-  "copytext",
-  "previousAnswer",
-];
+const BLOCK_LABELS: Record<DisplayKind, string> = {
+  header: "Header Block",
+  text: "Text Block",
+  label: "Label Block",
+  divider: "Divider Block",
+  spacer: "Spacer Block",
+  html: "HTML Block",
+  image: "Image Block",
+  video: "Video Block",
+  quote: "Quote Block",
+  biglink: "Big Link Block",
+  copytext: "Copy Text Block",
+  previousAnswer: "Previous Answer Block",
+  userLocation: "User Location Block",
+};
+const BLOCK_TYPES = Object.keys(BLOCK_LABELS) as DisplayKind[];
 
 export function ElementSelect({
   onAddField,
@@ -62,11 +66,7 @@ export function ElementSelect({
                     onClick={() => onAddField(type)}
                     className="w-full text-left px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 rounded-md border border-blue-200 transition-colors"
                   >
-                    {type === "custom"
-                      ? "Custom Component Field"
-                      : type === "textarea"
-                        ? "Text Field"
-                        : `${type.charAt(0).toUpperCase() + type.slice(1)} Field`}
+                    {FIELD_LABELS[type]}
                   </button>
                 ))}
               </div>
@@ -82,11 +82,7 @@ export function ElementSelect({
                   onClick={() => onAddDisplayBlock(type)}
                   className="w-full text-left px-3 py-2 text-sm bg-green/10 hover:bg-green/20 rounded-md border border-green/30 transition-colors"
                 >
-                  {type === "previousAnswer"
-                    ? "Previous Answer Block"
-                    : type === "copytext"
-                      ? "Copy Text Block"
-                      : type.charAt(0).toUpperCase() + type.slice(1) + " Block"}
+                  {BLOCK_LABELS[type]}
                 </button>
               ))}
             </div>

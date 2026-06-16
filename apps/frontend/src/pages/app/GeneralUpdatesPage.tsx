@@ -1,11 +1,11 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link, href } from "react-router";
 import { actionsAllGeneralUpdates } from "@alliance/shared/client";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
-import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
+import { useQuery } from "@tanstack/react-query";
 import { MoveLeft } from "lucide-react";
+import React from "react";
+import { Link, href } from "react-router";
+import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import { useAuth } from "../../lib/AuthContext";
 
 const GeneralUpdatesPage: React.FC = () => {
@@ -38,6 +38,7 @@ const GeneralUpdatesPage: React.FC = () => {
               schema={generalUpdate.schema}
               userId={user?.id}
               user={user}
+              loadCurrentUserLocation={!!user}
             />
           ))}
         </div>

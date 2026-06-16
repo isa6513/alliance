@@ -142,6 +142,7 @@ export default function FollowUpFormPanel({
           persistKey={`follow-up-${followUpForm.id}`}
           userId={user?.id}
           user={user}
+          loadCurrentUserLocation={!!user}
           onFormStarted={() => {}}
           renderFormAsCompleted={false}
           scrollPageTo={scrollPageTo}

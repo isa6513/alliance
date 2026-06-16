@@ -1,9 +1,9 @@
-import { View } from "react-native";
-import type { GeneralUpdateDto, UserDto } from "@alliance/shared/client";
 import type { FormSchema } from "@alliance/common/forms/form-schema";
+import type { GeneralUpdateDto, UserDto } from "@alliance/shared/client";
+import { View } from "react-native";
 import FormRenderer from "./forms/FormRenderer";
-import Card from "./system/Card";
 import Button, { ButtonColor } from "./system/Button";
+import Card from "./system/Card";
 import Text, { FontFamily, FontWeight } from "./system/Text";
 
 export interface LargeGeneralUpdateCardProps {
@@ -11,6 +11,7 @@ export interface LargeGeneralUpdateCardProps {
   onDismiss: () => void;
   userId?: number | string;
   user?: UserDto;
+  loadCurrentUserLocation?: boolean;
 }
 
 function getFormSchema(schema: GeneralUpdateDto["schema"]): FormSchema | null {
@@ -31,6 +32,7 @@ export default function LargeGeneralUpdateCard({
   onDismiss,
   userId,
   user,
+  loadCurrentUserLocation,
 }: LargeGeneralUpdateCardProps) {
   const formSchema = getFormSchema(generalUpdate.schema);
 
@@ -55,6 +57,7 @@ export default function LargeGeneralUpdateCard({
             onSubmit={null}
             userId={userId}
             user={user}
+            loadCurrentUserLocation={loadCurrentUserLocation}
             scrollPageTo={() => {}}
             scrollToEnd={() => {}}
           />

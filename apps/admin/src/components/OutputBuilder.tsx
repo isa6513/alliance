@@ -23,6 +23,7 @@ import {
   EditableLabelBlock,
   EditableSpacerBlock,
   EditableTextBlock,
+  EditableUserLocationBlock,
 } from "./display-blocks";
 import { EditableQuoteBlock } from "./display-blocks/EditableQuoteBlock";
 import { EditableOutputFieldBlock } from "./output-builder/EditableOutputFieldBlock";
@@ -36,9 +37,24 @@ const DISPLAY_BLOCK_KINDS = [
   "html",
   "image",
   "quote",
+  "userLocation",
 ] as const satisfies DisplayKind[];
 
-const createDisplayBlock = (kind: DisplayKind): DisplayBlock => {
+type OutputDisplayBlockKind = (typeof DISPLAY_BLOCK_KINDS)[number];
+
+const DISPLAY_BLOCK_LABELS: Record<OutputDisplayBlockKind, string> = {
+  header: "Header block",
+  text: "Text block",
+  label: "Label block",
+  divider: "Divider block",
+  spacer: "Spacer block",
+  html: "HTML block",
+  image: "Image block",
+  quote: "Quote block",
+  userLocation: "User location block",
+};
+
+const createDisplayBlock = (kind: OutputDisplayBlockKind): DisplayBlock => {
   const blockId = `block-${Date.now()}-${Math.random()
     .toString(36)
     .slice(2, 6)}`;
@@ -86,13 +102,16 @@ const createDisplayBlock = (kind: DisplayKind): DisplayBlock => {
         id: blockId,
         text: "Quote text",
       };
-    default:
+    case "userLocation":
       return {
-        type: "display",
-        kind: "text",
+        type: "display" as const,
+        kind,
         id: blockId,
-        text: "Text content",
+        title: "Your location",
+        emptyText: "No location set",
       };
+    default:
+      throw new Error(`Unknown display block kind: ${kind satisfies never}`);
   }
 };
 
@@ -268,7 +287,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
     updateSelectedView({ blocks: nextBlocks });
   };
 
-  const addDisplayBlock = (kind: DisplayKind) => {
+  const addDisplayBlock = (kind: OutputDisplayBlockKind) => {
     const block = createDisplayBlock(kind);
     if (
       !schema.outputViews ||
@@ -438,7 +457,8 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                 outputBlocks,
                 ...dragProps,
               };
-              switch (displayBlock.kind) {
+              const displayBlockKind = displayBlock.kind;
+              switch (displayBlockKind) {
                 case "header":
                   return (
                     <EditableHeaderBlock
@@ -480,7 +500,20 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                   return (
                     <EditableQuoteBlock block={displayBlock} {...sharedProps} />
                   );
+                case "userLocation":
+                  return (
+                    <EditableUserLocationBlock
+                      block={displayBlock}
+                      {...sharedProps}
+                    />
+                  );
+                case "biglink":
+                case "copytext":
+                case "previousAnswer":
+                case "video":
+                  return null;
                 default:
+                  displayBlockKind satisfies never;
                   return null;
               }
             })()
@@ -617,7 +650,8 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                       defaultValue=""
                       className="px-3 py-2 border border-gray-300 rounded text-sm bg-white"
                       onChange={(event) => {
-                        const nextKind = event.target.value as DisplayKind;
+                        const nextKind = event.target
+                          .value as OutputDisplayBlockKind;
                         addDisplayBlock(nextKind);
                         event.currentTarget.selectedIndex = 0;
                       }}
@@ -627,7 +661,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                       </option>
                       {DISPLAY_BLOCK_KINDS.map((kind) => (
                         <option key={kind} value={kind}>
-                          {kind.charAt(0).toUpperCase() + kind.slice(1)} block
+                          {DISPLAY_BLOCK_LABELS[kind]}
                         </option>
                       ))}
                     </select>

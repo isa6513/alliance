@@ -1,7 +1,7 @@
 import type { FormSchema } from "@alliance/common/forms/form-schema";
+import { UserDto } from "@alliance/shared/client";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import Card from "@alliance/sharedweb/ui/Card";
-import { UserDto } from "@alliance/shared/client";
 
 export interface LargeGeneralUpdateCardProps {
   title: string;
@@ -10,6 +10,7 @@ export interface LargeGeneralUpdateCardProps {
   id?: number;
   userId?: number | string;
   user?: UserDto;
+  loadCurrentUserLocation?: boolean;
 }
 
 function getFormSchema(schema: Record<string, unknown>): FormSchema | null {
@@ -32,6 +33,7 @@ const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
   id: propsId,
   userId,
   user,
+  loadCurrentUserLocation,
 }) => {
   const formSchema = getFormSchema(schema);
 
@@ -52,6 +54,7 @@ const LargeGeneralUpdateCard: React.FC<LargeGeneralUpdateCardProps> = ({
               onSubmit={null}
               userId={userId}
               user={user}
+              loadCurrentUserLocation={loadCurrentUserLocation}
               isGeneralUpdate
               onDismiss={onDismiss}
             />

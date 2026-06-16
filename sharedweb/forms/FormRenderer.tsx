@@ -5,6 +5,7 @@ import {
   collectSourceFormIds,
   isQuestionField,
   type AnyField,
+  type CityFieldValue,
   type FormSchema,
   type FormValue,
 } from "@alliance/common/forms/form-schema";
@@ -17,6 +18,7 @@ import {
   tasksGetFormResponsesAdmin,
   tasksGetMyFormResponse,
   tasksRunValidator,
+  userMyLocation,
   type UserDto,
 } from "@alliance/shared/client";
 import {
@@ -88,6 +90,8 @@ type FormRendererProps = {
   fieldLabelRightContent?: Record<string, React.ReactNode>;
   /** When set, previousAnswer blocks fetch this user's responses via the admin all-responses endpoint. */
   adminPreviewUserId?: string | number;
+  /** When true, fetch the logged-in viewer's saved city for userLocation display blocks. */
+  loadCurrentUserLocation?: boolean;
   onSubmit: ((data: SubmitFormDto) => Promise<boolean>) | null; // null for admin preview
   scrollContainerRef?: React.RefObject<HTMLElement | null>;
 } & (
@@ -139,6 +143,7 @@ const FormRenderer = ({
   draftFormResponse,
   fieldLabelRightContent,
   adminPreviewUserId,
+  loadCurrentUserLocation,
   actionId,
   initialPageIndex,
   sessionReplayUrl,
@@ -200,6 +205,16 @@ const FormRenderer = ({
 
   const unknownKind = useMemo(
     () => findUnknownFormElementKind(schema),
+    [schema],
+  );
+  const hasUserLocationDisplayBlock = useMemo(
+    () =>
+      schema.pages?.some((page) =>
+        page.fields?.some(
+          (element) =>
+            !isQuestionField(element) && element.kind === "userLocation",
+        ),
+      ) ?? false,
     [schema],
   );
 
@@ -345,6 +360,43 @@ const FormRenderer = ({
   const [outOfTimeSelected, setOutOfTimeSelected] = useState(false);
   const [customReason, setCustomReason] = useState("");
   const ref = useOutsideClick(() => setDropdownOpen(false));
+  const [currentUserLocation, setCurrentUserLocation] =
+    useState<CityFieldValue | null>(null);
+  const [currentUserLocationLoading, setCurrentUserLocationLoading] =
+    useState(false);
+
+  useEffect(() => {
+    if (!loadCurrentUserLocation || !hasUserLocationDisplayBlock || !user) {
+      setCurrentUserLocation(null);
+      setCurrentUserLocationLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setCurrentUserLocation(null);
+    setCurrentUserLocationLoading(true);
+
+    userMyLocation()
+      .then((response) => {
+        if (cancelled) return;
+        setCurrentUserLocation(response.data?.city ?? null);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setCurrentUserLocation(null);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setCurrentUserLocationLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasUserLocationDisplayBlock, loadCurrentUserLocation, user?.id, user]);
+
+  const userLocationDisplayValue =
+    currentUserLocation ?? user?.customCityString ?? null;
 
   useEffect(() => {
     if (readOnly || typeof window === "undefined") {
@@ -1497,6 +1549,8 @@ const FormRenderer = ({
         block={resolvedBlock}
         previousAnswerData={previousAnswerData}
         previousAnswerSchemas={previousAnswerSchemas}
+        userLocation={userLocationDisplayValue}
+        userLocationLoading={currentUserLocationLoading}
       />
     );
   };

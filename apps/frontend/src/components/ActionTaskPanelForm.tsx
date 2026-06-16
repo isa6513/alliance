@@ -208,6 +208,7 @@ const ActionTaskPanelForm = ({
           persistKey={String(taskFormId)}
           userId={user?.id}
           user={user}
+          loadCurrentUserLocation={!!user && isAuthenticated}
           onFormStarted={onFormStarted}
           onAbandonAction={onAbandonAction}
           renderFormAsCompleted={disabled}

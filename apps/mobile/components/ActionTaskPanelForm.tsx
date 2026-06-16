@@ -164,6 +164,7 @@ const ActionTaskPanelForm = ({
         persistKey={String(taskFormId)}
         userId={user?.id}
         user={user}
+        loadCurrentUserLocation={!!user && isAuthenticated}
         scrollPageTo={scrollPageTo}
         scrollToEnd={scrollToEnd}
         renderFormAsCompleted={disabled}

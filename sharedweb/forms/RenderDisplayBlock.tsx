@@ -1,24 +1,30 @@
-import React, { useState } from "react";
-import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
-import type { DisplayBlock } from "@alliance/common/forms/display-blocks";
-import { getApiUrl } from "../lib/config";
-import { Link } from "react-router";
-import Card from "../ui/Card";
+import type {
+  BigLinkIcon,
+  DisplayBlock,
+} from "@alliance/common/forms/display-blocks";
+import type { FormSchema } from "@alliance/common/forms/form-schema";
+import {
+  formatUserLocationDisplayValue,
+  type UserLocationDisplayValue,
+} from "@alliance/shared/formrenderer";
+import { CardStyle } from "@alliance/shared/styles/card";
 import { cn } from "@alliance/shared/styles/util";
 import {
-  MessagesSquare,
-  File,
-  FileText,
-  FileCheck,
-  Signature,
-  Copy,
   Check,
+  Copy,
+  File,
+  FileCheck,
+  FileText,
+  MessagesSquare,
+  Signature,
 } from "lucide-react";
-import type { BigLinkIcon } from "@alliance/common/forms/display-blocks";
-import { CardStyle } from "@alliance/shared/styles/card";
-import VideoPlayer from "./VideoPlayer";
-import type { FormSchema } from "@alliance/common/forms/form-schema";
+import React, { useState } from "react";
+import { Link } from "react-router";
+import { getApiUrl } from "../lib/config";
+import Card from "../ui/Card";
+import FormMarkdownWrapper from "../ui/FormMarkdownWrapper";
 import RenderPreviousAnswer from "./RenderPreviousAnswer";
+import VideoPlayer from "./VideoPlayer";
 
 const bigLinkIcons: Record<BigLinkIcon, React.FC<{ size?: number }>> = {
   "messages-square": MessagesSquare,
@@ -64,12 +70,16 @@ type Props = {
   block: DisplayBlock;
   previousAnswerData?: Record<number, Record<string, unknown>>;
   previousAnswerSchemas?: Record<number, FormSchema>;
+  userLocation?: UserLocationDisplayValue;
+  userLocationLoading?: boolean;
 };
 
 export default function RenderDisplayBlock({
   block,
   previousAnswerData,
   previousAnswerSchemas,
+  userLocation,
+  userLocationLoading = false,
 }: Props) {
   switch (block.kind) {
     case "header":
@@ -197,6 +207,34 @@ export default function RenderDisplayBlock({
 
     case "copytext":
       return <CopyTextDisplay text={block.text} title={block.title} />;
+
+    case "userLocation": {
+      const locationText = formatUserLocationDisplayValue(userLocation);
+      const displayText =
+        locationText ||
+        (userLocationLoading ? "Loading location..." : null) ||
+        block.emptyText ||
+        "No location set";
+      const hasLocation = locationText.length > 0;
+      const title = block.title?.trim();
+      return (
+        <div>
+          {title ? (
+            <span className="text-zinc-500 mb-1 block">{title}</span>
+          ) : null}
+          <div className="rounded-md border border-gray-200 bg-zinc-50 px-3 py-2">
+            <span
+              className={cn(
+                "whitespace-pre-wrap",
+                hasLocation ? "text-black" : "text-zinc-500 italic",
+              )}
+            >
+              {displayText}
+            </span>
+          </div>
+        </div>
+      );
+    }
 
     case "previousAnswer": {
       const answers = previousAnswerData?.[block.sourceFormId];

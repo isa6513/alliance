@@ -76,6 +76,7 @@ const KNOWN_FORM_ELEMENT_KINDS_RECORD = {
   biglink: true,
   copytext: true,
   previousAnswer: true,
+  userLocation: true,
 } as const satisfies Record<FormElementKind, true>;
 
 const KNOWN_FORM_ELEMENT_KINDS = new Set(
@@ -112,6 +113,34 @@ const isCityValue = (value: unknown): value is CityFieldValue => {
     "id" in candidate
   );
 };
+
+export type UserLocationDisplayValue =
+  | CityFieldValue
+  | string
+  | null
+  | undefined;
+
+export function formatUserLocationDisplayValue(
+  value: UserLocationDisplayValue,
+): string {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value.trim();
+  }
+  if (!isCityValue(value)) {
+    return "";
+  }
+
+  const region = value.admin1?.trim();
+  const country = value.countryName?.trim();
+  const locationParts = [region, country].filter(
+    (part): part is string => !!part && part.length > 0,
+  );
+  const suffix = locationParts.length ? `, ${locationParts.join(", ")}` : "";
+  return `${value.name}${suffix}`;
+}
 
 export function getRangeOptionCount(field: RangeField): number {
   const desired = field.optionCount ?? DEFAULT_RANGE_OPTION_COUNT;

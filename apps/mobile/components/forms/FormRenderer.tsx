@@ -7,6 +7,7 @@ import {
   collectSourceFormIds,
   isQuestionField,
   type AnyField,
+  type CityFieldValue,
   type FormSchema,
   type FormValue,
 } from "@alliance/common/forms/form-schema";
@@ -17,6 +18,7 @@ import {
   tasksGetForm,
   tasksGetMyFormResponse,
   tasksRunValidator,
+  userMyLocation,
   type UserDto,
 } from "@alliance/shared/client";
 import {
@@ -26,10 +28,12 @@ import {
   computeFormStorageKey,
   filterAnswersByFieldIds,
   findUnknownFormElementKind,
+  formatUserLocationDisplayValue,
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
   resolveDisplayBlockForUser,
   resolveFieldDefaultValue,
   validateFieldValue as validateFieldValueShared,
+  type UserLocationDisplayValue,
 } from "@alliance/shared/formrenderer";
 import { outputFieldPublicToggle } from "@alliance/shared/lib/copy";
 import { cn } from "@alliance/shared/styles/util";
@@ -77,6 +81,7 @@ type FormRendererProps = {
   sessionReplayUrl?: string;
   user?: Omit<UserDto, "email">;
   disableOptionRandomization?: boolean;
+  loadCurrentUserLocation?: boolean;
   onFormStarted?: () => void;
   onAbandonAction?: (
     outOfTime: boolean,
@@ -168,6 +173,8 @@ type RenderDisplayBlockMobileProps = {
   hasRenderedNeighborAbove?: boolean;
   hasRenderedNeighborBelow?: boolean;
   user?: Omit<UserDto, "email">;
+  userLocation?: UserLocationDisplayValue;
+  userLocationLoading?: boolean;
 };
 
 export function RenderDisplayBlockMobile({
@@ -177,6 +184,8 @@ export function RenderDisplayBlockMobile({
   hasRenderedNeighborAbove = false,
   hasRenderedNeighborBelow = false,
   user,
+  userLocation,
+  userLocationLoading = false,
 }: RenderDisplayBlockMobileProps) {
   const handleLinkPress = useHandleLinkPress();
   switch (block.kind) {
@@ -265,6 +274,28 @@ export function RenderDisplayBlockMobile({
       );
     case "copytext":
       return <CopyTextDisplayMobile text={block.text} title={block.title} />;
+    case "userLocation": {
+      const locationText = formatUserLocationDisplayValue(userLocation);
+      const displayText =
+        locationText ||
+        (userLocationLoading ? "Loading location..." : null) ||
+        block.emptyText ||
+        "No location set";
+      const hasLocation = locationText.length > 0;
+      const title = block.title?.trim();
+      return (
+        <View>
+          {title ? (
+            <Text className="text-sm text-zinc-500 mb-1">{title}</Text>
+          ) : null}
+          <View className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-3">
+            <Text className={hasLocation ? "text-zinc-900" : "text-zinc-500"}>
+              {displayText}
+            </Text>
+          </View>
+        </View>
+      );
+    }
     case "video": {
       return block.videoId !== undefined ? (
         <View
@@ -309,6 +340,7 @@ const FormRenderer = ({
   userId,
   user,
   disableOptionRandomization,
+  loadCurrentUserLocation,
   onFormStarted,
   onAbandonAction,
   renderFormAsCompleted,
@@ -369,6 +401,16 @@ const FormRenderer = ({
 
   const unknownKind = useMemo(
     () => findUnknownFormElementKind(schema),
+    [schema],
+  );
+  const hasUserLocationDisplayBlock = useMemo(
+    () =>
+      schema.pages?.some((page) =>
+        page.fields?.some(
+          (element) =>
+            !isQuestionField(element) && element.kind === "userLocation",
+        ),
+      ) ?? false,
     [schema],
   );
 
@@ -545,6 +587,43 @@ const FormRenderer = ({
   const [otherReasonSelected, setOtherReasonSelected] = useState(false);
   const [customReason, setCustomReason] = useState("");
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
+  const [currentUserLocation, setCurrentUserLocation] =
+    useState<CityFieldValue | null>(null);
+  const [currentUserLocationLoading, setCurrentUserLocationLoading] =
+    useState(false);
+
+  useEffect(() => {
+    if (!loadCurrentUserLocation || !hasUserLocationDisplayBlock || !user) {
+      setCurrentUserLocation(null);
+      setCurrentUserLocationLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setCurrentUserLocation(null);
+    setCurrentUserLocationLoading(true);
+
+    userMyLocation()
+      .then((response) => {
+        if (cancelled) return;
+        setCurrentUserLocation(response.data?.city ?? null);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setCurrentUserLocation(null);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setCurrentUserLocationLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasUserLocationDisplayBlock, loadCurrentUserLocation, user?.id, user]);
+
+  const userLocationDisplayValue =
+    currentUserLocation ?? user?.customCityString ?? null;
 
   // Draft persistence: tracks whether we've loaded a stored draft so the save
   // effect doesn't overwrite stored data with initial defaults.
@@ -1143,6 +1222,8 @@ const FormRenderer = ({
                   hasRenderedNeighborAbove={hasRenderedNeighborAbove(idx)}
                   hasRenderedNeighborBelow={hasRenderedNeighborBelow(idx)}
                   user={user}
+                  userLocation={userLocationDisplayValue}
+                  userLocationLoading={currentUserLocationLoading}
                 />
               </View>
             );
