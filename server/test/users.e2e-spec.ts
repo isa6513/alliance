@@ -1,21 +1,21 @@
+import { ContractService } from 'src/contract/contract.service';
 import {
   Notification,
   NotificationCategory,
 } from 'src/notifs/entities/notification.entity';
+import {
+  OnetimeInvite,
+  OnetimeInviteStatus,
+} from 'src/user/entities/onetime-invite.entity';
+import { UserService } from 'src/user/user.service';
 import request from 'supertest';
 import type { Repository } from 'typeorm';
+import { Community } from '../src/community/entities/community.entity';
 import { City } from '../src/geo/city.entity';
 import { GeoModule } from '../src/geo/geo.module';
 import { FriendStatus } from '../src/user/entities/friend.entity';
 import { ReferralSource, User } from '../src/user/entities/user.entity';
 import { createTestApp, TestContext } from './e2e-test-utils';
-import { ContractService } from 'src/contract/contract.service';
-import { UserService } from 'src/user/user.service';
-import { Community } from '../src/community/entities/community.entity';
-import {
-  OnetimeInvite,
-  OnetimeInviteStatus,
-} from 'src/user/entities/onetime-invite.entity';
 
 describe('Users (e2e)', () => {
   let ctx: TestContext;
@@ -357,6 +357,7 @@ describe('Users (e2e)', () => {
           password: 'Password123!',
           referredBy: inviter,
           referredByInvite: invite,
+          referralSource: ReferralSource.OnetimeInvite,
         }),
       );
 
@@ -466,6 +467,7 @@ describe('Users (e2e)', () => {
           email: 'no.community.user@example.com',
           password: 'Password123!',
           referredBy: referrer,
+          referralSource: ReferralSource.ReferralLink,
         }),
       );
 

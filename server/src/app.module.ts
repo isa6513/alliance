@@ -113,7 +113,7 @@ export class AppModule implements OnModuleInit {
           password: process.env.ADMIN_PASSWORD,
           name: 'Admin',
           admin: true,
-          referralSource: ReferralSource.ReferralLink,
+          referralSource: ReferralSource.None,
         });
       }
     }

@@ -33,6 +33,7 @@ import type { Relation } from 'src/utils/Repository';
 import {
   BeforeInsert,
   BeforeUpdate,
+  Check,
   Column,
   Entity,
   JoinColumn,
@@ -77,8 +78,15 @@ export enum ReferralSource {
   ExternalShareLink = 'external_share_link',
   InviteShareLink = 'invite_share_link',
   Campaign = 'campaign',
+  None = 'none',
 }
 
+@Check(
+  'CHK_user_referral_fields',
+  `("referredByCampaignId" IS NULL OR "referralSource" = 'campaign')
+   AND ("referredById" IS NULL OR "referralSource" IN ('referral_link', 'onetime_invite', 'action_share_link', 'external_share_link', 'invite_share_link'))
+   AND ("referredByInviteId" IS NULL OR "referralSource" = 'onetime_invite')`,
+)
 @Entity()
 export class User {
   // Fields
@@ -347,7 +355,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: ReferralSource,
-    default: ReferralSource.ReferralLink,
+    default: ReferralSource.None,
   })
   @ApiProperty({ enum: ReferralSource, enumName: 'ReferralSource' })
   referralSource: ReferralSource;

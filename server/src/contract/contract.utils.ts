@@ -45,6 +45,7 @@ export const REFERRAL_COMMUNITY_SELECTORS: Record<
   [ReferralSource.ExternalShareLink]: selectCommunityForLinkReferral,
   [ReferralSource.InviteShareLink]: selectCommunityForLinkReferral,
   [ReferralSource.Campaign]: () => null,
+  [ReferralSource.None]: () => null,
 };
 
 export function memberJoinedCommunityNotif(

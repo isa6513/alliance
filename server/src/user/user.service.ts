@@ -890,6 +890,7 @@ export class UserService {
       name: body.firstName + ' ' + body.lastName,
       password: Math.random().toString(36).substring(2, 15), //TODO: they have to reset this but maybe do something better
       isNotSignedUpPartialProfile: true,
+      referralSource: ReferralSource.None,
     });
   }
 

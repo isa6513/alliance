@@ -122,7 +122,7 @@ export async function createTestApp(
       email: 'user@example.com',
       password: 'pass',
       name: 'Test User',
-      referralSource: ReferralSource.ReferralLink,
+      referralSource: ReferralSource.None,
       tags: [defaultTag],
     }),
   );
@@ -133,7 +133,7 @@ export async function createTestApp(
       password: 'pass',
       name: 'Test Admin',
       admin: true,
-      referralSource: ReferralSource.ReferralLink,
+      referralSource: ReferralSource.None,
       tags: [defaultTag],
     }),
   );

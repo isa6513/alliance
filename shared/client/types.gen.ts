@@ -60,7 +60,7 @@ export type ContractEvent = {
     contract?: Contract | null;
 };
 
-export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link' | 'external_share_link' | 'invite_share_link' | 'campaign';
+export type ReferralSource = 'referral_link' | 'onetime_invite' | 'action_share_link' | 'external_share_link' | 'invite_share_link' | 'campaign' | 'none';
 
 export type NotificationPreference = 'all' | 'digest' | 'none';
 
