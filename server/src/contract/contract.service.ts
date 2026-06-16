@@ -28,6 +28,16 @@ import {
 import { CreateContractDto, UpdateContractDto } from './dto/contract.dto';
 import { Contract } from './entities/contract.entity';
 
+function referralLabel(user: User): string {
+  if (user.referredBy) {
+    return `(invited by ${user.referredBy.name}) `;
+  }
+  if (user.referredByCampaign) {
+    return `(via campaign ${user.referredByCampaign.name}) `;
+  }
+  return '';
+}
+
 @Injectable()
 export class ContractService {
   constructor(
@@ -89,6 +99,7 @@ export class ContractService {
       relations: {
         contractEvents: true,
         referredBy: true,
+        referredByCampaign: true,
         referredByInvite: true,
         pendingCommunity: true,
       },
@@ -221,7 +232,7 @@ export class ContractService {
       this.notifsService.sendNotifs(notifs),
       this.eventLogService.sendMessage({
         type: EventType.ContractSigned,
-        message: `${user.name} ${user.referredBy ? `(invited by ${user.referredBy.name}) ` : ''}signed their contract :)`,
+        message: `${user.name} ${referralLabel(user)}signed their contract :)`,
         userId: user.id,
       }),
       ...promises,
