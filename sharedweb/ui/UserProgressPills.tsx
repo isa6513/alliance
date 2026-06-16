@@ -14,7 +14,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./HoverCard";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
 const MIN_MAX_WIDTH = "min-w-4 max-w-18";
 
@@ -142,8 +142,8 @@ function Pill({
   const { pillLabel, pillStyle, pillSubtitleText, pillTextStyle } =
     pillStatusData;
   return (
-    <HoverCard key={action.id}>
-      <HoverCardTrigger
+    <Tooltip key={action.id}>
+      <TooltipTrigger
         render={
           <div
             className={cn("relative flex-1", MIN_MAX_WIDTH)}
@@ -160,7 +160,7 @@ function Pill({
           </div>
         }
       />
-      <HoverCardContent side="top" sideOffset={4}>
+      <TooltipContent side="top" sideOffset={4}>
         <div className="flex flex-col items-center justify-center text-center">
           <p>{action.name}</p>
           <p className="text-zinc-500">
@@ -173,8 +173,8 @@ function Pill({
             {additionalSubtitleText}
           </p>
         </div>
-      </HoverCardContent>
-    </HoverCard>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 

@@ -26,10 +26,10 @@ import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@alliance/sharedweb/ui/HoverCard";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@alliance/sharedweb/ui/Tooltip";
 import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
@@ -364,46 +364,46 @@ const UserProfilePage: React.FC = () => {
                   </div>
                 )}
                 {profile.staff && (
-                  <HoverCard>
-                    <HoverCardTrigger
+                  <Tooltip>
+                    <TooltipTrigger
                       render={
                         <div className="text-xs bg-staff text-white px-2 py-0.5 rounded-sm self-center cursor-default">
                           Staff
                         </div>
                       }
                     />
-                    <HoverCardContent sideOffset={4}>
+                    <TooltipContent sideOffset={4}>
                       Member of the office
-                    </HoverCardContent>
-                  </HoverCard>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
                 {!profile.staff && profile.isCommunityLeader && (
-                  <HoverCard>
-                    <HoverCardTrigger
+                  <Tooltip>
+                    <TooltipTrigger
                       render={
                         <div className="text-xs bg-grouplead text-white px-2 py-0.5 rounded-sm self-center cursor-default">
                           Lead
                         </div>
                       }
                     />
-                    <HoverCardContent sideOffset={4}>
+                    <TooltipContent sideOffset={4}>
                       Leads a group of members
-                    </HoverCardContent>
-                  </HoverCard>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
                 {!profile.hasActiveContract && !profilePending && (
-                  <HoverCard>
-                    <HoverCardTrigger
+                  <Tooltip>
+                    <TooltipTrigger
                       render={
                         <div className="text-xs bg-zinc-100 text-zinc-600 px-2 py-1 rounded-sm self-center cursor-default">
                           Observer
                         </div>
                       }
                     />
-                    <HoverCardContent sideOffset={4}>
+                    <TooltipContent sideOffset={4}>
                       No signed contract
-                    </HoverCardContent>
-                  </HoverCard>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
             )}

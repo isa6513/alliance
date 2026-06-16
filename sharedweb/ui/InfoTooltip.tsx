@@ -1,6 +1,6 @@
 import { InfoIcon } from "lucide-react";
 import { ReactNode } from "react";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./HoverCard";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
 interface InfoTooltipProps {
   content: ReactNode;
@@ -12,16 +12,16 @@ const InfoTooltip: React.FC<InfoTooltipProps> = ({
   size = 15,
 }: InfoTooltipProps) => {
   return (
-    <HoverCard>
-      <HoverCardTrigger
+    <Tooltip>
+      <TooltipTrigger
         render={
           <span className="inline-block cursor-default">
             <InfoIcon className="text-zinc-400" size={size} />
           </span>
         }
       />
-      <HoverCardContent>{content}</HoverCardContent>
-    </HoverCard>
+      <TooltipContent>{content}</TooltipContent>
+    </Tooltip>
   );
 };
 

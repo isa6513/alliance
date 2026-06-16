@@ -1,11 +1,13 @@
 import { MessageDto } from "@alliance/shared/client";
-import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
+import { cn } from "@alliance/shared/styles/util";
 import Card from "@alliance/sharedweb/ui/Card";
+import NewButton, { ButtonColor } from "@alliance/sharedweb/ui/NewButton";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@alliance/sharedweb/ui/HoverCard";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@alliance/sharedweb/ui/Tooltip";
 import { Plus, Send, X } from "lucide-react";
 import {
   type ClipboardEvent,
@@ -18,8 +20,6 @@ import {
   useState,
 } from "react";
 import TextareaAutosize from "react-textarea-autosize";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { cn } from "@alliance/shared/styles/util";
 
 interface MessageInputProps {
   message: string;
@@ -232,8 +232,8 @@ const MessageInput = ({
             </div>
           ) : (
             <div className="flex flex-row items-center">
-              <HoverCard>
-                <HoverCardTrigger
+              <Tooltip>
+                <TooltipTrigger
                   render={
                     <span className="inline-block">
                       <NewButton
@@ -244,10 +244,10 @@ const MessageInput = ({
                     </span>
                   }
                 />
-                <HoverCardContent>Add image</HoverCardContent>
-              </HoverCard>
-              <HoverCard>
-                <HoverCardTrigger
+                <TooltipContent>Add image</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger
                   render={
                     <span className="inline-block">
                       <NewButton
@@ -258,8 +258,8 @@ const MessageInput = ({
                     </span>
                   }
                 />
-                <HoverCardContent>Send message</HoverCardContent>
-              </HoverCard>
+                <TooltipContent>Send message</TooltipContent>
+              </Tooltip>
             </div>
           )}
         </div>

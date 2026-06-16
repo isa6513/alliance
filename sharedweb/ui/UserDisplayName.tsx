@@ -1,6 +1,16 @@
-import { Earth, UserCircle } from "lucide-react";
 import { cn } from "@alliance/shared/styles/util";
-import { HoverBadge } from "./HoverBadge";
+import { Earth, UserCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
+
+const HoverBadge: React.FC<React.PropsWithChildren<{ title: string }>> = ({
+  children,
+  title,
+}) => (
+  <Tooltip>
+    <TooltipTrigger render={<span className="inline-block">{children}</span>} />
+    <TooltipContent side="bottom">{title}</TooltipContent>
+  </Tooltip>
+);
 
 interface UserDisplayNameProps extends React.PropsWithChildren {
   staff?: boolean;
