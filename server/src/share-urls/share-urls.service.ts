@@ -339,13 +339,6 @@ export class ShareUrlsService {
       .filter((s): s is string => !!s);
   }
 
-  async findForAction(actionId: number): Promise<ShareUrl[]> {
-    return this.shareUrlRepository.find({
-      where: { action: { id: actionId } },
-      relations: { user: true },
-    });
-  }
-
   /**
    * Share links owned by a referring user (campaign-owned links, which have no
    * user, are excluded). Callers can safely treat `user` as non-null.
