@@ -43,12 +43,13 @@ const MembersListPage = () => {
     [members]
   );
 
-  const { data: sentRequests = [] } = useQuery({
-    queryKey: ["userListSentRequests"],
-    queryFn: () => userListSentRequests().then((res) => res.data ?? []),
-  });
+  const { data: sentRequests = [], isLoading: isLoadingSentRequests } =
+    useQuery({
+      queryKey: ["userListSentRequests"],
+      queryFn: () => userListSentRequests().then((res) => res.data ?? []),
+    });
 
-  const { data: friendsData = [] } = useQuery({
+  const { data: friendsData = [], isPending: isPendingFriends } = useQuery({
     queryKey: ["userListFriends", user?.id],
     queryFn: () =>
       userListFriends({ path: { id: user!.id } }).then((res) => res.data ?? []),
@@ -65,7 +66,10 @@ const MembersListPage = () => {
     [friendsData]
   );
 
-  const loading = isLoadingMembers;
+  const loading =
+    isLoadingMembers ||
+    isLoadingSentRequests ||
+    (!!user && isPendingFriends);
   const error = membersError ? "Could not load members" : null;
 
   const [params, setParams] = useSearchParams();
