@@ -1,7 +1,8 @@
-import type React from "react";
-import { Menu } from "@base-ui/react/menu";
-import { ChevronRight, Check } from "lucide-react";
 import { cn } from "@alliance/shared/styles/util";
+import { Menu } from "@base-ui/react/menu";
+import { Check, ChevronRight } from "lucide-react";
+import type React from "react";
+import { zIndex } from "./zIndex";
 
 function DropdownMenu({ ...props }: Menu.Root.Props) {
   return <Menu.Root data-slot="dropdown-menu" {...props} />;
@@ -35,7 +36,7 @@ function DropdownMenuContent({
   return (
     <Menu.Portal>
       <Menu.Positioner
-        className="isolate z-50 outline-none"
+        className={cn(zIndex.popover, "isolate outline-none")}
         align={align}
         alignOffset={alignOffset}
         side={side}
@@ -44,7 +45,7 @@ function DropdownMenuContent({
         <Menu.Popup
           data-slot="dropdown-menu-content"
           className={cn(
-            "min-w-32 rounded-md border border-zinc-200 bg-white p-1 shadow-lg text-zinc-900 outline-none overflow-x-hidden overflow-y-auto z-50",
+            "min-w-32 rounded-md border border-zinc-200 bg-white p-1 shadow-lg text-zinc-900 outline-none overflow-x-hidden overflow-y-auto",
             className,
           )}
           {...props}
@@ -143,7 +144,7 @@ function DropdownMenuSubContent({
   return (
     <Menu.Portal>
       <Menu.Positioner
-        className="isolate z-50 outline-none"
+        className={cn(zIndex.popover, "isolate outline-none")}
         align={align}
         alignOffset={alignOffset}
         side={side}
@@ -152,7 +153,7 @@ function DropdownMenuSubContent({
         <Menu.Popup
           data-slot="dropdown-menu-sub-content"
           className={cn(
-            "min-w-[140px] rounded-md border border-zinc-200 bg-white p-1 shadow-lg text-zinc-900 outline-none overflow-x-hidden overflow-y-auto z-50",
+            "min-w-[140px] rounded-md border border-zinc-200 bg-white p-1 shadow-lg text-zinc-900 outline-none overflow-x-hidden overflow-y-auto",
             className,
           )}
           {...props}
@@ -257,18 +258,19 @@ function DropdownMenuShortcut({
 
 export {
   DropdownMenu,
-  DropdownMenuPortal,
-  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuLabel,
   DropdownMenuItem,
-  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuSub,
-  DropdownMenuSubTrigger,
   DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger
 };
+

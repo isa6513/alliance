@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo } from "react";
 import type { ColumnMetadataDto } from "@alliance/shared/client/types.gen";
-import { isTimeOnlyColumn } from "./dbviewer/timeFieldUtils";
 import { cn } from "@alliance/shared/styles/util";
+import { zIndex } from "@alliance/sharedweb/ui/zIndex";
+import React, { useEffect, useMemo } from "react";
+import { isTimeOnlyColumn } from "./dbviewer/timeFieldUtils";
 
 interface AddRowModalProps {
   isOpen: boolean;
@@ -70,15 +71,15 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
       const placeholder = isTimeColumn
         ? "07:00"
         : column.isNullable
-        ? "Leave blank for NULL"
-        : undefined;
+          ? "Leave blank for NULL"
+          : undefined;
 
       const commonInputProps = {
         value,
         onChange: (
           e: React.ChangeEvent<
             HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-          >
+          >,
         ) => onChange(column.name, e.target.value),
         className: inputClasses,
         placeholder,
@@ -155,7 +156,7 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
           key={column.name}
           className={cn(
             "space-y-1",
-            column.dataType === "json" && "md:col-span-2"
+            column.dataType === "json" && "md:col-span-2",
           )}
         >
           <div className="flex items-center justify-between">
@@ -180,8 +181,8 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
               {column.isNullable
                 ? "Optional"
                 : column.isPrimary
-                ? "Leave blank to use the auto-generated default"
-                : "Required (may have default)"}
+                  ? "Leave blank to use the auto-generated default"
+                  : "Required (may have default)"}
             </span>
           )}
         </div>
@@ -192,7 +193,12 @@ const AddRowModal: React.FC<AddRowModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div
+      className={cn(
+        zIndex.modal,
+        "fixed inset-0 flex items-center justify-center bg-black/50 p-4",
+      )}
+    >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">

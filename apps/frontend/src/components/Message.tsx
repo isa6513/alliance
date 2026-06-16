@@ -1,13 +1,14 @@
 import type { MessageDto } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { formatTime } from "@alliance/shared/lib/utils";
+import { cn } from "@alliance/shared/styles/util";
+import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
+import { zIndex } from "@alliance/sharedweb/ui/zIndex";
 import { Reply, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, href } from "react-router";
-import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
-import { formatTime } from "@alliance/shared/lib/utils";
-import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
-import { cn } from "@alliance/shared/styles/util";
 
 const Message = ({
   message,
@@ -40,11 +41,15 @@ const Message = ({
         setLightboxIndex(null);
       } else if (e.key === "ArrowRight" && attachments.length > 1) {
         setLightboxIndex((idx) =>
-          idx === null ? 0 : (idx + 1 + attachments.length) % attachments.length
+          idx === null
+            ? 0
+            : (idx + 1 + attachments.length) % attachments.length,
         );
       } else if (e.key === "ArrowLeft" && attachments.length > 1) {
         setLightboxIndex((idx) =>
-          idx === null ? 0 : (idx - 1 + attachments.length) % attachments.length
+          idx === null
+            ? 0
+            : (idx - 1 + attachments.length) % attachments.length,
         );
       }
     };
@@ -67,7 +72,7 @@ const Message = ({
           "group relative",
           isFirstInGroup ? "pt-2" : "pt-1 pr-7",
           isFocused && "!bg-green/20",
-          className
+          className,
         )}
         ref={ref}
       >
@@ -151,7 +156,10 @@ const Message = ({
 
       {lightboxSrc && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4"
+          className={cn(
+            zIndex.modal,
+            "fixed inset-0 bg-black/70 flex items-center justify-center px-4",
+          )}
           onClick={() => setLightboxIndex(null)}
         >
           <div

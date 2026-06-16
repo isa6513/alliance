@@ -1,11 +1,13 @@
+import { cn } from "@alliance/shared/styles/util";
 import { X } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { zIndex } from "./zIndex";
 
 type ImageLightboxProps = {
   images: string[];
   renderPreview: (
-    openAtIndex: (idx: number, e: React.MouseEvent) => void
+    openAtIndex: (idx: number, e: React.MouseEvent) => void,
   ) => React.ReactNode;
 };
 
@@ -57,7 +59,10 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({
         hasImages &&
         createPortal(
           <div
-            className="fixed inset-0 z-[1000] bg-black/80 flex items-center justify-center"
+            className={cn(
+              zIndex.modal,
+              "fixed inset-0 bg-black/80 flex items-center justify-center",
+            )}
             onClick={closeLightbox}
           >
             <div
@@ -95,7 +100,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({
               </button>
             </div>
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

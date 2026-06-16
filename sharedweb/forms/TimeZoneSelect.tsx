@@ -1,9 +1,11 @@
-import type React from "react";
-import { Check } from "lucide-react";
 import {
-  useTimeZoneSelect,
   formatNowTimeInTz,
+  useTimeZoneSelect,
 } from "@alliance/shared/forms/timeZoneSelect";
+import { cn } from "@alliance/shared/styles/util";
+import { Check } from "lucide-react";
+import type React from "react";
+import { zIndex } from "../ui/zIndex";
 
 type Props = {
   value?: string;
@@ -127,7 +129,10 @@ export default function TimeZoneSelectPretty({
 
         {open && !disabled && (
           <div
-            className="absolute z-50 w-full rounded border border-zinc-200 bg-white shadow-lg overflow-hidden"
+            className={cn(
+              zIndex.popover,
+              "absolute w-full rounded border border-zinc-200 bg-white shadow-lg overflow-hidden",
+            )}
             onKeyDown={onListKeyDown}
           >
             <div className="p-2 border-b border-zinc-100">

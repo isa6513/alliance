@@ -1,11 +1,12 @@
-import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
-import { href, useNavigate } from "react-router";
+import { NAV_BAR_ICON_HEIGHT } from "@alliance/shared/lib/constants";
 import { useNotifications } from "@alliance/shared/lib/useNotifications";
 import { cn } from "@alliance/shared/styles/util";
+import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { zIndex } from "@alliance/sharedweb/ui/zIndex";
 import { Bell } from "lucide-react";
-import { NAV_BAR_ICON_HEIGHT } from "@alliance/shared/lib/constants";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { href, useNavigate } from "react-router";
 import NotificationList from "./NotificationList";
 
 const VIEWPORT_EDGE_PX = 8;
@@ -81,9 +82,8 @@ const NotificationsIcon = () => {
         <div
           ref={panelRef}
           className={cn(
-            "absolute right-0 top-full mt-1 z-50",
-            "shadow-lg/5 bg-white rounded p-4 space-y-2 max-h-[500px] overflow-y-auto cursor-default",
-            "w-[min(450px,calc(100vw-1rem))]",
+            zIndex.popover,
+            "absolute right-0 top-full mt-1 shadow-lg/5 bg-white rounded p-4 space-y-2 max-h-[500px] overflow-y-auto cursor-default w-[min(450px,calc(100vw-1rem))]",
           )}
           style={
             panelShiftX !== 0

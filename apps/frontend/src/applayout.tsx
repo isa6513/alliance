@@ -1,7 +1,9 @@
+import { cn } from "@alliance/shared/styles/util";
 import { isStaging } from "@alliance/sharedweb/lib/config";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { zIndex } from "@alliance/sharedweb/ui/zIndex";
 import { useEffect } from "react";
 import { href, Outlet, useNavigate, useNavigation } from "react-router";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useAuth } from "./lib/AuthContext";
 
 export function HydrateFallback() {
@@ -69,7 +71,12 @@ export default function AppLayout() {
     <>
       <Outlet />
       {isStaging() && (
-        <div className="fixed top-0 left-0 right-0 h-6 bg-green z-50 flex flex-row gap-1">
+        <div
+          className={cn(
+            zIndex.nav,
+            "fixed top-0 left-0 right-0 h-6 bg-green flex flex-row gap-1",
+          )}
+        >
           {[...Array(100)].map((_, index) => (
             <span key={index} className="text-white text-sm !font-mono">
               staging
@@ -78,7 +85,12 @@ export default function AppLayout() {
         </div>
       )}
       {isImpersonation && (
-        <div className="fixed top-0 left-0 right-0 h-6 bg-amber-500 z-50 flex flex-row gap-1">
+        <div
+          className={cn(
+            zIndex.nav,
+            "fixed top-0 left-0 right-0 h-6 bg-amber-500 flex flex-row gap-1",
+          )}
+        >
           {[...Array(100)].map((_, index) => (
             <span key={index} className="text-white text-sm !font-mono">
               impersonation

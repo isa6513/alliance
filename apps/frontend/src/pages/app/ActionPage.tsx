@@ -7,7 +7,9 @@ import { guestReferral, taskHeaders } from "@alliance/shared/lib/copy";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
+import { cn } from "@alliance/shared/styles/util";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { zIndex } from "@alliance/sharedweb/ui/zIndex";
 import { X } from "lucide-react";
 import { useCallback, useState } from "react";
 import {
@@ -197,7 +199,12 @@ export default function ActionPage() {
         />
       )}
       {showInvitePopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
+        <div
+          className={cn(
+            zIndex.modal,
+            "fixed inset-0 flex items-center justify-center bg-black/45 px-4",
+          )}
+        >
           <div
             role="dialog"
             aria-modal="true"

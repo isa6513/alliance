@@ -9,9 +9,11 @@ import {
   UserActionRelation,
   userMyProfile,
 } from "@alliance/shared/client";
+import { cn } from "@alliance/shared/styles/util";
+import { isStaging } from "@alliance/sharedweb/lib/config";
+import { zIndex } from "@alliance/sharedweb/ui/zIndex";
 import { Outlet, useRouteLoaderData } from "react-router";
 import { useAuth } from "./lib/AuthContext";
-import { isStaging } from "@alliance/sharedweb/lib/config";
 
 export interface RouteMatch {
   data: unknown;
@@ -55,7 +57,7 @@ export async function clientLoader() {
     }
   }
   const completionActivities = activityList.filter(
-    (activity) => activity.type === "user_completed"
+    (activity) => activity.type === "user_completed",
   );
 
   completionActivities.forEach((activity) => {
@@ -109,7 +111,12 @@ export default function AdminLayout() {
     <>
       <Outlet />
       {isStaging() && (
-        <div className="fixed top-0 left-0 right-0 h-6 bg-green z-50 flex flex-row gap-1">
+        <div
+          className={cn(
+            zIndex.nav,
+            "fixed top-0 left-0 right-0 h-6 bg-green flex flex-row gap-1",
+          )}
+        >
           {[...Array(100)].map((_, index) => (
             <span key={index} className="text-white text-sm !font-mono">
               staging

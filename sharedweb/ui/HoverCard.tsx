@@ -1,6 +1,7 @@
-import type React from "react";
-import { PreviewCard } from "@base-ui/react/preview-card";
 import { cn } from "@alliance/shared/styles/util";
+import { PreviewCard } from "@base-ui/react/preview-card";
+import type React from "react";
+import { zIndex } from "./zIndex";
 
 type PositionerProps = React.ComponentProps<typeof PreviewCard.Positioner>;
 type Side = NonNullable<PositionerProps["side"]>;
@@ -45,7 +46,7 @@ function HoverCardContent({
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
-        className="isolate z-50"
+        className={cn(zIndex.popover, "isolate")}
       >
         <PreviewCard.Popup
           data-slot="hover-card-content"
@@ -60,4 +61,4 @@ function HoverCardContent({
   );
 }
 
-export { HoverCard, HoverCardTrigger, HoverCardContent };
+export { HoverCard, HoverCardContent, HoverCardTrigger };

@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { zIndex } from "./zIndex";
 
 type ToastVariant = "info" | "success" | "error" | "warning" | "confirm";
 
@@ -187,7 +188,12 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
       {children}
 
       {/* Toast container */}
-      <div className="z-50 pointer-events-none fixed inset-0 flex flex-col items-end gap-2 px-4 py-6 sm:bottom-0 sm:items-end">
+      <div
+        className={cn(
+          zIndex.toast,
+          "pointer-events-none fixed inset-0 flex flex-col items-end gap-2 px-4 py-6 sm:bottom-0 sm:items-end",
+        )}
+      >
         {toasts.map((toast) => {
           if (toast.variant === "confirm") {
             return (

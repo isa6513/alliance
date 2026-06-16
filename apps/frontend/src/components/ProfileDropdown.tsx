@@ -1,10 +1,12 @@
-import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import { NAV_BAR_CONTAINER_HEIGHT } from "@alliance/shared/lib/constants";
+import { cn } from "@alliance/shared/styles/util";
 import { useOutsideClick } from "@alliance/sharedweb/lib/useOutsideClick";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import DropdownIcon from "@alliance/sharedweb/ui/icons/DropdownIcon";
+import { zIndex } from "@alliance/sharedweb/ui/zIndex";
 import { useCallback, useState } from "react";
 import { Link, href, useNavigate } from "react-router";
 import { useAuth } from "../lib/AuthContext";
-import { NAV_BAR_CONTAINER_HEIGHT } from "@alliance/shared/lib/constants";
 import { useMediaQuery } from "../lib/useMediaQuery";
 
 const ProfileDropdown = () => {
@@ -75,7 +77,12 @@ const ProfileDropdown = () => {
         </>
       )}
       {isOpen && (
-        <div className="absolute top-full z-60 shadow-lg/5 right-0 bg-white rounded min-w-[175px] max-h-[500px] overflow-y-auto cursor-default flex flex-col *:hover:bg-zinc-100 *:px-4 *:py-2 text-base">
+        <div
+          className={cn(
+            zIndex.popover,
+            "absolute top-full shadow-lg/5 right-0 bg-white rounded min-w-[175px] max-h-[500px] overflow-y-auto cursor-default flex flex-col *:hover:bg-zinc-100 *:px-4 *:py-2 text-base",
+          )}
+        >
           <Link to={profileUrl} onClick={() => setIsOpen(false)}>
             Profile
           </Link>

@@ -1,3 +1,8 @@
+import { cn } from "@alliance/shared/styles/util";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { zIndex } from "@alliance/sharedweb/ui/zIndex";
+import { RiArrowGoBackLine, RiArrowGoForwardLine } from "@remixicon/react";
 import {
   type ChangeEventHandler,
   type FC,
@@ -8,10 +13,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { RiArrowGoBackLine, RiArrowGoForwardLine } from "@remixicon/react";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { cn } from "@alliance/shared/styles/util";
 
 type ImageEditorProps = {
   initialImageUrl: string | null;
@@ -80,7 +81,7 @@ const createImage = (url: string) =>
 const getCroppedImage = async (
   imageSrc: string,
   pixelCrop: PixelCrop,
-  rotation: number
+  rotation: number,
 ) => {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -142,7 +143,7 @@ const createPreviewImage = async (image: HTMLImageElement) => {
 
 const rotateImageData = async (
   imageSrc: string,
-  direction: "left" | "right"
+  direction: "left" | "right",
 ) => {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -172,14 +173,14 @@ const getMinCropSize = (layout: ImageLayout) => {
   const maxSize = Math.min(layout.width, layout.height);
   return Math.min(
     Math.max(maxSize * MIN_CROP_RATIO, ABS_MIN_CROP_SIZE),
-    maxSize
+    maxSize,
   );
 };
 
 const convertCropToPixels = (
   cropRect: CropRect,
   imageLayout: ImageLayout,
-  dimensions: { width: number; height: number }
+  dimensions: { width: number; height: number },
 ): PixelCrop => {
   const scaleX = dimensions.width / imageLayout.width;
   const scaleY = dimensions.height / imageLayout.height;
@@ -207,7 +208,7 @@ const resizeCropRect = (
   handle: DragHandle,
   pointer: { x: number; y: number },
   start: CropRect,
-  imageRect: ImageLayout
+  imageRect: ImageLayout,
 ): CropRect => {
   const minSize = getMinCropSize(imageRect);
   const maxRight = imageRect.x + imageRect.width;
@@ -382,7 +383,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
       const maxBytes = maxFileSizeMb * 1024 * 1024;
       if (file.size > maxBytes) {
         setError(
-          `Image size must be less than ${maxFileSizeMb}MB. Please choose a smaller image.`
+          `Image size must be less than ${maxFileSizeMb}MB. Please choose a smaller image.`,
         );
         event.target.value = "";
         return;
@@ -408,7 +409,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
       reader.readAsDataURL(file);
       event.target.value = "";
     },
-    [allowedMimeTypes, maxFileSizeMb, onChange]
+    [allowedMimeTypes, maxFileSizeMb, onChange],
   );
 
   const updateLayout = useCallback(() => {
@@ -536,7 +537,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
           y: event.clientY - top,
         };
         setCropRect(
-          resizeCropRect(state.handle, pointer, state.startCrop, imageLayout)
+          resizeCropRect(state.handle, pointer, state.startCrop, imageLayout),
         );
       }
     };
@@ -590,7 +591,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
     const pixelCrop = convertCropToPixels(
       cropRect,
       imageLayout,
-      rotatedDimensions
+      rotatedDimensions,
     );
     const previous = lastSelectionRef.current;
     if (previous && areCropsRoughlyEqual(previous, pixelCrop)) {
@@ -607,7 +608,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
         if (cropped.length > CROPPED_IMAGE_STRING_MAX_LENGTH) {
           if (!isCancelled) {
             setError(
-              "The cropped image is too large. Please crop a smaller area or use a smaller image."
+              "The cropped image is too large. Please crop a smaller area or use a smaller image.",
             );
           }
           return;
@@ -653,7 +654,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
         startCrop: cropRect,
       };
     },
-    [cropRect, isUploading]
+    [cropRect, isUploading],
   );
 
   const handleResizePointerDown = useCallback(
@@ -670,7 +671,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
         containerRect: containerRef.current.getBoundingClientRect(),
       };
     },
-    [cropRect, isUploading]
+    [cropRect, isUploading],
   );
 
   const handleRotate = useCallback(
@@ -699,7 +700,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
         setIsPreviewProcessing(false);
       }
     },
-    [hasCustomImage, isUploading, previewSrc, rotation, isPreviewProcessing]
+    [hasCustomImage, isUploading, previewSrc, rotation, isPreviewProcessing],
   );
 
   const previewImage = useMemo(() => {
@@ -741,7 +742,7 @@ const ImageEditor: FC<ImageEditorProps> = ({
               "bg-white/80 text-xs text-zinc-600 transition-opacity disabled:opacity-40 focus-visible:opacity-100",
               showMobileOverlay
                 ? "opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                : "opacity-0 group-hover:opacity-100"
+                : "opacity-0 group-hover:opacity-100",
             )}
           >
             {previewImage ? "Change photo" : "Upload photo"}
@@ -777,7 +778,10 @@ const ImageEditor: FC<ImageEditorProps> = ({
 
       {hasCustomImage && isCropModalOpen && imageSrc && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-2"
+          className={cn(
+            zIndex.modal,
+            "fixed inset-0 flex items-center justify-center bg-black/60 px-2",
+          )}
           onClick={() => {
             if (!dragJustEndedRef.current) {
               setIsCropModalOpen(false);
