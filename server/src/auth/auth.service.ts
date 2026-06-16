@@ -196,7 +196,7 @@ export class AuthService {
         invite: null,
         referringUser: null,
         referredByCampaign: null,
-        referralSource: ReferralSource.ReferralLink,
+        referralSource: ReferralSource.None,
       };
     }
 
