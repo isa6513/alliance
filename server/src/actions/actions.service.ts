@@ -816,6 +816,15 @@ export class ActionsService {
       trimmedCode,
     );
 
+    // Campaign-owned action share links have no referring user.
+    if (shareUrl?.campaign) {
+      return {
+        firstName: shareUrl.campaign.name,
+        completedByReferrer: false,
+        validReferral: true,
+      };
+    }
+
     if (!shareUrl?.user) {
       return { completedByReferrer: false, validReferral: false };
     }
@@ -3448,14 +3457,19 @@ export class ActionsService {
     if (!action) {
       throw new NotFoundException('No action found for this form');
     }
-    return this.shareUrlsService.findForAction(action.id);
+    // This is a per-user view (ShareUrlDto requires a user); campaign-owned
+    // links have no user and are managed via the admin campaign view instead.
+    return this.shareUrlsService.findUserOwnedForAction(action.id);
   }
 
   async getShareUrlStats(
     actionId: number,
     questionId?: string,
   ): Promise<ShareUrlStats[]> {
-    const shareUrls = await this.shareUrlsService.findForAction(actionId);
+    // Per-user referral leaderboard (ShareUrlStats.user is non-null); exclude
+    // campaign-owned links, which have no referring user.
+    const shareUrls =
+      await this.shareUrlsService.findUserOwnedForAction(actionId);
 
     if (shareUrls.length === 0) {
       return [];

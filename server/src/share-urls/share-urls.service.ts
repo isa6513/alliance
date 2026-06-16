@@ -304,7 +304,7 @@ export class ShareUrlsService {
   ): Promise<ShareUrl | null> {
     return this.shareUrlRepository.findOne({
       where: { action: { id: actionId }, sid },
-      relations: { user: true },
+      relations: { user: true, campaign: true },
     });
   }
 
@@ -342,6 +342,17 @@ export class ShareUrlsService {
   async findForAction(actionId: number): Promise<ShareUrl[]> {
     return this.shareUrlRepository.find({
       where: { action: { id: actionId } },
+      relations: { user: true },
+    });
+  }
+
+  /**
+   * Share links owned by a referring user (campaign-owned links, which have no
+   * user, are excluded). Callers can safely treat `user` as non-null.
+   */
+  async findUserOwnedForAction(actionId: number): Promise<ShareUrl[]> {
+    return this.shareUrlRepository.find({
+      where: { action: { id: actionId }, user: Not(IsNull()) },
       relations: { user: true },
     });
   }
