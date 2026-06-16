@@ -22,14 +22,10 @@ import { useAuth } from "../../lib/AuthContext";
 import { useContract } from "../../lib/useContract";
 
 const WEEKLY_COMMITMENT_CONFIRMATION =
-  "I commit to complete each task to the best of my ability.";
+  "I understand that the Alliance relies on my 15-minute contribution every single week. I commit to complete each task to the best of my ability.";
 
-const COMMITMENT_CONFIRMATION_LENGTH_TOLERANCE = 10;
-
-const isConfirmationLengthCloseEnough = (confirmation: string) =>
-  Math.abs(
-    confirmation.trim().length - WEEKLY_COMMITMENT_CONFIRMATION.length,
-  ) <= COMMITMENT_CONFIRMATION_LENGTH_TOLERANCE;
+const normalizeConfirmation = (confirmation: string) =>
+  confirmation.trim().toLocaleLowerCase();
 
 const ContractPage: React.FC = () => {
   const { user, refreshUser } = useAuth();
@@ -39,9 +35,9 @@ const ContractPage: React.FC = () => {
     useState("");
   const [lastContractEvent, setLastContractEvent] =
     useState<ContractEventState>(null);
-  const weeklyCommitmentConfirmed = isConfirmationLengthCloseEnough(
-    weeklyCommitmentConfirmation,
-  );
+  const weeklyCommitmentConfirmed =
+    normalizeConfirmation(weeklyCommitmentConfirmation) ===
+    normalizeConfirmation(WEEKLY_COMMITMENT_CONFIRMATION);
 
   const signedContractId =
     lastContractEvent?.contractId !== undefined &&
@@ -183,6 +179,7 @@ const ContractPage: React.FC = () => {
                       onChange={(e) =>
                         setWeeklyCommitmentConfirmation(e.target.value)
                       }
+                      onPaste={(e) => e.preventDefault()}
                       placeholder="Type the statement here"
                       rows={2}
                       className="resize-y rounded border border-zinc-200 bg-white px-3 py-3 text-[11pt] transition-all duration-200 hover:border-zinc-300 focus:border-green focus:outline-none"
