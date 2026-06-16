@@ -268,7 +268,7 @@ export class MailService {
     return this.sendMail(
       email,
       EmailType.ContractReminder,
-      'Reminder to sign your Alliance membership contract',
+      'Sign your membership contract to participate in actions',
       {
         name,
         link: `${process.env.APP_URL}/tasks`,
