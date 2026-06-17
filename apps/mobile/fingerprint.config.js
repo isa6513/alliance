@@ -6,7 +6,7 @@ const { SourceSkips } = require("@expo/fingerprint");
  * a binary it's actually compatible with. CI compares this hash against the
  * committed `fingerprint.{ios,android}.txt` baselines (the last-shipped builds)
  * and alerts on Slack when it drifts — i.e. when a new store build is required.
- * See `scripts/fingerprint.js` + `.github/workflows/mobile-fingerprint-check.yaml`.
+ * See `scripts/fingerprint.mjs` + `.github/workflows/mobile-fingerprint-check.yaml`.
  *
  * We skip inputs that do NOT change native/OTA compatibility, so they don't
  * needlessly churn the runtimeVersion and orphan shipped binaries from OTA:

@@ -1,13 +1,13 @@
 // EAS Update fingerprint (runtimeVersion) tooling.
 //
-//   node scripts/fingerprint.js                 # print current per-platform hashes
-//   node scripts/fingerprint.js check           # exit EXIT_DRIFT if drifted from baselines (CI)
-//   node scripts/fingerprint.js update <build>   # set a baseline from a built artifact
+//   node scripts/fingerprint.mjs                 # print current per-platform hashes
+//   node scripts/fingerprint.mjs check           # exit EXIT_DRIFT if drifted from baselines (CI)
+//   node scripts/fingerprint.mjs update <build>  # set a baseline from a built artifact
 //
 // Exit codes: 0 = OK/no drift, EXIT_DRIFT = drift detected, anything else = the
 // tool failed to run. Drift uses a DEDICATED code (not 1) so CI can tell real
 // drift apart from a generic Node failure — an uncaught error (e.g. a missing
-// module at require-time) also exits 1, and must not be reported as drift.
+// module at import-time) also exits 1, and must not be reported as drift.
 //
 // The baselines in fingerprint.{ios,android}.txt represent the builds currently
 // live in the stores. A drift (check) means the native layer changed, so the
@@ -24,16 +24,16 @@
 // `check`/print recompute the fingerprint, so run those with APP_VARIANT=production
 // (the package.json scripts set it); `update` reads a file and needs no variant.
 
-const fs = require("node:fs");
-const path = require("node:path");
-const { execFileSync } = require("node:child_process");
-const { createFingerprintAsync } = require("@expo/fingerprint");
+import { createFingerprintAsync } from "@expo/fingerprint";
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 
-const PROJECT_ROOT = path.join(__dirname, "..");
+const PROJECT_ROOT = path.join(import.meta.dirname, "..");
 const PLATFORMS = ["ios", "android"];
 const FINGERPRINT_RE = /^[0-9a-f]{40}$/;
 // Dedicated drift exit code, deliberately not 1 (Node's generic uncaught-error
-// code) nor 2 (used by the top-level catch below for tool failures).
+// code) nor 2 (used by die() and the top-level catch below for tool failures).
 const EXIT_DRIFT = 3;
 
 const baselineFile = (platform) =>
@@ -53,7 +53,9 @@ function baselineHash(platform) {
 
 function die(message) {
   console.error(`Error: ${message}`);
-  process.exit(1);
+  // Exit 2 ("tool failed to run"), matching the top-level catch — kept distinct
+  // from EXIT_DRIFT (3) and Node's generic uncaught-error code (1).
+  process.exit(2);
 }
 
 // --- artifact extraction (the `update` command) ---
@@ -89,7 +91,7 @@ function readDirEntry(dir, suffix, label) {
 function extractFromArtifact(artifact) {
   if (!artifact) {
     die(
-      "usage: node scripts/fingerprint.js update <path-to-.ipa|.app|.xcarchive|.aab|.apk>",
+      "usage: node scripts/fingerprint.mjs update <path-to-.ipa|.app|.xcarchive|.aab|.apk>",
     );
   }
   if (!fs.existsSync(artifact)) die(`no such artifact: ${artifact}`);

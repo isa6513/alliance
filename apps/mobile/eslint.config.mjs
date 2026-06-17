@@ -1,6 +1,7 @@
 // https://docs.expo.dev/guides/using-eslint/
-import { defineConfig } from "eslint/config";
 import expoConfig from "eslint-config-expo/flat.js";
+import { defineConfig } from "eslint/config";
+import globals from "globals";
 import sharedRules from "../../eslint/shared-rules.mjs";
 
 export default defineConfig([
@@ -11,6 +12,13 @@ export default defineConfig([
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+  {
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      sourceType: "module",
+      globals: globals.node,
     },
   },
   {

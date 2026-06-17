@@ -64,7 +64,7 @@ jobs:
             echo "No Slack webhook configured; skipping notification."
             exit 0
           fi
-          MSG=$(printf ':iphone: *Mobile native fingerprint changed* — a new App Store / Play Store build is required.\nThese changes cannot reach existing installs over OTA.\n\n*PR:* <%s|#%s %s>\n*Branch:* `%s`\n```\n%s\n```\nAfter submitting the new build(s), run `bun fingerprint:update` and commit to clear this.' \
+          MSG=$(printf ':iphone: *Mobile native fingerprint changed* — a new App Store / Play Store build is required.\nThese changes cannot reach existing installs over OTA.\n\n*PR:* <%s|#%s %s>\n*Branch:* `%s`\n```\n%s\n```\nAfter submitting the new build(s), run `bun fingerprint:update <path-to-.ipa|.aab|.apk>` and commit to clear this.' \
             "$PR_URL" "$PR_NUMBER" "$PR_TITLE" "$BRANCH" "$DETAILS")
           PAYLOAD=$(jq -n --arg text "$MSG" '{text: $text}')
           curl -sS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$WEBHOOK"

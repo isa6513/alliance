@@ -18,9 +18,9 @@
     "build:ios": "APP_VARIANT=production eas build -p ios --profile production --local",
     "update:production": "APP_VARIANT=production eas update --branch production",
     "update:preview": "APP_VARIANT=production eas update --branch preview",
-    "fingerprint": "APP_VARIANT=production node scripts/fingerprint.js",
-    "fingerprint:check": "APP_VARIANT=production node scripts/fingerprint.js check",
-    "fingerprint:update": "node scripts/fingerprint.js update"
+    "fingerprint": "APP_VARIANT=production node scripts/fingerprint.mjs",
+    "fingerprint:check": "APP_VARIANT=production node scripts/fingerprint.mjs check",
+    "fingerprint:update": "node scripts/fingerprint.mjs update"
   },
   "dependencies": {
     "@alliance/common": "workspace:*",
