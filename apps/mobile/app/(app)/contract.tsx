@@ -147,7 +147,7 @@ export default function ContractScreen() {
   }
 
   const inputClasses =
-    "border border-zinc-200 rounded bg-white px-3 py-3 text-base flex-1";
+    "border border-zinc-200 rounded bg-white px-3 py-3 text-base flex-1 min-h-12";
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.grey[0] }}>
@@ -197,13 +197,16 @@ export default function ContractScreen() {
               lastContractEvent.contractId === latestContract.id ? (
                 signedContractMessage
               ) : (
-                <View className="flex-row mt-2">
+                <View className="flex-row mt-2 items-start">
                   <TextInput
                     className={inputClasses}
                     value={editName}
                     onChangeText={setEditName}
                     placeholder="Type your full name"
                     placeholderTextColor="#9ca3af"
+                    multiline
+                    scrollEnabled={false}
+                    textAlignVertical="top"
                   />
                   <Button
                     onPress={handleContractSign}
