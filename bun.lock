@@ -192,6 +192,7 @@
       "dependencies": {
         "@alliance/common": "workspace:*",
         "@alliance/shared": "workspace:*",
+        "@expo/fingerprint": "0.16.6",
         "@hey-api/client-fetch": "^0.10.0",
         "@legendapp/list": "^2.0.19",
         "@likashefqet/react-native-image-zoom": "^4.3.0",

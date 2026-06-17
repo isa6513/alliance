@@ -14,6 +14,11 @@ jobs:
   test-common-unit:
     uses: ./.github/workflows/test-common-unit.yaml
 
+  mobile-fingerprint-check:
+    uses: ./.github/workflows/mobile-fingerprint-check.yaml
+    secrets:
+      SLACK_WEBHOOK_URL_DEPLOYMENT: ${{ secrets.SLACK_WEBHOOK_URL_DEPLOYMENT }}
+
   migrations-drift-check:
     runs-on: ubuntu-latest
     services:

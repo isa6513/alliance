@@ -15,13 +15,17 @@
     "build:simulator:clean": "bunx expo prebuild --clean && cd ios && pod install && cd .. && bunx expo run:ios",
     "build:device": "bunx expo prebuild && cd ios && pod install && cd .. && bunx expo run:ios --device 00008150-001528163445401C",
     "build:android": "APP_VARIANT=production eas build -p android --profile production --local",
-    "build:ios": "APP_VARIANT=production bunx expo prebuild --clean && cd ios && pod repo update && pod install && cd .. && open ios/*.xcworkspace",
+    "build:ios": "APP_VARIANT=production eas build -p ios --profile production --local",
     "update:production": "APP_VARIANT=production eas update --branch production",
-    "update:preview": "APP_VARIANT=production eas update --branch preview"
+    "update:preview": "APP_VARIANT=production eas update --branch preview",
+    "fingerprint": "APP_VARIANT=production node scripts/fingerprint.js",
+    "fingerprint:check": "APP_VARIANT=production node scripts/fingerprint.js check",
+    "fingerprint:update": "node scripts/fingerprint.js update"
   },
   "dependencies": {
     "@alliance/common": "workspace:*",
     "@alliance/shared": "workspace:*",
+    "@expo/fingerprint": "0.16.6",
     "@hey-api/client-fetch": "^0.10.0",
     "@legendapp/list": "^2.0.19",
     "@likashefqet/react-native-image-zoom": "^4.3.0",
