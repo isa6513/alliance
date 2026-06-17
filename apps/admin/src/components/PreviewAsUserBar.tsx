@@ -1,4 +1,5 @@
 import type { UserDto } from "@alliance/shared/client";
+import UserSelect from "@alliance/sharedweb/ui/UserSelect";
 
 export interface PreviewAsUserBarProps {
   previewUserId: string;
@@ -15,29 +16,26 @@ export function PreviewAsUserBar({
   isLoadingPreviewUsers,
   previewUserError,
 }: PreviewAsUserBarProps) {
+  const selectedUserIds =
+    previewUserId === "preview" ? [] : [Number(previewUserId)];
+
+  const handleChange = (userIds: number[]) => {
+    setPreviewUserId(userIds.length > 0 ? String(userIds[0]) : "preview");
+  };
+
   return (
-    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600">Preview as</span>
-        <select
-          value={previewUserId}
-          onChange={(event) => setPreviewUserId(event.target.value)}
-          className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        >
-          <option value="preview">Preview user</option>
-          {previewUsers.map((user) => (
-            <option key={user.id} value={String(user.id)}>
-              {user.name ?? `User #${user.id}`}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="flex items-center gap-3 text-xs text-gray-500">
-        {isLoadingPreviewUsers && <span>Loading users…</span>}
-        {previewUserError && (
-          <span className="text-red-600">{previewUserError}</span>
-        )}
-      </div>
+    <div className="mb-4">
+      <UserSelect
+        users={previewUsers}
+        selectedUserIds={selectedUserIds}
+        onChange={handleChange}
+        loading={isLoadingPreviewUsers}
+        label="Preview as"
+        single
+      />
+      {previewUserError && (
+        <span className="text-xs text-red-600">{previewUserError}</span>
+      )}
     </div>
   );
 }
