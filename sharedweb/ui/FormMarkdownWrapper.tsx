@@ -55,7 +55,12 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
         li: ({ ...props }) => <li className="text-zinc-800 my-1" {...props} />,
         a: ({ node: _node, ...props }) =>
           getActionIdFromHref(props.href) != null ? (
-            <ActionLink className={cn(inlineClass)} {...props} />
+            <ActionLink
+              className={cn(inlineClass)}
+              {...props}
+              target="_blank"
+              rel="noreferrer"
+            />
           ) : (
             <a
               className={cn("text-link", inlineClass)}
