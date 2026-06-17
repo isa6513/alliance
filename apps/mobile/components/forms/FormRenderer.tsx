@@ -183,12 +183,18 @@ function ImageBlock({
   src,
   alt,
   caption,
+  aspectRatio: configuredAspectRatio,
 }: {
   src: string;
   alt?: string;
   caption?: string;
+  aspectRatio?: number;
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [measuredAspectRatio, setMeasuredAspectRatio] = useState<number | null>(
+    null,
+  );
+  const aspectRatio = configuredAspectRatio ?? measuredAspectRatio;
   return (
     <View className="items-center">
       <TouchableOpacity
@@ -199,8 +205,13 @@ function ImageBlock({
         <Image
           source={{ uri: src }}
           accessibilityLabel={alt}
-          className="w-full h-48 bg-zinc-200 rounded-lg"
-          resizeMode="cover"
+          onLoad={({ nativeEvent: { source } }) =>
+            source.height > 0 &&
+            setMeasuredAspectRatio(source.width / source.height)
+          }
+          className="w-full bg-zinc-200 rounded-lg"
+          style={aspectRatio ? { aspectRatio } : { height: 192 }}
+          resizeMode="contain"
         />
       </TouchableOpacity>
       {caption && (
@@ -275,7 +286,12 @@ export function RenderDisplayBlockMobile({
       );
     case "image":
       return (
-        <ImageBlock src={block.src} alt={block.alt} caption={block.caption} />
+        <ImageBlock
+          src={block.src}
+          alt={block.alt}
+          caption={block.caption}
+          aspectRatio={block.aspectRatio}
+        />
       );
     case "biglink":
       const IconComponent = bigLinkIcons[block.icon || "messages-square"];
