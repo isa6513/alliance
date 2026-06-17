@@ -1600,13 +1600,15 @@ export function FormBuilder({
     const showInsertionBar =
       dragOverIndex === index && dropPosition && !isDragging;
 
-    // Build previous answer fields for conditional visibility controls
-    const previousFields = currentPage.fields
-      .slice(0, index)
-      .filter(
-        (f): f is AnyField =>
-          (f as any)?.kind && (f as any)?.label !== undefined,
-      );
+    // Build previous answer fields for conditional visibility controls.
+    const previousFields = [
+      ...schema.pages
+        .slice(0, selectedPageIndex)
+        .flatMap((page) => page.fields),
+      ...currentPage.fields.slice(0, index),
+    ].filter(
+      (f): f is AnyField => (f as any)?.kind && (f as any)?.label !== undefined,
+    );
 
     const commonProps = {
       onUpdate: updateField,
