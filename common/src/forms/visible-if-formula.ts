@@ -46,6 +46,11 @@ const conditionOutputBlockVisibleSchema = z.strictObject({
   isVisible: z.boolean().optional(),
 });
 
+const conditionUserHasCitySchema = z.strictObject({
+  kind: z.literal("userHasCity"),
+  userHasCity: z.boolean(),
+});
+
 export const conditionSchema = z.discriminatedUnion("kind", [
   conditionEqualsSchema,
   conditionIncludesOptionSchema,
@@ -54,6 +59,7 @@ export const conditionSchema = z.discriminatedUnion("kind", [
   conditionValidatorSchema,
   conditionDeviceTypeSchema,
   conditionOutputBlockVisibleSchema,
+  conditionUserHasCitySchema,
 ]);
 
 export type Condition = z.infer<typeof conditionSchema>;

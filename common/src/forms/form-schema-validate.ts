@@ -154,6 +154,16 @@ function checkCondition(
   ctx: CheckCtx,
   errors: FormSchemaValidationError[],
 ): void {
+  if (cond.kind === "userHasCity") {
+    if (ctx.context !== "input") {
+      errors.push({
+        viewId: ctx.viewId,
+        blockId: ctx.blockId,
+        message: '"userHasCity" condition is only valid on input fields',
+      });
+    }
+    return;
+  }
   if (cond.kind !== "outputBlockVisible") return;
   if (ctx.context !== "output") {
     errors.push({

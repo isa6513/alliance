@@ -19,6 +19,7 @@ import {
   type ConditionExtras,
   isElementCurrentlyVisible,
 } from '@alliance/common/forms/visibility';
+import type { Condition } from '@alliance/common/forms/visible-if-formula';
 import { Temporal } from '@js-temporal/polyfill';
 import {
   BadRequestException,
@@ -276,29 +277,33 @@ export class TasksService {
     userId: number;
   }): Promise<Record<number, boolean>> {
     const validatorIds = new Set<number>();
+    let hasUserHasCityCondition = false;
+
+    const collectFromFormula = (formula?: { conditions?: unknown }): void => {
+      const conditions = formula?.conditions;
+      if (!conditions || typeof conditions !== 'object') {
+        return;
+      }
+      for (const condition of Object.values(
+        conditions as Record<string, Condition>,
+      )) {
+        if (!condition) continue;
+        if (condition.kind === 'validator') {
+          validatorIds.add(condition.validatorId);
+        } else if (condition.kind === 'userHasCity') {
+          hasUserHasCityCondition = true;
+        }
+      }
+    };
 
     for (const page of schema.pages) {
       for (const element of page.fields) {
-        const formula = element.visibleIfFormula;
-        if (formula?.conditions) {
-          for (const condition of Object.values(formula.conditions)) {
-            if (condition && condition.kind === 'validator') {
-              validatorIds.add(condition.validatorId);
-            }
-          }
-        }
+        collectFromFormula(element.visibleIfFormula);
         if (isQuestionField(element) && element.kind === 'list') {
           const listField = element as ListField;
           if (Array.isArray(listField.fields)) {
             for (const sub of listField.fields) {
-              const subFormula = sub.visibleIfFormula;
-              if (subFormula?.conditions) {
-                for (const condition of Object.values(subFormula.conditions)) {
-                  if (condition && condition.kind === 'validator') {
-                    validatorIds.add(condition.validatorId);
-                  }
-                }
-              }
+              collectFromFormula(sub.visibleIfFormula);
             }
           }
         }
@@ -349,6 +354,10 @@ export class TasksService {
         if (entry) previousAnswerData[entry[0]] = entry[1];
       }
     }
+    const userHasCity = hasUserHasCityCondition
+      ? await this.userService.userHasCitySet(userId)
+      : false;
+
     const visibilityExtras: ConditionExtras = {
       deviceType: submitFormDto.deviceType,
       visibilityValidatorResults: validatorResults,
@@ -356,6 +365,7 @@ export class TasksService {
         Object.keys(previousAnswerData).length > 0
           ? previousAnswerData
           : undefined,
+      userHasCity,
     };
 
     for (const page of schema.pages) {

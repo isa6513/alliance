@@ -4,6 +4,7 @@ import {
   type CityFieldValue,
   type FormSchema,
   type FormValue,
+  isQuestionField,
   type ListField,
   type NumberField,
   type RangeField,
@@ -14,6 +15,7 @@ import {
   hasContent,
   isElementCurrentlyVisible,
 } from "@alliance/common/forms/visibility";
+import type { VisibleIfFormula } from "@alliance/common/forms/visible-if-formula";
 import { parseTimeToMinutes } from "@alliance/shared/forms/timeUtils";
 
 export {
@@ -140,6 +142,29 @@ export function formatUserLocationDisplayValue(
   );
   const suffix = locationParts.length ? `, ${locationParts.join(", ")}` : "";
   return `${value.name}${suffix}`;
+}
+
+export function schemaHasUserHasCityCondition(schema: FormSchema): boolean {
+  const formulaHasUserHasCity = (
+    visibleIfFormula: VisibleIfFormula | undefined,
+  ): boolean =>
+    Object.values(visibleIfFormula?.conditions ?? {}).some(
+      (condition) => condition.kind === "userHasCity",
+    );
+  for (const page of schema.pages) {
+    for (const element of page.fields) {
+      if (formulaHasUserHasCity(element.visibleIfFormula)) return true;
+      if (isQuestionField(element) && element.kind === "list") {
+        const listField = element as ListField;
+        if (Array.isArray(listField.fields)) {
+          for (const sub of listField.fields) {
+            if (formulaHasUserHasCity(sub.visibleIfFormula)) return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
 }
 
 export function getRangeOptionCount(field: RangeField): number {

@@ -384,6 +384,7 @@ export function collectSourceFormIds(schema: FormSchema): number[] {
       case "validator":
       case "deviceType":
       case "outputBlockVisible":
+      case "userHasCity":
         break;
       default:
         throw new Error(

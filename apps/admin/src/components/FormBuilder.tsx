@@ -268,6 +268,7 @@ const mapConditionForOptionValue = (
     case "deviceType":
     case "hasValue":
     case "outputBlockVisible":
+    case "userHasCity":
     case "validator":
       return { condition, updated: false };
     default:

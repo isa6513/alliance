@@ -796,6 +796,22 @@ export class UserService {
     return user.city ?? undefined;
   }
 
+  /**
+   * Whether the user has a location set — either a structured city or a custom
+   * city string. Mirrors the location shown by the `userLocation` display block
+   * and drives `userHasCity` visibility conditions.
+   */
+  async userHasCitySet(userId: number): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: { city: true },
+    });
+    if (!user) {
+      return false;
+    }
+    return user.city != null || (user.customCityString?.trim().length ?? 0) > 0;
+  }
+
   async getUserCityCounts(): Promise<UserCityCount[]> {
     // return (
     //   await this.userRepository.find({

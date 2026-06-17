@@ -27,6 +27,7 @@ export type ConditionExtras = {
   visibilityEvaluationStack?: Set<string>;
   previousAnswerData?: Record<number, Record<string, unknown>>;
   outputBlockVisibility?: Map<string, boolean>;
+  userHasCity?: boolean;
 };
 
 type ValueBasedCondition = Extract<
@@ -124,6 +125,10 @@ export function evaluateCondition(
         extras.outputBlockVisibility?.get(cond.outputBlockVisible) ?? true;
       return actual === expected;
     }
+    case "userHasCity": {
+      const present = extras.userHasCity ?? false;
+      return cond.userHasCity ? present : !present;
+    }
     case "equals":
     case "includesOption":
     case "anySelected":
@@ -209,6 +214,7 @@ export function isElementCurrentlyVisible(
       case "deviceType":
       case "validator":
       case "outputBlockVisible":
+      case "userHasCity":
         results[name] = evaluateCondition(cond, data, extras);
         break;
       case "equals":

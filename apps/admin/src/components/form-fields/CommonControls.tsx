@@ -262,6 +262,7 @@ type OutputBlockVisibleCondition = Extract<
   Condition,
   { kind: "outputBlockVisible" }
 >;
+type UserHasCityCondition = Extract<Condition, { kind: "userHasCity" }>;
 
 function isFieldCondition(cond: Condition): cond is FieldCondition {
   return (
@@ -284,6 +285,10 @@ function isOutputBlockVisibleCondition(
   cond: Condition,
 ): cond is OutputBlockVisibleCondition {
   return cond.kind === "outputBlockVisible";
+}
+
+function isUserHasCityCondition(cond: Condition): cond is UserHasCityCondition {
+  return cond.kind === "userHasCity";
 }
 
 function isHasValueCondition(
@@ -799,6 +804,25 @@ export function ConditionalVisibility({
     const next = [...conditions, defaultCondition];
     updateConditions(next);
   }, [conditions, updateConditions]);
+
+  const addUserHasCityCondition = useCallback(() => {
+    const defaultCondition: UserHasCityCondition = {
+      kind: "userHasCity",
+      userHasCity: true,
+    };
+    updateConditions([...conditions, defaultCondition]);
+  }, [conditions, updateConditions]);
+
+  const handleUserHasCityChange = useCallback(
+    (index: number, userHasCity: boolean) => {
+      const next = [...conditions];
+      const current = next[index];
+      if (!isUserHasCityCondition(current)) return;
+      next[index] = { ...current, userHasCity };
+      updateConditions(next, true);
+    },
+    [conditions, updateConditions],
+  );
 
   const addOutputBlockVisibleCondition = useCallback(() => {
     if (!outputBlocks || outputBlocks.length === 0) return;
@@ -1419,6 +1443,29 @@ export function ConditionalVisibility({
     );
   };
 
+  const renderUserHasCityCondition = (
+    condition: UserHasCityCondition,
+    index: number,
+  ) => {
+    return (
+      <div className="space-y-2">
+        <label className="block text-xs text-gray-700 mb-1">
+          Show when the user&apos;s city
+        </label>
+        <select
+          className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+          value={String(condition.userHasCity)}
+          onChange={(event) =>
+            handleUserHasCityChange(index, event.target.value === "true")
+          }
+        >
+          <option value="true">is set</option>
+          <option value="false">is not set</option>
+        </select>
+      </div>
+    );
+  };
+
   const renderDeviceCondition = (condition: DeviceCondition, index: number) => {
     const selected = new Set(condition.deviceType ?? []);
     return (
@@ -1545,6 +1592,8 @@ export function ConditionalVisibility({
               renderDeviceCondition(condition, index)
             ) : isOutputBlockVisibleCondition(condition) ? (
               renderOutputBlockVisibleCondition(condition, index)
+            ) : isUserHasCityCondition(condition) ? (
+              renderUserHasCityCondition(condition, index)
             ) : (
               <p className="text-[11px] text-red-500">
                 Unsupported condition type. Remove and re-create this rule.
@@ -1595,6 +1644,15 @@ export function ConditionalVisibility({
           >
             + Device condition
           </button>
+          {outputBlocks === undefined && (
+            <button
+              type="button"
+              className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100"
+              onClick={addUserHasCityCondition}
+            >
+              + User has city condition
+            </button>
+          )}
           {outputBlocks !== undefined && (
             <button
               type="button"

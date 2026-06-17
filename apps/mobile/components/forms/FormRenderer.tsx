@@ -32,6 +32,7 @@ import {
   isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
   resolveDisplayBlockForUser,
   resolveFieldDefaultValue,
+  schemaHasUserHasCityCondition,
   validateFieldValue as validateFieldValueShared,
   type UserLocationDisplayValue,
 } from "@alliance/shared/formrenderer";
@@ -414,6 +415,11 @@ const FormRenderer = ({
     [schema],
   );
 
+  const hasUserHasCityCondition = useMemo(
+    () => schemaHasUserHasCityCondition(schema),
+    [schema],
+  );
+
   const previousAnswerSourceFormIds = useMemo(() => {
     const ids = new Set<number>();
     for (const page of schema.pages) {
@@ -593,7 +599,11 @@ const FormRenderer = ({
     useState(false);
 
   useEffect(() => {
-    if (!loadCurrentUserLocation || !hasUserLocationDisplayBlock || !user) {
+    if (
+      !loadCurrentUserLocation ||
+      (!hasUserLocationDisplayBlock && !hasUserHasCityCondition) ||
+      !user
+    ) {
       setCurrentUserLocation(null);
       setCurrentUserLocationLoading(false);
       return;
@@ -620,10 +630,21 @@ const FormRenderer = ({
     return () => {
       cancelled = true;
     };
-  }, [hasUserLocationDisplayBlock, loadCurrentUserLocation, user?.id, user]);
+  }, [
+    hasUserLocationDisplayBlock,
+    hasUserHasCityCondition,
+    loadCurrentUserLocation,
+    user?.id,
+    user,
+  ]);
 
   const userLocationDisplayValue =
     currentUserLocation ?? user?.customCityString ?? null;
+
+  const userHasCity = useMemo(
+    () => formatUserLocationDisplayValue(userLocationDisplayValue).length > 0,
+    [userLocationDisplayValue],
+  );
 
   // Draft persistence: tracks whether we've loaded a stored draft so the save
   // effect doesn't overwrite stored data with initial defaults.
@@ -842,6 +863,7 @@ const FormRenderer = ({
         fieldLookup,
         readOnly,
         previousAnswerData,
+        userHasCity,
       }),
     [
       fieldLookup,
@@ -849,6 +871,7 @@ const FormRenderer = ({
       visibilityValidatorResults,
       readOnly,
       previousAnswerData,
+      userHasCity,
     ],
   );
 
