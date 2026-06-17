@@ -1,6 +1,7 @@
 import { cn } from "@alliance/shared/styles/util";
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import ActionLink, { getActionIdFromHref } from "./ActionLink";
 
 interface FormMarkdownWrapper {
   markdownContent: string;
@@ -52,14 +53,17 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
           <ul className="text-zinc-800 list-disc list-inside pl-2" {...props} />
         ),
         li: ({ ...props }) => <li className="text-zinc-800 my-1" {...props} />,
-        a: ({ ...props }) => (
-          <a
-            className={cn("text-link", inlineClass)}
-            {...props}
-            target="_blank"
-            rel="noreferrer"
-          />
-        ),
+        a: ({ node: _node, ...props }) =>
+          getActionIdFromHref(props.href) != null ? (
+            <ActionLink className={cn(inlineClass)} {...props} />
+          ) : (
+            <a
+              className={cn("text-link", inlineClass)}
+              {...props}
+              target="_blank"
+              rel="noreferrer"
+            />
+          ),
         code: ({ node: _node, className: _className, ...props }) => (
           <code
             className={cn(
