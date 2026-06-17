@@ -832,6 +832,7 @@ const FormRenderer = ({
         visibilityValidatorResults,
         fieldLookup,
         previousAnswerData,
+        userHasCity,
       }),
     [
       effectiveDeviceType,
@@ -839,6 +840,7 @@ const FormRenderer = ({
       visibilityValidatorResults,
       fieldLookup,
       previousAnswerData,
+      userHasCity,
     ],
   );
 

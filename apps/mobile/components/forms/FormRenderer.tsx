@@ -884,9 +884,17 @@ const FormRenderer = ({
       validateFieldValueShared(field, fieldValue, data ?? formData, {
         deviceType: DEVICE_TYPE,
         visibilityValidatorResults,
+        fieldLookup,
         previousAnswerData,
+        userHasCity,
       }),
-    [formData, visibilityValidatorResults, previousAnswerData],
+    [
+      formData,
+      visibilityValidatorResults,
+      fieldLookup,
+      previousAnswerData,
+      userHasCity,
+    ],
   );
 
   const applyFieldErrorUpdates = useCallback(
