@@ -61,6 +61,7 @@ import {
   View,
 } from "react-native";
 import AppMarkdownWrapper, { useHandleLinkPress } from "../AppMarkdownWrapper";
+import { ImageLightboxModal } from "../ImageLightbox";
 import Button, { ButtonColor, ButtonSize } from "../system/Button";
 import Checkbox from "../system/Checkbox";
 import Text, { FontWeight } from "../system/Text";
@@ -178,6 +179,43 @@ type RenderDisplayBlockMobileProps = {
   userLocationLoading?: boolean;
 };
 
+function ImageBlock({
+  src,
+  alt,
+  caption,
+}: {
+  src: string;
+  alt?: string;
+  caption?: string;
+}) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  return (
+    <View className="items-center">
+      <TouchableOpacity
+        onPress={() => setLightboxOpen(true)}
+        activeOpacity={0.9}
+        className="w-full"
+      >
+        <Image
+          source={{ uri: src }}
+          accessibilityLabel={alt}
+          className="w-full h-48 bg-zinc-200 rounded-lg"
+          resizeMode="cover"
+        />
+      </TouchableOpacity>
+      {caption && (
+        <Text className="text-sm text-zinc-600 mt-2 text-center">
+          {caption}
+        </Text>
+      )}
+      <ImageLightboxModal
+        uri={lightboxOpen ? src : null}
+        onClose={() => setLightboxOpen(false)}
+      />
+    </View>
+  );
+}
+
 export function RenderDisplayBlockMobile({
   block,
   previousAnswerData,
@@ -237,19 +275,7 @@ export function RenderDisplayBlockMobile({
       );
     case "image":
       return (
-        <View className="items-center">
-          <Image
-            source={{ uri: block.src }}
-            accessibilityLabel={block.alt}
-            className="w-full h-48 bg-zinc-200 rounded-lg"
-            resizeMode="cover"
-          />
-          {block.caption && (
-            <Text className="text-sm text-zinc-600 mt-2 text-center">
-              {block.caption}
-            </Text>
-          )}
-        </View>
+        <ImageBlock src={block.src} alt={block.alt} caption={block.caption} />
       );
     case "biglink":
       const IconComponent = bigLinkIcons[block.icon || "messages-square"];
