@@ -28,7 +28,10 @@ const FIELD_LABELS: Record<FieldKind, string> = {
   list: "List Field",
   custom: "Custom Component Field",
 };
-const FIELD_TYPES = Object.keys(FIELD_LABELS) as FieldKind[];
+const FIELD_TYPES = (Object.keys(FIELD_LABELS) as FieldKind[]).filter(
+  // `text` specifically is deprecated, all other fields are valid
+  (kind) => kind !== "text",
+);
 
 const BLOCK_LABELS: Record<DisplayKind, string> = {
   header: "Header Block",
