@@ -99,7 +99,7 @@ export class LikesService {
   ): Promise<User[]> {
     // targetId is ParseIntPipe-validated; inline it to avoid reusing the join
     // param in ORDER BY.
-    const rankExpr = `${LIKE_ORDER_RANK_FN}('${targetId}:' || user.id::text)`;
+    const rankExpr = `${LIKE_ORDER_RANK_FN}('${targetId}:' || "user"."id"::text)`;
     const query = this.userRepository
       .createQueryBuilder('user')
       .select('user.id', 'id')
@@ -112,7 +112,7 @@ export class LikesService {
     if (afterId !== undefined) {
       // Cursor rank plus id matches `byLikeOrder`'s collision tiebreaker.
       query.andWhere(
-        `(${rankExpr} > :afterRank OR (${rankExpr} = :afterRank AND user.id > :afterId))`,
+        `(${rankExpr} > :afterRank OR (${rankExpr} = :afterRank AND "user"."id" > :afterId))`,
         { afterRank: likeOrderRank(targetId, afterId), afterId },
       );
     }
