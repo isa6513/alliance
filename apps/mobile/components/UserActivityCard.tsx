@@ -1,19 +1,19 @@
-import { useCallback, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
-import { router } from "expo-router";
 import { ActionActivityDto } from "@alliance/shared/client";
-import { formatTime } from "@alliance/shared/lib/utils";
-import { MessageCircleIcon } from "lucide-react-native";
-import ProfileImage from "./ProfileImage";
-import LikeButton from "./LikeButton";
-import Comments from "./Comments";
-import EditableContentRenderer from "./EditableContentRenderer";
-import OutputRenderer from "./OutputRenderer";
-import Text, { FontWeight } from "./system/Text";
 import {
   actionActivityCommentable,
   actionActivityTransitiveVerb,
 } from "@alliance/shared/lib/actionActivityConstants";
+import { formatTime } from "@alliance/shared/lib/utils";
+import { router } from "expo-router";
+import { MessageCircleIcon } from "lucide-react-native";
+import { useCallback, useState } from "react";
+import { TouchableOpacity, View } from "react-native";
+import Comments from "./Comments";
+import EditableContentRenderer from "./EditableContentRenderer";
+import LikeFooter, { LikeBarButton } from "./LikeFooter";
+import OutputRenderer from "./OutputRenderer";
+import ProfileImage from "./ProfileImage";
+import Text, { FontWeight } from "./system/Text";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -53,7 +53,6 @@ export default function UserActivityCard({
         onPress={handleActivityPress}
         disabled={showCommentForm}
       >
-        {/* Header: User info and action */}
         <View className="flex-row items-start flex-wrap">
           <TouchableOpacity onPress={handleUserPress} activeOpacity={0.7}>
             <ProfileImage pfp={activity.user.profilePicture} size="medium" />
@@ -91,31 +90,22 @@ export default function UserActivityCard({
           </View>
         )}
 
-        {/* Footer: pressable icons */}
-        <View className="flex-row justify-between items-center mt-3">
-          <View className="flex-1 flex-row items-center justify-around gap-x-8! w-full">
-            <LikeButton
-              liked={activity.likedByMe ?? false}
-              likes={activity.likesCount}
-              iconColor="#a1a1aa"
-              size={22}
-              onPress={() => handleLike(activity.id)}
+        <LikeFooter
+          likeTargetType="activity"
+          likeTargetId={activity.id}
+          liked={activity.likedByMe ?? false}
+          likesCount={activity.likesCount}
+          likers={activity.likes}
+          onLike={() => handleLike(activity.id)}
+        >
+          {commentable && (
+            <LikeBarButton
+              icon={MessageCircleIcon}
+              label="Comment"
+              onPress={() => setShowCommentForm(true)}
             />
-
-            {commentable && (
-              <TouchableOpacity
-                onPress={(e) => {
-                  setShowCommentForm(true);
-                  e.stopPropagation();
-                }}
-                activeOpacity={0.4}
-                className="flex-row items-center gap-x-1 py-1!"
-              >
-                <MessageCircleIcon size={22} color="#a1a1aa" />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
+          )}
+        </LikeFooter>
       </TouchableOpacity>
 
       {commentable && (

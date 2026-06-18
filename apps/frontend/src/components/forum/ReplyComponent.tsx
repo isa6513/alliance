@@ -12,7 +12,8 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Link, href } from "react-router";
 import { useCommentEditing } from "../../hooks/useCommentEditing";
-import CommentLikeButton from "../CommentLikeButton";
+import { LikeActionButton } from "../LikeFooter";
+import LikeSummary from "../LikeSummary";
 import CommentActionsMenu from "./CommentActionsMenu";
 import { useCommentsContext } from "./CommentsContext";
 import ReplyForm from "./ReplyForm";
@@ -166,43 +167,50 @@ const ReplyContent = ({
             </div>
           </div>
         ) : (
-          <div className="flex justify-between items-center text-sm">
-            <div className="flex items-center gap-1.5 sm:gap-3">
-              <CommentLikeButton
-                liked={reply.likes.some((like) => like.id === user?.id)}
-                likes={reply.likes.length}
-                handleLike={() =>
-                  ctx.onLikeReply(
-                    reply.id,
-                    reply.likes.some((like) => like.id === user?.id),
-                  )
-                }
-              />
-              {user && canNest && (
-                <button
-                  onClick={() => {
-                    ctx.setReplyingTo(reply.id);
-                    if (isCollapsed && onToggleCollapse) {
-                      onToggleCollapse();
-                    }
-                  }}
-                  className="text-zinc-500 hover:text-zinc-700 hover:underline text-sm"
-                >
-                  {!isReplyingToThis && "Reply"}
-                </button>
+          <div className="text-sm">
+            <LikeSummary
+              likeTargetType="comment"
+              likeTargetId={reply.id}
+              liked={reply.likedByMe ?? false}
+              likesCount={reply.likesCount}
+              likers={reply.likes}
+              className="mb-1.5"
+            />
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <LikeActionButton
+                  compact
+                  liked={reply.likedByMe ?? false}
+                  onLike={() =>
+                    ctx.onLikeReply(reply.id, reply.likedByMe ?? false)
+                  }
+                />
+                {user && canNest && (
+                  <button
+                    onClick={() => {
+                      ctx.setReplyingTo(reply.id);
+                      if (isCollapsed && onToggleCollapse) {
+                        onToggleCollapse();
+                      }
+                    }}
+                    className="text-zinc-500 hover:text-zinc-700 hover:underline text-sm"
+                  >
+                    {!isReplyingToThis && "Reply"}
+                  </button>
+                )}
+              </div>
+              {!reply.deleted && (
+                <CommentActionsMenu
+                  replyId={reply.id}
+                  isOwner={!!user && reply.author.id === user.id}
+                  isAdmin={!!user?.admin}
+                  isPinned={reply.pinned}
+                  onEdit={editing.startEdit}
+                  onDelete={ctx.handleDeleteReply}
+                  onPin={ctx.onPinReply}
+                />
               )}
             </div>
-            {!reply.deleted && (
-              <CommentActionsMenu
-                replyId={reply.id}
-                isOwner={!!user && reply.author.id === user.id}
-                isAdmin={!!user?.admin}
-                isPinned={reply.pinned}
-                onEdit={editing.startEdit}
-                onDelete={ctx.handleDeleteReply}
-                onPin={ctx.onPinReply}
-              />
-            )}
           </div>
         )}
       </div>

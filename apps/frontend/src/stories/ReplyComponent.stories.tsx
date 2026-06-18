@@ -1,9 +1,9 @@
-import { Meta, StoryObj } from "@storybook/react";
-import ReplyComponent from "../components/forum/ReplyComponent";
-import { CommentsProvider } from "../components/forum/CommentsContext";
 import { CommentDto, CreateEditableContentDto } from "@alliance/shared/client";
+import { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 import React from "react";
+import { CommentsProvider } from "../components/forum/CommentsContext";
+import ReplyComponent from "../components/forum/ReplyComponent";
 import { testAuthUser } from "./testData";
 
 const makeAuthor = (
@@ -21,23 +21,29 @@ const makeAuthor = (
   ...overrides,
 });
 
-const makeReply = (overrides: Partial<CommentDto> = {}): CommentDto => ({
-  id: 100,
-  parentObjectType: "post",
-  parentObjectId: 1,
-  deleted: false,
-  createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-  updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-  pinned: false,
-  author: makeAuthor(),
-  children: [],
-  likes: [],
-  editableContent: {
-    body: "This is a sample reply to the original post. I think we should consider all options before making a decision.",
-    attachments: [],
-  },
-  ...overrides,
-});
+const makeReply = (overrides: Partial<CommentDto> = {}): CommentDto => {
+  const reply: CommentDto = {
+    id: 100,
+    parentObjectType: "post",
+    parentObjectId: 1,
+    deleted: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    pinned: false,
+    author: makeAuthor(),
+    children: [],
+    likes: [],
+    likesCount: 0,
+    editableContent: {
+      body: "This is a sample reply to the original post. I think we should consider all options before making a decision.",
+      attachments: [],
+    },
+    ...overrides,
+  };
+  // Let stories that set `likes` render a summary unless they override `likesCount`.
+  reply.likesCount = reply.likesCount ?? reply.likes.length;
+  return reply;
+};
 
 const defaultCtx = {
   user: testAuthUser,

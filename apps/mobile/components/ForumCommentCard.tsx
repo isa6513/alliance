@@ -4,7 +4,7 @@ import { RelativePathString, router } from "expo-router";
 import { MessageCircleIcon } from "lucide-react-native";
 import { TouchableOpacity, View } from "react-native";
 import EditableContentRenderer from "./EditableContentRenderer";
-import LikeButton from "./LikeButton";
+import LikeFooter, { LikeBarButton } from "./LikeFooter";
 import ProfileImage from "./ProfileImage";
 import Text, { FontWeight } from "./system/Text";
 
@@ -82,24 +82,20 @@ export default function ForumCommentCard({
           </View>
         )}
 
-        <View className="flex-row justify-between items-center mt-3">
-          <View className="flex-1 flex-row items-center justify-around gap-x-8! w-full">
-            <LikeButton
-              liked={likedByMe}
-              likes={likesCount}
-              iconColor="#a1a1aa"
-              size={22}
-              onPress={handleLike}
-            />
-            <TouchableOpacity
-              onPress={() => router.push(replyUrl)}
-              activeOpacity={0.4}
-              className="flex-row items-center gap-x-1 py-1!"
-            >
-              <MessageCircleIcon size={22} color="#a1a1aa" />
-            </TouchableOpacity>
-          </View>
-        </View>
+        <LikeFooter
+          likeTargetType="comment"
+          likeTargetId={comment.id}
+          liked={likedByMe}
+          likesCount={likesCount}
+          likers={comment.likes}
+          onLike={handleLike}
+        >
+          <LikeBarButton
+            icon={MessageCircleIcon}
+            label="Reply"
+            onPress={() => router.push(replyUrl)}
+          />
+        </LikeFooter>
       </TouchableOpacity>
     </View>
   );

@@ -1,13 +1,14 @@
 import { ActionActivityDto, ActionActivityType } from "@alliance/shared/client";
-import { Link, href, useNavigate } from "react-router";
-import { formatTime } from "@alliance/shared/lib/utils";
-import ActivityLikeButton from "./ActivityLikeButton";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import { cn } from "@alliance/shared/styles/util";
 import {
   actionActivityTransitiveVerb,
   type ViewableActionActivity,
 } from "@alliance/shared/lib/actionActivityConstants";
+import { formatTime } from "@alliance/shared/lib/utils";
+import { cn } from "@alliance/shared/styles/util";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import { MessageCircle } from "lucide-react";
+import { Link, href, useNavigate } from "react-router";
+import LikeFooter, { LikeBarButton } from "./LikeFooter";
 
 export interface ActionActivityFeedItemProps {
   activity: ActionActivityDto;
@@ -84,7 +85,7 @@ const ActionActivityFeedItem = ({
           );
         }}
       >
-        <div className="flex flex-row gap-x-2 items-center flex-1 hover:bg-zinc-50 hover:p-2 hover:-m-2 rounded">
+        <div className="flex flex-row gap-x-2 items-center flex-1 rounded">
           <AvatarProfile
             pfp={activity.user.profilePicture}
             size="medium"
@@ -111,13 +112,28 @@ const ActionActivityFeedItem = ({
               </p>
             )}
           </div>
-          <ActivityLikeButton
-            liked={activity.likedByMe ?? false}
-            likes={activity.likesCount}
-            handleLike={() => handleLike(activity)}
-            backgroundColor="white"
-          />
         </div>
+        <LikeFooter
+          likeTargetType="activity"
+          likeTargetId={activity.id}
+          liked={activity.likedByMe ?? false}
+          likesCount={activity.likesCount}
+          likers={activity.likes}
+          onLike={() => handleLike(activity)}
+        >
+          <LikeBarButton
+            icon={MessageCircle}
+            label="Comment"
+            onPress={() =>
+              navigate(
+                href("/actions/:id/activity/:activityId", {
+                  id: activity.actionId.toString(),
+                  activityId: activity.id.toString(),
+                }),
+              )
+            }
+          />
+        </LikeFooter>
       </div>
     );
   }

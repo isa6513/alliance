@@ -1,3 +1,4 @@
+import { byLikeOrder, LIKE_FACEPILE_LIMIT } from '@alliance/common/likeOrder';
 import {
   ApiProperty,
   ApiPropertyOptional,
@@ -29,14 +30,26 @@ export class CommentDto extends PickType(Comment, [
   @ApiPropertyOptional({ type: () => CommentDto, isArray: true })
   children?: CommentDto[];
 
+  /**
+   * Bounded facepile; use `likesCount` and `/likes/comment/:id/users` for all
+   * likers.
+   */
   @ApiProperty({ type: () => ProfileDto, isArray: true })
   likes: ProfileDto[];
+
+  @ApiProperty()
+  likesCount: number;
+
+  /** Undefined for anonymous/admin views. */
+  @ApiPropertyOptional({ type: Boolean })
+  likedByMe?: boolean;
 
   @ApiProperty({ type: () => EditableContentDto })
   editableContent: EditableContentDto;
 
-  constructor(comment: Comment) {
+  constructor(comment: Comment, requestingUserId?: number) {
     super();
+    const allLikes = comment.likes ?? [];
     this.id = comment.id;
     this.parentObjectId = comment.parentObjectId;
     this.parentId = comment.parentId;
@@ -47,9 +60,17 @@ export class CommentDto extends PickType(Comment, [
     this.pinned = comment.pinned;
     this.author = new ProfileDto(comment.author);
     this.children = comment.children
-      ? comment.children.map((child) => new CommentDto(child))
+      ? comment.children.map((child) => new CommentDto(child, requestingUserId))
       : undefined;
-    this.likes = (comment.likes ?? []).map((like) => new ProfileDto(like));
+    this.likesCount = comment.likesCount ?? allLikes.length;
+    this.likedByMe =
+      requestingUserId !== undefined && comment.likes !== undefined
+        ? allLikes.some((like) => like.id === requestingUserId)
+        : undefined;
+    this.likes = allLikes
+      .map((like) => new ProfileDto(like))
+      .sort(byLikeOrder(comment.id))
+      .slice(0, LIKE_FACEPILE_LIMIT);
     this.editableContent = new EditableContentDto(comment.editableContent);
   }
 }
@@ -58,8 +79,11 @@ export class UserCommentDto extends CommentDto {
   @ApiPropertyOptional()
   parentTitle?: string;
 
-  constructor({ comment, parentTitle }: UserComment) {
-    super(comment);
+  constructor(
+    { comment, parentTitle }: UserComment,
+    requestingUserId?: number,
+  ) {
+    super(comment, requestingUserId);
     this.parentTitle = parentTitle;
   }
 }

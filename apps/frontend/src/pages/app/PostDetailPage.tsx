@@ -14,7 +14,7 @@ import { ArrowLeft } from "lucide-react";
 import React, { useState } from "react";
 import { Link, href, useNavigate, useParams } from "react-router";
 import Comments from "../../components/Comments";
-import PostLikeButton from "../../components/PostLikeButton";
+import LikeFooter from "../../components/LikeFooter";
 import { useAuth } from "../../lib/AuthContext";
 import { useCIDFromParams } from "../../lib/utils";
 
@@ -184,33 +184,33 @@ const PostDetailPage: React.FC = () => {
               )}
             </div>
             <EditableContentRenderer content={post.editableContent} />
-            <div className="flex items-center gap-x-1.5 sm:-mb-2 mt-2">
-              <PostLikeButton
-                liked={
-                  post.likes?.some((like) => like.id === user?.id) ?? false
-                }
-                likes={post.likes?.length ?? 0}
-                handleLike={handleLike}
-              />
-              {amAuthor && (
-                <>
-                  <Link
-                    to={href("/forum/edit/:postId", {
-                      postId: post.id.toString(),
-                    })}
-                    className="px-4 py-2 text-sm bg-zinc-100 text-gray-700 rounded hover:bg-zinc-200"
-                  >
-                    Edit
-                  </Link>
-                  <span
-                    onClick={handleDeletePost}
-                    className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 cursor-pointer"
-                  >
-                    Delete
-                  </span>
-                </>
-              )}
-            </div>
+            <LikeFooter
+              likeTargetType="post"
+              likeTargetId={post.id}
+              liked={post.likedByMe ?? false}
+              likesCount={post.likeCount ?? 0}
+              likers={post.likes}
+              onLike={handleLike}
+              align="right"
+            />
+            {amAuthor && (
+              <div className="flex items-center gap-x-2 mt-3">
+                <Link
+                  to={href("/forum/edit/:postId", {
+                    postId: post.id.toString(),
+                  })}
+                  className="px-4 py-2 text-sm bg-zinc-100 text-gray-700 rounded hover:bg-zinc-200"
+                >
+                  Edit
+                </Link>
+                <span
+                  onClick={handleDeletePost}
+                  className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 cursor-pointer"
+                >
+                  Delete
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <Comments

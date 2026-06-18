@@ -1478,6 +1478,8 @@ export type CommentDto = {
     author: ProfileDto;
     children?: Array<CommentDto>;
     likes: Array<ProfileDto>;
+    likesCount: number;
+    likedByMe?: boolean;
     editableContent: EditableContentDto;
 };
 
@@ -2630,6 +2632,7 @@ export type PostDto = {
     commentCount?: number;
     editableContent: EditableContentDto;
     likes?: Array<ProfileDto>;
+    likedByMe?: boolean;
     lastComment?: CommentDto;
     likeCount?: number;
     experts?: Array<ProfileDto>;
@@ -2648,6 +2651,8 @@ export type UserCommentDto = {
     author: ProfileDto;
     children?: Array<CommentDto>;
     likes: Array<ProfileDto>;
+    likesCount: number;
+    likedByMe?: boolean;
     editableContent: EditableContentDto;
     parentTitle?: string;
 };
@@ -9937,6 +9942,87 @@ export type VideosDeleteVideoAdminResponses = {
 };
 
 export type VideosDeleteVideoAdminResponse = VideosDeleteVideoAdminResponses[keyof VideosDeleteVideoAdminResponses];
+
+export type LikesGetPostUsersData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: {
+        limit?: number;
+        afterId?: number;
+    };
+    url: '/likes/post/{id}/users';
+};
+
+export type LikesGetPostUsersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type LikesGetPostUsersError = LikesGetPostUsersErrors[keyof LikesGetPostUsersErrors];
+
+export type LikesGetPostUsersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type LikesGetPostUsersResponse = LikesGetPostUsersResponses[keyof LikesGetPostUsersResponses];
+
+export type LikesGetCommentUsersData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: {
+        limit?: number;
+        afterId?: number;
+    };
+    url: '/likes/comment/{id}/users';
+};
+
+export type LikesGetCommentUsersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type LikesGetCommentUsersError = LikesGetCommentUsersErrors[keyof LikesGetCommentUsersErrors];
+
+export type LikesGetCommentUsersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type LikesGetCommentUsersResponse = LikesGetCommentUsersResponses[keyof LikesGetCommentUsersResponses];
+
+export type LikesGetActivityUsersData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: {
+        limit?: number;
+        afterId?: number;
+    };
+    url: '/likes/activity/{id}/users';
+};
+
+export type LikesGetActivityUsersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type LikesGetActivityUsersError = LikesGetActivityUsersErrors[keyof LikesGetActivityUsersErrors];
+
+export type LikesGetActivityUsersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type LikesGetActivityUsersResponse = LikesGetActivityUsersResponses[keyof LikesGetActivityUsersResponses];
 
 export type GeoSearchCityData = {
     body?: never;

@@ -1,3 +1,14 @@
+import {
+  ActionActivityDto,
+  UserActionRelation,
+  actionsGetActionActivities,
+  actionsLikeActivity,
+  actionsUnlikeActivity,
+} from "@alliance/shared/client";
+import { useActionHandlers } from "@alliance/shared/lib/actionPage";
+import { getNextEvent } from "@alliance/shared/lib/largeActionCard";
+import { cn } from "@alliance/shared/styles/util";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -9,35 +20,21 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
+import ActionEventsPanel from "../../../../components/ActionEventsPanel";
+import ActionPageTaskPanel from "../../../../components/ActionPageTaskPanel";
 import AppMarkdownWrapper from "../../../../components/AppMarkdownWrapper";
-import {
-  ActionActivityDto,
-  UserActionRelation,
-  actionsGetActionActivities,
-  actionsLikeActivity,
-  actionsUnlikeActivity,
-} from "@alliance/shared/client";
+import Comments from "../../../../components/Comments";
+import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
+import BackButton from "../../../../components/system/BackButton";
+import Button, { ButtonColor } from "../../../../components/system/Button";
 import Text, {
   FontFamily,
   FontWeight,
 } from "../../../../components/system/Text";
-import { cn } from "@alliance/shared/styles/util";
-import ActionEventsPanel from "../../../../components/ActionEventsPanel";
 import TaskTimeInfo from "../../../../components/TaskTimeInfo";
-import { getNextEvent } from "@alliance/shared/lib/largeActionCard";
-import ActionPageTaskPanel from "../../../../components/ActionPageTaskPanel";
-import { useActionHandlers } from "@alliance/shared/lib/actionPage";
-import { actionActivityIntransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
-import Button, { ButtonColor } from "../../../../components/system/Button";
-import Comments from "../../../../components/Comments";
-import ProfileImage from "../../../../components/ProfileImage";
-import { formatTime } from "@alliance/shared/lib/utils";
-import LikeButton from "../../../../components/LikeButton";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import UserActivityCard from "../../../../components/UserActivityCard";
 import { colors } from "../../../../lib/style/colors";
-import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
-import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
-import BackButton from "../../../../components/system/BackButton";
 
 type TabId = "task" | "activity" | "description" | "comments";
 
@@ -47,43 +44,6 @@ const tabs: { id: TabId; label: string }[] = [
   { id: "description", label: "Description" },
   { id: "comments", label: "Comments" },
 ];
-
-interface ActivityItemProps {
-  activity: ActionActivityDto;
-  onLike: (activityId: number) => Promise<unknown>;
-}
-
-function ActivityItem({ activity, onLike }: ActivityItemProps) {
-  const verb = actionActivityIntransitiveVerb[activity.type];
-  if (verb === null) {
-    return null;
-  }
-
-  return (
-    <Pressable
-      onPress={() =>
-        router.push(`/actions/${activity.actionId}/activity/${activity.id}`)
-      }
-      className="flex-row gap-x-3 py-3 border-b border-zinc-100 items-center"
-    >
-      <ProfileImage pfp={activity.user.profilePicture} size="medium" />
-      <View className="flex-1">
-        <Text className="text-zinc-900" weight={FontWeight.Medium}>
-          {activity.user.displayName}
-          {verb && <Text className="text-zinc-500"> {verb}.</Text>}
-        </Text>
-        <Text className="text-zinc-400 text-xs mt-1">
-          {formatTime(new Date(activity.createdAt), { addSuffix: true })}
-        </Text>
-      </View>
-      <LikeButton
-        liked={activity.likedByMe ?? false}
-        likes={activity.likesCount}
-        onPress={() => onLike(activity.id)}
-      />
-    </Pressable>
-  );
-}
 
 interface ActivityTabContentProps {
   actionId: number;
@@ -97,7 +57,7 @@ function ActivityTabContent({ actionId }: ActivityTabContentProps) {
     queryFn: () =>
       actionsGetActionActivities({
         path: { id: actionId },
-        query: { limit: 50, comments: false, before: new Date().toISOString() },
+        query: { limit: 50, comments: true, before: new Date().toISOString() },
       }),
   });
 
@@ -207,11 +167,9 @@ function ActivityTabContent({ actionId }: ActivityTabContentProps) {
   return (
     <View>
       {activities.map((activity) => (
-        <ActivityItem
-          key={activity.id}
-          activity={activity}
-          onLike={handleLike}
-        />
+        <View key={activity.id} className="-mx-4 border-b-3 border-zinc-100">
+          <UserActivityCard activity={activity} handleLike={handleLike} />
+        </View>
       ))}
     </View>
   );
@@ -407,7 +365,6 @@ export default function ActionDetailScreen() {
             </View>
           )}
 
-          {/* Tab Bar */}
           <View className="flex-row border-b border-zinc-200 mb-4 w-full">
             {tabs.map((tab) => (
               <TouchableOpacity
@@ -434,7 +391,6 @@ export default function ActionDetailScreen() {
               </TouchableOpacity>
             ))}
           </View>
-          {/* Tab Content */}
           <View className="pb-10">{renderTabContent()}</View>
         </View>
       </KeyboardAwareScrollView>

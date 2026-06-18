@@ -1,11 +1,10 @@
-import { useCallback } from "react";
-import { useMutation } from "@tanstack/react-query";
 import {
   CommentDto,
-  ProfileDto,
   forumLikeComment,
   forumUnlikeComment,
 } from "@alliance/shared/client";
+import { useMutation } from "@tanstack/react-query";
+import { useCallback } from "react";
 
 interface UseCommentLikeMutationOptions {
   userId: number | undefined;
@@ -40,9 +39,8 @@ export function useCommentLikeMutation({
           if (item.id === replyId) {
             return {
               ...item,
-              likes: unlike
-                ? item.likes.filter((l) => l.id !== userId)
-                : [...item.likes, { id: userId } as ProfileDto],
+              likedByMe: !unlike,
+              likesCount: Math.max(0, item.likesCount + (unlike ? -1 : 1)),
             };
           }
           if (item.children?.length) {

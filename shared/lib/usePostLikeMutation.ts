@@ -1,13 +1,10 @@
-import { useCallback } from "react";
+import { forumLikePost, forumUnlikePost } from "@alliance/shared/client";
 import { useMutation } from "@tanstack/react-query";
-import {
-  forumLikePost,
-  forumUnlikePost,
-  ProfileDto,
-} from "@alliance/shared/client";
+import { useCallback } from "react";
 
 interface PostLike {
-  likes?: ProfileDto[];
+  likedByMe?: boolean;
+  likeCount?: number;
 }
 
 interface UsePostLikeMutationOptions {
@@ -38,9 +35,8 @@ export function usePostLikeMutation({
       if (!post || !userId) return;
       setPost((prev) => ({
         ...prev,
-        likes: isLiked
-          ? (prev.likes ?? []).filter((l) => l.id !== userId)
-          : [...(prev.likes ?? []), { id: userId } as ProfileDto],
+        likedByMe: !isLiked,
+        likeCount: Math.max(0, (prev.likeCount ?? 0) + (isLiked ? -1 : 1)),
       }));
       return { previousPost: post };
     },
@@ -54,7 +50,7 @@ export function usePostLikeMutation({
   const handleLike = useCallback(async () => {
     const post = getPost();
     if (!post || !userId) return;
-    const isLiked = post.likes?.some((like) => like.id === userId) ?? false;
+    const isLiked = post.likedByMe ?? false;
     await mutation.mutateAsync(isLiked);
   }, [getPost, userId, mutation]);
 

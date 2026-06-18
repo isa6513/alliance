@@ -3,20 +3,20 @@ import {
   ActionDto,
   actionsGetActivity,
 } from "@alliance/shared/client";
+import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
+import { formatTime } from "@alliance/shared/lib/utils";
+import { OutputRenderer } from "@alliance/sharedweb/forms/OutputRenderer";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
+import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { Link, href, useOutletContext, useParams } from "react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import chevronLeft from "../assets/icons8-expand-arrow-96.png";
 import { useAuth } from "../lib/AuthContext";
-import { formatTime } from "@alliance/shared/lib/utils";
-import ActivityLikesButtonRow from "./ActivityLikesButtonRow";
-import Comments from "./Comments";
-import UserDisplayName from "@alliance/sharedweb/ui/UserDisplayName";
-import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
-import { OutputRenderer } from "@alliance/sharedweb/forms/OutputRenderer";
 import BasicErrorMessage from "./BasicErrorMessage";
-import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
+import Comments from "./Comments";
+import LikeFooter from "./LikeFooter";
 
 export function ErrorBoundary(error: unknown) {
   console.error(error);
@@ -46,7 +46,6 @@ const ActionActivityDetail = () => {
   const { action, activities, handleLikeActivity } =
     useOutletContext<ActionActivityDetailContext>();
 
-  // Find the activity from the shared state (used for like sync)
   const origactivity = activities.find((a) => a.id === activityId) || null;
 
   const { data: fetchedActivity } = useQuery({
@@ -58,7 +57,6 @@ const ActionActivityDetail = () => {
     enabled: !!activityId,
   });
 
-  // Merge fetched activity with live like data from outlet context
   const activity = useMemo(() => {
     const base = fetchedActivity ?? origactivity;
     if (!base || !origactivity) return base;
@@ -189,15 +187,15 @@ const ActionActivityDetail = () => {
                 className="w-full h-auto rounded-md object-cover"
               />
             ))}
-            <div className="flex flex-row items-center justify-between mt-4">
-              <ActivityLikesButtonRow
-                isLiked={isLiked}
-                likes={activity.likes}
-                likesCount={activity.likesCount}
-                handleLike={handleLike}
-                labelText={true}
-              />
-            </div>
+            <LikeFooter
+              likeTargetType="activity"
+              likeTargetId={activity.id}
+              liked={isLiked}
+              likesCount={activity.likesCount}
+              likers={activity.likes}
+              onLike={handleLike}
+              align="right"
+            />
             <Comments objectId={activity.id} type={"activity"} />
           </>
         )}

@@ -16,6 +16,7 @@ import type { JwtPayload, JwtRequest } from 'src/auth/guards/jwtreq';
 import { PosthogService } from 'src/posthog/posthog.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { AuthOptionalGuard } from '../auth/guards/authoptional.guard';
 import { ReqUser } from '../auth/user.decorator';
 import {
   CommentDto,
@@ -56,7 +57,7 @@ export class ForumController {
         postId: post.id,
       },
     });
-    return new PostDto({ post });
+    return new PostDto({ post, requestingUserId: user.sub });
   }
 
   @Get('posts')
@@ -65,7 +66,9 @@ export class ForumController {
   @UseGuards(AuthGuard)
   async findAllPosts(@Request() req: JwtRequest): Promise<PostDto[]> {
     const results = await this.forumService.findAllPosts(req.user.sub);
-    return results.map((args) => new PostDto(args));
+    return results.map(
+      (args) => new PostDto({ ...args, requestingUserId: req.user.sub }),
+    );
   }
 
   @Get('posts/action/:actionId')
@@ -74,10 +77,15 @@ export class ForumController {
   @UseGuards(AuthGuard)
   async findPostsByAction(
     @Param('actionId') actionId: string,
+    @Request() req: JwtRequest,
   ): Promise<PostDto[]> {
     return this.forumService
       .findPostsByAction(+actionId)
-      .then((posts) => posts.map((post) => new PostDto({ post })));
+      .then((posts) =>
+        posts.map(
+          (post) => new PostDto({ post, requestingUserId: req.user?.sub }),
+        ),
+      );
   }
 
   @Get('posts/:id')
@@ -90,47 +98,70 @@ export class ForumController {
   ): Promise<PostDto> {
     return new PostDto({
       post: await this.forumService.findOnePost(+id, req.user?.sub),
+      requestingUserId: req.user?.sub,
     });
   }
 
   @Get('posts/:id/comments')
   @ApiOperation({ summary: 'Get all comments for a specific post' })
   @ApiOkResponse({ type: [CommentDto] })
-  async findCommentsForPost(@Param('id') id: string): Promise<CommentDto[]> {
+  @UseGuards(AuthOptionalGuard)
+  async findCommentsForPost(
+    @Param('id') id: string,
+    @Request() req: JwtRequest,
+  ): Promise<CommentDto[]> {
     return this.forumService
       .findCommentsForPost(+id)
-      .then((comments) => comments.map((comment) => new CommentDto(comment)));
+      .then((comments) =>
+        comments.map((comment) => new CommentDto(comment, req.user?.sub)),
+      );
   }
 
   @Get('activity/:id/comments')
   @ApiOperation({ summary: 'Get all comments for a specific activity' })
   @ApiOkResponse({ type: [CommentDto] })
+  @UseGuards(AuthOptionalGuard)
   async findCommentsForActivity(
     @Param('id') id: string,
+    @Request() req: JwtRequest,
   ): Promise<CommentDto[]> {
     return this.forumService
       .findCommentsForActivity(+id)
-      .then((comments) => comments.map((comment) => new CommentDto(comment)));
+      .then((comments) =>
+        comments.map((comment) => new CommentDto(comment, req.user?.sub)),
+      );
   }
 
   @Get('actions/:id/comments')
   @ApiOperation({ summary: 'Get all comments for a specific action' })
   @ApiOkResponse({ type: [CommentDto] })
-  async findCommentsForAction(@Param('id') id: string): Promise<CommentDto[]> {
+  @UseGuards(AuthOptionalGuard)
+  async findCommentsForAction(
+    @Param('id') id: string,
+    @Request() req: JwtRequest,
+  ): Promise<CommentDto[]> {
     return this.forumService
       .findCommentsForAction(+id)
-      .then((comments) => comments.map((comment) => new CommentDto(comment)));
+      .then((comments) =>
+        comments.map((comment) => new CommentDto(comment, req.user?.sub)),
+      );
   }
 
   @Get('posts/user/:id')
   @ApiOperation({ summary: 'Get all posts by a specific user' })
   @ApiOkResponse({ type: [PostDto] })
+  @UseGuards(AuthOptionalGuard)
   async findPostsByUser(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
   ): Promise<PostDto[]> {
     return this.forumService
       .findPostsByUser(id)
-      .then((posts) => posts.map((post) => new PostDto({ post })));
+      .then((posts) =>
+        posts.map(
+          (post) => new PostDto({ post, requestingUserId: req.user?.sub }),
+        ),
+      );
   }
 
   @Get('posts/user/:id/comments')
@@ -138,22 +169,30 @@ export class ForumController {
     summary: 'Get all comments by a specific user, excluding activity comments',
   })
   @ApiOkResponse({ type: [UserCommentDto] })
+  @UseGuards(AuthOptionalGuard)
   async findCommentsByUser(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
   ): Promise<UserCommentDto[]> {
     const userComments = await this.forumService.findCommentsByUser(id);
-    return userComments.map((userComment) => new UserCommentDto(userComment));
+    return userComments.map(
+      (userComment) => new UserCommentDto(userComment, req.user?.sub),
+    );
   }
 
   @Get('posts/user/:id/forumComments')
   @ApiOperation({ summary: 'Get all forum comments by a specific user' })
   @ApiOkResponse({ type: [CommentDto] })
+  @UseGuards(AuthOptionalGuard)
   async findForumCommentsByUser(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: JwtRequest,
   ): Promise<CommentDto[]> {
     return this.forumService
       .findForumCommentsByUser(id)
-      .then((comments) => comments.map((comment) => new CommentDto(comment)));
+      .then((comments) =>
+        comments.map((comment) => new CommentDto(comment, req.user?.sub)),
+      );
   }
 
   @Patch('posts/:id')
@@ -167,6 +206,7 @@ export class ForumController {
   ): Promise<PostDto> {
     return new PostDto({
       post: await this.forumService.updatePost(id, updatePostDto, user.sub),
+      requestingUserId: user.sub,
     });
   }
 
@@ -200,7 +240,7 @@ export class ForumController {
         commentId: comment.id,
       },
     });
-    return new CommentDto(comment);
+    return new CommentDto(comment, user.sub);
   }
 
   @Patch('comments/:id')
@@ -214,6 +254,7 @@ export class ForumController {
   ): Promise<CommentDto> {
     return new CommentDto(
       await this.forumService.updateComment(id, updateCommentDto, user.sub),
+      user.sub,
     );
   }
 

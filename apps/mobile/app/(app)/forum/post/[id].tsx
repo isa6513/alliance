@@ -14,7 +14,7 @@ import { KeyboardAwareScrollViewRef } from "react-native-keyboard-controller";
 import Comments from "../../../../components/Comments";
 import EditableContentRenderer from "../../../../components/EditableContentRenderer";
 import KeyboardAwareScrollView from "../../../../components/KeyboardAwareScrollView";
-import LikeButton from "../../../../components/LikeButton";
+import LikeFooter from "../../../../components/LikeFooter";
 import ProfileImage from "../../../../components/ProfileImage";
 import BackButton from "../../../../components/system/BackButton";
 import Text, { FontWeight } from "../../../../components/system/Text";
@@ -112,8 +112,8 @@ export default function PostDetailScreen() {
     );
   }
 
-  const likedByMe = post.likes?.some((like) => like.id === user?.id) ?? false;
-  const likeCount = post.likes?.length ?? 0;
+  const likedByMe = post.likedByMe ?? false;
+  const likeCount = post.likeCount ?? 0;
   const isPrivateFuturePost =
     post.visibleAt && new Date(post.visibleAt) > new Date();
   const action = post.action;
@@ -177,13 +177,17 @@ export default function PostDetailScreen() {
             <EditableContentRenderer content={post.editableContent} />
           </View>
 
-          <View className="flex-row items-center gap-x-2 mt-1">
-            <LikeButton
-              liked={likedByMe}
-              likes={likeCount}
-              onPress={user ? handleLike : undefined}
-            />
-            {post.author.id === user?.id && (
+          <LikeFooter
+            likeTargetType="post"
+            likeTargetId={post.id}
+            liked={likedByMe}
+            likesCount={likeCount}
+            likers={post.likes}
+            onLike={user ? handleLike : undefined}
+            align="right"
+          />
+          {post.author.id === user?.id && (
+            <View className="flex-row items-center mt-3">
               <TouchableOpacity
                 onPress={confirmDeletePost}
                 className="px-3 py-1 rounded bg-red-100"
@@ -191,8 +195,8 @@ export default function PostDetailScreen() {
               >
                 <Text className="text-red-700 text-sm">Delete</Text>
               </TouchableOpacity>
-            )}
-          </View>
+            </View>
+          )}
         </View>
 
         <View className="mt-4">

@@ -1,37 +1,37 @@
-import { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  RefreshControl,
-  TouchableOpacity,
-  View,
-  ScrollView,
-} from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
 import {
   ActionActivityDto,
   actionsGetActivity,
   actionsLikeActivity,
   actionsUnlikeActivity,
 } from "@alliance/shared/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
 import {
   InfiniteActivityData,
   mapInfiniteActivities,
 } from "@alliance/shared/lib/useActivities";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { colors } from "../../../../../lib/style/colors";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { KeyboardStickyView } from "react-native-keyboard-controller";
+import Comments from "../../../../../components/Comments";
+import EditableContentRenderer from "../../../../../components/EditableContentRenderer";
+import LikeFooter from "../../../../../components/LikeFooter";
+import OutputRenderer from "../../../../../components/OutputRenderer";
+import ProfileImage from "../../../../../components/ProfileImage";
+import BackButton from "../../../../../components/system/BackButton";
 import Text, {
   FontFamily,
   FontWeight,
 } from "../../../../../components/system/Text";
-import ProfileImage from "../../../../../components/ProfileImage";
-import LikeButton from "../../../../../components/LikeButton";
-import Comments from "../../../../../components/Comments";
-import EditableContentRenderer from "../../../../../components/EditableContentRenderer";
-import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
-import OutputRenderer from "../../../../../components/OutputRenderer";
-import BackButton from "../../../../../components/system/BackButton";
-import { KeyboardStickyView } from "react-native-keyboard-controller";
+import { colors } from "../../../../../lib/style/colors";
 
 export default function ActivityDetailScreen() {
   const { id, activityId } = useLocalSearchParams<{
@@ -109,7 +109,6 @@ export default function ActivityDetailScreen() {
     onMutate: async (isLiked: boolean) => {
       const previousActivity = activity;
 
-      // Optimistically update local state
       setActivity((prev: ActionActivityDto | null) =>
         prev
           ? {
@@ -120,7 +119,6 @@ export default function ActivityDetailScreen() {
           : prev,
       );
 
-      // Optimistically update the action page's activity list cache
       await queryClient.cancelQueries({
         queryKey: ["actionActivities", actionId],
       });
@@ -139,9 +137,7 @@ export default function ActivityDetailScreen() {
                 ? {
                     ...a,
                     likedByMe: !isLiked,
-                    likesCount: isLiked
-                      ? a.likesCount - 1
-                      : a.likesCount + 1,
+                    likesCount: isLiked ? a.likesCount - 1 : a.likesCount + 1,
                   }
                 : a,
             ),
@@ -149,7 +145,6 @@ export default function ActivityDetailScreen() {
         },
       );
 
-      // Optimistically update all feed caches (home, activity feed, etc.)
       await queryClient.cancelQueries({ queryKey: ["useActivities"] });
       const previousFeedQueries =
         queryClient.getQueriesData<InfiniteActivityData>({
@@ -169,7 +164,11 @@ export default function ActivityDetailScreen() {
           ),
       );
 
-      return { previousActivity, previousActionActivities, previousFeedQueries };
+      return {
+        previousActivity,
+        previousActionActivities,
+        previousFeedQueries,
+      };
     },
     onError: (_err, _vars, context) => {
       if (context?.previousActivity) {
@@ -186,7 +185,6 @@ export default function ActivityDetailScreen() {
       });
     },
     onSuccess: (data) => {
-      // Reconcile with server data
       setActivity((prev: ActionActivityDto | null) =>
         prev
           ? {
@@ -299,11 +297,15 @@ export default function ActivityDetailScreen() {
             </View>
           )}
 
-          <View className="flex-row items-center mb-6">
-            <LikeButton
+          <View className="mb-6">
+            <LikeFooter
+              likeTargetType="activity"
+              likeTargetId={activity.id}
               liked={activity.likedByMe ?? false}
-              likes={activity.likesCount}
-              onPress={handleLike}
+              likesCount={activity.likesCount}
+              likers={activity.likes}
+              onLike={handleLike}
+              align="right"
             />
           </View>
 

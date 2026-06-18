@@ -38,7 +38,8 @@ import { colors } from "../lib/style/colors";
 import BottomSheetOptionPicker from "./BottomSheetOptionPicker";
 import EditableContentForm from "./EditableContentForm";
 import EditableContentRenderer from "./EditableContentRenderer";
-import LikeButton from "./LikeButton";
+import { LikeActionButton } from "./LikeFooter";
+import LikeSummary from "./LikeSummary";
 import ProfileImage from "./ProfileImage";
 import Text from "./system/Text";
 import UserDisplayName from "./UserDisplayName";
@@ -390,60 +391,66 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
       </View>
 
       {!isEditing && (
-        <View className="flex-row items-center gap-x-3 mt-2">
-          <LikeButton
-            liked={reply.likes.some((like) => like.id === shared.user?.id)}
-            likes={reply.likes.length}
-            onPress={
-              shared.user
-                ? () =>
-                    shared.onLikeReply(
-                      reply.id,
-                      reply.likes.some((like) => like.id === shared.user?.id),
-                    )
-                : undefined
-            }
+        <View className="mt-2">
+          <LikeSummary
+            likeTargetType="comment"
+            likeTargetId={reply.id}
+            liked={reply.likedByMe ?? false}
+            likesCount={reply.likesCount}
+            likers={reply.likes}
+            className="mb-1.5"
           />
-          {shared.user && canNest && (
-            <TouchableOpacity
-              onPress={() =>
-                shared.setReplyingTo(isReplyingToThis ? null : reply.id)
+          <View className="flex-row items-center gap-x-3">
+            <LikeActionButton
+              compact
+              liked={reply.likedByMe ?? false}
+              onLike={
+                shared.user
+                  ? () => shared.onLikeReply(reply.id, reply.likedByMe ?? false)
+                  : undefined
               }
-              activeOpacity={0.7}
-            >
-              {!isReplyingToThis ? (
-                <Text className={actionTextClass}>Reply</Text>
-              ) : null}
-            </TouchableOpacity>
-          )}
-          {shared.user &&
-            reply.author.id === shared.user.id &&
-            !reply.deleted && (
-              <View className="flex-row items-center gap-x-3">
-                <TouchableOpacity
-                  onPress={() => setIsEditing(true)}
-                  activeOpacity={0.7}
-                >
-                  <Text className={actionTextClass}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => shared.onDeleteReply(reply.id)}
-                  activeOpacity={0.7}
-                >
-                  <Text className={deleteTextClass}>Delete</Text>
-                </TouchableOpacity>
-              </View>
+            />
+            {shared.user && canNest && (
+              <TouchableOpacity
+                onPress={() =>
+                  shared.setReplyingTo(isReplyingToThis ? null : reply.id)
+                }
+                activeOpacity={0.7}
+              >
+                {!isReplyingToThis ? (
+                  <Text className={actionTextClass}>Reply</Text>
+                ) : null}
+              </TouchableOpacity>
             )}
-          {hasChildren && depth === 0 && (
-            <TouchableOpacity
-              onPress={() => setIsCollapsed(!isCollapsed)}
-              activeOpacity={0.7}
-            >
-              <Text className={actionTextClass}>
-                {isCollapsed ? "Show replies" : "Hide replies"}
-              </Text>
-            </TouchableOpacity>
-          )}
+            {shared.user &&
+              reply.author.id === shared.user.id &&
+              !reply.deleted && (
+                <View className="flex-row items-center gap-x-3">
+                  <TouchableOpacity
+                    onPress={() => setIsEditing(true)}
+                    activeOpacity={0.7}
+                  >
+                    <Text className={actionTextClass}>Edit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => shared.onDeleteReply(reply.id)}
+                    activeOpacity={0.7}
+                  >
+                    <Text className={deleteTextClass}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            {hasChildren && depth === 0 && (
+              <TouchableOpacity
+                onPress={() => setIsCollapsed(!isCollapsed)}
+                activeOpacity={0.7}
+              >
+                <Text className={actionTextClass}>
+                  {isCollapsed ? "Show replies" : "Hide replies"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       )}
 

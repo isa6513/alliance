@@ -1,11 +1,11 @@
 import { CommentDto } from "@alliance/shared/client";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
+import { MessageCircle } from "lucide-react";
 import { useCallback } from "react";
 import { Link, href, useNavigate } from "react-router";
-import ActivityLikeButton from "./ActivityLikeButton";
+import LikeFooter, { LikeBarButton } from "./LikeFooter";
 
 interface ForumCommentCardProps {
   comment: CommentDto;
@@ -51,7 +51,7 @@ const ForumCommentCard = ({
   return (
     <div className="flex flex-col bg-white">
       <div
-        className="block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white hover:bg-grey-1 cursor-pointer"
+        className="block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white cursor-pointer"
         onClick={handleCardClick}
       >
         <div className="flex flex-wrap items-center">
@@ -82,24 +82,21 @@ const ForumCommentCard = ({
               <EditableContentRenderer content={comment.editableContent} />
             </div>
           )}
-          <div className="flex flex-row justify-between w-full items-end">
-            <p className="text-zinc-500">{timeSinceCommented}</p>
-            <div className="flex items-center space-x-2 self-end mt-2">
-              <ActivityLikeButton
-                liked={likedByMe}
-                likes={likesCount}
-                handleLike={handleLike}
-                backgroundColor="white"
-              />
-              <Button
-                onClick={handleReplyClick}
-                color={ButtonColor.White}
-                className="flex flex-row gap-x-1 items-center !px-3 !py-[6px] !h-full"
-              >
-                <span className="text-sm text-zinc-800 text-nowrap">Reply</span>
-              </Button>
-            </div>
-          </div>
+          <p className="text-zinc-500 mt-1">{timeSinceCommented}</p>
+          <LikeFooter
+            likeTargetType="comment"
+            likeTargetId={comment.id}
+            liked={likedByMe}
+            likesCount={likesCount}
+            likers={comment.likes}
+            onLike={handleLike}
+          >
+            <LikeBarButton
+              icon={MessageCircle}
+              label="Reply"
+              onPress={handleReplyClick}
+            />
+          </LikeFooter>
         </div>
       </div>
     </div>

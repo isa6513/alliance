@@ -1,19 +1,19 @@
+import { FormSchema } from "@alliance/common/forms/form-schema";
 import { ActionActivityDto } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
-import { useCallback, useState } from "react";
-import { Link, href, useNavigate } from "react-router";
-import { formatTime } from "@alliance/shared/lib/utils";
-import ActivityLikeButton from "./ActivityLikeButton";
-import Comments from "./Comments";
-import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
-import OutputRenderer from "@alliance/sharedweb/forms/OutputRenderer";
-import { cn } from "@alliance/shared/styles/util";
 import {
   actionActivityCommentable,
   actionActivityTransitiveVerb,
 } from "@alliance/shared/lib/actionActivityConstants";
-import { FormSchema } from "@alliance/common/forms/form-schema";
+import { formatTime } from "@alliance/shared/lib/utils";
+import { cn } from "@alliance/shared/styles/util";
+import OutputRenderer from "@alliance/sharedweb/forms/OutputRenderer";
+import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
+import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
+import { MessageCircle } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Link, href, useNavigate } from "react-router";
+import Comments from "./Comments";
+import LikeFooter, { LikeBarButton } from "./LikeFooter";
 
 interface UserActivityCardProps {
   activity: ActionActivityDto;
@@ -54,7 +54,7 @@ const UserActivityCard = ({ activity, handleLike }: UserActivityCardProps) => {
       <div
         className={cn(
           "block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white",
-          !showCommentForm && "hover:bg-grey-1 cursor-pointer",
+          !showCommentForm && "cursor-pointer",
         )}
         onClick={handleActivityClick}
       >
@@ -102,36 +102,26 @@ const UserActivityCard = ({ activity, handleLike }: UserActivityCardProps) => {
                 <OutputRenderer submission={activity.formResponseOutput} />
               </div>
             )}
-          <div className="flex flex-row justify-between w-full items-end">
-            <p className="text-zinc-500">{timeSinceCompleted}</p>
-            <div
-              className={cn(
-                "flex items-center space-x-2 self-end",
-                !activity.editableContent.body && "mt-2",
-              )}
-            >
-              <ActivityLikeButton
-                liked={activity.likedByMe ?? false}
-                likes={activity.likesCount}
-                handleLike={() => handleLike(activity.id)}
-                backgroundColor="white"
+          <p className="text-zinc-500 mt-1">{timeSinceCompleted}</p>
+          <LikeFooter
+            likeTargetType="activity"
+            likeTargetId={activity.id}
+            liked={activity.likedByMe ?? false}
+            likesCount={activity.likesCount}
+            likers={activity.likes}
+            onLike={() => handleLike(activity.id)}
+          >
+            {commentable && (
+              <LikeBarButton
+                icon={MessageCircle}
+                label="Comment"
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setShowCommentForm(true);
+                }}
               />
-              {commentable && (
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowCommentForm(true);
-                  }}
-                  color={ButtonColor.White}
-                  className="flex flex-row gap-x-1 items-center !px-3 !py-[6px] !h-full"
-                >
-                  <span className="text-sm text-zinc-800 text-nowrap">
-                    Reply
-                  </span>
-                </Button>
-              )}
-            </div>
-          </div>
+            )}
+          </LikeFooter>
         </div>
       </div>
       {commentable && (

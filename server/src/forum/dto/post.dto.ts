@@ -1,3 +1,4 @@
+import { byLikeOrder, LIKE_FACEPILE_LIMIT } from '@alliance/common/likeOrder';
 import {
   ApiProperty,
   ApiPropertyOptional,
@@ -16,7 +17,6 @@ import {
   EditableContentDto,
 } from './editablecontent.dto';
 
-// return object for get requests
 export class PostDto extends PickType(Post, [
   'id',
   'title',
@@ -34,7 +34,6 @@ export class PostDto extends PickType(Post, [
   'notifyForReplies',
   'showClusterTags',
 ]) {
-  //redefine to use compacted dto types
   @ApiPropertyOptional({ type: () => ActionDto })
   action: ActionDto | undefined;
 
@@ -47,8 +46,16 @@ export class PostDto extends PickType(Post, [
   @ApiProperty({ type: () => EditableContentDto })
   editableContent: EditableContentDto;
 
+  /**
+   * Bounded facepile; use `likeCount` and `/likes/post/:id/users` for all
+   * likers.
+   */
   @ApiPropertyOptional({ type: () => ProfileDto, isArray: true })
   likes?: ProfileDto[];
+
+  /** Undefined for anonymous/admin views. */
+  @ApiPropertyOptional({ type: Boolean })
+  likedByMe?: boolean;
 
   @ApiPropertyOptional({ type: () => CommentDto })
   lastComment?: CommentDto;
@@ -62,7 +69,12 @@ export class PostDto extends PickType(Post, [
   @ApiPropertyOptional({ type: () => ProfileDto, isArray: true })
   authors?: ProfileDto[];
 
-  constructor({ post, commentCount, lastComment }: PostDtoArgs) {
+  constructor({
+    post,
+    commentCount,
+    lastComment,
+    requestingUserId,
+  }: PostDtoArgs) {
     super();
     this.id = post.id;
     this.title = post.title;
@@ -83,11 +95,21 @@ export class PostDto extends PickType(Post, [
     this.author = new ProfileDto(post.author);
     this.commentCount = commentCount;
     this.editableContent = new EditableContentDto(post.editableContent);
+    const likerIds = post.likesIds ?? post.likes?.map((like) => like.id);
     this.likes = post.likes
-      ? post.likes.map((like) => new ProfileDto(like))
+      ? post.likes
+          .map((like) => new ProfileDto(like))
+          .sort(byLikeOrder(post.id))
+          .slice(0, LIKE_FACEPILE_LIMIT)
       : undefined;
-    this.lastComment = lastComment ? new CommentDto(lastComment) : undefined;
-    this.likeCount = post.likesIds?.length;
+    this.likedByMe =
+      requestingUserId !== undefined
+        ? (likerIds?.includes(requestingUserId) ?? false)
+        : undefined;
+    this.lastComment = lastComment
+      ? new CommentDto(lastComment, requestingUserId)
+      : undefined;
+    this.likeCount = likerIds?.length;
     this.experts = post.experts
       ? post.experts.map((expert) => new ProfileDto(expert))
       : undefined;
@@ -101,6 +123,7 @@ export type PostDtoArgs = {
   post: Post;
   commentCount?: number;
   lastComment?: Comment;
+  requestingUserId?: number;
 };
 
 export class CreatePostDto extends PickType(Post, [

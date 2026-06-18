@@ -24,6 +24,7 @@ import { EventLogModule } from './eventlog/eventlog.module';
 import { ForumModule } from './forum/forum.module';
 import { GeoModule } from './geo/geo.module';
 import { ImagesModule } from './images/images.module';
+import { LikesModule } from './likes/likes.module';
 import { MailModule } from './mail/mail.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { MmsModule } from './mms/mms.module';
@@ -80,6 +81,7 @@ import { VideosModule } from './videos/videos.module';
     ImagesModule,
     VideosModule,
     ForumModule,
+    LikesModule,
     NotifsModule,
     GeoModule,
     MailModule,

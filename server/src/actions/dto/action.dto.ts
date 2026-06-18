@@ -1,3 +1,4 @@
+import { byLikeOrder, LIKE_FACEPILE_LIMIT } from '@alliance/common/likeOrder';
 import {
   ApiProperty,
   ApiPropertyOptional,
@@ -511,8 +512,8 @@ export class ActionActivityDto extends PickType(ActionActivity, [
     extra?: {
       comments?: Comment[];
       formResponseOutput?: FormResponse;
-      includeLikes?: boolean;
       likedByMe?: boolean;
+      requestingUserId?: number;
     },
   ) {
     super();
@@ -523,14 +524,17 @@ export class ActionActivityDto extends PickType(ActionActivity, [
     this.likesCount = actionActivity.likesCount;
     this.actionName = actionActivity.action?.name;
     this.user = new ProfileDto(actionActivity.user);
-    // Only include likes array when explicitly requested (detail views, like/unlike)
-    // For feed views, we rely on likesCount
-    if (extra?.includeLikes && actionActivity.likes !== undefined) {
-      this.likes = actionActivity.likes.map((like) => new ProfileDto(like));
+    if (actionActivity.likes !== undefined) {
+      this.likes = actionActivity.likes
+        .map((like) => new ProfileDto(like))
+        .sort(byLikeOrder(actionActivity.id))
+        .slice(0, LIKE_FACEPILE_LIMIT);
     }
     this.likedByMe = extra?.likedByMe;
     this.comments =
-      extra?.comments?.map((comment) => new CommentDto(comment)) ?? [];
+      extra?.comments?.map(
+        (comment) => new CommentDto(comment, extra?.requestingUserId),
+      ) ?? [];
     this.formResponseOutput = extra?.formResponseOutput
       ? new FormResponseOutputDto(extra.formResponseOutput)
       : undefined;
