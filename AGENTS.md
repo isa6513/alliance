@@ -8,6 +8,10 @@
 - `shared/` — shared by admin + frontend + mobile
 - `common/` — shared by all apps + server
 
+## Nested instructions
+
+When reading, inspecting, modifying, or reviewing files under a subtree that has its own `AGENTS.md`, manually read that nested file first if it is not already in the current session context. For example, read `server/AGENTS.md` before working with `server/**`, and read `apps/AGENTS.md` before working with `apps/**`. (So far, these are the only two nested `AGENTS.md` files.)
+
 ## Typechecking
 
 **Always typecheck with `bun run typecheck`** — it works in any package (`server`, `apps/{frontend,admin,mobile}`, `sharedweb`, `shared`, `common`) and resolves the correct config (e.g. `tsconfig.typecheck.json`, which pulls shared sources in directly). Do **not** substitute a bare `tsc` invocation, even with `--noEmit`.
