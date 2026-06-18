@@ -1,11 +1,13 @@
 # Local Database Access
 
-Local Postgres on `localhost:5432`. Credentials in `server/.env`: user `postgres`, password `alliance`, database `alliance`.
+Local Postgres credentials in `server/.env`. **Do not read the entire file.**
+
+You _can_ grep for the lines containing the specific variables: `grep -E '^(DB_HOST|DB_PORT|DB_USERNAME|DB_PASSWORD|DB_NAME)' server/.env` (these variables are not sensitive).
 
 ## Ad-hoc queries
 
 ```bash
-PGPASSWORD=alliance psql -h localhost -p 5432 -U postgres -d alliance -c "SELECT ..."
+PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USERNAME -d $DB_NAME -c "SELECT ..."
 ```
 
 ## Notes

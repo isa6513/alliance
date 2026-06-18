@@ -37,6 +37,10 @@ Don't switch on an enum (or union discriminator) with a ternary or an open `if`/
 
 Apply this to any branch keyed on a closed set (enum, string-literal union, tagged union `kind`), even when there are only two variants today.
 
+## Local database
+
+For querying the local Postgres database, see `.claude/skills/LOCAL_DB.md`.
+
 ## Result type
 
 Prefer the `Result<T, E>` type in `common/` for operations that can fail in expected ways (parsing, validation, fallible I/O you want callers to handle explicitly) instead of throwing or returning `null`/`undefined`. `Result<T, E>` is the type and `R` is the helper namespace — import them separately: `import { R, type Result } from "@alliance/common/result"`. Use the helpers (`R.fromPromise`, `R.match`, …) rather than hand-rolling `{ ok, ... }` objects or re-implementing this pattern. Don't reach for it where throwing is already idiomatic (e.g. NestJS controllers that rely on exception filters) — it's for making expected failure explicit, not replacing every `throw`.
