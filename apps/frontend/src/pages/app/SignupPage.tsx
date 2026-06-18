@@ -30,6 +30,7 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import SignupForm from "../../components/SignupForm";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
 import { isFeatureEnabled } from "../../lib/config";
+import { socialPreviewMeta } from "../../lib/socialPreviewMeta";
 
 function formatSignupSocialProofNames(
   profiles: Pick<ProfileDto, "displayName">[],
@@ -46,6 +47,16 @@ function formatSignupSocialProofNames(
   const namesShown = 3;
   const others = Math.max(0, totalMemberCount - namesShown);
   return `${names[0]}, ${names[1]}, ${names[2]} and ${others} ${others === 1 ? "other" : "others"}`;
+}
+
+export function meta() {
+  return socialPreviewMeta({
+    title: "Create an account — The Alliance",
+    description:
+      "Join a global community cooperating to improve the world. Members spend 15 minutes a week completing thoughtfully designed actions for measurable impact.",
+    image: "/og-signup.png",
+    url: "/signup",
+  });
 }
 
 const memberQuotes = [

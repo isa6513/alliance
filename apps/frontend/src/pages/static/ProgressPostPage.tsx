@@ -5,6 +5,7 @@ import { useLoaderData } from "react-router";
 import Footer from "../../components/Footer";
 import MarkdownWrapper from "../../components/MarkdownWrapper";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
+import { socialPreviewMeta } from "../../lib/socialPreviewMeta";
 
 export async function loader({ params }: { params: { slug: string } }) {
   const { slug } = params;
@@ -34,7 +35,7 @@ export async function loader({ params }: { params: { slug: string } }) {
 }
 
 export function meta({ data }: { data: Awaited<ReturnType<typeof loader>> }) {
-  return [{ title: data.frontmatter.title ?? "Alliance" }];
+  return socialPreviewMeta({ title: data.frontmatter.title ?? "Alliance" });
 }
 
 const ProgressPostPage: React.FC = () => {

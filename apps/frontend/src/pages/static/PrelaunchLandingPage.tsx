@@ -13,6 +13,7 @@ import Footer from "../../components/Footer";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
+import { socialPreviewMeta } from "../../lib/socialPreviewMeta";
 import {
   LANDING_PAGE_STACK,
   LANDING_QUOTES_COL,
@@ -21,6 +22,17 @@ import {
   SECTION_TITLE_CLASS,
   SUBTITLE_CLASS,
 } from "./prelaunchLayout";
+
+export function meta() {
+  return socialPreviewMeta({
+    title:
+      "The Alliance — A global group of people cooperating to improve the world",
+    description:
+      "A global group of people cooperating to improve the world. Members spend 15 minutes a week completing thoughtfully designed actions for measurable impact.",
+    image: "/og-home.png",
+    url: "/",
+  });
+}
 
 const MEMBER_QUOTES = [
   {

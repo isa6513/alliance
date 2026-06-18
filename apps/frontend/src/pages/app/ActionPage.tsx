@@ -29,6 +29,7 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { useAuth } from "../../lib/AuthContext";
 import { useNavbarOptions } from "../../lib/NavbarOptionsContext";
 import { isNonmemberOnPublicActionReferral } from "../../lib/publicActionReferral";
+import { socialPreviewMeta } from "../../lib/socialPreviewMeta";
 import { useCIDFromParams } from "../../lib/utils";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
 
@@ -73,15 +74,11 @@ export function meta({ data }: { data: Awaited<ReturnType<typeof loader>> }) {
       : `${action.name} - Alliance`
     : "Alliance";
 
-  return [
-    { title },
-    { property: "og:title", content: title },
-    ...(action?.shortDescription
-      ? [{ property: "og:description", content: action.shortDescription }]
-      : []),
-    ...(action?.image ? [{ property: "og:image", content: action.image }] : []),
-    { property: "og:type", content: "website" },
-  ];
+  return socialPreviewMeta({
+    title,
+    description: action?.shortDescription,
+    image: action?.image,
+  });
 }
 
 export default function ActionPage() {
