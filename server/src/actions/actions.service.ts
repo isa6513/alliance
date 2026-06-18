@@ -173,6 +173,26 @@ type SuspendPlanContext = {
   allExpectedUsers: number[];
 };
 
+/** Inline preview size; full member lists page through dedicated endpoints. */
+const GLOBAL_FEED_FACEPILE_LIMIT = 8;
+
+/** Shared rolling window for feed and member-list endpoints. */
+const GLOBAL_FEED_WINDOW_DAYS = 8;
+
+/** Page ordered, deduped members after `afterId`; unknown cursors return empty. */
+function sliceMembersAfterId(
+  ordered: ProfileDto[],
+  limit: number,
+  afterId?: number,
+): ProfileDto[] {
+  let start = 0;
+  if (afterId !== undefined) {
+    const idx = ordered.findIndex((u) => u.id === afterId);
+    start = idx === -1 ? ordered.length : idx + 1;
+  }
+  return ordered.slice(start, start + limit);
+}
+
 @Injectable()
 export class ActionsService {
   constructor(
@@ -3618,19 +3638,12 @@ export class ActionsService {
     return results.sort((a, b) => b.inviteCount - a.inviteCount);
   }
 
-  /**
-   * Get a unified global feed that includes:
-   * - Activity groups (e.g., "10 people completed [action]") - combined across all time
-   * - Action updates
-   * - New member joins
-   * - Forum comments grouped by post
-   */
+  /** Unified feed of recent activity groups, action updates, joins, and comments. */
   async getGlobalFeed(limit: number = 15): Promise<GlobalFeedItemDto[]> {
     const feedItems: GlobalFeedItemDto[] = [];
     const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
+    const oneWeekAgo = this.globalFeedWindowStart();
 
-    // 1. Fetch recent activities (last week) and group by action + type (no day bucketing)
     const recentActivities = (await this.actionActivityRepository
       .createQueryBuilder('activity')
       .leftJoinAndSelect('activity.user', 'user')
@@ -3662,7 +3675,7 @@ export class ActionsService {
       type: GlobalFeedActivityType;
     })[];
 
-    // Group activities by action + type only (combine across all days)
+    // Activity groups are action + type, not day buckets.
     const activityGroups = new Map<
       string,
       {
@@ -3675,7 +3688,6 @@ export class ActionsService {
     >();
 
     for (const activity of recentActivities) {
-      // Key by action + type only (no date bucketing)
       const key = `${activity.actionId}-${activity.type}`;
 
       if (!activityGroups.has(key)) {
@@ -3694,7 +3706,6 @@ export class ActionsService {
       }
     }
 
-    // Convert activity groups to feed items
     for (const group of activityGroups.values()) {
       const uniqueUsers = new Map<number, ProfileDto>();
       for (const activity of group.activities) {
@@ -3702,10 +3713,10 @@ export class ActionsService {
           uniqueUsers.set(activity.user.id, new ProfileDto(activity.user));
         }
       }
-      const users = Array.from(uniqueUsers.values()).slice(0, 8);
+      const users = Array.from(uniqueUsers.values());
 
       const activityGroup: GlobalFeedActivityGroupDto = {
-        users,
+        users: users.slice(0, GLOBAL_FEED_FACEPILE_LIMIT),
         actionId: group.actionId,
         actionName: group.actionName,
         activityType: group.type,
@@ -3731,7 +3742,6 @@ export class ActionsService {
     });
 
     for (const update of actionUpdates) {
-      // Only show if visibleAt has passed
       if (update.visibleAt <= now) {
         const actionUpdateDto: GlobalFeedActionUpdateDto = {
           id: update.id,
@@ -3752,64 +3762,24 @@ export class ActionsService {
       }
     }
 
-    const signedEvents = (
-      await this.contractEventRepository.find({
-        where: {
-          type: ContractEventType.SIGNED,
-          date: MoreThan(oneWeekAgo),
-        },
-        relations: { user: { contractEvents: true } },
-        order: { date: 'DESC' },
-      })
-    ).filter((event) => {
-      const eventIndex = event.user
-        .contractEvents!.sort((a, b) => a.date.getTime() - b.date.getTime())
-        .findIndex((e) => e.id === event.id);
-      if (eventIndex === -1) {
-        // should never occur
-        return false;
-      }
+    const { users: newMemberUsers, latestDate: latestMemberDate } =
+      await this.computeRecentNewMembers(oneWeekAgo);
 
-      return (
-        eventIndex === 0 ||
-        event.user.contractEvents![eventIndex - 1].type ===
-          ContractEventType.SUSPENDED
+    if (newMemberUsers.length > 0 && latestMemberDate) {
+      const newMembers: GlobalFeedNewMembersDto = {
+        users: newMemberUsers.slice(0, GLOBAL_FEED_FACEPILE_LIMIT),
+        count: newMemberUsers.length,
+      };
+
+      feedItems.push(
+        new GlobalFeedItemDto({
+          type: GlobalFeedItemType.NewMembers,
+          date: latestMemberDate,
+          newMembers,
+        }),
       );
-    });
-
-    // Combine all new members into one feed item
-    if (signedEvents.length > 0) {
-      const uniqueNewMembers = new Map<number, ProfileDto>();
-      let latestMemberDate: Date | null = null;
-
-      for (const event of signedEvents) {
-        const user = event.user;
-        if (!user?.hasActiveContract) continue;
-        if (!uniqueNewMembers.has(user.id)) {
-          uniqueNewMembers.set(user.id, new ProfileDto(user));
-        }
-        if (!latestMemberDate || event.date > latestMemberDate) {
-          latestMemberDate = event.date;
-        }
-      }
-
-      if (uniqueNewMembers.size > 0 && latestMemberDate) {
-        const newMembers: GlobalFeedNewMembersDto = {
-          users: Array.from(uniqueNewMembers.values()).slice(0, 20),
-          count: uniqueNewMembers.size,
-        };
-
-        feedItems.push(
-          new GlobalFeedItemDto({
-            type: GlobalFeedItemType.NewMembers,
-            date: latestMemberDate,
-            newMembers,
-          }),
-        );
-      }
     }
 
-    // 4. Fetch recent forum comments grouped by post
     const recentComments = await this.commentRepository
       .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.author', 'author')
@@ -3835,7 +3805,6 @@ export class ActionsService {
       .orderBy('comment.createdAt', 'DESC')
       .getMany();
 
-    // Group comments by post
     const commentGroups = new Map<
       number,
       {
@@ -3867,7 +3836,6 @@ export class ActionsService {
       }
     }
 
-    // Fetch post titles for the comment groups
     const postIds = Array.from(commentGroups.keys());
     if (postIds.length > 0) {
       const posts = await this.postRepository.find({
@@ -3880,14 +3848,15 @@ export class ActionsService {
         postTitleMap.set(post.id, post.title);
       }
 
-      // Convert comment groups to feed items
       for (const group of commentGroups.values()) {
         const postTitle = postTitleMap.get(group.postId);
-        if (!postTitle) continue; // Skip if post was deleted
+        if (!postTitle) continue;
 
         const usersArray = Array.from(group.users.values());
         const forumComments: GlobalFeedForumCommentsDto = {
-          users: usersArray.slice(0, 8).map((u) => u.profile),
+          users: usersArray
+            .slice(0, GLOBAL_FEED_FACEPILE_LIMIT)
+            .map((u) => u.profile),
           postId: group.postId,
           postTitle,
           count: group.users.size,
@@ -3908,6 +3877,161 @@ export class ActionsService {
     feedItems.sort((a, b) => b.date.getTime() - a.date.getTime());
 
     return feedItems.slice(0, limit);
+  }
+
+  private globalFeedWindowStart(): Date {
+    return new Date(Date.now() - GLOBAL_FEED_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  }
+
+  /**
+   * Recent active-contract members whose SIGNED event is first or follows
+   * suspension, newest first and deduped.
+   */
+  private async computeRecentNewMembers(
+    oneWeekAgo: Date,
+  ): Promise<{ users: ProfileDto[]; latestDate: Date | null }> {
+    const signedEvents = (
+      await this.contractEventRepository.find({
+        where: {
+          type: ContractEventType.SIGNED,
+          date: MoreThan(oneWeekAgo),
+        },
+        relations: { user: { contractEvents: true } },
+        order: { date: 'DESC', id: 'DESC' },
+      })
+    ).filter((event) => {
+      const eventIndex = event.user
+        .contractEvents!.sort((a, b) => a.date.getTime() - b.date.getTime())
+        .findIndex((e) => e.id === event.id);
+      if (eventIndex === -1) {
+        return false;
+      }
+
+      return (
+        eventIndex === 0 ||
+        event.user.contractEvents![eventIndex - 1].type ===
+          ContractEventType.SUSPENDED
+      );
+    });
+
+    const uniqueNewMembers = new Map<number, ProfileDto>();
+    let latestDate: Date | null = null;
+
+    for (const event of signedEvents) {
+      const user = event.user;
+      if (!user?.hasActiveContract) continue;
+      if (!uniqueNewMembers.has(user.id)) {
+        uniqueNewMembers.set(user.id, new ProfileDto(user));
+      }
+      if (!latestDate || event.date > latestDate) {
+        latestDate = event.date;
+      }
+    }
+
+    return { users: Array.from(uniqueNewMembers.values()), latestDate };
+  }
+
+  /** Paged members matching an activity-group feed item's count. */
+  async getActivityGroupMembers(
+    actionId: number,
+    activityType: GlobalFeedActivityType,
+    limit: number,
+    afterId?: number,
+  ): Promise<ProfileDto[]> {
+    const oneWeekAgo = this.globalFeedWindowStart();
+
+    const activities = await this.actionActivityRepository
+      .createQueryBuilder('activity')
+      .innerJoin('activity.action', 'action')
+      .leftJoinAndSelect('activity.user', 'user')
+      .select([
+        'activity.id',
+        'activity.createdAt',
+        'user.id',
+        'user.name',
+        'user.profilePicture',
+        'user.anonymous',
+        'user.admin',
+        'user.staff',
+        'user.profileDescription',
+      ])
+      .loadRelationIdAndMap('user.leaderOfIds', 'user.leaderOf')
+      .where('activity.actionId = :actionId', { actionId })
+      .andWhere('activity.type = :activityType', { activityType })
+      .andWhere('action.onboarding = false')
+      .andWhere('activity.createdAt > :oneWeekAgo', { oneWeekAgo })
+      .orderBy('activity.createdAt', 'DESC')
+      .addOrderBy('activity.id', 'DESC')
+      .getMany();
+
+    const uniqueUsers = new Map<number, ProfileDto>();
+    for (const activity of activities) {
+      if (activity.user && !uniqueUsers.has(activity.user.id)) {
+        uniqueUsers.set(activity.user.id, new ProfileDto(activity.user));
+      }
+    }
+
+    return sliceMembersAfterId(
+      Array.from(uniqueUsers.values()),
+      limit,
+      afterId,
+    );
+  }
+
+  /** Paged members matching the new-members feed item's count. */
+  async getNewMembers(limit: number, afterId?: number): Promise<ProfileDto[]> {
+    const oneWeekAgo = this.globalFeedWindowStart();
+    const { users } = await this.computeRecentNewMembers(oneWeekAgo);
+    return sliceMembersAfterId(users, limit, afterId);
+  }
+
+  /** Paged members matching a forum-comments feed item's count. */
+  async getForumCommentMembers(
+    postId: number,
+    limit: number,
+    afterId?: number,
+    requestingUserId?: number,
+  ): Promise<ProfileDto[]> {
+    const oneWeekAgo = this.globalFeedWindowStart();
+    await this.forumService.findOnePost(postId, requestingUserId);
+
+    const comments = await this.commentRepository
+      .createQueryBuilder('comment')
+      .leftJoinAndSelect('comment.author', 'author')
+      .select([
+        'comment.id',
+        'comment.createdAt',
+        'author.id',
+        'author.name',
+        'author.profilePicture',
+        'author.anonymous',
+        'author.admin',
+        'author.staff',
+        'author.profileDescription',
+      ])
+      .loadRelationIdAndMap('author.leaderOfIds', 'author.leaderOf')
+      .where('comment.parentObjectType = :postType', {
+        postType: CommentParentObject.Post,
+      })
+      .andWhere('comment.parentObjectId = :postId', { postId })
+      .andWhere('comment.createdAt > :oneWeekAgo', { oneWeekAgo })
+      .andWhere('comment.deleted = false')
+      .orderBy('comment.createdAt', 'DESC')
+      .addOrderBy('comment.id', 'DESC')
+      .getMany();
+
+    const uniqueUsers = new Map<number, ProfileDto>();
+    for (const comment of comments) {
+      if (comment.author && !uniqueUsers.has(comment.author.id)) {
+        uniqueUsers.set(comment.author.id, new ProfileDto(comment.author));
+      }
+    }
+
+    return sliceMembersAfterId(
+      Array.from(uniqueUsers.values()),
+      limit,
+      afterId,
+    );
   }
 
   async getTimelineFeed(limit: number = 15): Promise<TimelineFeedItemDto[]> {

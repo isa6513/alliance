@@ -85,7 +85,7 @@ const ActionActivityFeedItem = ({
           );
         }}
       >
-        <div className="flex flex-row gap-x-2 items-center flex-1 rounded">
+        <div className="flex flex-row gap-x-2 items-center flex-1 hover:bg-zinc-50 hover:p-2 hover:-m-2 rounded">
           <AvatarProfile
             pfp={activity.user.profilePicture}
             size="medium"

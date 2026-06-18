@@ -51,7 +51,8 @@ const ForumCommentCard = ({
   return (
     <div className="flex flex-col bg-white">
       <div
-        className="block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white cursor-pointer"
+        // Child controls do not open post; keep card hover off there.
+        className="block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white hover:bg-grey-1 [&:has(a:hover)]:bg-white [&:has(button:hover)]:bg-white cursor-pointer"
         onClick={handleCardClick}
       >
         <div className="flex flex-wrap items-center">

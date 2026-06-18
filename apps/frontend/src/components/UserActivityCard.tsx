@@ -27,14 +27,6 @@ const UserActivityCard = ({ activity, handleLike }: UserActivityCardProps) => {
   const verb = actionActivityTransitiveVerb[activity.type];
   const commentable = actionActivityCommentable[activity.type];
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      navigate(href("/actions/:id", { id: activity.actionId.toString() }));
-    },
-    [activity.actionId, navigate],
-  );
-
   const handleActivityClick = useCallback(() => {
     if (showCommentForm) return;
     navigate(
@@ -54,7 +46,9 @@ const UserActivityCard = ({ activity, handleLike }: UserActivityCardProps) => {
       <div
         className={cn(
           "block p-4 -m-4 text-[11pt] transition-colors duration-100 flex-1 gap-y-2 bg-white",
-          !showCommentForm && "cursor-pointer",
+          // Child controls do not open activity; keep card hover off there.
+          !showCommentForm &&
+            "hover:bg-grey-1 [&:has(a:hover)]:bg-white [&:has(button:hover)]:bg-white cursor-pointer",
         )}
         onClick={handleActivityClick}
       >
@@ -74,12 +68,13 @@ const UserActivityCard = ({ activity, handleLike }: UserActivityCardProps) => {
           <span className="whitespace-pre text-zinc-900">{` ${verb} `}</span>
 
           {activity.actionName ? (
-            <span
-              className="text-green cursor-pointer hover:underline font-medium"
-              onClick={handleClick}
+            <Link
+              to={href("/actions/:id", { id: activity.actionId.toString() })}
+              className="text-green hover:underline font-medium"
+              onClick={(e) => e.stopPropagation()}
             >
               {activity.actionName}
-            </span>
+            </Link>
           ) : (
             <span>this action</span>
           )}

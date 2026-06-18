@@ -7337,6 +7337,84 @@ export type ActionsGetGlobalFeedResponses = {
 
 export type ActionsGetGlobalFeedResponse = ActionsGetGlobalFeedResponses[keyof ActionsGetGlobalFeedResponses];
 
+export type ActionsGetGlobalFeedActivityMembersData = {
+    body?: never;
+    path?: never;
+    query: {
+        actionId: number;
+        activityType: string;
+        limit?: number;
+        afterId?: number;
+    };
+    url: '/actions/globalFeed/activityGroupMembers';
+};
+
+export type ActionsGetGlobalFeedActivityMembersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetGlobalFeedActivityMembersError = ActionsGetGlobalFeedActivityMembersErrors[keyof ActionsGetGlobalFeedActivityMembersErrors];
+
+export type ActionsGetGlobalFeedActivityMembersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type ActionsGetGlobalFeedActivityMembersResponse = ActionsGetGlobalFeedActivityMembersResponses[keyof ActionsGetGlobalFeedActivityMembersResponses];
+
+export type ActionsGetGlobalFeedNewMembersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        limit?: number;
+        afterId?: number;
+    };
+    url: '/actions/globalFeed/newMembers';
+};
+
+export type ActionsGetGlobalFeedNewMembersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetGlobalFeedNewMembersError = ActionsGetGlobalFeedNewMembersErrors[keyof ActionsGetGlobalFeedNewMembersErrors];
+
+export type ActionsGetGlobalFeedNewMembersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type ActionsGetGlobalFeedNewMembersResponse = ActionsGetGlobalFeedNewMembersResponses[keyof ActionsGetGlobalFeedNewMembersResponses];
+
+export type ActionsGetGlobalFeedCommentMembersData = {
+    body?: never;
+    path?: never;
+    query: {
+        postId: number;
+        limit?: number;
+        afterId?: number;
+    };
+    url: '/actions/globalFeed/forumCommentMembers';
+};
+
+export type ActionsGetGlobalFeedCommentMembersErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetGlobalFeedCommentMembersError = ActionsGetGlobalFeedCommentMembersErrors[keyof ActionsGetGlobalFeedCommentMembersErrors];
+
+export type ActionsGetGlobalFeedCommentMembersResponses = {
+    200: Array<ProfileDto>;
+};
+
+export type ActionsGetGlobalFeedCommentMembersResponse = ActionsGetGlobalFeedCommentMembersResponses[keyof ActionsGetGlobalFeedCommentMembersResponses];
+
 export type ActionsGetActivityData = {
     body?: never;
     path: {

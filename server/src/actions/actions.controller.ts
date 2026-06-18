@@ -3,6 +3,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   NotFoundException,
@@ -66,6 +67,8 @@ import {
   EvaluateCohortExpressionDto,
   EvaluateCohortExpressionResponseDto,
   ExportActionDto,
+  GlobalFeedActivityType,
+  GlobalFeedActivityTypes,
   GlobalFeedItemDto,
   HomeFeedItemDto,
   OptOutActionDto,
@@ -103,6 +106,20 @@ import {
 import { ShareUrlDto, ShareUrlStatsDto } from './dto/share-url.dto';
 import { UserCompletedActionsCountDto } from './dto/user-completed-actions-count.dto';
 import { ForumActionCompleterWorker } from './forum-action-completer.worker';
+
+const GLOBAL_FEED_MEMBERS_DEFAULT_LIMIT = 30;
+const GLOBAL_FEED_MEMBERS_MAX_LIMIT = 50;
+
+function capGlobalFeedMembersLimit(limit: number): number {
+  return Math.min(Math.max(limit, 1), GLOBAL_FEED_MEMBERS_MAX_LIMIT);
+}
+
+function parseFeedActivityType(value: string): GlobalFeedActivityType {
+  if ((GlobalFeedActivityTypes as readonly string[]).includes(value)) {
+    return value as GlobalFeedActivityType;
+  }
+  throw new BadRequestException(`Invalid activityType: ${value}`);
+}
 
 @Controller('actions')
 export class ActionsController {
@@ -344,6 +361,83 @@ export class ActionsController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ): Promise<GlobalFeedItemDto[]> {
     return this.actionsService.getGlobalFeed(limit ?? 15);
+  }
+
+  @Get('globalFeed/activityGroupMembers')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ProfileDto] })
+  @ApiOperation({
+    summary: 'Paginated members behind a global-feed activity-group item',
+  })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'afterId', required: false, type: Number })
+  async getGlobalFeedActivityMembers(
+    @Query('actionId', ParseIntPipe) actionId: number,
+    @Query('activityType') activityType: string,
+    @Query(
+      'limit',
+      new DefaultValuePipe(GLOBAL_FEED_MEMBERS_DEFAULT_LIMIT),
+      ParseIntPipe,
+    )
+    limit: number,
+    @Query('afterId', new ParseIntPipe({ optional: true })) afterId?: number,
+  ): Promise<ProfileDto[]> {
+    return this.actionsService.getActivityGroupMembers(
+      actionId,
+      parseFeedActivityType(activityType),
+      capGlobalFeedMembersLimit(limit),
+      afterId,
+    );
+  }
+
+  @Get('globalFeed/newMembers')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ProfileDto] })
+  @ApiOperation({
+    summary: 'Paginated members behind the global-feed new-members item',
+  })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'afterId', required: false, type: Number })
+  async getGlobalFeedNewMembers(
+    @Query(
+      'limit',
+      new DefaultValuePipe(GLOBAL_FEED_MEMBERS_DEFAULT_LIMIT),
+      ParseIntPipe,
+    )
+    limit: number,
+    @Query('afterId', new ParseIntPipe({ optional: true })) afterId?: number,
+  ): Promise<ProfileDto[]> {
+    return this.actionsService.getNewMembers(
+      capGlobalFeedMembersLimit(limit),
+      afterId,
+    );
+  }
+
+  @Get('globalFeed/forumCommentMembers')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: [ProfileDto] })
+  @ApiOperation({
+    summary: 'Paginated members behind a global-feed forum-comments item',
+  })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'afterId', required: false, type: Number })
+  async getGlobalFeedCommentMembers(
+    @Request() req: JwtRequest,
+    @Query('postId', ParseIntPipe) postId: number,
+    @Query(
+      'limit',
+      new DefaultValuePipe(GLOBAL_FEED_MEMBERS_DEFAULT_LIMIT),
+      ParseIntPipe,
+    )
+    limit: number,
+    @Query('afterId', new ParseIntPipe({ optional: true })) afterId?: number,
+  ): Promise<ProfileDto[]> {
+    return this.actionsService.getForumCommentMembers(
+      postId,
+      capGlobalFeedMembersLimit(limit),
+      afterId,
+      req.user.sub,
+    );
   }
 
   @Get('activities/:id')
