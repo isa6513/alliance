@@ -6,10 +6,10 @@ type Params = Parameters<typeof computeShouldParticipateInAction>[0];
 function makeAction(
   opts: {
     hasMemberActionEvent?: boolean;
-    everyoneShouldComplete?: boolean;
+    onboarding?: boolean;
   } = {},
 ): Params['action'] {
-  const { hasMemberActionEvent = true, everyoneShouldComplete = false } = opts;
+  const { hasMemberActionEvent = true, onboarding = false } = opts;
   return {
     events: hasMemberActionEvent
       ? [{ newStatus: ActionStatus.MemberAction, date: new Date('2020-01-01') }]
@@ -19,7 +19,7 @@ function makeAction(
             date: new Date('2020-01-01'),
           },
         ],
-    everyoneShouldComplete,
+    onboarding,
     memberActionPhase: {
       event: { date: new Date('2020-01-01') },
       deadline: new Date('2020-02-01'),
@@ -80,11 +80,11 @@ describe('computeShouldParticipateInAction', () => {
       ).toBe(false);
     });
 
-    it('participates without an active contract when everyone should complete', () => {
+    it('participates without an active contract for an onboarding action', () => {
       expect(
         computeShouldParticipateInAction(
           input({
-            action: makeAction({ everyoneShouldComplete: true }),
+            action: makeAction({ onboarding: true }),
             user: makeUser(false),
           }),
         ),

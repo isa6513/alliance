@@ -38,7 +38,7 @@ interface ActionFormProps {
   availableUsers?: UserSelectUser[];
   usersLoading?: boolean;
   activeContractUserIds?: Set<number>;
-  everyoneShouldComplete?: boolean;
+  onboarding?: boolean;
   cohortExpression: CohortExpression | null | undefined;
   onCohortExpressionChange: (expr: CohortExpression | null) => void;
   authorIds: number[];
@@ -82,7 +82,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
   availableUsers = [],
   usersLoading = false,
   activeContractUserIds,
-  everyoneShouldComplete = false,
+  onboarding = false,
   cohortExpression,
   onCohortExpressionChange,
   authorIds,
@@ -262,13 +262,6 @@ const ActionForm: React.FC<ActionFormProps> = ({
         type: "checkbox",
         section: "settings",
         gridCol: true,
-      },
-      {
-        name: "everyoneShouldComplete",
-        label: "Everyone Should Complete",
-        type: "checkbox",
-        section: "settings",
-        helpText: "Override contract signing requirements (for onboarding)",
       },
       {
         name: "shouldCompleteAfterDeadline",
@@ -631,7 +624,7 @@ const ActionForm: React.FC<ActionFormProps> = ({
           availableUsers={availableUsers}
           usersLoading={usersLoading}
           activeContractUserIds={activeContractUserIds}
-          everyoneShouldComplete={everyoneShouldComplete}
+          onboarding={onboarding}
         />
       </FormSection>
 

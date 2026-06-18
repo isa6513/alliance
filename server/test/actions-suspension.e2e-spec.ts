@@ -1,4 +1,10 @@
+import request from 'supertest';
+import type { Repository } from 'typeorm';
 import { ActionsService } from '../src/actions/actions.service';
+import {
+  ActionActivity,
+  ActionActivityType,
+} from '../src/actions/entities/action-activity.entity';
 import {
   ActionEvent,
   ActionStatus,
@@ -9,16 +15,10 @@ import {
   ActionTaskType,
   VisibilityMode,
 } from '../src/actions/entities/action.entity';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from '../src/actions/entities/action-activity.entity';
-import { ContractEventType } from '../src/user/entities/contract-event.entity';
 import { ContractService } from '../src/contract/contract.service';
+import { ContractEventType } from '../src/user/entities/contract-event.entity';
 import { User } from '../src/user/entities/user.entity';
 import { UserService } from '../src/user/user.service';
-import type { Repository } from 'typeorm';
-import request from 'supertest';
 import { createTestApp, TestContext } from './e2e-test-utils';
 
 const addDays = (date: Date, days: number) =>
@@ -58,7 +58,6 @@ describe('findUsersToSuspend (e2e)', () => {
         taskContents: 'Tasks',
         shortDescription: 'Short description',
         suite,
-        everyoneShouldComplete: false,
         visibilityMode: VisibilityMode.Public,
         preventCompletion: false,
         type: ActionTaskType.Activity,
@@ -210,7 +209,6 @@ describe('findUsersToSuspend (e2e)', () => {
         taskContents: 'Tasks',
         shortDescription: 'Short description',
         suite: inProgressSuite,
-        everyoneShouldComplete: false,
         visibilityMode: VisibilityMode.Public,
         priority: 0,
         preventCompletion: false,
@@ -289,7 +287,6 @@ describe('findUsersToSuspend (e2e)', () => {
         taskContents: 'Tasks',
         shortDescription: 'Short description',
         suite: optionalSuite,
-        everyoneShouldComplete: false,
         visibilityMode: VisibilityMode.Public,
         preventCompletion: false,
         type: ActionTaskType.Activity,

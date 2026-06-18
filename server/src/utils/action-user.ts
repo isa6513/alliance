@@ -36,10 +36,7 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
  * cohort evaluation runs. Not yet unified.
  */
 export function computeShouldParticipateInAction(params: {
-  action: Pick<
-    Action,
-    'events' | 'memberActionPhase' | 'everyoneShouldComplete'
-  >;
+  action: Pick<Action, 'events' | 'memberActionPhase' | 'onboarding'>;
   user: Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'> | null;
   inCohort: boolean;
   dismissed: boolean;
@@ -55,7 +52,7 @@ export function computeShouldParticipateInAction(params: {
     hasMemberActionEvent &&
     !dismissed &&
     inCohort &&
-    (action.everyoneShouldComplete ||
+    (action.onboarding ||
       computeIsContractActiveDuringEntireMemberAction({ action, user }))
   );
 }
@@ -104,7 +101,7 @@ export function computeIsTaggedOrInManualCohortAction(params: {
     useManualCohort: false,
     manualCohortUserIdSet: null,
     participatingTagIdSet: new Set<string>(),
-    everyoneShouldComplete: action.everyoneShouldComplete,
+    onboarding: action.onboarding,
     memberActionEventDate: action.memberActionPhase?.event?.date,
     memberActionEventDeadline: action.memberActionPhase?.deadline,
     includeSuspended,
@@ -116,7 +113,7 @@ export function computeIsTaggedOrInManualCohort(params: {
   useManualCohort: boolean;
   manualCohortUserIdSet: Set<number> | null;
   participatingTagIdSet: Set<string>;
-  everyoneShouldComplete: boolean;
+  onboarding: boolean;
   memberActionEventDate: Date | undefined | null;
   memberActionEventDeadline: Date | undefined | null;
   includeSuspended: boolean;
@@ -126,7 +123,7 @@ export function computeIsTaggedOrInManualCohort(params: {
     useManualCohort,
     manualCohortUserIdSet,
     participatingTagIdSet,
-    everyoneShouldComplete,
+    onboarding,
     memberActionEventDate,
     memberActionEventDeadline,
     includeSuspended,
@@ -139,7 +136,7 @@ export function computeIsTaggedOrInManualCohort(params: {
   return (
     user.tags.some((tag) => participatingTagIdSet.has(tag.id)) &&
     (includeSuspended ||
-      everyoneShouldComplete ||
+      onboarding ||
       user.hasActiveContractInFullRange({
         startDate: memberActionEventDate,
         endDate: memberActionEventDeadline,
@@ -149,13 +146,11 @@ export function computeIsTaggedOrInManualCohort(params: {
 
 /**
  * Determines whether a user should participate in a given action event based on
- * cohort membership, dismissal status, onboarding rules, contract dates, and the
- * `everyoneShouldComplete` flag.
+ * cohort membership, dismissal status, onboarding rules, and contract dates.
  */
 export function computeShouldParticipate(params: {
   eventDate: Date;
   deadlineDate: Date | null;
-  everyoneShouldComplete: boolean;
   cohortMemberIds: Set<number> | null;
   user: User;
   userDismissed: boolean;
@@ -166,7 +161,6 @@ export function computeShouldParticipate(params: {
   const {
     eventDate,
     deadlineDate,
-    everyoneShouldComplete,
     cohortMemberIds,
     user,
     userDismissed,
@@ -184,7 +178,7 @@ export function computeShouldParticipate(params: {
   }
 
   if (
-    !everyoneShouldComplete &&
+    !onboarding &&
     deadlineDate &&
     !user.hasActiveContractInFullRange({
       startDate: eventDate,
@@ -207,5 +201,5 @@ export function computeShouldParticipate(params: {
   if (includeSuspended) {
     return true;
   }
-  return user.hasActiveContractAt(eventDate) || everyoneShouldComplete;
+  return user.hasActiveContractAt(eventDate) || onboarding;
 }

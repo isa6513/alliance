@@ -189,15 +189,6 @@ export class Action {
   @Column({ default: false })
   @ApiProperty({
     description:
-      'Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)',
-    default: false,
-  })
-  @Allow()
-  everyoneShouldComplete: boolean;
-
-  @Column({ default: false })
-  @ApiProperty({
-    description:
       'Whether the action is an onboarding action (hide for existing members)',
     default: false,
   })

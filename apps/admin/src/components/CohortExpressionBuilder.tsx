@@ -47,7 +47,7 @@ interface CohortExpressionBuilderProps {
   availableUsers: UserSelectUser[];
   usersLoading?: boolean;
   activeContractUserIds?: Set<number>;
-  everyoneShouldComplete?: boolean;
+  onboarding?: boolean;
   /** @internal used to thread selected expression to nested editors */
   _selectedExpr?: CohortExpression | null;
 }
@@ -511,20 +511,15 @@ const BooleanOperatorEditor: React.FC<{
 const CohortExpressionBuilder: React.FC<CohortExpressionBuilderProps> = (
   props,
 ) => {
-  const {
-    value,
-    onChange,
-    availableUsers,
-    activeContractUserIds,
-    everyoneShouldComplete,
-  } = props;
+  const { value, onChange, availableUsers, activeContractUserIds, onboarding } =
+    props;
 
   const { error: pushError } = useToast();
 
   const visualizationUsers = useMemo(() => {
-    if (everyoneShouldComplete || !activeContractUserIds) return availableUsers;
+    if (onboarding || !activeContractUserIds) return availableUsers;
     return availableUsers.filter((u) => activeContractUserIds.has(u.id));
-  }, [availableUsers, activeContractUserIds, everyoneShouldComplete]);
+  }, [availableUsers, activeContractUserIds, onboarding]);
   const [selectedSubExpr, setSelectedSubExpr] =
     useState<CohortExpression | null>(null);
   const [compareEnabled, setCompareEnabled] = useState(false);

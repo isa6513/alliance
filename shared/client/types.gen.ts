@@ -418,10 +418,6 @@ export type Action = {
      */
     usersCompleted: number;
     /**
-     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
-     */
-    everyoneShouldComplete: boolean;
-    /**
      * Whether the action is an onboarding action (hide for existing members)
      */
     onboarding: boolean;
@@ -1638,10 +1634,6 @@ export type ActionDto = {
     visibilityMode: VisibilityMode;
     usersJoined: number;
     /**
-     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
-     */
-    everyoneShouldComplete: boolean;
-    /**
      * Whether the action is an onboarding action (hide for existing members)
      */
     onboarding: boolean;
@@ -1694,6 +1686,11 @@ export type ActionDto = {
     userRelation?: UserActionRelation;
     reqAuthenticated?: boolean;
     authors?: Array<ProfileDto>;
+    /**
+     * Deprecated alias for `onboarding`.
+     * @deprecated
+     */
+    everyoneShouldComplete?: boolean;
 };
 
 export type GeneralUpdateDto = {
@@ -2042,10 +2039,6 @@ export type CreateActionDto = {
     isContractSigningAction: boolean;
     visibilityMode: VisibilityMode;
     /**
-     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
-     */
-    everyoneShouldComplete: boolean;
-    /**
      * Whether the action is an onboarding action (hide for existing members)
      */
     onboarding: boolean;
@@ -2087,6 +2080,11 @@ export type CreateActionDto = {
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
     reqAuthenticated?: boolean;
+    /**
+     * Deprecated alias for `onboarding`.
+     * @deprecated
+     */
+    everyoneShouldComplete?: boolean;
     suiteId?: number | null;
     authorIds?: Array<number>;
 };
@@ -2148,10 +2146,6 @@ export type UpdateActionDto = {
     isContractSigningAction?: boolean;
     visibilityMode?: VisibilityMode;
     /**
-     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
-     */
-    everyoneShouldComplete?: boolean;
-    /**
      * Whether the action is an onboarding action (hide for existing members)
      */
     onboarding?: boolean;
@@ -2193,6 +2187,11 @@ export type UpdateActionDto = {
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
     reqAuthenticated?: boolean;
+    /**
+     * Deprecated alias for `onboarding`.
+     * @deprecated
+     */
+    everyoneShouldComplete?: boolean;
     suiteId?: number | null;
     authorIds?: Array<number>;
 };
@@ -2445,10 +2444,6 @@ export type ExportActionDto = {
     isContractSigningAction: boolean;
     visibilityMode: VisibilityMode;
     /**
-     * Override default contract signing requirements for showing in tasks (e.g. for onboarding actions)
-     */
-    everyoneShouldComplete: boolean;
-    /**
      * Whether the action is an onboarding action (hide for existing members)
      */
     onboarding: boolean;
@@ -2501,6 +2496,11 @@ export type ExportActionDto = {
     authors?: Array<User>;
     taskForm?: Form;
     reminderGroups?: Array<ReminderGroup>;
+    /**
+     * Deprecated alias for `onboarding`.
+     * @deprecated
+     */
+    everyoneShouldComplete?: boolean;
 };
 
 export type PasteJsonDto = {

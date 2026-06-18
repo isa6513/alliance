@@ -383,9 +383,7 @@ ORDER BY pp.total_session_duration_seconds DESC
       // - not publicOnly
       // - has a member_action event
       const showInChart =
-        !action.publicOnly &&
-        !!memberActionEvent &&
-        !action.everyoneShouldComplete;
+        !action.publicOnly && !!memberActionEvent && !action.onboarding;
 
       const existingRecord = await this.actionStatsRepository.findOne({
         where: { actionId: action.id },
@@ -941,12 +939,7 @@ ORDER BY pp.total_session_duration_seconds DESC
       memberActionEndEvent: ActionEvent | undefined;
     }[] = [];
     for (const action of actions) {
-      if (
-        action.publicOnly ||
-        action.onboarding ||
-        action.optional ||
-        action.everyoneShouldComplete
-      ) {
+      if (action.publicOnly || action.onboarding || action.optional) {
         continue;
       }
 

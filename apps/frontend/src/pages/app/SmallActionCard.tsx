@@ -2,10 +2,10 @@ import {
   ActionActivityDto,
   ActionDto,
 } from "@alliance/shared/client/types.gen";
-import Card from "@alliance/sharedweb/ui/Card";
 import { CardStyle } from "@alliance/shared/styles/card";
-import React, { useCallback } from "react";
 import { cn } from "@alliance/shared/styles/util";
+import Card from "@alliance/sharedweb/ui/Card";
+import React, { useCallback } from "react";
 import { href, useNavigate } from "react-router";
 import Tag, { TagStyle } from "../../components/Tag";
 import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
@@ -18,7 +18,7 @@ export interface SmallActionCardProps {
     | "category"
     | "id"
     | "status"
-    | "everyoneShouldComplete"
+    | "onboarding"
     | "userRelation"
     | "usersCompleted"
     | "usersJoined"
@@ -45,7 +45,7 @@ const SmallActionCard: React.FC<SmallActionCardProps> = ({
       e.stopPropagation();
       navigate(href("/actions/:id", { id: action.id.toString() }));
     },
-    [navigate, action.id]
+    [navigate, action.id],
   );
 
   const waitingOnCompletion = action.status === "member_action";

@@ -1,9 +1,9 @@
 import { ActionActivityDto, ActionDto } from "../client";
 
 export function showCompletedBar(
-  action: Pick<ActionDto, "status" | "everyoneShouldComplete">
+  action: Pick<ActionDto, "status" | "onboarding">,
 ) {
-  return action.status === "member_action" && !action.everyoneShouldComplete;
+  return action.status === "member_action" && !action.onboarding;
 }
 
 export interface ActionItemCardPropsShared {
@@ -14,7 +14,7 @@ export interface ActionItemCardPropsShared {
     | "category"
     | "id"
     | "status"
-    | "everyoneShouldComplete"
+    | "onboarding"
     | "usersJoined"
     | "userRelation"
     | "usersCompleted"

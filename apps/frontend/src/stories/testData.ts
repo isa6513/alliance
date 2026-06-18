@@ -39,7 +39,6 @@ export const testActions: ActionDto[] = [
       },
     ],
 
-    everyoneShouldComplete: false,
     archived: false,
     updates: [],
     priority: 0,
@@ -70,7 +69,6 @@ export const testActions: ActionDto[] = [
     usersCompleted: 57,
     events: [],
 
-    everyoneShouldComplete: false,
     archived: false,
     priority: 0,
     preventCompletion: false,

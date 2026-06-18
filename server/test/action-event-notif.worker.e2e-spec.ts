@@ -160,7 +160,6 @@ describe('ActionEventNotifWorker (e2e)', () => {
         body: 'Body copy',
         shortDescription: 'Short description',
         type: ActionTaskType.Activity,
-        everyoneShouldComplete: false,
         suite,
         timeEstimate,
         cohortExpression: {
@@ -1512,7 +1511,6 @@ describe('ActionEventNotifWorker (e2e)', () => {
         body: 'Body copy',
         shortDescription: 'Short description',
         type: ActionTaskType.Activity,
-        everyoneShouldComplete: true,
         cohortExpression,
       }),
     );
@@ -1543,7 +1541,6 @@ describe('ActionEventNotifWorker (e2e)', () => {
         body: 'Body',
         shortDescription: 'Short',
         type: ActionTaskType.Activity,
-        everyoneShouldComplete: true,
       }),
     );
     await recordCompletion(user, prereqAction);

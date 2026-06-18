@@ -228,7 +228,7 @@ export function isCurrentlyCompletedAction(action: ActionDto) {
   return (
     action.shouldParticipate &&
     action.status === "member_action" &&
-    !action.everyoneShouldComplete &&
+    !action.onboarding &&
     action.userRelation === "completed"
   );
 }

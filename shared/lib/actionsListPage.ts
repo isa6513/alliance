@@ -1,6 +1,6 @@
+import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { ActionDto, actionsFindAllLoggedIn } from "../client";
 import { FilterMode } from "./actionUtils";
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
 
 export const useActionsQuery = (options?: {
   refetchInterval?: number | false;
@@ -28,8 +28,7 @@ export const filterActions = (
       return actions.filter((action) => action.status === "office_action");
     case FilterMode.MemberAction:
       return actions.filter(
-        (action) =>
-          action.status === "member_action" && !action.everyoneShouldComplete,
+        (action) => action.status === "member_action" && !action.onboarding,
       );
     case FilterMode.Past:
       return actions.filter(

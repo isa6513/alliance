@@ -231,7 +231,6 @@ export class ActionEventRecipientService {
           computeShouldParticipate({
             eventDate: event.date,
             deadlineDate: deadlineEvent?.date ?? null,
-            everyoneShouldComplete: action.everyoneShouldComplete,
             cohortMemberIds,
             user,
             userDismissed: usersDismissed.has(user.id),
@@ -357,7 +356,6 @@ export class ActionEventRecipientService {
         computeShouldParticipate({
           eventDate: event.date,
           deadlineDate: deadlineEvent?.date ?? null,
-          everyoneShouldComplete: event.action.everyoneShouldComplete,
           cohortMemberIds: participationCohortMemberIds,
           user: idToUser.get(user.id)!,
           userDismissed: usersDismissed.has(user.id),

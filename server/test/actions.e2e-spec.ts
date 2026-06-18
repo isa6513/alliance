@@ -204,7 +204,6 @@ describe('Actions (e2e)', () => {
         visibilityMode: VisibilityMode.Public,
         type: ActionTaskType.Activity,
         isContractSigningAction: false,
-        everyoneShouldComplete: false,
         shouldCompleteAfterDeadline: false,
         isForumParticipationAction: false,
         optional: false,
@@ -400,7 +399,7 @@ describe('Actions (e2e)', () => {
           taskContents: 'Manual cohort task',
           visibilityMode: VisibilityMode.Public,
           preventCompletion: false,
-          everyoneShouldComplete: true,
+          onboarding: true,
           type: ActionTaskType.Activity,
           cohortExpression: {
             type: 'Manual',
@@ -510,7 +509,7 @@ describe('Actions (e2e)', () => {
           taskContents: 'Task',
           visibilityMode: VisibilityMode.Public,
           preventCompletion: false,
-          everyoneShouldComplete: true,
+          onboarding: true,
           type: ActionTaskType.Activity,
           cohortExpression: {
             type: 'CompletedAction',
@@ -638,7 +637,7 @@ describe('Actions (e2e)', () => {
           taskContents: 'Task',
           visibilityMode: VisibilityMode.Public,
           preventCompletion: false,
-          everyoneShouldComplete: true,
+          onboarding: true,
           type: ActionTaskType.Activity,
           cohortExpression: {
             type: 'InProgressAction',
@@ -728,7 +727,7 @@ describe('Actions (e2e)', () => {
           taskContents: 'Task',
           visibilityMode: VisibilityMode.Public,
           preventCompletion: false,
-          everyoneShouldComplete: true,
+          onboarding: true,
           type: ActionTaskType.Activity,
           cohortExpression: {
             type: 'GroupLead',
@@ -850,7 +849,7 @@ describe('Actions (e2e)', () => {
           taskContents: 'Task',
           visibilityMode: VisibilityMode.Public,
           preventCompletion: false,
-          everyoneShouldComplete: true,
+          onboarding: true,
           type: ActionTaskType.Activity,
           cohortExpression: {
             type: 'FormFieldValue',
@@ -968,7 +967,7 @@ describe('Actions (e2e)', () => {
           taskContents: 'Task',
           visibilityMode: VisibilityMode.Public,
           preventCompletion: false,
-          everyoneShouldComplete: true,
+          onboarding: true,
           type: ActionTaskType.Activity,
           cohortExpression: {
             type: 'FormFieldValue',
@@ -1071,7 +1070,7 @@ describe('Actions (e2e)', () => {
           taskContents: 'Task',
           visibilityMode: VisibilityMode.Public,
           preventCompletion: false,
-          everyoneShouldComplete: true,
+          onboarding: true,
           type: ActionTaskType.Activity,
           cohortExpression: {
             op: 'AND',
@@ -1128,14 +1127,12 @@ describe('Actions (e2e)', () => {
       await userRepo.delete(leaderOnlyUser.id);
     });
 
-    it('excludes shouldComplete flag for users without eligible contracts when everyoneShouldComplete is false', async () => {
+    it('excludes shouldComplete flag for users without eligible contracts when not an onboarding action', async () => {
       const { action, event } = await createPublishedAction(
         'Contract Restricted Action',
         {
           status: ActionStatus.MemberAction,
-          actionOverrides: {
-            everyoneShouldComplete: false,
-          },
+          actionOverrides: {},
         },
       );
 
@@ -1238,11 +1235,11 @@ describe('Actions (e2e)', () => {
       await userRepo.delete(eligibleUser.id);
     });
 
-    it('shows actions with everyoneShouldComplete true to users without contracts', async () => {
+    it('shows onboarding actions to users without contracts', async () => {
       const { action } = await createPublishedAction('Onboarding Action', {
         status: ActionStatus.MemberAction,
         actionOverrides: {
-          everyoneShouldComplete: true,
+          onboarding: true,
         },
       });
 
@@ -2387,7 +2384,6 @@ describe('Actions (e2e)', () => {
           preventCompletion: false,
           type: ActionTaskType.Activity,
           onboarding: true,
-          everyoneShouldComplete: true,
           cohortExpression: {
             type: 'Tag',
             tagId: ctx.defaultTag.id,

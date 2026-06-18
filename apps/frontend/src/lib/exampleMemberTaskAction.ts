@@ -28,7 +28,6 @@ export const exampleMemberTaskAction: ActionWithAwayStatus = {
   usersCompleted: 98,
   priority: 0,
   preventCompletion: false,
-  everyoneShouldComplete: false,
   shouldCompleteAfterDeadline: false,
   archived: false,
   createdAt: new Date().toISOString(),

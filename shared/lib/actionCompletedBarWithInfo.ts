@@ -4,7 +4,7 @@ export interface ActionCompletedBarWithInfoPropsShared {
   action: Pick<
     ActionDto,
     | "status"
-    | "everyoneShouldComplete"
+    | "onboarding"
     | "usersCompleted"
     | "usersJoined"
     | "optional"
@@ -29,7 +29,7 @@ export function getCompletedPercentage(
 
   const safeThreshold = Math.max(threshold, value);
 
-  const noDenominator = action.optional || action.everyoneShouldComplete;
+  const noDenominator = action.optional || action.onboarding;
 
   const labelString = noDenominator
     ? `${value} member${value === 1 ? "" : "s"} completed`

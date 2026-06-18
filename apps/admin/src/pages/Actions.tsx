@@ -159,10 +159,7 @@ const ActionsList: React.FC = () => {
       <title>Admin panel</title>
       <ActionTimeline
         actions={actions.filter(
-          (a) =>
-            !a.archived &&
-            !a.everyoneShouldComplete &&
-            a.status !== "completed",
+          (a) => !a.archived && !a.onboarding && a.status !== "completed",
         )}
         className="h-full"
       />

@@ -290,7 +290,6 @@ const ActionDashboard: React.FC = () => {
     preventCompletion: false,
     taskFormId: undefined,
     isForumParticipationAction: false,
-    everyoneShouldComplete: false,
     shouldCompleteAfterDeadline: false,
     publicOnly: false,
     suiteId: undefined,
@@ -317,7 +316,6 @@ const ActionDashboard: React.FC = () => {
         shouldCompleteAfterDeadline: false,
         publicOnly: false,
         isForumParticipationAction: false,
-        everyoneShouldComplete: false,
         isContractSigningAction: false,
         suiteId: searchParams.get("suiteId")
           ? parseInt(searchParams.get("suiteId")!)
@@ -980,7 +978,7 @@ const ActionDashboard: React.FC = () => {
             availableUsers={availableUsers}
             usersLoading={usersLoading}
             activeContractUserIds={activeContractUserIds}
-            everyoneShouldComplete={form.everyoneShouldComplete ?? false}
+            onboarding={form.onboarding ?? false}
             cohortExpression={cohortExpression}
             onCohortExpressionChange={handleCohortExpressionChange}
             authorIds={form.authorIds ?? []}
@@ -1550,7 +1548,7 @@ const ActionDashboard: React.FC = () => {
                   availableUsers={availableUsers}
                   usersLoading={usersLoading}
                   activeContractUserIds={activeContractUserIds}
-                  everyoneShouldComplete={form.everyoneShouldComplete ?? false}
+                  onboarding={form.onboarding ?? false}
                   cohortExpression={cohortExpression}
                   onCohortExpressionChange={handleCohortExpressionChange}
                   authorIds={form.authorIds ?? []}

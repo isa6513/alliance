@@ -1075,7 +1075,7 @@ export class ActionsService {
           useManualCohort: update.useManualCohort,
           manualCohortUserIdSet: new Set(update.manualCohortUserIds),
           participatingTagIdSet: new Set(update.tags.map((tag) => tag.id)),
-          everyoneShouldComplete: false,
+          onboarding: false,
           memberActionEventDate: update.startDate,
           memberActionEventDeadline: update.endDate,
           includeSuspended: false,
@@ -2772,22 +2772,23 @@ export class ActionsService {
       relations,
     });
 
-    const actionWithExtras: ExportActionDto = {
-      ...action,
-      taskForm: taskForm
-        ? await this.formRepository.findOneOrFail({
-            where: { id: action.taskFormId },
-            relations: { formSnapshot: true },
-          })
-        : undefined,
-      reminderGroups: reminders
-        ? await this.actionEventReminderService.getReminderGroupsForEvent(
-            action.id,
-          )
-        : undefined,
-    };
+    const taskFormEntity = taskForm
+      ? await this.formRepository.findOneOrFail({
+          where: { id: action.taskFormId },
+          relations: { formSnapshot: true },
+        })
+      : undefined;
 
-    return actionWithExtras;
+    const reminderGroups = reminders
+      ? await this.actionEventReminderService.getReminderGroupsForEvent(
+          action.id,
+        )
+      : undefined;
+
+    return new ExportActionDto(action, {
+      taskForm: taskFormEntity,
+      reminderGroups,
+    });
   }
 
   async importAction(json: string): Promise<Action> {
@@ -2812,7 +2813,7 @@ export class ActionsService {
         : never]: IsRelation<(typeof actionCols)[K]> extends true
         ? K
         : undefined;
-    }[keyof typeof actionCols];
+    }[Exclude<keyof typeof actionCols, 'everyoneShouldComplete'>];
     type _ensure_ImportActionDto_noRelations = Assert<
       _actionCols_relations extends undefined ? true : false
     >;
@@ -3371,7 +3372,6 @@ export class ActionsService {
             computeShouldParticipate({
               eventDate: event.date,
               deadlineDate: deadlineEvent?.date ?? null,
-              everyoneShouldComplete: action.everyoneShouldComplete,
               cohortMemberIds,
               user,
               userDismissed: dismissedSet.has(user.id),

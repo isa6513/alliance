@@ -234,7 +234,6 @@ export class ActionDto extends PickType(Action, [
   'isContractSigningAction',
   'visibilityMode',
   'usersJoined',
-  'everyoneShouldComplete',
   'onboarding',
   'archived',
   'priority',
@@ -285,6 +284,16 @@ export class ActionDto extends PickType(Action, [
   @Type(() => ProfileDto)
   authors?: ProfileDto[];
 
+  /**
+   * @deprecated Merged into `onboarding`. Kept as an alias so older clients
+   * that still read the field keep working; it mirrors `onboarding`.
+   */
+  @ApiPropertyOptional({
+    deprecated: true,
+    description: 'Deprecated alias for `onboarding`.',
+  })
+  everyoneShouldComplete?: boolean;
+
   constructor(
     action: Action,
     extra?: {
@@ -318,8 +327,9 @@ export class ActionDto extends PickType(Action, [
     this.visibilityMode = action.visibilityMode;
     this.usersJoined = action.usersJoined;
     this.usersCompleted = action.usersCompleted || 0;
-    this.everyoneShouldComplete = action.everyoneShouldComplete;
     this.onboarding = action.onboarding;
+    // Deprecated alias; mirrors `onboarding` for older clients.
+    this.everyoneShouldComplete = action.onboarding;
     this.archived = action.archived;
     this.priority = action.priority;
     this.optional = action.optional;
@@ -749,6 +759,35 @@ export class ExportActionDto extends OmitType(Action, [
   @Type(() => ReminderGroup)
   @IsOptional()
   reminderGroups?: ReminderGroup[];
+
+  /**
+   * @deprecated Merged into `onboarding`. Kept as an alias for older clients;
+   * mirrors `onboarding`.
+   */
+  @ApiPropertyOptional({
+    deprecated: true,
+    description: 'Deprecated alias for `onboarding`.',
+  })
+  @IsOptional()
+  everyoneShouldComplete?: boolean;
+
+  constructor(
+    action?: Action,
+    extra?: {
+      taskForm?: Form;
+      reminderGroups?: ReminderGroup[];
+    },
+  ) {
+    super();
+    if (!action) {
+      return;
+    }
+    Object.assign(this, action);
+    // Deprecated alias; mirrors `onboarding` for older clients.
+    this.everyoneShouldComplete = action.onboarding;
+    this.taskForm = extra?.taskForm;
+    this.reminderGroups = extra?.reminderGroups;
+  }
 }
 
 export class PasteJsonDto {
