@@ -211,6 +211,32 @@ const SignupPage: React.FC = () => {
     );
   }
 
+  let inviterLine: React.ReactNode = null;
+  if (isInviteValid && inviterProfile) {
+    switch (inviterProfile.kind) {
+      case "campaign":
+        // Campaign invites don't show an inviter line.
+        break;
+      case "user":
+        inviterLine = (
+          <div className="rounded-md">
+            <div className="flex flex-row gap-x-1 items-center text-zinc-500">
+              <span>Invited by </span>
+              <AvatarProfile
+                pfp={inviterProfile.profilePicture ?? null}
+                size="small"
+                className="ml-1 inline-block text-green"
+              />
+              <span className="font-medium">{inviterProfile.displayName}</span>
+            </div>
+          </div>
+        );
+        break;
+      default:
+        inviterProfile.kind satisfies never;
+    }
+  }
+
   return (
     <div className="min-h-screen w-full bg-white">
       <PrelaunchNavbar transparent={false} absolute={false} />
@@ -222,25 +248,7 @@ const SignupPage: React.FC = () => {
               invite link.
             </p>
           )}
-          {isInviteValid && inviterProfile && (
-            <div className="rounded-md">
-              <div className="flex flex-row gap-x-1 items-center text-zinc-500">
-                <span>
-                  {inviterProfile.kind === "campaign"
-                    ? "Invited via "
-                    : "Invited by "}
-                </span>
-                <AvatarProfile
-                  pfp={inviterProfile?.profilePicture ?? null}
-                  size="small"
-                  className="ml-1 inline-block text-green"
-                />
-                <span className="font-medium">
-                  {inviterProfile?.displayName}
-                </span>
-              </div>
-            </div>
-          )}
+          {inviterLine}
 
           {error && (
             <Card style={CardStyle.Alert} className="border-red-400 bg-red-50">
