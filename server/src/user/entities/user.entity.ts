@@ -45,7 +45,12 @@ import {
   RelationId,
 } from 'typeorm';
 import { Notification } from '../../notifs/entities/notification.entity';
-import { ContractEvent, ContractEventType } from './contract-event.entity';
+import {
+  compareContractEventsNewestFirst,
+  ContractEvent,
+  ContractEventType,
+  getEffectiveContractEventsInRange,
+} from './contract-event.entity';
 import { Friend, FriendStatus } from './friend.entity';
 import { OnetimeInvite } from './onetime-invite.entity';
 import { Tag } from './tag.entity';
@@ -525,7 +530,7 @@ export class User {
       const latestContractEvent = this.contractEvents
         ? findLeast(
             this.contractEvents,
-            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+            compareContractEventsNewestFirst,
             (event) => event.date <= date,
           )
         : null;
@@ -553,7 +558,7 @@ export class User {
       const latestContractEventBeforeStart = this.contractEvents
         ? findLeast(
             this.contractEvents,
-            (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
+            compareContractEventsNewestFirst,
             (event) => event.date.getTime() <= startTime,
           )
         : null;
@@ -562,12 +567,11 @@ export class User {
         break populateCache;
       }
 
-      hasActiveContract = !this.contractEvents?.some(
-        (event) =>
-          event.date.getTime() >= startTime &&
-          event.date.getTime() < endTime &&
-          event.type !== ContractEventType.SIGNED,
-      );
+      hasActiveContract = !getEffectiveContractEventsInRange(
+        this.contractEvents ?? [],
+        startTime,
+        endTime,
+      ).some((event) => event.type !== ContractEventType.SIGNED);
 
       this._hasActiveContractInFullRange.set(key, hasActiveContract);
     }
@@ -622,4 +626,22 @@ export class User {
     }
     return this._leaderOfIdSet;
   }
+}
+
+/**
+ * SQL equivalent of {@link User.hasActiveContractAt}; keep date/id ordering in sync.
+ *
+ * @param userIdExpr User-id SQL, e.g. `'u.id'` or `'signed_event."userId"'`.
+ * @param contractAtExpr Instant SQL, e.g. `':contractAt'`, `'$4'`, or `'NOW()'`.
+ */
+export function sqlUserHasActiveContractAt(
+  userIdExpr: string,
+  contractAtExpr = ':contractAt',
+): string {
+  return `(
+    SELECT ce."type" FROM "contract_event" ce
+    WHERE ce."userId" = ${userIdExpr} AND ce."date" <= ${contractAtExpr}
+    ORDER BY ce."date" DESC, ce."id" DESC
+    LIMIT 1
+  ) = '${ContractEventType.SIGNED}'`;
 }

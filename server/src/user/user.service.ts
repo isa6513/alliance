@@ -71,9 +71,9 @@ import { UserDevice } from './entities/user-device.entity';
 import {
   DEFAULT_TIME_ZONE,
   ReferralSource,
+  sqlUserHasActiveContractAt,
   User,
 } from './entities/user.entity';
-import { sqlUserHasActiveContractAt } from './has-active-contract-at';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -538,14 +538,14 @@ export class UserService {
         new Brackets((sqb) => {
           sqb
             .where(
-              `f.requesterId = :inviterId AND addr.profilePicture IS NOT NULL AND TRIM(addr.profilePicture) <> '' AND (${sqlUserHasActiveContractAt('addr')})`,
+              `f.requesterId = :inviterId AND addr.profilePicture IS NOT NULL AND TRIM(addr.profilePicture) <> '' AND (${sqlUserHasActiveContractAt('addr.id')})`,
             )
             .orWhere(
-              `f.addresseeId = :inviterId AND req.profilePicture IS NOT NULL AND TRIM(req.profilePicture) <> '' AND (${sqlUserHasActiveContractAt('req')})`,
+              `f.addresseeId = :inviterId AND req.profilePicture IS NOT NULL AND TRIM(req.profilePicture) <> '' AND (${sqlUserHasActiveContractAt('req.id')})`,
             );
         }),
       )
-      .setParameter('contractAt', contractAt) // used in sqlUserHasActiveContractAt
+      .setParameter('contractAt', contractAt)
       .getMany();
     const others = rels.map((r) =>
       r.requester!.id === inviterId ? r.addressee! : r.requester!,
@@ -571,7 +571,7 @@ export class UserService {
       qb.andWhere('u.id NOT IN (:...ids)', { ids: excludeIds });
     }
     if (signedContract) {
-      qb.andWhere(sqlUserHasActiveContractAt('u'), { contractAt });
+      qb.andWhere(sqlUserHasActiveContractAt('u.id'), { contractAt });
     }
     return qb.orderBy('RANDOM()').take(count).getMany();
   }

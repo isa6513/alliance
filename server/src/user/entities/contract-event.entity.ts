@@ -1,4 +1,9 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { Allow, IsOptional } from 'class-validator';
+import { Contract } from 'src/contract/entities/contract.entity';
 import { UpdateDateColumnTz } from 'src/datasources/basecolumns';
+import type { Relation } from 'src/utils/Repository';
 import {
   Check,
   Column,
@@ -10,15 +15,36 @@ import {
   Unique,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Contract } from 'src/contract/entities/contract.entity';
-import type { Relation } from 'src/utils/Repository';
-import { Allow, IsOptional } from 'class-validator';
 
 export enum ContractEventType {
   SIGNED = 'signed',
   SUSPENDED = 'suspended',
+}
+
+type ContractEventOrderFields = Pick<ContractEvent, 'date' | 'id'>;
+
+export function compareContractEventsNewestFirst<
+  T extends ContractEventOrderFields,
+>(a: T, b: T): number {
+  return b.date.getTime() - a.date.getTime() || b.id - a.id;
+}
+
+export function getEffectiveContractEventsInRange<
+  T extends ContractEventOrderFields,
+>(events: readonly T[], startTime: number, endTime: number): T[] {
+  const effectiveByTime = new Map<number, T>();
+
+  for (const event of events) {
+    const eventTime = event.date.getTime();
+    if (eventTime < startTime || eventTime >= endTime) continue;
+
+    const existing = effectiveByTime.get(eventTime);
+    if (!existing || compareContractEventsNewestFirst(event, existing) < 0) {
+      effectiveByTime.set(eventTime, event);
+    }
+  }
+
+  return Array.from(effectiveByTime.values());
 }
 
 @Entity()

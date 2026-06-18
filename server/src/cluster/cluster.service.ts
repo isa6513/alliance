@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { sqlUserHasActiveContractAt } from 'src/user/entities/user.entity';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { bulkAssign, type ClusterUser } from './cluster.algorithm';
 import { Cluster } from './entities/cluster.entity';
@@ -55,12 +56,7 @@ export class ClusterService {
       const eligibleRows = await manager.query<{ id: number }[]>(`
         SELECT u.id
         FROM "user" u
-        WHERE (
-          SELECT ce."type" FROM "contract_event" ce
-          WHERE ce."userId" = u.id AND ce."date" <= NOW()
-          ORDER BY ce."date" DESC
-          LIMIT 1
-        ) = 'signed'
+        WHERE ${sqlUserHasActiveContractAt('u.id', 'NOW()')}
       `);
       const eligibleIds = eligibleRows.map((r) => r.id);
 

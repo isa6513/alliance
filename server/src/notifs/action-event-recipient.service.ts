@@ -15,7 +15,6 @@ import { Community } from 'src/community/entities/community.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { Tag } from 'src/user/entities/tag.entity';
 import { computeShouldParticipate } from 'src/utils/action-user';
-import { computeIsAwayInRange } from 'src/utils/user';
 import { In, type Repository } from 'typeorm';
 import {
   ActionActivity,
@@ -240,8 +239,7 @@ export class ActionEventRecipientService {
             includeSuspended,
             includeDismissed,
           }) &&
-          !computeIsAwayInRange({
-            user,
+          !user.isAwayAtAnyPointInRange({
             startDate: event.date,
             endDate: deadlineEvent?.date,
           }),

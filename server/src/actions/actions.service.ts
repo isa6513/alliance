@@ -53,12 +53,12 @@ import {
   UserActionSummary,
 } from 'src/user/dto/user-action-relations.dto';
 import { ProfileDto } from 'src/user/dto/user.dto';
-import {
-  ContractEvent,
-  ContractEventType,
-} from 'src/user/entities/contract-event.entity';
+import { ContractEventType } from 'src/user/entities/contract-event.entity';
 import { Tag } from 'src/user/entities/tag.entity';
-import { User } from 'src/user/entities/user.entity';
+import {
+  sqlUserHasActiveContractAt,
+  User,
+} from 'src/user/entities/user.entity';
 import {
   computeIsAwayDuringAnyOfMemberAction,
   computeIsTaggedOrInManualCohort,
@@ -69,7 +69,6 @@ import { CachedFilter } from 'src/utils/cached-filter';
 import { findLeast } from 'src/utils/filter';
 import { startDatePriorityComparator } from 'src/utils/general-update';
 import type { IsRelation, Relations } from 'src/utils/Repository';
-import { computeIsAwayInRange } from 'src/utils/user';
 import {
   DeepPartial,
   ILike,
@@ -173,25 +172,26 @@ type SuspendPlanContext = {
   allExpectedUsers: number[];
 };
 
-/** Inline preview size; full member lists page through dedicated endpoints. */
+/** Facepile preview size; member-list endpoints paginate full lists. */
 const GLOBAL_FEED_FACEPILE_LIMIT = 8;
 
-/** Shared rolling window for feed and member-list endpoints. */
+/** Feed/member-list rolling window. */
 const GLOBAL_FEED_WINDOW_DAYS = 8;
 
-/** Page ordered, deduped members after `afterId`; unknown cursors return empty. */
-function sliceMembersAfterId(
-  ordered: ProfileDto[],
-  limit: number,
-  afterId?: number,
-): ProfileDto[] {
-  let start = 0;
-  if (afterId !== undefined) {
-    const idx = ordered.findIndex((u) => u.id === afterId);
-    start = idx === -1 ? ordered.length : idx + 1;
-  }
-  return ordered.slice(start, start + limit);
-}
+type FeedMemberPageRow = {
+  userId: number | string;
+  latestAt: Date | string;
+  latestId: number | string;
+};
+
+type FeedMemberRankedQuery = {
+  rankedSql: string;
+  params: unknown[];
+};
+
+type FeedMemberSummaryRow = FeedMemberPageRow & {
+  totalCount: number | string;
+};
 
 @Injectable()
 export class ActionsService {
@@ -222,8 +222,6 @@ export class ActionsService {
     private readonly shareUrlsService: ShareUrlsService,
     @InjectRepository(FormResponse)
     private readonly formResponseRepository: Repository<FormResponse>,
-    @InjectRepository(ContractEvent)
-    private readonly contractEventRepository: Repository<ContractEvent>,
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
     @InjectRepository(FollowUpForm)
@@ -3379,8 +3377,7 @@ export class ActionsService {
               userDismissed: dismissedSet.has(user.id),
               onboarding: action.onboarding,
             }) &&
-            !computeIsAwayInRange({
-              user,
+            !user.isAwayAtAnyPointInRange({
               startDate: event.date,
               endDate: deadlineEvent?.date,
             }),
@@ -3762,13 +3759,16 @@ export class ActionsService {
       }
     }
 
-    const { users: newMemberUsers, latestDate: latestMemberDate } =
-      await this.computeRecentNewMembers(oneWeekAgo);
+    const {
+      users: newMemberUsers,
+      count: newMemberCount,
+      latestDate: latestMemberDate,
+    } = await this.computeRecentNewMembers(oneWeekAgo, now);
 
-    if (newMemberUsers.length > 0 && latestMemberDate) {
+    if (newMemberCount > 0 && latestMemberDate) {
       const newMembers: GlobalFeedNewMembersDto = {
-        users: newMemberUsers.slice(0, GLOBAL_FEED_FACEPILE_LIMIT),
-        count: newMemberUsers.length,
+        users: newMemberUsers,
+        count: newMemberCount,
       };
 
       feedItems.push(
@@ -3883,55 +3883,163 @@ export class ActionsService {
     return new Date(Date.now() - GLOBAL_FEED_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   }
 
-  /**
-   * Recent active-contract members whose SIGNED event is first or follows
-   * suspension, newest first and deduped.
-   */
-  private async computeRecentNewMembers(
+  private buildRecentNewMembersRankedQuery(
     oneWeekAgo: Date,
-  ): Promise<{ users: ProfileDto[]; latestDate: Date | null }> {
-    const signedEvents = (
-      await this.contractEventRepository.find({
-        where: {
-          type: ContractEventType.SIGNED,
-          date: MoreThan(oneWeekAgo),
-        },
-        relations: { user: { contractEvents: true } },
-        order: { date: 'DESC', id: 'DESC' },
-      })
-    ).filter((event) => {
-      const eventIndex = event.user
-        .contractEvents!.sort((a, b) => a.date.getTime() - b.date.getTime())
-        .findIndex((e) => e.id === event.id);
-      if (eventIndex === -1) {
-        return false;
-      }
-
-      return (
-        eventIndex === 0 ||
-        event.user.contractEvents![eventIndex - 1].type ===
-          ContractEventType.SUSPENDED
-      );
-    });
-
-    const uniqueNewMembers = new Map<number, ProfileDto>();
-    let latestDate: Date | null = null;
-
-    for (const event of signedEvents) {
-      const user = event.user;
-      if (!user?.hasActiveContract) continue;
-      if (!uniqueNewMembers.has(user.id)) {
-        uniqueNewMembers.set(user.id, new ProfileDto(user));
-      }
-      if (!latestDate || event.date > latestDate) {
-        latestDate = event.date;
-      }
-    }
-
-    return { users: Array.from(uniqueNewMembers.values()), latestDate };
+    now: Date,
+  ): FeedMemberRankedQuery {
+    return {
+      rankedSql: `
+        SELECT "userId", "latestAt", "latestId"
+        FROM (
+          SELECT DISTINCT ON (signed_event."userId")
+            signed_event."userId" AS "userId",
+            signed_event.date AS "latestAt",
+            signed_event.id AS "latestId"
+          FROM "contract_event" signed_event
+          LEFT JOIN LATERAL (
+            SELECT previous_event.type
+            FROM "contract_event" previous_event
+            WHERE previous_event."userId" = signed_event."userId"
+              AND (
+                previous_event.date < signed_event.date
+                OR (
+                  previous_event.date = signed_event.date
+                  AND previous_event.id < signed_event.id
+                )
+              )
+            ORDER BY previous_event.date DESC, previous_event.id DESC
+            LIMIT 1
+          ) previous_event ON true
+          WHERE signed_event.type = $1
+            AND signed_event.date > $2
+            AND (
+              previous_event.type IS NULL
+              OR previous_event.type = $3
+            )
+            AND ${sqlUserHasActiveContractAt('signed_event."userId"', '$4')}
+          ORDER BY signed_event."userId" ASC, signed_event.date DESC, signed_event.id DESC
+        ) ranked`,
+      params: [
+        ContractEventType.SIGNED,
+        oneWeekAgo,
+        ContractEventType.SUSPENDED,
+        now,
+      ],
+    };
   }
 
-  /** Paged members matching an activity-group feed item's count. */
+  /** Recent active-contract members whose SIGNED event starts/resumes a contract. */
+  private async computeRecentNewMembers(
+    oneWeekAgo: Date,
+    now: Date,
+  ): Promise<{ users: ProfileDto[]; count: number; latestDate: Date | null }> {
+    const { rankedSql, params } = this.buildRecentNewMembersRankedQuery(
+      oneWeekAgo,
+      now,
+    );
+    return this.queryFeedMemberSummary({
+      rankedSql,
+      params,
+      limit: GLOBAL_FEED_FACEPILE_LIMIT,
+    });
+  }
+
+  private async queryFeedMemberPageIds({
+    rankedSql,
+    params,
+    limit,
+    afterId,
+  }: {
+    rankedSql: string;
+    params: unknown[];
+    limit: number;
+    afterId?: number;
+  }): Promise<number[]> {
+    const pageParams = [...params];
+
+    if (afterId === undefined) {
+      const limitParam = pageParams.length + 1;
+      pageParams.push(limit);
+      const rows = await this.userRepository.query<FeedMemberPageRow[]>(
+        `WITH ranked_members AS (${rankedSql})
+        SELECT "userId", "latestAt", "latestId" FROM ranked_members
+        ORDER BY "latestAt" DESC, "latestId" DESC
+        LIMIT $${limitParam}`,
+        pageParams,
+      );
+      return rows.map((row) => Number(row.userId));
+    }
+
+    // Share one materialized ranking; unknown cursors produce no page.
+    const afterParam = pageParams.length + 1;
+    pageParams.push(afterId);
+    const limitParam = pageParams.length + 1;
+    pageParams.push(limit);
+    const rows = await this.userRepository.query<FeedMemberPageRow[]>(
+      `WITH ranked_members AS MATERIALIZED (${rankedSql}),
+      cursor_row AS (
+        SELECT "latestAt", "latestId" FROM ranked_members WHERE "userId" = $${afterParam}
+      )
+      SELECT rm."userId", rm."latestAt", rm."latestId"
+      FROM ranked_members rm, cursor_row c
+      WHERE rm."latestAt" < c."latestAt"
+        OR (rm."latestAt" = c."latestAt" AND rm."latestId" < c."latestId")
+      ORDER BY rm."latestAt" DESC, rm."latestId" DESC
+      LIMIT $${limitParam}`,
+      pageParams,
+    );
+
+    return rows.map((row) => Number(row.userId));
+  }
+
+  private async hydrateFeedMemberProfiles(
+    orderedIds: number[],
+  ): Promise<ProfileDto[]> {
+    if (orderedIds.length === 0) return [];
+
+    // Hydrate only needed relations: `leaderOf` powers `isCommunityLeader`;
+    // load `contractEvents`/`cluster` for accurate
+    // `hasActiveContract`/`lastContractEvent`/`cluster`.
+    const users = await this.userRepository.find({
+      where: { id: In(orderedIds) },
+      relations: { leaderOf: true },
+    });
+    const byId = new Map(users.map((user) => [user.id, user]));
+    return orderedIds
+      .map((id) => byId.get(id))
+      .filter((user): user is User => user !== undefined)
+      .map((user) => new ProfileDto(user));
+  }
+
+  private async queryFeedMemberSummary({
+    rankedSql,
+    params,
+    limit,
+  }: {
+    rankedSql: string;
+    params: unknown[];
+    limit: number;
+  }): Promise<{ users: ProfileDto[]; count: number; latestDate: Date | null }> {
+    const limitParam = params.length + 1;
+    const rows = await this.userRepository.query<FeedMemberSummaryRow[]>(
+      `SELECT "userId", "latestAt", "latestId", COUNT(*) OVER() AS "totalCount"
+      FROM (${rankedSql}) feed_members
+      ORDER BY "latestAt" DESC, "latestId" DESC
+      LIMIT $${limitParam}`,
+      [...params, limit],
+    );
+
+    const users = await this.hydrateFeedMemberProfiles(
+      rows.map((row) => Number(row.userId)),
+    );
+
+    return {
+      users,
+      count: rows.length === 0 ? 0 : Number(rows[0].totalCount),
+      latestDate: rows[0]?.latestAt ? new Date(rows[0].latestAt) : null,
+    };
+  }
+
   async getActivityGroupMembers(
     actionId: number,
     activityType: GlobalFeedActivityType,
@@ -3939,53 +4047,47 @@ export class ActionsService {
     afterId?: number,
   ): Promise<ProfileDto[]> {
     const oneWeekAgo = this.globalFeedWindowStart();
+    const rankedSql = `
+      SELECT "userId", "latestAt", "latestId"
+      FROM (
+        SELECT DISTINCT ON (activity."userId")
+          activity."userId" AS "userId",
+          activity."createdAt" AS "latestAt",
+          activity.id AS "latestId"
+        FROM "action_activity" activity
+        INNER JOIN "action" action_entity ON action_entity.id = activity."actionId"
+        WHERE activity."actionId" = $1
+          AND activity.type = $2
+          AND action_entity.onboarding = false
+          AND activity."createdAt" > $3
+        ORDER BY activity."userId" ASC, activity."createdAt" DESC, activity.id DESC
+      ) ranked`;
 
-    const activities = await this.actionActivityRepository
-      .createQueryBuilder('activity')
-      .innerJoin('activity.action', 'action')
-      .leftJoinAndSelect('activity.user', 'user')
-      .select([
-        'activity.id',
-        'activity.createdAt',
-        'user.id',
-        'user.name',
-        'user.profilePicture',
-        'user.anonymous',
-        'user.admin',
-        'user.staff',
-        'user.profileDescription',
-      ])
-      .loadRelationIdAndMap('user.leaderOfIds', 'user.leaderOf')
-      .where('activity.actionId = :actionId', { actionId })
-      .andWhere('activity.type = :activityType', { activityType })
-      .andWhere('action.onboarding = false')
-      .andWhere('activity.createdAt > :oneWeekAgo', { oneWeekAgo })
-      .orderBy('activity.createdAt', 'DESC')
-      .addOrderBy('activity.id', 'DESC')
-      .getMany();
-
-    const uniqueUsers = new Map<number, ProfileDto>();
-    for (const activity of activities) {
-      if (activity.user && !uniqueUsers.has(activity.user.id)) {
-        uniqueUsers.set(activity.user.id, new ProfileDto(activity.user));
-      }
-    }
-
-    return sliceMembersAfterId(
-      Array.from(uniqueUsers.values()),
+    const pageIds = await this.queryFeedMemberPageIds({
+      rankedSql,
+      params: [actionId, activityType, oneWeekAgo],
       limit,
       afterId,
-    );
+    });
+    return this.hydrateFeedMemberProfiles(pageIds);
   }
 
-  /** Paged members matching the new-members feed item's count. */
   async getNewMembers(limit: number, afterId?: number): Promise<ProfileDto[]> {
     const oneWeekAgo = this.globalFeedWindowStart();
-    const { users } = await this.computeRecentNewMembers(oneWeekAgo);
-    return sliceMembersAfterId(users, limit, afterId);
+    const { rankedSql, params } = this.buildRecentNewMembersRankedQuery(
+      oneWeekAgo,
+      new Date(),
+    );
+
+    const pageIds = await this.queryFeedMemberPageIds({
+      rankedSql,
+      params,
+      limit,
+      afterId,
+    });
+    return this.hydrateFeedMemberProfiles(pageIds);
   }
 
-  /** Paged members matching a forum-comments feed item's count. */
   async getForumCommentMembers(
     postId: number,
     limit: number,
@@ -3994,44 +4096,28 @@ export class ActionsService {
   ): Promise<ProfileDto[]> {
     const oneWeekAgo = this.globalFeedWindowStart();
     await this.forumService.findOnePost(postId, requestingUserId);
+    const rankedSql = `
+      SELECT "userId", "latestAt", "latestId"
+      FROM (
+        SELECT DISTINCT ON (comment."authorId")
+          comment."authorId" AS "userId",
+          comment."createdAt" AS "latestAt",
+          comment.id AS "latestId"
+        FROM "comment" comment
+        WHERE comment."parentObjectType" = $1
+          AND comment."parentObjectId" = $2
+          AND comment."createdAt" > $3
+          AND comment.deleted = false
+        ORDER BY comment."authorId" ASC, comment."createdAt" DESC, comment.id DESC
+      ) ranked`;
 
-    const comments = await this.commentRepository
-      .createQueryBuilder('comment')
-      .leftJoinAndSelect('comment.author', 'author')
-      .select([
-        'comment.id',
-        'comment.createdAt',
-        'author.id',
-        'author.name',
-        'author.profilePicture',
-        'author.anonymous',
-        'author.admin',
-        'author.staff',
-        'author.profileDescription',
-      ])
-      .loadRelationIdAndMap('author.leaderOfIds', 'author.leaderOf')
-      .where('comment.parentObjectType = :postType', {
-        postType: CommentParentObject.Post,
-      })
-      .andWhere('comment.parentObjectId = :postId', { postId })
-      .andWhere('comment.createdAt > :oneWeekAgo', { oneWeekAgo })
-      .andWhere('comment.deleted = false')
-      .orderBy('comment.createdAt', 'DESC')
-      .addOrderBy('comment.id', 'DESC')
-      .getMany();
-
-    const uniqueUsers = new Map<number, ProfileDto>();
-    for (const comment of comments) {
-      if (comment.author && !uniqueUsers.has(comment.author.id)) {
-        uniqueUsers.set(comment.author.id, new ProfileDto(comment.author));
-      }
-    }
-
-    return sliceMembersAfterId(
-      Array.from(uniqueUsers.values()),
+    const pageIds = await this.queryFeedMemberPageIds({
+      rankedSql,
+      params: [CommentParentObject.Post, postId, oneWeekAgo],
       limit,
       afterId,
-    );
+    });
+    return this.hydrateFeedMemberProfiles(pageIds);
   }
 
   async getTimelineFeed(limit: number = 15): Promise<TimelineFeedItemDto[]> {

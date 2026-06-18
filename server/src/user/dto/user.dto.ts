@@ -15,7 +15,10 @@ import {
 import { getImageSource } from 'src/images/images.service';
 import { ClusterSummaryDto } from '../../cluster/dto/cluster.dto';
 import { Cluster } from '../../cluster/entities/cluster.entity';
-import { ContractEvent } from '../entities/contract-event.entity';
+import {
+  compareContractEventsNewestFirst,
+  ContractEvent,
+} from '../entities/contract-event.entity';
 import { FriendStatus } from '../entities/friend.entity';
 import { User } from '../entities/user.entity';
 import type { ReferrerResolution } from '../user.service';
@@ -86,9 +89,7 @@ export class ProfileDto extends PickType(User, [
     this.isCommunityLeader = user.isCommunityLeader;
     this.anonymous = user.anonymous;
     this.lastContractEvent = user.contractEvents?.length
-      ? user.contractEvents?.sort(
-          (a, b) => b.date.getTime() - a.date.getTime(),
-        )[0]
+      ? user.contractEvents?.sort(compareContractEventsNewestFirst)[0]
       : undefined;
     if (user.anonymous) {
       this.displayName = 'Someone';
