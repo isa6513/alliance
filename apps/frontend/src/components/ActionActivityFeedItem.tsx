@@ -15,6 +15,7 @@ export interface ActionActivityFeedItemProps {
   showTime?: boolean;
   card?: boolean;
   showAction: boolean;
+  showLikeFooter: boolean;
   handleLike: (activity: ActionActivityDto) => Promise<unknown>;
 }
 
