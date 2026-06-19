@@ -1,8 +1,8 @@
 import { ActionActivityDto } from "@alliance/shared/client";
 import { useState } from "react";
+import { Link, href } from "react-router";
 import { useAuth } from "../lib/AuthContext";
 import ActionActivityFeedItem from "./ActionActivityFeedItem";
-import { Link, href } from "react-router";
 
 interface ActionActivityListProps {
   actionId: number;
@@ -76,6 +76,7 @@ const ActionActivityList = ({
             showTime={false}
             card={false}
             showAction={false}
+            showLikeFooter={false}
             handleLike={handleLike}
           />
         ))}

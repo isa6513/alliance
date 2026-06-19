@@ -34,6 +34,7 @@ const ActionActivityFeedItem = ({
   showTime = true,
   card = true,
   showAction = true,
+  showLikeFooter = true,
   handleLike,
 }: ActionActivityFeedItemProps) => {
   const navigate = useNavigate();
@@ -113,27 +114,29 @@ const ActionActivityFeedItem = ({
             )}
           </div>
         </div>
-        <LikeFooter
-          likeTargetType="activity"
-          likeTargetId={activity.id}
-          liked={activity.likedByMe ?? false}
-          likesCount={activity.likesCount}
-          likers={activity.likes}
-          onLike={() => handleLike(activity)}
-        >
-          <LikeBarButton
-            icon={MessageCircle}
-            label="Comment"
-            onPress={() =>
-              navigate(
-                href("/actions/:id/activity/:activityId", {
-                  id: activity.actionId.toString(),
-                  activityId: activity.id.toString(),
-                }),
-              )
-            }
-          />
-        </LikeFooter>
+        {showLikeFooter && (
+          <LikeFooter
+            likeTargetType="activity"
+            likeTargetId={activity.id}
+            liked={activity.likedByMe ?? false}
+            likesCount={activity.likesCount}
+            likers={activity.likes}
+            onLike={() => handleLike(activity)}
+          >
+            <LikeBarButton
+              icon={MessageCircle}
+              label="Comment"
+              onPress={() =>
+                navigate(
+                  href("/actions/:id/activity/:activityId", {
+                    id: activity.actionId.toString(),
+                    activityId: activity.id.toString(),
+                  }),
+                )
+              }
+            />
+          </LikeFooter>
+        )}
       </div>
     );
   }

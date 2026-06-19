@@ -60,7 +60,7 @@ export const MemberFacepileButton = ({
         }}
         className="inline-flex items-center gap-1 align-middle hover:text-zinc-900"
       >
-        <MemberFacepile users={users} max={max} className="mr-1" />
+        <MemberFacepile users={users} max={max} className="inline-flex" />
         <span className="font-medium">{label}</span>
       </button>
       <MembersModal

@@ -25,10 +25,13 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
       <div className="text-zinc-700 mt-1.5">
         {isSingle ? (
           <>
-            <MemberFacepile users={item.users} className="mr-1 inline-flex" />
+            <MemberFacepile
+              users={item.users}
+              className="mr-1 inline-flex align-middle"
+            />
             <Link
               to={href("/member/:id", { id: item.users[0].id.toString() })}
-              className="font-medium hover:underline"
+              className="font-medium hover:underline align-middle"
             >
               {item.users[0].displayName}
             </Link>
@@ -44,14 +47,14 @@ const ActivityGroupItem = ({ item, date }: ActivityGroupItemProps) => {
             label={`${item.count} members`}
           />
         )}
-        <span className="text-zinc-500"> {verb} </span>
+        <span className="text-zinc-500 align-middle"> {verb} </span>
         <Link
           to={href("/actions/:id", { id: item.actionId.toString() })}
-          className="text-green font-medium hover:underline"
+          className="text-green font-medium hover:underline align-middle"
         >
           {item.actionName}
         </Link>
-        <span className="text-zinc-500">
+        <span className="text-zinc-500 align-middle">
           {" "}
           {formatTime(new Date(date), { addSuffix: true })}
         </span>
@@ -97,14 +100,19 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
       <div className="text-zinc-700 mt-1.5">
         {isSingle ? (
           <>
-            <MemberFacepile users={item.users} className="mr-1 inline-flex" />
+            <MemberFacepile
+              users={item.users}
+              className="mr-1 inline-flex align-middle"
+            />
             <Link
               to={href("/member/:id", { id: item.users[0].id.toString() })}
-              className="font-medium hover:underline"
+              className="font-medium hover:underline align-middle"
             >
               {item.users[0].displayName}
             </Link>
-            <span className="text-zinc-500">{" joined the Alliance"}</span>
+            <span className="text-zinc-500 align-middle">
+              {" joined the Alliance"}
+            </span>
           </>
         ) : (
           <>
@@ -113,7 +121,9 @@ const NewMembersItem = ({ item }: NewMembersItemProps) => {
               source={{ type: "newMembers" }}
               label={`${item.count} new members`}
             />
-            <span className="text-zinc-500"> joined the Alliance</span>
+            <span className="text-zinc-500 align-middle">
+              {" joined the Alliance"}
+            </span>
           </>
         )}
       </div>
@@ -140,8 +150,13 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
       <div className="text-zinc-700 mt-1.5">
         {isSingle ? (
           <>
-            <MemberFacepile users={item.users} className="mr-1 inline-flex" />
-            <span className="font-medium">{item.users[0].displayName}</span>
+            <MemberFacepile
+              users={item.users}
+              className="mr-1 inline-flex align-middle"
+            />
+            <span className="font-medium align-middle">
+              {item.users[0].displayName}
+            </span>
           </>
         ) : (
           <MemberFacepileButton
@@ -150,11 +165,14 @@ const ForumCommentsItem = ({ item, date }: ForumCommentsItemProps) => {
             label={`${item.count} members`}
           />
         )}
-        <span className="text-zinc-500"> commented on </span>
-        <Link to={postUrl} className="text-green font-medium hover:underline">
+        <span className="text-zinc-500 align-middle"> commented on </span>
+        <Link
+          to={postUrl}
+          className="text-green font-medium hover:underline align-middle"
+        >
           {item.postTitle}
         </Link>
-        <span className="text-zinc-500">
+        <span className="text-zinc-500 align-middle">
           {" "}
           {formatTime(new Date(date), { addSuffix: true })}
         </span>
