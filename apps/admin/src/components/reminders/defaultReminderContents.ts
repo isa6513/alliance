@@ -40,7 +40,12 @@ The deadline for the current task has passed and you have not completed it. If y
 
 The Alliance counts on every member. We plan precise actions based on the commitments of our members, and each missed task affects what others can count on.
 
-Please know that if you miss several actions in a row, we will suspend your contract and no longer assign you tasks.`;
+To learn more about the Alliance and why reliability matters, you can watch <a href="https://www.youtube.com/watch?v=VS6aFXXxtmY&t=125s">this video</a>.
+
+Please know that if you miss several actions in a row, we will suspend your contract and no longer assign you tasks.
+
+Best,
+The Alliance Team`;
 
 export const defaultMissedDeadlineTextMessage = `The deadline for the current task has passed and you have not completed it. If you did complete it, please contact us — we may have made a mistake. 
 
