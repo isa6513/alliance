@@ -52,8 +52,8 @@ export class ActionEventRecipientService {
    */
   async resolveCohortMemberIds(
     expression: CohortExpression | null | undefined,
-  ): Promise<Set<number> | null> {
-    if (!expression) return null;
+  ): Promise<Set<number>> {
+    if (!expression) return new Set();
     const ctx: CohortEvaluationContext = {
       getUserIdsForTag: async (tagId: string) => {
         if (!tagId) return new Set();
@@ -192,8 +192,8 @@ export class ActionEventRecipientService {
     }
 
     // 3. Deduplicated cohort resolution
-    const cohortCache = new Map<string, Promise<Set<number> | null>>();
-    const cohortByAction = new Map<number, Promise<Set<number> | null>>();
+    const cohortCache = new Map<string, Promise<Set<number>>>();
+    const cohortByAction = new Map<number, Promise<Set<number>>>();
     for (const { action } of entries) {
       const key = action.cohortExpression
         ? JSON.stringify(action.cohortExpression)
@@ -325,11 +325,7 @@ export class ActionEventRecipientService {
     );
 
     const participationCohortMemberIds = actionSuite
-      ? perActionCohortMemberIds.some((r) => r.memberIds === null)
-        ? null // at least one action targets everyone
-        : new Set(
-            perActionCohortMemberIds.flatMap((r) => [...(r.memberIds ?? [])]),
-          )
+      ? new Set(perActionCohortMemberIds.flatMap((r) => [...r.memberIds]))
       : cohortMemberIds;
 
     const idToUser = new Map(usersWithTags.map((user) => [user.id, user]));
@@ -338,7 +334,7 @@ export class ActionEventRecipientService {
     for (const user of users) {
       const relevantActions = actions.filter((action) => {
         const memberIds = cohortByActionId.get(action.id);
-        return !memberIds || memberIds.has(user.id);
+        return memberIds!.has(user.id);
       });
       userToHasCompletedAllActions.set(
         user.id,

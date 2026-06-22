@@ -726,10 +726,7 @@ export class ActionsService {
     if (action.status === ActionStatus.Draft || action.archived) {
       return false;
     }
-    if (
-      !action.cohortExpression ||
-      action.visibilityMode === VisibilityMode.Public
-    ) {
+    if (action.visibilityMode === VisibilityMode.Public) {
       return true;
     }
 
@@ -4176,25 +4173,25 @@ export class ActionsService {
   ): Promise<number[]> {
     const result =
       await this.actionEventRecipientService.resolveCohortMemberIds(expression);
-    return result ? Array.from(result) : [];
+    return Array.from(result);
   }
 
   /**
    * Filter follow-up forms by cohort expression for a given user.
-   * Forms with no cohortExpression are kept (shown to all completers).
+   * A null/absent cohortExpression targets no members, so the form is
+   * filtered out (consistent with action cohort semantics).
    */
   async filterFollowUpFormsByCohort(
     followUpForms: FollowUpForm[],
     user: User,
   ): Promise<FollowUpForm[]> {
     const results = await Promise.all(
-      followUpForms.map(async (form) => {
-        if (!form.cohortExpression) return true;
-        return this.computeIsInCohortExpression({
+      followUpForms.map((form) =>
+        this.computeIsInCohortExpression({
           user,
           cohortExpression: form.cohortExpression,
-        });
-      }),
+        }),
+      ),
     );
     return followUpForms.filter((_, i) => results[i]);
   }

@@ -361,8 +361,8 @@ function FollowUpFormCard({
           </label>
           <p className="text-xs text-zinc-500 mb-2">
             Only users matching this cohort (who also completed the action) will
-            see and be able to submit this follow-up form. Leave empty to show
-            to all completers.
+            see and be able to submit this follow-up form. Leave empty and no
+            one will see this form; set a cohort to target completers.
           </p>
           <CohortExpressionBuilder
             value={cohortExpr}

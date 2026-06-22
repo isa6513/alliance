@@ -684,7 +684,8 @@ const CohortExpressionBuilder: React.FC<CohortExpressionBuilderProps> = (
       {!value ? (
         <div className="space-y-2">
           <p className="text-sm text-gray-500">
-            No cohort expression set. All members will participate.
+            No cohort set — no users will participate. Add a condition to
+            target users.
           </p>
           <div className="flex gap-2 flex-wrap">
             <button

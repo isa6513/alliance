@@ -151,7 +151,7 @@ export function computeIsTaggedOrInManualCohort(params: {
 export function computeShouldParticipate(params: {
   eventDate: Date;
   deadlineDate: Date | null;
-  cohortMemberIds: Set<number> | null;
+  cohortMemberIds: Set<number>;
   user: User;
   userDismissed: boolean;
   onboarding: boolean;
@@ -173,7 +173,7 @@ export function computeShouldParticipate(params: {
     return false;
   }
 
-  if (cohortMemberIds && !cohortMemberIds.has(user.id)) {
+  if (!cohortMemberIds.has(user.id)) {
     return false;
   }
 
