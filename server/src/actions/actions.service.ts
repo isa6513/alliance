@@ -3328,6 +3328,7 @@ export class ActionsService {
     ]);
 
     const activeUsers = await this.userService.findActiveUsersWithTags();
+    const activeUsersById = new Map(activeUsers.map((user) => [user.id, user]));
 
     const dismissedByAction = new Map<number, Set<number>>();
     for (const activity of dismissedActivities) {
@@ -3388,29 +3389,27 @@ export class ActionsService {
     const failedBySuite = new Map<number, Set<number>>();
     const idToUser = new Map<number, User>();
 
+    const lastSignedDateByUser = new Map<number, Date>();
     const getLastSignedDate = (user: User) => {
-      return (
+      const cached = lastSignedDateByUser.get(user.id);
+      if (cached) {
+        return cached;
+      }
+      const lastSignedDate =
         user.contractEvents
           ?.filter((event) => event.type === ContractEventType.SIGNED)
           ?.sort((a, b) => b.date.getTime() - a.date.getTime())[0]?.date ??
-        new Date(0)
-      );
+        new Date(0);
+      lastSignedDateByUser.set(user.id, lastSignedDate);
+      return lastSignedDate;
     };
 
     for (const suite of suitesToProcess) {
-      const firstAction = suite.actions[0];
-      const firstEvent = memberActionEventByActionId.get(firstAction.id);
-      if (!firstEvent) {
-        throw new Error(
-          `Member action event not found for action ${firstAction.id}`,
-        );
-      }
-
-      const baseCohort = baseUsersByAction.get(firstAction.id) ?? [];
-      expectedBySuite.set(
-        suite.suite.id,
-        new Set(baseCohort.map((user) => user.id)),
-      );
+      // A user fails a suite only when every non-optional action assigned to
+      // them in that suite is missed. Each action can have a different cohort.
+      const expectedUserIds = new Set<number>();
+      const usersWhoCompletedAnAssignedAction = new Set<number>();
+      const usersWithAnAssignmentSinceLastSigning = new Set<number>();
 
       for (const action of suite.actions) {
         const event = memberActionEventByActionId.get(action.id);
@@ -3420,24 +3419,34 @@ export class ActionsService {
 
         const baseUsers = baseUsersByAction.get(action.id) ?? [];
         const completedSet = completedByAction.get(action.id) ?? new Set();
-        const failed = baseUsers.filter((user) => !completedSet.has(user.id));
-        const failedAndActive = failed.filter((user) => user.hasActiveContract);
-        const signedBeforeFailed = failedAndActive.filter(
-          (user) => getLastSignedDate(user) < event.date,
-        );
 
-        for (const user of signedBeforeFailed) {
-          idToUser.set(user.id, user);
-        }
-
-        if (!failedBySuite.has(suite.suite.id)) {
-          failedBySuite.set(suite.suite.id, new Set());
-        }
-        const suiteFailed = failedBySuite.get(suite.suite.id)!;
-        for (const user of signedBeforeFailed) {
-          suiteFailed.add(user.id);
+        for (const user of baseUsers) {
+          expectedUserIds.add(user.id);
+          if (completedSet.has(user.id)) {
+            usersWhoCompletedAnAssignedAction.add(user.id);
+          }
+          if (getLastSignedDate(user) < event.date) {
+            usersWithAnAssignmentSinceLastSigning.add(user.id);
+          }
         }
       }
+
+      expectedBySuite.set(suite.suite.id, expectedUserIds);
+
+      const suiteFailed = new Set<number>();
+      for (const userId of expectedUserIds) {
+        if (
+          !usersWhoCompletedAnAssignedAction.has(userId) &&
+          usersWithAnAssignmentSinceLastSigning.has(userId)
+        ) {
+          const user = activeUsersById.get(userId)!;
+          if (user.hasActiveContract) {
+            suiteFailed.add(userId);
+            idToUser.set(user.id, user);
+          }
+        }
+      }
+      failedBySuite.set(suite.suite.id, suiteFailed);
     }
 
     const allExpectedUsers = new Set<number>();

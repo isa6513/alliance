@@ -240,9 +240,9 @@ const ContractPage: React.FC = () => {
                 What happens if I don’t follow the contract?
               </h3>
               <p className="text-base">
-                If you miss 3 or more of the last 10 tasks you were assigned,
-                your contract will be suspended automatically. You can re-sign
-                the contract to re-join the Alliance.
+                If you miss all assigned non-optional actions for 3 weeks in a
+                row, your contract will be suspended automatically. You can
+                re-sign the contract to re-join the Alliance.
               </p>
             </div>
             <div className="flex flex-col gap-y-1">

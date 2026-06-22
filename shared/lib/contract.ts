@@ -27,12 +27,12 @@ export const PLACEHOLDER_CONTRACT_MARKDOWN = `
 
    c. I believe the task is immoral. In this case, I will inform the strategic office of my reasoning by the deadline for the task.
 
-3. I understand that I am considered an active member, and am therefore able to participate in Alliance governance, if I have completed at least 8 of the last 10 tasks I was assigned.
+3. I understand that if I miss all assigned non-optional actions for 3 weeks in a row, my contract will be suspended automatically.
 `.trim();
 
 export const CONTRACT_NOTES = [
   "You can terminate your membership at any time.",
-  "If you miss 3 or more of the last 10 tasks you were assigned, your contract will be suspended automatically. You can re-sign the contract to re-join the Alliance.",
+  "If you miss all assigned non-optional actions for 3 weeks in a row, your contract will be suspended automatically. You can re-sign the contract to re-join the Alliance.",
 ] as const;
 
 export function formatContractDate(dateString: string): string {

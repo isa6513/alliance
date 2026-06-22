@@ -234,9 +234,9 @@ const FAQPage: React.FC = () => {
               </p>
 
               <p>
-                Otherwise, a member who misses 2 or more of the last 10 tasks
-                will have their contract suspended and will be unable to
-                participate in Alliance governance.
+                Otherwise, a member who misses all assigned non-optional actions
+                for 3 weeks in a row will have their contract suspended and
+                will be unable to participate in Alliance governance.
               </p>
 
               <p>

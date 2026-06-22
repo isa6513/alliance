@@ -49,4 +49,4 @@ export function getTimeLeftString(
 
 export const welcomeMessage = `Thanks for opting in to action notifications from the Alliance! You'll get a text here when a new action is ready to complete. Reply STOP to opt out.`;
 
-export const suspensionMessage = `You did not fully complete any of the last three weeks of actions, so we've suspended your Alliance contract automatically. `;
+export const suspensionMessage = `You missed all assigned non-optional actions for 3 weeks in a row, so we've suspended your Alliance contract automatically. `;

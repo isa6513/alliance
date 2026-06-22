@@ -43,12 +43,19 @@ describe('findUsersToSuspend (e2e)', () => {
     suiteName: string,
     actionName: string,
     baseDate: Date,
+    options: {
+      cohortExpression?: Action['cohortExpression'];
+      priority?: number;
+      suite?: ActionSuite;
+    } = {},
   ) => {
-    const suite = await suiteRepo.save(
-      suiteRepo.create({
-        name: suiteName,
-      }),
-    );
+    const suite =
+      options.suite ??
+      (await suiteRepo.save(
+        suiteRepo.create({
+          name: suiteName,
+        }),
+      ));
 
     const action = await actionRepo.save(
       actionRepo.create({
@@ -59,9 +66,13 @@ describe('findUsersToSuspend (e2e)', () => {
         shortDescription: 'Short description',
         suite,
         visibilityMode: VisibilityMode.Public,
+        cohortExpression: options.cohortExpression ?? {
+          type: 'Tag',
+          tagId: ctx.defaultTag.id,
+        },
+        priority: options.priority,
         preventCompletion: false,
         type: ActionTaskType.Activity,
-        cohortExpression: { type: 'Tag', tagId: ctx.defaultTag.id },
       }),
     );
 
@@ -375,5 +386,97 @@ describe('findUsersToSuspend (e2e)', () => {
 
     const afterResigning = await actionsService.findUsersToSuspend(now);
     expect(afterResigning.usersToSuspend).toHaveLength(0);
+  });
+
+  it('counts a user as failing a suite only when they miss every assigned action', async () => {
+    const multiActionFailingUser = await userService.create({
+      email: 'suspension-multi-action@example.com',
+      password: 'Password123!',
+      name: 'Multi-Action Failing User',
+      tags: [ctx.defaultTag],
+      contractEvents: [
+        {
+          type: ContractEventType.SIGNED,
+          date: new Date('2023-03-15T00:00:00Z'),
+          automatic: false,
+          contractId: ctx.defaultContractId,
+        },
+      ],
+    });
+    const multiActionCompletingUser = await userService.create({
+      email: 'suspension-multi-action-completing@example.com',
+      password: 'Password123!',
+      name: 'Multi-Action Completing User',
+      tags: [ctx.defaultTag],
+      contractEvents: [
+        {
+          type: ContractEventType.SIGNED,
+          date: new Date('2023-03-15T00:00:00Z'),
+          automatic: false,
+          contractId: ctx.defaultContractId,
+        },
+      ],
+    });
+
+    const assignedTestUsers = {
+      type: 'Manual' as const,
+      userIds: [multiActionFailingUser.id, multiActionCompletingUser.id],
+    };
+    const onlyCompletingUser = {
+      type: 'Manual' as const,
+      userIds: [completingUser.id],
+    };
+
+    await createCompletedSuiteAction(
+      'Multi-Action Suite One',
+      'Multi-Action One',
+      new Date('2023-03-16T00:00:00Z'),
+      { cohortExpression: assignedTestUsers },
+    );
+    const multiActionSuiteTwo = await suiteRepo.save(
+      suiteRepo.create({ name: 'Multi-Action Suite Two' }),
+    );
+    await createCompletedSuiteAction(
+      'Multi-Action Suite Two',
+      'Restricted First Action',
+      new Date('2023-03-20T00:00:00Z'),
+      {
+        cohortExpression: onlyCompletingUser,
+        priority: 0,
+        suite: multiActionSuiteTwo,
+      },
+    );
+    const assignedSecondAction = await createCompletedSuiteAction(
+      'Multi-Action Suite Two',
+      'Assigned Second Action',
+      new Date('2023-03-20T00:00:00Z'),
+      {
+        cohortExpression: assignedTestUsers,
+        priority: 1,
+        suite: multiActionSuiteTwo,
+      },
+    );
+    await createCompletedSuiteAction(
+      'Multi-Action Suite Three',
+      'Multi-Action Three',
+      new Date('2023-03-24T00:00:00Z'),
+      { cohortExpression: assignedTestUsers },
+    );
+    await activityRepo.save(
+      activityRepo.create({
+        actionId: assignedSecondAction.id,
+        userId: multiActionCompletingUser.id,
+        type: ActionActivityType.USER_COMPLETED,
+      }),
+    );
+
+    const result = await actionsService.findUsersToSuspend(now);
+
+    expect(result.usersToSuspend.map((user) => user.id)).toContain(
+      multiActionFailingUser.id,
+    );
+    expect(result.usersToSuspend.map((user) => user.id)).not.toContain(
+      multiActionCompletingUser.id,
+    );
   });
 });
