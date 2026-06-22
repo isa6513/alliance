@@ -61,6 +61,7 @@ describe('findUsersToSuspend (e2e)', () => {
         visibilityMode: VisibilityMode.Public,
         preventCompletion: false,
         type: ActionTaskType.Activity,
+        cohortExpression: { type: 'Tag', tagId: ctx.defaultTag.id },
       }),
     );
 
@@ -213,6 +214,7 @@ describe('findUsersToSuspend (e2e)', () => {
         priority: 0,
         preventCompletion: false,
         type: ActionTaskType.Activity,
+        cohortExpression: { type: 'Tag', tagId: ctx.defaultTag.id },
       }),
     );
 
@@ -291,6 +293,7 @@ describe('findUsersToSuspend (e2e)', () => {
         preventCompletion: false,
         type: ActionTaskType.Activity,
         optional: true,
+        cohortExpression: { type: 'Tag', tagId: ctx.defaultTag.id },
       }),
     );
     await eventRepo.save([
