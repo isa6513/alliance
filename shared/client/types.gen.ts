@@ -3259,6 +3259,18 @@ export type MemberCompletionRetentionCohortDto = {
     points: Array<MemberCompletionRetentionPointDto>;
 };
 
+export type MemberReliabilityRateDto = {
+    assignedCount: number;
+    completedCount: number;
+    completionRate: number;
+};
+
+export type MemberReliabilityWindowDto = {
+    weeks: number;
+    firstWeek: MemberReliabilityRateDto;
+    fourthWeekOrLater: MemberReliabilityRateDto;
+};
+
 export type PlatformTenureCohortActionStatsDto = {
     actionId: number;
     actionName: string;
@@ -11045,6 +11057,30 @@ export type AnalyticsGetMemberCompletionRetentionAdminResponses = {
 };
 
 export type AnalyticsGetMemberCompletionRetentionAdminResponse = AnalyticsGetMemberCompletionRetentionAdminResponses[keyof AnalyticsGetMemberCompletionRetentionAdminResponses];
+
+export type AnalyticsGetMemberReliabilityWindowAdminData = {
+    body?: never;
+    path?: never;
+    query: {
+        weeks: number;
+    };
+    url: '/analytics/member-reliability-window';
+};
+
+export type AnalyticsGetMemberReliabilityWindowAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetMemberReliabilityWindowAdminError = AnalyticsGetMemberReliabilityWindowAdminErrors[keyof AnalyticsGetMemberReliabilityWindowAdminErrors];
+
+export type AnalyticsGetMemberReliabilityWindowAdminResponses = {
+    200: MemberReliabilityWindowDto;
+};
+
+export type AnalyticsGetMemberReliabilityWindowAdminResponse = AnalyticsGetMemberReliabilityWindowAdminResponses[keyof AnalyticsGetMemberReliabilityWindowAdminResponses];
 
 export type AnalyticsGetPlatformTenureCohortAdminData = {
     body?: never;

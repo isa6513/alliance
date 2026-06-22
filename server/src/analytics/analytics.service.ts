@@ -34,6 +34,7 @@ import {
   MemberCompletionRetentionCohort,
   MemberCompletionRetentionPoint,
 } from './member-completion-retention.dto';
+import { MemberReliabilityWindow } from './member-reliability-window.dto';
 import { PlatformTenureCohortStats } from './platform-tenure-cohort.dto';
 import { TimeSpentForUser } from './timespent.dto';
 
@@ -620,7 +621,10 @@ ORDER BY pp.total_session_duration_seconds DESC
     return date.toISOString().split('T')[0];
   }
 
-  async getMemberCompletionRetentionByCohort(): Promise<
+  async getMemberCompletionRetentionByCohort(
+    includeOptional = true,
+    startInFollowingWeek = false,
+  ): Promise<
     MemberCompletionRetentionCohort[]
   > {
     const signedEvents = await this.contractEventRepository
@@ -683,7 +687,11 @@ ORDER BY pp.total_session_duration_seconds DESC
     }[] = [];
 
     for (const action of actions) {
-      if (action.publicOnly || action.onboarding) {
+      if (
+        action.publicOnly ||
+        action.onboarding ||
+        (!includeOptional && action.optional)
+      ) {
         continue;
       }
       const sortedEvents = (action.events ?? []).sort(
@@ -746,8 +754,19 @@ ORDER BY pp.total_session_duration_seconds DESC
     const cohortIndexByUserId = new Map<number, number>();
     const cohortMembers = new Map<number, Set<number>>();
     for (const [userId, signedAt] of memberSignedAtByUserId) {
+      const firstAssignmentDate = new Date(signedAt);
+      if (startInFollowingWeek) {
+        firstAssignmentDate.setUTCHours(0, 0, 0, 0);
+        const daysUntilNextMonday = 7 - ((firstAssignmentDate.getUTCDay() + 6) % 7);
+        firstAssignmentDate.setUTCDate(
+          firstAssignmentDate.getUTCDate() + daysUntilNextMonday,
+        );
+      }
       const cohortIndex = actionGroups.findIndex(
-        (group) => signedAt < group.startAt,
+        (group) =>
+          startInFollowingWeek
+            ? group.startAt >= firstAssignmentDate
+            : signedAt < group.startAt,
       );
       if (cohortIndex < 0) {
         continue;
@@ -864,6 +883,63 @@ ORDER BY pp.total_session_duration_seconds DESC
           points,
         };
       });
+  }
+
+  async getMemberReliabilityWindow(
+    weeks: number,
+  ): Promise<MemberReliabilityWindow> {
+    const normalizedWeeks = Math.max(1, Math.floor(weeks));
+    const cohorts = await this.getMemberCompletionRetentionByCohort(
+      false,
+      true,
+    );
+    const points = cohorts.flatMap((cohort) => cohort.points);
+    const latestActionIndex = Math.max(
+      ...points.map((point) => point.actionIndex),
+    );
+    const earliestActionIndex = latestActionIndex - normalizedWeeks + 1;
+
+    const summarize = (
+      includePoint: (point: MemberCompletionRetentionPoint) => boolean,
+    ): MemberReliabilityWindow['firstWeek'] => {
+      const matchingPoints = points.filter(
+        (point) =>
+          point.actionIndex >= earliestActionIndex && includePoint(point),
+      );
+      const assignedCount = matchingPoints.reduce(
+        (total, point) => total + point.weekJoinedCount,
+        0,
+      );
+      const completedCount = matchingPoints.reduce(
+        (total, point) => total + point.weekCompletedCount,
+        0,
+      );
+      return {
+        assignedCount,
+        completedCount,
+        completionRate:
+          assignedCount > 0 ? completedCount / assignedCount : 0,
+      };
+    };
+
+    if (!Number.isFinite(latestActionIndex)) {
+      const emptyRate = {
+        assignedCount: 0,
+        completedCount: 0,
+        completionRate: 0,
+      };
+      return {
+        weeks: normalizedWeeks,
+        firstWeek: emptyRate,
+        fourthWeekOrLater: emptyRate,
+      };
+    }
+
+    return {
+      weeks: normalizedWeeks,
+      firstWeek: summarize((point) => point.weekIndex === 0),
+      fourthWeekOrLater: summarize((point) => point.weekIndex >= 3),
+    };
   }
 
   async getPlatformTenureCohortStats(

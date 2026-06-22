@@ -18,6 +18,7 @@ import { ContractStatusPointDto } from './contract-status-history.dto';
 import { DailyStatsDto } from './dailystats.dto';
 import { InviteFunnelDto } from './invite-funnel.dto';
 import { MemberCompletionRetentionCohortDto } from './member-completion-retention.dto';
+import { MemberReliabilityWindowDto } from './member-reliability-window.dto';
 import { PlatformTenureCohortStatsDto } from './platform-tenure-cohort.dto';
 import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { TimeSpentForUserDto } from './timespent.dto';
@@ -99,6 +100,27 @@ export class AnalyticsController {
     return cohorts.map(
       (cohort) => new MemberCompletionRetentionCohortDto(cohort),
     );
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('member-reliability-window')
+  @ApiOkResponse({ type: MemberReliabilityWindowDto })
+  @ApiQuery({ name: 'weeks', required: true, type: Number })
+  async getMemberReliabilityWindowAdmin(
+    @Query('weeks') weeks: string,
+  ): Promise<MemberReliabilityWindowDto> {
+    const parsedWeeks = Number(weeks);
+    if (
+      !Number.isFinite(parsedWeeks) ||
+      !Number.isInteger(parsedWeeks) ||
+      parsedWeeks < 1
+    ) {
+      throw new BadRequestException('weeks must be a whole number of at least 1');
+    }
+    const stats = await this.analyticsService.getMemberReliabilityWindow(
+      parsedWeeks,
+    );
+    return new MemberReliabilityWindowDto(stats);
   }
 
   @UseGuards(AdminGuard)
