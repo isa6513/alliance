@@ -60,13 +60,13 @@ import {
   User,
 } from 'src/user/entities/user.entity';
 import {
+  computeContractSignedAfterOnboardingStart,
   computeIsAwayDuringAnyOfMemberAction,
   computeIsTaggedOrInManualCohort,
   computeShouldParticipate,
   computeShouldParticipateInAction,
 } from 'src/utils/action-user';
 import { CachedFilter } from 'src/utils/cached-filter';
-import { findLeast } from 'src/utils/filter';
 import { startDatePriorityComparator } from 'src/utils/general-update';
 import type { IsRelation, Relations } from 'src/utils/Repository';
 import {
@@ -1798,24 +1798,14 @@ export class ActionsService {
       return false;
     }
 
-    if (action.onboarding) {
-      const earliestContractEvent = findLeast(
-        user.contractEvents ?? [],
-        (a, b) => a.date.getTime() - b.date.getTime(),
-      );
-      const earliestActionEvent = findLeast(
-        action.events ?? [],
-        (a, b) => a.date.getTime() - b.date.getTime(),
-      );
-      if (!earliestContractEvent) {
-        return inCohort;
-      }
-      if (
-        !earliestActionEvent ||
-        earliestContractEvent.date < earliestActionEvent.date
-      ) {
-        return false;
-      }
+    if (
+      action.onboarding &&
+      !computeContractSignedAfterOnboardingStart({
+        user,
+        memberActionPhaseStart: action.memberActionPhase.event?.date ?? null,
+      })
+    ) {
+      return false;
     }
 
     return inCohort;

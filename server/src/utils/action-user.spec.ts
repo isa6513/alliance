@@ -1,7 +1,22 @@
 import { ActionStatus } from '../actions/entities/action-event.entity';
-import { computeShouldParticipateInAction } from './action-user';
+import type { User } from '../user/entities/user.entity';
+import {
+  computeContractSignedAfterOnboardingStart,
+  computeShouldParticipateInAction,
+} from './action-user';
 
 type Params = Parameters<typeof computeShouldParticipateInAction>[0];
+
+const PHASE_START = new Date('2020-01-01');
+
+function userWithContractSignedAt(
+  date: Date | null,
+): Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'> {
+  return {
+    contractEvents: date ? [{ date }] : [],
+    hasActiveContractInFullRange: () => false,
+  } as unknown as Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'>;
+}
 
 function makeAction(
   opts: {
@@ -90,5 +105,74 @@ describe('computeShouldParticipateInAction', () => {
         ),
       ).toBe(true);
     });
+  });
+
+  describe('onboarding join timing', () => {
+    // An onboarding action targets new members: a user who joined before the
+    // member-action phase began (an existing member) is not expected to take it,
+    // even though they may be in the cohort.
+    it('excludes an existing member who joined before the phase began', () => {
+      expect(
+        computeShouldParticipateInAction(
+          input({
+            action: makeAction({ onboarding: true }),
+            user: userWithContractSignedAt(
+              new Date(PHASE_START.getTime() - 1000),
+            ),
+          }),
+        ),
+      ).toBe(false);
+    });
+
+    it('includes a new member who joined at/after the phase began', () => {
+      expect(
+        computeShouldParticipateInAction(
+          input({
+            action: makeAction({ onboarding: true }),
+            user: userWithContractSignedAt(
+              new Date(PHASE_START.getTime() + 1000),
+            ),
+          }),
+        ),
+      ).toBe(true);
+    });
+  });
+});
+
+describe('computeJoinedInTimeForOnboarding', () => {
+  it('treats a user with no contract events as in time', () => {
+    expect(
+      computeContractSignedAfterOnboardingStart({
+        user: userWithContractSignedAt(null),
+        memberActionPhaseStart: PHASE_START,
+      }),
+    ).toBe(true);
+  });
+
+  it('is out of time when joined before the phase began', () => {
+    expect(
+      computeContractSignedAfterOnboardingStart({
+        user: userWithContractSignedAt(new Date(PHASE_START.getTime() - 1000)),
+        memberActionPhaseStart: PHASE_START,
+      }),
+    ).toBe(false);
+  });
+
+  it('is in time when joined exactly at the phase start', () => {
+    expect(
+      computeContractSignedAfterOnboardingStart({
+        user: userWithContractSignedAt(PHASE_START),
+        memberActionPhaseStart: PHASE_START,
+      }),
+    ).toBe(true);
+  });
+
+  it('is out of time when a contract holder has no member-action phase start', () => {
+    expect(
+      computeContractSignedAfterOnboardingStart({
+        user: userWithContractSignedAt(PHASE_START),
+        memberActionPhaseStart: null,
+      }),
+    ).toBe(false);
   });
 });

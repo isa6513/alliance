@@ -26,6 +26,43 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
 }
 
 /**
+ * Onboarding "joined in time?" gate. An onboarding action targets *new* members
+ * only, so a user qualifies just when they joined (signed their first contract)
+ * at or after the member-action phase began. Existing members — who joined
+ * before — are excluded.
+ *
+ * Rules:
+ * - A user with no contract events counts as in time (e.g. a brand-new signup
+ *   who hasn't been issued a contract event yet).
+ * - When the action has no member-action phase start (`memberActionPhaseStart`
+ *   is null) but the user *does* have a contract event, they're out of time —
+ *   you can't be onboarded into a phase that hasn't started.
+ *
+ * This is the single source of truth for the rule. It is consumed by all three
+ * action↔user participation predicates: {@link computeShouldParticipateInAction}
+ * (self-view `shouldParticipate`), {@link computeShouldParticipate} (recipient/
+ * roster), and `ActionsService.isEligibleForAction` (`canParticipate`).
+ */
+export function computeContractSignedAfterOnboardingStart(params: {
+  user: Pick<User, 'contractEvents'>;
+  memberActionPhaseStart: Date | null;
+}): boolean {
+  const { user, memberActionPhaseStart } = params;
+
+  const earliestContractEvent = findLeast(
+    user.contractEvents ?? [],
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  );
+  if (!earliestContractEvent) {
+    return true;
+  }
+  if (!memberActionPhaseStart) {
+    return false;
+  }
+  return earliestContractEvent.date >= memberActionPhaseStart;
+}
+
+/**
  * Self-view "is this user expected to take this action?" predicate — source of
  * the viewer's own `ActionDto.shouldParticipate`.
  *
@@ -33,7 +70,10 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
  * driven by a precomputed cohort-member set, for notifications/roster). This one
  * consumes the full cohort-*expression* result (`computeIsInCohortExpression`)
  * as `inCohort`, and stays pure/sync so the caller controls when the DB-hitting
- * cohort evaluation runs. Not yet unified.
+ * cohort evaluation runs. The two still differ in *how* they obtain cohort
+ * membership, but the onboarding and contract rules they apply are now shared
+ * ({@link computeContractSignedAfterOnboardingStart} /
+ * {@link computeIsContractActiveDuringEntireMemberAction}).
  */
 export function computeShouldParticipateInAction(params: {
   action: Pick<Action, 'events' | 'memberActionPhase' | 'onboarding'>;
@@ -48,12 +88,17 @@ export function computeShouldParticipateInAction(params: {
   const hasMemberActionEvent = action.events.some(
     (event) => event.newStatus === ActionStatus.MemberAction,
   );
+  // Onboarding actions gate on *when the user joined*; everything else gates on
+  // *having an active contract across the phase*. Both anchor on the same
+  // member-action phase (`memberActionPhase`).
+  const meetsActionSpecificRule = action.onboarding
+    ? computeContractSignedAfterOnboardingStart({
+        user,
+        memberActionPhaseStart: action.memberActionPhase.event?.date ?? null,
+      })
+    : computeIsContractActiveDuringEntireMemberAction({ action, user });
   return (
-    hasMemberActionEvent &&
-    !dismissed &&
-    inCohort &&
-    (action.onboarding ||
-      computeIsContractActiveDuringEntireMemberAction({ action, user }))
+    hasMemberActionEvent && !dismissed && inCohort && meetsActionSpecificRule
   );
 }
 
@@ -188,14 +233,16 @@ export function computeShouldParticipate(params: {
     return false;
   }
 
-  if (onboarding) {
-    const earliestContractEvent = findLeast(
-      user.contractEvents ?? [],
-      (a, b) => a.date.getTime() - b.date.getTime(),
-    );
-    if (earliestContractEvent && earliestContractEvent.date < eventDate) {
-      return false;
-    }
+  if (
+    onboarding &&
+    !computeContractSignedAfterOnboardingStart({
+      user,
+      // This recipient path is driven per member-action event, so the event
+      // being processed *is* the phase start for the purposes of this rule.
+      memberActionPhaseStart: eventDate,
+    })
+  ) {
+    return false;
   }
 
   if (includeSuspended) {
