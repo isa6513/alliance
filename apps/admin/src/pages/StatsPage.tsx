@@ -198,6 +198,14 @@ const parseIsoDate = (value?: string | null): Date | null => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
+const asRecordArray = (value: unknown): Array<Record<string, unknown>> =>
+  Array.isArray(value)
+    ? value.filter(
+        (entry): entry is Record<string, unknown> =>
+          typeof entry === "object" && entry !== null,
+      )
+    : [];
+
 const parseLocalDateInput = (
   value?: string | null,
   endOfDay = false,
@@ -330,6 +338,9 @@ const StatsPage: React.FC = () => {
   const [memberReliabilityError, setMemberReliabilityError] = useState<
     string | null
   >(null);
+  const [missedActions, setMissedActions] = useState<unknown>(null);
+  const [missedActionsLoading, setMissedActionsLoading] =
+    useState<boolean>(false);
   const [dailyStatsTableOpen, setDailyStatsTableOpen] = useState(false);
   const [actionStatsTableOpen, setActionStatsTableOpen] = useState(false);
   const [weekRange, setWeekRange] = useState({ min: 0, max: 20 });
@@ -669,6 +680,23 @@ const StatsPage: React.FC = () => {
   useEffect(() => {
     void loadMemberReliabilityWindow(5);
   }, [loadMemberReliabilityWindow]);
+
+  const loadMissedActions = useCallback(async () => {
+    setMissedActionsLoading(true);
+    try {
+      const response = await client.get({ url: "/analytics/missed-actions" });
+      setMissedActions(response.data ?? null);
+    } catch (err) {
+      console.error("Failed to load missed actions", err);
+      setMissedActions(null);
+    } finally {
+      setMissedActionsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadMissedActions();
+  }, [loadMissedActions]);
 
   const handleRecalculateActionStats = useCallback(async () => {
     setActionStatsLoading(true);
@@ -1586,6 +1614,23 @@ const StatsPage: React.FC = () => {
     setHoveredRetentionCell(null);
   }, []);
 
+  const missedActionGroups = useMemo(() => {
+    if (typeof missedActions !== "object" || missedActions === null) {
+      return null;
+    }
+    const stats = missedActions as Record<string, unknown>;
+    return [
+      {
+        title: "Missed last action",
+        members: asRecordArray(stats.missedLastAction),
+      },
+      {
+        title: "Missed last two actions",
+        members: asRecordArray(stats.missedLastTwoActions),
+      },
+    ];
+  }, [missedActions]);
+
   return (
     <div className="p-6 md:p-8 space-y-6 text-gray-900 mx-auto">
       {aggregateStatsLoading ? (
@@ -1681,6 +1726,63 @@ const StatsPage: React.FC = () => {
           </div>
         </div>
       ) : null}
+
+      <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="border-b border-gray-200 px-4 py-3">
+          <h3 className="font-semibold text-gray-900">Recent missed actions</h3>
+          <p className="text-xs text-gray-500">
+            Active members whose most recent completed non-optional action was
+            missed.
+          </p>
+        </div>
+        <div className="grid gap-4 p-4 md:grid-cols-2">
+          {missedActionsLoading && !missedActions ? (
+            <p className="text-sm text-gray-600">Loading missed actions...</p>
+          ) : missedActionGroups ? (
+            missedActionGroups.map(({ title, members }) => (
+              <div
+                key={title}
+                className="rounded-md border border-gray-200 p-4"
+              >
+                <div className="flex items-baseline justify-between gap-3">
+                  <h4 className="text-sm font-semibold text-gray-900">
+                    {title}
+                  </h4>
+                  <span className="text-3xl font-bold text-gray-900">
+                    {members.length}
+                  </span>
+                </div>
+                {members.length > 0 ? (
+                  <ul className="mt-3 max-h-64 space-y-1 overflow-y-auto text-sm">
+                    {members.map((member) => (
+                      <li
+                        key={String(member.userId)}
+                        className="flex justify-between gap-3"
+                      >
+                        <a
+                          href={`/member/${String(member.userId)}`}
+                          className="min-w-0 truncate text-link hover:underline"
+                        >
+                          {String(member.name)}
+                        </a>
+                        <span className="shrink-0 text-xs text-gray-500">
+                          {String(member.lastActionName)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-3 text-sm text-gray-500">No members.</p>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-gray-600">
+              Unable to load missed actions.
+            </p>
+          )}
+        </div>
+      </div>
 
       <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white">
         <div className="flex flex-col gap-3 border-b border-gray-200 px-4 py-3 md:flex-row md:items-end md:justify-between">

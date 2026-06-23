@@ -19,6 +19,7 @@ import { DailyStatsDto } from './dailystats.dto';
 import { InviteFunnelDto } from './invite-funnel.dto';
 import { MemberCompletionRetentionCohortDto } from './member-completion-retention.dto';
 import { MemberReliabilityWindowDto } from './member-reliability-window.dto';
+import { MissedActionsDto } from './missed-actions.dto';
 import { PlatformTenureCohortStatsDto } from './platform-tenure-cohort.dto';
 import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { TimeSpentForUserDto } from './timespent.dto';
@@ -121,6 +122,14 @@ export class AnalyticsController {
       parsedWeeks,
     );
     return new MemberReliabilityWindowDto(stats);
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('missed-actions')
+  @ApiOkResponse({ type: MissedActionsDto })
+  async getMissedActionsAdmin(): Promise<MissedActionsDto> {
+    const stats = await this.analyticsService.getMissedActions();
+    return new MissedActionsDto(stats);
   }
 
   @UseGuards(AdminGuard)

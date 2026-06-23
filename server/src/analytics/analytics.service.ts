@@ -35,6 +35,7 @@ import {
   MemberCompletionRetentionPoint,
 } from './member-completion-retention.dto';
 import { MemberReliabilityWindow } from './member-reliability-window.dto';
+import { MissedActions } from './missed-actions.dto';
 import { PlatformTenureCohortStats } from './platform-tenure-cohort.dto';
 import { TimeSpentForUser } from './timespent.dto';
 
@@ -934,6 +935,113 @@ ORDER BY pp.total_session_duration_seconds DESC
       firstWeek: summarize((point) => point.weekIndex === 0),
       fourthWeekOrLater: summarize((point) => point.weekIndex >= 3),
     };
+  }
+
+  async getMissedActions(): Promise<MissedActions> {
+    const now = new Date();
+    const actions = await this.actionRepository.find({
+      relations: { events: true },
+    });
+    const completedActions = actions
+      .filter(
+        (action) =>
+          !action.onboarding && !action.optional && !action.publicOnly,
+      )
+      .flatMap((action) => {
+        const events = action.events.toSorted(
+          (a, b) => a.date.getTime() - b.date.getTime(),
+        );
+        const memberActionEvent = events.find(
+          (event) => event.newStatus === ActionStatus.MemberAction,
+        );
+        if (!memberActionEvent) return [];
+
+        const deadlineEvent = events.find(
+          (event) => event.date > memberActionEvent.date,
+        );
+        if (!deadlineEvent || deadlineEvent.date > now) return [];
+
+        return [{ action, memberActionEvent }];
+      })
+      .sort(
+        (a, b) =>
+          b.memberActionEvent.date.getTime() -
+          a.memberActionEvent.date.getTime(),
+      );
+
+    if (completedActions.length === 0) {
+      return { missedLastAction: [], missedLastTwoActions: [] };
+    }
+
+    const baseUsersByAction =
+      await this.actionEventRecipientService.findBaseUsersForEvents({
+        entries: completedActions.map(({ action, memberActionEvent }) => ({
+          action,
+          eventId: memberActionEvent.id,
+        })),
+      });
+    const activeUsers = new Map<number, User>();
+    const participantsByAction = new Map<number, Set<number>>();
+    for (const { action } of completedActions) {
+      const activeParticipants = (
+        baseUsersByAction.get(action.id) ?? []
+      ).filter((user) => user.hasActiveContract);
+      participantsByAction.set(
+        action.id,
+        new Set(activeParticipants.map((user) => user.id)),
+      );
+      for (const user of activeParticipants) {
+        activeUsers.set(user.id, user);
+      }
+    }
+
+    const completionActivities = await this.actionActivityRepository.find({
+      where: {
+        userId: In(Array.from(activeUsers.keys())),
+        actionId: In(completedActions.map(({ action }) => action.id)),
+        type: ActionActivityType.USER_COMPLETED,
+      },
+      select: { userId: true, actionId: true },
+    });
+    const completedByUserAction = new Set(
+      completionActivities.map(
+        (activity) => `${activity.userId}:${activity.actionId}`,
+      ),
+    );
+
+    const missedLastAction: MissedActions['missedLastAction'] = [];
+    const missedLastTwoActions: MissedActions['missedLastTwoActions'] = [];
+    for (const user of activeUsers.values()) {
+      const assignedActions = completedActions.filter(({ action }) =>
+        participantsByAction.get(action.id)?.has(user.id),
+      );
+      const [lastAction, previousAction] = assignedActions;
+      const missedLast =
+        lastAction &&
+        !completedByUserAction.has(`${user.id}:${lastAction.action.id}`);
+      if (!missedLast) continue;
+
+      const member = {
+        userId: user.id,
+        name: user.name,
+        lastActionName: lastAction.action.name,
+      };
+      missedLastAction.push(member);
+      if (
+        previousAction &&
+        !completedByUserAction.has(`${user.id}:${previousAction.action.id}`)
+      ) {
+        missedLastTwoActions.push(member);
+      }
+    }
+
+    const byName = (
+      a: MissedActions['missedLastAction'][number],
+      b: MissedActions['missedLastAction'][number],
+    ) => a.name.localeCompare(b.name) || a.userId - b.userId;
+    missedLastAction.sort(byName);
+    missedLastTwoActions.sort(byName);
+    return { missedLastAction, missedLastTwoActions };
   }
 
   async getPlatformTenureCohortStats(
