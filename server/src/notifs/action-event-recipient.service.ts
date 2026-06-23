@@ -141,23 +141,6 @@ export class ActionEventRecipientService {
     return evaluateCohortExpression(expression, ctx);
   }
 
-  getNextEvent(params: {
-    events: ActionEvent[];
-    currentEventId: number;
-  }): ActionEvent | null {
-    const { events, currentEventId } = params;
-    const sortedEvents = events.toSorted(
-      (a, b) => a.date.getTime() - b.date.getTime(),
-    );
-    const currentEventIndex = sortedEvents.findIndex(
-      (event) => event.id === currentEventId,
-    );
-    if (currentEventIndex === -1) {
-      return null;
-    }
-    return sortedEvents[currentEventIndex + 1] ?? null;
-  }
-
   /**
    * Batched version of findBaseUsersForEvent: loads shared data once
    * (active users, dismissed activities, cohort expressions) and filters
@@ -219,10 +202,7 @@ export class ActionEventRecipientService {
         continue;
       }
 
-      const deadlineEvent = this.getNextEvent({
-        events,
-        currentEventId: eventId,
-      });
+      const deadlineDate = action.memberActionPhase.deadline;
       const usersDismissed = dismissedByAction.get(action.id) ?? new Set();
       const cohortMemberIds = await cohortByAction.get(action.id)!;
 
@@ -230,7 +210,7 @@ export class ActionEventRecipientService {
         (user) =>
           computeShouldParticipate({
             eventDate: event.date,
-            deadlineDate: deadlineEvent?.date ?? null,
+            deadlineDate: deadlineDate,
             cohortMemberIds,
             user,
             userDismissed: usersDismissed.has(user.id),
@@ -240,7 +220,7 @@ export class ActionEventRecipientService {
           }) &&
           !user.isAwayAtAnyPointInRange({
             startDate: event.date,
-            endDate: deadlineEvent?.date,
+            endDate: deadlineDate,
           }),
       );
 

@@ -25,6 +25,7 @@ import {
   Unique,
 } from 'typeorm';
 import type { CohortExpression } from '../cohort-expression.types';
+import { memberActionDeadlineEvent } from '../utils/action-event';
 import { ActionActivity } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 import { ActionFormVariant } from './action-form-variant.entity';
@@ -410,16 +411,9 @@ export class Action {
         break populateCache;
       }
 
-      const deadlineEvent = findLeast(
-        this.events,
-        (a, b) => a.date.getTime() - b.date.getTime(),
-        (event) =>
-          event.date > memberActionEvent.date &&
-          event.newStatus !== ActionStatus.MemberAction,
-      );
       this._memberActionPhase = {
         event: memberActionEvent,
-        deadline: deadlineEvent?.date ?? null,
+        deadline: memberActionDeadlineEvent(this.events)?.date ?? null,
       };
     }
     return this._memberActionPhase;

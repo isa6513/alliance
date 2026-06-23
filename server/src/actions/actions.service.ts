@@ -3237,12 +3237,9 @@ export class ActionsService {
         }
         const memberEvent = memberActionEventByActionId.get(action.id);
         if (memberEvent) {
-          const deadlineEvent = this.actionEventRecipientService.getNextEvent({
-            events: action.events,
-            currentEventId: memberEvent.id,
-          });
-          if (deadlineEvent) {
-            deadlineDateByActionId.set(action.id, deadlineEvent.date);
+          const deadlineDate = action.memberActionPhase.deadline;
+          if (deadlineDate) {
+            deadlineDateByActionId.set(action.id, deadlineDate);
           }
         }
       }
@@ -3343,10 +3340,7 @@ export class ActionsService {
         if (!event) continue;
 
         const dismissedSet = dismissedByAction.get(action.id) ?? new Set();
-        const deadlineEvent = this.actionEventRecipientService.getNextEvent({
-          events: action.events,
-          currentEventId: event.id,
-        });
+        const deadlineDate = action.memberActionPhase.deadline;
 
         const baseCandidates = activeUsers;
 
@@ -3359,7 +3353,7 @@ export class ActionsService {
           (user) =>
             computeShouldParticipate({
               eventDate: event.date,
-              deadlineDate: deadlineEvent?.date ?? null,
+              deadlineDate: deadlineDate,
               cohortMemberIds,
               user,
               userDismissed: dismissedSet.has(user.id),
@@ -3367,7 +3361,7 @@ export class ActionsService {
             }) &&
             !user.isAwayAtAnyPointInRange({
               startDate: event.date,
-              endDate: deadlineEvent?.date,
+              endDate: deadlineDate,
             }),
         );
 

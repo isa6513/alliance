@@ -10,6 +10,7 @@ import {
   ActionStatus,
 } from 'src/actions/entities/action-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
+import { memberActionDeadlineEvent } from 'src/actions/utils/action-event';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import {
@@ -624,9 +625,7 @@ ORDER BY pp.total_session_duration_seconds DESC
   async getMemberCompletionRetentionByCohort(
     includeOptional = true,
     startInFollowingWeek = false,
-  ): Promise<
-    MemberCompletionRetentionCohort[]
-  > {
+  ): Promise<MemberCompletionRetentionCohort[]> {
     const signedEvents = await this.contractEventRepository
       .createQueryBuilder('event')
       .select('user.id', 'userId')
@@ -706,13 +705,9 @@ ORDER BY pp.total_session_duration_seconds DESC
         continue;
       }
 
-      const memberActionEndEvent = sortedEvents.find(
-        (event) =>
-          event.date > memberActionEvent.date &&
-          event.newStatus !== ActionStatus.MemberAction,
-      );
+      const memberActionDeadlineDate = action.memberActionPhase.deadline;
 
-      if (!memberActionEndEvent || memberActionEndEvent.date > now) {
+      if (!memberActionDeadlineDate || memberActionDeadlineDate > now) {
         continue;
       }
 
@@ -757,16 +752,16 @@ ORDER BY pp.total_session_duration_seconds DESC
       const firstAssignmentDate = new Date(signedAt);
       if (startInFollowingWeek) {
         firstAssignmentDate.setUTCHours(0, 0, 0, 0);
-        const daysUntilNextMonday = 7 - ((firstAssignmentDate.getUTCDay() + 6) % 7);
+        const daysUntilNextMonday =
+          7 - ((firstAssignmentDate.getUTCDay() + 6) % 7);
         firstAssignmentDate.setUTCDate(
           firstAssignmentDate.getUTCDate() + daysUntilNextMonday,
         );
       }
-      const cohortIndex = actionGroups.findIndex(
-        (group) =>
-          startInFollowingWeek
-            ? group.startAt >= firstAssignmentDate
-            : signedAt < group.startAt,
+      const cohortIndex = actionGroups.findIndex((group) =>
+        startInFollowingWeek
+          ? group.startAt >= firstAssignmentDate
+          : signedAt < group.startAt,
       );
       if (cohortIndex < 0) {
         continue;
@@ -917,8 +912,7 @@ ORDER BY pp.total_session_duration_seconds DESC
       return {
         assignedCount,
         completedCount,
-        completionRate:
-          assignedCount > 0 ? completedCount / assignedCount : 0,
+        completionRate: assignedCount > 0 ? completedCount / assignedCount : 0,
       };
     };
 
@@ -1031,11 +1025,8 @@ ORDER BY pp.total_session_duration_seconds DESC
         continue;
       }
 
-      const memberActionEndEvent = sortedEvents.find(
-        (event) =>
-          event.date > memberActionEvent.date &&
-          event.newStatus !== ActionStatus.MemberAction,
-      );
+      const memberActionEndEvent =
+        memberActionDeadlineEvent(action.events ?? []) ?? undefined;
 
       eligible.push({ action, memberActionEvent, memberActionEndEvent });
     }

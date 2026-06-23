@@ -19,11 +19,12 @@ import { EmailType } from 'src/mail/mail.entity';
 import { MailService, processKeywordReplacements } from 'src/mail/mail.service';
 import { Tag } from 'src/user/entities/tag.entity';
 import { UserService } from 'src/user/user.service';
-import { Brackets, In, MoreThan, type Repository } from 'typeorm';
+import { Brackets, type Repository } from 'typeorm';
 import {
   ActionEvent,
   ActionStatus,
 } from '../actions/entities/action-event.entity';
+import { memberActionDeadlineEvent } from '../actions/utils/action-event';
 import { DEFAULT_TIME_ZONE, User } from '../user/entities/user.entity';
 import { ActionEventRecipientService } from './action-event-recipient.service';
 import {
@@ -53,14 +54,6 @@ export interface MissedDeadlineCandidate {
 }
 
 export const NOTIFICATION_LOOKBACK_WINDOW_MS = 3 * 60 * 60 * 1000; // 3 hours
-
-export const POST_MEMBER_ACTION_STATUSES = new Set<ActionStatus>([
-  ActionStatus.OfficeAction,
-  ActionStatus.Resolution,
-  ActionStatus.Completed,
-  ActionStatus.Failed,
-  ActionStatus.Abandoned,
-]);
 
 @Injectable()
 export class ActionEventReminderService {
@@ -122,21 +115,14 @@ export class ActionEventReminderService {
     if (group.deadlineEvent || !group.memberActionEvent) {
       return group;
     }
-    const deadlineEvents = await this.eventRepository.find({
-      where: {
-        action: { id: group.memberActionEvent.action.id },
-        date: MoreThan(group.memberActionEvent.date),
-        newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
-      },
-      order: {
-        date: 'ASC',
-      },
-      take: 1,
+    const events = await this.eventRepository.find({
+      where: { action: { id: group.memberActionEvent.action.id } },
     });
-    if (deadlineEvents.length === 0) {
+    const deadlineEvent = memberActionDeadlineEvent(events);
+    if (!deadlineEvent) {
       return group;
     }
-    return { ...group, deadlineEvent: deadlineEvents[0] };
+    return { ...group, deadlineEvent };
   }
 
   async evaluateNotifications(
@@ -452,20 +438,12 @@ export class ActionEventReminderService {
       where: { id: eventId },
       relations: { action: true },
     });
-    const deadlineEvents = await this.eventRepository.find({
-      where: {
-        action: { id: event.action.id },
-        date: MoreThan(event.date),
-        newStatus: In(Array.from(POST_MEMBER_ACTION_STATUSES)),
-      },
-      order: {
-        date: 'ASC',
-      },
-      take: 1,
+    const events = await this.eventRepository.find({
+      where: { action: { id: event.action.id } },
     });
     return {
       event,
-      deadlineEvent: deadlineEvents.length > 0 ? deadlineEvents[0] : undefined,
+      deadlineEvent: memberActionDeadlineEvent(events) ?? undefined,
     };
   }
 
