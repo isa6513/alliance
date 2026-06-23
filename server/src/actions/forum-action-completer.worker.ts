@@ -28,7 +28,7 @@ import {
   ActionActivity,
   ActionActivityType,
 } from './entities/action-activity.entity';
-import { ActionEvent, ActionStatus } from './entities/action-event.entity';
+import { ActionEvent } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
 
 const [PROCESS_ONE_LOCK_KEY1, PROCESS_ONE_LOCK_KEY2] =
@@ -79,27 +79,28 @@ export class ForumActionCompleterWorker {
         });
 
         for (const action of actions) {
-          const memberActionPhase = this.getCurrentMemberActionPhase(
-            action.events,
-            now,
-          );
-          if (!memberActionPhase) {
+          const { event: memberActionEvent, deadlineEvent } =
+            action.memberActionPhase;
+
+          // Only act while the action is currently mid-member-action: it has
+          // started and its closing event hasn't happened yet.
+          if (
+            !memberActionEvent ||
+            memberActionEvent.date > now ||
+            !deadlineEvent ||
+            deadlineEvent.date <= now
+          ) {
             continue;
           }
 
-          const deadline = memberActionPhase.deadline;
-          if (!deadline) {
-            continue;
-          }
-
-          const deadlineMs = deadline.getTime();
+          const deadlineMs = deadlineEvent.date.getTime();
           if (deadlineMs < windowStartMs || deadlineMs > windowEndMs) {
             continue;
           }
 
           await this.processAction({
             action,
-            memberActionEvent: memberActionPhase.memberActionEvent,
+            memberActionEvent,
             runAt: now,
           });
         }
@@ -323,32 +324,26 @@ export class ForumActionCompleterWorker {
     const plans: ForumAutocompletePlan[] = [];
 
     for (const action of actions) {
-      const phases = this.getMemberActionPhases(action.events);
-      const upcomingPhase = phases
-        .map((phase) => ({
-          ...phase,
-          runAt: phase.deadline
-            ? new Date(phase.deadline.getTime() - AUTOCOMPLETE_TARGET_OFFSET_MS)
-            : null,
-        }))
-        .filter(
-          (phase) =>
-            phase.runAt &&
-            phase.deadline &&
-            phase.runAt >= rangeStart &&
-            phase.runAt <= rangeEnd &&
-            phase.runAt >= phase.memberActionEvent.date,
-        )
-        .sort((a, b) => a.runAt!.getTime() - b.runAt!.getTime())[0];
-
-      if (!upcomingPhase || !upcomingPhase.runAt) {
+      const { event: memberActionEvent, deadlineEvent } =
+        action.memberActionPhase;
+      if (!memberActionEvent || !deadlineEvent) {
+        continue;
+      }
+      const runAt = new Date(
+        deadlineEvent.date.getTime() - AUTOCOMPLETE_TARGET_OFFSET_MS,
+      );
+      if (
+        runAt < rangeStart ||
+        runAt > rangeEnd ||
+        runAt < memberActionEvent.date
+      ) {
         continue;
       }
 
       const users = await this.processAction({
         action,
-        memberActionEvent: upcomingPhase.memberActionEvent,
-        runAt: upcomingPhase.runAt,
+        memberActionEvent,
+        runAt,
         dryRun: true,
       });
 
@@ -356,88 +351,10 @@ export class ForumActionCompleterWorker {
         continue;
       }
 
-      plans.push({ date: upcomingPhase.runAt, users, action });
+      plans.push({ date: runAt, users, action });
     }
 
     return plans.sort((a, b) => a.date.getTime() - b.date.getTime());
-  }
-
-  private getCurrentMemberActionPhase(
-    events: ActionEvent[],
-    now: Date,
-  ): { memberActionEvent: ActionEvent; deadline: Date | null } | null {
-    if (!events || events.length === 0) {
-      return null;
-    }
-
-    const sortedEvents = events.toSorted(
-      (a, b) => a.date.getTime() - b.date.getTime(),
-    );
-    const pastEvents = sortedEvents.filter((event) => event.date <= now);
-    const latestPastEvent = pastEvents[pastEvents.length - 1];
-    if (
-      !latestPastEvent ||
-      latestPastEvent.newStatus !== ActionStatus.MemberAction
-    ) {
-      return null;
-    }
-
-    const memberActionEvent = [...pastEvents]
-      .reverse()
-      .find((event) => event.newStatus === ActionStatus.MemberAction);
-    if (!memberActionEvent) {
-      return null;
-    }
-
-    const deadlineEvent =
-      sortedEvents.find(
-        (event) =>
-          event.date > memberActionEvent.date &&
-          event.newStatus !== ActionStatus.MemberAction,
-      ) ?? null;
-
-    return {
-      memberActionEvent,
-      deadline: deadlineEvent?.date ?? null,
-    };
-  }
-
-  private getMemberActionPhases(
-    events: ActionEvent[],
-  ): Array<{ memberActionEvent: ActionEvent; deadline: Date | null }> {
-    if (!events || events.length === 0) {
-      return [];
-    }
-
-    const sortedEvents = events.toSorted(
-      (a, b) => a.date.getTime() - b.date.getTime(),
-    );
-
-    const phases: Array<{
-      memberActionEvent: ActionEvent;
-      deadline: Date | null;
-    }> = [];
-
-    for (let i = 0; i < sortedEvents.length; i += 1) {
-      const event = sortedEvents[i];
-      if (event.newStatus !== ActionStatus.MemberAction) {
-        continue;
-      }
-
-      const deadlineEvent =
-        sortedEvents
-          .slice(i + 1)
-          .find(
-            (candidate) => candidate.newStatus !== ActionStatus.MemberAction,
-          ) ?? null;
-
-      phases.push({
-        memberActionEvent: event,
-        deadline: deadlineEvent?.date ?? null,
-      });
-    }
-
-    return phases;
   }
 
   private async findForumValidator(
