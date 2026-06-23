@@ -2079,11 +2079,6 @@ export type CreateActionDto = {
     customStatValue?: number;
     customStatGoal?: number;
     followUpForms: Array<FollowUpForm>;
-    canParticipate?: boolean;
-    shouldParticipate?: boolean;
-    userRelation?: UserActionRelation;
-    awayStatus?: TaskAwayStatus;
-    reqAuthenticated?: boolean;
     /**
      * Deprecated alias for `onboarding`.
      * @deprecated
@@ -2187,11 +2182,6 @@ export type UpdateActionDto = {
     customStatValue?: number;
     customStatGoal?: number;
     followUpForms?: Array<FollowUpForm>;
-    canParticipate?: boolean;
-    shouldParticipate?: boolean;
-    userRelation?: UserActionRelation;
-    awayStatus?: TaskAwayStatus;
-    reqAuthenticated?: boolean;
     /**
      * Deprecated alias for `onboarding`.
      * @deprecated
