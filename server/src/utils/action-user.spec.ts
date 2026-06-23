@@ -37,7 +37,7 @@ function makeAction(
     onboarding,
     memberActionPhase: {
       event: { date: new Date('2020-01-01') },
-      deadline: new Date('2020-02-01'),
+      deadlineEvent: { date: new Date('2020-02-01') },
     },
   } as unknown as Params['action'];
 }

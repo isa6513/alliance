@@ -10,7 +10,6 @@ import {
   ActionStatus,
 } from 'src/actions/entities/action-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
-import { memberActionDeadlineEvent } from 'src/actions/utils/action-event';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import {
@@ -705,7 +704,8 @@ ORDER BY pp.total_session_duration_seconds DESC
         continue;
       }
 
-      const memberActionDeadlineDate = action.memberActionPhase.deadline;
+      const memberActionDeadlineDate =
+        action.memberActionPhase.deadlineEvent?.date;
 
       if (!memberActionDeadlineDate || memberActionDeadlineDate > now) {
         continue;
@@ -1026,7 +1026,7 @@ ORDER BY pp.total_session_duration_seconds DESC
       }
 
       const memberActionEndEvent =
-        memberActionDeadlineEvent(action.events ?? []) ?? undefined;
+        action.memberActionPhase.deadlineEvent ?? undefined;
 
       eligible.push({ action, memberActionEvent, memberActionEndEvent });
     }

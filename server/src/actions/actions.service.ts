@@ -1029,7 +1029,7 @@ export class ActionsService {
       }
 
       generalUpdate.startDate = action.memberActionPhase.event?.date;
-      generalUpdate.endDate = action.memberActionPhase.deadline ?? undefined;
+      generalUpdate.endDate = action.memberActionPhase.deadlineEvent?.date;
     }
     await this.generalUpdateRepository.save(generalUpdates);
   }
@@ -2944,7 +2944,7 @@ export class ActionsService {
           expressionReferencesTag(action.cohortExpression, allMembersTagId),
         suiteId: action.suite?.id,
         memberActionDeadline:
-          action.memberActionPhase?.deadline?.getTime() ?? null,
+          action.memberActionPhase?.deadlineEvent?.date?.getTime() ?? null,
       } satisfies UserActionSummary;
     });
 
@@ -3050,8 +3050,8 @@ export class ActionsService {
           isAway: detail.isAway,
           optional: action.optional,
           deadlinePassed:
-            !!action.memberActionPhase?.deadline &&
-            action.memberActionPhase.deadline < now,
+            !!action.memberActionPhase?.deadlineEvent?.date &&
+            action.memberActionPhase.deadlineEvent.date < now,
           activityStatus,
         });
       }
@@ -3237,7 +3237,7 @@ export class ActionsService {
         }
         const memberEvent = memberActionEventByActionId.get(action.id);
         if (memberEvent) {
-          const deadlineDate = action.memberActionPhase.deadline;
+          const deadlineDate = action.memberActionPhase.deadlineEvent?.date;
           if (deadlineDate) {
             deadlineDateByActionId.set(action.id, deadlineDate);
           }
@@ -3340,7 +3340,8 @@ export class ActionsService {
         if (!event) continue;
 
         const dismissedSet = dismissedByAction.get(action.id) ?? new Set();
-        const deadlineDate = action.memberActionPhase.deadline;
+        const deadlineDate =
+          action.memberActionPhase.deadlineEvent?.date ?? null;
 
         const baseCandidates = activeUsers;
 

@@ -24,7 +24,7 @@ import {
   ActionEvent,
   ActionStatus,
 } from '../actions/entities/action-event.entity';
-import { memberActionDeadlineEvent } from '../actions/utils/action-event';
+import { memberActionPhase } from '../actions/utils/action-event';
 import { DEFAULT_TIME_ZONE, User } from '../user/entities/user.entity';
 import { ActionEventRecipientService } from './action-event-recipient.service';
 import {
@@ -118,7 +118,7 @@ export class ActionEventReminderService {
     const events = await this.eventRepository.find({
       where: { action: { id: group.memberActionEvent.action.id } },
     });
-    const deadlineEvent = memberActionDeadlineEvent(events);
+    const { deadlineEvent } = memberActionPhase(events);
     if (!deadlineEvent) {
       return group;
     }
@@ -443,7 +443,7 @@ export class ActionEventReminderService {
     });
     return {
       event,
-      deadlineEvent: memberActionDeadlineEvent(events) ?? undefined,
+      deadlineEvent: memberActionPhase(events).deadlineEvent ?? undefined,
     };
   }
 

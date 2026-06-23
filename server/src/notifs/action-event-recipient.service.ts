@@ -202,7 +202,7 @@ export class ActionEventRecipientService {
         continue;
       }
 
-      const deadlineDate = action.memberActionPhase.deadline;
+      const deadlineDate = action.memberActionPhase.deadlineEvent?.date ?? null;
       const usersDismissed = dismissedByAction.get(action.id) ?? new Set();
       const cohortMemberIds = await cohortByAction.get(action.id)!;
 

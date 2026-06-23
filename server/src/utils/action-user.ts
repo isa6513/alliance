@@ -13,7 +13,7 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
   user: Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'>;
 }): boolean {
   const { action, user } = params;
-  const { event: memberActionEvent, deadline } = action.memberActionPhase;
+  const { event: memberActionEvent, deadlineEvent } = action.memberActionPhase;
 
   if (!memberActionEvent) {
     return false;
@@ -21,7 +21,7 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
 
   return user.hasActiveContractInFullRange({
     startDate: memberActionEvent.date,
-    endDate: deadline,
+    endDate: deadlineEvent?.date ?? null,
   });
 }
 
@@ -99,7 +99,7 @@ export function computeIsAwayDuringAnyOfMemberAction(params: {
 }): boolean {
   const { action, user } = params;
 
-  const { event: memberActionEvent, deadline } = action.memberActionPhase;
+  const { event: memberActionEvent, deadlineEvent } = action.memberActionPhase;
 
   if (!memberActionEvent) {
     return false;
@@ -107,7 +107,7 @@ export function computeIsAwayDuringAnyOfMemberAction(params: {
 
   return user.isAwayAtAnyPointInRange({
     startDate: memberActionEvent.date,
-    endDate: deadline,
+    endDate: deadlineEvent?.date ?? null,
   });
 }
 
@@ -139,7 +139,7 @@ export function computeIsTaggedOrInManualCohortAction(params: {
     participatingTagIdSet: new Set<string>(),
     onboarding: action.onboarding,
     memberActionEventDate: action.memberActionPhase?.event?.date,
-    memberActionEventDeadline: action.memberActionPhase?.deadline,
+    memberActionEventDeadline: action.memberActionPhase?.deadlineEvent?.date,
     includeSuspended,
   });
 }

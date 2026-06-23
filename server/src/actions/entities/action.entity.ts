@@ -25,7 +25,10 @@ import {
   Unique,
 } from 'typeorm';
 import type { CohortExpression } from '../cohort-expression.types';
-import { memberActionDeadlineEvent } from '../utils/action-event';
+import {
+  memberActionPhase,
+  type MemberActionPhase,
+} from '../utils/action-event';
 import { ActionActivity } from './action-activity.entity';
 import { ActionEvent, ActionStatus } from './action-event.entity';
 import { ActionFormVariant } from './action-form-variant.entity';
@@ -377,54 +380,23 @@ export class Action {
   }
 
   @IsOptional()
-  private _memberActionPhase:
-    | {
-        event: ActionEvent;
-        deadline: Date | null;
-      }
-    | {
-        event: null;
-        deadline: null;
-      }
-    | null = null;
-  get memberActionPhase(): NonNullable<typeof this._memberActionPhase> {
-    populateCache: if (!this._memberActionPhase) {
-      if (!this.events) {
-        this._memberActionPhase = {
-          event: null,
-          deadline: null,
-        };
-        break populateCache;
-      }
-
-      const memberActionEvent = findLeast(
-        this.events,
-        (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
-        (event) => event.newStatus === ActionStatus.MemberAction,
-      );
-
-      if (!memberActionEvent) {
-        this._memberActionPhase = {
-          event: null,
-          deadline: null,
-        };
-        break populateCache;
-      }
-
-      this._memberActionPhase = {
-        event: memberActionEvent,
-        deadline: memberActionDeadlineEvent(this.events)?.date ?? null,
-      };
+  private _memberActionPhase: MemberActionPhase | null = null;
+  get memberActionPhase(): MemberActionPhase {
+    if (!this._memberActionPhase) {
+      this._memberActionPhase = this.events
+        ? memberActionPhase(this.events)
+        : { event: null, deadlineEvent: null };
     }
     return this._memberActionPhase;
   }
 
   @IsOptional()
   get deadlineWeekNumber(): number | null {
-    if (!this.memberActionPhase?.deadline) {
+    const deadline = this.memberActionPhase.deadlineEvent?.date;
+    if (!deadline) {
       return null;
     } else {
-      return Math.floor(this.memberActionPhase.deadline.getTime() / MS_IN_WEEK);
+      return Math.floor(deadline.getTime() / MS_IN_WEEK);
     }
   }
 }

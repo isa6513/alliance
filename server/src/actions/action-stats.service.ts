@@ -1,13 +1,13 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { Action, CustomActionStat } from './entities/action.entity';
 import { Injectable } from '@nestjs/common';
-import { And, Between, IsNull, Not, type Repository } from 'typeorm';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   OnetimeInvite,
   OnetimeInviteStatus,
 } from 'src/user/entities/onetime-invite.entity';
+import { And, Between, IsNull, Not, type Repository } from 'typeorm';
 import { ActionStatus } from './entities/action-event.entity';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Action, CustomActionStat } from './entities/action.entity';
 
 @Injectable()
 export class ActionStatsService {
@@ -60,7 +60,7 @@ export class ActionStatsService {
 
   private async computeUsersInvited(action: Action) {
     const rangeStart = action.memberActionPhase.event?.date;
-    const rangeEnd = action.memberActionPhase.deadline;
+    const rangeEnd = action.memberActionPhase.deadlineEvent?.date;
     if (!rangeStart || !rangeEnd) {
       return undefined;
     }

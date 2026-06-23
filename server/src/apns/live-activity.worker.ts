@@ -64,7 +64,7 @@ export class LiveActivityWorker {
     const eligible: { action: Action; deadline: Date }[] = [];
     for (const action of actions) {
       if (action.status !== ActionStatus.MemberAction) continue;
-      const deadline = action.memberActionPhase?.deadline;
+      const deadline = action.memberActionPhase?.deadlineEvent?.date;
       if (!deadline) continue;
       if (deadline.getTime() > eightHoursFromNow.getTime()) continue;
       if (deadline.getTime() < now.getTime()) continue;
@@ -161,7 +161,7 @@ export class LiveActivityWorker {
     });
 
     for (const reg of registrations) {
-      const deadline = reg.action?.memberActionPhase?.deadline;
+      const deadline = reg.action?.memberActionPhase?.deadlineEvent?.date;
       if (!deadline || deadline.getTime() > now.getTime()) continue;
 
       try {

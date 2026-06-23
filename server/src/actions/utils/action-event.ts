@@ -1,25 +1,31 @@
 import { findLeast } from 'src/utils/filter';
 import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
 
+export type MemberActionPhase =
+  | {
+      event: ActionEvent;
+      deadlineEvent: ActionEvent | null;
+    }
+  | { event: null; deadlineEvent: null };
+
 /**
- * The event that ends the member-action phase: the earliest event after the
- * action's member-action event. An action has at most one member-action event,
- * so any later event closes the phase.
+ * The member-action phase of an action: the event that opens it and the event
+ * that closes it.
  */
-export function memberActionDeadlineEvent(
-  events: ActionEvent[],
-): ActionEvent | null {
-  const memberActionEvent = events.find(
+export function memberActionPhase(events: ActionEvent[]): MemberActionPhase {
+  const event = findLeast(
+    events,
+    (a, b) => b.date.getTime() - a.date.getTime(), // reverse order
     (event) => event.newStatus === ActionStatus.MemberAction,
   );
-  if (!memberActionEvent) {
-    return null;
+  if (!event) {
+    return { event: null, deadlineEvent: null };
   }
-  return (
+  const deadlineEvent =
     findLeast(
       events,
       (a, b) => a.date.getTime() - b.date.getTime(),
-      (event) => event.date > memberActionEvent.date,
-    ) ?? null
-  );
+      (candidate) => candidate.date > event.date,
+    ) ?? null;
+  return { event, deadlineEvent };
 }
