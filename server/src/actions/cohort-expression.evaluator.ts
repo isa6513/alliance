@@ -1,16 +1,12 @@
 /**
  * Cohort Expression Evaluator
- *
- * Two evaluator modes:
- * 1. Batch: resolves expression → Set<number> (user IDs)
- * 2. Single-user: resolves expression for one user → boolean
  */
 
 import { CohortExpression, isLeafCondition } from './cohort-expression.types';
 
-// --- Batch Evaluation Context ---
+// --- Evaluation Context ---
 
-export interface CohortEvaluationContext {
+export type CohortEvaluationContext = {
   getUserIdsForTag(tagId: string): Promise<Set<number>>;
   getUserIdsCompletedAction(actionId: number): Promise<Set<number>>;
   getUserIdsInProgressAction(actionId: number): Promise<Set<number>>;
@@ -22,10 +18,23 @@ export interface CohortEvaluationContext {
   }): Promise<Set<number>>;
   getGroupLeadUserIds(): Promise<Set<number>>;
   getAllCandidateUserIds(): Promise<Set<number>>;
-}
+  targetUserId?: number;
+};
 
 /**
- * Batch evaluator: resolves a CohortExpression to a Set of user IDs.
+ * Resolves a CohortExpression to the Set of user IDs it targets.
+ *
+ * `NOT(X)` is `getAllCandidateUserIds()` minus `X`'s set, so the candidate set
+ * is the universe a negation is taken against: all candidate users for the
+ * population context, or `{userId}` iff the user is a candidate for a
+ * single-user context — so `NOT(X)` excludes non-candidates from both.
+ *
+ * When `ctx.targetUserId` is set, the evaluator only cares about that one
+ * user's membership, so every leaf set is `{targetUserId}` or `{}`. This lets
+ * AND/OR short-circuit (stop once the target drops out / matches) instead of
+ * fanning out every branch's DB work and `InProgressAction` recursion. Set by
+ * {@link singleUserCohortContext}; population contexts omit it and need full
+ * sets, so they evaluate children in parallel.
  *
  * @param expr The expression to evaluate
  * @param ctx Data-fetching context
@@ -66,6 +75,19 @@ export async function evaluateCohortExpression(
   switch (expr.op) {
     case 'AND': {
       if (expr.children.length === 0) return new Set();
+      const { targetUserId } = ctx;
+      if (targetUserId !== undefined) {
+        // Single-user: stop at the first child the target is absent from.
+        for (const child of expr.children) {
+          const set = await evaluateCohortExpression(
+            child,
+            ctx,
+            visitedActionIds,
+          );
+          if (!set.has(targetUserId)) return new Set();
+        }
+        return new Set([targetUserId]);
+      }
       const sets = await Promise.all(
         expr.children.map((child) =>
           evaluateCohortExpression(child, ctx, visitedActionIds),
@@ -75,6 +97,19 @@ export async function evaluateCohortExpression(
     }
     case 'OR': {
       if (expr.children.length === 0) return new Set();
+      const { targetUserId } = ctx;
+      if (targetUserId !== undefined) {
+        // Single-user: stop at the first child the target is present in.
+        for (const child of expr.children) {
+          const set = await evaluateCohortExpression(
+            child,
+            ctx,
+            visitedActionIds,
+          );
+          if (set.has(targetUserId)) return new Set([targetUserId]);
+        }
+        return new Set();
+      }
       const sets = await Promise.all(
         expr.children.map((child) =>
           evaluateCohortExpression(child, ctx, visitedActionIds),
@@ -94,91 +129,77 @@ export async function evaluateCohortExpression(
   }
 }
 
-// --- Single-User Evaluation Context ---
+// --- Single-user scoping ---
 
-export interface SingleUserCohortContext {
+/**
+ * Per-user predicates for the single-user case. Each leaf is a boolean check
+ * for one user; {@link singleUserCohortContext} turns them into a context whose
+ * sets are `{userId}` or `{}`.
+ */
+export type SingleUserCohortPredicates = {
   userId: number;
-  userHasTag(tagId: string): boolean;
-  userCompletedAction(actionId: number): Promise<boolean>;
-  userInProgressAction(actionId: number): Promise<boolean>;
-  userMatchesFormField(params: {
+  isCandidate: boolean;
+  hasTag(tagId: string): boolean;
+  completedAction(actionId: number): Promise<boolean>;
+  inProgressAction(actionId: number): Promise<boolean>;
+  matchesFormField(params: {
     formId: number;
     fieldId: string;
     responseEqualTo?: string;
     responseAny?: boolean;
   }): Promise<boolean>;
-  userIsGroupLead(): Promise<boolean>;
+  isGroupLead(): Promise<boolean>;
+};
+
+/**
+ * Adapts per-user boolean predicates into a {@link CohortEvaluationContext}
+ * whose every set is `{userId}` (predicate true) or `{}` (false). Running
+ * {@link evaluateCohortExpression} with this context and checking `.has(userId)`
+ * gives the same answer the population evaluator would for that user, because
+ * AND/OR/NOT/difference all distribute over the singleton. Setting
+ * `targetUserId` also lets AND/OR short-circuit rather than fan out every
+ * branch's DB work.
+ *
+ * `isCandidate` becomes the `NOT` universe (`{userId}` iff a candidate —
+ * mirroring `findActiveUsersWithTags`, a fully signed-up, non-partial profile),
+ * so a non-candidate is in no `NOT(...)` result, exactly as in the population
+ * evaluator.
+ */
+export function singleUserCohortContext(
+  p: SingleUserCohortPredicates,
+): CohortEvaluationContext {
+  const just = (matches: boolean): Set<number> =>
+    matches ? new Set([p.userId]) : new Set();
+  const justAsync = async (matches: Promise<boolean>): Promise<Set<number>> =>
+    just(await matches);
+
+  return {
+    getUserIdsForTag: async (tagId) => just(p.hasTag(tagId)),
+    getUserIdsCompletedAction: (actionId) =>
+      justAsync(p.completedAction(actionId)),
+    getUserIdsInProgressAction: (actionId) =>
+      justAsync(p.inProgressAction(actionId)),
+    getUserIdsForFormField: (params) => justAsync(p.matchesFormField(params)),
+    getGroupLeadUserIds: () => justAsync(p.isGroupLead()),
+    getAllCandidateUserIds: async () => just(p.isCandidate),
+    targetUserId: p.userId,
+  };
 }
 
 /**
- * Single-user evaluator: resolves a CohortExpression for one user → boolean.
- *
- * @param expr The expression to evaluate
- * @param ctx Per-user check context
- * @param visitedActionIds Cycle detection guard for InProgressAction
+ * Whether one form response's answers satisfy a FormFieldValue leaf. Shared by
+ * the population and single-user contexts so they agree. `responseAny` (presence
+ * check) takes precedence over `responseEqualTo` (exact match).
  */
-export async function evaluateCohortExpressionForUser(
-  expr: CohortExpression,
-  ctx: SingleUserCohortContext,
-  visitedActionIds: Set<number> = new Set(),
-): Promise<boolean> {
-  if (isLeafCondition(expr)) {
-    switch (expr.type) {
-      case 'Tag':
-        return ctx.userHasTag(expr.tagId);
-      case 'Manual':
-        return expr.userIds.includes(ctx.userId);
-      case 'CompletedAction':
-        return ctx.userCompletedAction(expr.actionId);
-      case 'InProgressAction': {
-        if (visitedActionIds.has(expr.actionId)) {
-          return false;
-        }
-        return ctx.userInProgressAction(expr.actionId);
-      }
-      case 'FormFieldValue':
-        return ctx.userMatchesFormField({
-          formId: expr.formId,
-          fieldId: expr.fieldId,
-          responseEqualTo: expr.responseEqualTo,
-          responseAny: expr.responseAny,
-        });
-      case 'GroupLead':
-        return ctx.userIsGroupLead();
-    }
+export function answerMatchesFormField(
+  answers: Record<string, unknown> | null | undefined,
+  params: { fieldId: string; responseEqualTo?: string; responseAny?: boolean },
+): boolean {
+  const answer = answers?.[params.fieldId];
+  if (params.responseEqualTo !== undefined && !params.responseAny) {
+    return String(answer) === params.responseEqualTo;
   }
-
-  switch (expr.op) {
-    case 'AND': {
-      if (expr.children.length === 0) return false;
-      for (const child of expr.children) {
-        if (
-          !(await evaluateCohortExpressionForUser(child, ctx, visitedActionIds))
-        ) {
-          return false;
-        }
-      }
-      return true;
-    }
-    case 'OR': {
-      if (expr.children.length === 0) return false;
-      for (const child of expr.children) {
-        if (
-          await evaluateCohortExpressionForUser(child, ctx, visitedActionIds)
-        ) {
-          return true;
-        }
-      }
-      return false;
-    }
-    case 'NOT': {
-      return !(await evaluateCohortExpressionForUser(
-        expr.child,
-        ctx,
-        visitedActionIds,
-      ));
-    }
-  }
+  return !!answer && !(Array.isArray(answer) && answer.length === 0);
 }
 
 // --- Set helpers ---

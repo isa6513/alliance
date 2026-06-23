@@ -1,14 +1,15 @@
 import {
-  evaluateCohortExpression,
-  evaluateCohortExpressionForUser,
+  answerMatchesFormField,
   CohortEvaluationContext,
-  SingleUserCohortContext,
+  evaluateCohortExpression,
+  singleUserCohortContext,
+  SingleUserCohortPredicates,
 } from './cohort-expression.evaluator';
 import {
   CohortExpression,
   expressionReferencesTag,
-  isLeafCondition,
   isBooleanOperator,
+  isLeafCondition,
 } from './cohort-expression.types';
 
 // --- Helpers ---
@@ -27,19 +28,39 @@ function mockBatchContext(
   };
 }
 
-function mockSingleUserContext(
+/**
+ * A single-user-scoped context. The single-user case has no separate evaluator:
+ * we run the one evaluator with this context and check `.has(userId)`.
+ */
+function scopedContext(
   userId: number,
-  overrides: Partial<Omit<SingleUserCohortContext, 'userId'>> = {},
-): SingleUserCohortContext {
-  return {
+  overrides: Partial<Omit<SingleUserCohortPredicates, 'userId'>> = {},
+): CohortEvaluationContext {
+  return singleUserCohortContext({
     userId,
-    userHasTag: jest.fn().mockReturnValue(false),
-    userCompletedAction: jest.fn().mockResolvedValue(false),
-    userInProgressAction: jest.fn().mockResolvedValue(false),
-    userMatchesFormField: jest.fn().mockResolvedValue(false),
-    userIsGroupLead: jest.fn().mockResolvedValue(false),
+    isCandidate: true,
+    hasTag: () => false,
+    completedAction: async () => false,
+    inProgressAction: async () => false,
+    matchesFormField: async () => false,
+    isGroupLead: async () => false,
     ...overrides,
-  };
+  });
+}
+
+/** Whether `userId` is in the cohort, via the single unified evaluator. */
+async function userInCohort(
+  userId: number,
+  expr: CohortExpression,
+  overrides: Partial<Omit<SingleUserCohortPredicates, 'userId'>> = {},
+  visitedActionIds?: Set<number>,
+): Promise<boolean> {
+  const ids = await evaluateCohortExpression(
+    expr,
+    scopedContext(userId, overrides),
+    visitedActionIds,
+  );
+  return ids.has(userId);
 }
 
 // --- Type guards ---
@@ -67,17 +88,17 @@ describe('type guards', () => {
   it('isLeafCondition returns false for operators', () => {
     expect(isLeafCondition({ op: 'AND', children: [] })).toBe(false);
     expect(isLeafCondition({ op: 'OR', children: [] })).toBe(false);
-    expect(
-      isLeafCondition({ op: 'NOT', child: { type: 'GroupLead' } }),
-    ).toBe(false);
+    expect(isLeafCondition({ op: 'NOT', child: { type: 'GroupLead' } })).toBe(
+      false,
+    );
   });
 
   it('isBooleanOperator returns true for operators', () => {
     expect(isBooleanOperator({ op: 'AND', children: [] })).toBe(true);
     expect(isBooleanOperator({ op: 'OR', children: [] })).toBe(true);
-    expect(
-      isBooleanOperator({ op: 'NOT', child: { type: 'GroupLead' } }),
-    ).toBe(true);
+    expect(isBooleanOperator({ op: 'NOT', child: { type: 'GroupLead' } })).toBe(
+      true,
+    );
   });
 
   it('isBooleanOperator returns false for leaf nodes', () => {
@@ -109,9 +130,7 @@ describe('expressionReferencesTag', () => {
     expect(
       expressionReferencesTag({ type: 'Manual', userIds: [1] }, 'tag1'),
     ).toBe(false);
-    expect(
-      expressionReferencesTag({ type: 'GroupLead' }, 'tag1'),
-    ).toBe(false);
+    expect(expressionReferencesTag({ type: 'GroupLead' }, 'tag1')).toBe(false);
   });
 
   it('finds tag inside AND operator', () => {
@@ -175,15 +194,15 @@ describe('expressionReferencesTag', () => {
   });
 
   it('returns false when empty AND has no children', () => {
-    expect(
-      expressionReferencesTag({ op: 'AND', children: [] }, 'tag1'),
-    ).toBe(false);
+    expect(expressionReferencesTag({ op: 'AND', children: [] }, 'tag1')).toBe(
+      false,
+    );
   });
 });
 
-// --- Batch evaluator: evaluateCohortExpression ---
+// --- The evaluator: population (set) results ---
 
-describe('evaluateCohortExpression (batch)', () => {
+describe('evaluateCohortExpression', () => {
   describe('leaf conditions', () => {
     it('evaluates Tag condition', async () => {
       const ctx = mockBatchContext({
@@ -217,9 +236,7 @@ describe('evaluateCohortExpression (batch)', () => {
 
     it('evaluates CompletedAction condition', async () => {
       const ctx = mockBatchContext({
-        getUserIdsCompletedAction: jest
-          .fn()
-          .mockResolvedValue(new Set([5, 6])),
+        getUserIdsCompletedAction: jest.fn().mockResolvedValue(new Set([5, 6])),
       });
       const result = await evaluateCohortExpression(
         { type: 'CompletedAction', actionId: 42 },
@@ -245,9 +262,7 @@ describe('evaluateCohortExpression (batch)', () => {
 
     it('evaluates FormFieldValue condition', async () => {
       const ctx = mockBatchContext({
-        getUserIdsForFormField: jest
-          .fn()
-          .mockResolvedValue(new Set([11, 12])),
+        getUserIdsForFormField: jest.fn().mockResolvedValue(new Set([11, 12])),
       });
       const result = await evaluateCohortExpression(
         {
@@ -292,10 +307,7 @@ describe('evaluateCohortExpression (batch)', () => {
       const ctx = mockBatchContext({
         getGroupLeadUserIds: jest.fn().mockResolvedValue(new Set([100, 200])),
       });
-      const result = await evaluateCohortExpression(
-        { type: 'GroupLead' },
-        ctx,
-      );
+      const result = await evaluateCohortExpression({ type: 'GroupLead' }, ctx);
       expect(result).toEqual(new Set([100, 200]));
     });
   });
@@ -458,9 +470,7 @@ describe('evaluateCohortExpression (batch)', () => {
 
     it('returns full universe when child matches nobody', async () => {
       const ctx = mockBatchContext({
-        getAllCandidateUserIds: jest
-          .fn()
-          .mockResolvedValue(new Set([1, 2, 3])),
+        getAllCandidateUserIds: jest.fn().mockResolvedValue(new Set([1, 2, 3])),
         getUserIdsForTag: jest.fn().mockResolvedValue(new Set()),
       });
       const result = await evaluateCohortExpression(
@@ -475,9 +485,7 @@ describe('evaluateCohortExpression (batch)', () => {
 
     it('returns empty set when child matches everyone', async () => {
       const ctx = mockBatchContext({
-        getAllCandidateUserIds: jest
-          .fn()
-          .mockResolvedValue(new Set([1, 2])),
+        getAllCandidateUserIds: jest.fn().mockResolvedValue(new Set([1, 2])),
         getUserIdsForTag: jest.fn().mockResolvedValue(new Set([1, 2])),
       });
       const result = await evaluateCohortExpression(
@@ -529,10 +537,7 @@ describe('evaluateCohortExpression (batch)', () => {
           children: [
             {
               op: 'AND',
-              children: [
-                { type: 'Tag', tagId: 'a' },
-                { type: 'GroupLead' },
-              ],
+              children: [{ type: 'Tag', tagId: 'a' }, { type: 'GroupLead' }],
             },
             { type: 'Manual', userIds: [10] },
           ],
@@ -578,99 +583,91 @@ describe('evaluateCohortExpression (batch)', () => {
   });
 });
 
-// --- Single-user evaluator: evaluateCohortExpressionForUser ---
+// --- Single-user scoping via singleUserCohortContext + .has(userId) ---
 
-describe('evaluateCohortExpressionForUser (single-user)', () => {
+describe('single-user scoping (singleUserCohortContext)', () => {
   describe('leaf conditions', () => {
     it('evaluates Tag condition - user has tag', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const hasTag = jest.fn().mockReturnValue(true);
+      const result = await userInCohort(
+        1,
         { type: 'Tag', tagId: 'abc' },
-        ctx,
+        {
+          hasTag,
+        },
       );
       expect(result).toBe(true);
-      expect(ctx.userHasTag).toHaveBeenCalledWith('abc');
+      expect(hasTag).toHaveBeenCalledWith('abc');
     });
 
     it('evaluates Tag condition - user missing tag', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(false),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const result = await userInCohort(
+        1,
         { type: 'Tag', tagId: 'abc' },
-        ctx,
+        {
+          hasTag: () => false,
+        },
       );
       expect(result).toBe(false);
     });
 
     it('evaluates Manual condition - user in list', async () => {
-      const ctx = mockSingleUserContext(5);
-      const result = await evaluateCohortExpressionForUser(
-        { type: 'Manual', userIds: [3, 5, 7] },
-        ctx,
-      );
+      const result = await userInCohort(5, {
+        type: 'Manual',
+        userIds: [3, 5, 7],
+      });
       expect(result).toBe(true);
     });
 
     it('evaluates Manual condition - user not in list', async () => {
-      const ctx = mockSingleUserContext(5);
-      const result = await evaluateCohortExpressionForUser(
-        { type: 'Manual', userIds: [3, 7] },
-        ctx,
-      );
+      const result = await userInCohort(5, {
+        type: 'Manual',
+        userIds: [3, 7],
+      });
       expect(result).toBe(false);
     });
 
     it('evaluates Manual condition - empty list', async () => {
-      const ctx = mockSingleUserContext(5);
-      const result = await evaluateCohortExpressionForUser(
-        { type: 'Manual', userIds: [] },
-        ctx,
-      );
+      const result = await userInCohort(5, { type: 'Manual', userIds: [] });
       expect(result).toBe(false);
     });
 
     it('evaluates CompletedAction condition', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userCompletedAction: jest.fn().mockResolvedValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const completedAction = jest.fn().mockResolvedValue(true);
+      const result = await userInCohort(
+        1,
         { type: 'CompletedAction', actionId: 42 },
-        ctx,
+        { completedAction },
       );
       expect(result).toBe(true);
-      expect(ctx.userCompletedAction).toHaveBeenCalledWith(42);
+      expect(completedAction).toHaveBeenCalledWith(42);
     });
 
     it('evaluates InProgressAction condition', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userInProgressAction: jest.fn().mockResolvedValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const inProgressAction = jest.fn().mockResolvedValue(true);
+      const result = await userInCohort(
+        1,
         { type: 'InProgressAction', actionId: 99 },
-        ctx,
+        { inProgressAction },
       );
       expect(result).toBe(true);
-      expect(ctx.userInProgressAction).toHaveBeenCalledWith(99);
+      expect(inProgressAction).toHaveBeenCalledWith(99);
     });
 
     it('evaluates FormFieldValue condition', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userMatchesFormField: jest.fn().mockResolvedValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const matchesFormField = jest.fn().mockResolvedValue(true);
+      const result = await userInCohort(
+        1,
         {
           type: 'FormFieldValue',
           formId: 5,
           fieldId: 'f1',
           responseEqualTo: 'yes',
         },
-        ctx,
+        { matchesFormField },
       );
       expect(result).toBe(true);
-      expect(ctx.userMatchesFormField).toHaveBeenCalledWith({
+      expect(matchesFormField).toHaveBeenCalledWith({
         formId: 5,
         fieldId: 'f1',
         responseEqualTo: 'yes',
@@ -679,12 +676,12 @@ describe('evaluateCohortExpressionForUser (single-user)', () => {
     });
 
     it('evaluates GroupLead condition', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userIsGroupLead: jest.fn().mockResolvedValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const result = await userInCohort(
+        1,
         { type: 'GroupLead' },
-        ctx,
+        {
+          isGroupLead: async () => true,
+        },
       );
       expect(result).toBe(true);
     });
@@ -692,297 +689,243 @@ describe('evaluateCohortExpressionForUser (single-user)', () => {
 
   describe('AND operator', () => {
     it('returns false for empty children', async () => {
-      const ctx = mockSingleUserContext(1);
-      const result = await evaluateCohortExpressionForUser(
-        { op: 'AND', children: [] },
-        ctx,
-      );
+      const result = await userInCohort(1, { op: 'AND', children: [] });
       expect(result).toBe(false);
     });
 
     it('returns true when all children match', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(true),
-        userIsGroupLead: jest.fn().mockResolvedValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const result = await userInCohort(
+        1,
         {
           op: 'AND',
-          children: [
-            { type: 'Tag', tagId: 'a' },
-            { type: 'GroupLead' },
-          ],
+          children: [{ type: 'Tag', tagId: 'a' }, { type: 'GroupLead' }],
         },
-        ctx,
+        { hasTag: () => true, isGroupLead: async () => true },
       );
       expect(result).toBe(true);
     });
 
     it('returns false when any child does not match', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(true),
-        userIsGroupLead: jest.fn().mockResolvedValue(false),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const result = await userInCohort(
+        1,
         {
           op: 'AND',
-          children: [
-            { type: 'Tag', tagId: 'a' },
-            { type: 'GroupLead' },
-          ],
+          children: [{ type: 'Tag', tagId: 'a' }, { type: 'GroupLead' }],
         },
-        ctx,
+        { hasTag: () => true, isGroupLead: async () => false },
       );
       expect(result).toBe(false);
     });
 
-    it('short-circuits on first false', async () => {
-      const userIsGroupLead = jest.fn().mockResolvedValue(false);
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(false),
-        userIsGroupLead,
-      });
-      await evaluateCohortExpressionForUser(
+    it('short-circuits on first non-match (skips later predicates)', async () => {
+      const isGroupLead = jest.fn().mockResolvedValue(true);
+      const result = await userInCohort(
+        1,
         {
           op: 'AND',
-          children: [
-            { type: 'Tag', tagId: 'a' },
-            { type: 'GroupLead' },
-          ],
+          children: [{ type: 'Tag', tagId: 'a' }, { type: 'GroupLead' }],
         },
-        ctx,
+        { hasTag: () => false, isGroupLead },
       );
-      // GroupLead should not be checked because Tag already returned false
-      expect(userIsGroupLead).not.toHaveBeenCalled();
+      expect(result).toBe(false);
+      // GroupLead should not be checked because Tag already excluded the user.
+      expect(isGroupLead).not.toHaveBeenCalled();
     });
   });
 
   describe('OR operator', () => {
     it('returns false for empty children', async () => {
-      const ctx = mockSingleUserContext(1);
-      const result = await evaluateCohortExpressionForUser(
-        { op: 'OR', children: [] },
-        ctx,
-      );
+      const result = await userInCohort(1, { op: 'OR', children: [] });
       expect(result).toBe(false);
     });
 
     it('returns true when any child matches', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(false),
-        userIsGroupLead: jest.fn().mockResolvedValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const result = await userInCohort(
+        1,
         {
           op: 'OR',
-          children: [
-            { type: 'Tag', tagId: 'a' },
-            { type: 'GroupLead' },
-          ],
+          children: [{ type: 'Tag', tagId: 'a' }, { type: 'GroupLead' }],
         },
-        ctx,
+        { hasTag: () => false, isGroupLead: async () => true },
       );
       expect(result).toBe(true);
     });
 
     it('returns false when no children match', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(false),
-        userIsGroupLead: jest.fn().mockResolvedValue(false),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const result = await userInCohort(
+        1,
         {
           op: 'OR',
-          children: [
-            { type: 'Tag', tagId: 'a' },
-            { type: 'GroupLead' },
-          ],
+          children: [{ type: 'Tag', tagId: 'a' }, { type: 'GroupLead' }],
         },
-        ctx,
+        { hasTag: () => false, isGroupLead: async () => false },
       );
       expect(result).toBe(false);
     });
 
-    it('short-circuits on first true', async () => {
-      const userIsGroupLead = jest.fn().mockResolvedValue(true);
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(true),
-        userIsGroupLead,
-      });
-      await evaluateCohortExpressionForUser(
+    it('short-circuits on first match (skips later predicates)', async () => {
+      const isGroupLead = jest.fn().mockResolvedValue(true);
+      const result = await userInCohort(
+        1,
         {
           op: 'OR',
-          children: [
-            { type: 'Tag', tagId: 'a' },
-            { type: 'GroupLead' },
-          ],
+          children: [{ type: 'Tag', tagId: 'a' }, { type: 'GroupLead' }],
         },
-        ctx,
+        { hasTag: () => true, isGroupLead },
       );
-      expect(userIsGroupLead).not.toHaveBeenCalled();
+      expect(result).toBe(true);
+      // GroupLead should not be checked because Tag already matched.
+      expect(isGroupLead).not.toHaveBeenCalled();
     });
   });
 
   describe('NOT operator', () => {
     it('negates a true result', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+      const result = await userInCohort(
+        1,
         {
           op: 'NOT',
           child: { type: 'Tag', tagId: 'a' },
         },
-        ctx,
+        { hasTag: () => true },
       );
       expect(result).toBe(false);
     });
 
-    it('negates a false result', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(false),
-      });
-      const result = await evaluateCohortExpressionForUser(
+    it('negates a false result for a candidate user', async () => {
+      const result = await userInCohort(
+        1,
         {
           op: 'NOT',
           child: { type: 'Tag', tagId: 'a' },
         },
-        ctx,
+        { hasTag: () => false, isCandidate: true },
       );
       expect(result).toBe(true);
+    });
+
+    it('excludes a non-candidate user from NOT (matches population NOT-universe)', async () => {
+      const result = await userInCohort(
+        1,
+        {
+          op: 'NOT',
+          child: { type: 'Tag', tagId: 'a' },
+        },
+        { hasTag: () => false, isCandidate: false },
+      );
+      expect(result).toBe(false);
     });
   });
 
   describe('nested expressions', () => {
-    it('evaluates AND(Tag, NOT(Manual)) correctly for included user', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userHasTag: jest.fn().mockReturnValue(true),
-      });
+    it('evaluates AND(Tag, NOT(Manual)) for included user', async () => {
       // user 1 has tag 'a' and is NOT in manual list [2, 4]
-      const result = await evaluateCohortExpressionForUser(
+      const result = await userInCohort(
+        1,
         {
           op: 'AND',
           children: [
             { type: 'Tag', tagId: 'a' },
-            {
-              op: 'NOT',
-              child: { type: 'Manual', userIds: [2, 4] },
-            },
+            { op: 'NOT', child: { type: 'Manual', userIds: [2, 4] } },
           ],
         },
-        ctx,
+        { hasTag: () => true },
       );
       expect(result).toBe(true);
     });
 
-    it('evaluates AND(Tag, NOT(Manual)) correctly for excluded user', async () => {
-      const ctx = mockSingleUserContext(2, {
-        userHasTag: jest.fn().mockReturnValue(true),
-      });
+    it('evaluates AND(Tag, NOT(Manual)) for excluded user', async () => {
       // user 2 has tag 'a' but IS in manual exclusion list [2, 4]
-      const result = await evaluateCohortExpressionForUser(
+      const result = await userInCohort(
+        2,
         {
           op: 'AND',
           children: [
             { type: 'Tag', tagId: 'a' },
-            {
-              op: 'NOT',
-              child: { type: 'Manual', userIds: [2, 4] },
-            },
+            { op: 'NOT', child: { type: 'Manual', userIds: [2, 4] } },
           ],
         },
-        ctx,
+        { hasTag: () => true },
       );
       expect(result).toBe(false);
     });
 
-    it('evaluates complex: OR(AND(Tag,GroupLead), CompletedAction)', async () => {
-      // user is a group lead with the tag, but has NOT completed action 5
-      const ctx = mockSingleUserContext(10, {
-        userHasTag: jest.fn().mockReturnValue(true),
-        userIsGroupLead: jest.fn().mockResolvedValue(true),
-        userCompletedAction: jest.fn().mockResolvedValue(false),
-      });
-      const result = await evaluateCohortExpressionForUser(
+    it('evaluates OR(AND(Tag,GroupLead), CompletedAction)', async () => {
+      // group lead with the tag, has NOT completed action 5
+      const result = await userInCohort(
+        10,
         {
           op: 'OR',
           children: [
             {
               op: 'AND',
-              children: [
-                { type: 'Tag', tagId: 'a' },
-                { type: 'GroupLead' },
-              ],
+              children: [{ type: 'Tag', tagId: 'a' }, { type: 'GroupLead' }],
             },
             { type: 'CompletedAction', actionId: 5 },
           ],
         },
-        ctx,
+        {
+          hasTag: () => true,
+          isGroupLead: async () => true,
+          completedAction: async () => false,
+        },
       );
-      // AND(Tag=true, GroupLead=true) = true => OR short-circuits to true
       expect(result).toBe(true);
     });
   });
 
   describe('cycle detection', () => {
-    it('returns false for InProgressAction when actionId is in visited set', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userInProgressAction: jest.fn().mockResolvedValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+    it('skips InProgressAction when actionId is in visited set', async () => {
+      const inProgressAction = jest.fn().mockResolvedValue(true);
+      const result = await userInCohort(
+        1,
         { type: 'InProgressAction', actionId: 42 },
-        ctx,
+        { inProgressAction },
         new Set([42]),
       );
       expect(result).toBe(false);
-      expect(ctx.userInProgressAction).not.toHaveBeenCalled();
+      expect(inProgressAction).not.toHaveBeenCalled();
     });
 
-    it('proceeds normally when actionId is not in visited set', async () => {
-      const ctx = mockSingleUserContext(1, {
-        userInProgressAction: jest.fn().mockResolvedValue(true),
-      });
-      const result = await evaluateCohortExpressionForUser(
+    it('proceeds when actionId is not in visited set', async () => {
+      const inProgressAction = jest.fn().mockResolvedValue(true);
+      const result = await userInCohort(
+        1,
         { type: 'InProgressAction', actionId: 42 },
-        ctx,
+        { inProgressAction },
         new Set([99]),
       );
       expect(result).toBe(true);
-      expect(ctx.userInProgressAction).toHaveBeenCalledWith(42);
+      expect(inProgressAction).toHaveBeenCalledWith(42);
     });
   });
 });
 
-// --- Consistency between batch and single-user evaluators ---
+// --- Population and single-user agree (one evaluator, two contexts) ---
 
-describe('batch and single-user evaluator consistency', () => {
-  it('both give consistent results for a Tag condition', async () => {
+describe('population and single-user agreement', () => {
+  it('agree for a Tag condition', async () => {
     const tagUsers = new Set([1, 2, 3]);
-    const batchCtx = mockBatchContext({
-      getUserIdsForTag: jest.fn().mockResolvedValue(tagUsers),
-    });
-
     const batchResult = await evaluateCohortExpression(
       { type: 'Tag', tagId: 'test' },
-      batchCtx,
+      mockBatchContext({
+        getUserIdsForTag: jest.fn().mockResolvedValue(tagUsers),
+      }),
     );
 
-    // Check that each user's single evaluation matches batch membership
     for (const userId of [1, 2, 3, 4, 5]) {
-      const singleCtx = mockSingleUserContext(userId, {
-        userHasTag: jest
-          .fn()
-          .mockReturnValue(tagUsers.has(userId)),
-      });
-      const singleResult = await evaluateCohortExpressionForUser(
+      const single = await userInCohort(
+        userId,
         { type: 'Tag', tagId: 'test' },
-        singleCtx,
+        {
+          hasTag: () => tagUsers.has(userId),
+        },
       );
-      expect(singleResult).toBe(batchResult.has(userId));
+      expect(single).toBe(batchResult.has(userId));
     }
   });
 
-  it('both give consistent results for AND(Tag, Manual)', async () => {
+  it('agree for AND(Tag, Manual)', async () => {
     const tagUsers = new Set([1, 2, 3, 4]);
     const manualUsers = [2, 3, 5];
     const expr: CohortExpression = {
@@ -993,23 +936,112 @@ describe('batch and single-user evaluator consistency', () => {
       ],
     };
 
-    const batchCtx = mockBatchContext({
-      getUserIdsForTag: jest.fn().mockResolvedValue(tagUsers),
-    });
-
-    const batchResult = await evaluateCohortExpression(expr, batchCtx);
+    const batchResult = await evaluateCohortExpression(
+      expr,
+      mockBatchContext({
+        getUserIdsForTag: jest.fn().mockResolvedValue(tagUsers),
+      }),
+    );
     // AND({1,2,3,4}, {2,3,5}) = {2,3}
     expect(batchResult).toEqual(new Set([2, 3]));
 
     for (const userId of [1, 2, 3, 4, 5]) {
-      const singleCtx = mockSingleUserContext(userId, {
-        userHasTag: jest.fn().mockReturnValue(tagUsers.has(userId)),
+      const single = await userInCohort(userId, expr, {
+        hasTag: () => tagUsers.has(userId),
       });
-      const singleResult = await evaluateCohortExpressionForUser(
-        expr,
-        singleCtx,
-      );
-      expect(singleResult).toBe(batchResult.has(userId));
+      expect(single).toBe(batchResult.has(userId));
     }
+  });
+
+  it('agree for NOT(Tag) including the universe boundary', async () => {
+    // Population: universe = candidates {1,2,3,4}; tag = {2,4}; NOT = {1,3}.
+    // User 5 is not a candidate, so it must be excluded by both.
+    const candidates = new Set([1, 2, 3, 4]);
+    const tagUsers = new Set([2, 4]);
+    const expr: CohortExpression = {
+      op: 'NOT',
+      child: { type: 'Tag', tagId: 'a' },
+    };
+
+    const batchResult = await evaluateCohortExpression(
+      expr,
+      mockBatchContext({
+        getAllCandidateUserIds: jest.fn().mockResolvedValue(candidates),
+        getUserIdsForTag: jest.fn().mockResolvedValue(tagUsers),
+      }),
+    );
+    expect(batchResult).toEqual(new Set([1, 3]));
+
+    for (const userId of [1, 2, 3, 4, 5]) {
+      const single = await userInCohort(userId, expr, {
+        isCandidate: candidates.has(userId),
+        hasTag: () => tagUsers.has(userId),
+      });
+      expect(single).toBe(batchResult.has(userId));
+    }
+  });
+});
+
+// --- answerMatchesFormField ---
+
+describe('answerMatchesFormField', () => {
+  it('matches an exact responseEqualTo value', () => {
+    expect(
+      answerMatchesFormField(
+        { f1: 'yes' },
+        { fieldId: 'f1', responseEqualTo: 'yes' },
+      ),
+    ).toBe(true);
+    expect(
+      answerMatchesFormField(
+        { f1: 'no' },
+        { fieldId: 'f1', responseEqualTo: 'yes' },
+      ),
+    ).toBe(false);
+  });
+
+  it('coerces non-string answers when comparing responseEqualTo', () => {
+    expect(
+      answerMatchesFormField(
+        { f1: 5 },
+        { fieldId: 'f1', responseEqualTo: '5' },
+      ),
+    ).toBe(true);
+  });
+
+  it('treats responseAny as presence (any non-empty answer)', () => {
+    expect(
+      answerMatchesFormField(
+        { f1: 'anything' },
+        { fieldId: 'f1', responseAny: true },
+      ),
+    ).toBe(true);
+    expect(
+      answerMatchesFormField({ f1: '' }, { fieldId: 'f1', responseAny: true }),
+    ).toBe(false);
+    expect(
+      answerMatchesFormField({ f1: [] }, { fieldId: 'f1', responseAny: true }),
+    ).toBe(false);
+    expect(
+      answerMatchesFormField({}, { fieldId: 'f1', responseAny: true }),
+    ).toBe(false);
+  });
+
+  it('responseAny overrides responseEqualTo (presence wins)', () => {
+    expect(
+      answerMatchesFormField(
+        { f1: 'something-else' },
+        { fieldId: 'f1', responseEqualTo: 'yes', responseAny: true },
+      ),
+    ).toBe(true);
+  });
+
+  it('returns false for null/undefined answers', () => {
+    expect(
+      answerMatchesFormField(null, { fieldId: 'f1', responseEqualTo: 'yes' }),
+    ).toBe(false);
+    expect(
+      answerMatchesFormField(undefined, { fieldId: 'f1', responseAny: true }),
+    ).toBe(false);
   });
 });

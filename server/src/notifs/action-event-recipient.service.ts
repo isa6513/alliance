@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  answerMatchesFormField,
   evaluateCohortExpression,
   type CohortEvaluationContext,
 } from 'src/actions/cohort-expression.evaluator';
@@ -102,19 +103,9 @@ export class ActionEventRecipientService {
           where: { formId: params.formId },
           relations: { user: true },
         });
-        const matching = responses.filter((r) => {
-          if (params.responseEqualTo !== undefined && !params.responseAny) {
-            return (
-              String(
-                (r.answers as Record<string, unknown>)?.[params.fieldId],
-              ) === params.responseEqualTo
-            );
-          }
-          const answer = (r.answers as Record<string, unknown>)?.[
-            params.fieldId
-          ];
-          return !!answer && !(Array.isArray(answer) && answer.length === 0);
-        });
+        const matching = responses.filter((r) =>
+          answerMatchesFormField(r.answers as Record<string, unknown>, params),
+        );
         return new Set(
           matching
             .map((r) => r.user?.id)

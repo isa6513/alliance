@@ -87,8 +87,9 @@ import {
 } from './action-activity-status';
 import { ActionFormVariantService } from './action-form-variant.service';
 import {
-  evaluateCohortExpressionForUser,
-  SingleUserCohortContext,
+  answerMatchesFormField,
+  evaluateCohortExpression,
+  singleUserCohortContext,
 } from './cohort-expression.evaluator';
 import {
   expressionReferencesTag,
@@ -4205,12 +4206,13 @@ export class ActionsService {
       return false;
     }
 
-    const ctx: SingleUserCohortContext = {
+    const ctx = singleUserCohortContext({
       userId: user.id,
-      userHasTag: (tagId: string) => {
-        return (user.tags || []).some((tag) => tag.id === tagId);
-      },
-      userCompletedAction: async (actionId: number) => {
+      // Mirror findActiveUsersWithTags' universe filter so NOT() agrees across both paths.
+      isCandidate: !user.isNotSignedUpPartialProfile,
+      hasTag: (tagId: string) =>
+        (user.tags || []).some((tag) => tag.id === tagId),
+      completedAction: async (actionId: number) => {
         const activity = await this.actionActivityRepository.findOne({
           where: {
             userId: user.id,
@@ -4220,43 +4222,39 @@ export class ActionsService {
         });
         return !!activity;
       },
-      userInProgressAction: async (actionId: number) => {
+      inProgressAction: async (actionId: number) => {
         if (visitedActionIds.has(actionId)) return false;
         const action = await this.actionRepository.findOne({
           where: { id: actionId },
           relations: { events: true },
         });
         if (!action) return false;
-        visitedActionIds.add(actionId);
-        try {
-          const inCohort = await this.computeIsInCohortExpression({
-            user,
-            cohortExpression: action.cohortExpression,
-            visitedActionIds,
-          });
-          if (action.status !== ActionStatus.MemberAction) return false;
 
-          if (!inCohort) return false;
-          const terminal = await this.actionActivityRepository.findOne({
-            where: [
-              {
-                userId: user.id,
-                actionId,
-                type: ActionActivityType.USER_COMPLETED,
-              },
-              {
-                userId: user.id,
-                actionId,
-                type: ActionActivityType.USER_WONT_COMPLETE,
-              },
-            ],
-          });
-          return !terminal;
-        } finally {
-          visitedActionIds.delete(actionId);
-        }
+        const inCohort = await this.computeIsInCohortExpression({
+          user,
+          cohortExpression: action.cohortExpression,
+          visitedActionIds: new Set(visitedActionIds).add(actionId),
+        });
+        if (action.status !== ActionStatus.MemberAction) return false;
+
+        if (!inCohort) return false;
+        const terminal = await this.actionActivityRepository.findOne({
+          where: [
+            {
+              userId: user.id,
+              actionId,
+              type: ActionActivityType.USER_COMPLETED,
+            },
+            {
+              userId: user.id,
+              actionId,
+              type: ActionActivityType.USER_WONT_COMPLETE,
+            },
+          ],
+        });
+        return !terminal;
       },
-      userMatchesFormField: async (fieldParams: {
+      matchesFormField: async (fieldParams: {
         formId: number;
         fieldId: string;
         responseEqualTo?: string;
@@ -4268,23 +4266,14 @@ export class ActionsService {
             user: { id: user.id },
           },
         });
-        if (responses.length === 0) return false;
-        if (fieldParams.responseEqualTo !== undefined) {
-          return responses.some(
-            (r) =>
-              String(r.answers?.[fieldParams.fieldId]) ===
-              fieldParams.responseEqualTo,
-          );
-        }
-        const matching = responses.filter((r) => {
-          const answer = (r.answers as Record<string, unknown>)?.[
-            fieldParams.fieldId
-          ];
-          return !!answer && !(Array.isArray(answer) && answer.length === 0);
-        });
-        return matching.length > 0;
+        return responses.some((r) =>
+          answerMatchesFormField(
+            r.answers as Record<string, unknown>,
+            fieldParams,
+          ),
+        );
       },
-      userIsGroupLead: async () => {
+      isGroupLead: async () => {
         const count = await this.communityRepository
           .createQueryBuilder('community')
           .innerJoin('community.leaders', 'leader')
@@ -4292,8 +4281,13 @@ export class ActionsService {
           .getCount();
         return count > 0;
       },
-    };
+    });
 
-    return evaluateCohortExpressionForUser(cohortExpression, ctx);
+    const memberIds = await evaluateCohortExpression(
+      cohortExpression,
+      ctx,
+      visitedActionIds,
+    );
+    return memberIds.has(user.id);
   }
 }
