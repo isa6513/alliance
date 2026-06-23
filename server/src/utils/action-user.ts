@@ -26,22 +26,17 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
 }
 
 /**
- * Onboarding "joined in time?" gate. An onboarding action targets *new* members
- * only, so a user qualifies just when they joined (signed their first contract)
- * at or after the member-action phase began. Existing members — who joined
- * before — are excluded.
+ * Onboarding "joined in time?" gate. Targets *new* members, so a user qualifies
+ * only if their first contract was signed at or after the member-action phase began.
  *
- * Rules:
- * - A user with no contract events counts as in time (e.g. a brand-new signup
- *   who hasn't been issued a contract event yet).
- * - When the action has no member-action phase start (`memberActionPhaseStart`
- *   is null) but the user *does* have a contract event, they're out of time —
- *   you can't be onboarded into a phase that hasn't started.
+ * Edge cases:
+ * - No contract events → in time (brand-new signup).
+ * - Contract event but no phase start → out of time: can't onboard into a phase
+ *   that hasn't started.
  *
- * This is the single source of truth for the rule. It is consumed by all three
- * action↔user participation predicates: {@link computeShouldParticipateInAction}
- * (self-view `shouldParticipate`), {@link computeShouldParticipate} (recipient/
- * roster), and `ActionsService.isEligibleForAction` (`canParticipate`).
+ * Single source of this rule, shared by {@link computeShouldParticipateInAction}
+ * (`shouldParticipate`), {@link computeShouldParticipate} (recipient/roster), and
+ * `ActionsService.isEligibleForAction` (`canParticipate`).
  */
 export function computeContractSignedAfterOnboardingStart(params: {
   user: Pick<User, 'contractEvents'>;
@@ -70,8 +65,7 @@ export function computeContractSignedAfterOnboardingStart(params: {
  * driven by a precomputed cohort-member set, for notifications/roster). This one
  * consumes the full cohort-*expression* result (`computeIsInCohortExpression`)
  * as `inCohort`, and stays pure/sync so the caller controls when the DB-hitting
- * cohort evaluation runs. The two still differ in *how* they obtain cohort
- * membership, but the onboarding and contract rules they apply are now shared
+ * cohort evaluation runs. Both share the onboarding/contract rules
  * ({@link computeContractSignedAfterOnboardingStart} /
  * {@link computeIsContractActiveDuringEntireMemberAction}).
  */
@@ -88,9 +82,6 @@ export function computeShouldParticipateInAction(params: {
   const hasMemberActionEvent = action.events.some(
     (event) => event.newStatus === ActionStatus.MemberAction,
   );
-  // Onboarding actions gate on *when the user joined*; everything else gates on
-  // *having an active contract across the phase*. Both anchor on the same
-  // member-action phase (`memberActionPhase`).
   const meetsActionSpecificRule = action.onboarding
     ? computeContractSignedAfterOnboardingStart({
         user,
@@ -237,8 +228,7 @@ export function computeShouldParticipate(params: {
     onboarding &&
     !computeContractSignedAfterOnboardingStart({
       user,
-      // This recipient path is driven per member-action event, so the event
-      // being processed *is* the phase start for the purposes of this rule.
+      // Runs per member-action event, so this event is the phase start.
       memberActionPhaseStart: eventDate,
     })
   ) {

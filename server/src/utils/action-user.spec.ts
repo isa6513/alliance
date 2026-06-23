@@ -108,9 +108,7 @@ describe('computeShouldParticipateInAction', () => {
   });
 
   describe('onboarding join timing', () => {
-    // An onboarding action targets new members: a user who joined before the
-    // member-action phase began (an existing member) is not expected to take it,
-    // even though they may be in the cohort.
+    // Excluded even when in the cohort: onboarding targets new members only.
     it('excludes an existing member who joined before the phase began', () => {
       expect(
         computeShouldParticipateInAction(
@@ -139,7 +137,7 @@ describe('computeShouldParticipateInAction', () => {
   });
 });
 
-describe('computeJoinedInTimeForOnboarding', () => {
+describe('computeContractSignedAfterOnboardingStart', () => {
   it('treats a user with no contract events as in time', () => {
     expect(
       computeContractSignedAfterOnboardingStart({
