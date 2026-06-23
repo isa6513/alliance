@@ -6,11 +6,7 @@ import {
   actionsUnreadGeneralUpdates,
 } from "@alliance/shared/client";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
-import {
-  ActionWithAwayStatus,
-  getAwayStatusAt,
-} from "@alliance/shared/lib/actionUtils";
-import { useMyAwayRanges } from "@alliance/shared/lib/useMyAwayRanges";
+import { ActionWithAwayStatus } from "@alliance/shared/lib/actionUtils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
@@ -36,11 +32,6 @@ export function useTaskActionsData(options?: {
     isError: actionsError,
   } = useActionsQuery({ refetchInterval: options?.refetchInterval });
   const {
-    awayRanges,
-    isPending: awayRangesLoading,
-    isError: awayRangesError,
-  } = useMyAwayRanges();
-  const {
     data: generalUpdatesData,
     isLoading: generalUpdatesLoading,
     isError: generalUpdatesError,
@@ -50,19 +41,18 @@ export function useTaskActionsData(options?: {
       actionsUnreadGeneralUpdates().then((response) => response.data ?? []),
   });
 
-  const loading = actionsLoading || awayRangesLoading || generalUpdatesLoading;
+  const loading = actionsLoading || generalUpdatesLoading;
 
   const actions = useMemo<ActionWithAwayStatus[] | null>(() => {
-    if (loading || actionsError || awayRangesError) {
+    if (loading || actionsError) {
       return null;
     }
 
-    const now = new Date();
     return (actionsData ?? []).map((action) => ({
       ...action,
-      awayStatus: getAwayStatusAt(action, awayRanges, now),
+      awayStatus: action.awayStatus ?? "not_away",
     }));
-  }, [actionsData, awayRanges, loading, actionsError, awayRangesError]);
+  }, [actionsData, loading, actionsError]);
 
   const generalUpdates = useMemo<GeneralUpdateDto[] | null>(() => {
     if (loading || generalUpdatesError) {

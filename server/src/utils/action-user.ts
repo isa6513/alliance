@@ -93,6 +93,14 @@ export function computeShouldParticipateInAction(params: {
   );
 }
 
+/**
+ * Window-overlap away check: is the user away at *any* point during the whole
+ * member-action phase? Time-independent. Used for participation rosters and the
+ * `usersJoined` counter — i.e. "could this user have done it at all?".
+ *
+ * Distinct from {@link computeMemberActionAwayStatus}, which is the now-relative
+ * 4-valued status the UI renders. Two different questions; don't conflate them.
+ */
 export function computeIsAwayDuringAnyOfMemberAction(params: {
   action: Pick<Action, 'events' | 'memberActionPhase'>;
   user: Pick<User, 'awayRanges' | 'isAwayAtAnyPointInRange'>;
@@ -109,6 +117,71 @@ export function computeIsAwayDuringAnyOfMemberAction(params: {
     startDate: memberActionEvent.date,
     endDate: deadlineEvent?.date ?? null,
   });
+}
+
+/**
+ * Now-relative away status for a user's member action, as rendered on the home
+ * feed (away banner, sidebar visibility, task-count badge).
+ *
+ * This is the single source of truth that used to live on the client as
+ * `getAwayStatusAt` in `shared/lib/actionUtils.ts`. It is surfaced on
+ * `ActionDto.awayStatus` so clients read a field instead of recomputing it.
+ *
+ * Distinct from {@link computeIsAwayDuringAnyOfMemberAction} (window-overlap
+ * boolean for rosters/counters).
+ */
+export enum TaskAwayStatus {
+  AwayPreviously = 'away_previously',
+  AwayCurrently = 'away_currently',
+  AwayLater = 'away_later',
+  NotAway = 'not_away',
+}
+
+function findActionEventWindowAt(
+  events: { date: Date }[],
+  date: Date,
+): { startDate: Date | null; endDate: Date | null } {
+  const event = events.find((e) => e.date <= date) ?? null;
+  const nextEvent = events.find((e) => e.date > date) ?? null;
+  return { startDate: event?.date ?? null, endDate: nextEvent?.date ?? null };
+}
+
+export function computeMemberActionAwayStatus(params: {
+  action: Pick<Action, 'events'>;
+  user: Pick<User, 'awayRanges'>;
+  now: Date;
+}): TaskAwayStatus {
+  const { action, user, now } = params;
+
+  const memberActionEvent = action.events.find(
+    (event) =>
+      event.date <= now && event.newStatus === ActionStatus.MemberAction,
+  );
+  if (!memberActionEvent) {
+    return TaskAwayStatus.NotAway;
+  }
+
+  const { startDate, endDate } = findActionEventWindowAt(
+    action.events,
+    memberActionEvent.date,
+  );
+  if (!startDate) {
+    return TaskAwayStatus.NotAway;
+  }
+
+  for (const awayRange of user.awayRanges ?? []) {
+    const { startDate: awayStartDate, endDate: awayEndDate } = awayRange;
+    if (awayStartDate <= now && now < awayEndDate) {
+      return TaskAwayStatus.AwayCurrently;
+    }
+    if (startDate < awayEndDate && awayEndDate < now) {
+      return TaskAwayStatus.AwayPreviously;
+    }
+    if (now <= awayStartDate && (!endDate || awayStartDate < endDate)) {
+      return TaskAwayStatus.AwayLater;
+    }
+  }
+  return TaskAwayStatus.NotAway;
 }
 
 /**

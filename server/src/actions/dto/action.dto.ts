@@ -29,6 +29,7 @@ import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { SubmitFormDto } from 'src/tasks/form.dto';
 import { ProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
+import { TaskAwayStatus } from 'src/utils/action-user';
 import type { CohortExpression } from '../cohort-expression.types';
 import {
   ActionActivity,
@@ -277,6 +278,9 @@ export class ActionDto extends PickType(Action, [
   })
   userRelation?: UserActionRelation;
 
+  @ApiPropertyOptional({ enum: TaskAwayStatus, enumName: 'TaskAwayStatus' })
+  awayStatus?: TaskAwayStatus;
+
   @ApiPropertyOptional()
   reqAuthenticated?: boolean;
 
@@ -300,6 +304,7 @@ export class ActionDto extends PickType(Action, [
       canParticipate?: boolean;
       shouldParticipate?: boolean;
       userRelation?: UserActionRelation;
+      awayStatus?: TaskAwayStatus;
       reqAuthenticated?: boolean;
     },
   ) {
@@ -355,6 +360,7 @@ export class ActionDto extends PickType(Action, [
     this.canParticipate = extra?.canParticipate;
     this.shouldParticipate = extra?.shouldParticipate;
     this.userRelation = extra?.userRelation;
+    this.awayStatus = extra?.awayStatus;
     this.reqAuthenticated = extra?.reqAuthenticated;
     this.authors =
       action.authors?.map((author) => new ProfileDto(author)) || [];

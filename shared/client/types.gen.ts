@@ -1560,6 +1560,8 @@ export type ActionUpdateDto = {
     actionName?: string;
 };
 
+export type TaskAwayStatus = 'away_previously' | 'away_currently' | 'away_later' | 'not_away';
+
 export type ActionDto = {
     /**
      * Unique identifier for the action
@@ -1684,6 +1686,7 @@ export type ActionDto = {
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
+    awayStatus?: TaskAwayStatus;
     reqAuthenticated?: boolean;
     authors?: Array<ProfileDto>;
     /**
@@ -2079,6 +2082,7 @@ export type CreateActionDto = {
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
+    awayStatus?: TaskAwayStatus;
     reqAuthenticated?: boolean;
     /**
      * Deprecated alias for `onboarding`.
@@ -2186,6 +2190,7 @@ export type UpdateActionDto = {
     canParticipate?: boolean;
     shouldParticipate?: boolean;
     userRelation?: UserActionRelation;
+    awayStatus?: TaskAwayStatus;
     reqAuthenticated?: boolean;
     /**
      * Deprecated alias for `onboarding`.

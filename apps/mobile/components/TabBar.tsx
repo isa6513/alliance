@@ -1,10 +1,6 @@
 import { notifsGetUnreadCount } from "@alliance/shared/client";
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
-import {
-  getAwayStatusAt,
-  showActionInSidebarList,
-} from "@alliance/shared/lib/actionUtils";
-import { useMyAwayRanges } from "@alliance/shared/lib/useMyAwayRanges";
+import { showActionInSidebarList } from "@alliance/shared/lib/actionUtils";
 import { cn } from "@alliance/shared/styles/util";
 import { useQuery } from "@tanstack/react-query";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
@@ -109,7 +105,6 @@ export default function TabBar() {
     updateTick,
     refreshUnreadCount,
   } = useMessagingUnread();
-  const { awayRanges } = useMyAwayRanges();
   const { data: unreadNotifications = 0 } = useQuery({
     queryKey: ["notifications", "unreadCount"],
     queryFn: () =>
@@ -123,14 +118,14 @@ export default function TabBar() {
       return 0;
     }
 
-    const now = new Date();
     return actions.filter((action) =>
+      // `awayStatus` is computed on the server and shipped on each ActionDto.
       showActionInSidebarList({
         ...action,
-        awayStatus: getAwayStatusAt(action, awayRanges, now),
+        awayStatus: action.awayStatus ?? "not_away",
       }),
     ).length;
-  }, [actions, awayRanges]);
+  }, [actions]);
 
   useEffect(() => {
     if (hasUpdates) {

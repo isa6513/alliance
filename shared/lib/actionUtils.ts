@@ -1,11 +1,10 @@
 import {
   ActionDto,
-  ActionEventDto,
   CommunityUserInfoDto,
   GeneralUpdateDto,
+  TaskAwayStatus,
   UserActionRelationDetailDto,
   UserActionSummaryDto,
-  UserAwayRangeDto,
 } from "../client";
 
 type TaskPriority = {
@@ -117,67 +116,6 @@ export enum FilterMode {
   Past = "Past",
 }
 
-export function getActionEventAt(
-  action: ActionDto,
-  date: Date,
-): { event: ActionEventDto | null; endDate: Date | null } {
-  const event = action.events.find((event) => new Date(event.date) <= date);
-  const nextEvent = action.events.find((event) => new Date(event.date) > date);
-
-  return {
-    event: event ?? null,
-    endDate: nextEvent ? new Date(nextEvent.date) : null,
-  };
-}
-
-export enum TaskAwayStatus {
-  AWAY_PREVIOUSLY = "away_previously",
-  AWAY_CURRENTLY = "away_currently",
-  AWAY_LATER = "away_later",
-  NOT_AWAY = "not_away",
-}
-
-export function getAwayStatusAt(
-  action: ActionDto,
-  awayRanges: UserAwayRangeDto[],
-  date: Date,
-): TaskAwayStatus {
-  const memberActionEvent = action.events.find(
-    (event) =>
-      new Date(event.date) <= date && event.newStatus === "member_action",
-  );
-  if (!memberActionEvent) {
-    return TaskAwayStatus.NOT_AWAY;
-  }
-
-  const { event, endDate } = getActionEventAt(
-    action,
-    new Date(memberActionEvent.date),
-  );
-
-  if (!event) {
-    return TaskAwayStatus.NOT_AWAY;
-  }
-  const startDate = new Date(event.date);
-
-  for (const awayRange of awayRanges) {
-    const awayStartDate = new Date(awayRange.startDate);
-    const awayEndDate = new Date(awayRange.endDate);
-    if (awayStartDate <= date && date < awayEndDate) {
-      return TaskAwayStatus.AWAY_CURRENTLY;
-    }
-
-    if (startDate < awayEndDate && awayEndDate < date) {
-      return TaskAwayStatus.AWAY_PREVIOUSLY;
-    }
-
-    if (date <= awayStartDate && (!endDate || awayStartDate < endDate)) {
-      return TaskAwayStatus.AWAY_LATER;
-    }
-  }
-  return TaskAwayStatus.NOT_AWAY;
-}
-
 export type ActionWithAwayStatus = ActionDto & { awayStatus: TaskAwayStatus };
 
 export function getDeadlineTimestamp(
@@ -236,7 +174,7 @@ export function isCurrentlyCompletedAction(action: ActionDto) {
 export function showActionInSidebarList(action: ActionWithAwayStatus) {
   return (
     shouldCompleteAction(action) &&
-    action.awayStatus === TaskAwayStatus.NOT_AWAY &&
+    action.awayStatus === "not_away" &&
     !deadlineHasPassed(action, new Date()) &&
     action.userRelation !== "dismissed"
   );

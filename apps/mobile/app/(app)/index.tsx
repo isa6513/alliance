@@ -11,7 +11,6 @@ import {
 import { useActionsQuery } from "@alliance/shared/lib/actionsListPage";
 import {
   ActionWithAwayStatus,
-  getAwayStatusAt,
   homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
@@ -22,7 +21,6 @@ import useHomeFeed, {
   getForumComment,
   resetHomeFeed,
 } from "@alliance/shared/lib/useHomeFeed";
-import { useMyAwayRanges } from "@alliance/shared/lib/useMyAwayRanges";
 import { LegendList, type LegendListRef } from "@legendapp/list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -121,12 +119,6 @@ export default function HomeScreen() {
     [actions, refetch],
   );
 
-  const {
-    awayRanges,
-    isPending: awayRangesPending,
-    refetch: refetchAwayRanges,
-  } = useMyAwayRanges();
-
   const handleDismissGeneralUpdate = useCallback(
     async (generalUpdateId: number) => {
       await actionsDismissGeneralUpdate({
@@ -140,15 +132,16 @@ export default function HomeScreen() {
     [queryClient],
   );
 
-  const loading = isPending || awayRangesPending || generalUpdatesPending;
+  const loading = isPending || generalUpdatesPending;
 
   const actionsWithAwayStatus = useMemo((): ActionWithAwayStatus[] => {
-    if (!actions || awayRangesPending) return [];
+    if (!actions) return [];
+
     return actions.map((action) => ({
       ...action,
-      awayStatus: getAwayStatusAt(action, awayRanges, new Date()),
+      awayStatus: action.awayStatus ?? "not_away",
     }));
-  }, [actions, awayRanges, awayRangesPending]);
+  }, [actions]);
 
   const { todoActions, activeCompletableFollowUpForms } = useHomePageActions(
     actionsWithAwayStatus,
@@ -195,13 +188,12 @@ export default function HomeScreen() {
       await Promise.all([
         refetch(),
         refetchGeneralUpdates(),
-        refetchAwayRanges(),
         queryClient.invalidateQueries({ queryKey: ["form"] }),
       ]);
     } finally {
       setRefreshing(false);
     }
-  }, [refetch, refetchGeneralUpdates, refetchAwayRanges, queryClient]);
+  }, [refetch, refetchGeneralUpdates, queryClient]);
 
   const scrollPageTo = useCallback((y: number, animated = true) => {
     scrollViewRef.current?.scrollTo({ y, animated });

@@ -1,7 +1,4 @@
-import {
-  ActionWithAwayStatus,
-  TaskAwayStatus,
-} from "@alliance/shared/lib/actionUtils";
+import { ActionWithAwayStatus } from "@alliance/shared/lib/actionUtils";
 
 /**
  * Static action for previews of the member task UI on public pages (invite flow,
@@ -36,7 +33,7 @@ export const exampleMemberTaskAction: ActionWithAwayStatus = {
   updates: [],
   userRelation: "none" as const,
   canParticipate: true,
-  awayStatus: TaskAwayStatus.NOT_AWAY,
+  awayStatus: "not_away",
   events: [
     {
       id: 1,

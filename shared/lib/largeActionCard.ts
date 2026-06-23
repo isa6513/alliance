@@ -1,9 +1,5 @@
-import { ActionDto, ActionEventDto } from "../client";
-import {
-  ActionWithAwayStatus,
-  TaskAwayStatus,
-  deadlineHasPassed,
-} from "./actionUtils";
+import { ActionDto, ActionEventDto, type TaskAwayStatus } from "../client";
+import { ActionWithAwayStatus, deadlineHasPassed } from "./actionUtils";
 import { taskHeaders } from "./copy";
 
 export interface LargeActionCardPropsShared {
@@ -17,15 +13,10 @@ export interface LargeActionCardPropsShared {
 }
 
 const AWAY_STATUS_MESSAGES = {
-  [TaskAwayStatus.AWAY_CURRENTLY]:
-    taskHeaders.homePage.away.description.currentlyAway,
-  [TaskAwayStatus.AWAY_LATER]: taskHeaders.homePage.away.description.willBeAway,
-  [TaskAwayStatus.AWAY_PREVIOUSLY]:
-    taskHeaders.homePage.away.description.wasAway,
-} as const satisfies Record<
-  Exclude<TaskAwayStatus, TaskAwayStatus.NOT_AWAY>,
-  string
->;
+  away_currently: taskHeaders.homePage.away.description.currentlyAway,
+  away_later: taskHeaders.homePage.away.description.willBeAway,
+  away_previously: taskHeaders.homePage.away.description.wasAway,
+} as const satisfies Record<Exclude<TaskAwayStatus, "not_away">, string>;
 
 /**
  * Pure data computation — returns the banner header/message for a task that can
@@ -37,7 +28,7 @@ export function getTaskDismissInfo(
 ): { header: string; message: string } | undefined {
   if (action.onboarding) return undefined;
 
-  if (action.awayStatus !== TaskAwayStatus.NOT_AWAY) {
+  if (action.awayStatus !== "not_away") {
     return {
       header: taskHeaders.homePage.away.title,
       message: AWAY_STATUS_MESSAGES[action.awayStatus],

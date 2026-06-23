@@ -63,6 +63,7 @@ import {
   computeContractSignedAfterOnboardingStart,
   computeIsAwayDuringAnyOfMemberAction,
   computeIsTaggedOrInManualCohort,
+  computeMemberActionAwayStatus,
   computeShouldParticipate,
   computeShouldParticipateInAction,
 } from 'src/utils/action-user';
@@ -645,6 +646,8 @@ export class ActionsService {
     // Index viewer's activities once, rather than rescanning per action.
     const userActivities = user ? new CachedFilter(user.activities!) : null;
 
+    const now = new Date();
+
     return await Promise.all(
       filtered.map(async (action) => {
         const dismissed = actionsDismissed.has(action.id);
@@ -688,6 +691,9 @@ export class ActionsService {
                   actionId: action.id,
                 })
               : undefined,
+          awayStatus: user
+            ? computeMemberActionAwayStatus({ action, user, now })
+            : undefined,
           reqAuthenticated: !!user,
         });
       }),
