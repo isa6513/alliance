@@ -1,3 +1,4 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import { byLikeOrder, LIKE_FACEPILE_LIMIT } from '@alliance/common/likeOrder';
 import {
   ApiProperty,
@@ -31,10 +32,7 @@ import { ProfileDto } from 'src/user/dto/user.dto';
 import { User } from 'src/user/entities/user.entity';
 import { TaskAwayStatus } from 'src/utils/action-user';
 import type { CohortExpression } from '../cohort-expression.types';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from '../entities/action-activity.entity';
+import { ActionActivity } from '../entities/action-activity.entity';
 import { ActionEvent, ActionStatus } from '../entities/action-event.entity';
 import { ActionSuite } from '../entities/action-suite.entity';
 import { ActionUpdate } from '../entities/action-update.entity';

@@ -3,10 +3,10 @@ import {
   actionsUserCompletedCount,
 } from "@alliance/shared/client";
 import { Features } from "@alliance/shared/lib/features";
+import { getForumComment } from "@alliance/shared/lib/feedHelpers";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
-import { getForumComment } from "@alliance/shared/lib/useHomeFeed";
 import {
   buildForumActivityItems,
   useAcceptFriendRequestMutation,
@@ -25,15 +25,15 @@ import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import Card from "@alliance/sharedweb/ui/Card";
+import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
+import List from "@alliance/sharedweb/ui/List";
+import Spinner from "@alliance/sharedweb/ui/Spinner";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@alliance/sharedweb/ui/Tooltip";
-import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
-import List from "@alliance/sharedweb/ui/List";
-import Spinner from "@alliance/sharedweb/ui/Spinner";
-import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { useQuery } from "@tanstack/react-query";
 import { MessageSquare } from "lucide-react";
 import React, {
@@ -523,13 +523,14 @@ const UserProfilePage: React.FC = () => {
               {feedItems.map((item) => {
                 switch (item.type) {
                   case "activity": {
-                    if (!item.activity) return null;
                     return (
-                      <UserActivityCard
-                        activity={item.activity}
-                        key={`activity-${item.activity.id}`}
-                        handleLike={handleLikeActivity}
-                      />
+                      item.activity && (
+                        <UserActivityCard
+                          activity={item.activity}
+                          key={`activity-${item.activity.id}`}
+                          handleLike={handleLikeActivity}
+                        />
+                      )
                     );
                   }
                   case "cluster_forum_comment":

@@ -1,3 +1,4 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import type { FormSchema } from '@alliance/common/forms/form-schema';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
@@ -24,10 +25,7 @@ import {
 } from 'typeorm';
 import { ActionsService } from './actions.service';
 import { ForumAutocompletePlan } from './dto/action.dto';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from './entities/action-activity.entity';
+import { ActionActivity } from './entities/action-activity.entity';
 import { ActionEvent } from './entities/action-event.entity';
 import { Action } from './entities/action.entity';
 

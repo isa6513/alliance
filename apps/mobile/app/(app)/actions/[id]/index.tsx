@@ -5,6 +5,7 @@ import {
   actionsLikeActivity,
   actionsUnlikeActivity,
 } from "@alliance/shared/client";
+import { actionActivityDtoIsVisibleInFeed } from "@alliance/shared/lib/actionActivity";
 import { useActionHandlers } from "@alliance/shared/lib/actionPage";
 import { getNextEvent } from "@alliance/shared/lib/largeActionCard";
 import { cn } from "@alliance/shared/styles/util";
@@ -166,11 +167,17 @@ function ActivityTabContent({ actionId }: ActivityTabContentProps) {
 
   return (
     <View>
-      {activities.map((activity) => (
-        <View key={activity.id} className="-mx-4 border-b-3 border-zinc-100">
-          <UserActivityCard activity={activity} handleLike={handleLike} />
-        </View>
-      ))}
+      {activities.map(
+        (activity) =>
+          actionActivityDtoIsVisibleInFeed(activity) && (
+            <View
+              key={activity.id}
+              className="-mx-4 border-b-3 border-zinc-100"
+            >
+              <UserActivityCard activity={activity} handleLike={handleLike} />
+            </View>
+          ),
+      )}
     </View>
   );
 }

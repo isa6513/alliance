@@ -1,9 +1,9 @@
-import { FormSchema } from "@alliance/common/forms/form-schema";
-import { ActionActivityDto } from "@alliance/shared/client";
 import {
   actionActivityCommentable,
   actionActivityTransitiveVerb,
-} from "@alliance/shared/lib/actionActivityConstants";
+} from "@alliance/common/actionActivity";
+import { FormSchema } from "@alliance/common/forms/form-schema";
+import { FeedActionActivityDto } from "@alliance/shared/lib/actionActivity";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { cn } from "@alliance/shared/styles/util";
 import OutputRenderer from "@alliance/sharedweb/forms/OutputRenderer";
@@ -11,12 +11,12 @@ import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import EditableContentRenderer from "@alliance/sharedweb/ui/EditableContentRenderer";
 import { MessageCircle } from "lucide-react";
 import { useCallback, useState } from "react";
-import { Link, href, useNavigate } from "react-router";
+import { href, Link, useNavigate } from "react-router";
 import Comments from "./Comments";
 import LikeFooter, { LikeBarButton } from "./LikeFooter";
 
 interface UserActivityCardProps {
-  activity: ActionActivityDto;
+  activity: FeedActionActivityDto;
   handleLike: (activityId: number) => Promise<unknown>;
 }
 

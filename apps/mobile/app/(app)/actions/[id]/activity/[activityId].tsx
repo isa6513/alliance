@@ -1,10 +1,10 @@
+import { actionActivityTransitiveVerb } from "@alliance/common/actionActivity";
 import {
   ActionActivityDto,
   actionsGetActivity,
   actionsLikeActivity,
   actionsUnlikeActivity,
 } from "@alliance/shared/client";
-import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
 import {
   InfiniteActivityData,
   mapInfiniteActivities,
@@ -209,7 +209,7 @@ export default function ActivityDetailScreen() {
     await likeMutation.mutateAsync(activity.likedByMe ?? false);
   }, [activity, likeMutation]);
 
-  const verb = activity ? actionActivityTransitiveVerb[activity.type] : null;
+  const verb = activity && actionActivityTransitiveVerb[activity.type];
 
   if (loading) {
     return (

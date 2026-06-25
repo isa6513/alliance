@@ -1,12 +1,12 @@
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { cn } from "@alliance/shared/styles/util";
-import UserActivityCard from "../../components/UserActivityCard";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
+import { cn } from "@alliance/shared/styles/util";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, href } from "react-router";
+import UserActivityCard from "../../components/UserActivityCard";
 
 type Mode = "friends" | "everyone";
 

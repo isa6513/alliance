@@ -1,4 +1,5 @@
 import { ActionActivityDto } from "@alliance/shared/client";
+import { FeedActionActivityDto } from "@alliance/shared/lib/actionActivity";
 import { useState } from "react";
 import { Link, href } from "react-router";
 import { useAuth } from "../lib/AuthContext";
@@ -6,7 +7,7 @@ import ActionActivityFeedItem from "./ActionActivityFeedItem";
 
 interface ActionActivityListProps {
   actionId: number;
-  activities: ActionActivityDto[];
+  activities: FeedActionActivityDto[];
   loading: boolean;
   onLikeActivity: (activityId: number) => Promise<unknown>;
   maxN: number;
@@ -47,9 +48,9 @@ const ActionActivityList = ({
   if (!allActivities.length) {
     return null;
   }
-  const displayedCompletionActivities = (
-    showAll ? allActivities : allActivities.slice(0, maxN)
-  ).filter((activity) => activity.type === "user_completed");
+  const displayedCompletionActivities = showAll
+    ? allActivities
+    : allActivities.slice(0, maxN);
 
   const hasMore = allActivities.length > maxN;
 

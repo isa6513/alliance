@@ -1,3 +1,4 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -17,10 +18,7 @@ import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { Tag } from 'src/user/entities/tag.entity';
 import { computeShouldParticipate } from 'src/utils/action-user';
 import { In, type Repository } from 'typeorm';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from '../actions/entities/action-activity.entity';
+import { ActionActivity } from '../actions/entities/action-activity.entity';
 import {
   ActionEvent,
   ActionStatus,

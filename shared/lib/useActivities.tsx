@@ -16,7 +16,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
-import { actionActivityViewable } from "./actionActivityConstants";
+import {
+  actionActivityDtoIsVisibleInFeed,
+  type FeedActionActivityDto,
+} from "./actionActivity";
 
 export enum ActivityList {
   Friends = "friends",
@@ -120,8 +123,8 @@ const callActivityApi = async (props: UseActivitiesProps, before?: string) => {
 
 const processActivities = (
   data: ActionActivityDto[] | undefined,
-): ActionActivityDto[] => {
-  const filtered = data?.filter((a) => actionActivityViewable[a.type]) ?? [];
+): FeedActionActivityDto[] => {
+  const filtered = data?.filter(actionActivityDtoIsVisibleInFeed) ?? [];
   return filtered.sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
@@ -129,7 +132,7 @@ const processActivities = (
 
 /** Page wrapper that preserves the raw server count for accurate pagination */
 type ActivityPage = {
-  activities: ActionActivityDto[];
+  activities: FeedActionActivityDto[];
   serverCount: number;
 };
 
@@ -150,7 +153,7 @@ export type InfiniteActivityData = InfiniteData<ActivityPage>;
 /** Map over all activities across pages in an infinite query cache entry */
 export const mapInfiniteActivities = (
   old: InfiniteActivityData | undefined,
-  mapper: (activity: ActionActivityDto) => ActionActivityDto,
+  mapper: (activity: FeedActionActivityDto) => FeedActionActivityDto,
 ): InfiniteActivityData | undefined => {
   if (!old) return old;
   return {
@@ -273,8 +276,8 @@ const useActivities = (props: UseActivitiesProps) => {
   );
 
   const updateActivity = useCallback(
-    (updatedActivity: ActionActivityDto) => {
-      const mapper = (a: ActionActivityDto) =>
+    (updatedActivity: FeedActionActivityDto) => {
+      const mapper = (a: FeedActionActivityDto) =>
         a.id === updatedActivity.id ? { ...a, ...updatedActivity } : a;
 
       queryClient.setQueryData<InfiniteActivityData>(queryKey, (old) =>

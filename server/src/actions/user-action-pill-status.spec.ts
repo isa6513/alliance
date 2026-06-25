@@ -1,5 +1,5 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import { UserActionRelationPillStatus } from '../user/dto/user-action-relations.dto';
-import { ActionActivityType } from './entities/action-activity.entity';
 import {
   resolveUserActionPillStatus,
   UserActionPillStatusInput,

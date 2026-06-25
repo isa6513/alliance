@@ -1,8 +1,4 @@
-import type {
-  FollowUpForm,
-  GeneralUpdateDto,
-  HomeFeedItemDto,
-} from "@alliance/shared/client";
+import type { FollowUpForm, GeneralUpdateDto } from "@alliance/shared/client";
 import {
   actionsDismissAction,
   actionsDismissGeneralUpdate,
@@ -14,13 +10,14 @@ import {
   homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
+import {
+  ParsedHomeFeedItemDto,
+  getForumComment,
+} from "@alliance/shared/lib/feedHelpers";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
 import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
-import useHomeFeed, {
-  getForumComment,
-  resetHomeFeed,
-} from "@alliance/shared/lib/useHomeFeed";
+import useHomeFeed, { resetHomeFeed } from "@alliance/shared/lib/useHomeFeed";
 import { LegendList, type LegendListRef } from "@legendapp/list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -227,7 +224,7 @@ export default function HomeScreen() {
   }, [homeFeedHasNextPage, homeFeedFetchingNextPage, fetchNextHomeFeedPage]);
 
   const renderHomeFeedItem = useCallback(
-    ({ item }: { item: HomeFeedItemDto }) => {
+    ({ item }: { item: ParsedHomeFeedItemDto }) => {
       switch (item.type) {
         case "activity": {
           if (!item.activity) return null;

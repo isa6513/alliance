@@ -1,5 +1,5 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import type { ActionActivity } from 'src/actions/entities/action-activity.entity';
-import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import { ContractService } from 'src/contract/contract.service';
 import { CommentParentObject } from 'src/forum/entities/comment.entity';
 import {

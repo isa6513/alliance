@@ -1,10 +1,8 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import request from 'supertest';
 import type { Repository } from 'typeorm';
 import { ActionsService } from '../src/actions/actions.service';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from '../src/actions/entities/action-activity.entity';
+import { ActionActivity } from '../src/actions/entities/action-activity.entity';
 import {
   ActionEvent,
   ActionStatus,

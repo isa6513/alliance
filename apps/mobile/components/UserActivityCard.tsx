@@ -1,8 +1,8 @@
-import { ActionActivityDto } from "@alliance/shared/client";
 import {
   actionActivityCommentable,
   actionActivityTransitiveVerb,
-} from "@alliance/shared/lib/actionActivityConstants";
+} from "@alliance/common/actionActivity";
+import { FeedActionActivityDto } from "@alliance/shared/lib/actionActivity";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { router } from "expo-router";
 import { MessageCircleIcon } from "lucide-react-native";
@@ -16,7 +16,7 @@ import ProfileImage from "./ProfileImage";
 import Text, { FontWeight } from "./system/Text";
 
 interface UserActivityCardProps {
-  activity: ActionActivityDto;
+  activity: FeedActionActivityDto;
   handleLike: (activityId: number) => Promise<unknown>;
 }
 

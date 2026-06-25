@@ -1,8 +1,8 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import { CachedFilter } from '../utils/cached-filter';
 import { findLeast } from '../utils/filter';
 import { UserActionRelation } from './dto/action.dto';
 import type { ActionActivity } from './entities/action-activity.entity';
-import { ActionActivityType } from './entities/action-activity.entity';
 
 /**
  * A "terminal" activity determines a user's status on an action: an explicit

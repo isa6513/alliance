@@ -1,19 +1,19 @@
 import {
-  userListFriends,
-  actionsFindOne,
   ActionDto,
+  actionsFindOne,
+  userListFriends,
 } from "@alliance/shared/client";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@alliance/shared/styles/util";
-import UserActivityCard from "../../components/UserActivityCard";
-import { useAuth } from "../../lib/AuthContext";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
+import { cn } from "@alliance/shared/styles/util";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, href, useParams } from "react-router";
 import chevronLeft from "../../assets/icons8-expand-arrow-96.png";
+import UserActivityCard from "../../components/UserActivityCard";
+import { useAuth } from "../../lib/AuthContext";
 
 type Mode = "friends" | "everyone";
 

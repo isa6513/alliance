@@ -1,7 +1,7 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import { CachedFilter } from '../utils/cached-filter';
 import { resolveUserActionRelation } from './action-activity-status';
 import { UserActionRelation } from './dto/action.dto';
-import { ActionActivityType } from './entities/action-activity.entity';
 
 const USER_ID = 123;
 const ACTION_ID = 456;

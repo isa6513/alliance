@@ -1,7 +1,11 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow, IsOptional } from 'class-validator';
+import { Allow, IsEnum, IsOptional } from 'class-validator';
+import { CreateDateColumnTz } from 'src/datasources/basecolumns';
 import { EditableContent } from 'src/forum/entities/editablecontent.entity';
+import { FormResponse } from 'src/tasks/entities/formresponse.entity';
+import type { Relation } from 'src/utils/Repository';
 import {
   Column,
   Entity,
@@ -13,19 +17,8 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { CreateDateColumnTz } from 'src/datasources/basecolumns';
 import { User } from '../../user/entities/user.entity';
 import { Action } from './action.entity';
-import { FormResponse } from 'src/tasks/entities/formresponse.entity';
-import type { Relation } from 'src/utils/Repository';
-
-export enum ActionActivityType {
-  USER_COMPLETED = 'user_completed',
-  USER_WONT_COMPLETE = 'user_wont_complete',
-  USER_DISMISSED = 'user_dismissed',
-
-  USER_SUBMITTED_FOLLOW_UP_FORM = 'user_submitted_follow_up_form',
-}
 
 export const ALLOW_DUPLICATE = {
   [ActionActivityType.USER_COMPLETED]: false,
@@ -54,6 +47,7 @@ export class ActionActivity {
     enumName: 'ActionActivityType',
   })
   @Allow()
+  @IsEnum(ActionActivityType)
   type: ActionActivityType;
 
   @ManyToOne(() => Action, { onDelete: 'CASCADE' })

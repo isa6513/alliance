@@ -1,8 +1,6 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import { Temporal } from '@js-temporal/polyfill';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from 'src/actions/entities/action-activity.entity';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import {
   ActionEvent,
   ActionStatus,

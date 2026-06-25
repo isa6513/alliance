@@ -1,3 +1,7 @@
+import {
+  ACTION_ACTIVITY_FEED_VISIBLE_TYPES,
+  ActionActivityType,
+} from '@alliance/common/actionActivity';
 import type { FormSchema } from '@alliance/common/forms/form-schema';
 import { LIKE_FACEPILE_LIMIT, likeOrderRank } from '@alliance/common/likeOrder';
 import { run } from '@alliance/common/run';
@@ -138,7 +142,6 @@ import {
 import { ShareUrlStats } from './dto/share-url.dto';
 import {
   ActionActivity,
-  ActionActivityType,
   ActivitySource,
   ALLOW_DUPLICATE,
 } from './entities/action-activity.entity';
@@ -1526,12 +1529,11 @@ export class ActionsService {
     requestingUserId?: number,
     before?: Date,
   ): Promise<ActionActivityDto[]> {
-    const activities = await this.buildActivityFeedQuery({
+    const activities = await this.fetchActivityFeed({
       limit: limit ?? 20,
       actionId,
       before,
-      filterFeedTypes: false,
-    }).getMany();
+    });
 
     if (activities.length === 0) {
       return [];
@@ -1654,16 +1656,16 @@ export class ActionsService {
   }
 
   /**
-   * Shared helper to build optimized activity feed queries.
+   * Shared helper to run optimized activity feed queries.
    * Only selects the fields needed for ActionActivityDto to minimize data transfer.
    */
-  private buildActivityFeedQuery(options: {
+  private fetchActivityFeed(options: {
     limit: number;
     before?: Date;
     userIds?: number[];
     actionId?: number;
-    filterFeedTypes?: boolean;
     communityId?: number;
+    requireFormResponse?: boolean;
   }) {
     const qb = this.actionActivityRepository
       .createQueryBuilder('activity')
@@ -1702,17 +1704,11 @@ export class ActionsService {
         'taskFormSnapshot.schema',
       ])
       .loadRelationIdAndMap('user.leaderOfIds', 'user.leaderOf')
+      .where('activity.type IN (:...types)', {
+        types: ACTION_ACTIVITY_FEED_VISIBLE_TYPES,
+      })
       .orderBy('activity.createdAt', 'DESC')
       .take(options.limit);
-
-    if (options.filterFeedTypes !== false) {
-      qb.where('activity.type IN (:...types)', {
-        types: [
-          ActionActivityType.USER_COMPLETED,
-          ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM,
-        ],
-      });
-    }
 
     if (options.before) {
       qb.andWhere('activity.createdAt < :before', { before: options.before });
@@ -1737,7 +1733,11 @@ export class ActionsService {
       });
     }
 
-    return qb;
+    if (options.requireFormResponse) {
+      qb.andWhere('taskFormResponse.id IS NOT NULL');
+    }
+
+    return qb.getMany();
   }
 
   async getActivityFeed(
@@ -1746,10 +1746,10 @@ export class ActionsService {
     comments?: boolean,
     requestingUserId?: number,
   ): Promise<ActionActivityDto[]> {
-    const activities = await this.buildActivityFeedQuery({
+    const activities = await this.fetchActivityFeed({
       limit,
       before,
-    }).getMany();
+    });
 
     if (activities.length === 0) {
       return [];
@@ -1865,11 +1865,11 @@ export class ActionsService {
       return [];
     }
 
-    const friendActivities = await this.buildActivityFeedQuery({
+    const friendActivities = await this.fetchActivityFeed({
       limit: limit ?? 20,
       before,
       userIds: friends.map((f) => f.id),
-    }).getMany();
+    });
 
     if (friendActivities.length === 0) {
       return [];
@@ -1906,11 +1906,11 @@ export class ActionsService {
       return [];
     }
 
-    const friendActivities = await this.buildActivityFeedQuery({
+    const friendActivities = await this.fetchActivityFeed({
       limit: limit ?? 20,
       userIds: friends.map((f) => f.id),
       actionId,
-    }).getMany();
+    });
 
     if (friendActivities.length === 0) {
       return [];
@@ -1950,11 +1950,11 @@ export class ActionsService {
       return [];
     }
 
-    const memberActivities = await this.buildActivityFeedQuery({
+    const memberActivities = await this.fetchActivityFeed({
       limit: limitNum,
       before: beforeDate,
       userIds: members.map((m) => m.id),
-    }).getMany();
+    });
 
     if (memberActivities.length === 0) {
       return [];
@@ -2073,22 +2073,12 @@ export class ActionsService {
     let cursor = before;
 
     while (contentful.length < limit && allUserIds.length > 0) {
-      const qb = this.buildActivityFeedQuery({
+      const batch = await this.fetchActivityFeed({
         limit: batchSize,
         before: cursor,
         userIds: allUserIds,
-        filterFeedTypes: false,
+        requireFormResponse: true,
       });
-
-      qb.andWhere('activity.type IN (:...completionTypes)', {
-        completionTypes: [
-          ActionActivityType.USER_COMPLETED,
-          ActionActivityType.USER_SUBMITTED_FOLLOW_UP_FORM,
-        ],
-      });
-      qb.andWhere('taskFormResponse.id IS NOT NULL');
-
-      const batch = await qb.getMany();
 
       for (const a of batch) {
         if (this.buildOutputFormResponse(a) !== undefined) {

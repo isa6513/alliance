@@ -1,34 +1,19 @@
-import { ActionActivityDto, ActionActivityType } from "@alliance/shared/client";
-import {
-  actionActivityTransitiveVerb,
-  type ViewableActionActivity,
-} from "@alliance/shared/lib/actionActivityConstants";
+import { actionActivityTransitiveVerb } from "@alliance/common/actionActivity";
+import { FeedActionActivityDto } from "@alliance/shared/lib/actionActivity";
 import { formatTime } from "@alliance/shared/lib/utils";
-import { cn } from "@alliance/shared/styles/util";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { MessageCircle } from "lucide-react";
-import { Link, href, useNavigate } from "react-router";
+import { href, Link, useNavigate } from "react-router";
 import LikeFooter, { LikeBarButton } from "./LikeFooter";
 
 export interface ActionActivityFeedItemProps {
-  activity: ActionActivityDto;
+  activity: FeedActionActivityDto;
   showTime?: boolean;
   card?: boolean;
   showAction: boolean;
   showLikeFooter: boolean;
-  handleLike: (activity: ActionActivityDto) => Promise<unknown>;
+  handleLike: (activity: FeedActionActivityDto) => Promise<unknown>;
 }
-
-const ACTIVITY_TYPE_CLICKABLE = {
-  user_completed: true,
-  user_submitted_follow_up_form: true,
-
-  // no rendered activity
-  user_wont_complete: null,
-  user_dismissed: null,
-} as const satisfies {
-  [K in ActionActivityType]: K extends ViewableActionActivity ? boolean : null;
-};
 
 const ActionActivityFeedItem = ({
   activity,
@@ -39,11 +24,8 @@ const ActionActivityFeedItem = ({
   handleLike,
 }: ActionActivityFeedItemProps) => {
   const navigate = useNavigate();
-  const verb = actionActivityTransitiveVerb[activity.type];
 
-  if (verb === null) {
-    return null;
-  }
+  const verb = actionActivityTransitiveVerb[activity.type];
 
   if (card) {
     return (
@@ -66,19 +48,11 @@ const ActionActivityFeedItem = ({
       </Link>
     );
   } else {
-    const clickable = ACTIVITY_TYPE_CLICKABLE[activity.type];
     return (
       <div
         key={activity.id}
-        className={cn(
-          "rounded-md border-zinc-200",
-          clickable ? "cursor-pointer" : "cursor-default",
-        )}
+        className="rounded-md border-zinc-200 cursor-pointer"
         onClick={() => {
-          if (!clickable) {
-            return;
-          }
-
           navigate(
             href("/actions/:id/activity/:activityId", {
               id: activity.actionId.toString(),

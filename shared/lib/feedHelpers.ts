@@ -1,5 +1,4 @@
 import {
-  ActionActivityDto,
   HomeFeedForumCommentDto,
   HomeFeedItemDto,
   actionsLikeActivity,
@@ -14,7 +13,15 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
-import { actionActivityViewable } from "./actionActivityConstants";
+import {
+  actionActivityDtoIsVisibleInFeed,
+  type FeedActionActivityDto,
+} from "./actionActivity";
+
+/** A home-feed item that has passed `isViewable`. */
+export type ParsedHomeFeedItemDto = Omit<HomeFeedItemDto, "activity"> & {
+  activity?: FeedActionActivityDto;
+};
 
 // TODO(forum-comment-rename): server currently emits the legacy
 // 'cluster_forum_comment' type and 'clusterForumComment' field. Once all
@@ -31,10 +38,12 @@ export const getForumComment = (
   return extended.clusterForumComment ?? extended.forumComment;
 };
 
-const isViewable = (item: HomeFeedItemDto): boolean => {
+const isViewable = (item: HomeFeedItemDto): item is ParsedHomeFeedItemDto => {
   switch (item.type) {
     case "activity":
-      return item.activity ? actionActivityViewable[item.activity.type] : false;
+      return item.activity
+        ? actionActivityDtoIsVisibleInFeed(item.activity)
+        : false;
     case "cluster_forum_comment":
     // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
     case "forum_comment":
@@ -48,13 +57,13 @@ const isViewable = (item: HomeFeedItemDto): boolean => {
 
 export const processFeedItems = (
   data: HomeFeedItemDto[] | undefined,
-): HomeFeedItemDto[] =>
+): ParsedHomeFeedItemDto[] =>
   (data?.filter(isViewable) ?? []).sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
 export type FeedPage = {
-  items: HomeFeedItemDto[];
+  items: ParsedHomeFeedItemDto[];
   serverCount: number;
   oldestRawDate: string | undefined;
 };
@@ -69,7 +78,7 @@ export type InfiniteFeedData = InfiniteData<FeedPage>;
 
 export const mapActivitiesInPages = (
   old: InfiniteFeedData | undefined,
-  mapper: (activity: ActionActivityDto) => ActionActivityDto,
+  mapper: (activity: FeedActionActivityDto) => FeedActionActivityDto,
 ): InfiniteFeedData | undefined => {
   if (!old) return old;
   return {
@@ -95,7 +104,7 @@ export const mapForumCommentsInPages = (
     pages: old.pages.map((page) => ({
       ...page,
       items: page.items
-        .map((item): HomeFeedItemDto | null => {
+        .map((item): ParsedHomeFeedItemDto | null => {
           switch (item.type) {
             case "activity":
               return item;
@@ -109,7 +118,7 @@ export const mapForumCommentsInPages = (
               if (extended.clusterForumComment) {
                 return { ...item, clusterForumComment: mapped };
               }
-              return { ...item, forumComment: mapped } as HomeFeedItemDto;
+              return { ...item, forumComment: mapped } as ParsedHomeFeedItemDto;
             }
             default: {
               // Drop unknown variants so older clients don't crash on new server types.
@@ -118,7 +127,7 @@ export const mapForumCommentsInPages = (
             }
           }
         })
-        .filter((i): i is HomeFeedItemDto => i !== null),
+        .filter((i): i is ParsedHomeFeedItemDto => i !== null),
     })),
   };
 };

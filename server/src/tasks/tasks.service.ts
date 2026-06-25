@@ -1,3 +1,4 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
 import {
   type AggregateViewSchema,
@@ -35,7 +36,6 @@ import { parsePhoneNumber } from 'libphonenumber-js/max';
 import { ActionFormVariantService } from 'src/actions/action-form-variant.service';
 import { ActionsService } from 'src/actions/actions.service';
 import { ActionDto } from 'src/actions/dto/action.dto';
-import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { FollowUpForm } from 'src/actions/entities/follow-up-form.entity';
 import { AiDetectionQueryService } from 'src/ai-detection/ai-detection-query.service';

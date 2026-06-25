@@ -1,10 +1,8 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ActionsService } from 'src/actions/actions.service';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from 'src/actions/entities/action-activity.entity';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
 import { LOCK_KEYS } from 'src/notifs/lock-keys';

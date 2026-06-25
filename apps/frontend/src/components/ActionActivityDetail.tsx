@@ -1,9 +1,9 @@
+import { actionActivityTransitiveVerb } from "@alliance/common/actionActivity";
 import {
   ActionActivityDto,
   ActionDto,
   actionsGetActivity,
 } from "@alliance/shared/client";
-import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
 import { formatTime } from "@alliance/shared/lib/utils";
 import { OutputRenderer } from "@alliance/sharedweb/forms/OutputRenderer";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";

@@ -1,10 +1,10 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
+import { Temporal } from '@js-temporal/polyfill';
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { ActionStatus } from 'src/actions/entities/action-event.entity';
-import { ActionActivityType } from 'src/actions/entities/action-activity.entity';
-import { User } from '../entities/user.entity';
-import { Temporal } from '@js-temporal/polyfill';
-import { UserAwayRangeDto } from './away-range.dto';
 import { ActionSuite } from 'src/actions/entities/action-suite.entity';
+import { User } from '../entities/user.entity';
+import { UserAwayRangeDto } from './away-range.dto';
 
 export enum UserActionRelationPillStatus {
   Away = 'away',

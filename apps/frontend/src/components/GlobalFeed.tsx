@@ -1,10 +1,10 @@
+import { actionActivityTransitiveVerb } from "@alliance/common/actionActivity";
 import {
   GlobalFeedActivityGroupDto,
   GlobalFeedForumCommentsDto,
   GlobalFeedItemDto,
   GlobalFeedNewMembersDto,
 } from "@alliance/shared/client";
-import { actionActivityTransitiveVerb } from "@alliance/shared/lib/actionActivityConstants";
 import { formatTime } from "@alliance/shared/lib/utils";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";

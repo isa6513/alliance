@@ -1,3 +1,9 @@
+import { FeedActionActivityDto } from "@alliance/shared/lib/actionActivity";
+import useActivities, {
+  ActivityList,
+} from "@alliance/shared/lib/useActivities";
+import { cn } from "@alliance/shared/styles/util";
+import { LegendList } from "@legendapp/list";
 import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -5,17 +11,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ActionActivityDto } from "@alliance/shared/client";
-import useActivities, {
-  ActivityList,
-} from "@alliance/shared/lib/useActivities";
-import { colors } from "../../lib/style/colors";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import Text, { FontWeight } from "../../components/system/Text";
 import UserActivityCard from "../../components/UserActivityCard";
-import { LegendList } from "@legendapp/list";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
-import { cn } from "@alliance/shared/styles/util";
-import { SimplePageTitle } from "../../components/system/SimplePageTitle";
+import { colors } from "../../lib/style/colors";
 
 type Mode = "friends" | "everyone";
 
@@ -94,16 +94,14 @@ export default function FeedScreen() {
   }, []);
 
   const renderActivity = useCallback(
-    ({ item: activity }: { item: ActionActivityDto }) => {
-      return (
-        <View className="border-b-3 border-zinc-100">
-          <UserActivityCard
-            activity={activity}
-            handleLike={() => handleLikeActivity(activity.id, mode)}
-          />
-        </View>
-      );
-    },
+    ({ item: activity }: { item: FeedActionActivityDto }) => (
+      <View className="border-b-3 border-zinc-100">
+        <UserActivityCard
+          activity={activity}
+          handleLike={() => handleLikeActivity(activity.id, mode)}
+        />
+      </View>
+    ),
     [handleLikeActivity, mode],
   );
 

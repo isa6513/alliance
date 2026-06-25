@@ -5,10 +5,14 @@ import {
   UpdateProfileDto,
   actionsUserCompletedCount,
 } from "@alliance/shared/client";
+import { type FeedActionActivityDto } from "@alliance/shared/lib/actionActivity";
+import {
+  ParsedHomeFeedItemDto,
+  getForumComment,
+} from "@alliance/shared/lib/feedHelpers";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
-import { getForumComment } from "@alliance/shared/lib/useHomeFeed";
 import useUserFeed from "@alliance/shared/lib/useUserFeed";
 import {
   buildForumActivityItems,
@@ -414,7 +418,7 @@ export default function UserProfileScreen() {
   ]);
 
   const renderActionItem = useCallback(
-    ({ item }: { item: HomeFeedItemDto }) => {
+    ({ item }: { item: ParsedHomeFeedItemDto }) => {
       switch (item.type) {
         case "activity": {
           if (!item.activity) return null;
@@ -456,7 +460,7 @@ export default function UserProfileScreen() {
   );
 
   const renderCompletedActivityItem = useCallback(
-    ({ item }: { item: ActionActivityDto }) => (
+    ({ item }: { item: FeedActionActivityDto }) => (
       <View className="border-b border-zinc-200">
         <UserActivityCard
           activity={item}

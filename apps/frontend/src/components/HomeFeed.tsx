@@ -1,4 +1,5 @@
-import useHomeFeed, { getForumComment } from "@alliance/shared/lib/useHomeFeed";
+import { getForumComment } from "@alliance/shared/lib/feedHelpers";
+import useHomeFeed from "@alliance/shared/lib/useHomeFeed";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useCallback, useRef } from "react";
 import ForumCommentCard from "./ForumCommentCard";
@@ -80,13 +81,14 @@ const HomeFeed = () => {
         {items.map((item) => {
           switch (item.type) {
             case "activity": {
-              if (!item.activity) return null;
               return (
-                <UserActivityCard
-                  activity={item.activity}
-                  key={`activity-${item.activity.id}`}
-                  handleLike={() => handleLike(item.activity!.id)}
-                />
+                item.activity && (
+                  <UserActivityCard
+                    activity={item.activity}
+                    key={`activity-${item.activity.id}`}
+                    handleLike={() => handleLike(item.activity!.id)}
+                  />
+                )
               );
             }
             case "cluster_forum_comment":

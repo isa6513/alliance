@@ -1,10 +1,8 @@
+import { ActionActivityType } from '@alliance/common/actionActivity';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  ActionActivity,
-  ActionActivityType,
-} from 'src/actions/entities/action-activity.entity';
+import { ActionActivity } from 'src/actions/entities/action-activity.entity';
 import {
   ActionEvent,
   ActionStatus,

@@ -2,8 +2,6 @@ import { actionsHomeFeed } from "@alliance/shared/client";
 import type { QueryClient } from "@tanstack/react-query";
 import { buildFeedPage, useFeedQuery } from "./feedHelpers";
 
-export { getForumComment } from "./feedHelpers";
-
 export type UseHomeFeedProps = {
   comments?: boolean;
   limit?: number;
