@@ -38,8 +38,8 @@ import CommunityInvitesLeaderTab from "../../components/CommunityInvitesLeaderTa
 import CommunitySelectDropdown from "../../components/CommunitySelectDropdown";
 import FloatingChatPanel from "../../components/FloatingChatpanel";
 import ImageEditor from "../../components/ImageEditor";
+import PillTab from "../../components/PillTab";
 import TwoColumnLayout from "../../components/TwoColumnLayout";
-import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";
 import { isFeatureEnabled } from "../../lib/config";
 import { useMediaQuery } from "../../lib/useMediaQuery";
@@ -711,7 +711,7 @@ const CommunityPage = () => {
                 <div className="mt-4 flex flex-row flex-wrap items-center justify-between gap-x-2 gap-y-2 transition-none">
                   <div className="flex flex-row flex-wrap gap-2">
                     {tabs.map((m) => (
-                      <UserProfileTab
+                      <PillTab
                         key={m}
                         number={
                           m === "activity"

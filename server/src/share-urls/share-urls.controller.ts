@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -16,9 +17,11 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import type { JwtRequest } from 'src/auth/guards/jwtreq';
 import {
   CreateDuplicateShareLinkDto,
+  CreateInviteDuplicateDto,
   GetShareLinkDto,
   ShareLinkDto,
   ShareUrlAdminDto,
+  ShareUrlMineDto,
   UpdateShareLinkLabelDto,
 } from './dto/share-url.dto';
 import { type ShareUrlOwner, ShareUrlsService } from './share-urls.service';
@@ -54,6 +57,54 @@ export class ShareUrlsController {
       invite: body.invite,
     });
     return new ShareLinkDto(url);
+  }
+
+  @Get('mine/invites')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ShareUrlMineDto, isArray: true })
+  async findMyInvites(@Request() req: JwtRequest): Promise<ShareUrlMineDto[]> {
+    const rows = await this.shareUrlsService.findInvitesForUser(req.user.sub);
+    return rows.map((r) => new ShareUrlMineDto(r));
+  }
+
+  @Post('mine/invite-duplicate')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ShareUrlMineDto })
+  async createInviteDuplicate(
+    @Body() body: CreateInviteDuplicateDto,
+    @Request() req: JwtRequest,
+  ): Promise<ShareUrlMineDto> {
+    const row = await this.shareUrlsService.createDuplicateInviteForUser(
+      req.user.sub,
+      body.label,
+    );
+    return new ShareUrlMineDto(row);
+  }
+
+  @Patch('mine/invites/:id/label')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: ShareUrlMineDto })
+  async updateMyInviteLabel(
+    @Param('id') id: string,
+    @Body() body: UpdateShareLinkLabelDto,
+    @Request() req: JwtRequest,
+  ): Promise<ShareUrlMineDto> {
+    const row = await this.shareUrlsService.updateInviteLabelForUser(
+      id,
+      req.user.sub,
+      body.label,
+    );
+    return new ShareUrlMineDto(row);
+  }
+
+  @Delete('mine/invites/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async deleteMyInvite(
+    @Param('id') id: string,
+    @Request() req: JwtRequest,
+  ): Promise<void> {
+    await this.shareUrlsService.deleteInviteForUser(id, req.user.sub);
   }
 
   @Post('create-duplicate')
@@ -101,5 +152,12 @@ export class ShareUrlsController {
   ): Promise<ShareUrlAdminDto> {
     const row = await this.shareUrlsService.updateLabel(id, body.label);
     return new ShareUrlAdminDto(row);
+  }
+
+  @Delete(':id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async deleteAdmin(@Param('id') id: string): Promise<void> {
+    await this.shareUrlsService.deleteById(id);
   }
 }

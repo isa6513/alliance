@@ -1046,6 +1046,29 @@ export type ShareLinkDto = {
     url: string;
 };
 
+export type ShareUrlMineDto = {
+    id: string;
+    url: string;
+    label: string | null;
+    duplicate: boolean;
+    sid?: string;
+    createdAt: string;
+};
+
+export type CreateInviteDuplicateDto = {
+    /**
+     * Optional label to distinguish this duplicate at a glance.
+     */
+    label?: string;
+};
+
+export type UpdateShareLinkLabelDto = {
+    /**
+     * New label for the share URL. Send an empty string or omit to clear.
+     */
+    label?: string;
+};
+
 export type CreateDuplicateShareLinkDto = {
     /**
      * Owning user. Provide exactly one of userId or campaignId.
@@ -1091,13 +1114,6 @@ export type ShareUrlAdminDto = {
     createdAt: string;
     action?: ShareUrlAdminActionDto | null;
     externalTarget?: ShareUrlAdminExternalTargetDto | null;
-};
-
-export type UpdateShareLinkLabelDto = {
-    /**
-     * New label for the share URL. Send an empty string or omit to clear.
-     */
-    label?: string;
 };
 
 export type ExternalShareTargetDto = {
@@ -3266,6 +3282,17 @@ export type MemberReliabilityWindowDto = {
     fourthWeekOrLater: MemberReliabilityRateDto;
 };
 
+export type MissedActionMemberDto = {
+    userId: number;
+    name: string;
+    lastActionName: string;
+};
+
+export type MissedActionsDto = {
+    missedLastAction: Array<MissedActionMemberDto>;
+    missedLastTwoActions: Array<MissedActionMemberDto>;
+};
+
 export type PlatformTenureCohortActionStatsDto = {
     actionId: number;
     actionName: string;
@@ -5079,6 +5106,100 @@ export type ShareUrlsGetShareLinkResponses = {
 
 export type ShareUrlsGetShareLinkResponse = ShareUrlsGetShareLinkResponses[keyof ShareUrlsGetShareLinkResponses];
 
+export type ShareUrlsFindMyInvitesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/share-urls/mine/invites';
+};
+
+export type ShareUrlsFindMyInvitesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsFindMyInvitesError = ShareUrlsFindMyInvitesErrors[keyof ShareUrlsFindMyInvitesErrors];
+
+export type ShareUrlsFindMyInvitesResponses = {
+    200: Array<ShareUrlMineDto>;
+};
+
+export type ShareUrlsFindMyInvitesResponse = ShareUrlsFindMyInvitesResponses[keyof ShareUrlsFindMyInvitesResponses];
+
+export type ShareUrlsCreateInviteDuplicateData = {
+    body: CreateInviteDuplicateDto;
+    path?: never;
+    query?: never;
+    url: '/share-urls/mine/invite-duplicate';
+};
+
+export type ShareUrlsCreateInviteDuplicateErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsCreateInviteDuplicateError = ShareUrlsCreateInviteDuplicateErrors[keyof ShareUrlsCreateInviteDuplicateErrors];
+
+export type ShareUrlsCreateInviteDuplicateResponses = {
+    200: ShareUrlMineDto;
+};
+
+export type ShareUrlsCreateInviteDuplicateResponse = ShareUrlsCreateInviteDuplicateResponses[keyof ShareUrlsCreateInviteDuplicateResponses];
+
+export type ShareUrlsUpdateMyInviteLabelData = {
+    body: UpdateShareLinkLabelDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/share-urls/mine/invites/{id}/label';
+};
+
+export type ShareUrlsUpdateMyInviteLabelErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsUpdateMyInviteLabelError = ShareUrlsUpdateMyInviteLabelErrors[keyof ShareUrlsUpdateMyInviteLabelErrors];
+
+export type ShareUrlsUpdateMyInviteLabelResponses = {
+    200: ShareUrlMineDto;
+};
+
+export type ShareUrlsUpdateMyInviteLabelResponse = ShareUrlsUpdateMyInviteLabelResponses[keyof ShareUrlsUpdateMyInviteLabelResponses];
+
+export type ShareUrlsDeleteMyInviteData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/share-urls/mine/invites/{id}';
+};
+
+export type ShareUrlsDeleteMyInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsDeleteMyInviteError = ShareUrlsDeleteMyInviteErrors[keyof ShareUrlsDeleteMyInviteErrors];
+
+export type ShareUrlsDeleteMyInviteResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ShareUrlsDeleteMyInviteResponse = ShareUrlsDeleteMyInviteResponses[keyof ShareUrlsDeleteMyInviteResponses];
+
 export type ShareUrlsCreateDuplicateAdminData = {
     body: CreateDuplicateShareLinkDto;
     path?: never;
@@ -5172,6 +5293,32 @@ export type ShareUrlsUpdateLabelAdminResponses = {
 };
 
 export type ShareUrlsUpdateLabelAdminResponse = ShareUrlsUpdateLabelAdminResponses[keyof ShareUrlsUpdateLabelAdminResponses];
+
+export type ShareUrlsDeleteAdminData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/share-urls/{id}';
+};
+
+export type ShareUrlsDeleteAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ShareUrlsDeleteAdminError = ShareUrlsDeleteAdminErrors[keyof ShareUrlsDeleteAdminErrors];
+
+export type ShareUrlsDeleteAdminResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ShareUrlsDeleteAdminResponse = ShareUrlsDeleteAdminResponses[keyof ShareUrlsDeleteAdminResponses];
 
 export type ExternalShareTargetsFindAllAdminData = {
     body?: never;
@@ -11076,6 +11223,28 @@ export type AnalyticsGetMemberReliabilityWindowAdminResponses = {
 };
 
 export type AnalyticsGetMemberReliabilityWindowAdminResponse = AnalyticsGetMemberReliabilityWindowAdminResponses[keyof AnalyticsGetMemberReliabilityWindowAdminResponses];
+
+export type AnalyticsGetMissedActionsAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/missed-actions';
+};
+
+export type AnalyticsGetMissedActionsAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetMissedActionsAdminError = AnalyticsGetMissedActionsAdminErrors[keyof AnalyticsGetMissedActionsAdminErrors];
+
+export type AnalyticsGetMissedActionsAdminResponses = {
+    200: MissedActionsDto;
+};
+
+export type AnalyticsGetMissedActionsAdminResponse = AnalyticsGetMissedActionsAdminResponses[keyof AnalyticsGetMissedActionsAdminResponses];
 
 export type AnalyticsGetPlatformTenureCohortAdminData = {
     body?: never;

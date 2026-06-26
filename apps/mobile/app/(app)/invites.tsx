@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Alert, RefreshControl, View } from "react-native";
 import InviteForm from "../../components/InviteForm";
 import { InviteSection } from "../../components/InviteSection";
+import InviteShareLink from "../../components/InviteShareLink";
 import KeyboardAwareScrollView from "../../components/KeyboardAwareScrollView";
 import ReferralQrSection from "../../components/ReferralQrSection";
 import { ScreenWithLoading } from "../../components/system/ScreenWithLoading";
@@ -22,18 +23,21 @@ import { useReferralLink } from "../../lib/useReferralLink";
 enum InvitesTab {
   ReferralQr = "referral_qr",
   New = "new",
+  Reusable = "reusable",
   Past = "past",
 }
 
 const INVITES_TAB_LABELS: Record<InvitesTab, string> = {
   [InvitesTab.ReferralQr]: "QR code",
   [InvitesTab.New]: "New link",
+  [InvitesTab.Reusable]: "Reusable",
   [InvitesTab.Past]: "Past",
 };
 
 const INVITES_TABS_ORDER: InvitesTab[] = [
   InvitesTab.ReferralQr,
   InvitesTab.New,
+  InvitesTab.Reusable,
   InvitesTab.Past,
 ];
 
@@ -176,6 +180,7 @@ export default function InvitesScreen() {
         />
       </>
     ),
+    [InvitesTab.Reusable]: <InviteShareLink />,
     [InvitesTab.Past]: (
       <>
         {isError && (

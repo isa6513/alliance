@@ -8,7 +8,9 @@ import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/invite
 import { useAllianceMemberCount } from "@alliance/shared/lib/useAllianceMemberCount";
 import { useOnetimeInvitesOverview } from "@alliance/shared/lib/useOnetimeInvitesOverview";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
+import { CardStyle } from "@alliance/shared/styles/card";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
+import Card from "@alliance/sharedweb/ui/Card";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
 import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import List from "@alliance/sharedweb/ui/List";
@@ -17,7 +19,9 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { UserCheck } from "lucide-react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import InviteForm from "../../components/InviteForm";
+import InviteShareLink from "../../components/InviteShareLink";
 import OnetimeInviteListItem from "../../components/OnetimeInviteListItem";
+import PillTab from "../../components/PillTab";
 import { useAuth } from "../../lib/AuthContext";
 
 const InvitesPage = () => {
@@ -34,6 +38,7 @@ const InvitesPage = () => {
   } = useOnetimeInvitesOverview({ enabled: Boolean(user) });
   const [copiedInviteId, setCopiedInviteId] = useState<number | null>(null);
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activeTab, setActiveTab] = useState<"onetime" | "reusable">("onetime");
 
   const leaderCommunityIds = useMemo(
     () => getLeaderCommunityIds(user ?? undefined),
@@ -144,8 +149,8 @@ const InvitesPage = () => {
 
   return (
     <CenterLayout>
-      <div className="flex flex-col gap-y-12">
-        <div className="flex flex-col gap-y-4">
+      <div className="flex flex-col gap-y-2">
+        <Card style={CardStyle.White} className="p-6 gap-y-6">
           <div className="flex flex-col gap-y-4">
             <h1 className="text-title">Invites</h1>
             <div className="w-full flex flex-row items-center gap-x-6">
@@ -182,7 +187,7 @@ const InvitesPage = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-row items-center gap-x-2 bg-white rounded p-4">
+              <div className="flex flex-row items-center gap-x-2 bg-zinc-50 rounded p-4">
                 <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
                 <div>
                   <p className="font-semibold text-black text-lg sm:text-xl">
@@ -196,121 +201,142 @@ const InvitesPage = () => {
             </div>
           </div>
 
-          <InviteForm onInviteCreated={handleInviteCreated} />
-          {isError && (
-            <p className="text-red-500 text-sm">Failed to load invites</p>
+          <div className="flex flex-row gap-x-2">
+            <PillTab
+              label="Personalized invite"
+              selected={activeTab === "onetime"}
+              onClick={() => setActiveTab("onetime")}
+            />
+            <PillTab
+              label="Reusable invite"
+              selected={activeTab === "reusable"}
+              onClick={() => setActiveTab("reusable")}
+            />
+          </div>
+        </Card>
+
+        <div className="flex flex-col gap-y-12">
+          {activeTab === "reusable" ? (
+            <InviteShareLink />
+          ) : (
+            <>
+              <InviteForm onInviteCreated={handleInviteCreated} />
+              {isError && (
+                <p className="text-red-500 text-sm">Failed to load invites</p>
+              )}
+
+              {actionable.length === 0 &&
+                unverifiableActionable.length === 0 &&
+                waitingForResponse.length === 0 &&
+                settled.length === 0 && (
+                  <p className="text-zinc-500 text-center text-base sm:text-lg">
+                    Your invites will appear here once you create them.
+                  </p>
+                )}
+
+              {actionable.length > 0 && (
+                <div className="flex flex-col gap-y-4">
+                  <p className="font-semibold text-2xl">
+                    {inviteBuckets.actionable.title}
+                  </p>
+                  <List>
+                    {actionable.map((request) => (
+                      <OnetimeInviteListItem
+                        key={request.id}
+                        invite={request}
+                        showCommunityLabel={true}
+                        communityLabel={request.community?.name}
+                        selfInvited={user.id === request.invitingUser?.id}
+                        onApprove={handleApproveInvite}
+                        onReject={handleRejectInvite}
+                      />
+                    ))}
+                  </List>
+                </div>
+              )}
+
+              {unverifiableActionable.length > 0 && (
+                <div className="flex flex-col gap-y-4">
+                  <div className="flex flex-col gap-y-1">
+                    <p className="font-semibold text-2xl">
+                      {inviteBuckets.unverifiableActionable.title}
+                    </p>
+                    <p className="text-zinc-500">
+                      {inviteBuckets.unverifiableActionable.description}
+                    </p>
+                  </div>
+                  <List>
+                    {unverifiableActionable.map((invite) => (
+                      <OnetimeInviteListItem
+                        key={invite.id}
+                        invite={invite}
+                        showCommunityLabel={true}
+                        communityLabel={invite.community?.name}
+                        selfInvited={user.id === invite.invitingUser?.id}
+                        copied={copiedInviteId === invite.id}
+                        onDelete={handleDeleteInvite}
+                        onCopy={copyToClipboard}
+                        onCopied={handleCopied}
+                      />
+                    ))}
+                  </List>
+                </div>
+              )}
+
+              {waitingForResponse.length > 0 && (
+                <div className="flex flex-col gap-y-4">
+                  <div className="flex flex-col gap-y-1">
+                    <p className="font-semibold text-2xl">
+                      {inviteBuckets.waitingForResponse.title}
+                    </p>
+                    <p className="text-zinc-500">
+                      {inviteBuckets.waitingForResponse.description}
+                    </p>
+                  </div>
+                  <List>
+                    {waitingForResponse.map((request) => (
+                      <OnetimeInviteListItem
+                        key={request.id}
+                        invite={request}
+                        showCommunityLabel={true}
+                        communityLabel={request.community?.name}
+                        selfInvited={user.id === request.invitingUser?.id}
+                        onDelete={(inviteId) => handleDeleteRequest(inviteId)}
+                      />
+                    ))}
+                  </List>
+                </div>
+              )}
+
+              {settled.length > 0 && (
+                <div className="flex flex-col gap-y-4">
+                  <div className="flex flex-col gap-y-1">
+                    <p className="font-semibold text-2xl">
+                      {inviteBuckets.settled.title}
+                    </p>
+                    <p className="text-zinc-500">
+                      {inviteBuckets.settled.description}
+                    </p>
+                  </div>
+                  <List>
+                    {settled.map((invite) => (
+                      <OnetimeInviteListItem
+                        key={invite.id}
+                        invite={invite}
+                        showCommunityLabel={true}
+                        communityLabel={invite.community?.name}
+                        selfInvited={user.id === invite.invitingUser?.id}
+                        copied={copiedInviteId === invite.id}
+                        onCopy={copyToClipboard}
+                        onCopied={handleCopied}
+                      />
+                    ))}
+                  </List>
+                </div>
+              )}
+            </>
           )}
         </div>
-
-        {actionable.length === 0 &&
-          unverifiableActionable.length === 0 &&
-          waitingForResponse.length === 0 &&
-          settled.length === 0 && (
-            <p className="text-zinc-500 text-center text-base sm:text-lg">
-              Your invites will appear here once you create them.
-            </p>
-          )}
-
-        {actionable.length > 0 && (
-          <div className="flex flex-col gap-y-4">
-            <p className="font-semibold text-2xl">
-              {inviteBuckets.actionable.title}
-            </p>
-            <List>
-              {actionable.map((request) => (
-                <OnetimeInviteListItem
-                  key={request.id}
-                  invite={request}
-                  showCommunityLabel={true}
-                  communityLabel={request.community?.name}
-                  selfInvited={user.id === request.invitingUser?.id}
-                  onApprove={handleApproveInvite}
-                  onReject={handleRejectInvite}
-                />
-              ))}
-            </List>
-          </div>
-        )}
-
-        {unverifiableActionable.length > 0 && (
-          <div className="flex flex-col gap-y-4">
-            <div className="flex flex-col gap-y-1">
-              <p className="font-semibold text-2xl">
-                {inviteBuckets.unverifiableActionable.title}
-              </p>
-              <p className="text-zinc-500">
-                {inviteBuckets.unverifiableActionable.description}
-              </p>
-            </div>
-            <List>
-              {unverifiableActionable.map((invite) => (
-                <OnetimeInviteListItem
-                  key={invite.id}
-                  invite={invite}
-                  showCommunityLabel={true}
-                  communityLabel={invite.community?.name}
-                  selfInvited={user.id === invite.invitingUser?.id}
-                  copied={copiedInviteId === invite.id}
-                  onDelete={handleDeleteInvite}
-                  onCopy={copyToClipboard}
-                  onCopied={handleCopied}
-                />
-              ))}
-            </List>
-          </div>
-        )}
-
-        {waitingForResponse.length > 0 && (
-          <div className="flex flex-col gap-y-4">
-            <div className="flex flex-col gap-y-1">
-              <p className="font-semibold text-2xl">
-                {inviteBuckets.waitingForResponse.title}
-              </p>
-              <p className="text-zinc-500">
-                {inviteBuckets.waitingForResponse.description}
-              </p>
-            </div>
-            <List>
-              {waitingForResponse.map((request) => (
-                <OnetimeInviteListItem
-                  key={request.id}
-                  invite={request}
-                  showCommunityLabel={true}
-                  communityLabel={request.community?.name}
-                  selfInvited={user.id === request.invitingUser?.id}
-                  onDelete={(inviteId) => handleDeleteRequest(inviteId)}
-                />
-              ))}
-            </List>
-          </div>
-        )}
-
-        {settled.length > 0 && (
-          <div className="flex flex-col gap-y-4">
-            <div className="flex flex-col gap-y-1">
-              <p className="font-semibold text-2xl">
-                {inviteBuckets.settled.title}
-              </p>
-              <p className="text-zinc-500">
-                {inviteBuckets.settled.description}
-              </p>
-            </div>
-            <List>
-              {settled.map((invite) => (
-                <OnetimeInviteListItem
-                  key={invite.id}
-                  invite={invite}
-                  showCommunityLabel={true}
-                  communityLabel={invite.community?.name}
-                  selfInvited={user.id === invite.invitingUser?.id}
-                  copied={copiedInviteId === invite.id}
-                  onCopy={copyToClipboard}
-                  onCopied={handleCopied}
-                />
-              ))}
-            </List>
-          </div>
-        )}
       </div>
     </CenterLayout>
   );

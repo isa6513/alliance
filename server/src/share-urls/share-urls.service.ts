@@ -246,6 +246,64 @@ export class ShareUrlsService {
     return this.findForOwner({ type: 'user', userId });
   }
 
+  async findInvitesForUser(userId: number): Promise<ShareUrl[]> {
+    return this.shareUrlRepository.find({
+      where: { user: { id: userId }, kind: ShareUrlKind.Invite },
+      order: { duplicate: 'ASC', createdAt: 'DESC' },
+    });
+  }
+
+  async createDuplicateInviteForUser(
+    userId: number,
+    label?: string,
+  ): Promise<ShareUrl> {
+    return this.createDuplicate({
+      owner: { type: 'user', userId },
+      invite: true,
+      label,
+    });
+  }
+
+  async updateInviteLabelForUser(
+    id: string,
+    userId: number,
+    rawLabel: string | undefined,
+  ): Promise<ShareUrl> {
+    const trimmed = rawLabel?.trim();
+    const nextLabel = trimmed ? trimmed : null;
+    const row = await this.shareUrlRepository.findOne({
+      where: { id, kind: ShareUrlKind.Invite },
+    });
+    if (!row || row.userId !== userId) {
+      throw new NotFoundException('share url not found');
+    }
+    row.label = nextLabel;
+    return this.shareUrlRepository.save(row);
+  }
+
+  async deleteInviteForUser(id: string, userId: number): Promise<void> {
+    const row = await this.shareUrlRepository.findOne({
+      where: { id, kind: ShareUrlKind.Invite },
+    });
+    if (!row || row.userId !== userId) {
+      throw new NotFoundException('share url not found');
+    }
+    if (!row.duplicate) {
+      throw new BadRequestException(
+        'Your primary invite link cannot be deleted.',
+      );
+    }
+    await this.shareUrlRepository.remove(row);
+  }
+
+  async deleteById(id: string): Promise<void> {
+    const row = await this.shareUrlRepository.findOne({ where: { id } });
+    if (!row) {
+      throw new NotFoundException('share url not found');
+    }
+    await this.shareUrlRepository.remove(row);
+  }
+
   async findForCampaign(campaignId: number): Promise<ShareUrl[]> {
     return this.findForOwner({ type: 'campaign', campaignId });
   }

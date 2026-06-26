@@ -82,6 +82,45 @@ export class UpdateShareLinkLabelDto {
   label?: string;
 }
 
+export class CreateInviteDuplicateDto {
+  @ApiPropertyOptional({
+    description: 'Optional label to distinguish this duplicate at a glance.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  label?: string;
+}
+
+export class ShareUrlMineDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  url: string;
+
+  @ApiProperty({ type: String, nullable: true })
+  label: string | null;
+
+  @ApiProperty()
+  duplicate: boolean;
+
+  @ApiPropertyOptional()
+  sid?: string;
+
+  @ApiProperty({ type: Date })
+  createdAt: Date;
+
+  constructor(input: ShareUrl) {
+    this.id = input.id;
+    this.url = input.url;
+    this.label = input.label ?? null;
+    this.duplicate = input.duplicate;
+    this.sid = input.sid;
+    this.createdAt = input.createdAt;
+  }
+}
+
 type ShareUrlAdminTarget = { id: number; name: string };
 
 class ShareUrlAdminActionDto {

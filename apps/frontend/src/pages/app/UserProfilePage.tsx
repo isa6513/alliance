@@ -51,8 +51,8 @@ import ForumListPost from "../../components/ForumListPost";
 import FriendRequestButton from "../../components/FriendRequestButton";
 import FriendsTab from "../../components/FriendsTab";
 import ImageEditor from "../../components/ImageEditor";
+import PillTab from "../../components/PillTab";
 import UserActivityCard from "../../components/UserActivityCard";
-import UserProfileTab from "../../components/UserProfileTab";
 import { useAuth } from "../../lib/AuthContext";
 import { isFeatureEnabled } from "../../lib/config";
 
@@ -427,25 +427,25 @@ const UserProfilePage: React.FC = () => {
           )}
           {/* stats row */}
           <div className="mt-2 flex flex-row gap-x-2 transition-none">
-            <UserProfileTab
+            <PillTab
               label="Activity"
               selected={selectedTab === ProfileTabs.Activity}
               onClick={() => setSelectedTab(ProfileTabs.Activity)}
             />
-            <UserProfileTab
+            <PillTab
               number={completedActionCount}
               label={`action${completedActionCount === 1 ? "" : "s"} completed`}
               shortLabel={`action${completedActionCount === 1 ? "" : "s"}`}
               selected={selectedTab === ProfileTabs.ActionsCompleted}
               onClick={() => setSelectedTab(ProfileTabs.ActionsCompleted)}
             />
-            <UserProfileTab
+            <PillTab
               number={forumActivityCount}
               label={forumActivityCount === 1 ? "post" : "posts"}
               selected={selectedTab === ProfileTabs.Forum}
               onClick={() => setSelectedTab(ProfileTabs.Forum)}
             />
-            <UserProfileTab
+            <PillTab
               number={friends.length}
               label={`friend${friends.length === 1 ? "" : "s"}`}
               selected={selectedTab === ProfileTabs.Friends}

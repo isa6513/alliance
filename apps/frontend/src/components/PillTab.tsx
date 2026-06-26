@@ -1,6 +1,6 @@
 import { cn } from "@alliance/shared/styles/util";
 
-interface UserProfileTabProps {
+interface PillTabProps {
   /** When omitted, only the label is shown (e.g. navigation tabs without a count). */
   number?: number;
   label: string;
@@ -9,20 +9,20 @@ interface UserProfileTabProps {
   onClick: () => void;
 }
 
-const UserProfileTab: React.FC<UserProfileTabProps> = ({
+const PillTab: React.FC<PillTabProps> = ({
   number,
   label,
   shortLabel,
   selected,
   onClick,
-}: UserProfileTabProps) => {
+}: PillTabProps) => {
   const showNumber = typeof number === "number";
   return (
     <div
       onClick={onClick}
       className={cn(
         "border flex gap-x-1 items-center rounded py-1.5 px-4 text-base cursor-pointer",
-        selected ? "bg-black" : "bg-white hover:bg-zinc-50 border-zinc-200"
+        selected ? "bg-black" : "bg-white hover:bg-zinc-50 border-zinc-200",
       )}
     >
       {showNumber && (
@@ -40,4 +40,4 @@ const UserProfileTab: React.FC<UserProfileTabProps> = ({
   );
 };
 
-export default UserProfileTab;
+export default PillTab;

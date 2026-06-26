@@ -5,6 +5,7 @@ import {
   externalShareTargetsFindAllAdmin,
   imagesUploadImage,
   shareUrlsCreateDuplicateAdmin,
+  shareUrlsDeleteAdmin,
   shareUrlsFindForCampaignAdmin,
   shareUrlsFindForUserAdmin,
   shareUrlsUpdateLabelAdmin,
@@ -25,7 +26,7 @@ import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import UserSelect, {
   useSelectableUserIds,
 } from "@alliance/sharedweb/ui/UserSelect";
-import { ChevronDown, ChevronRight, Copy, Pencil } from "lucide-react";
+import { ChevronDown, ChevronRight, Copy, Pencil, Trash2 } from "lucide-react";
 import React, {
   useCallback,
   useEffect,
@@ -187,7 +188,7 @@ const ShareLinksPage: React.FC = () => {
     ownerKeyRef.current = currentOwnerKey;
   }, [currentOwnerKey]);
 
-  const { error, success } = useToast();
+  const { error, success, confirm } = useToast();
 
   const loadCampaigns = useCallback(async () => {
     try {
@@ -434,6 +435,35 @@ const ShareLinksPage: React.FC = () => {
     [success, error],
   );
 
+  const handleDelete = useCallback(
+    async (id: string, event: React.MouseEvent<HTMLElement>) => {
+      const ok = await confirm({
+        message:
+          "Delete this share link? Any URL already handed out using it will stop working.",
+        confirmLabel: "Delete",
+        cancelLabel: "Cancel",
+        anchorEl: event.currentTarget,
+        placement: "topleft",
+      });
+      if (!ok) return;
+      const requestKey = ownerKeyRef.current;
+      try {
+        const res = await shareUrlsDeleteAdmin({ path: { id } });
+        if (ownerKeyRef.current !== requestKey) return;
+        if (res.error) {
+          throw res.error;
+        }
+        setRows((prev) => prev.filter((r) => r.id !== id));
+        success("Share link deleted");
+      } catch (err) {
+        if (ownerKeyRef.current !== requestKey) return;
+        console.error("Failed to delete share link", err);
+        error("Failed to delete share link.");
+      }
+    },
+    [confirm, success, error],
+  );
+
   const handleCreateDuplicate = useCallback(async () => {
     if (!owner || !selectedTarget) return;
     const requestKey = ownerKey(owner);
@@ -643,6 +673,7 @@ const ShareLinksPage: React.FC = () => {
                     onToggle={() => handleToggleExpanded(group.key)}
                     onCopy={handleCopy}
                     onUpdateLabel={handleUpdateLabel}
+                    onDelete={handleDelete}
                   />
                 ))
               )}
@@ -844,6 +875,7 @@ const GroupCard: React.FC<{
   onToggle: () => void;
   onCopy: (url: string) => void;
   onUpdateLabel: (id: string, label: string) => Promise<boolean>;
+  onDelete: (id: string, event: React.MouseEvent<HTMLElement>) => void;
 }> = ({
   target,
   rows,
@@ -852,6 +884,7 @@ const GroupCard: React.FC<{
   onToggle,
   onCopy,
   onUpdateLabel,
+  onDelete,
 }) => {
   return (
     <Card className="w-full !p-0" style={CardStyle.White}>
@@ -888,6 +921,7 @@ const GroupCard: React.FC<{
               row={row}
               onCopy={onCopy}
               onUpdateLabel={onUpdateLabel}
+              onDelete={onDelete}
             />
           ))}
         </div>
@@ -900,7 +934,8 @@ const ShareUrlRow: React.FC<{
   row: ShareUrlAdminDto;
   onCopy: (url: string) => void;
   onUpdateLabel: (id: string, label: string) => Promise<boolean>;
-}> = ({ row, onCopy, onUpdateLabel }) => {
+  onDelete: (id: string, event: React.MouseEvent<HTMLElement>) => void;
+}> = ({ row, onCopy, onUpdateLabel, onDelete }) => {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(row.label ?? "");
   const [saving, setSaving] = useState(false);
@@ -1011,6 +1046,15 @@ const ShareUrlRow: React.FC<{
       >
         <Copy size={14} />
         Copy
+      </Button>
+      <Button
+        type="button"
+        color={ButtonColor.Red}
+        onClick={(event) => onDelete(row.id, event)}
+        className="shrink-0"
+      >
+        <Trash2 size={14} />
+        Delete
       </Button>
     </div>
   );
