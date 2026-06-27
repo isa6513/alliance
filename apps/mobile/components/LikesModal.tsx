@@ -30,6 +30,7 @@ function Row({ user, onClose }: { user: ProfileDto; onClose: () => void }) {
         <UserDisplayName
           name={user.displayName}
           staff={user.staff}
+          ambassador={user.ambassador}
           grouplead={user.isCommunityLeader}
         />
       </View>

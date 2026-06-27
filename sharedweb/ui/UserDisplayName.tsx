@@ -1,3 +1,4 @@
+import { roleBadges } from "@alliance/shared/lib/copy";
 import { cn } from "@alliance/shared/styles/util";
 import { Earth, UserCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
@@ -40,7 +41,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
         {children}
       </span>
       {staff && (
-        <HoverBadge title="Office member">
+        <HoverBadge title={roleBadges.staff.tooltip}>
           <Earth
             size={16}
             className="ml-1.5 text-green inline -mt-px"
@@ -51,14 +52,14 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
       {!staff && hasRoleBadges && (
         <span className="ml-1.5 inline-flex items-center gap-0.5 align-baseline">
           {ambassador && (
-            <HoverBadge title="Consistently recruits new members">
+            <HoverBadge title={roleBadges.ambassador.tooltip}>
               <span className="text-xs !bg-red-500 text-white rounded-xs px-1.5">
-                Ambassador
+                {roleBadges.ambassador.label}
               </span>
             </HoverBadge>
           )}
           {grouplead && (
-            <HoverBadge title="Leads a member group">
+            <HoverBadge title={roleBadges.grouplead.tooltip}>
               <UserCircle
                 size={16}
                 className="text-grouplead inline -mt-px"
@@ -68,7 +69,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
           )}
           {expert && (
             <span className="text-xs !bg-orange-500 text-white rounded-xs px-1.5">
-              {expertLabel || "Expert"}
+              {expertLabel || roleBadges.expert.label}
             </span>
           )}
         </span>

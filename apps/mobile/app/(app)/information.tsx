@@ -1,11 +1,11 @@
-import { useCallback, type ComponentType } from "react";
-import { Linking, ScrollView, View } from "react-native";
+import { Features, isEnabled } from "@alliance/shared/lib/features";
 import {
   BookOpenText,
   BookUser,
   CalendarCheck,
   ChevronRight,
   ClipboardList,
+  Handshake,
   Info,
   ListOrdered,
   Mail,
@@ -15,7 +15,8 @@ import {
   Scale,
   Users,
 } from "lucide-react-native";
-import { Features, isEnabled } from "@alliance/shared/lib/features";
+import { useCallback, type ComponentType } from "react";
+import { Linking, ScrollView, View } from "react-native";
 import Card from "../../components/system/Card";
 import { SimplePageTitle } from "../../components/system/SimplePageTitle";
 import Text, { FontWeight } from "../../components/system/Text";
@@ -94,6 +95,14 @@ const baseResources: InformationResource[] = [
     icon: PenTool,
   },
   {
+    id: "ambassador-program",
+    title: "Ambassador Program",
+    description:
+      "How ambassadors help the Alliance recruit reliable new members.",
+    href: "/ambassador-program",
+    icon: Handshake,
+  },
+  {
     id: "action-updates",
     title: "Action updates",
     description: "Progress updates on our actions.",
@@ -166,7 +175,7 @@ export default function InformationScreen() {
     __DEV__ ? "development" : "production",
   )
     ? [
-        ...baseResources.slice(0, 6),
+        ...baseResources.slice(0, 7),
         {
           id: "general-updates",
           title: "General updates",
@@ -175,7 +184,7 @@ export default function InformationScreen() {
           href: "/general-updates",
           icon: Megaphone,
         },
-        ...baseResources.slice(6),
+        ...baseResources.slice(7),
       ]
     : baseResources;
 

@@ -326,6 +326,7 @@ const ReplyItem = ({ reply, depth = 0, ...shared }: ReplyItemProps) => {
           <UserDisplayName
             name={reply.author.displayName}
             staff={reply.author.staff}
+            ambassador={reply.author.ambassador}
             grouplead={reply.author.isCommunityLeader}
             expert={shared.expertIds.includes(reply.author.id)}
             expertLabel={shared.expertLabel}

@@ -2,6 +2,7 @@ import {
   UpdateProfileDto,
   actionsUserCompletedCount,
 } from "@alliance/shared/client";
+import { roleBadges } from "@alliance/shared/lib/copy";
 import { Features } from "@alliance/shared/lib/features";
 import { getForumComment } from "@alliance/shared/lib/feedHelpers";
 import useActivities, {
@@ -372,12 +373,12 @@ const UserProfilePage: React.FC = () => {
                         <TooltipTrigger
                           render={
                             <div className="text-xs bg-staff text-white px-2 py-0.5 rounded-sm self-center cursor-default">
-                              Staff
+                              {roleBadges.staff.label}
                             </div>
                           }
                         />
                         <TooltipContent sideOffset={4}>
-                          Member of the office
+                          {roleBadges.staff.tooltip}
                         </TooltipContent>
                       </Tooltip>
                     )}
@@ -386,12 +387,12 @@ const UserProfilePage: React.FC = () => {
                         <TooltipTrigger
                           render={
                             <div className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-sm self-center cursor-default">
-                              Ambassador
+                              {roleBadges.ambassador.label}
                             </div>
                           }
                         />
                         <TooltipContent sideOffset={4}>
-                          Consistently recruits new members
+                          {roleBadges.ambassador.tooltip}
                         </TooltipContent>
                       </Tooltip>
                     )}
@@ -400,12 +401,12 @@ const UserProfilePage: React.FC = () => {
                         <TooltipTrigger
                           render={
                             <div className="text-xs bg-grouplead text-white px-2 py-0.5 rounded-sm self-center cursor-default">
-                              Lead
+                              {roleBadges.grouplead.label}
                             </div>
                           }
                         />
                         <TooltipContent sideOffset={4}>
-                          Leads a group of members
+                          {roleBadges.grouplead.tooltip}
                         </TooltipContent>
                       </Tooltip>
                     )}

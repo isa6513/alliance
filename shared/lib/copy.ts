@@ -213,6 +213,25 @@ export const shareInfoPubliclyToggle = {
   fallbackDefault: false,
 } as const;
 
+/** Labels and tooltip copy for member role badges.  */
+export const roleBadges = {
+  staff: {
+    label: "Staff",
+    tooltip: "Member of the office",
+  },
+  ambassador: {
+    label: "Ambassador",
+    tooltip: "Consistently recruits new members",
+  },
+  grouplead: {
+    label: "Lead",
+    tooltip: "Leads a group of members",
+  },
+  expert: {
+    label: "Expert",
+  },
+} as const;
+
 export const forgotPassword = {
   prompt: "Forgot password?",
   emailRequired: {

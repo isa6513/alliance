@@ -6,6 +6,7 @@ import {
   actionsUserCompletedCount,
 } from "@alliance/shared/client";
 import { type FeedActionActivityDto } from "@alliance/shared/lib/actionActivity";
+import { roleBadges } from "@alliance/shared/lib/copy";
 import {
   ParsedHomeFeedItemDto,
   getForumComment,
@@ -853,12 +854,23 @@ export default function UserProfileScreen() {
                 </Text>
                 {profile.staff && (
                   <View className={cn("bg-staff", badgeStyles)}>
-                    <Text className="text-white text-sm">Staff</Text>
+                    <Text className="text-white text-sm">
+                      {roleBadges.staff.label}
+                    </Text>
+                  </View>
+                )}
+                {!profile.staff && profile.ambassador && (
+                  <View className={cn("bg-red-500", badgeStyles)}>
+                    <Text className="text-white text-xs">
+                      {roleBadges.ambassador.label}
+                    </Text>
                   </View>
                 )}
                 {!profile.staff && profile.isCommunityLeader && (
                   <View className={cn("bg-grouplead", badgeStyles)}>
-                    <Text className="text-white text-xs">Lead</Text>
+                    <Text className="text-white text-xs">
+                      {roleBadges.grouplead.label}
+                    </Text>
                   </View>
                 )}
                 {!profile.hasActiveContract && (

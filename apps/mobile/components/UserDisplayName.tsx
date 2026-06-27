@@ -1,4 +1,5 @@
 import { ClusterSummaryDto } from "@alliance/shared/client";
+import { roleBadges } from "@alliance/shared/lib/copy";
 import { cn } from "@alliance/shared/styles/util";
 import { Earth, UserCircle } from "lucide-react-native";
 import { View } from "react-native";
@@ -9,6 +10,7 @@ import Text, { FontWeight } from "./system/Text";
 interface UserDisplayNameProps {
   name: string;
   staff?: boolean;
+  ambassador?: boolean;
   grouplead?: boolean;
   expert?: boolean;
   expertLabel?: string;
@@ -22,6 +24,7 @@ interface UserDisplayNameProps {
 const UserDisplayName: React.FC<UserDisplayNameProps> = ({
   name,
   staff = false,
+  ambassador = false,
   grouplead = false,
   expert = false,
   expertLabel,
@@ -33,6 +36,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
 }) => {
   const nameTextClass = small ? "text-xs" : "text-sm";
   const iconSize = small ? 12 : 14;
+  const hasRoleBadges = ambassador || grouplead || expert;
   return (
     <View className={cn("flex-row items-center gap-x-1", className)}>
       <Text
@@ -44,14 +48,29 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
       {staff && (
         <Earth size={iconSize} color={colors.green} strokeWidth={1.8} />
       )}
-      {!staff && grouplead && (
-        <UserCircle size={iconSize} color={colors.grouplead} strokeWidth={2} />
-      )}
-      {expert && (
-        <View className="bg-orange-500 rounded-xs px-1.5 py-0.5">
-          <Text className="text-white text-xs" weight={FontWeight.Medium}>
-            {expertLabel || "Expert"}
-          </Text>
+      {!staff && hasRoleBadges && (
+        <View className="flex-row items-center gap-x-1">
+          {ambassador && (
+            <View className="bg-red-500 rounded-xs px-1.5 py-0.5">
+              <Text className="text-white text-xs" weight={FontWeight.Medium}>
+                {roleBadges.ambassador.label}
+              </Text>
+            </View>
+          )}
+          {grouplead && (
+            <UserCircle
+              size={iconSize}
+              color={colors.grouplead}
+              strokeWidth={2}
+            />
+          )}
+          {expert && (
+            <View className="bg-orange-500 rounded-xs px-1.5 py-0.5">
+              <Text className="text-white text-xs" weight={FontWeight.Medium}>
+                {expertLabel || roleBadges.expert.label}
+              </Text>
+            </View>
+          )}
         </View>
       )}
       {cluster && (

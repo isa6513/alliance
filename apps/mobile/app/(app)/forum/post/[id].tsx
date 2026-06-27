@@ -155,6 +155,7 @@ export default function PostDetailScreen() {
             <UserDisplayName
               name={post.author.displayName}
               staff={post.author.staff}
+              ambassador={post.author.ambassador}
               grouplead={post.author.isCommunityLeader}
             />
             <Text className="text-sm text-zinc-500">
