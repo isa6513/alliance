@@ -67,7 +67,8 @@ const AmbassadorProgramPage: React.FC = () => {
         </p>
         <p>
           A successful recruit is someone who makes an Alliance account, signs
-          their membership contract, and completes their first weekly action.
+          their membership contract, and completes their first weekly assigned
+          action.
         </p>
 
         <h2 id="who-to-invite" className="mt-2 text-title-medium text-black">

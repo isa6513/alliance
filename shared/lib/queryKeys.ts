@@ -5,6 +5,8 @@ export const queryKeys = {
   allianceMemberCount: () => ["userNmembers"] as const,
   myAwayRanges: () => ["userGetAwayRanges"] as const,
   onetimeInvitesOverview: () => ["userGetOnetimeInvitesOverview"] as const,
+  ambassadorInviteDashboard: () =>
+    ["userGetAmbassadorInviteDashboard"] as const,
   myReusableInvites: () => ["shareUrlsMyInvites"] as const,
   communityOnetimeInvites: (communityId: number) =>
     ["userGetOnetimeInvitesByCommunity", communityId] as const,

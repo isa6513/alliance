@@ -972,6 +972,44 @@ export type CreateOnetimeInviteDto = {
     communityId?: number;
 };
 
+export type AmbassadorInviteGoalDto = {
+    id: number;
+    targetSuccessfulRecruits: number;
+    startAt: string;
+    dueAt: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type AmbassadorInviteStatsDto = {
+    totalInvitesSent: number;
+    totalAcceptedInvites: number;
+    totalSuccessfulRecruits: number;
+    goalSuccessfulRecruits: number;
+};
+
+export type AmbassadorInviteGoalWithStatsDto = {
+    goal: AmbassadorInviteGoalDto;
+    stats: AmbassadorInviteStatsDto;
+};
+
+export type AmbassadorInviteDashboardDto = {
+    goals: Array<AmbassadorInviteGoalWithStatsDto>;
+    stats: AmbassadorInviteStatsDto;
+};
+
+export type CreateAmbassadorInviteGoalDto = {
+    targetSuccessfulRecruits: number;
+    startAt: string;
+    dueAt: string;
+};
+
+export type UpdateAmbassadorInviteGoalDto = {
+    targetSuccessfulRecruits?: number;
+    startAt?: string;
+    dueAt?: string;
+};
+
 export type SingleGroupAssignmentDto = {
     userId: number;
     communityId: number;
@@ -4695,6 +4733,74 @@ export type UserCreateOnetimeInviteResponses = {
 };
 
 export type UserCreateOnetimeInviteResponse = UserCreateOnetimeInviteResponses[keyof UserCreateOnetimeInviteResponses];
+
+export type UserGetAmbassadorInviteDashboardData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/ambassadorInvites/dashboard';
+};
+
+export type UserGetAmbassadorInviteDashboardErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserGetAmbassadorInviteDashboardError = UserGetAmbassadorInviteDashboardErrors[keyof UserGetAmbassadorInviteDashboardErrors];
+
+export type UserGetAmbassadorInviteDashboardResponses = {
+    200: AmbassadorInviteDashboardDto;
+};
+
+export type UserGetAmbassadorInviteDashboardResponse = UserGetAmbassadorInviteDashboardResponses[keyof UserGetAmbassadorInviteDashboardResponses];
+
+export type UserCreateAmbassadorInviteGoalData = {
+    body: CreateAmbassadorInviteGoalDto;
+    path?: never;
+    query?: never;
+    url: '/user/ambassadorInvites/goal';
+};
+
+export type UserCreateAmbassadorInviteGoalErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserCreateAmbassadorInviteGoalError = UserCreateAmbassadorInviteGoalErrors[keyof UserCreateAmbassadorInviteGoalErrors];
+
+export type UserCreateAmbassadorInviteGoalResponses = {
+    200: AmbassadorInviteGoalDto;
+};
+
+export type UserCreateAmbassadorInviteGoalResponse = UserCreateAmbassadorInviteGoalResponses[keyof UserCreateAmbassadorInviteGoalResponses];
+
+export type UserUpdateAmbassadorInviteGoalData = {
+    body: UpdateAmbassadorInviteGoalDto;
+    path: {
+        goalId: number;
+    };
+    query?: never;
+    url: '/user/ambassadorInvites/goal/{goalId}';
+};
+
+export type UserUpdateAmbassadorInviteGoalErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserUpdateAmbassadorInviteGoalError = UserUpdateAmbassadorInviteGoalErrors[keyof UserUpdateAmbassadorInviteGoalErrors];
+
+export type UserUpdateAmbassadorInviteGoalResponses = {
+    200: AmbassadorInviteGoalDto;
+};
+
+export type UserUpdateAmbassadorInviteGoalResponse = UserUpdateAmbassadorInviteGoalResponses[keyof UserUpdateAmbassadorInviteGoalResponses];
 
 export type UserDeleteOnetimeInviteData = {
     body?: never;

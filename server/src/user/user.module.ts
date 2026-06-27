@@ -19,6 +19,7 @@ import { Action } from '../actions/entities/action.entity';
 import { City } from '../geo/city.entity';
 import { Notification } from '../notifs/entities/notification.entity';
 import { ContractEvent } from './entities/contract-event.entity';
+import { AmbassadorInviteGoal } from './entities/ambassador-invite-goal.entity';
 import { Friend } from './entities/friend.entity';
 import { OnetimeInvite } from './entities/onetime-invite.entity';
 import { Tag } from './entities/tag.entity';
@@ -39,6 +40,7 @@ import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
       Community,
       CommunityInvite,
       ContractEvent,
+      AmbassadorInviteGoal,
       Friend,
       Notification,
       OnetimeInvite,

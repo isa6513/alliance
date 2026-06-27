@@ -44,9 +44,13 @@ import {
   UserDeviceDto,
 } from './dto/device.dto';
 import {
+  AmbassadorInviteDashboardDto,
+  AmbassadorInviteGoalDto,
+  CreateAmbassadorInviteGoalDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   RequestOnetimeInviteDto,
+  UpdateAmbassadorInviteGoalDto,
 } from './dto/invite.dto';
 import {
   AddUserToTagDto,
@@ -640,6 +644,46 @@ export class UserController {
       },
     });
     return new OnetimeInviteDto(invite);
+  }
+
+  @Get('ambassadorInvites/dashboard')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: AmbassadorInviteDashboardDto })
+  async getAmbassadorInviteDashboard(
+    @Request() req: JwtRequest,
+  ): Promise<AmbassadorInviteDashboardDto> {
+    return new AmbassadorInviteDashboardDto(
+      await this.userService.getAmbassadorInviteDashboard(req.user.sub),
+    );
+  }
+
+  @Post('ambassadorInvites/goal')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: AmbassadorInviteGoalDto })
+  async createAmbassadorInviteGoal(
+    @Body() body: CreateAmbassadorInviteGoalDto,
+    @Request() req: JwtRequest,
+  ): Promise<AmbassadorInviteGoalDto> {
+    return new AmbassadorInviteGoalDto(
+      await this.userService.createAmbassadorInviteGoal(body, req.user.sub),
+    );
+  }
+
+  @Patch('ambassadorInvites/goal/:goalId')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: AmbassadorInviteGoalDto })
+  async updateAmbassadorInviteGoal(
+    @Param('goalId', ParseIntPipe) goalId: number,
+    @Body() body: UpdateAmbassadorInviteGoalDto,
+    @Request() req: JwtRequest,
+  ): Promise<AmbassadorInviteGoalDto> {
+    return new AmbassadorInviteGoalDto(
+      await this.userService.updateAmbassadorInviteGoal(
+        goalId,
+        body,
+        req.user.sub,
+      ),
+    );
   }
 
   @Delete('onetimeInvites/:inviteId')

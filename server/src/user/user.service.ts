@@ -1,6 +1,9 @@
 import { Temporal } from '@js-temporal/polyfill';
+import { ActionActivityType } from '@alliance/common/actionActivity';
+import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -47,9 +50,14 @@ import {
   RegisterLiveActivityUpdateTokenDto,
 } from './dto/device.dto';
 import {
+  AmbassadorInviteDashboard,
+  AmbassadorInviteStats,
+  CreateAmbassadorInviteGoalDto,
   CreateOnetimeInviteDto,
   RequestOnetimeInviteDto,
+  UpdateAmbassadorInviteGoalDto,
 } from './dto/invite.dto';
+import { AmbassadorInviteGoal } from './entities/ambassador-invite-goal.entity';
 import { CreateTagDto } from './dto/tag.dto';
 import {
   AssignGroupsDto,
@@ -135,6 +143,8 @@ export class UserService {
     private readonly communityRepository: Repository<Community>,
     @InjectRepository(OnetimeInvite)
     private readonly onetimeInviteRepository: Repository<OnetimeInvite>,
+    @InjectRepository(AmbassadorInviteGoal)
+    private readonly ambassadorInviteGoalRepository: Repository<AmbassadorInviteGoal>,
     @InjectRepository(UserAwayRange)
     private readonly userAwayRangeRepository: Repository<UserAwayRange>,
     @InjectRepository(UserDevice)
@@ -1216,6 +1226,237 @@ export class UserService {
       status: OnetimeInviteStatus.LINK_UNUSED,
     });
     return await this.onetimeInviteRepository.save(invite);
+  }
+
+  async createAmbassadorInviteGoal(
+    body: CreateAmbassadorInviteGoalDto,
+    userId: number,
+  ): Promise<AmbassadorInviteGoal> {
+    const user = await this.findOneOrFail(userId);
+    const startAt = new Date(body.startAt);
+    const dueAt = new Date(body.dueAt);
+
+    if (!user.ambassador) {
+      throw new ForbiddenException('Only ambassadors can set invite goals');
+    }
+    this.validateAmbassadorInviteGoalDates(startAt, dueAt);
+    await this.assertAmbassadorInviteGoalDoesNotOverlap({
+      userId,
+      startAt,
+      dueAt,
+    });
+
+    return this.ambassadorInviteGoalRepository.save(
+      this.ambassadorInviteGoalRepository.create({
+        ambassador: user,
+        targetSuccessfulRecruits: body.targetSuccessfulRecruits,
+        startAt,
+        dueAt,
+      }),
+    );
+  }
+
+  async updateAmbassadorInviteGoal(
+    goalId: number,
+    body: UpdateAmbassadorInviteGoalDto,
+    userId: number,
+  ): Promise<AmbassadorInviteGoal> {
+    const userP = this.findOneOrFail(userId);
+    const goalP = this.ambassadorInviteGoalRepository.findOneOrFail({
+      where: { id: goalId, ambassador: { id: userId } },
+      relations: { ambassador: true },
+    });
+
+    const user = await userP;
+    if (!user.ambassador) {
+      throw new ForbiddenException('Only ambassadors can edit invite goals');
+    }
+
+    const goal = await goalP;
+    const startAt = body.startAt ? new Date(body.startAt) : goal.startAt;
+    const dueAt = body.dueAt ? new Date(body.dueAt) : goal.dueAt;
+
+    this.validateAmbassadorInviteGoalDates(startAt, dueAt);
+    await this.assertAmbassadorInviteGoalDoesNotOverlap({
+      userId,
+      startAt,
+      dueAt,
+      excludeGoalId: goal.id,
+    });
+
+    goal.startAt = startAt;
+    goal.dueAt = dueAt;
+    if (body.targetSuccessfulRecruits !== undefined) {
+      goal.targetSuccessfulRecruits = body.targetSuccessfulRecruits;
+    }
+
+    return this.ambassadorInviteGoalRepository.save(goal);
+  }
+
+  async getAmbassadorInviteDashboard(
+    userId: number,
+  ): Promise<AmbassadorInviteDashboard> {
+    const userP = this.findOneOrFail(userId);
+    const goalsP = this.ambassadorInviteGoalRepository.find({
+      where: { ambassador: { id: userId } },
+      order: { startAt: 'ASC', id: 'ASC' },
+    });
+
+    const user = await userP;
+    if (!user.ambassador) {
+      throw new ForbiddenException('Only ambassadors can view invite stats');
+    }
+    const goals = await goalsP;
+    const stats = await this.getAmbassadorInviteStats(userId);
+    const goalsWithStats = await Promise.all(
+      goals.map(async (goal) => ({
+        goal,
+        stats: await this.getAmbassadorInviteStats(userId, goal),
+      })),
+    );
+
+    return { goals: goalsWithStats, stats };
+  }
+
+  private async getAmbassadorInviteStats(
+    userId: number,
+    goal?: AmbassadorInviteGoal,
+  ): Promise<AmbassadorInviteStats> {
+    const goalStartAt = goal?.startAt ?? null;
+    const goalDueAt = goal?.dueAt ?? null;
+
+    const [row] = (await this.onetimeInviteRepository.query(
+      `
+        SELECT
+          COUNT(*)::int AS "totalInvitesSent",
+          COUNT(*) FILTER (
+            WHERE invite."status" = $2
+          )::int AS "totalAcceptedInvites",
+          COUNT(*) FILTER (
+            WHERE invited_user."id" IS NOT NULL
+              AND EXISTS (
+                SELECT 1
+                FROM "contract_event" ce
+                WHERE ce."userId" = invited_user."id"
+                  AND ce."type" = 'signed'
+              )
+              AND EXISTS (
+                SELECT 1
+                FROM "action_activity" aa
+                INNER JOIN "action" action
+                  ON action."id" = aa."actionId"
+                WHERE aa."userId" = invited_user."id"
+                  AND aa."type" = $3
+                  AND action."onboarding" = FALSE
+                  AND EXISTS (
+                    SELECT 1
+                    FROM "action_event" action_event
+                    WHERE action_event."actionId" = action."id"
+                      AND action_event."newStatus" = $6
+                      AND action_event."date" <= aa."createdAt"
+                  )
+              )
+          )::int AS "totalSuccessfulRecruits",
+          COUNT(*) FILTER (
+            WHERE $4::timestamptz IS NOT NULL
+              AND $5::timestamptz IS NOT NULL
+              AND invite."createdAt" >= $4::timestamptz
+              AND invite."createdAt" <= $5::timestamptz
+              AND invited_user."id" IS NOT NULL
+              AND EXISTS (
+                SELECT 1
+                FROM "contract_event" ce
+                WHERE ce."userId" = invited_user."id"
+                  AND ce."type" = 'signed'
+                  AND ce."date" <= $5::timestamptz
+              )
+              AND EXISTS (
+                SELECT 1
+                FROM "action_activity" aa
+                INNER JOIN "action" action
+                  ON action."id" = aa."actionId"
+                WHERE aa."userId" = invited_user."id"
+                  AND aa."type" = $3
+                  AND action."onboarding" = FALSE
+                  AND aa."createdAt" <= $5::timestamptz
+                  AND EXISTS (
+                    SELECT 1
+                    FROM "action_event" action_event
+                    WHERE action_event."actionId" = action."id"
+                      AND action_event."newStatus" = $6
+                      AND action_event."date" <= aa."createdAt"
+                  )
+              )
+          )::int AS "goalSuccessfulRecruits"
+        FROM "onetime_invite" invite
+        LEFT JOIN "user" invited_user
+          ON invited_user."referredByInviteId" = invite."id"
+        WHERE invite."invitingUserId" = $1
+          AND invite."deletedAt" IS NULL
+      `,
+      [
+        userId,
+        OnetimeInviteStatus.LINK_USED,
+        ActionActivityType.USER_COMPLETED,
+        goalStartAt,
+        goalDueAt,
+        ActionStatus.MemberAction,
+      ],
+    )) as [
+      {
+        totalInvitesSent: number;
+        totalAcceptedInvites: number;
+        totalSuccessfulRecruits: number;
+        goalSuccessfulRecruits: number;
+      },
+    ];
+
+    return {
+      totalInvitesSent: row.totalInvitesSent,
+      totalAcceptedInvites: row.totalAcceptedInvites,
+      totalSuccessfulRecruits: row.totalSuccessfulRecruits,
+      goalSuccessfulRecruits: row.goalSuccessfulRecruits,
+    };
+  }
+
+  private validateAmbassadorInviteGoalDates(
+    startAt: Date,
+    dueAt: Date,
+  ): void {
+    if (Number.isNaN(startAt.getTime()) || Number.isNaN(dueAt.getTime())) {
+      throw new BadRequestException('Goal dates are invalid');
+    }
+    if (startAt >= dueAt) {
+      throw new BadRequestException('Goal start date must be before end date');
+    }
+  }
+
+  private async assertAmbassadorInviteGoalDoesNotOverlap(params: {
+    userId: number;
+    startAt: Date;
+    dueAt: Date;
+    excludeGoalId?: number;
+  }): Promise<void> {
+    const { userId, startAt, dueAt, excludeGoalId } = params;
+    const rows = (await this.ambassadorInviteGoalRepository.query(
+      `
+        SELECT goal."id"
+        FROM "ambassador_invite_goal" goal
+        WHERE goal."ambassadorId" = $1
+          AND ($4::int IS NULL OR goal."id" <> $4::int)
+          AND goal."startAt" < $3::timestamptz
+          AND goal."dueAt" > $2::timestamptz
+        LIMIT 1
+      `,
+      [userId, startAt, dueAt, excludeGoalId ?? null],
+    )) as { id: number }[];
+    const overlap = rows[0];
+
+    if (overlap) {
+      throw new BadRequestException(
+        'Invite goal dates overlap with an existing goal',
+      );
+    }
   }
 
   async deleteOnetimeInvite(inviteId: number, userId: number): Promise<void> {
