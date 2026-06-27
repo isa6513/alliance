@@ -30,7 +30,7 @@ export default function InviteShareLink() {
   const handleCreate = useCallback(() => {
     createInvite(labelDraft).then(
       () => setLabelDraft(""),
-      () => Alert.alert("Error", "Failed to create reusable invite"),
+      () => Alert.alert("Error", "Failed to create invite link"),
     );
   }, [createInvite, labelDraft]);
 
@@ -69,7 +69,7 @@ export default function InviteShareLink() {
     const id = pendingDeleteId;
     closeDeleteModal();
     void deleteInvite(id).catch(() =>
-      Alert.alert("Error", "Failed to delete reusable invite"),
+      Alert.alert("Error", "Failed to delete invite link"),
     );
   }, [pendingDeleteId, deleteInvite, closeDeleteModal]);
 
@@ -84,11 +84,11 @@ export default function InviteShareLink() {
               className="text-lg text-zinc-900"
               weight={FontWeight.Semibold}
             >
-              Reusable invite
+              Invite multiple people
             </Text>
             <Text className="text-sm text-zinc-500">
-              Create an invite link you can share with as many people as you
-              want. Add a label to remember where you shared each one.
+              Create one invite link you can share with multiple people. Add a
+              label to remember where you shared each one.
             </Text>
           </View>
           <Input
@@ -101,7 +101,7 @@ export default function InviteShareLink() {
           <Button
             onPress={handleCreate}
             color={ButtonColor.Black}
-            title={isCreating ? "Creating…" : "Create reusable invite"}
+            title={isCreating ? "Creating…" : "Create invite link"}
             disabled={isCreating}
             loading={isCreating}
           />
@@ -110,18 +110,18 @@ export default function InviteShareLink() {
 
       {isError ? (
         <Text className="text-sm text-red-500">
-          Failed to load reusable invites
+          Failed to load invite links
         </Text>
       ) : isPending ? (
         <Text className="text-sm text-zinc-500">Loading…</Text>
       ) : links.length === 0 ? (
         <Text className="text-center text-zinc-500 py-4">
-          Your reusable invites will appear here once you create them.
+          Your invite links will appear here once you create them.
         </Text>
       ) : (
         <View className="gap-3">
           <Text className="text-lg text-zinc-900" weight={FontWeight.Semibold}>
-            Your reusable invites
+            Your invite links
           </Text>
           <View className="bg-white rounded-lg overflow-hidden border border-zinc-100">
             {links.map((link) => (
@@ -144,7 +144,7 @@ export default function InviteShareLink() {
               className="text-lg text-zinc-900"
               weight={FontWeight.Semibold}
             >
-              Delete reusable invite?
+              Delete invite link?
             </Text>
             <Text className="text-sm text-zinc-500">
               Anyone you&apos;ve already shared it with won&apos;t be able to

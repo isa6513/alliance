@@ -29,8 +29,8 @@ enum InvitesTab {
 
 const INVITES_TAB_LABELS: Record<InvitesTab, string> = {
   [InvitesTab.ReferralQr]: "QR code",
-  [InvitesTab.New]: "New link",
-  [InvitesTab.Reusable]: "Reusable",
+  [InvitesTab.New]: "Individual",
+  [InvitesTab.Reusable]: "Multiple",
   [InvitesTab.Past]: "Past",
 };
 

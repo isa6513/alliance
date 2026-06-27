@@ -36,7 +36,7 @@ const InviteShareLink = () => {
     createInvite(labelDraft).then(
       () => setLabelDraft(""),
       (err: Error) =>
-        errorToast(`Failed to create reusable invite: ${err.message}`),
+        errorToast(`Failed to create invite link: ${err.message}`),
     );
   }, [createInvite, labelDraft, errorToast]);
 
@@ -67,7 +67,7 @@ const InviteShareLink = () => {
       void (async () => {
         const ok = await confirm({
           message:
-            "Delete this reusable invite? Anyone you've already shared it with won't be able to use it.",
+            "Delete this invite link? Anyone you've already shared it with won't be able to use it.",
           confirmLabel: "Delete",
           cancelLabel: "Cancel",
           anchorEl: event.currentTarget,
@@ -77,7 +77,7 @@ const InviteShareLink = () => {
         });
         if (!ok) return;
         deleteInvite(id).catch((err: Error) =>
-          errorToast(`Failed to delete reusable invite: ${err.message}`),
+          errorToast(`Failed to delete invite link: ${err.message}`),
         );
       })();
     },
@@ -89,10 +89,10 @@ const InviteShareLink = () => {
       <Card style={CardStyle.White} className="p-6">
         <div className="flex flex-col gap-y-4">
           <div className="flex flex-col gap-y-2">
-            <p className={inviteTitleClass}>Reusable invite</p>
+            <p className={inviteTitleClass}>Invite multiple people</p>
             <p className="text-invite-form-body">
-              Create an invite link you can share with as many people as you
-              want. Add a label to remember where you shared each one.
+              Create one invite link you can share with multiple people. Add a
+              label to remember where you shared each one.
             </p>
           </div>
           <div className="flex flex-col gap-y-4">
@@ -116,23 +116,23 @@ const InviteShareLink = () => {
               disabled={isCreating}
               className="w-full"
             >
-              {isCreating ? "Creating..." : "Create reusable invite"}
+              {isCreating ? "Creating..." : "Create invite link"}
             </NewButton>
           </div>
         </div>
       </Card>
 
       {isError ? (
-        <p className="text-red-500 text-sm">Failed to load reusable invites</p>
+        <p className="text-red-500 text-sm">Failed to load invite links</p>
       ) : isPending ? (
         <p className="text-zinc-500 text-sm">Loading…</p>
       ) : links.length === 0 ? (
         <p className="text-zinc-500 text-center text-base sm:text-lg">
-          Your reusable invites will appear here once you create them.
+          Your invite links will appear here once you create them.
         </p>
       ) : (
         <div className="flex flex-col gap-y-4">
-          <p className="font-semibold text-2xl">Your reusable invites</p>
+          <p className="font-semibold text-2xl">Your invite links</p>
           <List>
             {links.map((link) => (
               <InviteLinkRow

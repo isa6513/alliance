@@ -203,12 +203,12 @@ const InvitesPage = () => {
 
           <div className="flex flex-row gap-x-2">
             <PillTab
-              label="Personalized invite"
+              label="Invite an individual"
               selected={activeTab === "onetime"}
               onClick={() => setActiveTab("onetime")}
             />
             <PillTab
-              label="Reusable invite"
+              label="Invite multiple people"
               selected={activeTab === "reusable"}
               onClick={() => setActiveTab("reusable")}
             />

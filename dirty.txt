@@ -16,7 +16,13 @@ apps/frontend/src/routes.ts
 apps/frontend/src/stories/ForumListPost.stories.tsx
 apps/frontend/src/stories/ReplyComponent.stories.tsx
 apps/frontend/src/stories/testData.ts
+apps/mobile/app/(app)/forum/post/[id].tsx
+apps/mobile/app/(app)/information.tsx
+apps/mobile/app/(app)/member/[id].tsx
 apps/mobile/app/(app)/messages/[conversationId]/index.tsx
+apps/mobile/components/Comments.tsx
+apps/mobile/components/LikesModal.tsx
+apps/mobile/components/UserDisplayName.tsx
 server/migrations/1782505809729-add-user-ambassador.ts
 server/src/notifs/test-users.ts
 server/src/user/dto/user.dto.ts
