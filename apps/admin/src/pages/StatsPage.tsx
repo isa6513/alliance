@@ -198,6 +198,37 @@ const parseIsoDate = (value?: string | null): Date | null => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
+type ParsedContractStatusPoint = ContractStatusPointDto & {
+  parsedDate: Date;
+};
+
+const findContractStatusPointDaysAgo = (
+  history: ParsedContractStatusPoint[],
+  daysAgo: number,
+): ParsedContractStatusPoint | null => {
+  if (history.length === 0) return null;
+
+  const latest = history[history.length - 1];
+  const targetDate = new Date(latest.parsedDate);
+  targetDate.setDate(targetDate.getDate() - daysAgo);
+
+  let closest = history[0];
+  for (const point of history) {
+    if (point.parsedDate <= targetDate) {
+      closest = point;
+    } else {
+      break;
+    }
+  }
+
+  const daysBetween =
+    (latest.parsedDate.getTime() - closest.parsedDate.getTime()) /
+    (1000 * 60 * 60 * 24);
+  if (daysBetween < daysAgo - 2) return null;
+
+  return closest;
+};
+
 const asRecordArray = (value: unknown): Array<Record<string, unknown>> =>
   Array.isArray(value)
     ? value.filter(
@@ -1402,12 +1433,32 @@ const StatsPage: React.FC = () => {
     };
   }, [churnDurationsWeeks]);
 
-  const parsedContractStatusHistory = useMemo(() => {
+  const parsedContractStatusHistory = useMemo<
+    ParsedContractStatusPoint[]
+  >(() => {
     return contractStatusHistory.map((point) => ({
       ...point,
       parsedDate: new Date(point.date),
     }));
   }, [contractStatusHistory]);
+
+  const monthlyChurnRate = useMemo(() => {
+    const latest =
+      parsedContractStatusHistory[parsedContractStatusHistory.length - 1];
+    if (!latest) return null;
+
+    const monthAgo = findContractStatusPointDaysAgo(
+      parsedContractStatusHistory,
+      30,
+    );
+    if (!monthAgo || monthAgo.activeCount <= 0) return null;
+
+    const churnedInPeriod = Math.max(
+      0,
+      latest.churnedCount - monthAgo.churnedCount,
+    );
+    return (churnedInPeriod / monthAgo.activeCount) * 100;
+  }, [parsedContractStatusHistory]);
 
   const contractStatusChartGeometry = useMemo(() => {
     if (parsedContractStatusHistory.length === 0) return null;
@@ -1670,7 +1721,7 @@ const StatsPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex flex-col">
-                <div className="text-sm text-gray-600">Churn rate</div>
+                <div className="text-sm text-gray-600">All-time churn</div>
                 <div className="text-3xl font-bold text-gray-900">
                   {parsedContractStatusHistory.length > 0
                     ? (() => {
@@ -1685,6 +1736,15 @@ const StatsPage: React.FC = () => {
                             ).toFixed(1)
                           : "0";
                       })()
+                    : "[No data]"}
+                  %
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-sm text-gray-600">Last month churn</div>
+                <div className="text-3xl font-bold text-gray-900">
+                  {monthlyChurnRate !== null
+                    ? monthlyChurnRate.toFixed(1)
                     : "[No data]"}
                   %
                 </div>
@@ -1940,7 +2000,8 @@ const StatsPage: React.FC = () => {
               Member Reliability by Assignment Week
             </h3>
             <p className="text-xs text-gray-500">
-              Completed actions only. New members begin with the first member-action week after signing.
+              Completed actions only. New members begin with the first
+              member-action week after signing.
             </p>
           </div>
           <form
@@ -1984,19 +2045,24 @@ const StatsPage: React.FC = () => {
             <p className="text-sm text-gray-600">Loading reliability...</p>
           ) : memberReliabilityWindow ? (
             <div className="grid gap-3 md:grid-cols-2">
-              {([
+              {(
                 [
-                  "First assigned week",
-                  "Members' first week of assigned actions across the selected weeks.",
-                  memberReliabilityWindow.firstWeek,
-                ],
-                [
-                  "Fourth assigned week or later",
-                  "Actions taken in the selected weeks by members on assignment week four or beyond.",
-                  memberReliabilityWindow.fourthWeekOrLater,
-                ],
-              ] as const).map(([title, description, rate]) => (
-                <div key={title} className="rounded-md border border-gray-200 p-4">
+                  [
+                    "First assigned week",
+                    "Members' first week of assigned actions across the selected weeks.",
+                    memberReliabilityWindow.firstWeek,
+                  ],
+                  [
+                    "Fourth assigned week or later",
+                    "Actions taken in the selected weeks by members on assignment week four or beyond.",
+                    memberReliabilityWindow.fourthWeekOrLater,
+                  ],
+                ] as const
+              ).map(([title, description, rate]) => (
+                <div
+                  key={title}
+                  className="rounded-md border border-gray-200 p-4"
+                >
                   <div className="text-sm font-semibold text-gray-900">
                     {title}
                   </div>
@@ -2005,7 +2071,8 @@ const StatsPage: React.FC = () => {
                     {(rate.completionRate * 100).toFixed(1)}%
                   </div>
                   <div className="mt-1 text-sm text-gray-600">
-                    {rate.completedCount} completed / {rate.assignedCount} assigned
+                    {rate.completedCount} completed / {rate.assignedCount}{" "}
+                    assigned
                   </div>
                 </div>
               ))}
