@@ -8,6 +8,8 @@ The repo root is a **Bun** workspace (hoisted `node_modules`, see `bunfig.toml`)
 
 In root dir: `bun install` (install [Bun](https://bun.sh) 1.3.x+ if missing; `packageManager` in root `package.json` pins `bun@1.3.6`)
 
+Set up the frontend env file: `cp apps/frontend/.env.example apps/frontend/.env.local`.
+
 **server install:**
 
 `cd server`
