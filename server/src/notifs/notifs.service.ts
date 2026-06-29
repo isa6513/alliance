@@ -288,6 +288,17 @@ export class NotifsService {
     return this.notifsRepository.save(notifs.map((n) => this.createNotif(n)));
   }
 
+  async hasNotifWithGroupingKey(
+    userId: number,
+    groupingKey: string,
+  ): Promise<boolean> {
+    return (
+      (await this.notifsRepository.count({
+        where: { user: { id: userId }, groupingKey },
+      })) > 0
+    );
+  }
+
   createUnreadContent(unreadContent: CreateUnreadContentParams) {
     return this.unreadContentRepository.create({
       ...unreadContent,

@@ -686,6 +686,16 @@ export class UserController {
     );
   }
 
+  @Delete('ambassadorInvites/goal/:goalId')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse()
+  async deleteAmbassadorInviteGoal(
+    @Param('goalId', ParseIntPipe) goalId: number,
+    @Request() req: JwtRequest,
+  ): Promise<void> {
+    await this.userService.deleteAmbassadorInviteGoal(goalId, req.user.sub);
+  }
+
   @Delete('onetimeInvites/:inviteId')
   @UseGuards(AuthGuard)
   @ApiOkResponse()

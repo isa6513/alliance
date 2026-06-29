@@ -9,6 +9,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LiveActivityRegistration } from 'src/apns/entities/live-activity-registration.entity';
 import { CampaignService } from 'src/campaign/campaign.service';
@@ -107,6 +108,17 @@ const REFERRAL_SOURCE_BY_SHARE_KIND: Record<
   [ShareUrlKind.ExternalTarget]: ReferralSource.ExternalShareLink,
   [ShareUrlKind.Invite]: ReferralSource.InviteShareLink,
 };
+
+const AMBASSADOR_INVITES_URL = '/invites';
+const AMBASSADOR_GOAL_NOTIFICATION_LOOKBACK_MS = 60 * 60 * 1000;
+
+function ambassadorGoalHalfwayGroupingKey(goalId: number) {
+  return `ambassador-invite-goal:${goalId}:halfway`;
+}
+
+function ambassadorGoalEndedGroupingKey(goalId: number) {
+  return `ambassador-invite-goal:${goalId}:ended`;
+}
 
 /**
  * What a referral code/sid points to, resolved in a fixed precedence order
@@ -1293,6 +1305,21 @@ export class UserService {
     return this.ambassadorInviteGoalRepository.save(goal);
   }
 
+  async deleteAmbassadorInviteGoal(
+    goalId: number,
+    userId: number,
+  ): Promise<void> {
+    const user = await this.findOneOrFail(userId);
+    if (!user.ambassador) {
+      throw new ForbiddenException('Only ambassadors can delete invite goals');
+    }
+
+    const goal = await this.ambassadorInviteGoalRepository.findOneOrFail({
+      where: { id: goalId, ambassador: { id: userId } },
+    });
+    await this.ambassadorInviteGoalRepository.delete(goal.id);
+  }
+
   async getAmbassadorInviteDashboard(
     userId: number,
   ): Promise<AmbassadorInviteDashboard> {
@@ -1318,6 +1345,157 @@ export class UserService {
     return { goals: goalsWithStats, stats };
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
+  async sendDueAmbassadorInviteGoalNotifications(): Promise<void> {
+    const now = new Date();
+    const lookbackAt = new Date(
+      now.getTime() - AMBASSADOR_GOAL_NOTIFICATION_LOOKBACK_MS,
+    );
+    const [halfwayRows, endedRows] = await Promise.all([
+      this.ambassadorInviteGoalRepository.query(
+        `
+          SELECT goal."id"
+          FROM "ambassador_invite_goal" goal
+          WHERE goal."startAt" <= $1::timestamptz
+            AND goal."dueAt" > $1::timestamptz
+            AND (goal."startAt" + ((goal."dueAt" - goal."startAt") / 2)) <= $1::timestamptz
+            AND (goal."startAt" + ((goal."dueAt" - goal."startAt") / 2)) > $2::timestamptz
+        `,
+        [now, lookbackAt],
+      ) as Promise<{ id: number }[]>,
+      this.ambassadorInviteGoalRepository.query(
+        `
+          SELECT goal."id"
+          FROM "ambassador_invite_goal" goal
+          WHERE goal."dueAt" <= $1::timestamptz
+            AND goal."dueAt" > $2::timestamptz
+        `,
+        [now, lookbackAt],
+      ) as Promise<{ id: number }[]>,
+    ]);
+
+    const goalIds = [
+      ...new Set([
+        ...halfwayRows.map((goal) => goal.id),
+        ...endedRows.map((goal) => goal.id),
+      ]),
+    ];
+    if (!goalIds.length) {
+      return;
+    }
+
+    const goals = await this.ambassadorInviteGoalRepository.find({
+      where: { id: In(goalIds) },
+      relations: { ambassador: true },
+    });
+    const goalById = new Map(goals.map((goal) => [goal.id, goal]));
+
+    await Promise.all([
+      ...halfwayRows.map(async ({ id }) => {
+        const goal = goalById.get(id);
+        if (!goal) {
+          return;
+        }
+        await this.sendAmbassadorInviteGoalHalfwayNotif(goal);
+      }),
+      ...endedRows.map(async ({ id }) => {
+        const goal = goalById.get(id);
+        if (!goal) {
+          return;
+        }
+        await this.sendAmbassadorInviteGoalEndedNotif(goal);
+      }),
+    ]);
+  }
+
+  private async sendAmbassadorInviteGoalHalfwayNotif(
+    goal: AmbassadorInviteGoal,
+  ): Promise<void> {
+    const groupingKey = ambassadorGoalHalfwayGroupingKey(goal.id);
+    const alreadySent = await this.notifsService.hasNotifWithGroupingKey(
+      goal.ambassador.id,
+      groupingKey,
+    );
+    if (alreadySent) {
+      return;
+    }
+
+    const stats = await this.getAmbassadorInviteStats(goal.ambassador.id, goal);
+    await this.notifsService.sendNotif({
+      user: goal.ambassador,
+      category: NotificationCategory.NewMemberReferred,
+      message: this.getAmbassadorInviteGoalHalfwayMessage(goal, stats),
+      webAppLocation: AMBASSADOR_INVITES_URL,
+      mobileAppLocation: AMBASSADOR_INVITES_URL,
+      associatedUsers: [],
+      groupingKey,
+      sendTime: new Date(),
+      shouldPush: true,
+    });
+  }
+
+  private async sendAmbassadorInviteGoalEndedNotif(
+    goal: AmbassadorInviteGoal,
+  ): Promise<void> {
+    const groupingKey = ambassadorGoalEndedGroupingKey(goal.id);
+    const alreadySent = await this.notifsService.hasNotifWithGroupingKey(
+      goal.ambassador.id,
+      groupingKey,
+    );
+    if (alreadySent) {
+      return;
+    }
+
+    const stats = await this.getAmbassadorInviteStats(goal.ambassador.id, goal);
+    await this.notifsService.sendNotif({
+      user: goal.ambassador,
+      category: NotificationCategory.NewMemberReferred,
+      message: this.getAmbassadorInviteGoalEndedMessage(goal, stats),
+      webAppLocation: AMBASSADOR_INVITES_URL,
+      mobileAppLocation: AMBASSADOR_INVITES_URL,
+      associatedUsers: [],
+      groupingKey,
+      sendTime: new Date(),
+      shouldPush: true,
+    });
+  }
+
+  private getAmbassadorInviteGoalHalfwayMessage(
+    goal: AmbassadorInviteGoal,
+    stats: AmbassadorInviteStats,
+  ): string {
+    const remaining = Math.max(
+      goal.targetSuccessfulRecruits - stats.goalSuccessfulRecruits,
+      0,
+    );
+    if (remaining === 0) {
+      return `You're halfway through your recruiting goal and already hit it: ${this.formatSuccessfulRecruitCount(
+        stats.goalSuccessfulRecruits,
+        goal.targetSuccessfulRecruits,
+      )}.`;
+    }
+
+    return `You're halfway through your recruiting goal. You need ${remaining} more ${remaining === 1 ? 'successful recruit' : 'successful recruits'} to hit ${goal.targetSuccessfulRecruits}.`;
+  }
+
+  private getAmbassadorInviteGoalEndedMessage(
+    goal: AmbassadorInviteGoal,
+    stats: AmbassadorInviteStats,
+  ): string {
+    const percent = Math.round(
+      (stats.goalSuccessfulRecruits / goal.targetSuccessfulRecruits) * 100,
+    );
+
+    return `Your recruiting goal ended. You reached ${percent}% of your goal (${this.formatSuccessfulRecruitCount(
+      stats.goalSuccessfulRecruits,
+      goal.targetSuccessfulRecruits,
+    )}).`;
+  }
+
+  private formatSuccessfulRecruitCount(successful: number, target: number) {
+    return `${successful}/${target} ${target === 1 ? 'successful recruit' : 'successful recruits'}`;
+  }
+
   private async getAmbassadorInviteStats(
     userId: number,
     goal?: AmbassadorInviteGoal,
@@ -1328,69 +1506,46 @@ export class UserService {
     const [row] = (await this.onetimeInviteRepository.query(
       `
         SELECT
-          COUNT(*)::int AS "totalInvitesSent",
+          COUNT(*) FILTER (
+            WHERE ($4::timestamptz IS NULL OR invite."createdAt" >= $4::timestamptz)
+              AND ($5::timestamptz IS NULL OR invite."createdAt" <= $5::timestamptz)
+          )::int AS "totalInvitesSent",
           COUNT(*) FILTER (
             WHERE invite."status" = $2
+              AND ($4::timestamptz IS NULL OR invite."createdAt" >= $4::timestamptz)
+              AND ($5::timestamptz IS NULL OR invite."createdAt" <= $5::timestamptz)
           )::int AS "totalAcceptedInvites",
           COUNT(*) FILTER (
-            WHERE invited_user."id" IS NOT NULL
-              AND EXISTS (
-                SELECT 1
-                FROM "contract_event" ce
-                WHERE ce."userId" = invited_user."id"
-                  AND ce."type" = 'signed'
-              )
-              AND EXISTS (
-                SELECT 1
-                FROM "action_activity" aa
-                INNER JOIN "action" action
-                  ON action."id" = aa."actionId"
-                WHERE aa."userId" = invited_user."id"
-                  AND aa."type" = $3
-                  AND action."onboarding" = FALSE
-                  AND EXISTS (
-                    SELECT 1
-                    FROM "action_event" action_event
-                    WHERE action_event."actionId" = action."id"
-                      AND action_event."newStatus" = $6
-                      AND action_event."date" <= aa."createdAt"
-                  )
-              )
+            WHERE first_success."completedAt" IS NOT NULL
+              AND ($4::timestamptz IS NULL OR invite."createdAt" >= $4::timestamptz)
+              AND ($5::timestamptz IS NULL OR invite."createdAt" <= $5::timestamptz)
           )::int AS "totalSuccessfulRecruits",
           COUNT(*) FILTER (
             WHERE $4::timestamptz IS NOT NULL
               AND $5::timestamptz IS NOT NULL
+              AND first_success."completedAt" IS NOT NULL
               AND invite."createdAt" >= $4::timestamptz
               AND invite."createdAt" <= $5::timestamptz
-              AND invited_user."id" IS NOT NULL
-              AND EXISTS (
-                SELECT 1
-                FROM "contract_event" ce
-                WHERE ce."userId" = invited_user."id"
-                  AND ce."type" = 'signed'
-                  AND ce."date" <= $5::timestamptz
-              )
-              AND EXISTS (
-                SELECT 1
-                FROM "action_activity" aa
-                INNER JOIN "action" action
-                  ON action."id" = aa."actionId"
-                WHERE aa."userId" = invited_user."id"
-                  AND aa."type" = $3
-                  AND action."onboarding" = FALSE
-                  AND aa."createdAt" <= $5::timestamptz
-                  AND EXISTS (
-                    SELECT 1
-                    FROM "action_event" action_event
-                    WHERE action_event."actionId" = action."id"
-                      AND action_event."newStatus" = $6
-                      AND action_event."date" <= aa."createdAt"
-                  )
-              )
           )::int AS "goalSuccessfulRecruits"
         FROM "onetime_invite" invite
         LEFT JOIN "user" invited_user
           ON invited_user."referredByInviteId" = invite."id"
+        LEFT JOIN LATERAL (
+          SELECT MIN(aa."createdAt") AS "completedAt"
+          FROM "action_activity" aa
+          INNER JOIN "action" action
+            ON action."id" = aa."actionId"
+          WHERE aa."userId" = invited_user."id"
+            AND aa."type" = $3
+            AND action."onboarding" = FALSE
+            AND EXISTS (
+              SELECT 1
+              FROM "action_event" action_event
+              WHERE action_event."actionId" = action."id"
+                AND action_event."newStatus" = $6
+                AND action_event."date" <= aa."createdAt"
+            )
+        ) first_success ON TRUE
         WHERE invite."invitingUserId" = $1
           AND invite."deletedAt" IS NULL
       `,

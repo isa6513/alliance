@@ -17,9 +17,9 @@ import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import { ChevronLeft, ChevronRight, UserCheck } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, UserCheck } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, MouseEvent } from "react";
 import InviteForm from "../../components/InviteForm";
 import InviteShareLink from "../../components/InviteShareLink";
 import OnetimeInviteListItem from "../../components/OnetimeInviteListItem";
@@ -72,6 +72,33 @@ const inviteGoalErrorMessage = (err: Error) => {
   return err.message;
 };
 
+const inviteStatsMetrics = (stats: {
+  totalInvitesSent: number;
+  totalAcceptedInvites: number;
+  totalSuccessfulRecruits: number;
+}) => [
+  {
+    label: "Invites",
+    value: stats.totalInvitesSent,
+  },
+  {
+    label: "Accepted",
+    value: stats.totalAcceptedInvites,
+  },
+  {
+    label: "Successful",
+    value: stats.totalSuccessfulRecruits,
+  },
+  {
+    label: "Accepted %",
+    value: formatPercent(stats.totalAcceptedInvites, stats.totalInvitesSent),
+  },
+  {
+    label: "Success %",
+    value: formatPercent(stats.totalSuccessfulRecruits, stats.totalInvitesSent),
+  },
+];
+
 const InvitesPage = () => {
   const { user } = useAuth();
   const { error: errorToast, confirm } = useToast();
@@ -106,6 +133,8 @@ const InvitesPage = () => {
     isCreatingGoal,
     updateGoal,
     isUpdatingGoal,
+    deleteGoal,
+    isDeletingGoal,
     refetch: refetchAmbassadorDashboard,
   } = useAmbassadorInviteDashboard({ enabled: Boolean(user?.ambassador) });
 
@@ -197,7 +226,7 @@ const InvitesPage = () => {
   );
 
   const handleDeleteInvite = useCallback(
-    (inviteId: number, event: React.MouseEvent<HTMLElement>) => {
+    (inviteId: number, event: MouseEvent<HTMLElement>) => {
       void (async () => {
         const ok = await confirm({
           message: deleteInviteConfirmation.message,
@@ -231,6 +260,34 @@ const InvitesPage = () => {
       }
     },
     [refetchAmbassadorDashboard, upsertInvite, user?.ambassador],
+  );
+
+  const handleDeleteGoal = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      if (!selectedGoal) {
+        return;
+      }
+
+      const goalId = selectedGoal.goal.id;
+      void (async () => {
+        const ok = await confirm({
+          title: "Delete recruit goal?",
+          message: "Are you sure you want to do this?",
+          confirmLabel: "Delete goal",
+          cancelLabel: "Cancel",
+          anchorEl: event.currentTarget,
+          placement: "topleft",
+        });
+        if (!ok) {
+          return;
+        }
+
+        await deleteGoal(goalId).catch((err: Error) => {
+          errorToast(`Failed to delete goal: ${err.message}`);
+        });
+      })();
+    },
+    [confirm, deleteGoal, errorToast, selectedGoal],
   );
 
   const handleSetGoal = useCallback(
@@ -332,12 +389,10 @@ const InvitesPage = () => {
   return (
     <CenterLayout>
       <div className="flex flex-col gap-y-2">
-        {user.ambassador && (
-          <Card style={CardStyle.White} className="p-6 gap-y-5">
+        {user.ambassador && activeTab === "onetime" && (
+          <Card style={CardStyle.White} className="p-6 gap-y-5 order-3">
             <div className="flex flex-col gap-y-1">
-              <p className="text-sm font-semibold text-green">
-                Ambassador invites
-              </p>
+              <p className="text-sm font-semibold text-green">Ambassador</p>
               <h1 className="text-title">Recruiting dashboard</h1>
             </div>
 
@@ -362,6 +417,17 @@ const InvitesPage = () => {
                       </p>
                     </div>
                     <div className="flex flex-row items-center gap-x-2 shrink-0">
+                      {selectedGoal && (
+                        <button
+                          className="border border-red-100 text-red-600 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center"
+                          type="button"
+                          aria-label="Delete recruit goal"
+                          disabled={isDeletingGoal}
+                          onClick={handleDeleteGoal}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                       <button
                         className="border border-zinc-200 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center"
                         type="button"
@@ -423,6 +489,24 @@ const InvitesPage = () => {
                   </div>
 
                   {selectedGoal && (
+                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
+                      {inviteStatsMetrics(selectedGoal.stats).map((metric) => (
+                        <div
+                          key={metric.label}
+                          className="rounded border border-zinc-200 bg-zinc-100 px-3 py-2 min-w-0"
+                        >
+                          <p className="text-sm text-zinc-500 leading-tight">
+                            {metric.label}
+                          </p>
+                          <p className="mt-1 text-base font-semibold tabular-nums break-words">
+                            {metric.value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedGoal && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
                       <label className="flex flex-col gap-y-1 min-w-0">
                         <span className="text-xs font-semibold text-zinc-500">
@@ -467,7 +551,7 @@ const InvitesPage = () => {
 
                 </div>
 
-                <div className="rounded border border-zinc-200 bg-zinc-50/60 p-4 sm:p-5 flex flex-col gap-y-3">
+                <div className="rounded border border-zinc-200 bg-zinc-100 p-4 sm:p-5 flex flex-col gap-y-3">
                   <div>
                     <p className="font-semibold text-lg">Set a new goal</p>
                     <p className="text-sm text-zinc-500">
@@ -477,7 +561,7 @@ const InvitesPage = () => {
                   </div>
 
                   <form
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-end"
                     onSubmit={handleSetGoal}
                   >
                     <label className="flex flex-col gap-y-1 min-w-0">
@@ -519,7 +603,7 @@ const InvitesPage = () => {
                       />
                     </label>
                     <button
-                      className="bg-black text-white rounded px-4 py-2 h-11 disabled:opacity-50 whitespace-nowrap w-full sm:col-span-2 lg:col-span-1"
+                      className="bg-black text-white rounded px-5 py-2 h-11 disabled:opacity-50 whitespace-nowrap w-full sm:col-span-2 lg:col-span-1 lg:w-auto lg:min-w-32"
                       type="submit"
                       disabled={isCreatingGoal}
                     >
@@ -533,69 +617,36 @@ const InvitesPage = () => {
                   </form>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-3">
-                  {[
-                    {
-                      label: "Total invites sent",
-                      value: ambassadorDashboard.stats.totalInvitesSent,
-                    },
-                    {
-                      label: "Total accepted invites",
-                      value: ambassadorDashboard.stats.totalAcceptedInvites,
-                    },
-                    {
-                      label: "Total successful recruits",
-                      value: ambassadorDashboard.stats.totalSuccessfulRecruits,
-                    },
-                    {
-                      label: "Total accepted conversion",
-                      value: `${ambassadorDashboard.stats.totalAcceptedInvites} / ${ambassadorDashboard.stats.totalInvitesSent}`,
-                      detail: formatPercent(
-                        ambassadorDashboard.stats.totalAcceptedInvites,
-                        ambassadorDashboard.stats.totalInvitesSent,
-                      ),
-                    },
-                    {
-                      label: "Total success conversion",
-                      value: `${ambassadorDashboard.stats.totalSuccessfulRecruits} / ${ambassadorDashboard.stats.totalInvitesSent}`,
-                      detail: formatPercent(
-                        ambassadorDashboard.stats.totalSuccessfulRecruits,
-                        ambassadorDashboard.stats.totalInvitesSent,
-                      ),
-                    },
-                  ].map((metric) => (
-                    <div
-                      key={metric.label}
-                      className="rounded border border-zinc-200 p-4 min-w-0 flex flex-col min-h-36"
-                    >
-                      <p className="text-sm text-zinc-500 leading-snug min-h-10">
-                        {metric.label}
-                      </p>
-                      <div className="mt-3 flex flex-col gap-y-1">
-                        <p className="font-semibold text-2xl tabular-nums break-words">
-                          {metric.value}
-                        </p>
-                        {metric.detail && (
-                          <p className="text-sm text-zinc-500">
-                            {metric.detail}
+                <details className="rounded border border-zinc-200 px-4 py-3 text-sm">
+                  <summary className="cursor-pointer font-medium text-zinc-600">
+                    Total invite stats
+                  </summary>
+                  <div className="mt-3 grid grid-cols-2 lg:grid-cols-5 gap-2">
+                    {inviteStatsMetrics(ambassadorDashboard.stats).map(
+                      (metric) => (
+                        <div key={metric.label} className="min-w-0">
+                          <p className="text-sm text-zinc-500 leading-tight">
+                            {metric.label}
                           </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                          <p className="mt-1 text-base font-semibold tabular-nums break-words">
+                            {metric.value}
+                          </p>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </details>
 
                 <p className="text-sm text-zinc-500 leading-snug">
-                  An accepted invite means the person made an account. A
-                  successful recruit means someone you invited joined, signed a
-                  contract, and completed their first weekly assigned action.
+                  Successful recruits are counted when someone you invited
+                  completes their first assigned action.
                 </p>
               </div>
             )}
           </Card>
         )}
 
-        <Card style={CardStyle.White} className="p-6 gap-y-6">
+        <Card style={CardStyle.White} className="p-6 gap-y-6 order-1">
           <div className="flex flex-col gap-y-4">
             <h1 className="text-title">Invites</h1>
             <div className="w-full flex flex-row items-center gap-x-6">
@@ -660,12 +711,16 @@ const InvitesPage = () => {
           </div>
         </Card>
 
-        <div className="flex flex-col gap-y-12">
-          {activeTab === "reusable" ? (
+        {activeTab === "reusable" ? (
+          <div className="flex flex-col gap-y-12 order-2">
             <InviteShareLink />
-          ) : (
-            <>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-y-12 order-2">
               <InviteForm onInviteCreated={handleInviteCreated} />
+            </div>
+            <div className="flex flex-col gap-y-12 order-4 pt-5">
               {isError && (
                 <p className="text-red-500 text-sm">Failed to load invites</p>
               )}
@@ -779,9 +834,9 @@ const InvitesPage = () => {
                   </List>
                 </div>
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </CenterLayout>
   );

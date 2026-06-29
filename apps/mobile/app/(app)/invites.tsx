@@ -6,6 +6,7 @@ import { useAllianceMemberCount } from "@alliance/shared/lib/useAllianceMemberCo
 import { useAmbassadorInviteDashboard } from "@alliance/shared/lib/useAmbassadorInviteDashboard";
 import { useOnetimeInvitesOverview } from "@alliance/shared/lib/useOnetimeInvitesOverview";
 import { getLeaderCommunityIds } from "@alliance/shared/lib/userUtils";
+import { Trash2 } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, RefreshControl, TouchableOpacity, View } from "react-native";
 import InviteForm from "../../components/InviteForm";
@@ -94,6 +95,33 @@ const inviteGoalErrorMessage = (err: Error) => {
   return err.message;
 };
 
+const inviteStatsMetrics = (stats: {
+  totalInvitesSent: number;
+  totalAcceptedInvites: number;
+  totalSuccessfulRecruits: number;
+}) => [
+  {
+    label: "Invites",
+    value: String(stats.totalInvitesSent),
+  },
+  {
+    label: "Accepted",
+    value: String(stats.totalAcceptedInvites),
+  },
+  {
+    label: "Successful",
+    value: String(stats.totalSuccessfulRecruits),
+  },
+  {
+    label: "Accepted %",
+    value: formatPercent(stats.totalAcceptedInvites, stats.totalInvitesSent),
+  },
+  {
+    label: "Success %",
+    value: formatPercent(stats.totalSuccessfulRecruits, stats.totalInvitesSent),
+  },
+];
+
 export default function InvitesScreen() {
   const { user } = useAuth();
   const {
@@ -131,6 +159,8 @@ export default function InvitesScreen() {
     isCreatingGoal,
     updateGoal,
     isUpdatingGoal,
+    deleteGoal,
+    isDeletingGoal,
     refetch: refetchAmbassadorDashboard,
   } = useAmbassadorInviteDashboard({ enabled: Boolean(user?.ambassador) });
 
@@ -245,6 +275,29 @@ export default function InvitesScreen() {
     [refetchAmbassadorDashboard, upsertInvite, user?.ambassador],
   );
 
+  const handleDeleteGoal = useCallback(() => {
+    if (!selectedGoal) {
+      return;
+    }
+
+    const goalId = selectedGoal.goal.id;
+    Alert.alert("Delete recruit goal?", "Are you sure you want to do this?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete goal",
+        style: "destructive",
+        onPress: () => {
+          void deleteGoal(goalId).catch(() => {
+            Alert.alert("Error", "Failed to delete goal");
+          });
+        },
+      },
+    ]);
+  }, [deleteGoal, selectedGoal]);
+
   const handleSetGoal = useCallback(() => {
     const target = Number(goalTarget);
     if (!Number.isInteger(target) || target < 1) {
@@ -342,21 +395,22 @@ export default function InvitesScreen() {
     [InvitesTab.ReferralQr]: <ReferralQrSection referralLink={referralLink} />,
     [InvitesTab.New]: (
       <>
-        <InviteForm onInviteCreated={handleInviteCreated} />
         {isError && (
           <Text className="text-sm text-red-500">Failed to load invites</Text>
         )}
-        <InviteSection
-          title={inviteBuckets.unverifiableActionable.title}
-          description={inviteBuckets.unverifiableActionable.description}
-          invites={unverifiableActionable}
-          user={user}
-          sharedInviteId={sharedInviteId}
-          actions={{
-            onDeleteWithConfirm: handleDeleteInvite,
-            onShared: handleShared,
-          }}
-        />
+        <View className="pt-2">
+          <InviteSection
+            title={inviteBuckets.unverifiableActionable.title}
+            description={inviteBuckets.unverifiableActionable.description}
+            invites={unverifiableActionable}
+            user={user}
+            sharedInviteId={sharedInviteId}
+            actions={{
+              onDeleteWithConfirm: handleDeleteInvite,
+              onShared: handleShared,
+            }}
+          />
+        </View>
       </>
     ),
     [InvitesTab.Reusable]: <InviteShareLink />,
@@ -472,7 +526,10 @@ export default function InvitesScreen() {
         }
       >
         <View className="px-4 pt-4 gap-4">
-          {user.ambassador && (
+          {selectedTab === InvitesTab.New && (
+            <InviteForm onInviteCreated={handleInviteCreated} />
+          )}
+          {user.ambassador && selectedTab === InvitesTab.New && (
             <Card className="gap-4">
               <View>
                 <Text
@@ -480,7 +537,7 @@ export default function InvitesScreen() {
                   weight={FontWeight.Semibold}
                   style={{ color: colors.green }}
                 >
-                  Ambassador invites
+                  Ambassador
                 </Text>
                 <Text className="text-2xl" weight={FontWeight.Semibold}>
                   Recruiting dashboard
@@ -508,6 +565,15 @@ export default function InvitesScreen() {
                         </Text>
                       </View>
                       <View className="flex-row items-center gap-2 self-start">
+                        {selectedGoal && (
+                          <TouchableOpacity
+                            className="border border-red-100 rounded w-10 h-10 items-center justify-center"
+                            disabled={isDeletingGoal}
+                            onPress={handleDeleteGoal}
+                          >
+                            <Trash2 size={16} color="#dc2626" />
+                          </TouchableOpacity>
+                        )}
                         <TouchableOpacity
                           className="border border-zinc-200 rounded w-10 h-10 items-center justify-center"
                           disabled={!canShowOlderGoal}
@@ -569,6 +635,25 @@ export default function InvitesScreen() {
                       </Text>
                     </Text>
                   </View>
+
+                  {selectedGoal && (
+                    <View className="flex-row flex-wrap gap-2">
+                      {inviteStatsMetrics(selectedGoal.stats).map((metric) => (
+                        <View
+                          key={metric.label}
+                          className="border border-zinc-200 rounded px-3 py-2 basis-[48%]"
+                          style={{ backgroundColor: colors.grey[1] }}
+                        >
+                          <Text className="text-sm text-zinc-500 leading-tight">
+                            {metric.label}
+                          </Text>
+                          <Text className="text-base" weight={FontWeight.Semibold}>
+                            {metric.value}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
 
                   {selectedGoal && (
                     <View className="gap-3">
@@ -642,72 +727,32 @@ export default function InvitesScreen() {
                     )}
                   </View>
 
-                  <View className="flex-row flex-wrap gap-2">
-                    {[
-                      {
-                        label: "Total invites sent",
-                        value: String(
-                          ambassadorDashboard.stats.totalInvitesSent,
-                        ),
-                      },
-                      {
-                        label: "Total accepted invites",
-                        value: String(
-                          ambassadorDashboard.stats.totalAcceptedInvites,
-                        ),
-                      },
-                      {
-                        label: "Total successful recruits",
-                        value: String(
-                          ambassadorDashboard.stats.totalSuccessfulRecruits,
-                        ),
-                      },
-                      {
-                        label: "Total accepted conversion",
-                        value: `${ambassadorDashboard.stats.totalAcceptedInvites} / ${ambassadorDashboard.stats.totalInvitesSent}`,
-                        detail: formatPercent(
-                          ambassadorDashboard.stats.totalAcceptedInvites,
-                          ambassadorDashboard.stats.totalInvitesSent,
-                        ),
-                      },
-                      {
-                        label: "Total success conversion",
-                        value: `${ambassadorDashboard.stats.totalSuccessfulRecruits} / ${ambassadorDashboard.stats.totalInvitesSent}`,
-                        detail: formatPercent(
-                          ambassadorDashboard.stats.totalSuccessfulRecruits,
-                          ambassadorDashboard.stats.totalInvitesSent,
-                        ),
-                      },
-                    ].map((metric) => (
-                      <View
-                        key={metric.label}
-                        className="border border-zinc-200 rounded p-3 basis-[48%] min-h-32"
-                      >
-                        <Text className="text-xs text-zinc-500 leading-tight min-h-9">
-                          {metric.label}
-                        </Text>
-                        <View className="mt-2">
-                          <Text
-                            className="text-xl"
-                            weight={FontWeight.Semibold}
-                          >
-                            {metric.value}
-                          </Text>
-                          {metric.detail && (
-                            <Text className="text-sm text-zinc-500">
-                              {metric.detail}
+                  <View className="border border-zinc-200 rounded p-3 gap-2">
+                    <Text className="text-sm text-zinc-600" weight={FontWeight.Medium}>
+                      Total invite stats
+                    </Text>
+                    <View className="flex-row flex-wrap gap-2">
+                      {inviteStatsMetrics(ambassadorDashboard.stats).map(
+                        (metric) => (
+                          <View key={metric.label} className="basis-[48%]">
+                            <Text className="text-sm text-zinc-500 leading-tight">
+                              {metric.label}
                             </Text>
-                          )}
-                        </View>
-                      </View>
-                    ))}
+                            <Text
+                              className="text-base"
+                              weight={FontWeight.Semibold}
+                            >
+                              {metric.value}
+                            </Text>
+                          </View>
+                        ),
+                      )}
+                    </View>
                   </View>
 
                   <Text className="text-sm text-zinc-500 leading-snug">
-                    An accepted invite means the person made an account. A
-                    successful recruit means someone you invited joined, signed
-                    a contract, and completed their first weekly assigned
-                    action.
+                    Successful recruits are counted when someone you invited
+                    completes their first assigned action.
                   </Text>
                 </>
               )}
