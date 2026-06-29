@@ -1987,6 +1987,14 @@ export type UpdateFollowUpFormDto = {
     formId?: number;
 };
 
+export type UnwelcomedSignedContractMemberDto = {
+    user: ProfileDto;
+    actionId: number;
+    activityId: number;
+    signedAt: string;
+    completedAt: string;
+};
+
 export type EvaluateCohortExpressionDto = {
     /**
      * Cohort expression to evaluate
@@ -4778,6 +4786,32 @@ export type UserCreateAmbassadorInviteGoalResponses = {
 
 export type UserCreateAmbassadorInviteGoalResponse = UserCreateAmbassadorInviteGoalResponses[keyof UserCreateAmbassadorInviteGoalResponses];
 
+export type UserDeleteAmbassadorInviteGoalData = {
+    body?: never;
+    path: {
+        goalId: number;
+    };
+    query?: never;
+    url: '/user/ambassadorInvites/goal/{goalId}';
+};
+
+export type UserDeleteAmbassadorInviteGoalErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserDeleteAmbassadorInviteGoalError = UserDeleteAmbassadorInviteGoalErrors[keyof UserDeleteAmbassadorInviteGoalErrors];
+
+export type UserDeleteAmbassadorInviteGoalResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserDeleteAmbassadorInviteGoalResponse = UserDeleteAmbassadorInviteGoalResponses[keyof UserDeleteAmbassadorInviteGoalResponses];
+
 export type UserUpdateAmbassadorInviteGoalData = {
     body: UpdateAmbassadorInviteGoalDto;
     path: {
@@ -7115,6 +7149,30 @@ export type ContractSuspendContractResponses = {
 
 export type ContractSuspendContractResponse = ContractSuspendContractResponses[keyof ContractSuspendContractResponses];
 
+export type ContractSuspendContractAdminData = {
+    body?: never;
+    path: {
+        userId: number;
+    };
+    query?: never;
+    url: '/contract/admin/suspend/{userId}';
+};
+
+export type ContractSuspendContractAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ContractSuspendContractAdminError = ContractSuspendContractAdminErrors[keyof ContractSuspendContractAdminErrors];
+
+export type ContractSuspendContractAdminResponses = {
+    200: ContractEventDateDto;
+};
+
+export type ContractSuspendContractAdminResponse = ContractSuspendContractAdminResponses[keyof ContractSuspendContractAdminResponses];
+
 export type ContractCreateAdminData = {
     body: CreateContractDto;
     path?: never;
@@ -8256,6 +8314,28 @@ export type ActionsGetCompletedUsersAdminResponses = {
 };
 
 export type ActionsGetCompletedUsersAdminResponse = ActionsGetCompletedUsersAdminResponses[keyof ActionsGetCompletedUsersAdminResponses];
+
+export type ActionsGetUnwelcomedSignedContractMembersAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/actions/welcome-queue';
+};
+
+export type ActionsGetUnwelcomedSignedContractMembersAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionsGetUnwelcomedSignedContractMembersAdminError = ActionsGetUnwelcomedSignedContractMembersAdminErrors[keyof ActionsGetUnwelcomedSignedContractMembersAdminErrors];
+
+export type ActionsGetUnwelcomedSignedContractMembersAdminResponses = {
+    200: Array<UnwelcomedSignedContractMemberDto>;
+};
+
+export type ActionsGetUnwelcomedSignedContractMembersAdminResponse = ActionsGetUnwelcomedSignedContractMembersAdminResponses[keyof ActionsGetUnwelcomedSignedContractMembersAdminResponses];
 
 export type ActionsEvaluateCohortAdminData = {
     body: EvaluateCohortExpressionDto;

@@ -2,6 +2,7 @@ import {
   actionsActionRelationsForUserAdmin,
   analyticsGetTimeSpentPerUserAdmin,
   analyticsGetTimeSpentPerUserTotalAdmin,
+  contractSuspendContractAdmin,
   notifsNotifsForUserAdmin,
   tasksGetFormsForUserSidAdmin,
   userAddUserToTagAdmin,
@@ -27,6 +28,7 @@ import { cn } from "@alliance/shared/styles/util";
 import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import {
   HoverCard,
   HoverCardContent,
@@ -123,7 +125,12 @@ const UserDetailView: React.FC = () => {
   const [roleMutationError, setRoleMutationError] = useState<string | null>(
     null,
   );
+  const [isSuspendPending, setIsSuspendPending] = useState(false);
+  const [suspendMutationError, setSuspendMutationError] = useState<
+    string | null
+  >(null);
   const [expandedEmailId, setExpandedEmailId] = useState<number | null>(null);
+  const { confirm, success } = useToast();
 
   useEffect(() => {
     setUser(loaderData.user);
@@ -228,7 +235,7 @@ const UserDetailView: React.FC = () => {
   }, [sortedAwayRanges]);
 
   const latestEvent = user.contractEvents?.length
-    ? user.contractEvents.sort(
+    ? [...user.contractEvents].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       )[0]
     : null;
@@ -345,6 +352,30 @@ const UserDetailView: React.FC = () => {
     [user.id],
   );
 
+  const handleSuspendContract = useCallback(async () => {
+    const confirmed = await confirm({
+      title: "Suspend contract?",
+      message: `Suspend ${user.name}'s contract and remove them from their current groups?`,
+    });
+    if (!confirmed) return;
+
+    setIsSuspendPending(true);
+    setSuspendMutationError(null);
+    try {
+      await contractSuspendContractAdmin({ path: { userId: user.id } });
+      const refreshed = await userUserDetailAdmin({ path: { id: user.id } });
+      if (refreshed.data) {
+        setUser(refreshed.data);
+      }
+      success("Contract suspended", user.name);
+    } catch (error) {
+      console.error("Failed to suspend contract", error);
+      setSuspendMutationError("Failed to suspend contract. Try again.");
+    } finally {
+      setIsSuspendPending(false);
+    }
+  }, [confirm, success, user.id, user.name]);
+
   return (
     <div className="p-4 max-w-7xl mx-auto">
       {/* Header */}
@@ -377,7 +408,23 @@ const UserDetailView: React.FC = () => {
             >
               Log in as user
             </Button>
+            <Button
+              color={ButtonColor.Red}
+              onClick={handleSuspendContract}
+              disabled={!user.hasActiveContract || isSuspendPending}
+              size="small"
+              title={
+                user.hasActiveContract
+                  ? "Suspend this member's contract"
+                  : "This member does not have an active contract"
+              }
+            >
+              {isSuspendPending ? "Suspending..." : "Suspend contract"}
+            </Button>
           </div>
+          {suspendMutationError && (
+            <p className="text-xs text-red-500 mt-2">{suspendMutationError}</p>
+          )}
           <div className="flex items-center gap-4 text-sm text-zinc-600 mt-3">
             <span>
               <Mail size={16} className="text-zinc-500 inline mr-1" />

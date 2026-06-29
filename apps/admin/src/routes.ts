@@ -34,6 +34,7 @@ export default [
       ),
       route("/posts/:postId?", "pages/PostsManagement.tsx"),
       route("/event-log", "pages/EventLogPage.tsx"),
+      route("/welcome-queue", "pages/WelcomeQueuePage.tsx"),
       route("/general-updates", "pages/GeneralUpdatesPage.tsx"),
       route("/general-updates/:id", "pages/GeneralUpdatePage.tsx"),
       route("/contracts", "pages/ContractsPage.tsx"),

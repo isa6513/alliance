@@ -103,6 +103,23 @@ export class ContractController {
     return new ContractEventDateDto(date);
   }
 
+  @Post('admin/suspend/:userId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: ContractEventDateDto })
+  async suspendContractAdmin(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<ContractEventDateDto> {
+    const date = await this.contractService.suspendContract(userId);
+    this.posthog.capture({
+      event: AnalyticsEvent.ContractSuspended,
+      distinctId: String(userId),
+      properties: {
+        adminInitiated: true,
+      },
+    });
+    return new ContractEventDateDto(date);
+  }
+
   @Post('create')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: ContractAdminDto })

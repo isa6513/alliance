@@ -574,6 +574,40 @@ export class ActionActivityDto extends PickType(ActionActivity, [
   }
 }
 
+export type UnwelcomedSignedContractMember = {
+  user: User;
+  actionId: number;
+  activityId: number;
+  signedAt: Date;
+  completedAt: Date;
+};
+
+export class UnwelcomedSignedContractMemberDto {
+  @ApiProperty({ type: () => ProfileDto })
+  @Type(() => ProfileDto)
+  user: ProfileDto;
+
+  @ApiProperty()
+  actionId: number;
+
+  @ApiProperty()
+  activityId: number;
+
+  @ApiProperty()
+  signedAt: Date;
+
+  @ApiProperty()
+  completedAt: Date;
+
+  constructor(input: UnwelcomedSignedContractMember) {
+    this.user = new ProfileDto(input.user);
+    this.actionId = input.actionId;
+    this.activityId = input.activityId;
+    this.signedAt = input.signedAt;
+    this.completedAt = input.completedAt;
+  }
+}
+
 export class UserActionRelationDto {
   @ApiProperty({ enum: UserActionRelation, enumName: 'UserActionRelation' })
   relation: UserActionRelation;

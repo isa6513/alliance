@@ -126,6 +126,7 @@ import {
   SuspensionPlan,
   TimelineFeedItemDto,
   TimelineFeedItemType,
+  UnwelcomedSignedContractMember,
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
@@ -600,6 +601,67 @@ export class ActionsService {
     }
 
     return this.userService.findByIds(completedUserIds);
+  }
+
+  async findUnwelcomedSignedContractMembers(): Promise<
+    UnwelcomedSignedContractMember[]
+  > {
+    const rows = await this.actionActivityRepository.query<
+      {
+        userId: number | string;
+        actionId: number | string;
+        activityId: number | string;
+        completedAt: Date | string;
+        signedAt: Date | string;
+      }[]
+    >(
+      `
+        SELECT
+          activity."userId" AS "userId",
+          action.id AS "actionId",
+          activity.id AS "activityId",
+          activity."createdAt" AS "completedAt",
+          MAX(contract_event.date) AS "signedAt"
+        FROM action_activity activity
+        INNER JOIN action
+          ON action.id = activity."actionId"
+          AND action."isContractSigningAction" = true
+        INNER JOIN contract_event
+          ON contract_event."userId" = activity."userId"
+          AND contract_event.type = $1
+        LEFT JOIN comment
+          ON comment."parentObjectType" = $2
+          AND comment."parentObjectId" = activity.id
+          AND comment.deleted = false
+        WHERE activity.type = $3
+        GROUP BY activity.id, activity."userId", action.id
+        HAVING COUNT(comment.id) = 0
+        ORDER BY MAX(contract_event.date) DESC
+      `,
+      [
+        ContractEventType.SIGNED,
+        CommentParentObject.Activity,
+        ActionActivityType.USER_COMPLETED,
+      ],
+    );
+
+    const users = await this.userService.findByIds(
+      rows.map((row) => Number(row.userId)),
+      { contractEvents: true },
+    );
+    const usersById = new Map(users.map((user) => [user.id, user]));
+
+    return rows.flatMap((row) => {
+      const user = usersById.get(Number(row.userId));
+      if (!user) return [];
+      return {
+        user,
+        actionId: Number(row.actionId),
+        activityId: Number(row.activityId),
+        signedAt: new Date(row.signedAt),
+        completedAt: new Date(row.completedAt),
+      };
+    });
   }
 
   async findMemberPublic(

@@ -298,6 +298,11 @@ const Sidebar: React.FC = () => {
                     icon: <ScrollText size={16} />,
                   },
                   {
+                    to: "/welcome-queue",
+                    label: "Welcome Queue",
+                    icon: <MessageSquare size={16} />,
+                  },
+                  {
                     to: "/priority",
                     label: "Priority",
                     icon: <ListOrdered size={16} />,

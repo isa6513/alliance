@@ -82,6 +82,7 @@ import {
   SetPriorityDto,
   SuspensionPlanDto,
   TimelineFeedItemDto,
+  UnwelcomedSignedContractMemberDto,
   UpdateActionActivityDto,
   UpdateActionDto,
   UpdateActionEventDto,
@@ -767,6 +768,17 @@ export class ActionsController {
   ): Promise<ProfileDto[]> {
     const users = await this.actionsService.findCompletedUsersForAction(id);
     return users.map((user) => new ProfileDto(user));
+  }
+
+  @Get('welcome-queue')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [UnwelcomedSignedContractMemberDto] })
+  async getUnwelcomedSignedContractMembersAdmin(): Promise<
+    UnwelcomedSignedContractMemberDto[]
+  > {
+    return (
+      await this.actionsService.findUnwelcomedSignedContractMembers()
+    ).map((member) => new UnwelcomedSignedContractMemberDto(member));
   }
 
   @Post('evaluate-cohort')
