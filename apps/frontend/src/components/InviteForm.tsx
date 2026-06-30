@@ -269,13 +269,8 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
           <OnetimeInviteForm
             inviteePlaceholder={
               multipleUseInvite
-                ? "Group name for multiple people"
-                : "Enter the invitee's first name"
-            }
-            contextExplanation={
-              multipleUseInvite
-                ? "(Optional) Any context to help you remember where you will share this invite link. This is not shown on the invite."
-                : onetimeInviteCreation.inviteeContextExplanation
+                ? "Name of the group you are inviting"
+                : "First name of the invitee"
             }
             inviteeName={inviteeName}
             setInviteeName={setInviteeName}

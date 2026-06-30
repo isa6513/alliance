@@ -1,13 +1,10 @@
-import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
-import TextareaAutosize from "react-textarea-autosize";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 
 type OnetimeInviteFormProps = {
   title?: string;
   explanation?: readonly string[];
   inviteePlaceholder?: string;
-  contextExplanation?: string;
   inviteeName: string;
   setInviteeName: (value: string) => void;
   info: string;
@@ -21,12 +18,9 @@ type OnetimeInviteFormProps = {
 const OnetimeInviteForm = ({
   title,
   explanation,
-  inviteePlaceholder = "Enter the invitee's first name",
-  contextExplanation = onetimeInviteCreation.inviteeContextExplanation,
+  inviteePlaceholder = "First name of the invitee",
   inviteeName,
   setInviteeName,
-  info,
-  setInfo,
   onSubmit,
   submitText = "Create invite",
   submittingText = "Creating invite...",
@@ -50,17 +44,6 @@ const OnetimeInviteForm = ({
           placeholder={inviteePlaceholder}
           value={inviteeName}
           onChange={(e) => setInviteeName(e.target.value)}
-        />
-        <p className="text-invite-form-body">
-          {contextExplanation}
-        </p>
-        <TextareaAutosize
-          className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"
-          placeholder="Context for the office"
-          value={info}
-          onChange={(e) => setInfo(e.target.value)}
-          minRows={2}
-          style={{ resize: "none" }}
         />
         {onSubmit && (
           <Button

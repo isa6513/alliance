@@ -83,8 +83,6 @@ export const onetimeInviteCreation = {
   ],
   assignToOpenGroup: "Assign them to any open group",
   createNewGroupOption: "Create a new group",
-  inviteeContextExplanation:
-    "(Optional) Any context you are comfortable sharing with the office, such as how you know them, why they are a fit, how you will send the link, etc. This is not shown on the invite.",
   groupContext:
     "New members usually have a better experience when they know their group lead personally.",
   responsible: {

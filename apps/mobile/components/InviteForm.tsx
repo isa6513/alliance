@@ -230,9 +230,6 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
             onChangeText={setInviteeName}
             containerClassName="gap-0"
           />
-          <Text className="text-sm text-zinc-500">
-            {onetimeInviteCreation.inviteeContextExplanation}
-          </Text>
           <Input
             label="Context for the office"
             placeholder="Context for the office"
