@@ -1509,7 +1509,15 @@ export class UserService {
           COUNT(*) FILTER (
             WHERE ($4::timestamptz IS NULL OR invite."createdAt" >= $4::timestamptz)
               AND ($5::timestamptz IS NULL OR invite."createdAt" <= $5::timestamptz)
-          )::int AS "totalInvitesSent",
+          )::int + (
+            SELECT COUNT(*)::int
+            FROM "share_url" share_invite
+            WHERE share_invite."userId" = $1
+              AND share_invite."kind" = $7
+              AND share_invite."duplicate" = TRUE
+              AND ($4::timestamptz IS NULL OR share_invite."createdAt" >= $4::timestamptz)
+              AND ($5::timestamptz IS NULL OR share_invite."createdAt" <= $5::timestamptz)
+          ) AS "totalInvitesSent",
           COUNT(*) FILTER (
             WHERE invite."status" = $2
               AND ($4::timestamptz IS NULL OR invite."createdAt" >= $4::timestamptz)
@@ -1556,6 +1564,7 @@ export class UserService {
         goalStartAt,
         goalDueAt,
         ActionStatus.MemberAction,
+        ShareUrlKind.Invite,
       ],
     )) as [
       {

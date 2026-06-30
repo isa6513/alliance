@@ -18,8 +18,8 @@ import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
 import { MoreHorizontal, Trash2, UserCheck } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import InviteForm from "../../components/InviteForm";
 import InviteShareLink from "../../components/InviteShareLink";
 import OnetimeInviteListItem from "../../components/OnetimeInviteListItem";
@@ -154,8 +154,7 @@ const InvitesPage = () => {
       )
       .sort(
         (a, b) =>
-          new Date(b.goal.dueAt).getTime() -
-          new Date(a.goal.dueAt).getTime(),
+          new Date(b.goal.dueAt).getTime() - new Date(a.goal.dueAt).getTime(),
       );
   }, [ambassadorGoals, currentGoal]);
   const currentGoalIsUp =
@@ -527,9 +526,7 @@ const InvitesPage = () => {
                               <MoreHorizontal className="w-4 h-4" />
                             </summary>
                             <div className="absolute right-0 top-12 z-20 w-72 rounded border border-zinc-200 bg-white p-4 shadow-lg">
-                              <p className="text-sm font-semibold">
-                                Edit goal
-                              </p>
+                              <p className="text-sm font-semibold">Edit goal</p>
                               <div className="mt-3 grid grid-cols-1 gap-3">
                                 <label className="flex flex-col gap-y-1 min-w-0">
                                   <span className="text-xs font-semibold text-zinc-500">
@@ -637,7 +634,7 @@ const InvitesPage = () => {
                     <div className="mt-2">
                       <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2">
                         <p className="text-xs font-semibold text-zinc-500">
-                          Invites sent
+                          Invites created
                         </p>
                         <p className="text-lg font-semibold tabular-nums">
                           {ambassadorDashboard.stats.totalInvitesSent}
@@ -645,7 +642,6 @@ const InvitesPage = () => {
                       </div>
                     </div>
                   </div>
-
                 </div>
 
                 {pastGoals.length > 0 && (
@@ -684,8 +680,8 @@ const InvitesPage = () => {
                     <div>
                       <p className="font-semibold text-lg">Set a new goal</p>
                       <p className="text-sm text-zinc-500">
-                        New goals can start in the past, but they cannot
-                        overlap another invite goal.
+                        New goals can start in the past, but they cannot overlap
+                        another invite goal.
                       </p>
                     </div>
 
