@@ -292,39 +292,39 @@ const CommunityInvitesLeaderTab = ({
             />
           </Card>
         ) : (
-          <Card style={CardStyle.Grey}>
-            <div className="flex flex-col gap-y-2">
-              <p className="font-semibold">
-                Invite an existing Alliance member to your group
-              </p>
-              <p className="text-zinc-500">
-                The member will recieve a notification inviting them to join the
-                group.
-              </p>
-              <div className="flex flex-row gap-x-2 mt-2">
-                <div className="flex-1">
-                  <UserSelect
-                    users={selectableUsers}
-                    selectedUserIds={selectedUser?.id ? [selectedUser.id] : []}
-                    onChange={(userIds) =>
-                      setSelectedUser(
-                        selectableUsers.find(
-                          (user) => user.id === userIds[0],
-                        ) ?? null,
-                      )
-                    }
-                    label={null}
-                    single={true}
-                  />
-                </div>
+          <Card style={CardStyle.White}>
+            <div className="flex flex-col gap-y-4">
+              <div className="flex flex-col gap-y-2">
+                <p className="text-xl font-semibold text-zinc-900">
+                  Invite a current member to your group
+                </p>
+                <p className="text-invite-form-body">
+                  The member will receive a notification inviting them to join
+                  the group.
+                </p>
               </div>
-              <Button
-                color={ButtonColor.Black}
-                onClick={handleInviteExistingMember}
-                disabled={creatingInvite || !selectedUser}
-              >
-                {creatingInvite ? "Creating invite..." : "Invite"}
-              </Button>
+              <div className="flex flex-col gap-y-4">
+                <UserSelect
+                  users={selectableUsers}
+                  selectedUserIds={selectedUser?.id ? [selectedUser.id] : []}
+                  onChange={(userIds) =>
+                    setSelectedUser(
+                      selectableUsers.find((user) => user.id === userIds[0]) ??
+                        null,
+                    )
+                  }
+                  label={null}
+                  single={true}
+                />
+                <Button
+                  color={ButtonColor.Black}
+                  onClick={handleInviteExistingMember}
+                  disabled={creatingInvite || !selectedUser}
+                  className="w-full"
+                >
+                  {creatingInvite ? "Creating invite..." : "Create invite"}
+                </Button>
+              </div>
             </div>
           </Card>
         )}
