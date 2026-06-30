@@ -29,6 +29,9 @@ import UserCard from "../components/UserCard";
 
 type ViewMode = "cards" | "rows";
 
+const normalizePhoneSearch = (value: string | undefined): string =>
+  value?.replace(/\D/g, "") ?? "";
+
 const UsersList: React.FC = () => {
   const [users, setUsers] = useState<UserDto[]>([]);
   const [timeSpentPerUserLast7, setTimeSpentPerUserLast7] = useState<
@@ -163,10 +166,18 @@ const UsersList: React.FC = () => {
       return filteredByTags;
     }
     const query = searchQuery.toLowerCase().trim();
+    const phoneQuery = normalizePhoneSearch(query);
     return filteredByTags.filter((user) => {
       const name = user.name?.toLowerCase() ?? "";
       const email = user.email?.toLowerCase() ?? "";
-      return name.includes(query) || email.includes(query);
+      const phone = user.phoneNumber?.toLowerCase() ?? "";
+      const normalizedPhone = normalizePhoneSearch(user.phoneNumber);
+      return (
+        name.includes(query) ||
+        email.includes(query) ||
+        phone.includes(query) ||
+        (phoneQuery !== "" && normalizedPhone.includes(phoneQuery))
+      );
     });
   }, [filteredByTags, searchQuery]);
 
@@ -342,7 +353,7 @@ const UsersList: React.FC = () => {
         <input
           type="text"
           autoFocus
-          placeholder="Search by name or email..."
+          placeholder="Search by name, email, or phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="text-sm border border-gray-2 text-black bg-white px-3 rounded-sm py-2 w-64 focus:outline-none focus:border-black"

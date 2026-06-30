@@ -14,6 +14,7 @@ import {
   OnetimeInvite,
   OnetimeInviteStatus,
 } from '../src/user/entities/onetime-invite.entity';
+import { ContractEventType } from '../src/user/entities/contract-event.entity';
 import { User } from '../src/user/entities/user.entity';
 import type { Repository } from 'typeorm';
 
@@ -25,6 +26,7 @@ const ACTION_IDS = [ACTION_132_ID, ACTION_133_ID, ACTION_74_ID] as const;
 const DEFAULT_FRAMING_FOR_UNOVERRIDDEN_INVITES = 'individual' as const;
 const ACTION_74_INVITES_SENT_ANSWER_FIELD_ID = 'field-1770338026569';
 const INVITES_SENT_ANSWER_FIELD_ID = 'field-1781048458496';
+const ACTION_133_INVITE_SUCCESS_END = new Date('2026-07-01T06:59:59.999Z');
 
 type InviteFraming = 'group' | 'individual';
 
@@ -106,6 +108,7 @@ type InviterInviteStats = {
   rawInvitesSent: number;
   inviteLinkRows: number;
   acceptedInvites: number;
+  signedContractInvites: number;
   statusCounts: InviteStatusCounts;
   inviteIds: number[];
   override?: ManualInviteFramingOverride;
@@ -117,9 +120,40 @@ type FramingBucket = {
   rawInvitesSent: number;
   discountedGroupInvites: number;
   exactAcceptedInvites: number;
+  exactSignedContractInvites: number;
   minAcceptedInvites: number;
   maxAcceptedInvites: number;
   unknownAcceptedInvites: number;
+};
+
+type InviteSuccessStats = {
+  label: string;
+  inviterIds: number[];
+  inviteIds: number[];
+  created: number;
+  joined: number;
+  signedContracts: number;
+  linkUnused: number;
+  requestPending: number;
+  requestRejected: number;
+};
+
+type SelfReportedVsActualInvitesStats = {
+  label: string;
+  assignedUserCount: number;
+  selfReportedUsers: number;
+  selfReportedInvites: number;
+  actualInviteRows: number;
+  difference: number;
+  ratio: number | null;
+};
+
+type GrowthActionSegmentStats = {
+  label: string;
+  userIds: number[];
+  selfReportedUsers: number;
+  selfReportedInvites: number;
+  actualInviteRows: number;
 };
 
 function getMemberActionEvent(action: Action): ActionEvent {
@@ -356,6 +390,63 @@ function printInviteComparisonStats(stats: InviteComparisonStats): void {
   printIds('unchanged IDs', stats.unchanged);
 }
 
+function printAction132To133DropoffStats(params: {
+  label: string;
+  pair: PairStats;
+}): void {
+  const { label, pair } = params;
+  const action132Completers =
+    pair.completedBoth.length + pair.aCompletedBIncomplete.length;
+  const action133Completers =
+    pair.completedBoth.length + pair.aIncompleteBCompleted.length;
+  console.log(`\n${label}`);
+  console.log(`overlapping assigned members: ${pair.overlapUserIds.length}`);
+  console.log(`completed both: ${pair.completedBoth.length}`);
+  console.log(
+    `completed action 132 but did not complete action 133: ${pair.aCompletedBIncomplete.length}`,
+  );
+  console.log(
+    `completed action 133 but did not complete action 132: ${pair.aIncompleteBCompleted.length}`,
+  );
+  console.log(`completed neither: ${pair.incompleteBoth.length}`);
+  console.log(
+    `action 132 completion rate in overlap: ${pct(
+      action132Completers,
+      pair.overlapUserIds.length,
+    )}`,
+  );
+  console.log(
+    `action 133 completion rate in overlap: ${pct(
+      action133Completers,
+      pair.overlapUserIds.length,
+    )}`,
+  );
+  console.log(
+    `dropoff rate among action 132 completers: ${pct(
+      pair.aCompletedBIncomplete.length,
+      action132Completers,
+    )}`,
+  );
+  console.log(
+    `action 133 completion rate among action 132 completers: ${pct(
+      pair.completedBoth.length,
+      action132Completers,
+    )}`,
+  );
+  console.log(
+    `dropoff as share of all overlapping members: ${pct(
+      pair.aCompletedBIncomplete.length,
+      pair.overlapUserIds.length,
+    )}`,
+  );
+  printIds(
+    'completed action 132 but did not complete action 133 IDs',
+    pair.aCompletedBIncomplete,
+  );
+  printIds('completed both IDs', pair.completedBoth);
+  printIds('completed neither IDs', pair.incompleteBoth);
+}
+
 function emptyInviteStatusCounts(): InviteStatusCounts {
   return {
     [OnetimeInviteStatus.REQUEST_PENDING]: 0,
@@ -411,6 +502,7 @@ function makeFramingBucket(formId: number, framing: InviteFraming): FramingBucke
     rawInvitesSent: 0,
     discountedGroupInvites: 0,
     exactAcceptedInvites: 0,
+    exactSignedContractInvites: 0,
     minAcceptedInvites: 0,
     maxAcceptedInvites: 0,
     unknownAcceptedInvites: 0,
@@ -421,9 +513,11 @@ function addExactBucketCounts(
   bucket: FramingBucket,
   rawInvitesSent: number,
   acceptedInvites: number,
+  signedContractInvites: number,
 ): void {
   bucket.rawInvitesSent += rawInvitesSent;
   bucket.exactAcceptedInvites += acceptedInvites;
+  bucket.exactSignedContractInvites += signedContractInvites;
   bucket.minAcceptedInvites += acceptedInvites;
   bucket.maxAcceptedInvites += acceptedInvites;
 }
@@ -462,12 +556,22 @@ function addSplitOverrideCounts(
       );
     }
     groupBucket.discountedGroupInvites += groupInvites;
-    addExactBucketCounts(individualBucket, individualInvites, acceptedIndividual);
+    addExactBucketCounts(
+      individualBucket,
+      individualInvites,
+      acceptedIndividual,
+      stats.signedContractInvites,
+    );
     return;
   }
 
   if (groupInvites === 0) {
-    addExactBucketCounts(individualBucket, individualInvites, stats.acceptedInvites);
+    addExactBucketCounts(
+      individualBucket,
+      individualInvites,
+      stats.acceptedInvites,
+      stats.signedContractInvites,
+    );
     return;
   }
   if (individualInvites === 0) {
@@ -478,6 +582,7 @@ function addSplitOverrideCounts(
   groupBucket.discountedGroupInvites += groupInvites;
   individualBucket.rawInvitesSent += individualInvites;
   individualBucket.unknownAcceptedInvites += stats.acceptedInvites;
+  individualBucket.exactSignedContractInvites += stats.signedContractInvites;
   individualBucket.minAcceptedInvites += Math.max(
     0,
     stats.acceptedInvites - groupInvites,
@@ -508,15 +613,23 @@ function printInviteFramingStats(params: {
     const bucket = bucketsByKey.get(
       `${stats.formId}:${DEFAULT_FRAMING_FOR_UNOVERRIDDEN_INVITES}`,
     )!;
-    addExactBucketCounts(bucket, stats.rawInvitesSent, stats.acceptedInvites);
+    addExactBucketCounts(
+      bucket,
+      stats.rawInvitesSent,
+      stats.acceptedInvites,
+      stats.signedContractInvites,
+    );
   }
 
-  console.log('\n=== Action 133 form invite framing analysis ===');
+  console.log('\n=== Action 133 form invite conversion analysis ===');
   console.log(
     `invite window: ${params.actionWindowStart.toISOString()} to ${params.actionWindowEnd.toISOString()}`,
   );
   console.log(
     `accepted definition: onetime_invite.status = ${OnetimeInviteStatus.LINK_USED}`,
+  );
+  console.log(
+    `signed-contract definition: invited user has a signed contract event by ${params.actionWindowEnd.toISOString()}`,
   );
   console.log(
     `default framing for users without a manual override: ${DEFAULT_FRAMING_FOR_UNOVERRIDDEN_INVITES}`,
@@ -545,6 +658,7 @@ function printInviteFramingStats(params: {
       rawInvitesSent: stats.rawInvitesSent,
       inviteLinkRows: stats.inviteLinkRows,
       acceptedInvites: stats.acceptedInvites,
+      signedContractInvites: stats.signedContractInvites,
       requestPending: stats.statusCounts.request_pending,
       requestRejected: stats.statusCounts.request_rejected,
       linkUnused: stats.statusCounts.link_unused,
@@ -580,6 +694,11 @@ function printInviteFramingStats(params: {
           individualBucket.maxAcceptedInvites,
           individualBucket.rawInvitesSent,
         ),
+        signedContracts: individualBucket.exactSignedContractInvites,
+        signedContractPct: pct(
+          individualBucket.exactSignedContractInvites,
+          individualBucket.rawInvitesSent,
+        ),
         invitersWithAnyInvites: rows.length,
       };
     }),
@@ -596,6 +715,11 @@ function printInviteFramingStats(params: {
         bucket.unknownAcceptedInvites > 0
           ? `${bucket.exactAcceptedInvites} exact + ${bucket.unknownAcceptedInvites} ambiguous`
           : bucket.exactAcceptedInvites,
+      signedContracts: bucket.exactSignedContractInvites,
+      signedContractPct: pct(
+        bucket.exactSignedContractInvites,
+        bucket.rawInvitesSent,
+      ),
       acceptedInvitesRange: `${bucket.minAcceptedInvites} - ${bucket.maxAcceptedInvites}`,
       acceptedPctRange: pctRange(
         bucket.minAcceptedInvites,
@@ -603,6 +727,149 @@ function printInviteFramingStats(params: {
         bucket.rawInvitesSent,
       ),
     })),
+  );
+}
+
+function inviteSignedContractBy(
+  invite: OnetimeInvite,
+  conversionEnd: Date,
+): boolean {
+  return (
+    invite.invitedUser?.contractEvents?.some(
+      (event) =>
+        event.type === ContractEventType.SIGNED && event.date <= conversionEnd,
+    ) ?? false
+  );
+}
+
+function inviteSuccessStats(params: {
+  label: string;
+  inviterIds: number[];
+  invites: OnetimeInvite[];
+  conversionEnd: Date;
+}): InviteSuccessStats {
+  const inviterIdSet = new Set(params.inviterIds);
+  const relevantInvites = params.invites.filter((invite) =>
+    inviterIdSet.has(invite.invitingUser.id),
+  );
+  const statusCounts = emptyInviteStatusCounts();
+  for (const invite of relevantInvites) {
+    statusCounts[invite.status] += 1;
+  }
+  return {
+    label: params.label,
+    inviterIds: [...inviterIdSet].sort((a, b) => a - b),
+    inviteIds: relevantInvites.map((invite) => invite.id).sort((a, b) => a - b),
+    created: relevantInvites.length,
+    joined: statusCounts[OnetimeInviteStatus.LINK_USED],
+    signedContracts: relevantInvites.filter((invite) =>
+      inviteSignedContractBy(invite, params.conversionEnd),
+    ).length,
+    linkUnused: statusCounts[OnetimeInviteStatus.LINK_UNUSED],
+    requestPending: statusCounts[OnetimeInviteStatus.REQUEST_PENDING],
+    requestRejected: statusCounts[OnetimeInviteStatus.REQUEST_REJECTED],
+  };
+}
+
+function printInviteSuccessStats(stats: InviteSuccessStats): void {
+  console.log(`\n${stats.label}`);
+  console.log(`eligible non-staff inviters: ${stats.inviterIds.length}`);
+  console.log(`invites created: ${stats.created}`);
+  console.log(`joined via invite: ${stats.joined}`);
+  console.log(`account-created conversion rate: ${pct(stats.joined, stats.created)}`);
+  console.log(`signed contracts: ${stats.signedContracts}`);
+  console.log(
+    `contract-signed conversion rate: ${pct(stats.signedContracts, stats.created)}`,
+  );
+  console.log(`link unused: ${stats.linkUnused}`);
+  console.log(`request pending: ${stats.requestPending}`);
+  console.log(`request rejected: ${stats.requestRejected}`);
+  printIds('inviter IDs', stats.inviterIds);
+  printIds('invite IDs', stats.inviteIds);
+}
+
+function selfReportedVsActualInvitesStats(params: {
+  label: string;
+  assignedUserIds: number[];
+  selfReportedInvitesByUser: Map<number, number>;
+  actualInvites: OnetimeInvite[];
+}): SelfReportedVsActualInvitesStats {
+  const assignedUserIdSet = new Set(params.assignedUserIds);
+  const selfReportedEntries = [...params.selfReportedInvitesByUser.entries()]
+    .filter(([userId]) => assignedUserIdSet.has(userId));
+  const selfReportedInvites = selfReportedEntries.reduce(
+    (sum, [, count]) => sum + count,
+    0,
+  );
+  const actualInviteRows = params.actualInvites.filter((invite) =>
+    assignedUserIdSet.has(invite.invitingUser.id),
+  ).length;
+  return {
+    label: params.label,
+    assignedUserCount: assignedUserIdSet.size,
+    selfReportedUsers: selfReportedEntries.length,
+    selfReportedInvites,
+    actualInviteRows,
+    difference: actualInviteRows - selfReportedInvites,
+    ratio:
+      selfReportedInvites === 0 ? null : actualInviteRows / selfReportedInvites,
+  };
+}
+
+function printSelfReportedVsActualInvitesStats(
+  stats: SelfReportedVsActualInvitesStats,
+): void {
+  console.log(`\n${stats.label}`);
+  console.log(`assigned non-staff users: ${stats.assignedUserCount}`);
+  console.log(`users with numeric self-report invite counts: ${stats.selfReportedUsers}`);
+  console.log(`self-reported invites: ${stats.selfReportedInvites}`);
+  console.log(`actual invite rows created: ${stats.actualInviteRows}`);
+  console.log(
+    `actual minus self-reported: ${stats.difference >= 0 ? '+' : ''}${stats.difference}`,
+  );
+  console.log(
+    `actual / self-reported: ${stats.ratio === null ? 'n/a' : stats.ratio.toFixed(2)}`,
+  );
+}
+
+function growthActionSegmentStats(params: {
+  label: string;
+  userIds: number[];
+  selfReportedInvitesByUser: Map<number, number>;
+  actualInvites: OnetimeInvite[];
+}): GrowthActionSegmentStats {
+  const userIdSet = new Set(params.userIds);
+  const selfReportedEntries = [...params.selfReportedInvitesByUser.entries()]
+    .filter(([userId]) => userIdSet.has(userId));
+  return {
+    label: params.label,
+    userIds: [...userIdSet].sort((a, b) => a - b),
+    selfReportedUsers: selfReportedEntries.length,
+    selfReportedInvites: selfReportedEntries.reduce(
+      (sum, [, count]) => sum + count,
+      0,
+    ),
+    actualInviteRows: params.actualInvites.filter((invite) =>
+      userIdSet.has(invite.invitingUser.id),
+    ).length,
+  };
+}
+
+function printGrowthActionSegmentStats(stats: GrowthActionSegmentStats): void {
+  console.log(`\n${stats.label}`);
+  console.log(`assigned users: ${stats.userIds.length}`);
+  console.log(`users with numeric self-report invite counts: ${stats.selfReportedUsers}`);
+  console.log(`self-reported invites: ${stats.selfReportedInvites}`);
+  console.log(
+    `self-reported invites/person across assigned users: ${(
+      stats.selfReportedInvites / stats.userIds.length
+    ).toFixed(2)}`,
+  );
+  console.log(`actual invite rows created: ${stats.actualInviteRows}`);
+  console.log(
+    `actual invite rows/person across assigned users: ${(
+      stats.actualInviteRows / stats.userIds.length
+    ).toFixed(2)}`,
   );
 }
 
@@ -653,7 +920,9 @@ async function main(): Promise<void> {
     const actionRosters = new Map<number, ActionRoster>();
     for (const action of actions) {
       const userIds = new Set(
-        (baseUsersByAction.get(action.id) ?? []).map((user) => user.id),
+        (baseUsersByAction.get(action.id) ?? [])
+          .filter((user) => !user.staff)
+          .map((user) => user.id),
       );
       actionRosters.set(action.id, {
         actionId: action.id,
@@ -682,6 +951,12 @@ async function main(): Promise<void> {
     const action133WindowEnd = action133.memberActionPhase.deadlineEvent?.date;
     if (!action133WindowStart || !action133WindowEnd) {
       throw new Error(`Action ${ACTION_133_ID} does not have a complete member-action window`);
+    }
+    const action74 = actionById.get(ACTION_74_ID)!;
+    const action74WindowStart = action74.memberActionPhase.event?.date;
+    const action74WindowEnd = action74.memberActionPhase.deadlineEvent?.date;
+    if (!action74WindowStart || !action74WindowEnd) {
+      throw new Error(`Action ${ACTION_74_ID} does not have a complete member-action window`);
     }
     const variants = await variantRepo.find({
       where: { actionId: ACTION_133_ID },
@@ -840,6 +1115,8 @@ async function main(): Promise<void> {
               'invite.invitingUser',
             ])
             .leftJoinAndSelect('invite.invitingUser', 'invitingUser')
+            .leftJoinAndSelect('invite.invitedUser', 'invitedUser')
+            .leftJoinAndSelect('invitedUser.contractEvents', 'contractEvent')
             .where('invite."invitingUserId" IN (:...userIds)', {
               userIds: action133UserIds,
             })
@@ -847,7 +1124,64 @@ async function main(): Promise<void> {
               windowStart: action133WindowStart,
             })
             .andWhere('invite."createdAt" <= :windowEnd', {
-              windowEnd: action133WindowEnd,
+              windowEnd: ACTION_133_INVITE_SUCCESS_END,
+            })
+            .andWhere('invite."deletedAt" IS NULL')
+            .orderBy('invite."createdAt"', 'ASC')
+            .getMany();
+    const action133SuccessInvites =
+      action133UserIds.length === 0
+        ? []
+        : await inviteRepo
+            .createQueryBuilder('invite')
+            .select([
+              'invite.id',
+              'invite.createdAt',
+              'invite.status',
+              'invite.deletedAt',
+              'invite.usedAt',
+              'invite.invitingUser',
+            ])
+            .leftJoinAndSelect('invite.invitingUser', 'invitingUser')
+            .leftJoinAndSelect('invite.invitedUser', 'invitedUser')
+            .leftJoinAndSelect('invitedUser.contractEvents', 'contractEvent')
+            .where('invite."invitingUserId" IN (:...userIds)', {
+              userIds: action133UserIds,
+            })
+            .andWhere('invite."createdAt" >= :windowStart', {
+              windowStart: action133WindowStart,
+            })
+            .andWhere('invite."createdAt" <= :windowEnd', {
+              windowEnd: ACTION_133_INVITE_SUCCESS_END,
+            })
+            .andWhere('invite."deletedAt" IS NULL')
+            .orderBy('invite."createdAt"', 'ASC')
+            .getMany();
+    const action74UserIds = [...actionRosters.get(ACTION_74_ID)!.userIds].sort(
+      (a, b) => a - b,
+    );
+    const action74ActualInvites =
+      action74UserIds.length === 0
+        ? []
+        : await inviteRepo
+            .createQueryBuilder('invite')
+            .select([
+              'invite.id',
+              'invite.createdAt',
+              'invite.status',
+              'invite.deletedAt',
+              'invite.usedAt',
+              'invite.invitingUser',
+            ])
+            .leftJoinAndSelect('invite.invitingUser', 'invitingUser')
+            .where('invite."invitingUserId" IN (:...userIds)', {
+              userIds: action74UserIds,
+            })
+            .andWhere('invite."createdAt" >= :windowStart', {
+              windowStart: action74WindowStart,
+            })
+            .andWhere('invite."createdAt" <= :windowEnd', {
+              windowEnd: action74WindowEnd,
             })
             .andWhere('invite."deletedAt" IS NULL')
             .orderBy('invite."createdAt"', 'ASC')
@@ -866,6 +1200,7 @@ async function main(): Promise<void> {
         rawInvitesSent,
         inviteLinkRows: 0,
         acceptedInvites: 0,
+        signedContractInvites: 0,
         statusCounts: emptyInviteStatusCounts(),
         inviteIds: [],
       });
@@ -887,6 +1222,7 @@ async function main(): Promise<void> {
           rawInvitesSent: selfReportedInvitesByUser.get(userId) ?? 0,
           inviteLinkRows: 0,
           acceptedInvites: 0,
+          signedContractInvites: 0,
           statusCounts: emptyInviteStatusCounts(),
           inviteIds: [],
         } satisfies InviterInviteStats);
@@ -895,6 +1231,9 @@ async function main(): Promise<void> {
       stats.inviteIds.push(invite.id);
       if (invite.status === OnetimeInviteStatus.LINK_USED) {
         stats.acceptedInvites += 1;
+      }
+      if (inviteSignedContractBy(invite, ACTION_133_INVITE_SUCCESS_END)) {
+        stats.signedContractInvites += 1;
       }
       inviteStatsByUser.set(userId, stats);
     }
@@ -921,6 +1260,22 @@ async function main(): Promise<void> {
       }
     }
 
+    const assignedNonStaffNonManualUserIds = action133UserIds.filter((userId) => {
+      const userName = userNameById.get(userId) ?? `(user ${userId})`;
+      const user = action133Users.find((candidate) => candidate.id === userId);
+      const formId = assignedFormIdByUser.get(userId);
+      if (!user || user.staff || !formId) {
+        return false;
+      }
+      return (
+        getManualOverride({
+          formId,
+          userId,
+          userName,
+        }) === undefined
+      );
+    });
+
     console.log('Action rosters');
     for (const actionId of ACTION_IDS) {
       const roster = actionRosters.get(actionId)!;
@@ -934,12 +1289,166 @@ async function main(): Promise<void> {
     printIds('action 133 eligible members with no form assignment/response', unassignedAction133UserIds);
     printInviteFramingStats({
       actionWindowStart: action133WindowStart,
-      actionWindowEnd: action133WindowEnd,
+      actionWindowEnd: ACTION_133_INVITE_SUCCESS_END,
       inviterStats,
     });
+    console.log('\n=== Action 133 invite success, non-staff assigned members ===');
+    console.log(
+      `invite window: ${action133WindowStart.toISOString()} to ${ACTION_133_INVITE_SUCCESS_END.toISOString()}`,
+    );
+    console.log(
+      'excluded: staff inviters, unassigned inviters, and manual massive group-invite overrides',
+    );
+    printInviteSuccessStats(
+      inviteSuccessStats({
+        label: 'all action 133 assigned non-staff members, excluding massive group-invite overrides',
+        inviterIds: assignedNonStaffNonManualUserIds,
+        invites: action133SuccessInvites,
+        conversionEnd: ACTION_133_INVITE_SUCCESS_END,
+      }),
+    );
+    for (const formRoster of formRosters) {
+      printInviteSuccessStats(
+        inviteSuccessStats({
+          label: `${formRoster.label}: assigned non-staff members, excluding massive group-invite overrides`,
+          inviterIds: assignedNonStaffNonManualUserIds.filter((userId) =>
+            formRoster.userIds.has(userId),
+          ),
+          invites: action133SuccessInvites,
+          conversionEnd: ACTION_133_INVITE_SUCCESS_END,
+        }),
+      );
+    }
+
+    const action133IndividualInvitesByUser = new Map<number, number>();
+    for (const formMap of action133IndividualInvitesByForm.values()) {
+      for (const [userId, invites] of formMap) {
+        action133IndividualInvitesByUser.set(userId, invites);
+      }
+    }
+    console.log('\n=== Self-reported invites vs actual invite rows ===');
+    console.log(
+      `action 133 actual invite window: ${action133WindowStart.toISOString()} to ${ACTION_133_INVITE_SUCCESS_END.toISOString()}`,
+    );
+    console.log(
+      `action 74 actual invite window: ${action74WindowStart.toISOString()} to ${action74WindowEnd.toISOString()}`,
+    );
+    console.log(
+      'action 133 self-reports use counted individual invites after massive group-invite overrides; staff are excluded throughout',
+    );
+    printSelfReportedVsActualInvitesStats(
+      selfReportedVsActualInvitesStats({
+        label: 'action 133 combined',
+        assignedUserIds: assignedNonStaffNonManualUserIds,
+        selfReportedInvitesByUser: action133IndividualInvitesByUser,
+        actualInvites: action133SuccessInvites,
+      }),
+    );
+    for (const formRoster of formRosters) {
+      printSelfReportedVsActualInvitesStats(
+        selfReportedVsActualInvitesStats({
+          label: formRoster.label,
+          assignedUserIds: assignedNonStaffNonManualUserIds.filter((userId) =>
+            formRoster.userIds.has(userId),
+          ),
+          selfReportedInvitesByUser: action133IndividualInvitesByForm.get(
+            formRoster.formId,
+          )!,
+          actualInvites: action133SuccessInvites,
+        }),
+      );
+    }
+    printSelfReportedVsActualInvitesStats(
+      selfReportedVsActualInvitesStats({
+        label: `action ${ACTION_74_ID}`,
+        assignedUserIds: action74UserIds,
+        selfReportedInvitesByUser: action74InvitesByUser,
+        actualInvites: action74ActualInvites,
+      }),
+    );
 
     const roster132 = actionRosters.get(ACTION_132_ID)!;
     const roster74 = actionRosters.get(ACTION_74_ID)!;
+
+    const action133AssignedBoth74UserIds = [...action133Roster.userIds]
+      .filter((userId) => roster74.userIds.has(userId))
+      .sort((a, b) => a - b);
+    const action133OnlyUserIds = [...action133Roster.userIds]
+      .filter((userId) => !roster74.userIds.has(userId))
+      .sort((a, b) => a - b);
+    console.log('\n=== Action 74 to action 133 growth-action repeat vs 133-only split ===');
+    printGrowthActionSegmentStats(
+      growthActionSegmentStats({
+        label: 'assigned both action 74 and action 133',
+        userIds: action133AssignedBoth74UserIds,
+        selfReportedInvitesByUser: action133IndividualInvitesByUser,
+        actualInvites: action133SuccessInvites,
+      }),
+    );
+    printGrowthActionSegmentStats(
+      growthActionSegmentStats({
+        label: 'assigned action 133 but not action 74',
+        userIds: action133OnlyUserIds,
+        selfReportedInvitesByUser: action133IndividualInvitesByUser,
+        actualInvites: action133SuccessInvites,
+      }),
+    );
+
+    console.log('\n=== Action 132 to action 133 dropoff analysis ===');
+    const action132OnlyUserIds = [...roster132.userIds]
+      .filter((userId) => !action133Roster.userIds.has(userId))
+      .sort((a, b) => a - b);
+    const action132OnlyCompletedUserIds = action132OnlyUserIds.filter(
+      (userId) =>
+        completionState({
+          latestTerminalByUserAction,
+          userId,
+          actionId: ACTION_132_ID,
+        }) === 'completed',
+    );
+    const action132OnlyIncompleteUserIds = action132OnlyUserIds.filter(
+      (userId) =>
+        completionState({
+          latestTerminalByUserAction,
+          userId,
+          actionId: ACTION_132_ID,
+        }) === 'incomplete',
+    );
+    printIds('action 132 eligible but not action 133 assigned', action132OnlyUserIds);
+    printIds(
+      'action 132 eligible but not action 133 assigned, completed action 132',
+      action132OnlyCompletedUserIds,
+    );
+    printIds(
+      'action 132 eligible but not action 133 assigned, did not complete action 132',
+      action132OnlyIncompleteUserIds,
+    );
+    printAction132To133DropoffStats({
+      label: 'action 132 vs action 133 combined',
+      pair: pairStats({
+        labelA: `action ${ACTION_132_ID}`,
+        labelB: `action ${ACTION_133_ID}`,
+        rosterA: roster132.userIds,
+        rosterB: action133Roster.userIds,
+        actionAId: ACTION_132_ID,
+        actionBId: ACTION_133_ID,
+        latestTerminalByUserAction,
+      }),
+    });
+    for (const formRoster of formRosters) {
+      printAction132To133DropoffStats({
+        label: `action 132 vs ${formRoster.label}`,
+        pair: pairStats({
+          labelA: `action ${ACTION_132_ID}`,
+          labelB: formRoster.label,
+          rosterA: roster132.userIds,
+          rosterB: formRoster.userIds,
+          actionAId: ACTION_132_ID,
+          actionBId: ACTION_133_ID,
+          latestTerminalByUserAction,
+        }),
+      });
+    }
 
     console.log('\n=== Action 132 vs action 133 forms ===');
     for (const formRoster of formRosters) {

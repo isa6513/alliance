@@ -53,7 +53,7 @@ import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
     MailModule,
     ShareUrlsModule,
     CampaignModule,
-    PushModule,
+    forwardRef(() => PushModule),
     forwardRef(() => EventLogModule),
     forwardRef(() => NotifsModule),
     forwardRef(() => CommunityModule),
