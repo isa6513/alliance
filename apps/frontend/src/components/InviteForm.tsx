@@ -266,7 +266,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
             inviteePlaceholder={
               multipleUseInvite
                 ? "Name of the group you are inviting"
-                : "First name of the invitee"
+                : "Name of the invitee"
             }
             inviteeName={inviteeName}
             setInviteeName={setInviteeName}

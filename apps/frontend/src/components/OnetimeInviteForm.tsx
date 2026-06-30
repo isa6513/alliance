@@ -16,7 +16,7 @@ type OnetimeInviteFormProps = {
 const OnetimeInviteForm = ({
   title,
   explanation,
-  inviteePlaceholder = "First name of the invitee",
+  inviteePlaceholder = "Name of the invitee",
   inviteeName,
   setInviteeName,
   onSubmit,
