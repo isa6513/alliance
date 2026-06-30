@@ -1205,108 +1205,6 @@ export type UpdateCampaignDto = {
     picture?: string | null;
 };
 
-export type ConversationType = 'direct' | 'multiple' | 'community';
-
-export type MessageReferenceDto = {
-    id: string;
-    body: string;
-    createdAt: string;
-    author: ProfileDto;
-};
-
-export type ParticipantDto = {
-    role: ParticipantRole;
-    state: ParticipantState;
-    userHidden: boolean;
-    user: ProfileDto;
-    lastReadMessage?: MessageReferenceDto;
-};
-
-export type MessageDto = {
-    id: string;
-    body: string;
-    /**
-     * Image keys attached to the content
-     */
-    attachments: Array<string>;
-    createdAt: string;
-    deletedAt?: string;
-    author: ProfileDto;
-    conversationId: number;
-    replyTo?: MessageReferenceDto;
-};
-
-export type ConversationAdminSummaryDto = {
-    id: number;
-    createdAt: string;
-    updatedAt: string;
-    type: ConversationType;
-    title: string;
-    photo?: string;
-    participants: Array<ParticipantDto>;
-    lastMessage?: MessageDto;
-    community?: CommunityDto;
-    hasUnread: boolean;
-    isMessageRequest: boolean;
-    unreadCount: number;
-    messageCount: number;
-};
-
-export type ConversationDto = {
-    id: number;
-    createdAt: string;
-    updatedAt: string;
-    type: ConversationType;
-    title: string;
-    photo?: string;
-    participants: Array<ParticipantDto>;
-    lastMessage?: MessageDto;
-    community?: CommunityDto;
-    hasUnread: boolean;
-    isMessageRequest: boolean;
-    unreadCount: number;
-};
-
-export type CreateDirectConversationDto = {
-    targetUserId: number;
-    title?: string;
-};
-
-export type CreateGroupConversationDto = {
-    title: string;
-    photo?: string;
-    participantIds: Array<number>;
-};
-
-export type UpdateConversationDto = {
-    title?: string;
-    photo?: string;
-};
-
-export type ConversationParticipantDto = {
-    userId: number;
-};
-
-export type UnreadMessagesDto = {
-    count: number;
-};
-
-export type UnreadMessageSummaryDto = {
-    messageCount: number;
-    messageRequestCount: number;
-    totalCount: number;
-};
-
-export type CreateMessageDto = {
-    conversationId: number;
-    body: string;
-    /**
-     * Image attachments encoded as data URLs or existing keys
-     */
-    attachments?: Array<string>;
-    replyToId?: string;
-};
-
 export type PushOpenedDto = {
     cid: number;
 };
@@ -1444,6 +1342,108 @@ export type CommunityInviteDto = {
 export type RequestCommunityInviteDto = {
     communityId: number;
     invitedUserId: number;
+};
+
+export type ConversationType = 'direct' | 'multiple' | 'community';
+
+export type MessageReferenceDto = {
+    id: string;
+    body: string;
+    createdAt: string;
+    author: ProfileDto;
+};
+
+export type ParticipantDto = {
+    role: ParticipantRole;
+    state: ParticipantState;
+    userHidden: boolean;
+    user: ProfileDto;
+    lastReadMessage?: MessageReferenceDto;
+};
+
+export type MessageDto = {
+    id: string;
+    body: string;
+    /**
+     * Image keys attached to the content
+     */
+    attachments: Array<string>;
+    createdAt: string;
+    deletedAt?: string;
+    author: ProfileDto;
+    conversationId: number;
+    replyTo?: MessageReferenceDto;
+};
+
+export type ConversationAdminSummaryDto = {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    type: ConversationType;
+    title: string;
+    photo?: string;
+    participants: Array<ParticipantDto>;
+    lastMessage?: MessageDto;
+    community?: CommunityDto;
+    hasUnread: boolean;
+    isMessageRequest: boolean;
+    unreadCount: number;
+    messageCount: number;
+};
+
+export type ConversationDto = {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    type: ConversationType;
+    title: string;
+    photo?: string;
+    participants: Array<ParticipantDto>;
+    lastMessage?: MessageDto;
+    community?: CommunityDto;
+    hasUnread: boolean;
+    isMessageRequest: boolean;
+    unreadCount: number;
+};
+
+export type CreateDirectConversationDto = {
+    targetUserId: number;
+    title?: string;
+};
+
+export type CreateGroupConversationDto = {
+    title: string;
+    photo?: string;
+    participantIds: Array<number>;
+};
+
+export type UpdateConversationDto = {
+    title?: string;
+    photo?: string;
+};
+
+export type ConversationParticipantDto = {
+    userId: number;
+};
+
+export type UnreadMessagesDto = {
+    count: number;
+};
+
+export type UnreadMessageSummaryDto = {
+    messageCount: number;
+    messageRequestCount: number;
+    totalCount: number;
+};
+
+export type CreateMessageDto = {
+    conversationId: number;
+    body: string;
+    /**
+     * Image attachments encoded as data URLs or existing keys
+     */
+    attachments?: Array<string>;
+    replyToId?: string;
 };
 
 export type ContractDto = {
@@ -3843,6 +3843,73 @@ export type UserUpdateAwayRangeResponses = {
 
 export type UserUpdateAwayRangeResponse = UserUpdateAwayRangeResponses[keyof UserUpdateAwayRangeResponses];
 
+export type UserCreateAwayRangeAdminData = {
+    body: CreateAwayRangeDto;
+    path: {
+        userId: number;
+    };
+    query?: never;
+    url: '/user/admin/{userId}/awayranges';
+};
+
+export type UserCreateAwayRangeAdminErrors = {
+    401: HeyApiError;
+};
+
+export type UserCreateAwayRangeAdminError = UserCreateAwayRangeAdminErrors[keyof UserCreateAwayRangeAdminErrors];
+
+export type UserCreateAwayRangeAdminResponses = {
+    200: UserAwayRangeDto;
+};
+
+export type UserCreateAwayRangeAdminResponse = UserCreateAwayRangeAdminResponses[keyof UserCreateAwayRangeAdminResponses];
+
+export type UserDeleteAwayRangeAdminData = {
+    body?: never;
+    path: {
+        userId: number;
+        id: number;
+    };
+    query?: never;
+    url: '/user/admin/{userId}/awayranges/{id}';
+};
+
+export type UserDeleteAwayRangeAdminErrors = {
+    401: HeyApiError;
+};
+
+export type UserDeleteAwayRangeAdminError = UserDeleteAwayRangeAdminErrors[keyof UserDeleteAwayRangeAdminErrors];
+
+export type UserDeleteAwayRangeAdminResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type UserDeleteAwayRangeAdminResponse = UserDeleteAwayRangeAdminResponses[keyof UserDeleteAwayRangeAdminResponses];
+
+export type UserUpdateAwayRangeAdminData = {
+    body: UpdateAwayRangeDto;
+    path: {
+        userId: number;
+        id: number;
+    };
+    query?: never;
+    url: '/user/admin/{userId}/awayranges/{id}';
+};
+
+export type UserUpdateAwayRangeAdminErrors = {
+    401: HeyApiError;
+};
+
+export type UserUpdateAwayRangeAdminError = UserUpdateAwayRangeAdminErrors[keyof UserUpdateAwayRangeAdminErrors];
+
+export type UserUpdateAwayRangeAdminResponses = {
+    200: UserAwayRangeDto;
+};
+
+export type UserUpdateAwayRangeAdminResponse = UserUpdateAwayRangeAdminResponses[keyof UserUpdateAwayRangeAdminResponses];
+
 export type UserUpdateData = {
     body: UpdateProfileDto;
     path?: never;
@@ -5703,407 +5770,6 @@ export type CampaignUpdateAdminResponses = {
 
 export type CampaignUpdateAdminResponse = CampaignUpdateAdminResponses[keyof CampaignUpdateAdminResponses];
 
-export type ConversationGetAllConversationsForAdminData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/messaging/conversations/admin';
-};
-
-export type ConversationGetAllConversationsForAdminErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationGetAllConversationsForAdminError = ConversationGetAllConversationsForAdminErrors[keyof ConversationGetAllConversationsForAdminErrors];
-
-export type ConversationGetAllConversationsForAdminResponses = {
-    200: Array<ConversationAdminSummaryDto>;
-};
-
-export type ConversationGetAllConversationsForAdminResponse = ConversationGetAllConversationsForAdminResponses[keyof ConversationGetAllConversationsForAdminResponses];
-
-export type ConversationGetMyConversationsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/messaging/conversations';
-};
-
-export type ConversationGetMyConversationsErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationGetMyConversationsError = ConversationGetMyConversationsErrors[keyof ConversationGetMyConversationsErrors];
-
-export type ConversationGetMyConversationsResponses = {
-    200: Array<ConversationDto>;
-};
-
-export type ConversationGetMyConversationsResponse = ConversationGetMyConversationsResponses[keyof ConversationGetMyConversationsResponses];
-
-export type ConversationGetCommunityConversationsData = {
-    body?: never;
-    path: {
-        communityId: number;
-    };
-    query?: never;
-    url: '/messaging/conversations/community/{communityId}';
-};
-
-export type ConversationGetCommunityConversationsErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationGetCommunityConversationsError = ConversationGetCommunityConversationsErrors[keyof ConversationGetCommunityConversationsErrors];
-
-export type ConversationGetCommunityConversationsResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationGetCommunityConversationsResponse = ConversationGetCommunityConversationsResponses[keyof ConversationGetCommunityConversationsResponses];
-
-export type ConversationCreateDirectConversationData = {
-    body: CreateDirectConversationDto;
-    path?: never;
-    query?: never;
-    url: '/messaging/conversations/direct';
-};
-
-export type ConversationCreateDirectConversationErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationCreateDirectConversationError = ConversationCreateDirectConversationErrors[keyof ConversationCreateDirectConversationErrors];
-
-export type ConversationCreateDirectConversationResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationCreateDirectConversationResponse = ConversationCreateDirectConversationResponses[keyof ConversationCreateDirectConversationResponses];
-
-export type ConversationCreateGroupConversationData = {
-    body: CreateGroupConversationDto;
-    path?: never;
-    query?: never;
-    url: '/messaging/conversations/group';
-};
-
-export type ConversationCreateGroupConversationErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationCreateGroupConversationError = ConversationCreateGroupConversationErrors[keyof ConversationCreateGroupConversationErrors];
-
-export type ConversationCreateGroupConversationResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationCreateGroupConversationResponse = ConversationCreateGroupConversationResponses[keyof ConversationCreateGroupConversationResponses];
-
-export type ConversationUpdateInfoData = {
-    body: UpdateConversationDto;
-    path: {
-        conversationId: number;
-    };
-    query?: never;
-    url: '/messaging/conversations/{conversationId}/update';
-};
-
-export type ConversationUpdateInfoErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationUpdateInfoError = ConversationUpdateInfoErrors[keyof ConversationUpdateInfoErrors];
-
-export type ConversationUpdateInfoResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationUpdateInfoResponse = ConversationUpdateInfoResponses[keyof ConversationUpdateInfoResponses];
-
-export type ConversationAcceptInviteData = {
-    body?: never;
-    path: {
-        conversationId: number;
-    };
-    query?: never;
-    url: '/messaging/conversations/{conversationId}/accept';
-};
-
-export type ConversationAcceptInviteErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationAcceptInviteError = ConversationAcceptInviteErrors[keyof ConversationAcceptInviteErrors];
-
-export type ConversationAcceptInviteResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationAcceptInviteResponse = ConversationAcceptInviteResponses[keyof ConversationAcceptInviteResponses];
-
-export type ConversationDeclineInviteData = {
-    body?: never;
-    path: {
-        conversationId: number;
-    };
-    query?: never;
-    url: '/messaging/conversations/{conversationId}/decline';
-};
-
-export type ConversationDeclineInviteErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationDeclineInviteError = ConversationDeclineInviteErrors[keyof ConversationDeclineInviteErrors];
-
-export type ConversationDeclineInviteResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationDeclineInviteResponse = ConversationDeclineInviteResponses[keyof ConversationDeclineInviteResponses];
-
-export type ConversationAddParticipantData = {
-    body: ConversationParticipantDto;
-    path: {
-        conversationId: number;
-    };
-    query?: never;
-    url: '/messaging/conversations/{conversationId}/participants';
-};
-
-export type ConversationAddParticipantErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationAddParticipantError = ConversationAddParticipantErrors[keyof ConversationAddParticipantErrors];
-
-export type ConversationAddParticipantResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationAddParticipantResponse = ConversationAddParticipantResponses[keyof ConversationAddParticipantResponses];
-
-export type ConversationRemoveParticipantData = {
-    body?: never;
-    path: {
-        conversationId: number;
-        userId: number;
-    };
-    query?: never;
-    url: '/messaging/conversations/{conversationId}/participants/{userId}';
-};
-
-export type ConversationRemoveParticipantErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationRemoveParticipantError = ConversationRemoveParticipantErrors[keyof ConversationRemoveParticipantErrors];
-
-export type ConversationRemoveParticipantResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationRemoveParticipantResponse = ConversationRemoveParticipantResponses[keyof ConversationRemoveParticipantResponses];
-
-export type ConversationMarkReadData = {
-    body?: never;
-    path: {
-        conversationId: number;
-    };
-    query?: never;
-    url: '/messaging/conversations/{conversationId}/read';
-};
-
-export type ConversationMarkReadErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationMarkReadError = ConversationMarkReadErrors[keyof ConversationMarkReadErrors];
-
-export type ConversationMarkReadResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationMarkReadResponse = ConversationMarkReadResponses[keyof ConversationMarkReadResponses];
-
-export type ConversationGetUnreadMessagesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/messaging/conversations/unread';
-};
-
-export type ConversationGetUnreadMessagesErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationGetUnreadMessagesError = ConversationGetUnreadMessagesErrors[keyof ConversationGetUnreadMessagesErrors];
-
-export type ConversationGetUnreadMessagesResponses = {
-    200: UnreadMessagesDto;
-};
-
-export type ConversationGetUnreadMessagesResponse = ConversationGetUnreadMessagesResponses[keyof ConversationGetUnreadMessagesResponses];
-
-export type ConversationGetUnreadSummaryData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/messaging/conversations/unread-summary';
-};
-
-export type ConversationGetUnreadSummaryErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationGetUnreadSummaryError = ConversationGetUnreadSummaryErrors[keyof ConversationGetUnreadSummaryErrors];
-
-export type ConversationGetUnreadSummaryResponses = {
-    200: UnreadMessageSummaryDto;
-};
-
-export type ConversationGetUnreadSummaryResponse = ConversationGetUnreadSummaryResponses[keyof ConversationGetUnreadSummaryResponses];
-
-export type ConversationLeaveData = {
-    body?: never;
-    path: {
-        conversationId: number;
-    };
-    query?: never;
-    url: '/messaging/conversations/{conversationId}/leave';
-};
-
-export type ConversationLeaveErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type ConversationLeaveError = ConversationLeaveErrors[keyof ConversationLeaveErrors];
-
-export type ConversationLeaveResponses = {
-    200: ConversationDto;
-};
-
-export type ConversationLeaveResponse = ConversationLeaveResponses[keyof ConversationLeaveResponses];
-
-export type MessageGetConversationMessagesForAdminData = {
-    body?: never;
-    path: {
-        conversationId: number;
-    };
-    query?: {
-        before?: string;
-        limit?: number;
-    };
-    url: '/messaging/messages/admin/{conversationId}';
-};
-
-export type MessageGetConversationMessagesForAdminErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type MessageGetConversationMessagesForAdminError = MessageGetConversationMessagesForAdminErrors[keyof MessageGetConversationMessagesForAdminErrors];
-
-export type MessageGetConversationMessagesForAdminResponses = {
-    200: Array<MessageDto>;
-};
-
-export type MessageGetConversationMessagesForAdminResponse = MessageGetConversationMessagesForAdminResponses[keyof MessageGetConversationMessagesForAdminResponses];
-
-export type MessageSendMessageData = {
-    body: CreateMessageDto;
-    path?: never;
-    query?: never;
-    url: '/messaging/messages';
-};
-
-export type MessageSendMessageErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type MessageSendMessageError = MessageSendMessageErrors[keyof MessageSendMessageErrors];
-
-export type MessageSendMessageResponses = {
-    200: MessageDto;
-};
-
-export type MessageSendMessageResponse = MessageSendMessageResponses[keyof MessageSendMessageResponses];
-
-export type MessageGetMessagesData = {
-    body?: never;
-    path: {
-        conversationId: number;
-    };
-    query?: {
-        before?: string;
-        limit?: number;
-    };
-    url: '/messaging/messages/{conversationId}';
-};
-
-export type MessageGetMessagesErrors = {
-    /**
-     * Default error response for hey-api
-     */
-    default: HeyApiError;
-};
-
-export type MessageGetMessagesError = MessageGetMessagesErrors[keyof MessageGetMessagesErrors];
-
-export type MessageGetMessagesResponses = {
-    200: Array<MessageDto>;
-};
-
-export type MessageGetMessagesResponse = MessageGetMessagesResponses[keyof MessageGetMessagesResponses];
-
 export type PushMarkOpenedData = {
     body: PushOpenedDto;
     path?: never;
@@ -7011,6 +6677,407 @@ export type CommunityRejectCommunityInviteResponses = {
 };
 
 export type CommunityRejectCommunityInviteResponse = CommunityRejectCommunityInviteResponses[keyof CommunityRejectCommunityInviteResponses];
+
+export type ConversationGetAllConversationsForAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/admin';
+};
+
+export type ConversationGetAllConversationsForAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetAllConversationsForAdminError = ConversationGetAllConversationsForAdminErrors[keyof ConversationGetAllConversationsForAdminErrors];
+
+export type ConversationGetAllConversationsForAdminResponses = {
+    200: Array<ConversationAdminSummaryDto>;
+};
+
+export type ConversationGetAllConversationsForAdminResponse = ConversationGetAllConversationsForAdminResponses[keyof ConversationGetAllConversationsForAdminResponses];
+
+export type ConversationGetMyConversationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations';
+};
+
+export type ConversationGetMyConversationsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetMyConversationsError = ConversationGetMyConversationsErrors[keyof ConversationGetMyConversationsErrors];
+
+export type ConversationGetMyConversationsResponses = {
+    200: Array<ConversationDto>;
+};
+
+export type ConversationGetMyConversationsResponse = ConversationGetMyConversationsResponses[keyof ConversationGetMyConversationsResponses];
+
+export type ConversationGetCommunityConversationsData = {
+    body?: never;
+    path: {
+        communityId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/community/{communityId}';
+};
+
+export type ConversationGetCommunityConversationsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetCommunityConversationsError = ConversationGetCommunityConversationsErrors[keyof ConversationGetCommunityConversationsErrors];
+
+export type ConversationGetCommunityConversationsResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationGetCommunityConversationsResponse = ConversationGetCommunityConversationsResponses[keyof ConversationGetCommunityConversationsResponses];
+
+export type ConversationCreateDirectConversationData = {
+    body: CreateDirectConversationDto;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/direct';
+};
+
+export type ConversationCreateDirectConversationErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationCreateDirectConversationError = ConversationCreateDirectConversationErrors[keyof ConversationCreateDirectConversationErrors];
+
+export type ConversationCreateDirectConversationResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationCreateDirectConversationResponse = ConversationCreateDirectConversationResponses[keyof ConversationCreateDirectConversationResponses];
+
+export type ConversationCreateGroupConversationData = {
+    body: CreateGroupConversationDto;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/group';
+};
+
+export type ConversationCreateGroupConversationErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationCreateGroupConversationError = ConversationCreateGroupConversationErrors[keyof ConversationCreateGroupConversationErrors];
+
+export type ConversationCreateGroupConversationResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationCreateGroupConversationResponse = ConversationCreateGroupConversationResponses[keyof ConversationCreateGroupConversationResponses];
+
+export type ConversationUpdateInfoData = {
+    body: UpdateConversationDto;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/update';
+};
+
+export type ConversationUpdateInfoErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationUpdateInfoError = ConversationUpdateInfoErrors[keyof ConversationUpdateInfoErrors];
+
+export type ConversationUpdateInfoResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationUpdateInfoResponse = ConversationUpdateInfoResponses[keyof ConversationUpdateInfoResponses];
+
+export type ConversationAcceptInviteData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/accept';
+};
+
+export type ConversationAcceptInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationAcceptInviteError = ConversationAcceptInviteErrors[keyof ConversationAcceptInviteErrors];
+
+export type ConversationAcceptInviteResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationAcceptInviteResponse = ConversationAcceptInviteResponses[keyof ConversationAcceptInviteResponses];
+
+export type ConversationDeclineInviteData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/decline';
+};
+
+export type ConversationDeclineInviteErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationDeclineInviteError = ConversationDeclineInviteErrors[keyof ConversationDeclineInviteErrors];
+
+export type ConversationDeclineInviteResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationDeclineInviteResponse = ConversationDeclineInviteResponses[keyof ConversationDeclineInviteResponses];
+
+export type ConversationAddParticipantData = {
+    body: ConversationParticipantDto;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/participants';
+};
+
+export type ConversationAddParticipantErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationAddParticipantError = ConversationAddParticipantErrors[keyof ConversationAddParticipantErrors];
+
+export type ConversationAddParticipantResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationAddParticipantResponse = ConversationAddParticipantResponses[keyof ConversationAddParticipantResponses];
+
+export type ConversationRemoveParticipantData = {
+    body?: never;
+    path: {
+        conversationId: number;
+        userId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/participants/{userId}';
+};
+
+export type ConversationRemoveParticipantErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationRemoveParticipantError = ConversationRemoveParticipantErrors[keyof ConversationRemoveParticipantErrors];
+
+export type ConversationRemoveParticipantResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationRemoveParticipantResponse = ConversationRemoveParticipantResponses[keyof ConversationRemoveParticipantResponses];
+
+export type ConversationMarkReadData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/read';
+};
+
+export type ConversationMarkReadErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationMarkReadError = ConversationMarkReadErrors[keyof ConversationMarkReadErrors];
+
+export type ConversationMarkReadResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationMarkReadResponse = ConversationMarkReadResponses[keyof ConversationMarkReadResponses];
+
+export type ConversationGetUnreadMessagesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/unread';
+};
+
+export type ConversationGetUnreadMessagesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetUnreadMessagesError = ConversationGetUnreadMessagesErrors[keyof ConversationGetUnreadMessagesErrors];
+
+export type ConversationGetUnreadMessagesResponses = {
+    200: UnreadMessagesDto;
+};
+
+export type ConversationGetUnreadMessagesResponse = ConversationGetUnreadMessagesResponses[keyof ConversationGetUnreadMessagesResponses];
+
+export type ConversationGetUnreadSummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/messaging/conversations/unread-summary';
+};
+
+export type ConversationGetUnreadSummaryErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationGetUnreadSummaryError = ConversationGetUnreadSummaryErrors[keyof ConversationGetUnreadSummaryErrors];
+
+export type ConversationGetUnreadSummaryResponses = {
+    200: UnreadMessageSummaryDto;
+};
+
+export type ConversationGetUnreadSummaryResponse = ConversationGetUnreadSummaryResponses[keyof ConversationGetUnreadSummaryResponses];
+
+export type ConversationLeaveData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: never;
+    url: '/messaging/conversations/{conversationId}/leave';
+};
+
+export type ConversationLeaveErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ConversationLeaveError = ConversationLeaveErrors[keyof ConversationLeaveErrors];
+
+export type ConversationLeaveResponses = {
+    200: ConversationDto;
+};
+
+export type ConversationLeaveResponse = ConversationLeaveResponses[keyof ConversationLeaveResponses];
+
+export type MessageGetConversationMessagesForAdminData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: {
+        before?: string;
+        limit?: number;
+    };
+    url: '/messaging/messages/admin/{conversationId}';
+};
+
+export type MessageGetConversationMessagesForAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type MessageGetConversationMessagesForAdminError = MessageGetConversationMessagesForAdminErrors[keyof MessageGetConversationMessagesForAdminErrors];
+
+export type MessageGetConversationMessagesForAdminResponses = {
+    200: Array<MessageDto>;
+};
+
+export type MessageGetConversationMessagesForAdminResponse = MessageGetConversationMessagesForAdminResponses[keyof MessageGetConversationMessagesForAdminResponses];
+
+export type MessageSendMessageData = {
+    body: CreateMessageDto;
+    path?: never;
+    query?: never;
+    url: '/messaging/messages';
+};
+
+export type MessageSendMessageErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type MessageSendMessageError = MessageSendMessageErrors[keyof MessageSendMessageErrors];
+
+export type MessageSendMessageResponses = {
+    200: MessageDto;
+};
+
+export type MessageSendMessageResponse = MessageSendMessageResponses[keyof MessageSendMessageResponses];
+
+export type MessageGetMessagesData = {
+    body?: never;
+    path: {
+        conversationId: number;
+    };
+    query?: {
+        before?: string;
+        limit?: number;
+    };
+    url: '/messaging/messages/{conversationId}';
+};
+
+export type MessageGetMessagesErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type MessageGetMessagesError = MessageGetMessagesErrors[keyof MessageGetMessagesErrors];
+
+export type MessageGetMessagesResponses = {
+    200: Array<MessageDto>;
+};
+
+export type MessageGetMessagesResponse = MessageGetMessagesResponses[keyof MessageGetMessagesResponses];
 
 export type ContractGetCurrentData = {
     body?: never;

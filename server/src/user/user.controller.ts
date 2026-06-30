@@ -159,6 +159,44 @@ export class UserController {
     );
   }
 
+  @Post('admin/:userId/awayranges')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: UserAwayRangeDto })
+  @ApiUnauthorizedResponse()
+  async createAwayRangeAdmin(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() body: CreateAwayRangeDto,
+  ): Promise<UserAwayRangeDto> {
+    return new UserAwayRangeDto(
+      await this.userService.createAwayRange(userId, body),
+    );
+  }
+
+  @Patch('admin/:userId/awayranges/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: UserAwayRangeDto })
+  @ApiUnauthorizedResponse()
+  async updateAwayRangeAdmin(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateAwayRangeDto,
+  ): Promise<UserAwayRangeDto> {
+    return new UserAwayRangeDto(
+      await this.userService.updateAwayRange(userId, id, body),
+    );
+  }
+
+  @Delete('admin/:userId/awayranges/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  @ApiUnauthorizedResponse()
+  async deleteAwayRangeAdmin(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.userService.deleteAwayRange(userId, id);
+  }
+
   @Post('update')
   @UseGuards(AuthGuard)
   @ApiOkResponse({ type: ProfileDto })
