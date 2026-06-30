@@ -121,6 +121,18 @@ const PeoplePage: React.FC = () => {
       name: "Travis Williams",
       description: "Professor of Chemistry, University of Southern California",
     },
+    {
+      name: "Matti Wilks",
+      description: "Associate Professor in Psychology, University of Edinburgh",
+    },
+    {
+      name: "Aditya Jain",
+      description: "Instagram Trust and Safety",
+    },
+    {
+      name: "Paul Gambill",
+      description: "Climate entrepreneur; previously founder of Nori",
+    },
   ];
 
   useEffect(() => {
