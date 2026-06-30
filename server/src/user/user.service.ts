@@ -1,16 +1,18 @@
-import { Temporal } from '@js-temporal/polyfill';
 import { ActionActivityType } from '@alliance/common/actionActivity';
-import { ActionStatus } from 'src/actions/entities/action-event.entity';
+import { Temporal } from '@js-temporal/polyfill';
 import {
   BadRequestException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ActionStatus } from 'src/actions/entities/action-event.entity';
 import { LiveActivityRegistration } from 'src/apns/entities/live-activity-registration.entity';
 import { CampaignService } from 'src/campaign/campaign.service';
 import { Campaign } from 'src/campaign/entities/campaign.entity';
@@ -58,7 +60,6 @@ import {
   RequestOnetimeInviteDto,
   UpdateAmbassadorInviteGoalDto,
 } from './dto/invite.dto';
-import { AmbassadorInviteGoal } from './entities/ambassador-invite-goal.entity';
 import { CreateTagDto } from './dto/tag.dto';
 import {
   AssignGroupsDto,
@@ -66,6 +67,7 @@ import {
   UpdateProfileDto,
   UserCityCount,
 } from './dto/user.dto';
+import { AmbassadorInviteGoal } from './entities/ambassador-invite-goal.entity';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import {
   OnetimeInvite,
@@ -83,6 +85,7 @@ import {
   sqlUserHasActiveContractAt,
   User,
 } from './entities/user.entity';
+import { type FriendsAcceptedPayload, UserEvents } from './user.events';
 
 export interface PWResetJwtPayload {
   sub: number;
@@ -142,6 +145,8 @@ export type ReferralResolution =
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -172,6 +177,7 @@ export class UserService {
     private readonly eventLogService: EventLogService,
     private readonly notifsService: NotifsService,
     private readonly communityService: CommunityService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(data: DeepPartial<User>): Promise<User> {
@@ -523,11 +529,36 @@ export class UserService {
       try {
         await this.notifsService.setRead(rel.sentNotif.id, addresseeId);
       } catch (error) {
-        console.error('Error setting read status for friend request:', error);
+        this.logger.error(
+          'Error setting read status for friend request:',
+          error,
+        );
       }
     }
 
-    return this.friendRepository.save({ ...rel, sentNotif: undefined });
+    const saved = await this.friendRepository.save({
+      ...rel,
+      sentNotif: undefined,
+    });
+
+    if (status === FriendStatus.Accepted) {
+      this.emitFriendsAccepted(requesterId, addresseeId);
+    }
+
+    return saved;
+  }
+
+  /**
+   * Decoupled from messaging via an event. Messaging listens and auto-accepts
+   * a pending direct-message invite between the two so a new friend never shows
+   * as a message request.
+   */
+  private emitFriendsAccepted(requesterId: number, addresseeId: number): void {
+    const payload: FriendsAcceptedPayload = {
+      userIdA: requesterId,
+      userIdB: addresseeId,
+    };
+    this.eventEmitter.emit(UserEvents.FriendsAccepted, payload);
   }
 
   /** Cancel a request OR un-friend an accepted friend in either direction. */
@@ -745,6 +776,7 @@ export class UserService {
     });
 
     await this.friendRepository.save(rel);
+    this.emitFriendsAccepted(requesterId, addresseeId);
   }
 
   async findPendingRequests(
@@ -1583,10 +1615,7 @@ export class UserService {
     };
   }
 
-  private validateAmbassadorInviteGoalDates(
-    startAt: Date,
-    dueAt: Date,
-  ): void {
+  private validateAmbassadorInviteGoalDates(startAt: Date, dueAt: Date): void {
     if (Number.isNaN(startAt.getTime()) || Number.isNaN(dueAt.getTime())) {
       throw new BadRequestException('Goal dates are invalid');
     }

@@ -10,7 +10,6 @@ import { ALL_MEMBERS_TAG_NAME } from 'src/constants';
 import { EventLogModule } from 'src/eventlog/eventlog.module';
 import { ImagesModule } from 'src/images/images.module';
 import { MailModule } from 'src/mail/mail.module';
-import { MessagingModule } from 'src/messaging/messaging.module';
 import { NotifsModule } from 'src/notifs/notifs.module';
 import { PushModule } from 'src/push/push.module';
 import { ShareUrlsModule } from 'src/share-urls/share-urls.module';
@@ -18,8 +17,8 @@ import { ActionActivity } from '../actions/entities/action-activity.entity';
 import { Action } from '../actions/entities/action.entity';
 import { City } from '../geo/city.entity';
 import { Notification } from '../notifs/entities/notification.entity';
-import { ContractEvent } from './entities/contract-event.entity';
 import { AmbassadorInviteGoal } from './entities/ambassador-invite-goal.entity';
+import { ContractEvent } from './entities/contract-event.entity';
 import { Friend } from './entities/friend.entity';
 import { OnetimeInvite } from './entities/onetime-invite.entity';
 import { Tag } from './entities/tag.entity';
@@ -54,7 +53,6 @@ import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
     MailModule,
     ShareUrlsModule,
     CampaignModule,
-    forwardRef(() => MessagingModule),
     PushModule,
     forwardRef(() => EventLogModule),
     forwardRef(() => NotifsModule),

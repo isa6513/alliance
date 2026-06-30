@@ -2,13 +2,27 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, type Repository } from 'typeorm';
 import { Community } from 'src/community/entities/community.entity';
+import { ImagesService } from 'src/images/images.service';
+import { Friend, FriendStatus } from 'src/user/entities/friend.entity';
 import { User } from 'src/user/entities/user.entity';
+import { type FriendsAcceptedPayload, UserEvents } from 'src/user/user.events';
+import type { Relations } from 'src/utils/Repository';
+import { In, type Repository } from 'typeorm';
+import {
+  ConversationAdminSummaryDto,
+  ConversationDto,
+  ConversationParticipantDto,
+  CreateDirectConversationDto,
+  CreateGroupConversationDto,
+  UnreadMessageSummary,
+  UpdateConversationDto,
+} from './dto/messaging.dto';
 import { Conversation, ConversationType } from './entities/conversation.entity';
 import { Message } from './entities/message.entity';
 import {
@@ -16,21 +30,12 @@ import {
   ParticipantRole,
   ParticipantState,
 } from './entities/participant.entity';
-import {
-  ConversationAdminSummaryDto,
-  ConversationDto,
-  CreateDirectConversationDto,
-  CreateGroupConversationDto,
-  ConversationParticipantDto,
-  UnreadMessageSummary,
-  UpdateConversationDto,
-} from './dto/messaging.dto';
 import { MessagingEvents } from './messaging.events';
-import { ImagesService } from 'src/images/images.service';
-import type { Relations } from 'src/utils/Repository';
 
 @Injectable()
 export class ConversationService {
+  private readonly logger = new Logger(ConversationService.name);
+
   private readonly conversationRelations = {
     participants: {
       user: true,
@@ -58,9 +63,52 @@ export class ConversationService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Community)
     private readonly communityRepository: Repository<Community>,
+    @InjectRepository(Friend)
+    private readonly friendRepository: Repository<Friend>,
     private readonly eventEmitter: EventEmitter2,
     private readonly imagesService: ImagesService,
-  ) {}
+  ) {
+    this.eventEmitter.on(
+      UserEvents.FriendsAccepted,
+      this.handleFriendsAccepted.bind(this),
+    );
+  }
+
+  /** Log and swallow errors so a failure here can't affect the friendship. */
+  private async handleFriendsAccepted(
+    payload: FriendsAcceptedPayload,
+  ): Promise<void> {
+    try {
+      await this.acceptDirectInviteBetween(payload.userIdA, payload.userIdB);
+    } catch (error) {
+      this.logger.error(
+        'Error auto-accepting direct invite for new friends:',
+        error,
+      );
+    }
+  }
+
+  /** Whether two users have an accepted friendship in either direction. */
+  private async queryAreUsersFriends(
+    userIdA: number,
+    userIdB: number,
+  ): Promise<boolean> {
+    const friendship = await this.friendRepository.findOne({
+      where: [
+        {
+          requester: { id: userIdA },
+          addressee: { id: userIdB },
+          status: FriendStatus.Accepted,
+        },
+        {
+          requester: { id: userIdB },
+          addressee: { id: userIdA },
+          status: FriendStatus.Accepted,
+        },
+      ],
+    });
+    return friendship !== null;
+  }
 
   async getAllConversationsForAdmin(): Promise<ConversationAdminSummaryDto[]> {
     const conversations = await this.conversationRepository
@@ -216,6 +264,11 @@ export class ConversationService {
       });
     }
 
+    const areFriends = await this.queryAreUsersFriends(
+      userId,
+      dto.targetUserId,
+    );
+
     const conversation = await this.conversationRepository.save(
       this.conversationRepository.create({
         title: dto.title?.trim() || 'Direct message',
@@ -236,7 +289,7 @@ export class ConversationService {
         conversation,
         user: target,
         role: ParticipantRole.Member,
-        state: ParticipantState.Invited,
+        state: areFriends ? ParticipantState.Joined : ParticipantState.Invited,
         joinedAt: now,
       }),
     ]);
@@ -371,6 +424,60 @@ export class ConversationService {
     const conversation = await this.getConversationEntity(conversationId);
     await this.emitConversationUpdate(conversation);
     return this.buildConversationDto(conversationId, userId);
+  }
+
+  /**
+   * Auto-accept any outstanding direct-message invite between two new friends
+   * so a friend never appears as a pending message request. No-op when there's
+   * no direct conversation or pending invite.
+   */
+  private async acceptDirectInviteBetween(
+    userIdA: number,
+    userIdB: number,
+  ): Promise<void> {
+    const conversation = await this.conversationRepository
+      .createQueryBuilder('conversation')
+      .innerJoin(
+        'conversation.participants',
+        'participantA',
+        'participantA.userId = :userIdA',
+        { userIdA },
+      )
+      .innerJoin(
+        'conversation.participants',
+        'participantB',
+        'participantB.userId = :userIdB',
+        { userIdB },
+      )
+      .where('conversation.type = :type', { type: ConversationType.Direct })
+      .getOne();
+
+    if (!conversation) {
+      return;
+    }
+
+    const invitedParticipants = await this.participantRepository.find({
+      where: {
+        conversation: { id: conversation.id },
+        user: { id: In([userIdA, userIdB]) },
+        state: ParticipantState.Invited,
+      },
+    });
+
+    if (invitedParticipants.length === 0) {
+      return;
+    }
+
+    const now = new Date();
+    for (const participant of invitedParticipants) {
+      participant.state = ParticipantState.Joined;
+      participant.joinedAt = now;
+    }
+    await this.participantRepository.save(invitedParticipants);
+    await this.touchConversation(conversation.id);
+
+    const hydrated = await this.getConversationEntity(conversation.id);
+    await this.emitConversationUpdate(hydrated);
   }
 
   async declineInvite(
