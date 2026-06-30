@@ -269,6 +269,10 @@ export class ConversationService {
       dto.targetUserId,
     );
 
+    // Messaging an admin (or an admin messaging a user) skips the request
+    const involvesAdmin = initiator.admin || target.admin;
+    const autoJoin = areFriends || involvesAdmin;
+
     const conversation = await this.conversationRepository.save(
       this.conversationRepository.create({
         title: dto.title?.trim() || 'Direct message',
@@ -289,7 +293,7 @@ export class ConversationService {
         conversation,
         user: target,
         role: ParticipantRole.Member,
-        state: areFriends ? ParticipantState.Joined : ParticipantState.Invited,
+        state: autoJoin ? ParticipantState.Joined : ParticipantState.Invited,
         joinedAt: now,
       }),
     ]);
