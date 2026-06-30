@@ -17,21 +17,13 @@ import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import { ChevronLeft, ChevronRight, Trash2, UserCheck } from "lucide-react";
+import { MoreHorizontal, Trash2, UserCheck } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, MouseEvent } from "react";
 import InviteForm from "../../components/InviteForm";
 import InviteShareLink from "../../components/InviteShareLink";
 import OnetimeInviteListItem from "../../components/OnetimeInviteListItem";
-import PillTab from "../../components/PillTab";
 import { useAuth } from "../../lib/AuthContext";
-
-const formatPercent = (numerator: number, denominator: number) => {
-  if (denominator === 0) {
-    return "0%";
-  }
-  return `${Math.round((numerator / denominator) * 100)}%`;
-};
 
 const formatDate = (value: string) =>
   new Date(value).toLocaleDateString(undefined, {
@@ -39,6 +31,14 @@ const formatDate = (value: string) =>
     day: "numeric",
     year: "numeric",
   });
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const pluralize = (count: number, singular: string, plural = `${singular}s`) =>
+  `${count} ${count === 1 ? singular : plural}`;
+
+const daysUntil = (date: Date, now = new Date()) =>
+  Math.max(0, Math.ceil((date.getTime() - now.getTime()) / DAY_MS));
 
 const dateInputToEndOfDayIso = (value: string) =>
   new Date(`${value}T23:59:59`).toISOString();
@@ -72,33 +72,6 @@ const inviteGoalErrorMessage = (err: Error) => {
   return err.message;
 };
 
-const inviteStatsMetrics = (stats: {
-  totalInvitesSent: number;
-  totalAcceptedInvites: number;
-  totalSuccessfulRecruits: number;
-}) => [
-  {
-    label: "Invites",
-    value: stats.totalInvitesSent,
-  },
-  {
-    label: "Accepted",
-    value: stats.totalAcceptedInvites,
-  },
-  {
-    label: "Successful",
-    value: stats.totalSuccessfulRecruits,
-  },
-  {
-    label: "Accepted %",
-    value: formatPercent(stats.totalAcceptedInvites, stats.totalInvitesSent),
-  },
-  {
-    label: "Success %",
-    value: formatPercent(stats.totalSuccessfulRecruits, stats.totalInvitesSent),
-  },
-];
-
 const InvitesPage = () => {
   const { user } = useAuth();
   const { error: errorToast, confirm } = useToast();
@@ -113,18 +86,16 @@ const InvitesPage = () => {
   } = useOnetimeInvitesOverview({ enabled: Boolean(user) });
   const [copiedInviteId, setCopiedInviteId] = useState<number | null>(null);
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [activeTab, setActiveTab] = useState<"onetime" | "reusable">("onetime");
   const [goalTarget, setGoalTarget] = useState("");
   const [goalStartDate, setGoalStartDate] = useState(todayDateInputValue);
   const [goalDueDate, setGoalDueDate] = useState(
     oneMonthFromTodayDateInputValue,
   );
-  const [selectedGoalIndex, setSelectedGoalIndex] = useState(0);
   const [editGoalStartDate, setEditGoalStartDate] = useState("");
   const [editGoalDueDate, setEditGoalDueDate] = useState("");
+  const [editGoalTarget, setEditGoalTarget] = useState("");
   const [goalFormMessage, setGoalFormMessage] = useState<string | null>(null);
   const [goalEditMessage, setGoalEditMessage] = useState<string | null>(null);
-  const previousGoalCountRef = useRef(0);
   const {
     data: ambassadorDashboard,
     isLoading: loadingAmbassadorDashboard,
@@ -138,31 +109,131 @@ const InvitesPage = () => {
     refetch: refetchAmbassadorDashboard,
   } = useAmbassadorInviteDashboard({ enabled: Boolean(user?.ambassador) });
 
-  const selectedGoal = ambassadorDashboard?.goals[selectedGoalIndex];
-  const goalCount = ambassadorDashboard?.goals.length ?? 0;
+  const ambassadorGoals = useMemo(
+    () => ambassadorDashboard?.goals ?? [],
+    [ambassadorDashboard],
+  );
+  const currentGoal = useMemo(() => {
+    const now = new Date();
+    const activeGoals = ambassadorGoals.filter((goal) => {
+      const startAt = new Date(goal.goal.startAt);
+      const dueAt = new Date(goal.goal.dueAt);
+      return startAt <= now && dueAt >= now;
+    });
+    if (activeGoals.length > 0) {
+      return [...activeGoals].sort(
+        (a, b) =>
+          new Date(b.goal.startAt).getTime() -
+          new Date(a.goal.startAt).getTime(),
+      )[0];
+    }
+
+    const futureGoals = ambassadorGoals.filter(
+      (goal) => new Date(goal.goal.startAt) > now,
+    );
+    if (futureGoals.length > 0) {
+      return [...futureGoals].sort(
+        (a, b) =>
+          new Date(a.goal.startAt).getTime() -
+          new Date(b.goal.startAt).getTime(),
+      )[0];
+    }
+
+    return [...ambassadorGoals].sort(
+      (a, b) =>
+        new Date(b.goal.dueAt).getTime() - new Date(a.goal.dueAt).getTime(),
+    )[0];
+  }, [ambassadorGoals]);
+  const pastGoals = useMemo(() => {
+    const now = new Date();
+    return ambassadorGoals
+      .filter(
+        (goal) =>
+          goal.goal.id !== currentGoal?.goal.id &&
+          new Date(goal.goal.dueAt) < now,
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.goal.dueAt).getTime() -
+          new Date(a.goal.dueAt).getTime(),
+      );
+  }, [ambassadorGoals, currentGoal]);
+  const currentGoalIsUp =
+    !currentGoal ||
+    new Date(currentGoal.goal.dueAt) < new Date() ||
+    currentGoal.stats.goalSuccessfulRecruits >=
+      currentGoal.goal.targetSuccessfulRecruits;
+  const showProminentGoalForm = !currentGoal || currentGoalIsUp;
+  const currentGoalSummary = useMemo(() => {
+    if (!currentGoal) {
+      return "Set a goal to track successful recruits.";
+    }
+
+    const now = new Date();
+    const startAt = new Date(currentGoal.goal.startAt);
+    const dueAt = new Date(currentGoal.goal.dueAt);
+    const remainingRecruits = Math.max(
+      0,
+      currentGoal.goal.targetSuccessfulRecruits -
+        currentGoal.stats.goalSuccessfulRecruits,
+    );
+
+    if (startAt > now) {
+      const daysToStart = daysUntil(startAt, now);
+      return (
+        <>
+          This goal starts in{" "}
+          <span className="font-semibold text-green">
+            {pluralize(daysToStart, "day")}
+          </span>
+          .
+        </>
+      );
+    }
+
+    if (remainingRecruits === 0) {
+      return "You have completed this successful recruit goal.";
+    }
+
+    if (dueAt < now) {
+      return (
+        <>
+          This goal ended with{" "}
+          <span className="font-semibold text-green">
+            {pluralize(remainingRecruits, "member")}
+          </span>{" "}
+          left to successfully recruit.
+        </>
+      );
+    }
+
+    return (
+      <>
+        You have{" "}
+        <span className="font-semibold text-green">
+          {pluralize(daysUntil(dueAt, now), "day")}
+        </span>{" "}
+        to successfully recruit{" "}
+        <span className="font-semibold text-green">
+          {pluralize(remainingRecruits, "more member", "more members")}
+        </span>
+        .
+      </>
+    );
+  }, [currentGoal]);
 
   useEffect(() => {
-    const previousGoalCount = previousGoalCountRef.current;
-    if (goalCount !== previousGoalCount) {
-      previousGoalCountRef.current = goalCount;
-      setSelectedGoalIndex(Math.max(0, goalCount - 1));
-      return;
-    }
-    if (selectedGoalIndex >= goalCount) {
-      setSelectedGoalIndex(Math.max(0, goalCount - 1));
-    }
-  }, [goalCount, selectedGoalIndex]);
-
-  useEffect(() => {
-    if (!selectedGoal) {
+    if (!currentGoal) {
       setEditGoalStartDate("");
       setEditGoalDueDate("");
+      setEditGoalTarget("");
       return;
     }
-    setEditGoalStartDate(dateToInputValue(selectedGoal.goal.startAt));
-    setEditGoalDueDate(dateToInputValue(selectedGoal.goal.dueAt));
+    setEditGoalStartDate(dateToInputValue(currentGoal.goal.startAt));
+    setEditGoalDueDate(dateToInputValue(currentGoal.goal.dueAt));
+    setEditGoalTarget(String(currentGoal.goal.targetSuccessfulRecruits));
     setGoalEditMessage(null);
-  }, [selectedGoal]);
+  }, [currentGoal]);
 
   const leaderCommunityIds = useMemo(
     () => getLeaderCommunityIds(user ?? undefined),
@@ -264,11 +335,11 @@ const InvitesPage = () => {
 
   const handleDeleteGoal = useCallback(
     (event: MouseEvent<HTMLElement>) => {
-      if (!selectedGoal) {
+      if (!currentGoal) {
         return;
       }
 
-      const goalId = selectedGoal.goal.id;
+      const goalId = currentGoal.goal.id;
       void (async () => {
         const ok = await confirm({
           title: "Delete recruit goal?",
@@ -287,12 +358,17 @@ const InvitesPage = () => {
         });
       })();
     },
-    [confirm, deleteGoal, errorToast, selectedGoal],
+    [confirm, currentGoal, deleteGoal, errorToast],
   );
 
   const handleSetGoal = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+
+      if (!showProminentGoalForm) {
+        errorToast("You can set a new goal once your current goal is up.");
+        return;
+      }
 
       const target = Number(goalTarget);
       if (!Number.isInteger(target) || target < 1) {
@@ -313,20 +389,38 @@ const InvitesPage = () => {
           setGoalFormMessage(inviteGoalErrorMessage(err));
         });
     },
-    [createGoal, errorToast, goalDueDate, goalStartDate, goalTarget],
+    [
+      createGoal,
+      errorToast,
+      goalDueDate,
+      goalStartDate,
+      goalTarget,
+      showProminentGoalForm,
+    ],
   );
 
-  const updateSelectedGoalDates = useCallback(
-    (startDate: string, dueDate: string) => {
-      if (!selectedGoal) {
+  const updateSelectedGoal = useCallback(
+    (params: {
+      targetSuccessfulRecruits?: number;
+      startDate?: string;
+      dueDate?: string;
+    }) => {
+      if (!currentGoal) {
         return;
       }
 
       void updateGoal({
-        goalId: selectedGoal.goal.id,
+        goalId: currentGoal.goal.id,
         body: {
-          startAt: dateInputToStartOfDayIso(startDate),
-          dueAt: dateInputToEndOfDayIso(dueDate),
+          ...(params.targetSuccessfulRecruits !== undefined && {
+            targetSuccessfulRecruits: params.targetSuccessfulRecruits,
+          }),
+          ...(params.startDate !== undefined && {
+            startAt: dateInputToStartOfDayIso(params.startDate),
+          }),
+          ...(params.dueDate !== undefined && {
+            dueAt: dateInputToEndOfDayIso(params.dueDate),
+          }),
         },
       })
         .then(() => {
@@ -336,43 +430,49 @@ const InvitesPage = () => {
           setGoalEditMessage(inviteGoalErrorMessage(err));
         });
     },
-    [selectedGoal, updateGoal],
+    [currentGoal, updateGoal],
   );
 
   const handleEditGoalStartDateChange = useCallback(
     (value: string) => {
       setEditGoalStartDate(value);
-      updateSelectedGoalDates(value, editGoalDueDate);
+      updateSelectedGoal({ startDate: value });
     },
-    [editGoalDueDate, updateSelectedGoalDates],
+    [updateSelectedGoal],
   );
 
   const handleEditGoalDueDateChange = useCallback(
     (value: string) => {
       setEditGoalDueDate(value);
-      updateSelectedGoalDates(editGoalStartDate, value);
+      updateSelectedGoal({ dueDate: value });
     },
-    [editGoalStartDate, updateSelectedGoalDates],
+    [updateSelectedGoal],
   );
 
-  const selectedGoalProgressPercent = useMemo(() => {
-    if (!selectedGoal) {
+  const handleEditGoalTargetChange = useCallback(
+    (value: string) => {
+      setEditGoalTarget(value);
+      const target = Number(value);
+      if (!Number.isInteger(target) || target < 1) {
+        setGoalEditMessage("Goal must be at least 1 successful recruit.");
+        return;
+      }
+      updateSelectedGoal({ targetSuccessfulRecruits: target });
+    },
+    [updateSelectedGoal],
+  );
+
+  const currentGoalProgressPercent = useMemo(() => {
+    if (!currentGoal) {
       return 0;
     }
     return Math.min(
       100,
-      (selectedGoal.stats.goalSuccessfulRecruits /
-        selectedGoal.goal.targetSuccessfulRecruits) *
+      (currentGoal.stats.goalSuccessfulRecruits /
+        currentGoal.goal.targetSuccessfulRecruits) *
         100,
     );
-  }, [selectedGoal]);
-
-  const goalPositionLabel = selectedGoal
-    ? `${selectedGoalIndex + 1} of ${goalCount}`
-    : "No goals yet";
-
-  const canShowOlderGoal = selectedGoalIndex > 0;
-  const canShowNewerGoal = selectedGoalIndex < goalCount - 1;
+  }, [currentGoal]);
 
   const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
     useAllianceMemberCount({ enabled: Boolean(user) });
@@ -389,11 +489,11 @@ const InvitesPage = () => {
   return (
     <CenterLayout>
       <div className="flex flex-col gap-y-2">
-        {user.ambassador && activeTab === "onetime" && (
+        {user.ambassador && (
           <Card style={CardStyle.White} className="p-6 gap-y-5 order-3">
             <div className="flex flex-col gap-y-1">
               <p className="text-sm font-semibold text-green">Ambassador</p>
-              <h1 className="text-title">Recruiting dashboard</h1>
+              <h1 className="text-title">Recruitment goal</h1>
             </div>
 
             {ambassadorDashboardError ? (
@@ -407,56 +507,104 @@ const InvitesPage = () => {
                 <div className="rounded border border-zinc-200 p-4 sm:p-5 flex flex-col gap-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-lg">
-                        Successful recruit goal
+                      <p className="font-semibold text-lg leading-snug">
+                        {currentGoalSummary}
                       </p>
                       <p className="text-sm text-zinc-500">
-                        {selectedGoal
-                          ? `${formatDate(selectedGoal.goal.startAt)} - ${formatDate(selectedGoal.goal.dueAt)}`
+                        {currentGoal
+                          ? `${formatDate(currentGoal.goal.startAt)} - ${formatDate(currentGoal.goal.dueAt)}`
                           : "Set a goal with a date range."}
                       </p>
                     </div>
                     <div className="flex flex-row items-center gap-x-2 shrink-0">
-                      {selectedGoal && (
-                        <button
-                          className="border border-red-100 text-red-600 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center"
-                          type="button"
-                          aria-label="Delete recruit goal"
-                          disabled={isDeletingGoal}
-                          onClick={handleDeleteGoal}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      {currentGoal && (
+                        <>
+                          <details className="relative">
+                            <summary
+                              className="border border-zinc-200 rounded p-2 h-10 w-10 flex items-center justify-center cursor-pointer list-none text-zinc-600 [&::-webkit-details-marker]:hidden"
+                              aria-label="Edit recruit goal"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </summary>
+                            <div className="absolute right-0 top-12 z-20 w-72 rounded border border-zinc-200 bg-white p-4 shadow-lg">
+                              <p className="text-sm font-semibold">
+                                Edit goal
+                              </p>
+                              <div className="mt-3 grid grid-cols-1 gap-3">
+                                <label className="flex flex-col gap-y-1 min-w-0">
+                                  <span className="text-xs font-semibold text-zinc-500">
+                                    Target successful recruits
+                                  </span>
+                                  <input
+                                    className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
+                                    type="number"
+                                    min={1}
+                                    inputMode="numeric"
+                                    value={editGoalTarget}
+                                    disabled={isUpdatingGoal}
+                                    onChange={(event) =>
+                                      handleEditGoalTargetChange(
+                                        event.target.value,
+                                      )
+                                    }
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-y-1 min-w-0">
+                                  <span className="text-xs font-semibold text-zinc-500">
+                                    Goal start
+                                  </span>
+                                  <input
+                                    className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
+                                    type="date"
+                                    value={editGoalStartDate}
+                                    disabled={isUpdatingGoal}
+                                    onChange={(event) =>
+                                      handleEditGoalStartDateChange(
+                                        event.target.value,
+                                      )
+                                    }
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-y-1 min-w-0">
+                                  <span className="text-xs font-semibold text-zinc-500">
+                                    Goal end
+                                  </span>
+                                  <input
+                                    className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
+                                    type="date"
+                                    value={editGoalDueDate}
+                                    disabled={isUpdatingGoal}
+                                    onChange={(event) =>
+                                      handleEditGoalDueDateChange(
+                                        event.target.value,
+                                      )
+                                    }
+                                  />
+                                </label>
+                                {isUpdatingGoal && !goalEditMessage && (
+                                  <p className="text-sm text-zinc-500">
+                                    Saving...
+                                  </p>
+                                )}
+                                {goalEditMessage && (
+                                  <p className="text-sm text-red-500">
+                                    {goalEditMessage}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </details>
+                          <button
+                            className="border border-red-100 text-red-600 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center"
+                            type="button"
+                            aria-label="Delete recruit goal"
+                            disabled={isDeletingGoal}
+                            onClick={handleDeleteGoal}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
                       )}
-                      <button
-                        className="border border-zinc-200 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center"
-                        type="button"
-                        aria-label="Show older invite goal"
-                        disabled={!canShowOlderGoal}
-                        onClick={() =>
-                          setSelectedGoalIndex((index) =>
-                            Math.max(0, index - 1),
-                          )
-                        }
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <p className="text-sm text-zinc-500 tabular-nums min-w-12 text-center">
-                        {goalPositionLabel}
-                      </p>
-                      <button
-                        className="border border-zinc-200 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center"
-                        type="button"
-                        aria-label="Show newer invite goal"
-                        disabled={!canShowNewerGoal}
-                        onClick={() =>
-                          setSelectedGoalIndex((index) =>
-                            Math.min(goalCount - 1, index + 1),
-                          )
-                        }
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
                     </div>
                   </div>
 
@@ -464,192 +612,158 @@ const InvitesPage = () => {
                     <div className="w-full h-4 bg-grey-2 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-green rounded-full transition-[width] duration-300 ease-out"
-                        style={{ width: `${selectedGoalProgressPercent}%` }}
+                        style={{ width: `${currentGoalProgressPercent}%` }}
                         role="progressbar"
                         aria-valuenow={
-                          selectedGoal?.stats.goalSuccessfulRecruits ?? 0
+                          currentGoal?.stats.goalSuccessfulRecruits ?? 0
                         }
                         aria-valuemin={0}
                         aria-valuemax={
-                          selectedGoal?.goal.targetSuccessfulRecruits ?? 0
+                          currentGoal?.goal.targetSuccessfulRecruits ?? 0
                         }
                         aria-label="Successful recruits toward ambassador goal"
                       />
                     </div>
                     <p className="text-sm sm:text-base tabular-nums">
                       <span className="font-semibold text-green">
-                        {selectedGoal?.stats.goalSuccessfulRecruits ?? 0}
+                        {currentGoal?.stats.goalSuccessfulRecruits ?? 0}
                       </span>
                       <span className="text-zinc-500">
                         {" "}
-                        / {selectedGoal?.goal.targetSuccessfulRecruits ?? 0}{" "}
+                        / {currentGoal?.goal.targetSuccessfulRecruits ?? 0}{" "}
                         successful recruits
                       </span>
                     </p>
+                    <div className="mt-2">
+                      <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2">
+                        <p className="text-xs font-semibold text-zinc-500">
+                          Invites sent
+                        </p>
+                        <p className="text-lg font-semibold tabular-nums">
+                          {ambassadorDashboard.stats.totalInvitesSent}
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  {selectedGoal && (
-                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
-                      {inviteStatsMetrics(selectedGoal.stats).map((metric) => (
+                </div>
+
+                {pastGoals.length > 0 && (
+                  <details className="rounded border border-zinc-200 px-4 py-3 text-sm">
+                    <summary className="cursor-pointer font-medium text-zinc-600">
+                      View past goals
+                    </summary>
+                    <div className="mt-3 flex flex-col divide-y divide-zinc-200">
+                      {pastGoals.map((goal) => (
                         <div
-                          key={metric.label}
-                          className="rounded border border-zinc-200 bg-zinc-100 px-3 py-2 min-w-0"
+                          key={goal.goal.id}
+                          className="py-3 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
                         >
-                          <p className="text-sm text-zinc-500 leading-tight">
-                            {metric.label}
+                          <p className="text-zinc-600">
+                            {formatDate(goal.goal.startAt)} -{" "}
+                            {formatDate(goal.goal.dueAt)}
                           </p>
-                          <p className="mt-1 text-base font-semibold tabular-nums break-words">
-                            {metric.value}
+                          <p className="tabular-nums">
+                            <span className="font-semibold text-green">
+                              {goal.stats.goalSuccessfulRecruits}
+                            </span>
+                            <span className="text-zinc-500">
+                              {" "}
+                              / {goal.goal.targetSuccessfulRecruits} successful
+                              recruits
+                            </span>
                           </p>
                         </div>
                       ))}
                     </div>
-                  )}
+                  </details>
+                )}
 
-                  {selectedGoal && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
-                      <label className="flex flex-col gap-y-1 min-w-0">
-                        <span className="text-xs font-semibold text-zinc-500">
-                          Goal start
-                        </span>
-                        <input
-                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
-                          type="date"
-                          value={editGoalStartDate}
-                          disabled={isUpdatingGoal}
-                          onChange={(event) =>
-                            handleEditGoalStartDateChange(event.target.value)
-                          }
-                        />
-                      </label>
-                      <label className="flex flex-col gap-y-1 min-w-0">
-                        <span className="text-xs font-semibold text-zinc-500">
-                          Goal end
-                        </span>
-                        <input
-                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
-                          type="date"
-                          value={editGoalDueDate}
-                          disabled={isUpdatingGoal}
-                          onChange={(event) =>
-                            handleEditGoalDueDateChange(event.target.value)
-                          }
-                        />
-                      </label>
-                      {isUpdatingGoal && !goalEditMessage && (
-                        <p className="md:col-span-2 text-sm text-zinc-500">
-                          Saving...
-                        </p>
-                      )}
-                      {goalEditMessage && (
-                        <p className="md:col-span-2 text-sm text-red-500">
-                          {goalEditMessage}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                </div>
-
-                <div className="rounded border border-zinc-200 bg-zinc-100 p-4 sm:p-5 flex flex-col gap-y-3">
-                  <div>
-                    <p className="font-semibold text-lg">Set a new goal</p>
-                    <p className="text-sm text-zinc-500">
-                      New goals can start in the past, but they cannot overlap
-                      another invite goal.
-                    </p>
-                  </div>
-
-                  <form
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-end"
-                    onSubmit={handleSetGoal}
-                  >
-                    <label className="flex flex-col gap-y-1 min-w-0">
-                      <span className="text-xs font-semibold text-zinc-500">
-                        Target successful recruits
-                      </span>
-                      <input
-                        className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
-                        type="number"
-                        min={1}
-                        inputMode="numeric"
-                        placeholder="10"
-                        value={goalTarget}
-                        onChange={(event) => setGoalTarget(event.target.value)}
-                      />
-                    </label>
-                    <label className="flex flex-col gap-y-1 min-w-0">
-                      <span className="text-xs font-semibold text-zinc-500">
-                        Start date
-                      </span>
-                      <input
-                        className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
-                        type="date"
-                        value={goalStartDate}
-                        onChange={(event) =>
-                          setGoalStartDate(event.target.value)
-                        }
-                      />
-                    </label>
-                    <label className="flex flex-col gap-y-1 min-w-0">
-                      <span className="text-xs font-semibold text-zinc-500">
-                        End date
-                      </span>
-                      <input
-                        className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
-                        type="date"
-                        value={goalDueDate}
-                        onChange={(event) => setGoalDueDate(event.target.value)}
-                      />
-                    </label>
-                    <button
-                      className="bg-black text-white rounded px-5 py-2 h-11 disabled:opacity-50 whitespace-nowrap w-full sm:col-span-2 lg:col-span-1 lg:w-auto lg:min-w-32"
-                      type="submit"
-                      disabled={isCreatingGoal}
-                    >
-                      Set goal
-                    </button>
-                    {goalFormMessage && (
-                      <p className="sm:col-span-2 lg:col-span-3 text-sm text-red-500">
-                        {goalFormMessage}
+                {showProminentGoalForm && (
+                  <div className="rounded border border-zinc-200 bg-zinc-100 p-4 sm:p-5 flex flex-col gap-y-3">
+                    <div>
+                      <p className="font-semibold text-lg">Set a new goal</p>
+                      <p className="text-sm text-zinc-500">
+                        New goals can start in the past, but they cannot
+                        overlap another invite goal.
                       </p>
-                    )}
-                  </form>
-                </div>
+                    </div>
 
-                <details className="rounded border border-zinc-200 px-4 py-3 text-sm">
-                  <summary className="cursor-pointer font-medium text-zinc-600">
-                    Total invite stats
-                  </summary>
-                  <div className="mt-3 grid grid-cols-2 lg:grid-cols-5 gap-2">
-                    {inviteStatsMetrics(ambassadorDashboard.stats).map(
-                      (metric) => (
-                        <div key={metric.label} className="min-w-0">
-                          <p className="text-sm text-zinc-500 leading-tight">
-                            {metric.label}
-                          </p>
-                          <p className="mt-1 text-base font-semibold tabular-nums break-words">
-                            {metric.value}
-                          </p>
-                        </div>
-                      ),
-                    )}
+                    <form
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 items-end"
+                      onSubmit={handleSetGoal}
+                    >
+                      <label className="flex flex-col gap-y-1 min-w-0">
+                        <span className="text-xs font-semibold text-zinc-500">
+                          Target successful recruits
+                        </span>
+                        <input
+                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
+                          type="number"
+                          min={1}
+                          inputMode="numeric"
+                          placeholder="10"
+                          value={goalTarget}
+                          onChange={(event) =>
+                            setGoalTarget(event.target.value)
+                          }
+                        />
+                      </label>
+                      <label className="flex flex-col gap-y-1 min-w-0">
+                        <span className="text-xs font-semibold text-zinc-500">
+                          Start date
+                        </span>
+                        <input
+                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
+                          type="date"
+                          value={goalStartDate}
+                          onChange={(event) =>
+                            setGoalStartDate(event.target.value)
+                          }
+                        />
+                      </label>
+                      <label className="flex flex-col gap-y-1 min-w-0">
+                        <span className="text-xs font-semibold text-zinc-500">
+                          End date
+                        </span>
+                        <input
+                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
+                          type="date"
+                          value={goalDueDate}
+                          onChange={(event) =>
+                            setGoalDueDate(event.target.value)
+                          }
+                        />
+                      </label>
+                      <button
+                        className="bg-black text-white rounded px-5 py-2 h-11 disabled:opacity-50 whitespace-nowrap w-full sm:col-span-2 lg:col-span-1 lg:w-auto lg:min-w-32"
+                        type="submit"
+                        disabled={isCreatingGoal}
+                      >
+                        Set goal
+                      </button>
+                      {goalFormMessage && (
+                        <p className="sm:col-span-2 lg:col-span-3 text-sm text-red-500">
+                          {goalFormMessage}
+                        </p>
+                      )}
+                    </form>
                   </div>
-                </details>
+                )}
 
                 <p className="text-sm text-zinc-500 leading-snug">
-                  Successful recruits are counted when someone you invited
-                  completes their first assigned action.
+                  Successful recruits are people you invited who sign their
+                  contract and complete their first weekly action.
                 </p>
               </div>
             )}
           </Card>
         )}
 
-        <Card style={CardStyle.White} className="p-6 gap-y-6 order-1">
+        <div className="flex flex-col gap-y-4 order-1">
           <div className="flex flex-col gap-y-4">
             <h1 className="text-title">Invites</h1>
-            <div className="w-full flex flex-row items-center gap-x-6">
+            <div className="w-full flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-x-6">
               <div className="flex-1 rounded flex flex-col gap-y-1 min-w-0">
                 <p className="leading-snug text-zinc-500 text-sm flex flex-row items-center gap-x-1">
                   Help the Alliance reach its current growth goal
@@ -683,7 +797,7 @@ const InvitesPage = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-row items-center gap-x-2 bg-zinc-50 rounded p-4">
+              <div className="flex flex-row items-center gap-x-2 bg-white rounded p-4 shrink-0">
                 <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
                 <div>
                   <p className="font-semibold text-black text-lg sm:text-xl">
@@ -696,147 +810,128 @@ const InvitesPage = () => {
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-row gap-x-2">
-            <PillTab
-              label="Invite an individual"
-              selected={activeTab === "onetime"}
-              onClick={() => setActiveTab("onetime")}
-            />
-            <PillTab
-              label="Invite multiple people"
-              selected={activeTab === "reusable"}
-              onClick={() => setActiveTab("reusable")}
-            />
-          </div>
-        </Card>
+        <div className="flex flex-col gap-y-12 order-2 mt-2">
+          <InviteForm onInviteCreated={handleInviteCreated} />
+        </div>
+        <div className="flex flex-col gap-y-12 order-4 pt-5">
+          <InviteShareLink showCreateCard={false} />
+          {isError && (
+            <p className="text-red-500 text-sm">Failed to load invites</p>
+          )}
 
-        {activeTab === "reusable" ? (
-          <div className="flex flex-col gap-y-12 order-2">
-            <InviteShareLink />
-          </div>
-        ) : (
-          <>
-            <div className="flex flex-col gap-y-12 order-2">
-              <InviteForm onInviteCreated={handleInviteCreated} />
+          {actionable.length === 0 &&
+            unverifiableActionable.length === 0 &&
+            waitingForResponse.length === 0 &&
+            settled.length === 0 && (
+              <p className="text-zinc-500 text-center text-base sm:text-lg">
+                Your invites will appear here once you create them.
+              </p>
+            )}
+
+          {actionable.length > 0 && (
+            <div className="flex flex-col gap-y-4">
+              <p className="font-semibold text-2xl">
+                {inviteBuckets.actionable.title}
+              </p>
+              <List>
+                {actionable.map((request) => (
+                  <OnetimeInviteListItem
+                    key={request.id}
+                    invite={request}
+                    showCommunityLabel={true}
+                    communityLabel={request.community?.name}
+                    selfInvited={user.id === request.invitingUser?.id}
+                    onApprove={handleApproveInvite}
+                    onReject={handleRejectInvite}
+                  />
+                ))}
+              </List>
             </div>
-            <div className="flex flex-col gap-y-12 order-4 pt-5">
-              {isError && (
-                <p className="text-red-500 text-sm">Failed to load invites</p>
-              )}
+          )}
 
-              {actionable.length === 0 &&
-                unverifiableActionable.length === 0 &&
-                waitingForResponse.length === 0 &&
-                settled.length === 0 && (
-                  <p className="text-zinc-500 text-center text-base sm:text-lg">
-                    Your invites will appear here once you create them.
-                  </p>
-                )}
-
-              {actionable.length > 0 && (
-                <div className="flex flex-col gap-y-4">
-                  <p className="font-semibold text-2xl">
-                    {inviteBuckets.actionable.title}
-                  </p>
-                  <List>
-                    {actionable.map((request) => (
-                      <OnetimeInviteListItem
-                        key={request.id}
-                        invite={request}
-                        showCommunityLabel={true}
-                        communityLabel={request.community?.name}
-                        selfInvited={user.id === request.invitingUser?.id}
-                        onApprove={handleApproveInvite}
-                        onReject={handleRejectInvite}
-                      />
-                    ))}
-                  </List>
-                </div>
-              )}
-
-              {unverifiableActionable.length > 0 && (
-                <div className="flex flex-col gap-y-4">
-                  <div className="flex flex-col gap-y-1">
-                    <p className="font-semibold text-2xl">
-                      {inviteBuckets.unverifiableActionable.title}
-                    </p>
-                    <p className="text-zinc-500">
-                      {inviteBuckets.unverifiableActionable.description}
-                    </p>
-                  </div>
-                  <List>
-                    {unverifiableActionable.map((invite) => (
-                      <OnetimeInviteListItem
-                        key={invite.id}
-                        invite={invite}
-                        showCommunityLabel={true}
-                        communityLabel={invite.community?.name}
-                        selfInvited={user.id === invite.invitingUser?.id}
-                        copied={copiedInviteId === invite.id}
-                        onDelete={handleDeleteInvite}
-                        onCopy={copyToClipboard}
-                        onCopied={handleCopied}
-                      />
-                    ))}
-                  </List>
-                </div>
-              )}
-
-              {waitingForResponse.length > 0 && (
-                <div className="flex flex-col gap-y-4">
-                  <div className="flex flex-col gap-y-1">
-                    <p className="font-semibold text-2xl">
-                      {inviteBuckets.waitingForResponse.title}
-                    </p>
-                    <p className="text-zinc-500">
-                      {inviteBuckets.waitingForResponse.description}
-                    </p>
-                  </div>
-                  <List>
-                    {waitingForResponse.map((request) => (
-                      <OnetimeInviteListItem
-                        key={request.id}
-                        invite={request}
-                        showCommunityLabel={true}
-                        communityLabel={request.community?.name}
-                        selfInvited={user.id === request.invitingUser?.id}
-                        onDelete={(inviteId) => handleDeleteRequest(inviteId)}
-                      />
-                    ))}
-                  </List>
-                </div>
-              )}
-
-              {settled.length > 0 && (
-                <div className="flex flex-col gap-y-4">
-                  <div className="flex flex-col gap-y-1">
-                    <p className="font-semibold text-2xl">
-                      {inviteBuckets.settled.title}
-                    </p>
-                    <p className="text-zinc-500">
-                      {inviteBuckets.settled.description}
-                    </p>
-                  </div>
-                  <List>
-                    {settled.map((invite) => (
-                      <OnetimeInviteListItem
-                        key={invite.id}
-                        invite={invite}
-                        showCommunityLabel={true}
-                        communityLabel={invite.community?.name}
-                        selfInvited={user.id === invite.invitingUser?.id}
-                        copied={copiedInviteId === invite.id}
-                        onCopy={copyToClipboard}
-                        onCopied={handleCopied}
-                      />
-                    ))}
-                  </List>
-                </div>
-              )}
+          {unverifiableActionable.length > 0 && (
+            <div className="flex flex-col gap-y-4">
+              <div className="flex flex-col gap-y-1">
+                <p className="font-semibold text-2xl">
+                  {inviteBuckets.unverifiableActionable.title}
+                </p>
+                <p className="text-zinc-500">
+                  {inviteBuckets.unverifiableActionable.description}
+                </p>
+              </div>
+              <List>
+                {unverifiableActionable.map((invite) => (
+                  <OnetimeInviteListItem
+                    key={invite.id}
+                    invite={invite}
+                    showCommunityLabel={true}
+                    communityLabel={invite.community?.name}
+                    selfInvited={user.id === invite.invitingUser?.id}
+                    copied={copiedInviteId === invite.id}
+                    onDelete={handleDeleteInvite}
+                    onCopy={copyToClipboard}
+                    onCopied={handleCopied}
+                  />
+                ))}
+              </List>
             </div>
-          </>
-        )}
+          )}
+
+          {waitingForResponse.length > 0 && (
+            <div className="flex flex-col gap-y-4">
+              <div className="flex flex-col gap-y-1">
+                <p className="font-semibold text-2xl">
+                  {inviteBuckets.waitingForResponse.title}
+                </p>
+                <p className="text-zinc-500">
+                  {inviteBuckets.waitingForResponse.description}
+                </p>
+              </div>
+              <List>
+                {waitingForResponse.map((request) => (
+                  <OnetimeInviteListItem
+                    key={request.id}
+                    invite={request}
+                    showCommunityLabel={true}
+                    communityLabel={request.community?.name}
+                    selfInvited={user.id === request.invitingUser?.id}
+                    onDelete={(inviteId) => handleDeleteRequest(inviteId)}
+                  />
+                ))}
+              </List>
+            </div>
+          )}
+
+          {settled.length > 0 && (
+            <div className="flex flex-col gap-y-4">
+              <div className="flex flex-col gap-y-1">
+                <p className="font-semibold text-2xl">
+                  {inviteBuckets.settled.title}
+                </p>
+                <p className="text-zinc-500">
+                  {inviteBuckets.settled.description}
+                </p>
+              </div>
+              <List>
+                {settled.map((invite) => (
+                  <OnetimeInviteListItem
+                    key={invite.id}
+                    invite={invite}
+                    showCommunityLabel={true}
+                    communityLabel={invite.community?.name}
+                    selfInvited={user.id === invite.invitingUser?.id}
+                    copied={copiedInviteId === invite.id}
+                    onDelete={handleDeleteInvite}
+                    onCopy={copyToClipboard}
+                    onCopied={handleCopied}
+                  />
+                ))}
+              </List>
+            </div>
+          )}
+        </div>
       </div>
     </CenterLayout>
   );

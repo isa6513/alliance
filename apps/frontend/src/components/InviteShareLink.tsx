@@ -11,7 +11,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const inviteTitleClass = "font-semibold text-xl text-zinc-900";
 
-const InviteShareLink = () => {
+type InviteShareLinkProps = {
+  showCreateCard?: boolean;
+};
+
+const InviteShareLink = ({ showCreateCard = true }: InviteShareLinkProps) => {
   const { error: errorToast, confirm } = useToast();
   const {
     links,
@@ -86,51 +90,53 @@ const InviteShareLink = () => {
 
   return (
     <>
-      <Card style={CardStyle.White} className="p-6">
-        <div className="flex flex-col gap-y-4">
-          <div className="flex flex-col gap-y-2">
-            <p className={inviteTitleClass}>Invite multiple people</p>
-            <p className="text-invite-form-body">
-              Create one invite link you can share with multiple people. Add a
-              label to remember where you shared each one.
-            </p>
-          </div>
+      {showCreateCard && (
+        <Card style={CardStyle.White} className="p-6">
           <div className="flex flex-col gap-y-4">
-            <input
-              type="text"
-              className="border border-zinc-300 rounded px-3 py-2"
-              placeholder="Label this link (optional) — e.g. Instagram bio"
-              value={labelDraft}
-              onChange={(event) => setLabelDraft(event.target.value)}
-              disabled={isCreating}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  handleCreate();
-                }
-              }}
-            />
-            <NewButton
-              color={ButtonColor.Black}
-              onClick={handleCreate}
-              disabled={isCreating}
-              className="w-full"
-            >
-              {isCreating ? "Creating..." : "Create invite link"}
-            </NewButton>
+            <div className="flex flex-col gap-y-2">
+              <p className={inviteTitleClass}>Invite multiple people</p>
+              <p className="text-invite-form-body">
+                Create one invite link you can share with multiple people. Add
+                a label to remember where you shared each one.
+              </p>
+            </div>
+            <div className="flex flex-col gap-y-4">
+              <input
+                type="text"
+                className="border border-zinc-300 rounded px-3 py-2"
+                placeholder="Label this link (optional) — e.g. Instagram bio"
+                value={labelDraft}
+                onChange={(event) => setLabelDraft(event.target.value)}
+                disabled={isCreating}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleCreate();
+                  }
+                }}
+              />
+              <NewButton
+                color={ButtonColor.Black}
+                onClick={handleCreate}
+                disabled={isCreating}
+                className="w-full"
+              >
+                {isCreating ? "Creating..." : "Create invite link"}
+              </NewButton>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {isError ? (
         <p className="text-red-500 text-sm">Failed to load invite links</p>
       ) : isPending ? (
         <p className="text-zinc-500 text-sm">Loading…</p>
-      ) : links.length === 0 ? (
+      ) : links.length === 0 && showCreateCard ? (
         <p className="text-zinc-500 text-center text-base sm:text-lg">
           Your invite links will appear here once you create them.
         </p>
-      ) : (
+      ) : links.length === 0 ? null : (
         <div className="flex flex-col gap-y-4">
           <p className="font-semibold text-2xl">Your invite links</p>
           <List>

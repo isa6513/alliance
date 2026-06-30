@@ -613,6 +613,7 @@ export class ActionsService {
         activityId: number | string;
         completedAt: Date | string;
         signedAt: Date | string;
+        staffLikeCount: number | string;
       }[]
     >(
       `
@@ -621,7 +622,8 @@ export class ActionsService {
           action.id AS "actionId",
           activity.id AS "activityId",
           activity."createdAt" AS "completedAt",
-          MAX(contract_event.date) AS "signedAt"
+          MAX(contract_event.date) AS "signedAt",
+          COUNT(DISTINCT staff_liker.id) AS "staffLikeCount"
         FROM action_activity activity
         INNER JOIN action
           ON action.id = activity."actionId"
@@ -629,13 +631,21 @@ export class ActionsService {
         INNER JOIN contract_event
           ON contract_event."userId" = activity."userId"
           AND contract_event.type = $1
-        LEFT JOIN comment
-          ON comment."parentObjectType" = $2
-          AND comment."parentObjectId" = activity.id
-          AND comment.deleted = false
+        LEFT JOIN comment staff_comment
+          ON staff_comment."parentObjectType" = $2
+          AND staff_comment."parentObjectId" = activity.id
+          AND staff_comment.deleted = false
+        LEFT JOIN "user" staff_comment_author
+          ON staff_comment_author.id = staff_comment."authorId"
+          AND staff_comment_author.staff = true
+        LEFT JOIN action_activity_likes_user activity_like
+          ON activity_like."actionActivityId" = activity.id
+        LEFT JOIN "user" staff_liker
+          ON staff_liker.id = activity_like."userId"
+          AND staff_liker.staff = true
         WHERE activity.type = $3
         GROUP BY activity.id, activity."userId", action.id
-        HAVING COUNT(comment.id) = 0
+        HAVING COUNT(staff_comment_author.id) = 0
         ORDER BY MAX(contract_event.date) DESC
       `,
       [
@@ -660,6 +670,7 @@ export class ActionsService {
         activityId: Number(row.activityId),
         signedAt: new Date(row.signedAt),
         completedAt: new Date(row.completedAt),
+        staffLikeCount: Number(row.staffLikeCount),
       };
     });
   }

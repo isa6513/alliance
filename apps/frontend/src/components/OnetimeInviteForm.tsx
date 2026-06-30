@@ -6,6 +6,8 @@ import TextareaAutosize from "react-textarea-autosize";
 type OnetimeInviteFormProps = {
   title?: string;
   explanation?: readonly string[];
+  inviteePlaceholder?: string;
+  contextExplanation?: string;
   inviteeName: string;
   setInviteeName: (value: string) => void;
   info: string;
@@ -19,6 +21,8 @@ type OnetimeInviteFormProps = {
 const OnetimeInviteForm = ({
   title,
   explanation,
+  inviteePlaceholder = "Enter the invitee's first name",
+  contextExplanation = onetimeInviteCreation.inviteeContextExplanation,
   inviteeName,
   setInviteeName,
   info,
@@ -43,12 +47,12 @@ const OnetimeInviteForm = ({
         <input
           type="text"
           className="border border-zinc-300 rounded px-3 py-2 flex-1"
-          placeholder="Enter the invitee's first name"
+          placeholder={inviteePlaceholder}
           value={inviteeName}
           onChange={(e) => setInviteeName(e.target.value)}
         />
         <p className="text-invite-form-body">
-          {onetimeInviteCreation.inviteeContextExplanation}
+          {contextExplanation}
         </p>
         <TextareaAutosize
           className="border border-zinc-300 rounded px-3 py-2 bg-white overflow-hidden"

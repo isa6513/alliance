@@ -580,6 +580,7 @@ export type UnwelcomedSignedContractMember = {
   activityId: number;
   signedAt: Date;
   completedAt: Date;
+  staffLikeCount: number;
 };
 
 export class UnwelcomedSignedContractMemberDto {
@@ -599,12 +600,16 @@ export class UnwelcomedSignedContractMemberDto {
   @ApiProperty()
   completedAt: Date;
 
+  @ApiProperty()
+  staffLikeCount: number;
+
   constructor(input: UnwelcomedSignedContractMember) {
     this.user = new ProfileDto(input.user);
     this.actionId = input.actionId;
     this.activityId = input.activityId;
     this.signedAt = input.signedAt;
     this.completedAt = input.completedAt;
+    this.staffLikeCount = input.staffLikeCount;
   }
 }
 

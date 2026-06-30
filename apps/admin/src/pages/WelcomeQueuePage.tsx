@@ -4,6 +4,8 @@ import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
+type WelcomeQueueFilter = "all" | "staff-liked";
+
 const formatDate = (date: string): string =>
   new Date(date).toLocaleDateString("en-US", {
     month: "short",
@@ -19,6 +21,7 @@ const WelcomeQueuePage: React.FC = () => {
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<WelcomeQueueFilter>("all");
 
   useEffect(() => {
     setLoading(true);
@@ -36,13 +39,30 @@ const WelcomeQueuePage: React.FC = () => {
       });
   }, []);
 
-  const sortedMembers = useMemo(
-    () =>
-      [...members].sort(
-        (a, b) =>
-          new Date(b.signedAt).getTime() - new Date(a.signedAt).getTime(),
-      ),
+  const staffLikedCount = useMemo(
+    () => members.filter((member) => member.staffLikeCount > 0).length,
     [members],
+  );
+
+  const displayedMembers = useMemo(
+    () =>
+      members
+        .filter((member) => {
+          switch (filter) {
+            case "all":
+              return true;
+            case "staff-liked":
+              return member.staffLikeCount > 0;
+            default:
+              filter satisfies never;
+              return true;
+          }
+        })
+        .sort(
+          (a, b) =>
+            new Date(b.signedAt).getTime() - new Date(a.signedAt).getTime(),
+        ),
+    [filter, members],
   );
 
   return (
@@ -53,27 +73,52 @@ const WelcomeQueuePage: React.FC = () => {
         <p className="text-sm text-zinc-600 mt-1 max-w-3xl">
           We welcome every user by leaving a comment on their signed contract
           action. This list shows signed members whose contract completion has
-          not received a comment yet.
+          not received a staff comment yet.
         </p>
       </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       <div className="border border-zinc-200 rounded-lg bg-white overflow-hidden">
-        <div className="px-4 py-3 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-zinc-200 bg-zinc-50 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-zinc-800">
             {loading
               ? "Loading members..."
-              : `${sortedMembers.length} member${
-                  sortedMembers.length === 1 ? "" : "s"
-                } need${sortedMembers.length === 1 ? "s" : ""} a welcome`}
+              : `${displayedMembers.length} member${
+                  displayedMembers.length === 1 ? "" : "s"
+                } need${
+                  displayedMembers.length === 1 ? "s" : ""
+                } a welcome`}
           </p>
+          <div className="flex rounded-md border border-zinc-300 bg-white overflow-hidden text-sm">
+            <button
+              type="button"
+              onClick={() => setFilter("all")}
+              className={`px-3 py-1.5 ${
+                filter === "all"
+                  ? "bg-zinc-800 text-white"
+                  : "text-zinc-600 hover:bg-zinc-100"
+              }`}
+            >
+              All ({members.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter("staff-liked")}
+              className={`px-3 py-1.5 border-l border-zinc-300 ${
+                filter === "staff-liked"
+                  ? "bg-zinc-800 text-white"
+                  : "text-zinc-600 hover:bg-zinc-100"
+              }`}
+            >
+              Staff liked ({staffLikedCount})
+            </button>
+          </div>
         </div>
 
-        {!loading && sortedMembers.length === 0 && !error ? (
+        {!loading && displayedMembers.length === 0 && !error ? (
           <p className="px-4 py-8 text-sm text-zinc-500">
-            Everyone who has signed their membership contract has a welcome
-            comment.
+            No signed contract completions match this filter.
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -90,12 +135,15 @@ const WelcomeQueuePage: React.FC = () => {
                     Completed
                   </th>
                   <th className="px-4 py-2 font-medium text-zinc-600">
+                    Staff Likes
+                  </th>
+                  <th className="px-4 py-2 font-medium text-zinc-600">
                     Links
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {sortedMembers.map((entry) => (
+                {displayedMembers.map((entry) => (
                   <tr key={entry.activityId} className="hover:bg-zinc-50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -119,6 +167,9 @@ const WelcomeQueuePage: React.FC = () => {
                     <td className="px-4 py-3 text-zinc-600">
                       {formatDate(entry.completedAt)}
                     </td>
+                    <td className="px-4 py-3 text-zinc-600">
+                      {entry.staffLikeCount}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-3">
                         <Link
@@ -136,7 +187,7 @@ const WelcomeQueuePage: React.FC = () => {
                 ))}
                 {loading && (
                   <tr>
-                    <td className="px-4 py-8 text-sm text-zinc-500" colSpan={4}>
+                    <td className="px-4 py-8 text-sm text-zinc-500" colSpan={5}>
                       Loading members...
                     </td>
                   </tr>

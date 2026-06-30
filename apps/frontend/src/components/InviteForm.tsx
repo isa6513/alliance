@@ -8,6 +8,7 @@ import { getMemberCount } from "@alliance/shared/lib/communityUtils";
 import { onetimeInviteCreation } from "@alliance/shared/lib/copy";
 import { getOnetimeInviteSignupUrl } from "@alliance/shared/lib/inviteUrls";
 import { useMyCommunities } from "@alliance/shared/lib/useMyCommunities";
+import { useReusableInvites } from "@alliance/shared/lib/useReusableInvites";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import AppMarkdownWrapper from "@alliance/sharedweb/ui/AppMarkdownWrapper";
@@ -42,10 +43,13 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   const [placement, setPlacement] = useState<PlacementSelection>({
     kind: "new",
   });
+  const [multipleUseInvite, setMultipleUseInvite] = useState(false);
   const [inviteeName, setInviteeName] = useState("");
   const [info, setInfo] = useState("");
   const [creatingInvite, setCreatingInvite] = useState(false);
   const { communities, refreshCommunities } = useMyCommunities({});
+  const { createInvite: createReusableInvite, isCreating: creatingReusable } =
+    useReusableInvites();
 
   // Default placement to a group the user leads. Runs once so it never clobbers
   // a manual selection on a later refetch.
@@ -167,6 +171,23 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     [inviteeName, info, errorToast, successToast, onInviteCreated],
   );
 
+  const handleCreateReusableInvite = useCallback(() => {
+    if (!inviteeName.trim()) {
+      errorToast("Please enter a group name");
+      return;
+    }
+
+    createReusableInvite(inviteeName.trim()).then(
+      () => {
+        successToast("Invite link created successfully!");
+        setInviteeName("");
+        setInfo("");
+      },
+      (err: Error) =>
+        errorToast(`Failed to create invite link: ${err.message}`),
+    );
+  }, [createReusableInvite, errorToast, inviteeName, successToast]);
+
   const onCreateCommunity = useCallback(
     async (community: CommunityDto) => {
       try {
@@ -202,7 +223,33 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
     <Card style={CardStyle.White} className="p-6">
       <div className="flex flex-col gap-y-6">
         <div className="flex flex-col gap-y-4">
-          <p className={inviteTitleClass}>{onetimeInviteCreation.title}</p>
+          <div className="flex flex-col gap-y-2">
+            <p className={inviteTitleClass}>{onetimeInviteCreation.title}</p>
+            <div className="flex flex-row flex-wrap gap-2 text-sm">
+              <button
+                type="button"
+                className={
+                  multipleUseInvite
+                    ? "rounded border border-zinc-200 bg-white px-3 py-1.5 font-medium text-zinc-600 hover:border-zinc-300 hover:text-zinc-900"
+                    : "rounded border border-green bg-green/10 px-3 py-1.5 font-semibold text-green"
+                }
+                onClick={() => setMultipleUseInvite(false)}
+              >
+                Single person
+              </button>
+              <button
+                type="button"
+                className={
+                  multipleUseInvite
+                    ? "rounded border border-green bg-green/10 px-3 py-1.5 font-semibold text-green"
+                    : "rounded border border-zinc-200 bg-white px-3 py-1.5 font-medium text-zinc-600 hover:border-zinc-300 hover:text-zinc-900"
+                }
+                onClick={() => setMultipleUseInvite(true)}
+              >
+                Many people
+              </button>
+            </div>
+          </div>
           <AppMarkdownWrapper
             className="text-invite-form-body"
             markdownContent={onetimeInviteCreation.explanation.join("\n\n")}
@@ -220,6 +267,16 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
             </Link>
           )}
           <OnetimeInviteForm
+            inviteePlaceholder={
+              multipleUseInvite
+                ? "Group name for multiple people"
+                : "Enter the invitee's first name"
+            }
+            contextExplanation={
+              multipleUseInvite
+                ? "(Optional) Any context to help you remember where you will share this invite link. This is not shown on the invite."
+                : onetimeInviteCreation.inviteeContextExplanation
+            }
             inviteeName={inviteeName}
             setInviteeName={setInviteeName}
             info={info}
@@ -227,148 +284,171 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
           />
         </div>
 
-        <div className="flex flex-col gap-y-4">
-          <p className={inviteSectionLabelClass}>
-            {onetimeInviteCreation.responsible.leader.title}
-          </p>
-          <p className="text-invite-form-body">
-            {onetimeInviteCreation.groupContext}
-          </p>
-          <DropdownSelect
-            options={communityOptions}
-            value={dropdownSelectedLabel}
-            onChange={([key]) => {
-              const k = String(key);
-              if (k === "assign") {
-                setPlacement({ kind: "assign" });
-              } else if (k === "new") {
-                setPlacement({ kind: "new" });
-              } else if (k.startsWith("c")) {
-                setPlacement({ kind: "community", id: Number(k.slice(1)) });
-              }
-            }}
-            titleOverride={dropdownSelectedLabel}
-            dropdownWidth="medium"
-          />
-        </div>
-
-        {placement.kind === "assign" && (
-          <div className="flex flex-col gap-y-4">
-            {!memberCommunityAllowsMemberInvites ? (
-              <AppMarkdownWrapper
-                className="text-invite-form-body"
-                markdownContent={onetimeInviteCreation.not_responsible.explanations.genericGroup.join(
-                  "\n\n",
-                )}
+        {multipleUseInvite ? (
+          <NewButton
+            color={ButtonColor.Black}
+            onClick={handleCreateReusableInvite}
+            disabled={creatingReusable || !inviteeName.trim()}
+            className="w-full"
+          >
+            {creatingReusable
+              ? "Creating invite link..."
+              : "Create invite link"}
+          </NewButton>
+        ) : (
+          <>
+            <div className="flex flex-col gap-y-4">
+              <p className={inviteSectionLabelClass}>
+                {onetimeInviteCreation.responsible.leader.title}
+              </p>
+              <p className="text-invite-form-body">
+                {onetimeInviteCreation.groupContext}
+              </p>
+              <DropdownSelect
+                options={communityOptions}
+                value={dropdownSelectedLabel}
+                onChange={([key]) => {
+                  const k = String(key);
+                  if (k === "assign") {
+                    setPlacement({ kind: "assign" });
+                  } else if (k === "new") {
+                    setPlacement({ kind: "new" });
+                  } else if (k.startsWith("c")) {
+                    setPlacement({
+                      kind: "community",
+                      id: Number(k.slice(1)),
+                    });
+                  }
+                }}
+                titleOverride={dropdownSelectedLabel}
+                dropdownWidth="medium"
               />
-            ) : memberCommunityRemainingCapacity > 0 ? (
-              <>
+            </div>
+
+            {placement.kind === "assign" && (
+              <div className="flex flex-col gap-y-4">
+                {!memberCommunityAllowsMemberInvites ? (
+                  <AppMarkdownWrapper
+                    className="text-invite-form-body"
+                    markdownContent={onetimeInviteCreation.not_responsible.explanations.genericGroup.join(
+                      "\n\n",
+                    )}
+                  />
+                ) : memberCommunityRemainingCapacity > 0 ? (
+                  <>
+                    <AppMarkdownWrapper
+                      className="text-invite-form-body"
+                      markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroup.join(
+                        "\n\n",
+                      )}
+                    />
+                    <Link
+                      to={`/groups?communityId=${memberCommunities[0].id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="border border-zinc-200 bg-white hover:bg-zinc-50 rounded px-3 py-2.5 flex flex-col gap-y-2 self-start max-w-full"
+                    >
+                      <p className={inviteSectionLabelClass}>
+                        Your current group
+                      </p>
+                      <div className="flex flex-row items-center gap-x-2 min-w-0">
+                        <AvatarProfile
+                          pfp={memberCommunities[0].photo ?? null}
+                          size="small"
+                        />
+                        <div className="flex flex-col min-w-0 sm:flex-row sm:items-baseline sm:gap-x-2">
+                          <p className={`${inviteStrongClass} truncate`}>
+                            {memberCommunities[0].name}
+                          </p>
+                          <p className="text-invite-form-body shrink-0">
+                            {`${memberCommunityRemainingCapacity} open seat${
+                              memberCommunityRemainingCapacity === 1 ? "" : "s"
+                            }`}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  </>
+                ) : (
+                  <AppMarkdownWrapper
+                    className="text-invite-form-body"
+                    markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.join(
+                      "\n\n",
+                    )}
+                  />
+                )}
+                <NewButton
+                  color={ButtonColor.Black}
+                  onClick={() => handleCreateInvite(null)}
+                  disabled={creatingInvite || !inviteeName.trim()}
+                  className="w-full"
+                >
+                  {creatingInvite ? "Creating..." : "Create invite"}
+                </NewButton>
+              </div>
+            )}
+
+            {placement.kind === "new" && (
+              <div className="flex flex-col gap-y-4">
                 <AppMarkdownWrapper
                   className="text-invite-form-body"
-                  markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroup.join(
+                  markdownContent={onetimeInviteCreation.responsible.leader.invite.explanation.join(
                     "\n\n",
                   )}
                 />
-                <Link
-                  to={`/groups?communityId=${memberCommunities[0].id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="border border-zinc-200 bg-white hover:bg-zinc-50 rounded px-3 py-2.5 flex flex-col gap-y-2 self-start max-w-full"
-                >
-                  <p className={inviteSectionLabelClass}>Your current group</p>
-                  <div className="flex flex-row items-center gap-x-2 min-w-0">
-                    <AvatarProfile
-                      pfp={memberCommunities[0].photo ?? null}
-                      size="small"
-                    />
-                    <div className="flex flex-col min-w-0 sm:flex-row sm:items-baseline sm:gap-x-2">
-                      <p className={`${inviteStrongClass} truncate`}>
-                        {memberCommunities[0].name}
-                      </p>
-                      <p className="text-invite-form-body shrink-0">
-                        {`${memberCommunityRemainingCapacity} open seat${
-                          memberCommunityRemainingCapacity === 1 ? "" : "s"
-                        }`}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              </>
-            ) : (
-              <AppMarkdownWrapper
-                className="text-invite-form-body"
-                markdownContent={onetimeInviteCreation.not_responsible.explanations.yourGroupNoCapacity.join(
-                  "\n\n",
+                <p className={inviteSectionLabelClass}>
+                  {onetimeInviteCreation.responsible.leader.newGroup.title}
+                </p>
+                {!isLeader && (
+                  <p className="text-invite-form-body">
+                    You are not leading a group yet—create one to be responsible
+                    for this member.
+                  </p>
                 )}
-              />
+                <p className="text-invite-form-body">
+                  Read our{" "}
+                  <Link
+                    to="/groups-guide"
+                    className="text-green hover:underline"
+                  >
+                    groups guide
+                  </Link>{" "}
+                  to learn how to lead a group.
+                </p>
+                <CommunityCreateForm
+                  name={user?.name}
+                  createButtonTextOverride={
+                    creatingInvite
+                      ? "Creating invite..."
+                      : onetimeInviteCreation.responsible.leader.newGroup
+                          .createButtonText
+                  }
+                  createDisabled={creatingInvite || !inviteeName.trim()}
+                  onSuccess={onCreateCommunity}
+                  includePhotoEditor={false}
+                  fullWidthButtons={true}
+                />
+              </div>
             )}
-            <NewButton
-              color={ButtonColor.Black}
-              onClick={() => handleCreateInvite(null)}
-              disabled={creatingInvite || !inviteeName.trim()}
-              className="w-full"
-            >
-              {creatingInvite ? "Creating..." : "Create invite"}
-            </NewButton>
-          </div>
-        )}
 
-        {placement.kind === "new" && (
-          <div className="flex flex-col gap-y-4">
-            <AppMarkdownWrapper
-              className="text-invite-form-body"
-              markdownContent={onetimeInviteCreation.responsible.leader.invite.explanation.join(
-                "\n\n",
-              )}
-            />
-            <p className={inviteSectionLabelClass}>
-              {onetimeInviteCreation.responsible.leader.newGroup.title}
-            </p>
-            {!isLeader && (
-              <p className="text-invite-form-body">
-                You are not leading a group yet—create one to be responsible for
-                this member.
-              </p>
+            {placement.kind === "community" && selectedCommunity && (
+              <div className="flex flex-col gap-y-4">
+                <AppMarkdownWrapper
+                  className="text-invite-form-body"
+                  markdownContent={onetimeInviteCreation.responsible.leader.invite.explanation.join(
+                    "\n\n",
+                  )}
+                />
+                <NewButton
+                  color={ButtonColor.Black}
+                  onClick={() => handleCreateInvite(placement.id)}
+                  disabled={creatingInvite || !inviteeName.trim()}
+                  className="w-full"
+                >
+                  {creatingInvite ? "Creating invite..." : "Create invite"}
+                </NewButton>
+              </div>
             )}
-            <p className="text-invite-form-body">
-              Read our{" "}
-              <Link to="/groups-guide" className="text-green hover:underline">
-                groups guide
-              </Link>{" "}
-              to learn how to lead a group.
-            </p>
-            <CommunityCreateForm
-              name={user?.name}
-              createButtonTextOverride={
-                creatingInvite
-                  ? "Creating invite..."
-                  : onetimeInviteCreation.responsible.leader.newGroup
-                      .createButtonText
-              }
-              createDisabled={creatingInvite || !inviteeName.trim()}
-              onSuccess={onCreateCommunity}
-              includePhotoEditor={false}
-              fullWidthButtons={true}
-            />
-          </div>
-        )}
-
-        {placement.kind === "community" && selectedCommunity && (
-          <div className="flex flex-col gap-y-4">
-            <AppMarkdownWrapper
-              className="text-invite-form-body"
-              markdownContent={onetimeInviteCreation.responsible.leader.invite.explanation.join(
-                "\n\n",
-              )}
-            />
-            <NewButton
-              color={ButtonColor.Black}
-              onClick={() => handleCreateInvite(placement.id)}
-              disabled={creatingInvite || !inviteeName.trim()}
-              className="w-full"
-            >
-              {creatingInvite ? "Creating invite..." : "Create invite"}
-            </NewButton>
-          </div>
+          </>
         )}
       </div>
     </Card>

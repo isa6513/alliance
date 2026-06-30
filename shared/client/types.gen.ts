@@ -1993,6 +1993,7 @@ export type UnwelcomedSignedContractMemberDto = {
     activityId: number;
     signedAt: string;
     completedAt: string;
+    staffLikeCount: number;
 };
 
 export type EvaluateCohortExpressionDto = {
