@@ -45,7 +45,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
   });
   const [multipleUseInvite, setMultipleUseInvite] = useState(false);
   const [inviteeName, setInviteeName] = useState("");
-  const [info, setInfo] = useState("");
   const [creatingInvite, setCreatingInvite] = useState(false);
   const { communities, refreshCommunities } = useMyCommunities({});
   const { createInvite: createReusableInvite, isCreating: creatingReusable } =
@@ -145,7 +144,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
       try {
         const body: CreateOnetimeInviteDto = {
           invitee: inviteeName.trim(),
-          ...(info.trim() && { info: info.trim() }),
           ...(communityId !== null && { communityId }),
         };
 
@@ -153,7 +151,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         if (response.data) {
           successToast("Invite created successfully!");
           setInviteeName("");
-          setInfo("");
           onInviteCreated(response.data);
         } else {
           errorToast(
@@ -168,7 +165,7 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
         setCreatingInvite(false);
       }
     },
-    [inviteeName, info, errorToast, successToast, onInviteCreated],
+    [inviteeName, errorToast, successToast, onInviteCreated],
   );
 
   const handleCreateReusableInvite = useCallback(() => {
@@ -181,7 +178,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
       () => {
         successToast("Invite link created successfully!");
         setInviteeName("");
-        setInfo("");
       },
       (err: Error) =>
         errorToast(`Failed to create invite link: ${err.message}`),
@@ -274,8 +270,6 @@ const InviteForm = ({ onInviteCreated }: InviteFormProps) => {
             }
             inviteeName={inviteeName}
             setInviteeName={setInviteeName}
-            info={info}
-            setInfo={setInfo}
           />
         </div>
 

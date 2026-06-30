@@ -7,8 +7,6 @@ type OnetimeInviteFormProps = {
   inviteePlaceholder?: string;
   inviteeName: string;
   setInviteeName: (value: string) => void;
-  info: string;
-  setInfo: (value: string) => void;
   onSubmit?: () => void;
   submitText?: string;
   submittingText?: string;

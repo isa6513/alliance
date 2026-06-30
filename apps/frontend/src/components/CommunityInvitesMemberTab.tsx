@@ -41,7 +41,6 @@ const CommunityInvitesMemberTab = ({
 
   const [creatingInvite, setCreatingInvite] = useState(false);
   const [inviteeName, setInviteeName] = useState("");
-  const [inviteeDescription, setInviteeDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const myInvitesForCommunity = useMemo(() => {
@@ -96,7 +95,6 @@ const CommunityInvitesMemberTab = ({
     setCreatingInvite(true);
     const body = {
       invitee: inviteeName,
-      inviteeDescription: inviteeDescription || undefined,
       communityId,
     } satisfies RequestOnetimeInviteDto;
 
@@ -104,7 +102,6 @@ const CommunityInvitesMemberTab = ({
       const response = await userRequestOnetimeInvite({ body });
       if (response.data) {
         setInviteeName("");
-        setInviteeDescription("");
         setError(null);
         void refresh();
       } else {
@@ -153,8 +150,6 @@ const CommunityInvitesMemberTab = ({
         <OnetimeInviteForm
           inviteeName={inviteeName}
           setInviteeName={setInviteeName}
-          info={inviteeDescription}
-          setInfo={setInviteeDescription}
           creatingInvite={creatingInvite}
           onSubmit={handleRequestInvite}
         />

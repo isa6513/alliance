@@ -1,6 +1,9 @@
-import { useCallback, useState } from "react";
-import type { CreateOnetimeInviteDto, OnetimeInviteDto } from "@alliance/shared/client";
+import type {
+  CreateOnetimeInviteDto,
+  OnetimeInviteDto,
+} from "@alliance/shared/client";
 import { userCreateOnetimeInvite } from "@alliance/shared/client";
+import { useCallback, useState } from "react";
 
 export type ResponsibilityChoice = "responsible" | "not_responsible" | null;
 
@@ -14,7 +17,6 @@ export function useCreateOnetimeInvite({
   onError,
 }: UseCreateOnetimeInviteOptions) {
   const [inviteeName, setInviteeName] = useState("");
-  const [info, setInfo] = useState("");
   const [responsibilityChoice, setResponsibilityChoice] =
     useState<ResponsibilityChoice>("responsible");
   const [creatingInvite, setCreatingInvite] = useState(false);
@@ -34,14 +36,12 @@ export function useCreateOnetimeInvite({
       try {
         const body: CreateOnetimeInviteDto = {
           invitee: inviteeName.trim(),
-          ...(info.trim() && { info: info.trim() }),
           ...(responsibilityChoice === "responsible" &&
             communityId !== null && { communityId }),
         };
         const response = await userCreateOnetimeInvite({ body });
         if (response.data) {
           setInviteeName("");
-          setInfo("");
           onInviteCreated(response.data);
         } else {
           onError?.(
@@ -54,19 +54,16 @@ export function useCreateOnetimeInvite({
         setCreatingInvite(false);
       }
     },
-    [inviteeName, info, responsibilityChoice, onInviteCreated, onError],
+    [inviteeName, responsibilityChoice, onInviteCreated, onError],
   );
 
   const resetForm = useCallback(() => {
     setInviteeName("");
-    setInfo("");
   }, []);
 
   return {
     inviteeName,
     setInviteeName,
-    info,
-    setInfo,
     responsibilityChoice,
     setResponsibilityChoice,
     creatingInvite,

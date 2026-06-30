@@ -51,7 +51,6 @@ const CommunityInvitesLeaderTab = ({
   setInviteNotifCount,
 }: CommunityInvitesLeaderTabProps) => {
   const [name, setName] = useState("");
-  const [info, setInfo] = useState("");
   const { user } = useAuth();
 
   const [creatingInvite, setCreatingInvite] = useState(false);
@@ -176,13 +175,11 @@ const CommunityInvitesLeaderTab = ({
       invitee: name,
       communityId,
       invitingUserId: user.id,
-      ...(info.trim() && { info: info.trim() }),
     } satisfies CreateOnetimeInviteDto;
 
     createInvite(body)
       .then(() => {
         setName("");
-        setInfo("");
         setError(null);
       })
       .catch(() => {
@@ -285,8 +282,6 @@ const CommunityInvitesLeaderTab = ({
               }
               inviteeName={name}
               setInviteeName={setName}
-              info={info}
-              setInfo={setInfo}
               onSubmit={handleInvite}
               creatingInvite={creatingInvite}
             />

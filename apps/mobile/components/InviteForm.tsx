@@ -45,7 +45,6 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
     kind: "new",
   });
   const [inviteeName, setInviteeName] = useState("");
-  const [info, setInfo] = useState("");
   const [creatingInvite, setCreatingInvite] = useState(false);
   const { communities, refreshCommunities } = useMyCommunities({});
   const [groupSelectModalOpen, setGroupSelectModalOpen] = useState(false);
@@ -120,7 +119,6 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
       try {
         const body: CreateOnetimeInviteDto = {
           invitee: inviteeName.trim(),
-          ...(info.trim() && { info: info.trim() }),
           ...(communityId !== null && { communityId }),
         };
 
@@ -128,7 +126,6 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
         if (response.data) {
           Alert.alert("Success", "Invite created successfully!");
           setInviteeName("");
-          setInfo("");
           onInviteCreated(response.data);
         } else {
           Alert.alert(
@@ -142,7 +139,7 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
         setCreatingInvite(false);
       }
     },
-    [inviteeName, info, onInviteCreated],
+    [inviteeName, onInviteCreated],
   );
 
   const handleCreateGroup = useCallback(async () => {
@@ -228,15 +225,6 @@ export default function InviteForm({ onInviteCreated }: InviteFormProps) {
             placeholder="Enter the invitee's first name"
             value={inviteeName}
             onChangeText={setInviteeName}
-            containerClassName="gap-0"
-          />
-          <Input
-            label="Context for the office"
-            placeholder="Context for the office"
-            value={info}
-            onChangeText={setInfo}
-            multiline
-            numberOfLines={2}
             containerClassName="gap-0"
           />
         </View>
