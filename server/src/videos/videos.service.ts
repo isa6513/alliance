@@ -31,6 +31,43 @@ export class VideosService {
     return 'video/MP2T';
   }
 
+  private async putFiles(
+    keyPrefix: string,
+    files: Express.Multer.File[],
+  ): Promise<void> {
+    await Promise.all(
+      files.map((file) =>
+        this.s3.send(
+          new PutObjectCommand({
+            Bucket: this.bucket,
+            Key: `${keyPrefix}/${file.originalname}`,
+            Body: file.buffer,
+            ContentType: this.contentTypeForFile(file.originalname),
+          }),
+        ),
+      ),
+    );
+  }
+
+  private async deletePrefix(keyPrefix: string): Promise<void> {
+    const listResult = await this.s3.send(
+      new ListObjectsV2Command({
+        Bucket: this.bucket,
+        Prefix: `${keyPrefix}/`,
+      }),
+    );
+    const contents = listResult.Contents ?? [];
+    if (contents.length === 0) return;
+
+    await Promise.all(
+      contents.map((obj) =>
+        this.s3.send(
+          new DeleteObjectCommand({ Bucket: this.bucket, Key: obj.Key! }),
+        ),
+      ),
+    );
+  }
+
   async uploadVideo(files: Express.Multer.File[]): Promise<Video> {
     const key = `videos/${Date.now()}`;
     const totalSize = files.reduce((sum, f) => sum + f.size, 0);
@@ -38,7 +75,19 @@ export class VideosService {
       (f) =>
         f.originalname.endsWith('.m3u8') && !f.originalname.includes('_vtt'),
     );
-    const video = await this.videoRepository.save(
+
+    // Upload to S3 before persisting: a failed upload throws before any Video
+    // row exists, so no phantom `ready` row points at an empty key.
+    try {
+      await this.putFiles(key, files);
+    } catch (err) {
+      this.logger.error(`Video upload to S3 failed for ${key}`, err as Error);
+      // Best-effort cleanup of objects that landed before the failure.
+      await this.deletePrefix(key).catch(() => undefined);
+      throw err;
+    }
+
+    return this.videoRepository.save(
       this.videoRepository.create({
         key,
         originalFilename: playlist?.originalname ?? files[0].originalname,
@@ -47,24 +96,6 @@ export class VideosService {
         status: 'ready',
       }),
     );
-
-    await Promise.all(
-      files.map(async (file) => {
-        const filename = file.originalname;
-        const contentType = this.contentTypeForFile(filename);
-
-        await this.s3.send(
-          new PutObjectCommand({
-            Bucket: this.bucket,
-            Key: `${video.key}/${filename}`,
-            Body: file.buffer,
-            ContentType: contentType,
-          }),
-        );
-      }),
-    );
-
-    return video;
   }
 
   async getVideo(id: number): Promise<Video | null> {
@@ -104,40 +135,36 @@ export class VideosService {
     const video = await this.videoRepository.findOneBy({ id });
     if (!video) return null;
 
-    // Delete existing S3 objects under this video's key prefix
+    // Upload replacements first, then remove stale objects — a failed replace
+    // can't wipe the existing video.
+    try {
+      await this.putFiles(video.key, files);
+    } catch (err) {
+      this.logger.error(
+        `Video replace upload to S3 failed for ${video.key}`,
+        err as Error,
+      );
+      throw err;
+    }
+
+    // Delete prior-version objects the new upload didn't overwrite (same-named
+    // files were already replaced by putFiles above).
+    const newFilenames = new Set(files.map((f) => f.originalname));
     const listResult = await this.s3.send(
       new ListObjectsV2Command({
         Bucket: this.bucket,
         Prefix: `${video.key}/`,
       }),
     );
-
-    if (listResult.Contents && listResult.Contents.length > 0) {
-      await Promise.all(
-        listResult.Contents.map((obj) =>
-          this.s3.send(
-            new DeleteObjectCommand({
-              Bucket: this.bucket,
-              Key: obj.Key!,
-            }),
-          ),
-        ),
-      );
-    }
-
+    const staleObjects = (listResult.Contents ?? []).filter(
+      (obj) => !newFilenames.has(obj.Key!.split('/').pop()!),
+    );
     await Promise.all(
-      files.map(async (file) => {
-        const contentType = this.contentTypeForFile(file.originalname);
-
-        await this.s3.send(
-          new PutObjectCommand({
-            Bucket: this.bucket,
-            Key: `${video.key}/${file.originalname}`,
-            Body: file.buffer,
-            ContentType: contentType,
-          }),
-        );
-      }),
+      staleObjects.map((obj) =>
+        this.s3.send(
+          new DeleteObjectCommand({ Bucket: this.bucket, Key: obj.Key! }),
+        ),
+      ),
     );
 
     await this.videoRepository.update(video.id, {
@@ -151,26 +178,7 @@ export class VideosService {
     const video = await this.getVideo(id);
     if (!video) return false;
 
-    // Delete all S3 objects under the video's key prefix
-    const listResult = await this.s3.send(
-      new ListObjectsV2Command({
-        Bucket: this.bucket,
-        Prefix: `${video.key}/`,
-      }),
-    );
-
-    if (listResult.Contents && listResult.Contents.length > 0) {
-      await Promise.all(
-        listResult.Contents.map((obj) =>
-          this.s3.send(
-            new DeleteObjectCommand({
-              Bucket: this.bucket,
-              Key: obj.Key!,
-            }),
-          ),
-        ),
-      );
-    }
+    await this.deletePrefix(video.key);
 
     await this.videoRepository.delete(id);
     return true;
@@ -178,7 +186,10 @@ export class VideosService {
 }
 
 export function getVideoSource(key: string): string {
-  if (typeof key !== 'string') return '';
+  // An empty/whitespace key must not become a bare-origin URL like
+  // `https://<cloudfront-domain>/` — the player would then append
+  // `/playlist.m3u8` and request a nonexistent bucket-root object (403).
+  if (typeof key !== 'string' || key.trim() === '') return '';
 
   if (key.startsWith('http')) return key;
 
