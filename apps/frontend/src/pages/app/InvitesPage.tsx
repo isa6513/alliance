@@ -165,7 +165,7 @@ const InvitesPage = () => {
   const showProminentGoalForm = !currentGoal || currentGoalIsUp;
   const currentGoalSummary = useMemo(() => {
     if (!currentGoal) {
-      return "Set a goal to track successful recruits.";
+      return "Set a goal to track successful invitations.";
     }
 
     const now = new Date();
@@ -191,7 +191,7 @@ const InvitesPage = () => {
     }
 
     if (remainingRecruits === 0) {
-      return "You have completed this successful recruit goal.";
+      return "You have completed this invitation goal.";
     }
 
     if (dueAt < now) {
@@ -201,7 +201,7 @@ const InvitesPage = () => {
           <span className="font-semibold text-green">
             {pluralize(remainingRecruits, "member")}
           </span>{" "}
-          left to successfully recruit.
+          left to successfully invite.
         </>
       );
     }
@@ -212,7 +212,7 @@ const InvitesPage = () => {
         <span className="font-semibold text-green">
           {pluralize(daysUntil(dueAt, now), "day")}
         </span>{" "}
-        to successfully recruit{" "}
+        to successfully invite{" "}
         <span className="font-semibold text-green">
           {pluralize(remainingRecruits, "more member", "more members")}
         </span>
@@ -341,7 +341,7 @@ const InvitesPage = () => {
       const goalId = currentGoal.goal.id;
       void (async () => {
         const ok = await confirm({
-          title: "Delete recruit goal?",
+          title: "Delete invitation goal?",
           message: "Are you sure you want to do this?",
           confirmLabel: "Delete goal",
           cancelLabel: "Cancel",
@@ -371,7 +371,7 @@ const InvitesPage = () => {
 
       const target = Number(goalTarget);
       if (!Number.isInteger(target) || target < 1) {
-        errorToast("Goal must be at least 1 successful recruit.");
+        errorToast("Goal must be at least 1 successful invitation.");
         return;
       }
 
@@ -453,7 +453,7 @@ const InvitesPage = () => {
       setEditGoalTarget(value);
       const target = Number(value);
       if (!Number.isInteger(target) || target < 1) {
-        setGoalEditMessage("Goal must be at least 1 successful recruit.");
+        setGoalEditMessage("Goal must be at least 1 successful invitation.");
         return;
       }
       updateSelectedGoal({ targetSuccessfulRecruits: target });
@@ -492,12 +492,12 @@ const InvitesPage = () => {
           <Card style={CardStyle.White} className="p-6 gap-y-5 order-3">
             <div className="flex flex-col gap-y-1">
               <p className="text-sm font-semibold text-green">Ambassador</p>
-              <h1 className="text-title">Recruitment goal</h1>
+              <h1 className="text-title">Invitation goal</h1>
             </div>
 
             {ambassadorDashboardError ? (
               <p className="text-sm text-red-500">
-                Failed to load ambassador invite stats.
+                Failed to load invitation goal stats.
               </p>
             ) : loadingAmbassadorDashboard || !ambassadorDashboard ? (
               <Spinner />
@@ -521,7 +521,7 @@ const InvitesPage = () => {
                           <details className="relative">
                             <summary
                               className="border border-zinc-200 rounded p-2 h-10 w-10 flex items-center justify-center cursor-pointer list-none text-zinc-600 [&::-webkit-details-marker]:hidden"
-                              aria-label="Edit recruit goal"
+                              aria-label="Edit invitation goal"
                             >
                               <MoreHorizontal className="w-4 h-4" />
                             </summary>
@@ -530,7 +530,7 @@ const InvitesPage = () => {
                               <div className="mt-3 grid grid-cols-1 gap-3">
                                 <label className="flex flex-col gap-y-1 min-w-0">
                                   <span className="text-xs font-semibold text-zinc-500">
-                                    Target successful recruits
+                                    Target successful invitations
                                   </span>
                                   <input
                                     className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
@@ -594,7 +594,7 @@ const InvitesPage = () => {
                           <button
                             className="border border-red-100 text-red-600 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center"
                             type="button"
-                            aria-label="Delete recruit goal"
+                            aria-label="Delete invitation goal"
                             disabled={isDeletingGoal}
                             onClick={handleDeleteGoal}
                           >
@@ -618,7 +618,7 @@ const InvitesPage = () => {
                         aria-valuemax={
                           currentGoal?.goal.targetSuccessfulRecruits ?? 0
                         }
-                        aria-label="Successful recruits toward ambassador goal"
+                        aria-label="Successful invitations toward invitation goal"
                       />
                     </div>
                     <p className="text-sm sm:text-base tabular-nums">
@@ -628,7 +628,7 @@ const InvitesPage = () => {
                       <span className="text-zinc-500">
                         {" "}
                         / {currentGoal?.goal.targetSuccessfulRecruits ?? 0}{" "}
-                        successful recruits
+                        successful invitations
                       </span>
                     </p>
                     <div className="mt-2">
@@ -666,7 +666,7 @@ const InvitesPage = () => {
                             <span className="text-zinc-500">
                               {" "}
                               / {goal.goal.targetSuccessfulRecruits} successful
-                              recruits
+                              invitations
                             </span>
                           </p>
                         </div>
@@ -691,7 +691,7 @@ const InvitesPage = () => {
                     >
                       <label className="flex flex-col gap-y-1 min-w-0">
                         <span className="text-xs font-semibold text-zinc-500">
-                          Target successful recruits
+                          Target successful invitations
                         </span>
                         <input
                           className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
@@ -748,7 +748,7 @@ const InvitesPage = () => {
                 )}
 
                 <p className="text-sm text-zinc-500 leading-snug">
-                  Successful recruits are people you invited who sign their
+                  Successful invitations are people you invited who sign their
                   contract and complete their first weekly action.
                 </p>
               </div>
