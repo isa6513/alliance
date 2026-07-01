@@ -4,7 +4,12 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
 import type { VideoDetailResponse } from './dto/video-response.dto';
@@ -29,6 +34,16 @@ export class VideosService {
       return 'text/vtt';
     }
     return 'video/MP2T';
+  }
+
+  private assertBroadlyPlayable(files: Express.Multer.File[]): void {
+    const unsupported = findUnsupportedVideoCodec(files);
+    if (unsupported) {
+      throw new BadRequestException(
+        `Video codec "${unsupported.codec}" (${unsupported.reason}) won't play in Firefox. ` +
+          `Re-encode as 8-bit H.264 (ffmpeg -c:v libx264 -profile:v high -pix_fmt yuv420p) and re-upload.`,
+      );
+    }
   }
 
   private async putFiles(
@@ -69,6 +84,8 @@ export class VideosService {
   }
 
   async uploadVideo(files: Express.Multer.File[]): Promise<Video> {
+    this.assertBroadlyPlayable(files);
+
     const key = `videos/${Date.now()}`;
     const totalSize = files.reduce((sum, f) => sum + f.size, 0);
     const playlist = files.find(
@@ -132,6 +149,8 @@ export class VideosService {
     id: number,
     files: Express.Multer.File[],
   ): Promise<Video | null> {
+    this.assertBroadlyPlayable(files);
+
     const video = await this.videoRepository.findOneBy({ id });
     if (!video) return null;
 
@@ -183,6 +202,72 @@ export class VideosService {
     await this.videoRepository.delete(id);
     return true;
   }
+}
+
+/**
+ * H.264 profiles every browser decodes through Media Source Extensions (what
+ * hls.js uses on Chrome/Firefox): Baseline (66), Main (77), High (100). Richer
+ * profiles — High 10 (10-bit) and the 4:2:2/4:4:4 profiles — play on
+ * Safari/native but fail in Firefox's MSE with a fatal "incompatible codecs".
+ */
+const MSE_SAFE_H264_PROFILES = new Set([66, 77, 100]);
+
+const H264_PROFILE_NAMES: Record<number, string> = {
+  88: 'Extended',
+  110: 'High 10 (10-bit)',
+  122: 'High 4:2:2',
+  244: 'High 4:4:4',
+};
+
+/**
+ * Returns why `codec` (an RFC 6381 string from an HLS `CODECS` attribute) names
+ * a video codec Firefox can't decode via MSE, or `null` if it's fine or not a
+ * video codec we police (audio codecs like `mp4a.40.2` are ignored).
+ */
+function unsupportedVideoCodecReason(codec: string): string | null {
+  if (codec.startsWith('hvc1') || codec.startsWith('hev1')) {
+    return 'HEVC / H.265, which Firefox cannot decode';
+  }
+  if (codec.startsWith('avc1.')) {
+    const rest = codec.slice(5);
+    // Two forms exist: packed hex `avc1.PPCCLL` (e.g. avc1.640028) and the
+    // legacy dotted decimal `avc1.<profile>.<level>` (e.g. avc1.66.30). Parse
+    // the profile_idc according to the form so we don't read a decimal `66` as
+    // hex `0x66` (= 102) and reject a Baseline stream as unplayable.
+    const profileIdc = rest.includes('.')
+      ? parseInt(rest.split('.')[0], 10)
+      : parseInt(rest.slice(0, 2), 16);
+    if (Number.isNaN(profileIdc) || MSE_SAFE_H264_PROFILES.has(profileIdc)) {
+      return null;
+    }
+    const name = H264_PROFILE_NAMES[profileIdc] ?? `profile ${profileIdc}`;
+    return `H.264 ${name}, which Firefox cannot decode`;
+  }
+  return null;
+}
+
+/**
+ * Scan uploaded HLS playlists for a video codec Firefox can't play through
+ * Media Source Extensions (e.g. 10-bit H.264). Only a master playlist's
+ * `#EXT-X-STREAM-INF` line declares `CODECS`, so a bare media playlist with no
+ * variant line isn't caught here — there's nothing to inspect short of demuxing
+ * a segment. Returns the first offending `{ codec, reason }`, or `null`.
+ */
+export function findUnsupportedVideoCodec(
+  files: Pick<Express.Multer.File, 'originalname' | 'buffer'>[],
+): { codec: string; reason: string } | null {
+  for (const file of files) {
+    if (!file.originalname.endsWith('.m3u8')) continue;
+    const manifest = file.buffer.toString('utf8');
+    for (const match of manifest.matchAll(/CODECS="([^"]*)"/g)) {
+      for (const raw of match[1].split(',')) {
+        const codec = raw.trim();
+        const reason = unsupportedVideoCodecReason(codec);
+        if (reason) return { codec, reason };
+      }
+    }
+  }
+  return null;
 }
 
 export function getVideoSource(key: string): string {

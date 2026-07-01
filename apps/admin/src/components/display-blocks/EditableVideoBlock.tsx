@@ -1,12 +1,12 @@
-import React from "react";
+import { errorMessage } from "@alliance/common/errorMessage";
 import type { VideoBlock } from "@alliance/common/forms/display-blocks";
-import { useState, useEffect } from "react";
+import { videosGetVideoStatus } from "@alliance/shared/client";
 import RenderDisplayBlock from "@alliance/sharedweb/forms/RenderDisplayBlock";
+import { getApiUrl } from "@alliance/sharedweb/lib/config";
+import React, { useEffect, useState } from "react";
+import { Link, href } from "react-router";
 import { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 import type { BaseDisplayBlockProps } from "./types";
-import { videosGetVideoStatus } from "@alliance/shared/client";
-import { getApiUrl } from "@alliance/sharedweb/lib/config";
-import { Link, href } from "react-router";
 
 export function EditableVideoBlock({
   block,
@@ -95,7 +95,13 @@ export function EditableVideoBlock({
       });
 
       if (!res.ok) {
-        setUploadError(`Upload failed with status ${res.status}`);
+        const body = await res.json().catch(() => null);
+        setUploadError(
+          errorMessage({
+            error: body,
+            fallback: `Upload failed with status ${res.status}`,
+          }),
+        );
         setIsUploading(false);
         return;
       }

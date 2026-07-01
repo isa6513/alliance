@@ -1,7 +1,8 @@
-import React, { useCallback, useRef, useState } from "react";
+import { errorMessage } from "@alliance/common/errorMessage";
+import { getApiUrl } from "@alliance/sharedweb/lib/config";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
-import { getApiUrl } from "@alliance/sharedweb/lib/config";
+import React, { useCallback, useRef, useState } from "react";
 
 interface VideoReplaceFormProps {
   videoId: number;
@@ -22,7 +23,7 @@ const VideoReplaceForm: React.FC<VideoReplaceFormProps> = ({
       const files = Array.from(e.target.files ?? []);
       setSelectedFiles(files);
     },
-    []
+    [],
   );
 
   const handleUpload = useCallback(async () => {
@@ -41,17 +42,20 @@ const VideoReplaceForm: React.FC<VideoReplaceFormProps> = ({
         formData.append("files", file);
       }
 
-      const res = await fetch(
-        `${getApiUrl()}/videos/${videoId}/replace`,
-        {
-          method: "POST",
-          credentials: "include",
-          body: formData,
-        }
-      );
+      const res = await fetch(`${getApiUrl()}/videos/${videoId}/replace`, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
 
       if (!res.ok) {
-        throw new Error(`Upload failed: ${res.status}`);
+        const body = await res.json().catch(() => null);
+        throw new Error(
+          errorMessage({
+            error: body,
+            fallback: `Upload failed: ${res.status}`,
+          }),
+        );
       }
 
       success("Video content replaced successfully");
@@ -60,7 +64,9 @@ const VideoReplaceForm: React.FC<VideoReplaceFormProps> = ({
       onComplete();
     } catch (err) {
       console.error("Failed to replace video", err);
-      pushError("Failed to replace video content");
+      pushError(
+        errorMessage({ error: err, fallback: "Failed to replace video content" }),
+      );
     } finally {
       setUploading(false);
     }
