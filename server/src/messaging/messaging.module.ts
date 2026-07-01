@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Community } from 'src/community/entities/community.entity';
 import { ImagesModule } from 'src/images/images.module';
@@ -27,7 +27,7 @@ import { MessagingOverviewGateway } from './messaging.overview.gateway';
       User,
       Friend,
     ]),
-    UserModule,
+    forwardRef(() => UserModule),
     ImagesModule,
     PushModule,
   ],
