@@ -372,19 +372,78 @@ export class AmbassadorProgramInteractionDto extends PickType(
   }
 }
 
+export type AmbassadorProgramInviteStats = {
+  totals: AmbassadorInviteStats;
+  currentGoal?: AmbassadorInviteGoalWithStats;
+  pastGoals: AmbassadorInviteGoalWithStats[];
+  upcomingGoals: AmbassadorInviteGoalWithStats[];
+};
+
+export class AmbassadorProgramInviteStatsDto {
+  @ApiProperty({ type: AmbassadorInviteStatsDto })
+  @Type(() => AmbassadorInviteStatsDto)
+  @ValidateNested()
+  totals: AmbassadorInviteStatsDto;
+
+  @ApiPropertyOptional({ type: AmbassadorInviteGoalWithStatsDto })
+  @Type(() => AmbassadorInviteGoalWithStatsDto)
+  @IsOptional()
+  @ValidateNested()
+  currentGoal?: AmbassadorInviteGoalWithStatsDto;
+
+  @ApiProperty({ type: AmbassadorInviteGoalWithStatsDto, isArray: true })
+  @Type(() => AmbassadorInviteGoalWithStatsDto)
+  @IsArray()
+  @ValidateNested({ each: true })
+  pastGoals: AmbassadorInviteGoalWithStatsDto[];
+
+  @ApiProperty({ type: AmbassadorInviteGoalWithStatsDto, isArray: true })
+  @Type(() => AmbassadorInviteGoalWithStatsDto)
+  @IsArray()
+  @ValidateNested({ each: true })
+  upcomingGoals: AmbassadorInviteGoalWithStatsDto[];
+
+  constructor(input: AmbassadorProgramInviteStats) {
+    this.totals = new AmbassadorInviteStatsDto(input.totals);
+    this.currentGoal = input.currentGoal
+      ? new AmbassadorInviteGoalWithStatsDto(input.currentGoal)
+      : undefined;
+    this.pastGoals = input.pastGoals.map(
+      (goal) => new AmbassadorInviteGoalWithStatsDto(goal),
+    );
+    this.upcomingGoals = input.upcomingGoals.map(
+      (goal) => new AmbassadorInviteGoalWithStatsDto(goal),
+    );
+  }
+}
+
+export type AmbassadorProgramMemberWithInviteStats =
+  AmbassadorProgramMember & {
+    inviteStats?: AmbassadorProgramInviteStats;
+  };
+
 export class AmbassadorProgramMemberDto extends PickType(
   AmbassadorProgramMember,
   ['id', 'userId', 'invited', 'activeParticipant', 'createdAt', 'updatedAt'],
 ) {
   @ApiProperty({ type: UserDto })
   @Type(() => UserDto)
+  @ValidateNested()
   user: UserDto;
 
   @ApiProperty({ type: AmbassadorProgramInteractionDto, isArray: true })
   @Type(() => AmbassadorProgramInteractionDto)
+  @IsArray()
+  @ValidateNested({ each: true })
   interactions: AmbassadorProgramInteractionDto[];
 
-  constructor(member: AmbassadorProgramMember) {
+  @ApiPropertyOptional({ type: AmbassadorProgramInviteStatsDto })
+  @Type(() => AmbassadorProgramInviteStatsDto)
+  @IsOptional()
+  @ValidateNested()
+  inviteStats?: AmbassadorProgramInviteStatsDto;
+
+  constructor(member: AmbassadorProgramMemberWithInviteStats) {
     super();
     this.id = member.id;
     this.userId = member.userId;
@@ -399,11 +458,14 @@ export class AmbassadorProgramMemberDto extends PickType(
           b.interactionDate.localeCompare(a.interactionDate) || b.id - a.id,
       )
       .map((interaction) => new AmbassadorProgramInteractionDto(interaction));
+    this.inviteStats = member.inviteStats
+      ? new AmbassadorProgramInviteStatsDto(member.inviteStats)
+      : undefined;
   }
 }
 
 export type AmbassadorProgramDashboard = {
-  members: AmbassadorProgramMember[];
+  members: AmbassadorProgramMemberWithInviteStats[];
 };
 
 export class AmbassadorProgramDashboardDto {

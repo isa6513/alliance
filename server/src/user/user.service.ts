@@ -59,6 +59,7 @@ import {
   AmbassadorInviteProjection,
   AmbassadorInviteStats,
   AmbassadorProgramDashboard,
+  AmbassadorProgramInviteStats,
   CreateAmbassadorProgramInteractionDto,
   CreateAmbassadorInviteGoalDto,
   CreateOnetimeInviteDto,
@@ -66,6 +67,7 @@ import {
   UpdateAmbassadorProgramMemberDto,
   UpdateAmbassadorInviteGoalDto,
   UpsertAmbassadorProgramMemberDto,
+  type AmbassadorProgramMemberWithInviteStats,
 } from './dto/invite.dto';
 import { CreateTagDto } from './dto/tag.dto';
 import {
@@ -1254,7 +1256,57 @@ export class UserService {
       },
     });
 
-    return { members };
+    const membersWithInviteStats: AmbassadorProgramMemberWithInviteStats[] =
+      await Promise.all(
+        members.map(async (member) => {
+          if (!member.activeParticipant) {
+            return member;
+          }
+
+          return Object.assign(member, {
+            inviteStats: await this.getAmbassadorProgramInviteStats(
+              member.userId,
+            ),
+          });
+        }),
+      );
+
+    return { members: membersWithInviteStats };
+  }
+
+  private async getAmbassadorProgramInviteStats(
+    userId: number,
+  ): Promise<AmbassadorProgramInviteStats> {
+    const now = new Date();
+    const [totals, goals] = await Promise.all([
+      this.getAmbassadorInviteStats(userId),
+      this.ambassadorInviteGoalRepository.find({
+        where: { ambassador: { id: userId } },
+        order: { startAt: 'ASC', id: 'ASC' },
+      }),
+    ]);
+    const goalsWithStats = await Promise.all(
+      goals.map(async (goal) => ({
+        goal,
+        stats: await this.getAmbassadorInviteStats(userId, goal),
+      })),
+    );
+
+    const currentGoals = goalsWithStats
+      .filter(({ goal }) => goal.startAt <= now && goal.dueAt >= now)
+      .sort((a, b) => b.goal.startAt.getTime() - a.goal.startAt.getTime());
+    const currentGoal = currentGoals[0];
+
+    return {
+      totals,
+      currentGoal,
+      pastGoals: goalsWithStats
+        .filter(({ goal }) => goal.dueAt < now)
+        .sort((a, b) => b.goal.dueAt.getTime() - a.goal.dueAt.getTime()),
+      upcomingGoals: goalsWithStats
+        .filter(({ goal }) => goal.startAt > now)
+        .sort((a, b) => a.goal.startAt.getTime() - b.goal.startAt.getTime()),
+    };
   }
 
   private async findAmbassadorProgramMemberOrFail(

@@ -988,6 +988,34 @@ export type AmbassadorProgramInteractionDto = {
     createdAt: string;
 };
 
+export type AmbassadorInviteStatsDto = {
+    totalInvitesSent: number;
+    totalAcceptedInvites: number;
+    totalSuccessfulRecruits: number;
+    goalSuccessfulRecruits: number;
+};
+
+export type AmbassadorInviteGoalDto = {
+    id: number;
+    targetSuccessfulRecruits: number;
+    startAt: string;
+    dueAt: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type AmbassadorInviteGoalWithStatsDto = {
+    goal: AmbassadorInviteGoalDto;
+    stats: AmbassadorInviteStatsDto;
+};
+
+export type AmbassadorProgramInviteStatsDto = {
+    totals: AmbassadorInviteStatsDto;
+    currentGoal?: AmbassadorInviteGoalWithStatsDto;
+    pastGoals: Array<AmbassadorInviteGoalWithStatsDto>;
+    upcomingGoals: Array<AmbassadorInviteGoalWithStatsDto>;
+};
+
 export type AmbassadorProgramMemberDto = {
     id: number;
     invited: boolean;
@@ -997,6 +1025,7 @@ export type AmbassadorProgramMemberDto = {
     userId: number;
     user: UserDto;
     interactions: Array<AmbassadorProgramInteractionDto>;
+    inviteStats?: AmbassadorProgramInviteStatsDto;
 };
 
 export type AmbassadorProgramDashboardDto = {
@@ -1071,27 +1100,6 @@ export type CreateOnetimeInviteDto = {
     info?: string;
     invitingUserId?: number;
     communityId?: number;
-};
-
-export type AmbassadorInviteGoalDto = {
-    id: number;
-    targetSuccessfulRecruits: number;
-    startAt: string;
-    dueAt: string;
-    createdAt: string;
-    updatedAt: string;
-};
-
-export type AmbassadorInviteStatsDto = {
-    totalInvitesSent: number;
-    totalAcceptedInvites: number;
-    totalSuccessfulRecruits: number;
-    goalSuccessfulRecruits: number;
-};
-
-export type AmbassadorInviteGoalWithStatsDto = {
-    goal: AmbassadorInviteGoalDto;
-    stats: AmbassadorInviteStatsDto;
 };
 
 export type AmbassadorInviteProjectionPointDto = {

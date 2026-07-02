@@ -14,6 +14,7 @@ import { CardStyle } from "@alliance/shared/styles/card";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import Card from "@alliance/sharedweb/ui/Card";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
+import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
@@ -477,7 +478,10 @@ const InvitesPage = () => {
   const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
     useAllianceMemberCount({ enabled: Boolean(user) });
 
-  const projectionPoints = ambassadorDashboard?.projection.points ?? [];
+  const allianceProgressPercent = useMemo(() => {
+    const n = allianceMemberCount ?? 0;
+    return Math.min(100, (n / MEMBER_GOAL) * 100);
+  }, [allianceMemberCount]);
 
   if (!user || loadingInvites) {
     return (
@@ -489,21 +493,79 @@ const InvitesPage = () => {
 
   return (
     <CenterLayout>
-      <div className="flex flex-col gap-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-title">Invites</h1>
-          <div className="flex flex-row items-center gap-x-2 bg-white rounded px-4 py-3 shrink-0 sm:min-w-52">
-            <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
-            <div>
-              <p className="font-semibold text-black text-lg sm:text-xl">
-                {acceptedInvites.length}
-              </p>
-              <p className="leading-none text-zinc-500 text-sm sm:text-base">
-                Your accepted invites
-              </p>
+      <div
+        className={
+          user.ambassador ? "flex flex-col gap-y-8" : "flex flex-col gap-y-2"
+        }
+      >
+        {user.ambassador ? (
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-title">Invites</h1>
+            <div className="flex flex-row items-center gap-x-2 bg-white rounded px-4 py-3 shrink-0 sm:min-w-52">
+              <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
+              <div>
+                <p className="font-semibold text-black text-lg sm:text-xl">
+                  {acceptedInvites.length}
+                </p>
+                <p className="leading-none text-zinc-500 text-sm sm:text-base">
+                  Your accepted invites
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col gap-y-4">
+            <div className="flex flex-col gap-y-4">
+              <h1 className="text-title">Invites</h1>
+              <div className="w-full flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-x-6">
+                <div className="flex-1 rounded flex flex-col gap-y-1 min-w-0">
+                  <p className="leading-snug text-zinc-500 text-sm flex flex-row items-center gap-x-1">
+                    Help the Alliance reach its current growth goal
+                    <InfoTooltip
+                      content="The office sets regular growth goals so that the Alliance can test processes and actions at progressively larger scales."
+                      size={12}
+                    />
+                  </p>
+                  <div className="flex flex-col gap-y-1">
+                    <div className="w-full h-4 bg-grey-2 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-green rounded-full transition-[width] duration-300 ease-out"
+                        style={{ width: `${allianceProgressPercent}%` }}
+                        role="progressbar"
+                        aria-valuenow={allianceMemberCount ?? 0}
+                        aria-valuemin={0}
+                        aria-valuemax={MEMBER_GOAL}
+                        aria-label="Alliance members toward growth goal"
+                      />
+                    </div>
+                    <p className="text-sm sm:text-base tabular-nums">
+                      <span className="font-semibold text-green">
+                        {allianceMemberCountPending
+                          ? "…"
+                          : (allianceMemberCount ?? 0).toLocaleString()}
+                      </span>
+                      <span className="text-zinc-500">
+                        {" "}
+                        / {MEMBER_GOAL.toLocaleString()} members
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-row items-center gap-x-2 bg-white rounded p-4 shrink-0">
+                  <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
+                  <div>
+                    <p className="font-semibold text-black text-lg sm:text-xl">
+                      {acceptedInvites.length}
+                    </p>
+                    <p className="leading-none text-zinc-500 text-sm sm:text-base">
+                      Accepted invites
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {user.ambassador && (
           <Card
@@ -676,56 +738,6 @@ const InvitesPage = () => {
                     </div>
                   </div>
                 </div>
-
-                {projectionPoints.length > 0 && (
-                  <div className="rounded border border-white/15 bg-white/10 p-4 sm:p-5 flex flex-col gap-y-4">
-                    <div>
-                      <p className="font-semibold text-lg">
-                        Projected growth
-                      </p>
-                      <p className="text-sm text-white/70">
-                        Rough estimate from all active and future ambassador
-                        goals.
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {projectionPoints.map((point) => {
-                        const projectedMembers =
-                          allianceMemberCount === undefined
-                            ? null
-                            : allianceMemberCount +
-                              point.projectedSuccessfulRecruits;
-
-                        return (
-                          <div
-                            key={point.date}
-                            className="rounded border border-white/15 bg-white/10 px-3 py-3"
-                          >
-                            <p className="text-xs font-semibold text-white/65">
-                              By {formatDate(point.date)}
-                            </p>
-                            <p className="mt-1 text-2xl font-semibold tabular-nums">
-                              +{point.projectedSuccessfulRecruits}
-                            </p>
-                            <p className="text-sm text-white/70">
-                              {projectedMembers === null ||
-                              allianceMemberCountPending
-                                ? "Projected members loading..."
-                                : `${projectedMembers.toLocaleString()} projected members`}
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <p className="text-xs text-white/65 leading-snug">
-                      Calculation reminder: subtract successful recruits
-                      already counted for each active or future goal, then
-                      spread the remaining target evenly from today (or the goal
-                      start date, if it has not started) through the due date.
-                      Ended goals are not included.
-                    </p>
-                  </div>
-                )}
 
                 {pastGoals.length > 0 && (
                   <details className="rounded border border-white/15 bg-white/10 px-4 py-3 text-sm">
