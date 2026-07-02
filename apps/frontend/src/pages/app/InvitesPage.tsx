@@ -472,6 +472,7 @@ const InvitesPage = () => {
         100,
     );
   }, [currentGoal]);
+  const currentGoalInvitesCreated = currentGoal?.stats.totalInvitesSent ?? 0;
 
   const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
     useAllianceMemberCount({ enabled: Boolean(user) });
@@ -637,7 +638,7 @@ const InvitesPage = () => {
                           Invites created
                         </p>
                         <p className="text-lg font-semibold tabular-nums">
-                          {ambassadorDashboard.stats.totalInvitesSent}
+                          {currentGoalInvitesCreated}
                         </p>
                       </div>
                     </div>
