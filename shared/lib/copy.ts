@@ -219,7 +219,7 @@ export const roleBadges = {
   },
   ambassador: {
     label: "Ambassador",
-    tooltip: "Consistently recruits new members",
+    tooltip: "Consistently invites new members",
   },
   grouplead: {
     label: "Lead",
