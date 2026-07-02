@@ -49,6 +49,9 @@ export function useReusableInvites(params?: { enabled?: boolean }) {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.ambassadorInviteDashboard(),
+      });
     },
   });
 
