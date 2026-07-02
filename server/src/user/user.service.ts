@@ -55,10 +55,14 @@ import {
 import {
   AmbassadorInviteDashboard,
   AmbassadorInviteStats,
+  AmbassadorProgramDashboard,
+  CreateAmbassadorProgramInteractionDto,
   CreateAmbassadorInviteGoalDto,
   CreateOnetimeInviteDto,
   RequestOnetimeInviteDto,
+  UpdateAmbassadorProgramMemberDto,
   UpdateAmbassadorInviteGoalDto,
+  UpsertAmbassadorProgramMemberDto,
 } from './dto/invite.dto';
 import { CreateTagDto } from './dto/tag.dto';
 import {
@@ -68,6 +72,8 @@ import {
   UserCityCount,
 } from './dto/user.dto';
 import { AmbassadorInviteGoal } from './entities/ambassador-invite-goal.entity';
+import { AmbassadorProgramInteraction } from './entities/ambassador-program-interaction.entity';
+import { AmbassadorProgramMember } from './entities/ambassador-program-member.entity';
 import { Friend, FriendStatus } from './entities/friend.entity';
 import {
   OnetimeInvite,
@@ -162,6 +168,10 @@ export class UserService {
     private readonly onetimeInviteRepository: Repository<OnetimeInvite>,
     @InjectRepository(AmbassadorInviteGoal)
     private readonly ambassadorInviteGoalRepository: Repository<AmbassadorInviteGoal>,
+    @InjectRepository(AmbassadorProgramMember)
+    private readonly ambassadorProgramMemberRepository: Repository<AmbassadorProgramMember>,
+    @InjectRepository(AmbassadorProgramInteraction)
+    private readonly ambassadorProgramInteractionRepository: Repository<AmbassadorProgramInteraction>,
     @InjectRepository(UserAwayRange)
     private readonly userAwayRangeRepository: Repository<UserAwayRange>,
     @InjectRepository(UserDevice)
@@ -1223,6 +1233,121 @@ export class UserService {
 
   async deleteTag(tagId: string): Promise<void> {
     await this.tagRepository.delete(tagId);
+  }
+
+  async getAmbassadorProgramDashboard(): Promise<AmbassadorProgramDashboard> {
+    const members = await this.ambassadorProgramMemberRepository.find({
+      relations: {
+        interactions: true,
+        user: { contractEvents: true, tags: true },
+      },
+      order: {
+        activeParticipant: 'DESC',
+        invited: 'DESC',
+        updatedAt: 'DESC',
+        id: 'ASC',
+      },
+    });
+
+    return { members };
+  }
+
+  private async findAmbassadorProgramMemberOrFail(
+    userId: number,
+  ): Promise<AmbassadorProgramMember> {
+    const member = await this.ambassadorProgramMemberRepository.findOne({
+      where: { user: { id: userId } },
+      relations: {
+        interactions: true,
+        user: { contractEvents: true, tags: true },
+      },
+      order: { interactions: { interactionDate: 'DESC', id: 'DESC' } },
+    });
+
+    if (!member) {
+      throw new NotFoundException('Ambassador program member not found');
+    }
+
+    return member;
+  }
+
+  async upsertAmbassadorProgramMember(
+    body: UpsertAmbassadorProgramMemberDto,
+  ): Promise<AmbassadorProgramMember> {
+    const userP = this.findOneOrFail(body.userId, {
+      contractEvents: true,
+      tags: true,
+    });
+    const existingP = this.ambassadorProgramMemberRepository.findOne({
+      where: { user: { id: body.userId } },
+      relations: { user: { contractEvents: true, tags: true } },
+    });
+
+    const user = await userP;
+    const existing = await existingP;
+
+    const member =
+      existing ??
+      this.ambassadorProgramMemberRepository.create({
+        user,
+        invited: false,
+        activeParticipant: false,
+      });
+
+    if (body.invited !== undefined) {
+      member.invited = body.invited;
+    }
+    if (body.activeParticipant !== undefined) {
+      member.activeParticipant = body.activeParticipant;
+    }
+
+    await this.ambassadorProgramMemberRepository.save(member);
+    return this.findAmbassadorProgramMemberOrFail(body.userId);
+  }
+
+  async updateAmbassadorProgramMember(
+    userId: number,
+    body: UpdateAmbassadorProgramMemberDto,
+  ): Promise<AmbassadorProgramMember> {
+    const member = await this.findAmbassadorProgramMemberOrFail(userId);
+
+    if (body.invited !== undefined) {
+      member.invited = body.invited;
+    }
+    if (body.activeParticipant !== undefined) {
+      member.activeParticipant = body.activeParticipant;
+    }
+
+    await this.ambassadorProgramMemberRepository.save(member);
+    return this.findAmbassadorProgramMemberOrFail(userId);
+  }
+
+  async createAmbassadorProgramInteraction(
+    body: CreateAmbassadorProgramInteractionDto,
+    createdByUserId: number,
+  ): Promise<AmbassadorProgramMember> {
+    const [member, createdBy] = await Promise.all([
+      this.upsertAmbassadorProgramMember({
+        userId: body.userId,
+      }),
+      this.findOneOrFail(createdByUserId),
+    ]);
+    const text = body.text.trim();
+
+    if (!text) {
+      throw new BadRequestException('Interaction text is required');
+    }
+
+    await this.ambassadorProgramInteractionRepository.save(
+      this.ambassadorProgramInteractionRepository.create({
+        programMember: member,
+        createdBy,
+        text,
+        interactionDate: body.interactionDate,
+      }),
+    );
+
+    return this.findAmbassadorProgramMemberOrFail(body.userId);
   }
 
   async createOnetimeInvite(

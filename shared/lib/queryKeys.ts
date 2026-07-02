@@ -14,4 +14,5 @@ export const queryKeys = {
 
   // Admin
   tagsAdmin: () => ["userGetTagsAdmin"] as const,
+  ambassadorProgramAdmin: () => ["userGetAmbassadorProgramAdmin"] as const,
 } as const;

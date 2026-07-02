@@ -3,6 +3,7 @@ import { MEMBER_GOAL } from "@alliance/shared/lib/constants";
 import {
   deleteInviteConfirmation,
   inviteBuckets,
+  roleBadges,
 } from "@alliance/shared/lib/copy";
 import { bucketOnetimeInvitesByActionability } from "@alliance/shared/lib/inviteUtils";
 import { useAllianceMemberCount } from "@alliance/shared/lib/useAllianceMemberCount";
@@ -13,7 +14,6 @@ import { CardStyle } from "@alliance/shared/styles/card";
 import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import Card from "@alliance/sharedweb/ui/Card";
 import CenterLayout from "@alliance/sharedweb/ui/CenterLayout";
-import InfoTooltip from "@alliance/sharedweb/ui/InfoTooltip";
 import List from "@alliance/sharedweb/ui/List";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
@@ -182,7 +182,7 @@ const InvitesPage = () => {
       return (
         <>
           This goal starts in{" "}
-          <span className="font-semibold text-green">
+          <span className="font-semibold text-white">
             {pluralize(daysToStart, "day")}
           </span>
           .
@@ -198,7 +198,7 @@ const InvitesPage = () => {
       return (
         <>
           This goal ended with{" "}
-          <span className="font-semibold text-green">
+          <span className="font-semibold text-white">
             {pluralize(remainingRecruits, "member")}
           </span>{" "}
           left to successfully invite.
@@ -209,11 +209,11 @@ const InvitesPage = () => {
     return (
       <>
         You have{" "}
-        <span className="font-semibold text-green">
+        <span className="font-semibold text-white">
           {pluralize(daysUntil(dueAt, now), "day")}
         </span>{" "}
         to successfully invite{" "}
-        <span className="font-semibold text-green">
+        <span className="font-semibold text-white">
           {pluralize(remainingRecruits, "more member", "more members")}
         </span>
         .
@@ -477,40 +477,70 @@ const InvitesPage = () => {
   const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
     useAllianceMemberCount({ enabled: Boolean(user) });
 
-  const allianceProgressPercent = useMemo(() => {
-    const n = allianceMemberCount ?? 0;
-    return Math.min(100, (n / MEMBER_GOAL) * 100);
-  }, [allianceMemberCount]);
-
   if (!user || loadingInvites) {
-    return <Spinner />;
+    return (
+      <div className="flex min-h-[calc(100dvh-var(--navbar-top-bar-height))] items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
 
   return (
     <CenterLayout>
-      <div className="flex flex-col gap-y-2">
+      <div className="flex flex-col gap-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <h1 className="text-title">Invites</h1>
+          <div className="flex flex-row items-center gap-x-2 bg-white rounded px-4 py-3 shrink-0 sm:min-w-52">
+            <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
+            <div>
+              <p className="font-semibold text-black text-lg sm:text-xl">
+                {acceptedInvites.length}
+              </p>
+              <p className="leading-none text-zinc-500 text-sm sm:text-base">
+                Your accepted invites
+              </p>
+            </div>
+          </div>
+        </div>
+
         {user.ambassador && (
-          <Card style={CardStyle.White} className="p-6 gap-y-5 order-3">
+          <Card
+            style={CardStyle.White}
+            className="p-6 gap-y-5 bg-green-bg-card border-none text-white shadow-sm"
+          >
             <div className="flex flex-col gap-y-1">
-              <p className="text-sm font-semibold text-green">Ambassador</p>
-              <h1 className="text-title">Invitation goal</h1>
+              <div className="text-xs bg-ambassador text-white px-2 py-0.5 rounded-sm self-start cursor-default">
+                {roleBadges.ambassador.label}
+              </div>
+              <h2 className="text-2xl font-semibold leading-tight">
+                Current invitation goal
+              </h2>
+              <p className="text-sm text-white/70">
+                Alliance growth goal:{" "}
+                <span className="font-semibold text-white">
+                  {allianceMemberCountPending
+                    ? "..."
+                    : (allianceMemberCount ?? 0).toLocaleString()}
+                </span>{" "}
+                / {MEMBER_GOAL.toLocaleString()} members.
+              </p>
             </div>
 
             {ambassadorDashboardError ? (
-              <p className="text-sm text-red-500">
+              <p className="text-sm text-red-100">
                 Failed to load invitation goal stats.
               </p>
             ) : loadingAmbassadorDashboard || !ambassadorDashboard ? (
               <Spinner />
             ) : (
               <div className="flex flex-col gap-y-5">
-                <div className="rounded border border-zinc-200 p-4 sm:p-5 flex flex-col gap-y-5">
+                <div className="rounded border border-white/15 bg-white/10 p-4 sm:p-5 flex flex-col gap-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div>
                       <p className="font-semibold text-lg leading-snug">
                         {currentGoalSummary}
                       </p>
-                      <p className="text-sm text-zinc-500">
+                      <p className="text-sm text-white/70">
                         {currentGoal
                           ? `${formatDate(currentGoal.goal.startAt)} - ${formatDate(currentGoal.goal.dueAt)}`
                           : "Set a goal with a date range."}
@@ -521,12 +551,12 @@ const InvitesPage = () => {
                         <>
                           <details className="relative">
                             <summary
-                              className="border border-zinc-200 rounded p-2 h-10 w-10 flex items-center justify-center cursor-pointer list-none text-zinc-600 [&::-webkit-details-marker]:hidden"
+                              className="border border-white/20 rounded p-2 h-10 w-10 flex items-center justify-center cursor-pointer list-none text-white hover:bg-white/10 [&::-webkit-details-marker]:hidden"
                               aria-label="Edit invitation goal"
                             >
                               <MoreHorizontal className="w-4 h-4" />
                             </summary>
-                            <div className="absolute right-0 top-12 z-20 w-72 rounded border border-zinc-200 bg-white p-4 shadow-lg">
+                            <div className="absolute right-0 top-12 z-20 w-72 rounded border border-zinc-200 bg-white p-4 text-black shadow-lg">
                               <p className="text-sm font-semibold">Edit goal</p>
                               <div className="mt-3 grid grid-cols-1 gap-3">
                                 <label className="flex flex-col gap-y-1 min-w-0">
@@ -593,7 +623,7 @@ const InvitesPage = () => {
                             </div>
                           </details>
                           <button
-                            className="border border-red-100 text-red-600 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center"
+                            className="border border-red-200/70 bg-red-500/10 text-red-100 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center hover:bg-red-500/20 hover:border-red-200"
                             type="button"
                             aria-label="Delete invitation goal"
                             disabled={isDeletingGoal}
@@ -607,9 +637,9 @@ const InvitesPage = () => {
                   </div>
 
                   <div className="flex flex-col gap-y-1">
-                    <div className="w-full h-4 bg-grey-2 rounded-full overflow-hidden">
+                    <div className="w-full h-4 bg-white/20 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-green rounded-full transition-[width] duration-300 ease-out"
+                        className="h-full bg-white rounded-full transition-[width] duration-300 ease-out"
                         style={{ width: `${currentGoalProgressPercent}%` }}
                         role="progressbar"
                         aria-valuenow={
@@ -623,18 +653,18 @@ const InvitesPage = () => {
                       />
                     </div>
                     <p className="text-sm sm:text-base tabular-nums">
-                      <span className="font-semibold text-green">
+                      <span className="font-semibold text-white">
                         {currentGoal?.stats.goalSuccessfulRecruits ?? 0}
                       </span>
-                      <span className="text-zinc-500">
+                      <span className="text-white/70">
                         {" "}
                         / {currentGoal?.goal.targetSuccessfulRecruits ?? 0}{" "}
                         successful invitations
                       </span>
                     </p>
                     <div className="mt-2">
-                      <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2">
-                        <p className="text-xs font-semibold text-zinc-500">
+                      <div className="rounded border border-white/15 bg-white/10 px-3 py-2">
+                        <p className="text-xs font-semibold text-white/65">
                           Invites created
                         </p>
                         <p className="text-lg font-semibold tabular-nums">
@@ -646,25 +676,25 @@ const InvitesPage = () => {
                 </div>
 
                 {pastGoals.length > 0 && (
-                  <details className="rounded border border-zinc-200 px-4 py-3 text-sm">
-                    <summary className="cursor-pointer font-medium text-zinc-600">
+                  <details className="rounded border border-white/15 bg-white/10 px-4 py-3 text-sm">
+                    <summary className="cursor-pointer font-medium text-white/80">
                       View past goals
                     </summary>
-                    <div className="mt-3 flex flex-col divide-y divide-zinc-200">
+                    <div className="mt-3 flex flex-col divide-y divide-white/15">
                       {pastGoals.map((goal) => (
                         <div
                           key={goal.goal.id}
                           className="py-3 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
                         >
-                          <p className="text-zinc-600">
+                          <p className="text-white/70">
                             {formatDate(goal.goal.startAt)} -{" "}
                             {formatDate(goal.goal.dueAt)}
                           </p>
                           <p className="tabular-nums">
-                            <span className="font-semibold text-green">
+                            <span className="font-semibold text-white">
                               {goal.stats.goalSuccessfulRecruits}
                             </span>
-                            <span className="text-zinc-500">
+                            <span className="text-white/70">
                               {" "}
                               / {goal.goal.targetSuccessfulRecruits} successful
                               invitations
@@ -677,10 +707,10 @@ const InvitesPage = () => {
                 )}
 
                 {showProminentGoalForm && (
-                  <div className="rounded border border-zinc-200 bg-zinc-100 p-4 sm:p-5 flex flex-col gap-y-3">
+                  <div className="rounded border border-white/15 bg-white/10 p-4 sm:p-5 flex flex-col gap-y-3">
                     <div>
                       <p className="font-semibold text-lg">Set a new goal</p>
-                      <p className="text-sm text-zinc-500">
+                      <p className="text-sm text-white/70">
                         New goals can start in the past, but they cannot overlap
                         another invite goal.
                       </p>
@@ -691,11 +721,11 @@ const InvitesPage = () => {
                       onSubmit={handleSetGoal}
                     >
                       <label className="flex flex-col gap-y-1 min-w-0">
-                        <span className="text-xs font-semibold text-zinc-500">
+                        <span className="text-xs font-semibold text-white/70">
                           Target successful invitations
                         </span>
                         <input
-                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
+                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white text-black"
                           type="number"
                           min={1}
                           inputMode="numeric"
@@ -707,11 +737,11 @@ const InvitesPage = () => {
                         />
                       </label>
                       <label className="flex flex-col gap-y-1 min-w-0">
-                        <span className="text-xs font-semibold text-zinc-500">
+                        <span className="text-xs font-semibold text-white/70">
                           Start date
                         </span>
                         <input
-                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
+                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white text-black"
                           type="date"
                           value={goalStartDate}
                           onChange={(event) =>
@@ -720,11 +750,11 @@ const InvitesPage = () => {
                         />
                       </label>
                       <label className="flex flex-col gap-y-1 min-w-0">
-                        <span className="text-xs font-semibold text-zinc-500">
+                        <span className="text-xs font-semibold text-white/70">
                           End date
                         </span>
                         <input
-                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white"
+                          className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0 bg-white text-black"
                           type="date"
                           value={goalDueDate}
                           onChange={(event) =>
@@ -733,14 +763,14 @@ const InvitesPage = () => {
                         />
                       </label>
                       <button
-                        className="bg-black text-white rounded px-5 py-2 h-11 disabled:opacity-50 whitespace-nowrap w-full sm:col-span-2 lg:col-span-1 lg:w-auto lg:min-w-32"
+                        className="bg-white text-green-bg-card rounded px-5 py-2 h-11 disabled:opacity-50 whitespace-nowrap w-full sm:col-span-2 lg:col-span-1 lg:w-auto lg:min-w-32 font-semibold hover:bg-white/90"
                         type="submit"
                         disabled={isCreatingGoal}
                       >
                         Set goal
                       </button>
                       {goalFormMessage && (
-                        <p className="sm:col-span-2 lg:col-span-3 text-sm text-red-500">
+                        <p className="sm:col-span-2 lg:col-span-3 text-sm text-red-100">
                           {goalFormMessage}
                         </p>
                       )}
@@ -748,7 +778,7 @@ const InvitesPage = () => {
                   </div>
                 )}
 
-                <p className="text-sm text-zinc-500 leading-snug">
+                <p className="text-sm text-white/70 leading-snug">
                   Successful invitations are people you invited who sign their
                   contract and complete their first weekly action.
                 </p>
@@ -757,62 +787,10 @@ const InvitesPage = () => {
           </Card>
         )}
 
-        <div className="flex flex-col gap-y-4 order-1">
-          <div className="flex flex-col gap-y-4">
-            <h1 className="text-title">Invites</h1>
-            <div className="w-full flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-x-6">
-              <div className="flex-1 rounded flex flex-col gap-y-1 min-w-0">
-                <p className="leading-snug text-zinc-500 text-sm flex flex-row items-center gap-x-1">
-                  Help the Alliance reach its current growth goal
-                  <InfoTooltip
-                    content="The office sets regular growth goals so that the Alliance can test processes and actions at progressively larger scales."
-                    size={12}
-                  />
-                </p>
-                <div className="flex flex-col gap-y-1">
-                  <div className="w-full h-4 bg-grey-2 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-green rounded-full transition-[width] duration-300 ease-out"
-                      style={{ width: `${allianceProgressPercent}%` }}
-                      role="progressbar"
-                      aria-valuenow={allianceMemberCount ?? 0}
-                      aria-valuemin={0}
-                      aria-valuemax={MEMBER_GOAL}
-                      aria-label="Alliance members toward growth goal"
-                    />
-                  </div>
-                  <p className="text-sm sm:text-base tabular-nums">
-                    <span className="font-semibold text-green">
-                      {allianceMemberCountPending
-                        ? "…"
-                        : (allianceMemberCount ?? 0).toLocaleString()}
-                    </span>
-                    <span className="text-zinc-500">
-                      {" "}
-                      / {MEMBER_GOAL.toLocaleString()} members
-                    </span>
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row items-center gap-x-2 bg-white rounded p-4 shrink-0">
-                <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
-                <div>
-                  <p className="font-semibold text-black text-lg sm:text-xl">
-                    {acceptedInvites.length}
-                  </p>
-                  <p className="leading-none text-zinc-500 text-sm sm:text-base">
-                    Accepted invites
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-y-12 order-2 mt-2">
+        <div className="flex flex-col gap-y-12">
           <InviteForm onInviteCreated={handleInviteCreated} />
         </div>
-        <div className="flex flex-col gap-y-12 order-4 pt-5">
+        <div className="flex flex-col gap-y-12 pt-5">
           <InviteShareLink showCreateCard={false} />
           {isError && (
             <p className="text-red-500 text-sm">Failed to load invites</p>

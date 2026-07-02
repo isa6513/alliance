@@ -6,13 +6,16 @@ import {
   IsInt,
   IsNumber,
   IsOptional,
+  IsString,
   Min,
 } from 'class-validator';
 import { CommunityDto } from 'src/community/dto/community.dto';
 import { CommunityInvite } from 'src/community/entities/community-invite.entity';
 import { AmbassadorInviteGoal } from '../entities/ambassador-invite-goal.entity';
+import { AmbassadorProgramInteraction } from '../entities/ambassador-program-interaction.entity';
+import { AmbassadorProgramMember } from '../entities/ambassador-program-member.entity';
 import { OnetimeInvite } from '../entities/onetime-invite.entity';
-import { ProfileDto } from './user.dto';
+import { ProfileDto, UserDto } from './user.dto';
 
 export class CreateOnetimeInviteDto extends PickType(OnetimeInvite, [
   'invitee',
@@ -262,5 +265,102 @@ export class AmbassadorInviteDashboardDto {
       (goal) => new AmbassadorInviteGoalWithStatsDto(goal),
     );
     this.stats = new AmbassadorInviteStatsDto(input.stats);
+  }
+}
+
+export class UpsertAmbassadorProgramMemberDto {
+  @ApiProperty()
+  @IsInt()
+  userId: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  invited?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  activeParticipant?: boolean;
+}
+
+export class UpdateAmbassadorProgramMemberDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  invited?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  activeParticipant?: boolean;
+}
+
+export class CreateAmbassadorProgramInteractionDto {
+  @ApiProperty()
+  @IsInt()
+  userId: number;
+
+  @ApiProperty()
+  @IsString()
+  text: string;
+
+  @ApiProperty({ type: String, format: 'date' })
+  @IsDateString()
+  interactionDate: string;
+}
+
+export class AmbassadorProgramInteractionDto extends PickType(
+  AmbassadorProgramInteraction,
+  ['id', 'text', 'interactionDate', 'createdAt'],
+) {
+  constructor(interaction: AmbassadorProgramInteraction) {
+    super();
+    this.id = interaction.id;
+    this.text = interaction.text;
+    this.interactionDate = interaction.interactionDate;
+    this.createdAt = interaction.createdAt;
+  }
+}
+
+export class AmbassadorProgramMemberDto extends PickType(
+  AmbassadorProgramMember,
+  ['id', 'userId', 'invited', 'activeParticipant', 'createdAt', 'updatedAt'],
+) {
+  @ApiProperty({ type: UserDto })
+  @Type(() => UserDto)
+  user: UserDto;
+
+  @ApiProperty({ type: AmbassadorProgramInteractionDto, isArray: true })
+  @Type(() => AmbassadorProgramInteractionDto)
+  interactions: AmbassadorProgramInteractionDto[];
+
+  constructor(member: AmbassadorProgramMember) {
+    super();
+    this.id = member.id;
+    this.userId = member.userId;
+    this.invited = member.invited;
+    this.activeParticipant = member.activeParticipant;
+    this.createdAt = member.createdAt;
+    this.updatedAt = member.updatedAt;
+    this.user = new UserDto(member.user);
+    this.interactions = [...(member.interactions ?? [])]
+      .sort(
+        (a, b) =>
+          b.interactionDate.localeCompare(a.interactionDate) || b.id - a.id,
+      )
+      .map((interaction) => new AmbassadorProgramInteractionDto(interaction));
+  }
+}
+
+export type AmbassadorProgramDashboard = {
+  members: AmbassadorProgramMember[];
+};
+
+export class AmbassadorProgramDashboardDto {
+  @ApiProperty({ type: AmbassadorProgramMemberDto, isArray: true })
+  @Type(() => AmbassadorProgramMemberDto)
+  members: AmbassadorProgramMemberDto[];
+
+  constructor(input: AmbassadorProgramDashboard) {
+    this.members = input.members.map(
+      (member) => new AmbassadorProgramMemberDto(member),
+    );
   }
 }

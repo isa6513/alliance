@@ -62,7 +62,7 @@ function Navbar() {
               <Outlet />
             </div>
             {isNavigating && (
-              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+              <div className="fixed top-[var(--navbar-top-bar-height)] right-0 bottom-0 left-0 md:left-[var(--nav-width)] flex items-center justify-center">
                 <Spinner size="large" />
               </div>
             )}

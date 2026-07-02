@@ -981,6 +981,45 @@ export type AddUserToTagDto = {
     userId: number;
 };
 
+export type AmbassadorProgramInteractionDto = {
+    id: number;
+    text: string;
+    interactionDate: string;
+    createdAt: string;
+};
+
+export type AmbassadorProgramMemberDto = {
+    id: number;
+    invited: boolean;
+    activeParticipant: boolean;
+    createdAt: string;
+    updatedAt: string;
+    userId: number;
+    user: UserDto;
+    interactions: Array<AmbassadorProgramInteractionDto>;
+};
+
+export type AmbassadorProgramDashboardDto = {
+    members: Array<AmbassadorProgramMemberDto>;
+};
+
+export type UpsertAmbassadorProgramMemberDto = {
+    userId: number;
+    invited?: boolean;
+    activeParticipant?: boolean;
+};
+
+export type UpdateAmbassadorProgramMemberDto = {
+    invited?: boolean;
+    activeParticipant?: boolean;
+};
+
+export type CreateAmbassadorProgramInteractionDto = {
+    userId: number;
+    text: string;
+    interactionDate: string;
+};
+
 export type SignupSocialProofDto = {
     profiles: Array<ProfileDto>;
 };
@@ -4702,6 +4741,96 @@ export type UserDeleteTagAdminResponses = {
 };
 
 export type UserDeleteTagAdminResponse = UserDeleteTagAdminResponses[keyof UserDeleteTagAdminResponses];
+
+export type UserGetAmbassadorProgramAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/user/ambassadorProgram';
+};
+
+export type UserGetAmbassadorProgramAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserGetAmbassadorProgramAdminError = UserGetAmbassadorProgramAdminErrors[keyof UserGetAmbassadorProgramAdminErrors];
+
+export type UserGetAmbassadorProgramAdminResponses = {
+    200: AmbassadorProgramDashboardDto;
+};
+
+export type UserGetAmbassadorProgramAdminResponse = UserGetAmbassadorProgramAdminResponses[keyof UserGetAmbassadorProgramAdminResponses];
+
+export type UserUpsertAmbassadorProgramMemberAdminData = {
+    body: UpsertAmbassadorProgramMemberDto;
+    path?: never;
+    query?: never;
+    url: '/user/ambassadorProgram/member';
+};
+
+export type UserUpsertAmbassadorProgramMemberAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserUpsertAmbassadorProgramMemberAdminError = UserUpsertAmbassadorProgramMemberAdminErrors[keyof UserUpsertAmbassadorProgramMemberAdminErrors];
+
+export type UserUpsertAmbassadorProgramMemberAdminResponses = {
+    200: AmbassadorProgramMemberDto;
+};
+
+export type UserUpsertAmbassadorProgramMemberAdminResponse = UserUpsertAmbassadorProgramMemberAdminResponses[keyof UserUpsertAmbassadorProgramMemberAdminResponses];
+
+export type UserUpdateAmbassadorProgramMemberAdminData = {
+    body: UpdateAmbassadorProgramMemberDto;
+    path: {
+        userId: number;
+    };
+    query?: never;
+    url: '/user/ambassadorProgram/member/{userId}';
+};
+
+export type UserUpdateAmbassadorProgramMemberAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserUpdateAmbassadorProgramMemberAdminError = UserUpdateAmbassadorProgramMemberAdminErrors[keyof UserUpdateAmbassadorProgramMemberAdminErrors];
+
+export type UserUpdateAmbassadorProgramMemberAdminResponses = {
+    200: AmbassadorProgramMemberDto;
+};
+
+export type UserUpdateAmbassadorProgramMemberAdminResponse = UserUpdateAmbassadorProgramMemberAdminResponses[keyof UserUpdateAmbassadorProgramMemberAdminResponses];
+
+export type UserCreateAmbassadorProgramInteractionAdminData = {
+    body: CreateAmbassadorProgramInteractionDto;
+    path?: never;
+    query?: never;
+    url: '/user/ambassadorProgram/interaction';
+};
+
+export type UserCreateAmbassadorProgramInteractionAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type UserCreateAmbassadorProgramInteractionAdminError = UserCreateAmbassadorProgramInteractionAdminErrors[keyof UserCreateAmbassadorProgramInteractionAdminErrors];
+
+export type UserCreateAmbassadorProgramInteractionAdminResponses = {
+    200: AmbassadorProgramMemberDto;
+};
+
+export type UserCreateAmbassadorProgramInteractionAdminResponse = UserCreateAmbassadorProgramInteractionAdminResponses[keyof UserCreateAmbassadorProgramInteractionAdminResponses];
 
 export type UserSignupSocialProofData = {
     body?: never;

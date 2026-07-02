@@ -18,6 +18,8 @@ import { Action } from '../actions/entities/action.entity';
 import { City } from '../geo/city.entity';
 import { Notification } from '../notifs/entities/notification.entity';
 import { AmbassadorInviteGoal } from './entities/ambassador-invite-goal.entity';
+import { AmbassadorProgramInteraction } from './entities/ambassador-program-interaction.entity';
+import { AmbassadorProgramMember } from './entities/ambassador-program-member.entity';
 import { ContractEvent } from './entities/contract-event.entity';
 import { Friend } from './entities/friend.entity';
 import { OnetimeInvite } from './entities/onetime-invite.entity';
@@ -40,6 +42,8 @@ import { IsUserAlreadyExist } from './validators/user-already-exists.validator';
       CommunityInvite,
       ContractEvent,
       AmbassadorInviteGoal,
+      AmbassadorProgramInteraction,
+      AmbassadorProgramMember,
       Friend,
       Notification,
       OnetimeInvite,

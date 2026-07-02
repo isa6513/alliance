@@ -8,7 +8,7 @@ import { useAuth } from "./lib/AuthContext";
 
 export function HydrateFallback() {
   return (
-    <div className="flex h-screen w-screen items-center justify-center">
+    <div className="fixed top-[var(--navbar-top-bar-height)] right-0 bottom-0 left-0 md:left-[var(--nav-width)] flex items-center justify-center bg-page">
       <Spinner size="large" />
     </div>
   );
@@ -66,6 +66,14 @@ export default function AppLayout() {
       window.removeEventListener("auth:unauthorized", handleUnauthorized);
     };
   }, [isAuthenticated, authLoading, navigate, isNavigating, logout]);
+
+  if (authLoading) {
+    return (
+      <div className="fixed top-[var(--navbar-top-bar-height)] right-0 bottom-0 left-0 md:left-[var(--nav-width)] flex items-center justify-center bg-page">
+        <Spinner size="large" />
+      </div>
+    );
+  }
 
   return (
     <>

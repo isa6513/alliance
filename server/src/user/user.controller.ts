@@ -46,11 +46,16 @@ import {
 import {
   AmbassadorInviteDashboardDto,
   AmbassadorInviteGoalDto,
+  AmbassadorProgramDashboardDto,
+  AmbassadorProgramMemberDto,
+  CreateAmbassadorProgramInteractionDto,
   CreateAmbassadorInviteGoalDto,
   CreateOnetimeInviteDto,
   OnetimeInviteDto,
   RequestOnetimeInviteDto,
+  UpdateAmbassadorProgramMemberDto,
   UpdateAmbassadorInviteGoalDto,
+  UpsertAmbassadorProgramMemberDto,
 } from './dto/invite.dto';
 import {
   AddUserToTagDto,
@@ -566,6 +571,53 @@ export class UserController {
   @ApiOkResponse()
   async deleteTagAdmin(@Param('tagId') tagId: string): Promise<void> {
     await this.userService.deleteTag(tagId);
+  }
+
+  @Get('ambassadorProgram')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: AmbassadorProgramDashboardDto })
+  async getAmbassadorProgramAdmin(): Promise<AmbassadorProgramDashboardDto> {
+    return new AmbassadorProgramDashboardDto(
+      await this.userService.getAmbassadorProgramDashboard(),
+    );
+  }
+
+  @Post('ambassadorProgram/member')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: AmbassadorProgramMemberDto })
+  async upsertAmbassadorProgramMemberAdmin(
+    @Body() body: UpsertAmbassadorProgramMemberDto,
+  ): Promise<AmbassadorProgramMemberDto> {
+    return new AmbassadorProgramMemberDto(
+      await this.userService.upsertAmbassadorProgramMember(body),
+    );
+  }
+
+  @Patch('ambassadorProgram/member/:userId')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: AmbassadorProgramMemberDto })
+  async updateAmbassadorProgramMemberAdmin(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() body: UpdateAmbassadorProgramMemberDto,
+  ): Promise<AmbassadorProgramMemberDto> {
+    return new AmbassadorProgramMemberDto(
+      await this.userService.updateAmbassadorProgramMember(userId, body),
+    );
+  }
+
+  @Post('ambassadorProgram/interaction')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: AmbassadorProgramMemberDto })
+  async createAmbassadorProgramInteractionAdmin(
+    @Body() body: CreateAmbassadorProgramInteractionDto,
+    @Request() req: JwtRequest,
+  ): Promise<AmbassadorProgramMemberDto> {
+    return new AmbassadorProgramMemberDto(
+      await this.userService.createAmbassadorProgramInteraction(
+        body,
+        req.user.sub,
+      ),
+    );
   }
 
   @Get('signupSocialProof')

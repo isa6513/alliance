@@ -18,6 +18,7 @@ import {
   Database,
   FileText,
   Film,
+  Handshake,
   ImageUp,
   ListOrdered,
   Map,
@@ -311,6 +312,11 @@ const Sidebar: React.FC = () => {
                     to: "/member-map",
                     label: "Member Map",
                     icon: <Map size={16} />,
+                  },
+                  {
+                    to: "/ambassador-program",
+                    label: "Ambassador Program",
+                    icon: <Handshake size={16} />,
                   },
                   {
                     to: "/share-targets",
