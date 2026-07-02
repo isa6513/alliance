@@ -1,5 +1,6 @@
 import {
   AmbassadorInviteGoalWithStatsDto,
+  AmbassadorInviteProjectionDto,
   AmbassadorProgramMemberDto,
   UserDto,
   userCreateAmbassadorProgramInteractionAdmin,
@@ -12,7 +13,13 @@ import { queryKeys } from "@alliance/shared/lib/queryKeys";
 import { cn } from "@alliance/shared/styles/util";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarDays, Plus, UserCheck, UserPlus } from "lucide-react";
+import {
+  CalendarDays,
+  Plus,
+  TrendingUp,
+  UserCheck,
+  UserPlus,
+} from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router";
 
@@ -61,6 +68,14 @@ const formatGoalDate = (date: string) =>
     month: "short",
     day: "numeric",
     year: "numeric",
+  }).format(new Date(date));
+
+const formatGeneratedAt = (date: string) =>
+  new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   }).format(new Date(date));
 
 const goalPeriodLabel = (goal: AmbassadorInviteGoalWithStatsDto) =>
@@ -257,6 +272,83 @@ const GoalPeriodStats: React.FC<{
     </div>
   </div>
 );
+
+const GrowthProjectionPanel: React.FC<{
+  projection?: AmbassadorInviteProjectionDto;
+  activeParticipants: AmbassadorProgramMemberDto[];
+}> = ({ projection, activeParticipants }) => {
+  const activeGoals = activeParticipants
+    .map((member) => member.inviteStats?.currentGoal)
+    .filter((goal): goal is AmbassadorInviteGoalWithStatsDto => Boolean(goal));
+  const currentTarget = activeGoals.reduce(
+    (total, goal) => total + goal.goal.targetSuccessfulRecruits,
+    0,
+  );
+  const currentSuccessful = activeGoals.reduce(
+    (total, goal) => total + goal.stats.goalSuccessfulRecruits,
+    0,
+  );
+  const remainingCurrentTarget = Math.max(0, currentTarget - currentSuccessful);
+  const points = projection?.points ?? [];
+
+  return (
+    <section className="border border-zinc-200 bg-white p-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <TrendingUp size={18} />
+            <h2 className="text-lg font-semibold text-zinc-900">
+              Projected growth
+            </h2>
+          </div>
+          <p className="mt-1 text-sm text-zinc-500">
+            Estimate of successful recruits expected from active and upcoming
+            ambassador invite goals.
+          </p>
+        </div>
+        {projection && (
+          <p className="text-xs text-zinc-500">
+            Updated {formatGeneratedAt(projection.generatedAt)}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="border border-zinc-200 bg-zinc-50 px-3 py-2">
+          <p className="text-xs text-zinc-500">Active goal target left</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums">
+            {numberLabel(remainingCurrentTarget)}
+          </p>
+        </div>
+        {points.map((point) => (
+          <div
+            key={point.date}
+            className="border border-zinc-200 bg-zinc-50 px-3 py-2"
+          >
+            <p className="text-xs text-zinc-500">
+              By {formatGoalDate(point.date)}
+            </p>
+            <p className="mt-1 text-xl font-semibold tabular-nums">
+              {numberLabel(point.projectedSuccessfulRecruits)}
+            </p>
+          </div>
+        ))}
+        {!points.length && (
+          <div className="border border-dashed border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-500">
+            No active or upcoming invite goals to project.
+          </div>
+        )}
+      </div>
+
+      <p className="mt-3 text-xs leading-5 text-zinc-500">
+        Calculation reminder: for every active or future goal, this estimates
+        the remaining successful recruits not yet earned, spreads them evenly
+        from today or the goal start date through the due date, then sums those
+        estimates for each checkpoint.
+      </p>
+    </section>
+  );
+};
 
 const InviteGoalStatsPanel: React.FC<{
   member: AmbassadorProgramMemberDto;
@@ -673,6 +765,11 @@ const AmbassadorProgramPage: React.FC = () => {
             </div>
           ))}
         </div>
+
+        <GrowthProjectionPanel
+          projection={dashboardQuery.data?.projection}
+          activeParticipants={active}
+        />
 
         {error && (
           <div className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

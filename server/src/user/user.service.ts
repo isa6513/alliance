@@ -127,6 +127,12 @@ const AMBASSADOR_INVITES_URL = '/invites';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const AMBASSADOR_GOAL_NOTIFICATION_LOOKBACK_MS = 60 * 60 * 1000;
 const AMBASSADOR_PROJECTION_DAYS = [14, 30] as const;
+const EMPTY_AMBASSADOR_INVITE_STATS: AmbassadorInviteStats = {
+  totalInvitesSent: 0,
+  totalAcceptedInvites: 0,
+  totalSuccessfulRecruits: 0,
+  goalSuccessfulRecruits: 0,
+};
 
 function ambassadorGoalHalfwayGroupingKey(goalId: number) {
   return `ambassador-invite-goal:${goalId}:halfway`;
@@ -1255,58 +1261,89 @@ export class UserService {
         id: 'ASC',
       },
     });
+    const activeUserIds = members
+      .filter((member) => member.activeParticipant)
+      .map((member) => member.userId);
+    const [projection, totalsByUserId, goals] = await Promise.all([
+      this.getAmbassadorInviteProjection(),
+      this.getAmbassadorInviteStatsByUserIds(activeUserIds),
+      activeUserIds.length
+        ? this.ambassadorInviteGoalRepository.find({
+            where: { ambassador: { id: In(activeUserIds) } },
+            relations: { ambassador: true },
+            order: { startAt: 'ASC', id: 'ASC' },
+          })
+        : Promise.resolve([]),
+    ]);
+    const statsByGoalId = await this.getAmbassadorInviteStatsByGoalIds(goals);
+    const inviteStatsByUserId = this.getAmbassadorProgramInviteStatsByUserId({
+      userIds: activeUserIds,
+      totalsByUserId,
+      goals,
+      statsByGoalId,
+    });
 
     const membersWithInviteStats: AmbassadorProgramMemberWithInviteStats[] =
-      await Promise.all(
-        members.map(async (member) => {
-          if (!member.activeParticipant) {
-            return member;
-          }
+      members.map((member) => {
+        if (!member.activeParticipant) {
+          return member;
+        }
 
-          return Object.assign(member, {
-            inviteStats: await this.getAmbassadorProgramInviteStats(
-              member.userId,
-            ),
-          });
-        }),
-      );
+        return Object.assign(member, {
+          inviteStats: inviteStatsByUserId.get(member.userId),
+        });
+      });
 
-    return { members: membersWithInviteStats };
+    return { members: membersWithInviteStats, projection };
   }
 
-  private async getAmbassadorProgramInviteStats(
-    userId: number,
-  ): Promise<AmbassadorProgramInviteStats> {
+  private getAmbassadorProgramInviteStatsByUserId(params: {
+    userIds: number[];
+    totalsByUserId: Map<number, AmbassadorInviteStats>;
+    goals: AmbassadorInviteGoal[];
+    statsByGoalId: Map<number, AmbassadorInviteStats>;
+  }): Map<number, AmbassadorProgramInviteStats> {
+    const { userIds, totalsByUserId, goals, statsByGoalId } = params;
     const now = new Date();
-    const [totals, goals] = await Promise.all([
-      this.getAmbassadorInviteStats(userId),
-      this.ambassadorInviteGoalRepository.find({
-        where: { ambassador: { id: userId } },
-        order: { startAt: 'ASC', id: 'ASC' },
-      }),
-    ]);
-    const goalsWithStats = await Promise.all(
-      goals.map(async (goal) => ({
+    const goalsByUserId = new Map<number, AmbassadorInviteGoalWithStats[]>();
+
+    for (const goal of goals) {
+      const goalWithStats = {
         goal,
-        stats: await this.getAmbassadorInviteStats(userId, goal),
-      })),
+        stats: statsByGoalId.get(goal.id) ?? EMPTY_AMBASSADOR_INVITE_STATS,
+      };
+      const userGoals = goalsByUserId.get(goal.ambassador.id) ?? [];
+      userGoals.push(goalWithStats);
+      goalsByUserId.set(goal.ambassador.id, userGoals);
+    }
+
+    return new Map(
+      userIds.map((userId) => {
+        const goalsWithStats = goalsByUserId.get(userId) ?? [];
+        const currentGoals = goalsWithStats
+          .filter(({ goal }) => goal.startAt <= now && goal.dueAt >= now)
+          .sort((a, b) => b.goal.startAt.getTime() - a.goal.startAt.getTime());
+        const [currentGoal, ...otherCurrentGoals] = currentGoals;
+
+        return [
+          userId,
+          {
+            totals:
+              totalsByUserId.get(userId) ?? EMPTY_AMBASSADOR_INVITE_STATS,
+            currentGoal,
+            pastGoals: goalsWithStats
+              .filter(({ goal }) => goal.dueAt < now)
+              .sort((a, b) => b.goal.dueAt.getTime() - a.goal.dueAt.getTime()),
+            upcomingGoals: [
+              ...otherCurrentGoals,
+              ...goalsWithStats.filter(({ goal }) => goal.startAt > now),
+            ].sort(
+              (a, b) => a.goal.startAt.getTime() - b.goal.startAt.getTime(),
+            ),
+          },
+        ];
+      }),
     );
-
-    const currentGoals = goalsWithStats
-      .filter(({ goal }) => goal.startAt <= now && goal.dueAt >= now)
-      .sort((a, b) => b.goal.startAt.getTime() - a.goal.startAt.getTime());
-    const currentGoal = currentGoals[0];
-
-    return {
-      totals,
-      currentGoal,
-      pastGoals: goalsWithStats
-        .filter(({ goal }) => goal.dueAt < now)
-        .sort((a, b) => b.goal.dueAt.getTime() - a.goal.dueAt.getTime()),
-      upcomingGoals: goalsWithStats
-        .filter(({ goal }) => goal.startAt > now)
-        .sort((a, b) => a.goal.startAt.getTime() - b.goal.startAt.getTime()),
-    };
   }
 
   private async findAmbassadorProgramMemberOrFail(
@@ -1546,6 +1583,7 @@ export class UserService {
     const userP = this.findOneOrFail(userId);
     const goalsP = this.ambassadorInviteGoalRepository.find({
       where: { ambassador: { id: userId } },
+      relations: { ambassador: true },
       order: { startAt: 'ASC', id: 'ASC' },
     });
 
@@ -1554,30 +1592,37 @@ export class UserService {
       throw new ForbiddenException('Only ambassadors can view invite stats');
     }
     const goals = await goalsP;
-    const stats = await this.getAmbassadorInviteStats(userId);
-    const goalsWithStats = await Promise.all(
-      goals.map(async (goal) => ({
-        goal,
-        stats: await this.getAmbassadorInviteStats(userId, goal),
-      })),
-    );
-    const projection = await this.getAmbassadorInviteProjection();
+    const [stats, statsByGoalId, projection] = await Promise.all([
+      this.getAmbassadorInviteStats(userId),
+      this.getAmbassadorInviteStatsByGoalIds(goals),
+      this.getAmbassadorInviteProjection(userId),
+    ]);
+    const goalsWithStats = goals.map((goal) => ({
+      goal,
+      stats: statsByGoalId.get(goal.id) ?? EMPTY_AMBASSADOR_INVITE_STATS,
+    }));
 
     return { goals: goalsWithStats, projection, stats };
   }
 
-  private async getAmbassadorInviteProjection(): Promise<AmbassadorInviteProjection> {
+  private async getAmbassadorInviteProjection(
+    userId?: number,
+  ): Promise<AmbassadorInviteProjection> {
     const now = new Date();
     const goals = await this.ambassadorInviteGoalRepository.find({
-      where: { dueAt: MoreThan(now) },
+      where: {
+        dueAt: MoreThan(now),
+        ...(userId === undefined ? {} : { ambassador: { id: userId } }),
+      },
       relations: { ambassador: true },
       order: { dueAt: 'ASC', id: 'ASC' },
     });
-    const goalsWithStats: AmbassadorInviteGoalWithStats[] = await Promise.all(
-      goals.map(async (goal) => ({
+    const statsByGoalId = await this.getAmbassadorInviteStatsByGoalIds(goals);
+    const goalsWithStats: AmbassadorInviteGoalWithStats[] = goals.map(
+      (goal) => ({
         goal,
-        stats: await this.getAmbassadorInviteStats(goal.ambassador.id, goal),
-      })),
+        stats: statsByGoalId.get(goal.id) ?? EMPTY_AMBASSADOR_INVITE_STATS,
+      }),
     );
 
     return {
@@ -1585,9 +1630,12 @@ export class UserService {
       points: AMBASSADOR_PROJECTION_DAYS.map((days) => {
         const date = new Date(now.getTime() + days * DAY_MS);
         const projectedSuccessfulRecruits = Math.round(
-          goalsWithStats.reduce((total, goalWithStats) => {
-            return total + this.projectGoalSuccessfulRecruits(goalWithStats, date, now);
-          }, 0),
+          goalsWithStats.reduce(
+            (total, goalWithStats) =>
+              total +
+              this.projectGoalSuccessfulRecruits(goalWithStats, date, now),
+            0,
+          ),
         );
 
         return {
@@ -1778,6 +1826,216 @@ export class UserService {
 
   private formatSuccessfulRecruitCount(successful: number, target: number) {
     return `${successful}/${target} ${target === 1 ? 'successful recruit' : 'successful recruits'}`;
+  }
+
+  private async getAmbassadorInviteStatsByUserIds(
+    userIds: number[],
+  ): Promise<Map<number, AmbassadorInviteStats>> {
+    if (!userIds.length) {
+      return new Map();
+    }
+
+    const rows = (await this.onetimeInviteRepository.query(
+      `
+        WITH selected_users AS (
+          SELECT UNNEST($1::int[]) AS "userId"
+        ),
+        invite_stats AS (
+          SELECT
+            selected_users."userId",
+            COUNT(invite."id")::int AS "totalInvitesSent",
+            COUNT(invite."id") FILTER (
+              WHERE invite."status" = $2
+            )::int AS "totalAcceptedInvites",
+            COUNT(invite."id") FILTER (
+              WHERE first_success."completedAt" IS NOT NULL
+            )::int AS "totalSuccessfulRecruits"
+          FROM selected_users
+          LEFT JOIN "onetime_invite" invite
+            ON invite."invitingUserId" = selected_users."userId"
+            AND invite."deletedAt" IS NULL
+          LEFT JOIN "user" invited_user
+            ON invited_user."referredByInviteId" = invite."id"
+          LEFT JOIN LATERAL (
+            SELECT MIN(aa."createdAt") AS "completedAt"
+            FROM "action_activity" aa
+            INNER JOIN "action" action
+              ON action."id" = aa."actionId"
+            WHERE aa."userId" = invited_user."id"
+              AND aa."type" = $3
+              AND action."onboarding" = FALSE
+              AND EXISTS (
+                SELECT 1
+                FROM "action_event" action_event
+                WHERE action_event."actionId" = action."id"
+                  AND action_event."newStatus" = $4
+                  AND action_event."date" <= aa."createdAt"
+              )
+          ) first_success ON TRUE
+          GROUP BY selected_users."userId"
+        ),
+        share_stats AS (
+          SELECT
+            selected_users."userId",
+            COUNT(share_invite."id")::int AS "duplicateInviteLinks"
+          FROM selected_users
+          LEFT JOIN "share_url" share_invite
+            ON share_invite."userId" = selected_users."userId"
+            AND share_invite."kind" = $5
+            AND share_invite."duplicate" = TRUE
+          GROUP BY selected_users."userId"
+        )
+        SELECT
+          selected_users."userId",
+          (
+            COALESCE(invite_stats."totalInvitesSent", 0)
+            + COALESCE(share_stats."duplicateInviteLinks", 0)
+          )::int AS "totalInvitesSent",
+          COALESCE(invite_stats."totalAcceptedInvites", 0)::int
+            AS "totalAcceptedInvites",
+          COALESCE(invite_stats."totalSuccessfulRecruits", 0)::int
+            AS "totalSuccessfulRecruits",
+          0::int AS "goalSuccessfulRecruits"
+        FROM selected_users
+        LEFT JOIN invite_stats
+          ON invite_stats."userId" = selected_users."userId"
+        LEFT JOIN share_stats
+          ON share_stats."userId" = selected_users."userId"
+      `,
+      [
+        userIds,
+        OnetimeInviteStatus.LINK_USED,
+        ActionActivityType.USER_COMPLETED,
+        ActionStatus.MemberAction,
+        ShareUrlKind.Invite,
+      ],
+    )) as ({
+      userId: number;
+    } & AmbassadorInviteStats)[];
+
+    return new Map(
+      rows.map((row) => [
+        row.userId,
+        {
+          totalInvitesSent: row.totalInvitesSent,
+          totalAcceptedInvites: row.totalAcceptedInvites,
+          totalSuccessfulRecruits: row.totalSuccessfulRecruits,
+          goalSuccessfulRecruits: row.goalSuccessfulRecruits,
+        },
+      ]),
+    );
+  }
+
+  private async getAmbassadorInviteStatsByGoalIds(
+    goals: AmbassadorInviteGoal[],
+  ): Promise<Map<number, AmbassadorInviteStats>> {
+    if (!goals.length) {
+      return new Map();
+    }
+
+    const rows = (await this.onetimeInviteRepository.query(
+      `
+        WITH selected_goals AS (
+          SELECT *
+          FROM UNNEST(
+            $1::int[],
+            $2::int[],
+            $3::timestamptz[],
+            $4::timestamptz[]
+          ) AS goal("goalId", "userId", "startAt", "dueAt")
+        ),
+        invite_stats AS (
+          SELECT
+            selected_goals."goalId",
+            COUNT(invite."id")::int AS "totalInvitesSent",
+            COUNT(invite."id") FILTER (
+              WHERE invite."status" = $5
+            )::int AS "totalAcceptedInvites",
+            COUNT(invite."id") FILTER (
+              WHERE first_success."completedAt" IS NOT NULL
+            )::int AS "totalSuccessfulRecruits"
+          FROM selected_goals
+          LEFT JOIN "onetime_invite" invite
+            ON invite."invitingUserId" = selected_goals."userId"
+            AND invite."deletedAt" IS NULL
+            AND invite."createdAt" >= selected_goals."startAt"
+            AND invite."createdAt" <= selected_goals."dueAt"
+          LEFT JOIN "user" invited_user
+            ON invited_user."referredByInviteId" = invite."id"
+          LEFT JOIN LATERAL (
+            SELECT MIN(aa."createdAt") AS "completedAt"
+            FROM "action_activity" aa
+            INNER JOIN "action" action
+              ON action."id" = aa."actionId"
+            WHERE aa."userId" = invited_user."id"
+              AND aa."type" = $6
+              AND action."onboarding" = FALSE
+              AND EXISTS (
+                SELECT 1
+                FROM "action_event" action_event
+                WHERE action_event."actionId" = action."id"
+                  AND action_event."newStatus" = $7
+                  AND action_event."date" <= aa."createdAt"
+              )
+          ) first_success ON TRUE
+          GROUP BY selected_goals."goalId"
+        ),
+        share_stats AS (
+          SELECT
+            selected_goals."goalId",
+            COUNT(share_invite."id")::int AS "duplicateInviteLinks"
+          FROM selected_goals
+          LEFT JOIN "share_url" share_invite
+            ON share_invite."userId" = selected_goals."userId"
+            AND share_invite."kind" = $8
+            AND share_invite."duplicate" = TRUE
+            AND share_invite."createdAt" >= selected_goals."startAt"
+            AND share_invite."createdAt" <= selected_goals."dueAt"
+          GROUP BY selected_goals."goalId"
+        )
+        SELECT
+          selected_goals."goalId",
+          (
+            COALESCE(invite_stats."totalInvitesSent", 0)
+            + COALESCE(share_stats."duplicateInviteLinks", 0)
+          )::int AS "totalInvitesSent",
+          COALESCE(invite_stats."totalAcceptedInvites", 0)::int
+            AS "totalAcceptedInvites",
+          COALESCE(invite_stats."totalSuccessfulRecruits", 0)::int
+            AS "totalSuccessfulRecruits",
+          COALESCE(invite_stats."totalSuccessfulRecruits", 0)::int
+            AS "goalSuccessfulRecruits"
+        FROM selected_goals
+        LEFT JOIN invite_stats
+          ON invite_stats."goalId" = selected_goals."goalId"
+        LEFT JOIN share_stats
+          ON share_stats."goalId" = selected_goals."goalId"
+      `,
+      [
+        goals.map((goal) => goal.id),
+        goals.map((goal) => goal.ambassador.id),
+        goals.map((goal) => goal.startAt),
+        goals.map((goal) => goal.dueAt),
+        OnetimeInviteStatus.LINK_USED,
+        ActionActivityType.USER_COMPLETED,
+        ActionStatus.MemberAction,
+        ShareUrlKind.Invite,
+      ],
+    )) as ({
+      goalId: number;
+    } & AmbassadorInviteStats)[];
+
+    return new Map(
+      rows.map((row) => [
+        row.goalId,
+        {
+          totalInvitesSent: row.totalInvitesSent,
+          totalAcceptedInvites: row.totalAcceptedInvites,
+          totalSuccessfulRecruits: row.totalSuccessfulRecruits,
+          goalSuccessfulRecruits: row.goalSuccessfulRecruits,
+        },
+      ]),
+    );
   }
 
   private async getAmbassadorInviteStats(

@@ -1028,8 +1028,19 @@ export type AmbassadorProgramMemberDto = {
     inviteStats?: AmbassadorProgramInviteStatsDto;
 };
 
+export type AmbassadorInviteProjectionPointDto = {
+    date: string;
+    projectedSuccessfulRecruits: number;
+};
+
+export type AmbassadorInviteProjectionDto = {
+    generatedAt: string;
+    points: Array<AmbassadorInviteProjectionPointDto>;
+};
+
 export type AmbassadorProgramDashboardDto = {
     members: Array<AmbassadorProgramMemberDto>;
+    projection: AmbassadorInviteProjectionDto;
 };
 
 export type UpsertAmbassadorProgramMemberDto = {
@@ -1100,16 +1111,6 @@ export type CreateOnetimeInviteDto = {
     info?: string;
     invitingUserId?: number;
     communityId?: number;
-};
-
-export type AmbassadorInviteProjectionPointDto = {
-    date: string;
-    projectedSuccessfulRecruits: number;
-};
-
-export type AmbassadorInviteProjectionDto = {
-    generatedAt: string;
-    points: Array<AmbassadorInviteProjectionPointDto>;
 };
 
 export type AmbassadorInviteDashboardDto = {

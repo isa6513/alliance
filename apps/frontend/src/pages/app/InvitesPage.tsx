@@ -499,7 +499,7 @@ const InvitesPage = () => {
         }
       >
         {user.ambassador ? (
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <h1 className="text-title">Invites</h1>
             <div className="flex flex-row items-center gap-x-2 bg-white rounded px-4 py-3 shrink-0 sm:min-w-52">
               <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
@@ -598,146 +598,141 @@ const InvitesPage = () => {
               <Spinner />
             ) : (
               <div className="flex flex-col gap-y-5">
-                <div className="rounded border border-white/15 bg-white/10 p-4 sm:p-5 flex flex-col gap-y-5">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-lg leading-snug">
-                        {currentGoalSummary}
-                      </p>
-                      <p className="text-sm text-white/70">
-                        {currentGoal
-                          ? `${formatDate(currentGoal.goal.startAt)} - ${formatDate(currentGoal.goal.dueAt)}`
-                          : "Set a goal with a date range."}
-                      </p>
-                    </div>
-                    <div className="flex flex-row items-center gap-x-2 shrink-0">
-                      {currentGoal && (
-                        <>
-                          <details className="relative">
-                            <summary
-                              className="border border-white/20 rounded p-2 h-10 w-10 flex items-center justify-center cursor-pointer list-none text-white hover:bg-white/10 [&::-webkit-details-marker]:hidden"
-                              aria-label="Edit invitation goal"
-                            >
-                              <MoreHorizontal className="w-4 h-4" />
-                            </summary>
-                            <div className="absolute right-0 top-12 z-20 w-72 rounded border border-zinc-200 bg-white p-4 text-black shadow-lg">
-                              <p className="text-sm font-semibold">Edit goal</p>
-                              <div className="mt-3 grid grid-cols-1 gap-3">
-                                <label className="flex flex-col gap-y-1 min-w-0">
-                                  <span className="text-xs font-semibold text-zinc-500">
-                                    Target successful invitations
-                                  </span>
-                                  <input
-                                    className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
-                                    type="number"
-                                    min={1}
-                                    inputMode="numeric"
-                                    value={editGoalTarget}
-                                    disabled={isUpdatingGoal}
-                                    onChange={(event) =>
-                                      handleEditGoalTargetChange(
-                                        event.target.value,
-                                      )
-                                    }
-                                  />
-                                </label>
-                                <label className="flex flex-col gap-y-1 min-w-0">
-                                  <span className="text-xs font-semibold text-zinc-500">
-                                    Goal start
-                                  </span>
-                                  <input
-                                    className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
-                                    type="date"
-                                    value={editGoalStartDate}
-                                    disabled={isUpdatingGoal}
-                                    onChange={(event) =>
-                                      handleEditGoalStartDateChange(
-                                        event.target.value,
-                                      )
-                                    }
-                                  />
-                                </label>
-                                <label className="flex flex-col gap-y-1 min-w-0">
-                                  <span className="text-xs font-semibold text-zinc-500">
-                                    Goal end
-                                  </span>
-                                  <input
-                                    className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
-                                    type="date"
-                                    value={editGoalDueDate}
-                                    disabled={isUpdatingGoal}
-                                    onChange={(event) =>
-                                      handleEditGoalDueDateChange(
-                                        event.target.value,
-                                      )
-                                    }
-                                  />
-                                </label>
-                                {isUpdatingGoal && !goalEditMessage && (
-                                  <p className="text-sm text-zinc-500">
-                                    Saving...
-                                  </p>
-                                )}
-                                {goalEditMessage && (
-                                  <p className="text-sm text-red-500">
-                                    {goalEditMessage}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </details>
-                          <button
-                            className="border border-red-200/70 bg-red-500/10 text-red-100 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center hover:bg-red-500/20 hover:border-red-200"
-                            type="button"
-                            aria-label="Delete invitation goal"
-                            disabled={isDeletingGoal}
-                            onClick={handleDeleteGoal}
+                {currentGoal && (
+                  <div className="rounded border border-white/15 bg-white/10 p-4 sm:p-5 flex flex-col gap-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-lg leading-snug">
+                          {currentGoalSummary}
+                        </p>
+                        <p className="text-sm text-white/70">
+                          {formatDate(currentGoal.goal.startAt)} -{" "}
+                          {formatDate(currentGoal.goal.dueAt)}
+                        </p>
+                      </div>
+                      <div className="flex flex-row items-center gap-x-2 shrink-0">
+                        <details className="relative">
+                          <summary
+                            className="border border-white/20 rounded p-2 h-10 w-10 flex items-center justify-center cursor-pointer list-none text-white hover:bg-white/10 [&::-webkit-details-marker]:hidden"
+                            aria-label="Edit invitation goal"
                           >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
+                            <MoreHorizontal className="w-4 h-4" />
+                          </summary>
+                          <div className="absolute right-0 top-12 z-20 w-72 rounded border border-zinc-200 bg-white p-4 text-black shadow-lg">
+                            <p className="text-sm font-semibold">Edit goal</p>
+                            <div className="mt-3 grid grid-cols-1 gap-3">
+                              <label className="flex flex-col gap-y-1 min-w-0">
+                                <span className="text-xs font-semibold text-zinc-500">
+                                  Target successful invitations
+                                </span>
+                                <input
+                                  className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
+                                  type="number"
+                                  min={1}
+                                  inputMode="numeric"
+                                  value={editGoalTarget}
+                                  disabled={isUpdatingGoal}
+                                  onChange={(event) =>
+                                    handleEditGoalTargetChange(
+                                      event.target.value,
+                                    )
+                                  }
+                                />
+                              </label>
+                              <label className="flex flex-col gap-y-1 min-w-0">
+                                <span className="text-xs font-semibold text-zinc-500">
+                                  Goal start
+                                </span>
+                                <input
+                                  className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
+                                  type="date"
+                                  value={editGoalStartDate}
+                                  disabled={isUpdatingGoal}
+                                  onChange={(event) =>
+                                    handleEditGoalStartDateChange(
+                                      event.target.value,
+                                    )
+                                  }
+                                />
+                              </label>
+                              <label className="flex flex-col gap-y-1 min-w-0">
+                                <span className="text-xs font-semibold text-zinc-500">
+                                  Goal end
+                                </span>
+                                <input
+                                  className="border border-zinc-200 rounded px-3 py-2 h-11 w-full min-w-0"
+                                  type="date"
+                                  value={editGoalDueDate}
+                                  disabled={isUpdatingGoal}
+                                  onChange={(event) =>
+                                    handleEditGoalDueDateChange(
+                                      event.target.value,
+                                    )
+                                  }
+                                />
+                              </label>
+                              {isUpdatingGoal && !goalEditMessage && (
+                                <p className="text-sm text-zinc-500">
+                                  Saving...
+                                </p>
+                              )}
+                              {goalEditMessage && (
+                                <p className="text-sm text-red-500">
+                                  {goalEditMessage}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </details>
+                        <button
+                          className="border border-red-200/70 bg-red-500/10 text-red-100 rounded p-2 disabled:opacity-40 h-10 w-10 flex items-center justify-center hover:bg-red-500/20 hover:border-red-200"
+                          type="button"
+                          aria-label="Delete invitation goal"
+                          disabled={isDeletingGoal}
+                          onClick={handleDeleteGoal}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex flex-col gap-y-1">
-                    <div className="w-full h-4 bg-white/20 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-white rounded-full transition-[width] duration-300 ease-out"
-                        style={{ width: `${currentGoalProgressPercent}%` }}
-                        role="progressbar"
-                        aria-valuenow={
-                          currentGoal?.stats.goalSuccessfulRecruits ?? 0
-                        }
-                        aria-valuemin={0}
-                        aria-valuemax={
-                          currentGoal?.goal.targetSuccessfulRecruits ?? 0
-                        }
-                        aria-label="Successful invitations toward invitation goal"
-                      />
-                    </div>
-                    <p className="text-sm sm:text-base tabular-nums">
-                      <span className="font-semibold text-white">
-                        {currentGoal?.stats.goalSuccessfulRecruits ?? 0}
-                      </span>
-                      <span className="text-white/70">
-                        {" "}
-                        / {currentGoal?.goal.targetSuccessfulRecruits ?? 0}{" "}
-                        successful invitations
-                      </span>
-                    </p>
-                    <div className="mt-2">
-                      <div className="rounded border border-white/15 bg-white/10 px-3 py-2">
-                        <p className="text-xs font-semibold text-white/65">
-                          Invites created
-                        </p>
-                        <p className="text-lg font-semibold tabular-nums">
-                          {currentGoalInvitesCreated}
-                        </p>
+                    <div className="flex flex-col gap-y-1">
+                      <div className="w-full h-4 bg-white/20 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-white rounded-full transition-[width] duration-300 ease-out"
+                          style={{ width: `${currentGoalProgressPercent}%` }}
+                          role="progressbar"
+                          aria-valuenow={currentGoal.stats.goalSuccessfulRecruits}
+                          aria-valuemin={0}
+                          aria-valuemax={
+                            currentGoal.goal.targetSuccessfulRecruits
+                          }
+                          aria-label="Successful invitations toward invitation goal"
+                        />
+                      </div>
+                      <p className="text-sm sm:text-base tabular-nums">
+                        <span className="font-semibold text-white">
+                          {currentGoal.stats.goalSuccessfulRecruits}
+                        </span>
+                        <span className="text-white/70">
+                          {" "}
+                          / {currentGoal.goal.targetSuccessfulRecruits}{" "}
+                          successful invitations
+                        </span>
+                      </p>
+                      <div className="mt-2">
+                        <div className="rounded border border-white/15 bg-white/10 px-3 py-2">
+                          <p className="text-xs font-semibold text-white/65">
+                            Invites created
+                          </p>
+                          <p className="text-lg font-semibold tabular-nums">
+                            {currentGoalInvitesCreated}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {pastGoals.length > 0 && (
                   <details className="rounded border border-white/15 bg-white/10 px-4 py-3 text-sm">
@@ -773,7 +768,9 @@ const InvitesPage = () => {
                 {showProminentGoalForm && (
                   <div className="rounded border border-white/15 bg-white/10 p-4 sm:p-5 flex flex-col gap-y-3">
                     <div>
-                      <p className="font-semibold text-lg">Set a new goal</p>
+                      <p className="font-semibold text-lg">
+                        {currentGoal ? "Set a new goal" : "Set a goal"}
+                      </p>
                       <p className="text-sm text-white/70">
                         New goals can start in the past, but they cannot overlap
                         another invite goal.

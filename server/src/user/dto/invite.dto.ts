@@ -4,6 +4,7 @@ import {
   Allow,
   IsArray,
   IsDateString,
+  IsDefined,
   IsInt,
   IsNumber,
   IsOptional,
@@ -466,16 +467,26 @@ export class AmbassadorProgramMemberDto extends PickType(
 
 export type AmbassadorProgramDashboard = {
   members: AmbassadorProgramMemberWithInviteStats[];
+  projection: AmbassadorInviteProjection;
 };
 
 export class AmbassadorProgramDashboardDto {
   @ApiProperty({ type: AmbassadorProgramMemberDto, isArray: true })
   @Type(() => AmbassadorProgramMemberDto)
+  @IsArray()
+  @ValidateNested({ each: true })
   members: AmbassadorProgramMemberDto[];
+
+  @ApiProperty({ type: AmbassadorInviteProjectionDto })
+  @Type(() => AmbassadorInviteProjectionDto)
+  @IsDefined()
+  @ValidateNested()
+  projection: AmbassadorInviteProjectionDto;
 
   constructor(input: AmbassadorProgramDashboard) {
     this.members = input.members.map(
       (member) => new AmbassadorProgramMemberDto(member),
     );
+    this.projection = new AmbassadorInviteProjectionDto(input.projection);
   }
 }
