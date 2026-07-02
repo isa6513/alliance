@@ -403,6 +403,9 @@ export class UserService {
     return this.findOneOrFail(id, {
       contractEvents: true,
       referredBy: true,
+      referredByCampaign: true,
+      referredByInvite: { invitingUser: true },
+      city: true,
       tags: true,
     });
   }
@@ -579,7 +582,10 @@ export class UserService {
         { requester: { id: userId }, status: FriendStatus.Accepted },
         { addressee: { id: userId }, status: FriendStatus.Accepted },
       ],
-      relations: { requester: true, addressee: true },
+      relations: {
+        requester: { contractEvents: true },
+        addressee: { contractEvents: true },
+      },
     });
 
     return rels.map((r) =>

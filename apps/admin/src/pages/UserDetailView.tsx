@@ -11,6 +11,7 @@ import {
   userDeleteAwayRangeAdmin,
   userGetAwayRangeForUserAdmin,
   userGetTagSummariesAdmin,
+  userListFriends,
   userRemoveUserFromTagAdmin,
   userUpdateAwayRangeAdmin,
   userUpdateUserRolesAdmin,
@@ -18,6 +19,7 @@ import {
 } from "@alliance/shared/client";
 import {
   ActionEventNotifDto,
+  ProfileDto,
   Push,
   TagDto,
   TagSummaryDto,
@@ -25,9 +27,9 @@ import {
   UserActionRelationDetailDto,
   UserActionRelationsResponseDto,
   UserActionSummaryDto,
+  UserAdminDetailDto,
   UserAwayRangeDto,
   UserAwayRangeReason,
-  UserDto,
 } from "@alliance/shared/client/types.gen";
 import { cn } from "@alliance/shared/styles/util";
 import { getApiUrl } from "@alliance/sharedweb/lib/config";
@@ -46,9 +48,12 @@ import {
   ChevronDown,
   ChevronRight,
   Database,
+  Globe,
   Mail,
+  MapPin,
   Pencil,
   Phone,
+  UserPlus,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -87,6 +92,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     timeSpentTotalRes,
     notifRes,
     formResponsesRes,
+    friendsRes,
   ] = await Promise.all([
     userUserDetailAdmin({ path: { id: userId } }),
     userGetAwayRangeForUserAdmin({ path: { id: userId } }),
@@ -98,6 +104,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     tasksGetFormsForUserSidAdmin({ path: { userId } }).catch(() => ({
       data: [],
     })),
+    userListFriends({ path: { id: userId } }),
   ]);
 
   const user = userRes.data;
@@ -126,6 +133,7 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
     awayRanges,
     notifs: notifRes.data ?? [],
     formResponses: formResponsesRes.data ?? [],
+    friends: friendsRes.data ?? [],
   };
 }
 
@@ -137,9 +145,10 @@ const UserDetailView: React.FC = () => {
     awayRanges,
     notifs,
     formResponses,
+    friends,
   } = loaderData;
 
-  const [user, setUser] = useState<UserDto>(loaderData.user);
+  const [user, setUser] = useState<UserAdminDetailDto>(loaderData.user);
   const [actionRelationsState, setActionRelationsState] =
     useState<UserActionRelationDetailDto[]>(actionRelations);
   const [allTags, setAllTags] = useState<TagSummaryDto[]>(loaderData.allTags);
@@ -1035,6 +1044,82 @@ const UserDetailView: React.FC = () => {
 
         {/* Right Column */}
         <div className="space-y-4">
+          {/* Member Info */}
+          <section className="border border-zinc-200 rounded p-3">
+            <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+              Member Info
+            </h2>
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-xs font-medium text-zinc-500 mb-1">Bio</p>
+                {user.profileDescription?.trim() ? (
+                  <p className="text-zinc-800 whitespace-pre-wrap break-words">
+                    {user.profileDescription}
+                  </p>
+                ) : (
+                  <p className="text-zinc-500 text-xs">No bio provided.</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <InfoRow icon={<MapPin size={14} />} label="Location">
+                  {formatUserLocation(user) ?? "No location provided"}
+                </InfoRow>
+                <InfoRow icon={<UserPlus size={14} />} label="Invited by">
+                  {formatInvitedBy(user)}
+                </InfoRow>
+                <InfoRow icon={<Globe size={14} />} label="Public profile">
+                  {user.shareInfoPublicly ? "Shared publicly" : "Private"}
+                </InfoRow>
+              </div>
+
+              <dl className="grid grid-cols-1 gap-2 pt-2 border-t border-zinc-100 text-xs">
+                <DetailItem label="Anonymous">
+                  {user.anonymous ? "Yes" : "No"}
+                </DetailItem>
+                <DetailItem label="Email with leads">
+                  {user.shareEmailWithCommunityLead ? "Shared" : "Private"}
+                </DetailItem>
+                <DetailItem label="Phone with leads">
+                  {user.sharePhoneNumberWithCommunityLead
+                    ? "Shared"
+                    : "Private"}
+                </DetailItem>
+                <DetailItem label="Form responses">
+                  {humanize(user.formDataPreference)}
+                </DetailItem>
+                <DetailItem label="Forum digest">
+                  {humanize(user.forumDigestPreference)}
+                </DetailItem>
+                <DetailItem label="Reminder time">
+                  {formatReminderTime(user)}
+                </DetailItem>
+                <DetailItem label="Time zone">
+                  {user.timeZone ?? "Not provided"}
+                </DetailItem>
+                {user.clusterId !== null && (
+                  <DetailItem label="Cluster">#{user.clusterId}</DetailItem>
+                )}
+              </dl>
+            </div>
+          </section>
+
+          {/* Friends */}
+          <section className="border border-zinc-200 rounded p-3">
+            <h2 className="text-sm font-semibold text-zinc-700 mb-2">
+              Friends ({friends.length})
+            </h2>
+            {friends.length ? (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {friends.map((friend) => (
+                  <FriendRow key={friend.id} friend={friend} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-zinc-500">No friends yet.</p>
+            )}
+          </section>
+
           {/* Roles */}
           <section className="border border-zinc-200 rounded p-3">
             <h2 className="text-sm font-semibold text-zinc-700 mb-2">Roles</h2>
@@ -1493,3 +1578,141 @@ function AwayReasonSelect({
 }
 
 export default UserDetailView;
+
+function InfoRow({
+  icon,
+  label,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-2 text-xs">
+      <span className="text-zinc-400 mt-0.5 shrink-0">{icon}</span>
+      <div className="min-w-0">
+        <p className="font-medium text-zinc-500">{label}</p>
+        <div className="text-zinc-800 break-words">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function DetailItem({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <dt className="text-zinc-500">{label}</dt>
+      <dd className="text-right text-zinc-800 break-words">{children}</dd>
+    </div>
+  );
+}
+
+function FriendRow({ friend }: { friend: ProfileDto }) {
+  return (
+    <Link
+      to={`/member/${friend.id}`}
+      className="flex items-center gap-2 rounded px-1 py-1.5 hover:bg-zinc-50"
+    >
+      <AvatarProfile pfp={friend.profilePicture} size="small" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-zinc-800">
+          {friend.displayName}
+        </p>
+        <p className="truncate text-xs text-zinc-500">
+          {formatFriendStatus(friend)}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+function formatFriendStatus(friend: ProfileDto) {
+  const labels = [];
+  if (friend.hasActiveContract) {
+    labels.push("Signed");
+  } else {
+    labels.push("Not signed");
+  }
+  if (friend.ambassador) {
+    labels.push("Ambassador");
+  }
+  if (friend.isCommunityLeader) {
+    labels.push("Leader");
+  }
+  return labels.join(" · ");
+}
+
+function formatUserLocation(user: UserAdminDetailDto) {
+  const parts = [
+    user.location.cityName,
+    user.location.countryName ?? user.location.countryCode,
+  ].filter(Boolean);
+  if (parts.length > 0) {
+    return parts.join(", ");
+  }
+  return user.location.customCityString?.trim() || null;
+}
+
+function formatInvitedBy(user: UserAdminDetailDto) {
+  const invitedBy = user.invitedBy;
+  if (!invitedBy) {
+    return "No invite attribution";
+  }
+
+  const source = invitedBy.referralSource
+    ? ` via ${humanize(invitedBy.referralSource)}`
+    : "";
+
+  switch (invitedBy.kind) {
+    case "user":
+      return invitedBy.userId ? (
+        <>
+          <Link
+            to={`/member/${invitedBy.userId}`}
+            className="text-blue-600 hover:underline"
+          >
+            {invitedBy.label}
+          </Link>
+          {source}
+        </>
+      ) : (
+        `${invitedBy.label}${source}`
+      );
+    case "campaign":
+      return invitedBy.campaignId ? (
+        <>
+          <Link
+            to={`/database/?table=campaign&id=${invitedBy.campaignId}`}
+            className="text-blue-600 hover:underline"
+          >
+            {invitedBy.label}
+          </Link>
+          {source}
+        </>
+      ) : (
+        `${invitedBy.label}${source}`
+      );
+    case "unknown":
+      return invitedBy.label;
+    default:
+      throw new Error(
+        `unknown invited by kind: ${invitedBy.kind satisfies never}`,
+      );
+  }
+}
+
+function formatReminderTime(user: UserAdminDetailDto) {
+  if (!user.preferredReminderTime) {
+    return "Not provided";
+  }
+  return user.timeZone
+    ? `${user.preferredReminderTime} ${user.timeZone}`
+    : user.preferredReminderTime;
+}

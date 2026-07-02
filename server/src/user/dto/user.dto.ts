@@ -16,12 +16,15 @@ import {
 import { getImageSource } from 'src/images/images.service';
 import { ClusterSummaryDto } from '../../cluster/dto/cluster.dto';
 import { Cluster } from '../../cluster/entities/cluster.entity';
+import { Campaign } from '../../campaign/entities/campaign.entity';
+import { City } from '../../geo/city.entity';
 import {
   compareContractEventsNewestFirst,
   ContractEvent,
 } from '../entities/contract-event.entity';
 import { FriendStatus } from '../entities/friend.entity';
-import { User } from '../entities/user.entity';
+import { OnetimeInvite } from '../entities/onetime-invite.entity';
+import { ReferralSource, User } from '../entities/user.entity';
 import type { ReferrerResolution } from '../user.service';
 
 export type FriendStatusDtoArgs = {
@@ -267,6 +270,155 @@ export class UserDto extends PickType(User, [
     this.profilePicture = getImageSource(user.profilePicture);
     this.referredById = user.referredBy?.id ?? null;
     this.clusterId = user.clusterId;
+  }
+}
+
+export type UserAdminInvitedBy =
+  | { kind: 'user'; user: User; referralSource: ReferralSource }
+  | { kind: 'campaign'; campaign: Campaign }
+  | { kind: 'unknown'; referralSource: ReferralSource };
+
+export class UserAdminInvitedByDto {
+  @ApiProperty({
+    enum: ['user', 'campaign', 'unknown'],
+    enumName: 'UserAdminInvitedByKind',
+  })
+  kind: 'user' | 'campaign' | 'unknown';
+
+  @ApiProperty()
+  label: string;
+
+  @ApiPropertyOptional({ type: Number, nullable: true })
+  userId?: number | null;
+
+  @ApiPropertyOptional({ type: Number, nullable: true })
+  campaignId?: number | null;
+
+  @ApiPropertyOptional({ enum: ReferralSource, enumName: 'ReferralSource' })
+  referralSource?: ReferralSource;
+
+  constructor(input: UserAdminInvitedBy) {
+    switch (input.kind) {
+      case 'user':
+        this.kind = 'user';
+        this.label = input.user.name;
+        this.userId = input.user.id;
+        this.referralSource = input.referralSource;
+        break;
+      case 'campaign':
+        this.kind = 'campaign';
+        this.label = input.campaign.name;
+        this.campaignId = input.campaign.id;
+        this.referralSource = ReferralSource.Campaign;
+        break;
+      case 'unknown':
+        this.kind = 'unknown';
+        this.label = humanizeReferralSource(input.referralSource);
+        this.referralSource = input.referralSource;
+        break;
+      default:
+        throw new Error(`unknown invited by kind: ${input satisfies never}`);
+    }
+  }
+}
+
+export class UserAdminLocationDto {
+  @ApiPropertyOptional({ type: Number, nullable: true })
+  cityId?: number | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  cityName?: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  countryName?: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  countryCode?: string | null;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  customCityString?: string | null;
+
+  constructor(input: { city?: City | null; customCityString?: string | null }) {
+    this.cityId = input.city?.id ?? null;
+    this.cityName = input.city?.englishName ?? input.city?.name ?? null;
+    this.countryName = input.city?.countryName ?? null;
+    this.countryCode = input.city?.countryCode ?? null;
+    this.customCityString = input.customCityString ?? null;
+  }
+}
+
+export type UserAdminDetail = User & {
+  city?: City | null;
+  referredBy?: User | null;
+  referredByCampaign?: Campaign | null;
+  referredByInvite?: (OnetimeInvite & { invitingUser?: User | null }) | null;
+};
+
+export class UserAdminDetailDto extends UserDto {
+  @ApiProperty({ type: () => UserAdminLocationDto })
+  location: UserAdminLocationDto;
+
+  @ApiProperty({ type: () => UserAdminInvitedByDto, nullable: true })
+  invitedBy: UserAdminInvitedByDto | null;
+
+  constructor(user: UserAdminDetail) {
+    super(user);
+    this.location = new UserAdminLocationDto({
+      city: user.city,
+      customCityString: user.customCityString,
+    });
+    this.invitedBy = userAdminInvitedBy(user);
+  }
+}
+
+function userAdminInvitedBy(user: UserAdminDetail) {
+  if (user.referredBy) {
+    return new UserAdminInvitedByDto({
+      kind: 'user',
+      user: user.referredBy,
+      referralSource: user.referralSource,
+    });
+  }
+  if (user.referredByCampaign) {
+    return new UserAdminInvitedByDto({
+      kind: 'campaign',
+      campaign: user.referredByCampaign,
+    });
+  }
+  if (user.referredByInvite?.invitingUser) {
+    return new UserAdminInvitedByDto({
+      kind: 'user',
+      user: user.referredByInvite.invitingUser,
+      referralSource: user.referralSource,
+    });
+  }
+  if (user.referralSource !== ReferralSource.None) {
+    return new UserAdminInvitedByDto({
+      kind: 'unknown',
+      referralSource: user.referralSource,
+    });
+  }
+  return null;
+}
+
+function humanizeReferralSource(source: ReferralSource) {
+  switch (source) {
+    case ReferralSource.ReferralLink:
+      return 'Referral link';
+    case ReferralSource.OnetimeInvite:
+      return 'One-time invite';
+    case ReferralSource.ActionShareLink:
+      return 'Action share link';
+    case ReferralSource.ExternalShareLink:
+      return 'External share link';
+    case ReferralSource.InviteShareLink:
+      return 'Invite share link';
+    case ReferralSource.Campaign:
+      return 'Campaign';
+    case ReferralSource.None:
+      return 'No invite';
+    default:
+      throw new Error(`unknown referral source: ${source satisfies never}`);
   }
 }
 

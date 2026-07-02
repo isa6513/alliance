@@ -862,6 +862,68 @@ export type UserCityCountDto = {
     longitude?: number | null;
 };
 
+export type UserAdminLocationDto = {
+    cityId?: number | null;
+    cityName?: string | null;
+    countryName?: string | null;
+    countryCode?: string | null;
+    customCityString?: string | null;
+};
+
+export type UserAdminInvitedByKind = 'user' | 'campaign' | 'unknown';
+
+export type UserAdminInvitedByDto = {
+    kind: UserAdminInvitedByKind;
+    label: string;
+    userId?: number | null;
+    campaignId?: number | null;
+    referralSource?: ReferralSource;
+};
+
+export type UserAdminDetailDto = {
+    id: number;
+    name: string;
+    phoneNumber?: string;
+    preferredReminderTime?: string;
+    timeZone?: string;
+    emailNotifsForActions: boolean;
+    textNotifsForActions: boolean;
+    pushNotifsForActions: boolean;
+    shareEmailWithCommunityLead: boolean;
+    sharePhoneNumberWithCommunityLead: boolean;
+    turnedOffAllNotifs: boolean;
+    forumDigestPreference: ForumDigestPreference;
+    admin: boolean;
+    staff: boolean;
+    ambassador: boolean;
+    profilePicture: string | null;
+    profileDescription: string | null;
+    referralCode: string | null;
+    customCityString?: string | null;
+    anonymous: boolean;
+    shareInfoPublicly: boolean;
+    formDataPreference: PublicFormResponseDefault;
+    pushesForLikes: boolean;
+    pushesForComments: boolean;
+    pushesForFriendRequests: boolean;
+    pushesForMessages: boolean;
+    pushesForActionUpdates: boolean;
+    undergoingGroupAssignment: boolean;
+    remindAboutUncompletedGroupMembers: boolean;
+    receiveReplyNotifications: boolean;
+    contractEvents?: Array<ContractEvent>;
+    referralSource: ReferralSource;
+    tags: Array<Tag>;
+    communities: Array<Community>;
+    leaderOfIds: Array<number>;
+    clusterId: number | null;
+    email: string;
+    hasActiveContract: boolean;
+    referredById?: number;
+    location: UserAdminLocationDto;
+    invitedBy: UserAdminInvitedByDto | null;
+};
+
 export type UpdateUserRolesAdminDto = {
     ambassador?: boolean;
 };
@@ -4269,7 +4331,7 @@ export type UserUserDetailAdminErrors = {
 export type UserUserDetailAdminError = UserUserDetailAdminErrors[keyof UserUserDetailAdminErrors];
 
 export type UserUserDetailAdminResponses = {
-    200: UserDto;
+    200: UserAdminDetailDto;
 };
 
 export type UserUserDetailAdminResponse = UserUserDetailAdminResponses[keyof UserUserDetailAdminResponses];
@@ -4293,7 +4355,7 @@ export type UserUpdateUserRolesAdminErrors = {
 export type UserUpdateUserRolesAdminError = UserUpdateUserRolesAdminErrors[keyof UserUpdateUserRolesAdminErrors];
 
 export type UserUpdateUserRolesAdminResponses = {
-    200: UserDto;
+    200: UserAdminDetailDto;
 };
 
 export type UserUpdateUserRolesAdminResponse = UserUpdateUserRolesAdminResponses[keyof UserUpdateUserRolesAdminResponses];

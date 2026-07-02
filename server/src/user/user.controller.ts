@@ -68,6 +68,7 @@ import {
   SignupSocialProofDto,
   UpdateProfileDto,
   UpdateUserRolesAdminDto,
+  UserAdminDetailDto,
   UserCityCountDto,
   UserDto,
 } from './dto/user.dto';
@@ -387,29 +388,34 @@ export class UserController {
 
   @Get('userdetail/:id')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: UserDto })
+  @ApiOkResponse({ type: UserAdminDetailDto })
   async userDetailAdmin(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<UserDto> {
+  ): Promise<UserAdminDetailDto> {
     const user = await this.userService.findOne(id, {
       contractEvents: true,
       referredBy: true,
+      referredByCampaign: true,
+      referredByInvite: { invitingUser: true },
+      city: true,
       tags: true,
     });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return new UserDto(user);
+    return new UserAdminDetailDto(user);
   }
 
   @Patch('userdetail/:id/roles')
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ type: UserDto })
+  @ApiOkResponse({ type: UserAdminDetailDto })
   async updateUserRolesAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateUserRolesAdminDto,
-  ): Promise<UserDto> {
-    return new UserDto(await this.userService.updateRolesAdmin(id, body));
+  ): Promise<UserAdminDetailDto> {
+    return new UserAdminDetailDto(
+      await this.userService.updateRolesAdmin(id, body),
+    );
   }
 
   @Get('list-public')
