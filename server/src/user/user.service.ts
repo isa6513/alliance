@@ -1265,7 +1265,7 @@ export class UserService {
       .filter((member) => member.activeParticipant)
       .map((member) => member.userId);
     const [projection, totalsByUserId, goals] = await Promise.all([
-      this.getAmbassadorInviteProjection(),
+      this.getAmbassadorInviteProjection(activeUserIds),
       this.getAmbassadorInviteStatsByUserIds(activeUserIds),
       activeUserIds.length
         ? this.ambassadorInviteGoalRepository.find({
@@ -1595,7 +1595,7 @@ export class UserService {
     const [stats, statsByGoalId, projection] = await Promise.all([
       this.getAmbassadorInviteStats(userId),
       this.getAmbassadorInviteStatsByGoalIds(goals),
-      this.getAmbassadorInviteProjection(userId),
+      this.getAmbassadorInviteProjection([userId]),
     ]);
     const goalsWithStats = goals.map((goal) => ({
       goal,
@@ -1606,17 +1606,19 @@ export class UserService {
   }
 
   private async getAmbassadorInviteProjection(
-    userId?: number,
+    userIds: number[],
   ): Promise<AmbassadorInviteProjection> {
     const now = new Date();
-    const goals = await this.ambassadorInviteGoalRepository.find({
-      where: {
-        dueAt: MoreThan(now),
-        ...(userId === undefined ? {} : { ambassador: { id: userId } }),
-      },
-      relations: { ambassador: true },
-      order: { dueAt: 'ASC', id: 'ASC' },
-    });
+    const goals = userIds.length
+      ? await this.ambassadorInviteGoalRepository.find({
+          where: {
+            dueAt: MoreThan(now),
+            ambassador: { id: In(userIds) },
+          },
+          relations: { ambassador: true },
+          order: { dueAt: 'ASC', id: 'ASC' },
+        })
+      : [];
     const statsByGoalId = await this.getAmbassadorInviteStatsByGoalIds(goals);
     const goalsWithStats: AmbassadorInviteGoalWithStats[] = goals.map(
       (goal) => ({

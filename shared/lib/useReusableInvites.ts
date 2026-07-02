@@ -85,6 +85,9 @@ export function useReusableInvites(params?: { enabled?: boolean }) {
       queryClient.setQueryData<ShareUrlMineDto[]>(QUERY_KEY, (prev) =>
         prev?.filter((link) => link.id !== id),
       );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.ambassadorInviteDashboard(),
+      });
     },
   });
 
