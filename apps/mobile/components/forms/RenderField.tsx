@@ -38,6 +38,7 @@ import CityAutosuggest from "./CityAutosuggest";
 import { getCustomComponentById } from "./customComponentRegistry";
 import FormModal from "./FormModal";
 import TimeZoneSelect from "./TimeZoneSelect";
+import { OptionalLabelPrefix } from "./OptionalLabelPrefix";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -99,17 +100,21 @@ const renderValidationMessage = (message: string | null) =>
     <Text className="text-base text-red-500 mt-1">{message}</Text>
   ) : null;
 
-export function RenderLabel({ field }: { field: AnyField }) {
-  if (field.label === null) return null;
+export function RenderLabel({
+  field,
+  isOutputView,
+}: {
+  field: AnyField;
+  isOutputView?: boolean;
+}) {
+  if (field.label === null && field.required) return null;
   return (
-    <View className="mb-1 flex-row flex-wrap items-center">
-      <View className="shrink flex-1">
-        <InlineLabelMarkdownWrapper>{field.label}</InlineLabelMarkdownWrapper>
-      </View>
-      {field.required && (
-        <Text className="text-red-500 ml-1" weight={FontWeight.Medium}>
-          *
-        </Text>
+    <View className="mb-1">
+      {!field.required && !isOutputView && <OptionalLabelPrefix />}
+      {field.label !== null && (
+        <View className="shrink flex-1">
+          <InlineLabelMarkdownWrapper>{field.label}</InlineLabelMarkdownWrapper>
+        </View>
       )}
     </View>
   );
@@ -168,7 +173,7 @@ export function RenderField({
     case "text":
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <TextInput
             className={inputBase}
             value={(value as string) ?? ""}
@@ -185,7 +190,7 @@ export function RenderField({
     case "textarea":
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <TextInput
             className={cn(inputBase, "text-base")}
             value={(value as string) ?? ""}
@@ -211,7 +216,7 @@ export function RenderField({
     case "email":
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <TextInput
             className={inputBase}
             value={(value as string) ?? ""}
@@ -230,7 +235,7 @@ export function RenderField({
     case "phone":
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <TextInput
             className={inputBase}
             value={(value as string) ?? ""}
@@ -254,7 +259,7 @@ export function RenderField({
         : undefined;
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <TextInput
             className={inputBase}
             value={value === undefined || value === null ? "" : String(value)}
@@ -301,7 +306,7 @@ export function RenderField({
 
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <View className="flex-row justify-between mb-2">
             <Text className="text-xs text-zinc-500">{field.startLabel}</Text>
             <Text className="text-xs text-zinc-500">{field.endLabel}</Text>
@@ -354,13 +359,13 @@ export function RenderField({
     case "checkbox":
       return (
         <View>
+          {!field.required && !isOutputView && <OptionalLabelPrefix />}
           <Checkbox
             checked={!!value}
             disabled={disabled}
             error={hasError}
             onChange={(next) => onChange?.(next)}
             label={field.label}
-            required={field.required}
           />
           {renderValidationMessage(errorMessage)}
         </View>
@@ -370,7 +375,7 @@ export function RenderField({
       const options = (randomizedOptions ?? field.options) as ChoiceOption[];
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <View className={cn(hasError && "border-l-2 border-red-500 pl-3")}>
             {options.map((option: ChoiceOption, optIndex: number) => {
               const selected = value === option.value;
@@ -417,7 +422,7 @@ export function RenderField({
 
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <TouchableOpacity
             className={cn(inputBase, "flex-row items-center justify-between")}
             onPress={() => setSelectOpen(true)}
@@ -462,7 +467,7 @@ export function RenderField({
 
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <View className={cn(hasError && "border-l-2 border-red-500 pl-3")}>
             {options.map((option: ChoiceOption, optIndex: number) => {
               const checked = selections.includes(option.value);
@@ -525,7 +530,7 @@ export function RenderField({
     case "date":
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <TextInput
             className={inputBase}
             value={(value as string) ?? ""}
@@ -548,13 +553,14 @@ export function RenderField({
           onFocus={onFocus}
           disabled={disabled}
           baseError={errorMessage}
+          isOutputView={isOutputView}
         />
       );
 
     case "timezone":
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <TimeZoneSelect
             value={(value as string) ?? undefined}
             onChange={(tz) => onChange?.(tz)}
@@ -574,7 +580,7 @@ export function RenderField({
             : "";
       return (
         <View>
-          <RenderLabel field={field as CityField} />
+          <RenderLabel field={field as CityField} isOutputView={isOutputView} />
           <CityAutosuggest
             value={displayValue}
             placeholder={(field as CityField).placeholder || "City"}
@@ -617,7 +623,7 @@ export function RenderField({
 
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           {currentPreview && (
             <Image
               source={{ uri: currentPreview }}
@@ -708,7 +714,7 @@ export function RenderField({
 
       return (
         <View>
-          <RenderLabel field={field} />
+          <RenderLabel field={field} isOutputView={isOutputView} />
           <View className="gap-3">
             {cards.map((card, cardIndex) => (
               <Card
@@ -771,14 +777,9 @@ export function RenderField({
                 <AppMarkdownWrapper>{contract.markdown}</AppMarkdownWrapper>
               </View>
               <Card cardStyle={CardStyle.White} className="p-4">
+                {!field.required && !isOutputView && <OptionalLabelPrefix />}
                 <Text className="text-zinc-900 mb-3" weight={FontWeight.Medium}>
                   {field.signQuestion.trim()}
-                  {field.required && (
-                    <Text className="text-red-500" weight={FontWeight.Medium}>
-                      {" "}
-                      *
-                    </Text>
-                  )}
                 </Text>
                 <View className="flex-row gap-3">
                   <TouchableOpacity
@@ -846,7 +847,7 @@ export function RenderField({
         return (
           <View>
             <View className="rounded-lg border border-red-200 bg-red-50 p-3">
-              <RenderLabel field={field} />
+              <RenderLabel field={field} isOutputView={isOutputView} />
               <Text className="text-sm text-red-700">
                 Unable to render this field because the selected custom
                 component is not registered.
@@ -865,6 +866,7 @@ export function RenderField({
             onChange={(next) => onChange?.(next)}
             user={user}
             disabled={disabled}
+            isOutputView={isOutputView}
           />
           {renderValidationMessage(errorMessage)}
         </View>
@@ -883,6 +885,7 @@ type TimeInputFieldProps = {
   onFocus?: () => void;
   disabled?: boolean;
   baseError: string | null;
+  isOutputView?: boolean;
 };
 
 export function TimeInputField({
@@ -892,6 +895,7 @@ export function TimeInputField({
   onFocus,
   disabled,
   baseError,
+  isOutputView,
 }: TimeInputFieldProps) {
   const normalizedValue = typeof value === "string" && value ? value : "";
   const [inputValue, setInputValue] = useState<string>(() =>
@@ -939,7 +943,7 @@ export function TimeInputField({
 
   return (
     <View>
-      <RenderLabel field={field} />
+      <RenderLabel field={field} isOutputView={isOutputView} />
       <View className="relative">
         <Pressable
           onPress={() => setShowDropdown((prev) => !prev)}

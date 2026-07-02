@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { CustomComponentProps } from "@alliance/shared/forms/customComponents";
 import Card from "../../ui/Card";
+import { OptionalLabelPrefix } from "../OptionalLabelPrefix";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { shareInfoPubliclyToggle } from "@alliance/shared/lib/copy";
 import YesNoToggle from "../../ui/YesNoToggle";
@@ -21,6 +22,7 @@ const ShareInfoPubliclyToggleComponent = ({
   onChange,
   user,
   disabled,
+  isOutputView,
 }: CustomComponentProps) => {
   const parsedValue = parseBooleanValue(value);
   const userDefault =
@@ -71,12 +73,8 @@ const ShareInfoPubliclyToggleComponent = ({
       className="flex flex-row gap-x-4 items-center justify-between"
     >
       <div>
-        <label className="block font-medium mb-1">
-          {label}
-          {field.required && (
-            <span className="text-red-500 text-sm ml-1">*</span>
-          )}
-        </label>
+        {!field.required && !isOutputView && <OptionalLabelPrefix />}
+        <label className="block font-medium mb-1">{label}</label>
         <p className="text-zinc-500">{description}</p>
       </div>
       <YesNoToggle

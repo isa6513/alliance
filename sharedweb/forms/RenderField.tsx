@@ -28,6 +28,7 @@ import YesNoToggle from "../ui/YesNoToggle";
 import { cn } from "@alliance/shared/styles/util";
 import { Plus, X } from "lucide-react";
 import NewButton, { ButtonColor, ButtonSize } from "../ui/NewButton";
+import { OptionalLabelPrefix } from "./OptionalLabelPrefix";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -94,30 +95,34 @@ export function RenderLabel({
   field,
   error,
   labelRightAddon,
+  isOutputView,
 }: {
   field: AnyField;
   error?: string | null;
   labelRightAddon?: ReactNode;
+  isOutputView?: boolean;
 }) {
   const hasError = Boolean(error);
   return (
-    <label
-      className={cn(
-        "block",
-        hasError ? "text-red-600" : "text-zinc-700",
-        labelRightAddon && "flex items-start justify-between gap-3",
-      )}
-    >
-      <span>
-        {field.label !== null && (
-          <FormMarkdownWrapper markdownContent={field.label} inline />
+    <>
+      {!field.required && !isOutputView && <OptionalLabelPrefix />}
+      <label
+        className={cn(
+          "block",
+          hasError ? "text-red-600" : "text-zinc-700",
+          labelRightAddon && "flex items-start justify-between gap-3",
         )}
-        {field.required && <span className="text-red-500 ml-1">*</span>}
-      </span>
-      {labelRightAddon ? (
-        <span className="shrink-0">{labelRightAddon}</span>
-      ) : null}
-    </label>
+      >
+        <span>
+          {field.label !== null && (
+            <FormMarkdownWrapper markdownContent={field.label} inline />
+          )}
+        </span>
+        {labelRightAddon ? (
+          <span className="shrink-0">{labelRightAddon}</span>
+        ) : null}
+      </label>
+    </>
   );
 }
 
@@ -192,6 +197,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <input
             type="text"
@@ -219,6 +225,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <TextareaAutosize
             minRows={disabled ? 1 : field.rows || 3}
@@ -250,6 +257,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <input
             type="email"
@@ -272,6 +280,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <input
             type="tel"
@@ -307,6 +316,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <input
             type="number"
@@ -363,6 +373,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <div className="flex items-center justify-between text-xs text-zinc-500 py-1">
             <span className="text-black">{field.startLabel}</span>
@@ -453,11 +464,11 @@ export function RenderField({
           {field.label !== null && (
             <FormMarkdownWrapper markdownContent={field.label} inline />
           )}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
         </span>
       );
       return (
         <div className="space-y-1 pr-5">
+          {!field.required && !isOutputView && <OptionalLabelPrefix />}
           <label className="flex items-start">
             {checkboxPosition === "right" ? (
               <>
@@ -484,6 +495,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <div
             className={cn(
@@ -535,6 +547,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <select
             value={(value as string) ?? ""}
@@ -581,6 +594,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <div
             className={cn(
@@ -657,6 +671,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <input
             type="date"
@@ -680,6 +695,7 @@ export function RenderField({
           disabled={disabled}
           baseError={errorMessage}
           labelRightAddon={labelRightAddon}
+          isOutputView={isOutputView}
         />
       );
 
@@ -690,6 +706,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <TimeZoneSelect
             value={(value as string) ?? "America/Los_Angeles"}
@@ -712,7 +729,7 @@ export function RenderField({
             : "";
       return (
         <div className="space-y-1">
-          <RenderLabel field={field as CityField} error={errorMessage} />
+          <RenderLabel field={field as CityField} error={errorMessage} isOutputView={isOutputView} />
           <CityAutosuggest
             key={`city-${cityValue?.id ?? field.id}`}
             value={displayValue}
@@ -747,6 +764,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           {imageUrl && (
             <div className="mb-2">
@@ -879,6 +897,7 @@ export function RenderField({
             field={field}
             error={errorMessage}
             labelRightAddon={labelRightAddon}
+            isOutputView={isOutputView}
           />
           <div className="space-y-3">
             {cards.map((card, cardIndex) => (
@@ -966,12 +985,10 @@ export function RenderField({
                 style={CardStyle.White}
                 className="flex flex-row gap-x-4 items-center justify-between"
               >
-                <p className="font-medium">
-                  {field.signQuestion.trim()}
-                  {field.required && (
-                    <span className="text-red-500 ml-1">*</span>
-                  )}
-                </p>
+                <div>
+                  {!field.required && !isOutputView && <OptionalLabelPrefix />}
+                  <p className="font-medium">{field.signQuestion.trim()}</p>
+                </div>
                 <YesNoToggle
                   value={signedValue}
                   onChange={(next) => onChange?.(next)}
@@ -1001,6 +1018,7 @@ export function RenderField({
               field={field}
               error={errorMessage}
               labelRightAddon={labelRightAddon}
+              isOutputView={isOutputView}
             />
             <p className="text-sm text-red-700">
               Unable to render this field because the selected custom component
@@ -1018,6 +1036,7 @@ export function RenderField({
             onChange={(next) => onChange?.(next)}
             user={user}
             disabled={disabled}
+            isOutputView={isOutputView}
           />
           {renderValidationMessage()}
         </div>
@@ -1038,6 +1057,7 @@ type TimeInputFieldProps = {
   disabled?: boolean;
   baseError: string | null;
   labelRightAddon?: ReactNode;
+  isOutputView?: boolean;
 };
 
 export function TimeInputField({
@@ -1047,6 +1067,7 @@ export function TimeInputField({
   disabled,
   baseError,
   labelRightAddon,
+  isOutputView,
 }: TimeInputFieldProps) {
   const normalizedValue = typeof value === "string" && value ? value : "";
   const [inputValue, setInputValue] = useState<string>(() =>
@@ -1126,6 +1147,7 @@ export function TimeInputField({
         field={field}
         error={effectiveError}
         labelRightAddon={labelRightAddon}
+        isOutputView={isOutputView}
       />
       <div className="relative">
         <input

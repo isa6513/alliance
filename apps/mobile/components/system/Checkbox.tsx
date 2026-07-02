@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import { TouchableOpacity, View, StyleSheet } from "react-native";
 import Markdown from "react-native-markdown-display";
 import { Check } from "lucide-react-native";
 import { cn } from "@alliance/shared/styles/util";
@@ -9,7 +9,6 @@ type CheckboxProps = {
   onChange?: (next: boolean) => void;
   disabled?: boolean;
   label?: string | null;
-  required?: boolean;
   error?: boolean;
   className?: string;
 };
@@ -35,7 +34,6 @@ export default function Checkbox({
   onChange,
   disabled,
   label,
-  required,
   error,
   className,
 }: CheckboxProps) {
@@ -67,7 +65,6 @@ export default function Checkbox({
       {label ? (
         <View className="flex-row flex-wrap items-center">
           <Markdown style={markdownStyles}>{label}</Markdown>
-          {required && <Text className="text-red-500 ml-px self-start">*</Text>}
         </View>
       ) : null}
     </TouchableOpacity>

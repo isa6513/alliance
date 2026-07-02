@@ -4,6 +4,7 @@ import { CardStyle } from "@alliance/shared/styles/card";
 import { shareInfoPubliclyToggle } from "@alliance/shared/lib/copy";
 import Card from "../system/Card";
 import Text, { FontWeight } from "../system/Text";
+import { OptionalLabelPrefix } from "./OptionalLabelPrefix";
 import { colors } from "../../lib/style/colors";
 import type { CustomComponentProps } from "@alliance/shared/forms/customComponents";
 
@@ -19,6 +20,7 @@ const ShareInfoPubliclyToggleComponent = ({
   onChange,
   user,
   disabled,
+  isOutputView,
 }: CustomComponentProps) => {
   const parsedValue = parseBooleanValue(value);
   const userDefault =
@@ -68,12 +70,10 @@ const ShareInfoPubliclyToggleComponent = ({
       className="flex-row items-center justify-between gap-x-4"
     >
       <View className="flex-1">
-        <View className="flex-row items-center mb-1">
-          <Text weight={FontWeight.Medium}>{label}</Text>
-          {field.required && (
-            <Text className="text-red-500 text-sm ml-1">*</Text>
-          )}
-        </View>
+        {!field.required && !isOutputView && <OptionalLabelPrefix />}
+        <Text className="mb-1" weight={FontWeight.Medium}>
+          {label}
+        </Text>
         <Text className="text-zinc-500">{description}</Text>
       </View>
       <Switch

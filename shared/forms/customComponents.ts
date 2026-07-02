@@ -18,6 +18,7 @@ export interface CustomComponentProps {
   onChange: (value: string) => void;
   user?: Omit<UserDto, "email">;
   disabled?: boolean;
+  isOutputView?: boolean;
 }
 
 export interface CustomComponentDefinition {
