@@ -53,7 +53,7 @@ const UserDisplayName: React.FC<UserDisplayNameProps> = ({
         <span className="ml-1.5 inline-flex items-center gap-0.5 align-baseline">
           {ambassador && (
             <HoverBadge title={roleBadges.ambassador.tooltip}>
-              <span className="text-xs !bg-red-500 text-white rounded-xs px-1.5">
+              <span className="text-xs !bg-ambassador text-white rounded-xs px-1.5">
                 {roleBadges.ambassador.label}
               </span>
             </HoverBadge>

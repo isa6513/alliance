@@ -386,7 +386,7 @@ const UserProfilePage: React.FC = () => {
                       <Tooltip>
                         <TooltipTrigger
                           render={
-                            <div className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-sm self-center cursor-default">
+                            <div className="text-xs bg-ambassador text-white px-2 py-0.5 rounded-sm self-center cursor-default">
                               {roleBadges.ambassador.label}
                             </div>
                           }
