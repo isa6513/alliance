@@ -80,7 +80,7 @@ const InformationPage: React.FC = () => {
       title: "Ambassador Program",
       description:
         "How ambassadors help the Alliance recruit reliable new members.",
-      href: href("/ambassador-program"),
+      href: href("/ambassadors"),
       icon: Handshake,
     },
     {

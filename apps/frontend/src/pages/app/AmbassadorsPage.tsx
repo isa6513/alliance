@@ -18,7 +18,7 @@ const imageFrameClassName =
 const imageClassName = "w-full h-auto border border-zinc-200 rounded";
 const imageCaptionClassName = "text-zinc-500 text-sm text-center";
 
-const AmbassadorProgramPage: React.FC = () => {
+const AmbassadorsPage: React.FC = () => {
   useWhiteBackground();
 
   const tocSections: TocSection[] = [
@@ -522,4 +522,4 @@ const AmbassadorProgramPage: React.FC = () => {
   );
 };
 
-export default AmbassadorProgramPage;
+export default AmbassadorsPage;
