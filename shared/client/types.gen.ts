@@ -1094,9 +1094,20 @@ export type AmbassadorInviteGoalWithStatsDto = {
     stats: AmbassadorInviteStatsDto;
 };
 
+export type AmbassadorInviteProjectionPointDto = {
+    date: string;
+    projectedSuccessfulRecruits: number;
+};
+
+export type AmbassadorInviteProjectionDto = {
+    generatedAt: string;
+    points: Array<AmbassadorInviteProjectionPointDto>;
+};
+
 export type AmbassadorInviteDashboardDto = {
     goals: Array<AmbassadorInviteGoalWithStatsDto>;
     stats: AmbassadorInviteStatsDto;
+    projection: AmbassadorInviteProjectionDto;
 };
 
 export type CreateAmbassadorInviteGoalDto = {

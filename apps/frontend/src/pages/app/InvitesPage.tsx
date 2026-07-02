@@ -477,6 +477,8 @@ const InvitesPage = () => {
   const { data: allianceMemberCount, isPending: allianceMemberCountPending } =
     useAllianceMemberCount({ enabled: Boolean(user) });
 
+  const projectionPoints = ambassadorDashboard?.projection.points ?? [];
+
   if (!user || loadingInvites) {
     return (
       <div className="flex min-h-[calc(100dvh-var(--navbar-top-bar-height))] items-center justify-center">
@@ -488,7 +490,7 @@ const InvitesPage = () => {
   return (
     <CenterLayout>
       <div className="flex flex-col gap-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-title">Invites</h1>
           <div className="flex flex-row items-center gap-x-2 bg-white rounded px-4 py-3 shrink-0 sm:min-w-52">
             <UserCheck className="w-10 h-10 bg-green/10 rounded p-2 text-green" />
@@ -674,6 +676,56 @@ const InvitesPage = () => {
                     </div>
                   </div>
                 </div>
+
+                {projectionPoints.length > 0 && (
+                  <div className="rounded border border-white/15 bg-white/10 p-4 sm:p-5 flex flex-col gap-y-4">
+                    <div>
+                      <p className="font-semibold text-lg">
+                        Projected growth
+                      </p>
+                      <p className="text-sm text-white/70">
+                        Rough estimate from all active and future ambassador
+                        goals.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {projectionPoints.map((point) => {
+                        const projectedMembers =
+                          allianceMemberCount === undefined
+                            ? null
+                            : allianceMemberCount +
+                              point.projectedSuccessfulRecruits;
+
+                        return (
+                          <div
+                            key={point.date}
+                            className="rounded border border-white/15 bg-white/10 px-3 py-3"
+                          >
+                            <p className="text-xs font-semibold text-white/65">
+                              By {formatDate(point.date)}
+                            </p>
+                            <p className="mt-1 text-2xl font-semibold tabular-nums">
+                              +{point.projectedSuccessfulRecruits}
+                            </p>
+                            <p className="text-sm text-white/70">
+                              {projectedMembers === null ||
+                              allianceMemberCountPending
+                                ? "Projected members loading..."
+                                : `${projectedMembers.toLocaleString()} projected members`}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-white/65 leading-snug">
+                      Calculation reminder: subtract successful recruits
+                      already counted for each active or future goal, then
+                      spread the remaining target evenly from today (or the goal
+                      start date, if it has not started) through the due date.
+                      Ended goals are not included.
+                    </p>
+                  </div>
+                )}
 
                 {pastGoals.length > 0 && (
                   <details className="rounded border border-white/15 bg-white/10 px-4 py-3 text-sm">

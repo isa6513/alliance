@@ -2,12 +2,14 @@ import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   Allow,
+  IsArray,
   IsDateString,
   IsInt,
   IsNumber,
   IsOptional,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { CommunityDto } from 'src/community/dto/community.dto';
 import { CommunityInvite } from 'src/community/entities/community-invite.entity';
@@ -246,8 +248,54 @@ export class AmbassadorInviteGoalWithStatsDto {
   }
 }
 
+export type AmbassadorInviteProjectionPoint = {
+  date: string;
+  projectedSuccessfulRecruits: number;
+};
+
+export class AmbassadorInviteProjectionPointDto {
+  @ApiProperty({ type: String, format: 'date-time' })
+  @IsDateString()
+  date: string;
+
+  @ApiProperty()
+  @IsInt()
+  @Min(0)
+  projectedSuccessfulRecruits: number;
+
+  constructor(input: AmbassadorInviteProjectionPoint) {
+    this.date = input.date;
+    this.projectedSuccessfulRecruits = input.projectedSuccessfulRecruits;
+  }
+}
+
+export type AmbassadorInviteProjection = {
+  generatedAt: string;
+  points: AmbassadorInviteProjectionPoint[];
+};
+
+export class AmbassadorInviteProjectionDto {
+  @ApiProperty({ type: String, format: 'date-time' })
+  @IsDateString()
+  generatedAt: string;
+
+  @ApiProperty({ type: AmbassadorInviteProjectionPointDto, isArray: true })
+  @Type(() => AmbassadorInviteProjectionPointDto)
+  @IsArray()
+  @ValidateNested({ each: true })
+  points: AmbassadorInviteProjectionPointDto[];
+
+  constructor(input: AmbassadorInviteProjection) {
+    this.generatedAt = input.generatedAt;
+    this.points = input.points.map(
+      (point) => new AmbassadorInviteProjectionPointDto(point),
+    );
+  }
+}
+
 export type AmbassadorInviteDashboard = {
   goals: AmbassadorInviteGoalWithStats[];
+  projection: AmbassadorInviteProjection;
   stats: AmbassadorInviteStats;
 };
 
@@ -260,11 +308,16 @@ export class AmbassadorInviteDashboardDto {
   @Type(() => AmbassadorInviteStatsDto)
   stats: AmbassadorInviteStatsDto;
 
+  @ApiProperty({ type: AmbassadorInviteProjectionDto })
+  @Type(() => AmbassadorInviteProjectionDto)
+  projection: AmbassadorInviteProjectionDto;
+
   constructor(input: AmbassadorInviteDashboard) {
     this.goals = input.goals.map(
       (goal) => new AmbassadorInviteGoalWithStatsDto(goal),
     );
     this.stats = new AmbassadorInviteStatsDto(input.stats);
+    this.projection = new AmbassadorInviteProjectionDto(input.projection);
   }
 }
 

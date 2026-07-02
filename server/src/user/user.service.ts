@@ -43,6 +43,7 @@ import {
   ILike,
   In,
   IsNull,
+  MoreThan,
   Not,
   type Repository,
 } from 'typeorm';
@@ -54,6 +55,8 @@ import {
 } from './dto/device.dto';
 import {
   AmbassadorInviteDashboard,
+  AmbassadorInviteGoalWithStats,
+  AmbassadorInviteProjection,
   AmbassadorInviteStats,
   AmbassadorProgramDashboard,
   CreateAmbassadorProgramInteractionDto,
@@ -119,7 +122,9 @@ const REFERRAL_SOURCE_BY_SHARE_KIND: Record<
 };
 
 const AMBASSADOR_INVITES_URL = '/invites';
+const DAY_MS = 24 * 60 * 60 * 1000;
 const AMBASSADOR_GOAL_NOTIFICATION_LOOKBACK_MS = 60 * 60 * 1000;
+const AMBASSADOR_PROJECTION_DAYS = [14, 30] as const;
 
 function ambassadorGoalHalfwayGroupingKey(goalId: number) {
   return `ambassador-invite-goal:${goalId}:halfway`;
@@ -1504,8 +1509,72 @@ export class UserService {
         stats: await this.getAmbassadorInviteStats(userId, goal),
       })),
     );
+    const projection = await this.getAmbassadorInviteProjection();
 
-    return { goals: goalsWithStats, stats };
+    return { goals: goalsWithStats, projection, stats };
+  }
+
+  private async getAmbassadorInviteProjection(): Promise<AmbassadorInviteProjection> {
+    const now = new Date();
+    const goals = await this.ambassadorInviteGoalRepository.find({
+      where: { dueAt: MoreThan(now) },
+      relations: { ambassador: true },
+      order: { dueAt: 'ASC', id: 'ASC' },
+    });
+    const goalsWithStats: AmbassadorInviteGoalWithStats[] = await Promise.all(
+      goals.map(async (goal) => ({
+        goal,
+        stats: await this.getAmbassadorInviteStats(goal.ambassador.id, goal),
+      })),
+    );
+
+    return {
+      generatedAt: now.toISOString(),
+      points: AMBASSADOR_PROJECTION_DAYS.map((days) => {
+        const date = new Date(now.getTime() + days * DAY_MS);
+        const projectedSuccessfulRecruits = Math.round(
+          goalsWithStats.reduce((total, goalWithStats) => {
+            return total + this.projectGoalSuccessfulRecruits(goalWithStats, date, now);
+          }, 0),
+        );
+
+        return {
+          date: date.toISOString(),
+          projectedSuccessfulRecruits,
+        };
+      }),
+    };
+  }
+
+  private projectGoalSuccessfulRecruits(
+    goalWithStats: AmbassadorInviteGoalWithStats,
+    checkpoint: Date,
+    now: Date,
+  ): number {
+    const { goal, stats } = goalWithStats;
+    const remaining = Math.max(
+      0,
+      goal.targetSuccessfulRecruits - stats.goalSuccessfulRecruits,
+    );
+    if (remaining === 0 || checkpoint <= goal.startAt || now >= goal.dueAt) {
+      return 0;
+    }
+
+    const projectionStart = goal.startAt > now ? goal.startAt : now;
+    if (checkpoint >= goal.dueAt) {
+      return remaining;
+    }
+    if (checkpoint <= projectionStart) {
+      return 0;
+    }
+
+    const remainingWindowMs = goal.dueAt.getTime() - projectionStart.getTime();
+    if (remainingWindowMs <= 0) {
+      return remaining;
+    }
+
+    const elapsedMs = checkpoint.getTime() - projectionStart.getTime();
+    return remaining * Math.min(1, Math.max(0, elapsedMs / remainingWindowMs));
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
