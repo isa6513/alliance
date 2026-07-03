@@ -51,7 +51,13 @@ const sectionConfig: Record<
   },
 };
 
-const todayInputValue = () => new Date().toISOString().slice(0, 10);
+const todayInputValue = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 const memberDisplayName = (user: Pick<UserDto, "id" | "name" | "email">) =>
   user.name?.trim() || user.email || `User #${user.id}`;
