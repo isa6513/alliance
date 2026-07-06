@@ -5,6 +5,9 @@ import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useQueries } from "@tanstack/react-query";
 import React from "react";
 import { Link } from "react-router";
+import alliancePeople640 from "../../assets/alliance_people-640.webp";
+import alliancePeople960 from "../../assets/alliance_people-960.webp";
+import alliancePeople1280 from "../../assets/alliance_people-1280.webp";
 import alliancePeople from "../../assets/alliance_people.webp";
 import AllianceIntroYouTubeEmbed from "../../components/AllianceIntroYouTubeEmbed";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
@@ -180,7 +183,13 @@ const PrelaunchLandingPage: React.FC = () => {
             <figure className="min-w-0 w-full lg:w-1/2">
               <img
                 src={alliancePeople}
+                srcSet={`${alliancePeople640} 640w, ${alliancePeople960} 960w, ${alliancePeople1280} 1280w, ${alliancePeople} 2000w`}
+                sizes="(min-width: 1024px) 50vw, (min-width: 768px) 86vw, 100vw"
                 alt="Alliance members at a meetup"
+                width={2000}
+                height={1333}
+                loading="eager"
+                decoding="async"
                 className="w-full h-auto rounded-md"
               />
               <figcaption className="mt-3 text-center text-base text-zinc-500">
