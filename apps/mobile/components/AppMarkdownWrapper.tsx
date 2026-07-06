@@ -1,6 +1,12 @@
 import { RelativePathString, router } from "expo-router";
-import React, { useCallback, useMemo } from "react";
-import { Image, Linking, StyleSheet, View } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  Image,
+  Linking,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Markdown, {
   ASTNode,
   RenderRules,
@@ -8,6 +14,7 @@ import Markdown, {
 } from "react-native-markdown-display";
 import { getApiUrl } from "../lib/config";
 import { colors } from "../lib/style/colors";
+import { ImageLightboxModal } from "./ImageLightbox";
 import Text from "./system/Text";
 
 /**
@@ -233,6 +240,25 @@ function isLastAmongSiblings(node: ASTNode, parentNodes: ASTNode[]): boolean {
   return node.index === parent.children.length - 1;
 }
 
+function renderPlainCodeBlock(node: ASTNode, parent: ASTNode[]) {
+  return (
+    <View
+      key={node.key}
+      style={{
+        backgroundColor: "#f4f4f5",
+        padding: 12,
+        borderRadius: 4,
+        marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
+        marginBottom: isLastAmongSiblings(node, parent) ? 0 : MD_SPACE_LIST_TOP,
+      }}
+    >
+      <Text style={{ fontFamily: "monospace", fontSize: 13 }}>
+        {node.content || ""}
+      </Text>
+    </View>
+  );
+}
+
 interface AppMarkdownWrapperProps {
   /** Prefer this name to match sharedweb `AppMarkdownWrapper` */
   markdownContent?: string;
@@ -249,6 +275,69 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
 }) => {
   const markdownSource = markdownContent ?? children ?? "";
   const handleLinkPress = useHandleLinkPress();
+  const [lightboxUri, setLightboxUri] = useState<string | null>(null);
+
+  const wrapImage = useCallback(
+    (image: React.ReactNode, src: string) =>
+      truncated ? (
+        image
+      ) : (
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={{ width: "100%" }}
+          onPress={() => setLightboxUri(src)}
+        >
+          {image}
+        </TouchableOpacity>
+      ),
+    [truncated],
+  );
+
+  const renderImgcap = useCallback(
+    (node: ASTNode, parent: ASTNode[]) => {
+      const [imgLine, ...captionLines] = (node.content || "").split("\n");
+      const img = imgLine.trim();
+      const caption = captionLines.join("\n").trim();
+      const transformedSrc = `${getApiUrl()}/images/${img}`;
+
+      return (
+        <View
+          key={node.key}
+          style={{
+            alignItems: "center",
+            marginTop: isFirstAmongSiblings(node) ? 0 : 24,
+            marginBottom: isLastAmongSiblings(node, parent) ? 0 : 24,
+          }}
+        >
+          {wrapImage(
+            <Image
+              source={{ uri: transformedSrc }}
+              style={{
+                width: "100%",
+                maxHeight: 300,
+                borderRadius: 4,
+              }}
+              resizeMode="contain"
+            />,
+            transformedSrc,
+          )}
+          {caption ? (
+            <Text
+              style={{
+                fontSize: 12,
+                color: "#6b7280",
+                marginTop: 8,
+                textAlign: "center",
+              }}
+            >
+              {caption}
+            </Text>
+          ) : null}
+        </View>
+      );
+    },
+    [wrapImage],
+  );
 
   const rules: RenderRules = useMemo(
     () => ({
@@ -393,16 +482,19 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
                 : MD_SPACE_LIST_TOP,
             }}
           >
-            <Image
-              source={{ uri: transformedSrc }}
-              style={{
-                aspectRatio: 1,
-                width: "100%",
-                borderRadius: 4,
-              }}
-              resizeMode="contain"
-              accessibilityLabel={alt}
-            />
+            {wrapImage(
+              <Image
+                source={{ uri: transformedSrc }}
+                style={{
+                  aspectRatio: 1,
+                  width: "100%",
+                  borderRadius: 4,
+                }}
+                resizeMode="contain"
+                accessibilityLabel={alt}
+              />,
+              transformedSrc,
+            )}
           </View>
         );
       },
@@ -421,140 +513,24 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
       },
       // Handle imgcap code blocks (custom image with caption syntax)
       code_block: (node, children, parent) => {
-        const content = node.content || "";
         const language = node.attributes?.class?.replace("language-", "") || "";
-
-        if (language === "imgcap") {
-          const [imgLine, ...captionLines] = content.split("\n");
-          const img = imgLine.trim();
-          const caption = captionLines.join("\n").trim();
-          const transformedSrc = `${getApiUrl()}/images/${img}`;
-
-          return (
-            <View
-              key={node.key}
-              style={{
-                alignItems: "center",
-                marginTop: isFirstAmongSiblings(node) ? 0 : 24,
-                marginBottom: isLastAmongSiblings(node, parent) ? 0 : 24,
-              }}
-            >
-              <Image
-                source={{ uri: transformedSrc }}
-                style={{
-                  width: "100%",
-                  maxHeight: 300,
-                  borderRadius: 4,
-                }}
-                resizeMode="contain"
-              />
-              {caption ? (
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: "#6b7280",
-                    marginTop: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  {caption}
-                </Text>
-              ) : null}
-            </View>
-          );
-        }
-
-        // Default code block rendering
-        return (
-          <View
-            key={node.key}
-            style={{
-              backgroundColor: "#f4f4f5",
-              padding: 12,
-              borderRadius: 4,
-              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
-              marginBottom: isLastAmongSiblings(node, parent)
-                ? 0
-                : MD_SPACE_LIST_TOP,
-            }}
-          >
-            <Text style={{ fontFamily: "monospace", fontSize: 13 }}>
-              {content}
-            </Text>
-          </View>
-        );
+        return language === "imgcap"
+          ? renderImgcap(node, parent)
+          : renderPlainCodeBlock(node, parent);
       },
       body: (node, children) => <>{children}</>,
       fence: (node, children, parent) => {
-        const content = node.content || "";
         // The info string (language) for fenced code blocks can be in different properties
         const info =
           (node as { sourceInfo?: string }).sourceInfo ||
           (node.attributes as { info?: string })?.info ||
           "";
-
-        if (info === "imgcap") {
-          const [imgLine, ...captionLines] = content.split("\n");
-          const img = imgLine.trim();
-          const caption = captionLines.join("\n").trim();
-          const transformedSrc = `${getApiUrl()}/images/${img}`;
-
-          return (
-            <View
-              key={node.key}
-              style={{
-                alignItems: "center",
-                marginTop: isFirstAmongSiblings(node) ? 0 : 24,
-                marginBottom: isLastAmongSiblings(node, parent) ? 0 : 24,
-              }}
-            >
-              <Image
-                source={{ uri: transformedSrc }}
-                style={{
-                  width: "100%",
-                  maxHeight: 300,
-                  borderRadius: 4,
-                }}
-                resizeMode="contain"
-              />
-              {caption ? (
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: "#6b7280",
-                    marginTop: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  {caption}
-                </Text>
-              ) : null}
-            </View>
-          );
-        }
-
-        // Default fence rendering
-        return (
-          <View
-            key={node.key}
-            style={{
-              backgroundColor: "#f4f4f5",
-              padding: 12,
-              borderRadius: 4,
-              marginTop: isFirstAmongSiblings(node) ? 0 : MD_SPACE_LIST_TOP,
-              marginBottom: isLastAmongSiblings(node, parent)
-                ? 0
-                : MD_SPACE_LIST_TOP,
-            }}
-          >
-            <Text style={{ fontFamily: "monospace", fontSize: 13 }}>
-              {content}
-            </Text>
-          </View>
-        );
+        return info === "imgcap"
+          ? renderImgcap(node, parent)
+          : renderPlainCodeBlock(node, parent);
       },
     }),
-    [handleLinkPress],
+    [handleLinkPress, wrapImage, renderImgcap],
   );
 
   const markdownStyles = useMemo(
@@ -617,16 +593,24 @@ const AppMarkdownWrapper: React.FC<AppMarkdownWrapperProps> = ({
     [style],
   );
 
-  return truncated ? (
-    <View className="max-h-20 overflow-hidden">
-      <Markdown style={markdownStyles} rules={rules} mergeStyle>
-        {children}
-      </Markdown>
-    </View>
-  ) : (
-    <Markdown style={markdownStyles} rules={rules} mergeStyle>
-      {markdownSource}
-    </Markdown>
+  return (
+    <>
+      {truncated ? (
+        <View className="max-h-20 overflow-hidden">
+          <Markdown style={markdownStyles} rules={rules} mergeStyle>
+            {markdownSource}
+          </Markdown>
+        </View>
+      ) : (
+        <Markdown style={markdownStyles} rules={rules} mergeStyle>
+          {markdownSource}
+        </Markdown>
+      )}
+      <ImageLightboxModal
+        uri={lightboxUri}
+        onClose={() => setLightboxUri(null)}
+      />
+    </>
   );
 };
 
