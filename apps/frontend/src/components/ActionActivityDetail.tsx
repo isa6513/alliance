@@ -200,7 +200,9 @@ const ActionActivityDetail = () => {
               onLike={handleLike}
               align="right"
             />
-            <Comments objectId={activity.id} type={"activity"} />
+            <div id="comments">
+              <Comments objectId={activity.id} type={"activity"} />
+            </div>
           </>
         )}
       </div>

@@ -9,6 +9,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import multer from 'multer';
 import { ActionsModule } from './actions/actions.module';
+import { ActionPartnershipsModule } from './action-partnerships/action-partnerships.module';
 import { AdminViewerModule } from './admin-viewer/admin-viewer.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ApnsModule } from './apns/apns.module';
@@ -78,6 +79,7 @@ import { VideosModule } from './videos/videos.module';
     TypeOrmModule.forRoot({ ...connectionOptions(), autoLoadEntities: true }),
     ScheduleModule.forRoot(),
     ActionsModule,
+    ActionPartnershipsModule,
     ImagesModule,
     VideosModule,
     ForumModule,

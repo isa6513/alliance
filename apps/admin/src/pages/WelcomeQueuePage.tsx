@@ -1,5 +1,6 @@
 import { actionsGetUnwelcomedSignedContractMembersAdmin } from "@alliance/shared/client";
 import type { UnwelcomedSignedContractMemberDto } from "@alliance/shared/client/types.gen";
+import { getBaseUrl } from "@alliance/sharedweb/lib/config";
 import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
@@ -14,6 +15,11 @@ const formatDate = (date: string): string =>
     hour: "numeric",
     minute: "2-digit",
   });
+
+const frontendActivityCommentsUrl = (
+  entry: UnwelcomedSignedContractMemberDto,
+): string =>
+  `${getBaseUrl()}/actions/${entry.actionId}/activity/${entry.activityId}#comments`;
 
 const WelcomeQueuePage: React.FC = () => {
   const [members, setMembers] = useState<UnwelcomedSignedContractMemberDto[]>(
@@ -178,6 +184,14 @@ const WelcomeQueuePage: React.FC = () => {
                         >
                           Contract action
                         </Link>
+                        <a
+                          href={frontendActivityCommentsUrl(entry)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Leave welcome comment
+                        </a>
                         <span className="text-zinc-500">
                           Activity #{entry.activityId}
                         </span>

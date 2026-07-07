@@ -33,6 +33,10 @@ client.setConfig({
 
 registerAnalytics(posthog);
 
+export function meta() {
+  return [{ title: "Alliance" }];
+}
+
 const options: Partial<PostHogConfig> = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
   defaults: "2025-05-24",
@@ -115,7 +119,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" type="image/png" href="/planet-earth.png" />
-        <title>Alliance</title>
         <Meta />
         <Links />
       </head>

@@ -2870,6 +2870,44 @@ export type UpdatePostAuthorsDto = {
     authorIds: Array<number>;
 };
 
+export type CreateActionPartnershipResponseDto = {
+    organizationName: string;
+    personName: string;
+    contact: string;
+    outreachChannels: Array<string>;
+    audienceSize: string;
+    desiredCollaboration: string;
+    notes: string;
+};
+
+export type ActionPartnershipNoteDto = {
+    id: number;
+    responseId: number;
+    noteDate: string;
+    body: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type ActionPartnershipResponseDto = {
+    id: number;
+    organizationName: string;
+    personName: string;
+    contact: string;
+    outreachChannels: Array<string>;
+    audienceSize: string;
+    desiredCollaboration: string;
+    notes: string;
+    createdAt: string;
+    updatedAt: string;
+    notesHistory: Array<ActionPartnershipNoteDto>;
+};
+
+export type CreateActionPartnershipNoteDto = {
+    body: string;
+    noteDate?: string;
+};
+
 export type UploadVideoResponseDto = {
     id: number;
     key: string;
@@ -10500,6 +10538,74 @@ export type ForumPinCommentAdminResponses = {
 };
 
 export type ForumPinCommentAdminResponse = ForumPinCommentAdminResponses[keyof ForumPinCommentAdminResponses];
+
+export type ActionPartnershipsFindAllResponsesAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/action-partnerships/responses';
+};
+
+export type ActionPartnershipsFindAllResponsesAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionPartnershipsFindAllResponsesAdminError = ActionPartnershipsFindAllResponsesAdminErrors[keyof ActionPartnershipsFindAllResponsesAdminErrors];
+
+export type ActionPartnershipsFindAllResponsesAdminResponses = {
+    200: Array<ActionPartnershipResponseDto>;
+};
+
+export type ActionPartnershipsFindAllResponsesAdminResponse = ActionPartnershipsFindAllResponsesAdminResponses[keyof ActionPartnershipsFindAllResponsesAdminResponses];
+
+export type ActionPartnershipsCreateResponseData = {
+    body: CreateActionPartnershipResponseDto;
+    path?: never;
+    query?: never;
+    url: '/action-partnerships/responses';
+};
+
+export type ActionPartnershipsCreateResponseErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionPartnershipsCreateResponseError = ActionPartnershipsCreateResponseErrors[keyof ActionPartnershipsCreateResponseErrors];
+
+export type ActionPartnershipsCreateResponseResponses = {
+    200: ActionPartnershipResponseDto;
+};
+
+export type ActionPartnershipsCreateResponseResponse = ActionPartnershipsCreateResponseResponses[keyof ActionPartnershipsCreateResponseResponses];
+
+export type ActionPartnershipsCreateNoteAdminData = {
+    body: CreateActionPartnershipNoteDto;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/action-partnerships/responses/{id}/notes';
+};
+
+export type ActionPartnershipsCreateNoteAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionPartnershipsCreateNoteAdminError = ActionPartnershipsCreateNoteAdminErrors[keyof ActionPartnershipsCreateNoteAdminErrors];
+
+export type ActionPartnershipsCreateNoteAdminResponses = {
+    200: ActionPartnershipNoteDto;
+};
+
+export type ActionPartnershipsCreateNoteAdminResponse = ActionPartnershipsCreateNoteAdminResponses[keyof ActionPartnershipsCreateNoteAdminResponses];
 
 export type VideosUploadVideoAdminData = {
     body: {

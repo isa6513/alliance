@@ -1,5 +1,6 @@
 import {
   ActionDto,
+  actionPartnershipsFindAllResponsesAdmin,
   actionsFindAllWithDraftsAdmin,
   actionsPasteJsonAdmin,
 } from "@alliance/shared/client";
@@ -47,6 +48,8 @@ import { useGroupAssignment } from "./lib/GroupAssignmentContext";
 const Sidebar: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
+  const [pendingActionPartnershipCount, setPendingActionPartnershipCount] =
+    useState<number>(0);
   const navigate = useNavigate();
 
   const { logout, user, loading: authLoading } = useAuth();
@@ -74,13 +77,43 @@ const Sidebar: React.FC = () => {
     }
   }, []);
 
+  const loadPendingActionPartnerships = useCallback(async () => {
+    try {
+      const response = await actionPartnershipsFindAllResponsesAdmin();
+      if (response.data) {
+        setPendingActionPartnershipCount(
+          response.data.filter(
+            (partnershipResponse) =>
+              partnershipResponse.notesHistory.length === 0,
+          ).length,
+        );
+      }
+    } catch (err) {
+      console.error("Failed to load action partnership responses", err);
+    }
+  }, []);
+
   const currentActionId = window.location.pathname.includes("/actions/")
     ? parseInt(window.location.pathname.split("/actions/")[1])
     : null;
 
   useEffect(() => {
     loadActions();
-  }, [loadActions]);
+    void loadPendingActionPartnerships();
+  }, [loadActions, loadPendingActionPartnerships]);
+
+  useEffect(() => {
+    window.addEventListener(
+      "action-partnerships-updated",
+      loadPendingActionPartnerships,
+    );
+    return () => {
+      window.removeEventListener(
+        "action-partnerships-updated",
+        loadPendingActionPartnerships,
+      );
+    };
+  }, [loadPendingActionPartnerships]);
 
   const handleEditAction = useCallback(
     (id: number) => {
@@ -254,6 +287,11 @@ const Sidebar: React.FC = () => {
             >
               <MoreHorizontal size={16} />
               Extras
+              {!!pendingActionPartnershipCount ? (
+                <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
+                  {pendingActionPartnershipCount}
+                </div>
+              ) : null}
               {extrasOpen ? (
                 <ChevronDown size={14} className="ml-auto" />
               ) : (
@@ -319,6 +357,12 @@ const Sidebar: React.FC = () => {
                     icon: <Handshake size={16} />,
                   },
                   {
+                    to: "/action-partnerships",
+                    label: "Action Partnerships",
+                    icon: <Handshake size={16} />,
+                    notifCount: pendingActionPartnershipCount,
+                  },
+                  {
                     to: "/share-targets",
                     label: "Share Targets",
                     icon: <SquareMousePointer size={16} />,
@@ -341,6 +385,11 @@ const Sidebar: React.FC = () => {
                   >
                     {link.icon}
                     {link.label}
+                    {!!link.notifCount ? (
+                      <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
+                        {link.notifCount}
+                      </div>
+                    ) : null}
                   </Link>
                 ))}
               </div>
