@@ -4,6 +4,16 @@ export type HealthCheckDto = {
     status: string;
 };
 
+export type MobilePlatformFingerprintDto = {
+    fingerprint: string;
+    version: string;
+};
+
+export type MobileFingerprintsDto = {
+    ios: MobilePlatformFingerprintDto;
+    android: MobilePlatformFingerprintDto;
+};
+
 export type SignInDto = {
     mode: 'cookie' | 'header';
     email: string;
@@ -3658,6 +3668,28 @@ export type AppHealthCheckResponses = {
 };
 
 export type AppHealthCheckResponse = AppHealthCheckResponses[keyof AppHealthCheckResponses];
+
+export type AppGetMobileFingerprintsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/mobile-fingerprints';
+};
+
+export type AppGetMobileFingerprintsErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AppGetMobileFingerprintsError = AppGetMobileFingerprintsErrors[keyof AppGetMobileFingerprintsErrors];
+
+export type AppGetMobileFingerprintsResponses = {
+    200: MobileFingerprintsDto;
+};
+
+export type AppGetMobileFingerprintsResponse = AppGetMobileFingerprintsResponses[keyof AppGetMobileFingerprintsResponses];
 
 export type AppMetricsData = {
     body?: never;

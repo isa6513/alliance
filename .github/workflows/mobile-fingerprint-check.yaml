@@ -1,8 +1,8 @@
 name: Mobile Fingerprint Check
 
 # Compares the mobile EAS Update fingerprint (runtimeVersion) against the
-# committed baselines (fingerprint.{ios,android}.txt = the builds live in the
-# stores). On drift it posts to Slack: the native layer changed, so the change
+# committed baselines (common/src/mobileFingerprints.ts = the builds live in
+# the stores). On drift it posts to Slack: the native layer changed, so the change
 # cannot reach existing users over OTA and a new store build is required.
 # Non-blocking — it notifies, it does not fail the PR.
 
@@ -64,7 +64,7 @@ jobs:
             echo "No Slack webhook configured; skipping notification."
             exit 0
           fi
-          MSG=$(printf ':iphone: *Mobile native fingerprint changed* — a new App Store / Play Store build is required.\nThese changes cannot reach existing installs over OTA.\n\n*PR:* <%s|#%s %s>\n*Branch:* `%s`\n```\n%s\n```\nAfter submitting the new build(s), run `bun fingerprint:update <path-to-.ipa|.aab|.apk>` and commit to clear this.' \
+          MSG=$(printf ':iphone: *Mobile native fingerprint changed* — a new App Store / Play Store build is required.\nThese changes cannot reach existing installs over OTA.\n\n*PR:* <%s|#%s %s>\n*Branch:* `%s`\n```\n%s\n```\nAfter the new build(s) are live in the App Store / Play Store, run `bun fingerprint:update <path-to-.ipa|.aab|.apk>` and commit/deploy promptly to clear this.' \
             "$PR_URL" "$PR_NUMBER" "$PR_TITLE" "$BRANCH" "$DETAILS")
           PAYLOAD=$(jq -n --arg text "$MSG" '{text: $text}')
           curl -sS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$WEBHOOK"

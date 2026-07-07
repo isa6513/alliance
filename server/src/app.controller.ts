@@ -1,6 +1,7 @@
+import { MOBILE_STORE_FINGERPRINTS } from '@alliance/common/mobileFingerprints';
 import { Controller, Get, Header, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
-import { HealthCheckDto } from './app.dto';
+import { HealthCheckDto, MobileFingerprintsDto } from './app.dto';
 import { Public } from './auth/public.decorator';
 import { register } from './metrics';
 
@@ -14,6 +15,14 @@ export class AppController {
   @ApiOkResponse({ type: HealthCheckDto })
   healthCheck(): HealthCheckDto {
     return new HealthCheckDto('OK');
+  }
+
+  @Public()
+  @Get('/mobile-fingerprints')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: MobileFingerprintsDto })
+  getMobileFingerprints(): MobileFingerprintsDto {
+    return new MobileFingerprintsDto(MOBILE_STORE_FINGERPRINTS);
   }
 
   /**
