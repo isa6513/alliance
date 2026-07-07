@@ -220,8 +220,8 @@ function OutreachPartnerPage() {
               <p className="mt-2 text-base leading-relaxed text-zinc-700">
                 A reforestation nonprofit could ask Alliance members to learn
                 about local reforestation work and answer a few questions about
-                website elements. In return, the nonprofit could introduce the
-                Alliance to its newsletter audience.
+                their website design. In return, the nonprofit could introduce
+                the Alliance to its newsletter audience.
               </p>
             </article>
           </div>
