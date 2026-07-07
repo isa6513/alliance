@@ -15,7 +15,10 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { ApnsModule } from './apns/apns.module';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
-import { SIGNUP_THROTTLERS } from './auth/signup-throttle.config';
+import {
+  ACTION_PARTNERSHIP_RESPONSE_THROTTLERS,
+  SIGNUP_THROTTLERS,
+} from './auth/signup-throttle.config';
 import { CampaignModule } from './campaign/campaign.module';
 import { ClusterModule } from './cluster/cluster.module';
 import { CommunityModule } from './community/community.module';
@@ -69,7 +72,10 @@ import { VideosModule } from './videos/videos.module';
       storage: multer.memoryStorage(),
     }),
     EventEmitterModule.forRoot(),
-    ThrottlerModule.forRoot(SIGNUP_THROTTLERS),
+    ThrottlerModule.forRoot([
+      ...SIGNUP_THROTTLERS,
+      ...ACTION_PARTNERSHIP_RESPONSE_THROTTLERS,
+    ]),
     PosthogModule,
     AuthModule,
     UserModule,

@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   Allow,
+  ArrayMaxSize,
+  ArrayNotEmpty,
   IsArray,
   IsNotEmpty,
   IsString,
@@ -21,6 +23,11 @@ import { ActionPartnershipNote } from './action-partnership-note.entity';
 
 const trim = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim() : value;
+
+const trimStringArray = ({ value }: { value: unknown }): unknown =>
+  Array.isArray(value)
+    ? value.map((item) => (typeof item === 'string' ? item.trim() : item))
+    : value;
 
 @Entity()
 export class ActionPartnershipResponse {
@@ -55,8 +62,13 @@ export class ActionPartnershipResponse {
 
   @Column({ type: 'jsonb' })
   @ApiProperty({ isArray: true, type: String })
+  @Transform(trimStringArray)
   @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(12)
   @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @MaxLength(100, { each: true })
   outreachChannels: string[];
 
   @Column()
@@ -72,12 +84,14 @@ export class ActionPartnershipResponse {
   @Transform(trim)
   @IsString()
   @IsNotEmpty()
+  @MaxLength(5000)
   desiredCollaboration: string;
 
   @Column({ type: 'text', default: '' })
   @ApiProperty()
   @Transform(trim)
   @IsString()
+  @MaxLength(5000)
   notes: string;
 
   @CreateDateColumnTz()

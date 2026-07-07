@@ -12,7 +12,8 @@ import {
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
-import { ActionPartnershipResponse } from './action-partnership-response.entity';
+import type { Relation } from 'typeorm';
+import type { ActionPartnershipResponse } from './action-partnership-response.entity';
 
 @Entity()
 export class ActionPartnershipNote {
@@ -21,13 +22,17 @@ export class ActionPartnershipNote {
   @Allow()
   id: number;
 
-  @ManyToOne(() => ActionPartnershipResponse, (response) => response.notesHistory, {
-    onDelete: 'CASCADE',
-    nullable: false,
-  })
+  // eslint-disable-next-line @darraghor/nestjs-typed/validated-non-primitive-property-needs-type-decorator
+  @ManyToOne(
+    'ActionPartnershipResponse',
+    (response: ActionPartnershipResponse) => response.notesHistory,
+    {
+      onDelete: 'CASCADE',
+      nullable: false,
+    },
+  )
   @Allow()
-  @Type(() => ActionPartnershipResponse)
-  response: ActionPartnershipResponse;
+  response: Relation<ActionPartnershipResponse>;
 
   @RelationId((note: ActionPartnershipNote) => note.response)
   @ApiProperty()

@@ -67,6 +67,15 @@ export class CreateActionPartnershipResponseDto extends PickType(
   ],
 ) {}
 
+export class CreateActionPartnershipResponseResultDto {
+  @ApiProperty()
+  submitted: boolean;
+
+  constructor() {
+    this.submitted = true;
+  }
+}
+
 export class CreateActionPartnershipNoteDto extends PickType(
   ActionPartnershipNote,
   ['body'],

@@ -2880,6 +2880,10 @@ export type CreateActionPartnershipResponseDto = {
     notes: string;
 };
 
+export type CreateActionPartnershipResponseResultDto = {
+    submitted: boolean;
+};
+
 export type ActionPartnershipNoteDto = {
     id: number;
     responseId: number;
@@ -10578,7 +10582,7 @@ export type ActionPartnershipsCreateResponseErrors = {
 export type ActionPartnershipsCreateResponseError = ActionPartnershipsCreateResponseErrors[keyof ActionPartnershipsCreateResponseErrors];
 
 export type ActionPartnershipsCreateResponseResponses = {
-    200: ActionPartnershipResponseDto;
+    200: CreateActionPartnershipResponseResultDto;
 };
 
 export type ActionPartnershipsCreateResponseResponse = ActionPartnershipsCreateResponseResponses[keyof ActionPartnershipsCreateResponseResponses];

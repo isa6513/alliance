@@ -1,13 +1,26 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { Public } from 'src/auth/public.decorator';
+import { ACTION_PARTNERSHIP_RESPONSE_THROTTLE } from 'src/auth/signup-throttle.config';
 import { ActionPartnershipsService } from './action-partnerships.service';
 import {
   ActionPartnershipNoteDto,
   ActionPartnershipResponseDto,
   CreateActionPartnershipNoteDto,
   CreateActionPartnershipResponseDto,
+  CreateActionPartnershipResponseResultDto,
 } from './dto/action-partnership.dto';
 
 @Controller('action-partnerships')
@@ -18,13 +31,15 @@ export class ActionPartnershipsController {
 
   @Post('responses')
   @Public()
-  @ApiOkResponse({ type: ActionPartnershipResponseDto })
+  @UseGuards(ThrottlerGuard)
+  @Throttle(ACTION_PARTNERSHIP_RESPONSE_THROTTLE)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: CreateActionPartnershipResponseResultDto })
   async createResponse(
     @Body() dto: CreateActionPartnershipResponseDto,
-  ): Promise<ActionPartnershipResponseDto> {
-    return new ActionPartnershipResponseDto(
-      await this.actionPartnershipsService.createResponse(dto),
-    );
+  ): Promise<CreateActionPartnershipResponseResultDto> {
+    await this.actionPartnershipsService.createResponse(dto);
+    return new CreateActionPartnershipResponseResultDto();
   }
 
   @Get('responses')
