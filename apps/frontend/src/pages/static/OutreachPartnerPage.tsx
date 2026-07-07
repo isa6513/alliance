@@ -212,10 +212,22 @@ function OutreachPartnerPage() {
                 </p>
               </article>
             </div>
+
+            <article className="rounded-md border border-zinc-200 bg-white p-6">
+              <h3 className="font-serif text-2xl font-semibold text-green-bg">
+                Example
+              </h3>
+              <p className="mt-2 text-base leading-relaxed text-zinc-700">
+                A reforestation nonprofit could ask Alliance members to learn
+                about local reforestation work and answer a few questions about
+                website elements. In return, the nonprofit could introduce the
+                Alliance to its newsletter audience.
+              </p>
+            </article>
           </div>
         </section>
 
-        <section>
+        <section className="bg-grey-0">
           <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-5 py-12 sm:px-8 md:py-16">
             <div>
               <h2 className="font-serif text-3xl font-semibold text-zinc-950 sm:text-4xl">
