@@ -2875,6 +2875,7 @@ export type CreateActionPartnershipResponseDto = {
     personName: string;
     contact: string;
     outreachChannels: Array<string>;
+    outreachOtherDetails: string;
     audienceSize: string;
     desiredCollaboration: string;
     notes: string;
@@ -2899,6 +2900,7 @@ export type ActionPartnershipResponseDto = {
     personName: string;
     contact: string;
     outreachChannels: Array<string>;
+    outreachOtherDetails: string;
     audienceSize: string;
     desiredCollaboration: string;
     notes: string;

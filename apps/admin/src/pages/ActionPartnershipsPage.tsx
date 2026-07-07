@@ -207,6 +207,12 @@ function ResponseCard({
           <InfoBlock title="Audience size">{response.audienceSize}</InfoBlock>
         </div>
 
+        {response.outreachOtherDetails.trim() ? (
+          <InfoBlock title="Other sharing details">
+            {response.outreachOtherDetails}
+          </InfoBlock>
+        ) : null}
+
         <InfoBlock title="What they want members to do">
           {response.desiredCollaboration}
         </InfoBlock>

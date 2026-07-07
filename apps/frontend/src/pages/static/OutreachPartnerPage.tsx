@@ -9,10 +9,10 @@ import { socialPreviewMeta } from "../../lib/socialPreviewMeta";
 
 export function meta() {
   return socialPreviewMeta({
-    title: "Action Partnerships",
+    title: "Outreach Partnerships",
     description:
       "Work with Alliance members who each commit 15 minutes every week to concrete actions for a better world.",
-    url: "/action-partner",
+    url: "/outreach-partner",
   });
 }
 
@@ -76,13 +76,14 @@ function Field({
 const inputClassName =
   "w-full rounded-md border border-zinc-300 bg-white px-4 py-3 text-base text-zinc-950 outline-none transition focus:border-green-bg-card focus:ring-2 focus:ring-green-bg-card/20";
 
-function ActionPartnerPage() {
+function OutreachPartnerPage() {
   useWhiteBackground();
   const { data: memberCount } = useAllianceMemberCount();
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [outreachError, setOutreachError] = useState<string | null>(null);
+  const [otherOutreachSelected, setOtherOutreachSelected] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -112,6 +113,9 @@ function ActionPartnerPage() {
           personName: String(formData.get("personName") ?? "").trim(),
           contact: String(formData.get("contact") ?? "").trim(),
           outreachChannels,
+          outreachOtherDetails: String(
+            formData.get("outreachOtherDetails") ?? "",
+          ).trim(),
           audienceSize: String(formData.get("audienceSize") ?? "").trim(),
           desiredCollaboration: String(
             formData.get("desiredCollaboration") ?? "",
@@ -121,9 +125,10 @@ function ActionPartnerPage() {
         throwOnError: true,
       });
       form.reset();
+      setOtherOutreachSelected(false);
       setSubmitted(true);
     } catch (error) {
-      console.error("Failed to submit action partnership inquiry", error);
+      console.error("Failed to submit action partnership form", error);
       setSubmitted(false);
       setSubmitError(
         "Something went wrong submitting this. Please try again or email contact@worldalliance.org.",
@@ -140,7 +145,7 @@ function ActionPartnerPage() {
         <section>
           <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-5 pt-12 pb-10 sm:px-8 md:pt-16 md:pb-12">
             <div className="flex flex-col gap-5">
-              <h1 className="font-serif text-4xl leading-tight text-zinc-950 sm:text-5xl lg:text-6xl">
+              <h1 className="font-serif text-4xl font-semibold leading-tight text-zinc-950 sm:text-5xl lg:text-6xl">
                 Partner with people
                 <br />
                 committed to help
@@ -155,10 +160,10 @@ function ActionPartnerPage() {
                 the world.
               </p>
               <p className="text-lg leading-relaxed text-zinc-700">
-                For aligned organizations, we can design a focused task within
-                our weekly action program where participating members learn
-                about your work, give feedback, support a campaign, or help with
-                another clear request.
+                For organizations working to address our priorities, we can
+                design a focused task within our weekly action program where
+                participating members learn about your work, give feedback,
+                support a campaign, or help with another clear request.
               </p>
               <p className="text-lg leading-relaxed text-zinc-700">
                 In return, we ask partners to share the Alliance with more
@@ -189,7 +194,7 @@ function ActionPartnerPage() {
 
             <div className="grid grid-cols-1 overflow-hidden rounded-md border border-zinc-200 bg-white md:grid-cols-2">
               <article className="p-6">
-                <h3 className="font-serif text-2xl text-green-bg">
+                <h3 className="font-serif text-2xl font-semibold text-green-bg">
                   What we can do
                 </h3>
                 <p className="mt-2 text-base leading-relaxed text-zinc-700">
@@ -197,8 +202,8 @@ function ActionPartnerPage() {
                   task.
                 </p>
               </article>
-              <article className="border-t border-zinc-200 p-6 md:border-t-0 md:border-l">
-                <h3 className="font-serif text-2xl text-green-bg">
+              <article className="p-6 md:border-l md:border-zinc-200">
+                <h3 className="font-serif text-2xl font-semibold text-green-bg">
                   What we ask
                 </h3>
                 <p className="mt-2 text-base leading-relaxed text-zinc-700">
@@ -211,9 +216,9 @@ function ActionPartnerPage() {
         </section>
 
         <section>
-          <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 border-t border-zinc-200 px-5 py-12 sm:px-8 md:py-16">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-5 py-12 sm:px-8 md:py-16">
             <div>
-              <h2 className="font-serif text-3xl text-zinc-950 sm:text-4xl">
+              <h2 className="font-serif text-3xl font-semibold text-zinc-950 sm:text-4xl">
                 How we can help
               </h2>
               <p className="mt-3 text-lg leading-relaxed text-zinc-700">
@@ -229,7 +234,7 @@ function ActionPartnerPage() {
                   key={offer.title}
                   className="rounded-md border border-zinc-200 bg-white p-6"
                 >
-                  <h3 className="font-serif text-2xl text-green-bg">
+                  <h3 className="font-serif text-2xl font-semibold text-green-bg">
                     {offer.title}
                   </h3>
                   <p className="mt-2 text-base leading-relaxed text-zinc-700">
@@ -241,11 +246,11 @@ function ActionPartnerPage() {
           </div>
         </section>
 
-        <section id="action-partner-form">
-          <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-10 border-t border-zinc-200 px-5 py-12 sm:px-8 md:py-16 lg:grid-cols-[0.72fr_1fr]">
+        <section id="outreach-partner-form">
+          <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-10 px-5 py-12 sm:px-8 md:py-16 lg:grid-cols-[0.72fr_1fr]">
             <div className="flex flex-col gap-4">
-              <h2 className="font-serif text-3xl text-zinc-950 sm:text-4xl">
-                Sign up as a potential action partner
+              <h2 className="font-serif text-3xl font-semibold text-zinc-950 sm:text-4xl">
+                Sign up as a potential outreach partner
               </h2>
               <p className="text-lg leading-relaxed text-zinc-700">
                 Tell us what you are working on, what kind of action might help,
@@ -312,7 +317,10 @@ function ActionPartnerPage() {
                         value={channel}
                         className="size-4 accent-green-bg-card"
                         disabled={submitting}
-                        onChange={() => {
+                        onChange={(event) => {
+                          if (channel === "Other") {
+                            setOtherOutreachSelected(event.target.checked);
+                          }
                           setOutreachError(null);
                           setSubmitted(false);
                           setSubmitError(null);
@@ -322,6 +330,22 @@ function ActionPartnerPage() {
                     </label>
                   ))}
                 </div>
+                {otherOutreachSelected ? (
+                  <Field
+                    label="What other way could you share?"
+                    name="outreachOtherDetails"
+                    required
+                  >
+                    <textarea
+                      className={cn(inputClassName, "min-h-24 resize-y")}
+                      id="outreachOtherDetails"
+                      name="outreachOtherDetails"
+                      placeholder="Briefly describe the other channel or context."
+                      required={otherOutreachSelected}
+                      maxLength={1000}
+                    />
+                  </Field>
+                ) : null}
                 {outreachError ? (
                   <p className="text-sm font-medium text-red-600">
                     {outreachError}
@@ -372,7 +396,7 @@ function ActionPartnerPage() {
                 disabled={submitting}
                 className="self-start rounded-md bg-green-bg-card px-6 py-3 text-base font-semibold text-white transition hover:bg-green-bg focus:outline-none focus:ring-2 focus:ring-green-bg-card/30"
               >
-                {submitting ? "Sending..." : "Send action partnership inquiry"}
+                {submitting ? "Sending..." : "Send outreach partnership form"}
               </button>
               {submitError ? (
                 <p className="text-sm font-medium text-red-600">
@@ -381,7 +405,7 @@ function ActionPartnerPage() {
               ) : null}
               {submitted ? (
                 <p className="text-sm font-medium text-green-bg">
-                  Thanks. We received your inquiry and will follow up soon.
+                  Thanks. We received your response and will follow up soon.
                 </p>
               ) : null}
             </form>
@@ -393,4 +417,4 @@ function ActionPartnerPage() {
   );
 }
 
-export default ActionPartnerPage;
+export default OutreachPartnerPage;

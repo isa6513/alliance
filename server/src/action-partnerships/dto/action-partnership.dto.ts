@@ -26,6 +26,7 @@ export class ActionPartnershipResponseDto extends PickType(
     'personName',
     'contact',
     'outreachChannels',
+    'outreachOtherDetails',
     'audienceSize',
     'desiredCollaboration',
     'notes',
@@ -43,6 +44,7 @@ export class ActionPartnershipResponseDto extends PickType(
     this.personName = response.personName;
     this.contact = response.contact;
     this.outreachChannels = response.outreachChannels;
+    this.outreachOtherDetails = response.outreachOtherDetails;
     this.audienceSize = response.audienceSize;
     this.desiredCollaboration = response.desiredCollaboration;
     this.notes = response.notes;
@@ -61,6 +63,7 @@ export class CreateActionPartnershipResponseDto extends PickType(
     'personName',
     'contact',
     'outreachChannels',
+    'outreachOtherDetails',
     'audienceSize',
     'desiredCollaboration',
     'notes',

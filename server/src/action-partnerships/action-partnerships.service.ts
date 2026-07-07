@@ -22,6 +22,7 @@ export class ActionPartnershipsService {
   ): Promise<ActionPartnershipResponse> {
     const response = this.responseRepository.create({
       ...dto,
+      outreachOtherDetails: dto.outreachOtherDetails ?? '',
       notes: dto.notes ?? '',
     });
     return this.responseRepository.save(response);

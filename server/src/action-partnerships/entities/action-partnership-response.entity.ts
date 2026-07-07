@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
   IsString,
   MaxLength,
+  ValidateIf,
 } from 'class-validator';
 import {
   CreateDateColumnTz,
@@ -70,6 +71,17 @@ export class ActionPartnershipResponse {
   @IsNotEmpty({ each: true })
   @MaxLength(100, { each: true })
   outreachChannels: string[];
+
+  @Column({ type: 'text', default: '' })
+  @ApiProperty()
+  @Transform(trim)
+  @ValidateIf((response: ActionPartnershipResponse) =>
+    response.outreachChannels?.includes('Other'),
+  )
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(1000)
+  outreachOtherDetails: string;
 
   @Column()
   @ApiProperty()
