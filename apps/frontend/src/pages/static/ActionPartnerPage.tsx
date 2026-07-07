@@ -256,7 +256,7 @@ function ActionPartnerPage() {
 
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col gap-5 rounded-md border border-zinc-200 bg-white p-5 shadow-sm sm:p-7"
+              className="flex flex-col gap-5 rounded-md border border-zinc-200 bg-white p-5 sm:p-7"
             >
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <Field
