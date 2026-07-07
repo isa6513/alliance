@@ -105,6 +105,44 @@ const userLocationContentSchema = z.strictObject({
   emptyText: z.string().optional(),
 });
 
+const chatTranscriptMessageSchema = z.strictObject({
+  side: z.enum(["left", "right"]),
+  text: z.string(),
+});
+export type ChatTranscriptMessage = z.infer<typeof chatTranscriptMessageSchema>;
+
+export type ChatTranscriptGroup = {
+  side: ChatTranscriptMessage["side"];
+  texts: string[];
+};
+
+/** Collapse a transcript into runs of consecutive same-side messages. */
+export function groupChatTranscriptMessages(
+  messages: ChatTranscriptMessage[],
+): ChatTranscriptGroup[] {
+  const groups: ChatTranscriptGroup[] = [];
+  for (const message of messages) {
+    const last = groups[groups.length - 1];
+    if (last && last.side === message.side) {
+      last.texts.push(message.text);
+    } else {
+      groups.push({ side: message.side, texts: [message.text] });
+    }
+  }
+  return groups;
+}
+
+/** One unit of a chat transcript block's `size`, in pixels of card height. */
+export const CHAT_TRANSCRIPT_SIZE_UNIT_PX = 100;
+
+const chatTranscriptContentSchema = z.strictObject({
+  ...baseContentFields,
+  leftName: z.string().optional(),
+  rightName: z.string().optional(),
+  size: z.number().positive().optional(),
+  messages: z.array(chatTranscriptMessageSchema),
+});
+
 const manualDisplayBlockContentSchema = z.union([
   headerContentSchema,
   textContentSchema,
@@ -119,6 +157,7 @@ const manualDisplayBlockContentSchema = z.union([
   copyTextContentSchema,
   previousAnswerContentSchema,
   userLocationContentSchema,
+  chatTranscriptContentSchema,
 ]);
 export type ManualDisplayBlockContent = z.infer<
   typeof manualDisplayBlockContentSchema
@@ -224,6 +263,13 @@ const userLocationBlockSchema = z.strictObject({
 });
 export type UserLocationBlock = z.infer<typeof userLocationBlockSchema>;
 
+const chatTranscriptBlockSchema = z.strictObject({
+  ...baseBlockFields,
+  kind: z.literal("chatTranscript"),
+  ...chatTranscriptContentSchema.shape,
+});
+export type ChatTranscriptBlock = z.infer<typeof chatTranscriptBlockSchema>;
+
 export const displayBlockSchema = z.discriminatedUnion("kind", [
   headerBlockSchema,
   textBlockSchema,
@@ -238,6 +284,7 @@ export const displayBlockSchema = z.discriminatedUnion("kind", [
   copyTextBlockSchema,
   previousAnswerBlockSchema,
   userLocationBlockSchema,
+  chatTranscriptBlockSchema,
 ]);
 export type DisplayBlock = z.infer<typeof displayBlockSchema>;
 export type DisplayKind = DisplayBlock["kind"];
@@ -266,6 +313,7 @@ export const MANUAL_IMPORT_FIELD_BY_KIND: Record<
   biglink: null,
   previousAnswer: null,
   userLocation: null,
+  chatTranscript: null,
 };
 
 export const manualImportClipboardSchema = z

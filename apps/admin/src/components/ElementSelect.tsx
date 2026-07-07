@@ -47,6 +47,7 @@ const BLOCK_LABELS: Record<DisplayKind, string> = {
   copytext: "Copy Text Block",
   previousAnswer: "Previous Answer Block",
   userLocation: "User Location Block",
+  chatTranscript: "Chat Transcript Block",
 };
 const BLOCK_TYPES = Object.keys(BLOCK_LABELS) as DisplayKind[];
 

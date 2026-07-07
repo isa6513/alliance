@@ -36,6 +36,7 @@ import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
 import { AggregateBuilder } from "./AggregateBuilder";
 import {
   EditableBigLinkBlock,
+  EditableChatTranscriptBlock,
   EditableCopyTextBlock,
   EditableDividerBlock,
   EditableHeaderBlock,
@@ -113,6 +114,7 @@ const BLOCK_NAMES = {
   copytext: "Copy Text Block",
   previousAnswer: "Previous Answer Block",
   userLocation: "User Location Block",
+  chatTranscript: "Chat Transcript Block",
 } as const satisfies Record<
   Exclude<DisplayKind, "text"> | "text-block",
   string
@@ -931,6 +933,14 @@ export function FormBuilder({
           id: blockId,
           title: "Your location",
           emptyText: "No location set",
+        };
+        break;
+      case "chatTranscript":
+        newBlock = {
+          type: "display",
+          kind: "chatTranscript",
+          id: blockId,
+          messages: [],
         };
         break;
       default:
@@ -1859,6 +1869,13 @@ export function FormBuilder({
                   case "userLocation":
                     return (
                       <EditableUserLocationBlock
+                        block={block as any}
+                        {...commonProps}
+                      />
+                    );
+                  case "chatTranscript":
+                    return (
+                      <EditableChatTranscriptBlock
                         block={block as any}
                         {...commonProps}
                       />

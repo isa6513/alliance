@@ -1,5 +1,6 @@
 export { DisplayBlockWrapper } from "./DisplayBlockWrapper";
 export { EditableBigLinkBlock } from "./EditableBigLinkBlock";
+export { EditableChatTranscriptBlock } from "./EditableChatTranscriptBlock";
 export { EditableCopyTextBlock } from "./EditableCopyTextBlock";
 export { EditableDividerBlock } from "./EditableDividerBlock";
 export { EditableHeaderBlock } from "./EditableHeaderBlock";

@@ -1,6 +1,8 @@
-import type {
-  BigLinkIcon,
-  DisplayBlock,
+import {
+  CHAT_TRANSCRIPT_SIZE_UNIT_PX,
+  groupChatTranscriptMessages,
+  type BigLinkIcon,
+  type DisplayBlock,
 } from "@alliance/common/forms/display-blocks";
 import type { FormSchema } from "@alliance/common/forms/form-schema";
 import {
@@ -235,6 +237,58 @@ export default function RenderDisplayBlock({
         </div>
       );
     }
+
+    case "chatTranscript":
+      return (
+        <Card style={CardStyle.WhiteBorder} flex={false}>
+          <div
+            className="flex flex-col gap-3 overflow-y-auto"
+            style={{
+              maxHeight: block.size
+                ? block.size * CHAT_TRANSCRIPT_SIZE_UNIT_PX
+                : undefined,
+            }}
+          >
+            {groupChatTranscriptMessages(block.messages).map((group, gi) => {
+              const name =
+                group.side === "left" ? block.leftName : block.rightName;
+              return (
+                <div
+                  key={gi}
+                  className={cn(
+                    "flex flex-col gap-1",
+                    group.side === "right" ? "items-end" : "items-start",
+                  )}
+                >
+                  {name?.trim() && (
+                    <span className="px-2 text-xs text-zinc-500">{name}</span>
+                  )}
+                  {group.texts.map((text, mi) => (
+                    <div
+                      key={mi}
+                      className={cn(
+                        "max-w-[75%] rounded-2xl px-3.5 py-2",
+                        group.side === "right"
+                          ? "bg-green text-white"
+                          : "bg-zinc-200 text-zinc-900",
+                        mi === group.texts.length - 1 &&
+                          (group.side === "right"
+                            ? "rounded-br-sm"
+                            : "rounded-bl-sm"),
+                      )}
+                    >
+                      <FormMarkdownWrapper
+                        markdownContent={text}
+                        inverted={group.side === "right"}
+                      />
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      );
 
     case "previousAnswer": {
       const answers = previousAnswerData?.[block.sourceFormId];

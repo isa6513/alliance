@@ -1,5 +1,7 @@
 import { type DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import {
+  CHAT_TRANSCRIPT_SIZE_UNIT_PX,
+  groupChatTranscriptMessages,
   type BigLinkIcon,
   type DisplayBlock,
 } from "@alliance/common/forms/display-blocks";
@@ -56,6 +58,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  ScrollView,
   TextInput,
   TouchableOpacity,
   View,
@@ -165,6 +168,33 @@ const bigLinkIcons: Record<BigLinkIcon, React.FC<{ size?: number }>> = {
   "file-text": FileText,
   "file-check": FileCheck,
   signature: Signature,
+};
+
+/**
+ * The markdown library's default paragraph style forces width:'100%' (and the
+ * wrapper's textgroup uses flex:1), which stretches auto-width chat bubbles to
+ * their max width. Keep bubbles sized to their content.
+ */
+const CHAT_BUBBLE_MARKDOWN_STYLE = {
+  paragraph: { width: "auto" as const },
+  textgroup: { flexShrink: 1 },
+};
+
+/** Light-on-dark markdown styling for right-side (green) chat bubbles. */
+const CHAT_BUBBLE_INVERTED_MARKDOWN_STYLE = {
+  ...CHAT_BUBBLE_MARKDOWN_STYLE,
+  body: { fontSize: 15, lineHeight: 22, color: "#ffffff" },
+  heading1: { fontSize: 20, fontWeight: "600" as const, color: "#ffffff" },
+  heading2: { fontSize: 18, fontWeight: "600" as const, color: "#ffffff" },
+  heading3: { fontSize: 16, fontWeight: "600" as const, color: "#ffffff" },
+  code_inline: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 2,
+    fontFamily: "monospace",
+    fontSize: 13,
+  },
 };
 
 type RenderDisplayBlockMobileProps = {
@@ -355,6 +385,65 @@ export function RenderDisplayBlockMobile({
         </View>
       ) : (
         <Text className="text-sm text-red-500">Could not load video</Text>
+      );
+    }
+    case "chatTranscript": {
+      const transcript = groupChatTranscriptMessages(block.messages).map(
+        (group, gi) => {
+          const name = group.side === "left" ? block.leftName : block.rightName;
+          return (
+            <View
+              key={gi}
+              className={cn(
+                "gap-1",
+                group.side === "right" ? "items-end" : "items-start",
+              )}
+            >
+              {name?.trim() ? (
+                <Text className="px-2 text-xs text-zinc-500">{name}</Text>
+              ) : null}
+              {group.texts.map((text, mi) => (
+                <View
+                  key={mi}
+                  className={cn(
+                    "max-w-[75%] rounded-2xl px-3.5 py-2",
+                    group.side === "right" ? "bg-green" : "bg-zinc-200",
+                    mi === group.texts.length - 1 &&
+                      (group.side === "right"
+                        ? "rounded-br-sm"
+                        : "rounded-bl-sm"),
+                  )}
+                >
+                  <AppMarkdownWrapper
+                    style={
+                      group.side === "right"
+                        ? CHAT_BUBBLE_INVERTED_MARKDOWN_STYLE
+                        : CHAT_BUBBLE_MARKDOWN_STYLE
+                    }
+                  >
+                    {text}
+                  </AppMarkdownWrapper>
+                </View>
+              ))}
+            </View>
+          );
+        },
+      );
+      return (
+        <View className="rounded-lg border border-zinc-200 bg-white p-4">
+          {block.size ? (
+            <ScrollView
+              style={{ maxHeight: block.size * CHAT_TRANSCRIPT_SIZE_UNIT_PX }}
+              nestedScrollEnabled
+              persistentScrollbar
+              contentContainerStyle={{ gap: 12 }}
+            >
+              {transcript}
+            </ScrollView>
+          ) : (
+            <View className="gap-3">{transcript}</View>
+          )}
+        </View>
       );
     }
     case "previousAnswer": {

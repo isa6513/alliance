@@ -6,13 +6,18 @@ import ActionLink, { getActionIdFromHref } from "./ActionLink";
 interface FormMarkdownWrapper {
   markdownContent: string;
   inline?: boolean;
+  /** Light-on-dark rendering */
+  inverted?: boolean;
 }
 
 const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
   markdownContent,
   inline = false,
+  inverted = false,
 }) => {
   const inlineClass = inline ? "inline" : "";
+  const textClass = inverted ? "text-white" : "text-zinc-800";
+  const codeBgClass = inverted ? "bg-white/20" : "bg-zinc-100";
   return (
     <ReactMarkdown
       components={{
@@ -39,20 +44,25 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
         ),
         p: ({ ...props }) => (
           <p
-            className={cn("text-zinc-800 first:mt-0 mt-4", inlineClass)}
+            className={cn(textClass, "first:mt-0 mt-4", inlineClass)}
             {...props}
           />
         ),
         ol: ({ ...props }) => (
           <ol
-            className="text-zinc-800 list-decimal list-inside pl-2"
+            className={cn(textClass, "list-decimal list-inside pl-2")}
             {...props}
           />
         ),
         ul: ({ ...props }) => (
-          <ul className="text-zinc-800 list-disc list-inside pl-2" {...props} />
+          <ul
+            className={cn(textClass, "list-disc list-inside pl-2")}
+            {...props}
+          />
         ),
-        li: ({ ...props }) => <li className="text-zinc-800 my-1" {...props} />,
+        li: ({ ...props }) => (
+          <li className={cn(textClass, "my-1")} {...props} />
+        ),
         a: ({ node: _node, ...props }) =>
           getActionIdFromHref(props.href) != null ? (
             <ActionLink
@@ -63,7 +73,10 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
             />
           ) : (
             <a
-              className={cn("text-link", inlineClass)}
+              className={cn(
+                inverted ? "text-white underline" : "text-link",
+                inlineClass,
+              )}
               {...props}
               target="_blank"
               rel="noreferrer"
@@ -72,7 +85,8 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
         code: ({ node: _node, className: _className, ...props }) => (
           <code
             className={cn(
-              "rounded bg-zinc-100 px-1 py-0.5 font-mono text-[0.9em]",
+              "rounded px-1 py-0.5 font-mono text-[0.9em]",
+              codeBgClass,
               inlineClass,
             )}
             {...props}
@@ -80,13 +94,20 @@ const FormMarkdownWrapper: React.FC<FormMarkdownWrapper> = ({
         ),
         pre: ({ node: _node, ...props }) => (
           <pre
-            className="my-4 overflow-x-auto rounded bg-zinc-100 p-3 font-mono text-[0.85em] [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-[1em]"
+            className={cn(
+              "my-4 overflow-x-auto rounded p-3 font-mono text-[0.85em] [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-[1em]",
+              codeBgClass,
+            )}
             {...props}
           />
         ),
         blockquote: ({ node: _node, ...props }) => (
           <blockquote
-            className="border-l-2 border-zinc-300 pl-4 my-4 text-zinc-800"
+            className={cn(
+              "border-l-2 pl-4 my-4",
+              textClass,
+              inverted ? "border-white/40" : "border-zinc-300",
+            )}
             {...props}
           />
         ),

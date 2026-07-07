@@ -79,6 +79,7 @@ const KNOWN_FORM_ELEMENT_KINDS_RECORD = {
   copytext: true,
   previousAnswer: true,
   userLocation: true,
+  chatTranscript: true,
 } as const satisfies Record<FormElementKind, true>;
 
 const KNOWN_FORM_ELEMENT_KINDS = new Set(

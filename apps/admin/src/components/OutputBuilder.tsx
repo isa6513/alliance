@@ -511,6 +511,7 @@ export function OutputBuilder({ schema, onSchemaChange }: OutputBuilderProps) {
                 case "copytext":
                 case "previousAnswer":
                 case "video":
+                case "chatTranscript":
                   return null;
                 default:
                   displayBlockKind satisfies never;
