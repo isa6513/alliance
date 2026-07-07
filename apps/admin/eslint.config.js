@@ -1,13 +1,13 @@
-import globals from "globals";
-import tseslint from "typescript-eslint";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import { defineConfig } from "eslint/config";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 import sharedRules from "../../eslint/shared-rules.mjs";
 
 export default defineConfig([
   {
-    ignores: [".react-router/", "public/"],
+    ignores: [".react-router/", "build/", "public/"],
   },
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],

@@ -8,6 +8,8 @@ import {
   type AnyField,
   type FieldKind,
   type FormSchema,
+  type ListField,
+  type ListSubField,
   type MultiSelectField,
   type Page,
 } from "@alliance/common/forms/form-schema";
@@ -30,6 +32,7 @@ import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import LargeGeneralUpdateCard from "@alliance/sharedweb/ui/LargeGeneralUpdateCard";
 import { useToast } from "@alliance/sharedweb/ui/ToastProvider";
+import { Copy } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBeforeUnload, useBlocker, useSearchParams } from "react-router";
 import { FORM_BUILDER_PREVIEW_USER } from "../lib/testData";
@@ -349,6 +352,210 @@ const applyOptionValueToConditionalVisibility = (
   });
 
   return hasChanges ? nextFields : fields;
+};
+
+const createUniqueFormBuilderId = (
+  prefix: "block" | "field" | "page",
+  usedIds: Set<string>,
+) => {
+  let id = "";
+  do {
+    id = `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  } while (usedIds.has(id));
+  usedIds.add(id);
+  return id;
+};
+
+const collectFormElementIds = (
+  elements: Array<AnyField | DisplayBlock>,
+  usedIds: Set<string>,
+) => {
+  elements.forEach((element) => {
+    if (element.id) {
+      usedIds.add(element.id);
+    }
+    if (isQuestionField(element) && "fields" in element) {
+      collectFormElementIds(element.fields, usedIds);
+    }
+  });
+};
+
+const collectSchemaIds = (schema: FormSchema) => {
+  const usedIds = new Set<string>();
+  schema.pages.forEach((page) => {
+    usedIds.add(page.id);
+    collectFormElementIds(page.fields, usedIds);
+  });
+  schema.outputViews.forEach((view) => {
+    usedIds.add(view.id);
+    view.blocks.forEach((block) => {
+      if (block.id) {
+        usedIds.add(block.id);
+      }
+    });
+  });
+  schema.aggregateViews?.forEach((view) => usedIds.add(view.id));
+  return usedIds;
+};
+
+const remapConditionFieldReferences = (
+  condition: Condition,
+  idMap: ReadonlyMap<string, string>,
+): Condition => {
+  switch (condition.kind) {
+    case "equals":
+    case "includesOption":
+    case "anySelected":
+    case "hasValue": {
+      if (condition.sourceFormId != null) {
+        return condition;
+      }
+      const nextWhen = idMap.get(condition.when);
+      return nextWhen ? { ...condition, when: nextWhen } : condition;
+    }
+    case "validator":
+    case "deviceType":
+    case "outputBlockVisible":
+    case "userHasCity":
+      return condition;
+    default:
+      condition satisfies never;
+      return condition;
+  }
+};
+
+const remapVisibleIfFormulaFieldReferences = (
+  visibleIfFormula: VisibleIfFormula | undefined,
+  idMap: ReadonlyMap<string, string>,
+): VisibleIfFormula | undefined => {
+  if (!visibleIfFormula?.conditions) {
+    return visibleIfFormula;
+  }
+
+  let changed = false;
+  const conditions: Record<string, Condition> = {};
+  for (const [name, condition] of Object.entries(visibleIfFormula.conditions)) {
+    const nextCondition = remapConditionFieldReferences(condition, idMap);
+    conditions[name] = nextCondition;
+    if (nextCondition !== condition) {
+      changed = true;
+    }
+  }
+
+  return changed ? { ...visibleIfFormula, conditions } : visibleIfFormula;
+};
+
+const remapListFieldReferences = (
+  field: ListField,
+  idMap: ReadonlyMap<string, string>,
+): ListField => ({
+  ...field,
+  visibleIfFormula: remapVisibleIfFormulaFieldReferences(
+    field.visibleIfFormula,
+    idMap,
+  ),
+  requiredIf: field.requiredIf
+    ? remapConditionFieldReferences(field.requiredIf, idMap)
+    : undefined,
+  fields: field.fields.map((subField) => remapFieldReferences(subField, idMap)),
+  outputViewHiddenFieldIds: field.outputViewHiddenFieldIds
+    ?.map((id) => idMap.get(id) ?? id)
+    .filter((id, index, ids) => ids.indexOf(id) === index),
+  prefillFromPreviousAnswer: field.prefillFromPreviousAnswer
+    ? {
+        ...field.prefillFromPreviousAnswer,
+        targetSubFieldId:
+          idMap.get(field.prefillFromPreviousAnswer.targetSubFieldId) ??
+          field.prefillFromPreviousAnswer.targetSubFieldId,
+      }
+    : undefined,
+});
+
+const remapFieldReferences = <T extends AnyField>(
+  field: T,
+  idMap: ReadonlyMap<string, string>,
+): T => {
+  if ("fields" in field) {
+    return remapListFieldReferences(field, idMap) as T;
+  }
+  return {
+    ...field,
+    visibleIfFormula: remapVisibleIfFormulaFieldReferences(
+      field.visibleIfFormula,
+      idMap,
+    ),
+    requiredIf: field.requiredIf
+      ? remapConditionFieldReferences(field.requiredIf, idMap)
+      : undefined,
+  };
+};
+
+const remapDisplayBlockReferences = (
+  block: DisplayBlock,
+  idMap: ReadonlyMap<string, string>,
+): DisplayBlock => ({
+  ...block,
+  visibleIfFormula: remapVisibleIfFormulaFieldReferences(
+    block.visibleIfFormula,
+    idMap,
+  ),
+});
+
+const remapCopiedPageReferences = (
+  page: Page,
+  idMap: ReadonlyMap<string, string>,
+): Page => ({
+  ...page,
+  fields: page.fields.map((element) =>
+    isQuestionField(element)
+      ? remapFieldReferences(element, idMap)
+      : remapDisplayBlockReferences(element, idMap),
+  ),
+});
+
+const copyPageWithUniqueIds = (page: Page, schema: FormSchema): Page => {
+  const usedIds = collectSchemaIds(schema);
+  const idMap = new Map<string, string>();
+  const copiedPage = structuredClone(page);
+  const copyPageId = createUniqueFormBuilderId("page", usedIds);
+  idMap.set(page.id, copyPageId);
+
+  const assignCopiedFieldId = <T extends AnyField>(field: T): T => {
+    const nextId = createUniqueFormBuilderId("field", usedIds);
+    idMap.set(field.id, nextId);
+
+    if ("fields" in field) {
+      return {
+        ...field,
+        id: nextId,
+        fields: field.fields.map(assignCopiedFieldId) as ListSubField[],
+      };
+    }
+
+    return { ...field, id: nextId };
+  };
+
+  const assignCopiedElementIds = (elements: Page["fields"]): Page["fields"] =>
+    elements.map((element) => {
+      if (isQuestionField(element)) {
+        return assignCopiedFieldId(element);
+      }
+
+      const nextId = createUniqueFormBuilderId("block", usedIds);
+      if (element.id) {
+        idMap.set(element.id, nextId);
+      }
+      return { ...element, id: nextId };
+    });
+
+  const pageWithCopiedIds: Page = {
+    ...copiedPage,
+    id: copyPageId,
+    title: copiedPage.title ? `${copiedPage.title} (Copy)` : "Copied page",
+    fields: assignCopiedElementIds(copiedPage.fields),
+  };
+
+  return remapCopiedPageReferences(pageWithCopiedIds, idMap);
 };
 
 export function FormBuilder({
@@ -1235,6 +1442,25 @@ export function FormBuilder({
       ...schema,
       pages: [...schema.pages, newPage],
     });
+  };
+
+  const copyPage = (pageIndex: number) => {
+    const sourcePage = schema.pages[pageIndex];
+    if (!sourcePage) return;
+
+    const copiedPage = copyPageWithUniqueIds(sourcePage, schema);
+    const nextPages = [...schema.pages];
+    const copiedPageIndex = pageIndex + 1;
+    nextPages.splice(copiedPageIndex, 0, copiedPage);
+
+    updateSchema({
+      ...schema,
+      pages: nextPages,
+    });
+    setSelectedPageIndex(copiedPageIndex);
+    setDraggedPageIndex(null);
+    setDragOverPageIndex(null);
+    setPageDropPosition(null);
   };
 
   const removePage = (pageIndex: number) => {
@@ -2173,14 +2399,29 @@ export function FormBuilder({
                         </div>
 
                         <button
+                          type="button"
                           onClick={() => setSelectedPageIndex(index)}
                           className="py-2 flex-1 text-left pr-2"
                         >
                           {page.title}
                         </button>
 
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyPage(index);
+                          }}
+                          className="py-2 px-1 text-gray-400 hover:text-blue-600"
+                          title="Copy page"
+                          aria-label={`Copy ${page.title || "page"}`}
+                        >
+                          <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                        </button>
+
                         {schema.pages.length > 1 && (
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               removePage(index);
