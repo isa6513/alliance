@@ -367,6 +367,145 @@ describe("validateFormSchema", () => {
     ]);
   });
 
+  it("allows input-context conditions on a page's visibleIfFormula", () => {
+    const schema = baseSchema({
+      pages: [
+        page("p1", [textField("f1")]),
+        {
+          ...page("p2", [textField("f2")]),
+          visibleIfFormula: formula({
+            c1: { kind: "equals", when: "f1", equals: "yes" },
+            c2: { kind: "userHasCity", userHasCity: true },
+          }),
+        },
+      ],
+    });
+    expect(validateFormSchema(schema)).toEqual([]);
+  });
+
+  it("allows a page condition referencing a list sub-field on an earlier page", () => {
+    const list: ListField = {
+      id: "list1",
+      type: "input",
+      kind: "list",
+      label: "list",
+      fields: [textField("sub1")],
+    };
+    const schema = baseSchema({
+      pages: [
+        page("p1", [list]),
+        {
+          ...page("p2", [textField("f2")]),
+          visibleIfFormula: formula({
+            c1: { kind: "equals", when: "sub1", equals: "yes" },
+          }),
+        },
+      ],
+    });
+    expect(validateFormSchema(schema)).toEqual([]);
+  });
+
+  it("allows a page condition referencing another form via sourceFormId", () => {
+    const schema = baseSchema({
+      pages: [
+        {
+          ...page("p1", [textField("f1")]),
+          visibleIfFormula: formula({
+            c1: {
+              kind: "equals",
+              when: "other-form-field",
+              equals: "yes",
+              sourceFormId: 42,
+            },
+          }),
+        },
+      ],
+    });
+    expect(validateFormSchema(schema)).toEqual([]);
+  });
+
+  it("rejects a page condition referencing a field on the same page", () => {
+    const schema = baseSchema({
+      pages: [
+        {
+          ...page("p1", [textField("f1")]),
+          visibleIfFormula: formula({
+            c1: { kind: "equals", when: "f1", equals: "yes" },
+          }),
+        },
+      ],
+    });
+    expect(validateFormSchema(schema)).toEqual([
+      {
+        blockId: "p1",
+        message:
+          'Page visibility references field "f1", which must be on an earlier page',
+      },
+    ]);
+  });
+
+  it("rejects a page condition referencing a field on a later page", () => {
+    const schema = baseSchema({
+      pages: [
+        {
+          ...page("p1", [textField("f1")]),
+          visibleIfFormula: formula({
+            c1: { kind: "hasValue", when: "f2", hasValue: true },
+          }),
+        },
+        page("p2", [textField("f2")]),
+      ],
+    });
+    expect(validateFormSchema(schema)).toEqual([
+      {
+        blockId: "p1",
+        message:
+          'Page visibility references field "f2", which must be on an earlier page',
+      },
+    ]);
+  });
+
+  it("rejects a page condition referencing a nonexistent field", () => {
+    const schema = baseSchema({
+      pages: [
+        page("p1", [textField("f1")]),
+        {
+          ...page("p2", [textField("f2")]),
+          visibleIfFormula: formula({
+            c1: { kind: "anySelected", when: "missing", anySelected: true },
+          }),
+        },
+      ],
+    });
+    expect(validateFormSchema(schema)).toEqual([
+      {
+        blockId: "p2",
+        message:
+          'Page visibility references field "missing", which must be on an earlier page',
+      },
+    ]);
+  });
+
+  it("rejects outputBlockVisible on a page's visibleIfFormula", () => {
+    const schema = baseSchema({
+      pages: [
+        {
+          ...page("p1", [textField("f1")]),
+          visibleIfFormula: formula({
+            c1: { kind: "outputBlockVisible", outputBlockVisible: "x" },
+          }),
+        },
+      ],
+    });
+    expect(validateFormSchema(schema)).toEqual([
+      {
+        blockId: "p1",
+        message:
+          '"outputBlockVisible" condition is only valid on output-view blocks',
+      },
+    ]);
+  });
+
   it("recurses into list sub-fields", () => {
     const nested: ListField = {
       id: "list1",

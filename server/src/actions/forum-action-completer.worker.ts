@@ -283,6 +283,15 @@ export class ForumActionCompleterWorker {
     const validatorIds = new Set<number>();
 
     for (const page of schema.pages ?? []) {
+      if (page.visibleIfFormula?.conditions) {
+        for (const condition of Object.values(
+          page.visibleIfFormula.conditions,
+        )) {
+          if (condition && condition.kind === 'validator') {
+            validatorIds.add(condition.validatorId);
+          }
+        }
+      }
       for (const element of page.fields ?? []) {
         if ('customValidatorId' in element && element.customValidatorId) {
           validatorIds.add(element.customValidatorId);

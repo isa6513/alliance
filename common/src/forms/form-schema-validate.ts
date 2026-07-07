@@ -1,9 +1,10 @@
 import type { DisplayBlock } from "./display-blocks";
-import type {
-  AnyField,
-  FormSchema,
-  ListField,
-  OutputViewSchema,
+import {
+  isQuestionField,
+  type AnyField,
+  type FormSchema,
+  type ListField,
+  type OutputViewSchema,
 } from "./form-schema";
 import type { Condition, VisibleIfFormula } from "./visible-if-formula";
 
@@ -20,9 +21,30 @@ export function validateFormSchema(
 ): FormSchemaValidationError[] {
   const errors: FormSchemaValidationError[] = [];
 
+  // A page's visibility must be decidable from answers given before reaching
+  // it, so a formula may only reference fields on strictly earlier pages: a
+  // same-page field can't be answered while its page is hidden, and a later
+  // field is only answered after this page was already skipped.
+  const earlierFieldIds = new Set<string>();
   for (const page of schema.pages ?? []) {
+    const blockId = page.id ?? "<unnamed>";
+    checkConditions(
+      page.visibleIfFormula,
+      { context: "input", blockId },
+      errors,
+    );
+    for (const cond of Object.values(page.visibleIfFormula?.conditions ?? {})) {
+      const fieldId = getLocalFieldReference(cond);
+      if (fieldId !== null && !earlierFieldIds.has(fieldId)) {
+        errors.push({
+          blockId,
+          message: `Page visibility references field "${fieldId}", which must be on an earlier page`,
+        });
+      }
+    }
     for (const item of page.fields ?? []) {
       collectInputErrors(item, errors);
+      collectQuestionFieldIds(item, earlierFieldIds);
     }
   }
 
@@ -110,6 +132,42 @@ function collectCycleErrors(
 
   for (const id of deps.keys()) {
     visit(id);
+  }
+}
+
+/**
+ * The id of the in-form field a condition reads, or null when it reads none
+ * (validator/device/etc.) or resolves against another form's answers
+ * (`sourceFormId`).
+ */
+function getLocalFieldReference(cond: Condition): string | null {
+  switch (cond.kind) {
+    case "equals":
+    case "includesOption":
+    case "anySelected":
+    case "hasValue":
+      return cond.sourceFormId == null ? cond.when : null;
+    case "validator":
+    case "deviceType":
+    case "outputBlockVisible":
+    case "userHasCity":
+      return null;
+    default:
+      cond satisfies never;
+      return null;
+  }
+}
+
+function collectQuestionFieldIds(
+  item: AnyField | DisplayBlock,
+  into: Set<string>,
+): void {
+  if (!isQuestionField(item)) return;
+  into.add(item.id);
+  if (item.kind === "list") {
+    for (const subField of (item as ListField).fields ?? []) {
+      into.add(subField.id);
+    }
   }
 }
 

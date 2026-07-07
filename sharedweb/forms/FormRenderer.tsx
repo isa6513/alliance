@@ -9,6 +9,10 @@ import {
   type FormSchema,
   type FormValue,
 } from "@alliance/common/forms/form-schema";
+import {
+  isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
+  stripHiddenAnswers,
+} from "@alliance/common/forms/visibility";
 import { type VisibleIfFormula } from "@alliance/common/forms/visible-if-formula";
 import {
   FormResponseDto,
@@ -29,8 +33,11 @@ import {
   filterAnswersByFieldIds,
   findUnknownFormElementKind,
   formatUserLocationDisplayValue,
+  getFallbackVisiblePageIndex,
   getListSubFieldErrors,
-  isElementCurrentlyVisible as isElementCurrentlyVisibleShared,
+  getNextVisiblePageIndex,
+  getPreviousVisiblePageIndex,
+  getVisiblePageIndices,
   resolveDisplayBlockForUser,
   resolveFieldDefaultValue,
   schemaHasUserHasCityCondition,
@@ -457,6 +464,7 @@ const FormRenderer = ({
       }
     };
     for (const page of schema.pages) {
+      collectFromVisibleIfFormula(page.visibleIfFormula);
       for (const element of page.fields) {
         collectFromVisibleIfFormula(element.visibleIfFormula);
         if (isQuestionField(element) && element.kind === "list") {
@@ -797,12 +805,39 @@ const FormRenderer = ({
     [],
   );
 
+  // Answers for fields the user can't currently see, treated as never given:
+  // visibility, validation, rendering, and the submitted payload all read
+  // this, so what the user sees is exactly what submits. Raw formData still
+  // holds the hidden values, so re-showing a field restores what the user
+  // typed.
+  const effectiveFormData = useMemo(
+    () =>
+      stripHiddenAnswers(schema.pages ?? [], formData, {
+        deviceType: effectiveDeviceType,
+        visibilityValidatorResults,
+        fieldLookup,
+        readOnly,
+        previousAnswerData,
+        userHasCity,
+      }),
+    [
+      schema.pages,
+      formData,
+      effectiveDeviceType,
+      visibilityValidatorResults,
+      fieldLookup,
+      readOnly,
+      previousAnswerData,
+      userHasCity,
+    ],
+  );
+
   const isElementCurrentlyVisible = useCallback(
     (
       element: AnyField | DisplayBlock,
       data?: Record<string, FormValue>,
     ): boolean =>
-      isElementCurrentlyVisibleShared(element, data ?? formData, {
+      isElementCurrentlyVisibleShared(element, data ?? effectiveFormData, {
         deviceType: effectiveDeviceType,
         visibilityValidatorResults,
         fieldLookup,
@@ -813,7 +848,7 @@ const FormRenderer = ({
     [
       effectiveDeviceType,
       fieldLookup,
-      formData,
+      effectiveFormData,
       readOnly,
       visibilityValidatorResults,
       previousAnswerData,
@@ -821,13 +856,57 @@ const FormRenderer = ({
     ],
   );
 
+  const visiblePageIndices = useMemo(
+    () =>
+      getVisiblePageIndices(schema.pages ?? [], effectiveFormData, {
+        deviceType: effectiveDeviceType,
+        visibilityValidatorResults,
+        fieldLookup,
+        readOnly,
+        previousAnswerData,
+        userHasCity,
+      }),
+    [
+      schema.pages,
+      effectiveFormData,
+      effectiveDeviceType,
+      visibilityValidatorResults,
+      fieldLookup,
+      readOnly,
+      previousAnswerData,
+      userHasCity,
+    ],
+  );
+
+  const nextVisiblePageIndex = useMemo(
+    () => getNextVisiblePageIndex(visiblePageIndices, currentPageIndex),
+    [visiblePageIndices, currentPageIndex],
+  );
+
+  const previousVisiblePageIndex = useMemo(
+    () => getPreviousVisiblePageIndex(visiblePageIndices, currentPageIndex),
+    [visiblePageIndices, currentPageIndex],
+  );
+
+  // If answers change and hide the current page, move to the nearest visible
+  // page.
+  useEffect(() => {
+    const fallback = getFallbackVisiblePageIndex(
+      visiblePageIndices,
+      currentPageIndex,
+    );
+    if (fallback !== null) {
+      setCurrentPageIndex(fallback);
+    }
+  }, [visiblePageIndices, currentPageIndex]);
+
   const validateFieldValue = useCallback(
     (
       field: AnyField,
       fieldValue: FormValue | undefined,
       data?: Record<string, FormValue>,
     ): string | null =>
-      validateFieldValueShared(field, fieldValue, data ?? formData, {
+      validateFieldValueShared(field, fieldValue, data ?? effectiveFormData, {
         deviceType: effectiveDeviceType,
         visibilityValidatorResults,
         fieldLookup,
@@ -836,7 +915,7 @@ const FormRenderer = ({
       }),
     [
       effectiveDeviceType,
-      formData,
+      effectiveFormData,
       visibilityValidatorResults,
       fieldLookup,
       previousAnswerData,
@@ -861,7 +940,9 @@ const FormRenderer = ({
           try {
             const response = await tasksRunValidator({
               path: { id: field.customValidatorId },
-              body: { fieldValue: formData[field.id].toString() },
+              body: {
+                fieldValue: effectiveFormData[field.id]?.toString() ?? "",
+              },
             });
 
             if (response.error || !response.data) {
@@ -885,7 +966,7 @@ const FormRenderer = ({
 
       return Object.fromEntries(results);
     },
-    [readOnly, formData],
+    [readOnly, effectiveFormData],
   );
 
   const validatePage = useCallback(
@@ -900,9 +981,12 @@ const FormRenderer = ({
 
       const updates: Record<string, string | null> = {};
       const fieldsOnPage = page.fields.filter(isQuestionField);
-      const visibleFields = fieldsOnPage.filter((field) =>
-        isElementCurrentlyVisible(field),
-      );
+      // Fields on a hidden page are treated as invisible: errors clear and
+      // nothing blocks navigation or submission.
+      const pageVisible = visiblePageIndices.includes(pageIndex);
+      const visibleFields = pageVisible
+        ? fieldsOnPage.filter((field) => isElementCurrentlyVisible(field))
+        : [];
       const visibleFieldIds = new Set(visibleFields.map((field) => field.id));
 
       for (const field of fieldsOnPage) {
@@ -910,16 +994,21 @@ const FormRenderer = ({
           updates[field.id] = null;
           continue;
         }
-        const fieldValue = formData[field.id];
+        const fieldValue = effectiveFormData[field.id];
         updates[field.id] = validateFieldValue(field, fieldValue);
         if (field.kind === "list") {
-          const subErrors = getListSubFieldErrors(field, fieldValue, formData, {
-            deviceType: effectiveDeviceType,
-            visibilityValidatorResults,
-            fieldLookup,
-            previousAnswerData,
-            userHasCity,
-          });
+          const subErrors = getListSubFieldErrors(
+            field,
+            fieldValue,
+            effectiveFormData,
+            {
+              deviceType: effectiveDeviceType,
+              visibilityValidatorResults,
+              fieldLookup,
+              previousAnswerData,
+              userHasCity,
+            },
+          );
           Object.assign(updates, subErrors);
         }
       }
@@ -967,8 +1056,9 @@ const FormRenderer = ({
     },
     [
       schema,
-      formData,
+      effectiveFormData,
       isElementCurrentlyVisible,
+      visiblePageIndices,
       validateFieldValue,
       getListSubFieldErrors,
       effectiveDeviceType,
@@ -1012,11 +1102,12 @@ const FormRenderer = ({
   };
 
   const currentPage =
-    currentPageIndex < schema.pages.length
+    currentPageIndex < schema.pages.length &&
+    visiblePageIndices.includes(currentPageIndex)
       ? schema.pages[currentPageIndex]
       : null;
-  const isLastPage = currentPageIndex === schema.pages.length - 1;
-  const isFirstPage = currentPageIndex === 0;
+  const isLastPage = nextVisiblePageIndex === null;
+  const isFirstPage = previousVisiblePageIndex === null;
 
   const updateField = (fieldId: string, value: FormValue) => {
     if (readOnly) return;
@@ -1115,27 +1206,27 @@ const FormRenderer = ({
     e.stopPropagation();
 
     if (readOnly) {
-      if (!isLastPage) {
-        setCurrentPageIndex((prev) => prev + 1);
+      if (nextVisiblePageIndex !== null) {
+        setCurrentPageIndex(nextVisiblePageIndex);
       }
       return;
     }
 
-    if (!isLastPage) {
+    if (nextVisiblePageIndex !== null) {
       const result = await validatePage(currentPageIndex, true);
       if (!result.isValid) {
         trackValidationError(result.firstInvalidFieldId);
         return;
       }
-      setCurrentPageIndex((prev) => prev + 1);
+      setCurrentPageIndex(nextVisiblePageIndex);
     }
   };
 
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isFirstPage) {
-      setCurrentPageIndex((prev) => prev - 1);
+    if (previousVisiblePageIndex !== null) {
+      setCurrentPageIndex(previousVisiblePageIndex);
     }
   };
 
@@ -1174,10 +1265,10 @@ const FormRenderer = ({
       );
     }
 
-    if (!isLastPage) {
+    if (nextVisiblePageIndex !== null) {
       const result = await validatePage(currentPageIndex, true);
       if (result.isValid) {
-        setCurrentPageIndex((prev) => prev + 1);
+        setCurrentPageIndex(nextVisiblePageIndex);
       } else {
         trackValidationError(result.firstInvalidFieldId);
       }
@@ -1197,7 +1288,10 @@ const FormRenderer = ({
       return finishSubmit(false);
     }
 
-    const sanitizedAnswers = filterAnswersByFieldIds(formData, fieldLookup);
+    const sanitizedAnswers = filterAnswersByFieldIds(
+      effectiveFormData,
+      fieldLookup,
+    );
 
     const sid = searchParams.get("sid") ?? searchParams.get("ref");
 
@@ -1225,11 +1319,11 @@ const FormRenderer = ({
     actionId,
     currentPageIndex,
     deviceType,
+    effectiveFormData,
     fieldLookup,
     form,
-    formData,
     formSnapshotId,
-    isLastPage,
+    nextVisiblePageIndex,
     onSubmit,
     phDistinctId,
     readOnly,
@@ -1514,7 +1608,7 @@ const FormRenderer = ({
       <div key={field.id || index}>
         <RenderField
           field={field}
-          value={formData[field.id]}
+          value={effectiveFormData[field.id]}
           onChange={readOnly ? undefined : (val) => updateField(field.id, val)}
           onFileSelected={
             readOnly ? undefined : (file) => handleFileUpload(field.id, file)
@@ -1529,7 +1623,7 @@ const FormRenderer = ({
           disableOptionRandomization={disableOptionRandomization}
           user={user}
           labelRightAddon={fieldLabelRightContent?.[field.id]}
-          formData={formData}
+          formData={effectiveFormData}
           isElementVisible={isElementCurrentlyVisible}
           fieldErrors={fieldErrors}
           responseHiddenFromOthers={isOutputField && !sharePublicly}
@@ -1612,7 +1706,7 @@ const FormRenderer = ({
         {/* Navigation */}
         <div className="flex flex-row justify-between items-end gap-x-2">
           <div className="flex flex-col gap-y-4 flex-1">
-            {schema.pages.length > 1 && (
+            {visiblePageIndices.length > 1 && (
               <div className="flex items-center space-x-3">
                 {!isFirstPage && (
                   <BaseButton
@@ -1625,7 +1719,12 @@ const FormRenderer = ({
                 )}
                 <div>
                   <span className="text-zinc-500 whitespace-nowrap">
-                    Page {currentPageIndex + 1} of {schema.pages.length}
+                    Page{" "}
+                    {Math.max(
+                      1,
+                      visiblePageIndices.indexOf(currentPageIndex) + 1,
+                    )}{" "}
+                    of {visiblePageIndices.length}
                   </span>
                 </div>
                 {!isLastPage && (

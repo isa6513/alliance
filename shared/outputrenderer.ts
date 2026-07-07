@@ -11,7 +11,7 @@ import type {
   OutputViewSchema,
 } from "@alliance/common/forms/form-schema";
 import { isQuestionField } from "@alliance/common/forms/form-schema";
-import { isElementCurrentlyVisible } from "./formrenderer";
+import { isElementCurrentlyVisible } from "@alliance/common/forms/visibility";
 
 export type ResolvedOutputDisplayItem = {
   type: "display";

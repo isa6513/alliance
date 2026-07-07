@@ -1,8 +1,15 @@
 import type { DeviceVisibilityTarget } from "./device";
 import type { DisplayBlock } from "./display-blocks";
-import type { AnyField, FormValue, OutputFieldBlock } from "./form-schema";
+import {
+  type AnyField,
+  type FormValue,
+  type OutputFieldBlock,
+  type Page,
+  isQuestionField,
+} from "./form-schema";
 import {
   type Condition,
+  type VisibleIfFormula,
   evaluateVisibilityFormula,
 } from "./visible-if-formula";
 
@@ -143,17 +150,23 @@ export function evaluateCondition(
   }
 }
 
+function hasEvaluableFormula(
+  formula: VisibleIfFormula | undefined,
+): formula is VisibleIfFormula {
+  return !!(
+    formula?.conditions &&
+    Object.keys(formula.conditions).length > 0 &&
+    formula.formula
+  );
+}
+
 export function isElementCurrentlyVisible(
   element: AnyField | DisplayBlock | OutputFieldBlock,
   data: Record<string, FormValue>,
   extras: ConditionExtras & { readOnly?: boolean },
 ): boolean {
   const formula = element.visibleIfFormula;
-  const hasFormula =
-    formula?.conditions &&
-    Object.keys(formula.conditions).length > 0 &&
-    formula.formula;
-  if (!hasFormula) {
+  if (!hasEvaluableFormula(formula)) {
     return true;
   }
   if (extras.readOnly && element.id) {
@@ -162,7 +175,100 @@ export function isElementCurrentlyVisible(
       return true;
     }
   }
+  return evaluateVisibleIfFormula(formula, data, extras);
+}
 
+/**
+ * A page with a `visibleIfFormula` is skipped entirely (rendering, navigation,
+ * validation) when the formula evaluates false. Pages without one are always
+ * visible.
+ */
+export function isPageCurrentlyVisible(
+  page: Page,
+  data: Record<string, FormValue>,
+  extras: ConditionExtras & { readOnly?: boolean },
+): boolean {
+  const formula = page.visibleIfFormula;
+  if (!hasEvaluableFormula(formula)) {
+    return true;
+  }
+  // Read-only fallback, mirroring isElementCurrentlyVisible: conditions don't
+  // always replay when reviewing a completed response (e.g. validator results
+  // missing from older submissions), so never hide a page the user answered.
+  if (extras.readOnly) {
+    const anyFieldAnswered = page.fields.some(
+      (field) => isQuestionField(field) && hasContent(data[field.id]),
+    );
+    if (anyFieldAnswered) {
+      return true;
+    }
+  }
+  return evaluateVisibleIfFormula(formula, data, extras);
+}
+
+/**
+ * Returns `answers` without the entries for question fields the user cannot
+ * currently see — because the field's own formula is false or because its page
+ * is hidden. An answer that isn't visible is treated as never given: it must
+ * not drive visibility conditions, satisfy validation, or be persisted.
+ *
+ * Runs to a fixpoint, since removing a stale answer can hide further pages and
+ * fields (or, with negated conditions, reveal fields — those stay stripped,
+ * because the user never answered them in a visible state). Keys that don't
+ * belong to any question field are left untouched. Returns `answers` itself
+ * when nothing is stripped.
+ */
+export function stripHiddenAnswers(
+  pages: Page[],
+  answers: Record<string, FormValue>,
+  extras: ConditionExtras & { readOnly?: boolean },
+): Record<string, FormValue> {
+  const fieldLookup =
+    extras.fieldLookup ??
+    new Map(
+      pages.flatMap((page) =>
+        page.fields
+          .filter(isQuestionField)
+          .map((field) => [field.id, field] as const),
+      ),
+    );
+
+  let data = answers;
+  for (;;) {
+    // Fresh memo per pass: `data` shrinks between passes, so cached visibility
+    // results from a previous pass may no longer hold.
+    const passExtras = {
+      ...extras,
+      fieldLookup,
+      visibilityMemo: new Map<string, boolean>(),
+      visibilityEvaluationStack: new Set<string>(),
+    };
+    const hiddenAnsweredIds = pages.flatMap((page) => {
+      const pageVisible = isPageCurrentlyVisible(page, data, passExtras);
+      return page.fields
+        .filter(isQuestionField)
+        .filter((field) => field.id in data)
+        .filter(
+          (field) =>
+            !pageVisible || !isElementCurrentlyVisible(field, data, passExtras),
+        )
+        .map((field) => field.id);
+    });
+    if (hiddenAnsweredIds.length === 0) {
+      return data;
+    }
+    data = { ...data };
+    for (const id of hiddenAnsweredIds) {
+      delete data[id];
+    }
+  }
+}
+
+function evaluateVisibleIfFormula(
+  formula: VisibleIfFormula,
+  data: Record<string, FormValue>,
+  extras: ConditionExtras & { readOnly?: boolean },
+): boolean {
   const visibilityMemo = extras.visibilityMemo ?? new Map<string, boolean>();
   const visibilityEvaluationStack =
     extras.visibilityEvaluationStack ?? new Set<string>();
@@ -209,7 +315,7 @@ export function isElementCurrentlyVisible(
   };
 
   const results: Record<string, boolean> = {};
-  for (const [name, cond] of Object.entries(formula!.conditions)) {
+  for (const [name, cond] of Object.entries(formula.conditions)) {
     switch (cond.kind) {
       case "deviceType":
       case "validator":
@@ -231,5 +337,5 @@ export function isElementCurrentlyVisible(
         );
     }
   }
-  return evaluateVisibilityFormula(formula!.formula, results);
+  return evaluateVisibilityFormula(formula.formula, results);
 }

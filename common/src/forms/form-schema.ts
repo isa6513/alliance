@@ -284,6 +284,7 @@ export const pageSchema = z.strictObject({
   id: z.string(),
   title: z.string().optional(),
   description: z.string().optional(),
+  visibleIfFormula: visibleIfFormulaSchema.optional(),
   fields: z.array(z.union([anyFieldSchema, displayBlockSchema])),
 });
 
@@ -403,6 +404,11 @@ export function collectSourceFormIds(schema: FormSchema): number[] {
     }
   };
   for (const page of schema.pages) {
+    if (page.visibleIfFormula?.conditions) {
+      Object.values(page.visibleIfFormula.conditions).forEach(
+        collectFromCondition,
+      );
+    }
     for (const field of page.fields) {
       collectFromElement(field);
       if (isQuestionField(field) && field.kind === "list") {

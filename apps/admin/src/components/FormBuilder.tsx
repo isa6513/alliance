@@ -71,6 +71,7 @@ import {
   EditableTimeField,
   EditableTimezoneField,
 } from "./form-fields";
+import { ConditionalVisibility } from "./form-fields/CommonControls";
 import {
   CustomValidatorDraft,
   CustomValidatorDraftsContext,
@@ -506,6 +507,7 @@ export function FormBuilder({
     };
 
     schema.pages.forEach((page) => {
+      collectFromVisibleIfFormula(page.visibleIfFormula);
       page.fields.forEach((field) => {
         if (isQuestionField(field)) {
           if (isDraftValidatorId(field.customValidatorId)) {
@@ -983,6 +985,7 @@ export function FormBuilder({
       };
 
       schemaToSave.pages.forEach((page) => {
+        collectFromVisibleIfFormula(page.visibleIfFormula);
         page.fields.forEach((field) => {
           if (
             isQuestionField(field) &&
@@ -1059,6 +1062,7 @@ export function FormBuilder({
         ...schemaToSave,
         pages: schemaToSave.pages.map((page) => ({
           ...page,
+          visibleIfFormula: mapVisibleIfFormula(page.visibleIfFormula),
           fields: page.fields.map((field) => {
             const nextVisibleIfFormula = mapVisibleIfFormula(
               field.visibleIfFormula,
@@ -1168,6 +1172,58 @@ export function FormBuilder({
       scrollContainer.scrollTo({ top: 0, behavior: "auto" });
     }
   }, [selectedPageIndex]);
+
+  const currentPageVisibilityConditionCount = Object.keys(
+    currentPage.visibleIfFormula?.conditions ?? {},
+  ).length;
+  const [showPageVisibilityControl, setShowPageVisibilityControl] = useState(
+    () => currentPageVisibilityConditionCount > 0,
+  );
+  useEffect(() => {
+    setShowPageVisibilityControl(
+      Object.keys(
+        schema.pages[selectedPageIndex]?.visibleIfFormula?.conditions ?? {},
+      ).length > 0,
+    );
+    // Reset the toggle only when switching pages, not on every schema edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPageIndex]);
+  useEffect(() => {
+    if (currentPageVisibilityConditionCount > 0) {
+      setShowPageVisibilityControl(true);
+    }
+  }, [currentPageVisibilityConditionCount]);
+
+  const updateCurrentPageVisibility = (updates: {
+    visibleIfFormula?: VisibleIfFormula;
+  }) => {
+    updateSchema({
+      ...schema,
+      pages: schema.pages.map((page, idx) =>
+        idx === selectedPageIndex
+          ? { ...page, visibleIfFormula: updates.visibleIfFormula }
+          : page,
+      ),
+    });
+  };
+
+  const handlePageVisibilityToggle = (checked: boolean) => {
+    setShowPageVisibilityControl(checked);
+    if (!checked) {
+      updateCurrentPageVisibility({ visibleIfFormula: undefined });
+    }
+  };
+
+  // Fields a page-level visibility condition can reference: anything answered
+  // before this page can show, i.e. fields on earlier pages.
+  const pagePreviousFields = useMemo(
+    () =>
+      schema.pages
+        .slice(0, selectedPageIndex)
+        .flatMap((page) => page.fields)
+        .filter(isQuestionField),
+    [schema.pages, selectedPageIndex],
+  );
 
   const addPage = () => {
     const newPage: Page = {
@@ -1578,9 +1634,24 @@ export function FormBuilder({
               optionValueChange.nextValue,
               -1,
             );
+          const pageFormulaResult = getUpdatedVisibilityFormula(
+            page.visibleIfFormula,
+            (field as AnyField).id,
+            optionValueChange.previousValue,
+            optionValueChange.nextValue,
+          );
 
-          if (fieldsWithUpdatedConditions !== page.fields) {
-            return { ...page, fields: fieldsWithUpdatedConditions };
+          if (
+            fieldsWithUpdatedConditions !== page.fields ||
+            pageFormulaResult.changed
+          ) {
+            return {
+              ...page,
+              ...(pageFormulaResult.changed
+                ? { visibleIfFormula: pageFormulaResult.visibleIfFormula }
+                : {}),
+              fields: fieldsWithUpdatedConditions,
+            };
           }
         }
 
@@ -2243,6 +2314,36 @@ export function FormBuilder({
                       {currentPage.description}
                     </p>
                   )}
+                  <div className="mt-3">
+                    <label className="flex cursor-pointer items-center text-xs text-gray-700">
+                      <input
+                        type="checkbox"
+                        className="mr-2"
+                        checked={showPageVisibilityControl}
+                        onChange={(event) =>
+                          handlePageVisibilityToggle(event.target.checked)
+                        }
+                      />
+                      Use conditional visibility for this page
+                    </label>
+                    {showPageVisibilityControl && (
+                      <div className="mt-2">
+                        {selectedPageIndex === 0 && (
+                          <p className="mb-2 text-xs text-amber-600">
+                            Conditions on the first page can only reference
+                            other forms or validators, since no fields have been
+                            answered yet.
+                          </p>
+                        )}
+                        <ConditionalVisibility
+                          key={currentPage.id}
+                          field={currentPage}
+                          previousFields={pagePreviousFields}
+                          onChange={updateCurrentPageVisibility}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-4">

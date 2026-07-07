@@ -7,23 +7,73 @@ import {
   isQuestionField,
   type ListField,
   type NumberField,
+  type Page,
   type RangeField,
 } from "@alliance/common/forms/form-schema";
 import {
   type ConditionExtras,
   evaluateCondition,
-  hasContent,
   isElementCurrentlyVisible,
+  isPageCurrentlyVisible,
 } from "@alliance/common/forms/visibility";
 import type { VisibleIfFormula } from "@alliance/common/forms/visible-if-formula";
 import { parseTimeToMinutes } from "@alliance/shared/forms/timeUtils";
 
-export {
-  evaluateCondition,
-  hasContent,
-  isElementCurrentlyVisible,
-  type ConditionExtras
-};
+/** Indices into `pages` of the currently visible pages. */
+export function getVisiblePageIndices(
+  pages: Page[],
+  data: Record<string, FormValue>,
+  extras: ConditionExtras & { readOnly?: boolean },
+): number[] {
+  const indices: number[] = [];
+  for (let index = 0; index < pages.length; index += 1) {
+    if (isPageCurrentlyVisible(pages[index], data, extras)) {
+      indices.push(index);
+    }
+  }
+  return indices;
+}
+
+/** The first visible page index after `currentIndex`, or null when on/past the last visible page. */
+export function getNextVisiblePageIndex(
+  visibleIndices: number[],
+  currentIndex: number,
+): number | null {
+  const next = visibleIndices.find((index) => index > currentIndex);
+  return next === undefined ? null : next;
+}
+
+/** The last visible page index before `currentIndex`, or null when on/before the first visible page. */
+export function getPreviousVisiblePageIndex(
+  visibleIndices: number[],
+  currentIndex: number,
+): number | null {
+  for (let i = visibleIndices.length - 1; i >= 0; i -= 1) {
+    if (visibleIndices[i] < currentIndex) {
+      return visibleIndices[i];
+    }
+  }
+  return null;
+}
+
+/**
+ * Where to move when answers change and hide the page the user is on: the
+ * nearest visible page forward, otherwise the closest one before it. Null when
+ * no move is needed (the current page is still visible) or possible (no page
+ * is visible at all).
+ */
+export function getFallbackVisiblePageIndex(
+  visibleIndices: number[],
+  currentIndex: number,
+): number | null {
+  if (visibleIndices.length === 0 || visibleIndices.includes(currentIndex)) {
+    return null;
+  }
+  return (
+    getNextVisiblePageIndex(visibleIndices, currentIndex) ??
+    visibleIndices[visibleIndices.length - 1]
+  );
+}
 
 export const FALLBACK_TIMEZONE = "America/Los_Angeles";
 const DEFAULT_RANGE_OPTION_COUNT = 10;
@@ -153,6 +203,7 @@ export function schemaHasUserHasCityCondition(schema: FormSchema): boolean {
       (condition) => condition.kind === "userHasCity",
     );
   for (const page of schema.pages) {
+    if (formulaHasUserHasCity(page.visibleIfFormula)) return true;
     for (const element of page.fields) {
       if (formulaHasUserHasCity(element.visibleIfFormula)) return true;
       if (isQuestionField(element) && element.kind === "list") {

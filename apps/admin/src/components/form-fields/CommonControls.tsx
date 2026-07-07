@@ -12,6 +12,7 @@ import {
   type FormSchema,
   type MultiSelectField,
   type NumberField,
+  type Page,
   type PhoneField,
   type RadioField,
   type RangeField,
@@ -188,7 +189,7 @@ export function OutputPrivateByDefaultToggle({
 export type OutputBlockOption = { id: string; label: string };
 
 type ConditionalVisibilityProps = {
-  field: (AnyField | DisplayBlock) & {
+  field: (AnyField | DisplayBlock | Page) & {
     visibleIfFormula?: VisibleIfFormula;
   };
   previousFields: AnyField[];

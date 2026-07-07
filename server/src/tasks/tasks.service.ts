@@ -19,6 +19,8 @@ import { validateFormSchema } from '@alliance/common/forms/form-schema-validate'
 import {
   type ConditionExtras,
   isElementCurrentlyVisible,
+  isPageCurrentlyVisible,
+  stripHiddenAnswers,
 } from '@alliance/common/forms/visibility';
 import type { Condition } from '@alliance/common/forms/visible-if-formula';
 import { Temporal } from '@js-temporal/polyfill';
@@ -275,7 +277,15 @@ export class TasksService {
     schema: FormSchema;
     submitFormDto: SubmitFormDto;
     userId: number;
-  }): Promise<Record<number, boolean>> {
+  }): Promise<{
+    validatorResults: Record<number, boolean>;
+    /**
+     * The submitted answers with entries for hidden fields removed — the
+     * client strips them too, but the server never trusts that. Validate
+     * against, extract from, and persist these, never the raw dto answers.
+     */
+    effectiveAnswers: Record<string, FormValue>;
+  }> {
     const validatorIds = new Set<number>();
     let hasUserHasCityCondition = false;
 
@@ -297,6 +307,7 @@ export class TasksService {
     };
 
     for (const page of schema.pages) {
+      collectFromFormula(page.visibleIfFormula);
       for (const element of page.fields) {
         collectFromFormula(element.visibleIfFormula);
         if (isQuestionField(element) && element.kind === 'list') {
@@ -358,9 +369,19 @@ export class TasksService {
       ? await this.userService.userHasCitySet(userId)
       : false;
 
+    const fieldLookup = new Map<string, AnyField>();
+    for (const page of schema.pages) {
+      for (const element of page.fields) {
+        if (isQuestionField(element)) {
+          fieldLookup.set(element.id, element);
+        }
+      }
+    }
+
     const visibilityExtras: ConditionExtras = {
       deviceType: submitFormDto.deviceType,
       visibilityValidatorResults: validatorResults,
+      fieldLookup,
       previousAnswerData:
         Object.keys(previousAnswerData).length > 0
           ? previousAnswerData
@@ -368,20 +389,25 @@ export class TasksService {
       userHasCity,
     };
 
+    const effectiveAnswers = stripHiddenAnswers(
+      schema.pages,
+      submitFormDto.answers,
+      visibilityExtras,
+    );
+
     for (const page of schema.pages) {
+      if (!isPageCurrentlyVisible(page, effectiveAnswers, visibilityExtras)) {
+        // Fields on a hidden page are never shown, so their requirements
+        // don't apply.
+        continue;
+      }
       for (const field of page.fields) {
         if (isQuestionField(field)) {
           if (
             field.required &&
-            isElementCurrentlyVisible(
-              field,
-              submitFormDto.answers,
-              visibilityExtras,
-            )
+            isElementCurrentlyVisible(field, effectiveAnswers, visibilityExtras)
           ) {
-            if (
-              !this.hasRequiredValue(field, submitFormDto.answers[field.id])
-            ) {
+            if (!this.hasRequiredValue(field, effectiveAnswers[field.id])) {
               throw new BadRequestException(`Field ${field.label} is required`);
             }
           }
@@ -389,13 +415,9 @@ export class TasksService {
             field.kind === 'multiselect' &&
             typeof field.maxSelections === 'number' &&
             field.maxSelections > 0 &&
-            isElementCurrentlyVisible(
-              field,
-              submitFormDto.answers,
-              visibilityExtras,
-            )
+            isElementCurrentlyVisible(field, effectiveAnswers, visibilityExtras)
           ) {
-            const answer = submitFormDto.answers[field.id];
+            const answer = effectiveAnswers[field.id];
             if (Array.isArray(answer) && answer.length > field.maxSelections) {
               throw new BadRequestException(
                 `Field ${field.label} allows selecting up to ${field.maxSelections} options.`,
@@ -407,13 +429,13 @@ export class TasksService {
             if (
               !isElementCurrentlyVisible(
                 listField,
-                submitFormDto.answers,
+                effectiveAnswers,
                 visibilityExtras,
               )
             ) {
               continue;
             }
-            const rawList = submitFormDto.answers[listField.id];
+            const rawList = effectiveAnswers[listField.id];
             const listValue: Record<string, FormValue>[] = Array.isArray(
               rawList,
             )
@@ -451,7 +473,7 @@ export class TasksService {
             for (let i = 0; i < listValue.length; i += 1) {
               const card = listValue[i] ?? {};
               const mergedData = {
-                ...submitFormDto.answers,
+                ...effectiveAnswers,
                 ...card,
               } as Record<string, FormValue>;
               for (const sub of subFields) {
@@ -475,7 +497,7 @@ export class TasksService {
       }
     }
 
-    return validatorResults;
+    return { validatorResults, effectiveAnswers };
   }
 
   async updateForm(
@@ -574,31 +596,32 @@ export class TasksService {
     );
     const submittedSchema = submittedSnapshot.schema as unknown as FormSchema;
 
-    const validatorResults = await this.validateFormSubmission({
-      schema: submittedSchema,
-      submitFormDto,
-      userId,
-    });
+    const { validatorResults, effectiveAnswers } =
+      await this.validateFormSubmission({
+        schema: submittedSchema,
+        submitFormDto,
+        userId,
+      });
 
     const phoneNumber = this.getFirstAutoExtractAnswer(
       submittedSchema,
-      submitFormDto.answers,
+      effectiveAnswers,
       'phone',
     );
     const preferredReminderTime = this.getFirstAutoExtractAnswer(
       submittedSchema,
-      submitFormDto.answers,
+      effectiveAnswers,
       'time',
     );
     const timeZone = this.getFirstAutoExtractAnswer(
       submittedSchema,
-      submitFormDto.answers,
+      effectiveAnswers,
       'timezone',
     );
 
     const city = this.getFirstAutoExtractAnswer(
       submittedSchema,
-      submitFormDto.answers,
+      effectiveAnswers,
       'city',
     );
 
@@ -686,7 +709,7 @@ export class TasksService {
 
     const shareInfoPublicly = this.getCheckboxExtractionValue(
       submittedSchema,
-      submitFormDto.answers,
+      effectiveAnswers,
       'shareInfoPublicly',
     );
     if (shareInfoPublicly !== null) {
@@ -699,7 +722,7 @@ export class TasksService {
 
     const contractIdsSigned = this.getContractIdsSigned(
       submittedSchema,
-      submitFormDto.answers,
+      effectiveAnswers,
     );
     for (const contractId of contractIdsSigned) {
       await this.contractService.signContract({
@@ -712,7 +735,7 @@ export class TasksService {
     const savedForm = await this.createAndSaveFormResponse({
       form,
       formId,
-      dto: submitFormDto,
+      dto: { ...submitFormDto, answers: effectiveAnswers },
       snapshot: submittedSnapshot,
       validatorResults,
       user,
@@ -772,16 +795,17 @@ export class TasksService {
       form,
       submitFollowUpFormDto,
     );
-    const validatorResults = await this.validateFormSubmission({
-      schema: submittedSnapshot.schema as unknown as FormSchema,
-      submitFormDto: submitFollowUpFormDto as SubmitFormDto,
-      userId,
-    });
+    const { validatorResults, effectiveAnswers } =
+      await this.validateFormSubmission({
+        schema: submittedSnapshot.schema as unknown as FormSchema,
+        submitFormDto: submitFollowUpFormDto as SubmitFormDto,
+        userId,
+      });
 
     const savedForm = await this.createAndSaveFormResponse({
       form,
       formId: form.id,
-      dto: submitFollowUpFormDto,
+      dto: { ...submitFollowUpFormDto, answers: effectiveAnswers },
       snapshot: submittedSnapshot,
       validatorResults,
       user,
