@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { View, ScrollView, Alert } from "react-native";
 import { router } from "expo-router";
+import { useState } from "react";
+import { Alert, View } from "react-native";
 import { forumCreatePost } from "../../../../../shared/client";
+import KeyboardAwareScrollView from "../../../components/KeyboardAwareScrollView";
 import Button, { ButtonColor } from "../../../components/system/Button";
 import Card, { CardStyle } from "../../../components/system/Card";
 import Input from "../../../components/system/Input";
@@ -102,7 +103,7 @@ export default function CreatePostScreen() {
         />
       </View>
 
-      <ScrollView className="px-4">
+      <KeyboardAwareScrollView className="px-4">
         <Card cardStyle={CardStyle.White} className="gap-4">
           <Input
             label="Title"
@@ -123,7 +124,7 @@ export default function CreatePostScreen() {
             required
           />
         </Card>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

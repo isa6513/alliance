@@ -26,11 +26,11 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
-  ScrollView,
   TouchableOpacity,
   View,
 } from "react-native";
 import { CreateGroupForm } from "../../../components/groups/CreateGroupForm";
+import KeyboardAwareScrollView from "../../../components/KeyboardAwareScrollView";
 import Button, {
   ButtonColor,
   ButtonSize,
@@ -445,7 +445,7 @@ export default function GroupManageScreen() {
               </Text>
             </TouchableOpacity>
           </SimplePageTitle>
-          <ScrollView
+          <KeyboardAwareScrollView
             className="flex-1"
             contentContainerStyle={{ paddingBottom: 40 }}
             refreshControl={
@@ -676,7 +676,7 @@ export default function GroupManageScreen() {
                 )}
               </View>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </>
       )}
     </View>

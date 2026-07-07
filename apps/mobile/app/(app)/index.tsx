@@ -25,7 +25,9 @@ import { Check } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  type LayoutChangeEvent,
   RefreshControl,
+  type ScrollViewProps,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -54,6 +56,11 @@ const GENERAL_UPDATES_QUERY_KEY = [
   "generalUpdates",
   "unread",
 ] as const;
+
+// Stable identity — LegendList remounts its scroll view whenever this prop changes.
+const renderKeyboardAwareScrollComponent = (props: ScrollViewProps) => (
+  <KeyboardAwareScrollView {...props} />
+);
 
 export default function HomeScreen() {
   const queryClient = useQueryClient();
@@ -178,6 +185,8 @@ export default function HomeScreen() {
 
   const scrollViewRef = useRef<KeyboardAwareScrollViewRef>(null);
   const legendListRef = useRef<LegendListRef>(null);
+  const legendListHeightRef = useRef(0);
+  const homeBodyHeightRef = useRef(0);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -194,6 +203,7 @@ export default function HomeScreen() {
 
   const scrollPageTo = useCallback((y: number, animated = true) => {
     scrollViewRef.current?.scrollTo({ y, animated });
+    legendListRef.current?.scrollToOffset({ offset: y, animated });
   }, []);
 
   const scrollToTop = useCallback(() => {
@@ -208,6 +218,22 @@ export default function HomeScreen() {
 
   const scrollToEnd = useCallback((animated = true) => {
     scrollViewRef.current?.scrollToEnd({ animated });
+
+    requestAnimationFrame(() => {
+      const offset = Math.max(
+        0,
+        homeBodyHeightRef.current - legendListHeightRef.current,
+      );
+      legendListRef.current?.scrollToOffset({ offset, animated });
+    });
+  }, []);
+
+  const handleHomeFeedLayout = useCallback((event: LayoutChangeEvent) => {
+    legendListHeightRef.current = event.nativeEvent.layout.height;
+  }, []);
+
+  const handleHomeBodyLayout = useCallback((event: LayoutChangeEvent) => {
+    homeBodyHeightRef.current = event.nativeEvent.layout.height;
   }, []);
 
   const handleHomeFeedLike = useCallback(
@@ -444,6 +470,7 @@ export default function HomeScreen() {
         <LegendList
           ref={legendListRef}
           className="flex-1"
+          onLayout={handleHomeFeedLayout}
           data={homeFeedItems}
           keyExtractor={(item) =>
             item.type === "activity"
@@ -453,6 +480,7 @@ export default function HomeScreen() {
           renderItem={renderHomeFeedItem}
           onEndReached={onHomeFeedEndReached}
           onEndReachedThreshold={0.3}
+          renderScrollComponent={renderKeyboardAwareScrollComponent}
           recycleItems
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -463,7 +491,7 @@ export default function HomeScreen() {
           }}
           ListHeaderComponent={
             <>
-              {body}
+              <View onLayout={handleHomeBodyLayout}>{body}</View>
               <View className="px-4 pt-4 pb-2 bg-white">
                 <Text className="text-xl">Activity</Text>
               </View>
