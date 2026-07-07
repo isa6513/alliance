@@ -396,7 +396,7 @@ function OutreachPartnerPage() {
                 disabled={submitting}
                 className="self-start rounded-md bg-green-bg-card px-6 py-3 text-base font-semibold text-white transition hover:bg-green-bg focus:outline-none focus:ring-2 focus:ring-green-bg-card/30"
               >
-                {submitting ? "Sending..." : "Send outreach partnership form"}
+                {submitting ? "Sending..." : "Submit"}
               </button>
               {submitError ? (
                 <p className="text-sm font-medium text-red-600">
