@@ -37,8 +37,8 @@ import Text, { FontWeight } from "../system/Text";
 import CityAutosuggest from "./CityAutosuggest";
 import { getCustomComponentById } from "./customComponentRegistry";
 import FormModal from "./FormModal";
-import TimeZoneSelect from "./TimeZoneSelect";
 import { OptionalLabelPrefix } from "./OptionalLabelPrefix";
+import TimeZoneSelect from "./TimeZoneSelect";
 
 export type RenderFieldProps = {
   field: AnyField;
@@ -58,6 +58,8 @@ export type RenderFieldProps = {
 
 const sharedInputClasses =
   "w-full rounded-lg border bg-white px-3 py-3 text-base text-zinc-900";
+const TEXTAREA_LINE_HEIGHT = 24;
+const TEXTAREA_VERTICAL_PADDING = 12;
 const DEFAULT_RANGE_OPTION_COUNT = 10;
 const MIN_RANGE_OPTION_COUNT = 2;
 const MAX_RANGE_OPTION_COUNT = 50;
@@ -187,12 +189,19 @@ export function RenderField({
         </View>
       );
 
-    case "textarea":
+    case "textarea": {
+      const rows = disabled ? 1 : field.rows || 3;
       return (
         <View>
           <RenderLabel field={field} isOutputView={isOutputView} />
           <TextInput
             className={cn(inputBase, "text-base")}
+            style={{
+              lineHeight: TEXTAREA_LINE_HEIGHT,
+              paddingVertical: TEXTAREA_VERTICAL_PADDING,
+              minHeight:
+                rows * TEXTAREA_LINE_HEIGHT + TEXTAREA_VERTICAL_PADDING * 2,
+            }}
             value={(value as string) ?? ""}
             onChangeText={(text) => onChange?.(text)}
             onFocus={onFocus}
@@ -212,6 +221,7 @@ export function RenderField({
           {renderValidationMessage(errorMessage)}
         </View>
       );
+    }
 
     case "email":
       return (
