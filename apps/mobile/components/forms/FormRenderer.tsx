@@ -1457,7 +1457,8 @@ const FormRenderer = ({
           This form can&apos;t be displayed
         </Text>
         <Text className="text-sm text-amber-800 mt-1">
-          Refreshing the app may fix the issue.
+          Restarting the app or downloading the latest version may fix the
+          issue.
         </Text>
       </View>
     );
