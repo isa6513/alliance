@@ -4,6 +4,8 @@ import type { FieldKind } from "@alliance/common/forms/form-schema";
 interface ElementSelectProps {
   onAddField: (kind: FieldKind) => void;
   onAddDisplayBlock: (kind: DisplayKind) => void;
+  /** Opens an inline picker to insert a copy of an existing element. */
+  onCopyExisting: () => void;
   /** When true, only show Display Blocks (no input fields). */
   displayBlocksOnly?: boolean;
 }
@@ -54,6 +56,7 @@ const BLOCK_TYPES = Object.keys(BLOCK_LABELS) as DisplayKind[];
 export function ElementSelect({
   onAddField,
   onAddDisplayBlock,
+  onCopyExisting,
   displayBlocksOnly = false,
 }: ElementSelectProps) {
   return (
@@ -90,6 +93,16 @@ export function ElementSelect({
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <h4 className="font-medium mb-2">Copy Existing</h4>
+            <button
+              onClick={onCopyExisting}
+              className="w-full text-left px-3 py-2 text-sm bg-purple-50 hover:bg-purple-100 rounded-md border border-purple-200 transition-colors"
+            >
+              Copy Existing Element
+            </button>
           </div>
 
           {/* Extra spacing at bottom to ensure last item is fully visible */}

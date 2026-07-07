@@ -138,7 +138,8 @@ type AvailableElement =
         name: (typeof BLOCK_NAMES)[K];
         type: "block";
       };
-    }[keyof typeof BLOCK_NAMES];
+    }[keyof typeof BLOCK_NAMES]
+  | { id: "copy-existing"; name: "Copy Existing Element"; type: "copy" };
 
 const AVAILABLE_ELEMENTS = [
   ...Object.entries(FIELD_NAMES).map(([id, name]) => ({
@@ -151,7 +152,17 @@ const AVAILABLE_ELEMENTS = [
     name,
     type: "block",
   })),
+  { id: "copy-existing", name: "Copy Existing Element", type: "copy" },
 ] as AvailableElement[];
+
+const ELEMENT_TYPE_BADGES: Record<
+  AvailableElement["type"],
+  { label: string; className: string }
+> = {
+  field: { label: "Field", className: "bg-blue-100 text-blue-800" },
+  block: { label: "Block", className: "bg-green-100 text-green-800" },
+  copy: { label: "Copy", className: "bg-purple-100 text-purple-800" },
+};
 
 interface FormBuilderProps {
   onSave?: (schema: FormSchema) => Promise<void>;
@@ -513,6 +524,27 @@ const remapCopiedPageReferences = (
   ),
 });
 
+const assignCopiedFieldIds = <T extends AnyField>(
+  field: T,
+  usedIds: Set<string>,
+  idMap: Map<string, string>,
+): T => {
+  const nextId = createUniqueFormBuilderId("field", usedIds);
+  idMap.set(field.id, nextId);
+
+  if ("fields" in field) {
+    return {
+      ...field,
+      id: nextId,
+      fields: field.fields.map((subField) =>
+        assignCopiedFieldIds(subField, usedIds, idMap),
+      ) as ListSubField[],
+    };
+  }
+
+  return { ...field, id: nextId };
+};
+
 const copyPageWithUniqueIds = (page: Page, schema: FormSchema): Page => {
   const usedIds = collectSchemaIds(schema);
   const idMap = new Map<string, string>();
@@ -520,25 +552,10 @@ const copyPageWithUniqueIds = (page: Page, schema: FormSchema): Page => {
   const copyPageId = createUniqueFormBuilderId("page", usedIds);
   idMap.set(page.id, copyPageId);
 
-  const assignCopiedFieldId = <T extends AnyField>(field: T): T => {
-    const nextId = createUniqueFormBuilderId("field", usedIds);
-    idMap.set(field.id, nextId);
-
-    if ("fields" in field) {
-      return {
-        ...field,
-        id: nextId,
-        fields: field.fields.map(assignCopiedFieldId) as ListSubField[],
-      };
-    }
-
-    return { ...field, id: nextId };
-  };
-
   const assignCopiedElementIds = (elements: Page["fields"]): Page["fields"] =>
     elements.map((element) => {
       if (isQuestionField(element)) {
-        return assignCopiedFieldId(element);
+        return assignCopiedFieldIds(element, usedIds, idMap);
       }
 
       const nextId = createUniqueFormBuilderId("block", usedIds);
@@ -556,6 +573,77 @@ const copyPageWithUniqueIds = (page: Page, schema: FormSchema): Page => {
   };
 
   return remapCopiedPageReferences(pageWithCopiedIds, idMap);
+};
+
+const copyElementWithUniqueIds = (
+  element: AnyField | DisplayBlock,
+  schema: FormSchema,
+): AnyField | DisplayBlock => {
+  const usedIds = collectSchemaIds(schema);
+  const idMap = new Map<string, string>();
+  const cloned = structuredClone(element);
+
+  if (isQuestionField(cloned)) {
+    // Only ids inside the copied field (itself + list sub-fields) are
+    // remapped; references to other fields keep pointing at the originals.
+    return remapFieldReferences(
+      assignCopiedFieldIds(cloned, usedIds, idMap),
+      idMap,
+    );
+  }
+
+  return { ...cloned, id: createUniqueFormBuilderId("block", usedIds) };
+};
+
+const displayBlockPreview = (block: DisplayBlock): string => {
+  switch (block.kind) {
+    case "header":
+    case "text":
+    case "label":
+    case "quote":
+    case "biglink":
+      return block.text;
+    case "copytext":
+      return block.title || block.text;
+    case "divider":
+      return block.thickness ?? "";
+    case "spacer":
+      return block.size ?? "";
+    case "html":
+      return block.html;
+    case "image":
+      return block.alt || block.src;
+    case "video":
+      return block.caption ?? block.src;
+    case "previousAnswer":
+      return block.title || block.sourceFieldId;
+    case "userLocation":
+      return block.title ?? "";
+    case "chatTranscript":
+      return `${block.messages.length} message${block.messages.length === 1 ? "" : "s"}`;
+    default:
+      block satisfies never;
+      return "";
+  }
+};
+
+const truncatePreview = (text: string, max = 40) =>
+  text.length > max ? `${text.slice(0, max - 1)}…` : text;
+
+const describeCopyableElement = (element: AnyField | DisplayBlock): string => {
+  if (isQuestionField(element)) {
+    const typeName =
+      element.kind === "text" ? "Text Field" : FIELD_NAMES[element.kind];
+    return element.label
+      ? `${typeName}: ${truncatePreview(element.label)}`
+      : typeName;
+  }
+  const typeName =
+    element.kind === "text"
+      ? BLOCK_NAMES["text-block"]
+      : BLOCK_NAMES[element.kind];
+  const preview = displayBlockPreview(element);
+  return preview ? `${typeName}: ${truncatePreview(preview)}` : typeName;
 };
 
 export function FormBuilder({
@@ -639,6 +727,7 @@ export function FormBuilder({
   const [searchResults, setSearchResults] = useState<Array<AvailableElement>>(
     [],
   );
+  const [copyPickerIndex, setCopyPickerIndex] = useState<number | null>(null);
   const [customValidatorDrafts, setCustomValidatorDrafts] = useState<
     Record<number, CustomValidatorDraft>
   >({});
@@ -762,12 +851,23 @@ export function FormBuilder({
     element: AvailableElement,
     insertIndex: number,
   ) => {
-    if (element.type === "field") {
-      addField(element.id as FieldKind, insertIndex);
-    } else {
-      // Map text-block back to text for DisplayKind
-      const blockKind = element.id === "text-block" ? "text" : element.id;
-      addDisplayBlock(blockKind, insertIndex);
+    switch (element.type) {
+      case "field":
+        addField(element.id, insertIndex);
+        break;
+      case "block": {
+        // Map text-block back to text for DisplayKind
+        const blockKind = element.id === "text-block" ? "text" : element.id;
+        addDisplayBlock(blockKind, insertIndex);
+        break;
+      }
+      case "copy":
+        setCopyPickerIndex(insertIndex);
+        break;
+      default:
+        throw new Error(
+          `Unknown element type: ${(element satisfies never as AvailableElement).type}`,
+        );
     }
     setActiveSearchIndex(null);
     setSearchQuery("");
@@ -792,7 +892,16 @@ export function FormBuilder({
       setSearchQuery("");
       setSearchResults([]);
     }
+    if (copyPickerIndex !== null) {
+      setCopyPickerIndex(null);
+    }
   };
+
+  // The copy picker's insert index is relative to the current page, so it
+  // can't survive a page switch.
+  useEffect(() => {
+    setCopyPickerIndex(null);
+  }, [selectedPageIndex]);
 
   // Load form data when formId changes
   useEffect(() => {
@@ -1167,6 +1276,23 @@ export function FormBuilder({
         idx === selectedPageIndex ? { ...page, fields: newFields } : page,
       ),
     });
+  };
+
+  const insertCopiedElement = (
+    source: AnyField | DisplayBlock,
+    insertIndex: number,
+  ) => {
+    const copied = copyElementWithUniqueIds(source, schema);
+    const newFields = [...currentPage.fields];
+    newFields.splice(insertIndex, 0, copied);
+
+    updateSchema({
+      ...schema,
+      pages: schema.pages.map((page, idx) =>
+        idx === selectedPageIndex ? { ...page, fields: newFields } : page,
+      ),
+    });
+    setCopyPickerIndex(null);
   };
 
   const updateSchema = (newSchema: FormSchema) => {
@@ -1780,12 +1906,10 @@ export function FormBuilder({
                       <span
                         className={cn(
                           "text-xs px-2 py-1 rounded-full",
-                          element.type === "field"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800",
+                          ELEMENT_TYPE_BADGES[element.type].className,
                         )}
                       >
-                        {element.type === "field" ? "Field" : "Block"}
+                        {ELEMENT_TYPE_BADGES[element.type].label}
                       </span>
                     </div>
                   </button>
@@ -1816,6 +1940,96 @@ export function FormBuilder({
       </div>
     );
   };
+
+  // Inline picker for inserting a copy of an existing element. Kept as UI
+  // state (not a schema element) so an in-progress pick never gets saved.
+  const InlineCopyPicker = ({ insertIndex }: { insertIndex: number }) => {
+    const selectRef = useRef<HTMLSelectElement | null>(null);
+    const [hasSelection, setHasSelection] = useState(false);
+    const hasCopyableElements = schema.pages.some(
+      (page) => page.fields.length > 0,
+    );
+
+    const commitSelection = () => {
+      const value = selectRef.current?.value;
+      if (!value) return;
+      const [pageIndex, elementIndex] = value.split(":").map(Number);
+      const source = schema.pages[pageIndex]?.fields[elementIndex];
+      if (source) {
+        insertCopiedElement(source, insertIndex);
+      }
+    };
+
+    return (
+      <div className="my-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 rounded-md border border-purple-300 bg-purple-50 px-3 py-2">
+          <select
+            ref={selectRef}
+            autoFocus
+            defaultValue=""
+            onChange={() => setHasSelection(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setCopyPickerIndex(null);
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                commitSelection();
+              }
+            }}
+            className="min-w-0 flex-1 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          >
+            <option value="" disabled>
+              {hasCopyableElements
+                ? "Choose an element to copy…"
+                : "No elements to copy yet"}
+            </option>
+            {schema.pages.map(
+              (page, pageIndex) =>
+                page.fields.length > 0 && (
+                  <optgroup
+                    key={page.id}
+                    label={page.title || `Page ${pageIndex + 1}`}
+                  >
+                    {page.fields.map((element, elementIndex) => (
+                      <option
+                        key={element.id || `${pageIndex}:${elementIndex}`}
+                        value={`${pageIndex}:${elementIndex}`}
+                      >
+                        {describeCopyableElement(element)}
+                      </option>
+                    ))}
+                  </optgroup>
+                ),
+            )}
+          </select>
+          <button
+            type="button"
+            onClick={commitSelection}
+            disabled={!hasSelection}
+            className="rounded-md bg-purple-600 px-3 py-1.5 text-sm text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-purple-300"
+          >
+            Insert
+          </button>
+          <button
+            type="button"
+            onClick={() => setCopyPickerIndex(null)}
+            className="text-gray-400 hover:text-gray-600"
+            title="Cancel"
+            aria-label="Cancel copy"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const InsertPoint = ({ insertIndex }: { insertIndex: number }) =>
+    copyPickerIndex === insertIndex ? (
+      <InlineCopyPicker insertIndex={insertIndex} />
+    ) : (
+      <InlineSearch insertIndex={insertIndex} />
+    );
 
   const renderField = (field: AnyField | DisplayBlock, index: number) => {
     const updateField = (updates: Partial<AnyField | DisplayBlock>) => {
@@ -2203,6 +2417,12 @@ export function FormBuilder({
           <ElementSelect
             onAddField={addField}
             onAddDisplayBlock={addDisplayBlock}
+            onCopyExisting={() => {
+              setActiveSearchIndex(null);
+              setSearchQuery("");
+              setSearchResults([]);
+              setCopyPickerIndex(currentPage.fields.length);
+            }}
             displayBlocksOnly={!!generalUpdateName}
           />
         )}
@@ -2590,21 +2810,21 @@ export function FormBuilder({
                 <div className="space-y-4">
                   {/* Search bar at the beginning if no fields */}
                   {currentPage.fields.length === 0 && (
-                    <InlineSearch insertIndex={0} />
+                    <InsertPoint insertIndex={0} />
                   )}
 
                   {currentPage.fields.map((field, index) => (
                     <div key={field.id || index}>
                       {/* Search bar before each element (except first) */}
-                      {index > 0 && <InlineSearch insertIndex={index} />}
+                      {index > 0 && <InsertPoint insertIndex={index} />}
                       {/* First element gets search at beginning */}
-                      {index === 0 && <InlineSearch insertIndex={0} />}
+                      {index === 0 && <InsertPoint insertIndex={0} />}
 
                       {renderField(field, index)}
 
                       {/* Search bar after last element */}
                       {index === currentPage.fields.length - 1 && (
-                        <InlineSearch insertIndex={index + 1} />
+                        <InsertPoint insertIndex={index + 1} />
                       )}
                     </div>
                   ))}
