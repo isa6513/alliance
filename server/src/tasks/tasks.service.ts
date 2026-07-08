@@ -1085,8 +1085,17 @@ export class TasksService {
   }
 
   async getFormResponses(formId: number): Promise<FormResponseDto[]> {
+    return this.getFormResponsesForForms([formId]);
+  }
+
+  async getFormResponsesForForms(
+    formIds: number[],
+  ): Promise<FormResponseDto[]> {
+    if (formIds.length === 0) {
+      return [];
+    }
     const responses = await this.formResponseRepository.find({
-      where: { formId },
+      where: { formId: In(formIds) },
       relations: { user: true, formSnapshot: true },
     });
     if (!responses.length) {

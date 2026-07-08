@@ -40,6 +40,7 @@ import {
   FormAggregateViewsDto,
   FormDto,
   FormResponseDto,
+  FormResponsesByFormsDto,
   FormSnapshotMigrationDto,
   GuestFormResponseDto,
   LinkedGuestDraftDto,
@@ -141,6 +142,15 @@ export class TasksController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<FormResponseDto[]> {
     return this.tasksService.getFormResponses(id);
+  }
+
+  @Post('responses/byForms')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse({ type: [FormResponseDto] })
+  async getFormResponsesByFormsAdmin(
+    @Body() body: FormResponsesByFormsDto,
+  ): Promise<FormResponseDto[]> {
+    return this.tasksService.getFormResponsesForForms(body.formIds);
   }
 
   @Get('forms/:formId/snapshotMigration')

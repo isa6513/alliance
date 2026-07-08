@@ -3291,6 +3291,10 @@ export type FormDto = {
     usedInAction?: ActionDto;
 };
 
+export type FormResponsesByFormsDto = {
+    formIds: Array<number>;
+};
+
 export type FormSnapshotDto = {
     id: number;
     hash: string;
@@ -11326,6 +11330,28 @@ export type TasksGetFormResponsesAdminResponses = {
 };
 
 export type TasksGetFormResponsesAdminResponse = TasksGetFormResponsesAdminResponses[keyof TasksGetFormResponsesAdminResponses];
+
+export type TasksGetFormResponsesByFormsAdminData = {
+    body: FormResponsesByFormsDto;
+    path?: never;
+    query?: never;
+    url: '/tasks/responses/byForms';
+};
+
+export type TasksGetFormResponsesByFormsAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type TasksGetFormResponsesByFormsAdminError = TasksGetFormResponsesByFormsAdminErrors[keyof TasksGetFormResponsesByFormsAdminErrors];
+
+export type TasksGetFormResponsesByFormsAdminResponses = {
+    200: Array<FormResponseDto>;
+};
+
+export type TasksGetFormResponsesByFormsAdminResponse = TasksGetFormResponsesByFormsAdminResponses[keyof TasksGetFormResponsesByFormsAdminResponses];
 
 export type TasksGetResponseSnapshotMigrationAdminData = {
     body?: never;

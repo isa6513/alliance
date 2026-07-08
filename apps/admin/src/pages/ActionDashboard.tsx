@@ -64,11 +64,15 @@ import ActionCompletionCurveChart from "../components/ActionCompletionCurveChart
 import ActionFollowUpFormsTab from "../components/ActionFollowUpFormsTab";
 import ActionForm from "../components/ActionForm";
 import ActionFormVariantsTab from "../components/ActionFormVariantsTab";
+import ActionMergedResponsesTab from "../components/ActionMergedResponsesTab";
 import ActionUpdatesTab from "../components/ActionUpdatesTab";
 import EventManagementTab from "../components/EventManagementTab";
 import { FormBuilder } from "../components/FormBuilder";
 import FormResponseStatistics from "../components/FormResponseStatistics";
-import type { FormResponseFilter, FormWithSchema } from "./FormResponses";
+import type {
+  FormResponseFilter,
+  FormWithSchema,
+} from "../components/FormResponsesView";
 
 // Status color mapping
 export const getStatusColor = (status: ActionDto["status"]) => {
@@ -109,7 +113,8 @@ type Tab =
   | "form"
   | "form-variants"
   | "updates"
-  | "follow-up-forms";
+  | "follow-up-forms"
+  | "responses";
 
 type ReadinessCheckItem = {
   id: string;
@@ -777,6 +782,7 @@ const ActionDashboard: React.FC = () => {
         ]
       : []),
     { key: "follow-up-forms", label: "Follow-up Forms" },
+    { key: "responses", label: "Responses" },
   ];
 
   const availableTabs = tabData.map((tab) => tab.key);
@@ -1007,15 +1013,6 @@ const ActionDashboard: React.FC = () => {
                   {tab.label}
                 </button>
               ))}
-              <button
-                key="responses"
-                onClick={() =>
-                  navigate(`/forms/${action?.taskFormId}/responses`)
-                }
-                className="py-2 px-1 border-b-2 text-sm text-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              >
-                Responses
-              </button>
               <a
                 href={getBaseUrl() + `/actions/${action?.id}`}
                 target="_blank"
@@ -1441,9 +1438,7 @@ const ActionDashboard: React.FC = () => {
                           Response Statistics ({formResponses.length} responses)
                         </h2>
                         <Button
-                          onClick={() =>
-                            navigate(`/forms/${action.taskFormId}/responses`)
-                          }
+                          onClick={() => onTabChange("responses")}
                           color={ButtonColor.White}
                           size="small"
                         >
@@ -1454,17 +1449,19 @@ const ActionDashboard: React.FC = () => {
                         form={taskForm}
                         responses={formResponses}
                         onFilterSelect={(filter: FormResponseFilter) => {
-                          const params = new URLSearchParams({
-                            tab: "responses",
-                            filterField: filter.fieldId,
-                            filterOp: filter.op,
+                          setSearchParams((prev) => {
+                            const next = new URLSearchParams(prev);
+                            next.set("tab", "responses");
+                            next.set("resp_tab", "responses");
+                            next.set("resp_filterField", filter.fieldId);
+                            next.set("resp_filterOp", filter.op);
+                            if (filter.value != null) {
+                              next.set("resp_filterValue", filter.value);
+                            } else {
+                              next.delete("resp_filterValue");
+                            }
+                            return next;
                           });
-                          if (filter.value != null) {
-                            params.set("filterValue", filter.value);
-                          }
-                          navigate(
-                            `/forms/${action.taskFormId}/responses?${params.toString()}`,
-                          );
                         }}
                       />
                     </Card>
@@ -1592,6 +1589,14 @@ const ActionDashboard: React.FC = () => {
                 availableForms={availableForms}
                 availableUsers={availableUsers}
               />
+            )}
+            {activeTab === "responses" && action && (
+              <div className="-mx-5">
+                <ActionMergedResponsesTab
+                  actionId={action.id}
+                  paramNamespace="resp"
+                />
+              </div>
             )}
           </div>
         </div>

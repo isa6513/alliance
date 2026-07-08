@@ -300,6 +300,15 @@ export class MigrateResponseSnapshotsResultDto {
   }
 }
 
+export class FormResponsesByFormsDto {
+  @ApiProperty({ type: Number, isArray: true })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(100)
+  @IsInt({ each: true })
+  formIds: number[];
+}
+
 export class GuestFormResponseDto {
   @ApiPropertyOptional({ type: () => FormResponseDto })
   @IsOptional()

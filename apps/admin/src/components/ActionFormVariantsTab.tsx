@@ -291,6 +291,12 @@ export default function ActionFormVariantsTab({
         </div>
         <div className="flex gap-2">
           <BaseButton
+            variant={BaseButtonVariant.White}
+            onClick={() => navigate(`/actions/${action.id}?tab=responses`)}
+          >
+            View responses
+          </BaseButton>
+          <BaseButton
             variant={BaseButtonVariant.BlueOutline}
             onClick={handleAddStaged}
             disabled={publishing || !action.taskFormId}

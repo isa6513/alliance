@@ -11,7 +11,7 @@ import React, { useMemo } from "react";
 import {
   type FormResponseFilter,
   type FormWithSchema,
-} from "../pages/FormResponses";
+} from "./FormResponsesView";
 
 export interface FormResponseStatisticsProps {
   form: FormWithSchema | null;
