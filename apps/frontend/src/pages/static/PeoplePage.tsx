@@ -13,6 +13,7 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import PublicMemberDirectoryCard from "../../components/PublicMemberDirectoryCard";
 import {
   LANDING_PAGE_STACK,
+  LANDING_SECTION_PB,
   LANDING_SECTION_PY,
   LANDING_WIDE_SECTION,
   SUBTITLE_CLASS,
@@ -175,15 +176,15 @@ const PeoplePage: React.FC = () => {
         </section>
 
         <section
-          className={cn("w-full bg-white", LANDING_SECTION_PY)}
+          className={cn("w-full bg-white mt-8", LANDING_SECTION_PB)}
           id="office"
         >
           <div className={LANDING_WIDE_SECTION}>
             <div className="flex flex-col gap-4 text-center mb-6">
               <p className={SECTION_TITLE_CLASS}>Office</p>
               <p className={SUBTITLE_CLASS}>
-                Alliance staff members plan actions, write software, and manage
-                the Alliance.
+                Alliance staff members plan actions, create infrastructure, and
+                manage the Alliance.
               </p>
             </div>
             <div className="grid grid-cols-1 gap-x-16 gap-y-8 sm:grid-cols-2">

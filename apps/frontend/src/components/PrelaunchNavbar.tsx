@@ -47,7 +47,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
     <div
       className={cn(
         "flex flex-col items-center",
-        "sm:flex-row md:gap-y-4 py-4 md:py-5 px-24",
+        "sm:flex-row md:gap-y-4 py-4 md:py-6 px-16",
         "top-0 left-0 z-10 text-[14pt] transition-[padding,background-color] duration-300",
         absolute ? "absolute" : "relative",
         "w-screen",
@@ -59,7 +59,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
       {showLogo && (
         <h1
           className={cn(
-            "font-bold font-berlingske text-lg md:text-2xl cursor-pointer text-nowrap",
+            "font-bold font-berlingske text-lg sm:text-xl md:text-2xl cursor-pointer text-nowrap",
             transparent ? "text-white" : undefined,
           )}
           onClick={() => {
@@ -69,14 +69,14 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
           THE ALLIANCE
         </h1>
       )}
-      <div className="flex flex-row items-center gap-x-5 sm:gap-x-10 text-base sm:text-lg">
+      <div className="flex flex-row items-center gap-x-5 sm:gap-x-10 text-base sm:text-lg md:text-xl ">
         {links.map((link) =>
           link === NavbarPage.LogIn ? (
             <div key={link} className="flex flex-row items-center gap-x-3">
               <Link
                 to={destinations[link]}
                 className={cn(
-                  "py-1 md:py-1.5 px-3 md:px-5 rounded-md whitespace-nowrap font-medium",
+                  "py-2 sm:py-2.5 px-3 sm:px-5 rounded-md whitespace-nowrap font-medium",
                   transparent
                     ? "bg-white text-black hover:bg-zinc-100"
                     : "bg-black text-white hover:bg-zinc-800",
@@ -88,7 +88,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
                 <Link
                   to={signupHref}
                   className={cn(
-                    "py-1 md:py-1.5 px-3 md:px-5 rounded-md whitespace-nowrap font-medium",
+                    "py-2 sm:py-2.5 px-3 sm:px-5 rounded-md whitespace-nowrap font-medium",
                     transparent
                       ? "bg-green text-white hover:bg-[#4d8c1d]"
                       : "bg-green text-white hover:bg-[#4d8c1d]",

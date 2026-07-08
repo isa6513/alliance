@@ -5,10 +5,16 @@ import { AvatarProfile } from "@alliance/sharedweb/ui/Avatar";
 import { useQueries } from "@tanstack/react-query";
 import React from "react";
 import { Link } from "react-router";
+
+import alliancePeople1280 from "../../assets/alliance_people-1280.webp";
 import alliancePeople640 from "../../assets/alliance_people-640.webp";
 import alliancePeople960 from "../../assets/alliance_people-960.webp";
-import alliancePeople1280 from "../../assets/alliance_people-1280.webp";
 import alliancePeople from "../../assets/alliance_people.webp";
+
+import officeImage from "../../assets/office.jpg";
+import rubyImage from "../../assets/ruby.jpg";
+
+import { ArrowRightIcon } from "lucide-react";
 import AllianceIntroYouTubeEmbed from "../../components/AllianceIntroYouTubeEmbed";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
 import FeaturedImpactCard from "../../components/FeaturedImpactCard";
@@ -132,17 +138,25 @@ function MemberQuoteCard({
 
 function HowItWorksCard({
   title,
-  children,
+  subtitle,
+  content,
+  image,
 }: {
   title: string;
-  children: React.ReactNode;
+  subtitle: string;
+  content: string;
+  image: string;
 }) {
   return (
     <div className="flex h-full flex-col gap-1 rounded-md bg-white p-6 sm:p-8">
-      <p className="font-serif text-xl font-semibold text-green-bg lg:text-2xl">
-        {title}
-      </p>
-      <p className="text-base text-zinc-800 lg:text-lg">{children}</p>
+      <img src={image} alt={title} className="w-full h-auto rounded-md mb-4" />
+      <div className="flex flex-col gap-1">
+        <p className="font-serif text-xl font-semibold text-zinc-900 lg:text-2xl">
+          {title}
+        </p>
+        <p className="text-base text-zinc-500 lg:text-xl">{subtitle}</p>
+      </div>
+      <p className="text-base text-zinc-800 lg:text-xl mt-2">{content}</p>
     </div>
   );
 }
@@ -164,20 +178,31 @@ const PrelaunchLandingPage: React.FC = () => {
           <div
             className={cn(
               LANDING_QUOTES_COL,
-              "flex flex-col gap-8 pt-6 sm:pt-8 md:gap-10 lg:flex-row lg:items-center lg:gap-16 lg:pt-12",
+              "flex flex-col gap-8 pt-6 sm:pt-8 md:gap-10 lg:flex-row lg:items-center lg:gap-24 lg:pt-12",
             )}
           >
             <div className="flex min-w-0 w-full flex-col gap-y-4 lg:w-1/2 lg:items-start">
-              <div className="flex flex-col gap-y-6">
-                <p className="text-center lg:leading-15 font-serif text-xl text-zinc-900 sm:gap-y-5 sm:text-3xl lg:text-left lg:text-5xl">
-                  A global group of people cooperating to improve the world
+              <div className="flex flex-col gap-y-4 lg:gap-y-8">
+                <p className="text-center font-serif lg:leading-18 font-semibold text-2xl text-zinc-900 sm:gap-y-5 sm:text-4xl lg:text-left lg:text-6xl">
+                  Working together to end global crises
                 </p>
-                <Link
-                  to="#join-us"
-                  className="mx-auto font-medium self-start rounded-md bg-green-bg-card px-6 py-4 text-base text-white hover:bg-green-bg lg:mx-0 lg:text-xl"
-                >
-                  Request an invite
-                </Link>
+
+                <div className="flex flex-col gap-y-4">
+                  <p className="text-center lg:text-left text-lg lg:text-2xl text-zinc-900">
+                    We are a global group of people who coordinate online to
+                    address problems that affect billions. We take regular
+                    actions designed to achieve clear outcomes. Right now, we
+                    are in an experimental phase.
+                  </p>
+                </div>
+                <div className="flex flex-row items-center gap-4">
+                  <Link
+                    to="#join-us"
+                    className="mx-auto font-semibold self-start rounded-md bg-green-bg-card px-4 py-3 lg:px-8 lg:py-6 text-base text-white hover:bg-green-bg lg:mx-0 lg:text-2xl"
+                  >
+                    <p>Join us</p>
+                  </Link>
+                </div>
               </div>
             </div>
             <figure className="min-w-0 w-full lg:w-1/2">
@@ -192,7 +217,7 @@ const PrelaunchLandingPage: React.FC = () => {
                 decoding="async"
                 className="w-full h-auto rounded-md"
               />
-              <figcaption className="mt-3 text-center text-base text-zinc-500">
+              <figcaption className="mt-3 text-center text-lg text-zinc-500">
                 Members at a meetup in San Francisco, California
               </figcaption>
             </figure>
@@ -204,25 +229,33 @@ const PrelaunchLandingPage: React.FC = () => {
             <div className="flex flex-col gap-4">
               <p className={SECTION_TITLE_CLASS}>How we work</p>
               <p className={SUBTITLE_CLASS}>
-                Each member contributes a consistent amount of their time each
-                week, providing the reliability needed to plan precise,
-                effective actions.
+                We ask members to be dependable. As a result, we can plan
+                effective actions that take advantage of predictable
+                participation.
               </p>
             </div>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-              <HowItWorksCard title="Members">
-                Alliance members complete weekly tasks on our online platform.
-                Tasks take no more than 15 minutes per week, so members can
-                easily fit them into their weekly routines.
-              </HowItWorksCard>
-              <HowItWorksCard title="Office">
-                Alliance staff design tasks in order to achieve a measurable
-                impact. Since the office knows how many members will
-                participate, it can predict how likely each action is to
-                succeed.
-              </HowItWorksCard>
+              <HowItWorksCard
+                title="Office"
+                subtitle="Designing rigorous, effective actions"
+                image={officeImage}
+                content="Our full-time team prepares actions for members to take. We strive to achieve clear outcomes and rigorously evaluate costs and benefits."
+              ></HowItWorksCard>
+              <HowItWorksCard
+                title="Members"
+                subtitle="Completing actions dependably"
+                image={rubyImage}
+                content="Alliance members complete actions on our online platform.
+                Participation currently requires a weekly commitment of 15 minutes."
+              ></HowItWorksCard>
             </div>
-            <AllianceIntroYouTubeEmbed />
+            <div className="flex flex-col mt-4 gap-8 lg:gap-16">
+              <p className={SUBTITLE_CLASS}>
+                In the long term, we aim to help people unlock their potential
+                to make rapid, large-scale change.
+              </p>
+              <AllianceIntroYouTubeEmbed />
+            </div>
           </div>
         </section>
 
@@ -267,10 +300,10 @@ const PrelaunchLandingPage: React.FC = () => {
                 </p>
                 <Link
                   to="/progress"
-                  className="self-start flex flex-row items-center gap-1 font-medium text-link"
+                  className="mx-auto self-start flex flex-row items-center gap-1 underline"
                 >
-                  <p className="whitespace-nowrap flex flex-row items-center gap-x-1 text-base lg:text-lg">
-                    See more
+                  <p className="whitespace-nowrap flex flex-row items-center gap-x-1 text-lg lg:text-xl">
+                    See more <ArrowRightIcon className="size-5" />
                   </p>
                 </Link>
               </div>
@@ -299,11 +332,12 @@ const PrelaunchLandingPage: React.FC = () => {
           className={cn("w-full bg-grey-0", LANDING_SECTION_PY)}
         >
           <div className={LANDING_SECTION}>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 my-12">
               <p className={SECTION_TITLE_CLASS}>Join us</p>
               <p className={SUBTITLE_CLASS}>
-                Membership is currently by invitation only. If you&apos;d like
-                to join, please send us an{" "}
+                Membership is currently by invitation only, and requires a
+                15-minute weekly commitment. If you&apos;d like to join, please
+                send us an{" "}
                 <a
                   href="mailto:contact@worldalliance.org"
                   className="text-link"
