@@ -8,6 +8,7 @@ import TableOfContents, {
   type TocSection,
 } from "../../components/TableOfContents";
 import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
+import { exampleMemberTaskFormSchema } from "../../lib/exampleMemberTaskFormSchema";
 import LargeActionCard from "../app/LargeActionCard";
 import {
   GuideFootnote,
@@ -443,6 +444,7 @@ const ExpertDescriptionPage: React.FC = () => {
                     <div className="p-1 md:p-4 md:py-6 bg-zinc-50 rounded-md">
                       <LargeActionCard
                         action={exampleMemberTaskAction}
+                        staticTaskFormSchema={exampleMemberTaskFormSchema}
                         userRelation="none"
                         onUpdateActionState={() => {}}
                         onCompleteAction={() => {}}

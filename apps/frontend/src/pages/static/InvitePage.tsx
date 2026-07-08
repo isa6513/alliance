@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import { Link, href, useNavigate, useSearchParams } from "react-router";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
+import { exampleMemberTaskFormSchema } from "../../lib/exampleMemberTaskFormSchema";
 import LargeActionCard from "../app/LargeActionCard";
 
 const InvitePage: React.FC = () => {
@@ -142,6 +143,7 @@ const InvitePage: React.FC = () => {
               <div className="p-1 md:p-4 md:py-6 bg-zinc-50 mb-2">
                 <LargeActionCard
                   action={exampleMemberTaskAction}
+                  staticTaskFormSchema={exampleMemberTaskFormSchema}
                   userRelation={"none"}
                   onUpdateActionState={() => {}}
                   onCompleteAction={() => {}}

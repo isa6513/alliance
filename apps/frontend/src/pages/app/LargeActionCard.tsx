@@ -1,3 +1,4 @@
+import type { FormSchema } from "@alliance/common/forms/form-schema";
 import { useCallback, useEffect, useState, type RefObject } from "react";
 import { href, Link, useNavigate } from "react-router";
 import { cn } from "@alliance/shared/styles/util";
@@ -25,6 +26,7 @@ export interface LargeActionCardProps extends LargeActionCardPropsShared {
   onCompleteAction: () => void;
   userRelation: UserActionRelation;
   scrollContainerRef?: RefObject<HTMLElement | null>;
+  staticTaskFormSchema?: FormSchema;
 }
 
 enum LargeActionCardState {
@@ -46,6 +48,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   showDetails = true,
   className = "",
   scrollContainerRef,
+  staticTaskFormSchema,
 }: LargeActionCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -159,6 +162,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               onOptOutAction={handleUpdateActionState}
               scrollContainerRef={scrollContainerRef}
               disabled={mustSignContractFirst}
+              staticTaskFormSchema={staticTaskFormSchema}
             />
           </div>
         </div>
