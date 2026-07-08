@@ -103,7 +103,6 @@
         "@base-ui/react": "^1.2.0",
         "@hey-api/client-fetch": "^0.12.0",
         "@hey-api/openapi-ts": "^0.67.3",
-        "@marsidev/react-turnstile": "^1.5.2",
         "@pm2/io": "^6.1.0",
         "@react-router/dev": "7.13.2",
         "@react-router/express": "7.13.2",
@@ -1077,8 +1076,6 @@
     "@likashefqet/react-native-image-zoom": ["@likashefqet/react-native-image-zoom@4.3.0", "", { "peerDependencies": { "react": ">=16.x.x", "react-native": ">=0.62.x", "react-native-gesture-handler": ">=2.x.x", "react-native-reanimated": ">=2.x.x" } }, "sha512-bRH26+Kq9m7y0rsBIwa0KI6XH/kujf7hZG0wz4gPu1kGsSb6KbLdZaR1ksGvaZm08JkNd2+JIUaHSb68eh4YEg=="],
 
     "@lukeed/csprng": ["@lukeed/csprng@1.1.0", "", {}, "sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA=="],
-
-    "@marsidev/react-turnstile": ["@marsidev/react-turnstile@1.5.2", "", { "peerDependencies": { "react": "^17.0.2 || ^18.0.0 || ^19.0", "react-dom": "^17.0.2 || ^18.0.0 || ^19.0" } }, "sha512-+3aBPxp86JzSC0ZmgyonoGoUEENcUkH3LGahXSpkV87ArvD2DzRCmPgh0FyQk6PQRmJwQJDAfwNavFsxUxMQWA=="],
 
     "@mdx-js/react": ["@mdx-js/react@3.1.1", "", { "dependencies": { "@types/mdx": "^2.0.0" }, "peerDependencies": { "@types/react": ">=16", "react": ">=16" } }, "sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw=="],
 

@@ -36,7 +36,6 @@ export type SignUpDto = {
     mode: TokenMode;
     referralCode?: string;
     guestToken?: string;
-    turnstileToken?: string;
 };
 
 export type RefreshTokensResponseDto = {

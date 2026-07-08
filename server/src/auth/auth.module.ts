@@ -8,7 +8,6 @@ import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { Guest } from './entities/guest.entity';
-import { TurnstileService } from './turnstile.service';
 
 @Module({
   imports: [
@@ -24,7 +23,7 @@ import { TurnstileService } from './turnstile.service';
     }),
     TypeOrmModule.forFeature([User, Guest]),
   ],
-  providers: [AuthService, TurnstileService],
+  providers: [AuthService],
   controllers: [AuthController],
   exports: [AuthService],
 })

@@ -42,9 +42,4 @@ export class SignUpDto {
   @IsString()
   @ApiPropertyOptional()
   readonly guestToken?: string;
-
-  @IsOptional()
-  @IsString()
-  @ApiPropertyOptional()
-  readonly turnstileToken?: string;
 }

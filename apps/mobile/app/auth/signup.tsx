@@ -1,16 +1,12 @@
 import { authRegister } from "@alliance/shared/client";
 import { Link, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Alert, ScrollView, TouchableOpacity, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Button from "../../components/system/Button";
 import Input from "../../components/system/Input";
 import PasswordVisibilityToggle from "../../components/system/PasswordVisibilityToggle";
 import Text from "../../components/system/Text";
-import TurnstileWebView, {
-  type TurnstileWebViewHandle,
-} from "../../components/TurnstileWebView";
-import { getTurnstileSiteKey } from "../../lib/config";
 import { clearGuestToken, getStoredGuestToken } from "../../lib/guestSession";
 
 const SignupScreen = () => {
@@ -25,19 +21,6 @@ const SignupScreen = () => {
     email: "",
     password: "",
   });
-
-  const turnstileSiteKey = getTurnstileSiteKey();
-  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(
-    undefined,
-  );
-  const [turnstileError, setTurnstileError] = useState(false);
-  const turnstileRef = useRef<TurnstileWebViewHandle>(null);
-
-  const retryTurnstile = () => {
-    setTurnstileError(false);
-    setTurnstileToken(undefined);
-    turnstileRef.current?.reset();
-  };
 
   const validateForm = () => {
     let isValid = true;
@@ -73,11 +56,6 @@ const SignupScreen = () => {
       return;
     }
 
-    if (turnstileSiteKey && !turnstileToken) {
-      Alert.alert("Verification required", "Please complete the captcha.");
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const guestToken = (await getStoredGuestToken()) ?? undefined;
@@ -88,7 +66,6 @@ const SignupScreen = () => {
           password,
           mode: "header",
           guestToken,
-          turnstileToken,
         },
       });
       if (guestToken) {
@@ -114,11 +91,6 @@ const SignupScreen = () => {
       Alert.alert("Registration Failed", errorMessage);
     } finally {
       setIsSubmitting(false);
-      // Turnstile tokens are single-use; fetch a fresh one for any retry.
-      if (turnstileSiteKey) {
-        setTurnstileToken(undefined);
-        turnstileRef.current?.reset();
-      }
     }
   };
 
@@ -187,42 +159,9 @@ const SignupScreen = () => {
             ) : null}
           </View>
 
-          {turnstileSiteKey ? (
-            <View>
-              <TurnstileWebView
-                ref={turnstileRef}
-                siteKey={turnstileSiteKey}
-                onToken={(token) => {
-                  setTurnstileToken(token);
-                  setTurnstileError(false);
-                }}
-                onExpire={() => setTurnstileToken(undefined)}
-                onError={() => {
-                  setTurnstileToken(undefined);
-                  setTurnstileError(true);
-                }}
-              />
-              {turnstileError ? (
-                <Text className="text-sm text-red-600">
-                  Couldn&apos;t load the verification challenge. Check your
-                  connection, then{" "}
-                  <Text
-                    className="text-sm text-red-600 underline"
-                    onPress={retryTurnstile}
-                  >
-                    try again
-                  </Text>
-                  .
-                </Text>
-              ) : null}
-            </View>
-          ) : null}
-
           <Button
             onPress={handleSignup}
-            disabled={
-              isSubmitting || (Boolean(turnstileSiteKey) && !turnstileToken)
-            }
+            disabled={isSubmitting}
             loading={isSubmitting}
           >
             <Text className="text-white text-base">Create Account</Text>

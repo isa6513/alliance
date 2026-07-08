@@ -1,9 +1,7 @@
 import { SignUpDto } from "@alliance/shared/client";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
 import FormInput from "@alliance/sharedweb/ui/FormInput";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { useCallback, useRef, useState } from "react";
-import { getTurnstileSiteKey } from "../lib/config";
+import { useCallback, useState } from "react";
 
 export interface SignupFormProps {
   onSubmit: (formData: SignUpDto) => void;
@@ -32,19 +30,6 @@ const SignupForm = ({
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const turnstileSiteKey = getTurnstileSiteKey();
-  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(
-    undefined,
-  );
-  const [turnstileError, setTurnstileError] = useState(false);
-  const turnstileRef = useRef<TurnstileInstance>(null);
-
-  const retryTurnstile = useCallback(() => {
-    setTurnstileError(false);
-    setTurnstileToken(undefined);
-    turnstileRef.current?.reset();
-  }, []);
-
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -63,23 +48,9 @@ const SignupForm = ({
       onSubmit({
         ...formData,
         referralCode: referralCode || undefined,
-        turnstileToken,
       });
-
-      // Turnstile tokens are single-use; fetch a fresh one for any retry.
-      if (turnstileSiteKey) {
-        setTurnstileToken(undefined);
-        turnstileRef.current?.reset();
-      }
     },
-    [
-      onSubmit,
-      formData,
-      referralCode,
-      disabled,
-      turnstileToken,
-      turnstileSiteKey,
-    ],
+    [onSubmit, formData, referralCode, disabled],
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,49 +124,12 @@ const SignupForm = ({
         disabled={disabled}
       />
 
-      {turnstileSiteKey && (
-        <div>
-          <Turnstile
-            ref={turnstileRef}
-            siteKey={turnstileSiteKey}
-            onSuccess={(token) => {
-              setTurnstileToken(token);
-              setTurnstileError(false);
-            }}
-            onExpire={() => setTurnstileToken(undefined)}
-            onError={() => {
-              setTurnstileToken(undefined);
-              setTurnstileError(true);
-            }}
-            options={{ size: "flexible" }}
-          />
-          {turnstileError && (
-            <p className="mt-2 text-[14px] text-red-600">
-              Couldn&apos;t load the verification challenge. Check your
-              connection or any ad blockers, then{" "}
-              <button
-                type="button"
-                onClick={retryTurnstile}
-                className="underline"
-              >
-                try again
-              </button>
-              .
-            </p>
-          )}
-        </div>
-      )}
-
       <div className="pt-2">
         <Button
           color={ButtonColor.Black}
           className="w-full flex justify-center text-center  justify-self-center pb-2 text-[16px]"
           type="submit"
-          disabled={
-            loading ||
-            disabled ||
-            (Boolean(turnstileSiteKey) && !turnstileToken)
-          }
+          disabled={loading || disabled}
         >
           {loading ? "Creating account..." : submitButtonText}
         </Button>

@@ -23,7 +23,6 @@ import { DataSource } from 'typeorm';
 import { ActionsModule } from '../src/actions/actions.module';
 import { AuthModule } from '../src/auth/auth.module';
 import { SIGNUP_THROTTLERS } from '../src/auth/signup-throttle.config';
-import { TurnstileService } from '../src/auth/turnstile.service';
 import { ContractModule } from '../src/contract/contract.module';
 import { ReferralSource, User } from '../src/user/entities/user.entity';
 import { UserModule } from '../src/user/user.module';
@@ -43,7 +42,7 @@ export interface TestContext {
 
 export async function createTestApp(
   modules: Type<unknown>[],
-  options: { enableTurnstile?: boolean; enableThrottle?: boolean } = {},
+  options: { enableThrottle?: boolean } = {},
 ): Promise<TestContext> {
   const builder = Test.createTestingModule({
     imports: [
@@ -70,16 +69,6 @@ export async function createTestApp(
       ...modules,
     ],
   });
-
-  // Disable Turnstile by default so tests don't depend on whether
-  // TURNSTILE_SECRET_KEY happens to be set in the runner's environment
-  // (bun auto-loads server/.env, which enables enforcement locally). Tests that
-  // specifically exercise captcha enforcement opt in with { enableTurnstile: true }.
-  if (!options.enableTurnstile) {
-    builder
-      .overrideProvider(TurnstileService)
-      .useValue({ verify: async () => {} });
-  }
 
   // Disable signup rate limiting by default. The burst limit is 5/min per IP and
   // the in-memory counter is shared across a whole spec (and never reset between

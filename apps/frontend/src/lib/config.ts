@@ -19,8 +19,3 @@ export const getBulkActionSSEUrl = (actionIds: number[]) => {
 export const isFeatureEnabled = (feature: Features) => {
   return isEnabled(feature, import.meta.env.MODE);
 };
-
-export const getTurnstileSiteKey = (): string | undefined => {
-  const key = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
-  return key ? key : undefined;
-};

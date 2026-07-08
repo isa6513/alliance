@@ -7,8 +7,7 @@ describe('Auth register rate limiting (e2e)', () => {
   const burstLimit = SIGNUP_THROTTLE.signupBurst.limit as number;
 
   beforeAll(async () => {
-    // Opt into the real ThrottlerGuard; Turnstile stays disabled by default so
-    // registrations don't need a token. All supertest requests share one source
+    // Opt into the real ThrottlerGuard. All supertest requests share one source
     // IP, so they land in a single per-IP bucket.
     ctx = await createTestApp([], { enableThrottle: true });
   });

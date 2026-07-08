@@ -46,7 +46,6 @@ import type { JwtPayload, JwtRequest } from './guards/jwtreq';
 import { RefreshTokenGuard } from './guards/refresh.guard';
 import { Public } from './public.decorator';
 import { SIGNUP_THROTTLE } from './signup-throttle.config';
-import { TurnstileService } from './turnstile.service';
 
 class TokenModeQuery {
   @ApiPropertyOptional({ enum: ['cookie', 'header'] })
@@ -61,7 +60,6 @@ class TokenModeQuery {
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private turnstileService: TurnstileService,
     private jwtService: JwtService,
     private posthog: PosthogService,
   ) {}
@@ -156,7 +154,6 @@ export class AuthController {
     @Body() signUp: SignUpDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<SignInResponseDto> {
-    await this.turnstileService.verify(signUp.turnstileToken, req.ip);
     await this.authService.register(signUp);
 
     const { access_token, refresh_token, isAdmin, userId } =
