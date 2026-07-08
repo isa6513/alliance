@@ -10645,6 +10645,32 @@ export type ActionPartnershipsCreateNoteAdminResponses = {
 
 export type ActionPartnershipsCreateNoteAdminResponse = ActionPartnershipsCreateNoteAdminResponses[keyof ActionPartnershipsCreateNoteAdminResponses];
 
+export type ActionPartnershipsDeleteResponseAdminData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/action-partnerships/responses/{id}';
+};
+
+export type ActionPartnershipsDeleteResponseAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type ActionPartnershipsDeleteResponseAdminError = ActionPartnershipsDeleteResponseAdminErrors[keyof ActionPartnershipsDeleteResponseAdminErrors];
+
+export type ActionPartnershipsDeleteResponseAdminResponses = {
+    200: {
+        [key: string]: never;
+    };
+};
+
+export type ActionPartnershipsDeleteResponseAdminResponse = ActionPartnershipsDeleteResponseAdminResponses[keyof ActionPartnershipsDeleteResponseAdminResponses];
+
 export type VideosUploadVideoAdminData = {
     body: {
         files?: Array<Blob | File>;

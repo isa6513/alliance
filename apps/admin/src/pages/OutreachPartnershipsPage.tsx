@@ -1,5 +1,6 @@
 import {
   actionPartnershipsCreateNoteAdmin,
+  actionPartnershipsDeleteResponseAdmin,
   actionPartnershipsFindAllResponsesAdmin,
 } from "@alliance/shared/client";
 import type {
@@ -21,7 +22,7 @@ const getDefaultNoteDate = (): string => {
   return now.toISOString().slice(0, 16);
 };
 
-const ActionPartnershipsPage: React.FC = () => {
+const OutreachPartnershipsPage: React.FC = () => {
   const [responses, setResponses] = useState<ActionPartnershipResponseDto[]>(
     [],
   );
@@ -42,8 +43,8 @@ const ActionPartnershipsPage: React.FC = () => {
       });
       setResponses(res.data);
     } catch (err) {
-      console.error("Failed to load action partnership responses", err);
-      setError("Failed to load action partnership responses.");
+      console.error("Failed to load outreach partnership responses", err);
+      setError("Failed to load outreach partnership responses.");
     } finally {
       setLoading(false);
     }
@@ -100,9 +101,9 @@ const ActionPartnershipsPage: React.FC = () => {
           ...prev,
           [responseId]: getDefaultNoteDate(),
         }));
-        window.dispatchEvent(new Event("action-partnerships-updated"));
+        window.dispatchEvent(new Event("outreach-partnerships-updated"));
       } catch (err) {
-        console.error("Failed to add action partnership note", err);
+        console.error("Failed to add outreach partnership note", err);
         setError("Failed to save note.");
       } finally {
         setSavingNoteIds((prev) => {
@@ -115,12 +116,39 @@ const ActionPartnershipsPage: React.FC = () => {
     [noteBodies, noteDates],
   );
 
+  const handleDeleteResponse = useCallback(
+    async (response: ActionPartnershipResponseDto) => {
+      const confirmed = window.confirm(
+        `Are you sure you want to delete ${response.organizationName}'s outreach partnership response? This cannot be undone.`,
+      );
+      if (!confirmed) {
+        return;
+      }
+
+      setError(null);
+      try {
+        await actionPartnershipsDeleteResponseAdmin({
+          path: { id: response.id },
+          throwOnError: true,
+        });
+        setResponses((prev) =>
+          prev.filter((existing) => existing.id !== response.id),
+        );
+        window.dispatchEvent(new Event("outreach-partnerships-updated"));
+      } catch (err) {
+        console.error("Failed to delete outreach partnership response", err);
+        setError("Failed to delete response.");
+      }
+    },
+    [],
+  );
+
   return (
     <div className="h-full overflow-y-auto p-5 pt-20">
-      <title>Action Partnerships - Admin</title>
+      <title>Outreach Partnerships - Admin</title>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold">Action partnerships</h1>
+          <h1 className="text-2xl font-semibold">Outreach partnerships</h1>
           <p className="text-sm text-zinc-500">{responseCountText}</p>
         </div>
 
@@ -131,7 +159,7 @@ const ActionPartnershipsPage: React.FC = () => {
         ) : responses.length === 0 ? (
           <div className="rounded-md border border-zinc-200 bg-white p-6">
             <p className="text-sm text-zinc-500">
-              No action partnership responses have been submitted yet.
+              No outreach partnership responses have been submitted yet.
             </p>
           </div>
         ) : (
@@ -151,6 +179,7 @@ const ActionPartnershipsPage: React.FC = () => {
                   setNoteDates((prev) => ({ ...prev, [response.id]: date }));
                 }}
                 onAddNote={() => handleAddNote(response.id)}
+                onDelete={() => handleDeleteResponse(response)}
               />
             ))}
           </div>
@@ -168,6 +197,7 @@ function ResponseCard({
   onNoteBodyChange,
   onNoteDateChange,
   onAddNote,
+  onDelete,
 }: {
   response: ActionPartnershipResponseDto;
   noteBody: string;
@@ -176,6 +206,7 @@ function ResponseCard({
   onNoteBodyChange: (body: string) => void;
   onNoteDateChange: (date: string) => void;
   onAddNote: () => void;
+  onDelete: () => void;
 }) {
   return (
     <article className="rounded-md border border-zinc-200 bg-white p-5 shadow-sm">
@@ -198,6 +229,13 @@ function ResponseCard({
             </a>
           </div>
           <p className="text-sm text-zinc-700">Contact: {response.personName}</p>
+          <Button
+            color={ButtonColor.Red}
+            className="self-start text-white"
+            onClick={onDelete}
+          >
+            Delete
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -302,4 +340,4 @@ function NoteItem({ note }: { note: ActionPartnershipNoteDto }) {
   );
 }
 
-export default ActionPartnershipsPage;
+export default OutreachPartnershipsPage;

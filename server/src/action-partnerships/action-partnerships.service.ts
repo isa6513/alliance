@@ -56,4 +56,15 @@ export class ActionPartnershipsService {
     });
     return this.noteRepository.save(note);
   }
+
+  async deleteResponseAdmin(responseId: number): Promise<void> {
+    const response = await this.responseRepository.findOne({
+      where: { id: responseId },
+    });
+    if (!response) {
+      throw new NotFoundException('Action partnership response not found');
+    }
+
+    await this.responseRepository.remove(response);
+  }
 }

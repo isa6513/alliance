@@ -40,7 +40,7 @@ export default [
       route("/contracts", "pages/ContractsPage.tsx"),
       route("/contracts/:id", "pages/ContractPage.tsx"),
       route("/ambassador-program", "pages/AmbassadorProgramPage.tsx"),
-      route("/action-partnerships", "pages/ActionPartnershipsPage.tsx"),
+      route("/outreach-partnerships", "pages/OutreachPartnershipsPage.tsx"),
       route("/share-targets", "pages/ExternalShareTargetsPage.tsx"),
       route("/share-links", "pages/ShareLinksPage.tsx"),
       route("/priority", "pages/PriorityPage.tsx"),

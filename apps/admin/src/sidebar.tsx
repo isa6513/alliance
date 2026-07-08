@@ -48,7 +48,7 @@ import { useGroupAssignment } from "./lib/GroupAssignmentContext";
 const Sidebar: React.FC = () => {
   const [actions, setActions] = useState<ActionDto[]>([]);
   const [actionsLoading, setActionsLoading] = useState<boolean>(true);
-  const [pendingActionPartnershipCount, setPendingActionPartnershipCount] =
+  const [pendingOutreachPartnershipCount, setPendingOutreachPartnershipCount] =
     useState<number>(0);
   const navigate = useNavigate();
 
@@ -77,11 +77,11 @@ const Sidebar: React.FC = () => {
     }
   }, []);
 
-  const loadPendingActionPartnerships = useCallback(async () => {
+  const loadPendingOutreachPartnerships = useCallback(async () => {
     try {
       const response = await actionPartnershipsFindAllResponsesAdmin();
       if (response.data) {
-        setPendingActionPartnershipCount(
+        setPendingOutreachPartnershipCount(
           response.data.filter(
             (partnershipResponse) =>
               partnershipResponse.notesHistory.length === 0,
@@ -89,7 +89,7 @@ const Sidebar: React.FC = () => {
         );
       }
     } catch (err) {
-      console.error("Failed to load action partnership responses", err);
+      console.error("Failed to load outreach partnership responses", err);
     }
   }, []);
 
@@ -99,21 +99,21 @@ const Sidebar: React.FC = () => {
 
   useEffect(() => {
     loadActions();
-    void loadPendingActionPartnerships();
-  }, [loadActions, loadPendingActionPartnerships]);
+    void loadPendingOutreachPartnerships();
+  }, [loadActions, loadPendingOutreachPartnerships]);
 
   useEffect(() => {
     window.addEventListener(
-      "action-partnerships-updated",
-      loadPendingActionPartnerships,
+      "outreach-partnerships-updated",
+      loadPendingOutreachPartnerships,
     );
     return () => {
       window.removeEventListener(
-        "action-partnerships-updated",
-        loadPendingActionPartnerships,
+        "outreach-partnerships-updated",
+        loadPendingOutreachPartnerships,
       );
     };
-  }, [loadPendingActionPartnerships]);
+  }, [loadPendingOutreachPartnerships]);
 
   const handleEditAction = useCallback(
     (id: number) => {
@@ -287,9 +287,9 @@ const Sidebar: React.FC = () => {
             >
               <MoreHorizontal size={16} />
               Extras
-              {!!pendingActionPartnershipCount ? (
+              {!!pendingOutreachPartnershipCount ? (
                 <div className="font-semibold text-xs text-white bg-red-500 rounded-md flex justify-center items-center w-5 h-5">
-                  {pendingActionPartnershipCount}
+                  {pendingOutreachPartnershipCount}
                 </div>
               ) : null}
               {extrasOpen ? (
@@ -357,10 +357,10 @@ const Sidebar: React.FC = () => {
                     icon: <Handshake size={16} />,
                   },
                   {
-                    to: "/action-partnerships",
-                    label: "Action Partnerships",
+                    to: "/outreach-partnerships",
+                    label: "Outreach Partnerships",
                     icon: <Handshake size={16} />,
-                    notifCount: pendingActionPartnershipCount,
+                    notifCount: pendingOutreachPartnershipCount,
                   },
                   {
                     to: "/share-targets",

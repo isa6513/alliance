@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -61,5 +62,14 @@ export class ActionPartnershipsController {
     return new ActionPartnershipNoteDto(
       await this.actionPartnershipsService.createNoteAdmin(id, dto),
     );
+  }
+
+  @Delete('responses/:id')
+  @UseGuards(AdminGuard)
+  @ApiOkResponse()
+  async deleteResponseAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.actionPartnershipsService.deleteResponseAdmin(id);
   }
 }
