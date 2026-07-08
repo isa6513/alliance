@@ -1452,7 +1452,14 @@ export function FormBuilder({
     ),
   );
 
-  const navigationBlocker = useBlocker(hasUnsavedChanges);
+  /** Bypass blocker while save-driven `setFormId` navigation sees stale dirty state. */
+  const skipNavigationBlockRef = useRef(false);
+  const navigationBlocker = useBlocker(
+    useCallback(
+      () => hasUnsavedChanges && !skipNavigationBlockRef.current,
+      [hasUnsavedChanges],
+    ),
+  );
 
   useEffect(() => {
     if (navigationBlocker.state === "blocked") {
@@ -1652,9 +1659,11 @@ export function FormBuilder({
       }
 
       if (response.response.ok && response.data) {
-        setFormId(response.data.id);
         setLastSavedSchemaJSON(JSON.stringify(schemaForSave));
         setHasUnsavedChanges(false);
+        skipNavigationBlockRef.current = true;
+        setFormId(response.data.id);
+        skipNavigationBlockRef.current = false;
         if (resolvedDraftIds.length > 0) {
           setCustomValidatorDrafts((prev) => {
             const next = { ...prev };
