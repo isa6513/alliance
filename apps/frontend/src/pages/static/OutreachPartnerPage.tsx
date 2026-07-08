@@ -145,10 +145,8 @@ function OutreachPartnerPage() {
         <section>
           <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-5 pt-12 pb-10 sm:px-8 md:pt-16 md:pb-12">
             <div className="flex flex-col gap-5">
-              <h1 className="font-serif text-4xl font-semibold leading-tight text-zinc-950 sm:text-5xl lg:text-6xl">
-                Partner with people
-                <br />
-                committed to help
+              <h1 className="font-serif text-4xl font-semibold leading-tight text-zinc-950 sm:text-5xl lg:text-5xl">
+                Introduce your cause to people who care
               </h1>
               <p className="text-lg leading-relaxed text-zinc-700">
                 At the Alliance, our{" "}
@@ -156,14 +154,14 @@ function OutreachPartnerPage() {
                   {memberCount ? memberCount.toLocaleString() : ""}
                   {memberCount ? " " : ""}volunteer members
                 </span>{" "}
-                each commit 15 minutes a week to coordinated actions to improve
-                the world.
+                each spend 15 minutes a week taking actions on our online
+                platform.
               </p>
               <p className="text-lg leading-relaxed text-zinc-700">
                 For organizations working to address our priorities, we can
-                design a focused task within our weekly action program where
-                participating members learn about your work, give feedback,
-                support a campaign, or help with another clear request.
+                design a focused task within our weekly action program in which
+                our members learn about your work, give feedback, support a
+                campaign, or help with another clear request.
               </p>
               <p className="text-lg leading-relaxed text-zinc-700">
                 In return, we ask partners to share the Alliance with more
@@ -192,38 +190,40 @@ function OutreachPartnerPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 overflow-hidden rounded-md border border-zinc-200 bg-white md:grid-cols-2">
-              <article className="p-6">
+            <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-1 overflow-hidden rounded-md border border-zinc-200 bg-white md:grid-cols-2">
+                <article className="p-6">
+                  <h3 className="font-serif text-2xl font-semibold text-green-bg">
+                    What we can do
+                  </h3>
+                  <p className="mt-2 text-base leading-relaxed text-zinc-700">
+                    Run a focused action where members help with a clear, useful
+                    task.
+                  </p>
+                </article>
+                <article className="p-6 md:border-l md:border-zinc-200">
+                  <h3 className="font-serif text-2xl font-semibold text-green-bg">
+                    What we ask
+                  </h3>
+                  <p className="mt-2 text-base leading-relaxed text-zinc-700">
+                    Share the Alliance through a newsletter, website, meeting,
+                    event, social channel, or similar place.
+                  </p>
+                </article>
+              </div>
+
+              <article className="rounded-md border border-zinc-200 bg-white p-6">
                 <h3 className="font-serif text-2xl font-semibold text-green-bg">
-                  What we can do
+                  Example
                 </h3>
                 <p className="mt-2 text-base leading-relaxed text-zinc-700">
-                  Run a focused action where members help with a clear, useful
-                  task.
-                </p>
-              </article>
-              <article className="p-6 md:border-l md:border-zinc-200">
-                <h3 className="font-serif text-2xl font-semibold text-green-bg">
-                  What we ask
-                </h3>
-                <p className="mt-2 text-base leading-relaxed text-zinc-700">
-                  Share the Alliance through a newsletter, website, meeting,
-                  event, social channel, or similar place.
+                  A reforestation nonprofit could ask Alliance members to learn
+                  about local reforestation work and answer a few questions
+                  about their website design. Then, the nonprofit could
+                  introduce the Alliance to its newsletter readers.
                 </p>
               </article>
             </div>
-
-            <article className="rounded-md border border-zinc-200 bg-white p-6">
-              <h3 className="font-serif text-2xl font-semibold text-green-bg">
-                Example
-              </h3>
-              <p className="mt-2 text-base leading-relaxed text-zinc-700">
-                A reforestation nonprofit could ask Alliance members to learn
-                about local reforestation work and answer a few questions about
-                their website design. In return, the nonprofit could introduce
-                the Alliance to its newsletter audience.
-              </p>
-            </article>
           </div>
         </section>
 
