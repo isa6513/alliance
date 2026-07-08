@@ -8,7 +8,7 @@ import type {
   ActionPartnershipResponseDto,
 } from "@alliance/shared/client/types.gen";
 import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const formatDateTime = (value: string): string =>
   new Date(value).toLocaleString(undefined, {
@@ -36,6 +36,7 @@ const OutreachPartnershipsPage: React.FC = () => {
   const [deletingResponseIds, setDeletingResponseIds] = useState<Set<number>>(
     () => new Set(),
   );
+  const deletingResponseIdsRef = useRef<Set<number>>(new Set());
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -121,7 +122,7 @@ const OutreachPartnershipsPage: React.FC = () => {
 
   const handleDeleteResponse = useCallback(
     async (response: ActionPartnershipResponseDto) => {
-      if (deletingResponseIds.has(response.id)) {
+      if (deletingResponseIdsRef.current.has(response.id)) {
         return;
       }
 
@@ -132,7 +133,10 @@ const OutreachPartnershipsPage: React.FC = () => {
         return;
       }
 
-      setDeletingResponseIds((prev) => new Set(prev).add(response.id));
+      deletingResponseIdsRef.current = new Set(
+        deletingResponseIdsRef.current,
+      ).add(response.id);
+      setDeletingResponseIds(deletingResponseIdsRef.current);
       setError(null);
       try {
         await actionPartnershipsDeleteResponseAdmin({
@@ -147,14 +151,15 @@ const OutreachPartnershipsPage: React.FC = () => {
         console.error("Failed to delete outreach partnership response", err);
         setError("Failed to delete response.");
       } finally {
-        setDeletingResponseIds((prev) => {
-          const next = new Set(prev);
-          next.delete(response.id);
-          return next;
-        });
+        const nextDeletingResponseIds = new Set(
+          deletingResponseIdsRef.current,
+        );
+        nextDeletingResponseIds.delete(response.id);
+        deletingResponseIdsRef.current = nextDeletingResponseIds;
+        setDeletingResponseIds(nextDeletingResponseIds);
       }
     },
-    [deletingResponseIds],
+    [],
   );
 
   return (

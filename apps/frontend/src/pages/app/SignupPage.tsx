@@ -232,13 +232,13 @@ const SignupPage: React.FC = () => {
         inviterLine = (
           <div className="rounded-md">
             <div className="flex flex-row gap-x-1 items-center text-zinc-500">
-              <span>Invited by </span>
               <AvatarProfile
                 pfp={inviterProfile.profilePicture ?? null}
                 size="small"
-                className="ml-1 inline-block text-green"
+                className="inline-block text-green"
               />
               <span className="font-medium">{inviterProfile.displayName}</span>
+              <span> invited you to the Alliance.</span>
             </div>
           </div>
         );
@@ -277,13 +277,12 @@ const SignupPage: React.FC = () => {
                   Create an account
                 </h2>
                 <p className="text-lg md:text-xl text-zinc-500">
-                  The Alliance is a global community of people cooperating to
-                  improve the world. We&apos;re in an early, experimental
-                  phase—membership is invite-only.
+                  The Alliance is a global community of people who spend 15
+                  minutes a week on coordinated actions to improve the world.
                 </p>
                 <p className="text-lg md:text-xl text-zinc-500 mt-3">
-                  Members spend 15 minutes a week completing thoughtfully
-                  designed actions. Past actions have included contacting local
+                  We&apos;re in an early, experimental phase—membership is
+                  invite-only. Past actions have included contacting local
                   government officials, participating in studies, and providing
                   feedback to nonprofits.
                 </p>
