@@ -33,6 +33,9 @@ const OutreachPartnershipsPage: React.FC = () => {
   const [savingNoteIds, setSavingNoteIds] = useState<Set<number>>(
     () => new Set(),
   );
+  const [deletingResponseIds, setDeletingResponseIds] = useState<Set<number>>(
+    () => new Set(),
+  );
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -118,6 +121,10 @@ const OutreachPartnershipsPage: React.FC = () => {
 
   const handleDeleteResponse = useCallback(
     async (response: ActionPartnershipResponseDto) => {
+      if (deletingResponseIds.has(response.id)) {
+        return;
+      }
+
       const confirmed = window.confirm(
         `Are you sure you want to delete ${response.organizationName}'s outreach partnership response? This cannot be undone.`,
       );
@@ -125,6 +132,7 @@ const OutreachPartnershipsPage: React.FC = () => {
         return;
       }
 
+      setDeletingResponseIds((prev) => new Set(prev).add(response.id));
       setError(null);
       try {
         await actionPartnershipsDeleteResponseAdmin({
@@ -138,9 +146,15 @@ const OutreachPartnershipsPage: React.FC = () => {
       } catch (err) {
         console.error("Failed to delete outreach partnership response", err);
         setError("Failed to delete response.");
+      } finally {
+        setDeletingResponseIds((prev) => {
+          const next = new Set(prev);
+          next.delete(response.id);
+          return next;
+        });
       }
     },
-    [],
+    [deletingResponseIds],
   );
 
   return (
@@ -171,6 +185,7 @@ const OutreachPartnershipsPage: React.FC = () => {
                 noteBody={noteBodies[response.id] ?? ""}
                 noteDate={noteDates[response.id] ?? getDefaultNoteDate()}
                 savingNote={savingNoteIds.has(response.id)}
+                deletingResponse={deletingResponseIds.has(response.id)}
                 onNoteBodyChange={(body) => {
                   setError(null);
                   setNoteBodies((prev) => ({ ...prev, [response.id]: body }));
@@ -194,6 +209,7 @@ function ResponseCard({
   noteBody,
   noteDate,
   savingNote,
+  deletingResponse,
   onNoteBodyChange,
   onNoteDateChange,
   onAddNote,
@@ -203,6 +219,7 @@ function ResponseCard({
   noteBody: string;
   noteDate: string;
   savingNote: boolean;
+  deletingResponse: boolean;
   onNoteBodyChange: (body: string) => void;
   onNoteDateChange: (date: string) => void;
   onAddNote: () => void;
@@ -232,9 +249,10 @@ function ResponseCard({
           <Button
             color={ButtonColor.Red}
             className="self-start text-white"
+            disabled={deletingResponse}
             onClick={onDelete}
           >
-            Delete
+            {deletingResponse ? "Deleting..." : "Delete"}
           </Button>
         </div>
 
