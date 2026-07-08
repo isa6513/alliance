@@ -4,7 +4,7 @@ export default {
   expo: {
     name: IS_DEV ? "Alliance (Dev)" : "Alliance",
     slug: "alliance-mobile",
-    version: "1.2.1",
+    version: "1.3.0",
     orientation: "portrait",
     icon: "./assets/images/globe-icon.png",
     scheme: "alliance",
