@@ -278,6 +278,12 @@ jobs:
             charleslien)
               mention="<@U0A0WQQM8HZ>"
               ;;
+            GrantHough)
+              mention="<@U0ACKHT60F4>"
+              ;;
+            nuakashborde)
+              mention="<@U0B2T057ZPU>"
+              ;;
           esac
           echo "mention=$mention" >> "$GITHUB_OUTPUT"
 
