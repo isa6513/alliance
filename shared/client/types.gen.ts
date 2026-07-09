@@ -3486,6 +3486,20 @@ export type ActionStatsWithOnboardingDto = {
     optional: boolean;
 };
 
+export type ReminderGroupClickRatePointDto = {
+    date: string;
+    reminderGroupId: number;
+    reminderGroupName: string;
+    actionId: number;
+    actionName: string;
+    emailClickRate: number;
+    textClickRate: number;
+    emailSentCount: number;
+    emailClickedCount: number;
+    textSentCount: number;
+    textClickedCount: number;
+};
+
 export type MemberCompletionRetentionActionSummaryDto = {
     actionId: number;
     actionName: string;
@@ -11831,6 +11845,28 @@ export type AnalyticsGetActionStatsAdminResponses = {
 };
 
 export type AnalyticsGetActionStatsAdminResponse = AnalyticsGetActionStatsAdminResponses[keyof AnalyticsGetActionStatsAdminResponses];
+
+export type AnalyticsGetReminderGroupClickRatesAdminData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/analytics/reminder-group-click-rates';
+};
+
+export type AnalyticsGetReminderGroupClickRatesAdminErrors = {
+    /**
+     * Default error response for hey-api
+     */
+    default: HeyApiError;
+};
+
+export type AnalyticsGetReminderGroupClickRatesAdminError = AnalyticsGetReminderGroupClickRatesAdminErrors[keyof AnalyticsGetReminderGroupClickRatesAdminErrors];
+
+export type AnalyticsGetReminderGroupClickRatesAdminResponses = {
+    200: Array<ReminderGroupClickRatePointDto>;
+};
+
+export type AnalyticsGetReminderGroupClickRatesAdminResponse = AnalyticsGetReminderGroupClickRatesAdminResponses[keyof AnalyticsGetReminderGroupClickRatesAdminResponses];
 
 export type AnalyticsGetActionStatsByIdAdminData = {
     body?: never;

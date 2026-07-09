@@ -1,7 +1,4 @@
 import {
-  actionsFindAllWithDraftsAdmin,
-  actionsReminderGroupsForEventAdmin,
-  actionsSentNotifsForGroupAdmin,
   analyticsGetActionStatsAdmin,
   analyticsGetAggregateStatsAdmin,
   analyticsGetContractStatusHistoryAdmin,
@@ -9,6 +6,7 @@ import {
   analyticsGetInviteFunnelAdmin,
   analyticsGetMemberCompletionRetentionAdmin,
   analyticsGetMemberReliabilityWindowAdmin,
+  analyticsGetReminderGroupClickRatesAdmin,
   analyticsGetTimeToChurnSamplesAdmin,
   analyticsRecalculateActionStatsAdmin,
 } from "@alliance/shared/client";
@@ -21,9 +19,12 @@ import {
   InviteFunnelDto,
   MemberCompletionRetentionCohortDto,
   MemberReliabilityWindowDto,
+  ReminderGroupClickRatePointDto,
   TimeToChurnSampleDto,
 } from "@alliance/shared/client/types.gen";
+import { queryKeys } from "@alliance/shared/lib/queryKeys";
 import { cn } from "@alliance/shared/styles/util";
+import { useQuery } from "@tanstack/react-query";
 import chroma from "chroma-js";
 import {
   area,
@@ -90,19 +91,10 @@ type HoveredRetentionCell = {
     memberCount: number;
   }>;
 };
-type ReminderGroupClickRatePoint = {
-  date: Date;
-  reminderGroupId: number;
-  reminderGroupName: string;
-  actionId: number;
-  actionName: string;
-  emailClickRate: number;
-  textClickRate: number;
-  emailSentCount: number;
-  emailClickedCount: number;
-  textSentCount: number;
-  textClickedCount: number;
-};
+type ReminderGroupClickRatePoint = Omit<
+  ReminderGroupClickRatePointDto,
+  "date"
+> & { date: Date };
 type ReminderActionChannelBar = {
   actionId: number;
   actionName: string;
@@ -274,20 +266,6 @@ const getWeekStartDate = (value: Date): Date => {
   return date;
 };
 
-const runInBatches = async <T, R>(
-  items: T[],
-  batchSize: number,
-  worker: (item: T) => Promise<R>,
-): Promise<R[]> => {
-  const results: R[] = [];
-  for (let i = 0; i < items.length; i += batchSize) {
-    const batch = items.slice(i, i + batchSize);
-    const batchResults = await Promise.all(batch.map((item) => worker(item)));
-    results.push(...batchResults);
-  }
-  return results;
-};
-
 const fetchPlatformTenureCohort = async (
   weeksOnPlatform: number,
 ): Promise<PlatformTenureCohortStats> => {
@@ -326,8 +304,6 @@ const StatsPage: React.FC = () => {
   const [actionStats, setActionStats] = useState<ActionStatsWithWithdrawals[]>(
     [],
   );
-  const [reminderGroupClickRatePoints, setReminderGroupClickRatePoints] =
-    useState<ReminderGroupClickRatePoint[]>([]);
   const [aggregateStats, setAggregateStats] =
     useState<AggregateStatsDto | null>(null);
   const [aggregateStatsLoading, setAggregateStatsLoading] =
@@ -337,8 +313,6 @@ const StatsPage: React.FC = () => {
   >([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [actionStatsLoading, setActionStatsLoading] = useState<boolean>(false);
-  const [reminderGroupClickRatesLoading, setReminderGroupClickRatesLoading] =
-    useState<boolean>(false);
   const [completionCurveRefreshKey, setCompletionCurveRefreshKey] =
     useState<number>(0);
   const [retentionLoading, setRetentionLoading] = useState<boolean>(false);
@@ -489,133 +463,21 @@ const StatsPage: React.FC = () => {
     }
   }, []);
 
-  const loadReminderGroupClickRates = useCallback(async () => {
-    setReminderGroupClickRatesLoading(true);
-    try {
-      const actionsResponse = await actionsFindAllWithDraftsAdmin();
-      const actions = actionsResponse.data ?? [];
-
-      const memberActionEvents = actions.flatMap((action) =>
-        action.events
-          .filter((event) => event.newStatus === "member_action")
-          .map((event) => ({
-            eventId: event.id,
-            actionId: action.id,
-            actionName: action.name,
-            fallbackDate: event.date,
-          })),
+  const {
+    data: reminderGroupClickRatePoints = [],
+    isPending: reminderGroupClickRatesLoading,
+  } = useQuery({
+    queryKey: queryKeys.reminderGroupClickRatesAdmin(),
+    queryFn: async () => {
+      const response = await analyticsGetReminderGroupClickRatesAdmin();
+      return (response.data ?? []).map(
+        (point): ReminderGroupClickRatePoint => ({
+          ...point,
+          date: new Date(point.date),
+        }),
       );
-
-      if (memberActionEvents.length === 0) {
-        setReminderGroupClickRatePoints([]);
-        return;
-      }
-
-      const reminderGroupResults = await runInBatches(
-        memberActionEvents,
-        16,
-        async (eventSummary) => {
-          const response = await actionsReminderGroupsForEventAdmin({
-            path: { id: eventSummary.eventId },
-          });
-          return (response.data ?? []).map((group) => ({
-            group,
-            actionId: eventSummary.actionId,
-            actionName: eventSummary.actionName,
-            fallbackDate: eventSummary.fallbackDate,
-          }));
-        },
-      );
-
-      const reminderGroups = reminderGroupResults.flat();
-      if (reminderGroups.length === 0) {
-        setReminderGroupClickRatePoints([]);
-        return;
-      }
-
-      const uniqueReminderGroups = Array.from(
-        new Map(
-          reminderGroups.map((entry) => [entry.group.id, entry]),
-        ).values(),
-      );
-
-      const groupsWithSentNotifs = await runInBatches(
-        uniqueReminderGroups,
-        16,
-        async (entry) => {
-          const response = await actionsSentNotifsForGroupAdmin({
-            path: { groupId: entry.group.id },
-          });
-          return {
-            ...entry,
-            sentNotifs: response.data ?? [],
-          };
-        },
-      );
-
-      const points = groupsWithSentNotifs
-        .map(({ group, actionId, actionName, fallbackDate, sentNotifs }) => {
-          const emailNotifs = sentNotifs.filter((notif) => !!notif.mail);
-          const textNotifs = sentNotifs.filter((notif) => !!notif.mms);
-
-          if (emailNotifs.length === 0 && textNotifs.length === 0) {
-            return null;
-          }
-
-          const emailClickedCount = emailNotifs.filter(
-            (notif) => notif.mail?.clickedLink,
-          ).length;
-          const textClickedCount = textNotifs.filter(
-            (notif) => notif.mms?.clickedLink,
-          ).length;
-
-          const sentTimestamps = [...emailNotifs, ...textNotifs]
-            .map((notif) => parseIsoDate(notif.createdAt)?.getTime())
-            .filter((value): value is number => typeof value === "number");
-          // Plot each reminder-group at its first sent notification time.
-          const pointDate =
-            (sentTimestamps.length
-              ? new Date(Math.min(...sentTimestamps))
-              : (parseIsoDate(group.sendAtAbsolute) ??
-                parseIsoDate(fallbackDate))) ?? null;
-
-          if (!pointDate) {
-            return null;
-          }
-
-          return {
-            date: pointDate,
-            reminderGroupId: group.id,
-            reminderGroupName: group.name,
-            actionId,
-            actionName,
-            emailClickRate:
-              emailNotifs.length > 0
-                ? emailClickedCount / emailNotifs.length
-                : 0,
-            textClickRate:
-              textNotifs.length > 0 ? textClickedCount / textNotifs.length : 0,
-            emailSentCount: emailNotifs.length,
-            emailClickedCount,
-            textSentCount: textNotifs.length,
-            textClickedCount,
-          };
-        })
-        .filter((point): point is ReminderGroupClickRatePoint => point !== null)
-        .sort(
-          (a, b) =>
-            a.date.getTime() - b.date.getTime() ||
-            a.reminderGroupId - b.reminderGroupId,
-        );
-
-      setReminderGroupClickRatePoints(points);
-    } catch (err) {
-      console.error("Failed to load reminder group click rates", err);
-      setReminderGroupClickRatePoints([]);
-    } finally {
-      setReminderGroupClickRatesLoading(false);
-    }
-  }, []);
+    },
+  });
 
   const loadRetentionCohorts = useCallback(async () => {
     setRetentionLoading(true);
@@ -745,10 +607,6 @@ const StatsPage: React.FC = () => {
   useEffect(() => {
     void loadActionStats();
   }, [loadActionStats]);
-
-  useEffect(() => {
-    void loadReminderGroupClickRates();
-  }, [loadReminderGroupClickRates]);
 
   useEffect(() => {
     void loadRetentionCohorts();

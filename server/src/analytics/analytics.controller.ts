@@ -21,6 +21,7 @@ import { MemberCompletionRetentionCohortDto } from './member-completion-retentio
 import { MemberReliabilityWindowDto } from './member-reliability-window.dto';
 import { MissedActionsDto } from './missed-actions.dto';
 import { PlatformTenureCohortStatsDto } from './platform-tenure-cohort.dto';
+import { ReminderGroupClickRatePointDto } from './reminder-group-click-rates.dto';
 import { TimeToChurnSampleDto } from './time-to-churn.dto';
 import { TimeSpentForUserDto } from './timespent.dto';
 
@@ -64,6 +65,16 @@ export class AnalyticsController {
   async getActionStatsAdmin(): Promise<ActionStatsWithOnboardingDto[]> {
     const stats = await this.analyticsService.getActionStats();
     return stats.map((stat) => new ActionStatsWithOnboardingDto(stat));
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('reminder-group-click-rates')
+  @ApiOkResponse({ type: [ReminderGroupClickRatePointDto] })
+  async getReminderGroupClickRatesAdmin(): Promise<
+    ReminderGroupClickRatePointDto[]
+  > {
+    const points = await this.analyticsService.getReminderGroupClickRates();
+    return points.map((point) => new ReminderGroupClickRatePointDto(point));
   }
 
   @UseGuards(AdminGuard)
@@ -116,11 +127,12 @@ export class AnalyticsController {
       !Number.isInteger(parsedWeeks) ||
       parsedWeeks < 1
     ) {
-      throw new BadRequestException('weeks must be a whole number of at least 1');
+      throw new BadRequestException(
+        'weeks must be a whole number of at least 1',
+      );
     }
-    const stats = await this.analyticsService.getMemberReliabilityWindow(
-      parsedWeeks,
-    );
+    const stats =
+      await this.analyticsService.getMemberReliabilityWindow(parsedWeeks);
     return new MemberReliabilityWindowDto(stats);
   }
 

@@ -8,7 +8,9 @@ import {
   ActionStatus,
 } from 'src/actions/entities/action-event.entity';
 import { Action } from 'src/actions/entities/action.entity';
+import { ReminderGroup } from 'src/actions/entities/reminder-group.entity';
 import { ActionEventRecipientService } from 'src/notifs/action-event-recipient.service';
+import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import {
   ContractEvent,
@@ -35,6 +37,7 @@ import {
 import { MemberReliabilityWindow } from './member-reliability-window.dto';
 import { MissedActions } from './missed-actions.dto';
 import { PlatformTenureCohortStats } from './platform-tenure-cohort.dto';
+import { ReminderGroupClickRatePoint } from './reminder-group-click-rates.dto';
 import { TimeSpentForUser } from './timespent.dto';
 
 @Injectable()
@@ -107,6 +110,10 @@ ORDER BY pp.total_session_duration_seconds DESC
     private readonly actionRepository: Repository<Action>,
     @InjectRepository(ContractEvent)
     private readonly contractEventRepository: Repository<ContractEvent>,
+    @InjectRepository(ReminderGroup)
+    private readonly reminderGroupRepository: Repository<ReminderGroup>,
+    @InjectRepository(ActionEventNotif)
+    private readonly actionEventNotifRepository: Repository<ActionEventNotif>,
     private readonly actionEventRecipientService: ActionEventRecipientService,
   ) {
     if (!process.env.POSTHOG_QUERY_KEY || !process.env.POSTHOG_PROJECT_ID) {
@@ -933,6 +940,84 @@ ORDER BY pp.total_session_duration_seconds DESC
       firstWeek: summarize((point) => point.weekIndex === 0),
       fourthWeekOrLater: summarize((point) => point.weekIndex >= 3),
     };
+  }
+
+  async getReminderGroupClickRates(): Promise<ReminderGroupClickRatePoint[]> {
+    // Every reminder group attached to a member_action event, with the owning
+    // action for labelling.
+    const groups = await this.reminderGroupRepository.find({
+      where: { memberActionEvent: { newStatus: ActionStatus.MemberAction } },
+      relations: { memberActionEvent: { action: true } },
+    });
+
+    const groupIds = groups.map((group) => group.id);
+    const sentNotifs = groupIds.length
+      ? await this.actionEventNotifRepository.find({
+          where: { reminderGroup: { id: In(groupIds) }, sent: true },
+          relations: { mail: true, mms: true, reminderGroup: true },
+        })
+      : [];
+
+    const notifsByGroupId = new Map<number, ActionEventNotif[]>();
+    for (const notif of sentNotifs) {
+      const groupId = notif.reminderGroup?.id;
+      if (groupId === undefined) continue;
+      const existing = notifsByGroupId.get(groupId);
+      if (existing) {
+        existing.push(notif);
+      } else {
+        notifsByGroupId.set(groupId, [notif]);
+      }
+    }
+
+    const points: ReminderGroupClickRatePoint[] = [];
+    for (const group of groups) {
+      const notifs = notifsByGroupId.get(group.id) ?? [];
+      const emailNotifs = notifs.filter((notif) => !!notif.mail);
+      const textNotifs = notifs.filter((notif) => !!notif.mms);
+
+      if (emailNotifs.length === 0 && textNotifs.length === 0) {
+        continue;
+      }
+
+      const emailClickedCount = emailNotifs.filter(
+        (notif) => notif.mail?.clickedLink,
+      ).length;
+      const textClickedCount = textNotifs.filter(
+        (notif) => notif.mms?.clickedLink,
+      ).length;
+
+      const sentTimestamps = [...emailNotifs, ...textNotifs].map((notif) =>
+        notif.createdAt.getTime(),
+      );
+      // Plot each reminder-group at its first sent notification time, falling
+      // back to its configured absolute send time or the member_action date.
+      const pointDate = sentTimestamps.length
+        ? new Date(Math.min(...sentTimestamps))
+        : (group.sendAtAbsolute ?? group.memberActionEvent.date);
+
+      points.push({
+        date: pointDate,
+        reminderGroupId: group.id,
+        reminderGroupName: group.name,
+        actionId: group.memberActionEvent.action.id,
+        actionName: group.memberActionEvent.action.name,
+        emailClickRate:
+          emailNotifs.length > 0 ? emailClickedCount / emailNotifs.length : 0,
+        textClickRate:
+          textNotifs.length > 0 ? textClickedCount / textNotifs.length : 0,
+        emailSentCount: emailNotifs.length,
+        emailClickedCount,
+        textSentCount: textNotifs.length,
+        textClickedCount,
+      });
+    }
+
+    return points.sort(
+      (a, b) =>
+        a.date.getTime() - b.date.getTime() ||
+        a.reminderGroupId - b.reminderGroupId,
+    );
   }
 
   async getMissedActions(): Promise<MissedActions> {
