@@ -8,23 +8,6 @@ import { User } from 'src/user/entities/user.entity';
 import { findLeast } from 'src/utils/filter';
 import type { Repository } from 'typeorm';
 
-export function computeIsContractActiveDuringEntireMemberAction(params: {
-  action: Pick<Action, 'events' | 'memberActionPhase'>;
-  user: Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'>;
-}): boolean {
-  const { action, user } = params;
-  const { event: memberActionEvent, deadlineEvent } = action.memberActionPhase;
-
-  if (!memberActionEvent) {
-    return false;
-  }
-
-  return user.hasActiveContractInFullRange({
-    startDate: memberActionEvent.date,
-    endDate: deadlineEvent?.date ?? null,
-  });
-}
-
 /**
  * Onboarding "joined in time?" gate. Targets *new* members, so a user qualifies
  * only if their first contract was signed at or after the member-action phase began.
@@ -34,9 +17,9 @@ export function computeIsContractActiveDuringEntireMemberAction(params: {
  * - Contract event but no phase start → out of time: can't onboard into a phase
  *   that hasn't started.
  *
- * Single source of this rule, shared by {@link computeShouldParticipateInAction}
- * (`shouldParticipate`), {@link computeShouldParticipate} (recipient/roster), and
- * `ActionsService.isEligibleForAction` (`canParticipate`).
+ * Single source of this rule, shared by {@link computeShouldParticipateCore}
+ * (both `shouldParticipate` variants) and `ActionsService.isEligibleForAction`
+ * (`canParticipate`).
  */
 export function computeContractSignedAfterOnboardingStart(params: {
   user: Pick<User, 'contractEvents'>;
@@ -58,6 +41,59 @@ export function computeContractSignedAfterOnboardingStart(params: {
 }
 
 /**
+ * Shared rule for both `shouldParticipate` variants: dismissal, cohort
+ * membership, and the contract requirement — onboarding actions need the first
+ * contract signed at/after the phase start; all others need an active contract
+ * across the whole member-action window (`deadlineDate: null` = open-ended).
+ */
+function computeShouldParticipateCore(params: {
+  /** Member-action phase start; also the onboarding join-timing reference. */
+  eventDate: Date;
+  deadlineDate: Date | null;
+  inCohort: boolean;
+  dismissed: boolean;
+  onboarding: boolean;
+  user: Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'>;
+  /**
+   * Skip the contract-lapse exclusion (analytics wants the historical base
+   * set and handles contract state itself).
+   */
+  includeSuspended?: boolean;
+  includeDismissed?: boolean;
+}): boolean {
+  const {
+    eventDate,
+    deadlineDate,
+    inCohort,
+    dismissed,
+    onboarding,
+    user,
+    includeSuspended = false,
+    includeDismissed = false,
+  } = params;
+
+  if (!includeDismissed && dismissed) {
+    return false;
+  }
+  if (!inCohort) {
+    return false;
+  }
+  if (onboarding) {
+    return computeContractSignedAfterOnboardingStart({
+      user,
+      memberActionPhaseStart: eventDate,
+    });
+  }
+  return (
+    includeSuspended ||
+    user.hasActiveContractInFullRange({
+      startDate: eventDate,
+      endDate: deadlineDate,
+    })
+  );
+}
+
+/**
  * Self-view "is this user expected to take this action?" predicate — source of
  * the viewer's own `ActionDto.shouldParticipate`.
  *
@@ -65,9 +101,7 @@ export function computeContractSignedAfterOnboardingStart(params: {
  * driven by a precomputed cohort-member set, for notifications/roster). This one
  * consumes the full cohort-*expression* result (`computeIsInCohortExpression`)
  * as `inCohort`, and stays pure/sync so the caller controls when the DB-hitting
- * cohort evaluation runs. Both share the onboarding/contract rules
- * ({@link computeContractSignedAfterOnboardingStart} /
- * {@link computeIsContractActiveDuringEntireMemberAction}).
+ * cohort evaluation runs. Both delegate to {@link computeShouldParticipateCore}.
  */
 export function computeShouldParticipateInAction(params: {
   action: Pick<Action, 'events' | 'memberActionPhase' | 'onboarding'>;
@@ -79,18 +113,18 @@ export function computeShouldParticipateInAction(params: {
   if (!user) {
     return false;
   }
-  const hasMemberActionEvent = action.events.some(
-    (event) => event.newStatus === ActionStatus.MemberAction,
-  );
-  const meetsActionSpecificRule = action.onboarding
-    ? computeContractSignedAfterOnboardingStart({
-        user,
-        memberActionPhaseStart: action.memberActionPhase.event?.date ?? null,
-      })
-    : computeIsContractActiveDuringEntireMemberAction({ action, user });
-  return (
-    hasMemberActionEvent && !dismissed && inCohort && meetsActionSpecificRule
-  );
+  const { event, deadlineEvent } = action.memberActionPhase;
+  if (!event) {
+    return false;
+  }
+  return computeShouldParticipateCore({
+    eventDate: event.date,
+    deadlineDate: deadlineEvent?.date ?? null,
+    inCohort,
+    dismissed,
+    onboarding: action.onboarding,
+    user,
+  });
 }
 
 /**
@@ -256,6 +290,7 @@ export function computeIsTaggedOrInManualCohort(params: {
 /**
  * Determines whether a user should participate in a given action event based on
  * cohort membership, dismissal status, onboarding rules, and contract dates.
+ * Runs per member-action event, so `eventDate` is the phase start.
  */
 export function computeShouldParticipate(params: {
   eventDate: Date;
@@ -274,42 +309,18 @@ export function computeShouldParticipate(params: {
     user,
     userDismissed,
     onboarding,
-    includeSuspended = false,
-    includeDismissed = false,
+    includeSuspended,
+    includeDismissed,
   } = params;
 
-  if (!includeDismissed && userDismissed) {
-    return false;
-  }
-
-  if (!cohortMemberIds.has(user.id)) {
-    return false;
-  }
-
-  if (
-    !onboarding &&
-    deadlineDate &&
-    !user.hasActiveContractInFullRange({
-      startDate: eventDate,
-      endDate: deadlineDate,
-    })
-  ) {
-    return false;
-  }
-
-  if (
-    onboarding &&
-    !computeContractSignedAfterOnboardingStart({
-      user,
-      // Runs per member-action event, so this event is the phase start.
-      memberActionPhaseStart: eventDate,
-    })
-  ) {
-    return false;
-  }
-
-  if (includeSuspended) {
-    return true;
-  }
-  return user.hasActiveContractAt(eventDate) || onboarding;
+  return computeShouldParticipateCore({
+    eventDate,
+    deadlineDate,
+    inCohort: cohortMemberIds.has(user.id),
+    dismissed: userDismissed,
+    onboarding,
+    user,
+    includeSuspended,
+    includeDismissed,
+  });
 }

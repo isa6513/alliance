@@ -2,6 +2,7 @@ import { ActionStatus } from '../actions/entities/action-event.entity';
 import type { User } from '../user/entities/user.entity';
 import {
   computeContractSignedAfterOnboardingStart,
+  computeShouldParticipate,
   computeShouldParticipateInAction,
 } from './action-user';
 
@@ -35,10 +36,14 @@ function makeAction(
           },
         ],
     onboarding,
-    memberActionPhase: {
-      event: { date: new Date('2020-01-01') },
-      deadlineEvent: { date: new Date('2020-02-01') },
-    },
+    // Mirrors the Action.memberActionPhase getter, which derives the phase
+    // from `events`: no member-action event means an empty phase.
+    memberActionPhase: hasMemberActionEvent
+      ? {
+          event: { date: new Date('2020-01-01') },
+          deadlineEvent: { date: new Date('2020-02-01') },
+        }
+      : { event: null, deadlineEvent: null },
   } as unknown as Params['action'];
 }
 
@@ -132,6 +137,131 @@ describe('computeShouldParticipateInAction', () => {
             ),
           }),
         ),
+      ).toBe(true);
+    });
+  });
+});
+
+describe('computeShouldParticipate', () => {
+  type PopulationParams = Parameters<typeof computeShouldParticipate>[0];
+
+  function makePopulationUser(opts: {
+    id?: number;
+    hasContractInFullRange?: boolean;
+    contractSignedAt?: Date | null;
+  }): {
+    user: User;
+    fullRangeCalls: { startDate?: Date | null; endDate?: Date | null }[];
+  } {
+    const {
+      id = 1,
+      hasContractInFullRange = true,
+      contractSignedAt = null,
+    } = opts;
+    const fullRangeCalls: { startDate?: Date | null; endDate?: Date | null }[] =
+      [];
+    const user = {
+      id,
+      contractEvents: contractSignedAt ? [{ date: contractSignedAt }] : [],
+      hasActiveContractInFullRange: (range: {
+        startDate?: Date | null;
+        endDate?: Date | null;
+      }) => {
+        fullRangeCalls.push(range);
+        return hasContractInFullRange;
+      },
+    } as unknown as User;
+    return { user, fullRangeCalls };
+  }
+
+  function populationInput(
+    overrides: Partial<PopulationParams> = {},
+  ): PopulationParams {
+    return {
+      eventDate: PHASE_START,
+      deadlineDate: new Date('2020-02-01'),
+      cohortMemberIds: new Set([1]),
+      user: makePopulationUser({}).user,
+      userDismissed: false,
+      onboarding: false,
+      ...overrides,
+    };
+  }
+
+  it('participates when in cohort with a contract active over the window', () => {
+    expect(computeShouldParticipate(populationInput())).toBe(true);
+  });
+
+  it('does not participate when dismissed, unless includeDismissed', () => {
+    expect(
+      computeShouldParticipate(populationInput({ userDismissed: true })),
+    ).toBe(false);
+    expect(
+      computeShouldParticipate(
+        populationInput({ userDismissed: true, includeDismissed: true }),
+      ),
+    ).toBe(true);
+  });
+
+  it('does not participate when not in the cohort', () => {
+    expect(
+      computeShouldParticipate(
+        populationInput({ cohortMemberIds: new Set([999]) }),
+      ),
+    ).toBe(false);
+  });
+
+  it('does not participate without a contract active over the window', () => {
+    const { user } = makePopulationUser({ hasContractInFullRange: false });
+    expect(computeShouldParticipate(populationInput({ user }))).toBe(false);
+  });
+
+  it('still requires the full-window contract when the deadline is null', () => {
+    // Regression: a null deadline used to skip the full-range check, so
+    // lapsed-contract users were included here but excluded by the self-view
+    // predicate (computeShouldParticipateInAction).
+    const { user, fullRangeCalls } = makePopulationUser({
+      hasContractInFullRange: false,
+    });
+    expect(
+      computeShouldParticipate(populationInput({ user, deadlineDate: null })),
+    ).toBe(false);
+    expect(fullRangeCalls).toEqual([{ startDate: PHASE_START, endDate: null }]);
+  });
+
+  it('includeSuspended skips the contract-lapse exclusion', () => {
+    const { user, fullRangeCalls } = makePopulationUser({
+      hasContractInFullRange: false,
+    });
+    expect(
+      computeShouldParticipate(
+        populationInput({ user, includeSuspended: true }),
+      ),
+    ).toBe(true);
+    expect(
+      computeShouldParticipate(
+        populationInput({ user, deadlineDate: null, includeSuspended: true }),
+      ),
+    ).toBe(true);
+    expect(fullRangeCalls).toEqual([]);
+  });
+
+  describe('onboarding join timing', () => {
+    it('excludes an existing member who joined before the event', () => {
+      const { user } = makePopulationUser({
+        contractSignedAt: new Date(PHASE_START.getTime() - 1000),
+      });
+      expect(
+        computeShouldParticipate(populationInput({ user, onboarding: true })),
+      ).toBe(false);
+    });
+
+    it('includes a new member who joined at/after the event', () => {
+      const { user } = makePopulationUser({
+        contractSignedAt: new Date(PHASE_START.getTime() + 1000),
+      });
+      expect(
+        computeShouldParticipate(populationInput({ user, onboarding: true })),
       ).toBe(true);
     });
   });
