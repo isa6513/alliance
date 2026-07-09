@@ -1,4 +1,4 @@
-import { MOBILE_STORE_FINGERPRINTS } from '@alliance/common/mobileFingerprints';
+import { MOBILE_STORE_FINGERPRINTS } from '@alliance/common/mobileFingerprints.gen';
 import { Controller, Get, Header, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { HealthCheckDto, MobileFingerprintsDto } from './app.dto';

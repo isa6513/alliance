@@ -20,6 +20,8 @@
     "update:preview": "APP_VARIANT=production eas update --branch preview",
     "fingerprint": "APP_VARIANT=production node scripts/fingerprint.mjs",
     "fingerprint:check": "APP_VARIANT=production node scripts/fingerprint.mjs check",
+    "fingerprint:capture": "node scripts/fingerprint.mjs capture",
+    "fingerprint:promote": "node scripts/fingerprint.mjs promote",
     "fingerprint:update": "node scripts/fingerprint.mjs update"
   },
   "dependencies": {

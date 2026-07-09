@@ -1,28 +1,22 @@
 const { SourceSkips } = require("@expo/fingerprint");
 
 /**
- * Controls how the OTA `runtimeVersion` (policy: "fingerprint") is computed.
- * The fingerprint hashes the *native* layer so an OTA update only ever lands on
- * a binary it's actually compatible with. CI compares this hash against the
- * committed baselines in `common/src/mobileFingerprints.ts` (the last-shipped
- * builds) and alerts on Slack when it drifts — i.e. when a new store build is
- * required.
- * See `scripts/fingerprint.mjs` + `.github/workflows/mobile-fingerprint-check.yaml`.
+ * Defines OTA `runtimeVersion` (policy: "fingerprint"). CI compares this
+ * native-compatibility hash with live store baselines in
+ * `common/src/mobileFingerprints.gen.ts`; native changes need store builds.
  *
- * We skip inputs that do NOT change native/OTA compatibility, so they don't
- * needlessly churn the runtimeVersion and orphan shipped binaries from OTA:
- *   - PackageJsonScriptsAll: package.json scripts are build tooling.
- *   - ExpoConfigVersions: app `version` / `buildNumber` / `versionCode` are
- *     bumped every release but don't affect JS compatibility — an OTA must
- *     still be able to patch an already-shipped build after the repo version
- *     moves on.
+ * Skips only inputs that do not affect native/OTA compatibility:
+ *   - PackageJsonScriptsAll: build tooling.
+ *   - ExpoConfigVersions: release numbers change each build, but OTAs must
+ *     still patch already-shipped builds.
+ *   - GitIgnore: scopes file walks; cannot change native output.
  *
- * We intentionally do NOT skip dependencies or other native config: adding /
- * upgrading a native dep or changing plugins genuinely changes the binary, so
- * the fingerprint must move (a new store build is required) rather than letting
- * an OTA reference a native module the installed binary lacks.
+ * Keep dependencies and native config included so OTA never targets missing
+ * native modules. Changing skips changes hashes; ship with a store build.
  */
 module.exports = {
   sourceSkips:
-    SourceSkips.PackageJsonScriptsAll | SourceSkips.ExpoConfigVersions,
+    SourceSkips.PackageJsonScriptsAll |
+    SourceSkips.ExpoConfigVersions |
+    SourceSkips.GitIgnore,
 };

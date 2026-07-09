@@ -1,10 +1,8 @@
 name: Mobile Fingerprint Check
 
-# Compares the mobile EAS Update fingerprint (runtimeVersion) against the
-# committed baselines (common/src/mobileFingerprints.ts = the builds live in
-# the stores). On drift it posts to Slack: the native layer changed, so the change
-# cannot reach existing users over OTA and a new store build is required.
-# Non-blocking — it notifies, it does not fail the PR.
+# Checks current EAS runtime fingerprint against live baselines in
+# common/src/mobileFingerprints.gen.ts. Drift needs a store build; Slack notifies
+# without failing PRs.
 
 on:
   workflow_call:
@@ -35,18 +33,21 @@ jobs:
           OUT=$(bun run fingerprint:check 2>&1)
           CODE=$?
           echo "$OUT"
-          # The script exits 0 (no drift), 3 (drift), or anything else (failed to
-          # run). Drift has its own code so a generic Node failure — which exits 1
-          # — never masquerades as drift, and an infra failure never passes green.
+          # Exit 3 means drift; other nonzero codes are tool failures.
           case "$CODE" in
             0) DRIFT=false ;;
             3) DRIFT=true ;;
             *) echo "fingerprint check failed to run (exit $CODE)" >&2; exit 1 ;;
           esac
+          # Drift rows carry [needs-capture] / [awaiting-promote].
+          DETAILS=$(echo "$OUT" | grep -E ' -> ' || true)
+          NEEDS_CAPTURE=false
+          echo "$DETAILS" | grep -q '\[needs-capture\]' && NEEDS_CAPTURE=true
           {
             echo "drift=$DRIFT"
+            echo "needs_capture=$NEEDS_CAPTURE"
             echo "details<<__FP_EOF__"
-            echo "$OUT" | grep -E ' -> ' || true
+            echo "$DETAILS"
             echo "__FP_EOF__"
           } >> "$GITHUB_OUTPUT"
 
@@ -59,12 +60,22 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
           BRANCH: ${{ github.head_ref }}
           DETAILS: ${{ steps.fp.outputs.details }}
+          NEEDS_CAPTURE: ${{ steps.fp.outputs.needs_capture }}
         run: |
           if [ -z "$WEBHOOK" ]; then
             echo "No Slack webhook configured; skipping notification."
             exit 0
           fi
-          MSG=$(printf ':iphone: *Mobile native fingerprint changed* — a new App Store / Play Store build is required.\nThese changes cannot reach existing installs over OTA.\n\n*PR:* <%s|#%s %s>\n*Branch:* `%s`\n```\n%s\n```\nAfter the new build(s) are live in the App Store / Play Store, run `bun fingerprint:update <path-to-.ipa|.aab|.apk>` and commit/deploy promptly to clear this.' \
-            "$PR_URL" "$PR_NUMBER" "$PR_TITLE" "$BRANCH" "$DETAILS")
+          # Choose copy by whether a matching build was captured.
+          # $'...' emits newlines.
+          if [ "$NEEDS_CAPTURE" = "true" ]; then
+            HEADLINE=$':iphone: *Mobile native fingerprint changed* — a new App Store / Play Store build is required.\nThese changes cannot reach existing installs over OTA.'
+            FOOTER='At build time run `bun run fingerprint:capture <.ipa> <.aab>` (pass both platform artifacts; then they can be deleted). Once the build is live in the store, run `bun run fingerprint:promote` and commit/deploy promptly to clear this.'
+          else
+            HEADLINE=$':iphone: *Mobile build captured — awaiting store release.*\nThe native fingerprint is already recorded in `fingerprint-pending.gen.json`; existing installs just need this build to go live in the store.'
+            FOOTER='Once the build is live in the store, run `bun run fingerprint:promote` and commit/deploy promptly to clear this.'
+          fi
+          MSG=$(printf '%s\n\n*PR:* <%s|#%s %s>\n*Branch:* `%s`\n```\n%s\n```\n%s' \
+            "$HEADLINE" "$PR_URL" "$PR_NUMBER" "$PR_TITLE" "$BRANCH" "$DETAILS" "$FOOTER")
           PAYLOAD=$(jq -n --arg text "$MSG" '{text: $text}')
           curl -sS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$WEBHOOK"
