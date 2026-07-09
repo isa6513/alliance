@@ -6,8 +6,12 @@ export enum ActionActivityType {
   USER_COMPLETED = "user_completed",
   USER_WONT_COMPLETE = "user_wont_complete",
   /**
-   * For optional actions, the user has acknowledged the action and chosen to
-   * not have it show up in their home page. Not a terminal activity.
+   * The user acknowledged the action's card and chose to hide it from their
+   * home page (the dismiss button is offered on optional, away, and
+   * past-deadline cards). Think "notification marked as read": it only
+   * affects the user's own view — hides the card from their task list and
+   * mutes their reminders for this action. Not a terminal activity: a later
+   * completion or withdrawal supersedes it.
    */
   USER_DISMISSED = "user_dismissed",
   USER_SUBMITTED_FOLLOW_UP_FORM = "user_submitted_follow_up_form",
