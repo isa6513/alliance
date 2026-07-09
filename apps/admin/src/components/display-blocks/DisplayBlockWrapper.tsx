@@ -39,8 +39,8 @@ const stripManualFields = (
 
 const stripIdentityFields = <T extends Record<string, unknown>>(
   value: T,
-): Omit<T, "kind" | "id"> => {
-  const { kind: _kind, id: _id, ...rest } = value;
+): Omit<T, "kind" | "id" | "type"> => {
+  const { kind: _kind, id: _id, type: _type, ...rest } = value;
   return rest;
 };
 

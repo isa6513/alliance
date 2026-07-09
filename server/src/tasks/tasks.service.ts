@@ -9,13 +9,17 @@ import {
   type CityFieldValue,
   collectSourceFormIds,
   type CustomComponentField,
+  formSchema,
   FormSchema,
   type FormValue,
   isQuestionField,
   type ListField,
   Page,
 } from '@alliance/common/forms/form-schema';
-import { validateFormSchema } from '@alliance/common/forms/form-schema-validate';
+import {
+  type FormSchemaValidationError,
+  validateFormSchema,
+} from '@alliance/common/forms/form-schema-validate';
 import {
   type ConditionExtras,
   isElementCurrentlyVisible,
@@ -23,6 +27,7 @@ import {
   stripHiddenAnswers,
 } from '@alliance/common/forms/visibility';
 import type { Condition } from '@alliance/common/forms/visible-if-formula';
+import { R, type Result } from '@alliance/common/result';
 import { Temporal } from '@js-temporal/polyfill';
 import {
   BadRequestException,
@@ -134,10 +139,8 @@ export class TasksService {
   }
 
   async createForm(createFormDto: CreateFormDto): Promise<Form> {
-    this.assertSchemaValid(createFormDto.schema as unknown as FormSchema);
-    const snapshot = await this.formSnapshotService.findOrCreate(
-      createFormDto.schema,
-    );
+    const schema = this.parseSchemaOrThrow(createFormDto.schema);
+    const snapshot = await this.formSnapshotService.findOrCreate(schema);
     const form = await this.formRepository.save({
       title: createFormDto.title,
       formSnapshotId: snapshot.id,
@@ -147,14 +150,34 @@ export class TasksService {
     return form;
   }
 
-  private assertSchemaValid(schema: FormSchema): void {
-    const errors = validateFormSchema(schema);
+  private validateSchema(
+    schema: unknown,
+  ): Result<FormSchema, FormSchemaValidationError[]> {
+    const parsed = formSchema.safeParse(schema);
+    if (!parsed.success) {
+      return R.failure(
+        parsed.error.issues.map((issue) => ({
+          blockId: issue.path.join('.') || '<root>',
+          message: issue.message,
+        })),
+      );
+    }
+    const errors = validateFormSchema(parsed.data);
     if (errors.length > 0) {
+      return R.failure(errors);
+    }
+    return R.success(parsed.data);
+  }
+
+  private parseSchemaOrThrow(schema: unknown): FormSchema {
+    const validated = this.validateSchema(schema);
+    if (!validated.ok) {
       throw new BadRequestException({
         message: 'Invalid form schema',
-        errors,
+        errors: validated.error,
       });
     }
+    return validated.value;
   }
 
   async getForm(formId: number): Promise<Form> {
@@ -510,13 +533,9 @@ export class TasksService {
     }
     let snapshotChanged = false;
     if (updateFormDto.schema) {
-      this.assertSchemaValid(updateFormDto.schema as unknown as FormSchema);
-      this.stripContractFromSchema(
-        updateFormDto.schema as unknown as FormSchema,
-      );
-      const snapshot = await this.formSnapshotService.findOrCreate(
-        updateFormDto.schema,
-      );
+      const schema = this.parseSchemaOrThrow(updateFormDto.schema);
+      this.stripContractFromSchema(schema);
+      const snapshot = await this.formSnapshotService.findOrCreate(schema);
       if (snapshot.id !== form.formSnapshotId) {
         form.formSnapshotId = snapshot.id;
         form.formSnapshot = snapshot;
