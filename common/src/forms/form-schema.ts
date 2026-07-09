@@ -219,11 +219,26 @@ const fileFieldSchema = z.strictObject({
 });
 export type FileField = z.infer<typeof fileFieldSchema>;
 
+const actionShareUrlConfigSchema = z.strictObject({
+  actionId: z.number().optional(),
+});
+
+const externalShareUrlConfigSchema = z.strictObject({
+  externalTargetId: z.number().optional(),
+});
+
+export const customComponentConfigSchema = z.union([
+  actionShareUrlConfigSchema,
+  externalShareUrlConfigSchema,
+]);
+export type CustomComponentConfig = z.infer<typeof customComponentConfigSchema>;
+
+/** @deprecated do not add any new types of custom components */
 const customComponentFieldSchema = z.strictObject({
   ...baseFieldSchema.shape,
   kind: z.literal("custom"),
   componentId: z.string(),
-  componentConfig: z.record(z.string(), z.unknown()).optional(),
+  componentConfig: customComponentConfigSchema.optional(),
   autoExtractUserData: z
     .strictObject({ target: checkboxExtractionTargetSchema })
     .optional(),
