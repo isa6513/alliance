@@ -262,7 +262,7 @@ function OutreachPartnerPage() {
           <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-10 px-5 py-12 sm:px-8 md:py-16 lg:grid-cols-[0.72fr_1fr]">
             <div className="flex flex-col gap-4">
               <h2 className="font-serif text-3xl font-semibold text-zinc-950 sm:text-4xl">
-                Sign up as a potential outreach partner
+                Request a collaboration
               </h2>
               <p className="text-lg leading-relaxed text-zinc-700">
                 Tell us what you are working on, what kind of action might help,

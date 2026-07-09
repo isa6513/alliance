@@ -64,24 +64,24 @@ const InformationPage: React.FC = () => {
       icon: MapIcon,
     },
     {
-      title: "How groups work",
+      title: "About groups",
       description:
         "The Alliance is organized into groups that help members hold each other accountable.",
       href: href("/groups-guide"),
       icon: Users,
     },
     {
+      title: "About ambassadors",
+      description:
+        "How ambassadors help introduce the Alliance to new members.",
+      href: href("/ambassadors"),
+      icon: Handshake,
+    },
+    {
       title: "How to design actions",
       description: "A basic guide that the office uses to design actions.",
       href: href("/action-design"),
       icon: PenTool,
-    },
-    {
-      title: "Ambassador Program",
-      description:
-        "How ambassadors help the Alliance recruit reliable new members.",
-      href: href("/ambassadors"),
-      icon: Handshake,
     },
     {
       title: "Action updates",
