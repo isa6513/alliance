@@ -392,14 +392,14 @@ export function RenderField({
               return (
                 <TouchableOpacity
                   key={optIndex}
-                  className="flex-row items-center py-2"
+                  className="flex-row items-start py-2"
                   onPress={() => onChange?.(option.value)}
                   disabled={disabled}
                   activeOpacity={0.7}
                 >
                   <View
                     className={cn(
-                      "w-5 h-5 rounded-full border items-center justify-center mr-3",
+                      "w-5 h-5 mt-0.5 rounded-full border items-center justify-center mr-3",
                       selected
                         ? "border-green"
                         : hasError
