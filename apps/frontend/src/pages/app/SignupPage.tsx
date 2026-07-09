@@ -22,7 +22,6 @@ import { ChevronRight } from "lucide-react";
 import posthog from "posthog-js";
 import React, { useEffect, useMemo, useState } from "react";
 import { href, Link, useSearchParams } from "react-router";
-import AllianceIntroYouTubeEmbed from "../../components/AllianceIntroYouTubeEmbed";
 import ExamplePriorityCardList from "../../components/ExamplePriorityCardList";
 import FeaturedImpactCard from "../../components/FeaturedImpactCard";
 import Footer from "../../components/Footer";
@@ -30,7 +29,10 @@ import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import SignupForm from "../../components/SignupForm";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
 import { isFeatureEnabled } from "../../lib/config";
+import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
+import { exampleMemberTaskFormSchema } from "../../lib/exampleMemberTaskFormSchema";
 import { socialPreviewMeta } from "../../lib/socialPreviewMeta";
+import LargeActionCard from "./LargeActionCard";
 
 function formatSignupSocialProofNames(
   profiles: Pick<ProfileDto, "displayName">[],
@@ -238,7 +240,7 @@ const SignupPage: React.FC = () => {
                 className="inline-block text-green"
               />
               <span className="font-medium">{inviterProfile.displayName}</span>
-              <span> invited you to the Alliance.</span>
+              <span> invited you to the Alliance</span>
             </div>
           </div>
         );
@@ -279,12 +281,8 @@ const SignupPage: React.FC = () => {
                 <p className="text-lg md:text-xl text-zinc-500">
                   The Alliance is a global community of people who spend 15
                   minutes a week on coordinated actions to improve the world.
-                </p>
-                <p className="text-lg md:text-xl text-zinc-500 mt-3">
                   We&apos;re in an early, experimental phase—membership is
-                  invite-only. Past actions have included contacting local
-                  government officials, participating in studies, and providing
-                  feedback to nonprofits.
+                  invite-only.
                 </p>
                 {(signupSocialProofPending ||
                   (signupSocialProof?.profiles?.length ?? 0) > 0) && (
@@ -328,9 +326,6 @@ const SignupPage: React.FC = () => {
                     referralCode={referralCode}
                     disabled={isPreviewMode}
                   />
-                  <div className="mt-6">
-                    <AllianceIntroYouTubeEmbed />
-                  </div>
                 </div>
               </div>
             ) : (
@@ -370,6 +365,38 @@ const SignupPage: React.FC = () => {
 
         <section className="flex flex-col">
           <div className="flex flex-col gap-y-8 md:gap-y-14">
+            <div className="flex flex-col">
+              <h2 className="font-semibold text-2xl md:text-3xl font-serif mb-2">
+                Weekly online actions
+              </h2>
+              <div className="flex flex-col mb-6">
+                <p className="text-lg md:text-xl text-zinc-500">
+                  <Link to={href("/progress")}>
+                    Once you join, you&apos;ll complete actions on our web and
+                    mobile apps. Past actions have included contacting
+                    government officials, participating in studies, and
+                    providing feedback to nonprofits.
+                  </Link>
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-y-4">
+                <div className="p-1 md:p-2 bg-zinc-50 rounded-md">
+                  <LargeActionCard
+                    action={exampleMemberTaskAction}
+                    staticTaskFormSchema={exampleMemberTaskFormSchema}
+                    userRelation="none"
+                    onUpdateActionState={() => {}}
+                    onCompleteAction={() => {}}
+                    showDetails={false}
+                    className="pointer-events-none transform-[scale(0.9)] bg-white drop-shadow-xl drop-shadow-zinc-100"
+                  />
+                </div>
+                <p className="text-center text-zinc-500 text-base">
+                  Example task a member might see on the platform
+                </p>
+              </div>
+            </div>
             <div className="flex flex-col">
               <h2 className="font-semibold text-2xl md:text-3xl font-serif mb-2">
                 Easy, tangible impact
