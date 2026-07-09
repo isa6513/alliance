@@ -85,6 +85,7 @@ import {
   type SnapshotResponseGroup,
   SubmitFollowUpFormDto,
   SubmitFormDto,
+  UpdateFormDto,
 } from './form.dto';
 import { FormSnapshotService } from './formsnapshot.service';
 
@@ -525,31 +526,49 @@ export class TasksService {
 
   async updateForm(
     formId: number,
-    updateFormDto: CreateFormDto,
+    updateFormDto: UpdateFormDto,
   ): Promise<Form> {
     const form = await this.getForm(formId);
-    if (updateFormDto.title !== undefined) {
-      form.title = updateFormDto.title;
-    }
+
+    const nextTitle =
+      updateFormDto.title !== undefined ? updateFormDto.title : form.title;
+
+    let nextSnapshotId = form.formSnapshotId;
     let snapshotChanged = false;
     if (updateFormDto.schema) {
       const schema = this.parseSchemaOrThrow(updateFormDto.schema);
       this.stripContractFromSchema(schema);
       const snapshot = await this.formSnapshotService.findOrCreate(schema);
       if (snapshot.id !== form.formSnapshotId) {
-        form.formSnapshotId = snapshot.id;
-        form.formSnapshot = snapshot;
+        nextSnapshotId = snapshot.id;
         snapshotChanged = true;
       }
     }
-    const saved = await this.formRepository.save(form);
-    if (snapshotChanged) {
-      await this.formSnapshotService.recordHistorical(
-        saved.id,
-        saved.formSnapshotId,
+
+    // Conditional UPDATE rejects stale saves atomically.
+    const expected = updateFormDto.expectedFormSnapshotId;
+    const result = await this.formRepository
+      .createQueryBuilder()
+      .update(Form)
+      .set({ title: nextTitle, formSnapshotId: nextSnapshotId })
+      .where('id = :formId', { formId })
+      .andWhere(
+        expected === undefined ? '1 = 1' : '"formSnapshotId" = :expected',
+        expected === undefined ? {} : { expected },
+      )
+      .execute();
+
+    if (result.affected === 0) {
+      throw new ConflictException(
+        'This form was changed by someone else since you opened it.',
       );
     }
-    return this.transformImageUrls(await this.transformContractFields(saved));
+
+    if (snapshotChanged) {
+      await this.formSnapshotService.recordHistorical(formId, nextSnapshotId);
+    }
+
+    return this.getForm(formId);
   }
 
   private stripContractFromSchema(schema: FormSchema): void {

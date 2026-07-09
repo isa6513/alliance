@@ -38,6 +38,14 @@ export class CreateFormDto extends PickType(Form, ['title']) {
   schema: Record<string, unknown>;
 }
 
+export class UpdateFormDto extends CreateFormDto {
+  /** Expected snapshot id; stale values return 409. */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  expectedFormSnapshotId?: number;
+}
+
 export class SubmitFormDto extends PickType(FormResponse, [
   'answers',
   'phDistinctId',

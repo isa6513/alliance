@@ -13,7 +13,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 import type { Request as ExpressRequest, Response } from 'express';
 import { ActionActivityDto, OptOutActionDto } from 'src/actions/dto/action.dto';
 import { AuthService } from 'src/auth/auth.service';
@@ -48,6 +48,7 @@ import {
   MigrateResponseSnapshotsResultDto,
   SubmitFollowUpFormDto,
   SubmitFormDto,
+  UpdateFormDto,
 } from './form.dto';
 import { TasksService } from './tasks.service';
 
@@ -244,9 +245,14 @@ export class TasksController {
   @Put('updateForm/:formId')
   @UseGuards(AdminGuard)
   @ApiOkResponse({ type: FormDto })
+  @ApiResponse({
+    status: 409,
+    description:
+      'The form was changed by someone else since it was opened (optimistic-concurrency conflict).',
+  })
   async updateFormAdmin(
     @Param('formId', ParseIntPipe) formId: number,
-    @Body() body: CreateFormDto,
+    @Body() body: UpdateFormDto,
   ): Promise<FormDto> {
     return new FormDto(await this.tasksService.updateForm(+formId, body));
   }

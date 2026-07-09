@@ -275,6 +275,64 @@ describe('Tasks (e2e)', () => {
       .expect(404);
   });
 
+  it('rejects a stale form update that would clobber another edit', async () => {
+    const createResponse = await request(ctx.app.getHttpServer())
+      .post('/tasks/createForm')
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .send({ title: sampleSchema.title, schema: sampleSchema })
+      .expect(201);
+
+    const concFormId = createResponse.body.id as number;
+    const snapshot0 = createResponse.body.formSnapshotId as number;
+
+    const schemaV1 = structuredClone(sampleSchema);
+    schemaV1.title = 'Concurrency V1';
+
+    const updateV1 = await request(ctx.app.getHttpServer())
+      .put(`/tasks/updateForm/${concFormId}`)
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .send({
+        title: 'V1',
+        schema: schemaV1,
+        expectedFormSnapshotId: snapshot0,
+      })
+      .expect(200);
+
+    const snapshot1 = updateV1.body.formSnapshotId as number;
+    expect(snapshot1).not.toBe(snapshot0);
+
+    const schemaV2 = structuredClone(sampleSchema);
+    schemaV2.title = 'Concurrency V2';
+    await request(ctx.app.getHttpServer())
+      .put(`/tasks/updateForm/${concFormId}`)
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .send({
+        title: 'V2',
+        schema: schemaV2,
+        expectedFormSnapshotId: snapshot0,
+      })
+      .expect(409);
+
+    const updateV2 = await request(ctx.app.getHttpServer())
+      .put(`/tasks/updateForm/${concFormId}`)
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .send({
+        title: 'V2',
+        schema: schemaV2,
+        expectedFormSnapshotId: snapshot1,
+      })
+      .expect(200);
+    expect(updateV2.body.formSnapshotId).not.toBe(snapshot1);
+
+    const schemaV3 = structuredClone(sampleSchema);
+    schemaV3.title = 'Concurrency V3';
+    await request(ctx.app.getHttpServer())
+      .put(`/tasks/updateForm/${concFormId}`)
+      .set('Authorization', `Bearer ${ctx.adminAccessToken}`)
+      .send({ title: 'V3', schema: schemaV3 })
+      .expect(200);
+  });
+
   it('sums number field answers into aggregate views', async () => {
     const aggregateSchema: FormSchema = {
       title: 'Aggregate Number Form',

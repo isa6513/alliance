@@ -3345,6 +3345,14 @@ export type FormAggregateViewsDto = {
     }>;
 };
 
+export type UpdateFormDto = {
+    title: string;
+    schema: {
+        [key: string]: unknown;
+    };
+    expectedFormSnapshotId?: number;
+};
+
 export type CustomValidatorType = 'UploadedPhoto' | 'SignedContract' | 'AddedProfileDescription' | 'RepliedToForumPost' | 'RepliedToForumPostOrChild' | 'HasPhoneNumber' | 'IsPhoneNumberValid' | 'MemberTag' | 'MemberCommunity' | 'AnyCommunity' | 'CustomExpression';
 
 export type CustomValidatorTypeDto = {
@@ -11522,7 +11530,7 @@ export type TasksGetFormAggregateViewsResponses = {
 export type TasksGetFormAggregateViewsResponse = TasksGetFormAggregateViewsResponses[keyof TasksGetFormAggregateViewsResponses];
 
 export type TasksUpdateFormAdminData = {
-    body: CreateFormDto;
+    body: UpdateFormDto;
     path: {
         formId: number;
     };
@@ -11532,9 +11540,9 @@ export type TasksUpdateFormAdminData = {
 
 export type TasksUpdateFormAdminErrors = {
     /**
-     * Default error response for hey-api
+     * The form was changed by someone else since it was opened (optimistic-concurrency conflict).
      */
-    default: HeyApiError;
+    409: HeyApiError;
 };
 
 export type TasksUpdateFormAdminError = TasksUpdateFormAdminErrors[keyof TasksUpdateFormAdminErrors];
