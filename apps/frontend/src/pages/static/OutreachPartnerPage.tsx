@@ -28,20 +28,20 @@ const OUTREACH_CHANNELS = [
 
 const PARTNER_OFFERS = [
   {
-    title: "Educate our members on your cause",
-    body: "Help people who already want to do good understand the issue you work on and why it matters.",
+    title: "Educate members on your cause",
+    body: "Help people who already want to make a difference understand the issue you work on and why it matters.",
   },
   {
     title: "Get thoughtful feedback",
     body: "Invite members to review your website, actions, product, campaigns, messages, or other materials.",
   },
   {
-    title: "Engage or invite engagement",
-    body: "Ask members to follow, comment, share, test, attend, or invite others when there is a concrete way to help.",
+    title: "Invite engagement",
+    body: "Ask members to follow, comment, share, test, or attend something you are planning or doing.",
   },
   {
     title: "Help with data collection",
-    body: "Members can send surveys, fill out surveys, or help collect small pieces of information when the task is clear.",
+    body: "Members can fill out surveys, participate in studies, and collect other kinds of information.",
   },
 ] as const;
 
@@ -148,7 +148,7 @@ function OutreachPartnerPage() {
               <h1 className="font-serif text-4xl font-semibold leading-tight text-zinc-950 sm:text-5xl lg:text-5xl">
                 Introduce your cause to people who care
               </h1>
-              <p className="text-lg leading-relaxed text-zinc-700">
+              <p className="text-lg  text-zinc-700">
                 At the Alliance, our{" "}
                 <span className="font-semibold text-zinc-900">
                   {memberCount ? memberCount.toLocaleString() : ""}
@@ -157,17 +157,17 @@ function OutreachPartnerPage() {
                 each spend 15 minutes a week taking actions on our online
                 platform.
               </p>
-              <p className="text-lg leading-relaxed text-zinc-700">
+              <p className="text-lg  text-zinc-700">
                 For organizations working to address our priorities, we can
                 design a focused task within our weekly action program in which
                 our members learn about your work, give feedback, support a
                 campaign, or help with another clear request.
               </p>
-              <p className="text-lg leading-relaxed text-zinc-700">
-                In return, we ask partners to share the Alliance with more
-                people who want to make a difference.
+              <p className="text-lg  text-zinc-700">
+                In return, we ask partners to share the Alliance with their
+                audience.
               </p>
-              <p className="text-lg leading-relaxed text-zinc-700">
+              <p className="text-lg  text-zinc-700">
                 We have previously worked with organizations like{" "}
                 {PAST_PARTNERS.map((partner, index) => (
                   <React.Fragment key={partner.name}>
@@ -196,7 +196,7 @@ function OutreachPartnerPage() {
                   <h3 className="font-serif text-2xl font-semibold text-green-bg">
                     What we can do
                   </h3>
-                  <p className="mt-2 text-base leading-relaxed text-zinc-700">
+                  <p className="mt-2 text-base  text-zinc-700">
                     Run a focused action where members help with a clear, useful
                     task.
                   </p>
@@ -205,24 +205,12 @@ function OutreachPartnerPage() {
                   <h3 className="font-serif text-2xl font-semibold text-green-bg">
                     What we ask
                   </h3>
-                  <p className="mt-2 text-base leading-relaxed text-zinc-700">
+                  <p className="mt-2 text-base  text-zinc-700">
                     Share the Alliance through a newsletter, website, meeting,
                     event, social channel, or similar place.
                   </p>
                 </article>
               </div>
-
-              <article className="rounded-md border border-zinc-200 bg-white p-6">
-                <h3 className="font-serif text-2xl font-semibold text-green-bg">
-                  Example
-                </h3>
-                <p className="mt-2 text-base leading-relaxed text-zinc-700">
-                  A reforestation nonprofit could ask Alliance members to learn
-                  about local reforestation work and answer a few questions
-                  about their website design. Then, the nonprofit could
-                  introduce the Alliance to its newsletter readers.
-                </p>
-              </article>
             </div>
           </div>
         </section>
@@ -233,11 +221,9 @@ function OutreachPartnerPage() {
               <h2 className="font-serif text-3xl font-semibold text-zinc-950 sm:text-4xl">
                 How we can help
               </h2>
-              <p className="mt-3 text-lg leading-relaxed text-zinc-700">
-                Alliance members care about the world. Because they are
-                coordinated and used to taking structured actions, they make a
-                strong audience for thoughtful feedback, quick research, and
-                other practical help.
+              <p className="mt-3 text-lg  text-zinc-700">
+                We can run any kind of action that helps your organization.
+                These are a few common examples.
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -249,9 +235,7 @@ function OutreachPartnerPage() {
                   <h3 className="font-serif text-2xl font-semibold text-green-bg">
                     {offer.title}
                   </h3>
-                  <p className="mt-2 text-base leading-relaxed text-zinc-700">
-                    {offer.body}
-                  </p>
+                  <p className="mt-2 text-base  text-zinc-700">{offer.body}</p>
                 </article>
               ))}
             </div>
@@ -264,7 +248,7 @@ function OutreachPartnerPage() {
               <h2 className="font-serif text-3xl font-semibold text-zinc-950 sm:text-4xl">
                 Request a collaboration
               </h2>
-              <p className="text-lg leading-relaxed text-zinc-700">
+              <p className="text-lg  text-zinc-700">
                 Tell us what you are working on, what kind of action might help,
                 and how your organization could share the Alliance with people
                 who might want to join.
