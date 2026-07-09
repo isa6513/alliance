@@ -30,13 +30,8 @@ export interface LargeActionCardProps extends LargeActionCardPropsShared {
 }
 
 enum LargeActionCardState {
-  Minified = "minified",
   Default = "default",
-  Confirming = "confirming",
-  Completed = "completed",
-  Committed = "committed",
   Closed = "closed",
-  Declined = "declined",
 }
 
 const LargeActionCard: React.FC<LargeActionCardProps> = ({
@@ -101,7 +96,6 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
         className={cn(
           "p-4 sm:p-6 transition-all duration-300 w-full relative rounded-md",
           state === LargeActionCardState.Closed && "opacity-0 overflow-hidden",
-          state === LargeActionCardState.Minified && "pb-4",
           state !== LargeActionCardState.Closed && "opacity-100",
           className,
         )}

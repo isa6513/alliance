@@ -315,11 +315,11 @@ export function calculateAllCompletionData(params: {
     new Map<number, Map<number, UserActionRelationDetailDto>>(),
   );
 
-  function calculateCompletionData(
-    actionIds: UserActionSummaryDto[],
+  function completionDataForActions(
+    actionSummaries: UserActionSummaryDto[],
   ): CompletionData {
     function* observe(): Generator<CompletionObservation> {
-      for (const action of actionIds) {
+      for (const action of actionSummaries) {
         const relationDetailByUser = relationDetailByActionThenUser.get(
           action.id,
         );
@@ -334,7 +334,7 @@ export function calculateAllCompletionData(params: {
 
     return {
       ...summarizeCompletion(observe()),
-      nActions: actionIds.length,
+      nActions: actionSummaries.length,
     };
   }
 
@@ -345,12 +345,12 @@ export function calculateAllCompletionData(params: {
       memberActionDeadline: number;
     } =>
       action.memberActionDeadline !== null &&
-      calculateCompletionData([action]).nTotal > 0,
+      completionDataForActions([action]).nTotal > 0,
   );
   if (actionsWithUserRelations.length === 0) {
     return {
       previous: undefined,
-      current: calculateCompletionData([]),
+      current: completionDataForActions([]),
     };
   }
 
@@ -364,7 +364,7 @@ export function calculateAllCompletionData(params: {
     if (previousActions.length === 0) {
       return {
         previous: undefined,
-        current: calculateCompletionData([]),
+        current: completionDataForActions([]),
       };
     }
 
@@ -377,7 +377,7 @@ export function calculateAllCompletionData(params: {
         latestPreviousDeadline - actionDeadlineWindowMs,
     );
     return {
-      previous: calculateCompletionData(selectedPreviousActions),
+      previous: completionDataForActions(selectedPreviousActions),
       current: undefined,
     };
   }
@@ -392,6 +392,6 @@ export function calculateAllCompletionData(params: {
 
   return {
     previous: undefined,
-    current: calculateCompletionData(currentActions),
+    current: completionDataForActions(currentActions),
   };
 }

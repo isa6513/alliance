@@ -5,6 +5,10 @@
 export enum ActionActivityType {
   USER_COMPLETED = "user_completed",
   USER_WONT_COMPLETE = "user_wont_complete",
+  /**
+   * For optional actions, the user has acknowledged the action and chosen to
+   * not have it show up in their home page. Not a terminal activity.
+   */
   USER_DISMISSED = "user_dismissed",
   USER_SUBMITTED_FOLLOW_UP_FORM = "user_submitted_follow_up_form",
 }

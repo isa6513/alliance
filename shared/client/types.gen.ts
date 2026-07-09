@@ -1881,11 +1881,6 @@ export type ActionDto = {
     awayStatus?: TaskAwayStatus;
     reqAuthenticated?: boolean;
     authors?: Array<ProfileDto>;
-    /**
-     * Deprecated alias for `onboarding`.
-     * @deprecated
-     */
-    everyoneShouldComplete?: boolean;
 };
 
 export type GeneralUpdateDto = {
@@ -2280,11 +2275,6 @@ export type CreateActionDto = {
     customStatValue?: number;
     customStatGoal?: number;
     followUpForms: Array<FollowUpForm>;
-    /**
-     * Deprecated alias for `onboarding`.
-     * @deprecated
-     */
-    everyoneShouldComplete?: boolean;
     suiteId?: number | null;
     authorIds?: Array<number>;
 };
@@ -2383,11 +2373,6 @@ export type UpdateActionDto = {
     customStatValue?: number;
     customStatGoal?: number;
     followUpForms?: Array<FollowUpForm>;
-    /**
-     * Deprecated alias for `onboarding`.
-     * @deprecated
-     */
-    everyoneShouldComplete?: boolean;
     suiteId?: number | null;
     authorIds?: Array<number>;
 };
@@ -2692,11 +2677,6 @@ export type ExportActionDto = {
     authors?: Array<User>;
     taskForm?: Form;
     reminderGroups?: Array<ReminderGroup>;
-    /**
-     * Deprecated alias for `onboarding`.
-     * @deprecated
-     */
-    everyoneShouldComplete?: boolean;
 };
 
 export type PasteJsonDto = {

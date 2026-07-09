@@ -2870,7 +2870,7 @@ export class ActionsService {
         : never]: IsRelation<(typeof actionCols)[K]> extends true
         ? K
         : undefined;
-    }[Exclude<keyof typeof actionCols, 'everyoneShouldComplete'>];
+    }[keyof typeof actionCols];
     type _ensure_ImportActionDto_noRelations = Assert<
       _actionCols_relations extends undefined ? true : false
     >;

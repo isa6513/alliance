@@ -286,16 +286,6 @@ export class ActionDto extends PickType(Action, [
   @Type(() => ProfileDto)
   authors?: ProfileDto[];
 
-  /**
-   * @deprecated Merged into `onboarding`. Kept as an alias so older clients
-   * that still read the field keep working; it mirrors `onboarding`.
-   */
-  @ApiPropertyOptional({
-    deprecated: true,
-    description: 'Deprecated alias for `onboarding`.',
-  })
-  everyoneShouldComplete?: boolean;
-
   constructor(
     action: Action,
     extra?: {
@@ -331,8 +321,6 @@ export class ActionDto extends PickType(Action, [
     this.usersJoined = action.usersJoined;
     this.usersCompleted = action.usersCompleted || 0;
     this.onboarding = action.onboarding;
-    // Deprecated alias; mirrors `onboarding` for older clients.
-    this.everyoneShouldComplete = action.onboarding;
     this.archived = action.archived;
     this.priority = action.priority;
     this.optional = action.optional;
@@ -394,7 +382,6 @@ export class CreateActionDto extends PickType(ActionDto, [
   'customStatValue',
   'customStatGoal',
   'followUpForms',
-  'everyoneShouldComplete',
 ]) {
   @ApiPropertyOptional({
     type: Number,
@@ -819,17 +806,6 @@ export class ExportActionDto extends OmitType(Action, [
   @IsOptional()
   reminderGroups?: ReminderGroup[];
 
-  /**
-   * @deprecated Merged into `onboarding`. Kept as an alias for older clients;
-   * mirrors `onboarding`.
-   */
-  @ApiPropertyOptional({
-    deprecated: true,
-    description: 'Deprecated alias for `onboarding`.',
-  })
-  @IsOptional()
-  everyoneShouldComplete?: boolean;
-
   constructor(
     action?: Action,
     extra?: {
@@ -842,8 +818,6 @@ export class ExportActionDto extends OmitType(Action, [
       return;
     }
     Object.assign(this, action);
-    // Deprecated alias; mirrors `onboarding` for older clients.
-    this.everyoneShouldComplete = action.onboarding;
     this.taskForm = extra?.taskForm;
     this.reminderGroups = extra?.reminderGroups;
   }

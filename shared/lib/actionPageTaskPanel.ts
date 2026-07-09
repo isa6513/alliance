@@ -137,12 +137,9 @@ export function getActionPageTaskPanelState(params: {
     return ActionPageTaskPanelState.OnboardingSignContractFirst;
   }
 
-  if (
-    !userRelation ||
-    !action ||
-    (!action.canParticipate && !action.preventCompletion)
-  )
+  if (!userRelation) {
     return ActionPageTaskPanelState.MissingDataOrNotActive;
+  }
 
   if (userRelation === "completed") {
     return ActionPageTaskPanelState.Completed;
