@@ -22,7 +22,10 @@ import Footer from "../../components/Footer";
 import { useWhiteBackground } from "../../components/HtmlBackgroundManager";
 import PrelaunchNavbar from "../../components/PrelaunchNavbar";
 import { FEATURED_IMPACT_ACTIONS } from "../../content/featuredImpactActions";
+import { exampleMemberTaskAction } from "../../lib/exampleMemberTaskAction";
+import { exampleMemberTaskFormSchema } from "../../lib/exampleMemberTaskFormSchema";
 import { socialPreviewMeta } from "../../lib/socialPreviewMeta";
+import LargeActionCard from "../app/LargeActionCard";
 import {
   LANDING_PAGE_STACK,
   LANDING_QUOTES_COL,
@@ -248,6 +251,27 @@ const PrelaunchLandingPage: React.FC = () => {
                 content="Alliance members complete actions on our online platform.
                 Participation currently requires a weekly commitment of 15 minutes."
               ></HowItWorksCard>
+            </div>
+            <div className="flex flex-col mt-4 gap-8 lg:gap-16">
+              <p className={SUBTITLE_CLASS}>
+                Members complete actions on our web and mobile apps.
+              </p>
+              <div className="flex flex-col gap-4">
+                <div className="p-2 md:p-4 lg:p-10 bg-green/5 rounded-md">
+                  <LargeActionCard
+                    action={exampleMemberTaskAction}
+                    staticTaskFormSchema={exampleMemberTaskFormSchema}
+                    userRelation="none"
+                    onUpdateActionState={() => {}}
+                    onCompleteAction={() => {}}
+                    showDetails={false}
+                    className="pointer-events-none transform-[scale(0.9)] bg-white drop-shadow-xl drop-shadow-zinc-100"
+                  />
+                </div>
+                <p className="text-center text-zinc-500 text-base">
+                  Example task a member might see on the platform
+                </p>
+              </div>
             </div>
             <div className="flex flex-col mt-4 gap-8 lg:gap-16">
               <p className={SUBTITLE_CLASS}>
