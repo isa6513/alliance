@@ -324,3 +324,24 @@ export function computeShouldParticipate(params: {
     includeDismissed,
   });
 }
+
+/**
+ * "Expected and able" recipient predicate: {@link computeShouldParticipate}
+ * AND not away at any point during the member-action window. Single source
+ * for every consumer of the participation roster — notification recipients
+ * (`ActionEventRecipientService`) and suite stats (`ActionsService`) — so a
+ * user the roster/pill counts as away is consistently excluded everywhere.
+ * `user` must have `awayRanges` loaded.
+ */
+export function computeIsParticipatingRecipient(
+  params: Parameters<typeof computeShouldParticipate>[0],
+): boolean {
+  const { user, eventDate, deadlineDate } = params;
+  return (
+    computeShouldParticipate(params) &&
+    !user.isAwayAtAnyPointInRange({
+      startDate: eventDate,
+      endDate: deadlineDate,
+    })
+  );
+}

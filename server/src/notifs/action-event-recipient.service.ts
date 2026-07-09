@@ -16,7 +16,7 @@ import { CommunityService } from 'src/community/community.service';
 import { Community } from 'src/community/entities/community.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { Tag } from 'src/user/entities/tag.entity';
-import { computeShouldParticipate } from 'src/utils/action-user';
+import { computeIsParticipatingRecipient } from 'src/utils/action-user';
 import { In, type Repository } from 'typeorm';
 import { ActionActivity } from '../actions/entities/action-activity.entity';
 import {
@@ -195,22 +195,17 @@ export class ActionEventRecipientService {
       const usersDismissed = dismissedByAction.get(action.id) ?? new Set();
       const cohortMemberIds = await cohortByAction.get(action.id)!;
 
-      const eligible = allUsers.filter(
-        (user) =>
-          computeShouldParticipate({
-            eventDate: event.date,
-            deadlineDate: deadlineDate,
-            cohortMemberIds,
-            user,
-            userDismissed: usersDismissed.has(user.id),
-            onboarding: action.onboarding,
-            includeSuspended,
-            includeDismissed,
-          }) &&
-          !user.isAwayAtAnyPointInRange({
-            startDate: event.date,
-            endDate: deadlineDate,
-          }),
+      const eligible = allUsers.filter((user) =>
+        computeIsParticipatingRecipient({
+          user,
+          eventDate: event.date,
+          deadlineDate,
+          cohortMemberIds,
+          userDismissed: usersDismissed.has(user.id),
+          onboarding: action.onboarding,
+          includeSuspended,
+          includeDismissed,
+        }),
       );
 
       result.set(action.id, eligible);
@@ -318,11 +313,11 @@ export class ActionEventRecipientService {
 
     return users
       .filter((user) =>
-        computeShouldParticipate({
+        computeIsParticipatingRecipient({
+          user: idToUser.get(user.id)!,
           eventDate: event.date,
           deadlineDate: deadlineEvent?.date ?? null,
           cohortMemberIds: participationCohortMemberIds,
-          user: idToUser.get(user.id)!,
           userDismissed: usersDismissed.has(user.id),
           onboarding: event.action.onboarding,
         }),

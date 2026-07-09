@@ -66,9 +66,9 @@ import {
 import {
   computeContractSignedAfterOnboardingStart,
   computeIsAwayDuringAnyOfMemberAction,
+  computeIsParticipatingRecipient,
   computeIsTaggedOrInManualCohort,
   computeMemberActionAwayStatus,
-  computeShouldParticipate,
   computeShouldParticipateInAction,
 } from 'src/utils/action-user';
 import { CachedFilter } from 'src/utils/cached-filter';
@@ -3420,20 +3420,15 @@ export class ActionsService {
             action.cohortExpression,
           );
 
-        const baseUsers = baseCandidates.filter(
-          (user) =>
-            computeShouldParticipate({
-              eventDate: event.date,
-              deadlineDate: deadlineDate,
-              cohortMemberIds,
-              user,
-              userDismissed: dismissedSet.has(user.id),
-              onboarding: action.onboarding,
-            }) &&
-            !user.isAwayAtAnyPointInRange({
-              startDate: event.date,
-              endDate: deadlineDate,
-            }),
+        const baseUsers = baseCandidates.filter((user) =>
+          computeIsParticipatingRecipient({
+            eventDate: event.date,
+            deadlineDate: deadlineDate,
+            cohortMemberIds,
+            user,
+            userDismissed: dismissedSet.has(user.id),
+            onboarding: action.onboarding,
+          }),
         );
 
         baseUsersByAction.set(action.id, baseUsers);

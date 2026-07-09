@@ -22,6 +22,10 @@ import {
   ContractEventType,
 } from 'src/user/entities/contract-event.entity';
 import { Tag } from 'src/user/entities/tag.entity';
+import {
+  UserAwayRange,
+  UserAwayRangeReason,
+} from 'src/user/entities/user-away-range.entity';
 import { User } from 'src/user/entities/user.entity';
 import type { Repository } from 'typeorm';
 import {
@@ -45,6 +49,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
   let communityRepo: Repository<Community>;
   let formRepo: Repository<Form>;
   let formResponseRepo: Repository<FormResponse>;
+  let awayRangeRepo: Repository<UserAwayRange>;
 
   const baseMessages = {
     emailMessage: 'Reminder for #{firstname} on #{action}',
@@ -71,6 +76,7 @@ describe('ActionEventNotifWorker (e2e)', () => {
     communityRepo = ctx.dataSource.getRepository(Community);
     formRepo = ctx.dataSource.getRepository(Form);
     formResponseRepo = ctx.dataSource.getRepository(FormResponse);
+    awayRangeRepo = ctx.dataSource.getRepository(UserAwayRange);
   });
 
   afterAll(async () => {
@@ -578,6 +584,153 @@ describe('ActionEventNotifWorker (e2e)', () => {
     expect(notifs).toHaveLength(0);
 
     await userRepo.delete({ id: suspendedCustomUser.id });
+  });
+
+  it('excludes users away during the member-action window, even if back at send time', async () => {
+    const now = Date.now();
+    const primaryUser = await getPrimaryUser();
+
+    // Away for a stretch mid-phase, but present again by the time the
+    // reminder is sent. The roster/pill treat window-overlap away as "not
+    // required", so the reminder must too — the send-time isUserIdAway check
+    // alone would let this user through.
+    const awayUser = await userRepo.save(
+      userRepo.create({
+        email: `${uniqueName('custom-away')}@example.com`,
+        password: 'pass',
+        name: 'Away Custom User',
+        tags: primaryUser.tags,
+        contractEvents: [
+          {
+            type: ContractEventType.SIGNED,
+            date: new Date(now - 7 * 24 * 60 * 60 * 1000),
+            automatic: false,
+            contractId: ctx.defaultContractId,
+          } as ContractEvent,
+        ],
+        textNotifsForActions: true,
+        phoneNumber: '+15555550202',
+        phoneNumberValidated: true,
+        emailNotifsForActions: false,
+      }),
+    );
+    await awayRangeRepo.save(
+      awayRangeRepo.create({
+        userId: awayUser.id,
+        startDate: new Date(now - 90 * 60 * 1000), // away 90min ago...
+        endDate: new Date(now - 30 * 60 * 1000), // ...until 30min ago
+        reason: UserAwayRangeReason.VACATION,
+      }),
+    );
+    const awayUserWithTags = await userRepo.findOneOrFail({
+      where: { id: awayUser.id },
+      relations: { tags: true },
+    });
+
+    const { action, memberEvent } = await createActionWithMemberEvent({
+      name: uniqueName('custom-cohort-away-mid-phase'),
+      eventDate: new Date(now - 2 * 60 * 60 * 1000), // phase started 2 hours ago
+    });
+    const deadlineEvent = await eventRepo.save(
+      eventRepo.create({
+        title: 'Deadline',
+        description: 'desc',
+        newStatus: ActionStatus.Resolution,
+        date: new Date(now + 60 * 60 * 1000), // deadline 1 hour from now
+        action,
+      }),
+    );
+
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.Custom,
+      {
+        users: [awayUserWithTags],
+        sendAtAbsolute: new Date(now - 5 * 60 * 1000),
+        deadlineEvent,
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    expect(notifs).toHaveLength(0);
+
+    await userRepo.delete({ id: awayUser.id });
+  });
+
+  it('sends reminders to users whose away range misses the member-action window', async () => {
+    const now = Date.now();
+    const primaryUser = await getPrimaryUser();
+
+    // Positive control for the window-overlap exclusion: away well before the
+    // phase started, present throughout it — must still be reminded.
+    const previouslyAwayUser = await userRepo.save(
+      userRepo.create({
+        email: `${uniqueName('custom-was-away')}@example.com`,
+        password: 'pass',
+        name: 'Previously Away Custom User',
+        tags: primaryUser.tags,
+        contractEvents: [
+          {
+            type: ContractEventType.SIGNED,
+            date: new Date(now - 7 * 24 * 60 * 60 * 1000),
+            automatic: false,
+            contractId: ctx.defaultContractId,
+          } as ContractEvent,
+        ],
+        textNotifsForActions: true,
+        phoneNumber: '+15555550203',
+        phoneNumberValidated: true,
+        emailNotifsForActions: false,
+      }),
+    );
+    await awayRangeRepo.save(
+      awayRangeRepo.create({
+        userId: previouslyAwayUser.id,
+        startDate: new Date(now - 5 * 24 * 60 * 60 * 1000), // away 5 days ago...
+        endDate: new Date(now - 4 * 24 * 60 * 60 * 1000), // ...until 4 days ago
+        reason: UserAwayRangeReason.VACATION,
+      }),
+    );
+    const userWithTags = await userRepo.findOneOrFail({
+      where: { id: previouslyAwayUser.id },
+      relations: { tags: true },
+    });
+
+    const { action, memberEvent } = await createActionWithMemberEvent({
+      name: uniqueName('custom-cohort-away-before-phase'),
+      eventDate: new Date(now - 2 * 60 * 60 * 1000),
+    });
+    const deadlineEvent = await eventRepo.save(
+      eventRepo.create({
+        title: 'Deadline',
+        description: 'desc',
+        newStatus: ActionStatus.Resolution,
+        date: new Date(now + 60 * 60 * 1000),
+        action,
+      }),
+    );
+
+    const reminderGroup = await createReminderGroup(
+      memberEvent,
+      ReminderGroupTimingMode.Absolute,
+      ReminderCohortType.Custom,
+      {
+        users: [userWithTags],
+        sendAtAbsolute: new Date(now - 5 * 60 * 1000),
+        deadlineEvent,
+      },
+    );
+
+    await worker.dispatchDueNotifs();
+
+    const notifs = await fetchNotifsForGroup(reminderGroup);
+    expect(notifs).toHaveLength(1);
+    expect(notifs[0].user.id).toBe(previouslyAwayUser.id);
+
+    await userRepo.delete({ id: previouslyAwayUser.id });
   });
 
   it('sends reminders only to members of a custom cohort', async () => {
