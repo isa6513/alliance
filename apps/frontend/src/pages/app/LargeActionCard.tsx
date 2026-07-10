@@ -1,24 +1,25 @@
 import type { FormSchema } from "@alliance/common/forms/form-schema";
-import { useCallback, useEffect, useState, type RefObject } from "react";
-import { href, Link, useNavigate } from "react-router";
-import { cn } from "@alliance/shared/styles/util";
-import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
-import ActionTaskPanel from "../../components/ActionTaskPanel";
-import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
-import TaskTimeInfo from "./TaskTimeInfo";
-import { ArrowRight, ChevronRight } from "lucide-react";
-import { useAuth } from "../../lib/AuthContext";
+import { UserActionRelation } from "@alliance/shared/client";
+import { mustSignContractFirst } from "@alliance/shared/lib/actionPageTaskPanel";
 import { taskHeaders } from "@alliance/shared/lib/copy";
 import {
   getNextEvent,
   LargeActionCardPropsShared,
 } from "@alliance/shared/lib/largeActionCard";
-import { CardStyle } from "@alliance/shared/styles/card";
-import Card from "@alliance/sharedweb/ui/Card";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
-import { UserActionRelation } from "@alliance/shared/client";
+import { CardStyle } from "@alliance/shared/styles/card";
+import { cn } from "@alliance/shared/styles/util";
+import Button, { ButtonColor } from "@alliance/sharedweb/ui/Button";
+import Card from "@alliance/sharedweb/ui/Card";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useState, type RefObject } from "react";
+import { href, Link, useNavigate } from "react-router";
+import ActionTaskPanel from "../../components/ActionTaskPanel";
+import { useAuth } from "../../lib/AuthContext";
+import ActionCompletedBarWithInfo from "./ActionCompletedBarWithInfo";
+import TaskTimeInfo from "./TaskTimeInfo";
 
 export interface LargeActionCardProps extends LargeActionCardPropsShared {
   showDetails?: boolean;
@@ -48,8 +49,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const contractSigned = user?.hasActiveContract ?? false;
-  const mustSignContractFirst =
-    action.onboarding && !contractSigned && !action.isContractSigningAction;
+  const showSignContractFirst = mustSignContractFirst(action, contractSigned);
 
   const [state, setState] = useState<LargeActionCardState>(
     LargeActionCardState.Default,
@@ -137,7 +137,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
             textSize="base"
           />
           <div className="mt-6 border-t border-zinc-200 pt-6">
-            {mustSignContractFirst && (
+            {showSignContractFirst && (
               <div className="mb-4 flex flex-row justify-between items-center gap-x-2 rounded-md border border-zinc-200 bg-zinc-50 p-4">
                 <p>{taskHeaders.actionPage.onboardingSignContractFirst}</p>
                 <Link
@@ -155,7 +155,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               onCompleteAction={handleCompleteAction}
               onOptOutAction={handleUpdateActionState}
               scrollContainerRef={scrollContainerRef}
-              disabled={mustSignContractFirst}
+              disabled={showSignContractFirst}
               staticTaskFormSchema={staticTaskFormSchema}
             />
           </div>

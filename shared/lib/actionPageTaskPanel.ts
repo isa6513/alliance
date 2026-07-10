@@ -95,6 +95,20 @@ export function cardStylesForState(
   return cardStylesByDisabled[stateIsDisabled[state]];
 }
 
+/**
+ * Onboarding actions stay locked until the member signs the contract — except
+ * the contract-signing action itself. Single source for the action-page panel
+ * state below and the large card's inline "sign the contract first" banner.
+ */
+export function mustSignContractFirst(
+  action: Pick<ActionDto, "onboarding" | "isContractSigningAction">,
+  contractSigned: boolean,
+): boolean {
+  return (
+    action.onboarding && !contractSigned && !action.isContractSigningAction
+  );
+}
+
 export function getActionPageTaskPanelState(params: {
   action: ActionDto;
   userRelation: UserActionRelation | null;
@@ -133,7 +147,7 @@ export function getActionPageTaskPanelState(params: {
   if (!action.canParticipate && !action.preventCompletion)
     return ActionPageTaskPanelState.NotAssigned;
 
-  if (action.onboarding && !contractSigned && !action.isContractSigningAction) {
+  if (mustSignContractFirst(action, contractSigned)) {
     return ActionPageTaskPanelState.OnboardingSignContractFirst;
   }
 
