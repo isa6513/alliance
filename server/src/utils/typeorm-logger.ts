@@ -24,6 +24,9 @@ const dbSlowQueryDurationSeconds = new client.Histogram({
 register.registerMetric(dbQueryTotal);
 register.registerMetric(dbSlowQueryDurationSeconds);
 
+/** Keep billed PostHog events to the slow-query tail. */
+const POSTHOG_SLOW_QUERY_MS = 500;
+
 function getQueryType(query: string): string {
   const firstWord = query.trim().split(/\s+/)[0]?.toUpperCase();
   if (firstWord === 'SELECT') return 'SELECT';
@@ -104,6 +107,7 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
     dbSlowQueryDurationSeconds.labels(type, source).observe(time / 1000);
 
     if (!this.client) return;
+    if (time < POSTHOG_SLOW_QUERY_MS) return;
 
     const ctx = requestContext.getStore();
 
