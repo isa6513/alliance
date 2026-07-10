@@ -61,6 +61,7 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
       sql: query,
       params: this.safeParams(parameters),
       error: error instanceof Error ? error.message : error,
+      handler: ctx?.handler,
       request_id: ctx?.requestId,
       request_method: ctx?.method,
       request_url: ctx?.url,
@@ -69,47 +70,16 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
   }
 
   logQuerySlow(time: number, query: string) {
-    const obj: any = {};
-    Error.captureStackTrace(obj, this.logQuerySlow);
-    const stack: string = obj.stack;
-
-    const serviceStackLines = stack
-      .split('\n')
-      .filter((line) => line.includes('.service.ts'))
-      .join('\n')
-      .trim();
-
-    const controllerStackLines = stack
-      .split('\n')
-      .filter((line) => line.includes('controller'))
-      .join('\n')
-      .trim();
-
-    let shortServiceName = serviceStackLines.substring(
-      0,
-      serviceStackLines.indexOf('.service.ts'),
-    );
-    shortServiceName = shortServiceName.substring(
-      shortServiceName.lastIndexOf('/') + 1,
-    );
-
-    let shortControllerName = controllerStackLines.substring(
-      0,
-      controllerStackLines.indexOf('.controller.ts'),
-    );
-    shortControllerName = shortControllerName.substring(
-      shortControllerName.lastIndexOf('/') + 1,
-    );
-
-    const source = shortServiceName || shortControllerName || 'unknown';
+    const ctx = requestContext.getStore();
+    // Route pattern, not the raw URL — this is a Prometheus label and must
+    // stay bounded-cardinality. Cron/startup queries have no request context.
+    const source = ctx ? (ctx.route ?? 'http') : 'background';
 
     const type = getQueryType(query);
     dbSlowQueryDurationSeconds.labels(type, source).observe(time / 1000);
 
     if (!this.client) return;
     if (time < POSTHOG_SLOW_QUERY_MS) return;
-
-    const ctx = requestContext.getStore();
 
     captureEvent({
       client: this.client,
@@ -119,9 +89,8 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
         $process_person_profile: false,
         durationMs: time,
         sql: query,
-        full_trace: stack,
-        service_trace: serviceStackLines,
-        controller_trace: controllerStackLines,
+        source,
+        handler: ctx?.handler,
         request_id: ctx?.requestId,
         request_method: ctx?.method,
         request_url: ctx?.url,
