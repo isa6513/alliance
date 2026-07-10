@@ -46,6 +46,7 @@ import {
   type UserLocationDisplayValue,
 } from "@alliance/shared/formrenderer";
 import {
+  canSubmitWithdrawal,
   WITHDRAWAL_OPTION_LABELS,
   WITHDRAWAL_OPTIONS,
   type ActionWithdrawal,
@@ -1412,7 +1413,7 @@ const FormRenderer = ({
     onAbandonAction?.({
       outOfTime: withdrawalOption === "out_of_time",
       isMoral: withdrawalOption === "moral",
-      reason: customReason,
+      reason: customReason.trim(),
       partialFormData: submissionPayload,
     });
     setWithdrawOpen(false);
@@ -1676,9 +1677,7 @@ const FormRenderer = ({
               size={ButtonSize.Large}
               disabled={
                 submitting ||
-                withdrawalOption === null ||
-                (withdrawalOption === "other" &&
-                  customReason.trim().length === 0)
+                !canSubmitWithdrawal(withdrawalOption, customReason)
               }
               title="Withdraw"
             />

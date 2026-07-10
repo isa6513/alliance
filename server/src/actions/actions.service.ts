@@ -1322,6 +1322,9 @@ export class ActionsService {
     userId: number,
     withdrawal: { reason: string; outOfTime: boolean; isMoral: boolean },
   ): Promise<ActionActivity> {
+    if (!withdrawal.outOfTime && withdrawal.reason.trim().length === 0) {
+      throw new BadRequestException('A withdrawal reason is required');
+    }
     return this.createActionActivity({
       actionId,
       userId,

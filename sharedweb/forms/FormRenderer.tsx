@@ -44,6 +44,7 @@ import {
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
 import {
+  canSubmitWithdrawal,
   WITHDRAWAL_OPTION_LABELS,
   WITHDRAWAL_OPTIONS,
   type ActionWithdrawal,
@@ -1371,7 +1372,7 @@ const FormRenderer = ({
     onAbandonAction?.({
       outOfTime: withdrawalOption === "out_of_time",
       isMoral: withdrawalOption === "moral",
-      reason: customReason,
+      reason: customReason.trim(),
       partialFormData: submissionPayload,
     });
     setDropdownOpen(false);
@@ -1839,6 +1840,10 @@ const FormRenderer = ({
                     <BaseButton
                       variant={BaseButtonVariant.Black}
                       onClick={handleAbandon}
+                      disabled={
+                        submitting ||
+                        !canSubmitWithdrawal(withdrawalOption, customReason)
+                      }
                     >
                       Withdraw
                     </BaseButton>

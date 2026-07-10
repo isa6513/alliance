@@ -895,6 +895,9 @@ export class TasksService {
     withdrawal: { reason: string; outOfTime: boolean; isMoral: boolean },
     partialFormData: SubmitFormDto,
   ) {
+    if (!withdrawal.outOfTime && withdrawal.reason.trim().length === 0) {
+      throw new BadRequestException('A withdrawal reason is required');
+    }
     const form = await this.getForm(formId);
     const user = await this.userService.findOneOrFail(userId);
 
