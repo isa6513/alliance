@@ -116,6 +116,7 @@ export class AppTypeOrmLogger implements TypeOrmLogger {
       distinctId: ctx?.userId ? `user:${ctx.userId}` : 'server',
       event: AnalyticsEvent.DbSlowQuery,
       properties: {
+        $process_person_profile: false,
         durationMs: time,
         sql: query,
         full_trace: stack,
