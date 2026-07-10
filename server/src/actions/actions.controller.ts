@@ -142,7 +142,7 @@ export class ActionsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: OptOutActionDto,
   ): Promise<ActionActivityDto> {
-    const activity = await this.actionsService.optoutAction(
+    const activity = await this.actionsService.withdrawFromAction(
       id,
       req.user.sub,
       body.reason,

@@ -16,7 +16,7 @@ import { CommunityService } from 'src/community/community.service';
 import { Community } from 'src/community/entities/community.entity';
 import { FormResponse } from 'src/tasks/entities/formresponse.entity';
 import { Tag } from 'src/user/entities/tag.entity';
-import { computeIsParticipatingRecipient } from 'src/utils/action-user';
+import { computeIsAssignedAndPresent } from 'src/utils/action-user';
 import { In, type Repository } from 'typeorm';
 import { ActionActivity } from '../actions/entities/action-activity.entity';
 import {
@@ -196,7 +196,7 @@ export class ActionEventRecipientService {
       const cohortMemberIds = await cohortByAction.get(action.id)!;
 
       const eligible = allUsers.filter((user) =>
-        computeIsParticipatingRecipient({
+        computeIsAssignedAndPresent({
           user,
           eventDate: event.date,
           deadlineDate,
@@ -313,7 +313,7 @@ export class ActionEventRecipientService {
 
     return users
       .filter((user) =>
-        computeIsParticipatingRecipient({
+        computeIsAssignedAndPresent({
           user: idToUser.get(user.id)!,
           eventDate: event.date,
           deadlineDate: deadlineEvent?.date ?? null,

@@ -17,9 +17,10 @@ import type { Repository } from 'typeorm';
  * - Contract event but no phase start → out of time: can't onboard into a phase
  *   that hasn't started.
  *
- * Single source of this rule, shared by {@link computeShouldParticipateCore}
- * (both `shouldParticipate` variants) and `ActionsService.isEligibleForAction`
- * (`canParticipate`).
+ * Single source of this rule, shared by {@link computeIsAssignedCore}
+ * (both assignment variants, i.e. the `ActionDto.shouldParticipate` wire field)
+ * and `ActionsService.isCompletionAllowed` (the `ActionDto.canParticipate`
+ * wire field).
  */
 export function computeContractSignedAfterOnboardingStart(params: {
   user: Pick<User, 'contractEvents'>;
@@ -41,12 +42,17 @@ export function computeContractSignedAfterOnboardingStart(params: {
 }
 
 /**
- * Shared rule for both `shouldParticipate` variants: dismissal, cohort
- * membership, and the contract requirement — onboarding actions need the first
- * contract signed at/after the phase start; all others need an active contract
- * across the whole member-action window (`deadlineDate: null` = open-ended).
+ * Shared "is this user assigned?" rule behind both assignment variants:
+ * dismissal, cohort membership, and the contract requirement — onboarding
+ * actions need the first contract signed at/after the phase start; all others
+ * need an active contract across the whole member-action window
+ * (`deadlineDate: null` = open-ended).
+ *
+ * NOTE: the dismissal exclusion still lives here for now; the target model
+ * treats dismissal as an overlay, not part of assignment. It moves out when
+ * `viewer.status` lands.
  */
-function computeShouldParticipateCore(params: {
+function computeIsAssignedCore(params: {
   /** Member-action phase start; also the onboarding join-timing reference. */
   eventDate: Date;
   deadlineDate: Date | null;
@@ -94,16 +100,17 @@ function computeShouldParticipateCore(params: {
 }
 
 /**
- * Self-view "is this user expected to take this action?" predicate — source of
- * the viewer's own `ActionDto.shouldParticipate`.
+ * Self-view "is this user assigned this action?" predicate — source of the
+ * viewer's own `ActionDto.shouldParticipate` (the wire field keeps its legacy
+ * name until the `viewer` object ships).
  *
- * Distinct from {@link computeShouldParticipate} (the event-recipient variant
+ * Distinct from {@link computeIsAssignedFromCohortSet} (the event-recipient variant
  * driven by a precomputed cohort-member set, for notifications/roster). This one
  * consumes the full cohort-*expression* result (`computeIsInCohortExpression`)
  * as `inCohort`, and stays pure/sync so the caller controls when the DB-hitting
- * cohort evaluation runs. Both delegate to {@link computeShouldParticipateCore}.
+ * cohort evaluation runs. Both delegate to {@link computeIsAssignedCore}.
  */
-export function computeShouldParticipateInAction(params: {
+export function computeIsAssignedToAction(params: {
   action: Pick<Action, 'events' | 'memberActionPhase' | 'onboarding'>;
   user: Pick<User, 'contractEvents' | 'hasActiveContractInFullRange'> | null;
   inCohort: boolean;
@@ -117,7 +124,7 @@ export function computeShouldParticipateInAction(params: {
   if (!event) {
     return false;
   }
-  return computeShouldParticipateCore({
+  return computeIsAssignedCore({
     eventDate: event.date,
     deadlineDate: deadlineEvent?.date ?? null,
     inCohort,
@@ -135,7 +142,7 @@ export function computeShouldParticipateInAction(params: {
  * Distinct from {@link computeMemberActionAwayStatus}, which is the now-relative
  * 4-valued status the UI renders. Two different questions; don't conflate them.
  */
-export function computeIsAwayDuringAnyOfMemberAction(params: {
+export function computeIsAwayDuringWindow(params: {
   action: Pick<Action, 'events' | 'memberActionPhase'>;
   user: Pick<User, 'awayRanges' | 'isAwayAtAnyPointInRange'>;
 }): boolean {
@@ -161,7 +168,7 @@ export function computeIsAwayDuringAnyOfMemberAction(params: {
  * `getAwayStatusAt` in `shared/lib/actionUtils.ts`. It is surfaced on
  * `ActionDto.awayStatus` so clients read a field instead of recomputing it.
  *
- * Distinct from {@link computeIsAwayDuringAnyOfMemberAction} (window-overlap
+ * Distinct from {@link computeIsAwayDuringWindow} (window-overlap
  * boolean for rosters/counters).
  */
 export enum TaskAwayStatus {
@@ -288,11 +295,13 @@ export function computeIsTaggedOrInManualCohort(params: {
 }
 
 /**
- * Determines whether a user should participate in a given action event based on
- * cohort membership, dismissal status, onboarding rules, and contract dates.
+ * Roster variant of the assignment predicate: is this user assigned, given a
+ * precomputed cohort-member id set? Same rule as
+ * {@link computeIsAssignedToAction} (cohort membership, dismissal, onboarding
+ * rules, contract dates) but shaped for bulk evaluation over many users.
  * Runs per member-action event, so `eventDate` is the phase start.
  */
-export function computeShouldParticipate(params: {
+export function computeIsAssignedFromCohortSet(params: {
   eventDate: Date;
   deadlineDate: Date | null;
   cohortMemberIds: Set<number>;
@@ -313,7 +322,7 @@ export function computeShouldParticipate(params: {
     includeDismissed,
   } = params;
 
-  return computeShouldParticipateCore({
+  return computeIsAssignedCore({
     eventDate,
     deadlineDate,
     inCohort: cohortMemberIds.has(user.id),
@@ -326,19 +335,19 @@ export function computeShouldParticipate(params: {
 }
 
 /**
- * "Expected and able" recipient predicate: {@link computeShouldParticipate}
+ * "Assigned and present" roster predicate: {@link computeIsAssignedFromCohortSet}
  * AND not away at any point during the member-action window. Single source
  * for every consumer of the participation roster — notification recipients
  * (`ActionEventRecipientService`) and suite stats (`ActionsService`) — so a
  * user the roster/pill counts as away is consistently excluded everywhere.
  * `user` must have `awayRanges` loaded.
  */
-export function computeIsParticipatingRecipient(
-  params: Parameters<typeof computeShouldParticipate>[0],
+export function computeIsAssignedAndPresent(
+  params: Parameters<typeof computeIsAssignedFromCohortSet>[0],
 ): boolean {
   const { user, eventDate, deadlineDate } = params;
   return (
-    computeShouldParticipate(params) &&
+    computeIsAssignedFromCohortSet(params) &&
     !user.isAwayAtAnyPointInRange({
       startDate: eventDate,
       endDate: deadlineDate,

@@ -70,9 +70,10 @@ export class LiveActivityWorker {
     }
 
     // Find users who joined but haven't completed
-    const joinedByAction = await this.actionsService.findJoinedUsersForActions(
-      eligible.map((e) => e.action),
-    );
+    const joinedByAction =
+      await this.actionsService.findParticipantIdsForActions(
+        eligible.map((e) => e.action),
+      );
 
     for (const { action, deadline } of eligible) {
       const joinedUserIds = joinedByAction.get(action.id) ?? [];

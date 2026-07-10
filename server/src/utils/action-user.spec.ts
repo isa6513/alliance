@@ -2,11 +2,11 @@ import { ActionStatus } from '../actions/entities/action-event.entity';
 import type { User } from '../user/entities/user.entity';
 import {
   computeContractSignedAfterOnboardingStart,
-  computeShouldParticipate,
-  computeShouldParticipateInAction,
+  computeIsAssignedFromCohortSet,
+  computeIsAssignedToAction,
 } from './action-user';
 
-type Params = Parameters<typeof computeShouldParticipateInAction>[0];
+type Params = Parameters<typeof computeIsAssignedToAction>[0];
 
 const PHASE_START = new Date('2020-01-01');
 
@@ -64,45 +64,41 @@ function input(overrides: Partial<Params> = {}): Params {
   };
 }
 
-describe('computeShouldParticipateInAction', () => {
+describe('computeIsAssignedToAction', () => {
   it('participates when in cohort, with a contract active over the member action', () => {
-    expect(computeShouldParticipateInAction(input())).toBe(true);
+    expect(computeIsAssignedToAction(input())).toBe(true);
   });
 
   it('does not participate for a logged-out viewer', () => {
-    expect(computeShouldParticipateInAction(input({ user: null }))).toBe(false);
+    expect(computeIsAssignedToAction(input({ user: null }))).toBe(false);
   });
 
   it('does not participate when the action has no member-action event', () => {
     expect(
-      computeShouldParticipateInAction(
+      computeIsAssignedToAction(
         input({ action: makeAction({ hasMemberActionEvent: false }) }),
       ),
     ).toBe(false);
   });
 
   it('does not participate when the user has dismissed the action', () => {
-    expect(computeShouldParticipateInAction(input({ dismissed: true }))).toBe(
-      false,
-    );
+    expect(computeIsAssignedToAction(input({ dismissed: true }))).toBe(false);
   });
 
   it('does not participate when the user is not in the cohort', () => {
-    expect(computeShouldParticipateInAction(input({ inCohort: false }))).toBe(
-      false,
-    );
+    expect(computeIsAssignedToAction(input({ inCohort: false }))).toBe(false);
   });
 
   describe('contract requirement', () => {
     it('does not participate without an active contract', () => {
-      expect(
-        computeShouldParticipateInAction(input({ user: makeUser(false) })),
-      ).toBe(false);
+      expect(computeIsAssignedToAction(input({ user: makeUser(false) }))).toBe(
+        false,
+      );
     });
 
     it('participates without an active contract for an onboarding action', () => {
       expect(
-        computeShouldParticipateInAction(
+        computeIsAssignedToAction(
           input({
             action: makeAction({ onboarding: true }),
             user: makeUser(false),
@@ -116,7 +112,7 @@ describe('computeShouldParticipateInAction', () => {
     // Excluded even when in the cohort: onboarding targets new members only.
     it('excludes an existing member who joined before the phase began', () => {
       expect(
-        computeShouldParticipateInAction(
+        computeIsAssignedToAction(
           input({
             action: makeAction({ onboarding: true }),
             user: userWithContractSignedAt(
@@ -129,7 +125,7 @@ describe('computeShouldParticipateInAction', () => {
 
     it('includes a new member who joined at/after the phase began', () => {
       expect(
-        computeShouldParticipateInAction(
+        computeIsAssignedToAction(
           input({
             action: makeAction({ onboarding: true }),
             user: userWithContractSignedAt(
@@ -142,8 +138,8 @@ describe('computeShouldParticipateInAction', () => {
   });
 });
 
-describe('computeShouldParticipate', () => {
-  type PopulationParams = Parameters<typeof computeShouldParticipate>[0];
+describe('computeIsAssignedFromCohortSet', () => {
+  type PopulationParams = Parameters<typeof computeIsAssignedFromCohortSet>[0];
 
   function makePopulationUser(opts: {
     id?: number;
@@ -189,15 +185,15 @@ describe('computeShouldParticipate', () => {
   }
 
   it('participates when in cohort with a contract active over the window', () => {
-    expect(computeShouldParticipate(populationInput())).toBe(true);
+    expect(computeIsAssignedFromCohortSet(populationInput())).toBe(true);
   });
 
   it('does not participate when dismissed, unless includeDismissed', () => {
     expect(
-      computeShouldParticipate(populationInput({ userDismissed: true })),
+      computeIsAssignedFromCohortSet(populationInput({ userDismissed: true })),
     ).toBe(false);
     expect(
-      computeShouldParticipate(
+      computeIsAssignedFromCohortSet(
         populationInput({ userDismissed: true, includeDismissed: true }),
       ),
     ).toBe(true);
@@ -205,7 +201,7 @@ describe('computeShouldParticipate', () => {
 
   it('does not participate when not in the cohort', () => {
     expect(
-      computeShouldParticipate(
+      computeIsAssignedFromCohortSet(
         populationInput({ cohortMemberIds: new Set([999]) }),
       ),
     ).toBe(false);
@@ -213,18 +209,22 @@ describe('computeShouldParticipate', () => {
 
   it('does not participate without a contract active over the window', () => {
     const { user } = makePopulationUser({ hasContractInFullRange: false });
-    expect(computeShouldParticipate(populationInput({ user }))).toBe(false);
+    expect(computeIsAssignedFromCohortSet(populationInput({ user }))).toBe(
+      false,
+    );
   });
 
   it('still requires the full-window contract when the deadline is null', () => {
     // Regression: a null deadline used to skip the full-range check, so
     // lapsed-contract users were included here but excluded by the self-view
-    // predicate (computeShouldParticipateInAction).
+    // predicate (computeIsAssignedToAction).
     const { user, fullRangeCalls } = makePopulationUser({
       hasContractInFullRange: false,
     });
     expect(
-      computeShouldParticipate(populationInput({ user, deadlineDate: null })),
+      computeIsAssignedFromCohortSet(
+        populationInput({ user, deadlineDate: null }),
+      ),
     ).toBe(false);
     expect(fullRangeCalls).toEqual([{ startDate: PHASE_START, endDate: null }]);
   });
@@ -234,12 +234,12 @@ describe('computeShouldParticipate', () => {
       hasContractInFullRange: false,
     });
     expect(
-      computeShouldParticipate(
+      computeIsAssignedFromCohortSet(
         populationInput({ user, includeSuspended: true }),
       ),
     ).toBe(true);
     expect(
-      computeShouldParticipate(
+      computeIsAssignedFromCohortSet(
         populationInput({ user, deadlineDate: null, includeSuspended: true }),
       ),
     ).toBe(true);
@@ -252,7 +252,9 @@ describe('computeShouldParticipate', () => {
         contractSignedAt: new Date(PHASE_START.getTime() - 1000),
       });
       expect(
-        computeShouldParticipate(populationInput({ user, onboarding: true })),
+        computeIsAssignedFromCohortSet(
+          populationInput({ user, onboarding: true }),
+        ),
       ).toBe(false);
     });
 
@@ -261,7 +263,9 @@ describe('computeShouldParticipate', () => {
         contractSignedAt: new Date(PHASE_START.getTime() + 1000),
       });
       expect(
-        computeShouldParticipate(populationInput({ user, onboarding: true })),
+        computeIsAssignedFromCohortSet(
+          populationInput({ user, onboarding: true }),
+        ),
       ).toBe(true);
     });
   });

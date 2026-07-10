@@ -65,11 +65,11 @@ import {
 } from 'src/user/entities/user.entity';
 import {
   computeContractSignedAfterOnboardingStart,
-  computeIsAwayDuringAnyOfMemberAction,
-  computeIsParticipatingRecipient,
+  computeIsAssignedAndPresent,
+  computeIsAssignedToAction,
+  computeIsAwayDuringWindow,
   computeIsTaggedOrInManualCohort,
   computeMemberActionAwayStatus,
-  computeShouldParticipateInAction,
 } from 'src/utils/action-user';
 import { CachedFilter } from 'src/utils/cached-filter';
 import { startDatePriorityComparator } from 'src/utils/general-update';
@@ -441,12 +441,12 @@ export class ActionsService {
   }
 
   async reloadUsersJoinedForAction(actionId: number): Promise<void> {
-    const usersJoined = (await this.findUsersJoinedForActionById(actionId))
+    const usersJoined = (await this.findParticipantIdsForActionById(actionId))
       .length;
     await this.actionRepository.update(actionId, { usersJoined });
   }
 
-  async findUsersJoinedForActionById(actionId: number): Promise<number[]> {
+  async findParticipantIdsForActionById(actionId: number): Promise<number[]> {
     const action = await this.actionRepository.findOneOrFail({
       where: { id: actionId },
       relations: {
@@ -455,20 +455,32 @@ export class ActionsService {
       },
     });
 
-    return this.findJoinedUsersForAction(action);
+    return this.findParticipantIdsForAction(action);
   }
 
-  async findJoinedUsersForAction(action: Action): Promise<number[]> {
-    const result = await this.findJoinedUsersForActions([action]);
+  async findParticipantIdsForAction(action: Action): Promise<number[]> {
+    const result = await this.findParticipantIdsForActions([action]);
     return result.get(action.id) ?? [];
   }
 
   /**
-   * Batched version of findJoinedUsersForAction: fetches the shared data in a
-   * handful of bulk queries instead of per-action. Returns a map of
-   * actionId -> joined userIds. Parity with findJoinedUsersForAction.
+   * The "participants" of an action — source of the persisted
+   * `Action.usersJoined` counter (which keeps its legacy wire/DB name for now).
+   * The formula:
+   *
+   *   base recipients (assigned, INCLUDING dismissed)
+   *   − away at any point during the member-action window
+   *   − withdrawn (USER_WONT_COMPLETE)
+   *   + everyone with a USER_COMPLETED activity
+   *
+   * i.e. "could this user have done it at all?" — note this is NOT the same
+   * set as the reminder/suspension roster (computeIsAssignedAndPresent), which
+   * excludes dismissed users.
+   *
+   * Batched: fetches the shared data in a handful of bulk queries instead of
+   * per-action. Returns a map of actionId -> participant userIds.
    */
-  async findJoinedUsersForActions(
+  async findParticipantIdsForActions(
     actions: Action[],
   ): Promise<Map<number, number[]>> {
     // Build entries for actions that have a MemberAction event
@@ -524,7 +536,7 @@ export class ActionsService {
       }
     }
 
-    // 3. Per-action assembly (same logic as findJoinedUsersForAction)
+    // 3. Per-action assembly
     const result = new Map<number, number[]>();
     for (const action of actions) {
       const baseUsers = baseUsersByAction.get(action.id);
@@ -534,7 +546,7 @@ export class ActionsService {
       }
 
       const notAwayDuringMemberActionPhase = baseUsers.filter(
-        (user) => !computeIsAwayDuringAnyOfMemberAction({ action, user }),
+        (user) => !computeIsAwayDuringWindow({ action, user }),
       );
 
       const withdrawals = withdrawalsByAction.get(action.id) ?? new Set();
@@ -564,7 +576,7 @@ export class ActionsService {
       },
     });
 
-    const joinedUserIds = await this.findJoinedUsersForAction(action);
+    const joinedUserIds = await this.findParticipantIdsForAction(action);
 
     const completedActivities = await this.actionActivityRepository.find({
       where: {
@@ -740,7 +752,7 @@ export class ActionsService {
                 cohortExpression: action.cohortExpression,
               })
             : false;
-        const shouldParticipate = computeShouldParticipateInAction({
+        const shouldParticipate = computeIsAssignedToAction({
           action,
           user,
           inCohort,
@@ -756,7 +768,7 @@ export class ActionsService {
 
         return new ActionDto(action, {
           canParticipate: user
-            ? await this.isEligibleForAction(action, user)
+            ? await this.isCompletionAllowed(action, user)
             : false,
           shouldParticipate,
           userRelation:
@@ -891,7 +903,7 @@ export class ActionsService {
     }
     return new ActionDto(action, {
       canParticipate: user
-        ? await this.isEligibleForAction(action, user)
+        ? await this.isCompletionAllowed(action, user)
         : false,
       userRelation: user
         ? await this.getActionRelation(action.id, user.id)
@@ -1248,7 +1260,7 @@ export class ActionsService {
     }
 
     if (type === ActionActivityType.USER_COMPLETED && !adminCreated) {
-      await this.ensureUserEligibleForAction(action, userId);
+      await this.ensureCompletionAllowed(action, userId);
     }
 
     const user = await this.userService.findOneOrFail(userId);
@@ -1302,7 +1314,7 @@ export class ActionsService {
     return savedActivity;
   }
 
-  async optoutAction(
+  async withdrawFromAction(
     actionId: number,
     userId: number,
     reason: string,
@@ -1849,22 +1861,7 @@ export class ActionsService {
     );
   }
 
-  async isIdEligibleForAction(
-    actionId: number,
-    userId: number,
-  ): Promise<boolean> {
-    const action = await this.findOneOrFail({ id: actionId, userId });
-    const user = await this.userService.findOne(userId, {
-      tags: true,
-      contractEvents: true,
-    });
-    if (!user) {
-      return false;
-    }
-    return this.isEligibleForAction(action, user);
-  }
-
-  async isEligibleForAction(action: Action, user: User): Promise<boolean> {
+  async isCompletionAllowed(action: Action, user: User): Promise<boolean> {
     if (action.preventCompletion) {
       return false;
     }
@@ -1891,12 +1888,12 @@ export class ActionsService {
     return inCohort;
   }
 
-  async ensureUserEligibleForAction(action: Action, userId: number) {
+  async ensureCompletionAllowed(action: Action, userId: number) {
     const user = await this.userService.findOneOrFail(userId, {
       tags: true,
       contractEvents: true,
     });
-    if (!(await this.isEligibleForAction(action, user))) {
+    if (!(await this.isCompletionAllowed(action, user))) {
       throw new ForbiddenException('This action is not available to you');
     }
   }
@@ -2563,7 +2560,7 @@ export class ActionsService {
       case ActionUpdateNotifyType.None:
         return;
       case ActionUpdateNotifyType.ActionCohort: {
-        const userIds = await this.findUsersJoinedForActionById(
+        const userIds = await this.findParticipantIdsForActionById(
           actionUpdate.actionId,
         );
         users = await this.userService.findByIds(userIds);
@@ -2962,7 +2959,7 @@ export class ActionsService {
 
     const joinedUsersP: Promise<Record<number, number[]>> = run(async () => {
       const actions = await actionsP;
-      const joinedUsersMap = await this.findJoinedUsersForActions(actions);
+      const joinedUsersMap = await this.findParticipantIdsForActions(actions);
 
       const userIdsSet = await userIdsSetP;
       const joinedUsers: Record<number, number[]> = {};
@@ -3064,7 +3061,7 @@ export class ActionsService {
         const detail = getDetail({ userId, actionId: action.id });
         const theUser = userCachedFilter.filtered({ id: userId })[0]!;
         if (
-          computeIsAwayDuringAnyOfMemberAction({
+          computeIsAwayDuringWindow({
             user: theUser,
             action,
           }) &&
@@ -3421,7 +3418,7 @@ export class ActionsService {
           );
 
         const baseUsers = baseCandidates.filter((user) =>
-          computeIsParticipatingRecipient({
+          computeIsAssignedAndPresent({
             eventDate: event.date,
             deadlineDate: deadlineDate,
             cohortMemberIds,
