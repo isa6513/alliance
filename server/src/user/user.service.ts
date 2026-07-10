@@ -60,14 +60,14 @@ import {
   AmbassadorInviteStats,
   AmbassadorProgramDashboard,
   AmbassadorProgramInviteStats,
-  CreateAmbassadorProgramInteractionDto,
+  type AmbassadorProgramMemberWithInviteStats,
   CreateAmbassadorInviteGoalDto,
+  CreateAmbassadorProgramInteractionDto,
   CreateOnetimeInviteDto,
   RequestOnetimeInviteDto,
-  UpdateAmbassadorProgramMemberDto,
   UpdateAmbassadorInviteGoalDto,
+  UpdateAmbassadorProgramMemberDto,
   UpsertAmbassadorProgramMemberDto,
-  type AmbassadorProgramMemberWithInviteStats,
 } from './dto/invite.dto';
 import { CreateTagDto } from './dto/tag.dto';
 import {
@@ -1004,6 +1004,7 @@ export class UserService {
         isNotSignedUpPartialProfile: false,
       },
       relations: { tags: true, awayRanges: true, contractEvents: true },
+      relationLoadStrategy: 'query',
     });
   }
 
@@ -1328,8 +1329,7 @@ export class UserService {
         return [
           userId,
           {
-            totals:
-              totalsByUserId.get(userId) ?? EMPTY_AMBASSADOR_INVITE_STATS,
+            totals: totalsByUserId.get(userId) ?? EMPTY_AMBASSADOR_INVITE_STATS,
             currentGoal,
             pastGoals: goalsWithStats
               .filter(({ goal }) => goal.dueAt < now)
