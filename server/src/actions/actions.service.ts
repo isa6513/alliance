@@ -2132,7 +2132,7 @@ export class ActionsService {
     const forumCommentItems: HomeFeedItem[] = forumComments.map((fc) => ({
       type: HomeFeedItemType.ForumComment,
       date: fc.comment.createdAt,
-      clusterForumComment: fc,
+      forumComment: fc,
     }));
     const forumCommentDateMs = forumCommentItems
       .map((c) => c.date.getTime())
@@ -2241,7 +2241,7 @@ export class ActionsService {
     const forumCommentItems: HomeFeedItem[] = forumComments.map((fc) => ({
       type: HomeFeedItemType.ForumComment,
       date: fc.comment.createdAt,
-      clusterForumComment: fc,
+      forumComment: fc,
     }));
 
     const merged: HomeFeedItem[] = [...activityItems, ...forumCommentItems];

@@ -23,31 +23,14 @@ export type ParsedHomeFeedItemDto = Omit<HomeFeedItemDto, "activity"> & {
   activity?: FeedActionActivityDto;
 };
 
-// TODO(forum-comment-rename): server currently emits the legacy
-// 'cluster_forum_comment' type and 'clusterForumComment' field. Once all
-// deployed clients ship reading 'forum_comment' / 'forumComment', flip the
-// server, regenerate types.gen.ts, and drop the legacy branches below.
-type HomeFeedItemWithForumComment = HomeFeedItemDto & {
-  forumComment?: HomeFeedForumCommentDto;
-};
-
-export const getForumComment = (
-  item: HomeFeedItemDto,
-): HomeFeedForumCommentDto | undefined => {
-  const extended = item as HomeFeedItemWithForumComment;
-  return extended.clusterForumComment ?? extended.forumComment;
-};
-
 const isViewable = (item: HomeFeedItemDto): item is ParsedHomeFeedItemDto => {
   switch (item.type) {
     case "activity":
       return item.activity
         ? actionActivityDtoIsVisibleInFeed(item.activity)
         : false;
-    case "cluster_forum_comment":
-    // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
     case "forum_comment":
-      return getForumComment(item) != null;
+      return item.forumComment != null;
     default:
       // Drop unknown variants so older clients don't crash on new server types.
       item.type satisfies never;
@@ -108,17 +91,10 @@ export const mapForumCommentsInPages = (
           switch (item.type) {
             case "activity":
               return item;
-            case "cluster_forum_comment":
-            // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
             case "forum_comment": {
-              const fc = getForumComment(item);
+              const fc = item.forumComment;
               if (!fc) return item;
-              const mapped = mapper(fc);
-              const extended = item as HomeFeedItemWithForumComment;
-              if (extended.clusterForumComment) {
-                return { ...item, clusterForumComment: mapped };
-              }
-              return { ...item, forumComment: mapped } as ParsedHomeFeedItemDto;
+              return { ...item, forumComment: mapper(fc) };
             }
             default: {
               // Drop unknown variants so older clients don't crash on new server types.
@@ -260,20 +236,7 @@ export const useFeedLikeMutations = (
   const handleLikeForumComment = useCallback(
     async (commentId: number) => {
       const forumComment = items
-        .filter((i) => {
-          switch (i.type) {
-            case "cluster_forum_comment":
-            // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
-            case "forum_comment":
-              return true;
-            case "activity":
-              return false;
-            default:
-              i.type satisfies never;
-              return false;
-          }
-        })
-        .map(getForumComment)
+        .map((item) => item.forumComment)
         .find((fc) => fc?.comment.id === commentId);
       if (!forumComment) return;
       await commentLikeMutation.mutateAsync({

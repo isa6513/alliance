@@ -1,4 +1,3 @@
-import { getForumComment } from "@alliance/shared/lib/feedHelpers";
 import useHomeFeed from "@alliance/shared/lib/useHomeFeed";
 import Spinner from "@alliance/sharedweb/ui/Spinner";
 import { useCallback, useRef } from "react";
@@ -91,10 +90,8 @@ const HomeFeed = () => {
                 )
               );
             }
-            case "cluster_forum_comment":
-            // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
             case "forum_comment": {
-              const fc = getForumComment(item);
+              const fc = item.forumComment;
               if (!fc) return null;
               return (
                 <ForumCommentCard

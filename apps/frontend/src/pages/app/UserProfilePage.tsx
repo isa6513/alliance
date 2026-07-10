@@ -4,7 +4,6 @@ import {
 } from "@alliance/shared/client";
 import { roleBadges } from "@alliance/shared/lib/copy";
 import { Features } from "@alliance/shared/lib/features";
-import { getForumComment } from "@alliance/shared/lib/feedHelpers";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
@@ -554,10 +553,8 @@ const UserProfilePage: React.FC = () => {
                       )
                     );
                   }
-                  case "cluster_forum_comment":
-                  // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
                   case "forum_comment": {
-                    const fc = getForumComment(item);
+                    const fc = item.forumComment;
                     if (!fc) return null;
                     return (
                       <ForumCommentCard

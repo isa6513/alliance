@@ -10,10 +10,7 @@ import {
   homePagePriorityComparator,
 } from "@alliance/shared/lib/actionUtils";
 import { noTasksToDoRightNow } from "@alliance/shared/lib/copy";
-import {
-  ParsedHomeFeedItemDto,
-  getForumComment,
-} from "@alliance/shared/lib/feedHelpers";
+import { ParsedHomeFeedItemDto } from "@alliance/shared/lib/feedHelpers";
 import { useHomePageActions } from "@alliance/shared/lib/homePage";
 import { getTaskDismissInfo } from "@alliance/shared/lib/largeActionCard";
 import { useBoundedIndex } from "@alliance/shared/lib/useBoundedIndex";
@@ -267,10 +264,8 @@ export default function HomeScreen() {
             </View>
           );
         }
-        case "cluster_forum_comment":
-        // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
         case "forum_comment": {
-          const fc = getForumComment(item);
+          const fc = item.forumComment;
           if (!fc) return null;
           const { comment, postId, postTitle, likedByMe, likesCount } = fc;
           return (
@@ -475,7 +470,7 @@ export default function HomeScreen() {
           keyExtractor={(item) =>
             item.type === "activity"
               ? `activity-${item.activity?.id}`
-              : `comment-${getForumComment(item)?.comment.id}`
+              : `comment-${item.forumComment?.comment.id}`
           }
           renderItem={renderHomeFeedItem}
           onEndReached={onHomeFeedEndReached}
