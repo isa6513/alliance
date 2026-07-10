@@ -145,8 +145,11 @@ export class ActionsController {
     const activity = await this.actionsService.withdrawFromAction(
       id,
       req.user.sub,
-      body.reason,
-      body.outOfTime,
+      {
+        reason: body.reason,
+        outOfTime: body.outOfTime,
+        isMoral: body.isMoral,
+      },
     );
     this.posthog.capture({
       event: AnalyticsEvent.ActionOptedOut,

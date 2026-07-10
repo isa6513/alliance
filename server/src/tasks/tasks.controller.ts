@@ -340,8 +340,11 @@ export class TasksController {
         id,
         body.actionId,
         req.user.sub,
-        body.reason,
-        body.outOfTime,
+        {
+          reason: body.reason,
+          outOfTime: body.outOfTime,
+          isMoral: body.isMoral,
+        },
         body.partialFormData,
       ),
     );

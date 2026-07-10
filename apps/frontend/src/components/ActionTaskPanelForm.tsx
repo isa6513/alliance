@@ -9,6 +9,7 @@ import {
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
+import type { ActionWithdrawal } from "@alliance/shared/lib/actionTaskPanel";
 import { captureException } from "@alliance/shared/lib/analytics";
 import { CardStyle } from "@alliance/shared/styles/card";
 import { cn } from "@alliance/shared/styles/util";
@@ -26,11 +27,7 @@ interface ActionTaskPanelFormProps {
   taskFormId: number;
   onCompleteAction: ((sendComplete: boolean) => void) | null;
   onFormStarted: () => void;
-  onAbandonAction?: (
-    outOfTime: boolean,
-    reason: string,
-    partialFormData: SubmitFormDto,
-  ) => void;
+  onAbandonAction?: (withdrawal: ActionWithdrawal) => void;
   card?: boolean;
   actionId: number;
   disabled?: boolean;

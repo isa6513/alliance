@@ -45,6 +45,12 @@ import {
   validateFieldValue as validateFieldValueShared,
   type UserLocationDisplayValue,
 } from "@alliance/shared/formrenderer";
+import {
+  WITHDRAWAL_OPTION_LABELS,
+  WITHDRAWAL_OPTIONS,
+  type ActionWithdrawal,
+  type WithdrawalOption,
+} from "@alliance/shared/lib/actionTaskPanel";
 import { outputFieldPublicToggle } from "@alliance/shared/lib/copy";
 import { cn } from "@alliance/shared/styles/util";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -95,11 +101,7 @@ type FormRendererProps = {
   disableOptionRandomization?: boolean;
   loadCurrentUserLocation?: boolean;
   onFormStarted?: () => void;
-  onAbandonAction?: (
-    outOfTime: boolean,
-    reason: string,
-    partialFormData: SubmitFormDto,
-  ) => void;
+  onAbandonAction?: (withdrawal: ActionWithdrawal) => void;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
   onSubmit: ((data: SubmitFormDto) => Promise<void>) | null;
@@ -727,8 +729,8 @@ const FormRenderer = ({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
-  const [outOfTimeSelected, setOutOfTimeSelected] = useState(false);
-  const [otherReasonSelected, setOtherReasonSelected] = useState(false);
+  const [withdrawalOption, setWithdrawalOption] =
+    useState<WithdrawalOption | null>(null);
   const [customReason, setCustomReason] = useState("");
   const [hasEmittedStart, setHasEmittedStart] = useState(false);
   const [currentUserLocation, setCurrentUserLocation] =
@@ -1407,7 +1409,12 @@ const FormRenderer = ({
       publicAnswers,
     };
 
-    onAbandonAction?.(outOfTimeSelected, customReason, submissionPayload);
+    onAbandonAction?.({
+      outOfTime: withdrawalOption === "out_of_time",
+      isMoral: withdrawalOption === "moral",
+      reason: customReason,
+      partialFormData: submissionPayload,
+    });
     setWithdrawOpen(false);
   };
 
@@ -1629,44 +1636,29 @@ const FormRenderer = ({
             Withdraw from action
           </Text>
           <View className="gap-2 mb-3">
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className={cn(
-                "border rounded px-3 py-3",
-                outOfTimeSelected
-                  ? "border-blue-600 bg-blue-100"
-                  : "border-zinc-200",
-              )}
-              onPress={() => {
-                setOutOfTimeSelected((prev) => !prev);
-                if (!outOfTimeSelected) {
-                  setOtherReasonSelected(false);
-                }
-              }}
-            >
-              <Text className="text-base text-zinc-900">
-                Took more than 15 minutes
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              className={cn(
-                "border rounded px-3 py-3",
-                otherReasonSelected
-                  ? "border-blue-600 bg-blue-100"
-                  : "border-zinc-200",
-              )}
-              onPress={() => {
-                setOtherReasonSelected((prev) => !prev);
-                if (!otherReasonSelected) {
-                  setOutOfTimeSelected(false);
-                }
-              }}
-            >
-              <Text className="text-base text-zinc-900">Other reason</Text>
-            </TouchableOpacity>
+            {WITHDRAWAL_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option}
+                activeOpacity={0.8}
+                className={cn(
+                  "border rounded px-3 py-3",
+                  withdrawalOption === option
+                    ? "border-blue-600 bg-blue-100"
+                    : "border-zinc-200",
+                )}
+                onPress={() => {
+                  setWithdrawalOption((previous) =>
+                    previous === option ? null : option,
+                  );
+                }}
+              >
+                <Text className="text-base text-zinc-900">
+                  {WITHDRAWAL_OPTION_LABELS[option]}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
-          {(outOfTimeSelected || otherReasonSelected) && (
+          {withdrawalOption !== null && (
             <TextInput
               value={customReason}
               onChangeText={setCustomReason}
@@ -1684,10 +1676,9 @@ const FormRenderer = ({
               size={ButtonSize.Large}
               disabled={
                 submitting ||
-                !(
-                  outOfTimeSelected ||
-                  (otherReasonSelected && customReason.trim().length > 0)
-                )
+                withdrawalOption === null ||
+                (withdrawalOption === "other" &&
+                  customReason.trim().length === 0)
               }
               title="Withdraw"
             />

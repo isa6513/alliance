@@ -1638,6 +1638,7 @@ export type OptOutActionDto = {
     actionId: number;
     reason: string;
     outOfTime: boolean;
+    isMoral: boolean;
     partialFormData?: {
         [key: string]: unknown;
     };

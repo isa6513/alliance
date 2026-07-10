@@ -892,8 +892,7 @@ export class TasksService {
     formId: number,
     actionId: number,
     userId: number,
-    reason: string,
-    outOfTime: boolean,
+    withdrawal: { reason: string; outOfTime: boolean; isMoral: boolean },
     partialFormData: SubmitFormDto,
   ) {
     const form = await this.getForm(formId);
@@ -912,8 +911,9 @@ export class TasksService {
       userId,
       type: ActionActivityType.USER_WONT_COMPLETE,
       taskFormResponse: savedForm,
-      declineReason: reason,
-      isOutOfTime: outOfTime,
+      declineReason: withdrawal.reason,
+      isOutOfTime: withdrawal.outOfTime,
+      isMoral: withdrawal.isMoral,
     });
   }
 

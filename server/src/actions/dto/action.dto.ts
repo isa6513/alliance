@@ -430,16 +430,6 @@ export class LatLonDto {
   longitude: number;
 }
 
-export class DeclineActionDto {
-  @ApiProperty()
-  @IsString()
-  reason: string;
-
-  @ApiProperty()
-  @IsBoolean()
-  moral: boolean;
-}
-
 export class OptOutActionDto {
   @ApiProperty({ type: Number })
   @IsDefined()
@@ -453,6 +443,11 @@ export class OptOutActionDto {
   @ApiProperty()
   @IsBoolean()
   outOfTime: boolean;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsBoolean()
+  isMoral: boolean;
 
   @ApiPropertyOptional({ type: Object })
   @Type(() => Object)

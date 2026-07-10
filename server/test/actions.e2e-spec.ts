@@ -1602,7 +1602,12 @@ describe('Actions (e2e)', () => {
       const optout = await request(ctx.app.getHttpServer())
         .post(`/actions/optout/${action.id}`)
         .set('Authorization', `Bearer ${ctx.accessToken}`)
-        .send({ reason: 'Out of time', outOfTime: true, actionId: action.id })
+        .send({
+          reason: 'Out of time',
+          outOfTime: true,
+          isMoral: false,
+          actionId: action.id,
+        })
         .expect(201);
 
       expect(optout.body.type).toBe(ActionActivityType.USER_WONT_COMPLETE);

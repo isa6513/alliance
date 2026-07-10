@@ -1236,6 +1236,7 @@ export class ActionsService {
     taskFormResponse?: FormResponse;
     declineReason?: string;
     isOutOfTime?: boolean;
+    isMoral?: boolean;
     adminCreated?: boolean;
   }): Promise<ActionActivity> {
     const {
@@ -1245,6 +1246,7 @@ export class ActionsService {
       taskFormResponse,
       declineReason,
       isOutOfTime,
+      isMoral,
       adminCreated,
     } = options;
     const action = await this.findOneOrFail({ id: actionId, userId });
@@ -1294,6 +1296,7 @@ export class ActionsService {
       taskFormResponse,
       declineReason,
       outOfTime: isOutOfTime,
+      isMoral,
       source: adminCreated
         ? ActivitySource.ADMIN_OVERRIDE
         : ActivitySource.USER,
@@ -1317,15 +1320,15 @@ export class ActionsService {
   async withdrawFromAction(
     actionId: number,
     userId: number,
-    reason: string,
-    outOfTime: boolean,
+    withdrawal: { reason: string; outOfTime: boolean; isMoral: boolean },
   ): Promise<ActionActivity> {
     return this.createActionActivity({
       actionId,
       userId,
       type: ActionActivityType.USER_WONT_COMPLETE,
-      declineReason: reason,
-      isOutOfTime: outOfTime,
+      declineReason: withdrawal.reason,
+      isOutOfTime: withdrawal.outOfTime,
+      isMoral: withdrawal.isMoral,
     });
   }
 
