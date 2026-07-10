@@ -2862,6 +2862,7 @@ export type UpdatePostAuthorsDto = {
 
 export type CreateActionPartnershipResponseDto = {
     organizationName: string;
+    organizationWebsite: string;
     personName: string;
     contact: string;
     outreachChannels: Array<string>;
@@ -2887,6 +2888,7 @@ export type ActionPartnershipNoteDto = {
 export type ActionPartnershipResponseDto = {
     id: number;
     organizationName: string;
+    organizationWebsite: string;
     personName: string;
     contact: string;
     outreachChannels: Array<string>;

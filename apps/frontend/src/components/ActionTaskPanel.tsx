@@ -26,6 +26,7 @@ export type ActionTaskPanelProps = ActionTaskPanelPropsShared & {
   forceRenderTask?: boolean;
   scrollContainerRef?: RefObject<HTMLElement | null>;
   staticTaskFormSchema?: FormSchema;
+  staticTaskInitialPageIndex?: number;
 };
 
 const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
@@ -42,6 +43,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
   forceRenderTask = false,
   scrollContainerRef,
   staticTaskFormSchema,
+  staticTaskInitialPageIndex,
 }: ActionTaskPanelProps) => {
   const handleCompleteAction = useCallback(async () => {
     const didSucceed = await onCompleteAction();
@@ -121,6 +123,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         onFormStarted={handleFormStarted}
         renderFormAsCompleted={disabled || !canSubmit}
         scrollContainerRef={scrollContainerRef}
+        initialPageIndex={staticTaskInitialPageIndex}
       />
     );
   }

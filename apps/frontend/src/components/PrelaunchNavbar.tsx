@@ -6,6 +6,7 @@ enum NavbarPage {
   People = "People",
   Guide = "Guide",
   Progress = "Progress",
+  Partner = "Partner",
   LogIn = "Log in",
 }
 
@@ -13,6 +14,7 @@ const links: NavbarPage[] = [
   NavbarPage.People,
   NavbarPage.Guide,
   NavbarPage.Progress,
+  NavbarPage.Partner,
   NavbarPage.LogIn,
 ];
 
@@ -40,6 +42,7 @@ const PrelaunchNavbar: React.FC<PrelaunchNavbarProps> = ({
     [NavbarPage.People]: href("/people"),
     [NavbarPage.Guide]: href("/guide"),
     [NavbarPage.Progress]: href("/progress"),
+    [NavbarPage.Partner]: href("/outreach-partner"),
     [NavbarPage.LogIn]: isAuthenticated ? href("/tasks") : href("/login"),
   };
 

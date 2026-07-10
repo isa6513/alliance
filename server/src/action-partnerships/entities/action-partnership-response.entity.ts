@@ -7,6 +7,7 @@ import {
   IsArray,
   IsNotEmpty,
   IsString,
+  IsUrl,
   MaxLength,
   ValidateIf,
 } from 'class-validator';
@@ -44,6 +45,15 @@ export class ActionPartnershipResponse {
   @IsNotEmpty()
   @MaxLength(300)
   organizationName: string;
+
+  @Column({ default: '' })
+  @ApiProperty()
+  @Transform(trim)
+  @IsString()
+  @IsNotEmpty()
+  @IsUrl({ require_protocol: false })
+  @MaxLength(500)
+  organizationWebsite: string;
 
   @Column()
   @ApiProperty()

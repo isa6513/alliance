@@ -28,6 +28,7 @@ export interface LargeActionCardProps extends LargeActionCardPropsShared {
   userRelation: UserActionRelation;
   scrollContainerRef?: RefObject<HTMLElement | null>;
   staticTaskFormSchema?: FormSchema;
+  staticTaskInitialPageIndex?: number;
 }
 
 enum LargeActionCardState {
@@ -45,6 +46,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
   className = "",
   scrollContainerRef,
   staticTaskFormSchema,
+  staticTaskInitialPageIndex,
 }: LargeActionCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -157,6 +159,7 @@ const LargeActionCard: React.FC<LargeActionCardProps> = ({
               scrollContainerRef={scrollContainerRef}
               disabled={showSignContractFirst}
               staticTaskFormSchema={staticTaskFormSchema}
+              staticTaskInitialPageIndex={staticTaskInitialPageIndex}
             />
           </div>
         </div>
