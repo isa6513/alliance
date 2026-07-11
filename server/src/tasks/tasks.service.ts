@@ -1,4 +1,7 @@
-import { ActionActivityType } from '@alliance/common/actionActivity';
+import {
+  ActionActivityType,
+  withdrawalHasRequiredReason,
+} from '@alliance/common/actionActivity';
 import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
 import {
   type AggregateViewSchema,
@@ -895,7 +898,7 @@ export class TasksService {
     withdrawal: { reason: string; outOfTime: boolean; isMoral: boolean },
     partialFormData: SubmitFormDto,
   ) {
-    if (!withdrawal.outOfTime && withdrawal.reason.trim().length === 0) {
+    if (!withdrawalHasRequiredReason(withdrawal)) {
       throw new BadRequestException('A withdrawal reason is required');
     }
     const form = await this.getForm(formId);

@@ -1,3 +1,4 @@
+import type { WithdrawalOption } from "@alliance/common/actionActivity";
 import { useCallback, useState } from "react";
 import {
   ActionDto,
@@ -29,26 +30,10 @@ export const WITHDRAWAL_OPTION_LABELS = {
   out_of_time: "Took more than 15 minutes",
   moral: "Moral objection",
   other: "Other reason",
-} as const;
-export type WithdrawalOption = keyof typeof WITHDRAWAL_OPTION_LABELS;
+} as const satisfies Record<WithdrawalOption, string>;
 export const WITHDRAWAL_OPTIONS = Object.keys(
   WITHDRAWAL_OPTION_LABELS,
 ) as WithdrawalOption[];
-
-/** Options that require the user to type a reason before withdrawing. */
-const WITHDRAWAL_OPTION_REQUIRES_REASON: Record<WithdrawalOption, boolean> = {
-  out_of_time: false,
-  moral: true,
-  other: true,
-};
-
-export function canSubmitWithdrawal(
-  option: WithdrawalOption | null,
-  reason: string,
-): boolean {
-  if (option === null) return false;
-  return !WITHDRAWAL_OPTION_REQUIRES_REASON[option] || reason.trim().length > 0;
-}
 
 export const useTaskFormHandlers = ({
   action,

@@ -1,3 +1,8 @@
+import {
+  canSubmitWithdrawal,
+  withdrawalFlagsFromOption,
+  type WithdrawalOption,
+} from "@alliance/common/actionActivity";
 import { errorMessage } from "@alliance/common/errorMessage";
 import { type DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import { type DisplayBlock } from "@alliance/common/forms/display-blocks";
@@ -44,11 +49,9 @@ import {
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
 import {
-  canSubmitWithdrawal,
   WITHDRAWAL_OPTION_LABELS,
   WITHDRAWAL_OPTIONS,
   type ActionWithdrawal,
-  type WithdrawalOption,
 } from "@alliance/shared/lib/actionTaskPanel";
 import {
   guestReferral,
@@ -1354,7 +1357,7 @@ const FormRenderer = ({
     setWithdrawalOption((previous) => (previous === option ? null : option));
   };
 
-  const handleAbandon = () => {
+  const handleAbandon = (option: WithdrawalOption) => {
     if (formSnapshotId === null) {
       throw new Error(
         "FormRenderer: formSnapshotId is required to abandon a form",
@@ -1370,8 +1373,7 @@ const FormRenderer = ({
     };
 
     onAbandonAction?.({
-      outOfTime: withdrawalOption === "out_of_time",
-      isMoral: withdrawalOption === "moral",
+      ...withdrawalFlagsFromOption(option),
       reason: customReason.trim(),
       partialFormData: submissionPayload,
     });
@@ -1839,7 +1841,7 @@ const FormRenderer = ({
                     />
                     <BaseButton
                       variant={BaseButtonVariant.Black}
-                      onClick={handleAbandon}
+                      onClick={() => handleAbandon(withdrawalOption)}
                       disabled={
                         submitting ||
                         !canSubmitWithdrawal(withdrawalOption, customReason)

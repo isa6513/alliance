@@ -1,3 +1,8 @@
+import {
+  canSubmitWithdrawal,
+  withdrawalFlagsFromOption,
+  type WithdrawalOption,
+} from "@alliance/common/actionActivity";
 import { type DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import {
   CHAT_TRANSCRIPT_SIZE_UNIT_PX,
@@ -46,11 +51,9 @@ import {
   type UserLocationDisplayValue,
 } from "@alliance/shared/formrenderer";
 import {
-  canSubmitWithdrawal,
   WITHDRAWAL_OPTION_LABELS,
   WITHDRAWAL_OPTIONS,
   type ActionWithdrawal,
-  type WithdrawalOption,
 } from "@alliance/shared/lib/actionTaskPanel";
 import { outputFieldPublicToggle } from "@alliance/shared/lib/copy";
 import { cn } from "@alliance/shared/styles/util";
@@ -1395,7 +1398,7 @@ const FormRenderer = ({
       });
   };
 
-  const handleAbandon = () => {
+  const handleAbandon = (option: WithdrawalOption) => {
     if (formSnapshotId === null) {
       throw new Error(
         "FormRenderer: formSnapshotId is required to abandon a form",
@@ -1411,8 +1414,7 @@ const FormRenderer = ({
     };
 
     onAbandonAction?.({
-      outOfTime: withdrawalOption === "out_of_time",
-      isMoral: withdrawalOption === "moral",
+      ...withdrawalFlagsFromOption(option),
       reason: customReason.trim(),
       partialFormData: submissionPayload,
     });
@@ -1672,7 +1674,9 @@ const FormRenderer = ({
           )}
           <View className="w-full self-center">
             <Button
-              onPress={handleAbandon}
+              onPress={() => {
+                if (withdrawalOption !== null) handleAbandon(withdrawalOption);
+              }}
               color={ButtonColor.Black}
               size={ButtonSize.Large}
               disabled={

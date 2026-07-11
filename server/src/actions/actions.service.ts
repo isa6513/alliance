@@ -1,6 +1,7 @@
 import {
   ACTION_ACTIVITY_FEED_VISIBLE_TYPES,
   ActionActivityType,
+  withdrawalHasRequiredReason,
 } from '@alliance/common/actionActivity';
 import type { FormSchema } from '@alliance/common/forms/form-schema';
 import { LIKE_FACEPILE_LIMIT, likeOrderRank } from '@alliance/common/likeOrder';
@@ -1322,7 +1323,7 @@ export class ActionsService {
     userId: number,
     withdrawal: { reason: string; outOfTime: boolean; isMoral: boolean },
   ): Promise<ActionActivity> {
-    if (!withdrawal.outOfTime && withdrawal.reason.trim().length === 0) {
+    if (!withdrawalHasRequiredReason(withdrawal)) {
       throw new BadRequestException('A withdrawal reason is required');
     }
     return this.createActionActivity({
