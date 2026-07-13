@@ -134,7 +134,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       <ActionTaskPanelForm
         publicAction={action.publicOnly || guestMode}
         taskFormId={action.taskFormId}
-        onCompleteAction={canSubmit ? handleCompleteWithTracking : (null)}
+        onCompleteAction={canSubmit ? handleCompleteWithTracking : null}
         onFormStarted={handleFormStarted}
         onAbandonAction={onAbandonAction}
         card={card}
