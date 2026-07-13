@@ -325,6 +325,9 @@ const ActionPageTaskPanel = () => {
                 </div>
               )}
             {bottom}
+            {isEditing && (
+              <button onClick={() => setIsEditing(false)} className="mt-3 rounded bg-zinc-200/60 hover:bg-zinc-200/80 px-2 py-2 text-center text-base font-medium text-black">Cancel Edit</button>
+            )}
           </>
         }
         bottomCardStyle={bodyStyle}
