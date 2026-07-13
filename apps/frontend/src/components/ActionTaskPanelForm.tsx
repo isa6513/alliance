@@ -79,7 +79,7 @@ const ActionTaskPanelForm = ({
 
       return response.data;
     },
-    enabled: !formResponse,
+    enabled: !formResponse || editing,
   });
 
   const draftEnabled =

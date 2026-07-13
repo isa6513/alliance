@@ -160,11 +160,7 @@ export function getActionPageTaskPanelState(params: {
     return ActionPageTaskPanelState.MissingDataOrNotActive;
   }
 
-  if (userRelation === "completed" && editing) {
-    return ActionPageTaskPanelState.Editing;
-  }
-
-  if (userRelation === "completed") {
+  if (userRelation === "completed" && !editing) {
     return ActionPageTaskPanelState.Completed;
   } else if (userRelation === "declined") {
     return ActionPageTaskPanelState.Declined;
@@ -176,6 +172,10 @@ export function getActionPageTaskPanelState(params: {
 
   if (deadlineHasPassed(action, now)) {
     return ActionPageTaskPanelState.ShowTaskWithMissedDeadline;
+  }
+
+  if (userRelation === "completed" && editing) {
+    return ActionPageTaskPanelState.Editing;
   }
 
   if (action.optional) {

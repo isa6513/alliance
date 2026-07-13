@@ -590,6 +590,13 @@ export class TasksService {
     }
   }
 
+  /**
+   * Save a form submission.
+   * @param formId A form id.
+   * @param userId A user id.
+   * @param submitFormDto The form's data.
+   * @returns The saved FormResponse.
+   */
   private async saveFormSubmission(
     formId: number,
     userId: number,
@@ -765,6 +772,13 @@ export class TasksService {
     return savedForm;
   }
 
+  /**
+   * Get an existing form response, if there is one.
+   * @param formId A form id.
+   * @param userId A user id.
+   * @param submitFormDto THe form's data/
+   * @returns A FormResponse, or null if there were no form responses found.
+   */
   private async getExistingFormResponse(
     formId: number,
     userId: number,
@@ -790,6 +804,13 @@ export class TasksService {
     return existingFormResponse;
   }
 
+  /**
+   * Submit a form for the first time.
+   * @param formId A form id.
+   * @param userId A user id.
+   * @param submitFormDto The form's data.
+   * @returns The saved FormResponse.
+   */
   async submitForm(
     formId: number,
     userId: number,
@@ -810,6 +831,13 @@ export class TasksService {
     return savedForm;
   }
 
+  /**
+   * Submit an updated form as long as a completed form already exists.
+   * @param formId A form id.
+   * @param userId A user id.
+   * @param submitFormDto The form's data.
+   * @returns The saved FormResponse.
+   */
   async submitUpdatedForm(
     formId: number,
     userId: number,

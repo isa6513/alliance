@@ -151,6 +151,11 @@ export function canCompleteAction(action: ActionDto) {
   );
 }
 
+/**
+ * Checks if the user can edit the given action.
+ * @param action The action's data.
+ * @returns True if the action can be edited, false otherwise.
+ */
 export function canEditAction(action: ActionDto) {
   return (
     action.events
