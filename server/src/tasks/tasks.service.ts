@@ -804,7 +804,7 @@ export class TasksService {
     userId: number,
     submitFormDto: SubmitFormDto,
   ): Promise<FormResponse> {
-    const action = await this.actionRepository.findOne({
+    const action = await this.actionRepository.findOneOrFail({
       where: { id: submitFormDto.actionId },
     });
     const variants = await this.actionFormVariantService.listForAction(
@@ -823,6 +823,10 @@ export class TasksService {
     if (!existingFormResponse) {
       throw new BadRequestException('There is no existing form to update');
     }
+
+    const actionActivities = await this.actionsService.getActionActivities(submitFormDto.actionId);
+    if (!actionActivities?.filter(activity => activity.type === ActionActivityType.USER_COMPLETED).length)
+      throw new BadRequestException('There is no existing completed form to update');
 
     return await this.saveFormSubmission(formId, userId, submitFormDto);
   }
@@ -1191,17 +1195,23 @@ export class TasksService {
         responses.map((response) => response.id),
       );
 
-    return responses.reduce((filteredResponses: Array<FormResponse>, response: FormResponse) => {
-      for (let i = 0; i < filteredResponses.length; i++) {
-        let filteredResponse = filteredResponses[i];
-        if (filteredResponse.formId == response.formId && filteredResponse.user?.id == response.user?.id)
-          return filteredResponses;
-      }
+    // Only take the most recent form response
+    const seen = new Set<string>();
+    const filteredResponses = responses.filter(response => {
+      if (response.user?.id == null)
+        return true;
 
-      filteredResponses.push(response);
+      const key = `${response.formId}:${response.user.id}`;
 
-      return filteredResponses;
-    }, new Array<FormResponse>()).map(
+      if (seen.has(key))
+        return false;
+
+      seen.add(key);
+
+      return true;
+    });
+
+    return filteredResponses.map(
       (response) =>
         new FormResponseDto({
           response,
