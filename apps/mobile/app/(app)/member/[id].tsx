@@ -7,10 +7,7 @@ import {
 } from "@alliance/shared/client";
 import { type FeedActionActivityDto } from "@alliance/shared/lib/actionActivity";
 import { roleBadges } from "@alliance/shared/lib/copy";
-import {
-  ParsedHomeFeedItemDto,
-  getForumComment,
-} from "@alliance/shared/lib/feedHelpers";
+import { ParsedHomeFeedItemDto } from "@alliance/shared/lib/feedHelpers";
 import useActivities, {
   ActivityList,
 } from "@alliance/shared/lib/useActivities";
@@ -432,10 +429,8 @@ export default function UserProfileScreen() {
             </View>
           );
         }
-        case "cluster_forum_comment":
-        // @ts-expect-error: TODO(forum-comment-rename): drop the legacy 'cluster_forum_comment'
         case "forum_comment": {
-          const fc = getForumComment(item);
+          const fc = item.forumComment;
           if (!fc) return null;
           return (
             <View className="border-b border-zinc-200">
@@ -658,7 +653,7 @@ export default function UserProfileScreen() {
           if (feedItem.type === "activity") {
             return `activity-${feedItem.activity?.id}`;
           }
-          return `comment-${getForumComment(feedItem)?.comment.id}`;
+          return `comment-${feedItem.forumComment?.comment.id}`;
         }
         case ProfileTab.ActionsCompleted:
           return `activity-${(item as ActionActivityDto).id}`;

@@ -23,6 +23,7 @@ export class ActionPartnershipResponseDto extends PickType(
   [
     'id',
     'organizationName',
+    'organizationWebsite',
     'personName',
     'contact',
     'outreachChannels',
@@ -41,6 +42,7 @@ export class ActionPartnershipResponseDto extends PickType(
     super();
     this.id = response.id;
     this.organizationName = response.organizationName;
+    this.organizationWebsite = response.organizationWebsite;
     this.personName = response.personName;
     this.contact = response.contact;
     this.outreachChannels = response.outreachChannels;
@@ -60,6 +62,7 @@ export class CreateActionPartnershipResponseDto extends PickType(
   ActionPartnershipResponse,
   [
     'organizationName',
+    'organizationWebsite',
     'personName',
     'contact',
     'outreachChannels',

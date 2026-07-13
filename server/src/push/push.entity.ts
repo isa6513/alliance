@@ -6,8 +6,8 @@ import {
 import { ActionEventNotif } from 'src/notifs/entities/action-event-notif.entity';
 import { Notification } from 'src/notifs/entities/notification.entity';
 import { UnreadContent } from 'src/notifs/entities/unread-content.entity';
-import type { Relation } from 'src/utils/Repository';
 import { User } from 'src/user/entities/user.entity';
+import type { Relation } from 'src/utils/Repository';
 import {
   Column,
   Entity,
@@ -21,6 +21,11 @@ import {
 @Index(['idempotencyKey'], {
   unique: true,
   where: '"idempotencyKey" IS NOT NULL',
+})
+// Serves the every-minute receipt cron: both its expiry UPDATE and its
+// pending-pushes SELECT filter on this predicate, keeping the index tiny.
+@Index(['createdAt'], {
+  where: `"receiptStatus" = 'pending' AND "receiptId" IS NOT NULL`,
 })
 export class Push {
   @PrimaryGeneratedColumn()

@@ -1,6 +1,7 @@
 import {
   ACTION_ACTIVITY_FEED_VISIBLE_TYPES,
   ActionActivityType,
+  withdrawalHasRequiredReason,
 } from '@alliance/common/actionActivity';
 import type { FormSchema } from '@alliance/common/forms/form-schema';
 import { LIKE_FACEPILE_LIMIT, likeOrderRank } from '@alliance/common/likeOrder';
@@ -1236,6 +1237,7 @@ export class ActionsService {
     taskFormResponse?: FormResponse;
     declineReason?: string;
     isOutOfTime?: boolean;
+    isMoral?: boolean;
     adminCreated?: boolean;
   }): Promise<ActionActivity> {
     const {
@@ -1245,6 +1247,7 @@ export class ActionsService {
       taskFormResponse,
       declineReason,
       isOutOfTime,
+      isMoral,
       adminCreated,
     } = options;
     const action = await this.findOneOrFail({ id: actionId, userId });
@@ -1294,6 +1297,7 @@ export class ActionsService {
       taskFormResponse,
       declineReason,
       outOfTime: isOutOfTime,
+      isMoral,
       source: adminCreated
         ? ActivitySource.ADMIN_OVERRIDE
         : ActivitySource.USER,
@@ -1317,15 +1321,18 @@ export class ActionsService {
   async withdrawFromAction(
     actionId: number,
     userId: number,
-    reason: string,
-    outOfTime: boolean,
+    withdrawal: { reason: string; outOfTime: boolean; isMoral: boolean },
   ): Promise<ActionActivity> {
+    if (!withdrawalHasRequiredReason(withdrawal)) {
+      throw new BadRequestException('A withdrawal reason is required');
+    }
     return this.createActionActivity({
       actionId,
       userId,
       type: ActionActivityType.USER_WONT_COMPLETE,
-      declineReason: reason,
-      isOutOfTime: outOfTime,
+      declineReason: withdrawal.reason,
+      isOutOfTime: withdrawal.outOfTime,
+      isMoral: withdrawal.isMoral,
     });
   }
 
@@ -2132,7 +2139,7 @@ export class ActionsService {
     const forumCommentItems: HomeFeedItem[] = forumComments.map((fc) => ({
       type: HomeFeedItemType.ForumComment,
       date: fc.comment.createdAt,
-      clusterForumComment: fc,
+      forumComment: fc,
     }));
     const forumCommentDateMs = forumCommentItems
       .map((c) => c.date.getTime())
@@ -2241,7 +2248,7 @@ export class ActionsService {
     const forumCommentItems: HomeFeedItem[] = forumComments.map((fc) => ({
       type: HomeFeedItemType.ForumComment,
       date: fc.comment.createdAt,
-      clusterForumComment: fc,
+      forumComment: fc,
     }));
 
     const merged: HomeFeedItem[] = [...activityItems, ...forumCommentItems];

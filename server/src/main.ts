@@ -14,6 +14,7 @@ import { MetricsInterceptor } from './metrics';
 import { injectResponseSchemas } from './openapi-errors';
 import { PosthogExceptionFilter } from './posthog.filter';
 import { requestContext } from './utils/request-context';
+import { RouteContextGuard } from './utils/request-context.guard';
 
 function validateEnv() {
   const requiredVars = [
@@ -100,6 +101,7 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+  app.useGlobalGuards(new RouteContextGuard());
   app.useGlobalInterceptors(new MetricsInterceptor());
   app.use((req, _res, next) => {
     requestContext.run(

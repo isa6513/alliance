@@ -1,3 +1,8 @@
+import {
+  canSubmitWithdrawal,
+  withdrawalFlagsFromOption,
+  type WithdrawalOption,
+} from "@alliance/common/actionActivity";
 import { errorMessage } from "@alliance/common/errorMessage";
 import { type DeviceVisibilityTarget } from "@alliance/common/forms/device";
 import { type DisplayBlock } from "@alliance/common/forms/display-blocks";
@@ -16,8 +21,8 @@ import {
 import { type VisibleIfFormula } from "@alliance/common/forms/visible-if-formula";
 import {
   FormResponseDto,
-  SubmitFormDto,
   imagesUploadImage,
+  SubmitFormDto,
   tasksGetForm,
   tasksGetFormResponsesAdmin,
   tasksGetMyFormResponse,
@@ -43,6 +48,11 @@ import {
   schemaHasUserHasCityCondition,
   validateFieldValue as validateFieldValueShared,
 } from "@alliance/shared/formrenderer";
+import {
+  WITHDRAWAL_OPTION_LABELS,
+  WITHDRAWAL_OPTIONS,
+  type ActionWithdrawal,
+} from "@alliance/shared/lib/actionTaskPanel";
 import {
   guestReferral,
   outputFieldPublicToggle,
@@ -87,11 +97,7 @@ type FormRendererProps = {
   editing?: boolean;
   disableOptionRandomization?: boolean;
   onFormStarted?: () => void;
-  onAbandonAction?: (
-    outOfTime: boolean,
-    reason: string,
-    partialFormData: SubmitFormDto,
-  ) => void;
+  onAbandonAction?: (withdrawal: ActionWithdrawal) => void;
   followUp?: boolean;
   renderFormAsCompleted?: boolean;
   completedFormResponse?: FormResponseDto;
@@ -372,8 +378,8 @@ const FormRenderer = ({
 
   // Dropdown state for "decline to participate" options
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [otherReasonSelected, setOtherReasonSelected] = useState(false);
-  const [outOfTimeSelected, setOutOfTimeSelected] = useState(false);
+  const [withdrawalOption, setWithdrawalOption] =
+    useState<WithdrawalOption | null>(null);
   const [customReason, setCustomReason] = useState("");
   const ref = useOutsideClick(() => setDropdownOpen(false));
   const [currentUserLocation, setCurrentUserLocation] =
@@ -1349,21 +1355,11 @@ const FormRenderer = ({
     await validatePage(currentPageIndex, true);
   }, [formData, form, onSubmit]);
 
-  const handleOutOfTime = () => {
-    setOutOfTimeSelected(!outOfTimeSelected);
-    if (otherReasonSelected) {
-      setOtherReasonSelected(false);
-    }
+  const toggleWithdrawalOption = (option: WithdrawalOption) => {
+    setWithdrawalOption((previous) => (previous === option ? null : option));
   };
 
-  const handleOtherReason = () => {
-    setOtherReasonSelected(!otherReasonSelected);
-    if (outOfTimeSelected) {
-      setOutOfTimeSelected(false);
-    }
-  };
-
-  const handleAbandon = () => {
+  const handleAbandon = (option: WithdrawalOption) => {
     if (formSnapshotId === null) {
       throw new Error(
         "FormRenderer: formSnapshotId is required to abandon a form",
@@ -1378,7 +1374,11 @@ const FormRenderer = ({
       publicAnswers: resolvedPublicAnswers,
     };
 
-    onAbandonAction?.(outOfTimeSelected, customReason, submissionPayload);
+    onAbandonAction?.({
+      ...withdrawalFlagsFromOption(option),
+      reason: customReason.trim(),
+      partialFormData: submissionPayload,
+    });
     setDropdownOpen(false);
   };
 
@@ -1821,25 +1821,19 @@ const FormRenderer = ({
                 ref={ref}
               >
                 <p className="mb-1 text-center">Withdrawal options</p>
-                <BaseButton
-                  className={cn(
-                    "justify-start",
-                    outOfTimeSelected && "bg-zinc-100",
-                  )}
-                  onClick={handleOutOfTime}
-                >
-                  Took more than 15 minutes
-                </BaseButton>
-                <BaseButton
-                  className={cn(
-                    "justify-start",
-                    otherReasonSelected && "bg-zinc-100",
-                  )}
-                  onClick={handleOtherReason}
-                >
-                  Other reason
-                </BaseButton>
-                {(otherReasonSelected || outOfTimeSelected) && (
+                {WITHDRAWAL_OPTIONS.map((option) => (
+                  <BaseButton
+                    key={option}
+                    className={cn(
+                      "justify-start",
+                      withdrawalOption === option && "bg-zinc-100",
+                    )}
+                    onClick={() => toggleWithdrawalOption(option)}
+                  >
+                    {WITHDRAWAL_OPTION_LABELS[option]}
+                  </BaseButton>
+                ))}
+                {withdrawalOption !== null && (
                   <>
                     <textarea
                       className="w-full h-20 border border-gray-300 rounded-md px-3 py-2 bg-white"
@@ -1849,7 +1843,11 @@ const FormRenderer = ({
                     />
                     <BaseButton
                       variant={BaseButtonVariant.Black}
-                      onClick={handleAbandon}
+                      onClick={() => handleAbandon(withdrawalOption)}
+                      disabled={
+                        submitting ||
+                        !canSubmitWithdrawal(withdrawalOption, customReason)
+                      }
                     >
                       Withdraw
                     </BaseButton>

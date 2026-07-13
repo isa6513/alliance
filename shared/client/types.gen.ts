@@ -1638,6 +1638,7 @@ export type OptOutActionDto = {
     actionId: number;
     reason: string;
     outOfTime: boolean;
+    isMoral: boolean;
     partialFormData?: {
         [key: string]: unknown;
     };
@@ -2033,7 +2034,7 @@ export type SetPriorityDto = {
     generalUpdatePriorities: Array<SetGeneralUpdatePriorityDto>;
 };
 
-export type HomeFeedItemType = 'activity' | 'cluster_forum_comment';
+export type HomeFeedItemType = 'activity' | 'forum_comment';
 
 export type HomeFeedForumCommentDto = {
     comment: CommentDto;
@@ -2047,7 +2048,7 @@ export type HomeFeedItemDto = {
     type: HomeFeedItemType;
     date: string;
     activity?: ActionActivityDto;
-    clusterForumComment?: HomeFeedForumCommentDto;
+    forumComment?: HomeFeedForumCommentDto;
 };
 
 export type CommunityCompletedActionsCountDto = {
@@ -2861,6 +2862,7 @@ export type UpdatePostAuthorsDto = {
 
 export type CreateActionPartnershipResponseDto = {
     organizationName: string;
+    organizationWebsite: string;
     personName: string;
     contact: string;
     outreachChannels: Array<string>;
@@ -2886,6 +2888,7 @@ export type ActionPartnershipNoteDto = {
 export type ActionPartnershipResponseDto = {
     id: number;
     organizationName: string;
+    organizationWebsite: string;
     personName: string;
     contact: string;
     outreachChannels: Array<string>;

@@ -1,3 +1,7 @@
+import { Logger, OnModuleDestroy } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   ConnectedSocket,
   OnGatewayConnection,
@@ -6,18 +10,15 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Server, Socket } from 'socket.io';
 import type { JwtPayload } from 'src/auth/guards/jwtreq';
-import { MessagingEvents } from './messaging.events';
-import { MessageDto } from './dto/messaging.dto';
-import { ConversationService } from './conversation.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Participant } from './entities/participant.entity';
+import { DetachedWorkTracker } from 'src/utils/detached-work';
 import type { Repository } from 'typeorm';
+import { ConversationService } from './conversation.service';
+import { MessageDto } from './dto/messaging.dto';
+import { Participant } from './entities/participant.entity';
 import { extractTokenFromSocket } from './gateway.utils';
+import { MessagingEvents } from './messaging.events';
 
 interface MessageCreatedPayload {
   conversationId: number;
@@ -32,12 +33,40 @@ interface MessageCreatedPayload {
   namespace: '/messaging/overview',
 })
 export class MessagingOverviewGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  implements
+    OnGatewayInit,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+    OnModuleDestroy
+{
   @WebSocketServer()
   server: Server;
 
   private readonly logger = new Logger(MessagingOverviewGateway.name);
   private readonly socketUsers = new Map<string, number>();
+  private readonly detachedWork = new DetachedWorkTracker();
+
+  private readonly onMessageCreated = (payload: MessageCreatedPayload) => {
+    this.detachedWork.track(
+      this.handleMessageCreated(payload).catch((error: Error) =>
+        this.logger.warn(
+          `Failed to emit unread updates for conversation ${payload.conversationId}: ${error.message}`,
+        ),
+      ),
+    );
+  };
+
+  private readonly onConversationUpdated = (payload: {
+    conversationId: number;
+  }) => {
+    this.detachedWork.track(
+      this.handleConversationUpdated(payload).catch((error: Error) =>
+        this.logger.warn(
+          `Failed to emit updates for conversation ${payload.conversationId}: ${error.message}`,
+        ),
+      ),
+    );
+  };
 
   constructor(
     private readonly jwtService: JwtService,
@@ -46,14 +75,23 @@ export class MessagingOverviewGateway
     @InjectRepository(Participant)
     private readonly participantRepository: Repository<Participant>,
   ) {
-    this.eventEmitter.on(
-      MessagingEvents.MessageCreated,
-      this.handleMessageCreated.bind(this),
-    );
+    this.eventEmitter.on(MessagingEvents.MessageCreated, this.onMessageCreated);
     this.eventEmitter.on(
       MessagingEvents.ConversationUpdated,
-      this.handleConversationUpdated.bind(this),
+      this.onConversationUpdated,
     );
+  }
+
+  async onModuleDestroy() {
+    this.eventEmitter.off(
+      MessagingEvents.MessageCreated,
+      this.onMessageCreated,
+    );
+    this.eventEmitter.off(
+      MessagingEvents.ConversationUpdated,
+      this.onConversationUpdated,
+    );
+    await this.detachedWork.drain();
   }
 
   afterInit(server: Server) {
@@ -115,7 +153,8 @@ export class MessagingOverviewGateway
           });
         } catch (error) {
           this.logger.warn(
-            `Failed to emit unread update to user ${userId} for conversation ${payload.conversationId}: ${(error as Error).message ?? error
+            `Failed to emit unread update to user ${userId} for conversation ${payload.conversationId}: ${
+              (error as Error).message ?? error
             }`,
           );
         }
@@ -148,7 +187,8 @@ export class MessagingOverviewGateway
           });
         } catch (error) {
           this.logger.warn(
-            `Failed to emit conversation update to user ${userId} for conversation ${payload.conversationId}: ${(error as Error).message ?? error
+            `Failed to emit conversation update to user ${userId} for conversation ${payload.conversationId}: ${
+              (error as Error).message ?? error
             }`,
           );
         }

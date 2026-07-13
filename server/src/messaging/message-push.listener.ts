@@ -1,18 +1,28 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Participant } from './entities/participant.entity';
-import { Conversation, ConversationType } from './entities/conversation.entity';
-import { PushService, CreatePushMessage } from 'src/push/push.service';
-import { MessagingGateway } from './messaging.gateway';
-import { MessagingEvents } from './messaging.events';
-import { MessageDto } from './dto/messaging.dto';
+import { CreatePushMessage, PushService } from 'src/push/push.service';
 import { conversationUrl } from 'src/search/approutes';
+import { DetachedWorkTracker } from 'src/utils/detached-work';
+import { Repository } from 'typeorm';
+import { MessageDto } from './dto/messaging.dto';
+import { Conversation, ConversationType } from './entities/conversation.entity';
+import { Participant } from './entities/participant.entity';
+import { MessagingEvents } from './messaging.events';
+import { MessagingGateway } from './messaging.gateway';
 
 @Injectable()
-export class MessagePushListener {
+export class MessagePushListener implements OnModuleDestroy {
   private readonly logger = new Logger(MessagePushListener.name);
+  private readonly detachedWork = new DetachedWorkTracker();
+
+  private readonly onMessageCreated = (payload: {
+    conversationId: number;
+    message: MessageDto;
+  }) => {
+    // handleMessageCreated never rejects: its body is wrapped in try/catch
+    this.detachedWork.track(this.handleMessageCreated(payload));
+  };
 
   constructor(
     private readonly eventEmitter: EventEmitter2,
@@ -23,10 +33,15 @@ export class MessagePushListener {
     private readonly pushService: PushService,
     private readonly messagingGateway: MessagingGateway,
   ) {
-    this.eventEmitter.on(
+    this.eventEmitter.on(MessagingEvents.MessageCreated, this.onMessageCreated);
+  }
+
+  async onModuleDestroy() {
+    this.eventEmitter.off(
       MessagingEvents.MessageCreated,
-      this.handleMessageCreated.bind(this),
+      this.onMessageCreated,
     );
+    await this.detachedWork.drain();
   }
 
   private async handleMessageCreated(payload: {

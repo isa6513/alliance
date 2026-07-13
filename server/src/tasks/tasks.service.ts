@@ -1,4 +1,7 @@
-import { ActionActivityType } from '@alliance/common/actionActivity';
+import {
+  ActionActivityType,
+  withdrawalHasRequiredReason,
+} from '@alliance/common/actionActivity';
 import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
 import {
   FormSchema,
@@ -930,10 +933,12 @@ export class TasksService {
     formId: number,
     actionId: number,
     userId: number,
-    reason: string,
-    outOfTime: boolean,
+    withdrawal: { reason: string; outOfTime: boolean; isMoral: boolean },
     partialFormData: SubmitFormDto,
   ) {
+    if (!withdrawalHasRequiredReason(withdrawal)) {
+      throw new BadRequestException('A withdrawal reason is required');
+    }
     const form = await this.getForm(formId);
     const user = await this.userService.findOneOrFail(userId);
 
@@ -950,8 +955,9 @@ export class TasksService {
       userId,
       type: ActionActivityType.USER_WONT_COMPLETE,
       taskFormResponse: savedForm,
-      declineReason: reason,
-      isOutOfTime: outOfTime,
+      declineReason: withdrawal.reason,
+      isOutOfTime: withdrawal.outOfTime,
+      isMoral: withdrawal.isMoral,
     });
   }
 

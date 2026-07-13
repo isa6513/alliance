@@ -8,6 +8,7 @@ import {
   tasksSubmitForm,
   tasksSubmitPublicForm,
 } from "@alliance/shared/client";
+import type { ActionWithdrawal } from "@alliance/shared/lib/actionTaskPanel";
 import { captureException } from "@alliance/shared/lib/analytics";
 import { noop } from "@alliance/shared/lib/constants";
 import { useQuery } from "@tanstack/react-query";
@@ -22,11 +23,7 @@ interface ActionTaskPanelFormProps {
   taskFormId: number;
   onCompleteAction: ((sendComplete: boolean) => void) | null;
   onFormStarted: () => void;
-  onAbandonAction?: (
-    outOfTime: boolean,
-    reason: string,
-    partialFormData: SubmitFormDto,
-  ) => void;
+  onAbandonAction?: (withdrawal: ActionWithdrawal) => void;
   actionId: number;
   scrollPageTo: (y: number, animated?: boolean) => void;
   scrollToEnd: (animated?: boolean) => void;

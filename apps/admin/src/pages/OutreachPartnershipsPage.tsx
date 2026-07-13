@@ -16,6 +16,13 @@ const formatDateTime = (value: string): string =>
     timeStyle: "short",
   });
 
+const getWebsiteHref = (website: string): string => {
+  if (/^https?:\/\//i.test(website)) {
+    return website;
+  }
+  return `https://${website}`;
+};
+
 const getDefaultNoteDate = (): string => {
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -239,6 +246,16 @@ function ResponseCard({
               <h2 className="text-xl font-semibold">
                 {response.organizationName}
               </h2>
+              {response.organizationWebsite.trim() ? (
+                <a
+                  href={getWebsiteHref(response.organizationWebsite)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-link"
+                >
+                  {response.organizationWebsite}
+                </a>
+              ) : null}
               <p className="text-sm text-zinc-500">
                 Submitted {formatDateTime(response.createdAt)}
               </p>

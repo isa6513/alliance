@@ -56,3 +56,70 @@ export const actionActivityCommentable = {
   user_wont_complete: false,
   user_dismissed: false,
 } as const satisfies Record<ActionActivityType, boolean>;
+
+/**
+ * Options offered in the withdrawal (`USER_WONT_COMPLETE`) UI. Display labels
+ * live in `WITHDRAWAL_OPTION_LABELS`; on the wire the option is encoded as
+ * the `outOfTime`/`isMoral` boolean pair (see `withdrawalOptionFromFlags`).
+ */
+export type WithdrawalOption = "out_of_time" | "moral" | "other";
+
+/** Options that require the user to type a reason before withdrawing. */
+const WITHDRAWAL_OPTION_REQUIRES_REASON = {
+  out_of_time: false,
+  moral: true,
+  other: true,
+} as const satisfies Record<WithdrawalOption, boolean>;
+
+export function canSubmitWithdrawal(
+  option: WithdrawalOption | null,
+  reason: string,
+): boolean {
+  if (option === null) return false;
+  return !WITHDRAWAL_OPTION_REQUIRES_REASON[option] || reason.trim().length > 0;
+}
+
+/** Decodes the wire encoding of a withdrawal option. */
+export function withdrawalOptionFromFlags(flags: {
+  outOfTime: boolean;
+  isMoral: boolean;
+}): WithdrawalOption {
+  if (flags.outOfTime) return "out_of_time";
+  if (flags.isMoral) return "moral";
+  return "other";
+}
+
+const WITHDRAWAL_OPTION_FLAGS = {
+  out_of_time: { outOfTime: true, isMoral: false },
+  moral: { outOfTime: false, isMoral: true },
+  other: { outOfTime: false, isMoral: false },
+} as const satisfies Record<
+  WithdrawalOption,
+  { outOfTime: boolean; isMoral: boolean }
+>;
+
+/**
+ * Encodes a withdrawal option as its wire flags — the inverse of
+ * `withdrawalOptionFromFlags`.
+ */
+export function withdrawalFlagsFromOption(option: WithdrawalOption): {
+  outOfTime: boolean;
+  isMoral: boolean;
+} {
+  return WITHDRAWAL_OPTION_FLAGS[option];
+}
+
+/**
+ * Server-side counterpart of `canSubmitWithdrawal`, keyed on the wire flags
+ * instead of the UI option.
+ */
+export function withdrawalHasRequiredReason(withdrawal: {
+  outOfTime: boolean;
+  isMoral: boolean;
+  reason: string;
+}): boolean {
+  return canSubmitWithdrawal(
+    withdrawalOptionFromFlags(withdrawal),
+    withdrawal.reason,
+  );
+}

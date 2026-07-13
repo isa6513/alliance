@@ -4,6 +4,8 @@ export interface RequestContext {
   requestId: string;
   method: string;
   url: string;
+  route?: string;
+  handler?: string;
   userId?: number;
 }
 

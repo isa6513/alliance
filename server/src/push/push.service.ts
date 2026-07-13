@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
 import { UserDevice } from 'src/user/entities/user-device.entity';
 import {
+  In,
   IsNull,
   LessThan,
   LessThanOrEqual,
@@ -16,6 +17,11 @@ import {
 import { Push } from './push.entity';
 
 export const EXPO_CLIENT = Symbol('EXPO_CLIENT');
+
+// Expo discards receipts ~24h after delivery, so a pending push older than
+// this will never get a receipt and must stop being re-checked. 48h = 24h
+// receipt TTL + generous slack for delivery lagging creation.
+const RECEIPT_MAX_AGE_MS = 1000 * 60 * 60 * 48;
 
 export class CreatePushMessage extends PickType(Push, [
   'expoPushToken',
@@ -185,6 +191,8 @@ export class PushService {
     const receiptIdChunks =
       this.expo.chunkPushNotificationReceiptIds(receiptIds);
 
+    const resolvedPushes = new Set<Push>();
+
     for (const chunk of receiptIdChunks) {
       try {
         const receipts =
@@ -192,17 +200,18 @@ export class PushService {
 
         for (const receiptId in receipts) {
           const receipt = receipts[receiptId];
-          const pushIdx = idToPushIdx.get(receiptId)!;
+          const push = pendingPushes[idToPushIdx.get(receiptId)!];
           console.log('updating push status', receipt.status);
-          pendingPushes[pushIdx].receiptStatus = receipt.status;
+          push.receiptStatus = receipt.status;
+          resolvedPushes.add(push);
           if (receipt.status === 'ok') {
             continue;
           } else if (receipt.status === 'error') {
             console.error(
               `There was an error sending a notification: ${receipt.message}`,
             );
-            pendingPushes[pushIdx].errorCode = receipt.details?.error;
-            pendingPushes[pushIdx].errorMessage = receipt.message;
+            push.errorCode = receipt.details?.error;
+            push.errorMessage = receipt.message;
 
             if (receipt.details && receipt.details.error) {
               // https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
@@ -214,9 +223,34 @@ export class PushService {
         console.error(error);
       }
     }
-    for (const push of pendingPushes) {
-      push.lastCheckedStatusAt = new Date();
+
+    const now = new Date();
+    for (const push of resolvedPushes) {
+      push.lastCheckedStatusAt = now;
     }
-    return await this.pushRepository.save(pendingPushes);
+    const saved = await this.pushRepository.save([...resolvedPushes]);
+
+    // Pushes with no receipt yet only need their recheck timestamp bumped;
+    // one batched UPDATE instead of a row-at-a-time save().
+    const unresolvedIds = pendingPushes
+      .filter((push) => !resolvedPushes.has(push))
+      .map((push) => push.id);
+    if (unresolvedIds.length > 0) {
+      await this.pushRepository.update(
+        { id: In(unresolvedIds) },
+        { lastCheckedStatusAt: now },
+      );
+    }
+
+    await this.pushRepository.update(
+      {
+        receiptStatus: 'pending',
+        receiptId: Not(IsNull()),
+        createdAt: LessThan(new Date(Date.now() - RECEIPT_MAX_AGE_MS)),
+      },
+      { receiptStatus: 'expired' },
+    );
+
+    return saved;
   }
 }
