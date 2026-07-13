@@ -43,6 +43,11 @@ export function useActionHandlers(
     reloadTasks();
   }, [action, reloadTasks]);
 
+  const onUpdateAction = useCallback(async () => {
+    if (!action) return;
+    reloadTasks();
+  }, [action, reloadTasks]);
+
   const onOptOutAction = useCallback(async () => {
     if (!action) return;
     setAction((action) => ({
@@ -57,6 +62,7 @@ export function useActionHandlers(
     loading,
     refetchAction: fetchAction,
     onCompleteAction,
+    onUpdateAction,
     onOptOutAction,
   };
 }

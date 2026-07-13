@@ -1,30 +1,30 @@
 import { ActionActivityType } from '@alliance/common/actionActivity';
 import type { DeviceVisibilityTarget } from '@alliance/common/forms/device';
 import {
+  FormSchema,
+  Page,
+  collectSourceFormIds,
+  formSchema,
+  isQuestionField,
   type AggregateViewSchema,
   type AggregateViewValue,
   type AnyField,
   type CheckboxExtractionTarget,
   type CheckboxField,
   type CityFieldValue,
-  collectSourceFormIds,
   type CustomComponentField,
-  formSchema,
-  FormSchema,
   type FormValue,
-  isQuestionField,
   type ListField,
-  Page,
 } from '@alliance/common/forms/form-schema';
 import {
-  type FormSchemaValidationError,
   validateFormSchema,
+  type FormSchemaValidationError,
 } from '@alliance/common/forms/form-schema-validate';
 import {
-  type ConditionExtras,
   isElementCurrentlyVisible,
   isPageCurrentlyVisible,
   stripHiddenAnswers,
+  type ConditionExtras,
 } from '@alliance/common/forms/visibility';
 import type { Condition } from '@alliance/common/forms/visible-if-formula';
 import { R, type Result } from '@alliance/common/result';
@@ -81,11 +81,11 @@ import {
   CreateFormDto,
   FormDto,
   FormResponseDto,
-  type FormSnapshotMigration,
-  type SnapshotResponseGroup,
   SubmitFollowUpFormDto,
   SubmitFormDto,
   UpdateFormDto,
+  type FormSnapshotMigration,
+  type SnapshotResponseGroup,
 } from './form.dto';
 import { FormSnapshotService } from './formsnapshot.service';
 
@@ -114,7 +114,7 @@ export class TasksService {
     private aiDetectionQueryService: AiDetectionQueryService,
     private formSnapshotService: FormSnapshotService,
     private actionFormVariantService: ActionFormVariantService,
-  ) {}
+  ) { }
 
   /** Returns true if value satisfies required validation for the field. Used for both top-level and list sub-field validation. */
   private hasRequiredValue(field: AnyField, value: unknown): boolean {
@@ -464,11 +464,11 @@ export class TasksService {
               rawList,
             )
               ? (rawList as unknown[]).filter(
-                  (item): item is Record<string, FormValue> =>
-                    item !== null &&
-                    typeof item === 'object' &&
-                    !Array.isArray(item),
-                )
+                (item): item is Record<string, FormValue> =>
+                  item !== null &&
+                  typeof item === 'object' &&
+                  !Array.isArray(item),
+              )
               : [];
             const minCards = Math.max(
               0,
@@ -587,7 +587,7 @@ export class TasksService {
     }
   }
 
-  async submitForm(
+  async saveFormSubmission(
     formId: number,
     userId: number,
     submitFormDto: SubmitFormDto,
@@ -606,26 +606,6 @@ export class TasksService {
       throw new ForbiddenException(
         'This form is not the variant assigned to you for this action',
       );
-    }
-
-    const action = await this.actionRepository.findOne({
-      where: { id: submitFormDto.actionId },
-    });
-    const variants = await this.actionFormVariantService.listForAction(
-      submitFormDto.actionId,
-    );
-    const actionFormIds = new Set<number>([formId]);
-    if (action?.taskFormId != null) actionFormIds.add(action.taskFormId);
-    for (const v of variants) actionFormIds.add(v.formId);
-
-    const existingFormResponse = await this.formResponseRepository.findOne({
-      where: {
-        formId: In([...actionFormIds]),
-        user: { id: userId },
-      },
-    });
-    if (existingFormResponse) {
-      throw new BadRequestException('Form already submitted');
     }
 
     const submittedSnapshot = await this.resolveSubmissionSnapshot(
@@ -779,11 +759,69 @@ export class TasksService {
       user,
     });
 
+    return savedForm;
+  }
+
+  async submitForm(
+    formId: number,
+    userId: number,
+    submitFormDto: SubmitFormDto,
+  ): Promise<FormResponse> {
+    const action = await this.actionRepository.findOne({
+      where: { id: submitFormDto.actionId },
+    });
+    const variants = await this.actionFormVariantService.listForAction(
+      submitFormDto.actionId,
+    );
+    const actionFormIds = new Set<number>([formId]);
+    if (action?.taskFormId != null) actionFormIds.add(action.taskFormId);
+    for (const v of variants) actionFormIds.add(v.formId);
+
+    const existingFormResponse = await this.formResponseRepository.findOne({
+      where: {
+        formId: In([...actionFormIds]),
+        user: { id: userId },
+      },
+    });
+    if (existingFormResponse) {
+      throw new BadRequestException('Form already submitted');
+    }
+
+    const savedForm = await this.saveFormSubmission(formId, userId, submitFormDto);
+
     await this.actionsService.completeAction(submitFormDto.actionId, userId, {
       taskFormResponse: savedForm,
     });
 
     return savedForm;
+  }
+
+  async submitUpdatedForm(
+    formId: number,
+    userId: number,
+    submitFormDto: SubmitFormDto,
+  ): Promise<FormResponse> {
+    const action = await this.actionRepository.findOne({
+      where: { id: submitFormDto.actionId },
+    });
+    const variants = await this.actionFormVariantService.listForAction(
+      submitFormDto.actionId,
+    );
+    const actionFormIds = new Set<number>([formId]);
+    if (action?.taskFormId != null) actionFormIds.add(action.taskFormId);
+    for (const v of variants) actionFormIds.add(v.formId);
+
+    const existingFormResponse = await this.formResponseRepository.findOne({
+      where: {
+        formId: In([...actionFormIds]),
+        user: { id: userId },
+      },
+    });
+    if (!existingFormResponse) {
+      throw new BadRequestException('There is no existing form to update');
+    }
+
+    return await this.saveFormSubmission(formId, userId, submitFormDto);
   }
 
   /** Submit a follow-up form response. Multiple submissions per user are allowed (no unique check). */
@@ -989,9 +1027,9 @@ export class TasksService {
       return dto.formSnapshotId === form.formSnapshotId && form.formSnapshot
         ? form.formSnapshot
         : this.formSnapshotService.findHistoricalOrThrow(
-            form.id,
-            dto.formSnapshotId,
-          );
+          form.id,
+          dto.formSnapshotId,
+        );
     }
     if (!dto.schemaSnapshot) {
       throw new BadRequestException(
@@ -1135,6 +1173,7 @@ export class TasksService {
     const responses = await this.formResponseRepository.find({
       where: { formId: In(formIds) },
       relations: { user: true, formSnapshot: true },
+      order: { createdAt: 'DESC', id: 'DESC' },
     });
     if (!responses.length) {
       return [];
@@ -1146,7 +1185,17 @@ export class TasksService {
         responses.map((response) => response.id),
       );
 
-    return responses.map(
+    return responses.reduce((filteredResponses: Array<FormResponse>, response: FormResponse) => {
+      for (let i = 0; i < filteredResponses.length; i++) {
+        let filteredResponse = filteredResponses[i];
+        if (filteredResponse.formId == response.formId && filteredResponse.user?.id == response.user?.id)
+          return filteredResponses;
+      }
+
+      filteredResponses.push(response);
+
+      return filteredResponses;
+    }, new Array<FormResponse>()).map(
       (response) =>
         new FormResponseDto({
           response,

@@ -64,12 +64,12 @@ import BaseButton, {
 } from "../ui/BaseButton";
 import ConfettiWrapper from "../ui/ConfettiWrapper";
 import Dropdown from "../ui/Dropdown";
+import RenderDisplayBlock from "./RenderDisplayBlock";
+import RenderField from "./RenderField";
 import {
   useFormPageDurationTracking,
   useFormValidationErrorTracking,
 } from "./formAnalytics";
-import RenderDisplayBlock from "./RenderDisplayBlock";
-import RenderField from "./RenderField";
 
 type FormRendererProps = {
   form: FormSchema;
@@ -84,6 +84,7 @@ type FormRendererProps = {
   phDistinctId?: string;
   sessionReplayUrl?: string;
   user?: Omit<UserDto, "email">;
+  editing?: boolean;
   disableOptionRandomization?: boolean;
   onFormStarted?: () => void;
   onAbandonAction?: (
@@ -104,15 +105,15 @@ type FormRendererProps = {
   onSubmit: ((data: SubmitFormDto) => Promise<boolean>) | null; // null for admin preview
   scrollContainerRef?: React.RefObject<HTMLElement | null>;
 } & (
-  | {
+    | {
       isGeneralUpdate?: false;
       onDismiss?: undefined;
     }
-  | {
+    | {
       isGeneralUpdate: true;
       onDismiss?: () => void;
     }
-);
+  );
 
 export { computeFormStorageKey };
 
@@ -159,6 +160,7 @@ const FormRenderer = ({
   isGeneralUpdate,
   onDismiss,
   scrollContainerRef,
+  editing,
 }: FormRendererProps) => {
   // Compute schema and a namespaced storage key for persistence (if enabled)
   const schema = form as unknown as FormSchema;
@@ -326,9 +328,9 @@ const FormRenderer = ({
 
     const draftAnswers = draftFormResponse?.answers
       ? filterAnswersByFieldIds(
-          draftFormResponse.answers as Record<string, FormValue>,
-          fieldLookup,
-        )
+        draftFormResponse.answers as Record<string, FormValue>,
+        fieldLookup,
+      )
       : null;
     if (draftAnswers && Object.keys(draftAnswers).length > 0) {
       draftLockedRef.current = true;
@@ -1042,11 +1044,11 @@ const FormRenderer = ({
         firstInvalid?.id ??
         (hasAnyError
           ? (() => {
-              const key = Object.keys(updates).find(
-                (k) => updates[k] && updates[k]!.trim().length > 0,
-              );
-              return key?.includes(":") ? key.split(":")[0] : key;
-            })()
+            const key = Object.keys(updates).find(
+              (k) => updates[k] && updates[k]!.trim().length > 0,
+            );
+            return key?.includes(":") ? key.split(":")[0] : key;
+          })()
           : undefined);
 
       return {
@@ -1103,7 +1105,7 @@ const FormRenderer = ({
 
   const currentPage =
     currentPageIndex < schema.pages.length &&
-    visiblePageIndices.includes(currentPageIndex)
+      visiblePageIndices.includes(currentPageIndex)
       ? schema.pages[currentPageIndex]
       : null;
   const isLastPage = nextVisiblePageIndex === null;
@@ -1639,11 +1641,11 @@ const FormRenderer = ({
                 readOnly
                   ? undefined
                   : (event) => {
-                      const nextPublic = useMakePublicToggle
-                        ? event.target.checked
-                        : !event.target.checked;
-                      handlePublicToggleChange(field.id, nextPublic);
-                    }
+                    const nextPublic = useMakePublicToggle
+                      ? event.target.checked
+                      : !event.target.checked;
+                    handlePublicToggleChange(field.id, nextPublic);
+                  }
               }
             />
             {toggleLabel}
@@ -1783,7 +1785,7 @@ const FormRenderer = ({
                               onKeyDown={onKeyDown}
                               onPointerDown={onPointerDown}
                             >
-                              {schema.submit?.label ||
+                              {(editing ? "Save Changes" : schema.submit?.label) ||
                                 (followUp ? "Submit" : "Complete")}
                             </BaseButton>
                           )}
@@ -1808,7 +1810,7 @@ const FormRenderer = ({
             )}
           </div>
 
-          {onAbandonAction && !readOnly && !publicAction && !followUp && (
+          {onAbandonAction && !editing && !readOnly && !publicAction && !followUp && (
             <div className="relative">
               <BaseButton onClick={() => setDropdownOpen(!dropdownOpen)}>
                 <Ellipsis size={15} />

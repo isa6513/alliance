@@ -59,7 +59,7 @@ export class TasksController {
   constructor(
     private readonly tasksService: TasksService,
     private readonly authService: AuthService,
-  ) {}
+  ) { }
 
   @Post('submitForm/:id')
   @UseGuards(AuthGuard)
@@ -71,6 +71,19 @@ export class TasksController {
   ): Promise<FormResponseDto> {
     return new FormResponseDto({
       response: await this.tasksService.submitForm(+id, req.user.sub, body),
+    });
+  }
+
+  @Post('submitUpdatedForm/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({ type: FormResponseDto })
+  async submitUpdatedForm(
+    @Request() req: JwtRequest,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: SubmitFormDto,
+  ): Promise<FormResponseDto> {
+    return new FormResponseDto({
+      response: await this.tasksService.submitUpdatedForm(+id, req.user.sub, body),
     });
   }
 

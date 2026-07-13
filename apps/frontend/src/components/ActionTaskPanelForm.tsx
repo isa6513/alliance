@@ -8,6 +8,7 @@ import {
   tasksGetLinkedGuestDraft,
   tasksSubmitForm,
   tasksSubmitPublicForm,
+  tasksSubmitUpdatedForm,
 } from "@alliance/shared/client";
 import { captureException } from "@alliance/shared/lib/analytics";
 import { CardStyle } from "@alliance/shared/styles/card";
@@ -39,6 +40,7 @@ interface ActionTaskPanelFormProps {
   redirectOnComplete?: boolean;
   onSubmitted?: (formResponse: FormResponseDto) => void;
   scrollContainerRef?: RefObject<HTMLElement | null>;
+  editing?: boolean;
 }
 
 const ActionTaskPanelForm = ({
@@ -54,6 +56,7 @@ const ActionTaskPanelForm = ({
   redirectOnComplete = publicAction,
   onSubmitted,
   scrollContainerRef,
+  editing
 }: ActionTaskPanelFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const { user, isAuthenticated, refreshUser } = useAuth();
@@ -98,50 +101,52 @@ const ActionTaskPanelForm = ({
 
   const handleSubmitForm = onCompleteAction
     ? async (data: SubmitFormDto): Promise<boolean> => {
-        setError(null);
+      setError(null);
 
-        const response = isAuthenticated
-          ? await tasksSubmitForm({
-              path: { id: taskFormId },
-              body: data,
-            })
-          : await tasksSubmitPublicForm({
-              path: { id: taskFormId },
-              body: data,
-            });
-        if (response.response.ok) {
-          if (response.data) {
-            onSubmitted?.(response.data);
-          }
-          if (!isAuthenticated && redirectOnComplete) {
-            window.location.href = "/actions/completed";
-          }
-          if (typeof window !== "undefined" && form) {
-            const storageKey = computeFormStorageKey({
-              formId: form.id,
-              instanceId: taskFormId,
-            });
-            window.localStorage.removeItem(storageKey);
-          }
-          if (user && !user.hasActiveContract) {
-            //TODO: better handling of user refresh (things used to break if the user signed a contract in another tab then went back to the first one)
-            refreshUser();
-          }
-          onCompleteAction(false); //tasksSubmitForm handles completion here
-          return true;
-        }
-        if (response.error?.message === "Form already submitted") {
-          window.location.reload();
-          return false;
-        }
-        console.error(response.error);
-        captureException(ExceptionEvent.FormSubmitError, response.error, {
-          actionId,
-          $exception_fingerprint: "FormSubmitError",
+      const response = isAuthenticated
+        ? (editing ? await tasksSubmitUpdatedForm({
+          path: { id: taskFormId },
+          body: data,
+        }) : await tasksSubmitForm({
+          path: { id: taskFormId },
+          body: data,
+        })) : await tasksSubmitPublicForm({
+          path: { id: taskFormId },
+          body: data,
         });
-        setError("Failed to submit action.");
+      if (response.response.ok) {
+        if (response.data) {
+          onSubmitted?.(response.data);
+        }
+        if (!isAuthenticated && redirectOnComplete) {
+          window.location.href = "/actions/completed";
+        }
+        if (typeof window !== "undefined" && form) {
+          const storageKey = computeFormStorageKey({
+            formId: form.id,
+            instanceId: taskFormId,
+          });
+          window.localStorage.removeItem(storageKey);
+        }
+        if (user && !user.hasActiveContract) {
+          //TODO: better handling of user refresh (things used to break if the user signed a contract in another tab then went back to the first one)
+          refreshUser();
+        }
+        onCompleteAction(false); //tasksSubmitForm handles completion here
+        return true;
+      }
+      if (response.error?.message === "Form already submitted") {
+        window.location.reload();
         return false;
       }
+      console.error(response.error);
+      captureException(ExceptionEvent.FormSubmitError, response.error, {
+        actionId,
+        $exception_fingerprint: "FormSubmitError",
+      });
+      setError("Failed to submit action.");
+      return false;
+    }
     : null;
 
   const { distinctId, sessionReplayUrl } = useMemo(() => {
@@ -151,7 +156,7 @@ const ActionTaskPanelForm = ({
     };
   }, []);
 
-  if (formResponse) {
+  if (disabled && formResponse) {
     return (
       <FormRenderer
         form={formResponse.schemaSnapshot as unknown as FormSchema}
@@ -213,10 +218,11 @@ const ActionTaskPanelForm = ({
           onAbandonAction={onAbandonAction}
           renderFormAsCompleted={disabled}
           publicAction={publicAction}
-          draftFormResponse={draftFormResponse}
+          draftFormResponse={editing ? formResponse : draftFormResponse}
           phDistinctId={distinctId}
           sessionReplayUrl={sessionReplayUrl}
           scrollContainerRef={scrollContainerRef}
+          editing={editing}
         />
       </div>
       {error && (

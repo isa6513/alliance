@@ -28,7 +28,7 @@ import Card from "@alliance/sharedweb/ui/Card";
 import CheckIcon from "@alliance/sharedweb/ui/icons/CheckIcon";
 import { ArrowRight, Link2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { isRouteErrorResponse, Link, useOutletContext } from "react-router";
+import { Link, isRouteErrorResponse, useOutletContext } from "react-router";
 import { Route } from "../../.react-router/types/src/components/+types/ActionPageTaskPanel";
 import { useAuth } from "../lib/AuthContext";
 import { isNonmemberOnPublicActionReferral } from "../lib/publicActionReferral";
@@ -123,6 +123,7 @@ const taskPanelHeaderByState: Record<
     </div>
   ),
   [ActionPageTaskPanelState.ShowTask]: null,
+  [ActionPageTaskPanelState.Editing]: null,
 };
 
 const bodyPaddingClasses = "p-4 sm:p-6";
@@ -143,6 +144,7 @@ const ActionPageTaskPanel = () => {
   const [localGuestFormResponse, setLocalGuestFormResponse] =
     useState<FormResponseDto | null>(null);
   const [animateReferralPanel, setAnimateReferralPanel] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const refCode = referralCode ?? null;
   const signupHref = refCode
     ? `/signup?ref=${encodeURIComponent(refCode)}`
@@ -161,6 +163,7 @@ const ActionPageTaskPanel = () => {
     hasRefCode: !!refCode,
     hasGuestResponse,
     now: new Date(),
+    editing: isEditing
   });
   const resolvedUserRelation = userRelation ?? "none";
   const guestCompleted = state === ActionPageTaskPanelState.GuestCompleted;
@@ -204,23 +207,34 @@ const ActionPageTaskPanel = () => {
     });
     return copyToClipboard(text);
   };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
   const completedHeader = (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-x-3">
         <CheckIcon size={24} />
         <p>{taskHeaders.actionPage.completed}</p>
       </div>
-      {isAuthenticated && (
-        <ShareButton
-          onClick={handleShareCopy}
-          icon={Link2}
-          label={clipboardCopy.share}
-          copiedLabel={clipboardCopy.copiedToClipboard}
-          className="text-zinc-500 hover:text-zinc-700"
-          iconClassName="w-3.5 h-3.5 shrink-0"
-          labelClassName="text-sm order-first"
-        />
-      )}
+      <div className="flex items-center gap-x-3">
+        {isAuthenticated && (
+          <button type="button" onClick={handleEdit} className="flex items-center gap-x-1 transition-colors disabled:cursor-default text-zinc-500 hover:text-zinc-700">
+            <span className="text-sm order-first">Edit</span>
+          </button>
+        )}
+        {isAuthenticated && (
+          <ShareButton
+            onClick={handleShareCopy}
+            icon={Link2}
+            label={clipboardCopy.share}
+            copiedLabel={clipboardCopy.copiedToClipboard}
+            className="text-zinc-500 hover:text-zinc-700"
+            iconClassName="w-3.5 h-3.5 shrink-0"
+            labelClassName="text-sm order-first"
+          />
+        )}
+      </div>
     </div>
   );
 
@@ -257,6 +271,11 @@ const ActionPageTaskPanel = () => {
     };
   }, [isNonmemberPublicReferralAction, referralPanelAnimationNonce]);
 
+  const editingOnCompleteAction = () => {
+    setIsEditing(false);
+    panelHandlers.onCompleteAction();
+  };
+
   const renderStackedCard = (bottom: React.ReactNode) => (
     <div className="relative">
       <StackedCard
@@ -269,11 +288,10 @@ const ActionPageTaskPanel = () => {
               signupHref && (
                 <div className="-mx-4 -mt-4 mb-4 overflow-hidden sm:-mx-6 sm:-mt-6">
                   <div
-                    className={`rounded-b-2xl rounded-t-none border-b border-zinc-200 bg-zinc-50 px-4 py-4 sm:px-6 sm:py-5 ${
-                      !guestCompleted && animateReferralPanel
-                        ? "referral-panel-slide-in"
-                        : ""
-                    }`}
+                    className={`rounded-b-2xl rounded-t-none border-b border-zinc-200 bg-zinc-50 px-4 py-4 sm:px-6 sm:py-5 ${!guestCompleted && animateReferralPanel
+                      ? "referral-panel-slide-in"
+                      : ""
+                      }`}
                   >
                     {guestCompleted ? (
                       <>
@@ -289,7 +307,7 @@ const ActionPageTaskPanel = () => {
                         <p className="text-lg font-semibold leading-8 text-zinc-900">
                           {guestReferral.inviteToTryTask(
                             sharePreviewFirstName ??
-                              guestReferral.defaultReferrerName,
+                            guestReferral.defaultReferrerName,
                           )}
                         </p>
                         <p className="mt-3 text-base leading-7 text-zinc-700">
@@ -341,7 +359,7 @@ const ActionPageTaskPanel = () => {
           action={action}
           {...panelHandlers}
           onCompleteAction={
-            guestMode ? () => {} : panelHandlers.onCompleteAction
+            guestMode ? () => { } : panelHandlers.onCompleteAction
           }
           disabled={formDisabledByState}
           formResponse={effectiveFormResponse}
@@ -369,11 +387,14 @@ const ActionPageTaskPanel = () => {
       );
     case ActionPageTaskPanelState.Optional:
     case ActionPageTaskPanelState.ShowTask:
+    case ActionPageTaskPanelState.Editing:
       return renderStackedCard(
         <ActionTaskPanel
           action={action}
           userRelation={resolvedUserRelation}
           {...panelHandlers}
+          onCompleteAction={isEditing ? editingOnCompleteAction : panelHandlers.onCompleteAction}
+          formResponse={effectiveFormResponse}
         />,
       );
     default:

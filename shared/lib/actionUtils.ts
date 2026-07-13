@@ -151,6 +151,16 @@ export function canCompleteAction(action: ActionDto) {
   );
 }
 
+export function canEditAction(action: ActionDto) {
+  return (
+    action.events
+      .filter((event) => new Date(event.date) <= new Date())
+      .some((event) => event.newStatus === "member_action") &&
+    action.userRelation === "completed" &&
+    (action.canParticipate || action.publicOnly)
+  );
+}
+
 export function shouldCompleteAction(action: ActionDto) {
   return (
     canCompleteAction(action) &&
@@ -290,13 +300,13 @@ export function calculateAllCompletionData(params: {
   actionDeadlineWindowMs: number;
 }):
   | {
-      previous: undefined;
-      current: CompletionData;
-    }
+    previous: undefined;
+    current: CompletionData;
+  }
   | {
-      previous: CompletionData;
-      current: undefined;
-    } {
+    previous: CompletionData;
+    current: undefined;
+  } {
   const { actions, users, actionDeadlineWindowMs } = params;
 
   const relationDetailByActionThenUser = users.reduce(

@@ -17,6 +17,7 @@ export enum ActionPageTaskPanelState {
   ShowTaskWithMissedDeadline = "show_task_with_missed_deadline",
   ShowTask = "show_task",
   Optional = "optional",
+  Editing = "editing"
 }
 
 enum ActionPageTaskPanelEnabled {
@@ -46,6 +47,7 @@ const stateIsDisabled = {
     ActionPageTaskPanelEnabled.Disabled,
   [ActionPageTaskPanelState.Optional]: ActionPageTaskPanelEnabled.Enabled,
   [ActionPageTaskPanelState.ShowTask]: ActionPageTaskPanelEnabled.Enabled,
+  [ActionPageTaskPanelState.Editing]: ActionPageTaskPanelEnabled.Enabled,
 } as const satisfies Record<
   ActionPageTaskPanelState,
   ActionPageTaskPanelEnabled
@@ -72,6 +74,7 @@ export const shouldLoadCompletedTaskFormByState = {
   [ActionPageTaskPanelState.OnboardingSignContractFirst]: false,
   [ActionPageTaskPanelState.Optional]: false,
   [ActionPageTaskPanelState.ShowTask]: false,
+  [ActionPageTaskPanelState.Editing]: false,
 } as const satisfies Record<ActionPageTaskPanelState, boolean>;
 
 type HeaderBodyStyles = {
@@ -117,6 +120,7 @@ export function getActionPageTaskPanelState(params: {
   hasRefCode: boolean;
   hasGuestResponse: boolean;
   now: Date;
+  editing: boolean;
 }): ActionPageTaskPanelState {
   const {
     action,
@@ -126,6 +130,7 @@ export function getActionPageTaskPanelState(params: {
     hasRefCode,
     hasGuestResponse,
     now,
+    editing
   } = params;
 
   if (!isAuthenticated && hasGuestResponse) {
@@ -153,6 +158,10 @@ export function getActionPageTaskPanelState(params: {
 
   if (!userRelation) {
     return ActionPageTaskPanelState.MissingDataOrNotActive;
+  }
+
+  if (userRelation === "completed" && editing) {
+    return ActionPageTaskPanelState.Editing;
   }
 
   if (userRelation === "completed") {

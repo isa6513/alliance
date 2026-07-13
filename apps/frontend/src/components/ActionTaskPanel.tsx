@@ -9,7 +9,7 @@ import {
   ActionTaskPanelPropsShared,
   useTaskFormHandlers,
 } from "@alliance/shared/lib/actionTaskPanel";
-import { canCompleteAction } from "@alliance/shared/lib/actionUtils";
+import { canCompleteAction, canEditAction } from "@alliance/shared/lib/actionUtils";
 import { captureEvent } from "@alliance/shared/lib/analytics";
 import FormRenderer from "@alliance/sharedweb/forms/FormRenderer";
 import { useCallback, useMemo, type RefObject } from "react";
@@ -91,7 +91,9 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     );
   }, [actionError]);
 
-  if ((disabled || formResponse) && action.taskFormId !== undefined) {
+  const canEditForm = canEditAction(action);
+
+  if ((disabled || (formResponse && !canEditForm)) && action.taskFormId !== undefined) {
     return (
       <ActionTaskPanelForm
         taskFormId={action.taskFormId}
@@ -107,7 +109,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
     );
   }
 
-  const canSubmit = canCompleteAction(action) || forceRenderTask;
+  const canSubmit = canCompleteAction(action) || canEditForm || forceRenderTask;
 
   let completionElement = null;
   if (staticTaskFormSchema) {
@@ -129,7 +131,7 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
       <ActionTaskPanelForm
         publicAction={action.publicOnly || guestMode}
         taskFormId={action.taskFormId}
-        onCompleteAction={canSubmit ? handleCompleteWithTracking : null}
+        onCompleteAction={canSubmit ? handleCompleteWithTracking : (null)}
         onFormStarted={handleFormStarted}
         onAbandonAction={onAbandonAction}
         card={card}
@@ -137,6 +139,8 @@ const ActionTaskPanel: React.FC<ActionTaskPanelProps> = ({
         redirectOnComplete={redirectOnComplete}
         onSubmitted={onFormSubmitted}
         scrollContainerRef={scrollContainerRef}
+        formResponse={formResponse}
+        editing={canEditForm}
         disabled={disabled || !canSubmit}
       />
     );

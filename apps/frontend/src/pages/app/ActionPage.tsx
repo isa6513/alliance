@@ -13,9 +13,9 @@ import { zIndex } from "@alliance/sharedweb/ui/zIndex";
 import { X } from "lucide-react";
 import { useCallback, useState } from "react";
 import {
-  href,
   Link,
   Outlet,
+  href,
   useLoaderData,
   useLocation,
   useNavigate,
@@ -48,11 +48,11 @@ export async function loader({
     actionsFindOne({ path: { id: parseInt(id) } }),
     refCode
       ? actionsGetSharePreview({
-          path: { id: parseInt(id) },
-          query: { sid: refCode },
-        })
-          .then((res) => res.data ?? null)
-          .catch(() => null)
+        path: { id: parseInt(id) },
+        query: { sid: refCode },
+      })
+        .then((res) => res.data ?? null)
+        .catch(() => null)
       : Promise.resolve(null),
   ]);
 
@@ -128,7 +128,7 @@ export default function ActionPage() {
     }
   }, []);
 
-  const { action, loading, onCompleteAction, onOptOutAction } =
+  const { action, loading, onCompleteAction, onUpdateAction, onOptOutAction } =
     useActionHandlers(actionId, isAuthenticated, reloadTasks);
 
   const publicMode = !isAuthenticated;
@@ -234,8 +234,8 @@ export default function ActionPage() {
               {guestCompleted
                 ? taskHeaders.actionPage.completed
                 : guestReferral.inviteToTryTask(
-                    sharePreview.firstName ?? guestReferral.defaultReferrerName,
-                  )}
+                  sharePreview.firstName ?? guestReferral.defaultReferrerName,
+                )}
             </h2>
             <p className="mt-4 text-base leading-7 text-zinc-700">
               {guestCompleted
@@ -278,7 +278,7 @@ export default function ActionPage() {
                 showReferralTaskPanel,
                 referralPanelAnimationNonce,
                 onGuestCompletionChange: handleGuestCompletionChange,
-                onCompleteAction,
+                onCompleteAction: action.userRelation === "completed" ? onUpdateAction : onCompleteAction,
                 publicMode,
                 onOptOutAction,
                 activities,
