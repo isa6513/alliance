@@ -590,7 +590,7 @@ export class TasksService {
     }
   }
 
-  async saveFormSubmission(
+  private async saveFormSubmission(
     formId: number,
     userId: number,
     submitFormDto: SubmitFormDto,
@@ -765,11 +765,11 @@ export class TasksService {
     return savedForm;
   }
 
-  async submitForm(
+  private async getExistingFormResponse(
     formId: number,
     userId: number,
     submitFormDto: SubmitFormDto,
-  ): Promise<FormResponse> {
+  ): Promise<FormResponse | null> {
     const action = await this.actionRepository.findOne({
       where: { id: submitFormDto.actionId },
     });
@@ -786,6 +786,17 @@ export class TasksService {
         user: { id: userId },
       },
     });
+
+    return existingFormResponse;
+  }
+
+  async submitForm(
+    formId: number,
+    userId: number,
+    submitFormDto: SubmitFormDto,
+  ): Promise<FormResponse> {
+    const existingFormResponse = await this.getExistingFormResponse(formId, userId, submitFormDto);
+
     if (existingFormResponse) {
       throw new BadRequestException('Form already submitted');
     }
@@ -804,22 +815,8 @@ export class TasksService {
     userId: number,
     submitFormDto: SubmitFormDto,
   ): Promise<FormResponse> {
-    const action = await this.actionRepository.findOneOrFail({
-      where: { id: submitFormDto.actionId },
-    });
-    const variants = await this.actionFormVariantService.listForAction(
-      submitFormDto.actionId,
-    );
-    const actionFormIds = new Set<number>([formId]);
-    if (action?.taskFormId != null) actionFormIds.add(action.taskFormId);
-    for (const v of variants) actionFormIds.add(v.formId);
+    const existingFormResponse = await this.getExistingFormResponse(formId, userId, submitFormDto);
 
-    const existingFormResponse = await this.formResponseRepository.findOne({
-      where: {
-        formId: In([...actionFormIds]),
-        user: { id: userId },
-      },
-    });
     if (!existingFormResponse) {
       throw new BadRequestException('There is no existing form to update');
     }
